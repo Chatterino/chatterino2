@@ -13,10 +13,10 @@ Q_OBJECT
 public:
     Notebook(QWidget *parent);
 
-    NotebookPage AddPage();
+    NotebookPage* AddPage();
 
 private:
-    QList<std::tuple<NotebookPage, NotebookTab>> pages;
+    QList<std::tuple<NotebookPage*, NotebookTab*>>* pages;
 };
 
 #endif // NOTEBOOK_H

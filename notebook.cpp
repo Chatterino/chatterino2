@@ -5,11 +5,18 @@
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent)
 {
+    auto list = new QList<std::tuple<NotebookPage*, NotebookTab*>>();
 
+    this->pages = list;
 }
 
-NotebookPage
+NotebookPage*
 Notebook::AddPage()
 {
-    return new NotebookPage(this);
+    auto page = new NotebookPage(this);
+    auto tab = new NotebookTab(this, this, page);
+
+    this->pages->append(std::make_tuple(page, tab));
+
+    return page;
 }
