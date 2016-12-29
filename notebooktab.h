@@ -2,8 +2,9 @@
 #define NOTEBOOKTAB_H
 
 #include "QObject"
-#include "notebook.h"
 #include "notebookpage.h"
+
+class Notebook;
 
 class NotebookTab : public QWidget
 {
