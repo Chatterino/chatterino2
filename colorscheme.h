@@ -5,49 +5,52 @@
 
 class ColorScheme
 {
-    static bool IsLightTheme;
+public:
+    bool IsLightTheme;
 
-    static QColor TooltipBackground;
-    static QColor TooltipText;
+    QColor TooltipBackground;
+    QColor TooltipText;
+    QColor ChatSeperator;
+    QColor ChatBackground;
+    QColor ChatBackgroundHighlighted;
+    QColor ChatBackgroundResub;
+    QColor ChatBackgroundWhisper;
+    QColor ChatInputOuter;
+    QColor ChatInputInner;
+    QColor ChatInputBorder;
+    QColor ChatMessageSeperatorBorder;
+    QColor ChatMessageSeperatorBorderInner;
+    QColor ChatBorder;
+    QColor ChatBorderFocused;
+    QColor Text;
+    QColor TextCaret;
+    QColor TextLink;
+    QColor TextFocused;
+    QColor Menu;
+    QColor MenuBorder;
+    QColor ScrollbarBG;
+    QColor ScrollbarThumb;
+    QColor ScrollbarThumbSelected;
+    QColor ScrollbarArrow;
+    QColor TabPanelBG;
+    QColor TabBG;
+    QColor TabHoverBG;
+    QColor TabSelectedBG;
+    QColor TabHighlightedBG;
+    QColor TabNewMessageBG;
+    QColor TabText;
+    QColor TabHoverText;
+    QColor TabSelectedText;
+    QColor TabHighlightedText;
 
-    static QColor ChatSeperator;
-    static QColor ChatBackground;
-    static QColor ChatBackgroundHighlighted;
-    static QColor ChatBackgroundResub;
-    static QColor ChatBackgroundWhisper;
-    static QColor ChatInputOuter;
-    static QColor ChatInputInner;
-    static QColor ChatInputBorder;
-    static QColor ChatMessageSeperatorBorder;
-    static QColor ChatMessageSeperatorBorderInner;
-    static QColor ChatBorder;
-    static QColor ChatBorderFocused;
+    static ColorScheme& getInstance()
+    {
+        static ColorScheme instance;
 
-    static QColor Text;
-    static QColor TextCaret;
-    static QColor TextLink;
-    static QColor TextFocused;
+        return instance;
+    }
 
-    static QColor Menu;
-    static QColor MenuBorder;
-
-    static QColor ScrollbarBG;
-    static QColor ScrollbarThumb;
-    static QColor ScrollbarThumbSelected;
-    static QColor ScrollbarArrow;
-
-    static QColor TabPanelBG;
-    static QColor TabBG;
-    static QColor TabHoverBG;
-    static QColor TabSelectedBG;
-    static QColor TabHighlightedBG;
-    static QColor TabNewMessageBG;
-    static QColor TabText;
-    static QColor TabHoverText;
-    static QColor TabSelectedText;
-    static QColor TabHighlightedText;
-
-    static void makeScheme(float hue, float multiplyer);
+    void setColors(float hue, float multiplyer);
 
 private:
     ColorScheme() {}
