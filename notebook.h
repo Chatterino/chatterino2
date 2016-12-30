@@ -18,6 +18,9 @@ public:
 
     enum HighlightType { none, highlighted, newMessage };
 
+    void select(NotebookPage* page);
+    void performLayout();
+
 protected:
     void resizeEvent(QResizeEvent *);
 
@@ -28,7 +31,7 @@ private:
     NotebookButton settingsButton;
     NotebookButton userButton;
 
-    void layout();
+    NotebookPage* selected = nullptr;
 };
 
 #endif // NOTEBOOK_H

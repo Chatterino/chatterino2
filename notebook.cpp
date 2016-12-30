@@ -1,9 +1,11 @@
 #include "QWidget"
 #include "QList"
+#include "QLayout"
 #include "notebook.h"
 #include "notebooktab.h"
 #include "notebookpage.h"
 #include "notebookbutton.h"
+#include "QFormLayout"
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent),
@@ -22,26 +24,48 @@ Notebook::Notebook(QWidget *parent)
 NotebookPage* Notebook::addPage()
 {
     auto tab = new NotebookTab(this);
-    auto page = new NotebookPage(this, tab);
+    auto page = new NotebookPage(tab);
+
+    if (pages.count() == 0)
+    {
+        select(page);
+    }
 
     this->pages.append(page);
-
-    layout();
 
     return page;
 }
 
-void Notebook::layout()
+void Notebook::select(NotebookPage* page)
+{
+    if (selected != nullptr)
+    {
+        selected->setParent(nullptr);
+        selected->tab->setSelected(false);
+    }
+
+    if (page != nullptr)
+    {
+        page->setParent(this);
+        page->tab->setSelected(true);
+    }
+
+    selected = page;
+
+    performLayout();
+}
+
+void Notebook::performLayout()
 {
     int x = 48, y = 0;
     int tabHeight = 16;
-    bool firstInLine = true;
+    bool first = true;
 
-    for (auto &i : this->pages)
+    for (auto &i : pages)
     {
         tabHeight = i->tab->height();
 
-        if (!firstInLine && (i == this->pages.last() ? tabHeight : 0) + x + i->width() > this->width())
+        if (!first && (i == pages.last() ? tabHeight : 0) + x + i->tab->width() > width())
         {
             y +=i->tab->height();
             i->tab->move(0, y);
@@ -53,13 +77,19 @@ void Notebook::layout()
             x += i->tab->width();
         }
 
-        firstInLine = false;
+        first = false;
     }
 
     this->addButton.move(x, y);
+
+    if (selected != nullptr)
+    {
+        selected->move(0, y + tabHeight);
+        selected->resize(width(), height() - y - tabHeight);
+    }
 }
 
 void Notebook::resizeEvent(QResizeEvent *)
 {
-    layout();
+    performLayout();
 }

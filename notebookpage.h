@@ -2,16 +2,19 @@
 #define NOTEBOOKPAGE_H
 
 #include "QWidget"
-
-class NotebookTab;
+#include "notebookpage.h"
+#include "notebooktab.h"
 
 class NotebookPage : public QWidget
 {
 Q_OBJECT
 
 public:
-    NotebookPage(QWidget *parent, NotebookTab *tab);
+    NotebookPage(NotebookTab *tab);
     NotebookTab* tab;
+
+protected:
+    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 };
 
 #endif // NOTEBOOKPAGE_H

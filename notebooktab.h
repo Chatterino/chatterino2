@@ -1,10 +1,10 @@
 #ifndef NOTEBOOKTAB_H
 #define NOTEBOOKTAB_H
 
-#include "QObject"
-#include "notebookpage.h"
+#include "QWidget"
 
 class Notebook;
+class NotebookPage;
 
 class NotebookTab : public QWidget
 {
@@ -12,6 +12,14 @@ Q_OBJECT
 
 public:
     NotebookTab(Notebook *notebook);
+
+    void calcSize();
+
+    NotebookPage* page;
+    QString text;
+
+    bool getSelected();
+    void setSelected(bool value);
 
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
@@ -21,12 +29,10 @@ protected:
     void enterEvent(QEvent *) Q_DECL_OVERRIDE;
     void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
 
-    bool IsSelected();
-
 private:
     Notebook *notebook;
+    bool selected = false;
 
-    bool isSelected;
     bool mouseOver = false;
     bool mouseDown = false;
 };
