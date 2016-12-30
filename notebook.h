@@ -5,6 +5,7 @@
 #include <QList>
 #include "notebookpage.h"
 #include "notebooktab.h"
+#include "notebookbutton.h"
 
 class Notebook : public QWidget
 {
@@ -13,10 +14,21 @@ Q_OBJECT
 public:
     Notebook(QWidget *parent);
 
-    NotebookPage* AddPage();
+    NotebookPage* addPage();
+
+    enum HighlightType { none, highlighted, newMessage };
+
+protected:
+    void resizeEvent(QResizeEvent *);
 
 private:
-    QList<std::tuple<NotebookPage*, NotebookTab*>>* pages;
+    QList<NotebookPage*> pages;
+
+    NotebookButton addButton;
+    NotebookButton settingsButton;
+    NotebookButton userButton;
+
+    void layout();
 };
 
 #endif // NOTEBOOK_H

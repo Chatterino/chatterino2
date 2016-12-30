@@ -28,12 +28,14 @@ SOURCES += main.cpp\
     chatwidget.cpp \
     notebook.cpp \
     notebooktab.cpp \
-    notebookpage.cpp
+    notebookpage.cpp \
+    notebookbutton.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
     notebook.h \
     notebooktab.h \
-    notebookpage.h
+    notebookpage.h \
+    notebookbutton.h
 
 FORMS    += mainwindow.ui

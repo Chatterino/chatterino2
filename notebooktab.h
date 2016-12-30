@@ -11,11 +11,24 @@ class NotebookTab : public QWidget
 Q_OBJECT
 
 public:
-    NotebookTab(QWidget *parent, Notebook *notebook, NotebookPage *page);
+    NotebookTab(Notebook *notebook);
+
+protected:
+    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+
+    void mousePressEvent(QMouseEvent *) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
+    void enterEvent(QEvent *) Q_DECL_OVERRIDE;
+    void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
+
+    bool IsSelected();
 
 private:
     Notebook *notebook;
-    NotebookPage *page;
+
+    bool isSelected;
+    bool mouseOver = false;
+    bool mouseDown = false;
 };
 
 #endif // NOTEBOOKTAB_H

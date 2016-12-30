@@ -3,12 +3,15 @@
 
 #include "QWidget"
 
+class NotebookTab;
+
 class NotebookPage : public QWidget
 {
 Q_OBJECT
 
 public:
-    NotebookPage(QWidget *parent);
+    NotebookPage(QWidget *parent, NotebookTab *tab);
+    NotebookTab* tab;
 };
 
 #endif // NOTEBOOKPAGE_H
