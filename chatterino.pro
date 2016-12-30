@@ -29,13 +29,15 @@ SOURCES += main.cpp\
     notebook.cpp \
     notebooktab.cpp \
     notebookpage.cpp \
-    notebookbutton.cpp
+    notebookbutton.cpp \
+    colorscheme.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
     notebook.h \
     notebooktab.h \
     notebookpage.h \
-    notebookbutton.h
+    notebookbutton.h \
+    colorscheme.h
 
 FORMS    +=
