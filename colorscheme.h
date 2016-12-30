@@ -50,7 +50,7 @@ class ColorScheme
     static void makeScheme(float hue, float multiplyer);
 
 private:
-    Colorscheme() {}
+    ColorScheme() {}
 };
 
 #endif // COLORSCHEME_H
