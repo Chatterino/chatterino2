@@ -38,4 +38,4 @@ HEADERS  += mainwindow.h \
     notebookpage.h \
     notebookbutton.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
