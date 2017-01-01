@@ -29,30 +29,6 @@ NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
 
     hbox.setSpacing(1);
     hbox.setMargin(0);
-
-    QVBoxLayout* vbox = new QVBoxLayout();
-    vbox->addWidget(new ChatWidget());
-    vbox->addWidget(new ChatWidget());
-    vbox->addWidget(new ChatWidget());
-
-    hbox.addLayout(vbox);
-
-    vbox = new QVBoxLayout();
-    vbox->addWidget(new ChatWidget());
-
-    hbox.addLayout(vbox);
-
-    vbox = new QVBoxLayout();
-    vbox->addWidget(new ChatWidget());
-    vbox->addWidget(new ChatWidget());
-
-    hbox.addLayout(vbox);
-
-    vbox = new QVBoxLayout();
-    vbox->addWidget(new ChatWidget());
-    vbox->addWidget(new ChatWidget());
-
-    hbox.addLayout(vbox);
 }
 
 std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
@@ -111,6 +87,32 @@ void NotebookPage::addToLayout(ChatWidget *widget, std::pair<int, int> position 
     vbox->insertWidget(std::max(0, std::min(vbox->count(), position.second)), widget);
 }
 
+void NotebookPage::enterEvent(QEvent *)
+{
+    if (hbox.count() == 0)
+    {
+        setCursor(QCursor(Qt::PointingHandCursor));
+    }
+    else
+    {
+        setCursor(QCursor(Qt::ArrowCursor));
+    }
+}
+
+void NotebookPage::leaveEvent(QEvent *)
+{
+
+}
+
+void NotebookPage::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (hbox.count() == 0 && event->button() == Qt::LeftButton)
+    {
+        addToLayout(new ChatWidget(), std::pair<int, int>(-1, -1));
+        setCursor(QCursor(Qt::ArrowCursor));
+    }
+}
+
 void NotebookPage::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!event->mimeData()->hasFormat("chatterino/split")) return;
@@ -119,18 +121,25 @@ void NotebookPage::dragEnterEvent(QDragEnterEvent *event)
     {
         dropRegions.clear();
 
-        for (int i = 0; i < hbox.count() + 1; ++i)
+        if (hbox.count()==0)
         {
-            dropRegions.push_back(DropRegion(QRect(((i*4 - 1) * width() / hbox.count()) / 4, 0, width()/hbox.count()/2, height()), std::pair<int, int>(i, -1)));
+            dropRegions.push_back(DropRegion(rect(), std::pair<int, int>(-1, -1)));
         }
-
-        for (int i = 0; i < hbox.count(); ++i)
+        else
         {
-            auto vbox = static_cast<QVBoxLayout*>(hbox.itemAt(i));
-
-            for (int j = 0; j < vbox->count() + 1; ++j)
+            for (int i = 0; i < hbox.count() + 1; ++i)
             {
-                dropRegions.push_back(DropRegion(QRect(i*width()/hbox.count(), ((j*2 - 1) * height() / vbox->count()) / 2, width()/hbox.count(), height()/vbox->count()), std::pair<int, int>(i, j)));
+                dropRegions.push_back(DropRegion(QRect(((i*4 - 1) * width() / hbox.count()) / 4, 0, width()/hbox.count()/2, height()), std::pair<int, int>(i, -1)));
+            }
+
+            for (int i = 0; i < hbox.count(); ++i)
+            {
+                auto vbox = static_cast<QVBoxLayout*>(hbox.itemAt(i));
+
+                for (int j = 0; j < vbox->count() + 1; ++j)
+                {
+                    dropRegions.push_back(DropRegion(QRect(i*width()/hbox.count(), ((j*2 - 1) * height() / vbox->count()) / 2, width()/hbox.count(), height()/vbox->count()), std::pair<int, int>(i, j)));
+                }
             }
         }
 
@@ -169,7 +178,7 @@ void NotebookPage::setPreviewRect(QPoint mousePos)
 
 void NotebookPage::dragLeaveEvent(QDragLeaveEvent *event)
 {
-
+    preview.hide();
 }
 
 void NotebookPage::dropEvent(QDropEvent *event)
@@ -190,11 +199,19 @@ void NotebookPage::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-//    painter.fillRect(rect(), ColorScheme::getInstance().ChatBackground);
+    if (hbox.count() == 0)
+    {
+        painter.fillRect(rect(), ColorScheme::getInstance().ChatBackground);
 
-//    painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
+        painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
 
-    painter.fillRect(rect(), ColorScheme::getInstance().TabSelectedBackground);
+        painter.setPen(ColorScheme::getInstance().Text);
+        painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
+    }
+    else
+    {
+        painter.fillRect(rect(), ColorScheme::getInstance().TabSelectedBackground);
 
-    painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
+        painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
+    }
 }

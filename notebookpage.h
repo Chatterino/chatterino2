@@ -32,6 +32,10 @@ public:
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
+    void enterEvent(QEvent *);
+    void leaveEvent(QEvent *);
+    void mouseReleaseEvent(QMouseEvent *event);
+
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
     void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
     void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;

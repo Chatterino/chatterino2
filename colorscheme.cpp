@@ -16,7 +16,7 @@ void ColorScheme::setColors(float hue, float multiplyer)
 
     DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.3);
 
-    TextCaret = IsLightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
+    Text = TextCaret = IsLightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
 
     // tab
     TabPanelBackground = QColor(255, 255, 255);

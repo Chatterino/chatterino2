@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     chatwidgetheader.cpp \
     chatwidgetinput.cpp \
     chatwidgetview.cpp \
-    notebookpagedroppreview.cpp
+    notebookpagedroppreview.cpp \
+    channel.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -46,7 +47,8 @@ HEADERS  += mainwindow.h \
     chatwidgetheader.h \
     chatwidgetinput.h \
     chatwidgetview.h \
-    notebookpagedroppreview.h
+    notebookpagedroppreview.h \
+    channel.h
 
 FORMS    +=
 
