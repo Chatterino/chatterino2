@@ -9,6 +9,9 @@ public:
     static const Channel whispers;
     static const Channel mentions;
 
+    static Channel addChannel(QString channel);
+    static void removeChannel(QString channel);
+
 public:
     QString getSubLink();
     QString getChannelLink();

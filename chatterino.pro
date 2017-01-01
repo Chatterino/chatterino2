@@ -35,7 +35,10 @@ SOURCES += main.cpp\
     chatwidgetinput.cpp \
     chatwidgetview.cpp \
     notebookpagedroppreview.cpp \
-    channel.cpp
+    channel.cpp \
+    dialog.cpp \
+    settingsdialog.cpp \
+    settingsdialogtab.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -48,9 +51,15 @@ HEADERS  += mainwindow.h \
     chatwidgetinput.h \
     chatwidgetview.h \
     notebookpagedroppreview.h \
-    channel.h
+    channel.h \
+    dialog.h \
+    settingsdialog.h \
+    settingsdialogtab.h
 
-FORMS    +=
+FORMS    += \
+    dialog.ui
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES +=

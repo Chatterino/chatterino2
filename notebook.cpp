@@ -7,6 +7,7 @@
 #include "notebookbutton.h"
 #include "QFormLayout"
 #include "colorscheme.h"
+#include "dialog.h"
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent),
@@ -14,12 +15,21 @@ Notebook::Notebook(QWidget *parent)
       settingsButton(this),
       userButton(this)
 {
+    connect(&settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
+
     settingsButton.resize(24, 24);
     settingsButton.icon = NotebookButton::IconSettings;
     userButton.resize(24, 24);
     userButton.move(24, 0);
     userButton.icon = NotebookButton::IconUser;
     addButton.resize(24, 24);
+}
+
+void Notebook::settingsButtonClicked()
+{
+    auto a = new Dialog();
+
+    a->show();
 }
 
 NotebookPage* Notebook::addPage()

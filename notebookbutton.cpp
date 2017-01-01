@@ -1,6 +1,7 @@
 #include "notebookbutton.h"
 #include "QPainter"
 #include "QPainterPath"
+#include "QMouseEvent"
 #include "colorscheme.h"
 
 NotebookButton::NotebookButton(QWidget *parent)
@@ -86,18 +87,26 @@ void NotebookButton::paintEvent(QPaintEvent *)
     }
 }
 
-void NotebookButton::mousePressEvent(QMouseEvent *)
+void NotebookButton::mousePressEvent(QMouseEvent *event)
 {
-    mouseDown = true;
+    if (event->button() == Qt::LeftButton)
+    {
+        mouseDown = true;
 
-    this->repaint();
+        this->repaint();
+    }
 }
 
-void NotebookButton::mouseReleaseEvent(QMouseEvent *)
+void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
-    mouseDown = false;
+    if (event->button() == Qt::LeftButton)
+    {
+        mouseDown = false;
 
-    this->repaint();
+        this->repaint();
+
+        emit clicked();
+    }
 }
 
 void NotebookButton::enterEvent(QEvent *)

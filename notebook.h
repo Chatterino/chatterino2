@@ -24,6 +24,11 @@ public:
 protected:
     void resizeEvent(QResizeEvent *);
 
+    void settingsButtonMouseReleased(QMouseEvent *event);
+
+public slots:
+    void settingsButtonClicked();
+
 private:
     QList<NotebookPage*> pages;
 
