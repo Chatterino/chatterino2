@@ -2,11 +2,14 @@
 #define COLORSCHEME_H
 
 #include <QColor>
+#include <QBrush>
 
 class ColorScheme
 {
 public:
     bool IsLightTheme;
+
+    QColor DropPreviewBackground;
 
     QColor TooltipBackground;
     QColor TooltipText;
@@ -15,9 +18,13 @@ public:
     QColor ChatBackgroundHighlighted;
     QColor ChatBackgroundResub;
     QColor ChatBackgroundWhisper;
-    QColor ChatInputOuter;
-    QColor ChatInputInner;
+
+    QColor ChatHeaderBorder;
+    QColor ChatHeaderBackground;
+
+    QColor ChatInputBackground;
     QColor ChatInputBorder;
+
     QColor ChatMessageSeperatorBorder;
     QColor ChatMessageSeperatorBorderInner;
     QColor ChatBorder;
@@ -32,12 +39,13 @@ public:
     QColor ScrollbarThumb;
     QColor ScrollbarThumbSelected;
     QColor ScrollbarArrow;
-    QColor TabPanelBG;
-    QColor TabBG;
-    QColor TabHoverBG;
-    QColor TabSelectedBG;
-    QColor TabHighlightedBG;
-    QColor TabNewMessageBG;
+
+    QColor TabPanelBackground;
+    QColor TabBackground;
+    QColor TabHoverBackground;
+    QColor TabSelectedBackground;
+    QColor TabHighlightedBackground;
+    QBrush TabNewMessageBackground;
     QColor TabText;
     QColor TabHoverText;
     QColor TabSelectedText;

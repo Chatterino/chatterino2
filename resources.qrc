@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/AppearanceEditorPart_16x.png</file>
+        <file>images/BrowserLink_16x.png</file>
+        <file>images/cheer1.png</file>
+        <file>images/cheer100.png</file>
+        <file>images/cheer1000.png</file>
+        <file>images/cheer5000.png</file>
+        <file>images/cheer10000.png</file>
+        <file>images/cheer100000.png</file>
+        <file>images/CopyLongTextToClipboard_16x.png</file>
+        <file>images/CustomActionEditor_16x.png</file>
+        <file>images/Emoji_Color_1F60A_19.png</file>
+        <file>images/Filter_16x.png</file>
+        <file>images/format_Bold_16xLG.png</file>
+        <file>images/Message_16xLG.png</file>
+        <file>images/settings.png</file>
+        <file>images/tool_moreCollapser_off16.png</file>
+        <file>images/twitchprime_bg.png</file>
+    </qresource>
+</RCC>

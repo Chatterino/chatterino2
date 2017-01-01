@@ -6,6 +6,7 @@
 #include "notebookpage.h"
 #include "notebookbutton.h"
 #include "QFormLayout"
+#include "colorscheme.h"
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent),
@@ -24,7 +25,7 @@ Notebook::Notebook(QWidget *parent)
 NotebookPage* Notebook::addPage()
 {
     auto tab = new NotebookTab(this);
-    auto page = new NotebookPage(tab);
+    auto page = new NotebookPage(this, tab);
 
     if (pages.count() == 0)
     {
@@ -38,16 +39,18 @@ NotebookPage* Notebook::addPage()
 
 void Notebook::select(NotebookPage* page)
 {
-    if (selected != nullptr)
-    {
-        selected->setParent(nullptr);
-        selected->tab->setSelected(false);
-    }
+    if (page == selected) return;
 
     if (page != nullptr)
     {
-        page->setParent(this);
+        page->setHidden(false);
         page->tab->setSelected(true);
+    }
+
+    if (selected != nullptr)
+    {
+        selected->setHidden(true);
+        selected->tab->setSelected(false);
     }
 
     selected = page;

@@ -8,8 +8,8 @@ class NotebookButton : public QWidget
     Q_OBJECT
 public:
     static const int IconPlus = 0;
-    static const int IconUser = 0;
-    static const int IconSettings = 0;
+    static const int IconUser = 1;
+    static const int IconSettings = 2;
 
     int icon = 0;
 

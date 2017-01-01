@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    //ColorScheme::makeScheme(0, -0.8);
+    ColorScheme::getInstance().setColors(0, -0.8);
 
     MainWindow w;
     w.show();

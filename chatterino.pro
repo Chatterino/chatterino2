@@ -30,7 +30,11 @@ SOURCES += main.cpp\
     notebooktab.cpp \
     notebookpage.cpp \
     notebookbutton.cpp \
-    colorscheme.cpp
+    colorscheme.cpp \
+    chatwidgetheader.cpp \
+    chatwidgetinput.cpp \
+    chatwidgetview.cpp \
+    notebookpagedroppreview.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -38,6 +42,13 @@ HEADERS  += mainwindow.h \
     notebooktab.h \
     notebookpage.h \
     notebookbutton.h \
-    colorscheme.h
+    colorscheme.h \
+    chatwidgetheader.h \
+    chatwidgetinput.h \
+    chatwidgetview.h \
+    notebookpagedroppreview.h
 
 FORMS    +=
+
+RESOURCES += \
+    resources.qrc

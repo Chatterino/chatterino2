@@ -21,6 +21,13 @@ public:
     bool getSelected();
     void setSelected(bool value);
 
+    int getHighlightStyle();
+    void setHighlightStyle(int style);
+
+    static const int HighlightNone = 0;
+    static const int HighlightHighlighted = 1;
+    static const int HighlightNewMessage = 2;
+
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
@@ -29,12 +36,15 @@ protected:
     void enterEvent(QEvent *) Q_DECL_OVERRIDE;
     void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
 
+    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+
 private:
     Notebook *notebook;
     bool selected = false;
 
     bool mouseOver = false;
     bool mouseDown = false;
+    int highlightStyle;
 };
 
 #endif // NOTEBOOKTAB_H
