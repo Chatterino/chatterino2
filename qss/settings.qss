@@ -1,0 +1,15 @@
+#tabWidget {
+    background-color: #333;
+}
+
+SettingsDialogTab {
+    color: #FFF;
+}
+
+SettingsDialogTab:hover {
+    border: 1px solid grey;
+}
+
+QLabel {
+    color: white;
+}

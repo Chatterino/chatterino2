@@ -8,6 +8,7 @@
 #include "QFormLayout"
 #include "colorscheme.h"
 #include "dialog.h"
+#include "settingsdialog.h"
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent),
@@ -27,7 +28,7 @@ Notebook::Notebook(QWidget *parent)
 
 void Notebook::settingsButtonClicked()
 {
-    auto a = new Dialog();
+    SettingsDialog* a = new SettingsDialog();
 
     a->show();
 }

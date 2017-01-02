@@ -4,18 +4,35 @@
 #include "QWidget"
 #include "QMainWindow"
 #include "QHBoxLayout"
+#include "QVBoxLayout"
 #include "QListView"
+#include "QButtonGroup"
+#include "QPushButton"
+#include "QDialogButtonBox"
+#include "QStackedLayout"
+#include "settingsdialogtab.h"
 
-class SettingsDialog : QMainWindow
+class SettingsDialog : public QWidget
 {
 public:
     SettingsDialog();
 
-private:
-    QListView tabs;
-    QHBoxLayout hbox;
+    void select(SettingsDialogTab* tab);
 
-    void addTab(QWidget* widget, QString title, QString imageRes);
+private:
+    QVBoxLayout tabs;
+    QVBoxLayout vbox;
+    QHBoxLayout hbox;
+    QStackedLayout pageStack;
+    QDialogButtonBox buttonBox;
+    QPushButton okButton;
+    QPushButton cancelButton;
+
+    void addTab(QLayout* layout, QString title, QString imageRes);
+
+    void addTabs();
+
+    SettingsDialogTab* selectedTab = NULL;
 };
 
 #endif // SETTINGSDIALOG_H
