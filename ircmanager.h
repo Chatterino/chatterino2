@@ -17,6 +17,8 @@ private:
 
     static void beginConnecting();
 
+    static QObject* parent;
+
     static IrcConnection* connection;
     static QMutex* connectionMutex;
     static long connectionIteration;

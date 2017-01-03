@@ -5,10 +5,13 @@
 #include "QThreadPool"
 #include "QRunnable"
 #include "lambdaqrunnable.h"
+#include "qcoreapplication.h"
 
 IrcConnection* IrcManager::connection = NULL;
 QMutex* IrcManager::connectionMutex = new QMutex();
 long IrcManager::connectionIteration = 0;
+
+QObject* IrcManager::parent = new QObject();
 
 IrcManager::IrcManager()
 {
@@ -41,7 +44,7 @@ void IrcManager::beginConnecting()
     c->setUserName("justinfan123");
     c->setNickName("justinfan123");
     c->setRealName("justinfan123");
-    c->sendRaw("JOIN #hsdogdog");
+    c->sendRaw("JOIN #fourtf");
 
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
@@ -50,6 +53,8 @@ void IrcManager::beginConnecting()
 
     connectionMutex->lock();
     if (iteration == connectionIteration) {
+        delete connection;
+        c->moveToThread(QCoreApplication::instance()->thread());
         connection = c;
     }
     else {
