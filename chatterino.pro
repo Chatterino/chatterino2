@@ -4,7 +4,11 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
+CONFIG += communi c++11
+COMMUNI += core model util
+
+include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -38,7 +42,11 @@ SOURCES += main.cpp\
     channel.cpp \
     dialog.cpp \
     settingsdialog.cpp \
-    settingsdialogtab.cpp
+    settingsdialogtab.cpp \
+    scrollbar.cpp \
+    scrollbarhighlight.cpp \
+    ircmanager.cpp \
+    lambdaqrunnable.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -54,7 +62,11 @@ HEADERS  += mainwindow.h \
     channel.h \
     dialog.h \
     settingsdialog.h \
-    settingsdialogtab.h
+    settingsdialogtab.h \
+    scrollbar.h \
+    scrollbarhighlight.h \
+    ircmanager.h \
+    lambdaqrunnable.h
 
 FORMS    += \
     dialog.ui

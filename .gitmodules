@@ -1,0 +1,3 @@
+[submodule "lib/libcommuni"]
+	path = lib/libcommuni
+	url = https://github.com/communi/libcommuni

@@ -2,6 +2,7 @@
 #define CHATVIEW_H
 
 #include <QWidget>
+#include "scrollbar.h"
 
 class ChatWidgetView : public QWidget
 {
@@ -9,6 +10,12 @@ class ChatWidgetView : public QWidget
 
 public:
     ChatWidgetView();
+
+protected:
+    void resizeEvent(QResizeEvent *);
+
+private:
+    ScrollBar scrollbar;
 };
 
 #endif // CHATVIEW_H

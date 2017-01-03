@@ -7,6 +7,7 @@
 #include "QLabel"
 #include "QFormLayout"
 #include "QComboBox"
+#include "QGroupBox"
 
 SettingsDialog::SettingsDialog()
 {
@@ -54,21 +55,62 @@ void SettingsDialog::addTabs()
     vbox = new QVBoxLayout();
 
     {
+        auto group = new QGroupBox("Application");
+
         auto form = new QFormLayout();
         auto combo = new QComboBox();
         auto slider = new QSlider(Qt::Horizontal);
         auto font = new QPushButton("select");
 
         form->addRow("Theme:", combo);
-        form->addRow("Theme Hue:", slider);
+        form->addRow("Theme color:", slider);
         form->addRow("Font:", font);
 
-        vbox->addLayout(form);
+        group->setLayout(form);
+
+        vbox->addWidget(group);
+    }
+
+    {
+        auto group = new QGroupBox("Messages");
+
+        auto v = new QVBoxLayout();
+        v->addWidget(createCheckbox("Show timestamp", ""));
+        v->addWidget(createCheckbox("Show seconds in timestamp", ""));
+        v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)", ""));
+        v->addWidget(createCheckbox("Seperate messages", ""));
+        v->addWidget(createCheckbox("Show message length", ""));
+
+        group->setLayout(v);
+
+        vbox->addWidget(group);
     }
 
     vbox->addStretch(1);
 
     addTab(vbox, "Appearance", ":/images/AppearanceEditorPart_16x.png");
+
+    // Behaviour
+    vbox = new QVBoxLayout();
+
+    vbox->addWidget(createCheckbox("Hide input box if empty", ""));
+    vbox->addWidget(createCheckbox("Mention users with a @ (except in commands)", ""));
+    vbox->addWidget(createCheckbox("Window always on top", ""));
+    vbox->addWidget(createCheckbox("Show last read message indicator", ""));
+
+    {
+        auto v = new QVBoxLayout();
+        v->addWidget(new QLabel("Mouse scroll speed"));
+
+        auto scroll = new QSlider(Qt::Horizontal);
+
+        v->addWidget(scroll);
+        v->addStretch(1);
+    }
+
+    vbox->addStretch(1);
+
+    addTab(vbox, "Behaviour", ":/images/AppearanceEditorPart_16x.png");
 
     // Commands
     vbox = new QVBoxLayout();
@@ -81,6 +123,11 @@ void SettingsDialog::addTabs()
 
     // Add stretch
     tabs.addStretch(1);
+}
+
+QCheckBox* SettingsDialog::createCheckbox(QString title, QString settingsId)
+{
+    return new QCheckBox(title);
 }
 
 void SettingsDialog::addTab(QLayout* layout, QString title, QString imageRes)

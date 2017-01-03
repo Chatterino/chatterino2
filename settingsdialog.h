@@ -11,6 +11,7 @@
 #include "QDialogButtonBox"
 #include "QStackedLayout"
 #include "settingsdialogtab.h"
+#include "QCheckBox"
 
 class SettingsDialog : public QWidget
 {
@@ -33,6 +34,8 @@ private:
     void addTabs();
 
     SettingsDialogTab* selectedTab = NULL;
+
+    QCheckBox* createCheckbox(QString title, QString settingsId);
 };
 
 #endif // SETTINGSDIALOG_H

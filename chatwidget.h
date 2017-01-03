@@ -7,6 +7,7 @@
 #include "chatwidgetheader.h"
 #include "chatwidgetview.h"
 #include "chatwidgetinput.h"
+#include "channel.h"
 
 class ChatWidget : public QWidget
 {
@@ -25,6 +26,9 @@ private:
     ChatWidgetHeader header;
     ChatWidgetView view;
     ChatWidgetInput input;
+
+
+    Channel* channel = NULL;
 };
 
 #endif // CHATWIDGET_H

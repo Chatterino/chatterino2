@@ -51,6 +51,9 @@ public:
     QColor TabSelectedText;
     QColor TabHighlightedText;
 
+    const int HighlightColorCount = 3;
+    QColor HighlightColors[3];
+
     static ColorScheme& getInstance()
     {
         static ColorScheme instance;

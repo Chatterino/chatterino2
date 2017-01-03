@@ -2,6 +2,7 @@
 #define CHANNEL_H
 
 #include "QString"
+#include "QMap"
 
 class Channel
 {
@@ -9,8 +10,9 @@ public:
     static const Channel whispers;
     static const Channel mentions;
 
-    static Channel addChannel(QString channel);
-    static void removeChannel(QString channel);
+    static Channel* addChannel(const QString &channel);
+    static Channel* getChannel(const QString &channel);
+    static void  removeChannel(const QString &channel);
 
 public:
     QString getSubLink();
@@ -25,7 +27,9 @@ public:
 private:
     Channel(QString channel);
 
-    int referenceCount = 0;
+    static QMap<QString, Channel*> channels;
+
+    int referenceCount = 1;
 
     QString name;
 

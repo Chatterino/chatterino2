@@ -3,12 +3,63 @@
 const Channel Channel::whispers = Channel(QString("/whispers"));
 const Channel Channel::mentions = Channel(QString("/mentions"));
 
+QMap<QString, Channel*> Channel::channels = QMap<QString, Channel*>();
+
 Channel::Channel(QString channel)
 {
     name = (channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel;
     subLink = "https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link";
     channelLink = "https://twitch.tv/" + name;
     popoutPlayerLink = "https://player.twitch.tv/?channel=" + name;
+}
+
+Channel* Channel::addChannel(const QString &channel)
+{
+    auto c = getChannel(channel);
+
+    if (c == NULL) {
+        c = new Channel(channel);
+        channels.insert(channel, c);
+
+        return c;
+    }
+
+    c->referenceCount++;
+
+    return c;
+}
+
+Channel* Channel::getChannel(const QString &channel)
+{
+    if (channel == "/whispers") {
+        return const_cast<Channel*>(&whispers);
+    }
+
+    if (channel == "/mentions") {
+        return const_cast<Channel*>(&mentions);
+    }
+
+    auto a = channels.find(channel);
+
+    if (a == channels.end()) {
+        return *a;
+    }
+
+    return NULL;
+}
+
+void Channel::removeChannel(const QString &channel)
+{
+    auto c = getChannel(channel);
+
+    if (c == NULL) return;
+
+    c->referenceCount--;
+
+    if (c->referenceCount == 0) {
+        channels.remove(channel);
+        delete c;
+    }
 }
 
 QString Channel::getSubLink()            { return subLink          ; }
