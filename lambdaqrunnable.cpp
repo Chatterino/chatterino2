@@ -1,6 +1,6 @@
 #include "lambdaqrunnable.h"
 
-LambdaQRunnable::LambdaQRunnable(std::function<bool ()> action)
+LambdaQRunnable::LambdaQRunnable(std::function<void ()> action)
 {
     this->action = action;
 }

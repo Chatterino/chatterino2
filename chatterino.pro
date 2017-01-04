@@ -46,7 +46,11 @@ SOURCES += main.cpp\
     scrollbar.cpp \
     scrollbarhighlight.cpp \
     ircmanager.cpp \
-    lambdaqrunnable.cpp
+    lambdaqrunnable.cpp \
+    account.cpp \
+    emotes.cpp \
+    lazyloadedimage.cpp \
+    concurrentmap.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -66,7 +70,13 @@ HEADERS  += mainwindow.h \
     scrollbar.h \
     scrollbarhighlight.h \
     ircmanager.h \
-    lambdaqrunnable.h
+    lambdaqrunnable.h \
+    asyncexec.h \
+    account.h \
+    emotes.h \
+    lazyloadedimage.h \
+    twitchemotevalue.h \
+    concurrentmap.h
 
 FORMS    += \
     dialog.ui

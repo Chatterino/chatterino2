@@ -5,6 +5,10 @@
 
 #include "IrcMessage"
 #include "QMutex"
+#include "QString"
+#include "QMap"
+#include "account.h"
+#include "qnetworkaccessmanager.h"
 
 class IrcManager
 {
@@ -12,12 +16,25 @@ public:
     static void connect();
     static void disconnect();
 
+    static const QString defaultClientId;
+
+    bool isTwitchBlockedUser(QString const &username);
+    bool tryAddIgnoredUser(QString const &username, QString& errorMessage);
+    void addIgnoredUser(QString const &username);
+    bool tryRemoveIgnoredUser(QString const &username, QString& errorMessage);
+    void removeIgnoredUser(QString const &username);
+
+    static Account* account;
+
 private:
     IrcManager();
 
-    static void beginConnecting();
+    static QMap<QString, bool>* twitchBlockedUsers;
+    static QMutex* twitchBlockedUsersMutex;
 
-    static QObject* parent;
+    static QNetworkAccessManager* accessManager;
+
+    static void beginConnecting();
 
     static IrcConnection* connection;
     static QMutex* connectionMutex;
