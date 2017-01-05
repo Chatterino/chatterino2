@@ -7,12 +7,12 @@ const Channel Channel::mentions = Channel(QString("/mentions"));
 QMap<QString, Channel*> Channel::channels = QMap<QString, Channel*>();
 
 Channel::Channel(QString channel)
+    : m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
 {
     messageMutex = new QMutex();
-    name = (channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel;
-    subLink = "https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link";
-    channelLink = "https://twitch.tv/" + name;
-    popoutPlayerLink = "https://player.twitch.tv/?channel=" + name;
+    subLink = "https://www.twitch.tv/" + m_name + "/subscribe?ref=in_chat_subscriber_link";
+    channelLink = "https://twitch.tv/" + m_name;
+    popoutPlayerLink = "https://player.twitch.tv/?channel=" + m_name;
 }
 
 //Channel::~Channel()

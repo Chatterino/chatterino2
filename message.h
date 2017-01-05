@@ -21,13 +21,14 @@ public:
 //    };
 
     Message(const QString& text);
-    Message(const IrcPrivateMessage& ircMessage, const Channel& Channel);
+    Message(const IrcPrivateMessage& ircMessage, const Channel& Channel, bool enablePingSound = true,
+            bool isReceivedWhisper = false, bool isSentWhisper = false, bool includeChannel = false);
 
     bool canHighlightTab() {
         return m_highlightTab;
     }
 
-    QString timeoutUser() {
+    const QString& timeoutUser() {
         return m_timeoutUser;
     }
 
@@ -35,11 +36,11 @@ public:
         return m_timeoutCount;
     }
 
-    QString userName() {
+    const QString& userName() {
         return m_userName;
     }
 
-    QString displayName() {
+    const QString& displayName() {
         return m_displayName;
     }
 
@@ -49,6 +50,10 @@ public:
 
     bool disabled() {
         return m_disabled;
+    }
+
+    const QString& id() {
+        return m_id;
     }
 
 private:
@@ -68,6 +73,7 @@ private:
 
     QString m_userName = "";
     QString m_displayName = "";
+    QString m_id = "";
 
     QList<Word> m_words;
 };

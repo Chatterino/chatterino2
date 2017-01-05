@@ -14,7 +14,7 @@ public:
         return m_id;
     }
 
-    QString channelName() {
+    const QString& channelName() {
         return m_channelName;
     }
 

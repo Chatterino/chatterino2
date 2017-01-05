@@ -18,14 +18,22 @@ Message::Message(const QString &text)
 
 }
 
-Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
+Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bool enablePingSound,
+                 bool isReceivedWhisper, bool isSentWhisper, bool includeChannel )
 {
     m_parseTime = std::chrono::system_clock::now();
 
     auto words = new QList<Word>();
 
+    auto iterator = ircMessage.tags().find("id");
+
+    if (iterator != ircMessage.tags().end())
+    {
+        m_id = iterator.value().toString();
+    }
+
     // timestamps
-    auto iterator = ircMessage.tags().find("tmi-sent-ts");
+    iterator = ircMessage.tags().find("tmi-sent-ts");
     std::time_t time = std::time(NULL);
 
     if (iterator != ircMessage.tags().end())
@@ -41,11 +49,24 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds = QString(timeStampBuffer);
 
-    QString copytext("");
-    QString tooltip("");
+    words->append(Word(timestamp, Word::TimestampNoSeconds, ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
+    words->append(Word(timestampWithSeconds, Word::TimestampWithSeconds, ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
 
-//    words->append(*new Word(timestamp, Word::TimestampNoSeconds, copytext, tooltip));
-//    words->append(*new Word(timestampWithSeconds, Word::TimestampWithSeconds, copytext, tooltip));
+    // color
+    QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
+
+    iterator = ircMessage.tags().find("color");
+    if (iterator != ircMessage.tags().end())
+    {
+         usernameColor = QColor(iterator.value().toString());
+    }
+
+    // channel name
+    if (includeChannel)
+    {
+        QString channelName("#" + channel.name());
+       words->append(Word(channelName, Word::Misc, QString(channelName), QString(), Link(Link::ShowMessage, channel.name() + "\n" + m_id)));
+    }
 
     // username
     m_userName = ircMessage.account();
@@ -65,23 +86,19 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
 
     iterator = ircMessage.tags().find("display-name");
     if (iterator == ircMessage.tags().end()) {
-        displayName = m_userName;
+        displayName = ircMessage.account();
     }
     else {
         displayName = iterator.value().toString();
     }
 
+    bool hasLocalizedName = QString::compare(displayName, ircMessage.account()) == 0;
+    QString userDisplayString = displayName + (hasLocalizedName ? (" (" + ircMessage.account() + ")") : QString());
+
+    words->append(Word(userDisplayString, Word::Username, usernameColor, userDisplayString, QString()));
+
     // highlights
 #pragma message WARN("xD")
-
-    // color
-    QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
-
-    iterator = ircMessage.tags().find("color");
-    if (iterator != ircMessage.tags().end())
-    {
-         usernameColor = QColor(iterator.value().toString());
-    }
 
     // bits
     QString bits = "";
@@ -103,86 +120,40 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
         {
             if (badge.startsWith("bits/"))
             {
-
+                long long int cheer = strtoll(badge.mid(5).toStdString().c_str(), NULL, 10);
+                words->append(Word(Emotes::getCheerBadge(cheer), Word::BadgeCheer, QString(), QString("Twitch Cheer" + QString::number(cheer))));
             }
             else if (badge == "staff/1")
             {
-                QString a("");
-                QString b("Twitch Staff");
-                words->append(*new Word(badgeStaff, Word::BadgeStaff, a, b));
+                words->append(Word(badgeStaff, Word::BadgeStaff, QString(), QString("Twitch Staff")));
             }
-//            else if (badge == "admin/1")
-//            {
-//                words->append(*new Word(badgeAdmin, Word::BadgeAdmin, "", "Twitch Admin"));
-//            }
-//            else if (badge == "global_mod/1")
-//            {
-//                words->append(*new Word(badgeGlobalmod, Word::BadgeGlobalMod, "", "Global Moderator"));
-//            }
-//            else if (badge == "moderator/1")
-//            {
-//#warning "xD"
-//                words->append(*new Word(badgeTurbo, Word::BadgeModerator, "", "Channel Moderator")); // custom badge
-//            }
-//            else if (badge == "turbo/1")
-//            {
-//                words->append(*new Word(badgeStaff, Word::BadgeTurbo, "", "Turbo Subscriber"));
-//            }
-//            else if (badge == "broadcaster/1")
-//            {
-//                words->append(*new Word(badgeBroadcaster, Word::BadgeBroadcaster, "", "Channel Broadcaster"));
-//            }
-//            else if (badge == "premium/1")
-//            {
-//                words->append(*new Word(badgeTwitchPrime, Word::BadgePremium, "", "Twitch Prime"));
-//            }
-
-
-//            case "staff/1":
-//                Badges |= MessageBadges.Staff;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeStaff), Tooltip =  });
-//                break;
-//            case "admin/1":
-//                Badges |= MessageBadges.Admin;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeAdmin), Tooltip = "Twitch Admin" });
-//                break;
-//            case "global_mod/1":
-//                Badges |= MessageBadges.GlobalMod;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeGlobalmod), Tooltip = "Global Moderator" });
-//                break;
-//            case "moderator/1":
-//                Badges |= MessageBadges.Mod;
-//                if (channel.ModeratorBadge == null)
-//                {
-//                    words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeModerator), Tooltip = "Channel Moderator" });
-//                }
-//                else
-//                {
-//                    words.Add(new Word { Type = SpanType.LazyLoadedImage, Value = channel.ModeratorBadge, Tooltip = channel.ModeratorBadge.Tooltip });
-//                }
-//                break;
-//            case "turbo/1":
-//                Badges |= MessageBadges.Turbo;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeTurbo), Tooltip = "Turbo Subscriber" });
-//                break;
-//            case "broadcaster/1":
-//                Badges |= MessageBadges.Broadcaster;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeBroadcaster), Tooltip = "Channel Broadcaster" });
-//                break;
-//            case "premium/1":
-//                Badges |= MessageBadges.Broadcaster;
-//                words.Add(new Word { Type = SpanType.Image, Value = GuiEngine.Current.GetImage(ImageType.BadgeTwitchPrime), Tooltip = "Twitch Prime" });
-//                break;
-
-
-//                 long long int cheer = strtoll(badge.mid(5).toStdString().c_str(), NULL, 10);
-
-//            auto image = Emotes::getCheerImage(cheer, false);
-//            auto imageAnimated = Emotes::getCheerImage(cheer, true);
-
-//            words->append(*new Word(image, Word::Bits));
-//            words->append(*new Word(imageAnimated, Word::BitsAnimated));
-
+            else if (badge == "admin/1")
+            {
+                words->append(Word(badgeAdmin, Word::BadgeAdmin, QString(), QString("Twitch Admin")));
+            }
+            else if (badge == "global_mod/1")
+            {
+                words->append(Word(badgeGlobalmod, Word::BadgeGlobalMod, QString(), QString("Global Moderator")));
+            }
+            else if (badge == "moderator/1")
+            {
+#warning "xD"
+                words->append(Word(badgeTurbo, Word::BadgeModerator, QString(), QString("Channel Moderator"))); // custom badge
+            }
+            else if (badge == "turbo/1")
+            {
+                words->append(Word(badgeStaff, Word::BadgeTurbo, QString(), QString("Turbo Subscriber")));
+            }
+            else if (badge == "broadcaster/1")
+            {
+                words->append(Word(badgeBroadcaster, Word::BadgeBroadcaster, QString(), QString("Channel Broadcaster")));
+            }
+            else if (badge == "premium/1")
+            {
+                words->append(Word(badgePremium, Word::BadgePremium, QString(), QString("Twitch Prime")));
+            }
         }
     }
+
+
 }

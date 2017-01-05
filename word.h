@@ -3,6 +3,7 @@
 
 #include "lazyloadedimage.h"
 #include "fonts.h"
+#include "link.h"
 
 #include <QRect>
 #include <QString>
@@ -38,13 +39,24 @@ public:
         BadgeBroadcaster = 0x80000,
         BadgePremium = 0x100000,
         BadgeChatterino = 0x200000,
-        BadgeBits = 0x400000,
+        BadgeCheer = 0x400000,
+        Badges = BadgeStaff
+            | BadgeAdmin
+            | BadgeGlobalMod
+            | BadgeModerator
+            | BadgeTurbo
+            | BadgeBroadcaster
+            | BadgePremium
+            | BadgeChatterino
+            | BadgeCheer,
+
+        Username = 0x800000,
+
+        Default = TimestampNoSeconds | Badges | Username | Bits | FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage
     };
 
-    explicit Word(LazyLoadedImage* m_image, Type type, const QString& copytext, const QString& tooltip = "");
-    explicit Word(const QString& m_text, Type type, const QString& copytext, const QString& tooltip = "");
-
-    ~Word();
+    explicit Word(LazyLoadedImage* m_image, Type type, const QString& copytext, const QString& tooltip, const Link& link = Link());
+    explicit Word(const QString& m_text, Type type, const QColor& color, const QString& copytext, const QString& tooltip, const Link& link = Link());
 
     LazyLoadedImage& getImage() {
         return *m_image;
@@ -98,9 +110,18 @@ public:
         return m_tooltip;
     }
 
+    const QColor& color() {
+        return m_color;
+    }
+
+    const Link& link() {
+        return m_link;
+    }
+
 private:
     LazyLoadedImage* m_image;
     QString m_text;
+    QColor m_color;
     bool m_isImage;
 
     Type m_type;
@@ -112,6 +133,7 @@ private:
     int m_height;
     bool m_hasTrailingSpace;
     Fonts::Type m_font = Fonts::Medium;
+    Link m_link;
 };
 
 #endif // WORD_H

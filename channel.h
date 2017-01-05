@@ -18,7 +18,6 @@ public:
     static Channel* getChannel(const QString &channel);
     static void  removeChannel(const QString &channel);
 
-public:
     QString getSubLink();
     QString getChannelLink();
     QString getPopoutPlayerLink();
@@ -27,6 +26,10 @@ public:
     int getStreamViewerCount();
     QString getStreamStatus();
     QString getStreamGame();
+
+    const QString& name() {
+        return m_name;
+    }
 
     void addMessage(Message* message);
 //    ~Channel();
@@ -42,7 +45,7 @@ private:
 
     int referenceCount = 1;
 
-    QString name;
+    QString m_name;
 
     int roomID;
 

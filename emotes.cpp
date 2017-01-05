@@ -9,6 +9,13 @@ ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_fFzChannelEmoteFromCaches  
 ConcurrentMap<int,     LazyLoadedImage* >* Emotes::m_twitchEmoteFromCache       = new ConcurrentMap<int,     LazyLoadedImage* >();
 ConcurrentMap<int,     LazyLoadedImage* >* Emotes::m_miscImageFromCache         = new ConcurrentMap<int,     LazyLoadedImage* >();
 
+LazyLoadedImage* Emotes::m_cheerBadge100000 = new LazyLoadedImage(new QImage(":/cheer100000"));
+LazyLoadedImage* Emotes::m_cheerBadge10000  = new LazyLoadedImage(new QImage(":/cheer10000"));
+LazyLoadedImage* Emotes::m_cheerBadge5000   = new LazyLoadedImage(new QImage(":/cheer5000"));
+LazyLoadedImage* Emotes::m_cheerBadge1000   = new LazyLoadedImage(new QImage(":/cheer1000"));
+LazyLoadedImage* Emotes::m_cheerBadge100    = new LazyLoadedImage(new QImage(":/cheer100"));
+LazyLoadedImage* Emotes::m_cheerBadge1      = new LazyLoadedImage(new QImage(":/cheer1"));
+
 Emotes::Emotes()
 {
 
@@ -16,35 +23,34 @@ Emotes::Emotes()
 
 LazyLoadedImage* Emotes::getCheerImage(long long amount, bool animated)
 {
-#pragma message WARN("Implement Emotes::getCheerImage")
-//    object image;
+#warning "xD"
+    return getCheerBadge(amount);
+}
 
-//    if (cheer >= 100000)
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer100000);
-//    }
-//    else if (cheer >= 10000)
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer10000);
-//    }
-//    else if (cheer >= 5000)
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer5000);
-//    }
-//    else if (cheer >= 1000)
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer1000);
-//    }
-//    else if (cheer >= 100)
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer100);
-//    }
-//    else
-//    {
-//        image = GuiEngine.Current.GetImage(ImageType.Cheer1);
-//    }
-
-//    words.Add(new Word { Type = SpanType.Image, Value = image, Tooltip = "Twitch Cheer " + cheer });
-
-    return new LazyLoadedImage("");
+LazyLoadedImage* Emotes::getCheerBadge(long long amount)
+{
+    if (amount >= 100000)
+    {
+        return m_cheerBadge100000;
+    }
+    else if (amount >= 10000)
+    {
+        return m_cheerBadge10000;
+    }
+    else if (amount >= 5000)
+    {\
+        return m_cheerBadge5000;
+    }
+    else if (amount >= 1000)
+    {
+        return m_cheerBadge1000;
+    }
+    else if (amount >= 100)
+    {
+        return m_cheerBadge100;
+    }
+    else
+    {
+        return m_cheerBadge1;
+    }
 }

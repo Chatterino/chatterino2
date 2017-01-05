@@ -22,6 +22,7 @@ public:
     static void loadGlobalEmotes();
 
     static LazyLoadedImage* getCheerImage(long long int amount, bool animated);
+    static LazyLoadedImage* getCheerBadge(long long int amount);
 
 private:
     Emotes();
@@ -34,6 +35,13 @@ private:
     static ConcurrentMap<QString, LazyLoadedImage* >* m_fFzChannelEmoteFromCaches;
     static ConcurrentMap<int,     LazyLoadedImage* >* m_twitchEmoteFromCache;
     static ConcurrentMap<int,     LazyLoadedImage* >* m_miscImageFromCache;
+
+    static LazyLoadedImage* m_cheerBadge100000;
+    static LazyLoadedImage* m_cheerBadge10000 ;
+    static LazyLoadedImage* m_cheerBadge5000  ;
+    static LazyLoadedImage* m_cheerBadge1000  ;
+    static LazyLoadedImage* m_cheerBadge100   ;
+    static LazyLoadedImage* m_cheerBadge1     ;
 };
 
 #endif // EMOTES_H
