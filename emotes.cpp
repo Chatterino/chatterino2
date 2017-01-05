@@ -16,7 +16,7 @@ Emotes::Emotes()
 
 LazyLoadedImage* Emotes::getCheerImage(long long amount, bool animated)
 {
-#warning "xD"
+#pragma message WARN("Implement Emotes::getCheerImage")
 //    object image;
 
 //    if (cheer >= 100000)

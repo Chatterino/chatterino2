@@ -84,7 +84,10 @@ HEADERS  += mainwindow.h \
     message.h \
     word.h \
     link.h \
-    fonts.h
+    fonts.h \
+    common.h
+
+PRECOMPILED_HEADER = common.h
 
 FORMS    += \
     dialog.ui
