@@ -77,8 +77,8 @@ public:
         return m_isImage;
     }
 
-    QString* copyText() {
-        return m_copyText;
+    QString& copyText() {
+        return *m_copyText;
     }
 
     bool hasTrailingSpace() {

@@ -23,7 +23,7 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
     auto words = new QList<Word>();
 
     // timestamps
-    iterator = ircMessage.tags().find("tmi-sent-ts");
+    auto iterator = ircMessage.tags().find("tmi-sent-ts");
     time_t time = std::time(NULL);
 
     if (iterator != ircMessage.tags().end())
@@ -39,8 +39,11 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds = QString(timeStampBuffer);
 
-    words->append(new Word(timestamp, Word::TimestampNoSeconds));
-    words->append(new Word(timestampWithSeconds, Word::TimestampWithSeconds));
+    QString copytext("");
+    QString tooltip("");
+
+//    words->append(*new Word(timestamp, Word::TimestampNoSeconds, copytext, tooltip));
+//    words->append(*new Word(timestampWithSeconds, Word::TimestampWithSeconds, copytext, tooltip));
 
     // username
     m_userName = ircMessage.account();
@@ -58,7 +61,7 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
     // display name
     QString displayName;
 
-    auto iterator = ircMessage.tags().find("display-name");
+    iterator = ircMessage.tags().find("display-name");
     if (iterator == ircMessage.tags().end()) {
         displayName = m_userName;
     }

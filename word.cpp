@@ -22,6 +22,7 @@ Word::Word(const QString& text, Type type, const QString& copytext, const QStrin
 
 Word::~Word()
 {
+    delete text;
     delete m_copyText;
     delete m_tooltip;
 }
