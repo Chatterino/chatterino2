@@ -3,6 +3,8 @@
 #include "colorscheme.h"
 #include "emotes.h"
 
+#include <ctime>
+
 LazyLoadedImage* Message::badgeStaff       = new LazyLoadedImage(new QImage(":/images/staff_bg.png"));
 LazyLoadedImage* Message::badgeAdmin       = new LazyLoadedImage(new QImage(":/images/admin_bg.png"));
 LazyLoadedImage* Message::badgeModerator   = new LazyLoadedImage(new QImage(":/images/moderator_bg.png"));
@@ -24,7 +26,7 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
 
     // timestamps
     auto iterator = ircMessage.tags().find("tmi-sent-ts");
-    time_t time = std::time(NULL);
+    std::time_t time = std::time(NULL);
 
     if (iterator != ircMessage.tags().end())
     {
