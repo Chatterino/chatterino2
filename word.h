@@ -49,7 +49,7 @@ public:
         return *image;
     }
 
-    QString& getText() {
+    const QString& getText() {
         return text;
     }
 
@@ -77,7 +77,7 @@ public:
         return m_isImage;
     }
 
-    QString& copyText() {
+    const QString& copyText() {
         return m_copyText;
     }
 
@@ -93,7 +93,7 @@ public:
         return m_type;
     }
 
-    QString& tooltip() {
+    const QString& tooltip() {
         return m_tooltip;
     }
 
