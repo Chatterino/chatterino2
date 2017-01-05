@@ -40,8 +40,8 @@ public:
         BadgeBits = 0x400000,
     };
 
-    Word(LazyLoadedImage* image, Type type, const QString& copytext, const QString& tooltip = "");
-    Word(const QString& text, Type type, const QString& copytext, const QString& tooltip = "");
+    explicit Word(LazyLoadedImage* image, Type type, const QString& copytext, const QString& tooltip = "");
+    explicit Word(const QString& text, Type type, const QString& copytext, const QString& tooltip = "");
 
     ~Word();
 
