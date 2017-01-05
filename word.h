@@ -40,17 +40,17 @@ public:
         BadgeBits = 0x400000,
     };
 
-    explicit Word(LazyLoadedImage* image, Type type, const QString& copytext, const QString& tooltip = "");
-    explicit Word(const QString& text, Type type, const QString& copytext, const QString& tooltip = "");
+    explicit Word(LazyLoadedImage* m_image, Type type, const QString& copytext, const QString& tooltip = "");
+    explicit Word(const QString& m_text, Type type, const QString& copytext, const QString& tooltip = "");
 
     ~Word();
 
     LazyLoadedImage& getImage() {
-        return *image;
+        return *m_image;
     }
 
     const QString& getText() {
-        return text;
+        return m_text;
     }
 
     int width() {
@@ -98,8 +98,8 @@ public:
     }
 
 private:
-    LazyLoadedImage* image;
-    QString text;
+    LazyLoadedImage* m_image;
+    QString m_text;
     bool m_isImage;
 
     Type m_type;

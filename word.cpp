@@ -2,7 +2,7 @@
 
 Word::Word(LazyLoadedImage* image, Type type, const QString& copytext, const QString& tooltip)
 {
-    this->image = image;
+    this->m_image = image;
     m_isImage = true;
     m_type = type;
     m_copyText = copytext;
@@ -11,8 +11,8 @@ Word::Word(LazyLoadedImage* image, Type type, const QString& copytext, const QSt
 
 Word::Word(const QString& text, Type type, const QString& copytext, const QString& tooltip)
 {
-    this->image = NULL;
-    this->text = text;
+    this->m_image = NULL;
+    this->m_text = text;
     m_isImage = false;
     m_type = type;
     m_copyText = copytext;
