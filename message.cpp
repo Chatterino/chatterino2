@@ -70,7 +70,7 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& Channel)
     }
 
     // highlights
-#warning "xD"
+#pragma message WARN("xD")
 
     // color
     QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
