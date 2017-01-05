@@ -9,6 +9,8 @@ class ColorScheme
 public:
     bool IsLightTheme;
 
+    QColor SystemMessageColor;
+
     QColor DropPreviewBackground;
 
     QColor TooltipBackground;

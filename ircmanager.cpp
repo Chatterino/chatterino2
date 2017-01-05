@@ -8,8 +8,9 @@
 #include "QJsonDocument"
 #include "QJsonObject"
 #include "QJsonArray"
+#include "channel.h"
 
-Account*                IrcManager::account                 = NULL;
+Account*                IrcManager::account                 = const_cast<Account*>(Account::anon());
 IrcConnection*          IrcManager::connection              = NULL;
 QMutex*                 IrcManager::connectionMutex         = new QMutex();
 long                    IrcManager::connectionIteration     = 0;
@@ -113,6 +114,7 @@ void IrcManager::beginConnecting()
     c->setNickName("justinfan123");
     c->setRealName("justinfan123");
     c->sendRaw("JOIN #fourtf");
+    c->sendRaw("JOIN #ian678");
 
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
@@ -147,12 +149,19 @@ void IrcManager::messageReceived(IrcMessage *message)
 {
     qInfo(message->command().toStdString().c_str());
 
-//    if (message->command() == "")
+    //    if (message->command() == "")
 }
 
 void IrcManager::privateMessageReceived(IrcPrivateMessage *message)
 {
     qInfo(message->content().toStdString().c_str());
+
+    qInfo(message->target().toStdString().c_str());
+    auto c = Channel::getChannel(message->target().mid(1));
+
+    if (c != NULL) {
+        c->addMessage(new Message(*message, *c));
+    }
 }
 
 bool IrcManager::isTwitchBlockedUser(QString const &username)
@@ -198,7 +207,7 @@ bool IrcManager::tryAddIgnoredUser(QString const &username, QString& errorMessag
 void IrcManager::addIgnoredUser(QString const &username)
 {
     QString errorMessage;
-    if (tryAddIgnoredUser(username, errorMessage)) {
+    if (!tryAddIgnoredUser(username, errorMessage)) {
 #warning "xD"
     }
 }
@@ -231,7 +240,7 @@ bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString& errorMes
 void IrcManager::removeIgnoredUser(QString const &username)
 {
     QString errorMessage;
-    if (tryRemoveIgnoredUser(username, errorMessage)) {
+    if (!tryRemoveIgnoredUser(username, errorMessage)) {
 #warning "xD"
     }
 }

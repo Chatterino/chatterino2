@@ -1,6 +1,11 @@
 #include "lazyloadedimage.h"
 
-LazyLoadedImage::LazyLoadedImage()
+LazyLoadedImage::LazyLoadedImage(QString url)
+{
+
+}
+
+LazyLoadedImage::LazyLoadedImage(QImage *image)
 {
 
 }

@@ -27,7 +27,7 @@ public:
         return true;
     }
 
-    TValue getOrAdd(const TKey &name, function<TValue ()> addLambda) {
+    TValue getOrAdd(const TKey &name, std::function<TValue ()> addLambda) {
         mutex->lock();
         auto a = map->find(name);
         if (a == map->end()) {

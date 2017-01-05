@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    Channel::addChannel("ian678");
+    Channel::addChannel("fourtf");
+
     IrcManager::connect();
 
     return a.exec();

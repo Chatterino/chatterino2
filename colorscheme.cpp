@@ -7,6 +7,8 @@ void ColorScheme::setColors(float hue, float multiplyer)
 {
     IsLightTheme = multiplyer > 0;
 
+    SystemMessageColor = QColor(140, 127, 127);
+
     auto isLightTheme = IsLightTheme;
 
     auto getColor = [isLightTheme, multiplyer] (qreal h, qreal s, qreal l, qreal a = 1.0)

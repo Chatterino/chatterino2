@@ -19,6 +19,10 @@ public:
     static ConcurrentMap<int,     LazyLoadedImage* >& twitchEmoteFromCache()       { return *m_twitchEmoteFromCache      ; }
     static ConcurrentMap<int,     LazyLoadedImage* >& miscImageFromCache()         { return *m_miscImageFromCache        ; }
 
+    static void loadGlobalEmotes();
+
+    static LazyLoadedImage* getCheerImage(long long int amount, bool animated);
+
 private:
     Emotes();
 

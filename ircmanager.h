@@ -9,6 +9,7 @@
 #include "QMap"
 #include "account.h"
 #include "qnetworkaccessmanager.h"
+#include "message.h"
 
 class IrcManager
 {

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui network
-CONFIG += communi c++11
+CONFIG += communi
 COMMUNI += core model util
 
 include(lib/libcommuni/src/src.pri)
@@ -50,7 +50,11 @@ SOURCES += main.cpp\
     account.cpp \
     emotes.cpp \
     lazyloadedimage.cpp \
-    concurrentmap.cpp
+    concurrentmap.cpp \
+    message.cpp \
+    word.cpp \
+    link.cpp \
+    fonts.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -76,7 +80,11 @@ HEADERS  += mainwindow.h \
     emotes.h \
     lazyloadedimage.h \
     twitchemotevalue.h \
-    concurrentmap.h
+    concurrentmap.h \
+    message.h \
+    word.h \
+    link.h \
+    fonts.h
 
 FORMS    += \
     dialog.ui

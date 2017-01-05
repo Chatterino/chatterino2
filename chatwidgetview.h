@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include "scrollbar.h"
+#include "QPaintEvent"
+#include "channel.h"
 
 class ChatWidgetView : public QWidget
 {
@@ -11,11 +13,18 @@ class ChatWidgetView : public QWidget
 public:
     ChatWidgetView();
 
+    Channel* channel() {
+        return m_channel;
+    }
+
 protected:
     void resizeEvent(QResizeEvent *);
 
 private:
     ScrollBar scrollbar;
+    Channel* m_channel;
+
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // CHATVIEW_H

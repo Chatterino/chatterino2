@@ -18,5 +18,11 @@
         <file>images/tool_moreCollapser_off16.png</file>
         <file>images/twitchprime_bg.png</file>
         <file>qss/settings.qss</file>
+        <file>images/admin_bg.png</file>
+        <file>images/broadcaster_bg.png</file>
+        <file>images/globalmod_bg.png</file>
+        <file>images/moderator_bg.png</file>
+        <file>images/staff_bg.png</file>
+        <file>images/turbo_bg.png</file>
     </qresource>
 </RCC>

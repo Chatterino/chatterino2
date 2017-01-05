@@ -3,6 +3,10 @@
 
 #include "QString"
 #include "QMap"
+#include "QMutex"
+#include "QVector"
+
+class Message;
 
 class Channel
 {
@@ -24,8 +28,15 @@ public:
     QString getStreamStatus();
     QString getStreamGame();
 
+    void addMessage(Message* message);
+//    ~Channel();
+
+    QVector<Message*>* getMessagesClone();
+
 private:
     Channel(QString channel);
+
+    QMutex* messageMutex;
 
     static QMap<QString, Channel*> channels;
 
@@ -34,6 +45,8 @@ private:
     QString name;
 
     int roomID;
+
+    QVector<Message*>* messages = new QVector<Message*>();
 
     QString subLink = "";
     QString channelLink = "";
