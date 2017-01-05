@@ -2,9 +2,10 @@
 #define WORD_H
 
 #include "lazyloadedimage.h"
-#include "QString"
 #include "fonts.h"
-#include "QRect"
+
+#include <QRect>
+#include <QString>
 
 class Word
 {
