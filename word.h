@@ -50,7 +50,7 @@ public:
     }
 
     QString& getText() {
-        return *text;
+        return text;
     }
 
     int width() {
@@ -78,7 +78,7 @@ public:
     }
 
     QString& copyText() {
-        return *m_copyText;
+        return m_copyText;
     }
 
     bool hasTrailingSpace() {
@@ -94,17 +94,17 @@ public:
     }
 
     QString& tooltip() {
-        return *m_tooltip;
+        return m_tooltip;
     }
 
 private:
     LazyLoadedImage* image;
-    QString* text;
+    QString text;
     bool m_isImage;
 
     Type m_type;
-    QString* m_copyText;
-    QString* m_tooltip;
+    QString m_copyText;
+    QString m_tooltip;
     int m_x;
     int m_y;
     int m_width;
