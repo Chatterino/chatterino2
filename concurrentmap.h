@@ -1,9 +1,9 @@
 #ifndef CONCURRENTMAP_H
 #define CONCURRENTMAP_H
 
-#include "QMutex"
-#include "QMap"
-#include "functional"
+#include <QMutex>
+#include <QMap>
+#include <functional>
 
 template<typename TKey, typename TValue>
 class ConcurrentMap

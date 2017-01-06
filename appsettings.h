@@ -6,13 +6,15 @@
 class AppSettings
 {
 public:
-    Word::Type wordTypeMask() {
+    static Word::Type wordTypeMask() {
         return m_wordTypeMask;
     }
 
+    static bool isIgnoredEmote(const QString& emote);
+
 private:
     AppSettings();
-    Word::Type m_wordTypeMask = Word::Default;
+    static Word::Type m_wordTypeMask;
 };
 
 #endif // APPSETTINGS_H

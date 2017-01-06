@@ -76,6 +76,8 @@ private:
     QString m_id = "";
 
     QList<Word> m_words;
+
+    static bool sortTwitchEmotes(const std::pair<long int, LazyLoadedImage*>& a, const std::pair<long int, LazyLoadedImage*>& b);
 };
 
 #endif // MESSAGE_H

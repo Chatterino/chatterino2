@@ -73,7 +73,7 @@ void ScrollBar::addHighlight(ScrollBarHighlight* highlight)
 void ScrollBar::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), ColorScheme::getInstance().ScrollbarBG);
+    painter.fillRect(rect(), ColorScheme::instance().ScrollbarBG);
 
     mutex.lock();
 

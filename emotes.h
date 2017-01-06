@@ -24,6 +24,8 @@ public:
     static LazyLoadedImage* getCheerImage(long long int amount, bool animated);
     static LazyLoadedImage* getCheerBadge(long long int amount);
 
+    static LazyLoadedImage* getTwitchEmoteById(const QString& name, long int id);
+
 private:
     Emotes();
 

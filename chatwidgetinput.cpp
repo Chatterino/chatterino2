@@ -11,7 +11,7 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::getInstance().ChatInputBackground);
-    painter.setPen(ColorScheme::getInstance().ChatInputBorder);
+    painter.fillRect(rect(), ColorScheme::instance().ChatInputBackground);
+    painter.setPen(ColorScheme::instance().ChatInputBorder);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }

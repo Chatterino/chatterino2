@@ -2,12 +2,15 @@
 #include "mainwindow.h"
 #include "colorscheme.h"
 #include "ircmanager.h"
+#include "emojis.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    ColorScheme::getInstance().setColors(0, -0.8);
+    Emojis::initEmojis();
+
+    ColorScheme::instance().setColors(0, -0.8);
 
     MainWindow w;
     w.show();

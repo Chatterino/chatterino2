@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     word.cpp \
     link.cpp \
     fonts.cpp \
-    appsettings.cpp
+    appsettings.cpp \
+    emojis.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -87,7 +88,8 @@ HEADERS  += mainwindow.h \
     link.h \
     fonts.h \
     common.h \
-    appsettings.h
+    appsettings.h \
+    emojis.h
 
 PRECOMPILED_HEADER = common.h
 

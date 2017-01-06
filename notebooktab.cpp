@@ -47,7 +47,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     QColor fg = QColor(0, 0, 0);
 
-    auto colorScheme = ColorScheme::getInstance();
+    auto colorScheme = ColorScheme::instance();
 
     if (selected)
     {

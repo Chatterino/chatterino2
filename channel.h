@@ -27,7 +27,7 @@ public:
     QString getStreamStatus();
     QString getStreamGame();
 
-    const QString& name() {
+    const QString& name() const {
         return m_name;
     }
 

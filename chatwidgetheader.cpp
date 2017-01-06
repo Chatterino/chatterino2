@@ -17,8 +17,8 @@ void ChatWidgetHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::getInstance().ChatHeaderBackground);
-    painter.setPen(ColorScheme::getInstance().ChatHeaderBorder);
+    painter.fillRect(rect(), ColorScheme::instance().ChatHeaderBackground);
+    painter.setPen(ColorScheme::instance().ChatHeaderBorder);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 

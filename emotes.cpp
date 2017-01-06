@@ -21,6 +21,13 @@ Emotes::Emotes()
 
 }
 
+LazyLoadedImage* Emotes::getTwitchEmoteById(const QString &name, long id)
+{
+#warning "xD"
+    return new LazyLoadedImage(NULL);
+//    return m_twitchEmoteFromCache->getOrAdd()
+}
+
 LazyLoadedImage* Emotes::getCheerImage(long long amount, bool animated)
 {
 #warning "xD"

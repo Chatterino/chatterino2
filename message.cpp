@@ -4,6 +4,7 @@
 #include "emotes.h"
 
 #include <ctime>
+#include <QStringList>
 
 LazyLoadedImage* Message::badgeStaff       = new LazyLoadedImage(new QImage(":/images/staff_bg.png"));
 LazyLoadedImage* Message::badgeAdmin       = new LazyLoadedImage(new QImage(":/images/admin_bg.png"));
@@ -49,65 +50,8 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bo
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds = QString(timeStampBuffer);
 
-    words->append(Word(timestamp, Word::TimestampNoSeconds, ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
-    words->append(Word(timestampWithSeconds, Word::TimestampWithSeconds, ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
-
-    // color
-    QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
-
-    iterator = ircMessage.tags().find("color");
-    if (iterator != ircMessage.tags().end())
-    {
-         usernameColor = QColor(iterator.value().toString());
-    }
-
-    // channel name
-    if (includeChannel)
-    {
-        QString channelName("#" + channel.name());
-       words->append(Word(channelName, Word::Misc, QString(channelName), QString(), Link(Link::ShowMessage, channel.name() + "\n" + m_id)));
-    }
-
-    // username
-    m_userName = ircMessage.account();
-
-    if (m_userName.isEmpty())
-    {
-        auto iterator = ircMessage.tags().find("login");
-
-        if (iterator != ircMessage.tags().end())
-        {
-            m_userName = iterator.value().toString();
-        }
-    }
-
-    // display name
-    QString displayName;
-
-    iterator = ircMessage.tags().find("display-name");
-    if (iterator == ircMessage.tags().end()) {
-        displayName = ircMessage.account();
-    }
-    else {
-        displayName = iterator.value().toString();
-    }
-
-    bool hasLocalizedName = QString::compare(displayName, ircMessage.account()) == 0;
-    QString userDisplayString = displayName + (hasLocalizedName ? (" (" + ircMessage.account() + ")") : QString());
-
-    words->append(Word(userDisplayString, Word::Username, usernameColor, userDisplayString, QString()));
-
-    // highlights
-#pragma message WARN("xD")
-
-    // bits
-    QString bits = "";
-
-    iterator = ircMessage.tags().find("bits");
-    if (iterator != ircMessage.tags().end())
-    {
-         bits = iterator.value().toString();
-    }
+    words->append(Word(timestamp, Word::TimestampNoSeconds, ColorScheme::instance().SystemMessageColor, QString(), QString()));
+    words->append(Word(timestampWithSeconds, Word::TimestampWithSeconds, ColorScheme::instance().SystemMessageColor, QString(), QString()));
 
     // badges
     iterator = ircMessage.tags().find("badges");
@@ -155,5 +99,133 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bo
         }
     }
 
+    // color
+    QColor usernameColor = ColorScheme::instance().SystemMessageColor;
 
+    iterator = ircMessage.tags().find("color");
+    if (iterator != ircMessage.tags().end())
+    {
+         usernameColor = QColor(iterator.value().toString());
+    }
+
+    // channel name
+    if (includeChannel)
+    {
+        QString channelName("#" + channel.name());
+        words->append(Word(channelName, Word::Misc, ColorScheme::instance().SystemMessageColor, QString(channelName), QString(), Link(Link::ShowMessage, channel.name() + "\n" + m_id)));
+    }
+
+    // username
+    m_userName = ircMessage.account();
+
+    if (m_userName.isEmpty())
+    {
+        auto iterator = ircMessage.tags().find("login");
+
+        if (iterator != ircMessage.tags().end())
+        {
+            m_userName = iterator.value().toString();
+        }
+    }
+
+    QString displayName;
+
+    iterator = ircMessage.tags().find("display-name");
+    if (iterator == ircMessage.tags().end()) {
+        displayName = ircMessage.account();
+    }
+    else {
+        displayName = iterator.value().toString();
+    }
+
+    bool hasLocalizedName = QString::compare(displayName, ircMessage.account()) == 0;
+    QString userDisplayString = displayName + (hasLocalizedName ? (" (" + ircMessage.account() + ")") : QString());
+
+    words->append(Word(userDisplayString, Word::Username, usernameColor, userDisplayString, QString()));
+
+    // highlights
+#pragma message WARN("xD")
+
+    // bits
+    QString bits = "";
+
+    iterator = ircMessage.tags().find("bits");
+    if (iterator != ircMessage.tags().end())
+    {
+         bits = iterator.value().toString();
+    }
+
+    // twitch emotes
+    QVector<std::pair<long int, LazyLoadedImage*>> twitchEmotes;
+
+    iterator = ircMessage.tags().find("emotes");
+
+    if (iterator != ircMessage.tags().end())
+    {
+        auto emotes = iterator.value().toString().split('/');
+
+        for (QString emote : emotes)
+        {
+            if (!emote.contains(':')) continue;
+
+            QStringList parameters = emote.split(':');
+
+            if (parameters.length() < 2) continue;
+
+            long int id = std::stol(parameters.at(0).toStdString(), NULL, 10);
+
+            QStringList occurences = parameters.at(1).split(',');
+
+            for (QString occurence : occurences)
+            {
+                QStringList coords = occurence.split('-');
+
+                if (coords.length() < 2) continue;
+
+                long int start = std::stol(coords.at(0).toStdString(), NULL, 10);
+                long int end = std::stol(coords.at(1).toStdString(), NULL, 10);
+
+                if (start >= end || start < 0 || end > ircMessage.content().length()) continue;
+
+                QString name = ircMessage.content().mid(start, end - start);
+
+                twitchEmotes.append(std::pair<long int, LazyLoadedImage*>(start, Emotes::getTwitchEmoteById(name, id)));
+            }
+        }
+
+        std::sort(twitchEmotes.begin(), twitchEmotes.end(), sortTwitchEmotes);
+    }
+
+    auto currentTwitchEmote = twitchEmotes.begin();
+
+    // words
+    QColor textColor = ircMessage.isAction() ? usernameColor : ColorScheme::instance().Text;
+
+    QStringList splits = ircMessage.content().split(' ');
+
+    long int i = 0;
+
+    for (QString split : splits)
+    {
+        // twitch emote
+        if (currentTwitchEmote == twitchEmotes.end()) break;
+
+        if (currentTwitchEmote->first == i)
+        {
+            words->append(Word(currentTwitchEmote->second, Word::TwitchEmoteImage, currentTwitchEmote->second->name(), currentTwitchEmote->second->name() + QString("\nTwitch Emote")));
+            words->append(Word(currentTwitchEmote->second->name(), Word::TwitchEmoteText, textColor, currentTwitchEmote->second->name(), currentTwitchEmote->second->name() + QString("\nTwitch Emote")));
+
+            i += split.length() + 1;
+            currentTwitchEmote = std::next(currentTwitchEmote);
+
+            continue;
+        }
+
+        // split words
+    }
+}
+
+bool Message::sortTwitchEmotes(const std::pair<long int, LazyLoadedImage*>& a, const std::pair<long int, LazyLoadedImage*>& b)
+{
+    return a.first < b.first;
 }
