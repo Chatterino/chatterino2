@@ -30,5 +30,5 @@ void ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto M = c->getMessagesClone();
 
-    delete M;
+
 }

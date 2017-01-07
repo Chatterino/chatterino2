@@ -4,22 +4,34 @@
 #include <QRegularExpression>
 #include <QObject>
 #include <QString>
+#include <unordered_map>
+
 #include "lazyloadedimage.h"
 #include "concurrentmap.h"
 
 class Emojis
 {
 public:
-    std::vector<std::tuple<LazyLoadedImage*, QString>> parseEmotes(const QString& value);
+    static void parseEmojis(std::vector<std::tuple<LazyLoadedImage*, QString>>& vector, const QString& text);
 
     static void initEmojis();
 
+    static QString replaceShortCodes(const QString& text);
+
+    struct EmojiData {
+        QString value;
+        QString code;
+    };
+
 private:
+
     static QRegularExpression* findShortCodesRegex;
 
-    static QMap<QString, QString>* shortCodeToEmoji;
+    static QMap<QString, EmojiData>* shortCodeToEmoji;
     static QMap<QString, QString>* emojiToShortCode;
-    static QMap<QChar, QMap<QString, LazyLoadedImage*>>* firstEmojiChars;
+    static QMap<QChar, QMap<QString, QString>>* firstEmojiChars;
+
+    static ConcurrentMap<QString, LazyLoadedImage*>* imageCache;
 
     Emojis() {}
 };

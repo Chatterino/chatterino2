@@ -24,35 +24,35 @@ public:
     Message(const IrcPrivateMessage& ircMessage, const Channel& Channel, bool enablePingSound = true,
             bool isReceivedWhisper = false, bool isSentWhisper = false, bool includeChannel = false);
 
-    bool canHighlightTab() {
+    bool canHighlightTab() const {
         return m_highlightTab;
     }
 
-    const QString& timeoutUser() {
+    const QString& timeoutUser() const {
         return m_timeoutUser;
     }
 
-    int timeoutCount() {
+    int timeoutCount() const {
         return m_timeoutCount;
     }
 
-    const QString& userName() {
+    const QString& userName() const {
         return m_userName;
     }
 
-    const QString& displayName() {
+    const QString& displayName() const {
         return m_displayName;
     }
 
-    QList<Word> words() {
+    QList<Word> words() const {
         return m_words;
     }
 
-    bool disabled() {
+    bool disabled() const {
         return m_disabled;
     }
 
-    const QString& id() {
+    const QString& id() const {
         return m_id;
     }
 
@@ -65,6 +65,8 @@ private:
     static LazyLoadedImage* badgeBroadcaster;
     static LazyLoadedImage* badgePremium;
 
+    static QRegularExpression* cheerRegex;
+
     bool m_highlightTab = false;
     QString m_timeoutUser = "";
     int m_timeoutCount = 0;
@@ -76,6 +78,8 @@ private:
     QString m_id = "";
 
     QList<Word> m_words;
+
+    static QString matchLink(const QString& string);
 
     static bool sortTwitchEmotes(const std::pair<long int, LazyLoadedImage*>& a, const std::pair<long int, LazyLoadedImage*>& b);
 };

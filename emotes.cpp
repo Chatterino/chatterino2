@@ -5,9 +5,9 @@ ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_bttvEmotes                 
 ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_ffzEmotes                  = new ConcurrentMap<QString, LazyLoadedImage* >();
 ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_chatterinoEmotes           = new ConcurrentMap<QString, LazyLoadedImage* >();
 ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_bttvChannelEmoteFromCaches = new ConcurrentMap<QString, LazyLoadedImage* >();
-ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_fFzChannelEmoteFromCaches  = new ConcurrentMap<QString, LazyLoadedImage* >();
+ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_ffzChannelEmoteFromCaches  = new ConcurrentMap<QString, LazyLoadedImage* >();
 ConcurrentMap<int,     LazyLoadedImage* >* Emotes::m_twitchEmoteFromCache       = new ConcurrentMap<int,     LazyLoadedImage* >();
-ConcurrentMap<int,     LazyLoadedImage* >* Emotes::m_miscImageFromCache         = new ConcurrentMap<int,     LazyLoadedImage* >();
+ConcurrentMap<QString, LazyLoadedImage* >* Emotes::m_miscImageFromCache         = new ConcurrentMap<QString, LazyLoadedImage* >();
 
 LazyLoadedImage* Emotes::m_cheerBadge100000 = new LazyLoadedImage(new QImage(":/cheer100000"));
 LazyLoadedImage* Emotes::m_cheerBadge10000  = new LazyLoadedImage(new QImage(":/cheer10000"));

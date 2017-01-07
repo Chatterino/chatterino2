@@ -51,70 +51,79 @@ public:
             | BadgeCheer,
 
         Username = 0x800000,
+        BitsAmount = 0x1000000,
 
-        Default = TimestampNoSeconds | Badges | Username | Bits | FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage
+        Default = TimestampNoSeconds | Badges | Username | Bits | FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount
     };
 
     explicit Word(LazyLoadedImage* m_image, Type type, const QString& copytext, const QString& tooltip, const Link& link = Link());
     explicit Word(const QString& m_text, Type type, const QColor& color, const QString& copytext, const QString& tooltip, const Link& link = Link());
 
-    LazyLoadedImage& getImage() {
+    LazyLoadedImage& getImage() const {
         return *m_image;
     }
 
-    const QString& getText() {
+    const QString& getText() const {
         return m_text;
     }
 
-    int width() {
+    int width() const {
         return m_width;
     }
 
-    int height() {
+    int height() const {
         return m_height;
     }
 
-    int x() {
+    int x() const {
         return m_x;
     }
 
-    int y() {
+    int y() const {
         return m_y;
     }
 
-    QRect rect() {
+    int right() const {
+        return m_x + m_width;
+    }
+
+    int bottom() const {
+        return m_y + m_height;
+    }
+
+    QRect rect() const {
         return QRect(m_x, m_y, m_width, m_height);
     }
 
-    bool isImage() {
+    bool isImage() const {
         return m_isImage;
     }
 
-    const QString& copyText() {
+    const QString& copyText() const {
         return m_copyText;
     }
 
-    bool hasTrailingSpace() {
+    bool hasTrailingSpace() const {
         return m_hasTrailingSpace;
     }
 
-    QFont& getFont() {
+    QFont& getFont() const {
         return Fonts::getFont(m_font);
     }
 
-    Type type() {
+    Type type() const {
         return m_type;
     }
 
-    const QString& tooltip() {
+    const QString& tooltip() const {
         return m_tooltip;
     }
 
-    const QColor& color() {
+    const QColor& color() const {
         return m_color;
     }
 
-    const Link& link() {
+    const Link& link() const {
         return m_link;
     }
 

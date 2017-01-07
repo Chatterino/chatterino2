@@ -3,6 +3,7 @@
 #include "colorscheme.h"
 #include "ircmanager.h"
 #include "emojis.h"
+#include <QClipboard>
 
 int main(int argc, char *argv[])
 {

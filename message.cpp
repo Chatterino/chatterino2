@@ -2,8 +2,13 @@
 #include "qcolor.h"
 #include "colorscheme.h"
 #include "emotes.h"
+#include "emojis.h"
+#include "link.h"
+#include "appsettings.h"
+#include "ircmanager.h"
 
 #include <ctime>
+#include <tuple>
 #include <QStringList>
 
 LazyLoadedImage* Message::badgeStaff       = new LazyLoadedImage(new QImage(":/images/staff_bg.png"));
@@ -13,6 +18,8 @@ LazyLoadedImage* Message::badgeGlobalmod   = new LazyLoadedImage(new QImage(":/i
 LazyLoadedImage* Message::badgeTurbo       = new LazyLoadedImage(new QImage(":/images/turbo_bg.png"));
 LazyLoadedImage* Message::badgeBroadcaster = new LazyLoadedImage(new QImage(":/images/broadcaster_bg.png"));
 LazyLoadedImage* Message::badgePremium     = new LazyLoadedImage(new QImage(":/images/twitchprime_bg.png"));
+
+QRegularExpression* Message::cheerRegex    = new QRegularExpression("cheer[1-9][0-9]*");
 
 Message::Message(const QString &text)
 {
@@ -112,7 +119,7 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bo
     if (includeChannel)
     {
         QString channelName("#" + channel.name());
-        words->append(Word(channelName, Word::Misc, ColorScheme::instance().SystemMessageColor, QString(channelName), QString(), Link(Link::ShowMessage, channel.name() + "\n" + m_id)));
+        words->append(Word(channelName, Word::Misc, ColorScheme::instance().SystemMessageColor, QString(channelName), QString(), Link(Link::Url, channel.name() + "\n" + m_id)));
     }
 
     // username
@@ -140,6 +147,21 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bo
 
     bool hasLocalizedName = QString::compare(displayName, ircMessage.account()) == 0;
     QString userDisplayString = displayName + (hasLocalizedName ? (" (" + ircMessage.account() + ")") : QString());
+
+    if (isSentWhisper)
+    {
+        userDisplayString = IrcManager::account->username() + " -> ";
+    }
+
+    if (isReceivedWhisper)
+    {
+        userDisplayString += " -> " + IrcManager::account->username();
+    }
+
+    if (!ircMessage.isAction())
+    {
+        userDisplayString += ": ";
+    }
 
     words->append(Word(userDisplayString, Word::Username, usernameColor, userDisplayString, QString()));
 
@@ -222,10 +244,108 @@ Message::Message(const IrcPrivateMessage& ircMessage, const Channel& channel, bo
         }
 
         // split words
+        std::vector<std::tuple<LazyLoadedImage*, QString>> parsed;
+
+        Emojis::parseEmojis(parsed, split);
+
+        for (const std::tuple<LazyLoadedImage*, QString>& tuple : parsed)
+        {
+            LazyLoadedImage* image = std::get<0>(tuple);
+            if (image == NULL)
+            {
+                QString string = std::get<1>(tuple);
+
+                // cheers
+                if (!bits.isEmpty() && string.length() >= 6 && cheerRegex->match(string).isValid())
+                {
+                    auto cheer = string.mid(5).toInt();
+
+                    QString color;
+
+                    QColor bitsColor;
+
+                    if (cheer >= 10000)
+                    {
+                        color = "red";
+                        bitsColor = QColor::fromHslF(0, 1, 0.5);
+                    }
+                    else if (cheer >= 5000)
+                    {
+                        color = "blue";
+                        bitsColor = QColor::fromHslF(0.61, 1, 0.4);
+                    }
+                    else if (cheer >= 1000)
+                    {
+                        color = "green";
+                        bitsColor = QColor::fromHslF(0.5, 1, 0.5);
+                    }
+                    else if (cheer >= 100)
+                    {
+                        color = "purple";
+                        bitsColor = QColor::fromHslF(0.8, 1, 0.5);
+                    }
+                    else
+                    {
+                        color = "gray";
+                        bitsColor = QColor::fromHslF(0.5f, 0.5f, 0.5f);
+                    }
+
+                    QString bitsLinkAnimated = QString("http://static-cdn.jtvnw.net/bits/dark/animated/" + color + "/1");
+                    QString bitsLink = QString("http://static-cdn.jtvnw.net/bits/dark/static/" + color + "/1");
+
+                    LazyLoadedImage* imageAnimated = Emotes::miscImageFromCache().getOrAdd(bitsLinkAnimated, [&bitsLinkAnimated]{ return new LazyLoadedImage(bitsLinkAnimated); });
+                    LazyLoadedImage* image = Emotes::miscImageFromCache().getOrAdd(bitsLink, [&bitsLink]{ return new LazyLoadedImage(bitsLink); });
+
+                    words->append(Word(imageAnimated, Word::BitsAnimated, QString("cheer"), QString("Twitch Cheer"), Link(Link::Url, QString("https://blog.twitch.tv/introducing-cheering-celebrate-together-da62af41fac6"))));
+                    words->append(Word(image, Word::Bits, QString("cheer"), QString("Twitch Cheer"), Link(Link::Url, QString("https://blog.twitch.tv/introducing-cheering-celebrate-together-da62af41fac6"))));
+
+                    words->append(Word(QString("x" + string.mid(5)), Word::BitsAmount, bitsColor, QString(string.mid(5)), QString("Twitch Cheer"), Link(Link::Url, QString("https://blog.twitch.tv/introducing-cheering-celebrate-together-da62af41fac6"))));
+                }
+
+                continue;
+
+                // bttv / ffz emotes
+                LazyLoadedImage* bttvEmote;
+
+                if (
+    #warning "xD ignored emotes"
+                        Emotes::bttvEmotes().tryGet(string, bttvEmote) ||
+                        channel.bttvChannelEmotes().tryGet(string, bttvEmote) ||
+                        Emotes::ffzEmotes().tryGet(string, bttvEmote) ||
+                        channel.ffzChannelEmotes().tryGet(string, bttvEmote) ||
+                        Emotes::chatterinoEmotes().tryGet(string, bttvEmote))
+                {
+                    words->append(Word(bttvEmote, Word::BttvEmoteImage, bttvEmote->name(), bttvEmote->tooltip(), Link(Link::Url, bttvEmote->url())));
+
+                    continue;
+                }
+
+                // actually just a word
+                QString link = matchLink(string);
+
+                words->append(Word(string, Word::Text, textColor, string, QString(), link.isEmpty() ? Link() : Link(Link::Url, link)));
+            }
+        }
+
+        i += split.length() + 1;
     }
+
+    this->words() = words;
+
+#warning "xD"
+//    if (!isReceivedWhisper && AppSettings.HighlightIgnoredUsers.ContainsKey(Username))
+//    {
+//        HighlightTab = false;
+//    }
 }
 
 bool Message::sortTwitchEmotes(const std::pair<long int, LazyLoadedImage*>& a, const std::pair<long int, LazyLoadedImage*>& b)
 {
     return a.first < b.first;
+}
+
+QString Message::matchLink(const QString &string)
+{
+#warning "xD"
+    return QString();
 }

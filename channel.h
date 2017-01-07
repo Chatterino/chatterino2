@@ -1,64 +1,79 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
-#include "QString"
-#include "QMap"
-#include "QMutex"
-#include "QVector"
+#include "concurrentmap.h"
+#include "lazyloadedimage.h"
+
+#include <QString>
+#include <QMap>
+#include <QMutex>
+#include <QVector>
 
 class Message;
 
 class Channel
 {
+// static
+
 public:
-    static const Channel whispers;
-    static const Channel mentions;
+    static Channel whispers;
+    static Channel mentions;
 
     static Channel* addChannel(const QString &channel);
     static Channel* getChannel(const QString &channel);
     static void  removeChannel(const QString &channel);
 
-    QString getSubLink();
-    QString getChannelLink();
-    QString getPopoutPlayerLink();
+private:
+    static QMap<QString, Channel*> channels;
 
-    bool getIsLive();
-    int getStreamViewerCount();
-    QString getStreamStatus();
-    QString getStreamGame();
+// members
 
-    const QString& name() const {
-        return m_name;
-    }
+public:
+    // properties
+    const ConcurrentMap<QString, LazyLoadedImage*>& bttvChannelEmotes() const { return m_bttvChannelEmotes; }
+    const ConcurrentMap<QString, LazyLoadedImage*>& ffzChannelEmotes() const { return m_ffzChannelEmotes; }
 
+    const QMutex& messageMutex() const { return m_messageMutex; }
+
+    const QString& name() const { return m_name; }
+    int roomID() const { return m_roomID; }
+
+    const QString& subLink() const { return m_subLink; }
+    const QString& channelLink() const { return m_channelLink; }
+    const QString& popoutPlayerLink() const { return m_popoutPlayerLink; }
+
+    bool isLive() const { return m_isLive; }
+    int streamViewerCount() const { return m_streamViewerCount; }
+    const QString& streamStatus() const { return m_streamStatus; }
+    const QString& streamGame() const { return m_streamGame; }
+
+    // methods
     void addMessage(Message* message);
-//    ~Channel();
 
-    QVector<Message*>* getMessagesClone();
+    QVector<Message*> getMessagesClone();
 
 private:
     Channel(QString channel);
 
-    QMutex* messageMutex;
+    ConcurrentMap<QString, LazyLoadedImage*> m_bttvChannelEmotes;
+    ConcurrentMap<QString, LazyLoadedImage*> m_ffzChannelEmotes;
+    QMutex  m_messageMutex;
 
-    static QMap<QString, Channel*> channels;
+    int     m_referenceCount = 0;
 
-    int referenceCount = 1;
+    QVector<Message*> m_messages;
 
     QString m_name;
+    int     m_roomID;
 
-    int roomID;
+    QString m_subLink;
+    QString m_channelLink;
+    QString m_popoutPlayerLink;
 
-    QVector<Message*>* messages = new QVector<Message*>();
-
-    QString subLink = "";
-    QString channelLink = "";
-    QString popoutPlayerLink = "";
-
-    bool isLive = false;
-    int streamViewerCount = 0;
-    QString streamStatus = "";
-    QString streamGame = "";
+    bool    m_isLive;
+    int     m_streamViewerCount;
+    QString m_streamStatus;
+    QString m_streamGame;
 };
 
 #endif // CHANNEL_H

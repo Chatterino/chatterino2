@@ -24,5 +24,6 @@
         <file>images/moderator_bg.png</file>
         <file>images/staff_bg.png</file>
         <file>images/turbo_bg.png</file>
+        <file>emojidata.txt</file>
     </qresource>
 </RCC>

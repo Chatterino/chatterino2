@@ -1,24 +1,23 @@
 #include "channel.h"
 #include "message.h"
 
-const Channel Channel::whispers = Channel(QString("/whispers"));
-const Channel Channel::mentions = Channel(QString("/mentions"));
+Channel Channel::whispers = Channel(QString("/whispers"));
+Channel Channel::mentions = Channel(QString("/mentions"));
 
 QMap<QString, Channel*> Channel::channels = QMap<QString, Channel*>();
 
 Channel::Channel(QString channel)
     : m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
+    , m_bttvChannelEmotes()
+    , m_ffzChannelEmotes()
+    , m_messages()
+    , m_messageMutex()
+    , m_subLink("https://www.twitch.tv/" + m_name + "/subscribe?ref=in_chat_subscriber_link")
+    , m_channelLink("https://twitch.tv/" + m_name)
+    , m_popoutPlayerLink("https://player.twitch.tv/?channel=" + m_name)
 {
-    messageMutex = new QMutex();
-    subLink = "https://www.twitch.tv/" + m_name + "/subscribe?ref=in_chat_subscriber_link";
-    channelLink = "https://twitch.tv/" + m_name;
-    popoutPlayerLink = "https://player.twitch.tv/?channel=" + m_name;
-}
 
-//Channel::~Channel()
-//{
-////    delete messages;
-//}
+}
 
 Channel* Channel::addChannel(const QString &channel)
 {
@@ -69,26 +68,17 @@ void Channel::removeChannel(const QString &channel)
     }
 }
 
-QString Channel::getSubLink()            { return subLink          ; }
-QString Channel::getChannelLink()        { return channelLink      ; }
-QString Channel::getPopoutPlayerLink()   { return popoutPlayerLink ; }
-
-bool    Channel::getIsLive()             { return isLive           ; }
-int     Channel::getStreamViewerCount()  { return streamViewerCount; }
-QString Channel::getStreamStatus()       { return streamStatus     ; }
-QString Channel::getStreamGame()         { return streamGame       ; }
-
-QVector<Message*>* Channel::getMessagesClone()
+QVector<Message*> Channel::getMessagesClone()
 {
-    messageMutex->lock();
-    auto M = new QVector<Message*>(*messages);
-    messageMutex->unlock();
+    m_messageMutex.lock();
+    QVector M = QVector<Message*>(*m_messages);
+    m_messageMutex.unlock();
     return M;
 }
 
 void Channel::addMessage(Message *message)
 {
-    messageMutex->lock();
+    m_messageMutex.lock();
 //    messages
-    messageMutex->unlock();
+    m_messageMutex.unlock();
 }
