@@ -1,10 +1,10 @@
-#include "QPainter"
 #include "scrollbar.h"
+#include "QPainter"
 #include "colorscheme.h"
 
-ScrollBar::ScrollBar(QWidget* widget)
-    : QWidget(widget),
-      mutex()
+ScrollBar::ScrollBar(QWidget *widget)
+    : QWidget(widget)
+    , mutex()
 {
     resize(16, 100);
 }
@@ -13,31 +13,26 @@ ScrollBar::~ScrollBar()
 {
     auto highlight = highlights;
 
-    while (highlight != NULL)
-    {
+    while (highlight != NULL) {
         auto tmp = highlight->next;
         delete highlight;
         highlight = tmp;
     }
 }
 
-void ScrollBar::removeHighlightsWhere(std::function<bool (ScrollBarHighlight&)> func)
+void
+ScrollBar::removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func)
 {
     mutex.lock();
 
-    ScrollBarHighlight* last = NULL;
-    ScrollBarHighlight* current = highlights;
+    ScrollBarHighlight *last = NULL;
+    ScrollBarHighlight *current = highlights;
 
-    while (current != NULL)
-    {
-        if (func(*current))
-        {
-            if (last == NULL)
-            {
+    while (current != NULL) {
+        if (func(*current)) {
+            if (last == NULL) {
                 highlights = current->next;
-            }
-            else
-            {
+            } else {
                 last->next = current->next;
             }
 
@@ -53,16 +48,14 @@ void ScrollBar::removeHighlightsWhere(std::function<bool (ScrollBarHighlight&)> 
     mutex.unlock();
 }
 
-void ScrollBar::addHighlight(ScrollBarHighlight* highlight)
+void
+ScrollBar::addHighlight(ScrollBarHighlight *highlight)
 {
     mutex.lock();
 
-    if (highlights == NULL)
-    {
+    if (highlights == NULL) {
         highlights = highlight;
-    }
-    else
-    {
+    } else {
         highlight->next = highlights->next;
         highlights->next = highlight;
     }
@@ -70,14 +63,13 @@ void ScrollBar::addHighlight(ScrollBarHighlight* highlight)
     mutex.unlock();
 }
 
-void ScrollBar::paintEvent(QPaintEvent *)
+void
+ScrollBar::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     painter.fillRect(rect(), ColorScheme::instance().ScrollbarBG);
 
     mutex.lock();
-
-
 
     mutex.unlock();
 }

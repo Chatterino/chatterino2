@@ -1,8 +1,8 @@
 #ifndef CHATWIDGETINPUT_H
 #define CHATWIDGETINPUT_H
 
-#include "QWidget"
 #include "QPaintEvent"
+#include "QWidget"
 
 class ChatWidgetInput : public QWidget
 {
@@ -15,4 +15,4 @@ protected:
     void paintEvent(QPaintEvent *);
 };
 
-#endif // CHATWIDGETINPUT_H
+#endif  // CHATWIDGETINPUT_H

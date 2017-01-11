@@ -1,24 +1,24 @@
 #ifndef NOTEBOOK_H
 #define NOTEBOOK_H
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
+#include "notebookbutton.h"
 #include "notebookpage.h"
 #include "notebooktab.h"
-#include "notebookbutton.h"
 
 class Notebook : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     Notebook(QWidget *parent);
 
-    NotebookPage* addPage();
+    NotebookPage *addPage();
 
     enum HighlightType { none, highlighted, newMessage };
 
-    void select(NotebookPage* page);
+    void select(NotebookPage *page);
     void performLayout();
 
 protected:
@@ -30,13 +30,13 @@ public slots:
     void settingsButtonClicked();
 
 private:
-    QList<NotebookPage*> pages;
+    QList<NotebookPage *> pages;
 
     NotebookButton addButton;
     NotebookButton settingsButton;
     NotebookButton userButton;
 
-    NotebookPage* selected = nullptr;
+    NotebookPage *selected = nullptr;
 };
 
-#endif // NOTEBOOK_H
+#endif  // NOTEBOOK_H

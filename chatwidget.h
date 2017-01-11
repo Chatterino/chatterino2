@@ -2,12 +2,12 @@
 #define CHATWIDGET_H
 
 #include <QWidget>
-#include "QVBoxLayout"
 #include "QFont"
-#include "chatwidgetheader.h"
-#include "chatwidgetview.h"
-#include "chatwidgetinput.h"
+#include "QVBoxLayout"
 #include "channel.h"
+#include "chatwidgetheader.h"
+#include "chatwidgetinput.h"
+#include "chatwidgetview.h"
 
 class ChatWidget : public QWidget
 {
@@ -27,8 +27,7 @@ private:
     ChatWidgetView view;
     ChatWidgetInput input;
 
-
-    Channel* channel = NULL;
+    Channel *channel = NULL;
 };
 
-#endif // CHATWIDGET_H
+#endif  // CHATWIDGET_H

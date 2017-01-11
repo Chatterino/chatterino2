@@ -3,18 +3,23 @@
 
 #include "QString"
 
-struct TwitchEmoteValue
-{
+struct TwitchEmoteValue {
 public:
-    int set() {
+    int
+    set()
+    {
         return m_set;
     }
 
-    int id() {
+    int
+    id()
+    {
         return m_id;
     }
 
-    const QString& channelName() {
+    const QString &
+    channelName()
+    {
         return m_channelName;
     }
 
@@ -24,4 +29,4 @@ private:
     QString m_channelName;
 };
 
-#endif // TWITCHEMOTEVALUE_H
+#endif  // TWITCHEMOTEVALUE_H

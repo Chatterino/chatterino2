@@ -1,10 +1,10 @@
 #ifndef CHATWIDGETHEADER_H
 #define CHATWIDGETHEADER_H
 
-#include "QWidget"
+#include "QMouseEvent"
 #include "QPaintEvent"
 #include "QPoint"
-#include "QMouseEvent"
+#include "QWidget"
 
 class ChatWidget;
 
@@ -14,7 +14,7 @@ class ChatWidgetHeader : public QWidget
 
 public:
     ChatWidgetHeader();
-    ChatWidget* getChatWidget();
+    ChatWidget *getChatWidget();
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -26,4 +26,4 @@ private:
     bool dragging = false;
 };
 
-#endif // CHATWIDGETHEADER_H
+#endif  // CHATWIDGETHEADER_H

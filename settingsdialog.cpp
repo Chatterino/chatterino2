@@ -1,13 +1,13 @@
 #include "settingsdialog.h"
 #include "settingsdialogtab.h"
 
-#include "QPalette"
-#include "QFile"
-#include "QResource"
-#include "QLabel"
-#include "QFormLayout"
 #include "QComboBox"
+#include "QFile"
+#include "QFormLayout"
 #include "QGroupBox"
+#include "QLabel"
+#include "QPalette"
+#include "QResource"
 
 SettingsDialog::SettingsDialog()
 {
@@ -38,7 +38,8 @@ SettingsDialog::SettingsDialog()
     hbox.addLayout(&pageStack);
 
     buttonBox.addButton(&okButton, QDialogButtonBox::ButtonRole::AcceptRole);
-    buttonBox.addButton(&cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
+    buttonBox.addButton(&cancelButton,
+                        QDialogButtonBox::ButtonRole::RejectRole);
     okButton.setText("OK");
     cancelButton.setText("Cancel");
 
@@ -47,9 +48,10 @@ SettingsDialog::SettingsDialog()
     addTabs();
 }
 
-void SettingsDialog::addTabs()
+void
+SettingsDialog::addTabs()
 {
-    QVBoxLayout* vbox;
+    QVBoxLayout *vbox;
 
     // Appearance
     vbox = new QVBoxLayout();
@@ -77,7 +79,8 @@ void SettingsDialog::addTabs()
         auto v = new QVBoxLayout();
         v->addWidget(createCheckbox("Show timestamp", ""));
         v->addWidget(createCheckbox("Show seconds in timestamp", ""));
-        v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)", ""));
+        v->addWidget(createCheckbox(
+            "Allow sending duplicate messages (add a space at the end)", ""));
         v->addWidget(createCheckbox("Seperate messages", ""));
         v->addWidget(createCheckbox("Show message length", ""));
 
@@ -94,7 +97,8 @@ void SettingsDialog::addTabs()
     vbox = new QVBoxLayout();
 
     vbox->addWidget(createCheckbox("Hide input box if empty", ""));
-    vbox->addWidget(createCheckbox("Mention users with a @ (except in commands)", ""));
+    vbox->addWidget(
+        createCheckbox("Mention users with a @ (except in commands)", ""));
     vbox->addWidget(createCheckbox("Window always on top", ""));
     vbox->addWidget(createCheckbox("Show last read message indicator", ""));
 
@@ -125,12 +129,14 @@ void SettingsDialog::addTabs()
     tabs.addStretch(1);
 }
 
-QCheckBox* SettingsDialog::createCheckbox(QString title, QString settingsId)
+QCheckBox *
+SettingsDialog::createCheckbox(QString title, QString settingsId)
 {
     return new QCheckBox(title);
 }
 
-void SettingsDialog::addTab(QLayout* layout, QString title, QString imageRes)
+void
+SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 {
     auto widget = new QWidget();
 
@@ -144,25 +150,25 @@ void SettingsDialog::addTab(QLayout* layout, QString title, QString imageRes)
 
     pageStack.addWidget(widget);
 
-    if (tabs.count() == 1)
-    {
+    if (tabs.count() == 1) {
         select(tab);
     }
 }
 
-void SettingsDialog::select(SettingsDialogTab* tab)
+void
+SettingsDialog::select(SettingsDialogTab *tab)
 {
     pageStack.setCurrentWidget(tab->widget);
 
-    if (selectedTab != NULL)
-    {
+    if (selectedTab != NULL) {
         selectedTab->setSelected(false);
         selectedTab->setStyleSheet("");
     }
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #F00;"
-            "background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #333, stop:1 #555);"
-            "border-right: none;");
+                       "background: qlineargradient( x1:0 y1:0, x2:1 y2:0, "
+                       "stop:0 #333, stop:1 #555);"
+                       "border-right: none;");
     selectedTab = tab;
 }

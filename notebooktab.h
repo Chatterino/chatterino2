@@ -8,14 +8,14 @@ class NotebookPage;
 
 class NotebookTab : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     NotebookTab(Notebook *notebook);
 
     void calcSize();
 
-    NotebookPage* page;
+    NotebookPage *page;
     QString text;
 
     bool getSelected();
@@ -47,4 +47,4 @@ private:
     int highlightStyle;
 };
 
-#endif // NOTEBOOKTAB_H
+#endif  // NOTEBOOKTAB_H

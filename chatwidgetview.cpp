@@ -1,15 +1,15 @@
 #include "chatwidgetview.h"
+#include "message.h"
 #include "word.h"
 #include "wordpart.h"
-#include "message.h"
 
-#include <QScroller>
 #include <QPainter>
+#include <QScroller>
 
 ChatWidgetView::ChatWidgetView()
-    : QWidget(),
-      scrollbar(this),
-      m_channel(NULL)
+    : QWidget()
+    , scrollbar(this)
+    , m_channel(NULL)
 {
     auto scroll = QScroller::scroller(this);
 
@@ -18,56 +18,60 @@ ChatWidgetView::ChatWidgetView()
     m_channel = Channel::getChannel("ian678");
 }
 
-void ChatWidgetView::resizeEvent(QResizeEvent *)
+void
+ChatWidgetView::resizeEvent(QResizeEvent *)
 {
     scrollbar.resize(scrollbar.width(), height());
     scrollbar.move(width() - scrollbar.width(), 0);
 
     auto c = channel();
 
-    if (c == NULL) return;
+    if (c == NULL)
+        return;
 
     auto messages = c->getMessagesClone();
 
-    for (std::shared_ptr<Message>& message : messages)
-    {
+    for (std::shared_ptr<Message> &message : messages) {
         message.get()->layout(width(), true);
     }
 }
 
-void ChatWidgetView::paintEvent(QPaintEvent *)
+void
+ChatWidgetView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
     auto c = channel();
 
-    if (c == NULL) return;
+    if (c == NULL)
+        return;
 
     auto messages = c->getMessagesClone();
 
     int y = 0;
 
-    for (std::shared_ptr<Message> const& message : messages)
-    {
-        for (WordPart const& wordPart : message.get()->wordParts())
-        {
+    for (std::shared_ptr<Message> const &message : messages) {
+        for (WordPart const &wordPart : message.get()->wordParts()) {
             // image
-            if (wordPart.word().isImage())
-            {
-                LazyLoadedImage& lli = wordPart.word().getImage();
+            if (wordPart.word().isImage()) {
+                LazyLoadedImage &lli = wordPart.word().getImage();
 
-                const QImage* image = lli.image();
+                const QImage *image = lli.image();
 
-                if (image != NULL)
-                {
-                    painter.drawImage(QRect(wordPart.x(), wordPart.y() + y, wordPart.width(), wordPart.height()), *image);
+                if (image != NULL) {
+                    painter.drawImage(
+                        QRect(wordPart.x(), wordPart.y() + y, wordPart.width(),
+                              wordPart.height()),
+                        *image);
                 }
             }
-
             // text
-            else
-            {
-                painter.drawText(wordPart.x(), wordPart.y() + y, wordPart.getText());
+            else {
+                painter.setPen(wordPart.word().color());
+                painter.setFont(wordPart.word().getFont());
+
+                painter.drawText(wordPart.x(), wordPart.y() + y,
+                                 wordPart.getText());
             }
         }
 

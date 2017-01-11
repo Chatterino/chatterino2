@@ -2,66 +2,89 @@
 #define WORDPART_H
 
 #include <QRect>
-#include <QStringRef>
+#include <QString>
 
 class Word;
 
 class WordPart
 {
 public:
-    WordPart(Word& word, int x, int y, const QStringRef& copyText, bool allowTrailingSpace = true);
+    WordPart(Word &word, int x, int y, const QString &copyText,
+             bool allowTrailingSpace = true);
 
-    const Word& word() const {
+    const Word &
+    word() const
+    {
         return m_word;
     }
 
-    int width() const {
+    int
+    width() const
+    {
         return m_width;
     }
 
-    int height() const {
+    int
+    height() const
+    {
         return m_height;
     }
 
-    int x() const {
+    int
+    x() const
+    {
         return m_x;
     }
 
-    int y() const {
+    int
+    y() const
+    {
         return m_y;
     }
 
-    void setPosition(int x, int y) {
+    void
+    setPosition(int x, int y)
+    {
         m_x = x;
         m_y = y;
     }
 
-    int right() const {
+    int
+    right() const
+    {
         return m_x + m_width;
     }
 
-    int bottom() const {
+    int
+    bottom() const
+    {
         return m_y + m_height;
     }
 
-    QRect rect() const {
+    QRect
+    rect() const
+    {
         return QRect(m_x, m_y, m_width, m_height);
     }
 
-    const QStringRef copyText() const {
+    const QString
+    copyText() const
+    {
         return m_copyText;
     }
 
-    int hasTrailingSpace() const {
+    int
+    hasTrailingSpace() const
+    {
         return m_trailingSpace;
     }
 
-    const QString& getText() const;
+    const QString &getText() const;
 
 private:
-    Word& m_word;
+    Word &m_word;
 
-    QStringRef m_copyText;
+    QString m_copyText;
 
     int m_x;
     int m_y;
@@ -71,4 +94,4 @@ private:
     bool m_trailingSpace;
 };
 
-#endif // WORDPART_H
+#endif  // WORDPART_H

@@ -1,32 +1,32 @@
 #ifndef NOTEBOOKPAGE_H
 #define NOTEBOOKPAGE_H
 
-#include "QWidget"
-#include "QRect"
-#include "QVector"
-#include "QHBoxLayout"
-#include "QVBoxLayout"
 #include "QDragEnterEvent"
-#include "notebookpage.h"
-#include "notebooktab.h"
+#include "QHBoxLayout"
+#include "QRect"
+#include "QVBoxLayout"
+#include "QVector"
+#include "QWidget"
 #include "chatwidget.h"
+#include "notebookpage.h"
 #include "notebookpagedroppreview.h"
+#include "notebooktab.h"
 
 class NotebookPage : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     NotebookPage(QWidget *parent, NotebookTab *tab);
-    NotebookTab* tab;
+    NotebookTab *tab;
     QVBoxLayout parentbox;
     QHBoxLayout hbox;
 
-    std::pair<int, int> removeFromLayout(ChatWidget* widget);
-    void addToLayout(ChatWidget* widget, std::pair<int, int> position);
+    std::pair<int, int> removeFromLayout(ChatWidget *widget);
+    void addToLayout(ChatWidget *widget, std::pair<int, int> position);
 
     static bool isDraggingSplit;
-    static ChatWidget* draggingSplit;
+    static ChatWidget *draggingSplit;
     static std::pair<int, int> dropPosition;
 
 protected:
@@ -41,8 +41,7 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
     void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
 
-    struct DropRegion
-    {
+    struct DropRegion {
         QRect rect;
         std::pair<int, int> position;
 
@@ -61,4 +60,4 @@ private:
     void setPreviewRect(QPoint mousePos);
 };
 
-#endif // NOTEBOOKPAGE_H
+#endif  // NOTEBOOKPAGE_H

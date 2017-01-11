@@ -1,22 +1,24 @@
 #ifndef EMOJIS_H
 #define EMOJIS_H
 
-#include <QRegularExpression>
 #include <QObject>
+#include <QRegularExpression>
 #include <QString>
 #include <unordered_map>
 
-#include "lazyloadedimage.h"
 #include "concurrentmap.h"
+#include "lazyloadedimage.h"
 
 class Emojis
 {
 public:
-    static void parseEmojis(std::vector<std::tuple<LazyLoadedImage*, QString>>& vector, const QString& text);
+    static void parseEmojis(
+        std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
+        const QString &text);
 
     static void initEmojis();
 
-    static QString replaceShortCodes(const QString& text);
+    static QString replaceShortCodes(const QString &text);
 
     struct EmojiData {
         QString value;
@@ -24,16 +26,17 @@ public:
     };
 
 private:
+    static QRegularExpression *findShortCodesRegex;
 
-    static QRegularExpression* findShortCodesRegex;
+    static QMap<QString, EmojiData> *shortCodeToEmoji;
+    static QMap<QString, QString> *emojiToShortCode;
+    static QMap<QChar, QMap<QString, QString>> *firstEmojiChars;
 
-    static QMap<QString, EmojiData>* shortCodeToEmoji;
-    static QMap<QString, QString>* emojiToShortCode;
-    static QMap<QChar, QMap<QString, QString>>* firstEmojiChars;
+    static ConcurrentMap<QString, LazyLoadedImage *> *imageCache;
 
-    static ConcurrentMap<QString, LazyLoadedImage*>* imageCache;
-
-    Emojis() {}
+    Emojis()
+    {
+    }
 };
 
-#endif // EMOJIS_H
+#endif  // EMOJIS_H

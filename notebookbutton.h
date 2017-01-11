@@ -29,4 +29,4 @@ private:
     bool mouseDown = false;
 };
 
-#endif // NOTEBOOKBUTTON_H
+#endif  // NOTEBOOKBUTTON_H

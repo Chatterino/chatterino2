@@ -2,9 +2,9 @@
 #define CHATVIEW_H
 
 #include <QWidget>
-#include "scrollbar.h"
 #include "QPaintEvent"
 #include "channel.h"
+#include "scrollbar.h"
 
 class ChatWidgetView : public QWidget
 {
@@ -13,7 +13,9 @@ class ChatWidgetView : public QWidget
 public:
     ChatWidgetView();
 
-    Channel* channel() {
+    Channel *
+    channel()
+    {
         return m_channel;
     }
 
@@ -22,9 +24,9 @@ protected:
 
 private:
     ScrollBar scrollbar;
-    Channel* m_channel;
+    Channel *m_channel;
 
     void paintEvent(QPaintEvent *);
 };
 
-#endif // CHATVIEW_H
+#endif  // CHATVIEW_H

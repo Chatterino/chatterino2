@@ -1,6 +1,6 @@
 #include "account.h"
 
-const Account* Account::m_anon = new Account("justinfan123", "", "");
+const Account *Account::m_anon = new Account("justinfan123", "", "");
 
 Account::Account(QString username, QString oauthToken, QString oauthClient)
 {

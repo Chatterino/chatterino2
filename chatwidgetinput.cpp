@@ -1,13 +1,14 @@
 #include "chatwidgetinput.h"
-#include "colorscheme.h"
 #include "QPainter"
+#include "colorscheme.h"
 
 ChatWidgetInput::ChatWidgetInput()
 {
     setFixedHeight(38);
 }
 
-void ChatWidgetInput::paintEvent(QPaintEvent *)
+void
+ChatWidgetInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 

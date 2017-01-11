@@ -3,7 +3,8 @@
 #include "QStyleOption"
 #include "settingsdialog.h"
 
-SettingsDialogTab::SettingsDialogTab(SettingsDialog* dialog, QString label, QString imageRes)
+SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label,
+                                     QString imageRes)
     : image(QImage(imageRes))
 {
     this->dialog = dialog;
@@ -14,7 +15,8 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog* dialog, QString label, QStr
     setCursor(QCursor(Qt::PointingHandCursor));
 }
 
-void SettingsDialogTab::paintEvent(QPaintEvent *)
+void
+SettingsDialogTab::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -29,12 +31,15 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     a = a + a + image.width();
 
-    painter.drawText(QRect(a, 0, width() - a, height()), label, QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    painter.drawText(QRect(a, 0, width() - a, height()), label,
+                     QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
-void SettingsDialogTab::mouseReleaseEvent(QMouseEvent *event)
+void
+SettingsDialogTab::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() != Qt::LeftButton) return;
+    if (event->button() != Qt::LeftButton)
+        return;
 
     dialog->select(this);
 }

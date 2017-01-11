@@ -6,20 +6,28 @@
 class AppSettings
 {
 public:
-    static Word::Type wordTypeMask() {
+    static Word::Type
+    wordTypeMask()
+    {
         return m_wordTypeMask;
     }
 
-    static bool isIgnoredEmote(const QString& emote);
-    static qreal emoteScale() {
+    static bool isIgnoredEmote(const QString &emote);
+    static qreal
+    emoteScale()
+    {
         return 1;
     }
 
-    static qreal badgeScale() {
+    static qreal
+    badgeScale()
+    {
         return 1;
     }
 
-    static bool scaleEmotesByLineHeight() {
+    static bool
+    scaleEmotesByLineHeight()
+    {
         return false;
     }
 
@@ -28,4 +36,4 @@ private:
     static Word::Type m_wordTypeMask;
 };
 
-#endif // APPSETTINGS_H
+#endif  // APPSETTINGS_H

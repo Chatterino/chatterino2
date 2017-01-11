@@ -12,4 +12,4 @@ protected:
     void paintEvent(QPaintEvent *);
 };
 
-#endif // NOTEBOOKPAGEDROPPREVIEW_H
+#endif  // NOTEBOOKPAGEDROPPREVIEW_H

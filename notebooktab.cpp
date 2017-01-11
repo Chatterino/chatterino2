@@ -1,7 +1,7 @@
-#include <QPainter>
-#include "notebook.h"
 #include "notebooktab.h"
+#include <QPainter>
 #include "colorscheme.h"
+#include "notebook.h"
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : QWidget(notebook)
@@ -14,34 +14,40 @@ NotebookTab::NotebookTab(Notebook *notebook)
     setAcceptDrops(true);
 }
 
-int NotebookTab::getHighlightStyle()
+int
+NotebookTab::getHighlightStyle()
 {
     return highlightStyle;
 }
 
-void NotebookTab::setHighlightStyle(int style)
+void
+NotebookTab::setHighlightStyle(int style)
 {
     highlightStyle = style;
     repaint();
 }
 
-void NotebookTab::setSelected(bool value)
+void
+NotebookTab::setSelected(bool value)
 {
     selected = value;
     repaint();
 }
 
-bool NotebookTab::getSelected()
+bool
+NotebookTab::getSelected()
 {
     return selected;
 }
 
-void NotebookTab::calcSize()
+void
+NotebookTab::calcSize()
 {
     resize(fontMetrics().width(text) + 8, 24);
 }
 
-void NotebookTab::paintEvent(QPaintEvent *)
+void
+NotebookTab::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -49,28 +55,19 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     auto colorScheme = ColorScheme::instance();
 
-    if (selected)
-    {
+    if (selected) {
         painter.fillRect(rect(), colorScheme.TabSelectedBackground);
         fg = colorScheme.TabSelectedText;
-    }
-    else if (mouseOver)
-    {
+    } else if (mouseOver) {
         painter.fillRect(rect(), colorScheme.TabHoverBackground);
         fg = colorScheme.TabHoverText;
-    }
-    else if (highlightStyle == HighlightHighlighted)
-    {
+    } else if (highlightStyle == HighlightHighlighted) {
         painter.fillRect(rect(), colorScheme.TabHighlightedBackground);
         fg = colorScheme.TabHighlightedText;
-    }
-    else if (highlightStyle == HighlightNewMessage)
-    {
+    } else if (highlightStyle == HighlightNewMessage) {
         painter.fillRect(rect(), colorScheme.TabNewMessageBackground);
         fg = colorScheme.TabHighlightedText;
-    }
-    else
-    {
+    } else {
         painter.fillRect(rect(), colorScheme.TabBackground);
         fg = colorScheme.TabText;
     }
@@ -79,7 +76,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.drawText(4, (height() + fontMetrics().height()) / 2, text);
 }
 
-void NotebookTab::mousePressEvent(QMouseEvent *)
+void
+NotebookTab::mousePressEvent(QMouseEvent *)
 {
     mouseDown = true;
 
@@ -88,28 +86,32 @@ void NotebookTab::mousePressEvent(QMouseEvent *)
     notebook->select(page);
 }
 
-void NotebookTab::mouseReleaseEvent(QMouseEvent *)
+void
+NotebookTab::mouseReleaseEvent(QMouseEvent *)
 {
     mouseDown = false;
 
     repaint();
 }
 
-void NotebookTab::enterEvent(QEvent *)
+void
+NotebookTab::enterEvent(QEvent *)
 {
     mouseOver = true;
 
     repaint();
 }
 
-void NotebookTab::leaveEvent(QEvent *)
+void
+NotebookTab::leaveEvent(QEvent *)
 {
     mouseOver = false;
 
     repaint();
 }
 
-void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
+void
+NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 {
     notebook->select(page);
 }

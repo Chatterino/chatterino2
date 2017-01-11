@@ -16,25 +16,25 @@ public:
         VeryLarge
     };
 
-    static QFont& getFont(Type type);
-    static QFontMetrics& getFontMetrics(Type type);
+    static QFont &getFont(Type type);
+    static QFontMetrics &getFontMetrics(Type type);
 
 private:
     Fonts();
 
-    static QFont* medium;
-    static QFont* mediumBold;
-    static QFont* mediumItalic;
-    static QFont* small;
-    static QFont* large;
-    static QFont* veryLarge;
+    static QFont *medium;
+    static QFont *mediumBold;
+    static QFont *mediumItalic;
+    static QFont *small;
+    static QFont *large;
+    static QFont *veryLarge;
 
-    static QFontMetrics* metricsMedium;
-    static QFontMetrics* metricsMediumBold;
-    static QFontMetrics* metricsMediumItalic;
-    static QFontMetrics* metricsSmall;
-    static QFontMetrics* metricsLarge;
-    static QFontMetrics* metricsVeryLarge;
+    static QFontMetrics *metricsMedium;
+    static QFontMetrics *metricsMediumBold;
+    static QFontMetrics *metricsMediumItalic;
+    static QFontMetrics *metricsSmall;
+    static QFontMetrics *metricsLarge;
+    static QFontMetrics *metricsVeryLarge;
 };
 
-#endif // FONTS_H
+#endif  // FONTS_H

@@ -1,16 +1,16 @@
 #include "notebookbutton.h"
+#include "QMouseEvent"
 #include "QPainter"
 #include "QPainterPath"
-#include "QMouseEvent"
 #include "colorscheme.h"
 
 NotebookButton::NotebookButton(QWidget *parent)
     : QWidget(parent)
 {
-
 }
 
-void NotebookButton::paintEvent(QPaintEvent *)
+void
+NotebookButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -19,18 +19,13 @@ void NotebookButton::paintEvent(QPaintEvent *)
 
     auto colorScheme = ColorScheme::instance();
 
-    if (mouseDown)
-    {
+    if (mouseDown) {
         background = colorScheme.TabSelectedBackground;
         foreground = colorScheme.TabSelectedText;
-    }
-    else if (mouseOver)
-    {
+    } else if (mouseOver) {
         background = colorScheme.TabHoverBackground;
         foreground = colorScheme.TabSelectedBackground;
-    }
-    else
-    {
+    } else {
         background = colorScheme.TabPanelBackground;
         foreground = colorScheme.TabSelectedBackground;
     }
@@ -40,17 +35,18 @@ void NotebookButton::paintEvent(QPaintEvent *)
 
     float h = this->height(), w = this->width();
 
-    if (icon == IconPlus)
-    {
-        painter.fillRect(QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1, w - ((h / 12) * 5), (h / 12) * 1), foreground);
-        painter.fillRect(QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1, (h / 12) * 1, w - ((h / 12) * 5)), foreground);
-    }
-    else if (icon == IconUser)
-    {
+    if (icon == IconPlus) {
+        painter.fillRect(QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1,
+                                w - ((h / 12) * 5), (h / 12) * 1),
+                         foreground);
+        painter.fillRect(QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1,
+                                (h / 12) * 1, w - ((h / 12) * 5)),
+                         foreground);
+    } else if (icon == IconUser) {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-        auto a = w/8;
+        auto a = w / 8;
         QPainterPath path;
 
         path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
@@ -59,48 +55,48 @@ void NotebookButton::paintEvent(QPaintEvent *)
         painter.fillPath(path, foreground);
 
         painter.setBrush(background);
-        painter.drawEllipse(2*a, 1*a, 4*a, 4*a);
+        painter.drawEllipse(2 * a, 1 * a, 4 * a, 4 * a);
 
         painter.setBrush(foreground);
-        painter.drawEllipse(2.5*a, 1.5*a, 3*a + 1, 3*a);
-    }
-    else // IconSettings
+        painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
+    } else  // IconSettings
     {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
-        auto a = w/8;
+        auto a = w / 8;
         QPainterPath path;
 
-        path.arcMoveTo(a, a, 6*a, 6*a, 0 - (360 / 32.0));
+        path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
 
-        for (int i = 0; i < 8; i++)
-        {
-            path.arcTo(a, a, 6*a, 6*a, i * (360 / 8.0) - (360 / 32.0), (360 / 32.0));
-            path.arcTo(2*a, 2*a, 4*a, 4*a, i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
+        for (int i = 0; i < 8; i++) {
+            path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
+                       (360 / 32.0));
+            path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
+                       i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
         }
 
         painter.fillPath(path, foreground);
 
         painter.setBrush(background);
-        painter.drawEllipse(3*a, 3*a, 2*a, 2*a);
+        painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
     }
 }
 
-void NotebookButton::mousePressEvent(QMouseEvent *event)
+void
+NotebookButton::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         mouseDown = true;
 
         this->repaint();
     }
 }
 
-void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
+void
+NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         mouseDown = false;
 
         this->repaint();
@@ -109,14 +105,16 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void NotebookButton::enterEvent(QEvent *)
+void
+NotebookButton::enterEvent(QEvent *)
 {
     mouseOver = true;
 
     this->repaint();
 }
 
-void NotebookButton::leaveEvent(QEvent *)
+void
+NotebookButton::leaveEvent(QEvent *)
 {
     mouseOver = false;
 

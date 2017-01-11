@@ -8,9 +8,11 @@ NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent = 0)
     setHidden(true);
 }
 
-void NotebookPageDropPreview::paintEvent(QPaintEvent *)
+void
+NotebookPageDropPreview::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(8, 8, width()-17, height()-17, ColorScheme::instance().DropPreviewBackground);
+    painter.fillRect(8, 8, width() - 17, height() - 17,
+                     ColorScheme::instance().DropPreviewBackground);
 }

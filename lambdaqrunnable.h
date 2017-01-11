@@ -7,12 +7,12 @@
 class LambdaQRunnable : public QRunnable
 {
 public:
-    LambdaQRunnable(std::function<void ()> action);
+    LambdaQRunnable(std::function<void()> action);
 
     void run();
 
 private:
-    std::function<void ()> action;
+    std::function<void()> action;
 };
 
-#endif // LAMBDAQRUNNABLE_H
+#endif  // LAMBDAQRUNNABLE_H

@@ -2,8 +2,8 @@
 #define SCROLLBAR_H
 
 #include <functional>
-#include "QWidget"
 #include "QMutex"
+#include "QWidget"
 #include "scrollbarhighlight.h"
 
 class ScrollBar : public QWidget
@@ -11,18 +11,18 @@ class ScrollBar : public QWidget
     Q_OBJECT
 
 public:
-    ScrollBar(QWidget* parent = 0);
+    ScrollBar(QWidget *parent = 0);
     ~ScrollBar();
 
-    void removeHighlightsWhere(std::function<bool (ScrollBarHighlight&)> func);
-    void addHighlight(ScrollBarHighlight* highlight);
+    void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);
+    void addHighlight(ScrollBarHighlight *highlight);
 
 private:
     QMutex mutex;
-    ScrollBarHighlight* highlights = NULL;
+    ScrollBarHighlight *highlights = NULL;
     void paintEvent(QPaintEvent *);
 
     QRect thumbRect;
 };
 
-#endif // SCROLLBAR_H
+#endif  // SCROLLBAR_H

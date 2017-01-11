@@ -6,22 +6,24 @@
 Channel Channel::whispers(QString("/whispers"));
 Channel Channel::mentions(QString("/mentions"));
 
-QMap<QString, Channel*> Channel::channels = QMap<QString, Channel*>();
+QMap<QString, Channel *> Channel::channels = QMap<QString, Channel *>();
 
 Channel::Channel(QString channel)
-    : m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
+    : m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1)
+                                                         : channel)
     , m_bttvChannelEmotes()
     , m_ffzChannelEmotes()
     , m_messages()
     , m_messageMutex()
-    , m_subLink("https://www.twitch.tv/" + m_name + "/subscribe?ref=in_chat_subscriber_link")
+    , m_subLink("https://www.twitch.tv/" + m_name +
+                "/subscribe?ref=in_chat_subscriber_link")
     , m_channelLink("https://twitch.tv/" + m_name)
     , m_popoutPlayerLink("https://player.twitch.tv/?channel=" + m_name)
 {
-
 }
 
-Channel* Channel::addChannel(const QString &channel)
+Channel *
+Channel::addChannel(const QString &channel)
 {
     auto c = getChannel(channel);
 
@@ -37,14 +39,15 @@ Channel* Channel::addChannel(const QString &channel)
     return c;
 }
 
-Channel* Channel::getChannel(const QString &channel)
+Channel *
+Channel::getChannel(const QString &channel)
 {
     if (channel == "/whispers") {
-        return const_cast<Channel*>(&whispers);
+        return const_cast<Channel *>(&whispers);
     }
 
     if (channel == "/mentions") {
-        return const_cast<Channel*>(&mentions);
+        return const_cast<Channel *>(&mentions);
     }
 
     auto a = channels.find(channel);
@@ -56,11 +59,13 @@ Channel* Channel::getChannel(const QString &channel)
     return a.value();
 }
 
-void Channel::removeChannel(const QString &channel)
+void
+Channel::removeChannel(const QString &channel)
 {
     auto c = getChannel(channel);
 
-    if (c == NULL) return;
+    if (c == NULL)
+        return;
 
     c->m_referenceCount--;
 
@@ -70,7 +75,8 @@ void Channel::removeChannel(const QString &channel)
     }
 }
 
-QVector<std::shared_ptr<Message>> Channel::getMessagesClone()
+QVector<std::shared_ptr<Message>>
+Channel::getMessagesClone()
 {
     m_messageMutex.lock();
     QVector<std::shared_ptr<Message>> M(m_messages);
@@ -79,7 +85,8 @@ QVector<std::shared_ptr<Message>> Channel::getMessagesClone()
     return M;
 }
 
-void Channel::addMessage(std::shared_ptr<Message> message)
+void
+Channel::addMessage(std::shared_ptr<Message> message)
 {
     m_messageMutex.lock();
     m_messages.append(message);

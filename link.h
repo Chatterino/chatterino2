@@ -16,17 +16,23 @@ public:
     };
 
     Link();
-    Link(Type type, const QString& value);
+    Link(Type type, const QString &value);
 
-    bool isValid() {
+    bool
+    isValid()
+    {
         return m_type == None;
     }
 
-    Type type() {
+    Type
+    type()
+    {
         return m_type;
     }
 
-    const QString& value() {
+    const QString &
+    value()
+    {
         return m_value;
     }
 
@@ -35,4 +41,4 @@ private:
     QString m_value;
 };
 
-#endif // LINK_H
+#endif  // LINK_H

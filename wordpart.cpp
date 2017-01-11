@@ -1,7 +1,8 @@
 #include "wordpart.h"
 #include "word.h"
 
-WordPart::WordPart(Word& word, int x, int y, const QStringRef& copyText, bool allowTrailingSpace)
+WordPart::WordPart(Word &word, int x, int y, const QString &copyText,
+                   bool allowTrailingSpace)
     : m_word(word)
     , m_copyText(copyText)
     , m_x(x)
@@ -12,7 +13,8 @@ WordPart::WordPart(Word& word, int x, int y, const QStringRef& copyText, bool al
 {
 }
 
-const QString& WordPart::getText() const
+const QString &
+WordPart::getText() const
 {
     return m_word.getText();
 }

@@ -1,13 +1,13 @@
 #include "chatwidget.h"
-#include "QPainter"
 #include "QFont"
 #include "QFontDatabase"
+#include "QPainter"
 #include "QVBoxLayout"
 #include "colorscheme.h"
 
 ChatWidget::ChatWidget(QWidget *parent)
-    : QWidget(parent),
-      vbox(this)
+    : QWidget(parent)
+    , vbox(this)
 {
     vbox.setSpacing(0);
     vbox.setMargin(1);
@@ -19,12 +19,12 @@ ChatWidget::ChatWidget(QWidget *parent)
 
 ChatWidget::~ChatWidget()
 {
-
 }
 
-void ChatWidget::paintEvent(QPaintEvent *)
+void
+ChatWidget::paintEvent(QPaintEvent *)
 {
-    QPainter painter (this);
+    QPainter painter(this);
 
     painter.fillRect(rect(), ColorScheme::instance().ChatBackground);
 }

@@ -1,8 +1,8 @@
 #ifndef COLORSCHEME_H
 #define COLORSCHEME_H
 
-#include <QColor>
 #include <QBrush>
+#include <QColor>
 
 class ColorScheme
 {
@@ -56,7 +56,8 @@ public:
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];
 
-    static ColorScheme& instance()
+    static ColorScheme &
+    instance()
     {
         static ColorScheme instance;
 
@@ -66,7 +67,9 @@ public:
     void setColors(float hue, float multiplyer);
 
 private:
-    ColorScheme() {}
+    ColorScheme()
+    {
+    }
 };
 
-#endif // COLORSCHEME_H
+#endif  // COLORSCHEME_H

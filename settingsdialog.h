@@ -1,24 +1,24 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "QWidget"
-#include "QMainWindow"
-#include "QHBoxLayout"
-#include "QVBoxLayout"
-#include "QListView"
 #include "QButtonGroup"
-#include "QPushButton"
-#include "QDialogButtonBox"
-#include "QStackedLayout"
-#include "settingsdialogtab.h"
 #include "QCheckBox"
+#include "QDialogButtonBox"
+#include "QHBoxLayout"
+#include "QListView"
+#include "QMainWindow"
+#include "QPushButton"
+#include "QStackedLayout"
+#include "QVBoxLayout"
+#include "QWidget"
+#include "settingsdialogtab.h"
 
 class SettingsDialog : public QWidget
 {
 public:
     SettingsDialog();
 
-    void select(SettingsDialogTab* tab);
+    void select(SettingsDialogTab *tab);
 
 private:
     QVBoxLayout tabs;
@@ -29,13 +29,13 @@ private:
     QPushButton okButton;
     QPushButton cancelButton;
 
-    void addTab(QLayout* layout, QString title, QString imageRes);
+    void addTab(QLayout *layout, QString title, QString imageRes);
 
     void addTabs();
 
-    SettingsDialogTab* selectedTab = NULL;
+    SettingsDialogTab *selectedTab = NULL;
 
-    QCheckBox* createCheckbox(QString title, QString settingsId);
+    QCheckBox *createCheckbox(QString title, QString settingsId);
 };
 
-#endif // SETTINGSDIALOG_H
+#endif  // SETTINGSDIALOG_H

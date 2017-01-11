@@ -1,7 +1,8 @@
 #include "word.h"
 
 // Image word
-Word::Word(LazyLoadedImage* image, Type type, const QString& copytext, const QString& tooltip, const Link& link)
+Word::Word(LazyLoadedImage *image, Type type, const QString &copytext,
+           const QString &tooltip, const Link &link)
     : m_image(image)
     , m_text()
     , m_isImage(true)
@@ -11,11 +12,12 @@ Word::Word(LazyLoadedImage* image, Type type, const QString& copytext, const QSt
     , m_color()
     , m_link(link)
 {
-    image->width(); // professional segfault test
+    image->width();  // professional segfault test
 }
 
 // Text word
-Word::Word(const QString& text, Type type, const QColor& color, const QString& copytext, const QString& tooltip, const Link& link)
+Word::Word(const QString &text, Type type, const QColor &color,
+           const QString &copytext, const QString &tooltip, const Link &link)
     : m_image(NULL)
     , m_text(text)
     , m_isImage(false)

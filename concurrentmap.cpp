@@ -1,7 +1,7 @@
 #include "concurrentmap.h"
 
-//template<typename TKey, typename TValue>
-//ConcurrentMap<TKey, TValue>::ConcurrentMap()
+// template<typename TKey, typename TValue>
+// ConcurrentMap<TKey, TValue>::ConcurrentMap()
 //{
 
 //}
