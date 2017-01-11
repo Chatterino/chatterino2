@@ -30,21 +30,21 @@ public:
     static QNetworkAccessManager &
     accessManager()
     {
-        return *m_accessManager;
+        return m_accessManager;
     }
 
 private:
     IrcManager();
 
-    static QMap<QString, bool> *twitchBlockedUsers;
-    static QMutex *twitchBlockedUsersMutex;
+    static QMap<QString, bool> twitchBlockedUsers;
+    static QMutex twitchBlockedUsersMutex;
 
-    static QNetworkAccessManager *m_accessManager;
+    static QNetworkAccessManager m_accessManager;
 
     static void beginConnecting();
 
     static IrcConnection *connection;
-    static QMutex *connectionMutex;
+    static QMutex connectionMutex;
     static long connectionIteration;
 
     static void messageReceived(IrcMessage *message);
