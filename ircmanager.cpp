@@ -22,7 +22,7 @@ QMutex*                 IrcManager::twitchBlockedUsersMutex = new QMutex();
 
 IrcManager::IrcManager()
 {
-//    account = Account::anon();
+
 }
 
 void IrcManager::connect()
@@ -160,7 +160,7 @@ void IrcManager::privateMessageReceived(IrcPrivateMessage *message)
     auto c = Channel::getChannel(message->target().mid(1));
 
     if (c != NULL) {
-        c->addMessage(new Message(*message, *c));
+        c->addMessage(std::shared_ptr<Message>(new Message(*message, *c)));
     }
 }
 

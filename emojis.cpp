@@ -15,7 +15,7 @@ ConcurrentMap<QString, LazyLoadedImage*>* Emojis::imageCache = new ConcurrentMap
 
 QString Emojis::replaceShortCodes(const QString &text)
 {
-#warning "xD"
+#pragma message WARN("xD")
     return text;
 }
 

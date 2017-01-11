@@ -25,8 +25,22 @@ public:
     bool animated() const { return m_animated; }
     bool isHat() const { return m_ishat; }
 
+    const long width() const {
+        if (m_image == NULL) {
+            return 16;
+        }
+        return m_image->width();
+    }
+
+    const long height() const {
+        if (m_image == NULL) {
+            return 16;
+        }
+        return m_image->height();
+    }
+
 private:
-    QImage* m_image = NULL;
+    QImage* m_image;
     qreal m_scale;
 
     QString m_url;

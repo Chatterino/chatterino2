@@ -27,6 +27,7 @@ public:
         BttvGifEmoteText = 0x200,
         FfzEmoteImage = 0x400,
         FfzEmoteText = 0x800,
+        EmoteImages = TwitchEmoteImage | BttvEmoteImage | BttvGifEmoteImage | FfzEmoteImage,
 
         Bits = 0x1000,
         BitsAnimated = 0x2000,
@@ -75,28 +76,17 @@ public:
         return m_height;
     }
 
-    int x() const {
-        return m_x;
-    }
-
-    int y() const {
-        return m_y;
-    }
-
-    int right() const {
-        return m_x + m_width;
-    }
-
-    int bottom() const {
-        return m_y + m_height;
-    }
-
-    QRect rect() const {
-        return QRect(m_x, m_y, m_width, m_height);
+    void setSize(int width, int height) {
+        m_width = width;
+        m_height = height;
     }
 
     bool isImage() const {
         return m_isImage;
+    }
+
+    bool isText() const {
+        return !m_isImage;
     }
 
     const QString& copyText() const {
@@ -109,6 +99,10 @@ public:
 
     QFont& getFont() const {
         return Fonts::getFont(m_font);
+    }
+
+    QFontMetrics& getFontMetrics() const {
+        return Fonts::getFontMetrics(m_font);
     }
 
     Type type() const {
@@ -127,6 +121,19 @@ public:
         return m_link;
     }
 
+    int xOffset() const {
+        return m_xOffset;
+    }
+
+    int yOffset() const {
+        return m_yOffset;
+    }
+
+    void setOffset(int xOffset, int yOffset) {
+        m_xOffset = std::max(0, xOffset);
+        m_yOffset = std::max(0, yOffset);
+    }
+
 private:
     LazyLoadedImage* m_image;
     QString m_text;
@@ -136,10 +143,12 @@ private:
     Type m_type;
     QString m_copyText;
     QString m_tooltip;
-    int m_x;
-    int m_y;
+
     int m_width;
     int m_height;
+    int m_xOffset;
+    int m_yOffset;
+
     bool m_hasTrailingSpace;
     Fonts::Type m_font = Fonts::Medium;
     Link m_link;

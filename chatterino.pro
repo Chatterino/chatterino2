@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     link.cpp \
     fonts.cpp \
     appsettings.cpp \
-    emojis.cpp
+    emojis.cpp \
+    wordpart.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -87,11 +88,12 @@ HEADERS  += mainwindow.h \
     word.h \
     link.h \
     fonts.h \
-    common.h \
     appsettings.h \
-    emojis.h
+    emojis.h \
+    wordpart.h \
+    common.h
 
-PRECOMPILED_HEADER = common.h
+PRECOMPILED_HEADER =
 
 FORMS    += \
     dialog.ui

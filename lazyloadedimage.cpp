@@ -1,7 +1,8 @@
 #include "lazyloadedimage.h"
 
 LazyLoadedImage::LazyLoadedImage(const QString& url, qreal scale, const QString& name, const QString& tooltip, const QMargins& margin, bool isHat)
-    : m_url(url)
+    : m_image(NULL)
+    , m_url(url)
     , m_name(name)
     , m_tooltip(tooltip)
     , m_animated(false)

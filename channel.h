@@ -8,6 +8,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QVector>
+#include <memory>
 
 class Message;
 
@@ -48,9 +49,9 @@ public:
     const QString& streamGame() const { return m_streamGame; }
 
     // methods
-    void addMessage(Message* message);
+    void addMessage(std::shared_ptr<Message> message);
 
-    QVector<Message*> getMessagesClone();
+    QVector<std::shared_ptr<Message>> getMessagesClone();
 
 private:
     Channel(QString channel);
@@ -61,7 +62,7 @@ private:
 
     int     m_referenceCount = 0;
 
-    QVector<Message*> m_messages;
+    QVector<std::shared_ptr<Message>> m_messages;
 
     QString m_name;
     int     m_roomID;

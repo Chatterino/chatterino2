@@ -14,7 +14,7 @@ public:
         map = new QMap<TKey, TValue>();
     }
 
-    bool tryGet(const TKey &name, TValue& value) {
+    bool tryGet(const TKey &name, TValue& value) const {
         mutex->lock();
         auto a = map->find(name);
         if (a == map->end()) {

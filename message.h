@@ -1,28 +1,26 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include "IrcMessage"
 #include "word.h"
-#include "chrono"
+#include "wordpart.h"
 #include "channel.h"
+
+#include <IrcMessage>
+#include <QVector>
+#include <chrono>
 
 class Message
 {
 public:
-//    enum Badges : char {
-//        None = 0,
-//        Mod = 1,
-//        Turbo = 2,
-//        Sub = 4,
-//        Staff = 8,
-//        GlobalMod = 16,
-//        Admin = 32,
-//        Broadcaster = 64,
-//    };
-
     Message(const QString& text);
     Message(const IrcPrivateMessage& ircMessage, const Channel& Channel, bool enablePingSound = true,
             bool isReceivedWhisper = false, bool isSentWhisper = false, bool includeChannel = false);
+
+    ~Message() {
+        if (m_wordParts != NULL) {
+            delete m_wordParts;
+        }
+    }
 
     bool canHighlightTab() const {
         return m_highlightTab;
@@ -44,8 +42,12 @@ public:
         return m_displayName;
     }
 
-    QList<Word> words() const {
+    const std::vector<Word> words() const {
         return m_words;
+    }
+
+    const std::list<WordPart> wordParts() const {
+        return *m_wordParts;
     }
 
     bool disabled() const {
@@ -55,6 +57,16 @@ public:
     const QString& id() const {
         return m_id;
     }
+
+    int height() const {
+        return m_height;
+    }
+
+    bool layout(int width, bool enableEmoteMargins = true);
+
+    void requestRelayout() { m_relayoutRequested = true; }
+    void requestTextRecalculation() { m_recalculateText = true; }
+    void requestImageRecalculation() { m_recalculateImages = true; }
 
 private:
     static LazyLoadedImage* badgeStaff;
@@ -77,7 +89,15 @@ private:
     QString m_displayName = "";
     QString m_id = "";
 
-    QList<Word> m_words;
+    int m_height = 0;
+
+    std::vector<Word> m_words;
+    std::list<WordPart>* m_wordParts;
+
+    long m_currentLayoutWidth = -1;
+    bool m_relayoutRequested = true;
+    bool m_recalculateText = true;
+    bool m_recalculateImages = true;
 
     static QString matchLink(const QString& string);
 

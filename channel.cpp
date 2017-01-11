@@ -1,8 +1,10 @@
 #include "channel.h"
 #include "message.h"
 
-Channel Channel::whispers = Channel(QString("/whispers"));
-Channel Channel::mentions = Channel(QString("/mentions"));
+#include <memory>
+
+Channel Channel::whispers(QString("/whispers"));
+Channel Channel::mentions(QString("/mentions"));
 
 QMap<QString, Channel*> Channel::channels = QMap<QString, Channel*>();
 
@@ -30,7 +32,7 @@ Channel* Channel::addChannel(const QString &channel)
         return c;
     }
 
-    c->referenceCount++;
+    c->m_referenceCount++;
 
     return c;
 }
@@ -60,25 +62,26 @@ void Channel::removeChannel(const QString &channel)
 
     if (c == NULL) return;
 
-    c->referenceCount--;
+    c->m_referenceCount--;
 
-    if (c->referenceCount == 0) {
+    if (c->m_referenceCount == 0) {
         channels.remove(channel);
         delete c;
     }
 }
 
-QVector<Message*> Channel::getMessagesClone()
+QVector<std::shared_ptr<Message>> Channel::getMessagesClone()
 {
     m_messageMutex.lock();
-    QVector M = QVector<Message*>(*m_messages);
+    QVector<std::shared_ptr<Message>> M(m_messages);
+    M.detach();
     m_messageMutex.unlock();
     return M;
 }
 
-void Channel::addMessage(Message *message)
+void Channel::addMessage(std::shared_ptr<Message> message)
 {
     m_messageMutex.lock();
-//    messages
+    m_messages.append(message);
     m_messageMutex.unlock();
 }

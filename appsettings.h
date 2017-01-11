@@ -11,6 +11,17 @@ public:
     }
 
     static bool isIgnoredEmote(const QString& emote);
+    static qreal emoteScale() {
+        return 1;
+    }
+
+    static qreal badgeScale() {
+        return 1;
+    }
+
+    static bool scaleEmotesByLineHeight() {
+        return false;
+    }
 
 private:
     AppSettings();
