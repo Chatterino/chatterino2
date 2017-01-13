@@ -76,7 +76,7 @@ Emojis::parseEmojis(std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
 }
 
 void
-Emojis::initEmojis()
+Emojis::loadEmojis()
 {
     QFile file(":/emojidata.txt");
     file.open(QFile::ReadOnly);

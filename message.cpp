@@ -7,6 +7,7 @@
 #include "ircmanager.h"
 #include "link.h"
 #include "qcolor.h"
+#include "resources.h"
 
 #include <QStringList>
 #include <ctime>
@@ -17,21 +18,6 @@
 #define MARGIN_RIGHT 8
 #define MARGIN_TOP 8
 #define MARGIN_BOTTOM 8
-
-LazyLoadedImage *Message::badgeStaff =
-    new LazyLoadedImage(new QImage(":/images/staff_bg.png"));
-LazyLoadedImage *Message::badgeAdmin =
-    new LazyLoadedImage(new QImage(":/images/admin_bg.png"));
-LazyLoadedImage *Message::badgeModerator =
-    new LazyLoadedImage(new QImage(":/images/moderator_bg.png"));
-LazyLoadedImage *Message::badgeGlobalmod =
-    new LazyLoadedImage(new QImage(":/images/globalmod_bg.png"));
-LazyLoadedImage *Message::badgeTurbo =
-    new LazyLoadedImage(new QImage(":/images/turbo_bg.png"));
-LazyLoadedImage *Message::badgeBroadcaster =
-    new LazyLoadedImage(new QImage(":/images/broadcaster_bg.png"));
-LazyLoadedImage *Message::badgePremium =
-    new LazyLoadedImage(new QImage(":/images/twitchprime_bg.png"));
 
 QRegularExpression *Message::cheerRegex =
     new QRegularExpression("cheer[1-9][0-9]*");
@@ -60,12 +46,14 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 
     // timestamps
     iterator = tags.find("tmi-sent-ts");
+
     std::time_t time = std::time(NULL);
 
-    if (iterator != tags.end()) {
-        time = strtoll(iterator.value().toString().toStdString().c_str(), NULL,
-                       10);
-    }
+    //    if (iterator != tags.end()) {
+    //        time = strtoll(iterator.value().toString().toStdString().c_str(),
+    //        NULL,
+    //                       10);
+    //    }
 
     char timeStampBuffer[69];
 
@@ -96,29 +84,31 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                     Emotes::getCheerBadge(cheer), Word::BadgeCheer, QString(),
                     QString("Twitch Cheer" + QString::number(cheer))));
             } else if (badge == "staff/1") {
-                words.push_back(Word(badgeStaff, Word::BadgeStaff, QString(),
-                                     QString("Twitch Staff")));
+                words.push_back(Word(Resources::badgeStaff(), Word::BadgeStaff,
+                                     QString(), QString("Twitch Staff")));
             } else if (badge == "admin/1") {
-                words.push_back(Word(badgeAdmin, Word::BadgeAdmin, QString(),
-                                     QString("Twitch Admin")));
+                words.push_back(Word(Resources::badgeAdmin(), Word::BadgeAdmin,
+                                     QString(), QString("Twitch Admin")));
             } else if (badge == "global_mod/1") {
-                words.push_back(Word(badgeGlobalmod, Word::BadgeGlobalMod,
-                                     QString(), QString("Global Moderator")));
+                words.push_back(Word(Resources::badgeGlobalmod(),
+                                     Word::BadgeGlobalMod, QString(),
+                                     QString("Global Moderator")));
             } else if (badge == "moderator/1") {
 #pragma message WARN("xD")
-                words.push_back(
-                    Word(badgeTurbo, Word::BadgeModerator, QString(),
-                         QString("Channel Moderator")));  // custom badge
+                words.push_back(Word(
+                    Resources::badgeTurbo(), Word::BadgeModerator, QString(),
+                    QString("Channel Moderator")));  // custom badge
             } else if (badge == "turbo/1") {
-                words.push_back(Word(badgeStaff, Word::BadgeTurbo, QString(),
-                                     QString("Turbo Subscriber")));
+                words.push_back(Word(Resources::badgeStaff(), Word::BadgeTurbo,
+                                     QString(), QString("Turbo Subscriber")));
             } else if (badge == "broadcaster/1") {
-                words.push_back(Word(badgeBroadcaster, Word::BadgeBroadcaster,
-                                     QString(),
+                words.push_back(Word(Resources::badgeBroadcaster(),
+                                     Word::BadgeBroadcaster, QString(),
                                      QString("Channel Broadcaster")));
             } else if (badge == "premium/1") {
-                words.push_back(Word(badgePremium, Word::BadgePremium,
-                                     QString(), QString("Twitch Prime")));
+                words.push_back(Word(Resources::badgePremium(),
+                                     Word::BadgePremium, QString(),
+                                     QString("Twitch Prime")));
             }
         }
     }
@@ -390,14 +380,13 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     //    }
 }
 
-// static void normalize
-
 bool
 Message::layout(int width, bool enableEmoteMargins)
 {
     width = width - (width % 2);
 
     int mediumTextLineHeight = Fonts::getFontMetrics(Fonts::Medium).height();
+    int spaceWidth = 4;
 
     bool redraw = width != m_currentLayoutWidth || m_relayoutRequested;
 
@@ -436,56 +425,103 @@ Message::layout(int width, bool enableEmoteMargins)
         m_recalculateText = false;
     }
 
-    if (redraw) {
-        int x = MARGIN_LEFT;
-        int y = MARGIN_TOP;
+    if (!redraw) {
+        return false;
+    }
 
-        int right = width - MARGIN_RIGHT;
+    int x = MARGIN_LEFT;
+    int y = MARGIN_TOP;
 
-        std::list<WordPart> *parts = new std::list<WordPart>();
+    int right = width - MARGIN_RIGHT - MARGIN_LEFT;
 
-        auto lineStart = m_wordParts->begin();
-        int lineHeight = 0;
+    std::list<WordPart> *parts = new std::list<WordPart>();
 
-        for (auto it = m_words.begin(); it != m_words.end(); ++it) {
-            Word &word = *it;
+    auto lineStart = parts->begin();
+    int lineHeight = 0;
 
-            int xOffset = 0, yOffset = 0;
+    auto alignParts = [&lineStart, &lineHeight, &parts, this] {
+        for (auto it2 = lineStart; true; it2++) {
+            WordPart &wordPart2 = *it2;
 
-            if (enableEmoteMargins) {
-                if (word.isImage() && word.getImage().isHat()) {
-                    xOffset = -word.width() + 2;
-                } else {
-                    xOffset = word.xOffset();
-                    yOffset = word.yOffset();
-                }
+            wordPart2.setY(wordPart2.y() + lineHeight);
 
-                lineHeight = std::max(word.height(), lineHeight);
+            if (it2 == parts->end()) {
+                break;
             }
+        }
+    };
 
-            if (x + word.width() + xOffset <= right) {
-                parts->push_back(WordPart(word, x, y, word.copyText()));
-                x += word.width() + xOffset;
-            }
-            //            else if (word.isText() && word.getText().length() > 2)
-            //            {
+    int flags = AppSettings::wordTypeMask();
 
-            //            }
-            else {
-                parts->push_back(WordPart(word, x, y, word.copyText()));
+    for (auto it = m_words.begin(); it != m_words.end(); ++it) {
+        Word &word = *it;
 
-                lineHeight = std::max(word.height(), lineHeight);
+        if ((word.type() & flags) == Word::None) {
+            continue;
+        }
+
+        int xOffset = 0, yOffset = 0;
+
+        if (enableEmoteMargins) {
+            if (word.isImage() && word.getImage().isHat()) {
+                xOffset = -word.width() + 2;
+            } else {
+                xOffset = word.xOffset();
+                yOffset = word.yOffset();
             }
         }
 
-        auto tmp = m_wordParts;
-        m_wordParts = parts;
-        delete tmp;
+        // fits in the line
+        if (x + word.width() + xOffset <= right) {
+            parts->push_back(
+                WordPart(word, x, y - word.height(), word.copyText()));
 
-        m_height = y + lineHeight;
+            x += word.width() + xOffset;
+
+            if (word.hasTrailingSpace()) {
+                x += spaceWidth;
+            }
+
+            lineHeight = std::max(word.height(), lineHeight);
+        }
+
+        //            else if (word.isText() && word.getText().length()
+        //            > 2)
+        //            {
+        //            }
+
+        // doesn't fit in the line
+        else {
+            alignParts();
+
+            y += lineHeight;
+
+            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.height(),
+                                      word.copyText()));
+
+            lineStart = parts->end();
+
+            lineHeight = word.height();
+
+            x = word.width();
+
+            if (word.hasTrailingSpace()) {
+                x += spaceWidth;
+            }
+        }
     }
 
-    return redraw;
+    alignParts();
+
+    qInfo("words: %d, parts: %d", m_words.size(), parts->size());
+
+    auto tmp = m_wordParts;
+    m_wordParts = parts;
+    delete tmp;
+
+    m_height = y + lineHeight;
+
+    return true;
 }
 
 bool

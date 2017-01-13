@@ -16,7 +16,7 @@ public:
         std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
         const QString &text);
 
-    static void initEmojis();
+    static void loadEmojis();
 
     static QString replaceShortCodes(const QString &text);
 

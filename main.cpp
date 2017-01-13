@@ -1,16 +1,19 @@
-#include "mainwindow.h"
 #include "colorscheme.h"
-#include "ircmanager.h"
 #include "emojis.h"
+#include "ircmanager.h"
+#include "mainwindow.h"
+#include "resources.h"
 
 #include <QApplication>
 #include <QClipboard>
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    Emojis::initEmojis();
+    Resources::load();
+    Emojis::loadEmojis();
 
     ColorScheme::instance().setColors(0, -0.8);
 

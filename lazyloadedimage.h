@@ -1,7 +1,7 @@
 #ifndef LAZYLOADEDIMAGE_H
 #define LAZYLOADEDIMAGE_H
 
-#include <QImage>
+#include <QPixmap>
 #include <QString>
 
 class LazyLoadedImage
@@ -10,19 +10,19 @@ public:
     LazyLoadedImage(const QString &url, qreal scale = 1,
                     const QString &name = "", const QString &tooltip = "",
                     const QMargins &margin = QMargins(), bool isHat = false);
-    LazyLoadedImage(QImage *image, qreal scale = 1, const QString &name = "",
+    LazyLoadedImage(QPixmap *pixmap, qreal scale = 1, const QString &name = "",
                     const QString &tooltip = "",
                     const QMargins &margin = QMargins(), bool isHat = false);
 
-    const QImage *
-    image()
+    const QPixmap *
+    pixmap()
     {
         if (!m_isLoading) {
             m_isLoading = true;
 
             loadImage();
         }
-        return m_image;
+        return m_pixmap;
     }
 
     qreal
@@ -67,27 +67,26 @@ public:
         return m_ishat;
     }
 
-    const long
+    int
     width() const
     {
-        if (m_image == NULL) {
+        if (m_pixmap == NULL) {
             return 16;
         }
-        return m_image->width();
+        return m_pixmap->width();
     }
 
-    const long
+    int
     height() const
     {
-        if (m_image == NULL) {
+        if (m_pixmap == NULL) {
             return 16;
         }
-        return m_image->height();
+        return m_pixmap->height();
     }
 
 private:
-    QImage *m_image;
-    qreal m_scale;
+    QPixmap *m_pixmap;
 
     QString m_url;
     QString m_name;
@@ -95,6 +94,7 @@ private:
     bool m_animated;
     QMargins m_margin;
     bool m_ishat;
+    qreal m_scale;
 
     bool m_isLoading;
 

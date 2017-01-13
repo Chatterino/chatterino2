@@ -49,6 +49,12 @@ public:
         m_y = y;
     }
 
+    void
+    setY(int y)
+    {
+        m_y = y;
+    }
+
     int
     right() const
     {

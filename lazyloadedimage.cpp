@@ -11,7 +11,7 @@
 LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale,
                                  const QString &name, const QString &tooltip,
                                  const QMargins &margin, bool isHat)
-    : m_image(NULL)
+    : m_pixmap(NULL)
     , m_url(url)
     , m_name(name)
     , m_tooltip(tooltip)
@@ -23,16 +23,17 @@ LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale,
 {
 }
 
-LazyLoadedImage::LazyLoadedImage(QImage *image, qreal scale,
+LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale,
                                  const QString &name, const QString &tooltip,
                                  const QMargins &margin, bool isHat)
-    : m_name(name)
+    : m_pixmap(image)
+    , m_url()
+    , m_name(name)
     , m_tooltip(tooltip)
     , m_animated(false)
     , m_margin(margin)
     , m_ishat(isHat)
     , m_scale(scale)
-    , m_image(image)
     , m_isLoading(true)
 {
 }
@@ -40,13 +41,21 @@ LazyLoadedImage::LazyLoadedImage(QImage *image, qreal scale,
 void
 LazyLoadedImage::loadImage()
 {
-    QString url = m_url;
+    //    QThreadPool::globalInstance()->start(new LambdaQRunnable([=] {
+    QUrl url(m_url);
+    QNetworkRequest request(url);
 
-    async_exec([url] {
-        QNetworkRequest req(QUrl(url));
+    QNetworkReply *reply = IrcManager::accessManager().get(request);
 
-        QNetworkReply *reply = IrcManager::accessManager().get(req);
+    QObject::connect(reply, &QNetworkReply::finished, [=] {
+        QPixmap *pixmap = new QPixmap();
+        pixmap->loadFromData(reply->readAll());
 
-        QObject::connect(reply, &QNetworkReply::finished, [=] {});
-    })
+        if (pixmap->isNull()) {
+            return;
+        }
+
+        m_pixmap = pixmap;
+    });
+    //}));
 }

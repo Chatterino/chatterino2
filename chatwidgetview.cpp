@@ -32,7 +32,8 @@ ChatWidgetView::resizeEvent(QResizeEvent *)
     auto messages = c->getMessagesClone();
 
     for (std::shared_ptr<Message> &message : messages) {
-        message.get()->layout(width(), true);
+        qInfo(QString::number(width()).toStdString().c_str());
+        message.get()->layout(this->width(), true);
     }
 }
 
@@ -48,18 +49,22 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto messages = c->getMessagesClone();
 
-    int y = 0;
+    int y = 32;
 
     for (std::shared_ptr<Message> const &message : messages) {
         for (WordPart const &wordPart : message.get()->wordParts()) {
+            painter.setPen(QColor(255, 0, 0));
+            painter.drawRect(wordPart.x(), wordPart.y() + y, wordPart.width(),
+                             wordPart.height());
+
             // image
             if (wordPart.word().isImage()) {
                 LazyLoadedImage &lli = wordPart.word().getImage();
 
-                const QImage *image = lli.image();
+                const QPixmap *image = lli.pixmap();
 
                 if (image != NULL) {
-                    painter.drawImage(
+                    painter.drawPixmap(
                         QRect(wordPart.x(), wordPart.y() + y, wordPart.width(),
                               wordPart.height()),
                         *image);
@@ -70,8 +75,10 @@ ChatWidgetView::paintEvent(QPaintEvent *)
                 painter.setPen(wordPart.word().color());
                 painter.setFont(wordPart.word().getFont());
 
-                painter.drawText(wordPart.x(), wordPart.y() + y,
-                                 wordPart.getText());
+                painter.drawText(
+                    QRectF(wordPart.x(), wordPart.y() + y, 10000, 10000),
+                    wordPart.getText(),
+                    QTextOption(Qt::AlignLeft | Qt::AlignTop));
             }
         }
 

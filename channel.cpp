@@ -9,11 +9,11 @@ Channel Channel::mentions(QString("/mentions"));
 QMap<QString, Channel *> Channel::channels = QMap<QString, Channel *>();
 
 Channel::Channel(QString channel)
-    : m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1)
+    : m_messages()
+    , m_name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1)
                                                          : channel)
     , m_bttvChannelEmotes()
     , m_ffzChannelEmotes()
-    , m_messages()
     , m_messageMutex()
     , m_subLink("https://www.twitch.tv/" + m_name +
                 "/subscribe?ref=in_chat_subscriber_link")

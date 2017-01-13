@@ -51,7 +51,7 @@ public:
 
         Default = TimestampNoSeconds | Badges | Username | Bits |
                   FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
-                  TwitchEmoteImage | BitsAmount
+                  TwitchEmoteImage | BitsAmount | Text
     };
 
     explicit Word(LazyLoadedImage *m_image, Type type, const QString &copytext,
@@ -180,10 +180,10 @@ private:
     QString m_copyText;
     QString m_tooltip;
 
-    int m_width;
-    int m_height;
-    int m_xOffset;
-    int m_yOffset;
+    int m_width = 16;
+    int m_height = 16;
+    int m_xOffset = 0;
+    int m_yOffset = 0;
 
     bool m_hasTrailingSpace;
     Fonts::Type m_font = Fonts::Medium;

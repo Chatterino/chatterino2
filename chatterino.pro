@@ -8,6 +8,9 @@ QT       += core gui network
 CONFIG += communi
 COMMUNI += core model util
 
+win32:LIBS += -LC:/OpenSSL-Win32/lib/openssl.lib
+INCLUDEPATH += C:/OpenSSL-Win32/include
+
 include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -28,7 +31,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     chatwidget.cpp \
     notebook.cpp \
     notebooktab.cpp \
@@ -57,7 +60,8 @@ SOURCES += main.cpp\
     fonts.cpp \
     appsettings.cpp \
     emojis.cpp \
-    wordpart.cpp
+    wordpart.cpp \
+    resources.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -91,7 +95,8 @@ HEADERS  += mainwindow.h \
     appsettings.h \
     emojis.h \
     wordpart.h \
-    common.h
+    common.h \
+    resources.h
 
 PRECOMPILED_HEADER =
 

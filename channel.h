@@ -104,16 +104,16 @@ public:
 private:
     Channel(QString channel);
 
-    ConcurrentMap<QString, LazyLoadedImage *> m_bttvChannelEmotes;
-    ConcurrentMap<QString, LazyLoadedImage *> m_ffzChannelEmotes;
-    QMutex m_messageMutex;
-
     int m_referenceCount = 0;
 
     QVector<std::shared_ptr<Message>> m_messages;
 
     QString m_name;
     int m_roomID;
+
+    ConcurrentMap<QString, LazyLoadedImage *> m_bttvChannelEmotes;
+    ConcurrentMap<QString, LazyLoadedImage *> m_ffzChannelEmotes;
+    QMutex m_messageMutex;
 
     QString m_subLink;
     QString m_channelLink;
