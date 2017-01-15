@@ -18,10 +18,10 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton()
     hbox.addWidget(&m_label);
     hbox.addSpacing(6);
 
-    QObject::connect(&m_label, ChatWidgetHeaderButtonLabel::mouseUp, this,
-                     labelMouseUp);
-    QObject::connect(&m_label, ChatWidgetHeaderButtonLabel::mouseDown, this,
-                     labelMouseDown);
+    QObject::connect(&m_label, &ChatWidgetHeaderButtonLabel::mouseUp, this,
+                     &ChatWidgetHeaderButton::labelMouseUp);
+    QObject::connect(&m_label, &ChatWidgetHeaderButtonLabel::mouseDown, this,
+                     &ChatWidgetHeaderButton::labelMouseDown);
 }
 
 void
