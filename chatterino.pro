@@ -11,6 +11,8 @@ COMMUNI += core model util
 win32:LIBS += -LC:/OpenSSL-Win32/lib/openssl.lib
 INCLUDEPATH += C:/OpenSSL-Win32/include
 
+CONFIG += c++11
+
 include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
