@@ -25,5 +25,7 @@
         <file>images/staff_bg.png</file>
         <file>images/turbo_bg.png</file>
         <file>emojidata.txt</file>
+        <file>images/button_ban.png</file>
+        <file>images/button_timeout.png</file>
     </qresource>
 </RCC>

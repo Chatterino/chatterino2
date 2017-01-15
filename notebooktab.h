@@ -1,7 +1,7 @@
 #ifndef NOTEBOOKTAB_H
 #define NOTEBOOKTAB_H
 
-#include "QWidget"
+#include <QWidget>
 
 class Notebook;
 class NotebookPage;
@@ -11,22 +11,55 @@ class NotebookTab : public QWidget
     Q_OBJECT
 
 public:
-    NotebookTab(Notebook *notebook);
+    enum HighlightStyle {
+        HighlightNone,
+        HighlightHighlighted,
+        HighlightNewMessage
+    };
+
+    NotebookTab(Notebook *m_notebook);
 
     void calcSize();
 
     NotebookPage *page;
-    QString text;
 
-    bool getSelected();
-    void setSelected(bool value);
+    const QString &
+    text() const
+    {
+        return m_text;
+    }
 
-    int getHighlightStyle();
-    void setHighlightStyle(int style);
+    void
+    setText(const QString &text)
+    {
+        m_text = text;
+    }
 
-    static const int HighlightNone = 0;
-    static const int HighlightHighlighted = 1;
-    static const int HighlightNewMessage = 2;
+    bool
+    selected()
+    {
+        return m_selected;
+    }
+
+    void
+    setSelected(bool value)
+    {
+        m_selected = value;
+        repaint();
+    }
+
+    HighlightStyle
+    highlightStyle() const
+    {
+        return m_highlightStyle;
+    }
+
+    void
+    setHighlightStyle(HighlightStyle style)
+    {
+        m_highlightStyle = style;
+        repaint();
+    }
 
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
@@ -39,12 +72,14 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    Notebook *notebook;
-    bool selected = false;
+    Notebook *m_notebook;
 
-    bool mouseOver = false;
-    bool mouseDown = false;
-    int highlightStyle;
+    QString m_text;
+
+    bool m_selected;
+    bool m_mouseOver;
+    bool m_mouseDown;
+    HighlightStyle m_highlightStyle;
 };
 
 #endif  // NOTEBOOKTAB_H

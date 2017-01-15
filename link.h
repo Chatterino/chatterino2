@@ -11,6 +11,8 @@ public:
         Url,
         CloseCurrentSplit,
         UserInfo,
+        UserTimeout,
+        UserBan,
         InsertText,
         ShowMessage,
     };

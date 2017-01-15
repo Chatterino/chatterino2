@@ -1,49 +1,27 @@
 #include "notebooktab.h"
-#include <QPainter>
 #include "colorscheme.h"
 #include "notebook.h"
 
+#include <QPainter>
+
 NotebookTab::NotebookTab(Notebook *notebook)
     : QWidget(notebook)
+    , m_notebook(notebook)
+    , m_text("<no title>")
+    , m_selected(false)
+    , m_mouseOver(false)
+    , m_mouseDown(false)
+    , m_highlightStyle(HighlightNone)
 {
-    this->notebook = notebook;
-    text = "<no title>";
-
     calcSize();
 
     setAcceptDrops(true);
 }
 
-int
-NotebookTab::getHighlightStyle()
-{
-    return highlightStyle;
-}
-
-void
-NotebookTab::setHighlightStyle(int style)
-{
-    highlightStyle = style;
-    repaint();
-}
-
-void
-NotebookTab::setSelected(bool value)
-{
-    selected = value;
-    repaint();
-}
-
-bool
-NotebookTab::getSelected()
-{
-    return selected;
-}
-
 void
 NotebookTab::calcSize()
 {
-    resize(fontMetrics().width(text) + 8, 24);
+    resize(fontMetrics().width(m_text) + 8, 24);
 }
 
 void
@@ -55,16 +33,16 @@ NotebookTab::paintEvent(QPaintEvent *)
 
     auto colorScheme = ColorScheme::instance();
 
-    if (selected) {
+    if (m_selected) {
         painter.fillRect(rect(), colorScheme.TabSelectedBackground);
         fg = colorScheme.TabSelectedText;
-    } else if (mouseOver) {
+    } else if (m_mouseOver) {
         painter.fillRect(rect(), colorScheme.TabHoverBackground);
         fg = colorScheme.TabHoverText;
-    } else if (highlightStyle == HighlightHighlighted) {
+    } else if (m_highlightStyle == HighlightHighlighted) {
         painter.fillRect(rect(), colorScheme.TabHighlightedBackground);
         fg = colorScheme.TabHighlightedText;
-    } else if (highlightStyle == HighlightNewMessage) {
+    } else if (m_highlightStyle == HighlightNewMessage) {
         painter.fillRect(rect(), colorScheme.TabNewMessageBackground);
         fg = colorScheme.TabHighlightedText;
     } else {
@@ -73,23 +51,23 @@ NotebookTab::paintEvent(QPaintEvent *)
     }
 
     painter.setPen(fg);
-    painter.drawText(4, (height() + fontMetrics().height()) / 2, text);
+    painter.drawText(4, (height() + fontMetrics().height()) / 2, m_text);
 }
 
 void
 NotebookTab::mousePressEvent(QMouseEvent *)
 {
-    mouseDown = true;
+    m_mouseDown = true;
 
     repaint();
 
-    notebook->select(page);
+    m_notebook->select(page);
 }
 
 void
 NotebookTab::mouseReleaseEvent(QMouseEvent *)
 {
-    mouseDown = false;
+    m_mouseDown = false;
 
     repaint();
 }
@@ -97,7 +75,7 @@ NotebookTab::mouseReleaseEvent(QMouseEvent *)
 void
 NotebookTab::enterEvent(QEvent *)
 {
-    mouseOver = true;
+    m_mouseOver = true;
 
     repaint();
 }
@@ -105,7 +83,7 @@ NotebookTab::enterEvent(QEvent *)
 void
 NotebookTab::leaveEvent(QEvent *)
 {
-    mouseOver = false;
+    m_mouseOver = false;
 
     repaint();
 }
@@ -113,5 +91,5 @@ NotebookTab::leaveEvent(QEvent *)
 void
 NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 {
-    notebook->select(page);
+    m_notebook->select(page);
 }

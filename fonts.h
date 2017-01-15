@@ -19,6 +19,18 @@ public:
     static QFont &getFont(Type type);
     static QFontMetrics &getFontMetrics(Type type);
 
+    static int
+    generation()
+    {
+        return m_generation;
+    }
+
+    static void
+    incGeneration()
+    {
+        m_generation++;
+    }
+
 private:
     Fonts();
 
@@ -35,6 +47,8 @@ private:
     static QFontMetrics *metricsSmall;
     static QFontMetrics *metricsLarge;
     static QFontMetrics *metricsVeryLarge;
+
+    static int m_generation;
 };
 
 #endif  // FONTS_H

@@ -13,6 +13,8 @@ ConcurrentMap<QString, LazyLoadedImage *> Emotes::m_ffzChannelEmoteFromCaches;
 ConcurrentMap<long, LazyLoadedImage *> Emotes::m_twitchEmoteFromCache;
 ConcurrentMap<QString, LazyLoadedImage *> Emotes::m_miscImageFromCache;
 
+int Emotes::m_generation = 0;
+
 Emotes::Emotes()
 {
 }

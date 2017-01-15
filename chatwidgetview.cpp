@@ -15,7 +15,7 @@ ChatWidgetView::ChatWidgetView()
 
     scroll->scrollTo(QPointF(0, 100));
 
-    m_channel = Channel::getChannel("ian678");
+    m_channel = Channel::getChannel("fourtf");
 }
 
 void
@@ -42,6 +42,8 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
     auto c = channel();
 
     if (c == NULL)
@@ -49,7 +51,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto messages = c->getMessagesClone();
 
-    int y = 32;
+    int y = 0;
 
     for (std::shared_ptr<Message> const &message : messages) {
         for (WordPart const &wordPart : message.get()->wordParts()) {
@@ -77,8 +79,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
                 painter.drawText(
                     QRectF(wordPart.x(), wordPart.y() + y, 10000, 10000),
-                    wordPart.getText(),
-                    QTextOption(Qt::AlignLeft | Qt::AlignTop));
+                    wordPart.text(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
             }
         }
 

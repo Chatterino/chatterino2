@@ -3,6 +3,7 @@
 #include "ircmanager.h"
 #include "mainwindow.h"
 #include "resources.h"
+#include "windows.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -17,7 +18,7 @@ main(int argc, char *argv[])
 
     ColorScheme::instance().setColors(0, -0.8);
 
-    MainWindow w;
+    MainWindow &w = Windows::mainWindow();
     w.show();
 
     Channel::addChannel("ian678");

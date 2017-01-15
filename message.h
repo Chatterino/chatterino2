@@ -60,7 +60,7 @@ public:
         return m_words;
     }
 
-    const std::list<WordPart>
+    const std::vector<WordPart>
     wordParts() const
     {
         return *m_wordParts;
@@ -91,16 +91,6 @@ public:
     {
         m_relayoutRequested = true;
     }
-    void
-    requestTextRecalculation()
-    {
-        m_recalculateText = true;
-    }
-    void
-    requestImageRecalculation()
-    {
-        m_recalculateImages = true;
-    }
 
 private:
     static LazyLoadedImage *badgeStaff;
@@ -126,12 +116,12 @@ private:
     int m_height = 0;
 
     std::vector<Word> m_words;
-    std::list<WordPart> *m_wordParts;
+    std::vector<WordPart> *m_wordParts;
 
     long m_currentLayoutWidth = -1;
     bool m_relayoutRequested = true;
-    bool m_recalculateText = true;
-    bool m_recalculateImages = true;
+    int m_fontGeneration = -1;
+    int m_emoteGeneration = -1;
 
     static QString matchLink(const QString &string);
 

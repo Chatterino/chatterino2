@@ -66,6 +66,18 @@ public:
     static LazyLoadedImage *getTwitchEmoteById(const QString &name,
                                                long int id);
 
+    static int
+    generation()
+    {
+        return m_generation;
+    }
+
+    static void
+    incGeneration()
+    {
+        m_generation++;
+    }
+
 private:
     Emotes();
 
@@ -83,6 +95,8 @@ private:
     static ConcurrentMap<QString, LazyLoadedImage *> m_miscImageFromCache;
 
     static QString getTwitchEmoteLink(long id, qreal &scale);
+
+    static int m_generation;
 };
 
 #endif  // EMOTES_H

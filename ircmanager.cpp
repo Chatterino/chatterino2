@@ -120,8 +120,6 @@ IrcManager::beginConnecting()
     c->setNickName("justinfan123");
     c->setRealName("justinfan123");
     c->sendRaw("JOIN #fourtf");
-    c->sendRaw("JOIN #ian678");
-    c->sendRaw("JOIN #nuuls");
 
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));

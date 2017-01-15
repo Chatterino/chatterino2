@@ -23,14 +23,14 @@ QRegularExpression *Message::cheerRegex =
     new QRegularExpression("cheer[1-9][0-9]*");
 
 Message::Message(const QString &text)
-    : m_wordParts(new std::list<WordPart>())
+    : m_wordParts(new std::vector<WordPart>())
 {
 }
 
 Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
-    : m_wordParts(new std::list<WordPart>())
+    : m_wordParts(new std::vector<WordPart>())
 {
     m_parseTime = std::chrono::system_clock::now();
 
@@ -69,6 +69,17 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     words.push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
                          ColorScheme::instance().SystemMessageColor, QString(),
                          QString()));
+
+    // mod buttons
+    static QString buttonBanTooltip("Ban user");
+    static QString buttonTimeoutTooltip("Timeout user");
+
+    words.push_back(Word(Resources::buttonBan(), Word::ButtonBan, QString(),
+                         buttonBanTooltip,
+                         Link(Link::UserBan, ircMessage.account())));
+    words.push_back(Word(Resources::buttonTimeout(), Word::ButtonTimeout,
+                         QString(), buttonTimeoutTooltip,
+                         Link(Link::UserTimeout, ircMessage.account())));
 
     // badges
     iterator = tags.find("badges");
@@ -239,10 +250,8 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 
     for (QString split : splits) {
         // twitch emote
-        if (currentTwitchEmote == twitchEmotes.end())
-            break;
-
-        if (currentTwitchEmote->first == i) {
+        if (currentTwitchEmote != twitchEmotes.end() &&
+            currentTwitchEmote->first == i) {
             words.push_back(Word(currentTwitchEmote->second,
                                  Word::TwitchEmoteImage,
                                  currentTwitchEmote->second->name(),
@@ -264,10 +273,10 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
         std::vector<std::tuple<LazyLoadedImage *, QString>> parsed;
 
         Emojis::parseEmojis(parsed, split);
-
         for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {
             LazyLoadedImage *image = std::get<0>(tuple);
-            if (image == NULL) {
+
+            if (image == NULL) {  // is text
                 QString string = std::get<1>(tuple);
 
                 // cheers
@@ -344,7 +353,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                 // bttv / ffz emotes
                 LazyLoadedImage *bttvEmote;
 
-#pragma message WARN("xD ignored emotes")
+#pragma message WARN("ignored emotes")
                 if (Emotes::bttvEmotes().tryGet(string, bttvEmote) ||
                     channel.bttvChannelEmotes().tryGet(string, bttvEmote) ||
                     Emotes::ffzEmotes().tryGet(string, bttvEmote) ||
@@ -364,6 +373,13 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                 words.push_back(
                     Word(string, Word::Text, textColor, string, QString(),
                          link.isEmpty() ? Link() : Link(Link::Url, link)));
+            } else {  // is emoji
+                static QString emojiTooltip("Emoji");
+
+                words.push_back(
+                    Word(image, Word::EmojiImage, image->name(), emojiTooltip));
+                Word(image->name(), Word::EmojiText, textColor, image->name(),
+                     emojiTooltip);
             }
         }
 
@@ -390,12 +406,18 @@ Message::layout(int width, bool enableEmoteMargins)
 
     bool redraw = width != m_currentLayoutWidth || m_relayoutRequested;
 
-    if (m_recalculateImages || m_recalculateText) {
+    bool recalculateImages = m_emoteGeneration != Emotes::generation();
+    bool recalculateText = m_fontGeneration != Fonts::generation();
+
+    if (recalculateImages || recalculateText) {
+        m_emoteGeneration = Emotes::generation();
+        m_fontGeneration = Fonts::generation();
+
         redraw = true;
 
         for (auto &word : m_words) {
             if (word.isImage()) {
-                if (m_recalculateImages) {
+                if (recalculateImages) {
                     auto &image = word.getImage();
 
                     qreal w = image.width();
@@ -413,16 +435,13 @@ Message::layout(int width, bool enableEmoteMargins)
                     }
                 }
             } else {
-                if (m_recalculateText) {
+                if (recalculateText) {
                     QFontMetrics &metrics = word.getFontMetrics();
                     word.setSize(metrics.width(word.getText()),
                                  metrics.height());
                 }
             }
         }
-
-        m_recalculateImages = false;
-        m_recalculateText = false;
     }
 
     if (!redraw) {
@@ -434,20 +453,17 @@ Message::layout(int width, bool enableEmoteMargins)
 
     int right = width - MARGIN_RIGHT - MARGIN_LEFT;
 
-    std::list<WordPart> *parts = new std::list<WordPart>();
+    std::vector<WordPart> *parts = new std::vector<WordPart>();
 
-    auto lineStart = parts->begin();
+    int lineStart = 0;
     int lineHeight = 0;
+    bool first = true;
 
     auto alignParts = [&lineStart, &lineHeight, &parts, this] {
-        for (auto it2 = lineStart; true; it2++) {
-            WordPart &wordPart2 = *it2;
+        for (int i = lineStart; i < parts->size(); i++) {
+            WordPart &wordPart2 = parts->at(i);
 
             wordPart2.setY(wordPart2.y() + lineHeight);
-
-            if (it2 == parts->end()) {
-                break;
-            }
         }
     };
 
@@ -471,24 +487,70 @@ Message::layout(int width, bool enableEmoteMargins)
             }
         }
 
+        // word wrapping
+        if (word.isText() && word.width() + MARGIN_LEFT > right) {
+            alignParts();
+
+            y += lineHeight;
+
+            const QString &text = word.getText();
+
+            int start = 0;
+            QFontMetrics &metrics = word.getFontMetrics();
+
+            int width = 0;
+
+            std::vector<short> &charWidths = word.characterWidthCache();
+
+            if (charWidths.size() == 0) {
+                charWidths.reserve(text.length());
+
+                for (int i = 0; i < text.length(); i++) {
+                    charWidths.push_back(metrics.charWidth(text, i));
+                }
+            }
+
+            for (int i = 2; i <= text.length(); i++) {
+                if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
+                    QString mid = text.mid(start, i - start - 1);
+
+                    parts->push_back(WordPart(word, MARGIN_LEFT, y, width,
+                                              word.height(), mid, mid));
+
+                    y += metrics.height();
+
+                    start = i - 1;
+
+                    width = 0;
+                }
+            }
+
+            QString mid(text.mid(start));
+            width = metrics.width(mid);
+
+            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.height(),
+                                      width, word.height(), mid, mid));
+            x = width + MARGIN_LEFT + spaceWidth;
+
+            lineHeight = word.height();
+
+            lineStart = parts->size() - 1;
+
+            first = false;
+        }
+
         // fits in the line
-        if (x + word.width() + xOffset <= right) {
+        else if (first || x + word.width() + xOffset <= right) {
             parts->push_back(
                 WordPart(word, x, y - word.height(), word.copyText()));
 
             x += word.width() + xOffset;
-
-            if (word.hasTrailingSpace()) {
-                x += spaceWidth;
-            }
+            x += spaceWidth;
 
             lineHeight = std::max(word.height(), lineHeight);
-        }
 
-        //            else if (word.isText() && word.getText().length()
-        //            > 2)
-        //            {
-        //            }
+            first = false;
+        }
 
         // doesn't fit in the line
         else {
@@ -499,15 +561,12 @@ Message::layout(int width, bool enableEmoteMargins)
             parts->push_back(WordPart(word, MARGIN_LEFT, y - word.height(),
                                       word.copyText()));
 
-            lineStart = parts->end();
+            lineStart = parts->size() - 1;
 
             lineHeight = word.height();
 
-            x = word.width();
-
-            if (word.hasTrailingSpace()) {
-                x += spaceWidth;
-            }
+            x = word.width() + MARGIN_LEFT;
+            x += spaceWidth;
         }
     }
 

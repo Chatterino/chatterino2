@@ -12,6 +12,10 @@ public:
     WordPart(Word &word, int x, int y, const QString &copyText,
              bool allowTrailingSpace = true);
 
+    WordPart(Word &word, int x, int y, int width, int height,
+             const QString &copyText, const QString &customText,
+             bool allowTrailingSpace = true);
+
     const Word &
     word() const
     {
@@ -85,12 +89,17 @@ public:
         return m_trailingSpace;
     }
 
-    const QString &getText() const;
+    const QString &
+    text() const
+    {
+        return m_text;
+    }
 
 private:
     Word &m_word;
 
     QString m_copyText;
+    QString m_text;
 
     int m_x;
     int m_y;

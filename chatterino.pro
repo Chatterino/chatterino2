@@ -61,7 +61,10 @@ SOURCES += main.cpp\
     appsettings.cpp \
     emojis.cpp \
     wordpart.cpp \
-    resources.cpp
+    resources.cpp \
+    windows.cpp \
+    chatwidgetheaderbutton.cpp \
+    chatwidgetheaderbuttonlabel.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -96,7 +99,10 @@ HEADERS  += mainwindow.h \
     emojis.h \
     wordpart.h \
     common.h \
-    resources.h
+    resources.h \
+    windows.h \
+    chatwidgetheaderbutton.h \
+    chatwidgetheaderbuttonlabel.h
 
 PRECOMPILED_HEADER =
 

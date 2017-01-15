@@ -1,6 +1,7 @@
 #include "lazyloadedimage.h"
 
 #include "asyncexec.h"
+#include "emotes.h"
 #include "ircmanager.h"
 
 #include <QNetworkAccessManager>
@@ -56,6 +57,7 @@ LazyLoadedImage::loadImage()
         }
 
         m_pixmap = pixmap;
+        Emotes::incGeneration();
     });
     //}));
 }

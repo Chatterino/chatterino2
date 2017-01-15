@@ -5,7 +5,7 @@
 QFont *Fonts::medium = new QFont(DEFAULT_FONT, 14);
 QFont *Fonts::mediumBold = new QFont(DEFAULT_FONT, 14);
 QFont *Fonts::mediumItalic = new QFont(DEFAULT_FONT, 14);
-QFont *Fonts::small = new QFont(DEFAULT_FONT, 12);
+QFont *Fonts::small = new QFont(DEFAULT_FONT, 10);
 QFont *Fonts::large = new QFont(DEFAULT_FONT, 16);
 QFont *Fonts::veryLarge = new QFont(DEFAULT_FONT, 18);
 
@@ -15,6 +15,8 @@ QFontMetrics *Fonts::metricsMediumItalic = new QFontMetrics(*mediumItalic);
 QFontMetrics *Fonts::metricsSmall = new QFontMetrics(*small);
 QFontMetrics *Fonts::metricsLarge = new QFontMetrics(*large);
 QFontMetrics *Fonts::metricsVeryLarge = new QFontMetrics(*veryLarge);
+
+int Fonts::m_generation = 0;
 
 Fonts::Fonts()
 {

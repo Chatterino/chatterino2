@@ -49,9 +49,16 @@ public:
         Username = 0x800000,
         BitsAmount = 0x1000000,
 
+        ButtonBan = 0x2000000,
+        ButtonTimeout = 0x4000000,
+
+        EmojiImage = 0x8000000,
+        EmojiText = 0x10000000,
+
         Default = TimestampNoSeconds | Badges | Username | Bits |
                   FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
-                  TwitchEmoteImage | BitsAmount | Text
+                  TwitchEmoteImage | BitsAmount | Text | ButtonBan |
+                  ButtonTimeout
     };
 
     explicit Word(LazyLoadedImage *m_image, Type type, const QString &copytext,
@@ -170,6 +177,12 @@ public:
         m_yOffset = std::max(0, yOffset);
     }
 
+    std::vector<short> &
+    characterWidthCache()
+    {
+        return m_characterWidthCache;
+    }
+
 private:
     LazyLoadedImage *m_image;
     QString m_text;
@@ -188,6 +201,8 @@ private:
     bool m_hasTrailingSpace;
     Fonts::Type m_font = Fonts::Medium;
     Link m_link;
+
+    std::vector<short> m_characterWidthCache;
 };
 
 #endif  // WORD_H

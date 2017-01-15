@@ -88,6 +88,18 @@ public:
         return m_cheerBadge1;
     }
 
+    static LazyLoadedImage *
+    buttonBan()
+    {
+        return m_buttonBan;
+    }
+
+    static LazyLoadedImage *
+    buttonTimeout()
+    {
+        return m_buttonTimeout;
+    }
+
 private:
     Resources();
 
@@ -105,6 +117,9 @@ private:
     static LazyLoadedImage *m_cheerBadge1000;
     static LazyLoadedImage *m_cheerBadge100;
     static LazyLoadedImage *m_cheerBadge1;
+
+    static LazyLoadedImage *m_buttonBan;
+    static LazyLoadedImage *m_buttonTimeout;
 };
 
 #endif  // RESOURCES_H
