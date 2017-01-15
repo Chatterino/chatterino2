@@ -10,7 +10,7 @@
 #include "ircconnection.h"
 #include "qnetworkrequest.h"
 
-Account *IrcManager::account = const_cast<Account *>(Account::anon());
+Account *IrcManager::account = nullptr;
 IrcConnection *IrcManager::connection = NULL;
 QMutex IrcManager::connectionMutex;
 long IrcManager::connectionIteration = 0;
@@ -35,6 +35,8 @@ IrcManager::connect()
 void
 IrcManager::beginConnecting()
 {
+    IrcManager::account = const_cast<Account *>(Account::anon());
+
     int iteration = ++connectionIteration;
 
     auto c = new IrcConnection();
@@ -207,8 +209,8 @@ IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
         return true;
     }
 
-    errorMessage = "Error while ignoring user \"" + username +
-                   "\": " + reply->errorString();
+    errorMessage = "Error while ignoring user \"" + username + "\": " +
+                   reply->errorString();
     return false;
 }
 
@@ -241,8 +243,8 @@ IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
         return true;
     }
 
-    errorMessage = "Error while unignoring user \"" + username +
-                   "\": " + reply->errorString();
+    errorMessage = "Error while unignoring user \"" + username + "\": " +
+                   reply->errorString();
     return false;
 }
 
