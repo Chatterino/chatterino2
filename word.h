@@ -8,52 +8,54 @@
 #include <QRect>
 #include <QString>
 
+#include <stdint.h>
+
 class Word
 {
 public:
-    enum Type : long int {
+    enum Type : uint32_t {
         None = 0,
-        Misc = 1,
-        Text = 2,
+        Misc = (1 << 0),
+        Text = (1 << 1),
 
-        TimestampNoSeconds = 4,
-        TimestampWithSeconds = 8,
+        TimestampNoSeconds = (1 << 2),
+        TimestampWithSeconds = (1 << 3),
 
-        TwitchEmoteImage = 0x10,
-        TwitchEmoteText = 0x20,
-        BttvEmoteImage = 0x40,
-        BttvEmoteText = 0x80,
-        BttvGifEmoteImage = 0x100,
-        BttvGifEmoteText = 0x200,
-        FfzEmoteImage = 0x400,
-        FfzEmoteText = 0x800,
+        TwitchEmoteImage = (1 << 4),
+        TwitchEmoteText = (1 << 5),
+        BttvEmoteImage = (1 << 6),
+        BttvEmoteText = (1 << 7),
+        BttvGifEmoteImage = (1 << 8),
+        BttvGifEmoteText = (1 << 9),
+        FfzEmoteImage = (1 << 10),
+        FfzEmoteText = (1 << 11),
         EmoteImages = TwitchEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
                       FfzEmoteImage,
 
-        Bits = 0x1000,
-        BitsAnimated = 0x2000,
+        Bits = (1 << 12),
+        BitsAnimated = (1 << 13),
 
-        BadgeStaff = 0x4000,
-        BadgeAdmin = 0x8000,
-        BadgeGlobalMod = 0x10000,
-        BadgeModerator = 0x20000,
-        BadgeTurbo = 0x40000,
-        BadgeBroadcaster = 0x80000,
-        BadgePremium = 0x100000,
-        BadgeChatterino = 0x200000,
-        BadgeCheer = 0x400000,
+        BadgeStaff = (1 << 14),
+        BadgeAdmin = (1 << 15),
+        BadgeGlobalMod = (1 << 16),
+        BadgeModerator = (1 << 17),
+        BadgeTurbo = (1 << 18),
+        BadgeBroadcaster = (1 << 19),
+        BadgePremium = (1 << 20),
+        BadgeChatterino = (1 << 21),
+        BadgeCheer = (1 << 22),
         Badges = BadgeStaff | BadgeAdmin | BadgeGlobalMod | BadgeModerator |
                  BadgeTurbo | BadgeBroadcaster | BadgePremium |
                  BadgeChatterino | BadgeCheer,
 
-        Username = 0x800000,
-        BitsAmount = 0x1000000,
+        Username = (1 << 23),
+        BitsAmount = (1 << 24),
 
-        ButtonBan = 0x2000000,
-        ButtonTimeout = 0x4000000,
+        ButtonBan = (1 << 25),
+        ButtonTimeout = (1 << 26),
 
-        EmojiImage = 0x8000000,
-        EmojiText = 0x10000000,
+        EmojiImage = (1 << 27),
+        EmojiText = (1 << 28),
 
         Default = TimestampNoSeconds | Badges | Username | Bits |
                   FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
