@@ -217,7 +217,7 @@ IrcManager::addIgnoredUser(QString const &username)
 {
     QString errorMessage;
     if (!tryAddIgnoredUser(username, errorMessage)) {
-#pragma message WARN("Implement IrcManager::addIgnoredUser")
+        // TODO: Implement IrcManager::addIgnoredUser
     }
 }
 
@@ -251,6 +251,6 @@ IrcManager::removeIgnoredUser(QString const &username)
 {
     QString errorMessage;
     if (!tryRemoveIgnoredUser(username, errorMessage)) {
-#pragma message WARN("TODO: Implement IrcManager::removeIgnoredUser")
+        // TODO: Implement IrcManager::removeIgnoredUser
     }
 }

@@ -42,7 +42,7 @@ Emotes::getTwitchEmoteLink(long id, qreal &scale)
 LazyLoadedImage *
 Emotes::getCheerImage(long long amount, bool animated)
 {
-#pragma message WARN("xD")
+    // TODO: fix this xD
     return getCheerBadge(amount);
 }
 
