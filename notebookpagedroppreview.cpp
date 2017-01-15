@@ -2,7 +2,7 @@
 #include "QPainter"
 #include "colorscheme.h"
 
-NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent = 0)
+NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     : QWidget(parent)
 {
     setHidden(true);
