@@ -105,7 +105,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                                      Word::BadgeGlobalMod, QString(),
                                      QString("Global Moderator")));
             } else if (badge == "moderator/1") {
-#pragma message WARN("xD")
+                // TODO: implement this xD
                 words.push_back(Word(
                     Resources::badgeTurbo(), Word::BadgeModerator, QString(),
                     QString("Channel Moderator")));  // custom badge
@@ -183,7 +183,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                          userDisplayString, QString()));
 
 // highlights
-#pragma message WARN("xD")
+                // TODO: implement this xD
 
     // bits
     QString bits = "";
@@ -353,7 +353,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                 // bttv / ffz emotes
                 LazyLoadedImage *bttvEmote;
 
-#pragma message WARN("ignored emotes")
+                // TODO: Implement this (ignored emotes)
                 if (Emotes::bttvEmotes().tryGet(string, bttvEmote) ||
                     channel.bttvChannelEmotes().tryGet(string, bttvEmote) ||
                     Emotes::ffzEmotes().tryGet(string, bttvEmote) ||
@@ -388,7 +388,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 
     this->m_words = words;
 
-#pragma message WARN("xD")
+    // TODO: Implement this xD
     //    if (!isReceivedWhisper &&
     //    AppSettings.HighlightIgnoredUsers.ContainsKey(Username))
     //    {
@@ -593,6 +593,6 @@ Message::sortTwitchEmotes(const std::pair<long int, LazyLoadedImage *> &a,
 QString
 Message::matchLink(const QString &string)
 {
-#pragma message WARN("xD")
+    // TODO: Implement this xD
     return QString();
 }
