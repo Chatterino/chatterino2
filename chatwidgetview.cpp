@@ -32,7 +32,6 @@ ChatWidgetView::resizeEvent(QResizeEvent *)
     auto messages = c->getMessagesClone();
 
     for (std::shared_ptr<Message> &message : messages) {
-        qInfo(QString::number(width()).toStdString().c_str());
         message.get()->layout(this->width(), true);
     }
 }

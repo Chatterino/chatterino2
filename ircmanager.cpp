@@ -155,7 +155,7 @@ IrcManager::disconnect()
 void
 IrcManager::messageReceived(IrcMessage *message)
 {
-    qInfo(message->command().toStdString().c_str());
+//    qInfo(message->command().toStdString().c_str());
 
     //    if (message->command() == "")
 }
@@ -163,9 +163,9 @@ IrcManager::messageReceived(IrcMessage *message)
 void
 IrcManager::privateMessageReceived(IrcPrivateMessage *message)
 {
-    qInfo(message->content().toStdString().c_str());
+//    qInfo(message->content().toStdString().c_str());
 
-    qInfo(message->target().toStdString().c_str());
+//    qInfo(message->target().toStdString().c_str());
     auto c = Channel::getChannel(message->target().mid(1));
 
     if (c != NULL) {

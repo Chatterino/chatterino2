@@ -36,28 +36,28 @@ ChatWidgetHeader::ChatWidgetHeader()
     QObject::connect(&leftLabel, &ChatWidgetHeaderButton::clicked, this,
                      &ChatWidgetHeader::leftButtonClicked);
 
-    leftMenu.addAction("Add new split", this, &ChatWidgetHeader::menuAddSplit,
-                       QKeySequence(tr("Ctrl+T")));
-    leftMenu.addAction("Close split", this, &ChatWidgetHeader::menuCloseSplit,
-                       QKeySequence(tr("Ctrl+W")));
-    leftMenu.addAction("Move split", this, &ChatWidgetHeader::menuMoveSplit);
-    leftMenu.addSeparator();
-    leftMenu.addAction("Change channel", this,
-                       &ChatWidgetHeader::menuChangeChannel,
-                       QKeySequence(tr("Ctrl+R")));
-    leftMenu.addAction("Clear chat", this, &ChatWidgetHeader::menuClearChat);
-    leftMenu.addAction("Open channel", this,
-                       &ChatWidgetHeader::menuOpenChannel);
-    leftMenu.addAction("Open pop-out player", this,
-                       &ChatWidgetHeader::menuPopupPlayer);
-    leftMenu.addSeparator();
-    leftMenu.addAction("Reload channel emotes", this,
-                       &ChatWidgetHeader::menuReloadChannelEmotes);
-    leftMenu.addAction("Manual reconnect", this,
-                       &ChatWidgetHeader::menuManualReconnect);
-    leftMenu.addSeparator();
-    leftMenu.addAction("Show changelog", this,
-                       &ChatWidgetHeader::menuShowChangelog);
+//    leftMenu.addAction("Add new split", this, &ChatWidgetHeader::menuAddSplit,
+//                       QKeySequence(tr("Ctrl+T")));
+//    leftMenu.addAction("Close split", this, &ChatWidgetHeader::menuCloseSplit,
+//                       QKeySequence(tr("Ctrl+W")));
+//    leftMenu.addAction("Move split", this, &ChatWidgetHeader::menuMoveSplit);
+//    leftMenu.addSeparator();
+//    leftMenu.addAction("Change channel", this,
+//                       &ChatWidgetHeader::menuChangeChannel,
+//                       QKeySequence(tr("Ctrl+R")));
+//    leftMenu.addAction("Clear chat", this, &ChatWidgetHeader::menuClearChat);
+//    leftMenu.addAction("Open channel", this,
+//                       &ChatWidgetHeader::menuOpenChannel);
+//    leftMenu.addAction("Open pop-out player", this,
+//                       &ChatWidgetHeader::menuPopupPlayer);
+//    leftMenu.addSeparator();
+//    leftMenu.addAction("Reload channel emotes", this,
+//                       &ChatWidgetHeader::menuReloadChannelEmotes);
+//    leftMenu.addAction("Manual reconnect", this,
+//                       &ChatWidgetHeader::menuManualReconnect);
+//    leftMenu.addSeparator();
+//    leftMenu.addAction("Show changelog", this,
+//                       &ChatWidgetHeader::menuShowChangelog);
 
     // middle
     middleLabel.setAlignment(Qt::AlignCenter);
