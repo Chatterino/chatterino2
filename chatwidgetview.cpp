@@ -1,5 +1,6 @@
 #include "chatwidgetview.h"
 #include "channels.h"
+#include "chatwidget.h"
 #include "message.h"
 #include "word.h"
 #include "wordpart.h"
@@ -7,22 +8,20 @@
 #include <QPainter>
 #include <QScroller>
 
-ChatWidgetView::ChatWidgetView()
+ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
-    , scrollbar(this)
-    , m_channel(NULL)
+    , m_chatWidget(parent)
+    , m_scrollbar(this)
 {
     auto scroll = QScroller::scroller(this);
 
     scroll->scrollTo(QPointF(0, 100));
-
-    m_channel = Channels::getChannel("fourtf");
 }
 
 bool
 ChatWidgetView::layoutMessages()
 {
-    auto c = channel();
+    auto c = m_chatWidget->channel();
 
     if (c == NULL)
         return false;
@@ -41,8 +40,8 @@ ChatWidgetView::layoutMessages()
 void
 ChatWidgetView::resizeEvent(QResizeEvent *)
 {
-    scrollbar.resize(scrollbar.width(), height());
-    scrollbar.move(width() - scrollbar.width(), 0);
+    m_scrollbar.resize(m_scrollbar.width(), height());
+    m_scrollbar.move(width() - m_scrollbar.width(), 0);
 
     layoutMessages();
 }
@@ -54,7 +53,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    auto c = channel();
+    auto c = m_chatWidget->channel();
 
     if (c == NULL)
         return;

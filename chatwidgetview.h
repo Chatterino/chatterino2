@@ -6,18 +6,14 @@
 #include "channel.h"
 #include "scrollbar.h"
 
+class ChatWidget;
+
 class ChatWidgetView : public QWidget
 {
     Q_OBJECT
 
 public:
-    ChatWidgetView();
-
-    Channel *
-    channel()
-    {
-        return m_channel;
-    }
+    ChatWidgetView(ChatWidget *parent);
 
     bool layoutMessages();
 
@@ -25,8 +21,9 @@ protected:
     void resizeEvent(QResizeEvent *);
 
 private:
-    ScrollBar scrollbar;
-    Channel *m_channel;
+    ChatWidget *m_chatWidget;
+
+    ScrollBar m_scrollbar;
 
     void paintEvent(QPaintEvent *);
 };

@@ -1,37 +1,51 @@
 #include "channels.h"
+#include "ircmanager.h"
 
 Channel Channels::m_whispers(QString("/whispers"));
 Channel Channels::m_mentions(QString("/mentions"));
+Channel Channels::m_empty(QString(""));
 
 QMap<QString, std::tuple<Channel *, int>> Channels::m_channels;
 
 Channel *
 Channels::addChannel(const QString &channel)
 {
-    auto c = getChannel(channel);
+    QString c = channel.toLower();
 
-    if (c == NULL) {
-        c = new Channel(channel);
-        m_channels.insert(channel, std::tuple<Channel *, int>(c, 1));
+    auto a = m_channels.find(c);
 
-        return c;
+    if (a == m_channels.end()) {
+        auto _c = new Channel(c);
+        m_channels.insert(c, std::tuple<Channel *, int>(_c, 1));
+
+        IrcManager::joinChannel(c);
+
+        return _c;
+    } else {
+        std::get<1>(a.value())++;
     }
 
-    return c;
+    return std::get<0>(a.value());
 }
 
 Channel *
 Channels::getChannel(const QString &channel)
 {
-    if (channel == "/whispers") {
-        return &m_whispers;
+    QString c = channel.toLower();
+
+    if (channel.length() > 1 && channel.at(0) == '/') {
+        if (c == "/whispers") {
+            return &m_whispers;
+        }
+
+        if (c == "/mentions") {
+            return &m_mentions;
+        }
+
+        return &m_empty;
     }
 
-    if (channel == "/mentions") {
-        return &m_mentions;
-    }
-
-    auto a = m_channels.find(channel);
+    auto a = m_channels.find(c);
 
     if (a == m_channels.end()) {
         return NULL;
@@ -43,7 +57,13 @@ Channels::getChannel(const QString &channel)
 void
 Channels::removeChannel(const QString &channel)
 {
-    auto a = m_channels.find(channel);
+    if (channel.length() > 1 && channel.at(0) == '/') {
+        return;
+    }
+
+    QString c = channel.toLower();
+
+    auto a = m_channels.find(c);
 
     if (a == m_channels.end()) {
         return;
@@ -52,7 +72,8 @@ Channels::removeChannel(const QString &channel)
     std::get<1>(a.value())--;
 
     if (std::get<1>(a.value()) == 0) {
-        m_channels.remove(channel);
+        IrcManager::partChannel(c);
+        m_channels.remove(c);
         delete std::get<0>(a.value());
     }
 }

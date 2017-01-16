@@ -68,7 +68,7 @@ SOURCES += main.cpp\
     chatwidgetheaderbutton.cpp \
     chatwidgetheaderbuttonlabel.cpp \
     channels.cpp \
-    textinputform.cpp
+    textinputdialog.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -108,7 +108,7 @@ HEADERS  += mainwindow.h \
     chatwidgetheaderbutton.h \
     chatwidgetheaderbuttonlabel.h \
     channels.h \
-    textinputform.h
+    textinputdialog.h
 
 PRECOMPILED_HEADER =
 

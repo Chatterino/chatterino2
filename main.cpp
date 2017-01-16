@@ -22,9 +22,6 @@ main(int argc, char *argv[])
     MainWindow &w = Windows::mainWindow();
     w.show();
 
-    Channels::addChannel("ian678");
-    Channels::addChannel("fourtf");
-
     IrcManager::connect();
 
     return a.exec();

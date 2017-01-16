@@ -13,14 +13,14 @@
 #include <future>
 
 Account *IrcManager::account = nullptr;
-IrcConnection *IrcManager::connection = NULL;
-QMutex IrcManager::connectionMutex;
-long IrcManager::connectionIteration = 0;
+IrcConnection *IrcManager::m_connection = NULL;
+QMutex IrcManager::m_connectionMutex;
+long IrcManager::m_connectionIteration = 0;
 const QString IrcManager::defaultClientId = "7ue61iz46fz11y3cugd0l3tawb4taal";
 QNetworkAccessManager IrcManager::m_accessManager;
 
-QMap<QString, bool> IrcManager::twitchBlockedUsers;
-QMutex IrcManager::twitchBlockedUsersMutex;
+QMap<QString, bool> IrcManager::m_twitchBlockedUsers;
+QMutex IrcManager::m_twitchBlockedUsersMutex;
 
 IrcManager::IrcManager()
 {
@@ -39,7 +39,7 @@ IrcManager::beginConnecting()
 {
     IrcManager::account = const_cast<Account *>(Account::anon());
 
-    int iteration = ++connectionIteration;
+    int iteration = ++m_connectionIteration;
 
     auto c = new IrcConnection();
 
@@ -62,9 +62,9 @@ IrcManager::beginConnecting()
             QNetworkReply *reply = m_accessManager.get(req);
 
             QObject::connect(reply, &QNetworkReply::finished, [=] {
-                twitchBlockedUsersMutex.lock();
-                twitchBlockedUsers.clear();
-                twitchBlockedUsersMutex.unlock();
+                m_twitchBlockedUsersMutex.lock();
+                m_twitchBlockedUsers.clear();
+                m_twitchBlockedUsersMutex.unlock();
 
                 QByteArray data = reply->readAll();
                 QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
@@ -75,15 +75,15 @@ IrcManager::beginConnecting()
 
                 auto blocks = root.value("blocks").toArray();
 
-                twitchBlockedUsersMutex.lock();
+                m_twitchBlockedUsersMutex.lock();
                 for (QJsonValue block : blocks) {
                     QJsonObject user =
                         block.toObject().value("user").toObject();
                     // display_name
-                    twitchBlockedUsers.insert(
+                    m_twitchBlockedUsers.insert(
                         user.value("name").toString().toLower(), true);
                 }
-                twitchBlockedUsersMutex.unlock();
+                m_twitchBlockedUsersMutex.unlock();
             });
         }
 
@@ -104,15 +104,15 @@ IrcManager::beginConnecting()
 
                 auto blocks = root.value("blocks").toArray();
 
-                twitchBlockedUsersMutex.lock();
+                m_twitchBlockedUsersMutex.lock();
                 for (QJsonValue block : blocks) {
                     QJsonObject user =
                         block.toObject().value("user").toObject();
                     // display_name
-                    twitchBlockedUsers.insert(
+                    m_twitchBlockedUsers.insert(
                         user.value("name").toString().toLower(), true);
                 }
-                twitchBlockedUsersMutex.unlock();
+                m_twitchBlockedUsersMutex.unlock();
             });
         }
     }
@@ -123,41 +123,60 @@ IrcManager::beginConnecting()
     c->setUserName("justinfan123");
     c->setNickName("justinfan123");
     c->setRealName("justinfan123");
-    c->sendRaw("JOIN #fourtf");
 
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
     c->open();
 
-    connectionMutex.lock();
-    if (iteration == connectionIteration) {
-        delete connection;
+    m_connectionMutex.lock();
+    if (iteration == m_connectionIteration) {
+        delete m_connection;
         c->moveToThread(QCoreApplication::instance()->thread());
-        connection = c;
+        m_connection = c;
     } else {
         delete c;
     }
-    connectionMutex.unlock();
+    m_connectionMutex.unlock();
 }
 
 void
 IrcManager::disconnect()
 {
-    connectionMutex.lock();
+    m_connectionMutex.lock();
 
-    if (connection != NULL) {
-        delete connection;
-        connection = NULL;
+    if (m_connection != NULL) {
+        delete m_connection;
+        m_connection = NULL;
     }
 
-    connectionMutex.unlock();
+    m_connectionMutex.unlock();
+}
+
+void
+IrcManager::joinChannel(const QString &channel)
+{
+    m_connectionMutex.lock();
+    if (m_connection != NULL) {
+        m_connection->sendRaw("JOIN #" + channel);
+    }
+    m_connectionMutex.unlock();
+}
+
+void
+IrcManager::partChannel(const QString &channel)
+{
+    m_connectionMutex.lock();
+    if (m_connection != NULL) {
+        m_connection->sendRaw("PART #" + channel);
+    }
+    m_connectionMutex.unlock();
 }
 
 void
 IrcManager::messageReceived(IrcMessage *message)
 {
-//    qInfo(message->command().toStdString().c_str());
+    qInfo(message->command().toStdString().c_str());
 
     //    if (message->command() == "")
 }
@@ -165,7 +184,7 @@ IrcManager::messageReceived(IrcMessage *message)
 void
 IrcManager::privateMessageReceived(IrcPrivateMessage *message)
 {
-//    qInfo(message->content().toStdString().c_str());
+    //    qInfo(message->content().toStdString().c_str());
 
     auto c = Channels::getChannel(message->target().mid(1));
 
@@ -177,16 +196,16 @@ IrcManager::privateMessageReceived(IrcPrivateMessage *message)
 bool
 IrcManager::isTwitchBlockedUser(QString const &username)
 {
-    twitchBlockedUsersMutex.lock();
+    m_twitchBlockedUsersMutex.lock();
 
-    auto iterator = twitchBlockedUsers.find(username);
+    auto iterator = m_twitchBlockedUsers.find(username);
 
-    if (iterator == twitchBlockedUsers.end()) {
-        twitchBlockedUsersMutex.unlock();
+    if (iterator == m_twitchBlockedUsers.end()) {
+        m_twitchBlockedUsersMutex.unlock();
         return false;
     }
 
-    twitchBlockedUsersMutex.unlock();
+    m_twitchBlockedUsersMutex.unlock();
     return true;
 }
 
@@ -202,9 +221,9 @@ IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
-        twitchBlockedUsersMutex.lock();
-        twitchBlockedUsers.insert(username, true);
-        twitchBlockedUsersMutex.unlock();
+        m_twitchBlockedUsersMutex.lock();
+        m_twitchBlockedUsers.insert(username, true);
+        m_twitchBlockedUsersMutex.unlock();
 
         delete reply;
         return true;
@@ -236,9 +255,9 @@ IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
-        twitchBlockedUsersMutex.lock();
-        twitchBlockedUsers.remove(username);
-        twitchBlockedUsersMutex.unlock();
+        m_twitchBlockedUsersMutex.lock();
+        m_twitchBlockedUsers.remove(username);
+        m_twitchBlockedUsersMutex.unlock();
 
         delete reply;
         return true;

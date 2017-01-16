@@ -34,19 +34,23 @@ public:
         return m_accessManager;
     }
 
+    static void joinChannel(const QString &channel);
+
+    static void partChannel(const QString &channel);
+
 private:
     IrcManager();
 
-    static QMap<QString, bool> twitchBlockedUsers;
-    static QMutex twitchBlockedUsersMutex;
+    static QMap<QString, bool> m_twitchBlockedUsers;
+    static QMutex m_twitchBlockedUsersMutex;
 
     static QNetworkAccessManager m_accessManager;
 
     static void beginConnecting();
 
-    static IrcConnection *connection;
-    static QMutex connectionMutex;
-    static long connectionIteration;
+    static IrcConnection *m_connection;
+    static QMutex m_connectionMutex;
+    static long m_connectionIteration;
 
     static void messageReceived(IrcMessage *message);
     static void privateMessageReceived(IrcPrivateMessage *message);

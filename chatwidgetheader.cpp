@@ -22,6 +22,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
     setFixedHeight(32);
 
     updateColors();
+    updateChannelText();
 
     setLayout(&m_hbox);
     m_hbox.setMargin(0);
@@ -37,36 +38,28 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
     QObject::connect(&m_leftLabel, &ChatWidgetHeaderButton::clicked, this,
                      &ChatWidgetHeader::leftButtonClicked);
 
-        m_leftMenu.addAction("Add new split", this,
-        SLOT(menuAddSplit()),
-                           QKeySequence(tr("Ctrl+T")));
-        m_leftMenu.addAction("Close split", this,
-        SLOT(menuCloseSplit()),
-                           QKeySequence(tr("Ctrl+W")));
-        m_leftMenu.addAction("Move split", this,
-        SLOT(menuMoveSplit()));
-        m_leftMenu.addSeparator();
-        m_leftMenu.addAction("Change channel", this,
-                           SLOT(menuChangeChannel()),
-                           QKeySequence(tr("Ctrl+R")));
-        m_leftMenu.addAction("Clear chat", this,
-        SLOT(menuClearChat()));
-        m_leftMenu.addAction("Open channel", this,
-                           SLOT(menuOpenChannel()));
-        m_leftMenu.addAction("Open pop-out player", this,
-                           SLOT(menuPopupPlayer()));
-        m_leftMenu.addSeparator();
-        m_leftMenu.addAction("Reload channel emotes", this,
-                           SLOT(menuReloadChannelEmotes()));
-        m_leftMenu.addAction("Manual reconnect", this,
-                           SLOT(menuManualReconnect()));
-        m_leftMenu.addSeparator();
-        m_leftMenu.addAction("Show changelog", this,
-                           SLOT(menuShowChangelog()));
+    m_leftMenu.addAction("Add new split", this, SLOT(menuAddSplit()),
+                         QKeySequence(tr("Ctrl+T")));
+    m_leftMenu.addAction("Close split", this, SLOT(menuCloseSplit()),
+                         QKeySequence(tr("Ctrl+W")));
+    m_leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
+    m_leftMenu.addSeparator();
+    m_leftMenu.addAction("Change channel", this, SLOT(menuChangeChannel()),
+                         QKeySequence(tr("Ctrl+R")));
+    m_leftMenu.addAction("Clear chat", this, SLOT(menuClearChat()));
+    m_leftMenu.addAction("Open channel", this, SLOT(menuOpenChannel()));
+    m_leftMenu.addAction("Open pop-out player", this, SLOT(menuPopupPlayer()));
+    m_leftMenu.addSeparator();
+    m_leftMenu.addAction("Reload channel emotes", this,
+                         SLOT(menuReloadChannelEmotes()));
+    m_leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
+    m_leftMenu.addSeparator();
+    m_leftMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
 
     // middle
     m_middleLabel.setAlignment(Qt::AlignCenter);
-    m_middleLabel.setText("textString");
+    QObject::connect(&m_middleLabel, &m_middleLabel.mouseDoubleClickEvent, this,
+                     &mouseDoubleClickEvent);
 
     // right
     m_rightLabel.setMinimumWidth(height());
@@ -83,6 +76,14 @@ ChatWidgetHeader::updateColors()
     m_leftLabel.setPalette(palette);
     m_middleLabel.setPalette(palette);
     m_rightLabel.setPalette(palette);
+}
+
+void
+ChatWidgetHeader::updateChannelText()
+{
+    const QString &c = m_chatWidget->channelName();
+
+    m_middleLabel.setText(c.isEmpty() ? "<no channel>" : c);
 }
 
 void
@@ -140,6 +141,14 @@ ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
 }
 
 void
+ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+        chatWidget()->showChangeChannelPopup();
+    }
+}
+
+void
 ChatWidgetHeader::leftButtonClicked()
 {
     m_leftMenu.move(m_leftLabel.mapToGlobal(QPoint(0, m_leftLabel.height())));
@@ -166,6 +175,7 @@ ChatWidgetHeader::menuMoveSplit()
 void
 ChatWidgetHeader::menuChangeChannel()
 {
+    m_chatWidget->showChangeChannelPopup();
 }
 void
 ChatWidgetHeader::menuClearChat()

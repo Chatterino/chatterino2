@@ -28,11 +28,13 @@ public:
     }
 
     void updateColors();
+    void updateChannelText();
 
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
     ChatWidget *m_chatWidget;

@@ -29,6 +29,7 @@ private:
 
     static Channel m_whispers;
     static Channel m_mentions;
+    static Channel m_empty;
 
     static QMap<QString, std::tuple<Channel *, int>> m_channels;
 };
