@@ -52,6 +52,7 @@ private:
     void leftButtonClicked();
     void rightButtonClicked();
 
+private slots:
     void menuAddSplit();
     void menuCloseSplit();
     void menuMoveSplit();
