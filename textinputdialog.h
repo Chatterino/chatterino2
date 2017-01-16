@@ -34,6 +34,7 @@ private:
     QPushButton m_okButton;
     QPushButton m_cancelButton;
 
+private slots:
     void okButtonClicked();
     void cancelButtonClicked();
 };

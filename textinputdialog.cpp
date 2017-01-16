@@ -15,9 +15,9 @@ TextInputDialog::TextInputDialog(QWidget *parent)
     m_buttonBox.addWidget(&m_okButton);
     m_buttonBox.addWidget(&m_cancelButton);
 
-    QObject::connect(&m_okButton, &m_okButton.clicked, this, &okButtonClicked);
-    QObject::connect(&m_cancelButton, &m_cancelButton.clicked, this,
-                     &cancelButtonClicked);
+    QObject::connect(&m_okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
+    QObject::connect(&m_cancelButton, SIGNAL(clicked()), this,
+                      SLOT(cancelButtonClicked()));
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
@@ -29,10 +29,12 @@ void
 TextInputDialog::okButtonClicked()
 {
     accept();
+    close();
 }
 
 void
 TextInputDialog::cancelButtonClicked()
 {
     reject();
+    close();
 }

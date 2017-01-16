@@ -2,7 +2,7 @@
 #include "resources.h"
 
 QString Emotes::m_twitchEmoteTemplate(
-    "http://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0");
+    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0");
 
 ConcurrentMap<QString, TwitchEmoteValue *> Emotes::m_twitchEmotes;
 ConcurrentMap<QString, LazyLoadedImage *> Emotes::m_bttvEmotes;

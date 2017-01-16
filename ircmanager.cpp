@@ -176,7 +176,7 @@ IrcManager::partChannel(const QString &channel)
 void
 IrcManager::messageReceived(IrcMessage *message)
 {
-    qInfo(message->command().toStdString().c_str());
+//    qInfo(message->command().toStdString().c_str());
 
     //    if (message->command() == "")
 }

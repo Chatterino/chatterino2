@@ -58,8 +58,8 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
 
     // middle
     m_middleLabel.setAlignment(Qt::AlignCenter);
-    QObject::connect(&m_middleLabel, &m_middleLabel.mouseDoubleClickEvent, this,
-                     &mouseDoubleClickEvent);
+    QObject::connect(&m_middleLabel, SIGNAL(mouseDoubleClickEvent(QMouseEvent)), this,
+                     SLOT(mouseDoubleClickEvent));
 
     // right
     m_rightLabel.setMinimumWidth(height());
