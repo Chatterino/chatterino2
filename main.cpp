@@ -1,3 +1,4 @@
+#include "channels.h"
 #include "colorscheme.h"
 #include "emojis.h"
 #include "ircmanager.h"
@@ -21,8 +22,8 @@ main(int argc, char *argv[])
     MainWindow &w = Windows::mainWindow();
     w.show();
 
-    Channel::addChannel("ian678");
-    Channel::addChannel("fourtf");
+    Channels::addChannel("ian678");
+    Channels::addChannel("fourtf");
 
     IrcManager::connect();
 

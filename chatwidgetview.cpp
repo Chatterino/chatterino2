@@ -1,4 +1,5 @@
 #include "chatwidgetview.h"
+#include "channels.h"
 #include "message.h"
 #include "word.h"
 #include "wordpart.h"
@@ -15,7 +16,26 @@ ChatWidgetView::ChatWidgetView()
 
     scroll->scrollTo(QPointF(0, 100));
 
-    m_channel = Channel::getChannel("fourtf");
+    m_channel = Channels::getChannel("fourtf");
+}
+
+bool
+ChatWidgetView::layoutMessages()
+{
+    auto c = channel();
+
+    if (c == NULL)
+        return false;
+
+    auto messages = c->getMessagesClone();
+
+    bool redraw = false;
+
+    for (std::shared_ptr<Message> &message : messages) {
+        redraw |= message.get()->layout(this->width(), true);
+    }
+
+    return redraw;
 }
 
 void
@@ -24,17 +44,7 @@ ChatWidgetView::resizeEvent(QResizeEvent *)
     scrollbar.resize(scrollbar.width(), height());
     scrollbar.move(width() - scrollbar.width(), 0);
 
-    auto c = channel();
-
-    if (c == NULL)
-        return;
-
-    auto messages = c->getMessagesClone();
-
-    for (std::shared_ptr<Message> &message : messages) {
-        qInfo(QString::number(width()).toStdString().c_str());
-        message.get()->layout(this->width(), true);
-    }
+    layoutMessages();
 }
 
 void

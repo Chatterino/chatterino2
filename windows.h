@@ -8,7 +8,8 @@
 class Windows
 {
 public:
-    static void invalidateEmotes();
+    static void layoutVisibleChatWidgets();
+    static void repaintVisibleChatWidgets();
 
     static MainWindow &
     mainWindow()

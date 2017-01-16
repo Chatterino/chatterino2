@@ -19,6 +19,13 @@ public:
     enum HighlightType { none, highlighted, newMessage };
 
     void select(NotebookPage *page);
+
+    NotebookPage *
+    selected()
+    {
+        return m_selected;
+    }
+
     void performLayout();
 
 protected:
@@ -30,13 +37,13 @@ public slots:
     void settingsButtonClicked();
 
 private:
-    QList<NotebookPage *> pages;
+    QList<NotebookPage *> m_pages;
 
-    NotebookButton addButton;
-    NotebookButton settingsButton;
-    NotebookButton userButton;
+    NotebookButton m_addButton;
+    NotebookButton m_settingsButton;
+    NotebookButton m_userButton;
 
-    NotebookPage *selected = nullptr;
+    NotebookPage *m_selected = nullptr;
 };
 
 #endif  // NOTEBOOK_H

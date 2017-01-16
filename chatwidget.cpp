@@ -7,14 +7,14 @@
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
-    , vbox(this)
+    , m_vbox(this)
 {
-    vbox.setSpacing(0);
-    vbox.setMargin(1);
+    m_vbox.setSpacing(0);
+    m_vbox.setMargin(1);
 
-    vbox.addWidget(&header);
-    vbox.addWidget(&view);
-    vbox.addWidget(&input);
+    m_vbox.addWidget(&m_header);
+    m_vbox.addWidget(&m_view);
+    m_vbox.addWidget(&m_input);
 }
 
 ChatWidget::~ChatWidget()

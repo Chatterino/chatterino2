@@ -19,11 +19,15 @@ class NotebookPage : public QWidget
 public:
     NotebookPage(QWidget *parent, NotebookTab *tab);
     NotebookTab *tab;
-    QVBoxLayout parentbox;
-    QHBoxLayout hbox;
 
     std::pair<int, int> removeFromLayout(ChatWidget *widget);
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);
+
+    const std::vector<ChatWidget *> &
+    chatWidgets() const
+    {
+        return m_chatWidgets;
+    }
 
     static bool isDraggingSplit;
     static ChatWidget *draggingSplit;
@@ -52,9 +56,13 @@ protected:
         }
     };
 
-    std::vector<DropRegion> dropRegions;
+    QVBoxLayout m_parentbox;
+    QHBoxLayout m_hbox;
 
-    NotebookPageDropPreview preview;
+    std::vector<ChatWidget *> m_chatWidgets;
+    std::vector<DropRegion> m_dropRegions;
+
+    NotebookPageDropPreview m_preview;
 
 private:
     void setPreviewRect(QPoint mousePos);

@@ -66,7 +66,8 @@ SOURCES += main.cpp\
     resources.cpp \
     windows.cpp \
     chatwidgetheaderbutton.cpp \
-    chatwidgetheaderbuttonlabel.cpp
+    chatwidgetheaderbuttonlabel.cpp \
+    channels.cpp
 
 HEADERS  += mainwindow.h \
     chatwidget.h \
@@ -104,7 +105,8 @@ HEADERS  += mainwindow.h \
     resources.h \
     windows.h \
     chatwidgetheaderbutton.h \
-    chatwidgetheaderbuttonlabel.h
+    chatwidgetheaderbuttonlabel.h \
+    channels.h
 
 PRECOMPILED_HEADER =
 

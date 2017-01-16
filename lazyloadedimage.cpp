@@ -3,6 +3,7 @@
 #include "asyncexec.h"
 #include "emotes.h"
 #include "ircmanager.h"
+#include "windows.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -58,6 +59,7 @@ LazyLoadedImage::loadImage()
 
         m_pixmap = pixmap;
         Emotes::incGeneration();
+        Windows::layoutVisibleChatWidgets();
     });
     //}));
 }

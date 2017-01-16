@@ -14,8 +14,9 @@ std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 
 NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
     : QWidget(parent)
-    , parentbox(this)
-    , preview(this)
+    , m_parentbox(this)
+    , m_preview(this)
+    , m_chatWidgets()
 {
     this->tab = tab;
     tab->page = this;
@@ -23,19 +24,27 @@ NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
     setHidden(true);
     setAcceptDrops(true);
 
-    parentbox.addSpacing(2);
-    parentbox.addLayout(&hbox);
-    parentbox.setMargin(0);
+    m_parentbox.addSpacing(2);
+    m_parentbox.addLayout(&m_hbox);
+    m_parentbox.setMargin(0);
 
-    hbox.setSpacing(1);
-    hbox.setMargin(0);
+    m_hbox.setSpacing(1);
+    m_hbox.setMargin(0);
 }
 
 std::pair<int, int>
 NotebookPage::removeFromLayout(ChatWidget *widget)
 {
-    for (int i = 0; i < hbox.count(); ++i) {
-        auto vbox = static_cast<QVBoxLayout *>(hbox.itemAt(i));
+    for (auto it = m_chatWidgets.begin(); it != m_chatWidgets.end(); ++it) {
+        if (*it == widget) {
+            m_chatWidgets.erase(it);
+
+            break;
+        }
+    }
+
+    for (int i = 0; i < m_hbox.count(); ++i) {
+        auto vbox = static_cast<QVBoxLayout *>(m_hbox.itemAt(i));
 
         for (int j = 0; j < vbox->count(); ++j) {
             if (vbox->itemAt(j)->widget() != widget)
@@ -46,13 +55,12 @@ NotebookPage::removeFromLayout(ChatWidget *widget)
             bool isLastItem = vbox->count() == 0;
 
             if (isLastItem) {
-                hbox.removeItem(vbox);
+                m_hbox.removeItem(vbox);
 
                 delete vbox;
             }
 
             return std::pair<int, int>(i, isLastItem ? -1 : j);
-            ;
         }
     }
 
@@ -64,12 +72,14 @@ NotebookPage::addToLayout(
     ChatWidget *widget,
     std::pair<int, int> position = std::pair<int, int>(-1, -1))
 {
+    m_chatWidgets.push_back(widget);
+
     // add vbox at the end
-    if (position.first < 0 || position.first >= hbox.count()) {
+    if (position.first < 0 || position.first >= m_hbox.count()) {
         auto vbox = new QVBoxLayout();
         vbox->addWidget(widget);
 
-        hbox.addLayout(vbox);
+        m_hbox.addLayout(vbox);
         return;
     }
 
@@ -78,12 +88,12 @@ NotebookPage::addToLayout(
         auto vbox = new QVBoxLayout();
         vbox->addWidget(widget);
 
-        hbox.insertLayout(position.first, vbox);
+        m_hbox.insertLayout(position.first, vbox);
         return;
     }
 
     // add to existing vbox
-    auto vbox = static_cast<QVBoxLayout *>(hbox.itemAt(position.first));
+    auto vbox = static_cast<QVBoxLayout *>(m_hbox.itemAt(position.first));
 
     vbox->insertWidget(std::max(0, std::min(vbox->count(), position.second)),
                        widget);
@@ -92,7 +102,7 @@ NotebookPage::addToLayout(
 void
 NotebookPage::enterEvent(QEvent *)
 {
-    if (hbox.count() == 0) {
+    if (m_hbox.count() == 0) {
         setCursor(QCursor(Qt::PointingHandCursor));
     } else {
         setCursor(QCursor(Qt::ArrowCursor));
@@ -107,8 +117,9 @@ NotebookPage::leaveEvent(QEvent *)
 void
 NotebookPage::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (hbox.count() == 0 && event->button() == Qt::LeftButton) {
+    if (m_hbox.count() == 0 && event->button() == Qt::LeftButton) {
         addToLayout(new ChatWidget(), std::pair<int, int>(-1, -1));
+
         setCursor(QCursor(Qt::ArrowCursor));
     }
 }
@@ -120,27 +131,28 @@ NotebookPage::dragEnterEvent(QDragEnterEvent *event)
         return;
 
     if (isDraggingSplit) {
-        dropRegions.clear();
+        m_dropRegions.clear();
 
-        if (hbox.count() == 0) {
-            dropRegions.push_back(
+        if (m_hbox.count() == 0) {
+            m_dropRegions.push_back(
                 DropRegion(rect(), std::pair<int, int>(-1, -1)));
         } else {
-            for (int i = 0; i < hbox.count() + 1; ++i) {
-                dropRegions.push_back(
-                    DropRegion(QRect(((i * 4 - 1) * width() / hbox.count()) / 4,
-                                     0, width() / hbox.count() / 2, height()),
-                               std::pair<int, int>(i, -1)));
+            for (int i = 0; i < m_hbox.count() + 1; ++i) {
+                m_dropRegions.push_back(DropRegion(
+                    QRect(((i * 4 - 1) * width() / m_hbox.count()) / 4, 0,
+                          width() / m_hbox.count() / 2, height()),
+                    std::pair<int, int>(i, -1)));
             }
 
-            for (int i = 0; i < hbox.count(); ++i) {
-                auto vbox = static_cast<QVBoxLayout *>(hbox.itemAt(i));
+            for (int i = 0; i < m_hbox.count(); ++i) {
+                auto vbox = static_cast<QVBoxLayout *>(m_hbox.itemAt(i));
 
                 for (int j = 0; j < vbox->count() + 1; ++j) {
-                    dropRegions.push_back(DropRegion(
-                        QRect(i * width() / hbox.count(),
+                    m_dropRegions.push_back(DropRegion(
+                        QRect(i * width() / m_hbox.count(),
                               ((j * 2 - 1) * height() / vbox->count()) / 2,
-                              width() / hbox.count(), height() / vbox->count()),
+                              width() / m_hbox.count(),
+                              height() / vbox->count()),
                         std::pair<int, int>(i, j)));
                 }
             }
@@ -161,18 +173,18 @@ NotebookPage::dragMoveEvent(QDragMoveEvent *event)
 void
 NotebookPage::setPreviewRect(QPoint mousePos)
 {
-    for (DropRegion region : dropRegions) {
+    for (DropRegion region : m_dropRegions) {
         if (region.rect.contains(mousePos)) {
-            preview.move(region.rect.x(), region.rect.y());
-            preview.resize(region.rect.width(), region.rect.height());
-            preview.show();
-            preview.raise();
+            m_preview.move(region.rect.x(), region.rect.y());
+            m_preview.resize(region.rect.width(), region.rect.height());
+            m_preview.show();
+            m_preview.raise();
 
             dropPosition = region.position;
 
             return;
         } else {
-            preview.hide();
+            m_preview.hide();
         }
     }
 }
@@ -180,7 +192,7 @@ NotebookPage::setPreviewRect(QPoint mousePos)
 void
 NotebookPage::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    preview.hide();
+    m_preview.hide();
 }
 
 void
@@ -194,7 +206,7 @@ NotebookPage::dropEvent(QDropEvent *event)
         addToLayout(NotebookPage::draggingSplit, dropPosition);
     }
 
-    preview.hide();
+    m_preview.hide();
 }
 
 void
@@ -202,7 +214,7 @@ NotebookPage::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (hbox.count() == 0) {
+    if (m_hbox.count() == 0) {
         painter.fillRect(rect(), ColorScheme::instance().ChatBackground);
 
         painter.fillRect(0, 0, width(), 2,

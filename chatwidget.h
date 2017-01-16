@@ -17,17 +17,23 @@ public:
     ChatWidget(QWidget *parent = 0);
     ~ChatWidget();
 
+    ChatWidgetView &
+    view()
+    {
+        return m_view;
+    }
+
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
 private:
-    QFont font;
-    QVBoxLayout vbox;
-    ChatWidgetHeader header;
-    ChatWidgetView view;
-    ChatWidgetInput input;
+    QFont m_font;
+    QVBoxLayout m_vbox;
+    ChatWidgetHeader m_header;
+    ChatWidgetView m_view;
+    ChatWidgetInput m_input;
 
-    Channel *channel = NULL;
+    Channel *m_channel = NULL;
 };
 
 #endif  // CHATWIDGET_H

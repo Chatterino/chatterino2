@@ -12,6 +12,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     Notebook notebook;
+
+    void layoutVisibleChatWidgets();
+    void repaintVisibleChatWidgets();
 };
 
 #endif  // MAINWINDOW_H

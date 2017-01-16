@@ -1,14 +1,16 @@
 #include "ircmanager.h"
-#include "QJsonArray"
-#include "QJsonDocument"
-#include "QJsonObject"
-#include "QNetworkReply"
 #include "asyncexec.h"
 #include "channel.h"
-#include "future"
-#include "irccommand.h"
-#include "ircconnection.h"
-#include "qnetworkrequest.h"
+#include "channels.h"
+
+#include <irccommand.h>
+#include <ircconnection.h>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <future>
 
 Account *IrcManager::account = nullptr;
 IrcConnection *IrcManager::connection = NULL;
@@ -166,7 +168,7 @@ IrcManager::privateMessageReceived(IrcPrivateMessage *message)
     qInfo(message->content().toStdString().c_str());
 
     qInfo(message->target().toStdString().c_str());
-    auto c = Channel::getChannel(message->target().mid(1));
+    auto c = Channels::getChannel(message->target().mid(1));
 
     if (c != NULL) {
         c->addMessage(std::shared_ptr<Message>(new Message(*message, *c)));
@@ -209,8 +211,8 @@ IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
         return true;
     }
 
-    errorMessage = "Error while ignoring user \"" + username + "\": " +
-                   reply->errorString();
+    errorMessage = "Error while ignoring user \"" + username +
+                   "\": " + reply->errorString();
     return false;
 }
 
@@ -243,8 +245,8 @@ IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
         return true;
     }
 
-    errorMessage = "Error while unignoring user \"" + username + "\": " +
-                   reply->errorString();
+    errorMessage = "Error while unignoring user \"" + username +
+                   "\": " + reply->errorString();
     return false;
 }
 

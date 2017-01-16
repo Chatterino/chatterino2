@@ -19,6 +19,8 @@ public:
         return m_channel;
     }
 
+    bool layoutMessages();
+
 protected:
     void resizeEvent(QResizeEvent *);
 

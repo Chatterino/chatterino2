@@ -25,3 +25,42 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 }
+
+void
+MainWindow::layoutVisibleChatWidgets()
+{
+    auto *page = notebook.selected();
+
+    if (page == NULL) {
+        return;
+    }
+
+    const std::vector<ChatWidget *> &widgets = page->chatWidgets();
+
+    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
+        ChatWidget *widget = *it;
+
+        if (widget->view().layoutMessages()) {
+            widget->repaint();
+        }
+    }
+}
+
+void
+MainWindow::repaintVisibleChatWidgets()
+{
+    auto *page = notebook.selected();
+
+    if (page == NULL) {
+        return;
+    }
+
+    const std::vector<ChatWidget *> &widgets = page->chatWidgets();
+
+    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
+        ChatWidget *widget = *it;
+
+        widget->view().layoutMessages();
+        widget->repaint();
+    }
+}

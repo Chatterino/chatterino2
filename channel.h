@@ -14,22 +14,9 @@ class Message;
 
 class Channel
 {
-    // static
-
 public:
-    static Channel whispers;
-    static Channel mentions;
+    Channel(const QString &channel);
 
-    static Channel *addChannel(const QString &channel);
-    static Channel *getChannel(const QString &channel);
-    static void removeChannel(const QString &channel);
-
-private:
-    static QMap<QString, Channel *> channels;
-
-    // members
-
-public:
     // properties
     const ConcurrentMap<QString, LazyLoadedImage *> &
     bttvChannelEmotes() const
@@ -102,10 +89,6 @@ public:
     QVector<std::shared_ptr<Message>> getMessagesClone();
 
 private:
-    Channel(QString channel);
-
-    int m_referenceCount = 0;
-
     QVector<std::shared_ptr<Message>> m_messages;
 
     QString m_name;

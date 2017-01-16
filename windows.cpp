@@ -5,6 +5,13 @@ QMutex Windows::m_windowMutex;
 MainWindow *Windows::m_mainWindow(NULL);
 
 void
-Windows::invalidateEmotes()
+Windows::layoutVisibleChatWidgets()
 {
+    m_mainWindow->layoutVisibleChatWidgets();
+}
+
+void
+Windows::repaintVisibleChatWidgets()
+{
+    m_mainWindow->repaintVisibleChatWidgets();
 }

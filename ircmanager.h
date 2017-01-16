@@ -3,13 +3,14 @@
 
 #define TWITCH_MAX_MESSAGELENGTH 500
 
-#include "IrcMessage"
-#include "QMap"
-#include "QMutex"
-#include "QString"
 #include "account.h"
 #include "message.h"
-#include "qnetworkaccessmanager.h"
+
+#include <IrcMessage>
+#include <QMap>
+#include <QMutex>
+#include <QNetworkAccessManager>
+#include <QString>
 
 class IrcManager
 {
