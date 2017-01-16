@@ -572,8 +572,6 @@ Message::layout(int width, bool enableEmoteMargins)
 
     alignParts();
 
-    qInfo("words: %d, parts: %d", m_words.size(), parts->size());
-
     auto tmp = m_wordParts;
     m_wordParts = parts;
     delete tmp;
