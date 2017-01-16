@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::layoutVisibleChatWidgets()
+MainWindow::layoutVisibleChatWidgets(Channel *channel)
 {
     auto *page = notebook.selected();
 
@@ -40,14 +40,16 @@ MainWindow::layoutVisibleChatWidgets()
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (widget->view().layoutMessages()) {
-            widget->repaint();
+        if (channel == NULL || channel == widget->channel()) {
+            if (widget->view().layoutMessages()) {
+                widget->repaint();
+            }
         }
     }
 }
 
 void
-MainWindow::repaintVisibleChatWidgets()
+MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {
     auto *page = notebook.selected();
 
@@ -60,7 +62,9 @@ MainWindow::repaintVisibleChatWidgets()
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        widget->view().layoutMessages();
-        widget->repaint();
+        if (channel == NULL || channel == widget->channel()) {
+            widget->view().layoutMessages();
+            widget->repaint();
+        }
     }
 }

@@ -13,8 +13,8 @@ public:
     ~MainWindow();
     Notebook notebook;
 
-    void layoutVisibleChatWidgets();
-    void repaintVisibleChatWidgets();
+    void layoutVisibleChatWidgets(Channel *channel = NULL);
+    void repaintVisibleChatWidgets(Channel *channel = NULL);
 };
 
 #endif  // MAINWINDOW_H

@@ -2,6 +2,7 @@
 
 ChatWidgetHeaderButtonLabel::ChatWidgetHeaderButtonLabel()
 {
+    setAlignment(Qt::AlignCenter);
 }
 
 void

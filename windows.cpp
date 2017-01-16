@@ -5,13 +5,13 @@ QMutex Windows::m_windowMutex;
 MainWindow *Windows::m_mainWindow(NULL);
 
 void
-Windows::layoutVisibleChatWidgets()
+Windows::layoutVisibleChatWidgets(Channel *channel)
 {
-    m_mainWindow->layoutVisibleChatWidgets();
+    m_mainWindow->layoutVisibleChatWidgets(channel);
 }
 
 void
-Windows::repaintVisibleChatWidgets()
+Windows::repaintVisibleChatWidgets(Channel *channel)
 {
-    m_mainWindow->repaintVisibleChatWidgets();
+    m_mainWindow->repaintVisibleChatWidgets(channel);
 }

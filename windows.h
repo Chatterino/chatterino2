@@ -8,8 +8,8 @@
 class Windows
 {
 public:
-    static void layoutVisibleChatWidgets();
-    static void repaintVisibleChatWidgets();
+    static void layoutVisibleChatWidgets(Channel *channel = NULL);
+    static void repaintVisibleChatWidgets(Channel *channel = NULL);
 
     static MainWindow &
     mainWindow()

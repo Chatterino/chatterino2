@@ -23,6 +23,12 @@ public:
         return m_view;
     }
 
+    Channel *
+    channel() const
+    {
+        return m_channel;
+    }
+
 protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
