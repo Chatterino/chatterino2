@@ -7,6 +7,7 @@
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
+    , m_header(this)
     , m_vbox(this)
 {
     m_vbox.setSpacing(0);
