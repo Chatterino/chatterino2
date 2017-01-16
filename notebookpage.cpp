@@ -175,8 +175,10 @@ NotebookPage::setPreviewRect(QPoint mousePos)
 {
     for (DropRegion region : m_dropRegions) {
         if (region.rect.contains(mousePos)) {
-            m_preview.move(region.rect.x(), region.rect.y());
-            m_preview.resize(region.rect.width(), region.rect.height());
+            m_preview.setBounds(region.rect);
+            //            m_preview.move(region.rect.x(), region.rect.y());
+            //            m_preview.resize(region.rect.width(),
+            //            region.rect.height());
             m_preview.show();
             m_preview.raise();
 
