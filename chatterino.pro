@@ -8,8 +8,12 @@ QT       += core gui network
 CONFIG += communi
 COMMUNI += core model util
 
-win32:LIBS += -LC:/OpenSSL-Win32/lib/openssl.lib
-INCLUDEPATH += C:/OpenSSL-Win32/include
+#win32 {
+#    LIBS += -L"C:/OpenSSL-Win32/lib" -llibssl.lib
+#    INCLUDEPATH += C:/OpenSSL-Win32/include
+#} else {
+#    LIBS += -lcrypto -lssl
+#}
 
 CONFIG += c++11
 

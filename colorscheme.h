@@ -64,12 +64,20 @@ public:
         return instance;
     }
 
+    void normalizeColor(QColor &color);
+
     void setColors(float hue, float multiplyer);
 
 private:
     ColorScheme()
     {
     }
+
+    qreal m_middleLookupTable[360] = {};
+    qreal m_minLookupTable[360] = {};
+
+    void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to,
+                               qreal fromValue, qreal toValue);
 };
 
 #endif  // COLORSCHEME_H

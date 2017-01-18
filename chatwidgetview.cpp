@@ -1,12 +1,14 @@
 #include "chatwidgetview.h"
 #include "channels.h"
 #include "chatwidget.h"
+#include "colorscheme.h"
 #include "message.h"
 #include "word.h"
 #include "wordpart.h"
 
 #include <QPainter>
 #include <QScroller>
+#include <functional>
 
 ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
@@ -55,12 +57,48 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto c = m_chatWidget->channel();
 
+    QColor color;
+
+    ColorScheme &scheme = ColorScheme::instance();
+
+    // code for tesing colors
+    /*
+    static ConcurrentMap<qreal, QImage *> imgCache;
+
+    std::function<QImage *(qreal)> getImg = [&scheme](qreal light) {
+        return imgCache.getOrAdd(light, [&scheme, &light] {
+            QImage *img = new QImage(150, 50, QImage::Format_RGB32);
+
+            QColor color;
+
+            for (int j = 0; j < 50; j++) {
+                for (qreal i = 0; i < 150; i++) {
+                    color = QColor::fromHslF(i / 150.0, light, j / 50.0);
+
+                    scheme.normalizeColor(color);
+
+                    img->setPixelColor(i, j, color);
+                }
+            }
+
+            return img;
+        });
+    };
+
+    for (qreal k = 0; k < 4.8; k++) {
+        auto img = getImg(k / 5);
+
+        painter.drawImage(QRect(k * 150, 0, 150, 150), *img);
+    }
+
+    painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
+
     if (c == NULL)
         return;
 
     auto messages = c->getMessagesClone();
 
-    int y = 0;
+    int y = m_scrollbar.star;
 
     for (std::shared_ptr<Message> const &message : messages) {
         for (WordPart const &wordPart : message.get()->wordParts()) {
@@ -83,7 +121,9 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             }
             // text
             else {
-                painter.setPen(wordPart.word().color());
+                QColor color = wordPart.word().color();
+
+                painter.setPen(color);
                 painter.setFont(wordPart.word().getFont());
 
                 painter.drawText(

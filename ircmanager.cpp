@@ -176,9 +176,17 @@ IrcManager::partChannel(const QString &channel)
 void
 IrcManager::messageReceived(IrcMessage *message)
 {
-//    qInfo(message->command().toStdString().c_str());
+    //    qInfo(message->command().toStdString().c_str());
 
-    //    if (message->command() == "")
+    const QString &command = message->command();
+
+    //    if (command == "CLEARCHAT") {
+    //        message->
+    //    } else if (command == "ROOMSTATE") {
+    //    } else if (command == "USERSTATE") {
+    //    } else if (command == "WHISPER") {
+    //    } else if (command == "USERNOTICE") {
+    //    }
 }
 
 void
