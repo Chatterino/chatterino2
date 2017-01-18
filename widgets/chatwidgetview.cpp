@@ -36,7 +36,7 @@ ChatWidgetView::layoutMessages()
 
     bool redraw = false;
 
-    for (std::shared_ptr<Message> &message : messages) {
+    for (std::shared_ptr<messages::Message> &message : messages) {
         redraw |= message.get()->layout(this->width(), true);
     }
 
@@ -112,16 +112,16 @@ ChatWidgetView::paintEvent(QPaintEvent *)
               (fmod(this->scrollbar.getValue(), 1)));
 
     for (int i = start; i < messages.size(); ++i) {
-        Message *message = messages[i].get();
+        messages::Message *message = messages[i].get();
 
-        for (WordPart const &wordPart : message->getWordParts()) {
+        for (messages::WordPart const &wordPart : message->getWordParts()) {
             painter.setPen(QColor(255, 0, 0));
             painter.drawRect(wordPart.getX(), wordPart.getY() + y,
                              wordPart.getWidth(), wordPart.getHeight());
 
             // image
             if (wordPart.getWord().isImage()) {
-                LazyLoadedImage &lli = wordPart.getWord().getImage();
+                messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
 
                 const QPixmap *image = lli.getPixmap();
 

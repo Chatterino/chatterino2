@@ -4,7 +4,7 @@ namespace chatterino {
 
 QMutex Windows::windowMutex;
 
-MainWindow *Windows::mainWindow(NULL);
+widgets::MainWindow *Windows::mainWindow(NULL);
 
 void
 Windows::layoutVisibleChatWidgets(Channel *channel)

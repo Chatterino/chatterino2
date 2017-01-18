@@ -199,7 +199,8 @@ IrcManager::privateMessageReceived(IrcPrivateMessage *message)
     auto c = Channels::getChannel(message->target().mid(1));
 
     if (c != NULL) {
-        c->addMessage(std::shared_ptr<Message>(new Message(*message, *c)));
+        c->addMessage(std::shared_ptr<messages::Message>(
+            new messages::Message(*message, *c)));
     }
 }
 

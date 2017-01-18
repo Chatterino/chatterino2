@@ -5,8 +5,6 @@
 
 #include <QMutex>
 
-using namespace chatterino::widgets;
-
 namespace chatterino {
 
 class Windows
@@ -15,12 +13,12 @@ public:
     static void layoutVisibleChatWidgets(Channel *channel = NULL);
     static void repaintVisibleChatWidgets(Channel *channel = NULL);
 
-    static MainWindow &
+    static widgets::MainWindow &
     getMainWindow()
     {
         windowMutex.lock();
         if (mainWindow == NULL) {
-            mainWindow = new MainWindow();
+            mainWindow = new widgets::MainWindow();
         }
         windowMutex.unlock();
 
@@ -34,7 +32,7 @@ private:
 
     static QMutex windowMutex;
 
-    static MainWindow *mainWindow;
+    static widgets::MainWindow *mainWindow;
 };
 }
 

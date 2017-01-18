@@ -10,10 +10,7 @@
 #include <QVector>
 #include <memory>
 
-using namespace chatterino::messages;
-
 namespace chatterino {
-
 namespace messages {
 class Message;
 }
@@ -24,13 +21,13 @@ public:
     Channel(const QString &channel);
 
     // properties
-    const ConcurrentMap<QString, LazyLoadedImage *> &
+    const ConcurrentMap<QString, messages::LazyLoadedImage *> &
     getBttvChannelEmotes() const
     {
         return bttvChannelEmotes;
     }
 
-    const ConcurrentMap<QString, LazyLoadedImage *> &
+    const ConcurrentMap<QString, messages::LazyLoadedImage *> &
     getFfzChannelEmotes() const
     {
         return ffzChannelEmotes;
@@ -92,18 +89,18 @@ public:
     }
 
     // methods
-    void addMessage(std::shared_ptr<Message> message);
+    void addMessage(std::shared_ptr<messages::Message> message);
 
-    QVector<std::shared_ptr<Message>> getMessagesClone();
+    QVector<std::shared_ptr<messages::Message>> getMessagesClone();
 
 private:
-    QVector<std::shared_ptr<Message>> messages;
+    QVector<std::shared_ptr<messages::Message>> messages;
 
     QString name;
     int roomID;
 
-    ConcurrentMap<QString, LazyLoadedImage *> bttvChannelEmotes;
-    ConcurrentMap<QString, LazyLoadedImage *> ffzChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
     QMutex messageMutex;
 
     QString subLink;

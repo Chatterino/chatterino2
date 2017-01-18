@@ -20,18 +20,18 @@ Channel::Channel(const QString &channel)
 {
 }
 
-QVector<std::shared_ptr<Message>>
+QVector<std::shared_ptr<messages::Message>>
 Channel::getMessagesClone()
 {
     this->messageMutex.lock();
-    QVector<std::shared_ptr<Message>> M(this->messages);
+    QVector<std::shared_ptr<messages::Message>> M(this->messages);
     M.detach();
     this->messageMutex.unlock();
     return M;
 }
 
 void
-Channel::addMessage(std::shared_ptr<Message> message)
+Channel::addMessage(std::shared_ptr<messages::Message> message)
 {
     this->messageMutex.lock();
     this->messages.append(message);
