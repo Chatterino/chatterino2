@@ -10,116 +10,116 @@ public:
 
     // badges
     static LazyLoadedImage *
-    badgeStaff()
+    getBadgeStaff()
     {
-        return m_badgeStaff;
+        return badgeStaff;
     }
 
     static LazyLoadedImage *
-    badgeAdmin()
+    getBadgeAdmin()
     {
-        return m_badgeAdmin;
+        return badgeAdmin;
     }
 
     static LazyLoadedImage *
-    badgeGlobalmod()
+    getBadgeGlobalmod()
     {
-        return m_badgeGlobalmod;
+        return badgeGlobalmod;
     }
 
     static LazyLoadedImage *
-    badgeModerator()
+    getBadgeModerator()
     {
-        return m_badgeModerator;
+        return badgeModerator;
     }
 
     static LazyLoadedImage *
-    badgeTurbo()
+    getBadgeTurbo()
     {
-        return m_badgeTurbo;
+        return badgeTurbo;
     }
 
     static LazyLoadedImage *
-    badgeBroadcaster()
+    getBadgeBroadcaster()
     {
-        return m_badgeBroadcaster;
+        return badgeBroadcaster;
     }
 
     static LazyLoadedImage *
-    badgePremium()
+    getBadgePremium()
     {
-        return m_badgePremium;
+        return badgePremium;
     }
 
     // cheer badges
     static LazyLoadedImage *
-    cheerBadge100000()
+    getCheerBadge100000()
     {
-        return m_cheerBadge100000;
+        return cheerBadge100000;
     }
 
     static LazyLoadedImage *
-    cheerBadge10000()
+    getCheerBadge10000()
     {
-        return m_cheerBadge10000;
+        return cheerBadge10000;
     }
 
     static LazyLoadedImage *
-    cheerBadge5000()
+    getCheerBadge5000()
     {
-        return m_cheerBadge5000;
+        return cheerBadge5000;
     }
 
     static LazyLoadedImage *
-    cheerBadge1000()
+    getCheerBadge1000()
     {
-        return m_cheerBadge1000;
+        return cheerBadge1000;
     }
 
     static LazyLoadedImage *
-    cheerBadge100()
+    getCheerBadge100()
     {
-        return m_cheerBadge100;
+        return cheerBadge100;
     }
 
     static LazyLoadedImage *
-    cheerBadge1()
+    getCheerBadge1()
     {
-        return m_cheerBadge1;
+        return cheerBadge1;
     }
 
     static LazyLoadedImage *
-    buttonBan()
+    getButtonBan()
     {
-        return m_buttonBan;
+        return buttonBan;
     }
 
     static LazyLoadedImage *
-    buttonTimeout()
+    getButtonTimeout()
     {
-        return m_buttonTimeout;
+        return buttonTimeout;
     }
 
 private:
     Resources();
 
-    static LazyLoadedImage *m_badgeStaff;
-    static LazyLoadedImage *m_badgeAdmin;
-    static LazyLoadedImage *m_badgeGlobalmod;
-    static LazyLoadedImage *m_badgeModerator;
-    static LazyLoadedImage *m_badgeTurbo;
-    static LazyLoadedImage *m_badgeBroadcaster;
-    static LazyLoadedImage *m_badgePremium;
+    static LazyLoadedImage *badgeStaff;
+    static LazyLoadedImage *badgeAdmin;
+    static LazyLoadedImage *badgeGlobalmod;
+    static LazyLoadedImage *badgeModerator;
+    static LazyLoadedImage *badgeTurbo;
+    static LazyLoadedImage *badgeBroadcaster;
+    static LazyLoadedImage *badgePremium;
 
-    static LazyLoadedImage *m_cheerBadge100000;
-    static LazyLoadedImage *m_cheerBadge10000;
-    static LazyLoadedImage *m_cheerBadge5000;
-    static LazyLoadedImage *m_cheerBadge1000;
-    static LazyLoadedImage *m_cheerBadge100;
-    static LazyLoadedImage *m_cheerBadge1;
+    static LazyLoadedImage *cheerBadge100000;
+    static LazyLoadedImage *cheerBadge10000;
+    static LazyLoadedImage *cheerBadge5000;
+    static LazyLoadedImage *cheerBadge1000;
+    static LazyLoadedImage *cheerBadge100;
+    static LazyLoadedImage *cheerBadge1;
 
-    static LazyLoadedImage *m_buttonBan;
-    static LazyLoadedImage *m_buttonTimeout;
+    static LazyLoadedImage *buttonBan;
+    static LazyLoadedImage *buttonTimeout;
 };
 
 #endif  // RESOURCES_H

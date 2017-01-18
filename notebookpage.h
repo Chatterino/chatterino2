@@ -24,9 +24,9 @@ public:
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);
 
     const std::vector<ChatWidget *> &
-    chatWidgets() const
+    getChatWidgets() const
     {
-        return m_chatWidgets;
+        return chatWidgets;
     }
 
     static bool isDraggingSplit;
@@ -56,13 +56,13 @@ protected:
         }
     };
 
-    QVBoxLayout m_parentbox;
-    QHBoxLayout m_hbox;
+    QVBoxLayout parentbox;
+    QHBoxLayout hbox;
 
-    std::vector<ChatWidget *> m_chatWidgets;
-    std::vector<DropRegion> m_dropRegions;
+    std::vector<ChatWidget *> chatWidgets;
+    std::vector<DropRegion> dropRegions;
 
-    NotebookPageDropPreview m_preview;
+    NotebookPageDropPreview preview;
 
 private:
     void setPreviewRect(QPoint mousePos);

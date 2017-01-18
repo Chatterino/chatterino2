@@ -1,17 +1,17 @@
 #include "windows.h"
 
-QMutex Windows::m_windowMutex;
+QMutex Windows::windowMutex;
 
-MainWindow *Windows::m_mainWindow(NULL);
+MainWindow *Windows::mainWindow(NULL);
 
 void
 Windows::layoutVisibleChatWidgets(Channel *channel)
 {
-    m_mainWindow->layoutVisibleChatWidgets(channel);
+    Windows::mainWindow->layoutVisibleChatWidgets(channel);
 }
 
 void
 Windows::repaintVisibleChatWidgets(Channel *channel)
 {
-    m_mainWindow->repaintVisibleChatWidgets(channel);
+    Windows::mainWindow->repaintVisibleChatWidgets(channel);
 }

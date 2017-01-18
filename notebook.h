@@ -21,9 +21,9 @@ public:
     void select(NotebookPage *page);
 
     NotebookPage *
-    selected()
+    getSelectedPage()
     {
-        return m_selected;
+        return selectedPage;
     }
 
     void performLayout();
@@ -37,13 +37,13 @@ public slots:
     void settingsButtonClicked();
 
 private:
-    QList<NotebookPage *> m_pages;
+    QList<NotebookPage *> pages;
 
-    NotebookButton m_addButton;
-    NotebookButton m_settingsButton;
-    NotebookButton m_userButton;
+    NotebookButton addButton;
+    NotebookButton settingsButton;
+    NotebookButton userButton;
 
-    NotebookPage *m_selected = nullptr;
+    NotebookPage *selectedPage = nullptr;
 };
 
 #endif  // NOTEBOOK_H

@@ -19,68 +19,69 @@ public:
 
     // properties
     const ConcurrentMap<QString, LazyLoadedImage *> &
-    bttvChannelEmotes() const
+    getBttvChannelEmotes() const
     {
-        return m_bttvChannelEmotes;
+        return bttvChannelEmotes;
     }
     const ConcurrentMap<QString, LazyLoadedImage *> &
-    ffzChannelEmotes() const
+    getFfzChannelEmotes() const
     {
-        return m_ffzChannelEmotes;
+        return ffzChannelEmotes;
     }
 
     const QMutex &
-    messageMutex() const
+    getMessageMutex() const
     {
-        return m_messageMutex;
+        return messageMutex;
     }
 
     const QString &
-    name() const
+    getName() const
     {
-        return m_name;
+        return name;
     }
+
     int
-    roomID() const
+    getRoomID() const
     {
-        return m_roomID;
+        return roomID;
     }
 
     const QString &
-    subLink() const
+    getSubLink() const
     {
-        return m_subLink;
+        return subLink;
     }
     const QString &
-    channelLink() const
+    getChannelLink() const
     {
-        return m_channelLink;
+        return channelLink;
     }
     const QString &
-    popoutPlayerLink() const
+    getPopoutPlayerLink() const
     {
-        return m_popoutPlayerLink;
+        return popoutPlayerLink;
     }
 
     bool
-    isLive() const
+    getIsLive() const
     {
-        return m_isLive;
+        return isLive;
     }
     int
-    streamViewerCount() const
+    getStreamViewerCount() const
     {
-        return m_streamViewerCount;
+        return streamViewerCount;
     }
     const QString &
-    streamStatus() const
+    getStreamStatus() const
     {
-        return m_streamStatus;
+        return streamStatus;
     }
     const QString &
-    streamGame() const
+    getStreamGame() const
     {
-        return m_streamGame;
+        return streamGame;
     }
 
     // methods
@@ -89,23 +90,23 @@ public:
     QVector<std::shared_ptr<Message>> getMessagesClone();
 
 private:
-    QVector<std::shared_ptr<Message>> m_messages;
+    QVector<std::shared_ptr<Message>> messages;
 
-    QString m_name;
-    int m_roomID;
+    QString name;
+    int roomID;
 
-    ConcurrentMap<QString, LazyLoadedImage *> m_bttvChannelEmotes;
-    ConcurrentMap<QString, LazyLoadedImage *> m_ffzChannelEmotes;
-    QMutex m_messageMutex;
+    ConcurrentMap<QString, LazyLoadedImage *> bttvChannelEmotes;
+    ConcurrentMap<QString, LazyLoadedImage *> ffzChannelEmotes;
+    QMutex messageMutex;
 
-    QString m_subLink;
-    QString m_channelLink;
-    QString m_popoutPlayerLink;
+    QString subLink;
+    QString channelLink;
+    QString popoutPlayerLink;
 
-    bool m_isLive;
-    int m_streamViewerCount;
-    QString m_streamStatus;
-    QString m_streamGame;
+    bool isLive;
+    int streamViewerCount;
+    QString streamStatus;
+    QString streamGame;
 };
 
 #endif  // CHANNEL_H

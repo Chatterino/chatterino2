@@ -7,21 +7,21 @@
 ChatWidgetHeaderButton::ChatWidgetHeaderButton()
     : QWidget()
     , hbox()
-    , m_label()
-    , m_mouseOver(false)
-    , m_mouseDown(false)
+    , label()
+    , mouseOver(false)
+    , mouseDown(false)
 {
     setLayout(&hbox);
 
     hbox.setMargin(0);
     hbox.addSpacing(6);
-    hbox.addWidget(&m_label);
+    hbox.addWidget(&this->label);
     hbox.addSpacing(6);
 
-    QObject::connect(&m_label, &ChatWidgetHeaderButtonLabel::mouseUp, this,
+    QObject::connect(&this->label, &ChatWidgetHeaderButtonLabel::mouseUp, this,
                      &ChatWidgetHeaderButton::labelMouseUp);
-    QObject::connect(&m_label, &ChatWidgetHeaderButtonLabel::mouseDown, this,
-                     &ChatWidgetHeaderButton::labelMouseDown);
+    QObject::connect(&this->label, &ChatWidgetHeaderButtonLabel::mouseDown,
+                     this, &ChatWidgetHeaderButton::labelMouseDown);
 }
 
 void
@@ -33,11 +33,11 @@ ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
                      ? QColor(0, 0, 0, 32)
                      : QColor(255, 255, 255, 32));
 
-    if (m_mouseDown) {
+    if (this->mouseDown) {
         painter.fillRect(rect(), brush);
     }
 
-    if (m_mouseOver) {
+    if (this->mouseOver) {
         painter.fillRect(rect(), brush);
     }
 }
@@ -46,7 +46,7 @@ void
 ChatWidgetHeaderButton::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        m_mouseDown = true;
+        this->mouseDown = true;
 
         repaint();
     }
@@ -56,7 +56,7 @@ void
 ChatWidgetHeaderButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        m_mouseDown = false;
+        this->mouseDown = false;
 
         repaint();
 
@@ -67,7 +67,7 @@ ChatWidgetHeaderButton::mouseReleaseEvent(QMouseEvent *event)
 void
 ChatWidgetHeaderButton::enterEvent(QEvent *)
 {
-    m_mouseOver = true;
+    this->mouseOver = true;
 
     repaint();
 }
@@ -75,7 +75,7 @@ ChatWidgetHeaderButton::enterEvent(QEvent *)
 void
 ChatWidgetHeaderButton::leaveEvent(QEvent *)
 {
-    m_mouseOver = false;
+    this->mouseOver = false;
 
     repaint();
 }
@@ -83,7 +83,7 @@ ChatWidgetHeaderButton::leaveEvent(QEvent *)
 void
 ChatWidgetHeaderButton::labelMouseUp()
 {
-    m_mouseDown = false;
+    this->mouseDown = false;
 
     repaint();
 
@@ -93,7 +93,7 @@ ChatWidgetHeaderButton::labelMouseUp()
 void
 ChatWidgetHeaderButton::labelMouseDown()
 {
-    m_mouseDown = true;
+    this->mouseDown = true;
 
     repaint();
 }

@@ -3,21 +3,22 @@
 
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)
-    , m_vbox(this)
-    , m_lineEdit()
-    , m_buttonBox()
-    , m_okButton("OK")
-    , m_cancelButton("Cancel")
+    , vbox(this)
+    , lineEdit()
+    , buttonBox()
+    , okButton("OK")
+    , cancelButton("Cancel")
 {
-    m_vbox.addWidget(&m_lineEdit);
-    m_vbox.addLayout(&m_buttonBox);
-    m_buttonBox.addStretch(1);
-    m_buttonBox.addWidget(&m_okButton);
-    m_buttonBox.addWidget(&m_cancelButton);
+    this->vbox.addWidget(&this->lineEdit);
+    this->vbox.addLayout(&this->buttonBox);
+    this->buttonBox.addStretch(1);
+    this->buttonBox.addWidget(&this->okButton);
+    this->buttonBox.addWidget(&this->cancelButton);
 
-    QObject::connect(&m_okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-    QObject::connect(&m_cancelButton, SIGNAL(clicked()), this,
-                      SLOT(cancelButtonClicked()));
+    QObject::connect(&this->okButton, SIGNAL(clicked()), this,
+                     SLOT(okButtonClicked()));
+    QObject::connect(&this->cancelButton, SIGNAL(clicked()), this,
+                     SLOT(cancelButtonClicked()));
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 

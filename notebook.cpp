@@ -12,19 +12,19 @@
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent)
-    , m_addButton(this)
-    , m_settingsButton(this)
-    , m_userButton(this)
+    , addButton(this)
+    , settingsButton(this)
+    , userButton(this)
 {
-    connect(&m_settingsButton, SIGNAL(clicked()), this,
+    connect(&this->settingsButton, SIGNAL(clicked()), this,
             SLOT(settingsButtonClicked()));
 
-    m_settingsButton.resize(24, 24);
-    m_settingsButton.icon = NotebookButton::IconSettings;
-    m_userButton.resize(24, 24);
-    m_userButton.move(24, 0);
-    m_userButton.icon = NotebookButton::IconUser;
-    m_addButton.resize(24, 24);
+    this->settingsButton.resize(24, 24);
+    this->settingsButton.icon = NotebookButton::IconSettings;
+    this->userButton.resize(24, 24);
+    this->userButton.move(24, 0);
+    this->userButton.icon = NotebookButton::IconUser;
+    this->addButton.resize(24, 24);
 }
 
 void
@@ -41,11 +41,11 @@ Notebook::addPage()
     auto tab = new NotebookTab(this);
     auto page = new NotebookPage(this, tab);
 
-    if (m_pages.count() == 0) {
+    if (this->pages.count() == 0) {
         select(page);
     }
 
-    this->m_pages.append(page);
+    this->pages.append(page);
 
     return page;
 }
@@ -53,7 +53,7 @@ Notebook::addPage()
 void
 Notebook::select(NotebookPage *page)
 {
-    if (page == m_selected)
+    if (page == this->selectedPage)
         return;
 
     if (page != nullptr) {
@@ -61,12 +61,12 @@ Notebook::select(NotebookPage *page)
         page->tab->setSelected(true);
     }
 
-    if (m_selected != nullptr) {
-        m_selected->setHidden(true);
-        m_selected->tab->setSelected(false);
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->setHidden(true);
+        this->selectedPage->tab->setSelected(false);
     }
 
-    m_selected = page;
+    this->selectedPage = page;
 
     performLayout();
 }
@@ -78,11 +78,11 @@ Notebook::performLayout()
     int tabHeight = 16;
     bool first = true;
 
-    for (auto &i : m_pages) {
+    for (auto &i : this->pages) {
         tabHeight = i->tab->height();
 
         if (!first &&
-            (i == m_pages.last() ? tabHeight : 0) + x + i->tab->width() >
+            (i == this->pages.last() ? tabHeight : 0) + x + i->tab->width() >
                 width()) {
             y += i->tab->height();
             i->tab->move(0, y);
@@ -95,11 +95,11 @@ Notebook::performLayout()
         first = false;
     }
 
-    this->m_addButton.move(x, y);
+    this->addButton.move(x, y);
 
-    if (m_selected != nullptr) {
-        m_selected->move(0, y + tabHeight);
-        m_selected->resize(width(), height() - y - tabHeight);
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->move(0, y + tabHeight);
+        this->selectedPage->resize(width(), height() - y - tabHeight);
     }
 }
 

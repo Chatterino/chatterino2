@@ -4,8 +4,8 @@
 
 NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     : QWidget(parent)
-    , m_positionAnimation(this, "geometry")
-    , m_desiredGeometry()
+    , positionAnimation(this, "geometry")
+    , desiredGeometry()
 {
     setHidden(true);
 }
@@ -22,15 +22,15 @@ NotebookPageDropPreview::paintEvent(QPaintEvent *)
 void
 NotebookPageDropPreview::setBounds(const QRect &rect)
 {
-    if (rect == m_desiredGeometry) {
+    if (rect == this->desiredGeometry) {
         return;
     }
 
-    m_positionAnimation.stop();
-    m_positionAnimation.setDuration(50);
-    m_positionAnimation.setStartValue(geometry());
-    m_positionAnimation.setEndValue(rect);
-    m_positionAnimation.start();
+    this->positionAnimation.stop();
+    this->positionAnimation.setDuration(50);
+    this->positionAnimation.setStartValue(geometry());
+    this->positionAnimation.setEndValue(rect);
+    this->positionAnimation.start();
 
-    m_desiredGeometry = rect;
+    this->desiredGeometry = rect;
 }

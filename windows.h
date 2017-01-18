@@ -12,15 +12,15 @@ public:
     static void repaintVisibleChatWidgets(Channel *channel = NULL);
 
     static MainWindow &
-    mainWindow()
+    getMainWindow()
     {
-        m_windowMutex.lock();
-        if (m_mainWindow == NULL) {
-            m_mainWindow = new MainWindow();
+        windowMutex.lock();
+        if (mainWindow == NULL) {
+            mainWindow = new MainWindow();
         }
-        m_windowMutex.unlock();
+        windowMutex.unlock();
 
-        return *m_mainWindow;
+        return *mainWindow;
     }
 
 private:
@@ -28,9 +28,9 @@ private:
     {
     }
 
-    static QMutex m_windowMutex;
+    static QMutex windowMutex;
 
-    static MainWindow *m_mainWindow;
+    static MainWindow *mainWindow;
 };
 
 #endif  // WINDOWS_H

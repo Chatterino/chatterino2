@@ -23,16 +23,16 @@ QRegularExpression *Message::cheerRegex =
     new QRegularExpression("cheer[1-9][0-9]*");
 
 Message::Message(const QString &text)
-    : m_wordParts(new std::vector<WordPart>())
+    : wordParts(new std::vector<WordPart>())
 {
 }
 
 Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
-    : m_wordParts(new std::vector<WordPart>())
+    : wordParts(new std::vector<WordPart>())
 {
-    m_parseTime = std::chrono::system_clock::now();
+    this->parseTime = std::chrono::system_clock::now();
 
     auto words = std::vector<Word>();
 
@@ -41,7 +41,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     auto iterator = tags.find("id");
 
     if (iterator != tags.end()) {
-        m_id = iterator.value().toString();
+        this->id = iterator.value().toString();
     }
 
     // timestamps
@@ -74,10 +74,10 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     static QString buttonBanTooltip("Ban user");
     static QString buttonTimeoutTooltip("Timeout user");
 
-    words.push_back(Word(Resources::buttonBan(), Word::ButtonBan, QString(),
+    words.push_back(Word(Resources::getButtonBan(), Word::ButtonBan, QString(),
                          buttonBanTooltip,
                          Link(Link::UserBan, ircMessage.account())));
-    words.push_back(Word(Resources::buttonTimeout(), Word::ButtonTimeout,
+    words.push_back(Word(Resources::getButtonTimeout(), Word::ButtonTimeout,
                          QString(), buttonTimeoutTooltip,
                          Link(Link::UserTimeout, ircMessage.account())));
 
@@ -95,29 +95,32 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                     Emotes::getCheerBadge(cheer), Word::BadgeCheer, QString(),
                     QString("Twitch Cheer" + QString::number(cheer))));
             } else if (badge == "staff/1") {
-                words.push_back(Word(Resources::badgeStaff(), Word::BadgeStaff,
-                                     QString(), QString("Twitch Staff")));
+                words.push_back(Word(Resources::getBadgeStaff(),
+                                     Word::BadgeStaff, QString(),
+                                     QString("Twitch Staff")));
             } else if (badge == "admin/1") {
-                words.push_back(Word(Resources::badgeAdmin(), Word::BadgeAdmin,
-                                     QString(), QString("Twitch Admin")));
+                words.push_back(Word(Resources::getBadgeAdmin(),
+                                     Word::BadgeAdmin, QString(),
+                                     QString("Twitch Admin")));
             } else if (badge == "global_mod/1") {
-                words.push_back(Word(Resources::badgeGlobalmod(),
+                words.push_back(Word(Resources::getBadgeGlobalmod(),
                                      Word::BadgeGlobalMod, QString(),
                                      QString("Global Moderator")));
             } else if (badge == "moderator/1") {
                 // TODO: implement this xD
                 words.push_back(Word(
-                    Resources::badgeTurbo(), Word::BadgeModerator, QString(),
+                    Resources::getBadgeTurbo(), Word::BadgeModerator, QString(),
                     QString("Channel Moderator")));  // custom badge
             } else if (badge == "turbo/1") {
-                words.push_back(Word(Resources::badgeStaff(), Word::BadgeTurbo,
-                                     QString(), QString("Turbo Subscriber")));
+                words.push_back(Word(Resources::getBadgeStaff(),
+                                     Word::BadgeTurbo, QString(),
+                                     QString("Turbo Subscriber")));
             } else if (badge == "broadcaster/1") {
-                words.push_back(Word(Resources::badgeBroadcaster(),
+                words.push_back(Word(Resources::getBadgeBroadcaster(),
                                      Word::BadgeBroadcaster, QString(),
                                      QString("Channel Broadcaster")));
             } else if (badge == "premium/1") {
-                words.push_back(Word(Resources::badgePremium(),
+                words.push_back(Word(Resources::getBadgePremium(),
                                      Word::BadgePremium, QString(),
                                      QString("Twitch Prime")));
             }
@@ -134,21 +137,21 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 
     // channel name
     if (includeChannel) {
-        QString channelName("#" + channel.name());
-        words.push_back(Word(channelName, Word::Misc,
-                             ColorScheme::instance().SystemMessageColor,
-                             QString(channelName), QString(),
-                             Link(Link::Url, channel.name() + "\n" + m_id)));
+        QString channelName("#" + channel.getName());
+        words.push_back(Word(
+            channelName, Word::Misc, ColorScheme::instance().SystemMessageColor,
+            QString(channelName), QString(),
+            Link(Link::Url, channel.getName() + "\n" + this->id)));
     }
 
     // username
-    m_userName = ircMessage.account();
+    this->userName = ircMessage.account();
 
-    if (m_userName.isEmpty()) {
+    if (this->userName.isEmpty()) {
         auto iterator = tags.find("login");
 
         if (iterator != tags.end()) {
-            m_userName = iterator.value().toString();
+            this->userName = iterator.value().toString();
         }
     }
 
@@ -168,11 +171,11 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
         (hasLocalizedName ? (" (" + ircMessage.account() + ")") : QString());
 
     if (isSentWhisper) {
-        userDisplayString = IrcManager::account->username() + " -> ";
+        userDisplayString = IrcManager::account->getUsername() + " -> ";
     }
 
     if (isReceivedWhisper) {
-        userDisplayString += " -> " + IrcManager::account->username();
+        userDisplayString += " -> " + IrcManager::account->getUsername();
     }
 
     if (!ircMessage.isAction()) {
@@ -182,8 +185,8 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     words.push_back(Word(userDisplayString, Word::Username, usernameColor,
                          userDisplayString, QString()));
 
-// highlights
-                // TODO: implement this xD
+    // highlights
+    // TODO: implement this xD
 
     // bits
     QString bits = "";
@@ -254,13 +257,13 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
             currentTwitchEmote->first == i) {
             words.push_back(Word(currentTwitchEmote->second,
                                  Word::TwitchEmoteImage,
-                                 currentTwitchEmote->second->name(),
-                                 currentTwitchEmote->second->name() +
+                                 currentTwitchEmote->second->getName(),
+                                 currentTwitchEmote->second->getName() +
                                      QString("\nTwitch Emote")));
-            words.push_back(Word(currentTwitchEmote->second->name(),
+            words.push_back(Word(currentTwitchEmote->second->getName(),
                                  Word::TwitchEmoteText, textColor,
-                                 currentTwitchEmote->second->name(),
-                                 currentTwitchEmote->second->name() +
+                                 currentTwitchEmote->second->getName(),
+                                 currentTwitchEmote->second->getName() +
                                      QString("\nTwitch Emote")));
 
             i += split.length() + 1;
@@ -313,12 +316,12 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                         color + "/1");
 
                     LazyLoadedImage *imageAnimated =
-                        Emotes::miscImageFromCache().getOrAdd(
+                        Emotes::getMiscImageFromCache().getOrAdd(
                             bitsLinkAnimated, [&bitsLinkAnimated] {
                                 return new LazyLoadedImage(bitsLinkAnimated);
                             });
                     LazyLoadedImage *image =
-                        Emotes::miscImageFromCache().getOrAdd(
+                        Emotes::getMiscImageFromCache().getOrAdd(
                             bitsLink, [&bitsLink] {
                                 return new LazyLoadedImage(bitsLink);
                             });
@@ -354,15 +357,15 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                 LazyLoadedImage *bttvEmote;
 
                 // TODO: Implement this (ignored emotes)
-                if (Emotes::bttvEmotes().tryGet(string, bttvEmote) ||
-                    channel.bttvChannelEmotes().tryGet(string, bttvEmote) ||
-                    Emotes::ffzEmotes().tryGet(string, bttvEmote) ||
-                    channel.ffzChannelEmotes().tryGet(string, bttvEmote) ||
-                    Emotes::chatterinoEmotes().tryGet(string, bttvEmote)) {
+                if (Emotes::getBttvEmotes().tryGet(string, bttvEmote) ||
+                    channel.getBttvChannelEmotes().tryGet(string, bttvEmote) ||
+                    Emotes::getFfzEmotes().tryGet(string, bttvEmote) ||
+                    channel.getFfzChannelEmotes().tryGet(string, bttvEmote) ||
+                    Emotes::getChatterinoEmotes().tryGet(string, bttvEmote)) {
                     words.push_back(Word(bttvEmote, Word::BttvEmoteImage,
-                                         bttvEmote->name(),
-                                         bttvEmote->tooltip(),
-                                         Link(Link::Url, bttvEmote->url())));
+                                         bttvEmote->getName(),
+                                         bttvEmote->getTooltip(),
+                                         Link(Link::Url, bttvEmote->getUrl())));
 
                     continue;
                 }
@@ -376,17 +379,17 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
             } else {  // is emoji
                 static QString emojiTooltip("Emoji");
 
-                words.push_back(
-                    Word(image, Word::EmojiImage, image->name(), emojiTooltip));
-                Word(image->name(), Word::EmojiText, textColor, image->name(),
-                     emojiTooltip);
+                words.push_back(Word(image, Word::EmojiImage, image->getName(),
+                                     emojiTooltip));
+                Word(image->getName(), Word::EmojiText, textColor,
+                     image->getName(), emojiTooltip);
             }
         }
 
         i += split.length() + 1;
     }
 
-    this->m_words = words;
+    this->words = words;
 
     // TODO: Implement this xD
     //    if (!isReceivedWhisper &&
@@ -404,34 +407,35 @@ Message::layout(int width, bool enableEmoteMargins)
     int mediumTextLineHeight = Fonts::getFontMetrics(Fonts::Medium).height();
     int spaceWidth = 4;
 
-    bool redraw = width != m_currentLayoutWidth || m_relayoutRequested;
+    bool redraw = width != this->currentLayoutWidth || this->relayoutRequested;
 
-    bool recalculateImages = m_emoteGeneration != Emotes::generation();
-    bool recalculateText = m_fontGeneration != Fonts::generation();
+    bool recalculateImages = this->emoteGeneration != Emotes::getGeneration();
+    bool recalculateText = this->fontGeneration != Fonts::getGeneration();
 
     if (recalculateImages || recalculateText) {
-        m_emoteGeneration = Emotes::generation();
-        m_fontGeneration = Fonts::generation();
+        this->emoteGeneration = Emotes::getGeneration();
+        this->fontGeneration = Fonts::getGeneration();
 
         redraw = true;
 
-        for (auto &word : m_words) {
+        for (auto &word : this->words) {
             if (word.isImage()) {
                 if (recalculateImages) {
                     auto &image = word.getImage();
 
-                    qreal w = image.width();
-                    qreal h = image.height();
+                    qreal w = image.getWidth();
+                    qreal h = image.getHeight();
 
-                    if (AppSettings::scaleEmotesByLineHeight()) {
-                        word.setSize(
-                            w * mediumTextLineHeight / h *
-                                AppSettings::emoteScale(),
-                            mediumTextLineHeight * AppSettings::emoteScale());
+                    if (AppSettings::getScaleEmotesByLineHeight()) {
+                        word.setSize(w * mediumTextLineHeight / h *
+                                         AppSettings::getEmoteScale(),
+                                     mediumTextLineHeight *
+                                         AppSettings::getEmoteScale());
                     } else {
                         word.setSize(
-                            w * image.scale() * AppSettings::emoteScale(),
-                            h * image.scale() * AppSettings::emoteScale());
+                            w * image.getScale() * AppSettings::getEmoteScale(),
+                            h * image.getScale() *
+                                AppSettings::getEmoteScale());
                     }
                 }
             } else {
@@ -463,32 +467,32 @@ Message::layout(int width, bool enableEmoteMargins)
         for (int i = lineStart; i < parts->size(); i++) {
             WordPart &wordPart2 = parts->at(i);
 
-            wordPart2.setY(wordPart2.y() + lineHeight);
+            wordPart2.setY(wordPart2.getY() + lineHeight);
         }
     };
 
-    int flags = AppSettings::wordTypeMask();
+    int flags = AppSettings::getWordTypeMask();
 
-    for (auto it = m_words.begin(); it != m_words.end(); ++it) {
+    for (auto it = this->words.begin(); it != this->words.end(); ++it) {
         Word &word = *it;
 
-        if ((word.type() & flags) == Word::None) {
+        if ((word.getType() & flags) == Word::None) {
             continue;
         }
 
         int xOffset = 0, yOffset = 0;
 
         if (enableEmoteMargins) {
-            if (word.isImage() && word.getImage().isHat()) {
-                xOffset = -word.width() + 2;
+            if (word.isImage() && word.getImage().getIsHat()) {
+                xOffset = -word.getWidth() + 2;
             } else {
-                xOffset = word.xOffset();
-                yOffset = word.yOffset();
+                xOffset = word.getXOffset();
+                yOffset = word.getYOffset();
             }
         }
 
         // word wrapping
-        if (word.isText() && word.width() + MARGIN_LEFT > right) {
+        if (word.isText() && word.getWidth() + MARGIN_LEFT > right) {
             alignParts();
 
             y += lineHeight;
@@ -500,7 +504,7 @@ Message::layout(int width, bool enableEmoteMargins)
 
             int width = 0;
 
-            std::vector<short> &charWidths = word.characterWidthCache();
+            std::vector<short> &charWidths = word.getCharacterWidthCache();
 
             if (charWidths.size() == 0) {
                 charWidths.reserve(text.length());
@@ -515,7 +519,7 @@ Message::layout(int width, bool enableEmoteMargins)
                     QString mid = text.mid(start, i - start - 1);
 
                     parts->push_back(WordPart(word, MARGIN_LEFT, y, width,
-                                              word.height(), mid, mid));
+                                              word.getHeight(), mid, mid));
 
                     y += metrics.height();
 
@@ -528,11 +532,11 @@ Message::layout(int width, bool enableEmoteMargins)
             QString mid(text.mid(start));
             width = metrics.width(mid);
 
-            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.height(),
-                                      width, word.height(), mid, mid));
+            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(),
+                                      width, word.getHeight(), mid, mid));
             x = width + MARGIN_LEFT + spaceWidth;
 
-            lineHeight = word.height();
+            lineHeight = word.getHeight();
 
             lineStart = parts->size() - 1;
 
@@ -540,14 +544,14 @@ Message::layout(int width, bool enableEmoteMargins)
         }
 
         // fits in the line
-        else if (first || x + word.width() + xOffset <= right) {
+        else if (first || x + word.getWidth() + xOffset <= right) {
             parts->push_back(
-                WordPart(word, x, y - word.height(), word.copyText()));
+                WordPart(word, x, y - word.getHeight(), word.getCopyText()));
 
-            x += word.width() + xOffset;
+            x += word.getWidth() + xOffset;
             x += spaceWidth;
 
-            lineHeight = std::max(word.height(), lineHeight);
+            lineHeight = std::max(word.getHeight(), lineHeight);
 
             first = false;
         }
@@ -558,25 +562,25 @@ Message::layout(int width, bool enableEmoteMargins)
 
             y += lineHeight;
 
-            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.height(),
-                                      word.copyText()));
+            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(),
+                                      word.getCopyText()));
 
             lineStart = parts->size() - 1;
 
-            lineHeight = word.height();
+            lineHeight = word.getHeight();
 
-            x = word.width() + MARGIN_LEFT;
+            x = word.getWidth() + MARGIN_LEFT;
             x += spaceWidth;
         }
     }
 
     alignParts();
 
-    auto tmp = m_wordParts;
-    m_wordParts = parts;
+    auto tmp = this->wordParts;
+    this->wordParts = parts;
     delete tmp;
 
-    m_height = y + lineHeight;
+    this->height = y + lineHeight;
 
     return true;
 }

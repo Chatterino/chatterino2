@@ -1,13 +1,13 @@
 #include "settingsdialog.h"
 #include "settingsdialogtab.h"
 
-#include "QComboBox"
-#include "QFile"
-#include "QFormLayout"
-#include "QGroupBox"
-#include "QLabel"
-#include "QPalette"
-#include "QResource"
+#include <QComboBox>
+#include <QFile>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPalette>
+#include <QResource>
 
 SettingsDialog::SettingsDialog()
 {
@@ -144,7 +144,7 @@ SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 
     auto tab = new SettingsDialogTab(this, title, imageRes);
 
-    tab->widget = widget;
+    tab->setWidget(widget);
 
     tabs.addWidget(tab, 0, Qt::AlignTop);
 
@@ -158,7 +158,7 @@ SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 void
 SettingsDialog::select(SettingsDialogTab *tab)
 {
-    pageStack.setCurrentWidget(tab->widget);
+    pageStack.setCurrentWidget(tab->getWidget());
 
     if (selectedTab != NULL) {
         selectedTab->setSelected(false);

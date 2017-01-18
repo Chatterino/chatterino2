@@ -1,13 +1,14 @@
 #ifndef CHATWIDGET_H
 #define CHATWIDGET_H
 
-#include <QWidget>
-#include "QFont"
-#include "QVBoxLayout"
 #include "channel.h"
 #include "chatwidgetheader.h"
 #include "chatwidgetinput.h"
 #include "chatwidgetview.h"
+
+#include <QFont>
+#include <QVBoxLayout>
+#include <QWidget>
 
 class ChatWidget : public QWidget
 {
@@ -18,21 +19,21 @@ public:
     ~ChatWidget();
 
     ChatWidgetView &
-    view()
+    getView()
     {
-        return m_view;
+        return view;
     }
 
     Channel *
-    channel() const
+    getChannel() const
     {
-        return m_channel;
+        return channel;
     }
 
     const QString &
-    channelName() const
+    getChannelName() const
     {
-        return m_channelName;
+        return channelName;
     }
 
     void setChannelName(const QString &name);
@@ -43,14 +44,14 @@ protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
 private:
-    Channel *m_channel;
-    QString m_channelName;
+    Channel *channel;
+    QString channelName;
 
-    QFont m_font;
-    QVBoxLayout m_vbox;
-    ChatWidgetHeader m_header;
-    ChatWidgetView m_view;
-    ChatWidgetInput m_input;
+    QFont font;
+    QVBoxLayout vbox;
+    ChatWidgetHeader header;
+    ChatWidgetView view;
+    ChatWidgetInput input;
 };
 
 #endif  // CHATWIDGET_H

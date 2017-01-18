@@ -1,6 +1,6 @@
 #include "appsettings.h"
 
-Word::Type AppSettings::m_wordTypeMask = Word::Default;
+Word::Type AppSettings::wordTypeMask = Word::Default;
 
 AppSettings::AppSettings()
 {

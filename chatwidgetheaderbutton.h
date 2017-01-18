@@ -16,9 +16,9 @@ public:
     ChatWidgetHeaderButton();
 
     ChatWidgetHeaderButtonLabel &
-    label()
+    getLabel()
     {
-        return m_label;
+        return label;
     }
 
 signals:
@@ -35,10 +35,10 @@ protected:
 
 private:
     QHBoxLayout hbox;
-    ChatWidgetHeaderButtonLabel m_label;
+    ChatWidgetHeaderButtonLabel label;
 
-    bool m_mouseOver;
-    bool m_mouseDown;
+    bool mouseOver;
+    bool mouseDown;
 
     void labelMouseUp();
     void labelMouseDown();

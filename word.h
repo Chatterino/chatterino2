@@ -63,148 +63,148 @@ public:
                   ButtonTimeout
     };
 
-    explicit Word(LazyLoadedImage *m_image, Type type, const QString &copytext,
-                  const QString &tooltip, const Link &link = Link());
-    explicit Word(const QString &m_text, Type type, const QColor &color,
-                  const QString &copytext, const QString &tooltip,
-                  const Link &link = Link());
+    explicit Word(LazyLoadedImage *image, Type getType, const QString &copytext,
+                  const QString &getTooltip, const Link &getLink = Link());
+    explicit Word(const QString &text, Type getType, const QColor &getColor,
+                  const QString &copytext, const QString &getTooltip,
+                  const Link &getLink = Link());
 
     LazyLoadedImage &
     getImage() const
     {
-        return *m_image;
+        return *image;
     }
 
     const QString &
     getText() const
     {
-        return m_text;
+        return text;
     }
 
     int
-    width() const
+    getWidth() const
     {
-        return m_width;
+        return width;
     }
 
     int
-    height() const
+    getHeight() const
     {
-        return m_height;
+        return height;
     }
 
     void
     setSize(int width, int height)
     {
-        m_width = width;
-        m_height = height;
+        width = width;
+        height = height;
     }
 
     bool
     isImage() const
     {
-        return m_isImage;
+        return _isImage;
     }
 
     bool
     isText() const
     {
-        return !m_isImage;
+        return !_isImage;
     }
 
     const QString &
-    copyText() const
+    getCopyText() const
     {
-        return m_copyText;
+        return copyText;
     }
 
     bool
     hasTrailingSpace() const
     {
-        return m_hasTrailingSpace;
+        return _hasTrailingSpace;
     }
 
     QFont &
     getFont() const
     {
-        return Fonts::getFont(m_font);
+        return Fonts::getFont(font);
     }
 
     QFontMetrics &
     getFontMetrics() const
     {
-        return Fonts::getFontMetrics(m_font);
+        return Fonts::getFontMetrics(font);
     }
 
     Type
-    type() const
+    getType() const
     {
-        return m_type;
+        return type;
     }
 
     const QString &
-    tooltip() const
+    getTooltip() const
     {
-        return m_tooltip;
+        return tooltip;
     }
 
     const QColor &
-    color() const
+    getColor() const
     {
-        return m_color;
+        return color;
     }
 
     const Link &
-    link() const
+    getLink() const
     {
-        return m_link;
+        return link;
     }
 
     int
-    xOffset() const
+    getXOffset() const
     {
-        return m_xOffset;
+        return xOffset;
     }
 
     int
-    yOffset() const
+    getYOffset() const
     {
-        return m_yOffset;
+        return yOffset;
     }
 
     void
     setOffset(int xOffset, int yOffset)
     {
-        m_xOffset = std::max(0, xOffset);
-        m_yOffset = std::max(0, yOffset);
+        xOffset = std::max(0, xOffset);
+        yOffset = std::max(0, yOffset);
     }
 
     std::vector<short> &
-    characterWidthCache()
+    getCharacterWidthCache()
     {
-        return m_characterWidthCache;
+        return characterWidthCache;
     }
 
 private:
-    LazyLoadedImage *m_image;
-    QString m_text;
-    QColor m_color;
-    bool m_isImage;
+    LazyLoadedImage *image;
+    QString text;
+    QColor color;
+    bool _isImage;
 
-    Type m_type;
-    QString m_copyText;
-    QString m_tooltip;
+    Type type;
+    QString copyText;
+    QString tooltip;
 
-    int m_width = 16;
-    int m_height = 16;
-    int m_xOffset = 0;
-    int m_yOffset = 0;
+    int width = 16;
+    int height = 16;
+    int xOffset = 0;
+    int yOffset = 0;
 
-    bool m_hasTrailingSpace;
-    Fonts::Type m_font = Fonts::Medium;
-    Link m_link;
+    bool _hasTrailingSpace;
+    Fonts::Type font = Fonts::Medium;
+    Link link;
 
-    std::vector<short> m_characterWidthCache;
+    std::vector<short> characterWidthCache;
 };
 
 #endif  // WORD_H

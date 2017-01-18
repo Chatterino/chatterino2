@@ -12,8 +12,8 @@
 
 ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
-    , m_chatWidget(parent)
-    , m_scrollbar(this)
+    , chatWidget(parent)
+    , scrollbar(this)
 {
     auto scroll = QScroller::scroller(this);
 
@@ -23,7 +23,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
 bool
 ChatWidgetView::layoutMessages()
 {
-    auto c = m_chatWidget->channel();
+    auto c = this->chatWidget->getChannel();
 
     if (c == NULL)
         return false;
@@ -42,8 +42,8 @@ ChatWidgetView::layoutMessages()
 void
 ChatWidgetView::resizeEvent(QResizeEvent *)
 {
-    m_scrollbar.resize(m_scrollbar.width(), height());
-    m_scrollbar.move(width() - m_scrollbar.width(), 0);
+    this->scrollbar.resize(this->scrollbar.width(), height());
+    this->scrollbar.move(width() - this->scrollbar.width(), 0);
 
     layoutMessages();
 }
@@ -55,7 +55,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    auto c = m_chatWidget->channel();
+    auto c = this->chatWidget->getChannel();
 
     QColor color;
 
@@ -98,40 +98,50 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto messages = c->getMessagesClone();
 
-    int y = 0;
+    int start = this->scrollbar.getValue();
 
-    for (std::shared_ptr<Message> const &message : messages) {
-        for (WordPart const &wordPart : message.get()->wordParts()) {
+    if (start >= messages.length()) {
+        return;
+    }
+
+    int y = -(messages[start].get()->getHeight() *
+              (std::fmod(this->scrollbar.getValue(), 1)));
+
+    for (int i = start; i < messages.size(); ++i) {
+        Message *message = messages[i].get();
+
+        for (WordPart const &wordPart : message->getWordParts()) {
             painter.setPen(QColor(255, 0, 0));
-            painter.drawRect(wordPart.x(), wordPart.y() + y, wordPart.width(),
-                             wordPart.height());
+            painter.drawRect(wordPart.getX(), wordPart.getY() + y,
+                             wordPart.getWidth(), wordPart.getHeight());
 
             // image
-            if (wordPart.word().isImage()) {
-                LazyLoadedImage &lli = wordPart.word().getImage();
+            if (wordPart.getWord().isImage()) {
+                LazyLoadedImage &lli = wordPart.getWord().getImage();
 
-                const QPixmap *image = lli.pixmap();
+                const QPixmap *image = lli.getPixmap();
 
                 if (image != NULL) {
                     painter.drawPixmap(
-                        QRect(wordPart.x(), wordPart.y() + y, wordPart.width(),
-                              wordPart.height()),
+                        QRect(wordPart.getX(), wordPart.getY() + y,
+                              wordPart.getWidth(), wordPart.getHeight()),
                         *image);
                 }
             }
             // text
             else {
-                QColor color = wordPart.word().color();
+                QColor color = wordPart.getWord().getColor();
 
                 painter.setPen(color);
-                painter.setFont(wordPart.word().getFont());
+                painter.setFont(wordPart.getWord().getFont());
 
                 painter.drawText(
-                    QRectF(wordPart.x(), wordPart.y() + y, 10000, 10000),
-                    wordPart.text(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+                    QRectF(wordPart.getX(), wordPart.getY() + y, 10000, 10000),
+                    wordPart.getText(),
+                    QTextOption(Qt::AlignLeft | Qt::AlignTop));
             }
         }
 
-        y += message.get()->height();
+        y += message->getHeight();
     }
 }

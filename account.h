@@ -1,49 +1,49 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include "QString"
+#include <QString>
 
 class Account
 {
 public:
-    Account(QString username, QString oauthToken, QString oauthClient);
+    Account(QString getUsername, QString getOauthToken, QString getOauthClient);
 
     static const Account *
-    anon()
+    getAnon()
     {
-        return m_anon;
+        return &anon;
     }
 
     const QString &
-    username()
+    getUsername() const
     {
-        return m_username;
+        return username;
     }
 
     const QString &
-    oauthToken()
+    getOauthToken() const
     {
-        return m_oauthToken;
+        return oauthToken;
     }
 
     const QString &
-    oauthClient()
+    getOauthClient() const
     {
-        return m_oauthClient;
+        return oauthClient;
     }
 
     bool
-    isAnon()
+    isAnon() const
     {
-        return m_username.startsWith("justinfan");
+        return username.startsWith("justinfan");
     }
 
 private:
-    const static Account *m_anon;
+    static Account anon;
 
-    QString m_username;
-    QString m_oauthClient;
-    QString m_oauthToken;
+    QString username;
+    QString oauthClient;
+    QString oauthToken;
 };
 
 #endif  // ACCOUNT_H

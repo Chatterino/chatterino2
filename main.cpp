@@ -19,7 +19,7 @@ main(int argc, char *argv[])
 
     ColorScheme::instance().setColors(0, -0.8);
 
-    MainWindow &w = Windows::mainWindow();
+    MainWindow &w = Windows::getMainWindow();
     w.show();
 
     IrcManager::connect();

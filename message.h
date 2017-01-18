@@ -19,69 +19,69 @@ public:
 
     ~Message()
     {
-        if (m_wordParts != NULL) {
-            delete m_wordParts;
+        if (wordParts != NULL) {
+            delete wordParts;
         }
     }
 
     bool
-    canHighlightTab() const
+    getCanHighlightTab() const
     {
-        return m_highlightTab;
+        return highlightTab;
     }
 
     const QString &
-    timeoutUser() const
+    getTimeoutUser() const
     {
-        return m_timeoutUser;
+        return timeoutUser;
     }
 
     int
-    timeoutCount() const
+    getTimeoutCount() const
     {
-        return m_timeoutCount;
+        return timeoutCount;
     }
 
     const QString &
-    userName() const
+    getUserName() const
     {
-        return m_userName;
+        return userName;
     }
 
     const QString &
-    displayName() const
+    getDisplayName() const
     {
-        return m_displayName;
+        return displayName;
     }
 
     const std::vector<Word>
-    words() const
+    getWords() const
     {
-        return m_words;
+        return words;
     }
 
     const std::vector<WordPart>
-    wordParts() const
+    getWordParts() const
     {
-        return *m_wordParts;
+        return *wordParts;
     }
 
     bool
-    disabled() const
+    getDisabled() const
     {
-        return m_disabled;
+        return disabled;
     }
 
     const QString &
-    id() const
+    getId() const
     {
-        return m_id;
+        return id;
     }
 
     int
-    height() const
+    getHeight() const
     {
-        return m_height;
+        return height;
     }
 
     bool layout(int width, bool enableEmoteMargins = true);
@@ -89,7 +89,7 @@ public:
     void
     requestRelayout()
     {
-        m_relayoutRequested = true;
+        relayoutRequested = true;
     }
 
 private:
@@ -103,25 +103,25 @@ private:
 
     static QRegularExpression *cheerRegex;
 
-    bool m_highlightTab = false;
-    QString m_timeoutUser = "";
-    int m_timeoutCount = 0;
-    bool m_disabled = false;
-    std::chrono::time_point<std::chrono::system_clock> m_parseTime;
+    bool highlightTab = false;
+    QString timeoutUser = "";
+    int timeoutCount = 0;
+    bool disabled = false;
+    std::chrono::time_point<std::chrono::system_clock> parseTime;
 
-    QString m_userName = "";
-    QString m_displayName = "";
-    QString m_id = "";
+    QString userName = "";
+    QString displayName = "";
+    QString id = "";
 
-    int m_height = 0;
+    int height = 0;
 
-    std::vector<Word> m_words;
-    std::vector<WordPart> *m_wordParts;
+    std::vector<Word> words;
+    std::vector<WordPart> *wordParts;
 
-    long m_currentLayoutWidth = -1;
-    bool m_relayoutRequested = true;
-    int m_fontGeneration = -1;
-    int m_emoteGeneration = -1;
+    long currentLayoutWidth = -1;
+    bool relayoutRequested = true;
+    int fontGeneration = -1;
+    int emoteGeneration = -1;
 
     static QString matchLink(const QString &string);
 

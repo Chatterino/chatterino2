@@ -14,8 +14,8 @@ public:
 protected:
     void paintEvent(QPaintEvent *);
 
-    QPropertyAnimation m_positionAnimation;
-    QRect m_desiredGeometry;
+    QPropertyAnimation positionAnimation;
+    QRect desiredGeometry;
 };
 
 #endif  // NOTEBOOKPAGEDROPPREVIEW_H

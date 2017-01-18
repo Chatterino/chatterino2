@@ -16,23 +16,23 @@ public:
     TextInputDialog(QWidget *parent = NULL);
 
     QString
-    text() const
+    getText() const
     {
-        return m_lineEdit.text();
+        return lineEdit.text();
     }
 
     void
     setText(const QString &text)
     {
-        m_lineEdit.setText(text);
+        lineEdit.setText(text);
     }
 
 private:
-    QVBoxLayout m_vbox;
-    QLineEdit m_lineEdit;
-    QHBoxLayout m_buttonBox;
-    QPushButton m_okButton;
-    QPushButton m_cancelButton;
+    QVBoxLayout vbox;
+    QLineEdit lineEdit;
+    QHBoxLayout buttonBox;
+    QPushButton okButton;
+    QPushButton cancelButton;
 
 private slots:
     void okButtonClicked();

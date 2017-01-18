@@ -16,7 +16,7 @@ QFontMetrics *Fonts::metricsSmall = new QFontMetrics(*small);
 QFontMetrics *Fonts::metricsLarge = new QFontMetrics(*large);
 QFontMetrics *Fonts::metricsVeryLarge = new QFontMetrics(*veryLarge);
 
-int Fonts::m_generation = 0;
+int Fonts::generation = 0;
 
 Fonts::Fonts()
 {

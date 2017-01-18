@@ -8,5 +8,5 @@ LambdaQRunnable::LambdaQRunnable(std::function<void()> action)
 void
 LambdaQRunnable::run()
 {
-    action();
+    this->action();
 }

@@ -11,51 +11,51 @@ class Emotes
 {
 public:
     static ConcurrentMap<QString, TwitchEmoteValue *> &
-    twitchEmotes()
+    getTwitchEmotes()
     {
-        return m_twitchEmotes;
+        return twitchEmotes;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    bttvEmotes()
+    getBttvEmotes()
     {
-        return m_bttvEmotes;
+        return bttvEmotes;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    ffzEmotes()
+    getFfzEmotes()
     {
-        return m_ffzEmotes;
+        return ffzEmotes;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    chatterinoEmotes()
+    getChatterinoEmotes()
     {
-        return m_chatterinoEmotes;
+        return chatterinoEmotes;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    bttvChannelEmoteFromCaches()
+    getBttvChannelEmoteFromCaches()
     {
-        return m_bttvChannelEmoteFromCaches;
+        return bttvChannelEmoteFromCaches;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    ffzChannelEmoteFromCaches()
+    getFfzChannelEmoteFromCaches()
     {
-        return m_ffzChannelEmoteFromCaches;
+        return ffzChannelEmoteFromCaches;
     }
 
     static ConcurrentMap<long, LazyLoadedImage *> &
-    twitchEmoteFromCache()
+    getTwitchEmoteFromCache()
     {
-        return m_twitchEmoteFromCache;
+        return twitchEmoteFromCache;
     }
 
     static ConcurrentMap<QString, LazyLoadedImage *> &
-    miscImageFromCache()
+    getMiscImageFromCache()
     {
-        return m_miscImageFromCache;
+        return miscImageFromCache;
     }
 
     static void loadGlobalEmotes();
@@ -67,36 +67,34 @@ public:
                                                long int id);
 
     static int
-    generation()
+    getGeneration()
     {
-        return m_generation;
+        return generation;
     }
 
     static void
     incGeneration()
     {
-        m_generation++;
+        generation++;
     }
 
 private:
     Emotes();
 
-    static QString m_twitchEmoteTemplate;
+    static QString twitchEmoteTemplate;
 
-    static ConcurrentMap<QString, TwitchEmoteValue *> m_twitchEmotes;
-    static ConcurrentMap<QString, LazyLoadedImage *> m_bttvEmotes;
-    static ConcurrentMap<QString, LazyLoadedImage *> m_ffzEmotes;
-    static ConcurrentMap<QString, LazyLoadedImage *> m_chatterinoEmotes;
-    static ConcurrentMap<QString, LazyLoadedImage *>
-        m_bttvChannelEmoteFromCaches;
-    static ConcurrentMap<QString, LazyLoadedImage *>
-        m_ffzChannelEmoteFromCaches;
-    static ConcurrentMap<long, LazyLoadedImage *> m_twitchEmoteFromCache;
-    static ConcurrentMap<QString, LazyLoadedImage *> m_miscImageFromCache;
+    static ConcurrentMap<QString, TwitchEmoteValue *> twitchEmotes;
+    static ConcurrentMap<QString, LazyLoadedImage *> bttvEmotes;
+    static ConcurrentMap<QString, LazyLoadedImage *> ffzEmotes;
+    static ConcurrentMap<QString, LazyLoadedImage *> chatterinoEmotes;
+    static ConcurrentMap<QString, LazyLoadedImage *> bttvChannelEmoteFromCaches;
+    static ConcurrentMap<QString, LazyLoadedImage *> ffzChannelEmoteFromCaches;
+    static ConcurrentMap<long, LazyLoadedImage *> twitchEmoteFromCache;
+    static ConcurrentMap<QString, LazyLoadedImage *> miscImageFromCache;
 
     static QString getTwitchEmoteLink(long id, qreal &scale);
 
-    static int m_generation;
+    static int generation;
 };
 
 #endif  // EMOTES_H

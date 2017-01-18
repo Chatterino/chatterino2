@@ -1,17 +1,18 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "QButtonGroup"
-#include "QCheckBox"
-#include "QDialogButtonBox"
-#include "QHBoxLayout"
-#include "QListView"
-#include "QMainWindow"
-#include "QPushButton"
-#include "QStackedLayout"
-#include "QVBoxLayout"
-#include "QWidget"
 #include "settingsdialogtab.h"
+
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialogButtonBox>
+#include <QHBoxLayout>
+#include <QListView>
+#include <QMainWindow>
+#include <QPushButton>
+#include <QStackedLayout>
+#include <QVBoxLayout>
+#include <QWidget>
 
 class SettingsDialog : public QWidget
 {

@@ -1,10 +1,11 @@
 #ifndef CHATVIEW_H
 #define CHATVIEW_H
 
-#include <QWidget>
-#include "QPaintEvent"
 #include "channel.h"
 #include "scrollbar.h"
+
+#include <QPaintEvent>
+#include <QWidget>
 
 class ChatWidget;
 
@@ -20,12 +21,12 @@ public:
 protected:
     void resizeEvent(QResizeEvent *);
 
-private:
-    ChatWidget *m_chatWidget;
-
-    ScrollBar m_scrollbar;
-
     void paintEvent(QPaintEvent *);
+
+private:
+    ChatWidget *chatWidget;
+
+    ScrollBar scrollbar;
 };
 
 #endif  // CHATVIEW_H

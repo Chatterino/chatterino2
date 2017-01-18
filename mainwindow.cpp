@@ -29,19 +29,19 @@ MainWindow::~MainWindow()
 void
 MainWindow::layoutVisibleChatWidgets(Channel *channel)
 {
-    auto *page = notebook.selected();
+    auto *page = notebook.getSelectedPage();
 
     if (page == NULL) {
         return;
     }
 
-    const std::vector<ChatWidget *> &widgets = page->chatWidgets();
+    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
 
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->channel()) {
-            if (widget->view().layoutMessages()) {
+        if (channel == NULL || channel == widget->getChannel()) {
+            if (widget->getView().layoutMessages()) {
                 widget->repaint();
             }
         }
@@ -51,19 +51,19 @@ MainWindow::layoutVisibleChatWidgets(Channel *channel)
 void
 MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {
-    auto *page = notebook.selected();
+    auto *page = notebook.getSelectedPage();
 
     if (page == NULL) {
         return;
     }
 
-    const std::vector<ChatWidget *> &widgets = page->chatWidgets();
+    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
 
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->channel()) {
-            widget->view().layoutMessages();
+        if (channel == NULL || channel == widget->getChannel()) {
+            widget->getView().layoutMessages();
             widget->repaint();
         }
     }

@@ -50,22 +50,22 @@ ColorScheme::setColors(float hue, float multiplyer)
     //    fillLookupTableValues(0.65, 0.83, 0.5, 0.7);
     //    fillLookupTableValues(0.83, 1, 0.7, 0.6);
 
-    fillLookupTableValues(m_middleLookupTable, 0.000, 0.166, 0.66, 0.5);
-    fillLookupTableValues(m_middleLookupTable, 0.166, 0.333, 0.5, 0.55);
-    fillLookupTableValues(m_middleLookupTable, 0.333, 0.500, 0.55, 0.45);
-    fillLookupTableValues(m_middleLookupTable, 0.500, 0.666, 0.45, 0.80);
-    fillLookupTableValues(m_middleLookupTable, 0.666, 0.833, 0.80, 0.61);
-    fillLookupTableValues(m_middleLookupTable, 0.833, 1.000, 0.61, 0.66);
+    fillLookupTableValues(this->middleLookupTable, 0.000, 0.166, 0.66, 0.5);
+    fillLookupTableValues(this->middleLookupTable, 0.166, 0.333, 0.5, 0.55);
+    fillLookupTableValues(this->middleLookupTable, 0.333, 0.500, 0.55, 0.45);
+    fillLookupTableValues(this->middleLookupTable, 0.500, 0.666, 0.45, 0.80);
+    fillLookupTableValues(this->middleLookupTable, 0.666, 0.833, 0.80, 0.61);
+    fillLookupTableValues(this->middleLookupTable, 0.833, 1.000, 0.61, 0.66);
 
-    fillLookupTableValues(m_minLookupTable, 0.000, 0.166, 0.33, 0.23);
-    fillLookupTableValues(m_minLookupTable, 0.166, 0.333, 0.23, 0.27);
-    fillLookupTableValues(m_minLookupTable, 0.333, 0.500, 0.27, 0.23);
-    fillLookupTableValues(m_minLookupTable, 0.500, 0.666, 0.23, 0.50);
-    fillLookupTableValues(m_minLookupTable, 0.666, 0.833, 0.50, 0.30);
-    fillLookupTableValues(m_minLookupTable, 0.833, 1.000, 0.30, 0.33);
+    fillLookupTableValues(this->minLookupTable, 0.000, 0.166, 0.33, 0.23);
+    fillLookupTableValues(this->minLookupTable, 0.166, 0.333, 0.23, 0.27);
+    fillLookupTableValues(this->minLookupTable, 0.333, 0.500, 0.27, 0.23);
+    fillLookupTableValues(this->minLookupTable, 0.500, 0.666, 0.23, 0.50);
+    fillLookupTableValues(this->minLookupTable, 0.666, 0.833, 0.50, 0.30);
+    fillLookupTableValues(this->minLookupTable, 0.833, 1.000, 0.30, 0.33);
 
     //    for (int i = 0; i < LOOKUP_COLOR_COUNT; i++) {
-    //        qInfo(QString::number(m_middleLookupTable[i]).toStdString().c_str());
+    //        qInfo(QString::number(this->middleLookupTable[i]).toStdString().c_str());
     //    }
 }
 
@@ -89,7 +89,7 @@ ColorScheme::normalizeColor(QColor &color)
 {
     //    qreal l = color.lightnessF();
     //    qreal s = color.saturationF();
-    //    qreal x = m_colorLookupTable[std::max(0, color.hue())];
+    //    qreal x = this->colorLookupTable[std::max(0, color.hue())];
     //    qreal newL = (l - 1) * x + 1;
 
     //    newL = s * newL + (1 - s) * l;
@@ -101,10 +101,10 @@ ColorScheme::normalizeColor(QColor &color)
     qreal l = color.lightnessF();
     qreal s = color.saturationF();
     int h = std::max(0, color.hue());
-    qreal x = m_middleLookupTable[h];
+    qreal x = this->middleLookupTable[h];
     x = s * 0.5 + (1 - s) * x;
 
-    qreal min = m_minLookupTable[h];
+    qreal min = this->minLookupTable[h];
     min = (1 - s) * 0.5 + s * min;
 
     qreal newL;

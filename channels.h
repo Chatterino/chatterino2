@@ -7,15 +7,15 @@ class Channels
 {
 public:
     static Channel *
-    whispers()
+    getWhispers()
     {
-        return &m_whispers;
+        return &whispers;
     }
 
     static Channel *
-    mentions()
+    getMentions()
     {
-        return &m_whispers;
+        return &mentions;
     }
 
     static Channel *addChannel(const QString &channel);
@@ -27,11 +27,11 @@ private:
     {
     }
 
-    static Channel m_whispers;
-    static Channel m_mentions;
-    static Channel m_empty;
+    static Channel whispers;
+    static Channel mentions;
+    static Channel empty;
 
-    static QMap<QString, std::tuple<Channel *, int>> m_channels;
+    static QMap<QString, std::tuple<Channel *, int>> channels;
 };
 
 #endif  // CHANNELS_H

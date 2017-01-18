@@ -73,8 +73,8 @@ private:
     {
     }
 
-    qreal m_middleLookupTable[360] = {};
-    qreal m_minLookupTable[360] = {};
+    qreal middleLookupTable[360] = {};
+    qreal minLookupTable[360] = {};
 
     void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to,
                                qreal fromValue, qreal toValue);

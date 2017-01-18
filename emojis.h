@@ -26,13 +26,13 @@ public:
     };
 
 private:
-    static QRegularExpression *findShortCodesRegex;
+    static QRegularExpression findShortCodesRegex;
 
-    static QMap<QString, EmojiData> *shortCodeToEmoji;
-    static QMap<QString, QString> *emojiToShortCode;
-    static QMap<QChar, QMap<QString, QString>> *firstEmojiChars;
+    static QMap<QString, EmojiData> shortCodeToEmoji;
+    static QMap<QString, QString> emojiToShortCode;
+    static QMap<QChar, QMap<QString, QString>> firstEmojiChars;
 
-    static ConcurrentMap<QString, LazyLoadedImage *> *imageCache;
+    static ConcurrentMap<QString, LazyLoadedImage *> imageCache;
 
     Emojis()
     {

@@ -9,104 +9,104 @@ class Word;
 class WordPart
 {
 public:
-    WordPart(Word &word, int x, int y, const QString &copyText,
+    WordPart(Word &getWord, int getX, int getY, const QString &getCopyText,
              bool allowTrailingSpace = true);
 
-    WordPart(Word &word, int x, int y, int width, int height,
-             const QString &copyText, const QString &customText,
+    WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight,
+             const QString &getCopyText, const QString &customText,
              bool allowTrailingSpace = true);
 
     const Word &
-    word() const
+    getWord() const
     {
         return m_word;
     }
 
     int
-    width() const
+    getWidth() const
     {
-        return m_width;
+        return width;
     }
 
     int
-    height() const
+    getHeight() const
     {
-        return m_height;
+        return height;
     }
 
     int
-    x() const
+    getX() const
     {
-        return m_x;
+        return x;
     }
 
     int
-    y() const
+    getY() const
     {
-        return m_y;
+        return y;
     }
 
     void
     setPosition(int x, int y)
     {
-        m_x = x;
-        m_y = y;
+        x = x;
+        y = y;
     }
 
     void
     setY(int y)
     {
-        m_y = y;
+        y = y;
     }
 
     int
-    right() const
+    getRight() const
     {
-        return m_x + m_width;
+        return x + width;
     }
 
     int
-    bottom() const
+    getBottom() const
     {
-        return m_y + m_height;
+        return y + height;
     }
 
     QRect
-    rect() const
+    getRect() const
     {
-        return QRect(m_x, m_y, m_width, m_height);
+        return QRect(x, y, width, height);
     }
 
     const QString
-    copyText() const
+    getCopyText() const
     {
-        return m_copyText;
+        return copyText;
     }
 
     int
     hasTrailingSpace() const
     {
-        return m_trailingSpace;
+        return _trailingSpace;
     }
 
     const QString &
-    text() const
+    getText() const
     {
-        return m_text;
+        return text;
     }
 
 private:
     Word &m_word;
 
-    QString m_copyText;
-    QString m_text;
+    QString copyText;
+    QString text;
 
-    int m_x;
-    int m_y;
-    int m_width;
-    int m_height;
+    int x;
+    int y;
+    int width;
+    int height;
 
-    bool m_trailingSpace;
+    bool _trailingSpace;
 };
 
 #endif  // WORDPART_H

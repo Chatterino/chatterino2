@@ -6,27 +6,27 @@
 struct TwitchEmoteValue {
 public:
     int
-    set()
+    getSet()
     {
-        return m_set;
+        return set;
     }
 
     int
-    id()
+    getId()
     {
-        return m_id;
+        return id;
     }
 
     const QString &
-    channelName()
+    getChannelName()
     {
-        return m_channelName;
+        return channelName;
     }
 
 private:
-    int m_set;
-    int m_id;
-    QString m_channelName;
+    int set;
+    int id;
+    QString channelName;
 };
 
 #endif  // TWITCHEMOTEVALUE_H

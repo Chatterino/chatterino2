@@ -17,47 +17,47 @@ public:
         HighlightNewMessage
     };
 
-    NotebookTab(Notebook *m_notebook);
+    NotebookTab(Notebook *notebook);
 
     void calcSize();
 
     NotebookPage *page;
 
     const QString &
-    text() const
+    getText() const
     {
-        return m_text;
+        return this->text;
     }
 
     void
     setText(const QString &text)
     {
-        m_text = text;
+        this->text = text;
     }
 
     bool
-    selected()
+    getSelected()
     {
-        return m_selected;
+        return this->selected;
     }
 
     void
     setSelected(bool value)
     {
-        m_selected = value;
+        this->selected = value;
         repaint();
     }
 
     HighlightStyle
-    highlightStyle() const
+    getHighlightStyle() const
     {
-        return m_highlightStyle;
+        return this->highlightStyle;
     }
 
     void
     setHighlightStyle(HighlightStyle style)
     {
-        m_highlightStyle = style;
+        this->highlightStyle = style;
         repaint();
     }
 
@@ -72,14 +72,14 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    Notebook *m_notebook;
+    Notebook *notebook;
 
-    QString m_text;
+    QString text;
 
-    bool m_selected;
-    bool m_mouseOver;
-    bool m_mouseDown;
-    HighlightStyle m_highlightStyle;
+    bool selected;
+    bool mouseOver;
+    bool mouseDown;
+    HighlightStyle highlightStyle;
 };
 
 #endif  // NOTEBOOKTAB_H

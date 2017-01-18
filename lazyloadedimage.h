@@ -7,96 +7,100 @@
 class LazyLoadedImage
 {
 public:
-    LazyLoadedImage(const QString &url, qreal scale = 1,
-                    const QString &name = "", const QString &tooltip = "",
-                    const QMargins &margin = QMargins(), bool isHat = false);
-    LazyLoadedImage(QPixmap *pixmap, qreal scale = 1, const QString &name = "",
-                    const QString &tooltip = "",
-                    const QMargins &margin = QMargins(), bool isHat = false);
+    explicit LazyLoadedImage(const QString &url, qreal scale = 1,
+                             const QString &getName = "",
+                             const QString &getTooltip = "",
+                             const QMargins &getMargin = QMargins(),
+                             bool getIsHat = false);
+    explicit LazyLoadedImage(QPixmap *pixmap, qreal scale = 1,
+                             const QString &getName = "",
+                             const QString &getTooltip = "",
+                             const QMargins &getMargin = QMargins(),
+                             bool getIsHat = false);
 
     const QPixmap *
-    pixmap()
+    getPixmap()
     {
-        if (!m_isLoading) {
-            m_isLoading = true;
+        if (!isLoading) {
+            isLoading = true;
 
             loadImage();
         }
-        return m_pixmap;
+        return pixmap;
     }
 
     qreal
-    scale() const
+    getScale() const
     {
-        return m_scale;
+        return scale;
     }
 
     const QString &
-    url() const
+    getUrl() const
     {
-        return m_url;
+        return url;
     }
 
     const QString &
-    name() const
+    getName() const
     {
-        return m_name;
+        return name;
     }
 
     const QString &
-    tooltip() const
+    getTooltip() const
     {
-        return m_tooltip;
+        return tooltip;
     }
 
     const QMargins &
-    margin() const
+    getMargin() const
     {
-        return m_margin;
+        return margin;
     }
 
     bool
-    animated() const
+    getAnimated() const
     {
-        return m_animated;
+        return animated;
     }
 
     bool
-    isHat() const
+    getIsHat() const
     {
-        return m_ishat;
+        return ishat;
     }
 
     int
-    width() const
+    getWidth() const
     {
-        if (m_pixmap == NULL) {
+        if (pixmap == NULL) {
             return 16;
         }
-        return m_pixmap->width();
+        return pixmap->width();
     }
 
     int
-    height() const
+    getHeight() const
     {
-        if (m_pixmap == NULL) {
+        if (pixmap == NULL) {
             return 16;
         }
-        return m_pixmap->height();
+        return pixmap->height();
     }
 
 private:
-    QPixmap *m_pixmap;
+    QPixmap *pixmap;
 
-    QString m_url;
-    QString m_name;
-    QString m_tooltip;
-    bool m_animated;
-    QMargins m_margin;
-    bool m_ishat;
-    qreal m_scale;
+    QString url;
+    QString name;
+    QString tooltip;
+    bool animated;
+    QMargins margin;
+    bool ishat;
+    qreal scale;
 
-    bool m_isLoading;
+    bool isLoading;
 
     void loadImage();
 };

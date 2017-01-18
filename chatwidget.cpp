@@ -10,19 +10,19 @@
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
-    , m_channel(NULL)
-    , m_channelName(QString())
-    , m_vbox(this)
-    , m_header(this)
-    , m_view(this)
-    , m_input()
+    , channel(NULL)
+    , channelName(QString())
+    , vbox(this)
+    , header(this)
+    , view(this)
+    , input()
 {
-    m_vbox.setSpacing(0);
-    m_vbox.setMargin(1);
+    this->vbox.setSpacing(0);
+    this->vbox.setMargin(1);
 
-    m_vbox.addWidget(&m_header);
-    m_vbox.addWidget(&m_view);
-    m_vbox.addWidget(&m_input);
+    this->vbox.addWidget(&header);
+    this->vbox.addWidget(&view);
+    this->vbox.addWidget(&input);
 }
 
 ChatWidget::~ChatWidget()
@@ -34,25 +34,26 @@ ChatWidget::setChannelName(const QString &name)
 {
     QString channel = name.trimmed();
 
-    if (QString::compare(channel, m_channelName, Qt::CaseInsensitive) == 0) {
-        m_channelName = channel;
-        m_header.updateChannelText();
+    if (QString::compare(channel, this->channelName, Qt::CaseInsensitive) ==
+        0) {
+        this->channelName = channel;
+        this->header.updateChannelText();
         return;
     }
 
-    m_channelName = channel;
-    m_header.updateChannelText();
+    this->channelName = channel;
+    this->header.updateChannelText();
 
-    m_view.layoutMessages();
+    this->view.layoutMessages();
 
-    if (!m_channelName.isEmpty()) {
-        Channels::removeChannel(m_channelName);
+    if (!this->channelName.isEmpty()) {
+        Channels::removeChannel(this->channelName);
     }
 
     if (channel.isEmpty()) {
-        m_channel = NULL;
+        this->channel = NULL;
     } else {
-        m_channel = Channels::addChannel(channel);
+        this->channel = Channels::addChannel(channel);
     }
 }
 
@@ -61,10 +62,10 @@ ChatWidget::showChangeChannelPopup()
 {
     TextInputDialog dialog(this);
 
-    dialog.setText(m_channelName);
+    dialog.setText(this->channelName);
 
     if (dialog.exec() == QDialog::Accepted) {
-        setChannelName(dialog.text());
+        setChannelName(dialog.getText());
     }
 }
 
@@ -73,5 +74,5 @@ ChatWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::instance().ChatBackground);
+    painter.fillRect(this->rect(), ColorScheme::instance().ChatBackground);
 }

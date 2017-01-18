@@ -8,40 +8,40 @@ class ScrollBarHighlight
 public:
     enum Style { Default, Left, Right, SingleLine };
 
-    ScrollBarHighlight(float position, int colorIndex, Style style = Default,
-                       QString tag = "");
+    ScrollBarHighlight(float getPosition, int getColorIndex,
+                       Style getStyle = Default, QString tag = "");
 
     Style
-    style()
+    getStyle()
     {
-        return m_style;
+        return style;
     }
 
     float
-    position()
+    getPosition()
     {
-        return m_position;
+        return position;
     }
 
     int
-    colorIndex()
+    getColorIndex()
     {
-        return m_colorIndex;
+        return colorIndex;
     }
 
     QString
     getTag()
     {
-        return m_tag;
+        return tag;
     }
 
     ScrollBarHighlight *next;
 
 private:
-    Style m_style;
-    float m_position;
-    int m_colorIndex;
-    QString m_tag;
+    Style style;
+    float position;
+    int colorIndex;
+    QString tag;
 };
 
 #endif  // SCROLLBARHIGHLIGHT_H
