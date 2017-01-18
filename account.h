@@ -3,6 +3,8 @@
 
 #include <QString>
 
+namespace chatterino {
+
 class Account
 {
 public:
@@ -45,5 +47,6 @@ private:
     QString oauthClient;
     QString oauthToken;
 };
+}
 
 #endif  // ACCOUNT_H

@@ -5,13 +5,15 @@
 #include <QStringBuilder>
 #include <QTextStream>
 
+namespace chatterino {
+
 QRegularExpression Emojis::findShortCodesRegex(":([-+\\w]+):");
 
 QMap<QString, Emojis::EmojiData> Emojis::shortCodeToEmoji;
 QMap<QString, QString> Emojis::emojiToShortCode;
 QMap<QChar, QMap<QString, QString>> Emojis::firstEmojiChars;
 
-ConcurrentMap<QString, LazyLoadedImage *> Emojis::imageCache;
+ConcurrentMap<QString, messages::LazyLoadedImage *> Emojis::imageCache;
 
 QString
 Emojis::replaceShortCodes(const QString &text)
@@ -21,8 +23,9 @@ Emojis::replaceShortCodes(const QString &text)
 }
 
 void
-Emojis::parseEmojis(std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
-                    const QString &text)
+Emojis::parseEmojis(
+    std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
+    const QString &text)
 {
     long lastSlice = 0;
 
@@ -42,17 +45,20 @@ Emojis::parseEmojis(std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
 
                         if (i - lastSlice != 0) {
                             vector.push_back(
-                                std::tuple<LazyLoadedImage *, QString>(
+                                std::tuple<messages::LazyLoadedImage *,
+                                           QString>(
                                     NULL, text.mid(lastSlice, i - lastSlice)));
                         }
 
-                        vector.push_back(std::tuple<LazyLoadedImage *, QString>(
-                            imageCache.getOrAdd(url,
-                                                [&url] {
-                                                    return new LazyLoadedImage(
-                                                        url, 0.35);
-                                                }),
-                            QString()));
+                        vector.push_back(
+                            std::tuple<messages::LazyLoadedImage *, QString>(
+                                imageCache.getOrAdd(
+                                    url,
+                                    [&url] {
+                                        return new messages::LazyLoadedImage(
+                                            url, 0.35);
+                                    }),
+                                QString()));
 
                         i += j - 1;
 
@@ -66,8 +72,8 @@ Emojis::parseEmojis(std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
     }
 
     if (lastSlice < text.length()) {
-        vector.push_back(
-            std::tuple<LazyLoadedImage *, QString>(NULL, text.mid(lastSlice)));
+        vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+            NULL, text.mid(lastSlice)));
     }
 }
 
@@ -120,4 +126,5 @@ Emojis::loadEmojis()
             emoji.first.at(0),
             QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
     }
+}
 }

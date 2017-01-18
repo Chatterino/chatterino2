@@ -2,12 +2,15 @@
 #include "colorscheme.h"
 #include "emojis.h"
 #include "ircmanager.h"
-#include "mainwindow.h"
 #include "resources.h"
+#include "widgets/mainwindow.h"
 #include "windows.h"
 
 #include <QApplication>
 #include <QClipboard>
+
+using namespace chatterino;
+using namespace chatterino::widgets;
 
 int
 main(int argc, char *argv[])

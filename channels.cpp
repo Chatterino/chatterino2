@@ -1,6 +1,8 @@
 #include "channels.h"
 #include "ircmanager.h"
 
+namespace chatterino {
+
 Channel Channels::whispers(QString("/whispers"));
 Channel Channels::mentions(QString("/mentions"));
 Channel Channels::empty(QString(""));
@@ -76,4 +78,5 @@ Channels::removeChannel(const QString &channel)
         Channels::channels.remove(c);
         delete std::get<0>(a.value());
     }
+}
 }

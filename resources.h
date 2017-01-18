@@ -1,7 +1,9 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#include "lazyloadedimage.h"
+#include "messages/lazyloadedimage.h"
+
+namespace chatterino {
 
 class Resources
 {
@@ -9,92 +11,92 @@ public:
     static void load();
 
     // badges
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeStaff()
     {
         return badgeStaff;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeAdmin()
     {
         return badgeAdmin;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeGlobalmod()
     {
         return badgeGlobalmod;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeModerator()
     {
         return badgeModerator;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeTurbo()
     {
         return badgeTurbo;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgeBroadcaster()
     {
         return badgeBroadcaster;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getBadgePremium()
     {
         return badgePremium;
     }
 
     // cheer badges
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge100000()
     {
         return cheerBadge100000;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge10000()
     {
         return cheerBadge10000;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge5000()
     {
         return cheerBadge5000;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge1000()
     {
         return cheerBadge1000;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge100()
     {
         return cheerBadge100;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getCheerBadge1()
     {
         return cheerBadge1;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getButtonBan()
     {
         return buttonBan;
     }
 
-    static LazyLoadedImage *
+    static messages::LazyLoadedImage *
     getButtonTimeout()
     {
         return buttonTimeout;
@@ -103,23 +105,24 @@ public:
 private:
     Resources();
 
-    static LazyLoadedImage *badgeStaff;
-    static LazyLoadedImage *badgeAdmin;
-    static LazyLoadedImage *badgeGlobalmod;
-    static LazyLoadedImage *badgeModerator;
-    static LazyLoadedImage *badgeTurbo;
-    static LazyLoadedImage *badgeBroadcaster;
-    static LazyLoadedImage *badgePremium;
+    static messages::LazyLoadedImage *badgeStaff;
+    static messages::LazyLoadedImage *badgeAdmin;
+    static messages::LazyLoadedImage *badgeGlobalmod;
+    static messages::LazyLoadedImage *badgeModerator;
+    static messages::LazyLoadedImage *badgeTurbo;
+    static messages::LazyLoadedImage *badgeBroadcaster;
+    static messages::LazyLoadedImage *badgePremium;
 
-    static LazyLoadedImage *cheerBadge100000;
-    static LazyLoadedImage *cheerBadge10000;
-    static LazyLoadedImage *cheerBadge5000;
-    static LazyLoadedImage *cheerBadge1000;
-    static LazyLoadedImage *cheerBadge100;
-    static LazyLoadedImage *cheerBadge1;
+    static messages::LazyLoadedImage *cheerBadge100000;
+    static messages::LazyLoadedImage *cheerBadge10000;
+    static messages::LazyLoadedImage *cheerBadge5000;
+    static messages::LazyLoadedImage *cheerBadge1000;
+    static messages::LazyLoadedImage *cheerBadge100;
+    static messages::LazyLoadedImage *cheerBadge1;
 
-    static LazyLoadedImage *buttonBan;
-    static LazyLoadedImage *buttonTimeout;
+    static messages::LazyLoadedImage *buttonBan;
+    static messages::LazyLoadedImage *buttonTimeout;
 };
+}
 
 #endif  // RESOURCES_H

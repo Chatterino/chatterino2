@@ -3,6 +3,8 @@
 
 #include "QString"
 
+namespace chatterino {
+
 struct TwitchEmoteValue {
 public:
     int
@@ -28,5 +30,6 @@ private:
     int id;
     QString channelName;
 };
+}
 
 #endif  // TWITCHEMOTEVALUE_H

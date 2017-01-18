@@ -2,18 +2,20 @@
 #define EMOJIS_H
 
 #include "concurrentmap.h"
-#include "lazyloadedimage.h"
+#include "messages/lazyloadedimage.h"
 
 #include <QObject>
 #include <QRegularExpression>
 #include <QString>
 #include <unordered_map>
 
+namespace chatterino {
+
 class Emojis
 {
 public:
     static void parseEmojis(
-        std::vector<std::tuple<LazyLoadedImage *, QString>> &vector,
+        std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
         const QString &text);
 
     static void loadEmojis();
@@ -32,11 +34,12 @@ private:
     static QMap<QString, QString> emojiToShortCode;
     static QMap<QChar, QMap<QString, QString>> firstEmojiChars;
 
-    static ConcurrentMap<QString, LazyLoadedImage *> imageCache;
+    static ConcurrentMap<QString, messages::LazyLoadedImage *> imageCache;
 
     Emojis()
     {
     }
 };
+}
 
 #endif  // EMOJIS_H

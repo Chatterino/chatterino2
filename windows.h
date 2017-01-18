@@ -1,9 +1,13 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
-#include "mainwindow.h"
+#include "widgets/mainwindow.h"
 
 #include <QMutex>
+
+using namespace chatterino::widgets;
+
+namespace chatterino {
 
 class Windows
 {
@@ -32,5 +36,6 @@ private:
 
     static MainWindow *mainWindow;
 };
+}
 
 #endif  // WINDOWS_H

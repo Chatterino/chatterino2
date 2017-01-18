@@ -12,6 +12,8 @@
 #include <QNetworkRequest>
 #include <future>
 
+namespace chatterino {
+
 Account *IrcManager::account = nullptr;
 IrcConnection *IrcManager::connection = NULL;
 QMutex IrcManager::connectionMutex;
@@ -285,4 +287,5 @@ IrcManager::removeIgnoredUser(QString const &username)
     if (!tryRemoveIgnoredUser(username, errorMessage)) {
         // TODO: Implement IrcManager::removeIgnoredUser
     }
+}
 }

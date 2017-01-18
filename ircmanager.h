@@ -4,13 +4,15 @@
 #define TWITCH_MAX_MESSAGELENGTH 500
 
 #include "account.h"
-#include "message.h"
+#include "messages/message.h"
 
 #include <IrcMessage>
 #include <QMap>
 #include <QMutex>
 #include <QNetworkAccessManager>
 #include <QString>
+
+namespace chatterino {
 
 class IrcManager
 {
@@ -55,5 +57,6 @@ private:
     static void messageReceived(IrcMessage *message);
     static void privateMessageReceived(IrcPrivateMessage *message);
 };
+}
 
 #endif  // IRCMANAGER_H

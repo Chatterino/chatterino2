@@ -3,6 +3,8 @@
 
 #include "channel.h"
 
+namespace chatterino {
+
 class Channels
 {
 public:
@@ -33,5 +35,5 @@ private:
 
     static QMap<QString, std::tuple<Channel *, int>> channels;
 };
-
+}
 #endif  // CHANNELS_H

@@ -4,6 +4,8 @@
 #include <QBrush>
 #include <QColor>
 
+namespace chatterino {
+
 class ColorScheme
 {
 public:
@@ -79,5 +81,6 @@ private:
     void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to,
                                qreal fromValue, qreal toValue);
 };
+}
 
 #endif  // COLORSCHEME_H

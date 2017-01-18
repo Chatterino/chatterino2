@@ -2,6 +2,8 @@
 
 #define DEFAULT_FONT "Arial"
 
+namespace chatterino {
+
 QFont *Fonts::medium = new QFont(DEFAULT_FONT, 14);
 QFont *Fonts::mediumBold = new QFont(DEFAULT_FONT, 14);
 QFont *Fonts::mediumItalic = new QFont(DEFAULT_FONT, 14);
@@ -58,4 +60,5 @@ Fonts::getFontMetrics(Type type)
         return *metricsVeryLarge;
 
     return *metricsMedium;
+}
 }

@@ -1,8 +1,10 @@
 #include "channel.h"
-#include "message.h"
+#include "messages/message.h"
 #include "windows.h"
 
 #include <memory>
+
+namespace chatterino {
 
 Channel::Channel(const QString &channel)
     : messages()
@@ -36,4 +38,5 @@ Channel::addMessage(std::shared_ptr<Message> message)
     this->messageMutex.unlock();
 
     Windows::repaintVisibleChatWidgets();
+}
 }

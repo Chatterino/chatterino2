@@ -37,88 +37,82 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-    mainwindow.cpp \
-    chatwidget.cpp \
-    notebook.cpp \
-    notebooktab.cpp \
-    notebookpage.cpp \
-    notebookbutton.cpp \
-    colorscheme.cpp \
-    chatwidgetheader.cpp \
-    chatwidgetinput.cpp \
-    chatwidgetview.cpp \
-    notebookpagedroppreview.cpp \
-    channel.cpp \
-    dialog.cpp \
-    settingsdialog.cpp \
-    settingsdialogtab.cpp \
-    scrollbar.cpp \
-    scrollbarhighlight.cpp \
-    ircmanager.cpp \
-    lambdaqrunnable.cpp \
     account.cpp \
-    emotes.cpp \
-    lazyloadedimage.cpp \
-    concurrentmap.cpp \
-    message.cpp \
-    word.cpp \
-    link.cpp \
-    fonts.cpp \
-    appsettings.cpp \
-    emojis.cpp \
-    wordpart.cpp \
-    resources.cpp \
-    windows.cpp \
-    chatwidgetheaderbutton.cpp \
-    chatwidgetheaderbuttonlabel.cpp \
+    channel.cpp \
     channels.cpp \
-    textinputdialog.cpp
+    colorscheme.cpp \
+    emojis.cpp \
+    emotes.cpp \
+    fonts.cpp \
+    ircmanager.cpp \
+    messages/lazyloadedimage.cpp \
+    messages/link.cpp \
+    messages/message.cpp \
+    messages/word.cpp \
+    messages/wordpart.cpp \
+    resources.cpp \
+    settings/settings.cpp \
+    widgets/chatwidget.cpp \
+    widgets/chatwidgetheader.cpp \
+    widgets/chatwidgetheaderbutton.cpp \
+    widgets/chatwidgetheaderbuttonlabel.cpp \
+    widgets/chatwidgetinput.cpp \
+    widgets/chatwidgetview.cpp \
+    widgets/mainwindow.cpp \
+    widgets/notebook.cpp \
+    widgets/notebookbutton.cpp \
+    widgets/notebookpage.cpp \
+    widgets/notebookpagedroppreview.cpp \
+    widgets/notebooktab.cpp \
+    widgets/scrollbar.cpp \
+    widgets/scrollbarhighlight.cpp \
+    widgets/settingsdialog.cpp \
+    widgets/settingsdialogtab.cpp \
+    widgets/textinputdialog.cpp \
+    windows.cpp
 
-HEADERS  += mainwindow.h \
-    chatwidget.h \
-    notebook.h \
-    notebooktab.h \
-    notebookpage.h \
-    notebookbutton.h \
-    colorscheme.h \
-    chatwidgetheader.h \
-    chatwidgetinput.h \
-    chatwidgetview.h \
-    notebookpagedroppreview.h \
-    channel.h \
-    dialog.h \
-    settingsdialog.h \
-    settingsdialogtab.h \
-    scrollbar.h \
-    scrollbarhighlight.h \
-    ircmanager.h \
-    lambdaqrunnable.h \
+HEADERS  += account.h \
     asyncexec.h \
-    account.h \
-    emotes.h \
-    lazyloadedimage.h \
-    twitchemotevalue.h \
-    concurrentmap.h \
-    message.h \
-    word.h \
-    link.h \
-    fonts.h \
-    appsettings.h \
-    emojis.h \
-    wordpart.h \
-    common.h \
-    resources.h \
-    windows.h \
-    chatwidgetheaderbutton.h \
-    chatwidgetheaderbuttonlabel.h \
+    channel.h \
     channels.h \
-    textinputdialog.h \
-    signallabel.h
+    colorscheme.h \
+    common.h \
+    concurrentmap.h \
+    emojis.h \
+    emotes.h \
+    fonts.h \
+    ircmanager.h \
+    messages/lazyloadedimage.h \
+    messages/link.h \
+    messages/message.h \
+    messages/word.h \
+    messages/wordpart.h \
+    resources.h \
+    settings/realsetting.h \
+    settings/setting.h \
+    settings/settings.h \
+    twitchemotevalue.h \
+    widgets/chatwidget.h \
+    widgets/chatwidgetheader.h \
+    widgets/chatwidgetheaderbutton.h \
+    widgets/chatwidgetheaderbuttonlabel.h \
+    widgets/chatwidgetinput.h \
+    widgets/chatwidgetview.h \
+    widgets/mainwindow.h \
+    widgets/notebook.h \
+    widgets/notebookbutton.h \
+    widgets/notebookpage.h \
+    widgets/notebookpagedroppreview.h \
+    widgets/notebooktab.h \
+    widgets/scrollbar.h \
+    widgets/scrollbarhighlight.h \
+    widgets/settingsdialog.h \
+    widgets/settingsdialogtab.h \
+    widgets/signallabel.h \
+    widgets/textinputdialog.h \
+    windows.h
 
 PRECOMPILED_HEADER =
-
-FORMS    += \
-    dialog.ui
 
 RESOURCES += \
     resources.qrc

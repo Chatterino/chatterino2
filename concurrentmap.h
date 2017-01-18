@@ -5,6 +5,8 @@
 #include <QMutex>
 #include <functional>
 
+namespace chatterino {
+
 template <typename TKey, typename TValue>
 class ConcurrentMap
 {
@@ -65,5 +67,6 @@ private:
     QMutex *mutex;
     QMap<TKey, TValue> *map;
 };
+}
 
 #endif  // CONCURRENTMAP_H

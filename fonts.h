@@ -4,6 +4,8 @@
 #include <QFont>
 #include <QFontMetrics>
 
+namespace chatterino {
+
 class Fonts
 {
 public:
@@ -50,5 +52,6 @@ private:
 
     static int generation;
 };
+}
 
 #endif  // FONTS_H

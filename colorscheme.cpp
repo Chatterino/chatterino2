@@ -4,6 +4,8 @@
 
 #include <QColor>
 
+namespace chatterino {
+
 // hue: theme color (0 - 1)
 // multiplyer: 1 = white, 0.8 = light, -0.8 dark, -1 black
 void
@@ -128,4 +130,5 @@ ColorScheme::normalizeColor(QColor &color)
     //    newL = newL > 0.5 ? newL : newL / 2 + 0.25;
 
     //    color.setHslF(color.hueF(), s, newL);
+}
 }

@@ -2,7 +2,7 @@
 #define CHANNEL_H
 
 #include "concurrentmap.h"
-#include "lazyloadedimage.h"
+#include "messages/lazyloadedimage.h"
 
 #include <QMap>
 #include <QMutex>
@@ -10,7 +10,13 @@
 #include <QVector>
 #include <memory>
 
+using namespace chatterino::messages;
+
+namespace chatterino {
+
+namespace messages {
 class Message;
+}
 
 class Channel
 {
@@ -23,6 +29,7 @@ public:
     {
         return bttvChannelEmotes;
     }
+
     const ConcurrentMap<QString, LazyLoadedImage *> &
     getFfzChannelEmotes() const
     {
@@ -108,5 +115,6 @@ private:
     QString streamStatus;
     QString streamGame;
 };
+}
 
 #endif  // CHANNEL_H
