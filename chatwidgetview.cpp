@@ -98,7 +98,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto messages = c->getMessagesClone();
 
-    int y = m_scrollbar.star;
+    int y = 0;
 
     for (std::shared_ptr<Message> const &message : messages) {
         for (WordPart const &wordPart : message.get()->wordParts()) {
