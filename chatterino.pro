@@ -112,7 +112,8 @@ HEADERS  += mainwindow.h \
     chatwidgetheaderbutton.h \
     chatwidgetheaderbuttonlabel.h \
     channels.h \
-    textinputdialog.h
+    textinputdialog.h \
+    signallabel.h
 
 PRECOMPILED_HEADER =
 

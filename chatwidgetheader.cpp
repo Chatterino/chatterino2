@@ -60,10 +60,13 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
 
     // middle
     this->middleLabel.setAlignment(Qt::AlignCenter);
-    QObject::connect(&this->middleLabel,
-                     SIGNAL(mouseDoubleClickEvent(QMouseEvent)), this,
-                     SLOT(mouseDoubleClickEvent));
-
+    /*QObject::connect(&this->middleLabel,
+     *                 SIGNAL(mouseDoubleClickEvent(QMouseEvent)), this,
+     *                 SLOT(mouseDoubleClickEvent));
+     * mouseDoubleClickEvent is not a signal, its an event handler
+     */
+    connect(&this->middleLabel, &SignalLabel::mouseDoubleClick, this, &ChatWidgetHeader::mouseDoubleClickEvent);
+    
     // right
     this->rightLabel.setMinimumWidth(height());
     this->rightLabel.getLabel().setTextFormat(Qt::RichText);

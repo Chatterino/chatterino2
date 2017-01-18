@@ -16,8 +16,8 @@ std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
     : QWidget(parent)
     , parentbox(this)
-    , preview(this)
     , chatWidgets()
+    , preview(this)
 {
     this->tab = tab;
     tab->page = this;

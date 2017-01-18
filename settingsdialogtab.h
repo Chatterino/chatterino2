@@ -18,23 +18,23 @@ public:
     void
     setSelected(bool selected)
     {
-        if (selected == selected)
+        if (this->selected == selected)
             return;
 
-        selected = selected;
+        this->selected = selected;
         emit selectedChanged(selected);
     }
 
     bool
     getSelected() const
     {
-        return selected;
+        return this->selected;
     }
 
     QWidget *
     getWidget()
     {
-        return widget;
+        return this->widget;
     }
 
     void

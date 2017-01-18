@@ -77,111 +77,111 @@ public:
     const QString &
     getText() const
     {
-        return text;
+        return this->text;
     }
 
     int
     getWidth() const
     {
-        return width;
+        return this->width;
     }
 
     int
     getHeight() const
     {
-        return height;
+        return this->height;
     }
 
     void
     setSize(int width, int height)
     {
-        width = width;
-        height = height;
+        this->width = width;
+        this->height = height;
     }
 
     bool
     isImage() const
     {
-        return _isImage;
+        return this->_isImage;
     }
 
     bool
     isText() const
     {
-        return !_isImage;
+        return !this->_isImage;
     }
 
     const QString &
     getCopyText() const
     {
-        return copyText;
+        return this->copyText;
     }
 
     bool
     hasTrailingSpace() const
     {
-        return _hasTrailingSpace;
+        return this->_hasTrailingSpace;
     }
 
     QFont &
     getFont() const
     {
-        return Fonts::getFont(font);
+        return Fonts::getFont(this->font);
     }
 
     QFontMetrics &
     getFontMetrics() const
     {
-        return Fonts::getFontMetrics(font);
+        return Fonts::getFontMetrics(this->font);
     }
 
     Type
     getType() const
     {
-        return type;
+        return this->type;
     }
 
     const QString &
     getTooltip() const
     {
-        return tooltip;
+        return this->tooltip;
     }
 
     const QColor &
     getColor() const
     {
-        return color;
+        return this->color;
     }
 
     const Link &
     getLink() const
     {
-        return link;
+        return this->link;
     }
 
     int
     getXOffset() const
     {
-        return xOffset;
+        return this->xOffset;
     }
 
     int
     getYOffset() const
     {
-        return yOffset;
+        return this->yOffset;
     }
 
     void
     setOffset(int xOffset, int yOffset)
     {
-        xOffset = std::max(0, xOffset);
-        yOffset = std::max(0, yOffset);
+        this->xOffset = std::max(0, xOffset);
+        this->yOffset = std::max(0, yOffset);
     }
 
     std::vector<short> &
     getCharacterWidthCache()
     {
-        return characterWidthCache;
+        return this->characterWidthCache;
     }
 
 private:

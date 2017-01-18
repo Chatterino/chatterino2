@@ -21,71 +21,71 @@ public:
     void
     setMaximum(qreal value)
     {
-        maximum = value;
+        this->maximum = value;
 
-        updateScroll();
+        this->updateScroll();
     }
 
     void
     setMinimum(qreal value)
     {
-        minimum = value;
+        this->minimum = value;
 
-        updateScroll();
+        this->updateScroll();
     }
 
     void
     setLargeChange(qreal value)
     {
-        largeChange = value;
+        this->largeChange = value;
 
-        updateScroll();
+        this->updateScroll();
     }
 
     void
     setSmallChange(qreal value)
     {
-        smallChange = value;
+        this->smallChange = value;
 
-        updateScroll();
+        this->updateScroll();
     }
 
     void
     setValue(qreal value)
     {
-        value = value;
+        this->value = value;
 
-        updateScroll();
+        this->updateScroll();
     }
 
     qreal
     getMaximum() const
     {
-        return maximum;
+        return this->maximum;
     }
 
     qreal
     getMinimum() const
     {
-        return minimum;
+        return this->minimum;
     }
 
     qreal
     getLargeChange() const
     {
-        return largeChange;
+        return this->largeChange;
     }
 
     qreal
     getSmallChange() const
     {
-        return smallChange;
+        return this->smallChange;
     }
 
     qreal
     getValue() const
     {
-        return value;
+        return this->value;
     }
 
 private:

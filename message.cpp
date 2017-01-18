@@ -464,7 +464,7 @@ Message::layout(int width, bool enableEmoteMargins)
     bool first = true;
 
     auto alignParts = [&lineStart, &lineHeight, &parts, this] {
-        for (int i = lineStart; i < parts->size(); i++) {
+        for (size_t i = lineStart; i < parts->size(); i++) {
             WordPart &wordPart2 = parts->at(i);
 
             wordPart2.setY(wordPart2.getY() + lineHeight);
@@ -510,7 +510,7 @@ Message::layout(int width, bool enableEmoteMargins)
                 charWidths.reserve(text.length());
 
                 for (int i = 0; i < text.length(); i++) {
-                    charWidths.push_back(metrics.charWidth(text, i));
+                    charWidths.push_back(metrics.width(text, i));
                 }
             }
 
