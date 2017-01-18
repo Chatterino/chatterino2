@@ -2,6 +2,7 @@
 #define CHATWIDGETHEADER_H
 
 #include "chatwidgetheaderbutton.h"
+#include "signallabel.h"
 
 #include <QAction>
 #include <QHBoxLayout>
@@ -45,7 +46,7 @@ private:
     QHBoxLayout hbox;
 
     ChatWidgetHeaderButton leftLabel;
-    QLabel middleLabel;
+    SignalLabel middleLabel;
     ChatWidgetHeaderButton rightLabel;
 
     QMenu leftMenu;

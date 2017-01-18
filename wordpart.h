@@ -19,84 +19,84 @@ public:
     const Word &
     getWord() const
     {
-        return m_word;
+        return this->m_word;
     }
 
     int
     getWidth() const
     {
-        return width;
+        return this->width;
     }
 
     int
     getHeight() const
     {
-        return height;
+        return this->height;
     }
 
     int
     getX() const
     {
-        return x;
+        return this->x;
     }
 
     int
     getY() const
     {
-        return y;
+        return this->y;
     }
 
     void
     setPosition(int x, int y)
     {
-        x = x;
-        y = y;
+        this->x = x;
+        this->y = y;
     }
 
     void
     setY(int y)
     {
-        y = y;
+        this->y = y;
     }
 
     int
     getRight() const
     {
-        return x + width;
+        return this->x + this->width;
     }
 
     int
     getBottom() const
     {
-        return y + height;
+        return this->y + this->height;
     }
 
     QRect
     getRect() const
     {
-        return QRect(x, y, width, height);
+        return QRect(this->x, this->y, this->width, this->height);
     }
 
     const QString
     getCopyText() const
     {
-        return copyText;
+        return this->copyText;
     }
 
     int
     hasTrailingSpace() const
     {
-        return _trailingSpace;
+        return this->_trailingSpace;
     }
 
     const QString &
     getText() const
     {
-        return text;
+        return this->text;
     }
 
 private:
-    Word &m_word;
+    Word& m_word;
 
     QString copyText;
     QString text;

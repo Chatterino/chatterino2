@@ -6,6 +6,7 @@
 #include "word.h"
 #include "wordpart.h"
 
+#include <math.h>
 #include <QPainter>
 #include <QScroller>
 #include <functional>
@@ -105,7 +106,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
     }
 
     int y = -(messages[start].get()->getHeight() *
-              (std::fmod(this->scrollbar.getValue(), 1)));
+              (fmod(this->scrollbar.getValue(), 1)));
 
     for (int i = start; i < messages.size(); ++i) {
         Message *message = messages[i].get();
