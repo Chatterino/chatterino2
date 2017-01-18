@@ -1,7 +1,8 @@
 #define LOOKUP_COLOR_COUNT 360
 
 #include "colorscheme.h"
-#include "QColor"
+
+#include <QColor>
 
 // hue: theme color (0 - 1)
 // multiplyer: 1 = white, 0.8 = light, -0.8 dark, -1 black

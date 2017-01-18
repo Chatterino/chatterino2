@@ -1,10 +1,11 @@
 #ifndef SCROLLBAR_H
 #define SCROLLBAR_H
 
-#include <functional>
-#include "QMutex"
-#include "QWidget"
 #include "scrollbarhighlight.h"
+
+#include <QMutex>
+#include <QWidget>
+#include <functional>
 
 class ScrollBar : public QWidget
 {

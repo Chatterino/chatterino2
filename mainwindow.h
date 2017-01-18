@@ -1,8 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include "notebook.h"
+
+#include <QMainWindow>
 
 class MainWindow : public QMainWindow
 {

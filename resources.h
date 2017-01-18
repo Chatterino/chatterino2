@@ -1,7 +1,7 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#include <lazyloadedimage.h>
+#include "lazyloadedimage.h"
 
 class Resources
 {

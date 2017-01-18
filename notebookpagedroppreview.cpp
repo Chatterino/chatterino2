@@ -1,6 +1,7 @@
 #include "notebookpagedroppreview.h"
-#include "QPainter"
 #include "colorscheme.h"
+
+#include <QPainter>
 
 NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     : QWidget(parent)

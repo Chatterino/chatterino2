@@ -1,16 +1,17 @@
 #ifndef NOTEBOOKPAGE_H
 #define NOTEBOOKPAGE_H
 
-#include "QDragEnterEvent"
-#include "QHBoxLayout"
-#include "QRect"
-#include "QVBoxLayout"
-#include "QVector"
-#include "QWidget"
 #include "chatwidget.h"
 #include "notebookpage.h"
 #include "notebookpagedroppreview.h"
 #include "notebooktab.h"
+
+#include <QDragEnterEvent>
+#include <QHBoxLayout>
+#include <QRect>
+#include <QVBoxLayout>
+#include <QVector>
+#include <QWidget>
 
 class NotebookPage : public QWidget
 {

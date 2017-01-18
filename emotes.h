@@ -1,11 +1,12 @@
 #ifndef EMOTES_H
 #define EMOTES_H
 
-#include "QMap"
-#include "QMutex"
 #include "concurrentmap.h"
 #include "lazyloadedimage.h"
 #include "twitchemotevalue.h"
+
+#include <QMap>
+#include <QMutex>
 
 class Emotes
 {

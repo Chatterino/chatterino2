@@ -1,8 +1,8 @@
 #ifndef LAMBDAQRUNNABLE_H
 #define LAMBDAQRUNNABLE_H
 
-#include "QRunnable"
-#include "functional"
+#include <QRunnable>
+#include <functional>
 
 class LambdaQRunnable : public QRunnable
 {

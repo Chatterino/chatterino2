@@ -5,10 +5,9 @@
 #include "lazyloadedimage.h"
 #include "link.h"
 
+#include <stdint.h>
 #include <QRect>
 #include <QString>
-
-#include <stdint.h>
 
 class Word
 {

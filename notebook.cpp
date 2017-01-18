@@ -1,14 +1,15 @@
 #include "notebook.h"
-#include "QFormLayout"
-#include "QLayout"
-#include "QList"
-#include "QWidget"
 #include "colorscheme.h"
 #include "dialog.h"
 #include "notebookbutton.h"
 #include "notebookpage.h"
 #include "notebooktab.h"
 #include "settingsdialog.h"
+
+#include <QFormLayout>
+#include <QLayout>
+#include <QList>
+#include <QWidget>
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent)

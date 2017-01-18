@@ -1,6 +1,7 @@
 #include "scrollbar.h"
-#include "QPainter"
 #include "colorscheme.h"
+
+#include <QPainter>
 
 #define MIN_THUMB_HEIGHT 10
 

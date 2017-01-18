@@ -1,8 +1,8 @@
 #ifndef SETTINGSNOTEBOOKTAB_H
 #define SETTINGSNOTEBOOKTAB_H
 
+#include <QPaintEvent>
 #include <QWidget>
-#include "QPaintEvent"
 
 class SettingsDialog;
 

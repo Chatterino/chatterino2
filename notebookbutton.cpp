@@ -1,8 +1,9 @@
 #include "notebookbutton.h"
-#include "QMouseEvent"
-#include "QPainter"
-#include "QPainterPath"
 #include "colorscheme.h"
+
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPainterPath>
 
 NotebookButton::NotebookButton(QWidget *parent)
     : QWidget(parent)

@@ -1,12 +1,13 @@
 #include "notebookpage.h"
-#include "QHBoxLayout"
-#include "QMimeData"
-#include "QPainter"
-#include "QVBoxLayout"
-#include "QWidget"
 #include "chatwidget.h"
 #include "colorscheme.h"
 #include "notebooktab.h"
+
+#include <QHBoxLayout>
+#include <QMimeData>
+#include <QPainter>
+#include <QVBoxLayout>
+#include <QWidget>
 
 bool NotebookPage::isDraggingSplit = false;
 ChatWidget *NotebookPage::draggingSplit = NULL;

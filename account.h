@@ -6,7 +6,7 @@
 class Account
 {
 public:
-    Account(QString getUsername, QString getOauthToken, QString getOauthClient);
+    Account(QString username, QString oauthToken, QString oauthClient);
 
     static const Account *
     getAnon()

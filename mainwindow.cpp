@@ -1,8 +1,9 @@
 #include "mainwindow.h"
-#include <QPalette>
 #include "chatwidget.h"
 #include "colorscheme.h"
 #include "notebook.h"
+
+#include <QPalette>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

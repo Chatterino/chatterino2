@@ -1,6 +1,7 @@
 #include "chatwidgetinput.h"
-#include "QPainter"
 #include "colorscheme.h"
+
+#include <QPainter>
 
 ChatWidgetInput::ChatWidgetInput()
 {

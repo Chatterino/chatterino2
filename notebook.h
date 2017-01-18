@@ -1,11 +1,12 @@
 #ifndef NOTEBOOK_H
 #define NOTEBOOK_H
 
-#include <QList>
-#include <QWidget>
 #include "notebookbutton.h"
 #include "notebookpage.h"
 #include "notebooktab.h"
+
+#include <QList>
+#include <QWidget>
 
 class Notebook : public QWidget
 {

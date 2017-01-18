@@ -1,5 +1,6 @@
 #include "resources.h"
-#include "QPixmap"
+
+#include <QPixmap>
 
 LazyLoadedImage *Resources::badgeStaff(NULL);
 LazyLoadedImage *Resources::badgeAdmin(NULL);

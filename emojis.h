@@ -1,13 +1,13 @@
 #ifndef EMOJIS_H
 #define EMOJIS_H
 
+#include "concurrentmap.h"
+#include "lazyloadedimage.h"
+
 #include <QObject>
 #include <QRegularExpression>
 #include <QString>
 #include <unordered_map>
-
-#include "concurrentmap.h"
-#include "lazyloadedimage.h"
 
 class Emojis
 {
