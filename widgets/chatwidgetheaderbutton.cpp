@@ -16,15 +16,17 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton()
 {
     setLayout(&hbox);
 
+    label.setAlignment(Qt::AlignCenter);
+
     hbox.setMargin(0);
     hbox.addSpacing(6);
     hbox.addWidget(&this->label);
     hbox.addSpacing(6);
 
-    QObject::connect(&this->label, &ChatWidgetHeaderButtonLabel::mouseUp, this,
+    QObject::connect(&this->label, &SignalLabel::mouseUp, this,
                      &ChatWidgetHeaderButton::labelMouseUp);
-    QObject::connect(&this->label, &ChatWidgetHeaderButtonLabel::mouseDown,
-                     this, &ChatWidgetHeaderButton::labelMouseDown);
+    QObject::connect(&this->label, &SignalLabel::mouseDown, this,
+                     &ChatWidgetHeaderButton::labelMouseDown);
 }
 
 void

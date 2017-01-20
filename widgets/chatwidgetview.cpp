@@ -147,6 +147,10 @@ ChatWidgetView::paintEvent(QPaintEvent *)
         }
 
         y += message->getHeight();
+
+        if (y > height()) {
+            break;
+        }
     }
 }
 }

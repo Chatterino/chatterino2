@@ -55,7 +55,6 @@ SOURCES += main.cpp\
     widgets/chatwidget.cpp \
     widgets/chatwidgetheader.cpp \
     widgets/chatwidgetheaderbutton.cpp \
-    widgets/chatwidgetheaderbuttonlabel.cpp \
     widgets/chatwidgetinput.cpp \
     widgets/chatwidgetview.cpp \
     widgets/mainwindow.cpp \
@@ -88,14 +87,12 @@ HEADERS  += account.h \
     messages/word.h \
     messages/wordpart.h \
     resources.h \
-    settings/realsetting.h \
     settings/setting.h \
     settings/settings.h \
     twitchemotevalue.h \
     widgets/chatwidget.h \
     widgets/chatwidgetheader.h \
     widgets/chatwidgetheaderbutton.h \
-    widgets/chatwidgetheaderbuttonlabel.h \
     widgets/chatwidgetinput.h \
     widgets/chatwidgetview.h \
     widgets/mainwindow.h \
@@ -110,7 +107,11 @@ HEADERS  += account.h \
     widgets/settingsdialogtab.h \
     widgets/signallabel.h \
     widgets/textinputdialog.h \
-    windows.h
+    windows.h \
+    settings/boolsetting.h \
+    settings/stringsetting.h \
+    settings/intsetting.h \
+    settings/floatsetting.h
 
 PRECOMPILED_HEADER =
 

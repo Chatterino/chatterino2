@@ -7,6 +7,7 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetInput::ChatWidgetInput()
+    : edit(this)
 {
     setFixedHeight(38);
 }

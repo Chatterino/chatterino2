@@ -1,6 +1,7 @@
 #ifndef SETTING_H
 #define SETTING_H
 
+#include <QSettings>
 #include <QString>
 
 namespace chatterino {
@@ -14,17 +15,20 @@ public:
     {
     }
 
+    virtual void save(const QSettings &settings) = 0;
+    virtual void load(const QSettings &settings) = 0;
+
+protected:
     const QString &
     getName() const
     {
         return name;
     }
 
-    virtual QString toString() = 0;
-
 private:
     QString name;
 };
+}
 }
 
 #endif  // SETTING_H

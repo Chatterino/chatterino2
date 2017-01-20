@@ -415,6 +415,10 @@ Message::layout(int width, bool enableEmoteMargins)
     bool recalculateImages = this->emoteGeneration != Emotes::getGeneration();
     bool recalculateText = this->fontGeneration != Fonts::getGeneration();
 
+    qreal emoteScale = settings::Settings::getEmoteScale().get();
+    bool scaleEmotesByLineHeight =
+        settings::Settings::getScaleEmotesByLineHeight().get();
+
     if (recalculateImages || recalculateText) {
         this->emoteGeneration = Emotes::getGeneration();
         this->fontGeneration = Fonts::getGeneration();
@@ -429,16 +433,12 @@ Message::layout(int width, bool enableEmoteMargins)
                     qreal w = image.getWidth();
                     qreal h = image.getHeight();
 
-                    if (settings::Settings::getScaleEmotesByLineHeight()) {
-                        word.setSize(w * mediumTextLineHeight / h *
-                                         settings::Settings::getEmoteScale(),
-                                     mediumTextLineHeight *
-                                         settings::Settings::getEmoteScale());
+                    if (scaleEmotesByLineHeight) {
+                        word.setSize(w * mediumTextLineHeight / h * emoteScale,
+                                     mediumTextLineHeight * emoteScale);
                     } else {
-                        word.setSize(w * image.getScale() *
-                                         settings::Settings::getEmoteScale(),
-                                     h * image.getScale() *
-                                         settings::Settings::getEmoteScale());
+                        word.setSize(w * image.getScale() * emoteScale,
+                                     h * image.getScale() * emoteScale);
                     }
                 }
             } else {

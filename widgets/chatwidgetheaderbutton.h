@@ -1,7 +1,7 @@
 #ifndef CHATWIDGETHEADERBUTTON_H
 #define CHATWIDGETHEADERBUTTON_H
 
-#include "widgets/chatwidgetheaderbuttonlabel.h"
+#include "widgets/signallabel.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -18,7 +18,7 @@ class ChatWidgetHeaderButton : public QWidget
 public:
     ChatWidgetHeaderButton();
 
-    ChatWidgetHeaderButtonLabel &
+    SignalLabel &
     getLabel()
     {
         return label;
@@ -38,7 +38,7 @@ protected:
 
 private:
     QHBoxLayout hbox;
-    ChatWidgetHeaderButtonLabel label;
+    SignalLabel label;
 
     bool mouseOver;
     bool mouseDown;

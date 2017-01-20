@@ -2,6 +2,7 @@
 #define CHATWIDGETINPUT_H
 
 #include <QPaintEvent>
+#include <QTextEdit>
 #include <QWidget>
 
 namespace chatterino {
@@ -16,6 +17,9 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *);
+
+private:
+    QTextEdit edit;
 };
 }
 }
