@@ -12,7 +12,7 @@ ChatWidgetInput::ChatWidgetInput()
 {
     this->setLayout(&hbox);
 
-    this->setMaximumHeight(100);
+    this->setMaximumHeight(150);
 
     this->hbox.addWidget(&edit);
 

@@ -44,7 +44,7 @@ protected:
 
         auto document = this->document()->clone();
 
-        return margins.top() + document->size().height() + margins.bottom() + 2;
+        return margins.top() + document->size().height() + margins.bottom() + 5;
     }
 };
 

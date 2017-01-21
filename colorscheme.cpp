@@ -47,12 +47,6 @@ ColorScheme::setColors(float hue, float multiplyer)
     ChatInputBorder = getColor(0, 0.1, 0.9);
 
     // generate color lookuptable
-    //    fillLookupTableValues(0, 0.1, 0.6, 1);
-    //    fillLookupTableValues(0.1, 0.50, 1, 1);
-    //    fillLookupTableValues(0.50, 0.65, 1, 0.5);
-    //    fillLookupTableValues(0.65, 0.83, 0.5, 0.7);
-    //    fillLookupTableValues(0.83, 1, 0.7, 0.6);
-
     fillLookupTableValues(this->middleLookupTable, 0.000, 0.166, 0.66, 0.5);
     fillLookupTableValues(this->middleLookupTable, 0.166, 0.333, 0.5, 0.55);
     fillLookupTableValues(this->middleLookupTable, 0.333, 0.500, 0.55, 0.45);
@@ -67,13 +61,12 @@ ColorScheme::setColors(float hue, float multiplyer)
     fillLookupTableValues(this->minLookupTable, 0.666, 0.833, 0.50, 0.30);
     fillLookupTableValues(this->minLookupTable, 0.833, 1.000, 0.30, 0.33);
 
-    //    for (int i = 0; i < LOOKUP_COLOR_COUNT; i++) {
-    //        qInfo(QString::number(this->middleLookupTable[i]).toStdString().c_str());
-    //    }
-
-    InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
-                      "border:" + TabSelectedBackground.name() + ";" +
-                      "color:" + Text.name();
+    // stylesheet
+    InputStyleSheet =
+        "background:" + ChatInputBackground.name() + ";" +
+        "border:" + TabSelectedBackground.name() + ";" +
+        "color:" + Text.name() + ";" +
+        "selection-background-color:" + TabSelectedBackground.name();
 }
 
 void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from,
