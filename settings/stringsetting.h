@@ -27,7 +27,13 @@ public:
     const QString &
     set(const QString &value)
     {
-        return (this->value = value);
+        this->value = value;
+
+        QString tmp = value;
+
+        emit valueChanged(tmp);
+
+        return this->value;
     }
 
     void
@@ -39,6 +45,9 @@ public:
     load(const QSettings &settings) override
     {
     }
+
+signals:
+    void valueChanged(const QString &value);
 
 private:
     QString value;

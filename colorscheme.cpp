@@ -70,6 +70,10 @@ ColorScheme::setColors(float hue, float multiplyer)
     //    for (int i = 0; i < LOOKUP_COLOR_COUNT; i++) {
     //        qInfo(QString::number(this->middleLookupTable[i]).toStdString().c_str());
     //    }
+
+    InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
+                      "border:" + TabSelectedBackground.name() + ";" +
+                      "color:" + Text.name();
 }
 
 void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from,

@@ -7,10 +7,10 @@
 
 namespace chatterino {
 namespace settings {
-class BoolSetting : public Setting
+class IntSetting : public Setting
 {
 public:
-    BoolSetting(const QString &name, int defaultValue)
+    IntSetting(const QString &name, int defaultValue)
         : Setting(name)
         , value(defaultValue)
         , defaultValue(defaultValue)

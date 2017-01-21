@@ -71,6 +71,7 @@ private:
         settingsItems.push_back(&enableGifs);
         settingsItems.push_back(&inlineWhispers);
         settingsItems.push_back(&windowTopMost);
+        settingsItems.push_back(&compactTabs);
     }
 
     static QSettings settings;
@@ -215,6 +216,11 @@ public:
     {
         return Settings::windowTopMost;
     }
+    static BoolSetting
+    getCompactTabs()
+    {
+        return Settings::compactTabs;
+    }
 
 private:
     static StringSetting theme;
@@ -242,6 +248,7 @@ private:
     static BoolSetting enableGifs;
     static BoolSetting inlineWhispers;
     static BoolSetting windowTopMost;
+    static BoolSetting compactTabs;
 };
 }
 }

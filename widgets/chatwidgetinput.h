@@ -1,8 +1,13 @@
 #ifndef CHATWIDGETINPUT_H
 #define CHATWIDGETINPUT_H
 
+#include "resizingtextedit.h"
+
+#include <QHBoxLayout>
+#include <QLineEdit>
 #include <QPaintEvent>
 #include <QTextEdit>
+#include <QVBoxLayout>
 #include <QWidget>
 
 namespace chatterino {
@@ -19,7 +24,8 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    QTextEdit edit;
+    QHBoxLayout hbox;
+    ResizingTextEdit edit;
 };
 }
 }

@@ -11,6 +11,8 @@ class ColorScheme
 public:
     bool IsLightTheme;
 
+    QString InputStyleSheet;
+
     QColor SystemMessageColor;
 
     QColor DropPreviewBackground;

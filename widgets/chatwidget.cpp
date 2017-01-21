@@ -23,8 +23,12 @@ ChatWidget::ChatWidget(QWidget *parent)
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
 
+    //    header.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    //    view.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    //    input.setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+
     this->vbox.addWidget(&header);
-    this->vbox.addWidget(&view);
+    this->vbox.addWidget(&view, 1);
     this->vbox.addWidget(&input);
 }
 

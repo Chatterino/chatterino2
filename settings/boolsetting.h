@@ -26,7 +26,11 @@ public:
     void
     set(bool value)
     {
-        this->value = value;
+        if (this->value != value) {
+            this->value = value;
+
+            emit valueChanged(value);
+        }
     }
 
     void
@@ -38,6 +42,9 @@ public:
     load(const QSettings &settings) override
     {
     }
+
+signals:
+    void valueChanged(bool value);
 
 private:
     bool value;

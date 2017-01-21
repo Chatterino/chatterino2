@@ -7,9 +7,16 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetInput::ChatWidgetInput()
-    : edit(this)
+    : hbox()
+    , edit()
 {
-    setFixedHeight(38);
+    this->setLayout(&hbox);
+
+    this->setMaximumHeight(100);
+
+    this->hbox.addWidget(&edit);
+
+    edit.setStyleSheet(ColorScheme::instance().InputStyleSheet);
 }
 
 void
