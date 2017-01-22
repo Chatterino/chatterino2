@@ -25,14 +25,14 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
 
     QObject::connect(&settings::Settings::getInstance(),
                      &settings::Settings::wordTypeMaskChanged, this,
-                     &wordTypeMaskChanged);
+                     &ChatWidgetView::wordTypeMaskChanged);
 }
 
 ChatWidgetView::~ChatWidgetView()
 {
     QObject::disconnect(&settings::Settings::getInstance(),
                         &settings::Settings::wordTypeMaskChanged, this,
-                        &wordTypeMaskChanged);
+                        &ChatWidgetView::wordTypeMaskChanged);
 }
 
 bool

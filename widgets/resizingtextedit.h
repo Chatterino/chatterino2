@@ -13,7 +13,7 @@ public:
         sizePolicy.setVerticalPolicy(QSizePolicy::Preferred);
         this->setSizePolicy(sizePolicy);
 
-        QObject::connect(this, &QTextEdit::textChanged, this, &updateGeometry);
+        QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
     }
 
     QSize
