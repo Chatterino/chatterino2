@@ -1,5 +1,6 @@
 #include "widgets/chatwidgetinput.h"
 #include "colorscheme.h"
+#include "settings/settings.h"
 
 #include <QPainter>
 
@@ -38,6 +39,20 @@ ChatWidgetInput::ChatWidgetInput()
     //    this->emotesLabel.setMaximumSize(12, 12);
 
     this->refreshTheme();
+
+    this->setMessageLengthVisisble(
+        settings::Settings::getInstance().getShowMessageLength().get());
+
+    QObject::connect(&settings::Settings::getInstance().getShowMessageLength(),
+                     &settings::BoolSetting::valueChanged, this,
+                     &setMessageLengthVisisble);
+}
+
+ChatWidgetInput::~ChatWidgetInput()
+{
+    QObject::disconnect(
+        &settings::Settings::getInstance().getShowMessageLength(),
+        &settings::BoolSetting::valueChanged, this, &setMessageLengthVisisble);
 }
 
 void

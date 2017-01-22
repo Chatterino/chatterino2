@@ -2,6 +2,7 @@
 #define CHATVIEW_H
 
 #include "channel.h"
+#include "messages/word.h"
 #include "widgets/scrollbar.h"
 
 #include <QPaintEvent>
@@ -17,6 +18,7 @@ class ChatWidgetView : public QWidget
 
 public:
     explicit ChatWidgetView(ChatWidget *parent);
+    ~ChatWidgetView();
 
     bool layoutMessages();
 
@@ -29,6 +31,15 @@ private:
     ChatWidget *chatWidget;
 
     ScrollBar scrollbar;
+
+private slots:
+    void
+    wordTypeMaskChanged()
+    {
+        if (layoutMessages()) {
+            repaint();
+        }
+    }
 };
 }
 }

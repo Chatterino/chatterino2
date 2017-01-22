@@ -14,10 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setCentralWidget(&this->notebook);
 
-    this->notebook.addPage();
-    this->notebook.addPage();
-    this->notebook.addPage();
-
     QPalette palette;
     palette.setColor(QPalette::Background,
                      ColorScheme::instance().TabPanelBackground);

@@ -2,6 +2,7 @@
 #define CHATWIDGET_H
 
 #include "channel.h"
+#include "messages/word.h"
 #include "widgets/chatwidgetheader.h"
 #include "widgets/chatwidgetinput.h"
 #include "widgets/chatwidgetview.h"

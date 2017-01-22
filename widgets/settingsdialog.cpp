@@ -54,6 +54,8 @@ SettingsDialog::SettingsDialog()
 void
 SettingsDialog::addTabs()
 {
+    settings::Settings &settings = settings::Settings::getInstance();
+
     QVBoxLayout *vbox;
 
     // Appearance
@@ -80,12 +82,17 @@ SettingsDialog::addTabs()
         auto group = new QGroupBox("Messages");
 
         auto v = new QVBoxLayout();
-        v->addWidget(createCheckbox("Show timestamp", ""));
-        v->addWidget(createCheckbox("Show seconds in timestamp", ""));
+        v->addWidget(
+            createCheckbox("Show timestamp", settings.getShowTimestamps()));
+        v->addWidget(createCheckbox("Show seconds in timestamp",
+                                    settings.getShowTimestampSeconds()));
         v->addWidget(createCheckbox(
-            "Allow sending duplicate messages (add a space at the end)", ""));
-        v->addWidget(createCheckbox("Seperate messages", ""));
-        v->addWidget(createCheckbox("Show message length", ""));
+            "Allow sending duplicate messages (add a space at the end)",
+            settings.getAllowDouplicateMessages()));
+        v->addWidget(createCheckbox("Seperate messages",
+                                    settings.getSeperateMessages()));
+        v->addWidget(createCheckbox("Show message length",
+                                    settings.getShowMessageLength()));
 
         group->setLayout(v);
 
@@ -99,11 +106,15 @@ SettingsDialog::addTabs()
     // Behaviour
     vbox = new QVBoxLayout();
 
-    vbox->addWidget(createCheckbox("Hide input box if empty", ""));
+    vbox->addWidget(createCheckbox("Hide input box if empty",
+                                   settings.getHideEmptyInput()));
     vbox->addWidget(
-        createCheckbox("Mention users with a @ (except in commands)", ""));
-    vbox->addWidget(createCheckbox("Window always on top", ""));
-    vbox->addWidget(createCheckbox("Show last read message indicator", ""));
+        createCheckbox("Mention users with a @ (except in commands)",
+                       settings.getMentionUsersWithAt()));
+    vbox->addWidget(
+        createCheckbox("Window always on top", settings.getWindowTopMost()));
+    vbox->addWidget(createCheckbox("Show last read message indicator",
+                                   settings.getShowLastMessageIndicator()));
 
     {
         auto v = new QVBoxLayout();
@@ -128,14 +139,66 @@ SettingsDialog::addTabs()
 
     addTab(vbox, "Commands", ":/images/CustomActionEditor_16x.png");
 
+    // Emotes
+    vbox = new QVBoxLayout();
+
+    vbox->addWidget(createCheckbox("Enable Twitch Emotes",
+                                   settings.getEnableTwitchEmotes()));
+    vbox->addWidget(createCheckbox("Enable BetterTTV Emotes",
+                                   settings.getEnableBttvEmotes()));
+    vbox->addWidget(createCheckbox("Enable FrankerFaceZ Emotes",
+                                   settings.getEnableFfzEmotes()));
+    vbox->addWidget(
+        createCheckbox("Enable Gif Emotes", settings.getEnableGifs()));
+    vbox->addWidget(
+        createCheckbox("Enable Emojis", settings.getEnableEmojis()));
+
+    vbox->addWidget(createCheckbox("Enable Twitch Emotes",
+                                   settings.getEnableTwitchEmotes()));
+
+    vbox->addStretch(1);
+    addTab(vbox, "Emotes", ":/images/Emoji_Color_1F60A_19.png");
+
+    // Ignored Users
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Ignored Users",
+           ":/images/StatusAnnotations_Blocked_16xLG_color.png");
+
+    // Ignored Messages
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Ignored Messages", ":/images/Filter_16x.png");
+
+    // Links
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Links", ":/images/VSO_Link_blue_16x.png");
+
+    // Highlighting
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Highlighting", ":/images/format_Bold_16xLG.png");
+
+    // Whispers
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Whispers", ":/images/Message_16xLG.png");
+
     // Add stretch
     tabs.addStretch(1);
 }
 
 QCheckBox *
-SettingsDialog::createCheckbox(QString title, QString settingsId)
+SettingsDialog::createCheckbox(const QString &title,
+                               settings::BoolSetting &setting)
 {
-    return new QCheckBox(title);
+    auto checkbox = new QCheckBox(title);
+
+    QObject::connect(checkbox, &QCheckBox::toggled, this,
+                     [&setting, this](bool state) { setting.set(state); });
+
+    return checkbox;
 }
 
 void

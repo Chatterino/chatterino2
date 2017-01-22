@@ -21,6 +21,7 @@ class ChatWidgetInput : public QWidget
 
 public:
     ChatWidgetInput();
+    ~ChatWidgetInput();
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -37,6 +38,11 @@ private:
 
 private slots:
     void refreshTheme();
+    void
+    setMessageLengthVisisble(bool value)
+    {
+        this->textLengthLabel.setHidden(!value);
+    }
 };
 }
 }

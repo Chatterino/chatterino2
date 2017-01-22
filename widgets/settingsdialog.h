@@ -1,6 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
+#include "settings/settings.h"
 #include "widgets/settingsdialogtab.h"
 
 #include <QButtonGroup>
@@ -39,7 +40,8 @@ private:
 
     SettingsDialogTab *selectedTab = NULL;
 
-    QCheckBox *createCheckbox(QString title, QString settingsId);
+    QCheckBox *createCheckbox(const QString &title,
+                              settings::BoolSetting &setting);
 };
 }
 }

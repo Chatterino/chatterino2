@@ -2,8 +2,8 @@
 #include "channels.h"
 #include "colorscheme.h"
 #include "messages/message.h"
-#include "messages/word.h"
 #include "messages/wordpart.h"
+#include "settings/settings.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>
@@ -22,6 +22,17 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     auto scroll = QScroller::scroller(this);
 
     scroll->scrollTo(QPointF(0, 100));
+
+    QObject::connect(&settings::Settings::getInstance(),
+                     &settings::Settings::wordTypeMaskChanged, this,
+                     &wordTypeMaskChanged);
+}
+
+ChatWidgetView::~ChatWidgetView()
+{
+    QObject::disconnect(&settings::Settings::getInstance(),
+                        &settings::Settings::wordTypeMaskChanged, this,
+                        &wordTypeMaskChanged);
 }
 
 bool

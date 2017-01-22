@@ -12,243 +12,231 @@
 namespace chatterino {
 namespace settings {
 
-class Settings
+class Settings : public QObject
 {
+    Q_OBJECT
+
 public:
-    static messages::Word::Type
+    static Settings &
+    getInstance()
+    {
+        return _;
+    }
+
+    void load();
+    void save();
+
+    messages::Word::Type
     getWordTypeMask()
     {
         return wordTypeMask;
     }
 
-    static bool isIgnoredEmote(const QString &emote);
+    bool isIgnoredEmote(const QString &emote);
 
-    static void load();
-    static void save();
-
-    static bool
+    bool
     getPortable()
     {
         return portable;
     }
 
-    static void
+    void
     setPortable(bool value)
     {
         portable = value;
     }
 
+signals:
+    void wordTypeMaskChanged();
+
 private:
     Settings();
 
-    static int _;
-    static int
-    _init()
-    {
-        settingsItems.reserve(25);
-        settingsItems.push_back(&theme);
-        settingsItems.push_back(&user);
-        settingsItems.push_back(&emoteScale);
-        settingsItems.push_back(&scaleEmotesByLineHeight);
-        settingsItems.push_back(&showTimestamps);
-        settingsItems.push_back(&showTimestampSeconds);
-        settingsItems.push_back(&allowDouplicateMessages);
-        settingsItems.push_back(&linksDoubleClickOnly);
-        settingsItems.push_back(&hideEmptyInput);
-        settingsItems.push_back(&showMessageLength);
-        settingsItems.push_back(&seperateMessages);
-        settingsItems.push_back(&mentionUsersWithAt);
-        settingsItems.push_back(&allowCommandsAtEnd);
-        settingsItems.push_back(&enableHighlights);
-        settingsItems.push_back(&enableHighlightSound);
-        settingsItems.push_back(&enableHighlightTaskbar);
-        settingsItems.push_back(&customHighlightSound);
-        settingsItems.push_back(&enableTwitchEmotes);
-        settingsItems.push_back(&enableBttvEmotes);
-        settingsItems.push_back(&enableFFzEmotes);
-        settingsItems.push_back(&enableEmojis);
-        settingsItems.push_back(&enableGifAnimations);
-        settingsItems.push_back(&enableGifs);
-        settingsItems.push_back(&inlineWhispers);
-        settingsItems.push_back(&windowTopMost);
-        settingsItems.push_back(&hideTabX);
-    }
+    static Settings _;
 
-    static QSettings settings;
-    static std::vector<Setting *> settingsItems;
+    void updateWordTypeMask(bool);
 
-    template <class T>
-    static T
-    addSetting(T setting)
-    {
-        settingsItems.push_back(setting);
-        return setting;
-    }
+    QSettings settings;
+    std::vector<Setting *> settingsItems;
 
-    static bool portable;
+    //    template <class T>
+    //    T
+    //    addSetting(T setting)
+    //    {
+    //        settingsItems.push_back(setting);
+    //        return setting;
+    //    }
 
-    static messages::Word::Type wordTypeMask;
+    bool portable;
+
+    messages::Word::Type wordTypeMask;
+
+private:
+    StringSetting theme;
+    StringSetting user;
+    FloatSetting emoteScale;
+    BoolSetting scaleEmotesByLineHeight;
+    BoolSetting showTimestamps;
+    BoolSetting showTimestampSeconds;
+    BoolSetting showLastMessageIndicator;
+    BoolSetting allowDouplicateMessages;
+    BoolSetting linksDoubleClickOnly;
+    BoolSetting hideEmptyInput;
+    BoolSetting showMessageLength;
+    BoolSetting seperateMessages;
+    BoolSetting mentionUsersWithAt;
+    BoolSetting allowCommandsAtEnd;
+    BoolSetting enableHighlights;
+    BoolSetting enableHighlightSound;
+    BoolSetting enableHighlightTaskbar;
+    BoolSetting customHighlightSound;
+    BoolSetting enableTwitchEmotes;
+    BoolSetting enableBttvEmotes;
+    BoolSetting enableFfzEmotes;
+    BoolSetting enableEmojis;
+    BoolSetting enableGifAnimations;
+    BoolSetting enableGifs;
+    BoolSetting inlineWhispers;
+    BoolSetting windowTopMost;
+    BoolSetting hideTabX;
 
     // settings
 public:
-    static StringSetting &
+    StringSetting &
     getTheme()
     {
-        return Settings::theme;
+        return this->theme;
     }
-    static StringSetting &
+    StringSetting &
     getUser()
     {
-        return Settings::user;
+        return this->user;
     }
-    static FloatSetting &
+    FloatSetting &
     getEmoteScale()
     {
-        return Settings::emoteScale;
+        return this->emoteScale;
     }
-    static BoolSetting &
+    BoolSetting &
     getScaleEmotesByLineHeight()
     {
-        return Settings::scaleEmotesByLineHeight;
+        return this->scaleEmotesByLineHeight;
     }
-    static BoolSetting &
+    BoolSetting &
     getShowTimestamps()
     {
-        return Settings::showTimestamps;
+        return this->showTimestamps;
     }
-    static BoolSetting &
+    BoolSetting &
     getShowTimestampSeconds()
     {
-        return Settings::showTimestampSeconds;
+        return this->showTimestampSeconds;
     }
-    static BoolSetting &
+    BoolSetting &
+    getShowLastMessageIndicator()
+    {
+        return this->showLastMessageIndicator;
+    }
+    BoolSetting &
     getAllowDouplicateMessages()
     {
-        return Settings::allowDouplicateMessages;
+        return this->allowDouplicateMessages;
     }
-    static BoolSetting &
+    BoolSetting &
     getLinksDoubleClickOnly()
     {
-        return Settings::linksDoubleClickOnly;
+        return this->linksDoubleClickOnly;
     }
-    static BoolSetting &
+    BoolSetting &
     getHideEmptyInput()
     {
-        return Settings::hideEmptyInput;
+        return this->hideEmptyInput;
     }
-    static BoolSetting &
+    BoolSetting &
     getShowMessageLength()
     {
-        return Settings::showMessageLength;
+        return this->showMessageLength;
     }
-    static BoolSetting &
+    BoolSetting &
     getSeperateMessages()
     {
-        return Settings::seperateMessages;
+        return this->seperateMessages;
     }
-    static BoolSetting &
+    BoolSetting &
     getMentionUsersWithAt()
     {
-        return Settings::mentionUsersWithAt;
+        return this->mentionUsersWithAt;
     }
-    static BoolSetting &
+    BoolSetting &
     getAllowCommandsAtEnd()
     {
-        return Settings::allowCommandsAtEnd;
+        return this->allowCommandsAtEnd;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableHighlights()
     {
-        return Settings::enableHighlights;
+        return this->enableHighlights;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableHighlightSound()
     {
-        return Settings::enableHighlightSound;
+        return this->enableHighlightSound;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableHighlightTaskbar()
     {
-        return Settings::enableHighlightTaskbar;
+        return this->enableHighlightTaskbar;
     }
-    static BoolSetting &
+    BoolSetting &
     getCustomHighlightSound()
     {
-        return Settings::customHighlightSound;
+        return this->customHighlightSound;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableTwitchEmotes()
     {
-        return Settings::enableTwitchEmotes;
+        return this->enableTwitchEmotes;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableBttvEmotes()
     {
-        return Settings::enableBttvEmotes;
+        return this->enableBttvEmotes;
     }
-    static BoolSetting &
-    getEnableFFzEmotes()
+    BoolSetting &
+    getEnableFfzEmotes()
     {
-        return Settings::enableFFzEmotes;
+        return this->enableFfzEmotes;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableEmojis()
     {
-        return Settings::enableEmojis;
+        return this->enableEmojis;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableGifAnimations()
     {
-        return Settings::enableGifAnimations;
+        return this->enableGifAnimations;
     }
-    static BoolSetting &
+    BoolSetting &
     getEnableGifs()
     {
-        return Settings::enableGifs;
+        return this->enableGifs;
     }
-    static BoolSetting &
+    BoolSetting &
     getInlineWhispers()
     {
-        return Settings::inlineWhispers;
+        return this->inlineWhispers;
     }
-    static BoolSetting &
+    BoolSetting &
     getWindowTopMost()
     {
-        return Settings::windowTopMost;
+        return this->windowTopMost;
     }
-    static BoolSetting &
+    BoolSetting &
     getHideTabX()
     {
-        return Settings::hideTabX;
+        return this->hideTabX;
     }
-
-private:
-    static StringSetting theme;
-    static StringSetting user;
-    static FloatSetting emoteScale;
-    static BoolSetting scaleEmotesByLineHeight;
-    static BoolSetting showTimestamps;
-    static BoolSetting showTimestampSeconds;
-    static BoolSetting allowDouplicateMessages;
-    static BoolSetting linksDoubleClickOnly;
-    static BoolSetting hideEmptyInput;
-    static BoolSetting showMessageLength;
-    static BoolSetting seperateMessages;
-    static BoolSetting mentionUsersWithAt;
-    static BoolSetting allowCommandsAtEnd;
-    static BoolSetting enableHighlights;
-    static BoolSetting enableHighlightSound;
-    static BoolSetting enableHighlightTaskbar;
-    static BoolSetting customHighlightSound;
-    static BoolSetting enableTwitchEmotes;
-    static BoolSetting enableBttvEmotes;
-    static BoolSetting enableFFzEmotes;
-    static BoolSetting enableEmojis;
-    static BoolSetting enableGifAnimations;
-    static BoolSetting enableGifs;
-    static BoolSetting inlineWhispers;
-    static BoolSetting windowTopMost;
-    static BoolSetting hideTabX;
 };
 }
 }

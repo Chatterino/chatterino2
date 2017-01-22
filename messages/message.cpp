@@ -337,7 +337,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                                           "introducing-cheering-celebrate-"
                                           "together-da62af41fac6"))));
                     words.push_back(
-                        Word(image, Word::Bits, QString("cheer"),
+                        Word(image, Word::BitsStatic, QString("cheer"),
                              QString("Twitch Cheer"),
                              Link(Link::Url,
                                   QString("https://blog.twitch.tv/"
@@ -405,6 +405,8 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 bool
 Message::layout(int width, bool enableEmoteMargins)
 {
+    auto &settings = settings::Settings::getInstance();
+
     width = width - (width % 2);
 
     int mediumTextLineHeight = Fonts::getFontMetrics(Fonts::Medium).height();
@@ -415,9 +417,8 @@ Message::layout(int width, bool enableEmoteMargins)
     bool recalculateImages = this->emoteGeneration != Emotes::getGeneration();
     bool recalculateText = this->fontGeneration != Fonts::getGeneration();
 
-    qreal emoteScale = settings::Settings::getEmoteScale().get();
-    bool scaleEmotesByLineHeight =
-        settings::Settings::getScaleEmotesByLineHeight().get();
+    qreal emoteScale = settings.getEmoteScale().get();
+    bool scaleEmotesByLineHeight = settings.getScaleEmotesByLineHeight().get();
 
     if (recalculateImages || recalculateText) {
         this->emoteGeneration = Emotes::getGeneration();
@@ -474,7 +475,7 @@ Message::layout(int width, bool enableEmoteMargins)
         }
     };
 
-    int flags = settings::Settings::getWordTypeMask();
+    uint32_t flags = settings::Settings::getInstance().getWordTypeMask();
 
     for (auto it = this->words.begin(); it != this->words.end(); ++it) {
         Word &word = *it;

@@ -27,5 +27,8 @@
         <file>emojidata.txt</file>
         <file>images/button_ban.png</file>
         <file>images/button_timeout.png</file>
+        <file>images/StatusAnnotations_Blocked_16xLG_color.png</file>
+        <file>images/UserProfile_22x.png</file>
+        <file>images/VSO_Link_blue_16x.png</file>
     </qresource>
 </RCC>

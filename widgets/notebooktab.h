@@ -1,6 +1,7 @@
 #ifndef NOTEBOOKTAB_H
 #define NOTEBOOKTAB_H
 
+#include <QPropertyAnimation>
 #include <QWidget>
 
 namespace chatterino {
@@ -20,7 +21,7 @@ public:
         HighlightNewMessage
     };
 
-    NotebookTab(Notebook *notebook);
+    explicit NotebookTab(Notebook *notebook);
     ~NotebookTab();
 
     void calcSize();
@@ -65,6 +66,8 @@ public:
         repaint();
     }
 
+    void moveAnimated(QPoint pos);
+
 protected:
     void paintEvent(QPaintEvent *) override;
 
@@ -78,6 +81,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
+    //    QPropertyAnimation posAnimation;
+    //    bool posAnimated;
+
     Notebook *notebook;
 
     QString text;
@@ -98,7 +104,7 @@ private:
 
 private slots:
     void
-    hideTabXChanged(bool value)
+    hideTabXChanged(bool)
     {
         calcSize();
         repaint();

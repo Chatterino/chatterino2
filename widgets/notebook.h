@@ -33,6 +33,9 @@ public:
 
     void performLayout();
 
+    NotebookPage *tabAt(QPoint point, int &index);
+    void rearrangePage(NotebookPage *page, int index);
+
 protected:
     void resizeEvent(QResizeEvent *);
 
@@ -50,7 +53,7 @@ private:
     NotebookButton settingsButton;
     NotebookButton userButton;
 
-    NotebookPage *selectedPage = nullptr;
+    NotebookPage *selectedPage;
 };
 }
 }

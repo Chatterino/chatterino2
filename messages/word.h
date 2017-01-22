@@ -34,7 +34,7 @@ public:
         EmoteImages = TwitchEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
                       FfzEmoteImage,
 
-        Bits = (1 << 12),
+        BitsStatic = (1 << 12),
         BitsAnimated = (1 << 13),
 
         BadgeStaff = (1 << 14),
@@ -59,7 +59,7 @@ public:
         EmojiImage = (1 << 27),
         EmojiText = (1 << 28),
 
-        Default = TimestampNoSeconds | Badges | Username | Bits |
+        Default = TimestampNoSeconds | Badges | Username | BitsStatic |
                   FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
                   TwitchEmoteImage | BitsAmount | Text | ButtonBan |
                   ButtonTimeout

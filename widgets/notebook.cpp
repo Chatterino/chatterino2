@@ -18,6 +18,7 @@ Notebook::Notebook(QWidget *parent)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)
+    , selectedPage(nullptr)
 {
     connect(&this->settingsButton, SIGNAL(clicked()), this,
             SLOT(settingsButtonClicked()));
@@ -34,6 +35,8 @@ Notebook::Notebook(QWidget *parent)
     this->userButton.icon = NotebookButton::IconUser;
 
     this->addButton.resize(24, 24);
+
+    this->addPage();
 }
 
 NotebookPage *
@@ -42,13 +45,15 @@ Notebook::addPage(bool select)
     auto tab = new NotebookTab(this);
     auto page = new NotebookPage(this, tab);
 
+    tab->show();
+
     if (select || this->pages.count() == 0) {
         this->select(page);
     }
 
     this->pages.append(page);
 
-    performLayout();
+    this->performLayout();
 
     return page;
 }
@@ -56,20 +61,24 @@ Notebook::addPage(bool select)
 void
 Notebook::removePage(NotebookPage *page)
 {
-    int index = pages.indexOf(page);
+    int index = this->pages.indexOf(page);
 
     if (pages.size() == 1) {
-        select(NULL);
+        this->select(NULL);
     } else if (index == pages.count() - 1) {
-        select(pages[index - 1]);
+        this->select(pages[index - 1]);
     } else {
-        select(pages[index + 1]);
+        this->select(pages[index + 1]);
     }
 
     delete page->tab;
     delete page;
 
-    pages.removeOne(page);
+    this->pages.removeOne(page);
+
+    if (this->pages.size() == 0) {
+        addPage();
+    }
 
     performLayout();
 }
@@ -95,6 +104,36 @@ Notebook::select(NotebookPage *page)
     performLayout();
 }
 
+NotebookPage *
+Notebook::tabAt(QPoint point, int &index)
+{
+    int i = 0;
+
+    for (auto *page : pages) {
+        if (page->tab->geometry().contains(point)) {
+            index = i;
+            return page;
+        }
+
+        i++;
+    }
+
+    index = -1;
+    return nullptr;
+}
+
+void
+Notebook::rearrangePage(NotebookPage *page, int index)
+{
+    int i1 = pages.indexOf(page);
+
+    pages.move(pages.indexOf(page), index);
+
+    int i2 = pages.indexOf(page);
+
+    performLayout();
+}
+
 void
 Notebook::performLayout()
 {
@@ -109,10 +148,10 @@ Notebook::performLayout()
             (i == this->pages.last() ? tabHeight : 0) + x + i->tab->width() >
                 width()) {
             y += i->tab->height();
-            i->tab->move(0, y);
+            i->tab->moveAnimated(QPoint(0, y));
             x = i->tab->width();
         } else {
-            i->tab->move(x, y);
+            i->tab->moveAnimated(QPoint(x, y));
             x += i->tab->width();
         }
 
