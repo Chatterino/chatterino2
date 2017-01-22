@@ -21,6 +21,7 @@ public:
     };
 
     NotebookTab(Notebook *notebook);
+    ~NotebookTab();
 
     void calcSize();
 
@@ -65,14 +66,16 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *) override;
 
-    void mousePressEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *) Q_DECL_OVERRIDE;
-    void enterEvent(QEvent *) Q_DECL_OVERRIDE;
-    void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
-    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     Notebook *notebook;
@@ -82,7 +85,24 @@ private:
     bool selected;
     bool mouseOver;
     bool mouseDown;
+    bool mouseOverX;
+    bool mouseDownX;
+
     HighlightStyle highlightStyle;
+
+    QRect
+    getXRect()
+    {
+        return QRect(this->width() - 20, 4, 16, 16);
+    }
+
+private slots:
+    void
+    hideTabXChanged(bool value)
+    {
+        calcSize();
+        repaint();
+    }
 };
 }
 }

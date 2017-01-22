@@ -31,7 +31,7 @@ BoolSetting Settings::enableGifAnimations("", true);
 BoolSetting Settings::enableGifs("", true);
 BoolSetting Settings::inlineWhispers("", true);
 BoolSetting Settings::windowTopMost("", true);
-BoolSetting Settings::compactTabs("", false);
+BoolSetting Settings::hideTabX("", false);
 
 QSettings Settings::settings(
     QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),

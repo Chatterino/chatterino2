@@ -71,7 +71,7 @@ private:
         settingsItems.push_back(&enableGifs);
         settingsItems.push_back(&inlineWhispers);
         settingsItems.push_back(&windowTopMost);
-        settingsItems.push_back(&compactTabs);
+        settingsItems.push_back(&hideTabX);
     }
 
     static QSettings settings;
@@ -91,135 +91,135 @@ private:
 
     // settings
 public:
-    static StringSetting
+    static StringSetting &
     getTheme()
     {
         return Settings::theme;
     }
-    static StringSetting
+    static StringSetting &
     getUser()
     {
         return Settings::user;
     }
-    static FloatSetting
+    static FloatSetting &
     getEmoteScale()
     {
         return Settings::emoteScale;
     }
-    static BoolSetting
+    static BoolSetting &
     getScaleEmotesByLineHeight()
     {
         return Settings::scaleEmotesByLineHeight;
     }
-    static BoolSetting
+    static BoolSetting &
     getShowTimestamps()
     {
         return Settings::showTimestamps;
     }
-    static BoolSetting
+    static BoolSetting &
     getShowTimestampSeconds()
     {
         return Settings::showTimestampSeconds;
     }
-    static BoolSetting
+    static BoolSetting &
     getAllowDouplicateMessages()
     {
         return Settings::allowDouplicateMessages;
     }
-    static BoolSetting
+    static BoolSetting &
     getLinksDoubleClickOnly()
     {
         return Settings::linksDoubleClickOnly;
     }
-    static BoolSetting
+    static BoolSetting &
     getHideEmptyInput()
     {
         return Settings::hideEmptyInput;
     }
-    static BoolSetting
+    static BoolSetting &
     getShowMessageLength()
     {
         return Settings::showMessageLength;
     }
-    static BoolSetting
+    static BoolSetting &
     getSeperateMessages()
     {
         return Settings::seperateMessages;
     }
-    static BoolSetting
+    static BoolSetting &
     getMentionUsersWithAt()
     {
         return Settings::mentionUsersWithAt;
     }
-    static BoolSetting
+    static BoolSetting &
     getAllowCommandsAtEnd()
     {
         return Settings::allowCommandsAtEnd;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableHighlights()
     {
         return Settings::enableHighlights;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableHighlightSound()
     {
         return Settings::enableHighlightSound;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableHighlightTaskbar()
     {
         return Settings::enableHighlightTaskbar;
     }
-    static BoolSetting
+    static BoolSetting &
     getCustomHighlightSound()
     {
         return Settings::customHighlightSound;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableTwitchEmotes()
     {
         return Settings::enableTwitchEmotes;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableBttvEmotes()
     {
         return Settings::enableBttvEmotes;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableFFzEmotes()
     {
         return Settings::enableFFzEmotes;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableEmojis()
     {
         return Settings::enableEmojis;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableGifAnimations()
     {
         return Settings::enableGifAnimations;
     }
-    static BoolSetting
+    static BoolSetting &
     getEnableGifs()
     {
         return Settings::enableGifs;
     }
-    static BoolSetting
+    static BoolSetting &
     getInlineWhispers()
     {
         return Settings::inlineWhispers;
     }
-    static BoolSetting
+    static BoolSetting &
     getWindowTopMost()
     {
         return Settings::windowTopMost;
     }
-    static BoolSetting
-    getCompactTabs()
+    static BoolSetting &
+    getHideTabX()
     {
-        return Settings::compactTabs;
+        return Settings::hideTabX;
     }
 
 private:
@@ -248,7 +248,7 @@ private:
     static BoolSetting enableGifs;
     static BoolSetting inlineWhispers;
     static BoolSetting windowTopMost;
-    static BoolSetting compactTabs;
+    static BoolSetting hideTabX;
 };
 }
 }

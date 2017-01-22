@@ -21,36 +21,57 @@ Notebook::Notebook(QWidget *parent)
 {
     connect(&this->settingsButton, SIGNAL(clicked()), this,
             SLOT(settingsButtonClicked()));
+    connect(&this->userButton, SIGNAL(clicked()), this,
+            SLOT(usersButtonClicked()));
+    connect(&this->addButton, SIGNAL(clicked()), this,
+            SLOT(addPageButtonClicked()));
 
     this->settingsButton.resize(24, 24);
     this->settingsButton.icon = NotebookButton::IconSettings;
+
     this->userButton.resize(24, 24);
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
+
     this->addButton.resize(24, 24);
 }
 
-void
-Notebook::settingsButtonClicked()
-{
-    SettingsDialog *a = new SettingsDialog();
-
-    a->show();
-}
-
 NotebookPage *
-Notebook::addPage()
+Notebook::addPage(bool select)
 {
     auto tab = new NotebookTab(this);
     auto page = new NotebookPage(this, tab);
 
-    if (this->pages.count() == 0) {
-        select(page);
+    if (select || this->pages.count() == 0) {
+        this->select(page);
     }
 
     this->pages.append(page);
 
+    performLayout();
+
     return page;
+}
+
+void
+Notebook::removePage(NotebookPage *page)
+{
+    int index = pages.indexOf(page);
+
+    if (pages.size() == 1) {
+        select(NULL);
+    } else if (index == pages.count() - 1) {
+        select(pages[index - 1]);
+    } else {
+        select(pages[index + 1]);
+    }
+
+    delete page->tab;
+    delete page;
+
+    pages.removeOne(page);
+
+    performLayout();
 }
 
 void
@@ -110,6 +131,25 @@ void
 Notebook::resizeEvent(QResizeEvent *)
 {
     performLayout();
+}
+
+void
+Notebook::settingsButtonClicked()
+{
+    SettingsDialog *a = new SettingsDialog();
+
+    a->show();
+}
+
+void
+Notebook::usersButtonClicked()
+{
+}
+
+void
+Notebook::addPageButtonClicked()
+{
+    addPage(true);
 }
 }
 }

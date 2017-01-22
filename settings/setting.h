@@ -7,8 +7,10 @@
 namespace chatterino {
 namespace settings {
 
-class Setting
+class Setting : public QObject
 {
+    Q_OBJECT
+
 public:
     explicit Setting(const QString &name)
         : name(name)

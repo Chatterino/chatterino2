@@ -36,6 +36,8 @@ protected:
         if (event->button() == Qt::LeftButton) {
             emit mouseDown();
         }
+
+        event->ignore();
     }
 
     void
@@ -44,6 +46,14 @@ protected:
         if (event->button() == Qt::LeftButton) {
             emit mouseUp();
         }
+
+        event->ignore();
+    }
+
+    virtual void
+    mouseMoveEvent(QMouseEvent *event) override
+    {
+        event->ignore();
     }
 };
 

@@ -9,6 +9,8 @@ namespace chatterino {
 namespace settings {
 class BoolSetting : public Setting
 {
+    Q_OBJECT
+
 public:
     BoolSetting(const QString &name, bool defaultValue)
         : Setting(name)

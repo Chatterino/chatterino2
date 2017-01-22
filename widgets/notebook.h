@@ -16,12 +16,13 @@ class Notebook : public QWidget
     Q_OBJECT
 
 public:
-    Notebook(QWidget *parent);
-
-    NotebookPage *addPage();
-
     enum HighlightType { none, highlighted, newMessage };
 
+    Notebook(QWidget *parent);
+
+    NotebookPage *addPage(bool select = false);
+
+    void removePage(NotebookPage *page);
     void select(NotebookPage *page);
 
     NotebookPage *
@@ -39,6 +40,8 @@ protected:
 
 public slots:
     void settingsButtonClicked();
+    void usersButtonClicked();
+    void addPageButtonClicked();
 
 private:
     QList<NotebookPage *> pages;

@@ -7,7 +7,7 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetHeaderButton::ChatWidgetHeaderButton()
+ChatWidgetHeaderButton::ChatWidgetHeaderButton(int spacing)
     : QWidget()
     , hbox()
     , label()
@@ -19,9 +19,9 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton()
     label.setAlignment(Qt::AlignCenter);
 
     hbox.setMargin(0);
-    hbox.addSpacing(6);
+    hbox.addSpacing(spacing);
     hbox.addWidget(&this->label);
-    hbox.addSpacing(6);
+    hbox.addSpacing(spacing);
 
     QObject::connect(&this->label, &SignalLabel::mouseUp, this,
                      &ChatWidgetHeaderButton::labelMouseUp);

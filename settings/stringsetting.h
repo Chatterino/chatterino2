@@ -10,6 +10,8 @@ namespace settings {
 
 class StringSetting : public Setting
 {
+    Q_OBJECT
+
 public:
     StringSetting(const QString &name, const QString &defaultValue)
         : Setting(name)

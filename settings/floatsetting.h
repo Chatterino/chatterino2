@@ -10,6 +10,8 @@ namespace settings {
 
 class FloatSetting : public Setting
 {
+    Q_OBJECT
+
 public:
     FloatSetting(const QString &name, qreal defaultValue,
                  qreal minValue = std::numeric_limits<qreal>::min(),

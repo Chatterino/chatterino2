@@ -9,6 +9,8 @@ namespace chatterino {
 namespace settings {
 class IntSetting : public Setting
 {
+    Q_OBJECT
+
 public:
     IntSetting(const QString &name, int defaultValue)
         : Setting(name)

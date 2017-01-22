@@ -16,7 +16,7 @@ class ChatWidgetHeaderButton : public QWidget
     Q_OBJECT
 
 public:
-    ChatWidgetHeaderButton();
+    explicit ChatWidgetHeaderButton(int spacing = 6);
 
     SignalLabel &
     getLabel()
