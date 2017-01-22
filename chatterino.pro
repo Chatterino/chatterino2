@@ -15,7 +15,7 @@ COMMUNI += core model util
 #    LIBS += -lcrypto -lssl
 #}
 
-CONFIG += c++11
+CONFIG += c++14
 
 include(lib/libcommuni/src/src.pri)
 
