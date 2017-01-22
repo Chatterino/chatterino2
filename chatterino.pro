@@ -108,10 +108,6 @@ HEADERS  += account.h \
     widgets/signallabel.h \
     widgets/textinputdialog.h \
     windows.h \
-    settings/boolsetting.h \
-    settings/stringsetting.h \
-    settings/intsetting.h \
-    settings/floatsetting.h \
     widgets/resizingtextedit.h
 
 PRECOMPILED_HEADER =

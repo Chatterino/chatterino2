@@ -24,24 +24,28 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->calcSize();
     this->setAcceptDrops(true);
 
+    /* XXX(pajlada): Fix this
     QObject::connect(&settings::Settings::getInstance().getHideTabX(),
                      &settings::BoolSetting::valueChanged, this,
                      &NotebookTab::hideTabXChanged);
+                     */
 
     this->setMouseTracking(true);
 }
 
 NotebookTab::~NotebookTab()
 {
+    /* XXX(pajlada): Fix this
     QObject::disconnect(&settings::Settings::getInstance().getHideTabX(),
                         &settings::BoolSetting::valueChanged, this,
                         &NotebookTab::hideTabXChanged);
+                     */
 }
 
 void
 NotebookTab::calcSize()
 {
-    if (settings::Settings::getInstance().getHideTabX().get()) {
+    if (settings::Settings::getInstance().hideTabX.get()) {
         this->resize(this->fontMetrics().width(this->text) + 8, 24);
     } else {
         this->resize(this->fontMetrics().width(this->text) + 8 + 24, 24);
@@ -101,13 +105,12 @@ NotebookTab::paintEvent(QPaintEvent *)
 
     QRect rect(
         0, 0,
-        width() -
-            (settings::Settings::getInstance().getHideTabX().get() ? 0 : 16),
+        width() - (settings::Settings::getInstance().hideTabX.get() ? 0 : 16),
         height());
 
     painter.drawText(rect, this->text, QTextOption(Qt::AlignCenter));
 
-    if (!settings::Settings::getInstance().getHideTabX().get() &&
+    if (!settings::Settings::getInstance().hideTabX.get() &&
         (this->mouseOver || this->selected)) {
         if (this->mouseOverX) {
             painter.fillRect(this->getXRect(), QColor(0, 0, 0, 64));
