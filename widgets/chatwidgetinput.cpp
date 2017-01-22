@@ -45,14 +45,14 @@ ChatWidgetInput::ChatWidgetInput()
 
     QObject::connect(&settings::Settings::getInstance().getShowMessageLength(),
                      &settings::BoolSetting::valueChanged, this,
-                     &setMessageLengthVisisble);
+                     &ChatWidgetInput::setMessageLengthVisisble);
 }
 
 ChatWidgetInput::~ChatWidgetInput()
 {
     QObject::disconnect(
         &settings::Settings::getInstance().getShowMessageLength(),
-        &settings::BoolSetting::valueChanged, this, &setMessageLengthVisisble);
+        &settings::BoolSetting::valueChanged, this, &ChatWidgetInput::setMessageLengthVisisble);
 }
 
 void
