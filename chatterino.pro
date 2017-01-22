@@ -120,3 +120,9 @@ RESOURCES += \
     resources.qrc
 
 DISTFILES +=
+
+
+# Include boost
+win32 {
+        INCLUDEPATH += C:\local\boost\
+}
