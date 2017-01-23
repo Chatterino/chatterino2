@@ -417,8 +417,8 @@ Message::layout(int width, bool enableEmoteMargins)
     bool recalculateImages = this->emoteGeneration != Emotes::getGeneration();
     bool recalculateText = this->fontGeneration != Fonts::getGeneration();
 
-    qreal emoteScale = settings.getEmoteScale().get();
-    bool scaleEmotesByLineHeight = settings.getScaleEmotesByLineHeight().get();
+    qreal emoteScale = settings.emoteScale.get();
+    bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
 
     if (recalculateImages || recalculateText) {
         this->emoteGeneration = Emotes::getGeneration();

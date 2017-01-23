@@ -2,10 +2,7 @@
 #define APPSETTINGS_H
 
 #include "messages/word.h"
-#include "settings/boolsetting.h"
-#include "settings/floatsetting.h"
 #include "settings/setting.h"
-#include "settings/stringsetting.h"
 
 #include <QSettings>
 
@@ -20,7 +17,7 @@ public:
     static Settings &
     getInstance()
     {
-        return _;
+        return instance;
     }
 
     void load();
@@ -52,12 +49,12 @@ signals:
 private:
     Settings();
 
-    static Settings _;
+    static Settings instance;
 
-    void updateWordTypeMask(bool);
+    void updateWordTypeMask();
 
     QSettings settings;
-    std::vector<Setting *> settingsItems;
+    std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
 
     //    template <class T>
     //    T
@@ -71,174 +68,37 @@ private:
 
     messages::Word::Type wordTypeMask;
 
-private:
-    StringSetting theme;
-    StringSetting user;
-    FloatSetting emoteScale;
-    BoolSetting scaleEmotesByLineHeight;
-    BoolSetting showTimestamps;
-    BoolSetting showTimestampSeconds;
-    BoolSetting showLastMessageIndicator;
-    BoolSetting allowDouplicateMessages;
-    BoolSetting linksDoubleClickOnly;
-    BoolSetting hideEmptyInput;
-    BoolSetting showMessageLength;
-    BoolSetting seperateMessages;
-    BoolSetting mentionUsersWithAt;
-    BoolSetting allowCommandsAtEnd;
-    BoolSetting enableHighlights;
-    BoolSetting enableHighlightSound;
-    BoolSetting enableHighlightTaskbar;
-    BoolSetting customHighlightSound;
-    BoolSetting enableTwitchEmotes;
-    BoolSetting enableBttvEmotes;
-    BoolSetting enableFfzEmotes;
-    BoolSetting enableEmojis;
-    BoolSetting enableGifAnimations;
-    BoolSetting enableGifs;
-    BoolSetting inlineWhispers;
-    BoolSetting windowTopMost;
-    BoolSetting hideTabX;
-
-    // settings
 public:
-    StringSetting &
-    getTheme()
-    {
-        return this->theme;
-    }
-    StringSetting &
-    getUser()
-    {
-        return this->user;
-    }
-    FloatSetting &
-    getEmoteScale()
-    {
-        return this->emoteScale;
-    }
-    BoolSetting &
-    getScaleEmotesByLineHeight()
-    {
-        return this->scaleEmotesByLineHeight;
-    }
-    BoolSetting &
-    getShowTimestamps()
-    {
-        return this->showTimestamps;
-    }
-    BoolSetting &
-    getShowTimestampSeconds()
-    {
-        return this->showTimestampSeconds;
-    }
-    BoolSetting &
-    getShowLastMessageIndicator()
-    {
-        return this->showLastMessageIndicator;
-    }
-    BoolSetting &
-    getAllowDouplicateMessages()
-    {
-        return this->allowDouplicateMessages;
-    }
-    BoolSetting &
-    getLinksDoubleClickOnly()
-    {
-        return this->linksDoubleClickOnly;
-    }
-    BoolSetting &
-    getHideEmptyInput()
-    {
-        return this->hideEmptyInput;
-    }
-    BoolSetting &
-    getShowMessageLength()
-    {
-        return this->showMessageLength;
-    }
-    BoolSetting &
-    getSeperateMessages()
-    {
-        return this->seperateMessages;
-    }
-    BoolSetting &
-    getMentionUsersWithAt()
-    {
-        return this->mentionUsersWithAt;
-    }
-    BoolSetting &
-    getAllowCommandsAtEnd()
-    {
-        return this->allowCommandsAtEnd;
-    }
-    BoolSetting &
-    getEnableHighlights()
-    {
-        return this->enableHighlights;
-    }
-    BoolSetting &
-    getEnableHighlightSound()
-    {
-        return this->enableHighlightSound;
-    }
-    BoolSetting &
-    getEnableHighlightTaskbar()
-    {
-        return this->enableHighlightTaskbar;
-    }
-    BoolSetting &
-    getCustomHighlightSound()
-    {
-        return this->customHighlightSound;
-    }
-    BoolSetting &
-    getEnableTwitchEmotes()
-    {
-        return this->enableTwitchEmotes;
-    }
-    BoolSetting &
-    getEnableBttvEmotes()
-    {
-        return this->enableBttvEmotes;
-    }
-    BoolSetting &
-    getEnableFfzEmotes()
-    {
-        return this->enableFfzEmotes;
-    }
-    BoolSetting &
-    getEnableEmojis()
-    {
-        return this->enableEmojis;
-    }
-    BoolSetting &
-    getEnableGifAnimations()
-    {
-        return this->enableGifAnimations;
-    }
-    BoolSetting &
-    getEnableGifs()
-    {
-        return this->enableGifs;
-    }
-    BoolSetting &
-    getInlineWhispers()
-    {
-        return this->inlineWhispers;
-    }
-    BoolSetting &
-    getWindowTopMost()
-    {
-        return this->windowTopMost;
-    }
-    BoolSetting &
-    getHideTabX()
-    {
-        return this->hideTabX;
-    }
+    Setting<QString> theme;
+    Setting<QString> user;
+    Setting<float> emoteScale;
+    Setting<bool> scaleEmotesByLineHeight;
+    Setting<bool> showTimestamps;
+    Setting<bool> showTimestampSeconds;
+    Setting<bool> showLastMessageIndicator;
+    Setting<bool> allowDouplicateMessages;
+    Setting<bool> linksDoubleClickOnly;
+    Setting<bool> hideEmptyInput;
+    Setting<bool> showMessageLength;
+    Setting<bool> seperateMessages;
+    Setting<bool> mentionUsersWithAt;
+    Setting<bool> allowCommandsAtEnd;
+    Setting<bool> enableHighlights;
+    Setting<bool> enableHighlightSound;
+    Setting<bool> enableHighlightTaskbar;
+    Setting<bool> customHighlightSound;
+    Setting<bool> enableTwitchEmotes;
+    Setting<bool> enableBttvEmotes;
+    Setting<bool> enableFfzEmotes;
+    Setting<bool> enableEmojis;
+    Setting<bool> enableGifAnimations;
+    Setting<bool> enableGifs;
+    Setting<bool> inlineWhispers;
+    Setting<bool> windowTopMost;
+    Setting<bool> hideTabX;
 };
-}
-}
+
+}  // namespace settings
+}  // namespace chatterino
 
 #endif  // APPSETTINGS_H

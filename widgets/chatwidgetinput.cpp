@@ -41,18 +41,23 @@ ChatWidgetInput::ChatWidgetInput()
     this->refreshTheme();
 
     this->setMessageLengthVisisble(
-        settings::Settings::getInstance().getShowMessageLength().get());
+        settings::Settings::getInstance().showMessageLength.get());
 
-    QObject::connect(&settings::Settings::getInstance().getShowMessageLength(),
+    /* XXX(pajlada): FIX THIS
+    QObject::connect(&settings::Settings::getInstance().showMessageLength,
                      &settings::BoolSetting::valueChanged, this,
                      &ChatWidgetInput::setMessageLengthVisisble);
+                     */
 }
 
 ChatWidgetInput::~ChatWidgetInput()
 {
+    /* XXX(pajlada): FIX THIS
     QObject::disconnect(
         &settings::Settings::getInstance().getShowMessageLength(),
-        &settings::BoolSetting::valueChanged, this, &ChatWidgetInput::setMessageLengthVisisble);
+        &settings::BoolSetting::valueChanged, this,
+        &ChatWidgetInput::setMessageLengthVisisble);
+        */
 }
 
 void

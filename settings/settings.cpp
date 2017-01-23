@@ -1,104 +1,80 @@
 #include "settings/settings.h"
 
+#include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
 
 namespace chatterino {
 namespace settings {
 
-Settings Settings::_;
+Settings Settings::instance;
 
 Settings::Settings()
     : settings(
           QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
           QSettings::IniFormat)
-    , settingsItems()
     , portable(false)
     , wordTypeMask(messages::Word::Default)
-    , theme("", "dark")
-    , user("", "")
-    , emoteScale("", 1.0)
-    , scaleEmotesByLineHeight("", false)
-    , showTimestamps("", true)
-    , showTimestampSeconds("", false)
-    , showLastMessageIndicator("", false)
-    , allowDouplicateMessages("", true)
-    , linksDoubleClickOnly("", false)
-    , hideEmptyInput("", false)
-    , showMessageLength("", false)
-    , seperateMessages("", false)
-    , mentionUsersWithAt("", false)
-    , allowCommandsAtEnd("", false)
-    , enableHighlights("", true)
-    , enableHighlightSound("", true)
-    , enableHighlightTaskbar("", true)
-    , customHighlightSound("", false)
-    , enableTwitchEmotes("", true)
-    , enableBttvEmotes("", true)
-    , enableFfzEmotes("", true)
-    , enableEmojis("", true)
-    , enableGifAnimations("", true)
-    , enableGifs("", true)
-    , inlineWhispers("", true)
-    , windowTopMost("", true)
-    , hideTabX("", false)
+    , theme(this->settingsItems, "theme", "dark")
+    , user(this->settingsItems, "userNotSureWhatThisMaybeOAuthOrSomething", "")
+    , emoteScale(this->settingsItems, "emoteScale", 1.0)
+    , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight",
+                              false)
+    , showTimestamps(this->settingsItems, "showTimestamps", true)
+    , showTimestampSeconds(this->settingsItems, "showTimestampSeconds", false)
+    , showLastMessageIndicator(this->settingsItems, "showLastMessageIndicator",
+                               false)
+    , allowDouplicateMessages(this->settingsItems, "allowDouplicateMessages",
+                              true)
+    , linksDoubleClickOnly(this->settingsItems, "linksDoubleClickOnly", false)
+    , hideEmptyInput(this->settingsItems, "hideEmptyInput", false)
+    , showMessageLength(this->settingsItems, "showMessageLength", false)
+    , seperateMessages(this->settingsItems, "seperateMessages", false)
+    , mentionUsersWithAt(this->settingsItems, "mentionUsersWithAt", false)
+    , allowCommandsAtEnd(this->settingsItems, "allowCommandsAtEnd", false)
+    , enableHighlights(this->settingsItems, "enableHighlights", true)
+    , enableHighlightSound(this->settingsItems, "enableHighlightSound", true)
+    , enableHighlightTaskbar(this->settingsItems, "enableHighlightTaskbar",
+                             true)
+    , customHighlightSound(this->settingsItems, "customHighlightSound", false)
+    , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
+    , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
+    , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
+    , enableEmojis(this->settingsItems, "enableEmojis", true)
+    , enableGifAnimations(this->settingsItems, "enableGifAnimations", true)
+    , enableGifs(this->settingsItems, "enableGifs", true)
+    , inlineWhispers(this->settingsItems, "inlineWhispers", true)
+    , windowTopMost(this->settingsItems, "windowTopMost", true)
+    , hideTabX(this->settingsItems, "hideTabX", false)
 {
-    settingsItems.reserve(25);
-    settingsItems.push_back(&theme);
-    settingsItems.push_back(&user);
-    settingsItems.push_back(&emoteScale);
-    settingsItems.push_back(&scaleEmotesByLineHeight);
-    settingsItems.push_back(&showTimestamps);
-    settingsItems.push_back(&showTimestampSeconds);
-    settingsItems.push_back(&showLastMessageIndicator);
-    settingsItems.push_back(&allowDouplicateMessages);
-    settingsItems.push_back(&linksDoubleClickOnly);
-    settingsItems.push_back(&hideEmptyInput);
-    settingsItems.push_back(&showMessageLength);
-    settingsItems.push_back(&seperateMessages);
-    settingsItems.push_back(&mentionUsersWithAt);
-    settingsItems.push_back(&allowCommandsAtEnd);
-    settingsItems.push_back(&enableHighlights);
-    settingsItems.push_back(&enableHighlightSound);
-    settingsItems.push_back(&enableHighlightTaskbar);
-    settingsItems.push_back(&customHighlightSound);
-    settingsItems.push_back(&enableTwitchEmotes);
-    settingsItems.push_back(&enableBttvEmotes);
-    settingsItems.push_back(&enableFfzEmotes);
-    settingsItems.push_back(&enableEmojis);
-    settingsItems.push_back(&enableGifAnimations);
-    settingsItems.push_back(&enableGifs);
-    settingsItems.push_back(&inlineWhispers);
-    settingsItems.push_back(&windowTopMost);
-    settingsItems.push_back(&hideTabX);
-
-    QObject::connect(&showTimestamps, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
-    QObject::connect(&showTimestampSeconds, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
-    QObject::connect(&enableBttvEmotes, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
-    QObject::connect(&enableEmojis, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
-    QObject::connect(&enableFfzEmotes, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
-    QObject::connect(&enableTwitchEmotes, &BoolSetting::valueChanged, this,
-                     &Settings::updateWordTypeMask);
+    this->showTimestamps.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->showTimestampSeconds.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->enableBttvEmotes.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->enableEmojis.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->enableFfzEmotes.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->enableTwitchEmotes.valueChanged.connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
 }
 
 void
 Settings::save()
 {
-    for (Setting *item : settingsItems) {
-        item->save(settings);
+    for (auto &item : settingsItems) {
+        item.get().save(settings);
     }
 }
 
 void
 Settings::load()
 {
-    for (Setting *item : settingsItems) {
-        item->load(settings);
+    for (auto &item : settingsItems) {
+        qDebug() << "Loading settings for " << item.get().getName();
+        item.get().load(settings);
     }
 }
 
@@ -109,7 +85,7 @@ Settings::isIgnoredEmote(const QString &)
 }
 
 void
-Settings::updateWordTypeMask(bool)
+Settings::updateWordTypeMask()
 
 {
     using namespace messages;
@@ -143,5 +119,6 @@ Settings::updateWordTypeMask(bool)
     emit wordTypeMaskChanged();
     //    }
 }
-}
-}
+
+}  // namespace settings
+}  // namespace chatterino

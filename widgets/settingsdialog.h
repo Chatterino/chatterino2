@@ -40,10 +40,12 @@ private:
 
     SettingsDialogTab *selectedTab = NULL;
 
+    /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title,
-                              settings::BoolSetting &setting);
+                              settings::Setting<bool> &setting);
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // SETTINGSDIALOG_H

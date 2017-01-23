@@ -15,7 +15,7 @@ COMMUNI += core model util
 #    LIBS += -lcrypto -lssl
 #}
 
-CONFIG += c++11
+CONFIG += c++14
 
 include(lib/libcommuni/src/src.pri)
 
@@ -108,10 +108,6 @@ HEADERS  += account.h \
     widgets/signallabel.h \
     widgets/textinputdialog.h \
     windows.h \
-    settings/boolsetting.h \
-    settings/stringsetting.h \
-    settings/intsetting.h \
-    settings/floatsetting.h \
     widgets/resizingtextedit.h
 
 PRECOMPILED_HEADER =
@@ -120,3 +116,9 @@ RESOURCES += \
     resources.qrc
 
 DISTFILES +=
+
+
+# Include boost
+win32 {
+        INCLUDEPATH += C:\local\boost\
+}
