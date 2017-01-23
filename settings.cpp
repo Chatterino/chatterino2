@@ -1,11 +1,10 @@
-#include "settings/settings.h"
+#include "settings.h"
 
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
 
 namespace chatterino {
-namespace settings {
 
 Settings Settings::instance;
 
@@ -120,5 +119,4 @@ Settings::updateWordTypeMask()
     //    }
 }
 
-}  // namespace settings
 }  // namespace chatterino

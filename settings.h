@@ -2,12 +2,11 @@
 #define APPSETTINGS_H
 
 #include "messages/word.h"
-#include "settings/setting.h"
+#include "setting.h"
 
 #include <QSettings>
 
 namespace chatterino {
-namespace settings {
 
 class Settings : public QObject
 {
@@ -98,7 +97,6 @@ public:
     Setting<bool> hideTabX;
 };
 
-}  // namespace settings
 }  // namespace chatterino
 
 #endif  // APPSETTINGS_H

@@ -1,7 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "settings/settings.h"
+#include "settings.h"
 #include "widgets/settingsdialogtab.h"
 
 #include <QButtonGroup>
@@ -42,7 +42,7 @@ private:
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title,
-                              settings::Setting<bool> &setting);
+                              Setting<bool> &setting);
 };
 
 }  // namespace widgets

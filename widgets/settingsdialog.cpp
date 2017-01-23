@@ -54,7 +54,7 @@ SettingsDialog::SettingsDialog()
 void
 SettingsDialog::addTabs()
 {
-    settings::Settings &settings = settings::Settings::getInstance();
+    Settings &settings = Settings::getInstance();
 
     QVBoxLayout *vbox;
 
@@ -227,7 +227,7 @@ SettingsDialog::select(SettingsDialogTab *tab)
 /// Widget creation helpers
 QCheckBox *
 SettingsDialog::createCheckbox(const QString &title,
-                               settings::Setting<bool> &setting)
+                               Setting<bool> &setting)
 {
     auto checkbox = new QCheckBox(title);
 

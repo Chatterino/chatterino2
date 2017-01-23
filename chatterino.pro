@@ -51,7 +51,7 @@ SOURCES += main.cpp\
     messages/word.cpp \
     messages/wordpart.cpp \
     resources.cpp \
-    settings/settings.cpp \
+    settings.cpp \
     widgets/chatwidget.cpp \
     widgets/chatwidgetheader.cpp \
     widgets/chatwidgetheaderbutton.cpp \
@@ -87,8 +87,8 @@ HEADERS  += account.h \
     messages/word.h \
     messages/wordpart.h \
     resources.h \
-    settings/setting.h \
-    settings/settings.h \
+    setting.h \
+    settings.h \
     twitchemotevalue.h \
     widgets/chatwidget.h \
     widgets/chatwidgetheader.h \

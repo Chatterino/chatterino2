@@ -6,7 +6,6 @@
 #include <boost/signals2.hpp>
 
 namespace chatterino {
-namespace settings {
 
 class BaseSetting
 {
@@ -79,7 +78,6 @@ private:
     T value;
 };
 
-}  // namespace settings
 }  // namespace chatterino
 
 #endif  // SETTING_H

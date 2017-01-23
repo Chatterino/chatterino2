@@ -7,7 +7,7 @@
 #include "messages/link.h"
 #include "qcolor.h"
 #include "resources.h"
-#include "settings/settings.h"
+#include "settings.h"
 
 #include <QStringList>
 #include <ctime>
@@ -405,7 +405,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 bool
 Message::layout(int width, bool enableEmoteMargins)
 {
-    auto &settings = settings::Settings::getInstance();
+    auto &settings = Settings::getInstance();
 
     width = width - (width % 2);
 
@@ -475,7 +475,7 @@ Message::layout(int width, bool enableEmoteMargins)
         }
     };
 
-    uint32_t flags = settings::Settings::getInstance().getWordTypeMask();
+    uint32_t flags = Settings::getInstance().getWordTypeMask();
 
     for (auto it = this->words.begin(); it != this->words.end(); ++it) {
         Word &word = *it;

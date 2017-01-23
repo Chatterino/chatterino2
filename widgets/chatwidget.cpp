@@ -1,7 +1,7 @@
 #include "widgets/chatwidget.h"
 #include "channels.h"
 #include "colorscheme.h"
-#include "settings/settings.h"
+#include "settings.h"
 #include "widgets/textinputdialog.h"
 
 #include <QFont>

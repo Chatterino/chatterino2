@@ -3,7 +3,7 @@
 #include "emojis.h"
 #include "ircmanager.h"
 #include "resources.h"
-#include "settings/settings.h"
+#include "settings.h"
 #include "widgets/mainwindow.h"
 #include "windows.h"
 
@@ -18,7 +18,7 @@ main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    settings::Settings::getInstance().load();
+    Settings::getInstance().load();
     Resources::load();
     Emojis::loadEmojis();
 
@@ -31,7 +31,7 @@ main(int argc, char *argv[])
 
     int ret = a.exec();
 
-    settings::Settings::getInstance().save();
+    Settings::getInstance().save();
 
     return ret;
 }

@@ -1,6 +1,6 @@
 #include "widgets/chatwidgetinput.h"
 #include "colorscheme.h"
-#include "settings/settings.h"
+#include "settings.h"
 
 #include <QPainter>
 
@@ -41,11 +41,11 @@ ChatWidgetInput::ChatWidgetInput()
     this->refreshTheme();
 
     this->setMessageLengthVisisble(
-        settings::Settings::getInstance().showMessageLength.get());
+        Settings::getInstance().showMessageLength.get());
 
     /* XXX(pajlada): FIX THIS
-    QObject::connect(&settings::Settings::getInstance().showMessageLength,
-                     &settings::BoolSetting::valueChanged, this,
+    QObject::connect(&Settings::getInstance().showMessageLength,
+                     &BoolSetting::valueChanged, this,
                      &ChatWidgetInput::setMessageLengthVisisble);
                      */
 }
@@ -54,8 +54,8 @@ ChatWidgetInput::~ChatWidgetInput()
 {
     /* XXX(pajlada): FIX THIS
     QObject::disconnect(
-        &settings::Settings::getInstance().getShowMessageLength(),
-        &settings::BoolSetting::valueChanged, this,
+        &Settings::getInstance().getShowMessageLength(),
+        &BoolSetting::valueChanged, this,
         &ChatWidgetInput::setMessageLengthVisisble);
         */
 }

@@ -1,6 +1,6 @@
 #include "widgets/notebooktab.h"
 #include "colorscheme.h"
-#include "settings/settings.h"
+#include "settings.h"
 #include "widgets/notebook.h"
 
 #include <QPainter>
@@ -25,8 +25,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->setAcceptDrops(true);
 
     /* XXX(pajlada): Fix this
-    QObject::connect(&settings::Settings::getInstance().getHideTabX(),
-                     &settings::BoolSetting::valueChanged, this,
+    QObject::connect(&Settings::getInstance().getHideTabX(),
+                     &BoolSetting::valueChanged, this,
                      &NotebookTab::hideTabXChanged);
                      */
 
@@ -36,8 +36,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
 NotebookTab::~NotebookTab()
 {
     /* XXX(pajlada): Fix this
-    QObject::disconnect(&settings::Settings::getInstance().getHideTabX(),
-                        &settings::BoolSetting::valueChanged, this,
+    QObject::disconnect(&Settings::getInstance().getHideTabX(),
+                        &BoolSetting::valueChanged, this,
                         &NotebookTab::hideTabXChanged);
                      */
 }
@@ -45,7 +45,7 @@ NotebookTab::~NotebookTab()
 void
 NotebookTab::calcSize()
 {
-    if (settings::Settings::getInstance().hideTabX.get()) {
+    if (Settings::getInstance().hideTabX.get()) {
         this->resize(this->fontMetrics().width(this->text) + 8, 24);
     } else {
         this->resize(this->fontMetrics().width(this->text) + 8 + 24, 24);
@@ -103,14 +103,13 @@ NotebookTab::paintEvent(QPaintEvent *)
 
     painter.setPen(fg);
 
-    QRect rect(
-        0, 0,
-        width() - (settings::Settings::getInstance().hideTabX.get() ? 0 : 16),
-        height());
+    QRect rect(0, 0,
+               width() - (Settings::getInstance().hideTabX.get() ? 0 : 16),
+               height());
 
     painter.drawText(rect, this->text, QTextOption(Qt::AlignCenter));
 
-    if (!settings::Settings::getInstance().hideTabX.get() &&
+    if (!Settings::getInstance().hideTabX.get() &&
         (this->mouseOver || this->selected)) {
         if (this->mouseOverX) {
             painter.fillRect(this->getXRect(), QColor(0, 0, 0, 64));
@@ -143,7 +142,7 @@ NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
     this->mouseDown = false;
 
-    if (this->mouseDownX) {
+    if (this->mouseDownX && this->getXRect().contains(event->pos())) {
         this->mouseDownX = false;
 
         this->notebook->removePage(this->page);
@@ -169,7 +168,7 @@ NotebookTab::leaveEvent(QEvent *)
 }
 
 void
-NotebookTab::dragEnterEvent(QDragEnterEvent *event)
+NotebookTab::dragEnterEvent(QDragEnterEvent *)
 {
     this->notebook->select(page);
 }

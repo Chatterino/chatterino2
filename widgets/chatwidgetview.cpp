@@ -3,7 +3,7 @@
 #include "colorscheme.h"
 #include "messages/message.h"
 #include "messages/wordpart.h"
-#include "settings/settings.h"
+#include "settings.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>
@@ -23,15 +23,14 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
 
     scroll->scrollTo(QPointF(0, 100));
 
-    QObject::connect(&settings::Settings::getInstance(),
-                     &settings::Settings::wordTypeMaskChanged, this,
-                     &ChatWidgetView::wordTypeMaskChanged);
+    QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
+                     this, &ChatWidgetView::wordTypeMaskChanged);
 }
 
 ChatWidgetView::~ChatWidgetView()
 {
-    QObject::disconnect(&settings::Settings::getInstance(),
-                        &settings::Settings::wordTypeMaskChanged, this,
+    QObject::disconnect(&Settings::getInstance(),
+                        &Settings::wordTypeMaskChanged, this,
                         &ChatWidgetView::wordTypeMaskChanged);
 }
 

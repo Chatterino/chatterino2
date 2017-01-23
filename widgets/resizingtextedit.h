@@ -13,7 +13,8 @@ public:
         sizePolicy.setVerticalPolicy(QSizePolicy::Preferred);
         this->setSizePolicy(sizePolicy);
 
-        QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
+        QObject::connect(this, &QTextEdit::textChanged, this,
+                         &QWidget::updateGeometry);
     }
 
     QSize
@@ -30,21 +31,12 @@ public:
 
 protected:
     int
-    heightForWidth(int w) const override
+    heightForWidth(int) const override
     {
         auto margins = this->contentsMargins();
 
-        int documentWidth;
-
-        if (w >= margins.left() + margins.right()) {
-            documentWidth = w - margins.left() - margins.right();
-        } else {
-            documentWidth = 0;
-        }
-
-        auto document = this->document()->clone();
-
-        return margins.top() + document->size().height() + margins.bottom() + 5;
+        return margins.top() + document()->size().height() + margins.bottom() +
+               5;
     }
 };
 
