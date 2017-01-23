@@ -231,6 +231,9 @@ SettingsDialog::createCheckbox(const QString &title,
 {
     auto checkbox = new QCheckBox(title);
 
+    // Set checkbox initial state
+    checkbox->setChecked(setting.get());
+
     QObject::connect(checkbox, &QCheckBox::toggled, this,
                      [&setting, this](bool state) { setting.set(state); });
 

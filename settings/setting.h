@@ -11,18 +11,34 @@ namespace settings {
 class BaseSetting
 {
 public:
+    BaseSetting(const QString &_name)
+        : name(_name)
+    {
+    }
+
     virtual void save(QSettings &settings) = 0;
     virtual void load(const QSettings &settings) = 0;
+
+    const QString &
+    getName() const
+    {
+        return this->name;
+    }
+
+private:
+    QString name;
 };
 
 template <typename T>
 class Setting : public BaseSetting
 {
 public:
-    Setting(const QString &_name, const T &defaultValue)
-        : name(_name)
+    Setting(std::vector<std::reference_wrapper<BaseSetting>> &settingItems,
+            const QString &_name, const T &defaultValue)
+        : BaseSetting(_name)
         , value(defaultValue)
     {
+        settingItems.push_back(*this);
     }
 
     const T &
@@ -53,21 +69,13 @@ public:
         QVariant newValue = settings.value(this->getName(), QVariant());
         if (newValue.isValid()) {
             assert(newValue.canConvert<T>());
-            this->value = newValue.value<T>();
+            this->set(newValue.value<T>());
         }
     }
 
     boost::signals2::signal<void(const T &newValue)> valueChanged;
 
-protected:
-    const QString &
-    getName() const
-    {
-        return name;
-    }
-
 private:
-    QString name;
     T value;
 };
 

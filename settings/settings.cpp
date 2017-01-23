@@ -1,5 +1,6 @@
 #include "settings/settings.h"
 
+#include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -14,62 +15,38 @@ Settings::Settings()
           QSettings::IniFormat)
     , portable(false)
     , wordTypeMask(messages::Word::Default)
-    , theme("", "dark")
-    , user("", "")
-    , emoteScale("", 1.0)
-    , scaleEmotesByLineHeight("", false)
-    , showTimestamps("", true)
-    , showTimestampSeconds("", false)
-    , showLastMessageIndicator("", false)
-    , allowDouplicateMessages("", true)
-    , linksDoubleClickOnly("", false)
-    , hideEmptyInput("", false)
-    , showMessageLength("", false)
-    , seperateMessages("", false)
-    , mentionUsersWithAt("", false)
-    , allowCommandsAtEnd("", false)
-    , enableHighlights("", true)
-    , enableHighlightSound("", true)
-    , enableHighlightTaskbar("", true)
-    , customHighlightSound("", false)
-    , enableTwitchEmotes("", true)
-    , enableBttvEmotes("", true)
-    , enableFfzEmotes("", true)
-    , enableEmojis("", true)
-    , enableGifAnimations("", true)
-    , enableGifs("", true)
-    , inlineWhispers("", true)
-    , windowTopMost("", true)
-    , hideTabX("", false)
+    , theme(this->settingsItems, "theme", "dark")
+    , user(this->settingsItems, "userNotSureWhatThisMaybeOAuthOrSomething", "")
+    , emoteScale(this->settingsItems, "emoteScale", 1.0)
+    , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight",
+                              false)
+    , showTimestamps(this->settingsItems, "showTimestamps", true)
+    , showTimestampSeconds(this->settingsItems, "showTimestampSeconds", false)
+    , showLastMessageIndicator(this->settingsItems, "showLastMessageIndicator",
+                               false)
+    , allowDouplicateMessages(this->settingsItems, "allowDouplicateMessages",
+                              true)
+    , linksDoubleClickOnly(this->settingsItems, "linksDoubleClickOnly", false)
+    , hideEmptyInput(this->settingsItems, "hideEmptyInput", false)
+    , showMessageLength(this->settingsItems, "showMessageLength", false)
+    , seperateMessages(this->settingsItems, "seperateMessages", false)
+    , mentionUsersWithAt(this->settingsItems, "mentionUsersWithAt", false)
+    , allowCommandsAtEnd(this->settingsItems, "allowCommandsAtEnd", false)
+    , enableHighlights(this->settingsItems, "enableHighlights", true)
+    , enableHighlightSound(this->settingsItems, "enableHighlightSound", true)
+    , enableHighlightTaskbar(this->settingsItems, "enableHighlightTaskbar",
+                             true)
+    , customHighlightSound(this->settingsItems, "customHighlightSound", false)
+    , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
+    , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
+    , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
+    , enableEmojis(this->settingsItems, "enableEmojis", true)
+    , enableGifAnimations(this->settingsItems, "enableGifAnimations", true)
+    , enableGifs(this->settingsItems, "enableGifs", true)
+    , inlineWhispers(this->settingsItems, "inlineWhispers", true)
+    , windowTopMost(this->settingsItems, "windowTopMost", true)
+    , hideTabX(this->settingsItems, "hideTabX", false)
 {
-    settingsItems.push_back(theme);
-    settingsItems.push_back(user);
-    settingsItems.push_back(emoteScale);
-    settingsItems.push_back(scaleEmotesByLineHeight);
-    settingsItems.push_back(showTimestamps);
-    settingsItems.push_back(showTimestampSeconds);
-    settingsItems.push_back(showLastMessageIndicator);
-    settingsItems.push_back(allowDouplicateMessages);
-    settingsItems.push_back(linksDoubleClickOnly);
-    settingsItems.push_back(hideEmptyInput);
-    settingsItems.push_back(showMessageLength);
-    settingsItems.push_back(seperateMessages);
-    settingsItems.push_back(mentionUsersWithAt);
-    settingsItems.push_back(allowCommandsAtEnd);
-    settingsItems.push_back(enableHighlights);
-    settingsItems.push_back(enableHighlightSound);
-    settingsItems.push_back(enableHighlightTaskbar);
-    settingsItems.push_back(customHighlightSound);
-    settingsItems.push_back(enableTwitchEmotes);
-    settingsItems.push_back(enableBttvEmotes);
-    settingsItems.push_back(enableFfzEmotes);
-    settingsItems.push_back(enableEmojis);
-    settingsItems.push_back(enableGifAnimations);
-    settingsItems.push_back(enableGifs);
-    settingsItems.push_back(inlineWhispers);
-    settingsItems.push_back(windowTopMost);
-    settingsItems.push_back(hideTabX);
-
     this->showTimestamps.valueChanged.connect(
         [this](const auto &) { this->updateWordTypeMask(); });
     this->showTimestampSeconds.valueChanged.connect(
@@ -96,6 +73,7 @@ void
 Settings::load()
 {
     for (auto &item : settingsItems) {
+        qDebug() << "Loading settings for " << item.get().getName();
         item.get().load(settings);
     }
 }
