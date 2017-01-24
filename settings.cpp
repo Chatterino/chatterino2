@@ -10,12 +10,13 @@ Settings Settings::instance;
 
 Settings::Settings()
     : settings(
-          QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+          QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+              "/Chatterino/newsettings.ini",
           QSettings::IniFormat)
     , portable(false)
     , wordTypeMask(messages::Word::Default)
     , theme(this->settingsItems, "theme", "dark")
-    , user(this->settingsItems, "userNotSureWhatThisMaybeOAuthOrSomething", "")
+    , user(this->settingsItems, "selectedUser", "")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
     , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight",
                               false)
