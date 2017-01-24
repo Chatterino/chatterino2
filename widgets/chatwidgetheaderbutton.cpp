@@ -34,7 +34,7 @@ ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QBrush brush(ColorScheme::instance().IsLightTheme
+    QBrush brush(ColorScheme::getInstance().IsLightTheme
                      ? QColor(0, 0, 0, 32)
                      : QColor(255, 255, 255, 32));
 

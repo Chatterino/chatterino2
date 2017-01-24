@@ -80,7 +80,7 @@ void
 ScrollBar::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), ColorScheme::instance().ScrollbarBG);
+    painter.fillRect(rect(), ColorScheme::getInstance().ScrollbarBG);
 
     painter.fillRect(QRect(0, 0, width(), this->buttonHeight),
                      QColor(255, 0, 0));

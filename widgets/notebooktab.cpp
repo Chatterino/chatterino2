@@ -82,7 +82,7 @@ NotebookTab::paintEvent(QPaintEvent *)
 
     QColor fg = QColor(0, 0, 0);
 
-    auto colorScheme = ColorScheme::instance();
+    auto colorScheme = ColorScheme::getInstance();
 
     if (this->selected) {
         painter.fillRect(rect(), colorScheme.TabSelectedBackground);

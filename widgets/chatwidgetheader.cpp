@@ -79,7 +79,7 @@ void
 ChatWidgetHeader::updateColors()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, ColorScheme::instance().Text);
+    palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
 
     this->leftLabel.setPalette(palette);
     this->middleLabel.setPalette(palette);
@@ -99,8 +99,8 @@ ChatWidgetHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::instance().ChatHeaderBackground);
-    painter.setPen(ColorScheme::instance().ChatHeaderBorder);
+    painter.fillRect(rect(), ColorScheme::getInstance().ChatHeaderBackground);
+    painter.setPen(ColorScheme::getInstance().ChatHeaderBorder);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 

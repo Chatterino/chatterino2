@@ -20,7 +20,7 @@ NotebookPageDropPreview::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.fillRect(8, 8, width() - 17, height() - 17,
-                     ColorScheme::instance().DropPreviewBackground);
+                     ColorScheme::getInstance().DropPreviewBackground);
 }
 
 void

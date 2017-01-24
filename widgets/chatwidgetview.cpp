@@ -73,7 +73,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     QColor color;
 
-    ColorScheme &scheme = ColorScheme::instance();
+    ColorScheme &scheme = ColorScheme::getInstance();
 
     // code for tesing colors
     /*

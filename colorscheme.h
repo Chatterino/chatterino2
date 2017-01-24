@@ -61,7 +61,7 @@ public:
     QColor HighlightColors[3];
 
     static ColorScheme &
-    instance()
+    getInstance()
     {
         static ColorScheme instance;
 

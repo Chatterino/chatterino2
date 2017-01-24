@@ -22,7 +22,7 @@ main(int argc, char *argv[])
     Resources::load();
     Emojis::loadEmojis();
 
-    ColorScheme::instance().setColors(0, -0.8);
+    ColorScheme::getInstance().setColors(0, -0.8);
 
     MainWindow &w = Windows::getMainWindow();
     w.show();

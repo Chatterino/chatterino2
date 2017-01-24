@@ -224,18 +224,19 @@ NotebookPage::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (this->hbox.count() == 0) {
-        painter.fillRect(rect(), ColorScheme::instance().ChatBackground);
+        painter.fillRect(rect(), ColorScheme::getInstance().ChatBackground);
 
         painter.fillRect(0, 0, width(), 2,
-                         ColorScheme::instance().TabSelectedBackground);
+                         ColorScheme::getInstance().TabSelectedBackground);
 
-        painter.setPen(ColorScheme::instance().Text);
+        painter.setPen(ColorScheme::getInstance().Text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), ColorScheme::instance().TabSelectedBackground);
+        painter.fillRect(rect(),
+                         ColorScheme::getInstance().TabSelectedBackground);
 
         painter.fillRect(0, 0, width(), 2,
-                         ColorScheme::instance().TabSelectedBackground);
+                         ColorScheme::getInstance().TabSelectedBackground);
     }
 }
 }

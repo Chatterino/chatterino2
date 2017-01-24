@@ -78,7 +78,7 @@ ChatWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), ColorScheme::instance().ChatBackground);
+    painter.fillRect(this->rect(), ColorScheme::getInstance().ChatBackground);
 }
 }
 }

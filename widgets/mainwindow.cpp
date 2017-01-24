@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QPalette palette;
     palette.setColor(QPalette::Background,
-                     ColorScheme::instance().TabPanelBackground);
+                     ColorScheme::getInstance().TabPanelBackground);
     setPalette(palette);
 
     resize(1280, 800);

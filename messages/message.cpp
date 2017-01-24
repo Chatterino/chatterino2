@@ -26,14 +26,17 @@ QRegularExpression *Message::cheerRegex =
     new QRegularExpression("cheer[1-9][0-9]*");
 
 Message::Message(const QString &text)
-    : wordParts(new std::vector<WordPart>())
+    : wordParts()
 {
+    words.push_back(Word(text, Word::Text,
+                         ColorScheme::getInstance().SystemMessageColor, text,
+                         QString()));
 }
 
 Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
-    : wordParts(new std::vector<WordPart>())
+    : wordParts()
 {
     this->parseTime = std::chrono::system_clock::now();
 
@@ -67,11 +70,11 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     QString timestampWithSeconds = QString(timeStampBuffer);
 
     words.push_back(Word(timestamp, Word::TimestampNoSeconds,
-                         ColorScheme::instance().SystemMessageColor, QString(),
-                         QString()));
+                         ColorScheme::getInstance().SystemMessageColor,
+                         QString(), QString()));
     words.push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                         ColorScheme::instance().SystemMessageColor, QString(),
-                         QString()));
+                         ColorScheme::getInstance().SystemMessageColor,
+                         QString(), QString()));
 
     // mod buttons
     static QString buttonBanTooltip("Ban user");
@@ -131,7 +134,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     }
 
     // color
-    QColor usernameColor = ColorScheme::instance().SystemMessageColor;
+    QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
 
     iterator = tags.find("color");
     if (iterator != tags.end()) {
@@ -142,9 +145,9 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
     if (includeChannel) {
         QString channelName("#" + channel.getName());
         words.push_back(Word(
-            channelName, Word::Misc, ColorScheme::instance().SystemMessageColor,
-            QString(channelName), QString(),
-            Link(Link::Url, channel.getName() + "\n" + this->id)));
+            channelName, Word::Misc,
+            ColorScheme::getInstance().SystemMessageColor, QString(channelName),
+            QString(), Link(Link::Url, channel.getName() + "\n" + this->id)));
     }
 
     // username
@@ -248,7 +251,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
 
     // words
     QColor textColor =
-        ircMessage.isAction() ? usernameColor : ColorScheme::instance().Text;
+        ircMessage.isAction() ? usernameColor : ColorScheme::getInstance().Text;
 
     QStringList splits = ircMessage.content().split(' ');
 
