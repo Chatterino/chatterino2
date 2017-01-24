@@ -145,7 +145,8 @@ NotebookPage::dragEnterEvent(QDragEnterEvent *event)
             for (int i = 0; i < this->hbox.count() + 1; ++i) {
                 this->dropRegions.push_back(DropRegion(
                     QRect(((i * 4 - 1) * width() / this->hbox.count()) / 4, 0,
-                          width() / this->hbox.count() / 2, height()),
+                          width() / this->hbox.count() / 2 + 1, height() + 1),
+
                     std::pair<int, int>(i, -1)));
             }
 
@@ -156,8 +157,9 @@ NotebookPage::dragEnterEvent(QDragEnterEvent *event)
                     this->dropRegions.push_back(DropRegion(
                         QRect(i * width() / this->hbox.count(),
                               ((j * 2 - 1) * height() / vbox->count()) / 2,
-                              width() / this->hbox.count(),
-                              height() / vbox->count()),
+                              width() / this->hbox.count() + 1,
+                              height() / vbox->count() + 1),
+
                         std::pair<int, int>(i, j)));
                 }
             }
@@ -181,19 +183,19 @@ NotebookPage::setPreviewRect(QPoint mousePos)
     for (DropRegion region : this->dropRegions) {
         if (region.rect.contains(mousePos)) {
             this->preview.setBounds(region.rect);
-            //            this->preview.move(region.rect.x(), region.rect.y());
-            //            this->preview.resize(region.rect.width(),
-            //            region.rect.height());
-            this->preview.show();
-            this->preview.raise();
+
+            if (!this->preview.isVisible()) {
+                this->preview.show();
+                this->preview.raise();
+            }
 
             dropPosition = region.position;
 
             return;
-        } else {
-            this->preview.hide();
         }
     }
+
+    this->preview.hide();
 }
 
 void

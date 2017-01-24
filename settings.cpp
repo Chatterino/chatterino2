@@ -16,7 +16,7 @@ Settings::Settings()
     , portable(false)
     , wordTypeMask(messages::Word::Default)
     , theme(this->settingsItems, "theme", "dark")
-    , user(this->settingsItems, "selectedUser", "")
+    , selectedUser(this->settingsItems, "selectedUser", "")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
     , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight",
                               false)
@@ -65,7 +65,7 @@ void
 Settings::save()
 {
     for (auto &item : settingsItems) {
-        item.get().save(settings);
+        this->settings.setValue(item.get().getName(), item.get().getVariant());
     }
 }
 
@@ -74,7 +74,8 @@ Settings::load()
 {
     for (auto &item : settingsItems) {
         qDebug() << "Loading settings for " << item.get().getName();
-        item.get().load(settings);
+
+        item.get().setVariant(this->settings.value(item.get().getName()));
     }
 }
 

@@ -15,8 +15,8 @@ public:
     {
     }
 
-    virtual void save(QSettings &settings) = 0;
-    virtual void load(const QSettings &settings) = 0;
+    virtual QVariant getVariant() = 0;
+    virtual void setVariant(QVariant value) = 0;
 
     const QString &
     getName() const
@@ -56,19 +56,18 @@ public:
         }
     }
 
-    virtual void
-    save(QSettings &settings) final
+    virtual QVariant
+    getVariant() final
     {
-        settings.setValue(this->getName(), QVariant::fromValue(this->value));
+        return QVariant::fromValue(value);
     }
 
     virtual void
-    load(const QSettings &settings) final
+    setVariant(QVariant value) final
     {
-        QVariant newValue = settings.value(this->getName(), QVariant());
-        if (newValue.isValid()) {
-            assert(newValue.canConvert<T>());
-            this->set(newValue.value<T>());
+        if (value.isValid()) {
+            assert(value.canConvert<T>());
+            this->set(value.value<T>());
         }
     }
 

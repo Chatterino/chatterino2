@@ -2,6 +2,7 @@
 #define SETTINGSDIALOG_H
 
 #include "settings.h"
+#include "settingssnapshot.h"
 #include "widgets/settingsdialogtab.h"
 
 #include <QButtonGroup>
@@ -26,6 +27,8 @@ public:
     void select(SettingsDialogTab *tab);
 
 private:
+    SettingsSnapshot snapshot;
+
     QVBoxLayout tabs;
     QVBoxLayout vbox;
     QHBoxLayout hbox;
@@ -41,8 +44,10 @@ private:
     SettingsDialogTab *selectedTab = NULL;
 
     /// Widget creation helpers
-    QCheckBox *createCheckbox(const QString &title,
-                              Setting<bool> &setting);
+    QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
+
+    void okButtonClicked();
+    void cancelButtonClicked();
 };
 
 }  // namespace widgets

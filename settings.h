@@ -3,6 +3,7 @@
 
 #include "messages/word.h"
 #include "setting.h"
+#include "settingssnapshot.h"
 
 #include <QSettings>
 
@@ -42,6 +43,24 @@ public:
         portable = value;
     }
 
+    QSettings &
+    getQSettings()
+    {
+        return settings;
+    }
+
+    SettingsSnapshot
+    createSnapshot()
+    {
+        SettingsSnapshot snapshot;
+
+        for (auto &item : this->settingsItems) {
+            snapshot.addItem(item, item.get().getVariant());
+        }
+
+        return snapshot;
+    }
+
 signals:
     void wordTypeMaskChanged();
 
@@ -55,21 +74,13 @@ private:
     QSettings settings;
     std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
 
-    //    template <class T>
-    //    T
-    //    addSetting(T setting)
-    //    {
-    //        settingsItems.push_back(setting);
-    //        return setting;
-    //    }
-
     bool portable;
 
     messages::Word::Type wordTypeMask;
 
 public:
     Setting<QString> theme;
-    Setting<QString> user;
+    Setting<QString> selectedUser;
     Setting<float> emoteScale;
     Setting<bool> scaleEmotesByLineHeight;
     Setting<bool> showTimestamps;

@@ -13,6 +13,7 @@ namespace chatterino {
 namespace widgets {
 
 SettingsDialog::SettingsDialog()
+    : snapshot(Settings::getInstance().createSnapshot())
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
@@ -43,6 +44,12 @@ SettingsDialog::SettingsDialog()
     buttonBox.addButton(&okButton, QDialogButtonBox::ButtonRole::AcceptRole);
     buttonBox.addButton(&cancelButton,
                         QDialogButtonBox::ButtonRole::RejectRole);
+
+    QObject::connect(&okButton, &QPushButton::clicked, this,
+                     &SettingsDialog::okButtonClicked);
+    QObject::connect(&cancelButton, &QPushButton::clicked, this,
+                     &SettingsDialog::cancelButtonClicked);
+
     okButton.setText("OK");
     cancelButton.setText("Cancel");
 
@@ -226,8 +233,7 @@ SettingsDialog::select(SettingsDialogTab *tab)
 
 /// Widget creation helpers
 QCheckBox *
-SettingsDialog::createCheckbox(const QString &title,
-                               Setting<bool> &setting)
+SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
 {
     auto checkbox = new QCheckBox(title);
 
@@ -238,6 +244,20 @@ SettingsDialog::createCheckbox(const QString &title,
                      [&setting, this](bool state) { setting.set(state); });
 
     return checkbox;
+}
+
+void
+SettingsDialog::okButtonClicked()
+{
+    this->close();
+}
+
+void
+SettingsDialog::cancelButtonClicked()
+{
+    snapshot.apply();
+
+    this->close();
 }
 
 }  // namespace widgets

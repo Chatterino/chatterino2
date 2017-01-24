@@ -108,7 +108,8 @@ HEADERS  += account.h \
     widgets/signallabel.h \
     widgets/textinputdialog.h \
     windows.h \
-    widgets/resizingtextedit.h
+    widgets/resizingtextedit.h \
+    settingssnapshot.h
 
 PRECOMPILED_HEADER =
 
