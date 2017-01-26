@@ -17,8 +17,11 @@ public:
 protected:
     void paintEvent(QPaintEvent *);
 
+    void hideEvent(QHideEvent *);
+
     QPropertyAnimation positionAnimation;
     QRect desiredGeometry;
+    bool animate;
 };
 }
 }

@@ -1,6 +1,7 @@
 #include "widgets/notebookpagedroppreview.h"
 #include "colorscheme.h"
 
+#include <QDebug>
 #include <QPainter>
 
 namespace chatterino {
@@ -10,8 +11,10 @@ NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     : QWidget(parent)
     , positionAnimation(this, "geometry")
     , desiredGeometry()
+    , animate(false)
 {
-    setHidden(true);
+    this->positionAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
+    this->setHidden(true);
 }
 
 void
@@ -24,19 +27,31 @@ NotebookPageDropPreview::paintEvent(QPaintEvent *)
 }
 
 void
+NotebookPageDropPreview::hideEvent(QHideEvent *)
+{
+    animate = false;
+}
+
+void
 NotebookPageDropPreview::setBounds(const QRect &rect)
 {
     if (rect == this->desiredGeometry) {
         return;
     }
 
-    this->positionAnimation.stop();
-    this->positionAnimation.setDuration(50);
-    this->positionAnimation.setStartValue(geometry());
-    this->positionAnimation.setEndValue(rect);
-    this->positionAnimation.start();
+    if (animate) {
+        this->positionAnimation.stop();
+        this->positionAnimation.setDuration(50);
+        this->positionAnimation.setStartValue(this->geometry());
+        this->positionAnimation.setEndValue(rect);
+        this->positionAnimation.start();
+    } else {
+        this->setGeometry(rect);
+    }
 
     this->desiredGeometry = rect;
+
+    animate = true;
 }
 }
 }

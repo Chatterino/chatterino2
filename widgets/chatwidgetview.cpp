@@ -54,7 +54,7 @@ ChatWidgetView::layoutMessages()
         redraw |= message.get()->layout(this->width(), true);
     }
 
-    int h = this->height();
+    int h = this->height() - 8;
 
     for (int i = messages.size() - 1; i >= 0; i--) {
         auto *message = messages[i].get();

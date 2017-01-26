@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QMutex>
 #include <functional>
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -12,22 +13,21 @@ class ConcurrentMap
 {
 public:
     ConcurrentMap()
+        : map()
     {
-        mutex = new QMutex();
-        map = new QMap<TKey, TValue>();
+        this->mutex = new QMutex();
     }
 
     bool
     tryGet(const TKey &name, TValue &value) const
     {
-        mutex->lock();
-        auto a = map->find(name);
-        if (a == map->end()) {
-            mutex->unlock();
-            value = NULL;
+        this->mutex->lock();
+        auto a = map.find(name);
+        if (a == map.end()) {
+            this->mutex->unlock();
             return false;
         }
-        mutex->unlock();
+        this->mutex->unlock();
         value = a.value();
         return true;
     }
@@ -35,37 +35,39 @@ public:
     TValue
     getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        mutex->lock();
-        auto a = map->find(name);
-        if (a == map->end()) {
+        this->mutex->lock();
+        auto a = map.find(name);
+
+        if (a == map.end()) {
             TValue value = addLambda();
-            map->insert(name, value);
-            mutex->unlock();
+            map.insert(name, value);
+            this->mutex->unlock();
             return value;
         }
-        mutex->unlock();
+
+        this->mutex->unlock();
         return a.value();
     }
 
     void
     clear()
     {
-        mutex->lock();
-        map->clear();
-        mutex->unlock();
+        this->mutex->lock();
+        map.clear();
+        this->mutex->unlock();
     }
 
     void
     insert(const TKey &name, const TValue &value)
     {
-        mutex->lock();
-        map->insert(name, value);
-        mutex->unlock();
+        this->mutex->lock();
+        map.insert(name, value);
+        this->mutex->unlock();
     }
 
 private:
     QMutex *mutex;
-    QMap<TKey, TValue> *map;
+    QMap<TKey, TValue> map;
 };
 }
 

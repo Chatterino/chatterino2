@@ -47,10 +47,12 @@ void
 LazyLoadedImage::loadImage()
 {
     //    QThreadPool::globalInstance()->start(new LambdaQRunnable([=] {
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+
     QUrl url(this->url);
     QNetworkRequest request(url);
 
-    QNetworkReply *reply = IrcManager::getAccessManager().get(request);
+    QNetworkReply *reply = manager->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, [=] {
         QPixmap *pixmap = new QPixmap();
@@ -63,8 +65,10 @@ LazyLoadedImage::loadImage()
         this->pixmap = pixmap;
         Emotes::incGeneration();
         Windows::layoutVisibleChatWidgets();
+
+        delete manager;
     });
-    //}));
+    //    }));
 }
 }
 }
