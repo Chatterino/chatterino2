@@ -31,7 +31,7 @@ public:
         return selectedPage;
     }
 
-    void performLayout();
+    void performLayout(bool animate = true);
 
     NotebookPage *tabAt(QPoint point, int &index);
     void rearrangePage(NotebookPage *page, int index);

@@ -92,6 +92,7 @@ Notebook::select(NotebookPage *page)
     if (page != nullptr) {
         page->setHidden(false);
         page->tab->setSelected(true);
+        page->tab->raise();
     }
 
     if (this->selectedPage != nullptr) {
@@ -110,7 +111,7 @@ Notebook::tabAt(QPoint point, int &index)
     int i = 0;
 
     for (auto *page : pages) {
-        if (page->tab->geometry().contains(point)) {
+        if (page->tab->getDesiredRect().contains(point)) {
             index = i;
             return page;
         }
@@ -135,7 +136,7 @@ Notebook::rearrangePage(NotebookPage *page, int index)
 }
 
 void
-Notebook::performLayout()
+Notebook::performLayout(bool animated)
 {
     int x = 48, y = 0;
     int tabHeight = 16;
@@ -148,10 +149,10 @@ Notebook::performLayout()
             (i == this->pages.last() ? tabHeight : 0) + x + i->tab->width() >
                 width()) {
             y += i->tab->height();
-            i->tab->moveAnimated(QPoint(0, y));
+            i->tab->moveAnimated(QPoint(0, y), animated);
             x = i->tab->width();
         } else {
-            i->tab->moveAnimated(QPoint(x, y));
+            i->tab->moveAnimated(QPoint(x, y), animated);
             x += i->tab->width();
         }
 
@@ -169,7 +170,7 @@ Notebook::performLayout()
 void
 Notebook::resizeEvent(QResizeEvent *)
 {
-    performLayout();
+    performLayout(false);
 }
 
 void

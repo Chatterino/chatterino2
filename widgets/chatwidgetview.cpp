@@ -18,7 +18,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     , chatWidget(parent)
     , scrollbar(this)
 {
-    this->scrollbar.setSmallChange(2);
+    this->scrollbar.setSmallChange(5);
 
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
                      this, &ChatWidgetView::wordTypeMaskChanged);

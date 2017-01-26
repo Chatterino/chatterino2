@@ -66,7 +66,14 @@ public:
         repaint();
     }
 
-    void moveAnimated(QPoint pos);
+    void moveAnimated(QPoint pos, bool animated = true);
+
+public:
+    QRect
+    getDesiredRect() const
+    {
+        return QRect(posAnimationDesired, this->size());
+    }
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -81,8 +88,9 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    //    QPropertyAnimation posAnimation;
-    //    bool posAnimated;
+    QPropertyAnimation posAnimation;
+    bool posAnimated;
+    QPoint posAnimationDesired;
 
     Notebook *notebook;
 

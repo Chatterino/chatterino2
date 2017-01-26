@@ -67,6 +67,7 @@ public:
             if (animated) {
                 this->valueAnimation.stop();
                 this->valueAnimation.setStartValue(this->value);
+
                 this->valueAnimation.setEndValue(value);
                 this->valueAnimation.start();
             } else {

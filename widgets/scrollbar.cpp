@@ -172,21 +172,21 @@ ScrollBar::mouseReleaseEvent(QMouseEvent *event)
 
     if (y < this->buttonHeight) {
         if (this->mouseDownIndex == 0) {
-            this->setValue(this->value - this->smallChange);
+            this->setValue(this->value - this->smallChange, true);
         }
     } else if (y < this->thumbRect.y()) {
-        if (this->mouseDownIndex == 0) {
-            this->setValue(this->value - this->smallChange);
+        if (this->mouseDownIndex == 1) {
+            this->setValue(this->value - this->smallChange, true);
         }
     } else if (this->thumbRect.contains(2, y)) {
         // do nothing
     } else if (y < height() - this->buttonHeight) {
-        if (this->mouseDownIndex == 0) {
-            this->setValue(this->value + this->smallChange);
+        if (this->mouseDownIndex == 3) {
+            this->setValue(this->value + this->smallChange, true);
         }
     } else {
-        if (this->mouseDownIndex == 0) {
-            this->setValue(this->value + this->smallChange);
+        if (this->mouseDownIndex == 4) {
+            this->setValue(this->value + this->smallChange, true);
         }
     }
 

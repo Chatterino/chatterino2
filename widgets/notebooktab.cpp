@@ -10,8 +10,9 @@ namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : QWidget(notebook)
-    //    , posAnimation(this, "pos")
-    //    , posAnimated(false)
+    , posAnimation(this, "pos")
+    , posAnimated(false)
+    , posAnimationDesired()
     , notebook(notebook)
     , text("<no title>")
     , selected(false)
@@ -24,11 +25,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->calcSize();
     this->setAcceptDrops(true);
 
+    posAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
+
     /* XXX(pajlada): Fix this
     QObject::connect(&Settings::getInstance().getHideTabX(),
                      &BoolSetting::valueChanged, this,
                      &NotebookTab::hideTabXChanged);
                      */
+
+    //    Settings::getInstance().hideTabX.valueChanged.connect(
+    //        boost::bind(&NotebookTab::hideTabXChanged, this));
 
     this->setMouseTracking(true);
 }
@@ -53,26 +59,28 @@ NotebookTab::calcSize()
 }
 
 void
-NotebookTab::moveAnimated(QPoint pos)
+NotebookTab::moveAnimated(QPoint pos, bool animated)
 {
-    move(pos);
+    //    move(pos);
 
-    //    if (posAnimated == false) {
-    //        move(pos);
+    posAnimationDesired = pos;
 
-    //        posAnimated = true;
-    //        return;
-    //    }
+    if (!animated || posAnimated == false) {
+        move(pos);
 
-    //    if (this->posAnimation.endValue() == pos) {
-    //        return;
-    //    }
+        posAnimated = true;
+        return;
+    }
 
-    //    this->posAnimation.stop();
-    //    this->posAnimation.setDuration(50);
-    //    this->posAnimation.setStartValue(this->pos());
-    //    this->posAnimation.setEndValue(pos);
-    //    this->posAnimation.start();
+    if (this->posAnimation.endValue() == pos) {
+        return;
+    }
+
+    this->posAnimation.stop();
+    this->posAnimation.setDuration(75);
+    this->posAnimation.setStartValue(this->pos());
+    this->posAnimation.setEndValue(pos);
+    this->posAnimation.start();
 }
 
 void
@@ -184,7 +192,7 @@ NotebookTab::mouseMoveEvent(QMouseEvent *event)
         this->repaint();
     }
 
-    if (this->mouseDown && !this->rect().contains(event->pos())) {
+    if (this->mouseDown && !this->getDesiredRect().contains(event->pos())) {
         QPoint relPoint = this->mapToParent(event->pos());
 
         int index;
