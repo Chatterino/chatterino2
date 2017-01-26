@@ -18,10 +18,10 @@ Channel::Channel(const QString &channel)
     , channelLink("https://twitch.tv/" + name)
     , popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
 {
-    for (int i = 0; i < 40; i++) {
-        addMessage(std::shared_ptr<messages::Message>(
-            new messages::Message("test xD test")));
-    }
+    //    for (int i = 0; i < 40; i++) {
+    //        addMessage(std::shared_ptr<messages::Message>(
+    //            new messages::Message("test xD test")));
+    //    }
 }
 
 QVector<std::shared_ptr<messages::Message>>

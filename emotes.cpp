@@ -1,6 +1,8 @@
 #include "emotes.h"
 #include "resources.h"
 
+#include <QDebug>
+
 namespace chatterino {
 
 QString Emotes::twitchEmoteTemplate(
@@ -26,7 +28,10 @@ Emotes::Emotes()
 messages::LazyLoadedImage *
 Emotes::getTwitchEmoteById(const QString &name, long id)
 {
-    return Emotes::twitchEmoteFromCache.getOrAdd(id, [&name, id] {
+    qDebug() << "loading twitch emote: " << id;
+
+    return Emotes::twitchEmoteFromCache.getOrAdd(id, [&name, &id] {
+        qDebug() << "loading twitch emote: " << id;
         qreal scale;
         QString url = getTwitchEmoteLink(id, scale);
         return new messages::LazyLoadedImage(url, scale, name,
@@ -39,8 +44,11 @@ Emotes::getTwitchEmoteLink(long id, qreal &scale)
 {
     scale = .5;
 
-    return Emotes::twitchEmoteTemplate.replace("{id}", QString::number(id))
-        .replace("{scale}", "2");
+    QString value = Emotes::twitchEmoteTemplate;
+
+    value.detach();
+
+    return value.replace("{id}", QString::number(id)).replace("{scale}", "2");
 }
 
 messages::LazyLoadedImage *
