@@ -50,7 +50,7 @@ public:
     setSelected(bool value)
     {
         this->selected = value;
-        repaint();
+        update();
     }
 
     HighlightStyle
@@ -63,7 +63,7 @@ public:
     setHighlightStyle(HighlightStyle style)
     {
         this->highlightStyle = style;
-        repaint();
+        update();
     }
 
     void moveAnimated(QPoint pos, bool animated = true);
@@ -115,7 +115,7 @@ private slots:
     hideTabXChanged(bool)
     {
         calcSize();
-        repaint();
+        update();
     }
 };
 }

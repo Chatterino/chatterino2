@@ -61,7 +61,7 @@ ChatWidget::setChannelName(const QString &name)
     }
 
     this->view.layoutMessages();
-    this->view.repaint();
+    this->view.update();
 }
 
 void

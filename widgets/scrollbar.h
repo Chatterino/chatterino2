@@ -77,7 +77,7 @@ public:
             this->updateScroll();
             this->valueChanged();
 
-            this->repaint();
+            this->update();
         }
     }
 

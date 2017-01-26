@@ -42,7 +42,7 @@ MainWindow::layoutVisibleChatWidgets(Channel *channel)
 
         if (channel == NULL || channel == widget->getChannel()) {
             if (widget->getView().layoutMessages()) {
-                widget->repaint();
+                widget->update();
             }
         }
     }
@@ -64,7 +64,7 @@ MainWindow::repaintVisibleChatWidgets(Channel *channel)
 
         if (channel == NULL || channel == widget->getChannel()) {
             widget->getView().layoutMessages();
-            widget->repaint();
+            widget->update();
         }
     }
 }

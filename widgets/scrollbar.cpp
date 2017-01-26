@@ -135,7 +135,7 @@ ScrollBar::mouseMoveEvent(QMouseEvent *event)
         }
 
         if (oldIndex != this->mouseOverIndex) {
-            this->repaint();
+            this->update();
         }
     } else if (this->mouseDownIndex == 2) {
         int delta = event->pos().y() - lastMousePosition.y();
@@ -191,7 +191,7 @@ ScrollBar::mouseReleaseEvent(QMouseEvent *event)
     }
 
     this->mouseDownIndex = -1;
-    repaint();
+    update();
 }
 
 void
@@ -199,7 +199,7 @@ ScrollBar::leaveEvent(QEvent *)
 {
     this->mouseOverIndex = -1;
 
-    repaint();
+    update();
 }
 
 void
@@ -216,7 +216,7 @@ ScrollBar::updateScroll()
               (int)(this->largeChange / this->maximum * this->trackHeight) +
                   MIN_THUMB_HEIGHT);
 
-    repaint();
+    update();
 }
 }
 }

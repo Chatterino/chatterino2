@@ -23,7 +23,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
                      this, &ChatWidgetView::wordTypeMaskChanged);
 
-    this->scrollbar.getValueChanged().connect([this] { repaint(); });
+    this->scrollbar.getValueChanged().connect([this] { update(); });
 }
 
 ChatWidgetView::~ChatWidgetView()
@@ -38,8 +38,13 @@ ChatWidgetView::layoutMessages()
 {
     auto c = this->chatWidget->getChannel();
 
-    if (c == NULL)
+    if (c == NULL) {
+        this->scrollbar.hide();
+
         return false;
+    }
+
+    bool showScrollbar = false;
 
     auto messages = c->getMessagesClone();
 
@@ -49,23 +54,29 @@ ChatWidgetView::layoutMessages()
         redraw |= message.get()->layout(this->width(), true);
     }
 
-    updateScrollbar();
+    int h = this->height();
 
-    return redraw;
-}
+    for (int i = messages.size() - 1; i >= 0; i--) {
+        auto *message = messages[i].get();
 
-void
-ChatWidgetView::updateScrollbar()
-{
-    auto c = this->chatWidget->getChannel();
+        message->layout(this->width(), true);
 
-    if (c == NULL) {
-        return;
+        h -= message->getHeight();
+
+        if (h < 0) {
+            this->scrollbar.setLargeChange((messages.length() - i) +
+                                           (qreal)h / message->getHeight());
+            this->scrollbar.setValue(this->scrollbar.getValue());
+
+            showScrollbar = true;
+        }
     }
 
-    //    this->scrollbar.setValue(0);
-    this->scrollbar.setLargeChange(10);
+    this->scrollbar.setVisible(showScrollbar);
+
     this->scrollbar.setMaximum(c->getMessages().size());
+
+    return redraw;
 }
 
 void
@@ -160,6 +171,8 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             // text
             else {
                 QColor color = wordPart.getWord().getColor();
+
+                ColorScheme::getInstance().normalizeColor(color);
 
                 painter.setPen(color);
                 painter.setFont(wordPart.getWord().getFont());

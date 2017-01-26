@@ -127,7 +127,7 @@ ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
 
                 auto originalLocation = page->removeFromLayout(chatWidget);
 
-                // page->repaint();
+                // page->update();
 
                 QDrag *drag = new QDrag(chatWidget);
                 QMimeData *mimeData = new QMimeData;

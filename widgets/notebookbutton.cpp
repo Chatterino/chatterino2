@@ -93,7 +93,7 @@ NotebookButton::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         mouseDown = true;
 
-        this->repaint();
+        this->update();
     }
 }
 
@@ -103,7 +103,7 @@ NotebookButton::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         mouseDown = false;
 
-        this->repaint();
+        this->update();
 
         emit clicked();
     }
@@ -114,7 +114,7 @@ NotebookButton::enterEvent(QEvent *)
 {
     mouseOver = true;
 
-    this->repaint();
+    this->update();
 }
 
 void
@@ -122,7 +122,7 @@ NotebookButton::leaveEvent(QEvent *)
 {
     mouseOver = false;
 
-    this->repaint();
+    this->update();
 }
 }
 }

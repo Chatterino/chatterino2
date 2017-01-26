@@ -24,15 +24,11 @@ public:
 
     bool layoutMessages();
 
-    void updateScrollbar();
-
 protected:
     void resizeEvent(QResizeEvent *);
 
     void paintEvent(QPaintEvent *);
     void wheelEvent(QWheelEvent *event);
-
-    void scroll(int dx, int dy);
 
 private:
     ChatWidget *chatWidget;
@@ -44,7 +40,7 @@ private slots:
     wordTypeMaskChanged()
     {
         if (layoutMessages()) {
-            repaint();
+            update();
         }
     }
 };

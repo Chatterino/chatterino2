@@ -140,7 +140,7 @@ NotebookTab::mousePressEvent(QMouseEvent *event)
     this->mouseDown = true;
     this->mouseDownX = this->getXRect().contains(event->pos());
 
-    this->repaint();
+    this->update();
 
     this->notebook->select(page);
 }
@@ -155,7 +155,7 @@ NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 
         this->notebook->removePage(this->page);
     } else {
-        repaint();
+        update();
     }
 }
 
@@ -164,7 +164,7 @@ NotebookTab::enterEvent(QEvent *)
 {
     this->mouseOver = true;
 
-    repaint();
+    update();
 }
 
 void
@@ -172,7 +172,7 @@ NotebookTab::leaveEvent(QEvent *)
 {
     this->mouseOverX = this->mouseOver = false;
 
-    repaint();
+    update();
 }
 
 void
@@ -189,7 +189,7 @@ NotebookTab::mouseMoveEvent(QMouseEvent *event)
     if (overX != this->mouseOverX) {
         this->mouseOverX = overX;
 
-        this->repaint();
+        this->update();
     }
 
     if (this->mouseDown && !this->getDesiredRect().contains(event->pos())) {
