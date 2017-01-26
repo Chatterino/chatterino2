@@ -30,6 +30,8 @@ Channel::Channel(const QString &channel)
     //        addMessage(std::shared_ptr<messages::Message>(
     //            new messages::Message("test xD test")));
     //    }
+
+    reloadChannelEmotes();
 }
 
 void
@@ -65,10 +67,11 @@ Channel::reloadBttvEmotes()
 
                 this->getBttvChannelEmotes().insert(
                     code,
-                    Emotes::getBttvChannelEmoteFromCaches().getOrAdd(id, [=] {
-                        return new messages::LazyLoadedImage(
-                            url, 1, code, code + "\nChannel Bttv Emote");
-                    }));
+                    Emotes::getBttvChannelEmoteFromCaches().getOrAdd(
+                        id, [&code, &url] {
+                            return new messages::LazyLoadedImage(
+                                url, 1, code, code + "\nChannel Bttv Emote");
+                        }));
             }
         }
 
@@ -82,7 +85,7 @@ Channel::reloadFfzEmotes()
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
-    QUrl url("https://api.frankerfacez.com/v1/set/global");
+    QUrl url("http://api.frankerfacez.com/v1/room/" + this->name);
     QNetworkRequest request(url);
 
     QNetworkReply *reply = manager->get(request);
@@ -109,9 +112,13 @@ Channel::reloadFfzEmotes()
                     QJsonObject urls = object.value("urls").toObject();
                     QString url1 = "http:" + urls.value("1").toString();
 
-                    Emotes::getBttvEmotes().insert(
-                        code, new messages::LazyLoadedImage(
-                                  url1, 1, code, code + "\nGlobal Ffz Emote"));
+                    this->getFfzChannelEmotes().insert(
+                        code,
+                        Emotes::getFfzChannelEmoteFromCaches().getOrAdd(
+                            id, [&code, &url1] {
+                                return new messages::LazyLoadedImage(
+                                    url1, 1, code, code + "\nGlobal Ffz Emote");
+                            }));
                 }
             }
         }

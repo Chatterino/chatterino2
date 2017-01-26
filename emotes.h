@@ -43,7 +43,7 @@ public:
         return bttvChannelEmoteFromCaches;
     }
 
-    static ConcurrentMap<QString, messages::LazyLoadedImage *> &
+    static ConcurrentMap<int, messages::LazyLoadedImage *> &
     getFfzChannelEmoteFromCaches()
     {
         return ffzChannelEmoteFromCaches;
@@ -93,7 +93,7 @@ private:
     static ConcurrentMap<QString, messages::LazyLoadedImage *> chatterinoEmotes;
     static ConcurrentMap<QString, messages::LazyLoadedImage *>
         bttvChannelEmoteFromCaches;
-    static ConcurrentMap<QString, messages::LazyLoadedImage *>
+    static ConcurrentMap<int, messages::LazyLoadedImage *>
         ffzChannelEmoteFromCaches;
     static ConcurrentMap<long, messages::LazyLoadedImage *>
         twitchEmoteFromCache;

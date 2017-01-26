@@ -22,7 +22,7 @@ ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::ffzEmotes;
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::chatterinoEmotes;
 ConcurrentMap<QString, messages::LazyLoadedImage *>
     Emotes::bttvChannelEmoteFromCaches;
-ConcurrentMap<QString, messages::LazyLoadedImage *>
+ConcurrentMap<int, messages::LazyLoadedImage *>
     Emotes::ffzChannelEmoteFromCaches;
 ConcurrentMap<long, messages::LazyLoadedImage *> Emotes::twitchEmoteFromCache;
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::miscImageFromCache;
