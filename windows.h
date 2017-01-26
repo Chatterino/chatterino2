@@ -25,6 +25,9 @@ public:
         return *mainWindow;
     }
 
+    static void load();
+    static void save();
+
 private:
     Windows()
     {

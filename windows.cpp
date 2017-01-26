@@ -21,4 +21,14 @@ Windows::repaintVisibleChatWidgets(Channel *channel)
         Windows::mainWindow->repaintVisibleChatWidgets(channel);
     }
 }
+
+void
+Windows::save()
+{
+}
+
+void
+Windows::load()
+{
+}
 }

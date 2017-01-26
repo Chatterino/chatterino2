@@ -84,7 +84,7 @@ NotebookPage::addToLayout(
         auto vbox = new QVBoxLayout();
         vbox->addWidget(widget);
 
-        this->hbox.addLayout(vbox);
+        this->hbox.addLayout(vbox, 1);
         return;
     }
 
@@ -93,7 +93,7 @@ NotebookPage::addToLayout(
         auto vbox = new QVBoxLayout();
         vbox->addWidget(widget);
 
-        this->hbox.insertLayout(position.first, vbox);
+        this->hbox.insertLayout(position.first, vbox, 1);
         return;
     }
 
