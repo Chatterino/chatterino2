@@ -33,7 +33,7 @@ Message::Message(const QString &text)
                          QString()));
 }
 
-Message::Message(const IrcPrivateMessage &ircMessage, const Channel &channel,
+Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
     : wordParts()

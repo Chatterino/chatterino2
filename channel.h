@@ -22,13 +22,13 @@ public:
 
     // properties
     const ConcurrentMap<QString, messages::LazyLoadedImage *> &
-    getBttvChannelEmotes() const
+    getBttvChannelEmotes()
     {
         return bttvChannelEmotes;
     }
 
     const ConcurrentMap<QString, messages::LazyLoadedImage *> &
-    getFfzChannelEmotes() const
+    getFfzChannelEmotes()
     {
         return ffzChannelEmotes;
     }

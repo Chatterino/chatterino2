@@ -1,7 +1,15 @@
 #include "channel.h"
+#include "emotes.h"
 #include "messages/message.h"
 #include "windows.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <memory>
 
 namespace chatterino {
@@ -27,9 +35,10 @@ Channel::Channel(const QString &channel)
 void
 Channel::reloadBttvEmotes()
 {
+    // bttv
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
-    QUrl url("https://api.frankerfacez.com/v1/set/global");
+    QUrl url("https://api.betterttv.net/2/channels/" + this->name);
     QNetworkRequest request(url);
 
     QNetworkReply *reply = manager->get(request);
@@ -40,26 +49,26 @@ Channel::reloadBttvEmotes()
             QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
             QJsonObject root = jsonDoc.object();
 
-            auto sets = root.value("sets").toObject();
+            auto emotes = root.value("emotes").toArray();
 
-            for (const QJsonValue &set : sets) {
-                auto emoticons = set.toObject().value("emoticons").toArray();
+            QString _template = "https:" + root.value("urlTemplate").toString();
 
-                for (const QJsonValue &emote : emoticons) {
-                    QJsonObject object = emote.toObject();
+            for (const QJsonValue &emote : emotes) {
+                QString id = emote.toObject().value("id").toString();
+                QString code = emote.toObject().value("code").toString();
+                // emote.value("imageType").toString();
 
-                    // margins
+                QString tmp = _template;
+                tmp.detach();
+                QString url =
+                    tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
-                    int id = object.value("id").toInt();
-                    QString code = object.value("name").toString();
-
-                    QJsonObject urls = object.value("urls").toObject();
-                    QString url1 = "http:" + urls.value("1").toString();
-
-                    Emotes::getBttvEmotes().insert(
-                        code, new messages::LazyLoadedImage(
-                                  url1, 1, code, code + "\nGlobal Ffz Emote"));
-                }
+                this->getBttvChannelEmotes().insert(
+                    code,
+                    Emotes::getBttvChannelEmoteFromCaches().getOrAdd(id, [=] {
+                        return new messages::LazyLoadedImage(
+                            url, 1, code, code + "\nChannel Bttv Emote");
+                    }));
             }
         }
 
