@@ -11,15 +11,15 @@ class LazyLoadedImage
 {
 public:
     explicit LazyLoadedImage(const QString &url, qreal scale = 1,
-                             const QString &getName = "",
-                             const QString &getTooltip = "",
-                             const QMargins &getMargin = QMargins(),
-                             bool getIsHat = false);
+                             const QString &name = "",
+                             const QString &tooltip = "",
+                             const QMargins &margin = QMargins(),
+                             bool isHat = false);
     explicit LazyLoadedImage(QPixmap *pixmap, qreal scale = 1,
-                             const QString &getName = "",
-                             const QString &getTooltip = "",
-                             const QMargins &getMargin = QMargins(),
-                             bool getIsHat = false);
+                             const QString &name = "",
+                             const QString &tooltip = "",
+                             const QMargins &margin = QMargins(),
+                             bool isHat = false);
 
     const QPixmap *
     getPixmap()

@@ -1,6 +1,7 @@
 #include "channels.h"
 #include "colorscheme.h"
 #include "emojis.h"
+#include "emotes.h"
 #include "ircmanager.h"
 #include "resources.h"
 #include "settings.h"
@@ -21,6 +22,7 @@ main(int argc, char *argv[])
     Settings::getInstance().load();
     Resources::load();
     Emojis::loadEmojis();
+    Emotes::loadGlobalEmotes();
 
     ColorScheme::getInstance().setColors(0, -0.8);
 

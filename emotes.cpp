@@ -2,6 +2,14 @@
 #include "resources.h"
 
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <memory>
 
 namespace chatterino {
 
@@ -23,6 +31,100 @@ int Emotes::generation = 0;
 
 Emotes::Emotes()
 {
+}
+
+void
+Emotes::loadGlobalEmotes()
+{
+    loadBttvEmotes();
+    loadFfzEmotes();
+}
+
+void
+Emotes::loadBttvEmotes()
+{
+    // bttv
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+
+    QUrl url("https://api.betterttv.net/2/emotes");
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = manager->get(request);
+
+    QObject::connect(reply, &QNetworkReply::finished, [=] {
+        if (reply->error() == QNetworkReply::NetworkError::NoError) {
+            QByteArray data = reply->readAll();
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+            QJsonObject root = jsonDoc.object();
+
+            auto emotes = root.value("emotes").toArray();
+
+            QString _template = "https:" + root.value("urlTemplate").toString();
+
+            for (const QJsonValue &emote : emotes) {
+                QString id = emote.toObject().value("id").toString();
+                QString code = emote.toObject().value("code").toString();
+                // emote.value("imageType").toString();
+
+                QString tmp = _template;
+                tmp.detach();
+                QString url =
+                    tmp.replace("{{id}}", id).replace("{{image}}", "1x");
+
+                Emotes::getBttvEmotes().insert(
+                    code, new messages::LazyLoadedImage(
+                              url, 1, code, code + "\nGlobal Bttv Emote"));
+            }
+        }
+
+        reply->deleteLater();
+        manager->deleteLater();
+    });
+}
+
+void
+Emotes::loadFfzEmotes()
+{
+    // bttv
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+
+    QUrl url("https://api.frankerfacez.com/v1/set/global");
+    QNetworkRequest request(url);
+
+    QNetworkReply *reply = manager->get(request);
+
+    QObject::connect(reply, &QNetworkReply::finished, [=] {
+        if (reply->error() == QNetworkReply::NetworkError::NoError) {
+            QByteArray data = reply->readAll();
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+            QJsonObject root = jsonDoc.object();
+
+            auto sets = root.value("sets").toObject();
+
+            for (const QJsonValue &set : sets) {
+                auto emoticons = set.toObject().value("emoticons").toArray();
+
+                for (const QJsonValue &emote : emoticons) {
+                    QJsonObject object = emote.toObject();
+
+                    // margins
+
+                    int id = object.value("id").toInt();
+                    QString code = object.value("name").toString();
+
+                    QJsonObject urls = object.value("urls").toObject();
+                    QString url1 = "http:" + urls.value("1").toString();
+
+                    Emotes::getBttvEmotes().insert(
+                        code, new messages::LazyLoadedImage(
+                                  url1, 1, code, code + "\nGlobal Ffz Emote"));
+                }
+            }
+        }
+
+        reply->deleteLater();
+        manager->deleteLater();
+    });
 }
 
 messages::LazyLoadedImage *

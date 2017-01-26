@@ -99,6 +99,13 @@ public:
         return messages;
     }
 
+    void
+    reloadChannelEmotes()
+    {
+        reloadBttvEmotes();
+        reloadFfzEmotes();
+    }
+
 private:
     QVector<std::shared_ptr<messages::Message>> messages;
 
@@ -117,6 +124,9 @@ private:
     int streamViewerCount;
     QString streamStatus;
     QString streamGame;
+
+    void reloadBttvEmotes();
+    void reloadFfzEmotes();
 };
 }
 

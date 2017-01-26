@@ -102,6 +102,9 @@ private:
 
     static QString getTwitchEmoteLink(long id, qreal &scale);
 
+    static void loadFfzEmotes();
+    static void loadBttvEmotes();
+
     static int generation;
 };
 }

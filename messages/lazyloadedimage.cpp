@@ -66,7 +66,8 @@ LazyLoadedImage::loadImage()
         Emotes::incGeneration();
         Windows::layoutVisibleChatWidgets();
 
-        delete manager;
+        reply->deleteLater();
+        manager->deleteLater();
     });
     //    }));
 }
