@@ -4,17 +4,21 @@ namespace chatterino {
 
 QMutex Windows::windowMutex;
 
-widgets::MainWindow *Windows::mainWindow(NULL);
+widgets::MainWindow *Windows::mainWindow(nullptr);
 
 void
 Windows::layoutVisibleChatWidgets(Channel *channel)
 {
-    Windows::mainWindow->layoutVisibleChatWidgets(channel);
+    if (Windows::mainWindow != nullptr) {
+        Windows::mainWindow->layoutVisibleChatWidgets(channel);
+    }
 }
 
 void
 Windows::repaintVisibleChatWidgets(Channel *channel)
 {
-    Windows::mainWindow->repaintVisibleChatWidgets(channel);
+    if (Windows::mainWindow != nullptr) {
+        Windows::mainWindow->repaintVisibleChatWidgets(channel);
+    }
 }
 }

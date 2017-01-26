@@ -94,9 +94,15 @@ public:
     QVector<std::shared_ptr<messages::Message>> getMessagesClone();
 
     QVector<std::shared_ptr<messages::Message>> &
-    getMessages()
+    getMessages() const
     {
         return messages;
+    }
+
+    QMutex &
+    getMessageMutes() const
+    {
+        return messageMutex;
     }
 
 private:

@@ -8,7 +8,6 @@
 
 #include <math.h>
 #include <QPainter>
-#include <QScroller>
 #include <functional>
 
 namespace chatterino {
@@ -19,12 +18,12 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     , chatWidget(parent)
     , scrollbar(this)
 {
-    auto scroll = QScroller::scroller(this);
-
-    scroll->scrollTo(QPointF(0, 100));
+    this->scrollbar.setSmallChange(2);
 
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
                      this, &ChatWidgetView::wordTypeMaskChanged);
+
+    this->scrollbar.getValueChanged().connect([this] { repaint(); });
 }
 
 ChatWidgetView::~ChatWidgetView()
@@ -50,7 +49,23 @@ ChatWidgetView::layoutMessages()
         redraw |= message.get()->layout(this->width(), true);
     }
 
+    updateScrollbar();
+
     return redraw;
+}
+
+void
+ChatWidgetView::updateScrollbar()
+{
+    auto c = this->chatWidget->getChannel();
+
+    if (c == NULL) {
+        return;
+    }
+
+    //    this->scrollbar.setValue(0);
+    this->scrollbar.setLargeChange(10);
+    this->scrollbar.setMaximum(c->getMessages().size());
 }
 
 void
@@ -162,6 +177,16 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             break;
         }
     }
+}
+
+void
+ChatWidgetView::wheelEvent(QWheelEvent *event)
+{
+    this->scrollbar.setValue(
+        this->scrollbar.getValue() -
+            event->delta() / 10.0 *
+                Settings::getInstance().mouseScrollMultiplier.get(),
+        true);
 }
 }
 }

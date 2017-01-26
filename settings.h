@@ -82,6 +82,7 @@ public:
     Setting<QString> theme;
     Setting<QString> selectedUser;
     Setting<float> emoteScale;
+    Setting<float> mouseScrollMultiplier;
     Setting<bool> scaleEmotesByLineHeight;
     Setting<bool> showTimestamps;
     Setting<bool> showTimestampSeconds;

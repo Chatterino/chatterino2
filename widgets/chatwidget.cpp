@@ -59,6 +59,9 @@ ChatWidget::setChannelName(const QString &name)
     } else {
         this->channel = Channels::addChannel(channel);
     }
+
+    this->view.layoutMessages();
+    this->view.repaint();
 }
 
 void

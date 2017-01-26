@@ -18,6 +18,7 @@ Settings::Settings()
     , theme(this->settingsItems, "theme", "dark")
     , selectedUser(this->settingsItems, "selectedUser", "")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
+    , mouseScrollMultiplier(this->settingsItems, "mouseScrollMultiplier", 1.0)
     , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight",
                               false)
     , showTimestamps(this->settingsItems, "showTimestamps", true)

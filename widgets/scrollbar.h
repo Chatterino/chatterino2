@@ -4,7 +4,9 @@
 #include "widgets/scrollbarhighlight.h"
 
 #include <QMutex>
+#include <QPropertyAnimation>
 #include <QWidget>
+#include <boost/signals2.hpp>
 #include <functional>
 
 namespace chatterino {
@@ -20,6 +22,8 @@ public:
 
     void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);
     void addHighlight(ScrollBarHighlight *highlight);
+
+    Q_PROPERTY(qreal value READ getValue WRITE setValue)
 
     void
     setMaximum(qreal value)
@@ -54,11 +58,26 @@ public:
     }
 
     void
-    setValue(qreal value)
+    setValue(qreal value, bool animated = false)
     {
-        this->value = value;
+        value = std::max(this->minimum,
+                         std::min(this->maximum - this->largeChange, value));
 
-        this->updateScroll();
+        if (this->value != value) {
+            if (animated) {
+                this->valueAnimation.stop();
+                this->valueAnimation.setStartValue(this->value);
+                this->valueAnimation.setEndValue(value);
+                this->valueAnimation.start();
+            } else {
+                this->value = value;
+            }
+
+            this->updateScroll();
+            this->valueChanged();
+
+            this->repaint();
+        }
     }
 
     qreal
@@ -91,10 +110,27 @@ public:
         return this->value;
     }
 
+    boost::signals2::signal<void()> &
+    getValueChanged()
+    {
+        return valueChanged;
+    }
+
 private:
     QMutex mutex;
     ScrollBarHighlight *highlights;
+
+    QPropertyAnimation valueAnimation;
+
     void paintEvent(QPaintEvent *);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void leaveEvent(QEvent *);
+
+    int mouseOverIndex;
+    int mouseDownIndex;
+    QPoint lastMousePosition;
 
     int buttonHeight;
     int trackHeight;
@@ -106,6 +142,8 @@ private:
     qreal largeChange;
     qreal smallChange;
     qreal value;
+
+    boost::signals2::signal<void()> valueChanged;
 
     void updateScroll();
 };

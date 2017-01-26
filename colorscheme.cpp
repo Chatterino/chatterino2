@@ -46,6 +46,8 @@ ColorScheme::setColors(float hue, float multiplyer)
     ChatInputBackground = getColor(0, 0.1, 0.95);
     ChatInputBorder = getColor(0, 0.1, 0.9);
 
+    ScrollbarBG = ChatBackground;
+
     // generate color lookuptable
     fillLookupTableValues(this->middleLookupTable, 0.000, 0.166, 0.66, 0.5);
     fillLookupTableValues(this->middleLookupTable, 0.166, 0.333, 0.5, 0.55);

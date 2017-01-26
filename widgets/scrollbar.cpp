@@ -1,6 +1,7 @@
 #include "widgets/scrollbar.h"
 #include "colorscheme.h"
 
+#include <QMouseEvent>
 #include <QPainter>
 
 #define MIN_THUMB_HEIGHT 10
@@ -11,15 +12,27 @@ namespace widgets {
 ScrollBar::ScrollBar(QWidget *widget)
     : QWidget(widget)
     , mutex()
+    , valueAnimation(this, "value")
     , highlights(NULL)
+    , mouseOverIndex(-1)
+    , mouseDownIndex(-1)
+    , lastMousePosition()
+    , buttonHeight(16)
+    , trackHeight(100)
     , thumbRect()
     , maximum()
     , minimum()
     , largeChange()
     , smallChange()
     , value()
+    , valueChanged()
 {
     resize(16, 100);
+
+    valueAnimation.setDuration(300);
+    valueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
+
+    this->setMouseTracking(true);
 }
 
 ScrollBar::~ScrollBar()
@@ -88,6 +101,8 @@ ScrollBar::paintEvent(QPaintEvent *)
         QRect(0, height() - this->buttonHeight, width(), this->buttonHeight),
         QColor(255, 0, 0));
 
+    painter.fillRect(this->thumbRect, QColor(0, 255, 255));
+
     ScrollBarHighlight *highlight = this->highlights;
 
     this->mutex.lock();
@@ -97,6 +112,94 @@ ScrollBar::paintEvent(QPaintEvent *)
     //    } while ((highlight = highlight->next()) != NULL);
 
     this->mutex.unlock();
+}
+
+void
+ScrollBar::mouseMoveEvent(QMouseEvent *event)
+{
+    if (this->mouseDownIndex == -1) {
+        int y = event->pos().y();
+
+        auto oldIndex = this->mouseOverIndex;
+
+        if (y < this->buttonHeight) {
+            this->mouseOverIndex = 0;
+        } else if (y < this->thumbRect.y()) {
+            this->mouseOverIndex = 1;
+        } else if (this->thumbRect.contains(2, y)) {
+            this->mouseOverIndex = 2;
+        } else if (y < height() - this->buttonHeight) {
+            this->mouseOverIndex = 3;
+        } else {
+            this->mouseOverIndex = 4;
+        }
+
+        if (oldIndex != this->mouseOverIndex) {
+            this->repaint();
+        }
+    } else if (this->mouseDownIndex == 2) {
+        int delta = event->pos().y() - lastMousePosition.y();
+
+        this->setValue(this->value +
+                       (qreal)delta / this->trackHeight * maximum);
+    }
+
+    this->lastMousePosition = event->pos();
+}
+
+void
+ScrollBar::mousePressEvent(QMouseEvent *event)
+{
+    int y = event->pos().y();
+
+    if (y < this->buttonHeight) {
+        this->mouseDownIndex = 0;
+    } else if (y < this->thumbRect.y()) {
+        this->mouseDownIndex = 1;
+    } else if (this->thumbRect.contains(2, y)) {
+        this->mouseDownIndex = 2;
+    } else if (y < height() - this->buttonHeight) {
+        this->mouseDownIndex = 3;
+    } else {
+        this->mouseDownIndex = 4;
+    }
+}
+
+void
+ScrollBar::mouseReleaseEvent(QMouseEvent *event)
+{
+    int y = event->pos().y();
+
+    if (y < this->buttonHeight) {
+        if (this->mouseDownIndex == 0) {
+            this->setValue(this->value - this->smallChange);
+        }
+    } else if (y < this->thumbRect.y()) {
+        if (this->mouseDownIndex == 0) {
+            this->setValue(this->value - this->smallChange);
+        }
+    } else if (this->thumbRect.contains(2, y)) {
+        // do nothing
+    } else if (y < height() - this->buttonHeight) {
+        if (this->mouseDownIndex == 0) {
+            this->setValue(this->value + this->smallChange);
+        }
+    } else {
+        if (this->mouseDownIndex == 0) {
+            this->setValue(this->value + this->smallChange);
+        }
+    }
+
+    this->mouseDownIndex = -1;
+    repaint();
+}
+
+void
+ScrollBar::leaveEvent(QEvent *)
+{
+    this->mouseOverIndex = -1;
+
+    repaint();
 }
 
 void

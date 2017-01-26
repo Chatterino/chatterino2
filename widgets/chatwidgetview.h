@@ -6,6 +6,8 @@
 #include "widgets/scrollbar.h"
 
 #include <QPaintEvent>
+#include <QScroller>
+#include <QWheelEvent>
 #include <QWidget>
 
 namespace chatterino {
@@ -22,10 +24,15 @@ public:
 
     bool layoutMessages();
 
+    void updateScrollbar();
+
 protected:
     void resizeEvent(QResizeEvent *);
 
     void paintEvent(QPaintEvent *);
+    void wheelEvent(QWheelEvent *event);
+
+    void scroll(int dx, int dy);
 
 private:
     ChatWidget *chatWidget;
