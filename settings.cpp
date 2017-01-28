@@ -88,7 +88,6 @@ Settings::isIgnoredEmote(const QString &)
 
 void
 Settings::updateWordTypeMask()
-
 {
     using namespace messages;
 
