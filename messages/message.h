@@ -54,13 +54,13 @@ public:
         return displayName;
     }
 
-    const std::vector<Word>
+    const std::vector<Word> &
     getWords() const
     {
         return words;
     }
 
-    const std::vector<WordPart>
+    const std::vector<WordPart> &
     getWordParts() const
     {
         return wordParts;
