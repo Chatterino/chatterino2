@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QVector>
 #include <QWidget>
+#include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -70,8 +71,12 @@ protected:
 
 private:
     void setPreviewRect(QPoint mousePos);
+
+public:
+    void load(const boost::property_tree::ptree &v);
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // NOTEBOOKPAGE_H

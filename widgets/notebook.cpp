@@ -5,10 +5,14 @@
 #include "widgets/notebooktab.h"
 #include "widgets/settingsdialog.h"
 
+#include <QDebug>
+#include <QFile>
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
+#include <QStandardPaths>
 #include <QWidget>
+#include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -35,8 +39,6 @@ Notebook::Notebook(QWidget *parent)
     this->userButton.icon = NotebookButton::IconUser;
 
     this->addButton.resize(24, 24);
-
-    this->addPage();
 }
 
 NotebookPage *
@@ -191,5 +193,50 @@ Notebook::addPageButtonClicked()
 {
     addPage(true);
 }
+
+void
+Notebook::load(const boost::property_tree::ptree &tree)
+{
+    // Read a list of tabs
+    try {
+        BOOST_FOREACH (const boost::property_tree::ptree::value_type &v,
+                       tree.get_child("tabs.")) {
+            bool select = v.second.get<bool>("selected", false);
+
+            auto page = this->addPage(select);
+            auto tab = page->tab;
+            tab->load(v.second);
+            page->load(v.second);
+        }
+    } catch (boost::property_tree::ptree_error &) {
+        // can't read tabs
+    }
+
+    if (this->pages.size() == 0) {
+        // No pages saved, show default stuff
+        this->loadDefaults();
+    }
 }
+
+void
+Notebook::save(boost::property_tree::ptree &tree)
+{
+    boost::property_tree::ptree tabs;
+
+    // Iterate through all tabs and add them to our tabs property thing
+    for (const auto &page : this->pages) {
+        boost::property_tree::ptree pTab = page->tab->save();
+        tabs.push_back(std::make_pair("", pTab));
+    }
+
+    tree.add_child("tabs", tabs);
 }
+
+void
+Notebook::loadDefaults()
+{
+    this->addPage();
+}
+
+}  // namespace widgets
+}  // namespace chatterino

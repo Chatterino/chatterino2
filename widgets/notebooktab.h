@@ -3,6 +3,7 @@
 
 #include <QPropertyAnimation>
 #include <QWidget>
+#include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -117,8 +118,13 @@ private slots:
         calcSize();
         update();
     }
+
+public:
+    void load(const boost::property_tree::ptree &tree);
+    boost::property_tree::ptree save();
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // NOTEBOOKTAB_H

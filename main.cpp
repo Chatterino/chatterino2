@@ -26,6 +26,8 @@ main(int argc, char *argv[])
 
     ColorScheme::getInstance().setColors(0, -0.8);
 
+    Windows::load();
+
     MainWindow &w = Windows::getMainWindow();
     w.show();
 
@@ -34,6 +36,8 @@ main(int argc, char *argv[])
     int ret = a.exec();
 
     Settings::getInstance().save();
+
+    Windows::save();
 
     return ret;
 }

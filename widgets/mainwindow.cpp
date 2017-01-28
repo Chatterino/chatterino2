@@ -3,7 +3,9 @@
 #include "widgets/chatwidget.h"
 #include "widgets/notebook.h"
 
+#include <QDebug>
 #include <QPalette>
+#include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -68,5 +70,34 @@ MainWindow::repaintVisibleChatWidgets(Channel *channel)
         }
     }
 }
+
+void
+MainWindow::load(const boost::property_tree::ptree &tree)
+{
+    this->notebook.load(tree);
+
+    this->loaded = true;
 }
+
+boost::property_tree::ptree
+MainWindow::save()
+{
+    boost::property_tree::ptree child;
+
+    child.put("type", "main");
+
+    this->notebook.save(child);
+
+    return child;
 }
+
+void
+MainWindow::loadDefaults()
+{
+    this->notebook.loadDefaults();
+
+    this->loaded = true;
+}
+
+}  // namespace widgets
+}  // namespace chatterino

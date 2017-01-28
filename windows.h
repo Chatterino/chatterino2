@@ -37,6 +37,7 @@ private:
 
     static widgets::MainWindow *mainWindow;
 };
-}
+
+}  // namespace chatterino
 
 #endif  // WINDOWS_H

@@ -7,6 +7,7 @@
 
 #include <QList>
 #include <QWidget>
+#include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -54,8 +55,14 @@ private:
     NotebookButton userButton;
 
     NotebookPage *selectedPage;
+
+public:
+    void load(const boost::property_tree::ptree &tree);
+    void save(boost::property_tree::ptree &tree);
+    void loadDefaults();
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // NOTEBOOK_H

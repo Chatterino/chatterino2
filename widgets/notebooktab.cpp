@@ -203,5 +203,26 @@ NotebookTab::mouseMoveEvent(QMouseEvent *event)
         }
     }
 }
+
+void
+NotebookTab::load(const boost::property_tree::ptree &tree)
+{
+    // Load tab text
+    try {
+        this->setText(QString::fromStdString(tree.get<std::string>("text")));
+    } catch (boost::property_tree::ptree_error) {
+    }
 }
+
+boost::property_tree::ptree
+NotebookTab::save()
+{
+    boost::property_tree::ptree tree;
+
+    tree.put("text", this->getText().toStdString());
+
+    return tree;
 }
+
+}  // namespace widgets
+}  // namespace chatterino

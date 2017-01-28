@@ -3,11 +3,13 @@
 #include "widgets/chatwidget.h"
 #include "widgets/notebooktab.h"
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QMimeData>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -73,9 +75,8 @@ NotebookPage::removeFromLayout(ChatWidget *widget)
 }
 
 void
-NotebookPage::addToLayout(
-    ChatWidget *widget,
-    std::pair<int, int> position = std::pair<int, int>(-1, -1))
+NotebookPage::addToLayout(ChatWidget *widget, std::pair<int, int> position =
+                                                  std::pair<int, int>(-1, -1))
 {
     this->chatWidgets.push_back(widget);
 
@@ -239,5 +240,14 @@ NotebookPage::paintEvent(QPaintEvent *)
                          ColorScheme::getInstance().TabSelectedBackground);
     }
 }
+
+void
+NotebookPage::load(const boost::property_tree::ptree &v)
+{
+    const std::string &tabName = v.get<std::string>("name", "UNNAMED");
+
+    qDebug() << "tab name :" << tabName.c_str();
 }
-}
+
+}  // namespace widgets
+}  // namespace chatterino
