@@ -26,7 +26,6 @@ QRegularExpression *Message::cheerRegex =
     new QRegularExpression("cheer[1-9][0-9]*");
 
 Message::Message(const QString &text)
-    : wordParts()
 {
     words.push_back(Word(text, Word::Text,
                          ColorScheme::getInstance().SystemMessageColor, text,
@@ -36,7 +35,6 @@ Message::Message(const QString &text)
 Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
-    : wordParts()
 {
     this->parseTime = std::chrono::system_clock::now();
 
@@ -464,19 +462,11 @@ Message::layout(int width, bool enableEmoteMargins)
 
     int right = width - MARGIN_RIGHT - MARGIN_LEFT;
 
-    std::vector<WordPart> *parts = new std::vector<WordPart>();
-
     int lineStart = 0;
     int lineHeight = 0;
     bool first = true;
 
-    auto alignParts = [&lineStart, &lineHeight, &parts, this] {
-        for (size_t i = lineStart; i < parts->size(); i++) {
-            WordPart &wordPart2 = parts->at(i);
-
-            wordPart2.setY(wordPart2.getY() + lineHeight);
-        }
-    };
+    this->wordParts.clear();
 
     uint32_t flags = Settings::getInstance().getWordTypeMask();
 
@@ -500,7 +490,7 @@ Message::layout(int width, bool enableEmoteMargins)
 
         // word wrapping
         if (word.isText() && word.getWidth() + MARGIN_LEFT > right) {
-            alignParts();
+            this->alignWordParts(lineStart, lineHeight);
 
             y += lineHeight;
 
@@ -525,8 +515,9 @@ Message::layout(int width, bool enableEmoteMargins)
                 if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
                     QString mid = text.mid(start, i - start - 1);
 
-                    parts->push_back(WordPart(word, MARGIN_LEFT, y, width,
-                                              word.getHeight(), mid, mid));
+                    this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y,
+                                                       width, word.getHeight(),
+                                                       mid, mid));
 
                     y += metrics.height();
 
@@ -539,20 +530,19 @@ Message::layout(int width, bool enableEmoteMargins)
             QString mid(text.mid(start));
             width = metrics.width(mid);
 
-            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(),
-                                      width, word.getHeight(), mid, mid));
+            this->wordParts.push_back(WordPart(word, MARGIN_LEFT,
+                                               y - word.getHeight(), width,
+                                               word.getHeight(), mid, mid));
             x = width + MARGIN_LEFT + spaceWidth;
 
             lineHeight = word.getHeight();
 
-            lineStart = parts->size() - 1;
+            lineStart = this->wordParts.size() - 1;
 
             first = false;
-        }
-
-        // fits in the line
-        else if (first || x + word.getWidth() + xOffset <= right) {
-            parts->push_back(
+        } else if (first || x + word.getWidth() + xOffset <= right) {
+            // fits in the line
+            this->wordParts.push_back(
                 WordPart(word, x, y - word.getHeight(), word.getCopyText()));
 
             x += word.getWidth() + xOffset;
@@ -561,18 +551,16 @@ Message::layout(int width, bool enableEmoteMargins)
             lineHeight = std::max(word.getHeight(), lineHeight);
 
             first = false;
-        }
-
-        // doesn't fit in the line
-        else {
-            alignParts();
+        } else {
+            // doesn't fit in the line
+            this->alignWordParts(lineStart, lineHeight);
 
             y += lineHeight;
 
-            parts->push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(),
-                                      word.getCopyText()));
+            this->wordParts.push_back(WordPart(
+                word, MARGIN_LEFT, y - word.getHeight(), word.getCopyText()));
 
-            lineStart = parts->size() - 1;
+            lineStart = this->wordParts.size() - 1;
 
             lineHeight = word.getHeight();
 
@@ -581,15 +569,28 @@ Message::layout(int width, bool enableEmoteMargins)
         }
     }
 
-    alignParts();
-
-    auto tmp = this->wordParts;
-    this->wordParts = parts;
-    delete tmp;
+    this->alignWordParts(lineStart, lineHeight);
 
     this->height = y + lineHeight;
 
     return true;
+}
+
+void
+Message::alignWordParts(int lineStart, int lineHeight)
+{
+    for (size_t i = lineStart; i < this->wordParts.size(); i++) {
+        WordPart &wordPart2 = this->wordParts.at(i);
+
+        wordPart2.setY(wordPart2.getY() + lineHeight);
+    }
+}
+
+QString
+Message::matchLink(const QString &string)
+{
+    // TODO: Implement this xD
+    return QString();
 }
 
 bool
@@ -599,11 +600,5 @@ Message::sortTwitchEmotes(const std::pair<long int, LazyLoadedImage *> &a,
     return a.first < b.first;
 }
 
-QString
-Message::matchLink(const QString &string)
-{
-    // TODO: Implement this xD
-    return QString();
-}
-}
-}
+}  // namespace messages
+}  // namespace chatterino

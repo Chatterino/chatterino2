@@ -22,9 +22,6 @@ public:
 
     ~Message()
     {
-        if (wordParts != NULL) {
-            delete wordParts;
-        }
     }
 
     bool
@@ -66,7 +63,7 @@ public:
     const std::vector<WordPart>
     getWordParts() const
     {
-        return *wordParts;
+        return wordParts;
     }
 
     bool
@@ -119,12 +116,14 @@ private:
     int height = 0;
 
     std::vector<Word> words;
-    std::vector<WordPart> *wordParts;
+    std::vector<WordPart> wordParts;
 
     long currentLayoutWidth = -1;
     bool relayoutRequested = true;
     int fontGeneration = -1;
     int emoteGeneration = -1;
+
+    void alignWordParts(int lineStart, int lineHeight);
 
     static QString matchLink(const QString &string);
 
@@ -132,7 +131,8 @@ private:
         const std::pair<long int, LazyLoadedImage *> &a,
         const std::pair<long int, LazyLoadedImage *> &b);
 };
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // MESSAGE_H
