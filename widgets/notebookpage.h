@@ -73,7 +73,8 @@ private:
     void setPreviewRect(QPoint mousePos);
 
 public:
-    void load(const boost::property_tree::ptree &v);
+    void load(const boost::property_tree::ptree &tree);
+    boost::property_tree::ptree save();
 };
 
 }  // namespace widgets

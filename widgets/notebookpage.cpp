@@ -124,7 +124,8 @@ void
 NotebookPage::mouseReleaseEvent(QMouseEvent *event)
 {
     if (this->hbox.count() == 0 && event->button() == Qt::LeftButton) {
-        addToLayout(new ChatWidget(), std::pair<int, int>(-1, -1));
+        // "Add Chat" was clicked
+        this->addToLayout(new ChatWidget(), std::pair<int, int>(-1, -1));
 
         setCursor(QCursor(Qt::ArrowCursor));
     }
@@ -242,11 +243,31 @@ NotebookPage::paintEvent(QPaintEvent *)
 }
 
 void
-NotebookPage::load(const boost::property_tree::ptree &v)
+NotebookPage::load(const boost::property_tree::ptree &tree)
 {
-    const std::string &tabName = v.get<std::string>("name", "UNNAMED");
+    try {
+        BOOST_FOREACH (const boost::property_tree::ptree::value_type &v,
+                       tree.get_child("chats.")) {
+            auto widget = new ChatWidget();
+            widget->load(v.second);
+            this->addToLayout(widget, std::pair<int, int>(-1, -1));
+        }
+    } catch (boost::property_tree::ptree_error &) {
+        // can't read tabs
+    }
+}
 
-    qDebug() << "tab name :" << tabName.c_str();
+boost::property_tree::ptree
+NotebookPage::save()
+{
+    boost::property_tree::ptree tree;
+
+    for (const auto &chat : this->chatWidgets) {
+        boost::property_tree::ptree child = chat->save();
+        tree.push_back(std::make_pair("", child));
+    }
+
+    return tree;
 }
 
 }  // namespace widgets
