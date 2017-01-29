@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QMutex>
+#include <QMutexLocker>
 
 #include <functional>
 #include <unordered_map>
@@ -21,54 +22,54 @@ public:
     bool
     tryGet(const TKey &name, TValue &value) const
     {
-        this->mutex.lock();
+        QMutexLocker lock(&this->mutex);
+
         auto a = map.find(name);
         if (a == map.end()) {
-            this->mutex.unlock();
             return false;
         }
+
         value = a.value();
-        this->mutex.unlock();
+
         return true;
     }
 
     TValue
     getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        this->mutex.lock();
-        auto a = map.find(name);
+        QMutexLocker lock(&this->mutex);
 
+        auto a = map.find(name);
         if (a == map.end()) {
             TValue value = addLambda();
             map.insert(name, value);
-            this->mutex.unlock();
             return value;
         }
 
-        this->mutex.unlock();
         return a.value();
     }
 
     void
     clear()
     {
-        this->mutex.lock();
+        QMutexLocker lock(&this->mutex);
+
         map.clear();
-        this->mutex.unlock();
     }
 
     void
     insert(const TKey &name, const TValue &value)
     {
-        this->mutex.lock();
+        QMutexLocker lock(&this->mutex);
+
         map.insert(name, value);
-        this->mutex.unlock();
     }
 
 private:
     mutable QMutex mutex;
     QMap<TKey, TValue> map;
 };
-}
+
+}  // namespace chatterino
 
 #endif  // CONCURRENTMAP_H
