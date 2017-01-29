@@ -6,7 +6,6 @@
 #include <QMutexLocker>
 
 #include <functional>
-#include <unordered_map>
 
 namespace chatterino {
 
