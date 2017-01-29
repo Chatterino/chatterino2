@@ -32,21 +32,21 @@ public:
         return true;
     }
 
-    void
-    getOrAdd(const TKey &name, TValue &value, std::function<TValue()> addLambda)
+    TValue
+    getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
         this->mutex->lock();
         auto a = map.find(name);
 
         if (a == map.end()) {
-            value = addLambda();
+            TValue value = addLambda();
             map.insert(name, value);
             this->mutex->unlock();
+            return value;
         }
 
-        value = a.value();
-
         this->mutex->unlock();
+        return a.value();
     }
 
     void
