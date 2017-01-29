@@ -16,58 +16,57 @@ public:
     ConcurrentMap()
         : map()
     {
-        this->mutex = new QMutex();
     }
 
     bool
     tryGet(const TKey &name, TValue &value) const
     {
-        this->mutex->lock();
+        this->mutex.lock();
         auto a = map.find(name);
         if (a == map.end()) {
-            this->mutex->unlock();
+            this->mutex.unlock();
             return false;
         }
         value = a.value();
-        this->mutex->unlock();
+        this->mutex.unlock();
         return true;
     }
 
     TValue
     getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        this->mutex->lock();
+        this->mutex.lock();
         auto a = map.find(name);
 
         if (a == map.end()) {
             TValue value = addLambda();
             map.insert(name, value);
-            this->mutex->unlock();
+            this->mutex.unlock();
             return value;
         }
 
-        this->mutex->unlock();
+        this->mutex.unlock();
         return a.value();
     }
 
     void
     clear()
     {
-        this->mutex->lock();
+        this->mutex.lock();
         map.clear();
-        this->mutex->unlock();
+        this->mutex.unlock();
     }
 
     void
     insert(const TKey &name, const TValue &value)
     {
-        this->mutex->lock();
+        this->mutex.lock();
         map.insert(name, value);
-        this->mutex->unlock();
+        this->mutex.unlock();
     }
 
 private:
-    QMutex *mutex;
+    mutable QMutex mutex;
     QMap<TKey, TValue> map;
 };
 }
