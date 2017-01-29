@@ -230,7 +230,7 @@ Notebook::save(boost::property_tree::ptree &tree)
         boost::property_tree::ptree pChats = page->save();
 
         if (pChats.size() > 0) {
-            pTab.add_child("chats", pChats);
+            pTab.add_child("columns", pChats);
         }
 
         tabs.push_back(std::make_pair("", pTab));

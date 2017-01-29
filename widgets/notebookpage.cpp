@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMimeData>
+#include <QObject>
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -242,18 +243,82 @@ NotebookPage::paintEvent(QPaintEvent *)
     }
 }
 
+static std::pair<int, int>
+getWidgetPositionInLayout(QLayout *layout, const ChatWidget *chatWidget)
+{
+    for (int i = 0; i < layout->count(); ++i) {
+        printf("xD\n");
+    }
+
+    return std::make_pair(-1, -1);
+}
+
+std::pair<int, int>
+NotebookPage::getChatPosition(const ChatWidget *chatWidget)
+{
+    auto layout = this->hbox.layout();
+
+    if (layout == nullptr) {
+        return std::make_pair(-1, -1);
+    }
+
+    return getWidgetPositionInLayout(layout, chatWidget);
+}
+
 void
 NotebookPage::load(const boost::property_tree::ptree &tree)
 {
     try {
-        BOOST_FOREACH (const boost::property_tree::ptree::value_type &v,
-                       tree.get_child("chats.")) {
-            auto widget = new ChatWidget();
-            widget->load(v.second);
-            this->addToLayout(widget, std::pair<int, int>(-1, -1));
+        int column = 0;
+        for (const auto &v : tree.get_child("columns.")) {
+            int row = 0;
+            for (const auto &innerV : v.second.get_child("")) {
+                auto widget = new ChatWidget();
+                widget->load(innerV.second);
+                this->addToLayout(widget, std::pair<int, int>(column, row));
+                ++row;
+            }
+            ++column;
         }
     } catch (boost::property_tree::ptree_error &) {
         // can't read tabs
+    }
+}
+
+static void
+saveFromLayout(QLayout *layout, boost::property_tree::ptree &tree)
+{
+    for (int i = 0; i < layout->count(); ++i) {
+        auto item = layout->itemAt(i);
+
+        auto innerLayout = item->layout();
+        if (innerLayout != nullptr) {
+            boost::property_tree::ptree innerLayoutTree;
+
+            saveFromLayout(innerLayout, innerLayoutTree);
+
+            if (innerLayoutTree.size() > 0) {
+                tree.push_back(std::make_pair("", innerLayoutTree));
+            }
+
+            continue;
+        }
+
+        auto widget = item->widget();
+
+        if (widget == nullptr) {
+            // This layoutitem does not manage a widget for some reason
+            continue;
+        }
+
+        ChatWidget *chatWidget = qobject_cast<ChatWidget *>(widget);
+
+        if (chatWidget != nullptr) {
+            boost::property_tree::ptree chat = chatWidget->save();
+
+            tree.push_back(std::make_pair("", chat));
+            continue;
+        }
     }
 }
 
@@ -262,10 +327,20 @@ NotebookPage::save()
 {
     boost::property_tree::ptree tree;
 
+    auto layout = this->hbox.layout();
+
+    saveFromLayout(layout, tree);
+
+    /*
     for (const auto &chat : this->chatWidgets) {
         boost::property_tree::ptree child = chat->save();
+
+        // Set child position
+        child.put("position", "5,3");
+
         tree.push_back(std::make_pair("", child));
     }
+    */
 
     return tree;
 }

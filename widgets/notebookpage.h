@@ -72,6 +72,8 @@ protected:
 private:
     void setPreviewRect(QPoint mousePos);
 
+    std::pair<int, int> getChatPosition(const ChatWidget *chatWidget);
+
 public:
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
