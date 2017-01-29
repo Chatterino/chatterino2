@@ -1,12 +1,15 @@
 #ifndef RESIZINGTEXTEDIT_H
 #define RESIZINGTEXTEDIT_H
 
+#include <QKeyEvent>
 #include <QTextEdit>
+#include <boost/signals2.hpp>
 
 class ResizingTextEdit : public QTextEdit
 {
 public:
     ResizingTextEdit()
+        : keyPressed()
     {
         auto sizePolicy = this->sizePolicy();
         sizePolicy.setHeightForWidth(true);
@@ -29,6 +32,8 @@ public:
         return true;
     }
 
+    boost::signals2::signal<void(QKeyEvent *)> keyPressed;
+
 protected:
     int
     heightForWidth(int) const override
@@ -37,6 +42,18 @@ protected:
 
         return margins.top() + document()->size().height() + margins.bottom() +
                5;
+    }
+
+    void
+    keyPressEvent(QKeyEvent *event)
+    {
+        event->ignore();
+
+        keyPressed(event);
+
+        if (!event->isAccepted()) {
+            QTextEdit::keyPressEvent(event);
+        }
     }
 };
 

@@ -179,6 +179,11 @@ SettingsDialog::addTabs()
     vbox->addStretch(1);
     addTab(vbox, "Links", ":/images/VSO_Link_blue_16x.png");
 
+    // Logging
+    vbox = new QVBoxLayout();
+    vbox->addStretch(1);
+    addTab(vbox, "Logs", ":/images/VSO_Link_blue_16x.png");
+
     // Highlighting
     vbox = new QVBoxLayout();
     vbox->addStretch(1);

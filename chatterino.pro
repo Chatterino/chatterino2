@@ -68,7 +68,8 @@ SOURCES += main.cpp\
     widgets/settingsdialog.cpp \
     widgets/settingsdialogtab.cpp \
     widgets/textinputdialog.cpp \
-    windows.cpp
+    windows.cpp \
+    logging.cpp
 
 HEADERS  += account.h \
     asyncexec.h \
@@ -109,7 +110,8 @@ HEADERS  += account.h \
     widgets/textinputdialog.h \
     windows.h \
     widgets/resizingtextedit.h \
-    settingssnapshot.h
+    settingssnapshot.h \
+    logging.h
 
 PRECOMPILED_HEADER =
 

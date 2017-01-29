@@ -15,12 +15,14 @@
 namespace chatterino {
 namespace widgets {
 
+class ChatWidget;
+
 class ChatWidgetInput : public QWidget
 {
     Q_OBJECT
 
 public:
-    ChatWidgetInput();
+    ChatWidgetInput(ChatWidget *parent);
     ~ChatWidgetInput();
 
 protected:
@@ -29,6 +31,8 @@ protected:
     void resizeEvent(QResizeEvent *);
 
 private:
+    ChatWidget *chatWidget;
+
     QHBoxLayout hbox;
     QVBoxLayout vbox;
     QHBoxLayout editContainer;
@@ -43,6 +47,8 @@ private slots:
     {
         this->textLengthLabel.setHidden(!value);
     }
+    void editTextChanged();
+    //    void editKeyPressed(QKeyEvent *event);
 };
 }
 }

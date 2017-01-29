@@ -156,6 +156,14 @@ IrcManager::disconnect()
 }
 
 void
+IrcManager::send(QString raw)
+{
+    IrcManager::connectionMutex.lock();
+    IrcManager::connection->sendRaw(raw);
+    IrcManager::connectionMutex.unlock();
+}
+
+void
 IrcManager::joinChannel(const QString &channel)
 {
     IrcManager::connectionMutex.lock();

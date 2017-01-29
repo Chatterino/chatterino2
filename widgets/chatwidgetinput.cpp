@@ -1,14 +1,18 @@
 #include "widgets/chatwidgetinput.h"
+#include "chatwidget.h"
 #include "colorscheme.h"
+#include "ircmanager.h"
 #include "settings.h"
 
 #include <QPainter>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetInput::ChatWidgetInput()
-    : hbox()
+ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
+    : chatWidget(widget)
+    , hbox()
     , vbox()
     , editContainer()
     , edit()
@@ -36,12 +40,27 @@ ChatWidgetInput::ChatWidgetInput()
         "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
         "/>");
 
-    //    this->emotesLabel.setMaximumSize(12, 12);
+    QObject::connect(&edit, &ResizingTextEdit::textChanged, this,
+                     &ChatWidgetInput::editTextChanged);
+
+    //    QObject::connect(&edit, &ResizingTextEdit::keyPressEvent, this,
+    //                     &ChatWidgetInput::editKeyPressed);
 
     this->refreshTheme();
-
     this->setMessageLengthVisisble(
         Settings::getInstance().showMessageLength.get());
+
+    this->edit.keyPressed.connect([this](QKeyEvent *event) {
+        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+            Channel *c = this->chatWidget->getChannel();
+            if (c != nullptr) {
+                IrcManager::send("PRIVMSG #" + c->getName() + ": " +
+                                 this->edit.toPlainText());
+                event->accept();
+                this->edit.setText(QString());
+            }
+        }
+    });
 
     /* XXX(pajlada): FIX THIS
     QObject::connect(&Settings::getInstance().showMessageLength,
@@ -71,6 +90,21 @@ ChatWidgetInput::refreshTheme()
 
     edit.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
 }
+
+void
+ChatWidgetInput::editTextChanged()
+{
+}
+
+// void
+// ChatWidgetInput::editKeyPressed(QKeyEvent *event)
+//{
+//    if (event->key() == Qt::Key_Enter) {
+//        event->accept();
+//        IrcManager::send("PRIVMSG #" +  edit.toPlainText();
+//        edit.setText(QString());
+//    }
+//}
 
 void
 ChatWidgetInput::paintEvent(QPaintEvent *)

@@ -19,7 +19,7 @@ ChatWidget::ChatWidget(QWidget *parent)
     , vbox(this)
     , header(this)
     , view(this)
-    , input()
+    , input(this)
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);

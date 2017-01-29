@@ -20,6 +20,8 @@ public:
     static void connect();
     static void disconnect();
 
+    static void send(QString raw);
+
     static const QString defaultClientId;
 
     bool isTwitchBlockedUser(QString const &username);
