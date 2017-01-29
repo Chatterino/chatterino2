@@ -27,26 +27,26 @@ public:
             this->mutex->unlock();
             return false;
         }
-        this->mutex->unlock();
         value = a.value();
+        this->mutex->unlock();
         return true;
     }
 
-    TValue
-    getOrAdd(const TKey &name, std::function<TValue()> addLambda)
+    void
+    getOrAdd(const TKey &name, TValue &value, std::function<TValue()> addLambda)
     {
         this->mutex->lock();
         auto a = map.find(name);
 
         if (a == map.end()) {
-            TValue value = addLambda();
+            value = addLambda();
             map.insert(name, value);
             this->mutex->unlock();
-            return value;
         }
 
+        value = a.value();
+
         this->mutex->unlock();
-        return a.value();
     }
 
     void
