@@ -30,15 +30,15 @@ public:
     NotebookPage *page;
 
     const QString &
-    getText() const
+    getTitle() const
     {
-        return this->text;
+        return this->title;
     }
 
     void
-    setText(const QString &text)
+    setTitle(const QString &title)
     {
-        this->text = text;
+        this->title = title;
     }
 
     bool
@@ -95,7 +95,7 @@ private:
 
     Notebook *notebook;
 
-    QString text;
+    QString title;
 
     bool selected;
     bool mouseOver;

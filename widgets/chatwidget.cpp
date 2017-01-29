@@ -83,5 +83,27 @@ ChatWidget::paintEvent(QPaintEvent *)
 
     painter.fillRect(this->rect(), ColorScheme::getInstance().ChatBackground);
 }
+
+void
+ChatWidget::load(const boost::property_tree::ptree &tree)
+{
+    // Load tab text
+    try {
+        this->setChannelName(
+            QString::fromStdString(tree.get<std::string>("channelName")));
+    } catch (boost::property_tree::ptree_error) {
+    }
 }
+
+boost::property_tree::ptree
+ChatWidget::save()
+{
+    boost::property_tree::ptree tree;
+
+    tree.put("channelName", this->getChannelName().toStdString());
+
+    return tree;
 }
+
+}  // namespace widgets
+}  // namespace chatterino

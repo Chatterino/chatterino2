@@ -226,6 +226,13 @@ Notebook::save(boost::property_tree::ptree &tree)
     // Iterate through all tabs and add them to our tabs property thing
     for (const auto &page : this->pages) {
         boost::property_tree::ptree pTab = page->tab->save();
+
+        boost::property_tree::ptree pChats = page->save();
+
+        if (pChats.size() > 0) {
+            pTab.add_child("columns", pChats);
+        }
+
         tabs.push_back(std::make_pair("", pTab));
     }
 

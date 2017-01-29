@@ -14,7 +14,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     , posAnimated(false)
     , posAnimationDesired()
     , notebook(notebook)
-    , text("<no title>")
+    , title("<no title>")
     , selected(false)
     , mouseOver(false)
     , mouseDown(false)
@@ -52,9 +52,9 @@ void
 NotebookTab::calcSize()
 {
     if (Settings::getInstance().hideTabX.get()) {
-        this->resize(this->fontMetrics().width(this->text) + 8, 24);
+        this->resize(this->fontMetrics().width(this->title) + 8, 24);
     } else {
-        this->resize(this->fontMetrics().width(this->text) + 8 + 24, 24);
+        this->resize(this->fontMetrics().width(this->title) + 8 + 24, 24);
     }
 }
 
@@ -115,7 +115,7 @@ NotebookTab::paintEvent(QPaintEvent *)
                width() - (Settings::getInstance().hideTabX.get() ? 0 : 16),
                height());
 
-    painter.drawText(rect, this->text, QTextOption(Qt::AlignCenter));
+    painter.drawText(rect, this->title, QTextOption(Qt::AlignCenter));
 
     if (!Settings::getInstance().hideTabX.get() &&
         (this->mouseOver || this->selected)) {
@@ -207,9 +207,9 @@ NotebookTab::mouseMoveEvent(QMouseEvent *event)
 void
 NotebookTab::load(const boost::property_tree::ptree &tree)
 {
-    // Load tab text
+    // Load tab title
     try {
-        this->setText(QString::fromStdString(tree.get<std::string>("text")));
+        this->setTitle(QString::fromStdString(tree.get<std::string>("title")));
     } catch (boost::property_tree::ptree_error) {
     }
 }
@@ -219,7 +219,7 @@ NotebookTab::save()
 {
     boost::property_tree::ptree tree;
 
-    tree.put("text", this->getText().toStdString());
+    tree.put("title", this->getTitle().toStdString());
 
     return tree;
 }

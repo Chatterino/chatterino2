@@ -10,6 +10,7 @@
 #include <QFont>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -56,8 +57,13 @@ private:
     ChatWidgetHeader header;
     ChatWidgetView view;
     ChatWidgetInput input;
+
+public:
+    void load(const boost::property_tree::ptree &tree);
+    boost::property_tree::ptree save();
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // CHATWIDGET_H
