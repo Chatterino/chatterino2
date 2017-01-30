@@ -503,11 +503,11 @@ Message::layout(int width, bool enableEmoteMargins)
 
             std::vector<short> &charWidths = word.getCharacterWidthCache();
 
-            if (charWidths.size() == 0) {
-                charWidths.reserve(text.length());
+            auto xD = charWidths.size();
 
+            if (charWidths.size() == 0) {
                 for (int i = 0; i < text.length(); i++) {
-                    charWidths.push_back(metrics.width(text, i));
+                    charWidths.push_back(metrics.charWidth(text, i));
                 }
             }
 
