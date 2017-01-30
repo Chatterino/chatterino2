@@ -15,9 +15,7 @@ Channels::getItems()
 {
     QMutexLocker locker(&Channels::channelsMutex);
 
-    int size = Channels::channels.size();
-
-    std::vector<std::shared_ptr<Channel>> items(size);
+    std::vector<std::shared_ptr<Channel>> items;
 
     for (auto &item : Channels::channels.values()) {
         items.push_back(std::get<0>(item));

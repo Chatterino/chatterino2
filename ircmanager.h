@@ -52,7 +52,7 @@ private:
 
     static void beginConnecting();
 
-    static IrcConnection *connection;
+    static std::shared_ptr<IrcConnection> connection;
     static QMutex connectionMutex;
     static long connectionGeneration;
 

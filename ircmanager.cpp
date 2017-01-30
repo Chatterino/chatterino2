@@ -15,7 +15,7 @@
 namespace chatterino {
 
 Account *IrcManager::account = nullptr;
-IrcConnection *IrcManager::connection = NULL;
+std::shared_ptr<IrcConnection> IrcManager::connection;
 QMutex IrcManager::connectionMutex;
 long IrcManager::connectionGeneration = 0;
 const QString IrcManager::defaultClientId = "7ue61iz46fz11y3cugd0l3tawb4taal";
@@ -136,9 +136,8 @@ IrcManager::beginConnecting()
 
     IrcManager::connectionMutex.lock();
     if (generation == IrcManager::connectionGeneration) {
-        delete IrcManager::connection;
         c->moveToThread(QCoreApplication::instance()->thread());
-        IrcManager::connection = c;
+        IrcManager::connection = std::shared_ptr<IrcConnection>(c);
 
         auto channels = Channels::getItems();
 
@@ -156,9 +155,8 @@ IrcManager::disconnect()
 {
     IrcManager::connectionMutex.lock();
 
-    if (IrcManager::connection != NULL) {
-        delete IrcManager::connection;
-        IrcManager::connection = NULL;
+    if (IrcManager::connection.get() != NULL) {
+        IrcManager::connection = std::shared_ptr<IrcConnection>();
     }
 
     IrcManager::connectionMutex.unlock();
