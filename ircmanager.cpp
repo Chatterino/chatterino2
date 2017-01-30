@@ -60,8 +60,9 @@ IrcManager::beginConnecting()
                                username + "/blocks?limit=" + 100 +
                                "&client_id=" + oauthClient;
 
+            QNetworkAccessManager *manager = new QNetworkAccessManager();
             QNetworkRequest req(QUrl(nextLink + "&oauth_token=" + oauthToken));
-            QNetworkReply *reply = IrcManager::accessManager.get(req);
+            QNetworkReply *reply = manager->get(req);
 
             QObject::connect(reply, &QNetworkReply::finished, [=] {
                 IrcManager::twitchBlockedUsersMutex.lock();
@@ -86,6 +87,8 @@ IrcManager::beginConnecting()
                         user.value("name").toString().toLower(), true);
                 }
                 IrcManager::twitchBlockedUsersMutex.unlock();
+
+                manager->deleteLater();
             });
         }
 
@@ -136,6 +139,12 @@ IrcManager::beginConnecting()
         delete IrcManager::connection;
         c->moveToThread(QCoreApplication::instance()->thread());
         IrcManager::connection = c;
+
+        auto channels = Channels::getItems();
+
+        for (auto &channel : channels) {
+            IrcManager::sendJoin(channel.get()->getName());
+        }
     } else {
         delete c;
     }
@@ -164,7 +173,7 @@ IrcManager::send(QString raw)
 }
 
 void
-IrcManager::joinChannel(const QString &channel)
+IrcManager::sendJoin(const QString &channel)
 {
     IrcManager::connectionMutex.lock();
     if (IrcManager::connection != NULL) {

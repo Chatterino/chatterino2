@@ -14,7 +14,7 @@ namespace widgets {
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
-    , channel(NULL)
+    , channel(Channels::getEmpty())
     , channelName(QString())
     , vbox(this)
     , header(this)

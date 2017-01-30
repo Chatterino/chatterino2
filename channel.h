@@ -33,6 +33,12 @@ public:
         return ffzChannelEmotes;
     }
 
+    bool
+    isEmpty() const
+    {
+        return name.isEmpty();
+    }
+
     const QMutex &
     getMessageMutex() const
     {

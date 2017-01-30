@@ -42,7 +42,7 @@ MainWindow::layoutVisibleChatWidgets(Channel *channel)
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->getChannel()) {
+        if (channel == NULL || channel == widget->getChannel().get()) {
             if (widget->getView().layoutMessages()) {
                 widget->update();
             }
@@ -64,7 +64,7 @@ MainWindow::repaintVisibleChatWidgets(Channel *channel)
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->getChannel()) {
+        if (channel == NULL || channel == widget->getChannel().get()) {
             widget->getView().layoutMessages();
             widget->update();
         }

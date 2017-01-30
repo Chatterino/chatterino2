@@ -29,7 +29,7 @@ public:
         return view;
     }
 
-    Channel *
+    std::shared_ptr<Channel>
     getChannel() const
     {
         return channel;
@@ -49,7 +49,7 @@ protected:
     void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
 
 private:
-    Channel *channel;
+    std::shared_ptr<Channel> channel;
     QString channelName;
 
     QFont font;

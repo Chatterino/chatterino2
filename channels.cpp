@@ -3,54 +3,75 @@
 
 namespace chatterino {
 
-Channel Channels::whispers(QString("/whispers"));
-Channel Channels::mentions(QString("/mentions"));
-Channel Channels::empty(QString(""));
+std::shared_ptr<Channel> Channels::whispers(new Channel(QString("/whispers")));
+std::shared_ptr<Channel> Channels::mentions(new Channel(QString("/mentions")));
+std::shared_ptr<Channel> Channels::empty(new Channel(QString("")));
 
-QMap<QString, std::tuple<Channel *, int>> Channels::channels;
+QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> Channels::channels;
+QMutex Channels::channelsMutex;
 
-Channel *
-Channels::addChannel(const QString &channel)
+const std::vector<std::shared_ptr<Channel>>
+Channels::getItems()
 {
-    QString c = channel.toLower();
+    QMutexLocker locker(&Channels::channelsMutex);
 
-    auto a = Channels::channels.find(c);
+    int size = Channels::channels.size();
 
-    if (a == Channels::channels.end()) {
-        auto _c = new Channel(c);
-        Channels::channels.insert(c, std::tuple<Channel *, int>(_c, 1));
+    std::vector<std::shared_ptr<Channel>> items(size);
 
-        IrcManager::joinChannel(c);
-
-        return _c;
-    } else {
-        std::get<1>(a.value())++;
+    for (auto &item : Channels::channels.values()) {
+        items.push_back(std::get<0>(item));
     }
 
-    return std::get<0>(a.value());
+    return items;
 }
 
-Channel *
+std::shared_ptr<Channel>
+Channels::addChannel(const QString &channel)
+{
+    QMutexLocker locker(&Channels::channelsMutex);
+
+    QString channelName = channel.toLower();
+
+    auto it = Channels::channels.find(channelName);
+
+    if (it == Channels::channels.end()) {
+        auto channel = std::shared_ptr<Channel>(new Channel(channelName));
+        Channels::channels.insert(channelName, std::make_tuple(channel, 1));
+
+        IrcManager::sendJoin(channelName);
+
+        return channel;
+    }
+
+    std::get<1>(it.value())++;
+
+    return std::get<0>(it.value());
+}
+
+std::shared_ptr<Channel>
 Channels::getChannel(const QString &channel)
 {
+    QMutexLocker locker(&Channels::channelsMutex);
+
     QString c = channel.toLower();
 
     if (channel.length() > 1 && channel.at(0) == '/') {
         if (c == "/whispers") {
-            return &Channels::whispers;
+            return Channels::whispers;
         }
 
         if (c == "/mentions") {
-            return &Channels::mentions;
+            return Channels::mentions;
         }
 
-        return &Channels::empty;
+        return Channels::empty;
     }
 
     auto a = Channels::channels.find(c);
 
     if (a == Channels::channels.end()) {
-        return NULL;
+        return Channels::empty;
     }
 
     return std::get<0>(a.value());
@@ -59,6 +80,8 @@ Channels::getChannel(const QString &channel)
 void
 Channels::removeChannel(const QString &channel)
 {
+    QMutexLocker locker(&Channels::channelsMutex);
+
     if (channel.length() > 1 && channel.at(0) == '/') {
         return;
     }
@@ -76,7 +99,6 @@ Channels::removeChannel(const QString &channel)
     if (std::get<1>(a.value()) == 0) {
         IrcManager::partChannel(c);
         Channels::channels.remove(c);
-        delete std::get<0>(a.value());
     }
 }
 }

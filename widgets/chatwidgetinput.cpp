@@ -52,7 +52,9 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
 
     this->edit.keyPressed.connect([this](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-            Channel *c = this->chatWidget->getChannel();
+            auto ptr = this->chatWidget->getChannel();
+            Channel *c = ptr.get();
+
             if (c != nullptr) {
                 IrcManager::send("PRIVMSG #" + c->getName() + ": " +
                                  this->edit.toPlainText());

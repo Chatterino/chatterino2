@@ -38,7 +38,7 @@ public:
         return accessManager;
     }
 
-    static void joinChannel(const QString &channel);
+    static void sendJoin(const QString &channel);
 
     static void partChannel(const QString &channel);
 
