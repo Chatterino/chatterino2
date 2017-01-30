@@ -132,9 +132,8 @@ IrcManager::beginConnecting()
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
-    c->open();
+    QMutexLocker locker(&IrcManager::connectionMutex);
 
-    IrcManager::connectionMutex.lock();
     if (generation == IrcManager::connectionGeneration) {
         c->moveToThread(QCoreApplication::instance()->thread());
         IrcManager::connection = std::shared_ptr<IrcConnection>(c);
@@ -142,12 +141,13 @@ IrcManager::beginConnecting()
         auto channels = Channels::getItems();
 
         for (auto &channel : channels) {
-            IrcManager::sendJoin(channel.get()->getName());
+            c->sendRaw("JOIN #" + channel.get()->getName());
         }
+
+        c->open();
     } else {
         delete c;
     }
-    IrcManager::connectionMutex.unlock();
 }
 
 void
@@ -155,6 +155,7 @@ IrcManager::disconnect()
 {
     IrcManager::connectionMutex.lock();
 
+    auto c = IrcManager::connection;
     if (IrcManager::connection.get() != NULL) {
         IrcManager::connection = std::shared_ptr<IrcConnection>();
     }
@@ -174,9 +175,11 @@ void
 IrcManager::sendJoin(const QString &channel)
 {
     IrcManager::connectionMutex.lock();
-    if (IrcManager::connection != NULL) {
-        IrcManager::connection->sendRaw("JOIN #" + channel);
+
+    if (IrcManager::connection.get() != NULL) {
+        IrcManager::connection.get()->sendRaw("JOIN #" + channel);
     }
+
     IrcManager::connectionMutex.unlock();
 }
 
@@ -184,9 +187,11 @@ void
 IrcManager::partChannel(const QString &channel)
 {
     IrcManager::connectionMutex.lock();
-    if (IrcManager::connection != NULL) {
-        IrcManager::connection->sendRaw("PART #" + channel);
+
+    if (IrcManager::connection.get() != NULL) {
+        IrcManager::connection.get()->sendRaw("PART #" + channel);
     }
+
     IrcManager::connectionMutex.unlock();
 }
 
