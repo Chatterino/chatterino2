@@ -4,6 +4,7 @@
 #include "ircmanager.h"
 #include "settings.h"
 
+#include <QCompleter>
 #include <QPainter>
 #include <boost/signals2.hpp>
 
@@ -50,7 +51,17 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
     this->setMessageLengthVisisble(
         Settings::getInstance().showMessageLength.get());
 
-    this->edit.keyPressed.connect([this](QKeyEvent *event) {
+    QStringList list;
+    list.append("asd");
+    list.append("asdf");
+    list.append("asdg");
+    list.append("asdh");
+
+    QCompleter *completer = new QCompleter(list, &edit);
+
+    completer->setWidget(&edit);
+
+    this->edit.keyPressed.connect([this, completer](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
             auto ptr = this->chatWidget->getChannel();
             Channel *c = ptr.get();
@@ -62,6 +73,11 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
                 this->edit.setText(QString());
             }
         }
+        //        else {
+        //            completer->setCompletionPrefix("asdf");
+        //            completer->complete();
+        //            //            completer->popup();
+        //        }
     });
 
     /* XXX(pajlada): FIX THIS

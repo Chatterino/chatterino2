@@ -503,8 +503,6 @@ Message::layout(int width, bool enableEmoteMargins)
 
             std::vector<short> &charWidths = word.getCharacterWidthCache();
 
-            auto xD = charWidths.size();
-
             if (charWidths.size() == 0) {
                 for (int i = 0; i < text.length(); i++) {
                     charWidths.push_back(metrics.charWidth(text, i));
