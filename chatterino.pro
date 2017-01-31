@@ -4,37 +4,21 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
-CONFIG += communi
+QT      += core gui network
+CONFIG  += communi
 COMMUNI += core model util
-
-#win32 {
-#    LIBS += -L"C:/OpenSSL-Win32/lib" -llibssl.lib
-#    INCLUDEPATH += C:/OpenSSL-Win32/include
-#} else {
-#    LIBS += -lcrypto -lssl
-#}
-
-CONFIG += c++14
+CONFIG  += c++14
 
 include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = chatterino
+TARGET   = chatterino
 TEMPLATE = app
 
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
 
 SOURCES += main.cpp\
     account.cpp \
@@ -120,8 +104,11 @@ RESOURCES += \
 
 DISTFILES +=
 
-
 # Include boost
 win32 {
         INCLUDEPATH += C:\local\boost\
+}
+
+macx {
+    INCLUDEPATH += /usr/local/include
 }
