@@ -7,6 +7,7 @@
 #include "widgets/chatwidget.h"
 
 #include <math.h>
+#include <QDebug>
 #include <QPainter>
 #include <functional>
 
@@ -61,14 +62,16 @@ ChatWidgetView::layoutMessages()
 
         message->layout(this->width(), true);
 
+        qDebug() << message->getHeight();
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollbar.setLargeChange((messages.length() - i) +
+            this->scrollbar.setLargeChange((messages.size() - i) +
                                            (qreal)h / message->getHeight());
             this->scrollbar.setValue(this->scrollbar.getValue());
 
             showScrollbar = true;
+            break;
         }
     }
 
