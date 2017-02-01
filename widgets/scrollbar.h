@@ -23,7 +23,7 @@ public:
     void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);
     void addHighlight(ScrollBarHighlight *highlight);
 
-    Q_PROPERTY(qreal value READ getValue WRITE setValue)
+    Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
 
     void
     setMaximum(qreal value)
@@ -58,26 +58,25 @@ public:
     }
 
     void
-    setValue(qreal value, bool animated = false)
+    setDesiredValue(qreal value, bool animated = false)
     {
         value = std::max(this->minimum,
                          std::min(this->maximum - this->largeChange, value));
 
-        if (this->value != value) {
+        this->desiredValue = value;
+
+        if (this->desiredValue != value) {
             if (animated) {
-                this->valueAnimation.stop();
-                this->valueAnimation.setStartValue(this->value);
+                this->currentValueAnimation.stop();
+                this->currentValueAnimation.setStartValue(this->currentValue);
 
-                this->valueAnimation.setEndValue(value);
-                this->valueAnimation.start();
+                this->currentValueAnimation.setEndValue(value);
+                this->currentValueAnimation.start();
             } else {
-                this->value = value;
+                this->currentValueAnimation.stop();
+
+                this->setCurrentValue(value);
             }
-
-            this->updateScroll();
-            this->valueChanged();
-
-            this->update();
         }
     }
 
@@ -106,22 +105,46 @@ public:
     }
 
     qreal
-    getValue() const
+    getDesiredValue() const
     {
-        return this->value;
+        return this->desiredValue;
+    }
+
+    qreal
+    getCurrentValue() const
+    {
+        return this->currentValue;
     }
 
     boost::signals2::signal<void()> &
-    getValueChanged()
+    getCurrentValueChanged()
     {
-        return valueChanged;
+        return currentValueChanged;
+    }
+
+    void
+    setCurrentValue(qreal value)
+    {
+        value = std::max(this->minimum,
+                         std::min(this->maximum - this->largeChange, value));
+
+        if (this->currentValue != value) {
+            this->currentValue = value;
+
+            this->updateScroll();
+            this->currentValueChanged();
+
+            this->update();
+        }
     }
 
 private:
+    Q_PROPERTY(qreal currentValue READ getCurrentValue WRITE setCurrentValue)
+
     QMutex mutex;
     ScrollBarHighlight *highlights;
 
-    QPropertyAnimation valueAnimation;
+    QPropertyAnimation currentValueAnimation;
 
     void paintEvent(QPaintEvent *);
     void mouseMoveEvent(QMouseEvent *event);
@@ -142,9 +165,10 @@ private:
     qreal minimum;
     qreal largeChange;
     qreal smallChange;
-    qreal value;
+    qreal desiredValue;
+    qreal currentValue;
 
-    boost::signals2::signal<void()> valueChanged;
+    boost::signals2::signal<void()> currentValueChanged;
 
     void updateScroll();
 };

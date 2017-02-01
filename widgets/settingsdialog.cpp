@@ -225,14 +225,11 @@ SettingsDialog::select(SettingsDialogTab *tab)
 
     if (selectedTab != NULL) {
         selectedTab->setSelected(false);
-        selectedTab->setStyleSheet("");
+        selectedTab->setStyleSheet("color: #FFF");
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet("background: #F00;"
-                       "background: qlineargradient( x1:0 y1:0, x2:1 y2:0, "
-                       "stop:0 #333, stop:1 #555);"
-                       "border-right: none;");
+    tab->setStyleSheet("background: #555; color: #FFF");
     selectedTab = tab;
 }
 

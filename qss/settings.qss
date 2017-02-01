@@ -6,14 +6,10 @@
     font-size: 14px;
 }
 
-SettingsDialogTab {
-    color: #FFF;
-}
-
 SettingsDialogTab:hover {
     border: 1px solid grey;
 }
 
-QLabel, QCheckBox, QGroupBox {
+QLabel, QCheckBox, QGroupBox, SettingsDialogTab {
     color: white;
 }

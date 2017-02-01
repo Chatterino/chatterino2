@@ -24,7 +24,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
                      this, &ChatWidgetView::wordTypeMaskChanged);
 
-    this->scrollbar.getValueChanged().connect([this] { update(); });
+    this->scrollbar.getCurrentValueChanged().connect([this] { update(); });
 }
 
 ChatWidgetView::~ChatWidgetView()
@@ -62,13 +62,12 @@ ChatWidgetView::layoutMessages()
 
         message->layout(this->width(), true);
 
-        qDebug() << message->getHeight();
         h -= message->getHeight();
 
         if (h < 0) {
             this->scrollbar.setLargeChange((messages.size() - i) +
                                            (qreal)h / message->getHeight());
-            this->scrollbar.setValue(this->scrollbar.getValue());
+            this->scrollbar.setDesiredValue(this->scrollbar.getDesiredValue());
 
             showScrollbar = true;
             break;
@@ -141,14 +140,14 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     auto messages = c->getMessagesClone();
 
-    int start = this->scrollbar.getValue();
+    int start = this->scrollbar.getCurrentValue();
 
     if (start >= messages.length()) {
         return;
     }
 
     int y = -(messages[start].get()->getHeight() *
-              (fmod(this->scrollbar.getValue(), 1)));
+              (fmod(this->scrollbar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.size(); ++i) {
         messages::Message *message = messages[i].get();
@@ -198,8 +197,8 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 void
 ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
-    this->scrollbar.setValue(
-        this->scrollbar.getValue() -
+    this->scrollbar.setDesiredValue(
+        this->scrollbar.getDesiredValue() -
             event->delta() / 10.0 *
                 Settings::getInstance().mouseScrollMultiplier.get(),
         true);

@@ -12,7 +12,7 @@ namespace widgets {
 ScrollBar::ScrollBar(QWidget *widget)
     : QWidget(widget)
     , mutex()
-    , valueAnimation(this, "value")
+    , currentValueAnimation(this, "currentValue")
     , highlights(NULL)
     , mouseOverIndex(-1)
     , mouseDownIndex(-1)
@@ -24,13 +24,14 @@ ScrollBar::ScrollBar(QWidget *widget)
     , minimum()
     , largeChange()
     , smallChange()
-    , value()
-    , valueChanged()
+    , desiredValue()
+    , currentValueChanged()
+    , currentValue()
 {
     resize(16, 100);
 
-    valueAnimation.setDuration(300);
-    valueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
+    currentValueAnimation.setDuration(300);
+    currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
     this->setMouseTracking(true);
 }
@@ -140,8 +141,8 @@ ScrollBar::mouseMoveEvent(QMouseEvent *event)
     } else if (this->mouseDownIndex == 2) {
         int delta = event->pos().y() - lastMousePosition.y();
 
-        this->setValue(this->value +
-                       (qreal)delta / this->trackHeight * maximum);
+        this->setDesiredValue(this->desiredValue +
+                              (qreal)delta / this->trackHeight * maximum);
     }
 
     this->lastMousePosition = event->pos();
@@ -172,21 +173,21 @@ ScrollBar::mouseReleaseEvent(QMouseEvent *event)
 
     if (y < this->buttonHeight) {
         if (this->mouseDownIndex == 0) {
-            this->setValue(this->value - this->smallChange, true);
+            this->setDesiredValue(this->desiredValue - this->smallChange, true);
         }
     } else if (y < this->thumbRect.y()) {
         if (this->mouseDownIndex == 1) {
-            this->setValue(this->value - this->smallChange, true);
+            this->setDesiredValue(this->desiredValue - this->smallChange, true);
         }
     } else if (this->thumbRect.contains(2, y)) {
         // do nothing
     } else if (y < height() - this->buttonHeight) {
         if (this->mouseDownIndex == 3) {
-            this->setValue(this->value + this->smallChange, true);
+            this->setDesiredValue(this->desiredValue + this->smallChange, true);
         }
     } else {
         if (this->mouseDownIndex == 4) {
-            this->setValue(this->value + this->smallChange, true);
+            this->setDesiredValue(this->desiredValue + this->smallChange, true);
         }
     }
 
@@ -210,8 +211,8 @@ ScrollBar::updateScroll()
 
     this->thumbRect =
         QRect(0,
-              (int)(this->value / this->maximum * this->trackHeight) + 1 +
-                  this->buttonHeight,
+              (int)(this->desiredValue / this->maximum * this->trackHeight) +
+                  1 + this->buttonHeight,
               width(),
               (int)(this->largeChange / this->maximum * this->trackHeight) +
                   MIN_THUMB_HEIGHT);

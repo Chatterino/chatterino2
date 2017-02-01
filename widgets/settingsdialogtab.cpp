@@ -17,6 +17,8 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label,
     setFixedHeight(32);
 
     setCursor(QCursor(Qt::PointingHandCursor));
+
+    setStyleSheet("color: #FFF");
 }
 
 void
