@@ -3,11 +3,13 @@
 
 #include "concurrentmap.h"
 #include "messages/lazyloadedimage.h"
+#include "messages/limitedqueue.h"
 
 #include <QMap>
 #include <QMutex>
 #include <QString>
 #include <QVector>
+#include <boost/signals2.hpp>
 #include <memory>
 
 namespace chatterino {
@@ -19,6 +21,11 @@ class Channel
 {
 public:
     Channel(const QString &channel);
+
+    boost::signals2::signal<void(std::shared_ptr<messages::Message> &)>
+        messageRemovedFromStart;
+    boost::signals2::signal<void(std::shared_ptr<messages::Message> &)>
+        messageAppended;
 
     // properties
     ConcurrentMap<QString, messages::LazyLoadedImage *> &
@@ -95,25 +102,23 @@ public:
     }
 
     // methods
-    void addMessage(std::shared_ptr<messages::Message> message);
-
-    QVector<std::shared_ptr<messages::Message>> getMessagesClone();
-
-    QVector<std::shared_ptr<messages::Message>> &
-    getMessages()
+    messages::LimitedQueueSnapshot<std::shared_ptr<messages::Message>>
+    getMessageSnapshot()
     {
-        return messages;
+        return messages.getSnapshot();
     }
+
+    void addMessage(std::shared_ptr<messages::Message> message);
 
     void
     reloadChannelEmotes()
     {
-        reloadBttvEmotes();
-        reloadFfzEmotes();
+        this->reloadBttvEmotes();
+        this->reloadFfzEmotes();
     }
 
 private:
-    QVector<std::shared_ptr<messages::Message>> messages;
+    messages::LimitedQueue<std::shared_ptr<messages::Message>> messages;
 
     QString name;
     int roomID;

@@ -128,23 +128,17 @@ Channel::reloadFfzEmotes()
     });
 }
 
-QVector<std::shared_ptr<messages::Message>>
-Channel::getMessagesClone()
-{
-    this->messageMutex.lock();
-    QVector<std::shared_ptr<messages::Message>> M(this->messages);
-    M.detach();
-    this->messageMutex.unlock();
-    return M;
-}
-
 void
 Channel::addMessage(std::shared_ptr<messages::Message> message)
 {
-    this->messageMutex.lock();
-    this->messages.append(message);
-    this->messageMutex.unlock();
+    std::shared_ptr<messages::Message> deleted;
 
-    Windows::repaintVisibleChatWidgets();
+    if (this->messages.appendItem(message, deleted)) {
+        this->messageRemovedFromStart(deleted);
+    }
+
+    this->messageAppended(message);
+
+    Windows::repaintVisibleChatWidgets(this);
 }
 }

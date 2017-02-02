@@ -16,7 +16,7 @@ class Message
 {
 public:
     Message(const QString &text);
-    Message(const IrcPrivateMessage &ircMessage, Channel &Channel,
+    Message(const IrcPrivateMessage &ircMessage, Channel &channel,
             bool enablePingSound = true, bool isReceivedWhisper = false,
             bool isSentWhisper = false, bool includeChannel = false);
 

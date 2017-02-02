@@ -28,10 +28,11 @@ ScrollBar::ScrollBar(QWidget *widget)
     , currentValueChanged()
     , currentValue()
 {
-    resize(16, 100);
+    this->resize(16, 100);
 
-    currentValueAnimation.setDuration(300);
-    currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
+    this->currentValueAnimation.setDuration(300);
+    this->currentValueAnimation.setEasingCurve(
+        QEasingCurve(QEasingCurve::OutCubic));
 
     this->setMouseTracking(true);
 }
@@ -211,7 +212,7 @@ ScrollBar::updateScroll()
 
     this->thumbRect =
         QRect(0,
-              (int)(this->desiredValue / this->maximum * this->trackHeight) +
+              (int)(this->currentValue / this->maximum * this->trackHeight) +
                   1 + this->buttonHeight,
               width(),
               (int)(this->largeChange / this->maximum * this->trackHeight) +

@@ -133,11 +133,7 @@ Notebook::tabAt(QPoint point, int &index)
 void
 Notebook::rearrangePage(NotebookPage *page, int index)
 {
-    int i1 = pages.indexOf(page);
-
     pages.move(pages.indexOf(page), index);
-
-    int i2 = pages.indexOf(page);
 
     performLayout();
 }

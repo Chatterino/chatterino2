@@ -63,8 +63,6 @@ public:
         value = std::max(this->minimum,
                          std::min(this->maximum - this->largeChange, value));
 
-        this->desiredValue = value;
-
         if (this->desiredValue != value) {
             if (animated) {
                 this->currentValueAnimation.stop();
@@ -78,6 +76,8 @@ public:
                 this->setCurrentValue(value);
             }
         }
+
+        this->desiredValue = value;
     }
 
     qreal

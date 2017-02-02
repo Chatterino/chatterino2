@@ -47,17 +47,19 @@ ChatWidgetView::layoutMessages()
 
     bool showScrollbar = false;
 
-    auto messages = c->getMessagesClone();
+    auto messages = c->getMessageSnapshot();
 
     bool redraw = false;
 
-    for (std::shared_ptr<messages::Message> &message : messages) {
-        redraw |= message.get()->layout(this->width(), true);
-    }
+    //    for (std::shared_ptr<messages::Message> &message : messages) {
+    //        redraw |= message.get()->layout(this->width(), true);
+    //    }
+
+    redraw = true;
 
     int h = this->height() - 8;
 
-    for (int i = messages.size() - 1; i >= 0; i--) {
+    for (int i = messages.getLength() - 1; i >= 0; i--) {
         auto *message = messages[i].get();
 
         message->layout(this->width(), true);
@@ -65,7 +67,7 @@ ChatWidgetView::layoutMessages()
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollbar.setLargeChange((messages.size() - i) +
+            this->scrollbar.setLargeChange((messages.getLength() - i) +
                                            (qreal)h / message->getHeight());
             this->scrollbar.setDesiredValue(this->scrollbar.getDesiredValue());
 
@@ -76,7 +78,7 @@ ChatWidgetView::layoutMessages()
 
     this->scrollbar.setVisible(showScrollbar);
 
-    this->scrollbar.setMaximum(c->getMessages().size());
+    this->scrollbar.setMaximum(messages.getLength());
 
     return redraw;
 }
@@ -138,18 +140,18 @@ ChatWidgetView::paintEvent(QPaintEvent *)
     if (c == NULL)
         return;
 
-    auto messages = c->getMessagesClone();
+    auto messages = c->getMessageSnapshot();
 
     int start = this->scrollbar.getCurrentValue();
 
-    if (start >= messages.length()) {
+    if (start >= messages.getLength()) {
         return;
     }
 
     int y = -(messages[start].get()->getHeight() *
               (fmod(this->scrollbar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.size(); ++i) {
+    for (int i = start; i < messages.getLength(); ++i) {
         messages::Message *message = messages[i].get();
 
         for (messages::WordPart const &wordPart : message->getWordParts()) {

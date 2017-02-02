@@ -95,7 +95,9 @@ HEADERS  += account.h \
     windows.h \
     widgets/resizingtextedit.h \
     settingssnapshot.h \
-    logging.h
+    logging.h \
+    messages/limitedqueue.h \
+    messages/limitedqueuesnapshot.h
 
 PRECOMPILED_HEADER =
 
