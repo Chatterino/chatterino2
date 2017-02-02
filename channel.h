@@ -46,12 +46,6 @@ public:
         return name.isEmpty();
     }
 
-    const QMutex &
-    getMessageMutex() const
-    {
-        return messageMutex;
-    }
-
     const QString &
     getName() const
     {
@@ -125,7 +119,6 @@ private:
 
     ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
     ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
-    QMutex messageMutex;
 
     QString subLink;
     QString channelLink;

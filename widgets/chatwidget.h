@@ -56,7 +56,7 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     messages::LimitedQueue<std::shared_ptr<messages::MessageRef>> messages;

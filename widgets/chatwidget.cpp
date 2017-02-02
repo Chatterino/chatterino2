@@ -4,6 +4,7 @@
 #include "settings.h"
 #include "widgets/textinputdialog.h"
 
+#include <QDebug>
 #include <QFont>
 #include <QFontDatabase>
 #include <QPainter>
@@ -47,17 +48,17 @@ ChatWidget::setChannelName(const QString &name)
         return;
     }
 
+    if (!this->channelName.isEmpty()) {
+        Channels::removeChannel(this->channelName);
+
+        this->messageAppendedConnection.disconnect();
+        this->messageRemovedConnection.disconnect();
+    }
+
     this->channelName = channel;
     this->header.updateChannelText();
 
     this->view.layoutMessages();
-
-    if (!this->channelName.isEmpty()) {
-        Channels::removeChannel(this->channelName);
-
-        messageAppendedConnection.disconnect();
-        messageRemovedConnection.disconnect();
-    }
 
     messages.clear();
 
@@ -67,7 +68,7 @@ ChatWidget::setChannelName(const QString &name)
     } else {
         this->channel = Channels::addChannel(channel);
 
-        messageAppendedConnection =
+        this->messageAppendedConnection =
             this->channel.get()->messageAppended.connect([this](
                 std::shared_ptr<messages::Message> &message) {
 
@@ -75,14 +76,26 @@ ChatWidget::setChannelName(const QString &name)
 
                 auto messageRef = new messages::MessageRef(message);
 
+                qDebug() << "xD";
+
                 this->messages.appendItem(
                     std::shared_ptr<messages::MessageRef>(messageRef), deleted);
-
             });
 
-        messageRemovedConnection =
+        this->messageRemovedConnection =
             this->channel.get()->messageRemovedFromStart.connect(
-                [this](std::shared_ptr<messages::Message> &message) {});
+                [this](std::shared_ptr<messages::Message> &) {});
+
+        auto snapshot = this->channel.get()->getMessageSnapshot();
+
+        for (int i = 0; i < snapshot.getLength(); i++) {
+            std::shared_ptr<messages::MessageRef> deleted;
+
+            auto messageRef = new messages::MessageRef(snapshot[i]);
+
+            this->messages.appendItem(
+                std::shared_ptr<messages::MessageRef>(messageRef), deleted);
+        }
     }
 
     this->view.layoutMessages();

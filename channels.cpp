@@ -31,6 +31,10 @@ Channels::addChannel(const QString &channel)
 
     QString channelName = channel.toLower();
 
+    if (channel.length() > 1 && channel.at(0) == '/') {
+        return getChannel(channel);
+    }
+
     auto it = Channels::channels.find(channelName);
 
     if (it == Channels::channels.end()) {

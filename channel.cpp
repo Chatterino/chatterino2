@@ -20,17 +20,11 @@ Channel::Channel(const QString &channel)
                                                        : channel)
     , bttvChannelEmotes()
     , ffzChannelEmotes()
-    , messageMutex()
     , subLink("https://www.twitch.tv/" + name +
               "/subscribe?ref=in_chat_subscriber_link")
     , channelLink("https://twitch.tv/" + name)
     , popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
 {
-    //    for (int i = 0; i < 40; i++) {
-    //        addMessage(std::shared_ptr<messages::Message>(
-    //            new messages::Message("test xD test")));
-    //    }
-
     reloadChannelEmotes();
 }
 
