@@ -3,6 +3,7 @@
 
 #include <QBrush>
 #include <QColor>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -68,14 +69,20 @@ public:
         return instance;
     }
 
+    void init();
     void normalizeColor(QColor &color);
 
-    void setColors(float hue, float multiplyer);
+    void update();
+
+    boost::signals2::signal<void()> updated;
 
 private:
     ColorScheme()
+        : updated()
     {
     }
+
+    void setColors(float hue, float multiplyer);
 
     qreal middleLookupTable[360] = {};
     qreal minLookupTable[360] = {};

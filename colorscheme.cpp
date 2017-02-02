@@ -1,10 +1,49 @@
 #define LOOKUP_COLOR_COUNT 360
 
 #include "colorscheme.h"
+#include "settings.h"
+#include "windows.h"
 
 #include <QColor>
 
 namespace chatterino {
+
+void
+ColorScheme::init()
+{
+    static bool initiated = false;
+
+    if (!initiated) {
+        initiated = true;
+        ColorScheme::getInstance().update();
+        Settings::getInstance().theme.valueChanged.connect(
+            [](const QString &) { ColorScheme::getInstance().update(); });
+        Settings::getInstance().themeHue.valueChanged.connect(
+            [](const float &) { ColorScheme::getInstance().update(); });
+
+        ColorScheme::getInstance().updated.connect(
+            [] { Windows::repaintVisibleChatWidgets(); });
+    }
+}
+
+void
+ColorScheme::update()
+{
+    QString theme = Settings::getInstance().theme.get();
+    theme = theme.toLower();
+
+    qreal hue = Settings::getInstance().themeHue.get();
+
+    if (theme == "light") {
+        setColors(hue, 0.8);
+    } else if (theme == "white") {
+        setColors(hue, 1);
+    } else if (theme == "black") {
+        setColors(hue, -1);
+    } else {
+        setColors(hue, -0.8);
+    }
+}
 
 // hue: theme color (0 - 1)
 // multiplyer: 1 = white, 0.8 = light, -0.8 dark, -1 black
@@ -69,6 +108,8 @@ ColorScheme::setColors(float hue, float multiplyer)
         "border:" + TabSelectedBackground.name() + ";" +
         "color:" + Text.name() + ";" +
         "selection-background-color:" + TabSelectedBackground.name();
+
+    updated();
 }
 
 void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from,

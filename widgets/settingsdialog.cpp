@@ -1,5 +1,6 @@
 #include "widgets/settingsdialog.h"
 #include "widgets/settingsdialogtab.h"
+#include "windows.h"
 
 #include <QComboBox>
 #include <QFile>
@@ -79,6 +80,45 @@ SettingsDialog::addTabs()
         form->addRow("Theme:", combo);
         form->addRow("Theme color:", slider);
         form->addRow("Font:", font);
+
+        // theme
+        combo->addItem("White");
+        combo->addItem("Light");
+        combo->addItem("Dark");
+        combo->addItem("Black");
+
+        QString theme = settings.theme.get();
+        theme = theme.toLower();
+
+        if (theme == "light") {
+            combo->setCurrentIndex(0);
+        } else if (theme == "white") {
+            combo->setCurrentIndex(1);
+        } else if (theme == "black") {
+            combo->setCurrentIndex(3);
+        } else {
+            combo->setCurrentIndex(2);
+        }
+
+        QObject::connect(combo, &QComboBox::currentTextChanged, this,
+                         [this, &settings](const QString &value) {
+                             settings.theme.set(value);
+                         });
+
+        // theme hue
+        slider->setMinimum(0);
+        slider->setMaximum(1000);
+
+        float hue = settings.themeHue.get();
+
+        slider->setValue(std::min(std::max(hue, (float)0.0), (float)1.0) *
+                         1000);
+
+        QObject::connect(slider, &QSlider::valueChanged, this,
+                         [this, &settings](int value) {
+                             settings.themeHue.set(value / 1000.0);
+                             Windows::updateAll();
+                         });
 
         group->setLayout(form);
 

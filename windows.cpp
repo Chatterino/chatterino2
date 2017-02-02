@@ -39,6 +39,14 @@ Windows::repaintVisibleChatWidgets(Channel *channel)
 }
 
 void
+Windows::updateAll()
+{
+    if (Windows::mainWindow != nullptr) {
+        Windows::mainWindow->update();
+    }
+}
+
+void
 Windows::load()
 {
     const auto &settingsPath = getSettingsPath();

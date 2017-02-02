@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <boost/signals2.hpp>
 
 using namespace chatterino;
 using namespace chatterino::widgets;
@@ -24,7 +25,7 @@ main(int argc, char *argv[])
     Emojis::loadEmojis();
     Emotes::loadGlobalEmotes();
 
-    ColorScheme::getInstance().setColors(0, -0.8);
+    ColorScheme::getInstance().init();
 
     Windows::load();
 

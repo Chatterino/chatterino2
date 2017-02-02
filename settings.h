@@ -80,6 +80,7 @@ private:
 
 public:
     Setting<QString> theme;
+    Setting<float> themeHue;
     Setting<QString> selectedUser;
     Setting<float> emoteScale;
     Setting<float> mouseScrollMultiplier;
