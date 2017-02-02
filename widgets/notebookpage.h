@@ -13,6 +13,7 @@
 #include <QVector>
 #include <QWidget>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {

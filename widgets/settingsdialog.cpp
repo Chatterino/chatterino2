@@ -76,10 +76,19 @@ SettingsDialog::addTabs()
         auto combo = new QComboBox();
         auto slider = new QSlider(Qt::Horizontal);
         auto font = new QPushButton("select");
+        auto compactTabs = createCheckbox("Hide tab X", settings.hideTabX);
+        auto hidePreferencesButton =
+            createCheckbox("Hide preferences button (ctrl+p to show)",
+                           settings.hidePreferencesButton);
+        auto hideUserButton =
+            createCheckbox("Hide user button", settings.hideUserButton);
 
         form->addRow("Theme:", combo);
         form->addRow("Theme color:", slider);
         form->addRow("Font:", font);
+        form->addRow("", compactTabs);
+        form->addRow("", hidePreferencesButton);
+        form->addRow("", hideUserButton);
 
         // theme
         combo->addItem("White");

@@ -39,6 +39,11 @@ Notebook::Notebook(QWidget *parent)
     this->userButton.icon = NotebookButton::IconUser;
 
     this->addButton.resize(24, 24);
+
+    Settings::getInstance().hidePreferencesButton.valueChanged.connect(
+        [this](const bool &) { this->performLayout(); });
+    Settings::getInstance().hideUserButton.valueChanged.connect(
+        [this](const bool &) { this->performLayout(); });
 }
 
 NotebookPage *
@@ -140,7 +145,21 @@ Notebook::rearrangePage(NotebookPage *page, int index)
 void
 Notebook::performLayout(bool animated)
 {
-    int x = 48, y = 0;
+    int x = 0, y = 0;
+
+    if (Settings::getInstance().hidePreferencesButton.get()) {
+        settingsButton.hide();
+    } else {
+        settingsButton.show();
+        x += 24;
+    }
+    if (Settings::getInstance().hideUserButton.get()) {
+        userButton.hide();
+    } else {
+        userButton.show();
+        x += 24;
+    }
+
     int tabHeight = 16;
     bool first = true;
 

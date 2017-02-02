@@ -76,8 +76,9 @@ NotebookPage::removeFromLayout(ChatWidget *widget)
 }
 
 void
-NotebookPage::addToLayout(ChatWidget *widget, std::pair<int, int> position =
-                                                  std::pair<int, int>(-1, -1))
+NotebookPage::addToLayout(
+    ChatWidget *widget,
+    std::pair<int, int> position = std::pair<int, int>(-1, -1))
 {
     this->chatWidgets.push_back(widget);
 

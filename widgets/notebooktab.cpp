@@ -27,25 +27,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     posAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    /* XXX(pajlada): Fix this
-    QObject::connect(&Settings::getInstance().getHideTabX(),
-                     &BoolSetting::valueChanged, this,
-                     &NotebookTab::hideTabXChanged);
-                     */
-
-    //    Settings::getInstance().hideTabX.valueChanged.connect(
-    //        boost::bind(&NotebookTab::hideTabXChanged, this));
+    this->hideXConnection =
+        Settings::getInstance().hideTabX.valueChanged.connect(
+            boost::bind(&NotebookTab::hideTabXChanged, this, _1));
 
     this->setMouseTracking(true);
 }
 
 NotebookTab::~NotebookTab()
 {
-    /* XXX(pajlada): Fix this
-    QObject::disconnect(&Settings::getInstance().getHideTabX(),
-                        &BoolSetting::valueChanged, this,
-                        &NotebookTab::hideTabXChanged);
-                     */
+    this->hideXConnection.disconnect();
 }
 
 void
@@ -56,13 +47,15 @@ NotebookTab::calcSize()
     } else {
         this->resize(this->fontMetrics().width(this->title) + 8 + 24, 24);
     }
+
+    if (this->parent() != nullptr) {
+        ((Notebook *)this->parent())->performLayout(true);
+    }
 }
 
 void
 NotebookTab::moveAnimated(QPoint pos, bool animated)
 {
-    //    move(pos);
-
     posAnimationDesired = pos;
 
     if ((this->window() != NULL && !this->window()->isVisible()) || !animated ||
@@ -151,7 +144,8 @@ NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
     this->mouseDown = false;
 
-    if (this->mouseDownX && this->getXRect().contains(event->pos())) {
+    if (!Settings::getInstance().hideTabX.get() && this->mouseDownX &&
+        this->getXRect().contains(event->pos())) {
         this->mouseDownX = false;
 
         this->notebook->removePage(this->page);
@@ -188,7 +182,7 @@ NotebookTab::mouseMoveEvent(QMouseEvent *event)
     bool overX = this->getXRect().contains(event->pos());
 
     if (overX != this->mouseOverX) {
-        this->mouseOverX = overX;
+        this->mouseOverX = overX && !Settings::getInstance().hideTabX.get();
 
         this->update();
     }

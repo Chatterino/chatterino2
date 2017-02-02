@@ -48,6 +48,8 @@ Settings::Settings()
     , inlineWhispers(this->settingsItems, "inlineWhispers", true)
     , windowTopMost(this->settingsItems, "windowTopMost", false)
     , hideTabX(this->settingsItems, "hideTabX", false)
+    , hidePreferencesButton(this->settingsItems, "hidePreferencesButton", false)
+    , hideUserButton(this->settingsItems, "hideUserButton", false)
 {
     this->showTimestamps.valueChanged.connect(
         [this](const auto &) { this->updateWordTypeMask(); });

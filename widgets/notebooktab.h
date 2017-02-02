@@ -4,6 +4,8 @@
 #include <QPropertyAnimation>
 #include <QWidget>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/signals2.hpp>
+#include <boost/signals2/connection.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -76,6 +78,13 @@ public:
         return QRect(posAnimationDesired, this->size());
     }
 
+    void
+    hideTabXChanged(bool)
+    {
+        calcSize();
+        update();
+    }
+
 protected:
     void paintEvent(QPaintEvent *) override;
 
@@ -89,6 +98,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
+    boost::signals2::connection hideXConnection;
+
     QPropertyAnimation posAnimation;
     bool posAnimated;
     QPoint posAnimationDesired;
@@ -109,14 +120,6 @@ private:
     getXRect()
     {
         return QRect(this->width() - 20, 4, 16, 16);
-    }
-
-private slots:
-    void
-    hideTabXChanged(bool)
-    {
-        calcSize();
-        update();
     }
 
 public:

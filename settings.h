@@ -108,6 +108,8 @@ public:
     Setting<bool> inlineWhispers;
     Setting<bool> windowTopMost;
     Setting<bool> hideTabX;
+    Setting<bool> hidePreferencesButton;
+    Setting<bool> hideUserButton;
 };
 
 }  // namespace chatterino
