@@ -24,7 +24,18 @@ public:
         , limit(limit)
         , buffer(buffer)
     {
-        ;
+    }
+
+    void
+    clear()
+    {
+        std::lock_guard<std::mutex> lock(this->mutex);
+
+        this->vector = new std::vector<T>(this->limit + this->buffer);
+        this->vectorPtr = std::shared_ptr<std::vector<T>>(this->vector);
+
+        this->offset = 0;
+        this->length = 0;
     }
 
     // return true if an item was deleted

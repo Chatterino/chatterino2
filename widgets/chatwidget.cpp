@@ -8,12 +8,14 @@
 #include <QFontDatabase>
 #include <QPainter>
 #include <QVBoxLayout>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
+    , messages()
     , channel(Channels::getEmpty())
     , channelName(QString())
     , vbox(this)
@@ -52,12 +54,35 @@ ChatWidget::setChannelName(const QString &name)
 
     if (!this->channelName.isEmpty()) {
         Channels::removeChannel(this->channelName);
+
+        messageAppendedConnection.disconnect();
+        messageRemovedConnection.disconnect();
     }
+
+    messages.clear();
 
     if (channel.isEmpty()) {
         this->channel = NULL;
+
     } else {
         this->channel = Channels::addChannel(channel);
+
+        messageAppendedConnection =
+            this->channel.get()->messageAppended.connect([this](
+                std::shared_ptr<messages::Message> &message) {
+
+                std::shared_ptr<messages::MessageRef> deleted;
+
+                auto messageRef = new messages::MessageRef(message);
+
+                this->messages.appendItem(
+                    std::shared_ptr<messages::MessageRef>(messageRef), deleted);
+
+            });
+
+        messageRemovedConnection =
+            this->channel.get()->messageRemovedFromStart.connect(
+                [this](std::shared_ptr<messages::Message> &message) {});
     }
 
     this->view.layoutMessages();

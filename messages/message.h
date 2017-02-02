@@ -54,16 +54,10 @@ public:
         return displayName;
     }
 
-    const std::vector<Word> &
-    getWords() const
+    std::vector<Word> &
+    getWords()
     {
         return words;
-    }
-
-    const std::vector<WordPart> &
-    getWordParts() const
-    {
-        return wordParts;
     }
 
     bool
@@ -76,20 +70,6 @@ public:
     getId() const
     {
         return id;
-    }
-
-    int
-    getHeight() const
-    {
-        return height;
-    }
-
-    bool layout(int width, bool enableEmoteMargins = true);
-
-    void
-    requestRelayout()
-    {
-        relayoutRequested = true;
     }
 
 private:
@@ -113,17 +93,7 @@ private:
     QString displayName = "";
     QString id = "";
 
-    int height = 0;
-
     std::vector<Word> words;
-    std::vector<WordPart> wordParts;
-
-    long currentLayoutWidth = -1;
-    bool relayoutRequested = true;
-    int fontGeneration = -1;
-    int emoteGeneration = -1;
-
-    void alignWordParts(int lineStart, int lineHeight);
 
     static QString matchLink(const QString &string);
 

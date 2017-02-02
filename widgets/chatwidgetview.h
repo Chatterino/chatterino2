@@ -2,6 +2,7 @@
 #define CHATVIEW_H
 
 #include "channel.h"
+#include "messages/messageref.h"
 #include "messages/word.h"
 #include "widgets/scrollbar.h"
 

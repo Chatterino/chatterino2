@@ -37,17 +37,9 @@ ChatWidgetView::~ChatWidgetView()
 bool
 ChatWidgetView::layoutMessages()
 {
-    auto c = this->chatWidget->getChannel();
-
-    if (c == NULL) {
-        this->scrollbar.hide();
-
-        return false;
-    }
-
     bool showScrollbar = false;
 
-    auto messages = c->getMessageSnapshot();
+    auto messages = chatWidget->getMessagesSnapshot();
 
     bool redraw = false;
 
@@ -99,7 +91,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    auto c = this->chatWidget->getChannel();
+    //    auto c = this->chatWidget->getChannel();
 
     QColor color;
 
@@ -137,10 +129,12 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
 
-    if (c == NULL)
-        return;
+    //    if (c == NULL)
+    //        return;
 
-    auto messages = c->getMessageSnapshot();
+    //    auto messages = c->getMessageSnapshot();
+
+    auto messages = chatWidget->getMessagesSnapshot();
 
     int start = this->scrollbar.getCurrentValue();
 
@@ -152,9 +146,9 @@ ChatWidgetView::paintEvent(QPaintEvent *)
               (fmod(this->scrollbar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.getLength(); ++i) {
-        messages::Message *message = messages[i].get();
+        messages::MessageRef *messageRef = messages[i].get();
 
-        for (messages::WordPart const &wordPart : message->getWordParts()) {
+        for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
             painter.setPen(QColor(255, 0, 0));
             painter.drawRect(wordPart.getX(), wordPart.getY() + y,
                              wordPart.getWidth(), wordPart.getHeight());
@@ -188,7 +182,7 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             }
         }
 
-        y += message->getHeight();
+        y += messageRef->getHeight();
 
         if (y > height()) {
             break;
