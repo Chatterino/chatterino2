@@ -2,6 +2,8 @@
 #include "emotes.h"
 #include "settings.h"
 
+#include <QDebug>
+
 #define MARGIN_LEFT 8
 #define MARGIN_RIGHT 8
 #define MARGIN_TOP 8
@@ -14,6 +16,7 @@ MessageRef::MessageRef(std::shared_ptr<Message> message)
     : message(message.get())
     , messagePtr(message)
     , wordParts()
+    , buffer()
 {
 }
 
@@ -22,46 +25,50 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 {
     auto &settings = Settings::getInstance();
 
-    width = width - (width % 2);
-
-    int mediumTextLineHeight = Fonts::getFontMetrics(Fonts::Medium).height();
+    bool sizeChanged = width != this->currentLayoutWidth;
+    bool redraw = width != this->currentLayoutWidth;
     int spaceWidth = 4;
 
-    bool redraw = width != this->currentLayoutWidth || this->relayoutRequested;
+    {
+        int mediumTextLineHeight =
+            Fonts::getFontMetrics(Fonts::Medium).height();
 
-    bool recalculateImages = this->emoteGeneration != Emotes::getGeneration();
-    bool recalculateText = this->fontGeneration != Fonts::getGeneration();
+        bool recalculateImages =
+            this->emoteGeneration != Emotes::getGeneration();
+        bool recalculateText = this->fontGeneration != Fonts::getGeneration();
 
-    qreal emoteScale = settings.emoteScale.get();
-    bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
+        qreal emoteScale = settings.emoteScale.get();
+        bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
 
-    if (recalculateImages || recalculateText) {
-        this->emoteGeneration = Emotes::getGeneration();
-        this->fontGeneration = Fonts::getGeneration();
+        if (recalculateImages || recalculateText) {
+            this->emoteGeneration = Emotes::getGeneration();
+            this->fontGeneration = Fonts::getGeneration();
 
-        redraw = true;
+            redraw = true;
 
-        for (auto &word : this->message->getWords()) {
-            if (word.isImage()) {
-                if (recalculateImages) {
-                    auto &image = word.getImage();
+            for (auto &word : this->message->getWords()) {
+                if (word.isImage()) {
+                    if (recalculateImages) {
+                        auto &image = word.getImage();
 
-                    qreal w = image.getWidth();
-                    qreal h = image.getHeight();
+                        qreal w = image.getWidth();
+                        qreal h = image.getHeight();
 
-                    if (scaleEmotesByLineHeight) {
-                        word.setSize(w * mediumTextLineHeight / h * emoteScale,
-                                     mediumTextLineHeight * emoteScale);
-                    } else {
-                        word.setSize(w * image.getScale() * emoteScale,
-                                     h * image.getScale() * emoteScale);
+                        if (scaleEmotesByLineHeight) {
+                            word.setSize(
+                                w * mediumTextLineHeight / h * emoteScale,
+                                mediumTextLineHeight * emoteScale);
+                        } else {
+                            word.setSize(w * image.getScale() * emoteScale,
+                                         h * image.getScale() * emoteScale);
+                        }
                     }
-                }
-            } else {
-                if (recalculateText) {
-                    QFontMetrics &metrics = word.getFontMetrics();
-                    word.setSize(metrics.width(word.getText()),
-                                 metrics.height());
+                } else {
+                    if (recalculateText) {
+                        QFontMetrics &metrics = word.getFontMetrics();
+                        word.setSize(metrics.width(word.getText()),
+                                     metrics.height());
+                    }
                 }
             }
         }
@@ -70,6 +77,8 @@ MessageRef::layout(int width, bool enableEmoteMargins)
     if (!redraw) {
         return false;
     }
+
+    this->currentLayoutWidth = width;
 
     int x = MARGIN_LEFT;
     int y = MARGIN_TOP;
@@ -184,7 +193,16 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 
     this->alignWordParts(lineStart, lineHeight);
 
-    this->height = y + lineHeight;
+    if (this->height != y + lineHeight) {
+        sizeChanged = true;
+        this->height = y + lineHeight;
+    }
+
+    if (sizeChanged) {
+        this->buffer = nullptr;
+    }
+
+    this->updateBuffer = true;
 
     return true;
 }

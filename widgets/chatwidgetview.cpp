@@ -37,17 +37,33 @@ ChatWidgetView::~ChatWidgetView()
 bool
 ChatWidgetView::layoutMessages()
 {
-    bool showScrollbar = false;
-
     auto messages = chatWidget->getMessagesSnapshot();
 
-    bool redraw = false;
+    if (messages.getLength() == 0) {
+        this->scrollbar.setVisible(false);
 
-    //    for (std::shared_ptr<messages::Message> &message : messages) {
-    //        redraw |= message.get()->layout(this->width(), true);
-    //    }
+        return false;
+    }
 
-    redraw = true;
+    bool showScrollbar = false, redraw = false;
+
+    int start = this->scrollbar.getCurrentValue();
+
+    int y = -(messages[start].get()->getHeight() *
+              (fmod(this->scrollbar.getCurrentValue(), 1)));
+
+    for (int i = start; i < messages.getLength(); ++i) {
+        auto messagePtr = messages[i];
+        auto message = messagePtr.get();
+
+        redraw |= message->layout(this->width(), true);
+
+        y += message->getHeight();
+
+        if (y >= height()) {
+            break;
+        }
+    }
 
     int h = this->height() - 8;
 
@@ -87,18 +103,15 @@ ChatWidgetView::resizeEvent(QResizeEvent *)
 void
 ChatWidgetView::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    QPainter _painter(this);
 
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
-
-    //    auto c = this->chatWidget->getChannel();
-
-    QColor color;
+    _painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     ColorScheme &scheme = ColorScheme::getInstance();
 
     // code for tesing colors
     /*
+    QColor color;
     static ConcurrentMap<qreal, QImage *> imgCache;
 
     std::function<QImage *(qreal)> getImg = [&scheme](qreal light) {
@@ -129,11 +142,6 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 
     painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
 
-    //    if (c == NULL)
-    //        return;
-
-    //    auto messages = c->getMessageSnapshot();
-
     auto messages = chatWidget->getMessagesSnapshot();
 
     int start = this->scrollbar.getCurrentValue();
@@ -148,39 +156,63 @@ ChatWidgetView::paintEvent(QPaintEvent *)
     for (int i = start; i < messages.getLength(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
 
-        for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
-            painter.setPen(QColor(255, 0, 0));
-            painter.drawRect(wordPart.getX(), wordPart.getY() + y,
-                             wordPart.getWidth(), wordPart.getHeight());
+        std::shared_ptr<QPixmap> bufferPtr = messageRef->buffer;
+        QPixmap *buffer = bufferPtr.get();
 
-            // image
-            if (wordPart.getWord().isImage()) {
-                messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
+        bool updateBuffer = messageRef->updateBuffer;
 
-                const QPixmap *image = lli.getPixmap();
+        if (buffer == nullptr) {
+            buffer = new QPixmap(this->width(), messageRef->getHeight());
+            bufferPtr = std::shared_ptr<QPixmap>(buffer);
+            updateBuffer = true;
+        }
 
-                if (image != NULL) {
-                    painter.drawPixmap(
-                        QRect(wordPart.getX(), wordPart.getY() + y,
-                              wordPart.getWidth(), wordPart.getHeight()),
-                        *image);
+        if (updateBuffer) {
+            QPainter painter(buffer);
+            painter.fillRect(buffer->rect(), scheme.ChatBackground);
+
+            for (messages::WordPart const &wordPart :
+                 messageRef->getWordParts()) {
+                painter.setPen(QColor(255, 0, 0));
+                painter.drawRect(wordPart.getX(), wordPart.getY(),
+                                 wordPart.getWidth(), wordPart.getHeight());
+
+                // image
+                if (wordPart.getWord().isImage()) {
+                    messages::LazyLoadedImage &lli =
+                        wordPart.getWord().getImage();
+
+                    const QPixmap *image = lli.getPixmap();
+
+                    if (image != NULL) {
+                        painter.drawPixmap(
+                            QRect(wordPart.getX(), wordPart.getY(),
+                                  wordPart.getWidth(), wordPart.getHeight()),
+                            *image);
+                    }
+                }
+                // text
+                else {
+                    QColor color = wordPart.getWord().getColor();
+
+                    ColorScheme::getInstance().normalizeColor(color);
+
+                    painter.setPen(color);
+                    painter.setFont(wordPart.getWord().getFont());
+
+                    painter.drawText(
+                        QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
+                        wordPart.getText(),
+                        QTextOption(Qt::AlignLeft | Qt::AlignTop));
                 }
             }
-            // text
-            else {
-                QColor color = wordPart.getWord().getColor();
 
-                ColorScheme::getInstance().normalizeColor(color);
-
-                painter.setPen(color);
-                painter.setFont(wordPart.getWord().getFont());
-
-                painter.drawText(
-                    QRectF(wordPart.getX(), wordPart.getY() + y, 10000, 10000),
-                    wordPart.getText(),
-                    QTextOption(Qt::AlignLeft | Qt::AlignTop));
-            }
+            messageRef->updateBuffer = false;
         }
+
+        messageRef->buffer = bufferPtr;
+
+        _painter.drawPixmap(0, y, *buffer);
 
         y += messageRef->getHeight();
 

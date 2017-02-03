@@ -1,8 +1,10 @@
 #ifndef MESSAGEREF_H
 #define MESSAGEREF_H
 
-#include <memory>
 #include "messages/message.h"
+
+#include <QPixmap>
+#include <memory>
 
 namespace chatterino {
 namespace messages {
@@ -26,17 +28,14 @@ public:
 
     bool layout(int width, bool enableEmoteMargins = true);
 
-    void
-    requestRelayout()
-    {
-        relayoutRequested = true;
-    }
-
     const std::vector<WordPart> &
     getWordParts() const
     {
         return wordParts;
     }
+
+    std::shared_ptr<QPixmap> buffer = nullptr;
+    bool updateBuffer = false;
 
 private:
     Message *message;
@@ -47,7 +46,6 @@ private:
     int height = 0;
 
     int currentLayoutWidth = -1;
-    bool relayoutRequested = true;
     int fontGeneration = -1;
     int emoteGeneration = -1;
 

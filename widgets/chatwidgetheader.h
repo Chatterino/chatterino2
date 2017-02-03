@@ -61,6 +61,7 @@ private slots:
     void menuAddSplit();
     void menuCloseSplit();
     void menuMoveSplit();
+    void menuPopup();
     void menuChangeChannel();
     void menuClearChat();
     void menuOpenChannel();

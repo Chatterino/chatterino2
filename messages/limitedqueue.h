@@ -15,7 +15,7 @@ template <typename T>
 class LimitedQueue
 {
 public:
-    LimitedQueue(int limit = 10, int buffer = 5)
+    LimitedQueue(int limit = 100, int buffer = 25)
         : vector(new std::vector<T>(limit + buffer))
         , vectorPtr(this->vector)
         , mutex()

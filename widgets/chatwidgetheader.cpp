@@ -46,6 +46,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
     this->leftMenu.addAction("Close split", this, SLOT(menuCloseSplit()),
                              QKeySequence(tr("Ctrl+W")));
     this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
+    this->leftMenu.addAction("Popup", this, SLOT(menuPopup()));
     this->leftMenu.addSeparator();
     this->leftMenu.addAction("Change channel", this, SLOT(menuChangeChannel()),
                              QKeySequence(tr("Ctrl+R")));
@@ -180,6 +181,13 @@ ChatWidgetHeader::menuCloseSplit()
 void
 ChatWidgetHeader::menuMoveSplit()
 {
+}
+void
+ChatWidgetHeader::menuPopup()
+{
+    auto widget = new ChatWidget();
+    widget->setChannelName(this->chatWidget->getChannelName());
+    widget->show();
 }
 void
 ChatWidgetHeader::menuChangeChannel()

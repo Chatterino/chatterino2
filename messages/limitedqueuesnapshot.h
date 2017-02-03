@@ -29,8 +29,8 @@ public:
 
     T const &operator[](int index) const
     {
-        assert(index >= 0);
-        assert(index < length);
+        //        assert(index >= 0);
+        //        assert(index < length);
 
         return vector->at(index + offset);
     }
