@@ -8,7 +8,9 @@
 
 #include <math.h>
 #include <QDebug>
+#include <QGraphicsBlurEffect>
 #include <QPainter>
+#include <chrono>
 #include <functional>
 
 namespace chatterino {
@@ -18,7 +20,9 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
     , chatWidget(parent)
     , scrollbar(this)
+    , onlyUpdateEmotes(false)
 {
+    this->setAttribute(Qt::WA_OpaquePaintEvent);
     this->scrollbar.setSmallChange(5);
 
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
@@ -90,6 +94,10 @@ ChatWidgetView::layoutMessages()
 
     this->scrollbar.setVisible(showScrollbar);
 
+    if (!showScrollbar) {
+        this->scrollbar.setDesiredValue(0);
+    }
+
     this->scrollbar.setMaximum(messages.getLength());
 
     return redraw;
@@ -102,16 +110,36 @@ ChatWidgetView::resizeEvent(QResizeEvent *)
     this->scrollbar.move(width() - this->scrollbar.width(), 0);
 
     layoutMessages();
+
+    update();
 }
 
 void
-ChatWidgetView::paintEvent(QPaintEvent *)
+ChatWidgetView::paintEvent(QPaintEvent *event)
 {
     QPainter _painter(this);
 
     _painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     ColorScheme &scheme = ColorScheme::getInstance();
+
+    // only update gif emotes
+    if (onlyUpdateEmotes) {
+        onlyUpdateEmotes = false;
+
+        for (GifEmoteData &item : this->gifEmotes) {
+            _painter.fillRect(item.rect, scheme.ChatBackground);
+
+            _painter.drawPixmap(item.rect, *item.image->getPixmap());
+        }
+
+        return;
+    }
+
+    // update all messages
+    gifEmotes.clear();
+
+    _painter.fillRect(rect(), scheme.ChatBackground);
 
     // code for tesing colors
     /*
@@ -171,16 +199,13 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             updateBuffer = true;
         }
 
+        // update messages that have been changed
         if (updateBuffer) {
             QPainter painter(buffer);
             painter.fillRect(buffer->rect(), scheme.ChatBackground);
 
             for (messages::WordPart const &wordPart :
                  messageRef->getWordParts()) {
-                painter.setPen(QColor(255, 0, 0));
-                painter.drawRect(wordPart.getX(), wordPart.getY(),
-                                 wordPart.getWidth(), wordPart.getHeight());
-
                 // image
                 if (wordPart.getWord().isImage()) {
                     messages::LazyLoadedImage &lli =
@@ -214,6 +239,24 @@ ChatWidgetView::paintEvent(QPaintEvent *)
             messageRef->updateBuffer = false;
         }
 
+        // get gif emotes
+        for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
+            if (wordPart.getWord().isImage()) {
+                messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
+
+                if (lli.getAnimated()) {
+                    GifEmoteData data;
+                    data.image = &lli;
+                    QRect rect(wordPart.getX(), wordPart.getY() + y,
+                               wordPart.getWidth(), wordPart.getHeight());
+
+                    data.rect = rect;
+
+                    gifEmotes.push_back(data);
+                }
+            }
+        }
+
         messageRef->buffer = bufferPtr;
 
         _painter.drawPixmap(0, y, *buffer);
@@ -223,6 +266,12 @@ ChatWidgetView::paintEvent(QPaintEvent *)
         if (y > height()) {
             break;
         }
+    }
+
+    for (GifEmoteData &item : this->gifEmotes) {
+        _painter.fillRect(item.rect, scheme.ChatBackground);
+
+        _painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
 }
 

@@ -2,6 +2,7 @@
 #define CHATVIEW_H
 
 #include "channel.h"
+#include "messages/lazyloadedimage.h"
 #include "messages/messageref.h"
 #include "messages/word.h"
 #include "widgets/scrollbar.h"
@@ -25,6 +26,13 @@ public:
 
     bool layoutMessages();
 
+    void
+    updateGifEmotes()
+    {
+        this->onlyUpdateEmotes = true;
+        this->update();
+    }
+
 protected:
     void resizeEvent(QResizeEvent *);
 
@@ -32,17 +40,23 @@ protected:
     void wheelEvent(QWheelEvent *event);
 
 private:
+    struct GifEmoteData {
+        messages::LazyLoadedImage *image;
+        QRect rect;
+    };
+
+    std::vector<GifEmoteData> gifEmotes;
+
     ChatWidget *chatWidget;
 
     ScrollBar scrollbar;
+    bool onlyUpdateEmotes;
 
 private slots:
     void
     wordTypeMaskChanged()
     {
-        if (layoutMessages()) {
-            update();
-        }
+        update();
     }
 };
 }

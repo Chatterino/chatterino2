@@ -90,8 +90,9 @@ LazyLoadedImage::loadImage()
         }
 
         if (allFrames.size() > 1) {
-            QObject::connect(&Emotes::getGifUpdateTimer(), &QTimer::timeout,
-                             [this] { gifUpdateTimout(); });
+            this->animated = true;
+
+            Emotes::getGifUpdateSignal().connect([this] { gifUpdateTimout(); });
         }
 
         Emotes::incGeneration();

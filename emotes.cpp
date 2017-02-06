@@ -26,6 +26,7 @@ ConcurrentMap<int, messages::LazyLoadedImage *>
     Emotes::ffzChannelEmoteFromCaches;
 ConcurrentMap<long, messages::LazyLoadedImage *> Emotes::twitchEmoteFromCache;
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::miscImageFromCache;
+boost::signals2::signal<void()> Emotes::gifUpdateTimerSignal;
 
 QTimer Emotes::gifUpdateTimer;
 bool Emotes::gifUpdateTimerInitiated(false);
