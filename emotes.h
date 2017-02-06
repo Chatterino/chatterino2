@@ -7,6 +7,7 @@
 
 #include <QMap>
 #include <QMutex>
+#include <QTimer>
 
 namespace chatterino {
 
@@ -82,6 +83,19 @@ public:
         generation++;
     }
 
+    static QTimer &
+    getGifUpdateTimer()
+    {
+        if (!gifUpdateTimerInitiated) {
+            gifUpdateTimerInitiated = true;
+
+            gifUpdateTimer.setInterval(33);
+            gifUpdateTimer.start();
+        }
+
+        return gifUpdateTimer;
+    }
+
 private:
     Emotes();
 
@@ -101,6 +115,9 @@ private:
         miscImageFromCache;
 
     static QString getTwitchEmoteLink(long id, qreal &scale);
+
+    static QTimer gifUpdateTimer;
+    static bool gifUpdateTimerInitiated;
 
     static void loadFfzEmotes();
     static void loadBttvEmotes();

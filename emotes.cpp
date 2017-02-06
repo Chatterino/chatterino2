@@ -27,6 +27,9 @@ ConcurrentMap<int, messages::LazyLoadedImage *>
 ConcurrentMap<long, messages::LazyLoadedImage *> Emotes::twitchEmoteFromCache;
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::miscImageFromCache;
 
+QTimer Emotes::gifUpdateTimer;
+bool Emotes::gifUpdateTimerInitiated(false);
+
 int Emotes::generation = 0;
 
 Emotes::Emotes()

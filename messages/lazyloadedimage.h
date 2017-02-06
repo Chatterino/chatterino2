@@ -7,7 +7,7 @@
 namespace chatterino {
 namespace messages {
 
-class LazyLoadedImage
+class LazyLoadedImage : QObject
 {
 public:
     explicit LazyLoadedImage(const QString &url, qreal scale = 1,
@@ -15,7 +15,7 @@ public:
                              const QString &tooltip = "",
                              const QMargins &margin = QMargins(),
                              bool isHat = false);
-    explicit LazyLoadedImage(QPixmap *pixmap, qreal scale = 1,
+    explicit LazyLoadedImage(QPixmap *currentPixmap, qreal scale = 1,
                              const QString &name = "",
                              const QString &tooltip = "",
                              const QMargins &margin = QMargins(),
@@ -29,7 +29,7 @@ public:
 
             loadImage();
         }
-        return pixmap;
+        return currentPixmap;
     }
 
     qreal
@@ -77,23 +77,30 @@ public:
     int
     getWidth() const
     {
-        if (pixmap == NULL) {
+        if (currentPixmap == NULL) {
             return 16;
         }
-        return pixmap->width();
+        return currentPixmap->width();
     }
 
     int
     getHeight() const
     {
-        if (pixmap == NULL) {
+        if (currentPixmap == NULL) {
             return 16;
         }
-        return pixmap->height();
+        return currentPixmap->height();
     }
 
 private:
-    QPixmap *pixmap;
+    struct FrameData {
+        QPixmap *image;
+        float duration;
+    };
+
+    QPixmap *currentPixmap;
+    std::vector<FrameData> allFrames;
+    int currentFrame;
 
     QString url;
     QString name;
@@ -106,6 +113,8 @@ private:
     bool isLoading;
 
     void loadImage();
+
+    void gifUpdateTimout();
 };
 }
 }
