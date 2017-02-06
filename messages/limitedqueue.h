@@ -4,6 +4,7 @@
 #include "messages/limitedqueuesnapshot.h"
 
 #include <boost/signals2.hpp>
+
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -102,7 +103,8 @@ private:
     int limit;
     int buffer;
 };
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // LIMITEDQUEUE_H

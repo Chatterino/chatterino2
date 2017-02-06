@@ -49,6 +49,17 @@ ChatWidgetView::layoutMessages()
 
     int start = this->scrollbar.getCurrentValue();
 
+    if (messages.getLength() <= start) {
+        // The scrollbar wants to show more values than we can offer
+
+        // just return for now
+        return false;
+
+
+        // Lower start value to the last message
+        // start = messages.getLength() - 1;
+    }
+
     int y = -(messages[start].get()->getHeight() *
               (fmod(this->scrollbar.getCurrentValue(), 1)));
 
