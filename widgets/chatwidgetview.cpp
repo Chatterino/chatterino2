@@ -49,33 +49,26 @@ ChatWidgetView::layoutMessages()
 
     int start = this->scrollbar.getCurrentValue();
 
-    if (messages.getLength() <= start) {
-        // The scrollbar wants to show more values than we can offer
+    // layout the visible messages in the view
+    if (messages.getLength() > start) {
+        int y = -(messages[start].get()->getHeight() *
+                  (fmod(this->scrollbar.getCurrentValue(), 1)));
 
-        // just return for now
-        return false;
+        for (int i = start; i < messages.getLength(); ++i) {
+            auto messagePtr = messages[i];
+            auto message = messagePtr.get();
 
+            redraw |= message->layout(this->width(), true);
 
-        // Lower start value to the last message
-        // start = messages.getLength() - 1;
-    }
+            y += message->getHeight();
 
-    int y = -(messages[start].get()->getHeight() *
-              (fmod(this->scrollbar.getCurrentValue(), 1)));
-
-    for (int i = start; i < messages.getLength(); ++i) {
-        auto messagePtr = messages[i];
-        auto message = messagePtr.get();
-
-        redraw |= message->layout(this->width(), true);
-
-        y += message->getHeight();
-
-        if (y >= height()) {
-            break;
+            if (y >= height()) {
+                break;
+            }
         }
     }
 
+    // layout the messages at the bottom to determine the scrollbar thumb size
     int h = this->height() - 8;
 
     for (int i = messages.getLength() - 1; i >= 0; i--) {
@@ -236,11 +229,13 @@ ChatWidgetView::paintEvent(QPaintEvent *)
 void
 ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
-    this->scrollbar.setDesiredValue(
-        this->scrollbar.getDesiredValue() -
-            event->delta() / 10.0 *
-                Settings::getInstance().mouseScrollMultiplier.get(),
-        true);
+    if (this->scrollbar.isVisible()) {
+        this->scrollbar.setDesiredValue(
+            this->scrollbar.getDesiredValue() -
+                event->delta() / 10.0 *
+                    Settings::getInstance().mouseScrollMultiplier.get(),
+            true);
+    }
 }
 }
 }

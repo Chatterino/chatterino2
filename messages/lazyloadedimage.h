@@ -95,12 +95,13 @@ public:
 private:
     struct FrameData {
         QPixmap *image;
-        float duration;
+        int duration;
     };
 
     QPixmap *currentPixmap;
     std::vector<FrameData> allFrames;
     int currentFrame;
+    int currentFrameOffset;
 
     QString url;
     QString name;

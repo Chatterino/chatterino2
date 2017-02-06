@@ -22,6 +22,7 @@ LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale,
     : currentPixmap(NULL)
     , allFrames()
     , currentFrame(0)
+    , currentFrameOffset(0)
     , url(url)
     , name(name)
     , tooltip(tooltip)
@@ -39,6 +40,7 @@ LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale,
     : currentPixmap(image)
     , allFrames()
     , currentFrame(0)
+    , currentFrameOffset(0)
     , url()
     , name(name)
     , tooltip(tooltip)
@@ -103,12 +105,21 @@ LazyLoadedImage::loadImage()
 void
 LazyLoadedImage::gifUpdateTimout()
 {
-    if (this->currentFrame >= this->allFrames.size() - 1) {
-        this->currentFrame = 0;
-        this->currentPixmap = this->allFrames.at(0).image;
-    } else {
-        this->currentPixmap = this->allFrames.at(++this->currentFrame).image;
+    this->currentFrameOffset += GIF_FRAME_LENGTH;
+
+    while (true) {
+        if (this->currentFrameOffset >
+            this->allFrames.at(this->currentFrame).duration) {
+            this->currentFrameOffset -=
+                this->allFrames.at(this->currentFrame).duration;
+            this->currentFrame =
+                (this->currentFrame + 1) % this->allFrames.size();
+        } else {
+            break;
+        }
     }
+
+    this->currentPixmap = this->allFrames[this->currentFrame].image;
 }
 }
 }

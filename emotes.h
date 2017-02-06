@@ -1,6 +1,8 @@
 #ifndef EMOTES_H
 #define EMOTES_H
 
+#define GIF_FRAME_LENGTH 33
+
 #include "concurrentmap.h"
 #include "messages/lazyloadedimage.h"
 #include "twitchemotevalue.h"
@@ -89,7 +91,7 @@ public:
         if (!gifUpdateTimerInitiated) {
             gifUpdateTimerInitiated = true;
 
-            gifUpdateTimer.setInterval(33);
+            gifUpdateTimer.setInterval(GIF_FRAME_LENGTH);
             gifUpdateTimer.start();
         }
 
