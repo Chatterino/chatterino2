@@ -8,4 +8,4 @@ Chatterino 2 is the second installment of my twitch chat client series "Chatteri
 3. Place libeay32.dll and ssleay32.dll from OpenSSL in a directory in PATH.
 
 ## code style
-The code is normally formated using clang format in qt creator. [clangformat.txt](https://github.com/fourtf/chatterino2/blob/master/clangformat.txt) conatins the style file for clang format.
+The code is normally formated using clang format in qt creator. [clangformat.txt](https://github.com/fourtf/chatterino2/blob/master/clangformat.txt) contains the style file for clang format.
