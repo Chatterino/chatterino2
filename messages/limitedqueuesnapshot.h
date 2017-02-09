@@ -1,7 +1,6 @@
 #ifndef LIMITEDQUEUESNAPSHOT_H
 #define LIMITEDQUEUESNAPSHOT_H
 
-#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -14,8 +13,7 @@ class LimitedQueueSnapshot
 public:
     LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> ptr, int offset,
                          int length)
-        : vectorPtr(ptr)
-        , vector(ptr.get())
+        : vector(ptr)
         , offset(offset)
         , length(length)
     {
@@ -24,20 +22,16 @@ public:
     int
     getLength()
     {
-        return length;
+        return this->length;
     }
 
     T const &operator[](int index) const
     {
-        //        assert(index >= 0);
-        //        assert(index < length);
-
-        return vector->at(index + offset);
+        return this->vector->at(index + this->offset);
     }
 
 private:
-    std::shared_ptr<std::vector<T>> vectorPtr;
-    std::vector<T> *vector;
+    std::shared_ptr<std::vector<T>> vector;
 
     int offset;
     int length;

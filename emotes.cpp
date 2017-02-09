@@ -89,7 +89,7 @@ Emotes::loadBttvEmotes()
 void
 Emotes::loadFfzEmotes()
 {
-    // bttv
+    // ffz
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
     QUrl url("https://api.frankerfacez.com/v1/set/global");
