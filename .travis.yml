@@ -7,4 +7,4 @@ before_install:
 script:
  - qmake -project
  - qmake Ultron.pro
- - make
+ - make 
