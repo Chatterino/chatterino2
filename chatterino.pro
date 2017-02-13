@@ -9,6 +9,8 @@ CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
 
+QMAKE_CXXFLAGS += -stdlib=libc++
+
 include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
