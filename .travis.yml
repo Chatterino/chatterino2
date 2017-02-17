@@ -5,6 +5,6 @@ before_install:
  - sudo apt-get install qt5-default qttools5-dev-tools
 
 script:
- - qmake -project
- - qmake Ultron.pro
+ - qmake -qt=qt5 -v
+ - qmake -qt=qt5
  - make 

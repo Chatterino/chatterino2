@@ -152,6 +152,7 @@ Notebook::performLayout(bool animated)
     if (Settings::getInstance().hideUserButton.get()) {
         userButton.hide();
     } else {
+        userButton.move(x, 0);
         userButton.show();
         x += 24;
     }

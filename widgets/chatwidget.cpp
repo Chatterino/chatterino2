@@ -76,8 +76,6 @@ ChatWidget::setChannelName(const QString &name)
 
                 auto messageRef = new messages::MessageRef(message);
 
-                qDebug() << "xD";
-
                 this->messages.appendItem(
                     std::shared_ptr<messages::MessageRef>(messageRef), deleted);
             });

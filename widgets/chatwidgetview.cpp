@@ -24,6 +24,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
 {
     this->setAttribute(Qt::WA_OpaquePaintEvent);
     this->scrollbar.setSmallChange(5);
+    this->setMouseTracking(true);
 
     QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
                      this, &ChatWidgetView::wordTypeMaskChanged);
@@ -285,6 +286,71 @@ ChatWidgetView::wheelEvent(QWheelEvent *event)
                     Settings::getInstance().mouseScrollMultiplier.get(),
             true);
     }
+}
+
+void
+ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
+{
+    std::shared_ptr<messages::MessageRef> message;
+    QPoint relativePos;
+
+    if (!tryGetMessageAt(event->pos(), message, relativePos)) {
+        this->setCursor(Qt::ArrowCursor);
+        return;
+    }
+
+    auto _message = message->getMessage();
+    auto user = _message->getUserName();
+
+    messages::Word hoverWord;
+
+    if (!message->tryGetWordPart(relativePos, hoverWord)) {
+        this->setCursor(Qt::ArrowCursor);
+        return;
+    }
+
+    int index = message->getSelectionIndex(relativePos);
+
+    qDebug() << index;
+
+    if (hoverWord.getLink().getIsValid()) {
+        this->setCursor(Qt::PointingHandCursor);
+        qDebug() << hoverWord.getLink().getValue();
+    } else {
+        this->setCursor(Qt::ArrowCursor);
+    }
+}
+
+bool
+ChatWidgetView::tryGetMessageAt(QPoint p,
+                                std::shared_ptr<messages::MessageRef> &_message,
+                                QPoint &relativePos)
+{
+    auto messages = chatWidget->getMessagesSnapshot();
+
+    int start = this->scrollbar.getCurrentValue();
+
+    if (start >= messages.getLength()) {
+        return false;
+    }
+
+    int y = -(messages[start].get()->getHeight() *
+              (fmod(this->scrollbar.getCurrentValue(), 1))) +
+            12;
+
+    for (int i = start; i < messages.getLength(); ++i) {
+        auto message = messages[i];
+
+        y += message->getHeight();
+
+        if (p.y() < y) {
+            relativePos = QPoint(p.x(), y - p.y());
+            _message = message;
+            return true;
+        }
+    }
+
+    return false;
 }
 }
 }

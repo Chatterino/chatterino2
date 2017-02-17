@@ -65,6 +65,9 @@ public:
                   ButtonTimeout
     };
 
+    Word()
+    {
+    }
     explicit Word(LazyLoadedImage *image, Type getType, const QString &copytext,
                   const QString &getTooltip, const Link &getLink = Link());
     explicit Word(const QString &text, Type getType, const QColor &getColor,
@@ -182,7 +185,7 @@ public:
     }
 
     std::vector<short> &
-    getCharacterWidthCache()
+    getCharacterWidthCache() const
     {
         return this->characterWidthCache;
     }
@@ -206,7 +209,7 @@ private:
     Fonts::Type font = Fonts::Medium;
     Link link;
 
-    std::vector<short> characterWidthCache;
+    mutable std::vector<short> characterWidthCache;
 };
 }
 }

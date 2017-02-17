@@ -36,11 +36,13 @@ MessageRef::layout(int width, bool enableEmoteMargins)
         bool recalculateImages =
             this->emoteGeneration != Emotes::getGeneration();
         bool recalculateText = this->fontGeneration != Fonts::getGeneration();
+        bool newWordTypes =
+            this->currentWordTypes != Settings::getInstance().getWordTypeMask();
 
         qreal emoteScale = settings.emoteScale.get();
         bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
 
-        if (recalculateImages || recalculateText) {
+        if (recalculateImages || recalculateText || newWordTypes) {
             this->emoteGeneration = Emotes::getGeneration();
             this->fontGeneration = Fonts::getGeneration();
 
@@ -72,6 +74,10 @@ MessageRef::layout(int width, bool enableEmoteMargins)
                 }
             }
         }
+
+        if (newWordTypes) {
+            this->currentWordTypes = Settings::getInstance().getWordTypeMask();
+        }
     }
 
     if (!redraw) {
@@ -85,6 +91,7 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 
     int right = width - MARGIN_RIGHT - MARGIN_LEFT;
 
+    int lineNumber = 0;
     int lineStart = 0;
     int lineHeight = 0;
     bool first = true;
@@ -139,22 +146,23 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 
                     this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y,
                                                        width, word.getHeight(),
-                                                       mid, mid));
+                                                       lineNumber, mid, mid));
 
                     y += metrics.height();
 
                     start = i - 1;
 
                     width = 0;
+                    lineNumber++;
                 }
             }
 
             QString mid(text.mid(start));
             width = metrics.width(mid);
 
-            this->wordParts.push_back(WordPart(word, MARGIN_LEFT,
-                                               y - word.getHeight(), width,
-                                               word.getHeight(), mid, mid));
+            this->wordParts.push_back(
+                WordPart(word, MARGIN_LEFT, y - word.getHeight(), width,
+                         word.getHeight(), lineNumber, mid, mid));
             x = width + MARGIN_LEFT + spaceWidth;
 
             lineHeight = word.getHeight();
@@ -164,8 +172,8 @@ MessageRef::layout(int width, bool enableEmoteMargins)
             first = false;
         } else if (first || x + word.getWidth() + xOffset <= right) {
             // fits in the line
-            this->wordParts.push_back(
-                WordPart(word, x, y - word.getHeight(), word.getCopyText()));
+            this->wordParts.push_back(WordPart(word, x, y - word.getHeight(),
+                                               lineNumber, word.getCopyText()));
 
             x += word.getWidth() + xOffset;
             x += spaceWidth;
@@ -179,8 +187,9 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 
             y += lineHeight;
 
-            this->wordParts.push_back(WordPart(
-                word, MARGIN_LEFT, y - word.getHeight(), word.getCopyText()));
+            this->wordParts.push_back(WordPart(word, MARGIN_LEFT,
+                                               y - word.getHeight(), lineNumber,
+                                               word.getCopyText()));
 
             lineStart = this->wordParts.size() - 1;
 
@@ -188,6 +197,8 @@ MessageRef::layout(int width, bool enableEmoteMargins)
 
             x = word.getWidth() + MARGIN_LEFT;
             x += spaceWidth;
+
+            lineNumber++;
         }
     }
 
@@ -215,6 +226,113 @@ MessageRef::alignWordParts(int lineStart, int lineHeight)
 
         wordPart2.setY(wordPart2.getY() + lineHeight);
     }
+}
+
+bool
+MessageRef::tryGetWordPart(QPoint point, messages::Word &word)
+{
+    for (messages::WordPart &wordPart : this->wordParts) {
+        if (wordPart.getRect().contains(point)) {
+            word = wordPart.getWord();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int
+MessageRef::getSelectionIndex(QPoint position)
+{
+    if (this->wordParts.size() == 0) {
+        return 0;
+    }
+
+    // find out in which line the cursor is
+    int lineNumber = 0, lineStart = 0, lineEnd = 0;
+
+    for (int i = 0; i < this->wordParts.size(); i++) {
+        WordPart &part = this->wordParts[i];
+
+        // return if curser under the word
+        if (position.y() >= part.getBottom()) {
+            break;
+        }
+
+        if (part.getLineNumber() != lineNumber) {
+            lineStart = i;
+            lineNumber = part.getLineNumber();
+        }
+
+        lineEnd = i;
+    }
+
+    // count up to the cursor
+    int index = 0;
+
+    for (int i = 0; i < lineStart; i++) {
+        WordPart &part = this->wordParts[i];
+
+        index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
+    }
+
+    for (int i = lineStart; i < lineEnd; i++) {
+        WordPart &part = this->wordParts[i];
+
+        // curser is left of the word part
+        if (position.x() < part.getX()) {
+            break;
+        }
+
+        // cursor is right of the word part
+        if (position.x() > part.getX()) {
+            index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
+            continue;
+        }
+
+        // cursor is over the word part
+        if (part.getWord().isImage()) {
+            index++;
+        } else {
+            auto text = part.getWord().getText();
+
+            int x = part.getX();
+
+            for (int j = 0; j < text.length(); j++) {
+                if (x > position.x()) {
+                    break;
+                }
+
+                index++;
+                x = part.getX() +
+                    part.getWord().getFontMetrics().width(text, j + 1);
+            }
+        }
+
+        break;
+    }
+
+    return index;
+
+    // go through all the wordparts
+    //    for (int i = 0; i < this->wordParts; i < this->wordParts.size()) {
+
+    //        WordPart &part = this->wordParts[i];
+
+    //        // return if curser under the word
+    //        if (position.y() >= part.getBottom()) {
+    //            break;
+    //        }
+
+    //        // increment index and continue if the curser x is bigger than the
+    //        words
+    //        // right edge
+    //        if (position.x() > part.getRight()) {
+    //            index += part.getWord().isImage() ? 2 +
+    //            part.getText().length() + 1;
+    //            continue;
+    //        }
+    //    }
 }
 }
 }

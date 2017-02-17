@@ -9,6 +9,7 @@
 #include "resources.h"
 #include "settings.h"
 
+#include <QObjectUserData>
 #include <QStringList>
 #include <ctime>
 #include <list>
@@ -144,7 +145,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
     }
 
     // username
-    this->userName = ircMessage.account();
+    this->userName = ircMessage.nick();
 
     if (this->userName.isEmpty()) {
         auto iterator = tags.find("login");
@@ -230,7 +231,7 @@ Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
                     end > ircMessage.content().length())
                     continue;
 
-                QString name = ircMessage.content().mid(start, end - start);
+                QString name = ircMessage.content().mid(start, end - start + 1);
 
                 twitchEmotes.push_back(std::pair<long int, LazyLoadedImage *>(
                     start, Emotes::getTwitchEmoteById(name, id)));

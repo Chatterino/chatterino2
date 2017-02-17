@@ -39,6 +39,12 @@ protected:
     void paintEvent(QPaintEvent *);
     void wheelEvent(QWheelEvent *event);
 
+    void mouseMoveEvent(QMouseEvent *event);
+
+    bool tryGetMessageAt(QPoint p,
+                         std::shared_ptr<messages::MessageRef> &message,
+                         QPoint &relativePos);
+
 private:
     struct GifEmoteData {
         messages::LazyLoadedImage *image;
@@ -56,6 +62,7 @@ private slots:
     void
     wordTypeMaskChanged()
     {
+        layoutMessages();
         update();
     }
 };
