@@ -3,6 +3,7 @@
 #include "emojis.h"
 #include "emotes.h"
 #include "ircmanager.h"
+#include "logging/loggingmanager.h"
 #include "resources.h"
 #include "settings.h"
 #include "widgets/mainwindow.h"
@@ -20,6 +21,8 @@ main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    chatterino::logging::init();
+    chatterino::initChannels();
     Settings::getInstance().load();
     Resources::load();
     Emojis::loadEmojis();

@@ -33,5 +33,6 @@ Word::Word(const QString &text, Type type, const QColor &color,
     , characterWidthCache()
 {
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino

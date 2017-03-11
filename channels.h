@@ -5,26 +5,14 @@
 
 namespace chatterino {
 
+void initChannels();
+
 class Channels
 {
 public:
-    static std::shared_ptr<Channel>
-    getWhispers()
-    {
-        return whispers;
-    }
-
-    static std::shared_ptr<Channel>
-    getMentions()
-    {
-        return mentions;
-    }
-
-    static std::shared_ptr<Channel>
-    getEmpty()
-    {
-        return empty;
-    }
+    static std::shared_ptr<Channel> getWhispers();
+    static std::shared_ptr<Channel> getMentions();
+    static std::shared_ptr<Channel> getEmpty();
 
     const static std::vector<std::shared_ptr<Channel>> getItems();
 
@@ -37,12 +25,10 @@ private:
     {
     }
 
-    static std::shared_ptr<Channel> whispers;
-    static std::shared_ptr<Channel> mentions;
-    static std::shared_ptr<Channel> empty;
-
     static QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> channels;
     static QMutex channelsMutex;
 };
-}
+
+}  // namespace chatterino
+
 #endif  // CHANNELS_H

@@ -12,6 +12,8 @@
 #include <QNetworkAccessManager>
 #include <QString>
 
+#include <memory>
+
 namespace chatterino {
 
 class IrcManager

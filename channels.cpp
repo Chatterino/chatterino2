@@ -3,12 +3,38 @@
 
 namespace chatterino {
 
-std::shared_ptr<Channel> Channels::whispers(new Channel(QString("/whispers")));
-std::shared_ptr<Channel> Channels::mentions(new Channel(QString("/mentions")));
-std::shared_ptr<Channel> Channels::empty(new Channel(QString("")));
+static std::shared_ptr<Channel> whispers(nullptr);
+static std::shared_ptr<Channel> mentions(nullptr);
+static std::shared_ptr<Channel> empty(nullptr);
 
 QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> Channels::channels;
 QMutex Channels::channelsMutex;
+
+void
+initChannels()
+{
+    whispers.reset(new Channel(QString("/whispers")));
+    mentions.reset(new Channel(QString("/mentions")));
+    empty.reset(new Channel(QString("")));
+}
+
+std::shared_ptr<Channel>
+Channels::getWhispers()
+{
+    return whispers;
+}
+
+std::shared_ptr<Channel>
+Channels::getMentions()
+{
+    return mentions;
+}
+
+std::shared_ptr<Channel>
+Channels::getEmpty()
+{
+    return empty;
+}
 
 const std::vector<std::shared_ptr<Channel>>
 Channels::getItems()
@@ -60,20 +86,20 @@ Channels::getChannel(const QString &channel)
 
     if (channel.length() > 1 && channel.at(0) == '/') {
         if (c == "/whispers") {
-            return Channels::whispers;
+            return whispers;
         }
 
         if (c == "/mentions") {
-            return Channels::mentions;
+            return mentions;
         }
 
-        return Channels::empty;
+        return empty;
     }
 
     auto a = Channels::channels.find(c);
 
     if (a == Channels::channels.end()) {
-        return Channels::empty;
+        return empty;
     }
 
     return std::get<0>(a.value());
@@ -103,4 +129,5 @@ Channels::removeChannel(const QString &channel)
         Channels::channels.remove(c);
     }
 }
-}
+
+}  // namespace chatterino

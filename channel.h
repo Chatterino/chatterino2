@@ -2,6 +2,7 @@
 #define CHANNEL_H
 
 #include "concurrentmap.h"
+#include "logging/loggingchannel.h"
 #include "messages/lazyloadedimage.h"
 #include "messages/limitedqueue.h"
 
@@ -128,10 +129,12 @@ private:
     int streamViewerCount;
     QString streamStatus;
     QString streamGame;
+    std::shared_ptr<logging::Channel> loggingChannel;
 
     void reloadBttvEmotes();
     void reloadFfzEmotes();
 };
-}
+
+}  // namespace chatterino
 
 #endif  // CHANNEL_H

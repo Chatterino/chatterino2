@@ -53,8 +53,9 @@ SOURCES += main.cpp\
     widgets/settingsdialogtab.cpp \
     widgets/textinputdialog.cpp \
     windows.cpp \
-    logging.cpp \
-    messages/messageref.cpp
+    messages/messageref.cpp \
+    logging/loggingmanager.cpp \
+    logging/loggingchannel.cpp
 
 HEADERS  += account.h \
     asyncexec.h \
@@ -96,10 +97,11 @@ HEADERS  += account.h \
     windows.h \
     widgets/resizingtextedit.h \
     settingssnapshot.h \
-    logging.h \
     messages/limitedqueue.h \
     messages/limitedqueuesnapshot.h \
-    messages/messageref.h
+    messages/messageref.h \
+    logging/loggingmanager.h \
+    logging/loggingchannel.h
 
 PRECOMPILED_HEADER =
 

@@ -1,4 +1,5 @@
 #include "messages/message.h"
+#include "channel.h"
 #include "colorscheme.h"
 #include "emojis.h"
 #include "emotes.h"
@@ -30,6 +31,7 @@ Message::Message(const QString &text)
 Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
                  bool enablePingSound, bool isReceivedWhisper,
                  bool isSentWhisper, bool includeChannel)
+    : content(ircMessage.content())
 {
     this->parseTime = std::chrono::system_clock::now();
 
@@ -144,14 +146,10 @@ Message::Message(const IrcPrivateMessage &ircMessage, Channel &channel,
     }
 
     // username
-    this->userName = ircMessage.account();
+    this->userName = ircMessage.nick();
 
     if (this->userName.isEmpty()) {
-        auto iterator = tags.find("login");
-
-        if (iterator != tags.end()) {
-            this->userName = iterator.value().toString();
-        }
+        this->userName = tags.value(QLatin1String("login")).toString();
     }
 
     QString displayName;

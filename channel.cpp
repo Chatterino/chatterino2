@@ -1,5 +1,6 @@
 #include "channel.h"
 #include "emotes.h"
+#include "logging/loggingmanager.h"
 #include "messages/message.h"
 #include "windows.h"
 
@@ -24,6 +25,7 @@ Channel::Channel(const QString &channel)
               "/subscribe?ref=in_chat_subscriber_link")
     , channelLink("https://twitch.tv/" + name)
     , popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
+    , loggingChannel(logging::get(name))
 {
     reloadChannelEmotes();
 }
@@ -127,6 +129,10 @@ Channel::addMessage(std::shared_ptr<messages::Message> message)
 {
     std::shared_ptr<messages::Message> deleted;
 
+    if (this->loggingChannel.get() != nullptr) {
+        this->loggingChannel->append(message);
+    }
+
     if (this->messages.appendItem(message, deleted)) {
         this->messageRemovedFromStart(deleted);
     }
@@ -135,4 +141,5 @@ Channel::addMessage(std::shared_ptr<messages::Message> message)
 
     Windows::repaintVisibleChatWidgets(this);
 }
-}
+
+}  // namespace chatterino

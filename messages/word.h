@@ -208,7 +208,8 @@ private:
 
     std::vector<short> characterWidthCache;
 };
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // WORD_H

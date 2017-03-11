@@ -1,15 +1,18 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include "channel.h"
 #include "messages/word.h"
 #include "messages/wordpart.h"
 
 #include <IrcMessage>
 #include <QVector>
+
 #include <chrono>
 
 namespace chatterino {
+
+class Channel;
+
 namespace messages {
 
 class Message
@@ -54,6 +57,18 @@ public:
         return displayName;
     }
 
+    inline const QString &
+    getContent() const
+    {
+        return this->content;
+    }
+
+    inline const std::chrono::time_point<std::chrono::system_clock> &
+    getParseTime() const
+    {
+        return this->parseTime;
+    }
+
     std::vector<Word> &
     getWords()
     {
@@ -91,6 +106,7 @@ private:
 
     QString userName = "";
     QString displayName = "";
+    QString content;
     QString id = "";
 
     std::vector<Word> words;
