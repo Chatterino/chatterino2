@@ -11,6 +11,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+
 #include <memory>
 
 namespace chatterino {
@@ -62,12 +63,12 @@ Channel::reloadBttvEmotes()
                     tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
                 this->getBttvChannelEmotes().insert(
-                    code,
-                    Emotes::getBttvChannelEmoteFromCaches().getOrAdd(
-                        id, [&code, &url] {
-                            return new messages::LazyLoadedImage(
-                                url, 1, code, code + "\nChannel Bttv Emote");
-                        }));
+                    code, Emotes::getBttvChannelEmoteFromCaches().getOrAdd(
+                              id, [&code, &url] {
+                                  return new messages::LazyLoadedImage(
+                                      url, 1, code,
+                                      code + "\nChannel Bttv Emote");
+                              }));
             }
         }
 
@@ -109,12 +110,12 @@ Channel::reloadFfzEmotes()
                     QString url1 = "http:" + urls.value("1").toString();
 
                     this->getFfzChannelEmotes().insert(
-                        code,
-                        Emotes::getFfzChannelEmoteFromCaches().getOrAdd(
-                            id, [&code, &url1] {
-                                return new messages::LazyLoadedImage(
-                                    url1, 1, code, code + "\nGlobal Ffz Emote");
-                            }));
+                        code, Emotes::getFfzChannelEmoteFromCaches().getOrAdd(
+                                  id, [&code, &url1] {
+                                      return new messages::LazyLoadedImage(
+                                          url1, 1, code,
+                                          code + "\nGlobal Ffz Emote");
+                                  }));
                 }
             }
         }
