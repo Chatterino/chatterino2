@@ -12,12 +12,12 @@ class Word;
 class WordPart
 {
 public:
-    WordPart(Word &getWord, int getX, int getY, const QString &getCopyText,
-             bool allowTrailingSpace = true);
+    WordPart(Word &getWord, int getX, int getY, int lineNumber,
+             const QString &getCopyText, bool allowTrailingSpace = true);
 
     WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight,
-             const QString &getCopyText, const QString &customText,
-             bool allowTrailingSpace = true);
+             int lineNumber, const QString &getCopyText,
+             const QString &customText, bool allowTrailingSpace = true);
 
     const Word &
     getWord() const
@@ -98,6 +98,12 @@ public:
         return this->text;
     }
 
+    int
+    getLineNumber()
+    {
+        return this->lineNumber;
+    }
+
 private:
     Word &m_word;
 
@@ -108,6 +114,8 @@ private:
     int y;
     int width;
     int height;
+
+    int lineNumber;
 
     bool _trailingSpace;
 };

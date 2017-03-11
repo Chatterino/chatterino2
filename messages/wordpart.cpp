@@ -4,8 +4,8 @@
 namespace chatterino {
 namespace messages {
 
-WordPart::WordPart(Word &word, int x, int y, const QString &copyText,
-                   bool allowTrailingSpace)
+WordPart::WordPart(Word &word, int x, int y, int lineNumber,
+                   const QString &copyText, bool allowTrailingSpace)
     : m_word(word)
     , copyText(copyText)
     , text(word.isText() ? m_word.getText() : QString())
@@ -13,13 +13,14 @@ WordPart::WordPart(Word &word, int x, int y, const QString &copyText,
     , y(y)
     , width(word.getWidth())
     , height(word.getHeight())
+    , lineNumber(lineNumber)
     , _trailingSpace(word.hasTrailingSpace() & allowTrailingSpace)
 {
 }
 
 WordPart::WordPart(Word &word, int x, int y, int width, int height,
-                   const QString &copyText, const QString &customText,
-                   bool allowTrailingSpace)
+                   int lineNumber, const QString &copyText,
+                   const QString &customText, bool allowTrailingSpace)
     : m_word(word)
     , copyText(copyText)
     , text(customText)
@@ -27,6 +28,7 @@ WordPart::WordPart(Word &word, int x, int y, int width, int height,
     , y(y)
     , width(width)
     , height(height)
+    , lineNumber(lineNumber)
     , _trailingSpace(word.hasTrailingSpace() & allowTrailingSpace)
 {
 }

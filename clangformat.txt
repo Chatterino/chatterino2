@@ -1,0 +1,28 @@
+IndentCaseLabels: true
+BasedOnStyle: Google
+IndentWidth: 4
+Standard: Auto
+PointerBindsToType: false
+Language: Cpp
+SpacesBeforeTrailingComments: 2
+AccessModifierOffset: -1
+AlignEscapedNewlinesLeft: true
+AlwaysBreakAfterDefinitionReturnType: true
+AlwaysBreakBeforeMultilineStrings: false
+BreakConstructorInitializersBeforeComma: true
+# BreakBeforeBraces: Linux
+BreakBeforeBraces: Custom
+AccessModifierOffset: -4
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+DerivePointerBinding: false
+BraceWrapping: {
+    AfterNamespace: 'false'
+    AfterClass: 'true'
+    BeforeElse: 'false'
+    AfterControlStatement: 'false'
+    AfterFunction: 'true'
+    BeforeCatch: 'false'
+}

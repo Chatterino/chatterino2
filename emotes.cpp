@@ -26,6 +26,10 @@ ConcurrentMap<int, messages::LazyLoadedImage *>
     Emotes::ffzChannelEmoteFromCaches;
 ConcurrentMap<long, messages::LazyLoadedImage *> Emotes::twitchEmoteFromCache;
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::miscImageFromCache;
+boost::signals2::signal<void()> Emotes::gifUpdateTimerSignal;
+
+QTimer Emotes::gifUpdateTimer;
+bool Emotes::gifUpdateTimerInitiated(false);
 
 int Emotes::generation = 0;
 
@@ -85,7 +89,7 @@ Emotes::loadBttvEmotes()
 void
 Emotes::loadFfzEmotes()
 {
-    // bttv
+    // ffz
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
     QUrl url("https://api.frankerfacez.com/v1/set/global");

@@ -44,7 +44,7 @@ MainWindow::layoutVisibleChatWidgets(Channel *channel)
 
         if (channel == NULL || channel == widget->getChannel().get()) {
             if (widget->getView().layoutMessages()) {
-                widget->update();
+                widget->getView().update();
             }
         }
     }
@@ -66,8 +66,26 @@ MainWindow::repaintVisibleChatWidgets(Channel *channel)
 
         if (channel == NULL || channel == widget->getChannel().get()) {
             widget->getView().layoutMessages();
-            widget->update();
+            widget->getView().update();
         }
+    }
+}
+
+void
+MainWindow::repaintGifEmotes()
+{
+    auto *page = notebook.getSelectedPage();
+
+    if (page == NULL) {
+        return;
+    }
+
+    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
+
+    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
+        ChatWidget *widget = *it;
+
+        widget->getView().updateGifEmotes();
     }
 }
 

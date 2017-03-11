@@ -24,19 +24,19 @@ public:
     Link(Type getType, const QString &getValue);
 
     bool
-    getIsValid()
+    getIsValid() const
     {
         return type == None;
     }
 
     Type
-    getType()
+    getType() const
     {
         return type;
     }
 
     const QString &
-    getValue()
+    getValue() const
     {
         return value;
     }

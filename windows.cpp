@@ -39,6 +39,14 @@ Windows::repaintVisibleChatWidgets(Channel *channel)
 }
 
 void
+Windows::repaintGifEmotes()
+{
+    if (Windows::mainWindow != nullptr) {
+        Windows::mainWindow->repaintGifEmotes();
+    }
+}
+
+void
 Windows::updateAll()
 {
     if (Windows::mainWindow != nullptr) {

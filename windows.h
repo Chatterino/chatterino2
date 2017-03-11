@@ -12,6 +12,7 @@ class Windows
 public:
     static void layoutVisibleChatWidgets(Channel *channel = NULL);
     static void repaintVisibleChatWidgets(Channel *channel = NULL);
+    static void repaintGifEmotes();
     static void updateAll();
 
     static widgets::MainWindow &

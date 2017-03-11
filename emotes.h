@@ -1,12 +1,17 @@
 #ifndef EMOTES_H
 #define EMOTES_H
 
+#define GIF_FRAME_LENGTH 33
+
 #include "concurrentmap.h"
 #include "messages/lazyloadedimage.h"
 #include "twitchemotevalue.h"
+#include "windows.h"
 
 #include <QMap>
 #include <QMutex>
+#include <QTimer>
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -82,6 +87,24 @@ public:
         generation++;
     }
 
+    static boost::signals2::signal<void()> &
+    getGifUpdateSignal()
+    {
+        if (!gifUpdateTimerInitiated) {
+            gifUpdateTimerInitiated = true;
+
+            gifUpdateTimer.setInterval(30);
+            gifUpdateTimer.start();
+
+            QObject::connect(&gifUpdateTimer, &QTimer::timeout, [] {
+                gifUpdateTimerSignal();
+                Windows::repaintGifEmotes();
+            });
+        }
+
+        return gifUpdateTimerSignal;
+    }
+
 private:
     Emotes();
 
@@ -102,10 +125,15 @@ private:
 
     static QString getTwitchEmoteLink(long id, qreal &scale);
 
+    static QTimer gifUpdateTimer;
+    static bool gifUpdateTimerInitiated;
+
     static void loadFfzEmotes();
     static void loadBttvEmotes();
 
     static int generation;
+
+    static boost::signals2::signal<void()> gifUpdateTimerSignal;
 };
 }
 

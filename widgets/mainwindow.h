@@ -20,6 +20,7 @@ public:
 
     void layoutVisibleChatWidgets(Channel *channel = NULL);
     void repaintVisibleChatWidgets(Channel *channel = NULL);
+    void repaintGifEmotes();
 
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
