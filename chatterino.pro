@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     windows.cpp \
     messages/messageref.cpp \
     logging/loggingmanager.cpp \
-    logging/loggingchannel.cpp
+    logging/loggingchannel.cpp \
+    widgets/userpopupwidget.cpp
 
 HEADERS  += account.h \
     asyncexec.h \
@@ -101,7 +102,8 @@ HEADERS  += account.h \
     messages/limitedqueuesnapshot.h \
     messages/messageref.h \
     logging/loggingmanager.h \
-    logging/loggingchannel.h
+    logging/loggingchannel.h \
+    widgets/userpopupwidget.h
 
 PRECOMPILED_HEADER =
 
@@ -118,3 +120,6 @@ win32 {
 macx {
     INCLUDEPATH += /usr/local/include
 }
+
+FORMS += \
+    forms/userpopup.ui

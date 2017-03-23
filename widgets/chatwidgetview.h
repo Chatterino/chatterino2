@@ -6,6 +6,7 @@
 #include "messages/messageref.h"
 #include "messages/word.h"
 #include "widgets/scrollbar.h"
+#include "widgets/userpopupwidget.h"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -40,6 +41,8 @@ protected:
     void wheelEvent(QWheelEvent *event);
 
     void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
     bool tryGetMessageAt(QPoint p,
                          std::shared_ptr<messages::MessageRef> &message,
@@ -56,7 +59,13 @@ private:
     ChatWidget *chatWidget;
 
     ScrollBar scrollbar;
-    bool onlyUpdateEmotes;
+
+    UserPopupWidget userPopupWidget;
+    bool onlyUpdateEmotes = false;
+
+    // Mouse event variables
+    bool mouseDown = false;
+    QPointF latestPressPosition;
 
 private slots:
     void

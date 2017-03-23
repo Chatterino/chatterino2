@@ -4,6 +4,7 @@
 #include "messages/message.h"
 #include "messages/wordpart.h"
 #include "settings.h"
+#include "ui_userpopup.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>
@@ -20,7 +21,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
     , chatWidget(parent)
     , scrollbar(this)
-    , onlyUpdateEmotes(false)
+    , userPopupWidget(this->chatWidget->getChannel())
 {
     this->setAttribute(Qt::WA_OpaquePaintEvent);
     this->scrollbar.setSmallChange(5);
@@ -311,14 +312,76 @@ ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 
     int index = message->getSelectionIndex(relativePos);
 
-    qDebug() << index;
-
     if (hoverWord.getLink().getIsValid()) {
         this->setCursor(Qt::PointingHandCursor);
-        qDebug() << hoverWord.getLink().getValue();
     } else {
         this->setCursor(Qt::ArrowCursor);
     }
+}
+
+void
+ChatWidgetView::mousePressEvent(QMouseEvent *event)
+{
+    this->mouseDown = true;
+    this->latestPressPosition = event->screenPos();
+}
+
+static float
+distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
+{
+    QPointF tmp = p1 - p2;
+
+    float distance = 0.f;
+    distance += tmp.x() * tmp.x();
+    distance += tmp.y() * tmp.y();
+
+    return std::sqrt(distance);
+}
+
+void
+ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (!this->mouseDown) {
+        // We didn't grab the mouse press, so we shouldn't be handling the mouse
+        // release
+        return;
+    }
+
+    this->mouseDown = false;
+
+    float distance =
+        distanceBetweenPoints(this->latestPressPosition, event->screenPos());
+
+    qDebug() << "Distance: " << distance;
+
+    if (std::fabsf(distance) > 15.f) {
+        // It wasn't a proper click, so we don't care about that here
+        return;
+    }
+
+    // If you clicked and released less than  X pixels away, it counts
+    // as a click!
+
+    // show user thing pajaW
+
+    std::shared_ptr<messages::MessageRef> message;
+    QPoint relativePos;
+
+    if (!tryGetMessageAt(event->pos(), message, relativePos)) {
+        // No message at clicked position
+        this->userPopupWidget.hide();
+        return;
+    }
+
+    auto _message = message->getMessage();
+    auto user = _message->getUserName();
+
+    qDebug() << "Clicked " << user << "s message";
+
+    this->userPopupWidget.setName(user);
+    this->userPopupWidget.move(event->screenPos().toPoint());
+    this->userPopupWidget.show();
+    this->userPopupWidget.setFocus();
 }
 
 bool
