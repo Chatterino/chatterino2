@@ -31,21 +31,20 @@ protected:
     void resizeEvent(QResizeEvent *);
 
 private:
-    ChatWidget *chatWidget;
+    ChatWidget *_chatWidget;
 
-    QHBoxLayout hbox;
-    QVBoxLayout vbox;
-    QHBoxLayout editContainer;
-    ResizingTextEdit edit;
-    QLabel textLengthLabel;
-    ChatWidgetHeaderButton emotesLabel;
+    QHBoxLayout _hbox;
+    QVBoxLayout _vbox;
+    QHBoxLayout _editContainer;
+    ResizingTextEdit _edit;
+    QLabel _textLengthLabel;
+    ChatWidgetHeaderButton _emotesLabel;
 
 private slots:
     void refreshTheme();
-    void
-    setMessageLengthVisisble(bool value)
+    void setMessageLengthVisisble(bool value)
     {
-        this->textLengthLabel.setHidden(!value);
+        _textLengthLabel.setHidden(!value);
     }
     void editTextChanged();
     //    void editKeyPressed(QKeyEvent *event);

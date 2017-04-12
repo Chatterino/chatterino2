@@ -12,110 +12,39 @@ class Word;
 class WordPart
 {
 public:
-    WordPart(Word &getWord, int getX, int getY, int lineNumber,
-             const QString &getCopyText, bool allowTrailingSpace = true);
+    WordPart(Word &getWord, int getX, int getY, int _lineNumber, const QString &getCopyText,
+             bool allowTrailingSpace = true);
 
-    WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight,
-             int lineNumber, const QString &getCopyText,
-             const QString &customText, bool allowTrailingSpace = true);
+    WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight, int _lineNumber,
+             const QString &getCopyText, const QString &customText, bool allowTrailingSpace = true);
 
-    const Word &
-    getWord() const
-    {
-        return this->m_word;
-    }
-
-    int
-    getWidth() const
-    {
-        return this->width;
-    }
-
-    int
-    getHeight() const
-    {
-        return this->height;
-    }
-
-    int
-    getX() const
-    {
-        return this->x;
-    }
-
-    int
-    getY() const
-    {
-        return this->y;
-    }
-
-    void
-    setPosition(int x, int y)
-    {
-        this->x = x;
-        this->y = y;
-    }
-
-    void
-    setY(int y)
-    {
-        this->y = y;
-    }
-
-    int
-    getRight() const
-    {
-        return this->x + this->width;
-    }
-
-    int
-    getBottom() const
-    {
-        return this->y + this->height;
-    }
-
-    QRect
-    getRect() const
-    {
-        return QRect(this->x, this->y, this->width, this->height);
-    }
-
-    const QString
-    getCopyText() const
-    {
-        return this->copyText;
-    }
-
-    int
-    hasTrailingSpace() const
-    {
-        return this->_trailingSpace;
-    }
-
-    const QString &
-    getText() const
-    {
-        return this->text;
-    }
-
-    int
-    getLineNumber()
-    {
-        return this->lineNumber;
-    }
+    const Word &getWord() const;
+    int getWidth() const;
+    int getHeight() const;
+    int getX() const;
+    int getY() const;
+    void setPosition(int _x, int _y);
+    void setY(int _y);
+    int getRight() const;
+    int getBottom() const;
+    QRect getRect() const;
+    const QString getCopyText() const;
+    int hasTrailingSpace() const;
+    const QString &getText() const;
+    int getLineNumber();
 
 private:
-    Word &m_word;
+    Word &_word;
 
-    QString copyText;
-    QString text;
+    QString _copyText;
+    QString _text;
 
-    int x;
-    int y;
-    int width;
-    int height;
+    int _x;
+    int _y;
+    int _width;
+    int _height;
 
-    int lineNumber;
+    int _lineNumber;
 
     bool _trailingSpace;
 };

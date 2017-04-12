@@ -27,51 +27,35 @@ public:
     ChatWidget(QWidget *parent = 0);
     ~ChatWidget();
 
-    ChatWidgetView &
-    getView()
-    {
-        return view;
-    }
-
-    std::shared_ptr<Channel>
-    getChannel() const
-    {
-        return channel;
-    }
-
-    const QString &
-    getChannelName() const
-    {
-        return channelName;
-    }
-
+    SharedChannel getChannel() const;
+    const QString &getChannelName() const;
     void setChannelName(const QString &name);
 
     void showChangeChannelPopup();
-
-    messages::LimitedQueueSnapshot<std::shared_ptr<messages::MessageRef>>
-    getMessagesSnapshot()
-    {
-        return messages.getSnapshot();
-    }
+    messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
+    void layoutMessages();
+    void updateGifEmotes();
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    messages::LimitedQueue<std::shared_ptr<messages::MessageRef>> messages;
+    void attachChannel(std::shared_ptr<Channel> _channel);
+    void detachChannel(std::shared_ptr<Channel> _channel);
 
-    std::shared_ptr<Channel> channel;
-    QString channelName;
+    messages::LimitedQueue<messages::SharedMessageRef> _messages;
 
-    QFont font;
-    QVBoxLayout vbox;
-    ChatWidgetHeader header;
-    ChatWidgetView view;
-    ChatWidgetInput input;
+    SharedChannel _channel;
+    QString _channelName;
 
-    boost::signals2::connection messageAppendedConnection;
-    boost::signals2::connection messageRemovedConnection;
+    QFont _font;
+    QVBoxLayout _vbox;
+    ChatWidgetHeader _header;
+    ChatWidgetView _view;
+    ChatWidgetInput _input;
+
+    boost::signals2::connection _messageAppendedConnection;
+    boost::signals2::connection _messageRemovedConnection;
 
 public:
     void load(const boost::property_tree::ptree &tree);

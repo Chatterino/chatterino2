@@ -24,8 +24,7 @@ public:
         vector->reserve(this->limit + this->buffer);
     }
 
-    void
-    clear()
+    void clear()
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
@@ -37,8 +36,7 @@ public:
 
     // return true if an item was deleted
     // deleted will be set if the item was deleted
-    bool
-    appendItem(const T &item, T &deleted)
+    bool appendItem(const T &item, T &deleted)
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
@@ -63,7 +61,7 @@ public:
             } else {
                 deleted = this->vector->at(this->offset);
 
-                //append item and increment offset("deleting" first element)
+                // append item and increment offset("deleting" first element)
                 this->vector->push_back(item);
                 this->offset++;
 
@@ -77,12 +75,11 @@ public:
         }
     }
 
-    messages::LimitedQueueSnapshot<T>
-    getSnapshot()
+    messages::LimitedQueueSnapshot<T> getSnapshot()
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
-        if(vector->size() < limit) {
+        if (vector->size() < limit) {
             return LimitedQueueSnapshot<T>(this->vector, this->offset, this->vector->size());
         } else {
             return LimitedQueueSnapshot<T>(this->vector, this->offset, this->limit);

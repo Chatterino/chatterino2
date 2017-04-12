@@ -14,9 +14,8 @@ namespace chatterino {
 class Emojis
 {
 public:
-    static void parseEmojis(
-        std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
-        const QString &text);
+    static void parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
+                            const QString &text);
 
     static void loadEmojis();
 

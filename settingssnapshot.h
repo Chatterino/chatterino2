@@ -3,34 +3,31 @@
 
 #include "setting.h"
 
-struct SettingsSnapshot {
-private:
-    std::vector<
-        std::pair<std::reference_wrapper<chatterino::BaseSetting>, QVariant>>
-        items;
+namespace chatterino {
 
+struct SettingsSnapshot {
 public:
     SettingsSnapshot()
-        : items()
+        : _items()
     {
     }
 
-    void
-    addItem(std::reference_wrapper<chatterino::BaseSetting> setting,
-            const QVariant &value)
+    void addItem(std::reference_wrapper<BaseSetting> setting, const QVariant &value)
     {
-        items.push_back(
-            std::pair<std::reference_wrapper<chatterino::BaseSetting>,
-                      QVariant>(setting.get(), value));
+        _items.push_back(
+            std::pair<std::reference_wrapper<BaseSetting>, QVariant>(setting.get(), value));
     }
 
-    void
-    apply()
+    void apply()
     {
-        for (auto &item : this->items) {
+        for (auto &item : _items) {
             item.first.get().setVariant(item.second);
         }
     }
+
+private:
+    std::vector<std::pair<std::reference_wrapper<BaseSetting>, QVariant>> _items;
 };
+}
 
 #endif  // SETTINGSSNAPSHOT_H

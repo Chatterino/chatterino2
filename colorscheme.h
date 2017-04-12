@@ -61,8 +61,7 @@ public:
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];
 
-    static ColorScheme &
-    getInstance()
+    static ColorScheme &getInstance()
     {
         static ColorScheme instance;
 
@@ -87,8 +86,8 @@ private:
     qreal middleLookupTable[360] = {};
     qreal minLookupTable[360] = {};
 
-    void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to,
-                               qreal fromValue, qreal toValue);
+    void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to, qreal fromValue,
+                               qreal toValue);
 };
 }
 

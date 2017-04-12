@@ -1,14 +1,17 @@
 #ifndef NOTEBOOKBUTTON_H
 #define NOTEBOOKBUTTON_H
 
+#include "fancybutton.h"
+
 #include <QWidget>
 
 namespace chatterino {
 namespace widgets {
 
-class NotebookButton : public QWidget
+class NotebookButton : public FancyButton
 {
     Q_OBJECT
+
 public:
     static const int IconPlus = 0;
     static const int IconUser = 1;
@@ -18,18 +21,17 @@ public:
 
     NotebookButton(QWidget *parent);
 
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void enterEvent(QEvent *) Q_DECL_OVERRIDE;
-    void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
+protected:
+    void paintEvent(QPaintEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 signals:
     void clicked();
 
 private:
-    bool mouseOver = false;
-    bool mouseDown = false;
+    bool _mouseOver = false;
+    bool _mouseDown = false;
+    QPoint _mousePos;
 };
 }
 }

@@ -2,38 +2,39 @@
 #define MAINWINDOW_H
 
 #include "widgets/notebook.h"
+#include "widgets/titlebar.h"
 
+#include <platform/borderless/qwinwidget.h>
 #include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 namespace widgets {
 
-class MainWindow : public QMainWindow
+class MainWindow : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    Notebook notebook;
 
-    void layoutVisibleChatWidgets(Channel *channel = NULL);
-    void repaintVisibleChatWidgets(Channel *channel = NULL);
+    void layoutVisibleChatWidgets(Channel *channel = nullptr);
+    void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
 
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
     void loadDefaults();
 
-    bool
-    isLoaded() const
-    {
-        return this->loaded;
-    }
+    bool isLoaded() const;
+
+    Notebook &getNotebook();
 
 private:
-    bool loaded = false;
+    Notebook _notebook;
+    bool _loaded;
+    TitleBar _titleBar;
 };
 
 }  // namespace widgets

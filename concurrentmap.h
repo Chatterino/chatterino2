@@ -14,17 +14,16 @@ class ConcurrentMap
 {
 public:
     ConcurrentMap()
-        : map()
+        : _map()
     {
     }
 
-    bool
-    tryGet(const TKey &name, TValue &value) const
+    bool tryGet(const TKey &name, TValue &value) const
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&_mutex);
 
-        auto a = map.find(name);
-        if (a == map.end()) {
+        auto a = _map.find(name);
+        if (a == _map.end()) {
             return false;
         }
 
@@ -33,40 +32,37 @@ public:
         return true;
     }
 
-    TValue
-    getOrAdd(const TKey &name, std::function<TValue()> addLambda)
+    TValue getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&_mutex);
 
-        auto a = map.find(name);
-        if (a == map.end()) {
+        auto a = _map.find(name);
+        if (a == _map.end()) {
             TValue value = addLambda();
-            map.insert(name, value);
+            _map.insert(name, value);
             return value;
         }
 
         return a.value();
     }
 
-    void
-    clear()
+    void clear()
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&_mutex);
 
-        map.clear();
+        _map.clear();
     }
 
-    void
-    insert(const TKey &name, const TValue &value)
+    void insert(const TKey &name, const TValue &value)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&_mutex);
 
-        map.insert(name, value);
+        _map.insert(name, value);
     }
 
 private:
-    mutable QMutex mutex;
-    QMap<TKey, TValue> map;
+    mutable QMutex _mutex;
+    QMap<TKey, TValue> _map;
 };
 
 }  // namespace chatterino

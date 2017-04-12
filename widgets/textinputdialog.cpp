@@ -6,38 +6,34 @@ namespace widgets {
 
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)
-    , vbox(this)
-    , lineEdit()
-    , buttonBox()
-    , okButton("OK")
-    , cancelButton("Cancel")
+    , _vbox(this)
+    , _lineEdit()
+    , _buttonBox()
+    , _okButton("OK")
+    , _cancelButton("Cancel")
 {
-    this->vbox.addWidget(&this->lineEdit);
-    this->vbox.addLayout(&this->buttonBox);
-    this->buttonBox.addStretch(1);
-    this->buttonBox.addWidget(&this->okButton);
-    this->buttonBox.addWidget(&this->cancelButton);
+    _vbox.addWidget(&_lineEdit);
+    _vbox.addLayout(&_buttonBox);
+    _buttonBox.addStretch(1);
+    _buttonBox.addWidget(&_okButton);
+    _buttonBox.addWidget(&_cancelButton);
 
-    QObject::connect(&this->okButton, SIGNAL(clicked()), this,
-                     SLOT(okButtonClicked()));
-    QObject::connect(&this->cancelButton, SIGNAL(clicked()), this,
-                     SLOT(cancelButtonClicked()));
+    QObject::connect(&_okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
+    QObject::connect(&_cancelButton, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
 
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    setWindowFlags((windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
-                   Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    setWindowFlags((windowFlags() & ~(Qt::WindowContextHelpButtonHint)) | Qt::Dialog |
+                   Qt::MSWindowsFixedSizeDialogHint);
 }
 
-void
-TextInputDialog::okButtonClicked()
+void TextInputDialog::okButtonClicked()
 {
     accept();
     close();
 }
 
-void
-TextInputDialog::cancelButtonClicked()
+void TextInputDialog::cancelButtonClicked()
 {
     reject();
     close();

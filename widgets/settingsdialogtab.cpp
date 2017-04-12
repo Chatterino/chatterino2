@@ -7,13 +7,12 @@
 namespace chatterino {
 namespace widgets {
 
-SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label,
-                                     QString imageRes)
-    : image(QImage(imageRes))
+SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label, QString imageRes)
+    : _label(label)
+    , _image(QImage(imageRes))
+    , _dialog(dialog)
+    , _selected(false)
 {
-    this->dialog = dialog;
-
-    this->label = label;
     setFixedHeight(32);
 
     setCursor(QCursor(Qt::PointingHandCursor));
@@ -21,8 +20,31 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label,
     setStyleSheet("color: #FFF");
 }
 
-void
-SettingsDialogTab::paintEvent(QPaintEvent *)
+void SettingsDialogTab::setSelected(bool selected)
+{
+    if (_selected == selected)
+        return;
+
+    _selected = selected;
+    emit selectedChanged(selected);
+}
+
+bool SettingsDialogTab::getSelected() const
+{
+    return _selected;
+}
+
+QWidget *SettingsDialogTab::getWidget()
+{
+    return _widget;
+}
+
+void SettingsDialogTab::setWidget(QWidget *widget)
+{
+    _widget = widget;
+}
+
+void SettingsDialogTab::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -31,23 +53,22 @@ SettingsDialogTab::paintEvent(QPaintEvent *)
 
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (height() - image.width()) / 2;
+    int a = (height() - _image.width()) / 2;
 
-    painter.drawImage(a, a, image);
+    painter.drawImage(a, a, _image);
 
-    a = a + a + image.width();
+    a = a + a + _image.width();
 
-    painter.drawText(QRect(a, 0, width() - a, height()), label,
+    painter.drawText(QRect(a, 0, width() - a, height()), _label,
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
-void
-SettingsDialogTab::mouseReleaseEvent(QMouseEvent *event)
+void SettingsDialogTab::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton)
         return;
 
-    dialog->select(this);
+    _dialog->select(this);
 }
 }
 }

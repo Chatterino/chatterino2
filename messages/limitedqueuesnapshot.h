@@ -11,16 +11,14 @@ template <typename T>
 class LimitedQueueSnapshot
 {
 public:
-    LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> ptr, int offset,
-                         int length)
+    LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> ptr, int offset, int length)
         : vector(ptr)
         , offset(offset)
         , length(length)
     {
     }
 
-    int
-    getLength()
+    int getLength()
     {
         return this->length;
     }

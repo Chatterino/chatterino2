@@ -15,13 +15,11 @@ static QString mentionsBasePath;
 
 std::unordered_map<std::string, std::weak_ptr<Channel>> channels;
 
-void
-init()
+void init()
 {
     // Make sure all folders are properly created
-    logBasePath =
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-        QDir::separator() + "Logs";
+    logBasePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+                  QDir::separator() + "Logs";
     channelBasePath = logBasePath + QDir::separator() + "Channels";
     whispersBasePath = logBasePath + QDir::separator() + "Whispers";
     mentionsBasePath = logBasePath + QDir::separator() + "Mentions";
@@ -55,8 +53,7 @@ init()
     }
 }
 
-static const QString &
-getBaseDirectory(const QString &channelName)
+static const QString &getBaseDirectory(const QString &channelName)
 {
     if (channelName == "/whispers") {
         return whispersBasePath;
@@ -67,8 +64,7 @@ getBaseDirectory(const QString &channelName)
     }
 }
 
-std::shared_ptr<Channel>
-get(const QString &channelName)
+std::shared_ptr<Channel> get(const QString &channelName)
 {
     if (channelName.isEmpty()) {
         return nullptr;

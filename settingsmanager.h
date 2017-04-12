@@ -9,74 +9,9 @@
 
 namespace chatterino {
 
-class Settings : public QObject
+class SettingsManager : public QObject
 {
     Q_OBJECT
-
-public:
-    static Settings &
-    getInstance()
-    {
-        return instance;
-    }
-
-    void load();
-    void save();
-
-    messages::Word::Type
-    getWordTypeMask()
-    {
-        return wordTypeMask;
-    }
-
-    bool isIgnoredEmote(const QString &emote);
-
-    bool
-    getPortable()
-    {
-        return portable;
-    }
-
-    void
-    setPortable(bool value)
-    {
-        portable = value;
-    }
-
-    QSettings &
-    getQSettings()
-    {
-        return settings;
-    }
-
-    SettingsSnapshot
-    createSnapshot()
-    {
-        SettingsSnapshot snapshot;
-
-        for (auto &item : this->settingsItems) {
-            snapshot.addItem(item, item.get().getVariant());
-        }
-
-        return snapshot;
-    }
-
-signals:
-    void wordTypeMaskChanged();
-
-private:
-    Settings();
-
-    static Settings instance;
-
-    void updateWordTypeMask();
-
-    QSettings settings;
-    std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
-
-    bool portable;
-
-    messages::Word::Type wordTypeMask;
 
 public:
     Setting<QString> theme;
@@ -110,6 +45,41 @@ public:
     Setting<bool> hideTabX;
     Setting<bool> hidePreferencesButton;
     Setting<bool> hideUserButton;
+    Setting<bool> useCustomWindowFrame;
+
+    void load();
+    void save();
+
+    messages::Word::Type getWordTypeMask();
+    bool isIgnoredEmote(const QString &emote);
+    bool getPortable();
+    void setPortable(bool value);
+    QSettings &getQSettings();
+    SettingsSnapshot createSnapshot();
+
+signals:
+    void wordTypeMaskChanged();
+
+private:
+    SettingsManager();
+
+    // variables
+    QSettings _settings;
+    std::vector<std::reference_wrapper<BaseSetting>> _settingsItems;
+    bool _portable;
+    messages::Word::Type _wordTypeMask;
+
+    // methods
+    void updateWordTypeMask();
+
+public:
+    static SettingsManager &getInstance()
+    {
+        return instance;
+    }
+
+private:
+    static SettingsManager instance;
 };
 
 }  // namespace chatterino

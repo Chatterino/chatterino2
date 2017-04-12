@@ -24,14 +24,12 @@ signals:
     void mouseUp();
 
 protected:
-    virtual void
-    mouseDoubleClickEvent(QMouseEvent *ev) override
+    virtual void mouseDoubleClickEvent(QMouseEvent *ev) override
     {
         emit this->mouseDoubleClick(ev);
     }
 
-    virtual void
-    mousePressEvent(QMouseEvent *event) override
+    virtual void mousePressEvent(QMouseEvent *event) override
     {
         if (event->button() == Qt::LeftButton) {
             emit mouseDown();
@@ -40,8 +38,7 @@ protected:
         event->ignore();
     }
 
-    void
-    mouseReleaseEvent(QMouseEvent *event) override
+    void mouseReleaseEvent(QMouseEvent *event) override
     {
         if (event->button() == Qt::LeftButton) {
             emit mouseUp();
@@ -50,8 +47,7 @@ protected:
         event->ignore();
     }
 
-    virtual void
-    mouseMoveEvent(QMouseEvent *event) override
+    virtual void mouseMoveEvent(QMouseEvent *event) override
     {
         event->ignore();
     }

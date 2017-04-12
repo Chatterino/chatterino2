@@ -1,6 +1,6 @@
 #include "widgets/settingsdialog.h"
 #include "widgets/settingsdialogtab.h"
-#include "windows.h"
+#include "windowmanager.h"
 
 #include <QComboBox>
 #include <QFile>
@@ -14,7 +14,7 @@ namespace chatterino {
 namespace widgets {
 
 SettingsDialog::SettingsDialog()
-    : snapshot(Settings::getInstance().createSnapshot())
+    : _snapshot(SettingsManager::getInstance().createSnapshot())
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
@@ -25,44 +25,41 @@ SettingsDialog::SettingsDialog()
     palette.setColor(QPalette::Background, QColor("#444"));
     setPalette(palette);
 
-    pageStack.setObjectName("pages");
+    _pageStack.setObjectName("pages");
 
-    setLayout(&vbox);
+    setLayout(&_vbox);
 
-    vbox.addLayout(&hbox);
+    _vbox.addLayout(&_hbox);
 
-    vbox.addWidget(&buttonBox);
+    _vbox.addWidget(&_buttonBox);
 
     auto tabWidget = new QWidget();
     tabWidget->setObjectName("tabWidget");
 
-    tabWidget->setLayout(&tabs);
+    tabWidget->setLayout(&_tabs);
     tabWidget->setFixedWidth(200);
 
-    hbox.addWidget(tabWidget);
-    hbox.addLayout(&pageStack);
+    _hbox.addWidget(tabWidget);
+    _hbox.addLayout(&_pageStack);
 
-    buttonBox.addButton(&okButton, QDialogButtonBox::ButtonRole::AcceptRole);
-    buttonBox.addButton(&cancelButton,
-                        QDialogButtonBox::ButtonRole::RejectRole);
+    _buttonBox.addButton(&_okButton, QDialogButtonBox::ButtonRole::AcceptRole);
+    _buttonBox.addButton(&_cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
 
-    QObject::connect(&okButton, &QPushButton::clicked, this,
-                     &SettingsDialog::okButtonClicked);
-    QObject::connect(&cancelButton, &QPushButton::clicked, this,
+    QObject::connect(&_okButton, &QPushButton::clicked, this, &SettingsDialog::okButtonClicked);
+    QObject::connect(&_cancelButton, &QPushButton::clicked, this,
                      &SettingsDialog::cancelButtonClicked);
 
-    okButton.setText("OK");
-    cancelButton.setText("Cancel");
+    _okButton.setText("OK");
+    _cancelButton.setText("Cancel");
 
     resize(600, 500);
 
     addTabs();
 }
 
-void
-SettingsDialog::addTabs()
+void SettingsDialog::addTabs()
 {
-    Settings &settings = Settings::getInstance();
+    SettingsManager &settings = SettingsManager::getInstance();
 
     QVBoxLayout *vbox;
 
@@ -77,11 +74,9 @@ SettingsDialog::addTabs()
         auto slider = new QSlider(Qt::Horizontal);
         auto font = new QPushButton("select");
         auto compactTabs = createCheckbox("Hide tab X", settings.hideTabX);
-        auto hidePreferencesButton =
-            createCheckbox("Hide preferences button (ctrl+p to show)",
-                           settings.hidePreferencesButton);
-        auto hideUserButton =
-            createCheckbox("Hide user button", settings.hideUserButton);
+        auto hidePreferencesButton = createCheckbox("Hide preferences button (ctrl+p to show)",
+                                                    settings.hidePreferencesButton);
+        auto hideUserButton = createCheckbox("Hide user button", settings.hideUserButton);
 
         form->addRow("Theme:", combo);
         form->addRow("Theme color:", slider);
@@ -110,9 +105,7 @@ SettingsDialog::addTabs()
         }
 
         QObject::connect(combo, &QComboBox::currentTextChanged, this,
-                         [this, &settings](const QString &value) {
-                             settings.theme.set(value);
-                         });
+                         [this, &settings](const QString &value) { settings.theme.set(value); });
 
         // theme hue
         slider->setMinimum(0);
@@ -120,14 +113,12 @@ SettingsDialog::addTabs()
 
         float hue = settings.themeHue.get();
 
-        slider->setValue(std::min(std::max(hue, (float)0.0), (float)1.0) *
-                         1000);
+        slider->setValue(std::min(std::max(hue, (float)0.0), (float)1.0) * 1000);
 
-        QObject::connect(slider, &QSlider::valueChanged, this,
-                         [this, &settings](int value) {
-                             settings.themeHue.set(value / 1000.0);
-                             Windows::updateAll();
-                         });
+        QObject::connect(slider, &QSlider::valueChanged, this, [this, &settings](int value) {
+            settings.themeHue.set(value / 1000.0);
+            WindowManager::updateAll();
+        });
 
         group->setLayout(form);
 
@@ -139,15 +130,11 @@ SettingsDialog::addTabs()
 
         auto v = new QVBoxLayout();
         v->addWidget(createCheckbox("Show timestamp", settings.showTimestamps));
-        v->addWidget(createCheckbox("Show seconds in timestamp",
-                                    settings.showTimestampSeconds));
-        v->addWidget(createCheckbox(
-            "Allow sending duplicate messages (add a space at the end)",
-            settings.allowDouplicateMessages));
-        v->addWidget(
-            createCheckbox("Seperate messages", settings.seperateMessages));
-        v->addWidget(
-            createCheckbox("Show message length", settings.showMessageLength));
+        v->addWidget(createCheckbox("Show seconds in timestamp", settings.showTimestampSeconds));
+        v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)",
+                                    settings.allowDouplicateMessages));
+        v->addWidget(createCheckbox("Seperate messages", settings.seperateMessages));
+        v->addWidget(createCheckbox("Show message length", settings.showMessageLength));
 
         group->setLayout(v);
 
@@ -161,15 +148,12 @@ SettingsDialog::addTabs()
     // Behaviour
     vbox = new QVBoxLayout();
 
+    vbox->addWidget(createCheckbox("Hide input box if empty", settings.hideEmptyInput));
     vbox->addWidget(
-        createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+        createCheckbox("Mention users with a @ (except in commands)", settings.mentionUsersWithAt));
+    vbox->addWidget(createCheckbox("Window always on top", settings.windowTopMost));
     vbox->addWidget(
-        createCheckbox("Mention users with a @ (except in commands)",
-                       settings.mentionUsersWithAt));
-    vbox->addWidget(
-        createCheckbox("Window always on top", settings.windowTopMost));
-    vbox->addWidget(createCheckbox("Show last read message indicator",
-                                   settings.showLastMessageIndicator));
+        createCheckbox("Show last read message indicator", settings.showLastMessageIndicator));
 
     {
         auto v = new QVBoxLayout();
@@ -197,17 +181,13 @@ SettingsDialog::addTabs()
     // Emotes
     vbox = new QVBoxLayout();
 
-    vbox->addWidget(
-        createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
-    vbox->addWidget(
-        createCheckbox("Enable BetterTTV Emotes", settings.enableBttvEmotes));
-    vbox->addWidget(
-        createCheckbox("Enable FrankerFaceZ Emotes", settings.enableFfzEmotes));
+    vbox->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
+    vbox->addWidget(createCheckbox("Enable BetterTTV Emotes", settings.enableBttvEmotes));
+    vbox->addWidget(createCheckbox("Enable FrankerFaceZ Emotes", settings.enableFfzEmotes));
     vbox->addWidget(createCheckbox("Enable Gif Emotes", settings.enableGifs));
     vbox->addWidget(createCheckbox("Enable Emojis", settings.enableEmojis));
 
-    vbox->addWidget(
-        createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
+    vbox->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
 
     vbox->addStretch(1);
     addTab(vbox, "Emotes", ":/images/Emoji_Color_1F60A_19.png");
@@ -215,8 +195,7 @@ SettingsDialog::addTabs()
     // Ignored Users
     vbox = new QVBoxLayout();
     vbox->addStretch(1);
-    addTab(vbox, "Ignored Users",
-           ":/images/StatusAnnotations_Blocked_16xLG_color.png");
+    addTab(vbox, "Ignored Users", ":/images/StatusAnnotations_Blocked_16xLG_color.png");
 
     // Ignored Messages
     vbox = new QVBoxLayout();
@@ -244,11 +223,10 @@ SettingsDialog::addTabs()
     addTab(vbox, "Whispers", ":/images/Message_16xLG.png");
 
     // Add stretch
-    tabs.addStretch(1);
+    _tabs.addStretch(1);
 }
 
-void
-SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
+void SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 {
     auto widget = new QWidget();
 
@@ -258,33 +236,31 @@ SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 
     tab->setWidget(widget);
 
-    tabs.addWidget(tab, 0, Qt::AlignTop);
+    _tabs.addWidget(tab, 0, Qt::AlignTop);
 
-    pageStack.addWidget(widget);
+    _pageStack.addWidget(widget);
 
-    if (tabs.count() == 1) {
+    if (_tabs.count() == 1) {
         select(tab);
     }
 }
 
-void
-SettingsDialog::select(SettingsDialogTab *tab)
+void SettingsDialog::select(SettingsDialogTab *tab)
 {
-    pageStack.setCurrentWidget(tab->getWidget());
+    _pageStack.setCurrentWidget(tab->getWidget());
 
-    if (selectedTab != NULL) {
-        selectedTab->setSelected(false);
-        selectedTab->setStyleSheet("color: #FFF");
+    if (_selectedTab != NULL) {
+        _selectedTab->setSelected(false);
+        _selectedTab->setStyleSheet("color: #FFF");
     }
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #555; color: #FFF");
-    selectedTab = tab;
+    _selectedTab = tab;
 }
 
 /// Widget creation helpers
-QCheckBox *
-SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
+QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
 {
     auto checkbox = new QCheckBox(title);
 
@@ -297,16 +273,14 @@ SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
     return checkbox;
 }
 
-void
-SettingsDialog::okButtonClicked()
+void SettingsDialog::okButtonClicked()
 {
     this->close();
 }
 
-void
-SettingsDialog::cancelButtonClicked()
+void SettingsDialog::cancelButtonClicked()
 {
-    snapshot.apply();
+    _snapshot.apply();
 
     this->close();
 }

@@ -11,70 +11,65 @@ class BaseSetting
 {
 public:
     BaseSetting(const QString &_name)
-        : name(_name)
+        : _name(_name)
     {
     }
 
     virtual QVariant getVariant() = 0;
     virtual void setVariant(QVariant value) = 0;
 
-    const QString &
-    getName() const
+    const QString &getName() const
     {
-        return this->name;
+        return _name;
     }
 
 private:
-    QString name;
+    QString _name;
 };
 
 template <typename T>
 class Setting : public BaseSetting
 {
 public:
-    Setting(std::vector<std::reference_wrapper<BaseSetting>> &settingItems,
-            const QString &_name, const T &defaultValue)
+    Setting(std::vector<std::reference_wrapper<BaseSetting>> &settingItems, const QString &_name,
+            const T &defaultValue)
         : BaseSetting(_name)
-        , value(defaultValue)
+        , _value(defaultValue)
     {
         settingItems.push_back(*this);
     }
 
-    const T &
-    get() const
+    const T &get() const
     {
-        return this->value;
+        return _value;
     }
 
-    void
-    set(const T &newValue)
+    void set(const T &newValue)
     {
-        if (this->value != newValue) {
-            this->value = newValue;
+        if (_value != newValue) {
+            _value = newValue;
 
-            this->valueChanged(newValue);
+            valueChanged(newValue);
         }
     }
 
-    virtual QVariant
-    getVariant() final
+    virtual QVariant getVariant() final
     {
-        return QVariant::fromValue(value);
+        return QVariant::fromValue(_value);
     }
 
-    virtual void
-    setVariant(QVariant value) final
+    virtual void setVariant(QVariant value) final
     {
         if (value.isValid()) {
             assert(value.canConvert<T>());
-            this->set(value.value<T>());
+            set(value.value<T>());
         }
     }
 
     boost::signals2::signal<void(const T &newValue)> valueChanged;
 
 private:
-    T value;
+    T _value;
 };
 
 }  // namespace chatterino

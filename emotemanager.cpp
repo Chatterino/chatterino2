@@ -1,4 +1,4 @@
-#include "emotes.h"
+#include "emotemanager.h"
 #include "resources.h"
 
 #include <QDebug>
@@ -11,41 +11,77 @@
 #include <QNetworkRequest>
 #include <memory>
 
+#define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0"
+
+using namespace chatterino::messages;
+
 namespace chatterino {
 
-QString Emotes::twitchEmoteTemplate(
-    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0");
+EmoteManager EmoteManager::instance;
 
-ConcurrentMap<QString, TwitchEmoteValue *> Emotes::twitchEmotes;
-ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::bttvEmotes;
-ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::ffzEmotes;
-ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::chatterinoEmotes;
-ConcurrentMap<QString, messages::LazyLoadedImage *>
-    Emotes::bttvChannelEmoteFromCaches;
-ConcurrentMap<int, messages::LazyLoadedImage *>
-    Emotes::ffzChannelEmoteFromCaches;
-ConcurrentMap<long, messages::LazyLoadedImage *> Emotes::twitchEmoteFromCache;
-ConcurrentMap<QString, messages::LazyLoadedImage *> Emotes::miscImageFromCache;
-boost::signals2::signal<void()> Emotes::gifUpdateTimerSignal;
-
-QTimer Emotes::gifUpdateTimer;
-bool Emotes::gifUpdateTimerInitiated(false);
-
-int Emotes::generation = 0;
-
-Emotes::Emotes()
+EmoteManager::EmoteManager()
+    : _twitchEmotes()
+    , _bttvEmotes()
+    , _ffzEmotes()
+    , _chatterinoEmotes()
+    , _bttvChannelEmoteFromCaches()
+    , _ffzChannelEmoteFromCaches()
+    , _twitchEmoteFromCache()
+    , _miscImageFromCache()
+    , _gifUpdateTimerSignal()
+    , _gifUpdateTimer()
+    , _gifUpdateTimerInitiated(false)
+    , _generation(0)
 {
 }
 
-void
-Emotes::loadGlobalEmotes()
+ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
+{
+    return _twitchEmotes;
+}
+
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBttvEmotes()
+{
+    return _bttvEmotes;
+}
+
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getFfzEmotes()
+{
+    return _ffzEmotes;
+}
+
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getChatterinoEmotes()
+{
+    return _chatterinoEmotes;
+}
+
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBttvChannelEmoteFromCaches()
+{
+    return _bttvChannelEmoteFromCaches;
+}
+
+ConcurrentMap<int, messages::LazyLoadedImage *> &EmoteManager::getFfzChannelEmoteFromCaches()
+{
+    return _ffzChannelEmoteFromCaches;
+}
+
+ConcurrentMap<long, messages::LazyLoadedImage *> &EmoteManager::getTwitchEmoteFromCache()
+{
+    return _twitchEmoteFromCache;
+}
+
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getMiscImageFromCache()
+{
+    return _miscImageFromCache;
+}
+
+void EmoteManager::loadGlobalEmotes()
 {
     loadBttvEmotes();
     loadFfzEmotes();
 }
 
-void
-Emotes::loadBttvEmotes()
+void EmoteManager::loadBttvEmotes()
 {
     // bttv
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -63,21 +99,19 @@ Emotes::loadBttvEmotes()
 
             auto emotes = root.value("emotes").toArray();
 
-            QString _template = "https:" + root.value("urlTemplate").toString();
+            QString linkTemplate = "https:" + root.value("urlTemplate").toString();
 
             for (const QJsonValue &emote : emotes) {
                 QString id = emote.toObject().value("id").toString();
                 QString code = emote.toObject().value("code").toString();
                 // emote.value("imageType").toString();
 
-                QString tmp = _template;
+                QString tmp = linkTemplate;
                 tmp.detach();
-                QString url =
-                    tmp.replace("{{id}}", id).replace("{{image}}", "1x");
+                QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
-                Emotes::getBttvEmotes().insert(
-                    code, new messages::LazyLoadedImage(
-                              url, 1, code, code + "\nGlobal Bttv Emote"));
+                EmoteManager::getBttvEmotes().insert(
+                    code, new LazyLoadedImage(url, 1, code, code + "\nGlobal Bttv Emote"));
             }
         }
 
@@ -86,8 +120,7 @@ Emotes::loadBttvEmotes()
     });
 }
 
-void
-Emotes::loadFfzEmotes()
+void EmoteManager::loadFfzEmotes()
 {
     // ffz
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -113,15 +146,14 @@ Emotes::loadFfzEmotes()
 
                     // margins
 
-                    int id = object.value("id").toInt();
+                    // int id = object.value("id").toInt();
                     QString code = object.value("name").toString();
 
                     QJsonObject urls = object.value("urls").toObject();
                     QString url1 = "http:" + urls.value("1").toString();
 
-                    Emotes::getBttvEmotes().insert(
-                        code, new messages::LazyLoadedImage(
-                                  url1, 1, code, code + "\nGlobal Ffz Emote"));
+                    EmoteManager::getBttvEmotes().insert(
+                        code, new LazyLoadedImage(url1, 1, code, code + "\nGlobal Ffz Emote"));
                 }
             }
         }
@@ -131,41 +163,34 @@ Emotes::loadFfzEmotes()
     });
 }
 
-messages::LazyLoadedImage *
-Emotes::getTwitchEmoteById(const QString &name, long id)
+LazyLoadedImage *EmoteManager::getTwitchEmoteById(const QString &name, long id)
 {
-    qDebug() << "loading twitch emote: " << id;
-
-    return Emotes::twitchEmoteFromCache.getOrAdd(id, [&name, &id] {
-        qDebug() << "loading twitch emote: " << id;
+    return EmoteManager::_twitchEmoteFromCache.getOrAdd(id, [&name, &id] {
+        qDebug() << "added twitch emote: " << id;
         qreal scale;
         QString url = getTwitchEmoteLink(id, scale);
-        return new messages::LazyLoadedImage(url, scale, name,
-                                             name + "\nTwitch Emote");
+        return new LazyLoadedImage(url, scale, name, name + "\nTwitch Emote");
     });
 }
 
-QString
-Emotes::getTwitchEmoteLink(long id, qreal &scale)
+QString EmoteManager::getTwitchEmoteLink(long id, qreal &scale)
 {
     scale = .5;
 
-    QString value = Emotes::twitchEmoteTemplate;
+    QString value = TWITCH_EMOTE_TEMPLATE;
 
     value.detach();
 
     return value.replace("{id}", QString::number(id)).replace("{scale}", "2");
 }
 
-messages::LazyLoadedImage *
-Emotes::getCheerImage(long long amount, bool animated)
+LazyLoadedImage *EmoteManager::getCheerImage(long long amount, bool animated)
 {
     // TODO: fix this xD
     return getCheerBadge(amount);
 }
 
-messages::LazyLoadedImage *
-Emotes::getCheerBadge(long long amount)
+LazyLoadedImage *EmoteManager::getCheerBadge(long long amount)
 {
     if (amount >= 100000) {
         return Resources::getCheerBadge100000();

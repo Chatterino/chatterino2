@@ -1,7 +1,7 @@
 #include "widgets/chatwidget.h"
-#include "channels.h"
+#include "channelmanager.h"
 #include "colorscheme.h"
-#include "settings.h"
+#include "settingsmanager.h"
 #include "widgets/textinputdialog.h"
 
 #include <QDebug>
@@ -11,29 +11,43 @@
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
+using namespace chatterino::messages;
+
 namespace chatterino {
 namespace widgets {
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
-    , messages()
-    , channel(Channels::getEmpty())
-    , channelName(QString())
-    , vbox(this)
-    , header(this)
-    , view(this)
-    , input(this)
+    , _messages()
+    , _channel(ChannelManager::getInstance().getEmpty())
+    , _channelName(QString())
+    , _vbox(this)
+    , _header(this)
+    , _view(this)
+    , _input(this)
 {
-    this->vbox.setSpacing(0);
-    this->vbox.setMargin(1);
+    this->_vbox.setSpacing(0);
+    this->_vbox.setMargin(1);
 
-    this->vbox.addWidget(&header);
-    this->vbox.addWidget(&view, 1);
-    this->vbox.addWidget(&input);
+    this->_vbox.addWidget(&_header);
+    this->_vbox.addWidget(&_view, 1);
+    this->_vbox.addWidget(&_input);
 }
 
 ChatWidget::~ChatWidget()
 {
+}
+
+std::shared_ptr<Channel>
+ChatWidget::getChannel() const
+{
+    return _channel;
+}
+
+const QString &
+ChatWidget::getChannelName() const
+{
+    return _channelName;
 }
 
 void
@@ -41,71 +55,99 @@ ChatWidget::setChannelName(const QString &name)
 {
     QString channel = name.trimmed();
 
-    if (QString::compare(channel, this->channelName, Qt::CaseInsensitive) ==
-        0) {
-        this->channelName = channel;
-        this->header.updateChannelText();
+    // return if channel name is the same
+    if (QString::compare(channel, _channelName, Qt::CaseInsensitive) == 0) {
+        _channelName = channel;
+        _header.updateChannelText();
+
         return;
     }
 
-    if (!this->channelName.isEmpty()) {
-        Channels::removeChannel(this->channelName);
+    // remove current channel
+    if (!_channelName.isEmpty()) {
+        ChannelManager::getInstance().removeChannel(_channelName);
 
-        this->messageAppendedConnection.disconnect();
-        this->messageRemovedConnection.disconnect();
+        detachChannel(_channel);
     }
 
-    this->channelName = channel;
-    this->header.updateChannelText();
+    // update members
+    _channelName = channel;
 
-    this->view.layoutMessages();
-
-    messages.clear();
+    // update messages
+    _messages.clear();
 
     if (channel.isEmpty()) {
-        this->channel = NULL;
-
+        _channel = NULL;
     } else {
-        this->channel = Channels::addChannel(channel);
+        _channel = ChannelManager::getInstance().addChannel(channel);
 
-        this->messageAppendedConnection =
-            this->channel.get()->messageAppended.connect([this](
-                std::shared_ptr<messages::Message> &message) {
-
-                std::shared_ptr<messages::MessageRef> deleted;
-
-                auto messageRef = new messages::MessageRef(message);
-
-                this->messages.appendItem(
-                    std::shared_ptr<messages::MessageRef>(messageRef), deleted);
-            });
-
-        this->messageRemovedConnection =
-            this->channel.get()->messageRemovedFromStart.connect(
-                [this](std::shared_ptr<messages::Message> &) {});
-
-        auto snapshot = this->channel.get()->getMessageSnapshot();
-
-        for (int i = 0; i < snapshot.getLength(); i++) {
-            std::shared_ptr<messages::MessageRef> deleted;
-
-            auto messageRef = new messages::MessageRef(snapshot[i]);
-
-            this->messages.appendItem(
-                std::shared_ptr<messages::MessageRef>(messageRef), deleted);
-        }
+        attachChannel(_channel);
     }
 
-    this->view.layoutMessages();
-    this->view.update();
+    // update header
+    _header.updateChannelText();
+
+    // update view
+    _view.layoutMessages();
+    _view.update();
+}
+
+void
+ChatWidget::attachChannel(SharedChannel channel)
+{
+    // on new message
+    _messageAppendedConnection =
+        channel->messageAppended.connect([this](SharedMessage &message) {
+            SharedMessageRef deleted;
+
+            auto messageRef = new MessageRef(message);
+
+            if (_messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+                qreal value =
+                    std::max(0.0, _view.getScrollbar()->getDesiredValue() - 1);
+
+                _view.getScrollbar()->setDesiredValue(value, false);
+            }
+        });
+
+    // on message removed
+    _messageRemovedConnection =
+        _channel->messageRemovedFromStart.connect([this](SharedMessage &) {});
+
+    auto snapshot = _channel.get()->getMessageSnapshot();
+
+    for (int i = 0; i < snapshot.getLength(); i++) {
+        SharedMessageRef deleted;
+
+        auto messageRef = new MessageRef(snapshot[i]);
+
+        _messages.appendItem(SharedMessageRef(messageRef), deleted);
+    }
+}
+
+void
+ChatWidget::detachChannel(std::shared_ptr<Channel> channel)
+{
+    // on message added
+    _messageAppendedConnection.disconnect();
+
+    // on message removed
+    _messageRemovedConnection.disconnect();
+}
+
+LimitedQueueSnapshot<SharedMessageRef>
+ChatWidget::getMessagesSnapshot()
+{
+    return _messages.getSnapshot();
 }
 
 void
 ChatWidget::showChangeChannelPopup()
 {
+    // create new input dialog and execute it
     TextInputDialog dialog(this);
 
-    dialog.setText(this->channelName);
+    dialog.setText(_channelName);
 
     if (dialog.exec() == QDialog::Accepted) {
         setChannelName(dialog.getText());
@@ -113,8 +155,23 @@ ChatWidget::showChangeChannelPopup()
 }
 
 void
+ChatWidget::layoutMessages()
+{
+    if (_view.layoutMessages()) {
+        _view.update();
+    }
+}
+
+void
+ChatWidget::updateGifEmotes()
+{
+    _view.updateGifEmotes();
+}
+
+void
 ChatWidget::paintEvent(QPaintEvent *)
 {
+    // color the background of the chat
     QPainter painter(this);
 
     painter.fillRect(this->rect(), ColorScheme::getInstance().ChatBackground);
@@ -123,7 +180,7 @@ ChatWidget::paintEvent(QPaintEvent *)
 void
 ChatWidget::load(const boost::property_tree::ptree &tree)
 {
-    // Load tab text
+    // load tab text
     try {
         this->setChannelName(
             QString::fromStdString(tree.get<std::string>("channelName")));

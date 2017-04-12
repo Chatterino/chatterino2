@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-class Windows
+class WindowManager
 {
 public:
     static void layoutVisibleChatWidgets(Channel *channel = NULL);
@@ -15,11 +15,10 @@ public:
     static void repaintGifEmotes();
     static void updateAll();
 
-    static widgets::MainWindow &
-    getMainWindow()
+    static widgets::MainWindow &getMainWindow()
     {
         windowMutex.lock();
-        if (mainWindow == NULL) {
+        if (mainWindow == nullptr) {
             mainWindow = new widgets::MainWindow();
         }
         windowMutex.unlock();
@@ -31,7 +30,7 @@ public:
     static void save();
 
 private:
-    Windows()
+    WindowManager()
     {
     }
 

@@ -1,5 +1,5 @@
 #include "emojis.h"
-#include "emotes.h"
+#include "emotemanager.h"
 
 #include <QFile>
 #include <QStringBuilder>
@@ -15,17 +15,14 @@ QMap<QChar, QMap<QString, QString>> Emojis::firstEmojiChars;
 
 ConcurrentMap<QString, messages::LazyLoadedImage *> Emojis::imageCache;
 
-QString
-Emojis::replaceShortCodes(const QString &text)
+QString Emojis::replaceShortCodes(const QString &text)
 {
     // TODO: Implement this xD
     return text;
 }
 
-void
-Emojis::parseEmojis(
-    std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
-    const QString &text)
+void Emojis::parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
+                         const QString &text)
 {
     long lastSlice = 0;
 
@@ -44,21 +41,14 @@ Emojis::parseEmojis(
                                       emojiIter.value() + ".png";
 
                         if (i - lastSlice != 0) {
-                            vector.push_back(
-                                std::tuple<messages::LazyLoadedImage *,
-                                           QString>(
-                                    NULL, text.mid(lastSlice, i - lastSlice)));
+                            vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+                                NULL, text.mid(lastSlice, i - lastSlice)));
                         }
 
-                        vector.push_back(
-                            std::tuple<messages::LazyLoadedImage *, QString>(
-                                imageCache.getOrAdd(
-                                    url,
-                                    [&url] {
-                                        return new messages::LazyLoadedImage(
-                                            url, 0.35);
-                                    }),
-                                QString()));
+                        vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+                            imageCache.getOrAdd(
+                                url, [&url] { return new messages::LazyLoadedImage(url, 0.35); }),
+                            QString()));
 
                         i += j - 1;
 
@@ -72,13 +62,12 @@ Emojis::parseEmojis(
     }
 
     if (lastSlice < text.length()) {
-        vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-            NULL, text.mid(lastSlice)));
+        vector.push_back(
+            std::tuple<messages::LazyLoadedImage *, QString>(NULL, text.mid(lastSlice)));
     }
 }
 
-void
-Emojis::loadEmojis()
+void Emojis::loadEmojis()
 {
     QFile file(":/emojidata.txt");
     file.open(QFile::ReadOnly);
@@ -106,8 +95,7 @@ Emojis::loadEmojis()
             emotes[i++] = QString(item).toUInt(nullptr, 16);
         }
 
-        shortCodeToEmoji.insert(
-            a.at(0), Emojis::EmojiData{QString::fromUcs4(emotes, i), a.at(1)});
+        shortCodeToEmoji.insert(a.at(0), Emojis::EmojiData{QString::fromUcs4(emotes, i), a.at(1)});
     }
 
     for (auto const &emoji : shortCodeToEmoji.toStdMap()) {
@@ -122,9 +110,8 @@ Emojis::loadEmojis()
             continue;
         }
 
-        firstEmojiChars.insert(
-            emoji.first.at(0),
-            QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
+        firstEmojiChars.insert(emoji.first.at(0),
+                               QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
     }
 }
 }

@@ -1,4 +1,4 @@
-#include "windows.h"
+#include "windowmanager.h"
 
 #include <QDebug>
 #include <QStandardPaths>
@@ -7,55 +7,48 @@
 
 namespace chatterino {
 
-static const std::string &
-getSettingsPath()
+static const std::string &getSettingsPath()
 {
     static std::string path =
-        (QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-         "/windows.json")
+        (QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/windows.json")
             .toStdString();
 
     return path;
 }
 
-QMutex Windows::windowMutex;
+QMutex WindowManager::windowMutex;
 
-widgets::MainWindow *Windows::mainWindow(nullptr);
+widgets::MainWindow *WindowManager::mainWindow(nullptr);
 
-void
-Windows::layoutVisibleChatWidgets(Channel *channel)
+void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    if (Windows::mainWindow != nullptr) {
-        Windows::mainWindow->layoutVisibleChatWidgets(channel);
+    if (WindowManager::mainWindow != nullptr) {
+        WindowManager::mainWindow->layoutVisibleChatWidgets(channel);
     }
 }
 
-void
-Windows::repaintVisibleChatWidgets(Channel *channel)
+void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (Windows::mainWindow != nullptr) {
-        Windows::mainWindow->repaintVisibleChatWidgets(channel);
+    if (WindowManager::mainWindow != nullptr) {
+        WindowManager::mainWindow->repaintVisibleChatWidgets(channel);
     }
 }
 
-void
-Windows::repaintGifEmotes()
+void WindowManager::repaintGifEmotes()
 {
-    if (Windows::mainWindow != nullptr) {
-        Windows::mainWindow->repaintGifEmotes();
+    if (WindowManager::mainWindow != nullptr) {
+        WindowManager::mainWindow->repaintGifEmotes();
     }
 }
 
-void
-Windows::updateAll()
+void WindowManager::updateAll()
 {
-    if (Windows::mainWindow != nullptr) {
-        Windows::mainWindow->update();
+    if (WindowManager::mainWindow != nullptr) {
+        WindowManager::mainWindow->update();
     }
 }
 
-void
-Windows::load()
+void WindowManager::load()
 {
     const auto &settingsPath = getSettingsPath();
     boost::property_tree::ptree tree;
@@ -63,10 +56,9 @@ Windows::load()
     try {
         boost::property_tree::read_json(settingsPath, tree);
     } catch (const boost::property_tree::json_parser_error &ex) {
-        qDebug() << "Error using property_tree::readJson: "
-                 << QString::fromStdString(ex.message());
+        qDebug() << "Error using property_tree::readJson: " << QString::fromStdString(ex.message());
 
-        Windows::getMainWindow().loadDefaults();
+        WindowManager::getMainWindow().loadDefaults();
 
         return;
     }
@@ -79,7 +71,7 @@ Windows::load()
             const auto &type = v.second.get<std::string>("type", "unknown");
 
             if (type == "main") {
-                Windows::getMainWindow().load(v.second);
+                WindowManager::getMainWindow().load(v.second);
             } else {
                 qDebug() << "Unhandled window type: " << type.c_str();
             }
@@ -89,15 +81,14 @@ Windows::load()
     }
 
     // if the main window was not loaded properly, load defaults
-    if (!Windows::getMainWindow().isLoaded()) {
-        Windows::getMainWindow().loadDefaults();
+    if (!WindowManager::getMainWindow().isLoaded()) {
+        WindowManager::getMainWindow().loadDefaults();
     }
 
     // If there are no windows, create a default main window
 }
 
-void
-Windows::save()
+void WindowManager::save()
 {
     const auto &settingsPath = getSettingsPath();
     boost::property_tree::ptree tree;
@@ -107,7 +98,7 @@ Windows::save()
 
     {
         // save main window
-        auto child = Windows::getMainWindow().save();
+        auto child = WindowManager::getMainWindow().save();
         windows.push_back(std::make_pair("", child));
     }
 

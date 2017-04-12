@@ -17,8 +17,7 @@ NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     this->setHidden(true);
 }
 
-void
-NotebookPageDropPreview::paintEvent(QPaintEvent *)
+void NotebookPageDropPreview::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -26,14 +25,12 @@ NotebookPageDropPreview::paintEvent(QPaintEvent *)
                      ColorScheme::getInstance().DropPreviewBackground);
 }
 
-void
-NotebookPageDropPreview::hideEvent(QHideEvent *)
+void NotebookPageDropPreview::hideEvent(QHideEvent *)
 {
     animate = false;
 }
 
-void
-NotebookPageDropPreview::setBounds(const QRect &rect)
+void NotebookPageDropPreview::setBounds(const QRect &rect)
 {
     if (rect == this->desiredGeometry) {
         return;

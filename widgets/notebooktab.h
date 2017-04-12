@@ -18,72 +18,27 @@ class NotebookTab : public QWidget
     Q_OBJECT
 
 public:
-    enum HighlightStyle {
-        HighlightNone,
-        HighlightHighlighted,
-        HighlightNewMessage
-    };
+    enum HighlightStyle { HighlightNone, HighlightHighlighted, HighlightNewMessage };
 
-    explicit NotebookTab(Notebook *notebook);
+    explicit NotebookTab(Notebook *_notebook);
     ~NotebookTab();
 
     void calcSize();
 
     NotebookPage *page;
 
-    const QString &
-    getTitle() const
-    {
-        return this->title;
-    }
+    const QString &getTitle() const;
+    void setTitle(const QString &title);
+    bool getSelected();
+    void setSelected(bool value);
 
-    void
-    setTitle(const QString &title)
-    {
-        this->title = title;
-    }
-
-    bool
-    getSelected()
-    {
-        return this->selected;
-    }
-
-    void
-    setSelected(bool value)
-    {
-        this->selected = value;
-        update();
-    }
-
-    HighlightStyle
-    getHighlightStyle() const
-    {
-        return this->highlightStyle;
-    }
-
-    void
-    setHighlightStyle(HighlightStyle style)
-    {
-        this->highlightStyle = style;
-        update();
-    }
+    HighlightStyle getHighlightStyle() const;
+    void setHighlightStyle(HighlightStyle style);
 
     void moveAnimated(QPoint pos, bool animated = true);
 
-public:
-    QRect
-    getDesiredRect() const
-    {
-        return QRect(posAnimationDesired, this->size());
-    }
-
-    void
-    hideTabXChanged(bool)
-    {
-        calcSize();
-        update();
-    }
+    QRect getDesiredRect() const;
+    void hideTabXChanged(bool);
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -98,26 +53,25 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    boost::signals2::connection hideXConnection;
+    boost::signals2::connection _hideXConnection;
 
-    QPropertyAnimation posAnimation;
-    bool posAnimated;
-    QPoint posAnimationDesired;
+    QPropertyAnimation _posAnimation;
+    bool _posAnimated;
+    QPoint _posAnimationDesired;
 
-    Notebook *notebook;
+    Notebook *_notebook;
 
-    QString title;
+    QString _title;
 
-    bool selected;
-    bool mouseOver;
-    bool mouseDown;
-    bool mouseOverX;
-    bool mouseDownX;
+    bool _selected;
+    bool _mouseOver;
+    bool _mouseDown;
+    bool _mouseOverX;
+    bool _mouseDownX;
 
-    HighlightStyle highlightStyle;
+    HighlightStyle _highlightStyle;
 
-    QRect
-    getXRect()
+    QRect getXRect()
     {
         return QRect(this->width() - 20, 4, 16, 16);
     }

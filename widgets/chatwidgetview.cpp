@@ -1,9 +1,10 @@
 #include "widgets/chatwidgetview.h"
-#include "channels.h"
+#include "channelmanager.h"
 #include "colorscheme.h"
 #include "messages/message.h"
 #include "messages/wordpart.h"
-#include "settings.h"
+#include "settingsmanager.h"
+#include "ui_userpopup.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>
@@ -18,46 +19,46 @@ namespace widgets {
 
 ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     : QWidget()
-    , chatWidget(parent)
-    , scrollbar(this)
-    , onlyUpdateEmotes(false)
+    , _chatWidget(parent)
+    , _scrollbar(this)
+    , _userPopupWidget(_chatWidget->getChannel())
+    , _onlyUpdateEmotes(false)
+    , _mouseDown(false)
+    , _lastPressPosition()
 {
     this->setAttribute(Qt::WA_OpaquePaintEvent);
-    this->scrollbar.setSmallChange(5);
+    _scrollbar.setSmallChange(5);
     this->setMouseTracking(true);
 
-    QObject::connect(&Settings::getInstance(), &Settings::wordTypeMaskChanged,
-                     this, &ChatWidgetView::wordTypeMaskChanged);
+    QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
+                     &ChatWidgetView::wordTypeMaskChanged);
 
-    this->scrollbar.getCurrentValueChanged().connect([this] { update(); });
+    _scrollbar.getCurrentValueChanged().connect([this] { update(); });
 }
 
 ChatWidgetView::~ChatWidgetView()
 {
-    QObject::disconnect(&Settings::getInstance(),
-                        &Settings::wordTypeMaskChanged, this,
-                        &ChatWidgetView::wordTypeMaskChanged);
+    QObject::disconnect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged,
+                        this, &ChatWidgetView::wordTypeMaskChanged);
 }
 
-bool
-ChatWidgetView::layoutMessages()
+bool ChatWidgetView::layoutMessages()
 {
-    auto messages = chatWidget->getMessagesSnapshot();
+    auto messages = _chatWidget->getMessagesSnapshot();
 
     if (messages.getLength() == 0) {
-        this->scrollbar.setVisible(false);
+        _scrollbar.setVisible(false);
 
         return false;
     }
 
     bool showScrollbar = false, redraw = false;
 
-    int start = this->scrollbar.getCurrentValue();
+    int start = _scrollbar.getCurrentValue();
 
     // layout the visible messages in the view
     if (messages.getLength() > start) {
-        int y = -(messages[start].get()->getHeight() *
-                  (fmod(this->scrollbar.getCurrentValue(), 1)));
+        int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
 
         for (int i = start; i < messages.getLength(); ++i) {
             auto messagePtr = messages[i];
@@ -84,39 +85,47 @@ ChatWidgetView::layoutMessages()
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollbar.setLargeChange((messages.getLength() - i) +
-                                           (qreal)h / message->getHeight());
-            this->scrollbar.setDesiredValue(this->scrollbar.getDesiredValue());
+            _scrollbar.setLargeChange((messages.getLength() - i) + (qreal)h / message->getHeight());
+            _scrollbar.setDesiredValue(_scrollbar.getDesiredValue());
 
             showScrollbar = true;
             break;
         }
     }
 
-    this->scrollbar.setVisible(showScrollbar);
+    _scrollbar.setVisible(showScrollbar);
 
     if (!showScrollbar) {
-        this->scrollbar.setDesiredValue(0);
+        _scrollbar.setDesiredValue(0);
     }
 
-    this->scrollbar.setMaximum(messages.getLength());
+    _scrollbar.setMaximum(messages.getLength());
 
     return redraw;
 }
 
-void
-ChatWidgetView::resizeEvent(QResizeEvent *)
+void ChatWidgetView::updateGifEmotes()
 {
-    this->scrollbar.resize(this->scrollbar.width(), height());
-    this->scrollbar.move(width() - this->scrollbar.width(), 0);
+    _onlyUpdateEmotes = true;
+    this->update();
+}
+
+ScrollBar *ChatWidgetView::getScrollbar()
+{
+    return &_scrollbar;
+}
+
+void ChatWidgetView::resizeEvent(QResizeEvent *)
+{
+    _scrollbar.resize(_scrollbar.width(), height());
+    _scrollbar.move(width() - _scrollbar.width(), 0);
 
     layoutMessages();
 
     update();
 }
 
-void
-ChatWidgetView::paintEvent(QPaintEvent *event)
+void ChatWidgetView::paintEvent(QPaintEvent *event)
 {
     QPainter _painter(this);
 
@@ -125,10 +134,10 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
     ColorScheme &scheme = ColorScheme::getInstance();
 
     // only update gif emotes
-    if (onlyUpdateEmotes) {
-        onlyUpdateEmotes = false;
+    if (_onlyUpdateEmotes) {
+        _onlyUpdateEmotes = false;
 
-        for (GifEmoteData &item : this->gifEmotes) {
+        for (GifEmoteData &item : _gifEmotes) {
             _painter.fillRect(item.rect, scheme.ChatBackground);
 
             _painter.drawPixmap(item.rect, *item.image->getPixmap());
@@ -138,7 +147,7 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
     }
 
     // update all messages
-    gifEmotes.clear();
+    _gifEmotes.clear();
 
     _painter.fillRect(rect(), scheme.ChatBackground);
 
@@ -175,16 +184,15 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
 
     painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
 
-    auto messages = chatWidget->getMessagesSnapshot();
+    auto messages = _chatWidget->getMessagesSnapshot();
 
-    int start = this->scrollbar.getCurrentValue();
+    int start = _scrollbar.getCurrentValue();
 
     if (start >= messages.getLength()) {
         return;
     }
 
-    int y = -(messages[start].get()->getHeight() *
-              (fmod(this->scrollbar.getCurrentValue(), 1)));
+    int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.getLength(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
@@ -205,20 +213,17 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
             QPainter painter(buffer);
             painter.fillRect(buffer->rect(), scheme.ChatBackground);
 
-            for (messages::WordPart const &wordPart :
-                 messageRef->getWordParts()) {
+            for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
                 // image
                 if (wordPart.getWord().isImage()) {
-                    messages::LazyLoadedImage &lli =
-                        wordPart.getWord().getImage();
+                    messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
 
                     const QPixmap *image = lli.getPixmap();
 
                     if (image != NULL) {
-                        painter.drawPixmap(
-                            QRect(wordPart.getX(), wordPart.getY(),
-                                  wordPart.getWidth(), wordPart.getHeight()),
-                            *image);
+                        painter.drawPixmap(QRect(wordPart.getX(), wordPart.getY(),
+                                                 wordPart.getWidth(), wordPart.getHeight()),
+                                           *image);
                     }
                 }
                 // text
@@ -230,10 +235,8 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
                     painter.setPen(color);
                     painter.setFont(wordPart.getWord().getFont());
 
-                    painter.drawText(
-                        QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
-                        wordPart.getText(),
-                        QTextOption(Qt::AlignLeft | Qt::AlignTop));
+                    painter.drawText(QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
+                                     wordPart.getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
                 }
             }
 
@@ -248,12 +251,12 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
                 if (lli.getAnimated()) {
                     GifEmoteData data;
                     data.image = &lli;
-                    QRect rect(wordPart.getX(), wordPart.getY() + y,
-                               wordPart.getWidth(), wordPart.getHeight());
+                    QRect rect(wordPart.getX(), wordPart.getY() + y, wordPart.getWidth(),
+                               wordPart.getHeight());
 
                     data.rect = rect;
 
-                    gifEmotes.push_back(data);
+                    _gifEmotes.push_back(data);
                 }
             }
         }
@@ -269,27 +272,24 @@ ChatWidgetView::paintEvent(QPaintEvent *event)
         }
     }
 
-    for (GifEmoteData &item : this->gifEmotes) {
+    for (GifEmoteData &item : _gifEmotes) {
         _painter.fillRect(item.rect, scheme.ChatBackground);
 
         _painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
 }
 
-void
-ChatWidgetView::wheelEvent(QWheelEvent *event)
+void ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
-    if (this->scrollbar.isVisible()) {
-        this->scrollbar.setDesiredValue(
-            this->scrollbar.getDesiredValue() -
-                event->delta() / 10.0 *
-                    Settings::getInstance().mouseScrollMultiplier.get(),
+    if (_scrollbar.isVisible()) {
+        _scrollbar.setDesiredValue(
+            _scrollbar.getDesiredValue() -
+                event->delta() / 10.0 * SettingsManager::getInstance().mouseScrollMultiplier.get(),
             true);
     }
 }
 
-void
-ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
+void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 {
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
@@ -311,32 +311,86 @@ ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 
     int index = message->getSelectionIndex(relativePos);
 
-    qDebug() << index;
-
     if (hoverWord.getLink().getIsValid()) {
         this->setCursor(Qt::PointingHandCursor);
-        qDebug() << hoverWord.getLink().getValue();
     } else {
         this->setCursor(Qt::ArrowCursor);
     }
 }
 
-bool
-ChatWidgetView::tryGetMessageAt(QPoint p,
-                                std::shared_ptr<messages::MessageRef> &_message,
-                                QPoint &relativePos)
+void ChatWidgetView::mousePressEvent(QMouseEvent *event)
 {
-    auto messages = chatWidget->getMessagesSnapshot();
+    _mouseDown = true;
+    _lastPressPosition = event->screenPos();
+}
 
-    int start = this->scrollbar.getCurrentValue();
+static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
+{
+    QPointF tmp = p1 - p2;
+
+    float distance = 0.f;
+    distance += tmp.x() * tmp.x();
+    distance += tmp.y() * tmp.y();
+
+    return std::sqrt(distance);
+}
+
+void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (!_mouseDown) {
+        // We didn't grab the mouse press, so we shouldn't be handling the mouse
+        // release
+        return;
+    }
+
+    _mouseDown = false;
+
+    float distance = distanceBetweenPoints(_lastPressPosition, event->screenPos());
+
+    qDebug() << "Distance: " << distance;
+
+    if (fabsf(distance) > 15.f) {
+        // It wasn't a proper click, so we don't care about that here
+        return;
+    }
+
+    // If you clicked and released less than  X pixels away, it counts
+    // as a click!
+
+    // show user thing pajaW
+
+    std::shared_ptr<messages::MessageRef> message;
+    QPoint relativePos;
+
+    if (!tryGetMessageAt(event->pos(), message, relativePos)) {
+        // No message at clicked position
+        _userPopupWidget.hide();
+        return;
+    }
+
+    auto _message = message->getMessage();
+    auto user = _message->getUserName();
+
+    qDebug() << "Clicked " << user << "s message";
+
+    _userPopupWidget.setName(user);
+    _userPopupWidget.move(event->screenPos().toPoint());
+    _userPopupWidget.show();
+    _userPopupWidget.setFocus();
+}
+
+bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
+                                     QPoint &relativePos)
+{
+    auto messages = _chatWidget->getMessagesSnapshot();
+
+    int start = _scrollbar.getCurrentValue();
 
     if (start >= messages.getLength()) {
         return false;
     }
 
-    int y = -(messages[start].get()->getHeight() *
-              (fmod(this->scrollbar.getCurrentValue(), 1))) +
-            12;
+    int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1))) + 12;
 
     for (int i = start; i < messages.getLength(); ++i) {
         auto message = messages[i];
@@ -352,5 +406,5 @@ ChatWidgetView::tryGetMessageAt(QPoint p,
 
     return false;
 }
-}
-}
+}  // namespace widgets
+}  // namespace chatterino

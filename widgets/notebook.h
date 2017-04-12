@@ -26,10 +26,9 @@ public:
     void removePage(NotebookPage *page);
     void select(NotebookPage *page);
 
-    NotebookPage *
-    getSelectedPage()
+    NotebookPage *getSelectedPage()
     {
-        return selectedPage;
+        return _selectedPage;
     }
 
     void performLayout(bool animate = true);
@@ -48,13 +47,13 @@ public slots:
     void addPageButtonClicked();
 
 private:
-    QList<NotebookPage *> pages;
+    QList<NotebookPage *> _pages;
 
-    NotebookButton addButton;
-    NotebookButton settingsButton;
-    NotebookButton userButton;
+    NotebookButton _addButton;
+    NotebookButton _settingsButton;
+    NotebookButton _userButton;
 
-    NotebookPage *selectedPage;
+    NotebookPage *_selectedPage;
 
 public:
     void load(const boost::property_tree::ptree &tree);

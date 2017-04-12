@@ -1,9 +1,9 @@
 #include "messages/lazyloadedimage.h"
 
 #include "asyncexec.h"
-#include "emotes.h"
+#include "emotemanager.h"
 #include "ircmanager.h"
-#include "windows.h"
+#include "windowmanager.h"
 
 #include <QBuffer>
 #include <QImageReader>
@@ -16,9 +16,8 @@
 namespace chatterino {
 namespace messages {
 
-LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale,
-                                 const QString &name, const QString &tooltip,
-                                 const QMargins &margin, bool isHat)
+LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
+                                 const QString &tooltip, const QMargins &margin, bool isHat)
     : currentPixmap(NULL)
     , allFrames()
     , currentFrame(0)
@@ -34,9 +33,8 @@ LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale,
 {
 }
 
-LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale,
-                                 const QString &name, const QString &tooltip,
-                                 const QMargins &margin, bool isHat)
+LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &name,
+                                 const QString &tooltip, const QMargins &margin, bool isHat)
     : currentPixmap(image)
     , allFrames()
     , currentFrame(0)
@@ -52,8 +50,7 @@ LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale,
 {
 }
 
-void
-LazyLoadedImage::loadImage()
+void LazyLoadedImage::loadImage()
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
@@ -92,29 +89,25 @@ LazyLoadedImage::loadImage()
         if (allFrames.size() > 1) {
             this->animated = true;
 
-            Emotes::getGifUpdateSignal().connect([this] { gifUpdateTimout(); });
+            EmoteManager::getInstance().getGifUpdateSignal().connect([this] { gifUpdateTimout(); });
         }
 
-        Emotes::incGeneration();
-        Windows::layoutVisibleChatWidgets();
+        EmoteManager::getInstance().incGeneration();
+        WindowManager::layoutVisibleChatWidgets();
 
         reply->deleteLater();
         manager->deleteLater();
     });
 }
 
-void
-LazyLoadedImage::gifUpdateTimout()
+void LazyLoadedImage::gifUpdateTimout()
 {
     this->currentFrameOffset += GIF_FRAME_LENGTH;
 
     while (true) {
-        if (this->currentFrameOffset >
-            this->allFrames.at(this->currentFrame).duration) {
-            this->currentFrameOffset -=
-                this->allFrames.at(this->currentFrame).duration;
-            this->currentFrame =
-                (this->currentFrame + 1) % this->allFrames.size();
+        if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
+            this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
+            this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
         } else {
             break;
         }

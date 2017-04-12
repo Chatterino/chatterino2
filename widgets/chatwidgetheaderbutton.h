@@ -18,10 +18,9 @@ class ChatWidgetHeaderButton : public QWidget
 public:
     explicit ChatWidgetHeaderButton(int spacing = 6);
 
-    SignalLabel &
-    getLabel()
+    SignalLabel &getLabel()
     {
-        return label;
+        return _label;
     }
 
 signals:
@@ -37,11 +36,11 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-    QHBoxLayout hbox;
-    SignalLabel label;
+    QHBoxLayout _hbox;
+    SignalLabel _label;
 
-    bool mouseOver;
-    bool mouseDown;
+    bool _mouseOver;
+    bool _mouseDown;
 
     void labelMouseUp();
     void labelMouseDown();

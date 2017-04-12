@@ -24,10 +24,9 @@ class ChatWidgetHeader : public QWidget
 public:
     explicit ChatWidgetHeader(ChatWidget *parent);
 
-    ChatWidget *
-    getChatWidget()
+    ChatWidget *getChatWidget()
     {
-        return chatWidget;
+        return _chatWidget;
     }
 
     void updateColors();
@@ -40,19 +39,19 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    ChatWidget *chatWidget;
+    ChatWidget *_chatWidget;
 
-    QPoint dragStart;
-    bool dragging;
+    QPoint _dragStart;
+    bool _dragging;
 
-    QHBoxLayout hbox;
+    QHBoxLayout _hbox;
 
-    ChatWidgetHeaderButton leftLabel;
-    SignalLabel middleLabel;
-    ChatWidgetHeaderButton rightLabel;
+    ChatWidgetHeaderButton _leftLabel;
+    SignalLabel _middleLabel;
+    ChatWidgetHeaderButton _rightLabel;
 
-    QMenu leftMenu;
-    QMenu rightMenu;
+    QMenu _leftMenu;
+    QMenu _rightMenu;
 
     void leftButtonClicked();
     void rightButtonClicked();

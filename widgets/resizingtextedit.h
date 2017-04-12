@@ -16,18 +16,15 @@ public:
         sizePolicy.setVerticalPolicy(QSizePolicy::Preferred);
         this->setSizePolicy(sizePolicy);
 
-        QObject::connect(this, &QTextEdit::textChanged, this,
-                         &QWidget::updateGeometry);
+        QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
     }
 
-    QSize
-    sizeHint() const override
+    QSize sizeHint() const override
     {
         return QSize(this->width(), this->heightForWidth(this->width()));
     }
 
-    bool
-    hasHeightForWidth() const override
+    bool hasHeightForWidth() const override
     {
         return true;
     }
@@ -35,17 +32,14 @@ public:
     boost::signals2::signal<void(QKeyEvent *)> keyPressed;
 
 protected:
-    int
-    heightForWidth(int) const override
+    int heightForWidth(int) const override
     {
         auto margins = this->contentsMargins();
 
-        return margins.top() + document()->size().height() + margins.bottom() +
-               5;
+        return margins.top() + document()->size().height() + margins.bottom() + 5;
     }
 
-    void
-    keyPressEvent(QKeyEvent *event)
+    void keyPressEvent(QKeyEvent *event)
     {
         event->ignore();
 

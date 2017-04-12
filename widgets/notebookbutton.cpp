@@ -1,20 +1,22 @@
 #include "widgets/notebookbutton.h"
 #include "colorscheme.h"
+#include "widgets/fancybutton.h"
 
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QRadialGradient>
 
 namespace chatterino {
 namespace widgets {
 
 NotebookButton::NotebookButton(QWidget *parent)
-    : QWidget(parent)
+    : FancyButton(parent)
 {
+    setMouseEffectColor(QColor(0, 0, 0));
 }
 
-void
-NotebookButton::paintEvent(QPaintEvent *)
+void NotebookButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -23,29 +25,30 @@ NotebookButton::paintEvent(QPaintEvent *)
 
     auto &colorScheme = ColorScheme::getInstance();
 
-    if (mouseDown) {
+    if (_mouseDown) {
         background = colorScheme.TabSelectedBackground;
         foreground = colorScheme.TabSelectedText;
-    } else if (mouseOver) {
+    } else if (_mouseOver) {
         background = colorScheme.TabHoverBackground;
         foreground = colorScheme.TabSelectedBackground;
     } else {
         background = colorScheme.TabPanelBackground;
-        foreground = colorScheme.TabSelectedBackground;
+        //        foreground = colorScheme.TabSelectedBackground;
+        foreground = QColor(230, 230, 230);
     }
 
     painter.setPen(Qt::NoPen);
     painter.fillRect(this->rect(), background);
 
-    float h = this->height(), w = this->width();
+    float h = height(), w = width();
 
     if (icon == IconPlus) {
-        painter.fillRect(QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1,
-                                w - ((h / 12) * 5), (h / 12) * 1),
-                         foreground);
-        painter.fillRect(QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1,
-                                (h / 12) * 1, w - ((h / 12) * 5)),
-                         foreground);
+        painter.fillRect(
+            QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1, w - ((h / 12) * 5), (h / 12) * 1),
+            foreground);
+        painter.fillRect(
+            QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1, (h / 12) * 1, w - ((h / 12) * 5)),
+            foreground);
     } else if (icon == IconUser) {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -74,10 +77,8 @@ NotebookButton::paintEvent(QPaintEvent *)
         path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
 
         for (int i = 0; i < 8; i++) {
-            path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
-                       (360 / 32.0));
-            path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
-                       i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
+            path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0), (360 / 32.0));
+            path.arcTo(2 * a, 2 * a, 4 * a, 4 * a, i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
         }
 
         painter.fillPath(path, foreground);
@@ -85,44 +86,21 @@ NotebookButton::paintEvent(QPaintEvent *)
         painter.setBrush(background);
         painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
     }
+
+    fancyPaint(painter);
 }
 
-void
-NotebookButton::mousePressEvent(QMouseEvent *event)
+void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        mouseDown = true;
+        _mouseDown = false;
 
-        this->update();
-    }
-}
-
-void
-NotebookButton::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        mouseDown = false;
-
-        this->update();
+        update();
 
         emit clicked();
     }
-}
 
-void
-NotebookButton::enterEvent(QEvent *)
-{
-    mouseOver = true;
-
-    this->update();
-}
-
-void
-NotebookButton::leaveEvent(QEvent *)
-{
-    mouseOver = false;
-
-    this->update();
+    FancyButton::mouseReleaseEvent(event);
 }
 }
 }

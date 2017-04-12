@@ -14,12 +14,10 @@ Channel::Channel(const QString &_channelName, const QString &_baseDirectory)
 {
     QDateTime now = QDateTime::currentDateTime();
 
-    this->fileName =
-        this->channelName + "-" + now.toString("yyyy-MM-dd") + ".log";
+    this->fileName = this->channelName + "-" + now.toString("yyyy-MM-dd") + ".log";
 
     // Open file handle to log file of current date
-    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() +
-                                 this->fileName);
+    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + this->fileName);
 
     this->fileHandle.open(QIODevice::Append);
     this->appendLine(this->generateOpeningString(now));
@@ -31,8 +29,7 @@ Channel::~Channel()
     this->fileHandle.close();
 }
 
-void
-Channel::append(std::shared_ptr<messages::Message> message)
+void Channel::append(std::shared_ptr<messages::Message> message)
 {
     QDateTime now = QDateTime::currentDateTime();
 
@@ -47,8 +44,7 @@ Channel::append(std::shared_ptr<messages::Message> message)
     this->appendLine(str);
 }
 
-QString
-Channel::generateOpeningString(const QDateTime &now) const
+QString Channel::generateOpeningString(const QDateTime &now) const
 {
     QString ret = QLatin1Literal("# Start logging at ");
 
@@ -59,8 +55,7 @@ Channel::generateOpeningString(const QDateTime &now) const
     return ret;
 }
 
-QString
-Channel::generateClosingString(const QDateTime &now) const
+QString Channel::generateClosingString(const QDateTime &now) const
 {
     QString ret = QLatin1Literal("# Stop logging at ");
 
@@ -71,8 +66,7 @@ Channel::generateClosingString(const QDateTime &now) const
     return ret;
 }
 
-void
-Channel::appendLine(const QString &line)
+void Channel::appendLine(const QString &line)
 {
     this->fileHandle.write(line.toUtf8());
     this->fileHandle.flush();

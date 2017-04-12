@@ -10,19 +10,14 @@ namespace messages {
 class LazyLoadedImage : QObject
 {
 public:
-    explicit LazyLoadedImage(const QString &url, qreal scale = 1,
-                             const QString &name = "",
-                             const QString &tooltip = "",
-                             const QMargins &margin = QMargins(),
+    explicit LazyLoadedImage(const QString &url, qreal scale = 1, const QString &name = "",
+                             const QString &tooltip = "", const QMargins &margin = QMargins(),
                              bool isHat = false);
-    explicit LazyLoadedImage(QPixmap *currentPixmap, qreal scale = 1,
-                             const QString &name = "",
-                             const QString &tooltip = "",
-                             const QMargins &margin = QMargins(),
+    explicit LazyLoadedImage(QPixmap *currentPixmap, qreal scale = 1, const QString &name = "",
+                             const QString &tooltip = "", const QMargins &margin = QMargins(),
                              bool isHat = false);
 
-    const QPixmap *
-    getPixmap()
+    const QPixmap *getPixmap()
     {
         if (!isLoading) {
             isLoading = true;
@@ -32,50 +27,42 @@ public:
         return currentPixmap;
     }
 
-    qreal
-    getScale() const
+    qreal getScale() const
     {
         return scale;
     }
 
-    const QString &
-    getUrl() const
+    const QString &getUrl() const
     {
         return url;
     }
 
-    const QString &
-    getName() const
+    const QString &getName() const
     {
         return name;
     }
 
-    const QString &
-    getTooltip() const
+    const QString &getTooltip() const
     {
         return tooltip;
     }
 
-    const QMargins &
-    getMargin() const
+    const QMargins &getMargin() const
     {
         return margin;
     }
 
-    bool
-    getAnimated() const
+    bool getAnimated() const
     {
         return animated;
     }
 
-    bool
-    getIsHat() const
+    bool getIsHat() const
     {
         return ishat;
     }
 
-    int
-    getWidth() const
+    int getWidth() const
     {
         if (currentPixmap == NULL) {
             return 16;
@@ -83,8 +70,7 @@ public:
         return currentPixmap->width();
     }
 
-    int
-    getHeight() const
+    int getHeight() const
     {
         if (currentPixmap == NULL) {
             return 16;

@@ -3,8 +3,8 @@
 
 #define TWITCH_MAX_MESSAGELENGTH 500
 
-#include "account.h"
 #include "messages/message.h"
+#include "twitch/twitchuser.h"
 
 #include <IrcMessage>
 #include <QMap>
@@ -16,15 +16,22 @@
 
 namespace chatterino {
 
-class IrcManager
+class IrcManager : public QObject
 {
-public:
-    static void connect();
-    static void disconnect();
+    Q_OBJECT
 
-    static void send(QString raw);
+public:
+    static IrcManager &getInstance()
+    {
+        return instance;
+    }
 
     static const QString defaultClientId;
+
+    void connect();
+    void disconnect();
+
+    void send(QString raw);
 
     bool isTwitchBlockedUser(QString const &username);
     bool tryAddIgnoredUser(QString const &username, QString &errorMessage);
@@ -32,34 +39,36 @@ public:
     bool tryRemoveIgnoredUser(QString const &username, QString &errorMessage);
     void removeIgnoredUser(QString const &username);
 
-    static Account *account;
+    QNetworkAccessManager &getAccessManager();
 
-    static QNetworkAccessManager &
-    getAccessManager()
-    {
-        return accessManager;
-    }
+    void sendJoin(const QString &channel);
 
-    static void sendJoin(const QString &channel);
+    void partChannel(const QString &channel);
 
-    static void partChannel(const QString &channel);
+    const twitch::TwitchUser &getUser() const;
+    void setUser(const twitch::TwitchUser &account);
 
 private:
+    static IrcManager instance;
     IrcManager();
 
-    static QMap<QString, bool> twitchBlockedUsers;
-    static QMutex twitchBlockedUsersMutex;
+    // variables
+    twitch::TwitchUser _account;
 
-    static QNetworkAccessManager accessManager;
+    std::shared_ptr<Communi::IrcConnection> _connection;
+    QMutex _connectionMutex;
+    long _connectionGeneration;
 
-    static void beginConnecting();
+    QMap<QString, bool> _twitchBlockedUsers;
+    QMutex _twitchBlockedUsersMutex;
 
-    static std::shared_ptr<IrcConnection> connection;
-    static QMutex connectionMutex;
-    static long connectionGeneration;
+    QNetworkAccessManager _accessManager;
 
-    static void messageReceived(IrcMessage *message);
-    static void privateMessageReceived(IrcPrivateMessage *message);
+    // methods
+    void beginConnecting();
+
+    void messageReceived(Communi::IrcMessage *message);
+    void privateMessageReceived(Communi::IrcPrivateMessage *message);
 };
 }
 

@@ -7,7 +7,7 @@ Language: Cpp
 SpacesBeforeTrailingComments: 2
 AccessModifierOffset: -1
 AlignEscapedNewlinesLeft: true
-AlwaysBreakAfterDefinitionReturnType: true
+AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
 BreakConstructorInitializersBeforeComma: true
 # BreakBeforeBraces: Linux
@@ -26,3 +26,4 @@ BraceWrapping: {
     AfterFunction: 'true'
     BeforeCatch: 'false'
 }
+ColumnLimit: 100

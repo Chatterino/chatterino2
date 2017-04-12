@@ -1,13 +1,13 @@
-#include "channels.h"
+#include "channelmanager.h"
 #include "colorscheme.h"
 #include "emojis.h"
-#include "emotes.h"
+#include "emotemanager.h"
 #include "ircmanager.h"
 #include "logging/loggingmanager.h"
 #include "resources.h"
-#include "settings.h"
+#include "settingsmanager.h"
 #include "widgets/mainwindow.h"
-#include "windows.h"
+#include "windowmanager.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -22,26 +22,25 @@ main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     chatterino::logging::init();
-    chatterino::initChannels();
-    Settings::getInstance().load();
+    SettingsManager::getInstance().load();
     Resources::load();
     Emojis::loadEmojis();
-    Emotes::loadGlobalEmotes();
+    EmoteManager::getInstance().loadGlobalEmotes();
 
     ColorScheme::getInstance().init();
 
-    Windows::load();
+    WindowManager::load();
 
-    MainWindow &w = Windows::getMainWindow();
+    MainWindow &w = WindowManager::getMainWindow();
     w.show();
 
-    IrcManager::connect();
+    IrcManager::getInstance().connect();
 
     int ret = a.exec();
 
-    Settings::getInstance().save();
+    SettingsManager::getInstance().save();
 
-    Windows::save();
+    WindowManager::save();
 
     return ret;
 }

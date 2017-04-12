@@ -15,17 +15,14 @@ namespace logging {
 class Channel
 {
 public:
-    explicit Channel(const QString &_channelName,
-                     const QString &_baseDirectory);
+    explicit Channel(const QString &_channelName, const QString &_baseDirectory);
     ~Channel();
 
     void append(std::shared_ptr<messages::Message> message);
 
 private:
-    QString generateOpeningString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
-    QString generateClosingString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateOpeningString(const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateClosingString(const QDateTime &now = QDateTime::currentDateTime()) const;
 
     void appendLine(const QString &line);
 

@@ -2,7 +2,7 @@
 #include "chatwidget.h"
 #include "colorscheme.h"
 #include "ircmanager.h"
-#include "settings.h"
+#include "settingsmanager.h"
 
 #include <QCompleter>
 #include <QPainter>
@@ -12,44 +12,43 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
-    : chatWidget(widget)
-    , hbox()
-    , vbox()
-    , editContainer()
-    , edit()
-    , textLengthLabel()
-    , emotesLabel(0)
+    : _chatWidget(widget)
+    , _hbox()
+    , _vbox()
+    , _editContainer()
+    , _edit()
+    , _textLengthLabel()
+    , _emotesLabel(0)
 {
-    this->setLayout(&this->hbox);
-    this->setMaximumHeight(150);
-    this->hbox.setMargin(4);
+    setLayout(&_hbox);
+    setMaximumHeight(150);
+    _hbox.setMargin(4);
 
-    this->hbox.addLayout(&this->editContainer);
-    this->hbox.addLayout(&this->vbox);
+    _hbox.addLayout(&_editContainer);
+    _hbox.addLayout(&_vbox);
 
-    this->editContainer.addWidget(&this->edit);
-    this->editContainer.setMargin(4);
+    _editContainer.addWidget(&_edit);
+    _editContainer.setMargin(4);
 
-    this->vbox.addWidget(&this->textLengthLabel);
-    this->vbox.addStretch(1);
-    this->vbox.addWidget(&this->emotesLabel);
+    _vbox.addWidget(&_textLengthLabel);
+    _vbox.addStretch(1);
+    _vbox.addWidget(&_emotesLabel);
 
-    this->textLengthLabel.setText("100");
-    this->textLengthLabel.setAlignment(Qt::AlignRight);
-    this->emotesLabel.getLabel().setTextFormat(Qt::RichText);
-    this->emotesLabel.getLabel().setText(
+    _textLengthLabel.setText("100");
+    _textLengthLabel.setAlignment(Qt::AlignRight);
+    _emotesLabel.getLabel().setTextFormat(Qt::RichText);
+    _emotesLabel.getLabel().setText(
         "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
         "/>");
 
-    QObject::connect(&edit, &ResizingTextEdit::textChanged, this,
+    QObject::connect(&_edit, &ResizingTextEdit::textChanged, this,
                      &ChatWidgetInput::editTextChanged);
 
     //    QObject::connect(&edit, &ResizingTextEdit::keyPressEvent, this,
     //                     &ChatWidgetInput::editKeyPressed);
 
-    this->refreshTheme();
-    this->setMessageLengthVisisble(
-        Settings::getInstance().showMessageLength.get());
+    refreshTheme();
+    setMessageLengthVisisble(SettingsManager::getInstance().showMessageLength.get());
 
     QStringList list;
     list.append("asd");
@@ -57,20 +56,20 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
     list.append("asdg");
     list.append("asdh");
 
-    QCompleter *completer = new QCompleter(list, &edit);
+    QCompleter *completer = new QCompleter(list, &_edit);
 
-    completer->setWidget(&edit);
+    completer->setWidget(&_edit);
 
-    this->edit.keyPressed.connect([this, completer](QKeyEvent *event) {
+    _edit.keyPressed.connect([this, completer](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-            auto ptr = this->chatWidget->getChannel();
+            auto ptr = _chatWidget->getChannel();
             Channel *c = ptr.get();
 
             if (c != nullptr) {
-                IrcManager::send("PRIVMSG #" + c->getName() + ": " +
-                                 this->edit.toPlainText());
+                IrcManager::getInstance().send("PRIVMSG #" + c->getName() + ": " +
+                                               _edit.toPlainText());
                 event->accept();
-                this->edit.setText(QString());
+                _edit.setText(QString());
             }
         }
         //        else {
@@ -97,20 +96,18 @@ ChatWidgetInput::~ChatWidgetInput()
         */
 }
 
-void
-ChatWidgetInput::refreshTheme()
+void ChatWidgetInput::refreshTheme()
 {
     QPalette palette;
 
     palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
 
-    this->textLengthLabel.setPalette(palette);
+    _textLengthLabel.setPalette(palette);
 
-    edit.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
+    _edit.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
 }
 
-void
-ChatWidgetInput::editTextChanged()
+void ChatWidgetInput::editTextChanged()
 {
 }
 
@@ -124,8 +121,7 @@ ChatWidgetInput::editTextChanged()
 //    }
 //}
 
-void
-ChatWidgetInput::paintEvent(QPaintEvent *)
+void ChatWidgetInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -134,13 +130,12 @@ ChatWidgetInput::paintEvent(QPaintEvent *)
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
-void
-ChatWidgetInput::resizeEvent(QResizeEvent *)
+void ChatWidgetInput::resizeEvent(QResizeEvent *)
 {
-    if (height() == this->maximumHeight()) {
-        edit.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    if (height() == maximumHeight()) {
+        _edit.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     } else {
-        edit.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        _edit.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 }
 }

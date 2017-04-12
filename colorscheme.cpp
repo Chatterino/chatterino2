@@ -1,38 +1,36 @@
 #define LOOKUP_COLOR_COUNT 360
 
 #include "colorscheme.h"
-#include "settings.h"
-#include "windows.h"
+#include "settingsmanager.h"
+#include "windowmanager.h"
 
 #include <QColor>
 
 namespace chatterino {
 
-void
-ColorScheme::init()
+void ColorScheme::init()
 {
     static bool initiated = false;
 
     if (!initiated) {
         initiated = true;
         ColorScheme::getInstance().update();
-        Settings::getInstance().theme.valueChanged.connect(
+        SettingsManager::getInstance().theme.valueChanged.connect(
             [](const QString &) { ColorScheme::getInstance().update(); });
-        Settings::getInstance().themeHue.valueChanged.connect(
+        SettingsManager::getInstance().themeHue.valueChanged.connect(
             [](const float &) { ColorScheme::getInstance().update(); });
 
         ColorScheme::getInstance().updated.connect(
-            [] { Windows::repaintVisibleChatWidgets(); });
+            [] { WindowManager::repaintVisibleChatWidgets(); });
     }
 }
 
-void
-ColorScheme::update()
+void ColorScheme::update()
 {
-    QString theme = Settings::getInstance().theme.get();
+    QString theme = SettingsManager::getInstance().theme.get();
     theme = theme.toLower();
 
-    qreal hue = Settings::getInstance().themeHue.get();
+    qreal hue = SettingsManager::getInstance().themeHue.get();
 
     if (theme == "light") {
         setColors(hue, 0.8);
@@ -47,33 +45,40 @@ ColorScheme::update()
 
 // hue: theme color (0 - 1)
 // multiplyer: 1 = white, 0.8 = light, -0.8 dark, -1 black
-void
-ColorScheme::setColors(float hue, float multiplyer)
+void ColorScheme::setColors(float hue, float multiplyer)
 {
     IsLightTheme = multiplyer > 0;
+    bool hasDarkBorder = false;
 
     SystemMessageColor = QColor(140, 127, 127);
 
     auto isLightTheme = IsLightTheme;
 
-    auto getColor = [isLightTheme, multiplyer](qreal h, qreal s, qreal l,
-                                               qreal a = 1.0) {
+    auto getColor = [isLightTheme, multiplyer](qreal h, qreal s, qreal l, qreal a = 1.0) {
         return QColor::fromHslF(h, s, (((l - 0.5) * multiplyer) + 0.5), a);
     };
 
-    DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.3);
+    DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
 
     Text = TextCaret = IsLightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
 
     // tab
-    TabPanelBackground = QColor(255, 255, 255);
-    TabBackground = QColor(255, 255, 255);
-    TabHoverBackground = getColor(hue, 0, 0.05);
+    if (hasDarkBorder) {
+        //    TabPanelBackground = getColor(hue, 0, 0.8);
+        //    TabBackground = getColor(hue, 0, 0.8);
+        //    TabHoverBackground = getColor(hue, 0, 0.8);
+    } else {
+        TabPanelBackground = QColor(255, 255, 255);
+        TabBackground = QColor(255, 255, 255);
+        TabHoverBackground = getColor(hue, 0, 0.05);
+    }
     TabSelectedBackground = getColor(hue, 0.5, 0.5);
     TabHighlightedBackground = getColor(hue, 0.5, 0.2);
-    TabNewMessageBackground =
-        QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
-    TabText = QColor(0, 0, 0);
+    TabNewMessageBackground = QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
+    if (hasDarkBorder)
+        //    TabText = QColor(210, 210, 210);
+        //    TabHoverText = QColor(210, 210, 210);
+        TabText = QColor(0, 0, 0);
     TabHoverText = QColor(0, 0, 0);
     TabSelectedText = QColor(255, 255, 255);
     TabHighlightedText = QColor(0, 0, 0);
@@ -103,17 +108,14 @@ ColorScheme::setColors(float hue, float multiplyer)
     fillLookupTableValues(this->minLookupTable, 0.833, 1.000, 0.30, 0.33);
 
     // stylesheet
-    InputStyleSheet =
-        "background:" + ChatInputBackground.name() + ";" +
-        "border:" + TabSelectedBackground.name() + ";" +
-        "color:" + Text.name() + ";" +
-        "selection-background-color:" + TabSelectedBackground.name();
+    InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
+                      "border:" + TabSelectedBackground.name() + ";" + "color:" + Text.name() +
+                      ";" + "selection-background-color:" + TabSelectedBackground.name();
 
     updated();
 }
 
-void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from,
-                                        qreal to, qreal fromValue,
+void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from, qreal to, qreal fromValue,
                                         qreal toValue)
 {
     qreal diff = toValue - fromValue;
@@ -127,8 +129,7 @@ void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from,
     }
 }
 
-void
-ColorScheme::normalizeColor(QColor &color)
+void ColorScheme::normalizeColor(QColor &color)
 {
     //    qreal l = color.lightnessF();
     //    qreal s = color.saturationF();

@@ -9,30 +9,21 @@
 namespace chatterino {
 namespace messages {
 
+class MessageRef;
+
+typedef std::shared_ptr<MessageRef> SharedMessageRef;
+
 class MessageRef
 {
 public:
-    MessageRef(std::shared_ptr<Message> message);
+    MessageRef(SharedMessage message);
 
-    Message *
-    getMessage()
-    {
-        return this->message;
-    }
-
-    int
-    getHeight() const
-    {
-        return height;
-    }
+    Message *getMessage();
+    int getHeight() const;
 
     bool layout(int width, bool enableEmoteMargins = true);
 
-    const std::vector<WordPart> &
-    getWordParts() const
-    {
-        return wordParts;
-    }
+    const std::vector<WordPart> &getWordParts() const;
 
     std::shared_ptr<QPixmap> buffer = nullptr;
     bool updateBuffer = false;
@@ -42,18 +33,18 @@ public:
     int getSelectionIndex(QPoint position);
 
 private:
-    Message *message;
-    std::shared_ptr<Message> messagePtr;
+    // variables
+    SharedMessage _message;
+    std::vector<messages::WordPart> _wordParts;
 
-    std::vector<messages::WordPart> wordParts;
+    int _height = 0;
 
-    int height = 0;
+    int _currentLayoutWidth = -1;
+    int _fontGeneration = -1;
+    int _emoteGeneration = -1;
+    Word::Type _currentWordTypes = Word::None;
 
-    int currentLayoutWidth = -1;
-    int fontGeneration = -1;
-    int emoteGeneration = -1;
-    Word::Type currentWordTypes = Word::None;
-
+    // methods
     void alignWordParts(int lineStart, int lineHeight);
 };
 }

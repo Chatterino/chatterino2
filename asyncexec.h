@@ -7,19 +7,16 @@
 #include <QThreadPool>
 #include <functional>
 
-#define async_exec(a) \
-    QThreadPool::globalInstance()->start(new LambdaRunnable(a));
+#define async_exec(a) QThreadPool::globalInstance()->start(new LambdaRunnable(a));
 
-class LambdaRunnable : public QRunnable
-{
+class LambdaRunnable : public QRunnable {
 public:
     LambdaRunnable(std::function<void()> action)
     {
         this->action = action;
     }
 
-    void
-    run()
+    void run()
     {
         this->action();
     }

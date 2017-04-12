@@ -6,6 +6,7 @@
 #include "messages/messageref.h"
 #include "messages/word.h"
 #include "widgets/scrollbar.h"
+#include "widgets/userpopupwidget.h"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -18,20 +19,14 @@ class ChatWidget;
 
 class ChatWidgetView : public QWidget
 {
-    Q_OBJECT
-
 public:
     explicit ChatWidgetView(ChatWidget *parent);
     ~ChatWidgetView();
 
     bool layoutMessages();
 
-    void
-    updateGifEmotes()
-    {
-        this->onlyUpdateEmotes = true;
-        this->update();
-    }
+    void updateGifEmotes();
+    ScrollBar *getScrollbar();
 
 protected:
     void resizeEvent(QResizeEvent *);
@@ -40,9 +35,10 @@ protected:
     void wheelEvent(QWheelEvent *event);
 
     void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
-    bool tryGetMessageAt(QPoint p,
-                         std::shared_ptr<messages::MessageRef> &message,
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &message,
                          QPoint &relativePos);
 
 private:
@@ -51,22 +47,27 @@ private:
         QRect rect;
     };
 
-    std::vector<GifEmoteData> gifEmotes;
+    std::vector<GifEmoteData> _gifEmotes;
 
-    ChatWidget *chatWidget;
+    ChatWidget *_chatWidget;
 
-    ScrollBar scrollbar;
-    bool onlyUpdateEmotes;
+    ScrollBar _scrollbar;
+
+    UserPopupWidget _userPopupWidget;
+    bool _onlyUpdateEmotes;
+
+    // Mouse event variables
+    bool _mouseDown;
+    QPointF _lastPressPosition;
 
 private slots:
-    void
-    wordTypeMaskChanged()
+    void wordTypeMaskChanged()
     {
         layoutMessages();
         update();
     }
 };
-}
-}
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // CHATVIEW_H

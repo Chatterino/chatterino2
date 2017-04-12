@@ -18,119 +18,59 @@ namespace messages {
 class Message;
 }
 
+class ChannelManager;
+
+typedef std::shared_ptr<Channel> SharedChannel;
+
 class Channel
 {
 public:
     Channel(const QString &channel);
 
-    boost::signals2::signal<void(std::shared_ptr<messages::Message> &)>
-        messageRemovedFromStart;
-    boost::signals2::signal<void(std::shared_ptr<messages::Message> &)>
-        messageAppended;
+    boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
+    boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
 
     // properties
-    ConcurrentMap<QString, messages::LazyLoadedImage *> &
-    getBttvChannelEmotes()
-    {
-        return bttvChannelEmotes;
-    }
+    ConcurrentMap<QString, messages::LazyLoadedImage *> &getBttvChannelEmotes();
+    ConcurrentMap<QString, messages::LazyLoadedImage *> &getFfzChannelEmotes();
 
-    ConcurrentMap<QString, messages::LazyLoadedImage *> &
-    getFfzChannelEmotes()
-    {
-        return ffzChannelEmotes;
-    }
-
-    bool
-    isEmpty() const
-    {
-        return name.isEmpty();
-    }
-
-    const QString &
-    getName() const
-    {
-        return name;
-    }
-
-    int
-    getRoomID() const
-    {
-        return roomID;
-    }
-
-    const QString &
-    getSubLink() const
-    {
-        return subLink;
-    }
-    const QString &
-    getChannelLink() const
-    {
-        return channelLink;
-    }
-    const QString &
-    getPopoutPlayerLink() const
-    {
-        return popoutPlayerLink;
-    }
-
-    bool
-    getIsLive() const
-    {
-        return isLive;
-    }
-    int
-    getStreamViewerCount() const
-    {
-        return streamViewerCount;
-    }
-    const QString &
-    getStreamStatus() const
-    {
-        return streamStatus;
-    }
-    const QString &
-    getStreamGame() const
-    {
-        return streamGame;
-    }
+    bool isEmpty() const;
+    const QString &getName() const;
+    int getRoomID() const;
+    const QString &getSubLink() const;
+    const QString &getChannelLink() const;
+    const QString &getPopoutPlayerLink() const;
+    bool getIsLive() const;
+    int getStreamViewerCount() const;
+    const QString &getStreamStatus() const;
+    const QString &getStreamGame() const;
+    messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
     // methods
-    messages::LimitedQueueSnapshot<std::shared_ptr<messages::Message>>
-    getMessageSnapshot()
-    {
-        return messages.getSnapshot();
-    }
-
-    void addMessage(std::shared_ptr<messages::Message> message);
-
-    void
-    reloadChannelEmotes()
-    {
-        this->reloadBttvEmotes();
-        this->reloadFfzEmotes();
-    }
+    void addMessage(messages::SharedMessage message);
+    void reloadChannelEmotes();
 
 private:
-    messages::LimitedQueue<std::shared_ptr<messages::Message>> messages;
+    // variabeles
+    messages::LimitedQueue<messages::SharedMessage> _messages;
 
-    QString name;
-    int roomID;
+    QString _name;
+    int _roomID;
 
-    ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzChannelEmotes;
 
-    QString subLink;
-    QString channelLink;
-    QString popoutPlayerLink;
+    QString _subLink;
+    QString _channelLink;
+    QString _popoutPlayerLink;
 
-    bool isLive;
-    int streamViewerCount;
-    QString streamStatus;
-    QString streamGame;
-    std::shared_ptr<logging::Channel> loggingChannel;
+    bool _isLive;
+    int _streamViewerCount;
+    QString _streamStatus;
+    QString _streamGame;
+    // std::shared_ptr<logging::Channel> _loggingChannel;
 
+    // methods
     void reloadBttvEmotes();
     void reloadFfzEmotes();
 };

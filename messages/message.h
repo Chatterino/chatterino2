@@ -1,6 +1,8 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include "messages/message.h"
+#include "messages/messageparseargs.h"
 #include "messages/word.h"
 #include "messages/wordpart.h"
 
@@ -8,84 +10,33 @@
 #include <QVector>
 
 #include <chrono>
+#include <memory>
 
 namespace chatterino {
 
 class Channel;
 
 namespace messages {
+class Message;
+
+typedef std::shared_ptr<Message> SharedMessage;
 
 class Message
 {
 public:
     Message(const QString &text);
-    Message(const IrcPrivateMessage &ircMessage, Channel &channel,
-            bool enablePingSound = true, bool isReceivedWhisper = false,
-            bool isSentWhisper = false, bool includeChannel = false);
+    Message(const std::vector<messages::Word> &words);
 
-    ~Message()
-    {
-    }
-
-    bool
-    getCanHighlightTab() const
-    {
-        return highlightTab;
-    }
-
-    const QString &
-    getTimeoutUser() const
-    {
-        return timeoutUser;
-    }
-
-    int
-    getTimeoutCount() const
-    {
-        return timeoutCount;
-    }
-
-    const QString &
-    getUserName() const
-    {
-        return userName;
-    }
-
-    const QString &
-    getDisplayName() const
-    {
-        return displayName;
-    }
-
-    inline const QString &
-    getContent() const
-    {
-        return this->content;
-    }
-
-    inline const std::chrono::time_point<std::chrono::system_clock> &
-    getParseTime() const
-    {
-        return this->parseTime;
-    }
-
-    std::vector<Word> &
-    getWords()
-    {
-        return words;
-    }
-
-    bool
-    getDisabled() const
-    {
-        return disabled;
-    }
-
-    const QString &
-    getId() const
-    {
-        return id;
-    }
+    bool getCanHighlightTab() const;
+    const QString &getTimeoutUser() const;
+    int getTimeoutCount() const;
+    const QString &getUserName() const;
+    const QString &getDisplayName() const;
+    const QString &getContent() const;
+    const std::chrono::time_point<std::chrono::system_clock> &getParseTime() const;
+    std::vector<Word> &getWords();
+    bool isDisabled() const;
+    const QString &getId() const;
 
 private:
     static LazyLoadedImage *badgeStaff;
@@ -98,24 +49,18 @@ private:
 
     static QRegularExpression *cheerRegex;
 
-    bool highlightTab = false;
-    QString timeoutUser = "";
-    int timeoutCount = 0;
-    bool disabled = false;
-    std::chrono::time_point<std::chrono::system_clock> parseTime;
+    bool _highlightTab = false;
+    QString _timeoutUser = "";
+    int _timeoutCount = 0;
+    bool _isDisabled = false;
+    std::chrono::time_point<std::chrono::system_clock> _parseTime;
 
-    QString userName = "";
-    QString displayName = "";
-    QString content;
-    QString id = "";
+    QString _userName = "";
+    QString _displayName = "";
+    QString _content;
+    QString _id = "";
 
-    std::vector<Word> words;
-
-    static QString matchLink(const QString &string);
-
-    static bool sortTwitchEmotes(
-        const std::pair<long int, LazyLoadedImage *> &a,
-        const std::pair<long int, LazyLoadedImage *> &b);
+    std::vector<Word> _words;
 };
 
 }  // namespace messages

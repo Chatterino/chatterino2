@@ -9,59 +9,55 @@ namespace widgets {
 
 ChatWidgetHeaderButton::ChatWidgetHeaderButton(int spacing)
     : QWidget()
-    , hbox()
-    , label()
-    , mouseOver(false)
-    , mouseDown(false)
+    , _hbox()
+    , _label()
+    , _mouseOver(false)
+    , _mouseDown(false)
 {
-    setLayout(&hbox);
+    setLayout(&_hbox);
 
-    label.setAlignment(Qt::AlignCenter);
+    _label.setAlignment(Qt::AlignCenter);
 
-    hbox.setMargin(0);
-    hbox.addSpacing(spacing);
-    hbox.addWidget(&this->label);
-    hbox.addSpacing(spacing);
+    _hbox.setMargin(0);
+    _hbox.addSpacing(spacing);
+    _hbox.addWidget(&_label);
+    _hbox.addSpacing(spacing);
 
-    QObject::connect(&this->label, &SignalLabel::mouseUp, this,
+    QObject::connect(&_label, &SignalLabel::mouseUp, this,
                      &ChatWidgetHeaderButton::labelMouseUp);
-    QObject::connect(&this->label, &SignalLabel::mouseDown, this,
+    QObject::connect(&_label, &SignalLabel::mouseDown, this,
                      &ChatWidgetHeaderButton::labelMouseDown);
 }
 
-void
-ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
+void ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QBrush brush(ColorScheme::getInstance().IsLightTheme
-                     ? QColor(0, 0, 0, 32)
-                     : QColor(255, 255, 255, 32));
+    QBrush brush(ColorScheme::getInstance().IsLightTheme ? QColor(0, 0, 0, 32)
+                                                         : QColor(255, 255, 255, 32));
 
-    if (this->mouseDown) {
+    if (_mouseDown) {
         painter.fillRect(rect(), brush);
     }
 
-    if (this->mouseOver) {
+    if (_mouseOver) {
         painter.fillRect(rect(), brush);
     }
 }
 
-void
-ChatWidgetHeaderButton::mousePressEvent(QMouseEvent *event)
+void ChatWidgetHeaderButton::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        this->mouseDown = true;
+        _mouseDown = true;
 
         update();
     }
 }
 
-void
-ChatWidgetHeaderButton::mouseReleaseEvent(QMouseEvent *event)
+void ChatWidgetHeaderButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        this->mouseDown = false;
+        _mouseDown = false;
 
         update();
 
@@ -69,36 +65,32 @@ ChatWidgetHeaderButton::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void
-ChatWidgetHeaderButton::enterEvent(QEvent *)
+void ChatWidgetHeaderButton::enterEvent(QEvent *)
 {
-    this->mouseOver = true;
+    _mouseOver = true;
 
     update();
 }
 
-void
-ChatWidgetHeaderButton::leaveEvent(QEvent *)
+void ChatWidgetHeaderButton::leaveEvent(QEvent *)
 {
-    this->mouseOver = false;
+    _mouseOver = false;
 
     update();
 }
 
-void
-ChatWidgetHeaderButton::labelMouseUp()
+void ChatWidgetHeaderButton::labelMouseUp()
 {
-    this->mouseDown = false;
+    _mouseDown = false;
 
     update();
 
     emit clicked();
 }
 
-void
-ChatWidgetHeaderButton::labelMouseDown()
+void ChatWidgetHeaderButton::labelMouseDown()
 {
-    this->mouseDown = true;
+    _mouseDown = true;
 
     update();
 }

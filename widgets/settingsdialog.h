@@ -1,7 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "settings.h"
+#include "settingsmanager.h"
 #include "settingssnapshot.h"
 #include "widgets/settingsdialogtab.h"
 
@@ -27,21 +27,21 @@ public:
     void select(SettingsDialogTab *tab);
 
 private:
-    SettingsSnapshot snapshot;
+    SettingsSnapshot _snapshot;
 
-    QVBoxLayout tabs;
-    QVBoxLayout vbox;
-    QHBoxLayout hbox;
-    QStackedLayout pageStack;
-    QDialogButtonBox buttonBox;
-    QPushButton okButton;
-    QPushButton cancelButton;
+    QVBoxLayout _tabs;
+    QVBoxLayout _vbox;
+    QHBoxLayout _hbox;
+    QStackedLayout _pageStack;
+    QDialogButtonBox _buttonBox;
+    QPushButton _okButton;
+    QPushButton _cancelButton;
 
     void addTab(QLayout *layout, QString title, QString imageRes);
 
     void addTabs();
 
-    SettingsDialogTab *selectedTab = NULL;
+    SettingsDialogTab *_selectedTab = NULL;
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);

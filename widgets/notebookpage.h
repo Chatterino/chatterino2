@@ -23,34 +23,31 @@ class NotebookPage : public QWidget
     Q_OBJECT
 
 public:
-    NotebookPage(QWidget *parent, NotebookTab *tab);
-    NotebookTab *tab;
+    NotebookPage(QWidget *parent, NotebookTab *_tab);
 
     std::pair<int, int> removeFromLayout(ChatWidget *widget);
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);
 
-    const std::vector<ChatWidget *> &
-    getChatWidgets() const
-    {
-        return chatWidgets;
-    }
+    const std::vector<ChatWidget *> &getChatWidgets() const;
+    NotebookTab *getTab() const;
 
     static bool isDraggingSplit;
     static ChatWidget *draggingSplit;
     static std::pair<int, int> dropPosition;
 
 protected:
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *) override;
 
     void enterEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
-    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
+private:
     struct DropRegion {
         QRect rect;
         std::pair<int, int> position;
@@ -62,15 +59,16 @@ protected:
         }
     };
 
-    QVBoxLayout parentbox;
-    QHBoxLayout hbox;
+    NotebookTab *_tab;
 
-    std::vector<ChatWidget *> chatWidgets;
-    std::vector<DropRegion> dropRegions;
+    QVBoxLayout _parentbox;
+    QHBoxLayout _hbox;
 
-    NotebookPageDropPreview preview;
+    std::vector<ChatWidget *> _chatWidgets;
+    std::vector<DropRegion> _dropRegions;
 
-private:
+    NotebookPageDropPreview _preview;
+
     void setPreviewRect(QPoint mousePos);
 
     std::pair<int, int> getChatPosition(const ChatWidget *chatWidget);

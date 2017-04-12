@@ -1,7 +1,7 @@
 #ifndef WORD_H
 #define WORD_H
 
-#include "fonts.h"
+#include "fontmanager.h"
 #include "messages/lazyloadedimage.h"
 #include "messages/link.h"
 
@@ -31,8 +31,7 @@ public:
         BttvGifEmoteText = (1 << 9),
         FfzEmoteImage = (1 << 10),
         FfzEmoteText = (1 << 11),
-        EmoteImages = TwitchEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
-                      FfzEmoteImage,
+        EmoteImages = TwitchEmoteImage | BttvEmoteImage | BttvGifEmoteImage | FfzEmoteImage,
 
         BitsStatic = (1 << 12),
         BitsAnimated = (1 << 13),
@@ -46,9 +45,8 @@ public:
         BadgePremium = (1 << 20),
         BadgeChatterino = (1 << 21),
         BadgeCheer = (1 << 22),
-        Badges = BadgeStaff | BadgeAdmin | BadgeGlobalMod | BadgeModerator |
-                 BadgeTurbo | BadgeBroadcaster | BadgePremium |
-                 BadgeChatterino | BadgeCheer,
+        Badges = BadgeStaff | BadgeAdmin | BadgeGlobalMod | BadgeModerator | BadgeTurbo |
+                 BadgeBroadcaster | BadgePremium | BadgeChatterino | BadgeCheer,
 
         Username = (1 << 23),
         BitsAmount = (1 << 24),
@@ -59,157 +57,61 @@ public:
         EmojiImage = (1 << 27),
         EmojiText = (1 << 28),
 
-        Default = TimestampNoSeconds | Badges | Username | BitsStatic |
-                  FfzEmoteImage | BttvEmoteImage | BttvGifEmoteImage |
-                  TwitchEmoteImage | BitsAmount | Text | ButtonBan |
-                  ButtonTimeout
+        Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
+                  BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |
+                  ButtonBan | ButtonTimeout
     };
 
     Word()
     {
     }
-    explicit Word(LazyLoadedImage *image, Type getType, const QString &copytext,
+    explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
                   const QString &getTooltip, const Link &getLink = Link());
-    explicit Word(const QString &text, Type getType, const QColor &getColor,
-                  const QString &copytext, const QString &getTooltip,
-                  const Link &getLink = Link());
+    explicit Word(const QString &_text, Type getType, const QColor &getColor,
+                  const QString &copytext, const QString &getTooltip, const Link &getLink = Link());
 
-    LazyLoadedImage &
-    getImage() const
-    {
-        return *image;
-    }
+    LazyLoadedImage &getImage() const;
+    const QString &getText() const;
+    int getWidth() const;
+    int getHeight() const;
+    void setSize(int _width, int _height);
 
-    const QString &
-    getText() const
-    {
-        return this->text;
-    }
+    bool isImage() const;
+    bool isText() const;
+    const QString &getCopyText() const;
+    bool hasTrailingSpace() const;
+    QFont &getFont() const;
+    QFontMetrics &getFontMetrics() const;
+    Type getType() const;
+    const QString &getTooltip() const;
+    const QColor &getColor() const;
+    const Link &getLink() const;
+    int getXOffset() const;
+    int getYOffset() const;
+    void setOffset(int _xOffset, int _yOffset);
 
-    int
-    getWidth() const
-    {
-        return this->width;
-    }
-
-    int
-    getHeight() const
-    {
-        return this->height;
-    }
-
-    void
-    setSize(int width, int height)
-    {
-        this->width = width;
-        this->height = height;
-    }
-
-    bool
-    isImage() const
-    {
-        return this->_isImage;
-    }
-
-    bool
-    isText() const
-    {
-        return !this->_isImage;
-    }
-
-    const QString &
-    getCopyText() const
-    {
-        return this->copyText;
-    }
-
-    bool
-    hasTrailingSpace() const
-    {
-        return this->_hasTrailingSpace;
-    }
-
-    QFont &
-    getFont() const
-    {
-        return Fonts::getFont(this->font);
-    }
-
-    QFontMetrics &
-    getFontMetrics() const
-    {
-        return Fonts::getFontMetrics(this->font);
-    }
-
-    Type
-    getType() const
-    {
-        return this->type;
-    }
-
-    const QString &
-    getTooltip() const
-    {
-        return this->tooltip;
-    }
-
-    const QColor &
-    getColor() const
-    {
-        return this->color;
-    }
-
-    const Link &
-    getLink() const
-    {
-        return this->link;
-    }
-
-    int
-    getXOffset() const
-    {
-        return this->xOffset;
-    }
-
-    int
-    getYOffset() const
-    {
-        return this->yOffset;
-    }
-
-    void
-    setOffset(int xOffset, int yOffset)
-    {
-        this->xOffset = std::max(0, xOffset);
-        this->yOffset = std::max(0, yOffset);
-    }
-
-    std::vector<short> &
-    getCharacterWidthCache() const
-    {
-        return this->characterWidthCache;
-    }
+    std::vector<short> &getCharacterWidthCache() const;
 
 private:
-    LazyLoadedImage *image;
-    QString text;
-    QColor color;
+    LazyLoadedImage *_image;
+    QString _text;
+    QColor _color;
     bool _isImage;
 
-    Type type;
-    QString copyText;
-    QString tooltip;
+    Type _type;
+    QString _copyText;
+    QString _tooltip;
 
-    int width = 16;
-    int height = 16;
-    int xOffset = 0;
-    int yOffset = 0;
+    int _width = 16;
+    int _height = 16;
+    int _xOffset = 0;
+    int _yOffset = 0;
 
     bool _hasTrailingSpace;
-    Fonts::Type font = Fonts::Medium;
-    Link link;
+    FontManager::Type _font = FontManager::Medium;
+    Link _link;
 
-    mutable std::vector<short> characterWidthCache;
+    mutable std::vector<short> _characterWidthCache;
 };
 
 }  // namespace messages
