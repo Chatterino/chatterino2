@@ -1,4 +1,6 @@
 #include "widgets/settingsdialog.h"
+#include "twitch/twitchuser.h"
+#include "usermanager.h"
 #include "widgets/settingsdialogtab.h"
 #include "windowmanager.h"
 
@@ -7,6 +9,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
+#include <QListWidget>
 #include <QPalette>
 #include <QResource>
 
@@ -63,6 +66,38 @@ void SettingsDialog::addTabs()
 
     QVBoxLayout *vbox;
 
+    // Accounts
+    vbox = new QVBoxLayout();
+
+    {
+        // add remove buttons
+        auto buttonBox = new QDialogButtonBox(this);
+
+        auto addButton = new QPushButton("add", this);
+        auto removeButton = new QPushButton("remove", this);
+
+        buttonBox->addButton(addButton, QDialogButtonBox::YesRole);
+        buttonBox->addButton(removeButton, QDialogButtonBox::NoRole);
+
+        vbox->addWidget(buttonBox);
+
+        // listview
+        auto listWidget = new QListWidget(this);
+
+        listWidget->addItem("xD");
+        listWidget->addItem("vi von");
+        listWidget->addItem("monkaS");
+
+        for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
+            listWidget->addItem(user.getUserName());
+        }
+
+        vbox->addWidget(listWidget);
+    }
+
+    //    vbox->addStretch(1);
+    addTab(vbox, "Accounts", ":/images/Message_16xLG.png");
+
     // Appearance
     vbox = new QVBoxLayout();
 
@@ -81,7 +116,7 @@ void SettingsDialog::addTabs()
         form->addRow("Theme:", combo);
         form->addRow("Theme color:", slider);
         form->addRow("Font:", font);
-        form->addRow("", compactTabs);
+        form->addRow("Tabbar:", compactTabs);
         form->addRow("", hidePreferencesButton);
         form->addRow("", hideUserButton);
 
@@ -148,21 +183,26 @@ void SettingsDialog::addTabs()
     // Behaviour
     vbox = new QVBoxLayout();
 
-    vbox->addWidget(createCheckbox("Hide input box if empty", settings.hideEmptyInput));
-    vbox->addWidget(
-        createCheckbox("Mention users with a @ (except in commands)", settings.mentionUsersWithAt));
-    vbox->addWidget(createCheckbox("Window always on top", settings.windowTopMost));
-    vbox->addWidget(
-        createCheckbox("Show last read message indicator", settings.showLastMessageIndicator));
-
     {
-        auto v = new QVBoxLayout();
-        v->addWidget(new QLabel("Mouse scroll speed"));
+        auto form = new QFormLayout();
+
+        form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
+        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in commands)",
+                                                 settings.mentionUsersWithAt));
+        form->addRow("", createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+        form->addRow("", createCheckbox("Show last read message indicator",
+                                        settings.showLastMessageIndicator));
+
+        //        auto v = new QVBoxLayout();
+        //        v->addWidget(new QLabel("Mouse scroll speed"));
 
         auto scroll = new QSlider(Qt::Horizontal);
+        form->addRow("Mouse scroll speed:", scroll);
 
-        v->addWidget(scroll);
-        v->addStretch(1);
+        //        v->addWidget(scroll);
+        //        v->addStretch(1);
+        //        vbox->addLayout(v);
+        vbox->addLayout(form);
     }
 
     vbox->addStretch(1);
