@@ -30,6 +30,9 @@ private:
 
     WindowManager();
 
+    // XXX(hemirt): private or public destructor?
+    ~WindowManager();
+
     std::mutex _windowMutex;
     widgets::MainWindow *_mainWindow;
 };

@@ -10,9 +10,16 @@ namespace chatterino {
 WindowManager WindowManager::instance;
 
 WindowManager::WindowManager()
-    : _windowMutex()
     , _mainWindow(nullptr)
 {
+}
+
+WindowManager::~WindowManager()
+{
+    if (_mainWindow != nullptr) {
+        // XXX(hemirt): some _mainWindow cleanup?
+        delete _mainWindow;
+    }
 }
 
 static const std::string &getSettingsPath()
@@ -103,7 +110,7 @@ void WindowManager::load()
 
 void WindowManager::save()
 {
-    const auto &settingsPath = getSettingsPath();
+    auto &settingsPath = getSettingsPath();
     boost::property_tree::ptree tree;
 
     // Create windows array
