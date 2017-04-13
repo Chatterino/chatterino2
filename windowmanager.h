@@ -3,40 +3,35 @@
 
 #include "widgets/mainwindow.h"
 
-#include <QMutex>
+#include <mutex>
 
 namespace chatterino {
 
 class WindowManager
 {
 public:
-    static void layoutVisibleChatWidgets(Channel *channel = NULL);
-    static void repaintVisibleChatWidgets(Channel *channel = NULL);
-    static void repaintGifEmotes();
-    static void updateAll();
-
-    static widgets::MainWindow &getMainWindow()
+    static WindowManager &getInstance()
     {
-        windowMutex.lock();
-        if (mainWindow == nullptr) {
-            mainWindow = new widgets::MainWindow();
-        }
-        windowMutex.unlock();
-
-        return *mainWindow;
+        return instance;
     }
 
-    static void load();
-    static void save();
+    void layoutVisibleChatWidgets(Channel *channel = nullptr);
+    void repaintVisibleChatWidgets(Channel *channel = nullptr);
+    void repaintGifEmotes();
+    void updateAll();
+
+    widgets::MainWindow &getMainWindow();
+
+    void load();
+    void save();
 
 private:
-    WindowManager()
-    {
-    }
+    static WindowManager instance;
 
-    static QMutex windowMutex;
+    WindowManager();
 
-    static widgets::MainWindow *mainWindow;
+    std::mutex _windowMutex;
+    widgets::MainWindow *_mainWindow;
 };
 
 }  // namespace chatterino

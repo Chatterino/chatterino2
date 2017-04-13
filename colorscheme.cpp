@@ -21,7 +21,7 @@ void ColorScheme::init()
             [](const float &) { ColorScheme::getInstance().update(); });
 
         ColorScheme::getInstance().updated.connect(
-            [] { WindowManager::repaintVisibleChatWidgets(); });
+            [] { WindowManager::getInstance().repaintVisibleChatWidgets(); });
     }
 }
 
@@ -172,4 +172,4 @@ void ColorScheme::normalizeColor(QColor &color)
 
     //    color.setHslF(color.hueF(), s, newL);
 }
-}
+}  // namespace chatterino

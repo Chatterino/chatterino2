@@ -117,7 +117,7 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 
     this->messageAppended(message);
 
-    WindowManager::repaintVisibleChatWidgets(this);
+    WindowManager::getInstance().repaintVisibleChatWidgets(this);
 }
 
 // private methods

@@ -7,6 +7,13 @@
 #include <boost/property_tree/json_parser.hpp>
 
 namespace chatterino {
+WindowManager WindowManager::instance;
+
+WindowManager::WindowManager()
+    : _windowMutex()
+    , _mainWindow(nullptr)
+{
+}
 
 static const std::string &getSettingsPath()
 {
@@ -15,36 +22,43 @@ static const std::string &getSettingsPath()
     return path;
 }
 
-QMutex WindowManager::windowMutex;
-
-widgets::MainWindow *WindowManager::mainWindow(nullptr);
-
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    if (WindowManager::mainWindow != nullptr) {
-        WindowManager::mainWindow->layoutVisibleChatWidgets(channel);
+    if (_mainWindow != nullptr) {
+        _mainWindow->layoutVisibleChatWidgets(channel);
     }
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (WindowManager::mainWindow != nullptr) {
-        WindowManager::mainWindow->repaintVisibleChatWidgets(channel);
+    if (_mainWindow != nullptr) {
+        _mainWindow->repaintVisibleChatWidgets(channel);
     }
 }
 
 void WindowManager::repaintGifEmotes()
 {
-    if (WindowManager::mainWindow != nullptr) {
-        WindowManager::mainWindow->repaintGifEmotes();
+    if (_mainWindow != nullptr) {
+        _mainWindow->repaintGifEmotes();
     }
 }
 
 void WindowManager::updateAll()
 {
-    if (WindowManager::mainWindow != nullptr) {
-        WindowManager::mainWindow->update();
+    if (_mainWindow != nullptr) {
+        _mainWindow->update();
     }
+}
+
+widgets::MainWindow &WindowManager::getMainWindow()
+{
+    std::lock_guard<std::mutex> lock(_windowMutex);
+
+    if (_mainWindow == nullptr) {
+        _mainWindow = new widgets::MainWindow();
+    }
+
+    return *_mainWindow;
 }
 
 void WindowManager::load()
@@ -57,7 +71,7 @@ void WindowManager::load()
     } catch (const boost::property_tree::json_parser_error &ex) {
         qDebug() << "Error using property_tree::readJson: " << QString::fromStdString(ex.message());
 
-        WindowManager::getMainWindow().loadDefaults();
+        getMainWindow().loadDefaults();
 
         return;
     }
@@ -70,7 +84,7 @@ void WindowManager::load()
             const auto &type = v.second.get<std::string>("type", "unknown");
 
             if (type == "main") {
-                WindowManager::getMainWindow().load(v.second);
+                getMainWindow().load(v.second);
             } else {
                 qDebug() << "Unhandled window type: " << type.c_str();
             }
@@ -80,8 +94,8 @@ void WindowManager::load()
     }
 
     // if the main window was not loaded properly, load defaults
-    if (!WindowManager::getMainWindow().isLoaded()) {
-        WindowManager::getMainWindow().loadDefaults();
+    if (!getMainWindow().isLoaded()) {
+        getMainWindow().loadDefaults();
     }
 
     // If there are no windows, create a default main window
@@ -97,7 +111,7 @@ void WindowManager::save()
 
     {
         // save main window
-        auto child = WindowManager::getMainWindow().save();
+        auto child = getMainWindow().save();
         windows.push_back(std::make_pair("", child));
     }
 

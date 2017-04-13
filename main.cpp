@@ -31,9 +31,9 @@ int main(int argc, char *argv[])
 
     ColorScheme::getInstance().init();
 
-    WindowManager::load();
+    WindowManager::getInstance().load();
 
-    MainWindow &w = WindowManager::getMainWindow();
+    MainWindow &w = WindowManager::getInstance().getMainWindow();
     w.show();
 
     IrcManager::getInstance().connect();
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     SettingsManager::getInstance().save();
 
-    WindowManager::save();
+    WindowManager::getInstance().save();
 
     return ret;
 }

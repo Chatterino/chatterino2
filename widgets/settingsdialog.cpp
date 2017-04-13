@@ -152,7 +152,7 @@ void SettingsDialog::addTabs()
 
         QObject::connect(slider, &QSlider::valueChanged, this, [this, &settings](int value) {
             settings.themeHue.set(value / 1000.0);
-            WindowManager::updateAll();
+            WindowManager::getInstance().updateAll();
         });
 
         group->setLayout(form);

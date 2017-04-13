@@ -58,7 +58,7 @@ public:
 
             QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
                 _gifUpdateTimerSignal();
-                WindowManager::repaintGifEmotes();
+                WindowManager::getInstance().repaintGifEmotes();
             });
         }
 
@@ -93,6 +93,6 @@ private:
     void loadFfzEmotes();
     void loadBttvEmotes();
 };
-}
+}  // namespace chatterino
 
 #endif  // EMOTES_H

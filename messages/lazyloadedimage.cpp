@@ -93,7 +93,7 @@ void LazyLoadedImage::loadImage()
         }
 
         EmoteManager::getInstance().incGeneration();
-        WindowManager::layoutVisibleChatWidgets();
+        WindowManager::getInstance().layoutVisibleChatWidgets();
 
         reply->deleteLater();
         manager->deleteLater();
@@ -115,5 +115,5 @@ void LazyLoadedImage::gifUpdateTimout()
 
     this->currentPixmap = this->allFrames[this->currentFrame].image;
 }
-}
-}
+}  // namespace messages
+}  // namespace chatterino
