@@ -10,7 +10,7 @@ namespace chatterino {
 WindowManager WindowManager::instance;
 
 WindowManager::WindowManager()
-    , _mainWindow(nullptr)
+    : _mainWindow(nullptr)
 {
 }
 
