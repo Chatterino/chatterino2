@@ -52,8 +52,6 @@ public:
 
     messages::Word::Type getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
-    bool getPortable();
-    void setPortable(bool value);
     QSettings &getQSettings();
     SettingsSnapshot createSnapshot();
 
@@ -66,7 +64,6 @@ private:
     // variables
     QSettings _settings;
     std::vector<std::reference_wrapper<BaseSetting>> _settingsItems;
-    bool _portable;
     messages::Word::Type _wordTypeMask;
 
     // methods

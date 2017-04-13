@@ -27,7 +27,7 @@ Channel::Channel(const QString &channel)
     , _subLink("https://www.twitch.tv/" + _name + "/subscribe?ref=in_chat_subscriber_link")
     , _channelLink("https://twitch.tv/" + _name)
     , _popoutPlayerLink("https://player.twitch.tv/?channel=" + _name)
-//, _loggingChannel(logging::get(_name))
+//    , _loggingChannel(logging::get(_name))
 {
     reloadChannelEmotes();
 }

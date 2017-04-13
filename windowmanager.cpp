@@ -1,4 +1,5 @@
 #include "windowmanager.h"
+#include "appdatapath.h"
 
 #include <QDebug>
 #include <QStandardPaths>
@@ -9,9 +10,7 @@ namespace chatterino {
 
 static const std::string &getSettingsPath()
 {
-    static std::string path =
-        (QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/windows.json")
-            .toStdString();
+    static std::string path = (Path::getAppdataPath() + "uilayout.json").toStdString();
 
     return path;
 }

@@ -1,5 +1,6 @@
 #include "channelmanager.h"
 #include "colorscheme.h"
+#include "common.h"
 #include "emojis.h"
 #include "emotemanager.h"
 #include "ircmanager.h"
@@ -11,13 +12,14 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QDir>
+#include <QStandardPaths>
 #include <boost/signals2.hpp>
 
 using namespace chatterino;
 using namespace chatterino::widgets;
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 

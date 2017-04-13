@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     twitch/twitchparsemessage.cpp \
     widgets/fancybutton.cpp \
     widgets/titlebar.cpp \
-    widgets/userpopupwidget.cpp
+    widgets/userpopupwidget.cpp \
+    appdatapath.cpp
 
 HEADERS  += \
     asyncexec.h \
@@ -121,7 +122,8 @@ HEADERS  += \
     twitch/twitchparsemessage.h \
     widgets/fancybutton.h \
     widgets/titlebar.h \
-    widgets/userpopupwidget.h
+    widgets/userpopupwidget.h \
+    appdatapath.h
 
 PRECOMPILED_HEADER =
 

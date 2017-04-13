@@ -1,4 +1,5 @@
 #include "settingsmanager.h"
+#include "appdatapath.h"
 
 #include <QDebug>
 #include <QDir>
@@ -11,10 +12,7 @@ namespace chatterino {
 SettingsManager SettingsManager::instance;
 
 SettingsManager::SettingsManager()
-    : _settings(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-                    "/Chatterino/newsettings.ini",
-                QSettings::IniFormat)
-    , _portable(false)
+    : _settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
     , _wordTypeMask(Word::Default)
     , theme(_settingsItems, "theme", "dark")
     , themeHue(_settingsItems, "themeHue", 0)
@@ -85,16 +83,6 @@ Word::Type SettingsManager::getWordTypeMask()
 bool SettingsManager::isIgnoredEmote(const QString &)
 {
     return false;
-}
-
-bool SettingsManager::getPortable()
-{
-    return _portable;
-}
-
-void SettingsManager::setPortable(bool value)
-{
-    _portable = value;
 }
 
 QSettings &SettingsManager::getQSettings()
