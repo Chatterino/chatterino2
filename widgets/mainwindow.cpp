@@ -10,7 +10,6 @@
 #include <boost/foreach.hpp>
 
 #ifdef USEWINSDK
-#define NOMINMAX
 #include "Windows.h"
 #endif
 
