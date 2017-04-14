@@ -115,7 +115,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         int xOffset = 0, yOffset = 0;
 
         if (enableEmoteMargins) {
-            if (word.isImage() && word.getImage().getIsHat()) {
+            if (word.isImage() && word.getImage().isHat()) {
                 xOffset = -word.getWidth() + 2;
             } else {
                 xOffset = word.getXOffset();

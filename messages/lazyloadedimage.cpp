@@ -3,6 +3,7 @@
 #include "asyncexec.h"
 #include "emotemanager.h"
 #include "ircmanager.h"
+#include "util/urlfetch.h"
 #include "windowmanager.h"
 
 #include <QBuffer>
@@ -18,49 +19,39 @@ namespace messages {
 
 LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : currentPixmap(NULL)
-    , allFrames()
-    , currentFrame(0)
-    , currentFrameOffset(0)
-    , url(url)
-    , name(name)
-    , tooltip(tooltip)
-    , animated(false)
-    , margin(margin)
-    , ishat(isHat)
-    , scale(scale)
-    , isLoading(false)
+    : _currentPixmap(NULL)
+    , _currentFrame(0)
+    , _currentFrameOffset(0)
+    , _url(url)
+    , _name(name)
+    , _tooltip(tooltip)
+    , _animated(false)
+    , _margin(margin)
+    , _ishat(isHat)
+    , _scale(scale)
+    , _isLoading(false)
 {
 }
 
 LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : currentPixmap(image)
-    , allFrames()
-    , currentFrame(0)
-    , currentFrameOffset(0)
-    , url()
-    , name(name)
-    , tooltip(tooltip)
-    , animated(false)
-    , margin(margin)
-    , ishat(isHat)
-    , scale(scale)
-    , isLoading(true)
+    : _currentPixmap(image)
+    , _currentFrame(0)
+    , _currentFrameOffset(0)
+    , _name(name)
+    , _tooltip(tooltip)
+    , _animated(false)
+    , _margin(margin)
+    , _ishat(isHat)
+    , _scale(scale)
+    , _isLoading(true)
 {
 }
 
 void LazyLoadedImage::loadImage()
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-
-    QUrl url(this->url);
-    QNetworkRequest request(url);
-
-    QNetworkReply *reply = manager->get(request);
-
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        QByteArray array = reply->readAll();
+    util::urlFetch(_url, [=](QNetworkReply &reply) {
+        QByteArray array = reply.readAll();
         QBuffer buffer(&array);
         buffer.open(QIODevice::ReadOnly);
 
@@ -75,45 +66,42 @@ void LazyLoadedImage::loadImage()
 
                 if (first) {
                     first = false;
-                    this->currentPixmap = pixmap;
+                    _currentPixmap = pixmap;
                 }
 
                 FrameData data;
                 data.duration = std::max(20, reader.nextImageDelay());
                 data.image = pixmap;
 
-                allFrames.push_back(data);
+                _allFrames.push_back(data);
             }
         }
 
-        if (allFrames.size() > 1) {
-            this->animated = true;
+        if (_allFrames.size() > 1) {
+            _animated = true;
 
             EmoteManager::getInstance().getGifUpdateSignal().connect([this] { gifUpdateTimout(); });
         }
 
         EmoteManager::getInstance().incGeneration();
         WindowManager::getInstance().layoutVisibleChatWidgets();
-
-        reply->deleteLater();
-        manager->deleteLater();
     });
 }
 
 void LazyLoadedImage::gifUpdateTimout()
 {
-    this->currentFrameOffset += GIF_FRAME_LENGTH;
+    _currentFrameOffset += GIF_FRAME_LENGTH;
 
     while (true) {
-        if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
-            this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
-            this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
+        if (_currentFrameOffset > _allFrames.at(_currentFrame).duration) {
+            _currentFrameOffset -= _allFrames.at(_currentFrame).duration;
+            _currentFrame = (_currentFrame + 1) % _allFrames.size();
         } else {
             break;
         }
     }
 
-    this->currentPixmap = this->allFrames[this->currentFrame].image;
+    _currentPixmap = _allFrames[_currentFrame].image;
 }
 }  // namespace messages
 }  // namespace chatterino

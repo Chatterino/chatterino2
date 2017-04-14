@@ -10,72 +10,72 @@ namespace messages {
 class LazyLoadedImage : QObject
 {
 public:
-    explicit LazyLoadedImage(const QString &url, qreal scale = 1, const QString &name = "",
-                             const QString &tooltip = "", const QMargins &margin = QMargins(),
+    explicit LazyLoadedImage(const QString &_url, qreal _scale = 1, const QString &_name = "",
+                             const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                              bool isHat = false);
-    explicit LazyLoadedImage(QPixmap *currentPixmap, qreal scale = 1, const QString &name = "",
-                             const QString &tooltip = "", const QMargins &margin = QMargins(),
+    explicit LazyLoadedImage(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
+                             const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                              bool isHat = false);
 
     const QPixmap *getPixmap()
     {
-        if (!isLoading) {
-            isLoading = true;
+        if (!_isLoading) {
+            _isLoading = true;
 
             loadImage();
         }
-        return currentPixmap;
+        return _currentPixmap;
     }
 
     qreal getScale() const
     {
-        return scale;
+        return _scale;
     }
 
     const QString &getUrl() const
     {
-        return url;
+        return _url;
     }
 
     const QString &getName() const
     {
-        return name;
+        return _name;
     }
 
     const QString &getTooltip() const
     {
-        return tooltip;
+        return _tooltip;
     }
 
     const QMargins &getMargin() const
     {
-        return margin;
+        return _margin;
     }
 
     bool getAnimated() const
     {
-        return animated;
+        return _animated;
     }
 
-    bool getIsHat() const
+    bool isHat() const
     {
-        return ishat;
+        return _ishat;
     }
 
     int getWidth() const
     {
-        if (currentPixmap == NULL) {
+        if (_currentPixmap == NULL) {
             return 16;
         }
-        return currentPixmap->width();
+        return _currentPixmap->width();
     }
 
     int getHeight() const
     {
-        if (currentPixmap == NULL) {
+        if (_currentPixmap == NULL) {
             return 16;
         }
-        return currentPixmap->height();
+        return _currentPixmap->height();
     }
 
 private:
@@ -84,26 +84,26 @@ private:
         int duration;
     };
 
-    QPixmap *currentPixmap;
-    std::vector<FrameData> allFrames;
-    int currentFrame;
-    int currentFrameOffset;
+    QPixmap *_currentPixmap;
+    std::vector<FrameData> _allFrames;
+    int _currentFrame;
+    int _currentFrameOffset;
 
-    QString url;
-    QString name;
-    QString tooltip;
-    bool animated;
-    QMargins margin;
-    bool ishat;
-    qreal scale;
+    QString _url;
+    QString _name;
+    QString _tooltip;
+    bool _animated;
+    QMargins _margin;
+    bool _ishat;
+    qreal _scale;
 
-    bool isLoading;
+    bool _isLoading;
 
     void loadImage();
 
     void gifUpdateTimout();
 };
-}
-}
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // LAZYLOADEDIMAGE_H
