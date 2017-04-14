@@ -8,8 +8,8 @@
 #include <QMimeData>
 #include <QPainter>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
     : QWidget()

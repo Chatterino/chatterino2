@@ -1,7 +1,7 @@
 #include "channelmanager.h"
 #include "ircmanager.h"
 
-namespace chatterino {
+namespace  chatterino {
 
 ChannelManager ChannelManager::instance;
 
@@ -119,4 +119,4 @@ void ChannelManager::removeChannel(const QString &channel)
     }
 }
 
-}  // namespace chatterino
+}  // namespace  chatterino

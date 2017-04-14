@@ -9,8 +9,8 @@
 #include <boost/signals2.hpp>
 #include <functional>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 class ScrollBar : public QWidget
 {

@@ -8,8 +8,8 @@
 #include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 class MainWindow : public QWidget
 {
@@ -37,7 +37,7 @@ private:
     TitleBar _titleBar;
 };
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino
 
 #endif  // MAINWINDOW_H

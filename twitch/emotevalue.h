@@ -3,8 +3,8 @@
 
 #include "QString"
 
-namespace chatterino {
-namespace twitch {
+namespace  chatterino {
+namespace  twitch {
 
 struct EmoteValue {
 public:

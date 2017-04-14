@@ -9,8 +9,8 @@
 
 #include <memory>
 
-namespace chatterino {
-namespace logging {
+namespace  chatterino {
+namespace  logging {
 
 class Channel
 {
@@ -33,7 +33,7 @@ private:
     QFile fileHandle;
 };
 
-}  // namespace logging
-}  // namespace chatterino
+}  // namespace  logging
+}  // namespace  chatterino
 
 #endif  // LOGGINGCHANNEL_H

@@ -7,8 +7,8 @@
 #include <QPainterPath>
 #include <QRadialGradient>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 NotebookButton::NotebookButton(QWidget *parent)
     : FancyButton(parent)

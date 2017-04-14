@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <boost/signals2.hpp>
 
-namespace chatterino {
+namespace  chatterino {
 class EmoteManager
 {
 public:
@@ -93,6 +93,6 @@ private:
     void loadFfzEmotes();
     void loadBttvEmotes();
 };
-}  // namespace chatterino
+}  // namespace  chatterino
 
 #endif  // EMOTES_H

@@ -16,8 +16,8 @@
 #include <QStandardPaths>
 #include <boost/signals2.hpp>
 
-using namespace chatterino;
-using namespace chatterino::widgets;
+using namespace  chatterino;
+using namespace  chatterino::widgets;
 
 int main(int argc, char *argv[])
 {

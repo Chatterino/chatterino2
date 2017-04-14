@@ -1,7 +1,7 @@
 #include "messages/link.h"
 
-namespace chatterino {
-namespace messages {
+namespace  chatterino {
+namespace  messages {
 
 Link::Link()
     : type(None)

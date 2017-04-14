@@ -23,7 +23,7 @@ protected:
     QRect desiredGeometry;
     bool animate;
 };
-}
-}
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // NOTEBOOKPAGEDROPPREVIEW_H

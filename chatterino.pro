@@ -17,7 +17,7 @@ TARGET   = chatterino
 TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += IRC_NAMESPACE=Communi
+DEFINES += IRC_namespace =Communi
 
 # do not use windows min/max macros
 win32 {

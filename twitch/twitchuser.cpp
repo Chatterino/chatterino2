@@ -1,7 +1,7 @@
 #include "twitchuser.h"
 
-namespace chatterino {
-namespace twitch {
+namespace  chatterino {
+namespace  twitch {
 TwitchUser::TwitchUser(const QString &username, const QString &oauthToken,
                        const QString &oauthClient)
     : IrcUser2(username, username, username, "oauth:" + oauthToken)

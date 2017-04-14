@@ -31,6 +31,6 @@ private:
     std::vector<twitch::TwitchUser> _twitchUsers;
     std::mutex _twitchUsersMutex;
 };
-}  // namespace chatterino
+}  // namespace  chatterino
 
 #endif  // ACCOUNTMANAGER_H

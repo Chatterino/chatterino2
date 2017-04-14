@@ -5,8 +5,8 @@
 
 #include <ctime>
 
-namespace chatterino {
-namespace logging {
+namespace  chatterino {
+namespace  logging {
 
 Channel::Channel(const QString &_channelName, const QString &_baseDirectory)
     : channelName(_channelName)
@@ -72,5 +72,5 @@ void Channel::appendLine(const QString &line)
     this->fileHandle.flush();
 }
 
-}  // namespace logging
-}  // namespace chatterino
+}  // namespace  logging
+}  // namespace  chatterino

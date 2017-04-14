@@ -12,8 +12,8 @@
 #include <QWidget>
 #include <boost/foreach.hpp>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 bool NotebookPage::isDraggingSplit = false;
 ChatWidget *NotebookPage::draggingSplit = NULL;
@@ -334,5 +334,5 @@ boost::property_tree::ptree NotebookPage::save()
     return tree;
 }
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino

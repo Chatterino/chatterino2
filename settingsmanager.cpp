@@ -5,9 +5,9 @@
 #include <QDir>
 #include <QStandardPaths>
 
-using namespace chatterino::messages;
+using namespace  chatterino::messages;
 
-namespace chatterino {
+namespace  chatterino {
 
 SettingsManager SettingsManager::instance;
 
@@ -131,4 +131,4 @@ SettingsSnapshot SettingsManager::createSnapshot()
     return snapshot;
 }
 
-}  // namespace chatterino
+}  // namespace  chatterino

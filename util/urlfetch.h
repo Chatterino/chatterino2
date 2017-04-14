@@ -12,8 +12,8 @@
 
 #include <functional>
 
-namespace chatterino {
-namespace util {
+namespace  chatterino {
+namespace  util {
 
 static void urlFetch(const QString &url, std::function<void(QNetworkReply &)> successCallback)
 {

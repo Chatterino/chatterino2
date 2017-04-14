@@ -27,7 +27,7 @@ signals:
 
 private:
     void paintEvent(QPaintEvent *);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
     QWidget *_widget;
     QString _label;
@@ -37,7 +37,7 @@ private:
 
     bool _selected;
 };
-}
-}
+}  // namespace  widgets
+}  // namespace  chatterino
 
 #endif  // SETTINGSNOTEBOOKTAB_H

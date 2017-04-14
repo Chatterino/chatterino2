@@ -5,15 +5,15 @@
 
 #include <memory>
 
-namespace Ui {
+namespace  Ui {
 class UserPopup;
 }
 
-namespace chatterino {
+namespace  chatterino {
 
 class Channel;
 
-namespace widgets {
+namespace  widgets {
 
 class UserPopupWidget : public QWidget
 {
@@ -29,7 +29,7 @@ private:
     std::shared_ptr<Channel> _channel;
 };
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino
 
 #endif  // USERPOPUPWIDGET_H

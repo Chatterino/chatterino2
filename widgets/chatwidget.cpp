@@ -11,10 +11,10 @@
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
-using namespace chatterino::messages;
+using namespace  chatterino::messages;
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
@@ -116,7 +116,7 @@ ChatWidget::attachChannel(SharedChannel channel)
 
     auto snapshot = _channel.get()->getMessageSnapshot();
 
-    for (int i = 0; i < snapshot.getLength(); i++) {
+    for (int i = 0; i < snapshot.getSize(); i++) {
         SharedMessageRef deleted;
 
         auto messageRef = new MessageRef(snapshot[i]);
@@ -198,5 +198,5 @@ ChatWidget::save()
     return tree;
 }
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino

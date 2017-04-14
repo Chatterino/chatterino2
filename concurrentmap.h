@@ -65,6 +65,6 @@ private:
     QMap<TKey, TValue> _map;
 };
 
-}  // namespace chatterino
+}  // namespace  chatterino
 
 #endif  // CONCURRENTMAP_H

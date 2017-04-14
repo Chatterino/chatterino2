@@ -9,10 +9,10 @@
 #define MARGIN_TOP 8
 #define MARGIN_BOTTOM 8
 
-using namespace chatterino::messages;
+using namespace  chatterino::messages;
 
-namespace chatterino {
-namespace messages {
+namespace  chatterino {
+namespace  messages {
 
 MessageRef::MessageRef(SharedMessage message)
     : _message(message)

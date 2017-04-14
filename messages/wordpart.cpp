@@ -1,8 +1,8 @@
 #include "messages/wordpart.h"
 #include "messages/word.h"
 
-namespace chatterino {
-namespace messages {
+namespace  chatterino {
+namespace  messages {
 
 WordPart::WordPart(Word &word, int x, int y, int lineNumber, const QString &copyText,
                    bool allowTrailingSpace)

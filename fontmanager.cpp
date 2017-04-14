@@ -2,7 +2,7 @@
 
 #define DEFAULT_FONT "Arial"
 
-namespace chatterino {
+namespace  chatterino {
 
 FontManager FontManager::instance;
 

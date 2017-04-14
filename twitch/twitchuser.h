@@ -5,8 +5,8 @@
 
 #include <QString>
 
-namespace chatterino {
-namespace twitch {
+namespace  chatterino {
+namespace  twitch {
 
 class TwitchUser : public IrcUser2
 {

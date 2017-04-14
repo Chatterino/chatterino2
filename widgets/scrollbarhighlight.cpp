@@ -1,8 +1,8 @@
 #include "widgets/scrollbarhighlight.h"
 #include "colorscheme.h"
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 ScrollBarHighlight::ScrollBarHighlight(float position, int colorIndex, Style style, QString tag)
     : _position(position)

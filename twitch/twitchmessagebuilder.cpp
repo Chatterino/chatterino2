@@ -5,10 +5,10 @@
 #include "ircmanager.h"
 #include "resources.h"
 
-using namespace chatterino::messages;
+using namespace  chatterino::messages;
 
-namespace chatterino {
-namespace twitch {
+namespace  chatterino {
+namespace  twitch {
 TwitchMessageBuilder::TwitchMessageBuilder()
     : MessageBuilder()
     , messageId()

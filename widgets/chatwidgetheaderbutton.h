@@ -8,8 +8,8 @@
 #include <QPaintEvent>
 #include <QWidget>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 class ChatWidgetHeaderButton : public QWidget
 {

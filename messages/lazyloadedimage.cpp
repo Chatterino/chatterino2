@@ -103,5 +103,5 @@ void LazyLoadedImage::gifUpdateTimout()
 
     _currentPixmap = _allFrames[_currentFrame].image;
 }
-}  // namespace messages
-}  // namespace chatterino
+}  // namespace  messages
+}  // namespace  chatterino

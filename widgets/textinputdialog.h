@@ -8,8 +8,8 @@
 #include <QString>
 #include <QVBoxLayout>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 class TextInputDialog : public QDialog
 {

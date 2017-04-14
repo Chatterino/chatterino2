@@ -103,7 +103,7 @@ private:
 
     void gifUpdateTimout();
 };
-}  // namespace messages
-}  // namespace chatterino
+}  // namespace  messages
+}  // namespace  chatterino
 
 #endif  // LAZYLOADEDIMAGE_H

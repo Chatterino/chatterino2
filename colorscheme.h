@@ -5,7 +5,7 @@
 #include <QColor>
 #include <boost/signals2.hpp>
 
-namespace chatterino {
+namespace  chatterino {
 
 class ColorScheme
 {

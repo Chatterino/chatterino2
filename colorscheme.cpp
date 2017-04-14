@@ -6,7 +6,7 @@
 
 #include <QColor>
 
-namespace chatterino {
+namespace  chatterino {
 
 void ColorScheme::init()
 {
@@ -172,4 +172,4 @@ void ColorScheme::normalizeColor(QColor &color)
 
     //    color.setHslF(color.hueF(), s, newL);
 }
-}  // namespace chatterino
+}  // namespace  chatterino

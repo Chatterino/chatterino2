@@ -63,12 +63,13 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
-void SettingsDialogTab::mouseReleaseEvent(QMouseEvent *event)
+void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() != Qt::LeftButton)
+    if (event->button() != Qt::LeftButton) {
         return;
+    }
 
     _dialog->select(this);
 }
-}
-}
+}  // namespace  widgets
+}  // namespace  chatterino

@@ -3,8 +3,8 @@
 
 #include <QWidget>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 class TitleBar : public QWidget
 {
 public:

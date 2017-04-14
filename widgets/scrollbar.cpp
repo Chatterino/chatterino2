@@ -6,8 +6,8 @@
 
 #define MIN_THUMB_HEIGHT 10
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 ScrollBar::ScrollBar(QWidget *widget)
     : QWidget(widget)

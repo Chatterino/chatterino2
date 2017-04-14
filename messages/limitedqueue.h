@@ -7,8 +7,8 @@
 #include <mutex>
 #include <vector>
 
-namespace chatterino {
-namespace messages {
+namespace  chatterino {
+namespace  messages {
 
 template <typename T>
 class LimitedQueue
@@ -96,7 +96,7 @@ private:
     unsigned int buffer;
 };
 
-}  // namespace messages
-}  // namespace chatterino
+}  // namespace  messages
+}  // namespace  chatterino
 
 #endif  // LIMITEDQUEUE_H

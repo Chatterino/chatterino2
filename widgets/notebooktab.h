@@ -81,7 +81,7 @@ public:
     boost::property_tree::ptree save();
 };
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino
 
 #endif  // NOTEBOOKTAB_H

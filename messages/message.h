@@ -12,11 +12,11 @@
 #include <chrono>
 #include <memory>
 
-namespace chatterino {
+namespace  chatterino {
 
 class Channel;
 
-namespace messages {
+namespace  messages {
 class Message;
 
 typedef std::shared_ptr<Message> SharedMessage;
@@ -63,7 +63,7 @@ private:
     std::vector<Word> _words;
 };
 
-}  // namespace messages
-}  // namespace chatterino
+}  // namespace  messages
+}  // namespace  chatterino
 
 #endif  // MESSAGE_H

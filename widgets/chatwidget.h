@@ -16,8 +16,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/signals2/connection.hpp>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 class ChatWidget : public QWidget
 {
@@ -62,7 +62,7 @@ public:
     boost::property_tree::ptree save();
 };
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino
 
 #endif  // CHATWIDGET_H

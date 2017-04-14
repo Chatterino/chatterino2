@@ -4,8 +4,8 @@
 #include <QRect>
 #include <QString>
 
-namespace chatterino {
-namespace messages {
+namespace  chatterino {
+namespace  messages {
 
 class Word;
 

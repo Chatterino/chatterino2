@@ -27,3 +27,4 @@ BraceWrapping: {
     BeforeCatch: 'false'
 }
 ColumnLimit: 100
+FixNamespaceComments: true

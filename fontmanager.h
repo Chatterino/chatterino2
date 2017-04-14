@@ -4,7 +4,7 @@
 #include <QFont>
 #include <QFontMetrics>
 
-namespace chatterino {
+namespace  chatterino {
 
 class FontManager
 {

@@ -26,9 +26,9 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     , _mouseDown(false)
     , _lastPressPosition()
 {
-    this->setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_OpaquePaintEvent);
     _scrollbar.setSmallChange(5);
-    this->setMouseTracking(true);
+    setMouseTracking(true);
 
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
                      &ChatWidgetView::wordTypeMaskChanged);
@@ -46,7 +46,7 @@ bool ChatWidgetView::layoutMessages()
 {
     auto messages = _chatWidget->getMessagesSnapshot();
 
-    if (messages.getLength() == 0) {
+    if (messages.getSize() == 0) {
         _scrollbar.setVisible(false);
 
         return false;
@@ -57,14 +57,13 @@ bool ChatWidgetView::layoutMessages()
     int start = _scrollbar.getCurrentValue();
 
     // layout the visible messages in the view
-    if (messages.getLength() > start) {
-        int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
+    if (messages.getSize() > start) {
+        int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
 
-        for (int i = start; i < messages.getLength(); ++i) {
-            auto messagePtr = messages[i];
-            auto message = messagePtr.get();
+        for (int i = start; i < messages.getSize(); ++i) {
+            auto message = messages[i];
 
-            redraw |= message->layout(this->width(), true);
+            redraw |= message->layout(width(), true);
 
             y += message->getHeight();
 
@@ -75,17 +74,17 @@ bool ChatWidgetView::layoutMessages()
     }
 
     // layout the messages at the bottom to determine the scrollbar thumb size
-    int h = this->height() - 8;
+    int h = height() - 8;
 
-    for (int i = messages.getLength() - 1; i >= 0; i--) {
+    for (int i = messages.getSize() - 1; i >= 0; i--) {
         auto *message = messages[i].get();
 
-        message->layout(this->width(), true);
+        message->layout(width(), true);
 
         h -= message->getHeight();
 
         if (h < 0) {
-            _scrollbar.setLargeChange((messages.getLength() - i) + (qreal)h / message->getHeight());
+            _scrollbar.setLargeChange((messages.getSize() - i) + (qreal)h / message->getHeight());
             _scrollbar.setDesiredValue(_scrollbar.getDesiredValue());
 
             showScrollbar = true;
@@ -99,7 +98,7 @@ bool ChatWidgetView::layoutMessages()
         _scrollbar.setDesiredValue(0);
     }
 
-    _scrollbar.setMaximum(messages.getLength());
+    _scrollbar.setMaximum(messages.getSize());
 
     return redraw;
 }
@@ -107,7 +106,7 @@ bool ChatWidgetView::layoutMessages()
 void ChatWidgetView::updateGifEmotes()
 {
     _onlyUpdateEmotes = true;
-    this->update();
+    update();
 }
 
 ScrollBar *ChatWidgetView::getScrollbar()
@@ -188,13 +187,13 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 
     int start = _scrollbar.getCurrentValue();
 
-    if (start >= messages.getLength()) {
+    if (start >= messages.getSize()) {
         return;
     }
 
     int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.getLength(); ++i) {
+    for (int i = start; i < messages.getSize(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
 
         std::shared_ptr<QPixmap> bufferPtr = messageRef->buffer;
@@ -203,7 +202,7 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
         bool updateBuffer = messageRef->updateBuffer;
 
         if (buffer == nullptr) {
-            buffer = new QPixmap(this->width(), messageRef->getHeight());
+            buffer = new QPixmap(width(), messageRef->getHeight());
             bufferPtr = std::shared_ptr<QPixmap>(buffer);
             updateBuffer = true;
         }
@@ -282,10 +281,10 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 void ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
     if (_scrollbar.isVisible()) {
+        auto mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier.get();
+
         _scrollbar.setDesiredValue(
-            _scrollbar.getDesiredValue() -
-                event->delta() / 10.0 * SettingsManager::getInstance().mouseScrollMultiplier.get(),
-            true);
+            _scrollbar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);
     }
 }
 
@@ -295,7 +294,7 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     QPoint relativePos;
 
     if (!tryGetMessageAt(event->pos(), message, relativePos)) {
-        this->setCursor(Qt::ArrowCursor);
+        setCursor(Qt::ArrowCursor);
         return;
     }
 
@@ -305,16 +304,16 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     messages::Word hoverWord;
 
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
-        this->setCursor(Qt::ArrowCursor);
+        setCursor(Qt::ArrowCursor);
         return;
     }
 
     int index = message->getSelectionIndex(relativePos);
 
     if (hoverWord.getLink().getIsValid()) {
-        this->setCursor(Qt::PointingHandCursor);
+        setCursor(Qt::PointingHandCursor);
     } else {
-        this->setCursor(Qt::ArrowCursor);
+        setCursor(Qt::ArrowCursor);
     }
 }
 
@@ -386,13 +385,13 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     int start = _scrollbar.getCurrentValue();
 
-    if (start >= messages.getLength()) {
+    if (start >= messages.getSize()) {
         return false;
     }
 
-    int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1))) + 12;
+    int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1))) + 12;
 
-    for (int i = start; i < messages.getLength(); ++i) {
+    for (int i = start; i < messages.getSize(); ++i) {
         auto message = messages[i];
 
         y += message->getHeight();
@@ -406,5 +405,5 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     return false;
 }
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino

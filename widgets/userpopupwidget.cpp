@@ -4,8 +4,8 @@
 
 #include <QDebug>
 
-namespace chatterino {
-namespace widgets {
+namespace  chatterino {
+namespace  widgets {
 
 UserPopupWidget::UserPopupWidget(std::shared_ptr<Channel> &&channel)
     : QWidget(nullptr)
@@ -37,5 +37,5 @@ void UserPopupWidget::setName(const QString &name)
     _ui->lblUsername->setText(name);
 }
 
-}  // namespace widgets
-}  // namespace chatterino
+}  // namespace  widgets
+}  // namespace  chatterino
