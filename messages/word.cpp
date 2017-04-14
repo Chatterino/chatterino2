@@ -1,7 +1,7 @@
 #include "messages/word.h"
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 // Image word
 Word::Word(LazyLoadedImage *image, Type type, const QString &copytext, const QString &tooltip,
@@ -130,5 +130,5 @@ std::vector<short> &Word::getCharacterWidthCache() const
 {
     return _characterWidthCache;
 }
-}  // namespace  messages
-}  // namespace  chatterino
+}  // namespace messages
+}  // namespace chatterino

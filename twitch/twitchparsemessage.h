@@ -5,8 +5,8 @@
 //#include "messages/messagebuilder.h"
 //#include "messages/messageparseargs.h"
 //
-// namespace  chatterino {
-// namespace  twitch {
+// namespace chatterino {
+// namespace twitch {
 //}
 //}
 //

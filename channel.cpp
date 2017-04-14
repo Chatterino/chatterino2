@@ -15,9 +15,9 @@
 
 #include <memory>
 
-using namespace  chatterino::messages;
+using namespace chatterino::messages;
 
-namespace  chatterino {
+namespace chatterino {
 
 Channel::Channel(const QString &channel)
     : _messages()
@@ -188,4 +188,4 @@ void Channel::reloadFfzEmotes()
     });
 }
 
-}  // namespace  chatterino
+}  // namespace chatterino

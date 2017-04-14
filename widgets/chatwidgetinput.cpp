@@ -8,8 +8,8 @@
 #include <QPainter>
 #include <boost/signals2.hpp>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
     : _chatWidget(widget)

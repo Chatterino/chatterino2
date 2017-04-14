@@ -13,8 +13,8 @@
 #include <boost/signals2.hpp>
 #include <memory>
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 class Message;
 }
 
@@ -75,6 +75,6 @@ private:
     void reloadFfzEmotes();
 };
 
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // CHANNEL_H

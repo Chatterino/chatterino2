@@ -19,9 +19,9 @@
 
 #include <future>
 
-using namespace  chatterino::messages;
+using namespace chatterino::messages;
 
-namespace  chatterino {
+namespace chatterino {
 
 IrcManager IrcManager::instance;
 

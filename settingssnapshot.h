@@ -28,6 +28,6 @@ public:
 private:
     std::vector<std::pair<std::reference_wrapper<BaseSetting>, QVariant>> _items;
 };
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // SETTINGSSNAPSHOT_H

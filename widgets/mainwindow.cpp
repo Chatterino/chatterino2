@@ -13,8 +13,8 @@
 #include "Windows.h"
 #endif
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent)
@@ -139,5 +139,5 @@ Notebook &MainWindow::getNotebook()
 {
     return _notebook;
 }
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

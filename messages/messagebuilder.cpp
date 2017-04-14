@@ -3,8 +3,8 @@
 #include "emotemanager.h"
 #include "resources.h"
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 MessageBuilder::MessageBuilder()
     : _words()

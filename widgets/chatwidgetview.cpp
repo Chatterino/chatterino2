@@ -405,5 +405,5 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     return false;
 }
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

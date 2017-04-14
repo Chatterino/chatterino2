@@ -70,6 +70,6 @@ private:
     void messageReceived(Communi::IrcMessage *message);
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
 };
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // IRCMANAGER_H

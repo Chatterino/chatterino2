@@ -79,6 +79,6 @@ private:
     static SettingsManager instance;
 };
 
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // APPSETTINGS_H

@@ -13,8 +13,8 @@
 #include <QPoint>
 #include <QWidget>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 class ChatWidget;
 
 class ChatWidgetHeader : public QWidget

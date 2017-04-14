@@ -5,8 +5,8 @@
 
 #include <QPainter>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : QWidget(notebook)
@@ -246,5 +246,5 @@ boost::property_tree::ptree NotebookTab::save()
     return tree;
 }
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

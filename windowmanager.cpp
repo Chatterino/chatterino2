@@ -121,4 +121,4 @@ void WindowManager::save()
     boost::property_tree::write_json(settingsPath, tree);
 }
 
-}  // namespace  chatterino
+}  // namespace chatterino

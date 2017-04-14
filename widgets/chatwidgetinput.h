@@ -49,7 +49,7 @@ private slots:
     void editTextChanged();
     //    void editKeyPressed(QKeyEvent *event);
 };
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // CHATWIDGETINPUT_H

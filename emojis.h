@@ -9,7 +9,7 @@
 #include <QString>
 #include <unordered_map>
 
-namespace  chatterino {
+namespace chatterino {
 
 class Emojis
 {

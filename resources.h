@@ -108,6 +108,6 @@ private:
     static messages::LazyLoadedImage *buttonBan;
     static messages::LazyLoadedImage *buttonTimeout;
 };
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // RESOURCES_H

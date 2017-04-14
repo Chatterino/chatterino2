@@ -9,8 +9,8 @@
 #include <QRect>
 #include <QString>
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 class Word
 {
@@ -114,7 +114,7 @@ private:
     mutable std::vector<short> _characterWidthCache;
 };
 
-}  // namespace  messages
-}  // namespace  chatterino
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // WORD_H

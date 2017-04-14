@@ -4,8 +4,8 @@
 #include <QBrush>
 #include <QPainter>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 ChatWidgetHeaderButton::ChatWidgetHeaderButton(int spacing)
     : QWidget()

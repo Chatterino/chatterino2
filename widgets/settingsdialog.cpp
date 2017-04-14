@@ -13,8 +13,8 @@
 #include <QPalette>
 #include <QResource>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 SettingsDialog::SettingsDialog()
     : _snapshot(SettingsManager::getInstance().createSnapshot())
@@ -325,5 +325,5 @@ void SettingsDialog::cancelButtonClicked()
     this->close();
 }
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

@@ -6,8 +6,8 @@
 
 #include <QString>
 
-namespace  chatterino {
-namespace  twitch {
+namespace chatterino {
+namespace twitch {
 
 class TwitchMessageBuilder : public messages::MessageBuilder
 {

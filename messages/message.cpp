@@ -16,8 +16,8 @@
 #include <list>
 #include <tuple>
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 Message::Message(const QString &text)
     : _words()
@@ -81,5 +81,5 @@ const QString &Message::getId() const
     return _id;
 }
 
-}  // namespace  messages
-}  // namespace  chatterino
+}  // namespace messages
+}  // namespace chatterino

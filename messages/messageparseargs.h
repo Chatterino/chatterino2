@@ -1,8 +1,8 @@
 #ifndef MESSAGEPARSEARGS_H
 #define MESSAGEPARSEARGS_H
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 struct MessageParseArgs {
 public:

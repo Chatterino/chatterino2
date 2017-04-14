@@ -6,8 +6,8 @@
 #include <QPixmap>
 #include <memory>
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 class MessageRef;
 

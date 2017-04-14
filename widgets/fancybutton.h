@@ -7,8 +7,8 @@
 #include <QTimer>
 #include <QWidget>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 class FancyButton : public QWidget
 {
     struct ClickEffect {

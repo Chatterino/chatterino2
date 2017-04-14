@@ -2,7 +2,7 @@
 
 #include <QPixmap>
 
-namespace  chatterino {
+namespace chatterino {
 
 messages::LazyLoadedImage *Resources::badgeStaff(NULL);
 messages::LazyLoadedImage *Resources::badgeAdmin(NULL);

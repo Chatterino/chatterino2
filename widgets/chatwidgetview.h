@@ -67,7 +67,7 @@ private slots:
         update();
     }
 };
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // CHATVIEW_H

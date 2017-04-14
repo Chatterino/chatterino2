@@ -3,8 +3,8 @@
 #include <QDebug>
 #include <QPainter>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 FancyButton::FancyButton(QWidget *parent)
     : QWidget(parent)

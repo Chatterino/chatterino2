@@ -3,8 +3,8 @@
 
 #include "QString"
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 class ScrollBarHighlight
 {

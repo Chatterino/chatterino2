@@ -8,10 +8,10 @@
 //
 //#include <QRegularExpression>
 //
-// using namespace  chatterino::messages;
+// using namespace chatterino::messages;
 //
-// namespace  chatterino {
-// namespace  twitch {
+// namespace chatterino {
+// namespace twitch {
 // SharedMessage
 // twitchParseMessage(const Communi::IrcPrivateMessage *ircMessage,
 //                   Channel *channel, const MessageParseArgs &args)

@@ -5,8 +5,8 @@
 
 #include <unordered_map>
 
-namespace  chatterino {
-namespace  logging {
+namespace chatterino {
+namespace logging {
 
 static QString logBasePath;
 static QString channelBasePath;
@@ -96,5 +96,5 @@ std::shared_ptr<Channel> get(const QString &channelName)
     return ret;
 }
 
-}  // namespace  logging
-}  // namespace  chatterino
+}  // namespace logging
+}  // namespace chatterino

@@ -1,8 +1,8 @@
 #include "widgets/textinputdialog.h"
 #include <QSizePolicy>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)

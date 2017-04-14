@@ -16,8 +16,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 class SettingsDialog : public QWidget
 {
@@ -50,7 +50,7 @@ private:
     void cancelButtonClicked();
 };
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // SETTINGSDIALOG_H

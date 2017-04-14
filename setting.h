@@ -72,6 +72,6 @@ private:
     T _value;
 };
 
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // SETTING_H

@@ -34,7 +34,7 @@ private:
     int _offset;
     int _length;
 };
-}  // namespace  messages
-}  // namespace  chatterino
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // LIMITEDQUEUESNAPSHOT_H

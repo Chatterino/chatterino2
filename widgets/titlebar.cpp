@@ -1,7 +1,7 @@
 #include "titlebar.h"
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 TitleBar::TitleBar(QWidget *parent)
     : QWidget(parent)
 {

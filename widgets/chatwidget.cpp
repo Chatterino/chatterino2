@@ -11,10 +11,10 @@
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
-using namespace  chatterino::messages;
+using namespace chatterino::messages;
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
@@ -198,5 +198,5 @@ ChatWidget::save()
     return tree;
 }
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

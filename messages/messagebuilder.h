@@ -4,8 +4,8 @@
 #include "messages/message.h"
 #include <ctime>
 
-namespace  chatterino {
-namespace  messages {
+namespace chatterino {
+namespace messages {
 
 class MessageBuilder
 {

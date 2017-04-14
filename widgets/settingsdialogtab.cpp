@@ -71,5 +71,5 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
 
     _dialog->select(this);
 }
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino

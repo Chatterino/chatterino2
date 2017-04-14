@@ -4,8 +4,8 @@
 #include <QDebug>
 #include <QPainter>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
     : QWidget(parent)

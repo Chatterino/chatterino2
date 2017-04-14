@@ -1,6 +1,6 @@
 ﻿#include "usermanager.h"
 
-namespace  chatterino {
+namespace chatterino {
 
 AccountManager AccountManager::instance;
 
@@ -41,4 +41,4 @@ void AccountManager::addTwitchUser(const twitch::TwitchUser &user)
 
     _twitchUsers.push_back(user);
 }
-}  // namespace  chatterino
+}  // namespace chatterino

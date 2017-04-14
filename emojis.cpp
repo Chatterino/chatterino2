@@ -5,7 +5,7 @@
 #include <QStringBuilder>
 #include <QTextStream>
 
-namespace  chatterino {
+namespace chatterino {
 
 QRegularExpression Emojis::findShortCodesRegex(":([-+\\w]+):");
 

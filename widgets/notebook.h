@@ -9,8 +9,8 @@
 #include <QWidget>
 #include <boost/property_tree/ptree.hpp>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 class Notebook : public QWidget
 {
@@ -61,7 +61,7 @@ public:
     void loadDefaults();
 };
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // NOTEBOOK_H

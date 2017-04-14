@@ -1,6 +1,6 @@
 #include "ircuser2.h"
 
-namespace  chatterino {
+namespace chatterino {
 
 IrcUser2::IrcUser2(const QString &userName, const QString &nickName, const QString &realName,
                    const QString &password)

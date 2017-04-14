@@ -13,9 +13,9 @@
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0"
 
-using namespace  chatterino::messages;
+using namespace chatterino::messages;
 
-namespace  chatterino {
+namespace chatterino {
 
 EmoteManager EmoteManager::instance;
 

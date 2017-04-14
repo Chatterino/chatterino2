@@ -3,7 +3,7 @@
 
 #include "channel.h"
 
-namespace  chatterino {
+namespace chatterino {
 
 class ChannelManager
 {
@@ -36,6 +36,6 @@ private:
     SharedChannel _empty;
 };
 
-}  // namespace  chatterino
+}  // namespace chatterino
 
 #endif  // CHANNELS_H

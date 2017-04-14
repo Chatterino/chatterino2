@@ -37,7 +37,7 @@ private:
 
     bool _selected;
 };
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // SETTINGSNOTEBOOKTAB_H

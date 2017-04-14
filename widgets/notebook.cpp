@@ -14,8 +14,8 @@
 #include <QWidget>
 #include <boost/foreach.hpp>
 
-namespace  chatterino {
-namespace  widgets {
+namespace chatterino {
+namespace widgets {
 
 Notebook::Notebook(QWidget *parent)
     : QWidget(parent)
@@ -242,5 +242,5 @@ void Notebook::loadDefaults()
     addPage();
 }
 
-}  // namespace  widgets
-}  // namespace  chatterino
+}  // namespace widgets
+}  // namespace chatterino
