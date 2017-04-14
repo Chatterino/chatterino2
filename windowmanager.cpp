@@ -14,14 +14,6 @@ WindowManager::WindowManager()
 {
 }
 
-WindowManager::~WindowManager()
-{
-    if (_mainWindow != nullptr) {
-        // XXX(hemirt): some _mainWindow cleanup?
-        delete _mainWindow;
-    }
-}
-
 static const std::string &getSettingsPath()
 {
     static std::string path = (Path::getAppdataPath() + "uilayout.json").toStdString();
