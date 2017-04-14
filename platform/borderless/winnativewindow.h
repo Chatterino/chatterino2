@@ -1,7 +1,6 @@
 #ifndef WINNATIVEWINDOW_H
 #define WINNATIVEWINDOW_H
 
-#define NOMINMAX
 #include "Windows.h"
 #include "Windowsx.h"
 
