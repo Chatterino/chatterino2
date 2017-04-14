@@ -4,6 +4,7 @@
 #include "twitch/twitchuser.h"
 
 #include <mutex>
+#include <vector>
 
 namespace chatterino {
 

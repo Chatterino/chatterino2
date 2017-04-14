@@ -2,6 +2,7 @@
 #define MESSAGEBUILDER_H
 
 #include "messages/message.h"
+#include <ctime>
 
 namespace chatterino {
 namespace messages {
