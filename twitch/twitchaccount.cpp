@@ -5,9 +5,9 @@ namespace twitch {
 TwitchUser::TwitchUser(const QString &username, const QString &oauthToken,
                        const QString &oauthClient)
     : IrcUser2(username, username, username, "oauth:" + oauthToken)
+    , _oauthClient(oauthClient)
+    , _oauthToken(oauthToken)
 {
-    _oauthClient = oauthClient;
-    _oauthToken = oauthToken;
 }
 
 const QString &TwitchUser::getOAuthClient() const
