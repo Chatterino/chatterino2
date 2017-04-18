@@ -4,7 +4,10 @@
 #include "widgets/notebook.h"
 #include "widgets/titlebar.h"
 
+#ifdef USEWINSDK
 #include <platform/borderless/qwinwidget.h>
+#endif
+
 #include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
 
