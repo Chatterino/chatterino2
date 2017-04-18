@@ -1,4 +1,4 @@
-#include "widgets/userpopupwidget.h"
+#include "widgets/accountpopup.h"
 #include "channel.h"
 #include "ui_userpopup.h"
 

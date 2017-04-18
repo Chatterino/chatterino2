@@ -1,4 +1,4 @@
-#include "ircuser2.h"
+#include "ircaccount.h"
 
 namespace chatterino {
 

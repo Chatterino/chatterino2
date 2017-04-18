@@ -6,7 +6,7 @@
 #include "messages/messageref.h"
 #include "messages/word.h"
 #include "widgets/scrollbar.h"
-#include "widgets/userpopupwidget.h"
+#include "widgets/accountpopup.h"
 
 #include <QPaintEvent>
 #include <QScroller>

@@ -4,7 +4,7 @@
 #define TWITCH_MAX_MESSAGELENGTH 500
 
 #include "messages/message.h"
-#include "twitch/twitchuser.h"
+#include "twitch/twitchaccount.h"
 
 #include <IrcMessage>
 #include <QMap>

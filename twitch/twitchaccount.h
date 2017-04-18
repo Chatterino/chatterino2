@@ -1,7 +1,7 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include "ircuser2.h"
+#include "ircaccount.h"
 
 #include <QString>
 

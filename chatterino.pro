@@ -61,16 +61,16 @@ SOURCES += main.cpp\
     fontmanager.cpp \
     settingsmanager.cpp \
     emotemanager.cpp \
-    usermanager.cpp \
-    twitch/twitchuser.cpp \
     messages/messagebuilder.cpp \
     twitch/twitchmessagebuilder.cpp \
-    ircuser2.cpp \
     twitch/twitchparsemessage.cpp \
     widgets/fancybutton.cpp \
     widgets/titlebar.cpp \
-    widgets/userpopupwidget.cpp \
-    appdatapath.cpp
+    appdatapath.cpp \
+    accountmanager.cpp \
+    twitch/twitchaccount.cpp \
+    ircaccount.cpp \
+    widgets/accountpopup.cpp
 
 HEADERS  += \
     asyncexec.h \
@@ -118,17 +118,17 @@ HEADERS  += \
     fontmanager.h \
     emotemanager.h \
     util/urlfetch.h \
-    usermanager.h \
-    twitch/twitchuser.h \
     messages/messageparseargs.h \
     messages/messagebuilder.h \
     twitch/twitchmessagebuilder.h \
-    ircuser2.h \
     twitch/twitchparsemessage.h \
     widgets/fancybutton.h \
     widgets/titlebar.h \
-    widgets/userpopupwidget.h \
-    appdatapath.h
+    appdatapath.h \
+    accountmanager.h \
+    twitch/twitchaccount.h \
+    ircaccount.h \
+    widgets/accountpopup.h
 
 PRECOMPILED_HEADER =
 
@@ -164,4 +164,4 @@ macx {
 }
 
 FORMS += \
-    forms/userpopup.ui
+    forms/accountpopupform.ui
