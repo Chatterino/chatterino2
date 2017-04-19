@@ -72,11 +72,11 @@ private:
 public:
     static SettingsManager &getInstance()
     {
+        static SettingsManager instance;
         return instance;
     }
 
 private:
-    static SettingsManager instance;
 };
 
 }  // namespace chatterino

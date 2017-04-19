@@ -2,8 +2,6 @@
 
 namespace chatterino {
 
-AccountManager AccountManager::instance;
-
 AccountManager::AccountManager()
     : _twitchAnon("justinfan64537", "", "")
     , _twitchUsers()

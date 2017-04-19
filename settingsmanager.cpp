@@ -9,8 +9,6 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-SettingsManager SettingsManager::instance;
-
 SettingsManager::SettingsManager()
     : _settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
     , _wordTypeMask(Word::Default)
