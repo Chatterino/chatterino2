@@ -13,6 +13,7 @@ class AccountManager
 public:
     static AccountManager &getInstance()
     {
+        static AccountManager instance;
         return instance;
     }
 
@@ -23,7 +24,6 @@ public:
     void addTwitchUser(const twitch::TwitchUser &user);
 
 private:
-    static AccountManager instance;
 
     AccountManager();
 
