@@ -53,7 +53,7 @@ private:
 
     ScrollBar _scrollbar;
 
-    UserPopupWidget _userPopupWidget;
+    AccountPopupWidget _userPopupWidget;
     bool _onlyUpdateEmotes;
 
     // Mouse event variables
