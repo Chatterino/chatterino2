@@ -6,7 +6,7 @@
 #include <memory>
 
 namespace Ui {
-class UserPopup;
+class AccountPopup;
 }
 
 namespace chatterino {
@@ -15,16 +15,16 @@ class Channel;
 
 namespace widgets {
 
-class UserPopupWidget : public QWidget
+class AccountPopupWidget : public QWidget
 {
     Q_OBJECT
 public:
-    UserPopupWidget(std::shared_ptr<Channel> &&_channel);
+    AccountPopupWidget(std::shared_ptr<Channel> &&_channel);
 
     void setName(const QString &name);
 
 private:
-    Ui::UserPopup *_ui;
+    Ui::AccountPopup *_ui;
 
     std::shared_ptr<Channel> _channel;
 };
