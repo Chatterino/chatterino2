@@ -4,7 +4,7 @@
 #include "messages/message.h"
 #include "messages/wordpart.h"
 #include "settingsmanager.h"
-#include "ui_userpopup.h"
+#include "ui_accountpopupform.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>

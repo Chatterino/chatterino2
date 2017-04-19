@@ -1,6 +1,6 @@
 #include "widgets/accountpopup.h"
 #include "channel.h"
-#include "ui_userpopup.h"
+#include "ui_userpopupform.h"
 
 #include <QDebug>
 
