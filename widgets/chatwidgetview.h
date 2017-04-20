@@ -29,14 +29,14 @@ public:
     ScrollBar *getScrollbar();
 
 protected:
-    void resizeEvent(QResizeEvent *);
+    void resizeEvent(QResizeEvent *) override;
 
-    void paintEvent(QPaintEvent *);
-    void wheelEvent(QWheelEvent *event);
+    void paintEvent(QPaintEvent *) override;
+    void wheelEvent(QWheelEvent *event) override;
 
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
     bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &message,
                          QPoint &relativePos);

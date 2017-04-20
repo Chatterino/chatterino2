@@ -219,7 +219,7 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 
                     const QPixmap *image = lli.getPixmap();
 
-                    if (image != NULL) {
+                    if (image != nullptr) {
                         painter.drawPixmap(QRect(wordPart.getX(), wordPart.getY(),
                                                  wordPart.getWidth(), wordPart.getHeight()),
                                            *image);
