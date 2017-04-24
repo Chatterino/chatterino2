@@ -23,9 +23,9 @@ public:
     Link();
     Link(Type getType, const QString &getValue);
 
-    bool getIsValid() const
+    bool isValid() const
     {
-        return type == None;
+        return type != None;
     }
 
     Type getType() const

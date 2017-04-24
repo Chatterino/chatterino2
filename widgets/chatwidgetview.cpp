@@ -5,6 +5,7 @@
 #include "messages/wordpart.h"
 #include "settingsmanager.h"
 #include "ui_accountpopupform.h"
+#include "util/distancebetweenpoints.h"
 #include "widgets/chatwidget.h"
 
 #include <math.h>
@@ -55,6 +56,7 @@ bool ChatWidgetView::layoutMessages()
     bool showScrollbar = false, redraw = false;
 
     int start = _scrollbar.getCurrentValue();
+    int layoutWidth = _scrollbar.isVisible() ? width() - _scrollbar.width() : width();
 
     // layout the visible messages in the view
     if (messages.getSize() > start) {
@@ -63,7 +65,7 @@ bool ChatWidgetView::layoutMessages()
         for (int i = start; i < messages.getSize(); ++i) {
             auto message = messages[i];
 
-            redraw |= message->layout(width(), true);
+            redraw |= message->layout(layoutWidth, true);
 
             y += message->getHeight();
 
@@ -79,7 +81,7 @@ bool ChatWidgetView::layoutMessages()
     for (int i = messages.getSize() - 1; i >= 0; i--) {
         auto *message = messages[i].get();
 
-        message->layout(width(), true);
+        message->layout(layoutWidth, true);
 
         h -= message->getHeight();
 
@@ -298,6 +300,9 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    int index = message->getSelectionIndex(relativePos);
+    qDebug() << index;
+
     messages::Word hoverWord;
 
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
@@ -305,11 +310,7 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    int index = message->getSelectionIndex(relativePos);
-
-    qDebug() << index;
-
-    if (hoverWord.getLink().getIsValid()) {
+    if (hoverWord.getLink().isValid()) {
         setCursor(Qt::PointingHandCursor);
     } else {
         setCursor(Qt::ArrowCursor);
@@ -322,17 +323,6 @@ void ChatWidgetView::mousePressEvent(QMouseEvent *event)
     _lastPressPosition = event->screenPos();
 }
 
-static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
-{
-    QPointF tmp = p1 - p2;
-
-    float distance = 0.f;
-    distance += tmp.x() * tmp.x();
-    distance += tmp.y() * tmp.y();
-
-    return std::sqrt(distance);
-}
-
 void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!_mouseDown) {
@@ -343,7 +333,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 
     _mouseDown = false;
 
-    float distance = distanceBetweenPoints(_lastPressPosition, event->screenPos());
+    float distance = util::distanceBetweenPoints(_lastPressPosition, event->screenPos());
 
     qDebug() << "Distance: " << distance;
 
@@ -366,15 +356,25 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    auto _message = message->getMessage();
-    auto user = _message->getUserName();
+    messages::Word hoverWord;
 
-    qDebug() << "Clicked " << user << "s message";
+    if (!message->tryGetWordPart(relativePos, hoverWord)) {
+        return;
+    }
 
-    _userPopupWidget.setName(user);
-    _userPopupWidget.move(event->screenPos().toPoint());
-    _userPopupWidget.show();
-    _userPopupWidget.setFocus();
+    auto &link = hoverWord.getLink();
+
+    switch (link.getType()) {
+        case messages::Link::UserInfo:
+            auto user = message->getMessage()->getUserName();
+            _userPopupWidget.setName(user);
+            _userPopupWidget.move(event->screenPos().toPoint());
+            _userPopupWidget.show();
+            _userPopupWidget.setFocus();
+
+            qDebug() << "Clicked " << user << "s message";
+            break;
+    }
 }
 
 bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
@@ -388,18 +388,18 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
         return false;
     }
 
-    int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1))) + 12;
+    int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.getSize(); ++i) {
         auto message = messages[i];
 
-        y += message->getHeight();
-
-        if (p.y() < y) {
-            relativePos = QPoint(p.x(), y - p.y());
+        if (p.y() < y + message->getHeight()) {
+            relativePos = QPoint(p.x(), p.y() - y);
             _message = message;
             return true;
         }
+
+        y += message->getHeight();
     }
 
     return false;

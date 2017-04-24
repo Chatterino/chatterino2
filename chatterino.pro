@@ -128,7 +128,8 @@ HEADERS  += \
     accountmanager.h \
     twitch/twitchaccount.h \
     ircaccount.h \
-    widgets/accountpopup.h
+    widgets/accountpopup.h \
+    util/distancebetweenpoints.h
 
 PRECOMPILED_HEADER =
 

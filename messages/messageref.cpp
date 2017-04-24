@@ -94,7 +94,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
     int x = MARGIN_LEFT;
     int y = MARGIN_TOP;
 
-    int right = width - MARGIN_RIGHT - MARGIN_LEFT;
+    int right = width - MARGIN_RIGHT;
 
     int lineNumber = 0;
     int lineStart = 0;
@@ -258,17 +258,16 @@ int MessageRef::getSelectionIndex(QPoint position)
     for (int i = 0; i < _wordParts.size(); i++) {
         WordPart &part = _wordParts[i];
 
-        // return if curser under the word
-        if (position.y() >= part.getBottom()) {
+        if (part.getLineNumber() != 0 && position.y() < part.getY()) {
             break;
         }
 
         if (part.getLineNumber() != lineNumber) {
-            lineStart = i;
+            lineStart = i - 1;
             lineNumber = part.getLineNumber();
         }
 
-        lineEnd = i;
+        lineEnd = part.getLineNumber() == 0 ? i : i + 1;
     }
 
     // count up to the cursor
@@ -289,7 +288,7 @@ int MessageRef::getSelectionIndex(QPoint position)
         }
 
         // cursor is right of the word part
-        if (position.x() > part.getX()) {
+        if (position.x() > part.getX() + part.getWidth()) {
             index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
             continue;
         }
@@ -316,26 +315,6 @@ int MessageRef::getSelectionIndex(QPoint position)
     }
 
     return index;
-
-    // go through all the wordparts
-    //    for (int i = 0; i < wordParts; i < wordParts.size()) {
-
-    //        WordPart &part = wordParts[i];
-
-    //        // return if curser under the word
-    //        if (position.y() >= part.getBottom()) {
-    //            break;
-    //        }
-
-    //        // increment index and continue if the curser x is bigger than the
-    //        words
-    //        // right edge
-    //        if (position.x() > part.getRight()) {
-    //            index += part.getWord().isImage() ? 2 +
-    //            part.getText().length() + 1;
-    //            continue;
-    //        }
-    //    }
 }
 }
 }

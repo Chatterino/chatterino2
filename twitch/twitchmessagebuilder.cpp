@@ -134,8 +134,8 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         userDisplayString += ": ";
     }
 
-    b.appendWord(
-        Word(userDisplayString, Word::Username, usernameColor, userDisplayString, QString()));
+    b.appendWord(Word(userDisplayString, Word::Username, usernameColor, userDisplayString,
+                      QString(), Link(Link::UserInfo, b.userName)));
 
     // highlights
     // TODO: implement this xD
