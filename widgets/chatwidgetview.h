@@ -5,8 +5,8 @@
 #include "messages/lazyloadedimage.h"
 #include "messages/messageref.h"
 #include "messages/word.h"
-#include "widgets/scrollbar.h"
 #include "widgets/accountpopup.h"
+#include "widgets/scrollbar.h"
 
 #include <QPaintEvent>
 #include <QScroller>

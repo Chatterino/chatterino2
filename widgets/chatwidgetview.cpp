@@ -298,9 +298,6 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    auto _message = message->getMessage();
-    auto user = _message->getUserName();
-
     messages::Word hoverWord;
 
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
@@ -309,6 +306,8 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     }
 
     int index = message->getSelectionIndex(relativePos);
+
+    qDebug() << index;
 
     if (hoverWord.getLink().getIsValid()) {
         setCursor(Qt::PointingHandCursor);
