@@ -15,61 +15,60 @@ class LimitedQueue
 {
 public:
     LimitedQueue(int limit = 100, int buffer = 25)
-        : mutex()
-        , offset(0)
-        , limit(limit)
-        , buffer(buffer)
+        : _offset(0)
+        , _limit(limit)
+        , _buffer(buffer)
     {
-        vector = std::make_shared<std::vector<T>>();
-        vector->reserve(this->limit + this->buffer);
+        _vector = std::make_shared<std::vector<T>>();
+        _vector->reserve(_limit + _buffer);
     }
 
     void clear()
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lock_guard<std::mutex> lock(_mutex);
 
-        this->vector = std::make_shared<std::vector<T>>();
-        this->vector->reserve(this->limit + this->buffer);
+        _vector = std::make_shared<std::vector<T>>();
+        _vector->reserve(_limit + _buffer);
 
-        this->offset = 0;
+        _offset = 0;
     }
 
     // return true if an item was deleted
     // deleted will be set if the item was deleted
     bool appendItem(const T &item, T &deleted)
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lock_guard<std::mutex> lock(_mutex);
 
-        if (this->vector->size() >= this->limit) {
+        if (_vector->size() >= _limit) {
             // vector is full
-            if (this->offset == this->buffer) {
-                deleted = this->vector->at(this->offset);
+            if (_offset == _buffer) {
+                deleted = _vector->at(_offset);
 
                 // create new vector
                 auto newVector = std::make_shared<std::vector<T>>();
-                newVector->reserve(this->limit + this->buffer);
+                newVector->reserve(_limit + _buffer);
 
-                for (unsigned int i = 0; i < this->limit - 1; i++) {
-                    newVector->push_back(this->vector->at(i + this->offset));
+                for (unsigned int i = 0; i < _limit - 1; i++) {
+                    newVector->push_back(_vector->at(i + _offset));
                 }
                 newVector->push_back(item);
 
-                this->offset = 0;
-                this->vector = newVector;
+                _offset = 0;
+                _vector = newVector;
 
                 return true;
             } else {
-                deleted = this->vector->at(this->offset);
+                deleted = _vector->at(_offset);
 
                 // append item and increment offset("deleting" first element)
-                this->vector->push_back(item);
-                this->offset++;
+                _vector->push_back(item);
+                _offset++;
 
                 return true;
             }
         } else {
             // append item
-            this->vector->push_back(item);
+            _vector->push_back(item);
 
             return false;
         }
@@ -77,23 +76,22 @@ public:
 
     messages::LimitedQueueSnapshot<T> getSnapshot()
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lock_guard<std::mutex> lock(_mutex);
 
-        if (vector->size() < limit) {
-            return LimitedQueueSnapshot<T>(this->vector, this->offset, this->vector->size());
+        if (_vector->size() < _limit) {
+            return LimitedQueueSnapshot<T>(_vector, _offset, _vector->size());
         } else {
-            return LimitedQueueSnapshot<T>(this->vector, this->offset, this->limit);
+            return LimitedQueueSnapshot<T>(_vector, _offset, _limit);
         }
     }
 
 private:
-    std::shared_ptr<std::vector<T>> vector;
+    std::shared_ptr<std::vector<T>> _vector;
+    std::mutex _mutex;
 
-    std::mutex mutex;
-
-    unsigned int offset;
-    unsigned int limit;
-    unsigned int buffer;
+    unsigned int _offset;
+    unsigned int _limit;
+    unsigned int _buffer;
 };
 
 }  // namespace messages
