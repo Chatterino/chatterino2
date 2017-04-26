@@ -304,7 +304,6 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     qDebug() << index;
 
     messages::Word hoverWord;
-
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
         setCursor(Qt::ArrowCursor);
         return;
