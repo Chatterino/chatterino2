@@ -3,9 +3,11 @@
 #include "settingsmanager.h"
 #include "widgets/chatwidget.h"
 #include "widgets/notebook.h"
+#include "widgets/settingsdialog.h"
 
 #include <QDebug>
 #include <QPalette>
+#include <QShortcut>
 #include <QVBoxLayout>
 #include <boost/foreach.hpp>
 
@@ -44,6 +46,15 @@ MainWindow::MainWindow(QWidget *parent)
     setPalette(palette);
 
     resize(1280, 800);
+
+    // Initialize program-wide hotkeys
+    {
+        // CTRL+P: Open Settings Dialog
+        auto shortcut = new QShortcut(QKeySequence("CTRL+P"), this);
+        connect(shortcut, &QShortcut::activated, []() {
+            SettingsDialog::showDialog();  //
+        });
+    }
 }
 
 MainWindow::~MainWindow()
