@@ -33,6 +33,7 @@ private:
     bool _mouseDown = false;
     QPoint _mousePos;
 };
+
 }  // namespace widgets
 }  // namespace chatterino
 

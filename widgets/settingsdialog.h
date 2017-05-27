@@ -26,6 +26,8 @@ public:
 
     void select(SettingsDialogTab *tab);
 
+    static void showDialog();
+
 private:
     SettingsSnapshot _snapshot;
 

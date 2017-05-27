@@ -1,6 +1,6 @@
 #include "widgets/settingsdialog.h"
-#include "twitch/twitchaccount.h"
 #include "accountmanager.h"
+#include "twitch/twitchaccount.h"
 #include "widgets/settingsdialogtab.h"
 #include "windowmanager.h"
 
@@ -297,6 +297,16 @@ void SettingsDialog::select(SettingsDialogTab *tab)
     tab->setSelected(true);
     tab->setStyleSheet("background: #555; color: #FFF");
     _selectedTab = tab;
+}
+
+void SettingsDialog::showDialog()
+{
+    static SettingsDialog *instance = new SettingsDialog();
+
+    instance->show();
+    instance->activateWindow();
+    instance->raise();
+    instance->setFocus();
 }
 
 /// Widget creation helpers

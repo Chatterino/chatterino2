@@ -181,9 +181,7 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::settingsButtonClicked()
 {
-    SettingsDialog *a = new SettingsDialog();
-
-    a->show();
+    SettingsDialog::showDialog();
 }
 
 void Notebook::usersButtonClicked()
