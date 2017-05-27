@@ -20,10 +20,14 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # Define warning flags for Chatterino
-QMAKE_CXXFLAGS_WARN_ON = -W4
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
-#QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+win32-msvc* {
+    QMAKE_CXXFLAGS_WARN_ON = -W4
+} else {
+    QMAKE_CXXFLAGS_WARN_ON = -Wall
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+}
 
 # do not use windows min/max macros
 win32 {
