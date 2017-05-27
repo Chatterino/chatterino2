@@ -34,7 +34,7 @@ public:
         return _tag;
     }
 
-    ScrollBarHighlight *next;
+    ScrollBarHighlight *next = nullptr;
 
 private:
     Style _style;
@@ -42,7 +42,8 @@ private:
     int _colorIndex;
     QString _tag;
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino
 
 #endif  // SCROLLBARHIGHLIGHT_H

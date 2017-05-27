@@ -39,7 +39,7 @@ protected:
         return margins.top() + document()->size().height() + margins.bottom() + 5;
     }
 
-    void keyPressEvent(QKeyEvent *event)
+    void keyPressEvent(QKeyEvent *event) override
     {
         event->ignore();
 

@@ -220,10 +220,10 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
         QPoint relPoint = mapToParent(event->pos());
 
         int index;
-        NotebookPage *page = _notebook->tabAt(relPoint, index);
+        NotebookPage *clickedPage = _notebook->tabAt(relPoint, index);
 
-        if (page != nullptr && page != page) {
-            _notebook->rearrangePage(page, index);
+        if (clickedPage != nullptr && clickedPage != page) {
+            _notebook->rearrangePage(clickedPage, index);
         }
     }
 }

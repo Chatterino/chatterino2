@@ -80,12 +80,11 @@ private:
     ConcurrentMap<long, messages::LazyLoadedImage *> _twitchEmoteFromCache;
     ConcurrentMap<QString, messages::LazyLoadedImage *> _miscImageFromCache;
 
+    boost::signals2::signal<void()> _gifUpdateTimerSignal;
     QTimer _gifUpdateTimer;
     bool _gifUpdateTimerInitiated;
 
     int _generation;
-
-    boost::signals2::signal<void()> _gifUpdateTimerSignal;
 
     // methods
     static QString getTwitchEmoteLink(long id, qreal &scale);
@@ -93,6 +92,7 @@ private:
     void loadFfzEmotes();
     void loadBttvEmotes();
 };
+
 }  // namespace chatterino
 
 #endif  // EMOTES_H

@@ -38,20 +38,17 @@ ChatWidget::~ChatWidget()
 {
 }
 
-std::shared_ptr<Channel>
-ChatWidget::getChannel() const
+std::shared_ptr<Channel> ChatWidget::getChannel() const
 {
     return _channel;
 }
 
-const QString &
-ChatWidget::getChannelName() const
+const QString &ChatWidget::getChannelName() const
 {
     return _channelName;
 }
 
-void
-ChatWidget::setChannelName(const QString &name)
+void ChatWidget::setChannelName(const QString &name)
 {
     QString channel = name.trimmed();
 
@@ -92,27 +89,25 @@ ChatWidget::setChannelName(const QString &name)
     _view.update();
 }
 
-void
-ChatWidget::attachChannel(SharedChannel channel)
+void ChatWidget::attachChannel(SharedChannel channel)
 {
     // on new message
-    _messageAppendedConnection =
-        channel->messageAppended.connect([this](SharedMessage &message) {
-            SharedMessageRef deleted;
+    _messageAppendedConnection = channel->messageAppended.connect([this](SharedMessage &message) {
+        SharedMessageRef deleted;
 
-            auto messageRef = new MessageRef(message);
+        auto messageRef = new MessageRef(message);
 
-            if (_messages.appendItem(SharedMessageRef(messageRef), deleted)) {
-                qreal value =
-                    std::max(0.0, _view.getScrollbar()->getDesiredValue() - 1);
+        if (_messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+            qreal value = std::max(0.0, _view.getScrollbar()->getDesiredValue() - 1);
 
-                _view.getScrollbar()->setDesiredValue(value, false);
-            }
-        });
+            _view.getScrollbar()->setDesiredValue(value, false);
+        }
+    });
 
     // on message removed
-    _messageRemovedConnection =
-        _channel->messageRemovedFromStart.connect([this](SharedMessage &) {});
+    _messageRemovedConnection = _channel->messageRemovedFromStart.connect([](SharedMessage &) {
+        //
+    });
 
     auto snapshot = _channel.get()->getMessageSnapshot();
 
@@ -125,8 +120,7 @@ ChatWidget::attachChannel(SharedChannel channel)
     }
 }
 
-void
-ChatWidget::detachChannel(std::shared_ptr<Channel> channel)
+void ChatWidget::detachChannel(std::shared_ptr<Channel> channel)
 {
     // on message added
     _messageAppendedConnection.disconnect();
@@ -135,14 +129,12 @@ ChatWidget::detachChannel(std::shared_ptr<Channel> channel)
     _messageRemovedConnection.disconnect();
 }
 
-LimitedQueueSnapshot<SharedMessageRef>
-ChatWidget::getMessagesSnapshot()
+LimitedQueueSnapshot<SharedMessageRef> ChatWidget::getMessagesSnapshot()
 {
     return _messages.getSnapshot();
 }
 
-void
-ChatWidget::showChangeChannelPopup()
+void ChatWidget::showChangeChannelPopup()
 {
     // create new input dialog and execute it
     TextInputDialog dialog(this);
@@ -154,22 +146,19 @@ ChatWidget::showChangeChannelPopup()
     }
 }
 
-void
-ChatWidget::layoutMessages()
+void ChatWidget::layoutMessages()
 {
     if (_view.layoutMessages()) {
         _view.update();
     }
 }
 
-void
-ChatWidget::updateGifEmotes()
+void ChatWidget::updateGifEmotes()
 {
     _view.updateGifEmotes();
 }
 
-void
-ChatWidget::paintEvent(QPaintEvent *)
+void ChatWidget::paintEvent(QPaintEvent *)
 {
     // color the background of the chat
     QPainter painter(this);
@@ -177,19 +166,16 @@ ChatWidget::paintEvent(QPaintEvent *)
     painter.fillRect(this->rect(), ColorScheme::getInstance().ChatBackground);
 }
 
-void
-ChatWidget::load(const boost::property_tree::ptree &tree)
+void ChatWidget::load(const boost::property_tree::ptree &tree)
 {
     // load tab text
     try {
-        this->setChannelName(
-            QString::fromStdString(tree.get<std::string>("channelName")));
+        this->setChannelName(QString::fromStdString(tree.get<std::string>("channelName")));
     } catch (boost::property_tree::ptree_error) {
     }
 }
 
-boost::property_tree::ptree
-ChatWidget::save()
+boost::property_tree::ptree ChatWidget::save()
 {
     boost::property_tree::ptree tree;
 

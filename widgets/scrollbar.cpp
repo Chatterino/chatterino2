@@ -13,7 +13,7 @@ ScrollBar::ScrollBar(QWidget *widget)
     : QWidget(widget)
     , _mutex()
     , _currentValueAnimation(this, "currentValue")
-    , _highlights(NULL)
+    , _highlights(nullptr)
     , _mouseOverIndex(-1)
     , _mouseDownIndex(-1)
     , _lastMousePosition()
@@ -25,8 +25,8 @@ ScrollBar::ScrollBar(QWidget *widget)
     , _largeChange()
     , _smallChange()
     , _desiredValue()
-    , _currentValueChanged()
     , _currentValue()
+    , _currentValueChanged()
 {
     resize(16, 100);
 

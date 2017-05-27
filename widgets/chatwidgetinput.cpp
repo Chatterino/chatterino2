@@ -60,7 +60,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
 
     completer->setWidget(&_edit);
 
-    _edit.keyPressed.connect([this, completer](QKeyEvent *event) {
+    _edit.keyPressed.connect([this/*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
             auto ptr = _chatWidget->getChannel();
             Channel *c = ptr.get();

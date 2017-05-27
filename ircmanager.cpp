@@ -1,12 +1,12 @@
 #include "ircmanager.h"
+#include "accountmanager.h"
 #include "asyncexec.h"
 #include "channel.h"
 #include "channelmanager.h"
 #include "messages/messageparseargs.h"
+#include "twitch/twitchaccount.h"
 #include "twitch/twitchmessagebuilder.h"
 #include "twitch/twitchparsemessage.h"
-#include "twitch/twitchaccount.h"
-#include "accountmanager.h"
 
 #include <irccommand.h>
 #include <ircconnection.h>
@@ -203,19 +203,20 @@ void IrcManager::partChannel(const QString &channel)
     _connectionMutex.unlock();
 }
 
-void IrcManager::messageReceived(Communi::IrcMessage *message)
+void IrcManager::messageReceived(Communi::IrcMessage * /*message*/)
 {
-    //    qInfo(message->command().toStdString().c_str());
+    // qInfo(message->command().toStdString().c_str());
 
+    /*
     const QString &command = message->command();
 
-    //    if (command == "CLEARCHAT") {
-    //        message->
-    //    } else if (command == "ROOMSTATE") {
-    //    } else if (command == "USERSTATE") {
-    //    } else if (command == "WHISPER") {
-    //    } else if (command == "USERNOTICE") {
-    //    }
+    if (command == "CLEARCHAT") {
+    } else if (command == "ROOMSTATE") {
+    } else if (command == "USERSTATE") {
+    } else if (command == "WHISPER") {
+    } else if (command == "USERNOTICE") {
+    }
+    */
 }
 
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
@@ -306,4 +307,4 @@ QNetworkAccessManager &IrcManager::getAccessManager()
 {
     return _accessManager;
 }
-}
+}  // namespace chatterino

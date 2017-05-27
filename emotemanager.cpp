@@ -206,4 +206,5 @@ LazyLoadedImage *EmoteManager::getCheerBadge(long long amount)
         return Resources::getCheerBadge1();
     }
 }
-}
+
+}  // namespace chatterino

@@ -14,6 +14,30 @@ class SettingsManager : public QObject
     Q_OBJECT
 
 public:
+    void load();
+    void save();
+
+    messages::Word::Type getWordTypeMask();
+    bool isIgnoredEmote(const QString &emote);
+    QSettings &getQSettings();
+    SettingsSnapshot createSnapshot();
+
+signals:
+    void wordTypeMaskChanged();
+
+private:
+    SettingsManager();
+
+    // variables
+    QSettings _settings;
+    std::vector<std::reference_wrapper<BaseSetting>> _settingsItems;
+    messages::Word::Type _wordTypeMask = messages::Word::Default;
+
+    // methods
+    void updateWordTypeMask();
+
+public:
+    // Settings
     Setting<QString> theme;
     Setting<float> themeHue;
     Setting<QString> selectedUser;
@@ -46,28 +70,6 @@ public:
     Setting<bool> hidePreferencesButton;
     Setting<bool> hideUserButton;
     Setting<bool> useCustomWindowFrame;
-
-    void load();
-    void save();
-
-    messages::Word::Type getWordTypeMask();
-    bool isIgnoredEmote(const QString &emote);
-    QSettings &getQSettings();
-    SettingsSnapshot createSnapshot();
-
-signals:
-    void wordTypeMaskChanged();
-
-private:
-    SettingsManager();
-
-    // variables
-    QSettings _settings;
-    std::vector<std::reference_wrapper<BaseSetting>> _settingsItems;
-    messages::Word::Type _wordTypeMask;
-
-    // methods
-    void updateWordTypeMask();
 
 public:
     static SettingsManager &getInstance()

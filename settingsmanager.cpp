@@ -11,7 +11,6 @@ namespace chatterino {
 
 SettingsManager::SettingsManager()
     : _settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
-    , _wordTypeMask(Word::Default)
     , theme(_settingsItems, "theme", "dark")
     , themeHue(_settingsItems, "themeHue", 0)
     , selectedUser(_settingsItems, "selectedUser", "")

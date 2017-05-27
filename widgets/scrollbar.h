@@ -43,9 +43,10 @@ private:
     Q_PROPERTY(qreal _currentValue READ getCurrentValue WRITE setCurrentValue)
 
     QMutex _mutex;
-    ScrollBarHighlight *_highlights;
 
     QPropertyAnimation _currentValueAnimation;
+
+    ScrollBarHighlight *_highlights;
 
     void paintEvent(QPaintEvent *);
     void mouseMoveEvent(QMouseEvent *event);

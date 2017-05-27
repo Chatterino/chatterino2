@@ -52,9 +52,7 @@ void ColorScheme::setColors(float hue, float multiplyer)
 
     SystemMessageColor = QColor(140, 127, 127);
 
-    auto isLightTheme = IsLightTheme;
-
-    auto getColor = [isLightTheme, multiplyer](qreal h, qreal s, qreal l, qreal a = 1.0) {
+    auto getColor = [multiplyer](qreal h, qreal s, qreal l, qreal a = 1.0) {
         return QColor::fromHslF(h, s, (((l - 0.5) * multiplyer) + 0.5), a);
     };
 
@@ -75,10 +73,11 @@ void ColorScheme::setColors(float hue, float multiplyer)
     TabSelectedBackground = getColor(hue, 0.5, 0.5);
     TabHighlightedBackground = getColor(hue, 0.5, 0.2);
     TabNewMessageBackground = QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
-    if (hasDarkBorder)
+    if (hasDarkBorder) {
         //    TabText = QColor(210, 210, 210);
         //    TabHoverText = QColor(210, 210, 210);
         TabText = QColor(0, 0, 0);
+    }
     TabHoverText = QColor(0, 0, 0);
     TabSelectedText = QColor(255, 255, 255);
     TabHighlightedText = QColor(0, 0, 0);

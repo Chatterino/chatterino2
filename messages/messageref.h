@@ -47,7 +47,8 @@ private:
     // methods
     void alignWordParts(int lineStart, int lineHeight);
 };
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
 
 #endif  // MESSAGEREF_H

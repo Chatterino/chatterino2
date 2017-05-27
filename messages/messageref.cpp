@@ -17,7 +17,6 @@ namespace messages {
 MessageRef::MessageRef(SharedMessage message)
     : _message(message)
     , _wordParts()
-    , buffer()
 {
 }
 
@@ -316,5 +315,6 @@ int MessageRef::getSelectionIndex(QPoint position)
 
     return index;
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino

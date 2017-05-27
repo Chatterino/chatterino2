@@ -140,7 +140,7 @@ void SettingsDialog::addTabs()
         }
 
         QObject::connect(combo, &QComboBox::currentTextChanged, this,
-                         [this, &settings](const QString &value) { settings.theme.set(value); });
+                         [&settings](const QString &value) { settings.theme.set(value); });
 
         // theme hue
         slider->setMinimum(0);
@@ -150,7 +150,7 @@ void SettingsDialog::addTabs()
 
         slider->setValue(std::min(std::max(hue, (float)0.0), (float)1.0) * 1000);
 
-        QObject::connect(slider, &QSlider::valueChanged, this, [this, &settings](int value) {
+        QObject::connect(slider, &QSlider::valueChanged, this, [&settings](int value) {
             settings.themeHue.set(value / 1000.0);
             WindowManager::getInstance().updateAll();
         });
@@ -318,7 +318,7 @@ QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &s
     checkbox->setChecked(setting.get());
 
     QObject::connect(checkbox, &QCheckBox::toggled, this,
-                     [&setting, this](bool state) { setting.set(state); });
+                     [&setting](bool state) { setting.set(state); });
 
     return checkbox;
 }
