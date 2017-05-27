@@ -22,6 +22,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # Define warning flags for Chatterino
 win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON = -W4
+# 4714 - function marked as __forceinline not inlined
+# 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
+#        These functions may have a different preferred name, may be insecure or have
+#        a more secure variant, or may be obsolete.
+    QMAKE_CXXFLAGS_WARN_ON += /wd4714
+    QMAKE_CXXFLAGS_WARN_ON += /wd4996
 } else {
     QMAKE_CXXFLAGS_WARN_ON = -Wall
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
