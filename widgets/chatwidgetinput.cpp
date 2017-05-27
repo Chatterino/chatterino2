@@ -62,15 +62,14 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
 
     _edit.keyPressed.connect([this/*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-            auto ptr = _chatWidget->getChannel();
-            Channel *c = ptr.get();
-
-            if (c != nullptr) {
-                IrcManager::getInstance().send("PRIVMSG #" + c->getName() + ": " +
-                                               _edit.toPlainText());
-                event->accept();
-                _edit.setText(QString());
+            auto c = _chatWidget->getChannel();
+            if (c == nullptr) {
+                return;
             }
+
+            c->sendMessage(_edit.toPlainText());
+            event->accept();
+            _edit.setText(QString());
         }
         //        else {
         //            completer->setCompletionPrefix("asdf");
