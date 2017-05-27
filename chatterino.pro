@@ -19,6 +19,12 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += IRC_NAMESPACE=Communi
 
+# Define warning flags for Chatterino
+QMAKE_CXXFLAGS_WARN_ON = -Wall
+QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
+QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
+QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+
 # do not use windows min/max macros
 win32 {
     DEFINES += NOMINMAX
@@ -166,3 +172,9 @@ macx {
 
 FORMS += \
     forms/accountpopupform.ui
+
+werr {
+    QMAKE_CXXFLAGS += -Werror
+
+    message("Enabling error on warning")
+}
