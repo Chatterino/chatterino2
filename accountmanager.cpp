@@ -39,4 +39,5 @@ void AccountManager::addTwitchUser(const twitch::TwitchUser &user)
 
     _twitchUsers.push_back(user);
 }
+
 }  // namespace chatterino

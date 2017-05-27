@@ -66,12 +66,18 @@ void IrcManager::beginConnecting()
     QObject::connect(c, &Communi::IrcConnection::privateMessageReceived, this,
                      &IrcManager::privateMessageReceived);
 
-    if (_account.isAnon()) {
-        // fetch ignored users
-        QString username = _account.getUserName();
-        QString oauthClient = _account.getOAuthClient();
-        QString oauthToken = _account.getOAuthToken();
+    QString username = _account.getUserName();
+    QString oauthClient = _account.getOAuthClient();
+    QString oauthToken = _account.getOAuthToken();
 
+    c->setUserName(username);
+    c->setNickName(username);
+    c->setRealName(username);
+
+    if (!_account.isAnon()) {
+        c->setPassword(oauthToken);
+
+        // fetch ignored users
         {
             QString nextLink = "https://api.twitch.tv/kraken/users/" + username +
                                "/blocks?limit=" + 100 + "&client_id=" + oauthClient;
@@ -105,41 +111,37 @@ void IrcManager::beginConnecting()
                 manager->deleteLater();
             });
         }
+    }
 
-        // fetch available twitch emtoes
-        {
-            QNetworkRequest req(QUrl("https://api.twitch.tv/kraken/users/" + username +
-                                     "/emotes?oauth_token=" + oauthToken +
-                                     "&client_id=" + oauthClient));
-            QNetworkReply *reply = _accessManager.get(req);
+    // fetch available twitch emtoes
+    {
+        QNetworkRequest req(QUrl("https://api.twitch.tv/kraken/users/" + username +
+                                 "/emotes?oauth_token=" + oauthToken +
+                                 "&client_id=" + oauthClient));
+        QNetworkReply *reply = _accessManager.get(req);
 
-            QObject::connect(reply, &QNetworkReply::finished, [=] {
-                QByteArray data = reply->readAll();
-                QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-                QJsonObject root = jsonDoc.object();
+        QObject::connect(reply, &QNetworkReply::finished, [=] {
+            QByteArray data = reply->readAll();
+            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+            QJsonObject root = jsonDoc.object();
 
-                // nextLink =
-                // root.value("_links").toObject().value("next").toString();
+            // nextLink =
+            // root.value("_links").toObject().value("next").toString();
 
-                auto blocks = root.value("blocks").toArray();
+            auto blocks = root.value("blocks").toArray();
 
-                _twitchBlockedUsersMutex.lock();
-                for (QJsonValue block : blocks) {
-                    QJsonObject user = block.toObject().value("user").toObject();
-                    // display_name
-                    _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
-                }
-                _twitchBlockedUsersMutex.unlock();
-            });
-        }
+            _twitchBlockedUsersMutex.lock();
+            for (QJsonValue block : blocks) {
+                QJsonObject user = block.toObject().value("user").toObject();
+                // display_name
+                _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
+            }
+            _twitchBlockedUsersMutex.unlock();
+        });
     }
 
     c->setHost("irc.chat.twitch.tv");
     c->setPort(6667);
-
-    c->setUserName("justinfan123");
-    c->setNickName("justinfan123");
-    c->setRealName("justinfan123");
 
     c->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     c->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
@@ -186,7 +188,21 @@ void IrcManager::sendJoin(const QString &channel)
     _connectionMutex.lock();
 
     if (_connection.get() != NULL) {
-        _connection.get()->sendRaw("JOIN #" + channel);
+        _connection->sendRaw("JOIN #" + channel);
+    }
+
+    _connectionMutex.unlock();
+}
+
+void IrcManager::sendMessage(const QString &channelName, const QString &message)
+{
+    _connectionMutex.lock();
+
+    if (_connection.get() != nullptr) {
+        qDebug() << "IRC Manager send message " << message << " to channel " << channelName;
+        QString xd = "PRIVMSG #" + channelName + " :" + message;
+        qDebug() << xd;
+        _connection->sendRaw(xd);
     }
 
     _connectionMutex.unlock();

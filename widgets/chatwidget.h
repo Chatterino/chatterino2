@@ -28,6 +28,7 @@ public:
     ~ChatWidget();
 
     SharedChannel getChannel() const;
+    SharedChannel &getChannelRef();
     const QString &getChannelName() const;
     void setChannelName(const QString &name);
 

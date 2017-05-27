@@ -43,6 +43,11 @@ std::shared_ptr<Channel> ChatWidget::getChannel() const
     return _channel;
 }
 
+std::shared_ptr<Channel> &ChatWidget::getChannelRef()
+{
+    return _channel;
+}
+
 const QString &ChatWidget::getChannelName() const
 {
     return _channelName;
@@ -50,11 +55,11 @@ const QString &ChatWidget::getChannelName() const
 
 void ChatWidget::setChannelName(const QString &name)
 {
-    QString channel = name.trimmed();
+    QString channelName = name.trimmed();
 
     // return if channel name is the same
-    if (QString::compare(channel, _channelName, Qt::CaseInsensitive) == 0) {
-        _channelName = channel;
+    if (QString::compare(channelName, _channelName, Qt::CaseInsensitive) == 0) {
+        _channelName = channelName;
         _header.updateChannelText();
 
         return;
@@ -68,15 +73,18 @@ void ChatWidget::setChannelName(const QString &name)
     }
 
     // update members
-    _channelName = channel;
+    _channelName = channelName;
 
     // update messages
     _messages.clear();
 
-    if (channel.isEmpty()) {
+    printf("Set channel name xD %s\n", qPrintable(name));
+
+    if (channelName.isEmpty()) {
         _channel = NULL;
     } else {
-        _channel = ChannelManager::getInstance().addChannel(channel);
+        _channel = ChannelManager::getInstance().addChannel(channelName);
+        printf("Created channel FeelsGoodMan %p\n", _channel.get());
 
         attachChannel(_channel);
     }

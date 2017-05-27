@@ -1,10 +1,12 @@
 #include "channel.h"
 #include "emotemanager.h"
+#include "ircmanager.h"
 #include "logging/loggingmanager.h"
 #include "messages/message.h"
 #include "util/urlfetch.h"
 #include "windowmanager.h"
 
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -29,6 +31,8 @@ Channel::Channel(const QString &channel)
     , _popoutPlayerLink("https://player.twitch.tv/?channel=" + _name)
 //    , _loggingChannel(logging::get(_name))
 {
+    qDebug() << "Open channel:" << channel << ". Name: " << _name;
+    printf("Channel pointer: %p\n", this);
     reloadChannelEmotes();
 }
 
@@ -125,6 +129,13 @@ void Channel::reloadChannelEmotes()
 {
     reloadBttvEmotes();
     reloadFfzEmotes();
+}
+
+void Channel::sendMessage(const QString &message)
+{
+    qDebug() << "Channel send message: " << message;
+    IrcManager &instance = IrcManager::getInstance();
+    instance.sendMessage(_name, message);
 }
 
 void Channel::reloadBttvEmotes()

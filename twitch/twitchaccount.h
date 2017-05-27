@@ -22,7 +22,8 @@ private:
     QString _oauthClient;
     QString _oauthToken;
 };
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino
 
 #endif  // ACCOUNT_H

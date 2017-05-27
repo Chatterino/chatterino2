@@ -50,6 +50,8 @@ public:
     void addMessage(messages::SharedMessage message);
     void reloadChannelEmotes();
 
+    void sendMessage(const QString &message);
+
 private:
     // variabeles
     messages::LimitedQueue<messages::SharedMessage> _messages;

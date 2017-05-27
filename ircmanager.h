@@ -42,6 +42,7 @@ public:
     QNetworkAccessManager &getAccessManager();
 
     void sendJoin(const QString &channel);
+    void sendMessage(const QString &channelName, const QString &message);
 
     void partChannel(const QString &channel);
 

@@ -19,14 +19,14 @@ class AccountPopupWidget : public QWidget
 {
     Q_OBJECT
 public:
-    AccountPopupWidget(std::shared_ptr<Channel> &&_channel);
+    AccountPopupWidget(std::shared_ptr<Channel> &channel);
 
     void setName(const QString &name);
 
 private:
     Ui::AccountPopup *_ui;
 
-    std::shared_ptr<Channel> _channel;
+    std::shared_ptr<Channel> &_channel;
 };
 
 }  // namespace widgets

@@ -24,13 +24,13 @@ public:
     void addTwitchUser(const twitch::TwitchUser &user);
 
 private:
-
     AccountManager();
 
     twitch::TwitchUser _twitchAnon;
     std::vector<twitch::TwitchUser> _twitchUsers;
     std::mutex _twitchUsersMutex;
 };
+
 }  // namespace chatterino
 
 #endif  // ACCOUNTMANAGER_H

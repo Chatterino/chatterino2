@@ -7,10 +7,10 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &&channel)
+AccountPopupWidget::AccountPopupWidget(SharedChannel &channel)
     : QWidget(nullptr)
     , _ui(new Ui::AccountPopup)
-    , _channel(std::move(channel))
+    , _channel(channel)
 {
     _ui->setupUi(this);
 
@@ -25,10 +25,10 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &&channel)
 
     connect(_ui->btnPurge, &QPushButton::clicked, [=]() {
         qDebug() << "xD: " << _channel->getName();
-        /*
-        _channel->sendMessage(
-            QString(".timeout %1 0").arg(_ui->lblUsername->text()));
-            */
+        printf("Channel pointer in dialog: %p\n", _channel.get());
+
+        //_channel->sendMessage(QString(".timeout %1 0").arg(_ui->lblUsername->text()));
+        _channel->sendMessage("xD");
     });
 }
 
