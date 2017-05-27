@@ -36,3 +36,6 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user
 
+# Ignore moc-files
+moc_*.h
+moc_*.cpp
