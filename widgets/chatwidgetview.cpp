@@ -300,8 +300,8 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    int index = message->getSelectionIndex(relativePos);
-    qDebug() << index;
+    // int index = message->getSelectionIndex(relativePos);
+    // qDebug() << index;
 
     messages::Word hoverWord;
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
