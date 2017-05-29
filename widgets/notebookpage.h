@@ -31,6 +31,8 @@ public:
     const std::vector<ChatWidget *> &getChatWidgets() const;
     NotebookTab *getTab() const;
 
+    void addChat(bool openChannelNameDialog = false);
+
     static bool isDraggingSplit;
     static ChatWidget *draggingSplit;
     static std::pair<int, int> dropPosition;

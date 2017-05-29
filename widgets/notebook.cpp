@@ -10,6 +10,7 @@
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
+#include <QShortcut>
 #include <QStandardPaths>
 #include <QWidget>
 #include <boost/foreach.hpp>
@@ -41,6 +42,20 @@ Notebook::Notebook(QWidget *parent)
         [this](const bool &) { performLayout(); });
     SettingsManager::getInstance().hideUserButton.valueChanged.connect(
         [this](const bool &) { performLayout(); });
+
+    // Initialize notebook hotkeys
+    {
+        // CTRL+T: Create new split (Add page)
+        auto shortcut = new QShortcut(QKeySequence("CTRL+T"), this);
+        connect(shortcut, &QShortcut::activated, [this]() {
+            printf("ctrL+t pressed\n");  //
+            if (this->_selectedPage == nullptr) {
+                return;
+            }
+
+            this->_selectedPage->addChat();
+        });
+    }
 }
 
 NotebookPage *Notebook::addPage(bool select)

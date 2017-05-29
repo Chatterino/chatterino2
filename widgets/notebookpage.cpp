@@ -49,6 +49,18 @@ NotebookTab *NotebookPage::getTab() const
     return _tab;
 }
 
+void
+NotebookPage::addChat(bool openChannelNameDialog)
+{
+    ChatWidget *w = new ChatWidget();
+
+    if (openChannelNameDialog) {
+        w->showChangeChannelPopup();
+    }
+
+    addToLayout(w, std::pair<int, int>(-1, -1));
+}
+
 std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
 {
     // remove from chatWidgets vector

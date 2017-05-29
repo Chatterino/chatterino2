@@ -157,9 +157,11 @@ void ChatWidgetHeader::rightButtonClicked()
 
 void ChatWidgetHeader::menuAddSplit()
 {
+    printf("Add split for menu (NOT IMPLEMENTED KKarrot)\n");
 }
 void ChatWidgetHeader::menuCloseSplit()
 {
+    printf("Close split\n");
 }
 void ChatWidgetHeader::menuMoveSplit()
 {
