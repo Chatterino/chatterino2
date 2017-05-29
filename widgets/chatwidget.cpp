@@ -36,6 +36,7 @@ ChatWidget::ChatWidget(QWidget *parent)
 
 ChatWidget::~ChatWidget()
 {
+    detachChannel();
 }
 
 std::shared_ptr<Channel> ChatWidget::getChannel() const
@@ -69,7 +70,7 @@ void ChatWidget::setChannelName(const QString &name)
     if (!_channelName.isEmpty()) {
         ChannelManager::getInstance().removeChannel(_channelName);
 
-        detachChannel(_channel);
+        detachChannel();
     }
 
     // update members
@@ -128,7 +129,7 @@ void ChatWidget::attachChannel(SharedChannel channel)
     }
 }
 
-void ChatWidget::detachChannel(std::shared_ptr<Channel> channel)
+void ChatWidget::detachChannel()
 {
     // on message added
     _messageAppendedConnection.disconnect();

@@ -42,7 +42,7 @@ protected:
 
 private:
     void attachChannel(std::shared_ptr<Channel> _channel);
-    void detachChannel(std::shared_ptr<Channel> _channel);
+    void detachChannel();
 
     messages::LimitedQueue<messages::SharedMessageRef> _messages;
 
