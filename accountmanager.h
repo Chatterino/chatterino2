@@ -1,7 +1,7 @@
 #ifndef ACCOUNTMANAGER_H
 #define ACCOUNTMANAGER_H
 
-#include "twitch/twitchaccount.h"
+#include "twitch/twitchuser.h"
 
 #include <mutex>
 #include <vector>

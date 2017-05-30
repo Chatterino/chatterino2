@@ -42,3 +42,5 @@ moc_*.cpp
 
 # Ignore binary file
 /chatterino
+
+settings.json

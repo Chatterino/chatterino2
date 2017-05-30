@@ -22,6 +22,7 @@ private:
     QString _realName;
     QString _password;
 };
+
 }  // namespace chatterino
 
 #endif  // IRCUSER_H

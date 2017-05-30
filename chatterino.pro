@@ -84,7 +84,7 @@ SOURCES += main.cpp\
     widgets/titlebar.cpp \
     appdatapath.cpp \
     accountmanager.cpp \
-    twitch/twitchaccount.cpp \
+    twitch/twitchuser.cpp \
     ircaccount.cpp \
     widgets/accountpopup.cpp
 
@@ -142,7 +142,7 @@ HEADERS  += \
     widgets/titlebar.h \
     appdatapath.h \
     accountmanager.h \
-    twitch/twitchaccount.h \
+    twitch/twitchuser.h \
     ircaccount.h \
     widgets/accountpopup.h \
     util/distancebetweenpoints.h
@@ -158,6 +158,12 @@ DISTFILES +=
 win32 {
     INCLUDEPATH += C:\local\boost\
 }
+
+# Include settings library
+SOURCES += lib/settings/src/settings/settingdata.cpp
+SOURCES += lib/settings/src/settings/settingmanager.cpp
+INCLUDEPATH += lib/settings/include/
+INCLUDEPATH += lib/settings/external/signals/include/
 
 # Optional dependency on windows sdk 7.1
 win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {

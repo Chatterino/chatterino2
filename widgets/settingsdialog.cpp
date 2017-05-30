@@ -1,6 +1,6 @@
 #include "widgets/settingsdialog.h"
 #include "accountmanager.h"
-#include "twitch/twitchaccount.h"
+#include "twitch/twitchuser.h"
 #include "widgets/settingsdialogtab.h"
 #include "windowmanager.h"
 

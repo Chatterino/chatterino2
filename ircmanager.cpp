@@ -4,9 +4,9 @@
 #include "channel.h"
 #include "channelmanager.h"
 #include "messages/messageparseargs.h"
-#include "twitch/twitchaccount.h"
 #include "twitch/twitchmessagebuilder.h"
 #include "twitch/twitchparsemessage.h"
+#include "twitch/twitchuser.h"
 
 #include <irccommand.h>
 #include <ircconnection.h>
