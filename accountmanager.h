@@ -19,6 +19,9 @@ public:
 
     twitch::TwitchUser &getTwitchAnon();
 
+    // Returns first user from _twitchUsers, or _twitchAnon if _twitchUsers is empty
+    twitch::TwitchUser &getTwitchUser();
+
     std::vector<twitch::TwitchUser> getTwitchUsers();
     bool removeTwitchUser(const QString &userName);
     void addTwitchUser(const twitch::TwitchUser &user);

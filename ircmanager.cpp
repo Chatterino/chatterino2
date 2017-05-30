@@ -28,7 +28,7 @@ IrcManager IrcManager::instance;
 const QString IrcManager::defaultClientId("7ue61iz46fz11y3cugd0l3tawb4taal");
 
 IrcManager::IrcManager()
-    : _account(AccountManager::getInstance().getTwitchAnon())
+    : _account(AccountManager::getInstance().getTwitchUser())
     , _connection()
     , _connectionMutex()
     , _connectionGeneration(0)
