@@ -24,7 +24,5 @@ const QString &Path::getAppdataPath()
         appdataPath = path;
     }
 
-    qDebug() << "memes: " << appdataPath;
-
     return appdataPath;
 }

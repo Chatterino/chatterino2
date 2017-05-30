@@ -66,8 +66,6 @@ void SettingsManager::save()
 void SettingsManager::load()
 {
     for (auto &item : _settingsItems) {
-        qDebug() << "Loading settings for " << item.get().getName();
-
         item.get().setVariant(_settings.value(item.get().getName()));
     }
 }
