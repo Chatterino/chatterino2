@@ -1,3 +1,6 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
 	url = https://github.com/hemirt/libcommuni
+[submodule "lib/settings"]
+	path = lib/settings
+	url = https://github.com/pajlada/settings
