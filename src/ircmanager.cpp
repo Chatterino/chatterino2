@@ -169,8 +169,7 @@ void IrcManager::beginConnecting()
         this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
         for (auto &channel : ChannelManager::getInstance().getItems()) {
-            this->writeConnection->sendRaw("JOIN #" + channel->getName());
-            this->readConnection->sendRaw("JOIN #" + channel->getName());
+            this->joinChannel(channel->getName());
         }
 
         this->writeConnection->open();
@@ -194,18 +193,6 @@ void IrcManager::disconnect()
     _connectionMutex.unlock();
 }
 
-void IrcManager::sendJoin(const QString &channel)
-{
-    _connectionMutex.lock();
-
-    if (this->readConnection && this->writeConnection) {
-        this->readConnection->sendRaw("JOIN #" + channel);
-        this->writeConnection->sendRaw("JOIN #" + channel);
-    }
-
-    _connectionMutex.unlock();
-}
-
 void IrcManager::sendMessage(const QString &channelName, const QString &message)
 {
     _connectionMutex.lock();
@@ -217,13 +204,26 @@ void IrcManager::sendMessage(const QString &channelName, const QString &message)
     _connectionMutex.unlock();
 }
 
-void IrcManager::partChannel(const QString &channel)
+void IrcManager::joinChannel(const QString &channelName)
 {
     _connectionMutex.lock();
 
     if (this->readConnection && this->writeConnection) {
-        this->readConnection->sendRaw("PART #" + channel);
-        this->writeConnection->sendRaw("PART #" + channel);
+        this->readConnection->sendRaw("JOIN #" + channelName);
+        this->writeConnection->sendRaw("JOIN #" + channelName);
+    }
+
+    _connectionMutex.unlock();
+}
+
+
+void IrcManager::partChannel(const QString &channelName)
+{
+    _connectionMutex.lock();
+
+    if (this->readConnection && this->writeConnection) {
+        this->readConnection->sendRaw("PART #" + channelName);
+        this->writeConnection->sendRaw("PART #" + channelName);
     }
 
     _connectionMutex.unlock();

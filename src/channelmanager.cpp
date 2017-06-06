@@ -58,7 +58,7 @@ SharedChannel ChannelManager::addChannel(const QString &channel)
         auto channel = SharedChannel(new Channel(channelName));
         _channels.insert(channelName, std::make_tuple(channel, 1));
 
-        IrcManager::getInstance().sendJoin(channelName);
+        IrcManager::getInstance().joinChannel(channelName);
 
         return channel;
     }

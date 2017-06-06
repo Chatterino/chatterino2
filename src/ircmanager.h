@@ -38,10 +38,10 @@ public:
 
     QNetworkAccessManager &getAccessManager();
 
-    void sendJoin(const QString &channel);
     void sendMessage(const QString &channelName, const QString &message);
 
-    void partChannel(const QString &channel);
+    void joinChannel(const QString &channelName);
+    void partChannel(const QString &channelName);
 
     const twitch::TwitchUser &getUser() const;
     void setUser(const twitch::TwitchUser &account);
