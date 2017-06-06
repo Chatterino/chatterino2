@@ -159,12 +159,6 @@ win32 {
     INCLUDEPATH += C:\local\boost\
 }
 
-# Include settings library
-SOURCES += lib/settings/src/settings/settingdata.cpp
-SOURCES += lib/settings/src/settings/settingmanager.cpp
-INCLUDEPATH += lib/settings/include/
-INCLUDEPATH += lib/settings/external/signals/include/
-
 # Optional dependency on windows sdk 7.1
 win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
     LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
@@ -194,3 +188,7 @@ werr {
 
     message("Enabling error on warning")
 }
+
+# External dependencies
+include(dependencies/rapidjson.pri)
+include(dependencies/settings.pri)
