@@ -8,10 +8,11 @@
 #include "util/distancebetweenpoints.h"
 #include "widgets/chatwidget.h"
 
-#include <math.h>
 #include <QDebug>
 #include <QGraphicsBlurEffect>
 #include <QPainter>
+
+#include <math.h>
 #include <chrono>
 #include <functional>
 
@@ -19,7 +20,7 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetView::ChatWidgetView(ChatWidget *parent)
-    : QWidget()
+    : QWidget(parent)
     , _chatWidget(parent)
     , _scrollbar(this)
     , _userPopupWidget(_chatWidget->getChannelRef())
@@ -34,7 +35,10 @@ ChatWidgetView::ChatWidgetView(ChatWidget *parent)
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
                      &ChatWidgetView::wordTypeMaskChanged);
 
-    _scrollbar.getCurrentValueChanged().connect([this] { update(); });
+    _scrollbar.getCurrentValueChanged().connect([this] {
+        // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
+        this->update();
+    });
 }
 
 ChatWidgetView::~ChatWidgetView()
@@ -54,6 +58,15 @@ bool ChatWidgetView::layoutMessages()
     }
 
     bool showScrollbar = false, redraw = false;
+
+    // Bool indicating whether or not we were showing all messages
+    // True if one of the following statements are true:
+    // The scrollbar was not visible
+    // The scrollbar was visible and at the bottom
+    bool showingLatestMessages = false;
+    if (this->_scrollbar.isAtBottom() || !this->_scrollbar.isVisible()) {
+        showingLatestMessages = true;
+    }
 
     int start = _scrollbar.getCurrentValue();
     int layoutWidth = _scrollbar.isVisible() ? width() - _scrollbar.width() : width();
@@ -102,13 +115,22 @@ bool ChatWidgetView::layoutMessages()
 
     _scrollbar.setMaximum(messages.getSize());
 
+    if (showingLatestMessages && showScrollbar) {
+        // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
+        // to bottom
+        // TODO: Do we want to check if the user is currently moving the scrollbar?
+        // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
+        // seconds or something
+        this->_scrollbar.scrollToBottom();
+    }
+
     return redraw;
 }
 
 void ChatWidgetView::updateGifEmotes()
 {
     _onlyUpdateEmotes = true;
-    update();
+    this->update();
 }
 
 ScrollBar *ChatWidgetView::getScrollbar()
@@ -123,7 +145,7 @@ void ChatWidgetView::resizeEvent(QResizeEvent *)
 
     layoutMessages();
 
-    update();
+    this->update();
 }
 
 void ChatWidgetView::paintEvent(QPaintEvent *event)
@@ -403,5 +425,6 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     return false;
 }
+
 }  // namespace widgets
 }  // namespace chatterino

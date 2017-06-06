@@ -1,5 +1,4 @@
-#ifndef CHATVIEW_H
-#define CHATVIEW_H
+#pragma once
 
 #include "channel.h"
 #include "messages/lazyloadedimage.h"
@@ -67,7 +66,6 @@ private slots:
         update();
     }
 };
+
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // CHATVIEW_H

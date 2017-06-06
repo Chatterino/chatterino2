@@ -1,6 +1,7 @@
 #include "widgets/scrollbar.h"
 #include "colorscheme.h"
 
+#include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
 
@@ -86,6 +87,16 @@ void ScrollBar::addHighlight(ScrollBarHighlight *highlight)
     }
 
     _mutex.unlock();
+}
+
+void ScrollBar::scrollToBottom()
+{
+    this->setDesiredValue(this->_maximum - this->getLargeChange());
+}
+
+bool ScrollBar::isAtBottom() const
+{
+    return this->getCurrentValue() == this->getMaximum() - this->getLargeChange();
 }
 
 void ScrollBar::setMaximum(qreal value)
@@ -186,6 +197,15 @@ void ScrollBar::setCurrentValue(qreal value)
 
         update();
     }
+}
+
+void ScrollBar::printCurrentState(const QString &prefix) const
+{
+    qDebug() << prefix                                         //
+             << "Current value: " << this->getCurrentValue()   //
+             << ". Maximum: " << this->getMaximum()            //
+             << ". Minimum: " << this->getMinimum()            //
+             << ". Large change: " << this->getLargeChange();  //
 }
 
 void ScrollBar::paintEvent(QPaintEvent *)
@@ -301,5 +321,6 @@ void ScrollBar::updateScroll()
 
     update();
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

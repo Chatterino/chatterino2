@@ -1,5 +1,4 @@
-#ifndef SCROLLBAR_H
-#define SCROLLBAR_H
+#pragma once
 
 #include "widgets/scrollbarhighlight.h"
 
@@ -7,7 +6,6 @@
 #include <QPropertyAnimation>
 #include <QWidget>
 #include <boost/signals2.hpp>
-#include <functional>
 
 namespace chatterino {
 namespace widgets {
@@ -25,6 +23,10 @@ public:
 
     Q_PROPERTY(qreal _desiredValue READ getDesiredValue WRITE setDesiredValue)
 
+    void scrollToBottom();
+
+    bool isAtBottom() const;
+
     void setMaximum(qreal value);
     void setMinimum(qreal value);
     void setLargeChange(qreal value);
@@ -38,6 +40,8 @@ public:
     qreal getCurrentValue() const;
     boost::signals2::signal<void()> &getCurrentValueChanged();
     void setCurrentValue(qreal value);
+
+    void printCurrentState(const QString &prefix = QString()) const;
 
 private:
     Q_PROPERTY(qreal _currentValue READ getCurrentValue WRITE setCurrentValue)
@@ -74,7 +78,6 @@ private:
 
     void updateScroll();
 };
-}
-}
 
-#endif  // SCROLLBAR_H
+}  // namespace widgets
+}  // namespace chatterino
