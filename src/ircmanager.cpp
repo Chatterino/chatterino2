@@ -76,9 +76,12 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
 
     this->refreshTwitchEmotes(username, oauthClient, oauthToken);
 
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    if (doRead) {
+        connection->sendCommand(
+            Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+        connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
+        connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    }
 
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6667);
