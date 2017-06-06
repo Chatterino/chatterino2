@@ -24,7 +24,7 @@ class ChatWidgetHeader : public QWidget
 public:
     explicit ChatWidgetHeader(ChatWidget *parent);
 
-    ChatWidget *getChatWidget()
+    ChatWidget *getChatWidget() const
     {
         return _chatWidget;
     }
@@ -39,7 +39,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    ChatWidget *_chatWidget;
+    ChatWidget * const _chatWidget;
 
     QPoint _dragStart;
     bool _dragging;

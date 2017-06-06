@@ -157,7 +157,8 @@ void ChatWidgetHeader::rightButtonClicked()
 
 void ChatWidgetHeader::menuAddSplit()
 {
-    printf("Add split for menu (NOT IMPLEMENTED KKarrot)\n");
+    auto page = static_cast<NotebookPage *>(_chatWidget->parentWidget());
+    page->addChat();
 }
 void ChatWidgetHeader::menuCloseSplit()
 {
