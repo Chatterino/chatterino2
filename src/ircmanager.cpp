@@ -169,7 +169,8 @@ void IrcManager::beginConnecting()
         this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
         for (auto &channel : ChannelManager::getInstance().getItems()) {
-            this->joinChannel(channel->getName());
+            this->writeConnection->sendRaw("JOIN #" + channel->getName());
+            this->readConnection->sendRaw("JOIN #" + channel->getName());
         }
 
         this->writeConnection->open();
