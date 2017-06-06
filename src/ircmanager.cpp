@@ -159,7 +159,7 @@ void IrcManager::beginConnecting()
     Communi::IrcConnection *_writeConnection = this->createConnection(false);
     Communi::IrcConnection *_readConnection = this->createConnection(true);
 
-    QMutexLocker locker(&_connectionMutex);
+    std::lock_guard<std::mutex> locker(this->connectionMutex);
 
     if (generation == this->connectionGeneration) {
         this->writeConnection = std::shared_ptr<Communi::IrcConnection>(_writeConnection);
@@ -183,7 +183,7 @@ void IrcManager::beginConnecting()
 
 void IrcManager::disconnect()
 {
-    _connectionMutex.lock();
+    this->connectionMutex.lock();
 
     auto _readConnection = this->readConnection;
     auto _writeConnection = this->writeConnection;
@@ -191,43 +191,43 @@ void IrcManager::disconnect()
     this->readConnection.reset();
     this->writeConnection.reset();
 
-    _connectionMutex.unlock();
+    this->connectionMutex.unlock();
 }
 
 void IrcManager::sendMessage(const QString &channelName, const QString &message)
 {
-    _connectionMutex.lock();
+    this->connectionMutex.lock();
 
     if (this->writeConnection) {
         this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
     }
 
-    _connectionMutex.unlock();
+    this->connectionMutex.unlock();
 }
 
 void IrcManager::joinChannel(const QString &channelName)
 {
-    _connectionMutex.lock();
+    this->connectionMutex.lock();
 
     if (this->readConnection && this->writeConnection) {
         this->readConnection->sendRaw("JOIN #" + channelName);
         this->writeConnection->sendRaw("JOIN #" + channelName);
     }
 
-    _connectionMutex.unlock();
+    this->connectionMutex.unlock();
 }
 
 
 void IrcManager::partChannel(const QString &channelName)
 {
-    _connectionMutex.lock();
+    this->connectionMutex.lock();
 
     if (this->readConnection && this->writeConnection) {
         this->readConnection->sendRaw("PART #" + channelName);
         this->writeConnection->sendRaw("PART #" + channelName);
     }
 
-    _connectionMutex.unlock();
+    this->connectionMutex.unlock();
 }
 
 void IrcManager::messageReceived(Communi::IrcMessage *message)
@@ -239,8 +239,8 @@ void IrcManager::messageReceived(Communi::IrcMessage *message)
         qDebug() << "Param: " << param;
     }
 
-    const QString &command = message->command();
     /*
+    const QString &command = message->command();
 
     if (command == "CLEARCHAT") {
     } else if (command == "ROOMSTATE") {

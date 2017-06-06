@@ -12,6 +12,7 @@
 #include <QString>
 
 #include <memory>
+#include <mutex>
 
 namespace chatterino {
 
@@ -56,7 +57,7 @@ private:
     std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
     std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
 
-    QMutex _connectionMutex;
+    std::mutex connectionMutex;
     uint32_t connectionGeneration = 0;
 
     QMap<QString, bool> _twitchBlockedUsers;
