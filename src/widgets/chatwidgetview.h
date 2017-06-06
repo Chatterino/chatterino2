@@ -52,6 +52,10 @@ private:
 
     ScrollBar _scrollbar;
 
+    // This variable can be used to decide whether or not we should render the "Show latest
+    // messages" button
+    bool showingLatestMessages = true;
+
     AccountPopupWidget _userPopupWidget;
     bool _onlyUpdateEmotes;
 

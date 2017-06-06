@@ -63,10 +63,7 @@ bool ChatWidgetView::layoutMessages()
     // True if one of the following statements are true:
     // The scrollbar was not visible
     // The scrollbar was visible and at the bottom
-    bool showingLatestMessages = false;
-    if (this->_scrollbar.isAtBottom() || !this->_scrollbar.isVisible()) {
-        showingLatestMessages = true;
-    }
+    this->showingLatestMessages = this->_scrollbar.isAtBottom() || !this->_scrollbar.isVisible();
 
     int start = _scrollbar.getCurrentValue();
     int layoutWidth = _scrollbar.isVisible() ? width() - _scrollbar.width() : width();
