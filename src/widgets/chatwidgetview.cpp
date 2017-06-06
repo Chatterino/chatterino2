@@ -112,7 +112,7 @@ bool ChatWidgetView::layoutMessages()
 
     _scrollbar.setMaximum(messages.getSize());
 
-    if (showingLatestMessages && showScrollbar) {
+    if (this->showingLatestMessages && showScrollbar) {
         // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
         // to bottom
         // TODO: Do we want to check if the user is currently moving the scrollbar?

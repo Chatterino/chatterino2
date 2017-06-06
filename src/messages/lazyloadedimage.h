@@ -1,5 +1,4 @@
-#ifndef LAZYLOADEDIMAGE_H
-#define LAZYLOADEDIMAGE_H
+#pragma once
 
 #include <QPixmap>
 #include <QString>
@@ -103,7 +102,6 @@ private:
 
     void gifUpdateTimout();
 };
+
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // LAZYLOADEDIMAGE_H

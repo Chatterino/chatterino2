@@ -12,6 +12,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
+
 #include <functional>
 
 namespace chatterino {

@@ -25,7 +25,7 @@ class Message
 {
 public:
     Message(const QString &text);
-    Message(const std::vector<messages::Word> &words);
+    Message(const QString &text, const std::vector<messages::Word> &words);
 
     bool getCanHighlightTab() const;
     const QString &getTimeoutUser() const;
@@ -37,6 +37,8 @@ public:
     std::vector<Word> &getWords();
     bool isDisabled() const;
     const QString &getId() const;
+
+    const QString _text;
 
 private:
     static LazyLoadedImage *badgeStaff;

@@ -14,7 +14,7 @@ MessageBuilder::MessageBuilder()
 
 SharedMessage MessageBuilder::build()
 {
-    return SharedMessage(new Message(_words));
+    return SharedMessage(new Message(this->originalMessage, _words));
 }
 
 void MessageBuilder::appendWord(const Word &word)

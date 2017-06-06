@@ -1,5 +1,4 @@
-#ifndef URLFETCH_H
-#define URLFETCH_H
+#pragma once
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -25,6 +24,16 @@ static void urlFetch(const QString &url, std::function<void(QNetworkReply &)> su
     QNetworkReply *reply = manager->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, [=] {
+        /* uncomment to follow redirects
+        QVariant replyStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        if (replyStatus >= 300 && replyStatus <= 304) {
+            QString newUrl =
+                reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
+            urlFetch(newUrl, successCallback);
+            return;
+        }
+        */
+
         if (reply->error() == QNetworkReply::NetworkError::NoError) {
             successCallback(*reply);
         }
@@ -49,7 +58,6 @@ static void urlJsonFetch(const QString &url, std::function<void(QJsonObject &)> 
         successCallback(rootNode);
     });
 }
-}
-}
 
-#endif  // URLFETCH_H
+}  // namespace util
+}  // namespace chatterino

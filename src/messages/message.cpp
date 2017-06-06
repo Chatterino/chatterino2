@@ -21,13 +21,15 @@ namespace messages {
 
 Message::Message(const QString &text)
     : _words()
+    , _text(text)
 {
     _words.push_back(
         Word(text, Word::Text, ColorScheme::getInstance().SystemMessageColor, text, QString()));
 }
 
-Message::Message(const std::vector<Word> &words)
+Message::Message(const QString &text, const std::vector<Word> &words)
     : _words(words)
+    , _text(text)
 {
 }
 

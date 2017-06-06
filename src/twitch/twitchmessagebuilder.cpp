@@ -204,7 +204,9 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     // words
     QColor textColor = ircMessage->isAction() ? usernameColor : ColorScheme::getInstance().Text;
 
-    QStringList splits = ircMessage->content().split(' ');
+    const QString &originalMessage = ircMessage->content();
+    b.originalMessage = originalMessage;
+    QStringList splits = originalMessage.split(' ');
 
     long int i = 0;
 

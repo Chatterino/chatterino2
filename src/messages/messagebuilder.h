@@ -1,7 +1,7 @@
-#ifndef MESSAGEBUILDER_H
-#define MESSAGEBUILDER_H
+#pragma once
 
 #include "messages/message.h"
+
 #include <ctime>
 
 namespace chatterino {
@@ -20,11 +20,12 @@ public:
 
     QString matchLink(const QString &string);
 
+    QString originalMessage;
+
 private:
     std::vector<Word> _words;
     std::chrono::time_point<std::chrono::system_clock> _parseTime;
 };
-}
-}
 
-#endif  // MESSAGEBUILDER_H
+}  // namespace messages
+}  // namespace chatterino
