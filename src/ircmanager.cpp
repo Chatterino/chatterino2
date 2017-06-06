@@ -29,12 +29,6 @@ const QString IrcManager::defaultClientId("7ue61iz46fz11y3cugd0l3tawb4taal");
 
 IrcManager::IrcManager()
     : _account(AccountManager::getInstance().getTwitchUser())
-    , _connection()
-    , _connectionMutex()
-    , _connectionGeneration(0)
-    , _twitchBlockedUsers()
-    , _twitchBlockedUsersMutex()
-    , _accessManager()
 {
 }
 
@@ -55,110 +49,132 @@ void IrcManager::connect()
     async_exec([this] { beginConnecting(); });
 }
 
-void IrcManager::beginConnecting()
+Communi::IrcConnection *IrcManager::createConnection(bool doRead)
 {
-    int generation = ++IrcManager::_connectionGeneration;
+    Communi::IrcConnection *connection = new Communi::IrcConnection;
 
-    Communi::IrcConnection *c = new Communi::IrcConnection;
-
-    QObject::connect(c, &Communi::IrcConnection::messageReceived, this,
-                     &IrcManager::messageReceived);
-    QObject::connect(c, &Communi::IrcConnection::privateMessageReceived, this,
-                     &IrcManager::privateMessageReceived);
+    if (doRead) {
+        QObject::connect(connection, &Communi::IrcConnection::messageReceived, this,
+                         &IrcManager::messageReceived);
+        QObject::connect(connection, &Communi::IrcConnection::privateMessageReceived, this,
+                         &IrcManager::privateMessageReceived);
+    }
 
     QString username = _account.getUserName();
     QString oauthClient = _account.getOAuthClient();
     QString oauthToken = _account.getOAuthToken();
 
-    c->setUserName(username);
-    c->setNickName(username);
-    c->setRealName(username);
+    connection->setUserName(username);
+    connection->setNickName(username);
+    connection->setRealName(username);
 
     if (!_account.isAnon()) {
-        c->setPassword(oauthToken);
+        connection->setPassword(oauthToken);
 
-        // fetch ignored users
-        {
-            QString nextLink = "https://api.twitch.tv/kraken/users/" + username +
-                               "/blocks?limit=" + 100 + "&client_id=" + oauthClient;
+        this->refreshIgnoredUsers(username, oauthClient, oauthToken);
+    }
 
-            QNetworkAccessManager *manager = new QNetworkAccessManager();
-            QNetworkRequest req(QUrl(nextLink + "&oauth_token=" + oauthToken));
-            QNetworkReply *reply = manager->get(req);
+    this->refreshTwitchEmotes(username, oauthClient, oauthToken);
 
-            QObject::connect(reply, &QNetworkReply::finished, [=] {
-                _twitchBlockedUsersMutex.lock();
-                _twitchBlockedUsers.clear();
-                _twitchBlockedUsersMutex.unlock();
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
-                QByteArray data = reply->readAll();
-                QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-                QJsonObject root = jsonDoc.object();
+    connection->setHost("irc.chat.twitch.tv");
+    connection->setPort(6667);
 
-                // nextLink =
-                // root.value("_links").toObject().value("next").toString();
+    return connection;
+}
 
-                auto blocks = root.value("blocks").toArray();
+void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oauthClient,
+                                     const QString &oauthToken)
+{
+    QString nextLink = "https://api.twitch.tv/kraken/users/" + username + "/blocks?limit=" + 100 +
+                       "&client_id=" + oauthClient;
 
-                _twitchBlockedUsersMutex.lock();
-                for (QJsonValue block : blocks) {
-                    QJsonObject user = block.toObject().value("user").toObject();
-                    // display_name
-                    _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
-                }
-                _twitchBlockedUsersMutex.unlock();
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QNetworkRequest req(QUrl(nextLink + "&oauth_token=" + oauthToken));
+    QNetworkReply *reply = manager->get(req);
 
-                manager->deleteLater();
-            });
+    QObject::connect(reply, &QNetworkReply::finished, [=] {
+        _twitchBlockedUsersMutex.lock();
+        _twitchBlockedUsers.clear();
+        _twitchBlockedUsersMutex.unlock();
+
+        QByteArray data = reply->readAll();
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+        QJsonObject root = jsonDoc.object();
+
+        // nextLink =
+        // root.value("_links").toObject().value("next").toString();
+
+        auto blocks = root.value("blocks").toArray();
+
+        _twitchBlockedUsersMutex.lock();
+        for (QJsonValue block : blocks) {
+            QJsonObject user = block.toObject().value("user").toObject();
+            // display_name
+            _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
         }
-    }
+        _twitchBlockedUsersMutex.unlock();
 
-    // fetch available twitch emtoes
-    {
-        QNetworkRequest req(QUrl("https://api.twitch.tv/kraken/users/" + username +
-                                 "/emotes?oauth_token=" + oauthToken +
-                                 "&client_id=" + oauthClient));
-        QNetworkReply *reply = _accessManager.get(req);
+        manager->deleteLater();
+    });
+}
 
-        QObject::connect(reply, &QNetworkReply::finished, [=] {
-            QByteArray data = reply->readAll();
-            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-            QJsonObject root = jsonDoc.object();
+void IrcManager::refreshTwitchEmotes(const QString &username, const QString &oauthClient,
+                                     const QString &oauthToken)
+{
+    QNetworkRequest req(QUrl("https://api.twitch.tv/kraken/users/" + username +
+                             "/emotes?oauth_token=" + oauthToken + "&client_id=" + oauthClient));
+    QNetworkReply *reply = _accessManager.get(req);
 
-            // nextLink =
-            // root.value("_links").toObject().value("next").toString();
+    QObject::connect(reply, &QNetworkReply::finished, [=] {
+        QByteArray data = reply->readAll();
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+        QJsonObject root = jsonDoc.object();
 
-            auto blocks = root.value("blocks").toArray();
+        // nextLink =
+        // root.value("_links").toObject().value("next").toString();
 
-            _twitchBlockedUsersMutex.lock();
-            for (QJsonValue block : blocks) {
-                QJsonObject user = block.toObject().value("user").toObject();
-                // display_name
-                _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
-            }
-            _twitchBlockedUsersMutex.unlock();
-        });
-    }
+        auto blocks = root.value("blocks").toArray();
 
-    c->setHost("irc.chat.twitch.tv");
-    c->setPort(6667);
+        _twitchBlockedUsersMutex.lock();
+        for (QJsonValue block : blocks) {
+            QJsonObject user = block.toObject().value("user").toObject();
+            // display_name
+            _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
+        }
+        _twitchBlockedUsersMutex.unlock();
+    });
+}
 
-    c->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    c->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+void IrcManager::beginConnecting()
+{
+    uint32_t generation = ++this->connectionGeneration;
+
+    Communi::IrcConnection *_writeConnection = this->createConnection(false);
+    Communi::IrcConnection *_readConnection = this->createConnection(true);
 
     QMutexLocker locker(&_connectionMutex);
 
-    if (generation == _connectionGeneration) {
-        c->moveToThread(QCoreApplication::instance()->thread());
-        _connection = std::shared_ptr<Communi::IrcConnection>(c);
+    if (generation == this->connectionGeneration) {
+        this->writeConnection = std::shared_ptr<Communi::IrcConnection>(_writeConnection);
+        this->readConnection = std::shared_ptr<Communi::IrcConnection>(_readConnection);
+
+        this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
+        this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
         for (auto &channel : ChannelManager::getInstance().getItems()) {
-            c->sendRaw("JOIN #" + channel->getName());
+            this->writeConnection->sendRaw("JOIN #" + channel->getName());
+            this->readConnection->sendRaw("JOIN #" + channel->getName());
         }
 
-        c->open();
+        this->writeConnection->open();
+        this->readConnection->open();
     } else {
-        delete c;
+        delete _writeConnection;
+        delete _readConnection;
     }
 }
 
@@ -166,19 +182,11 @@ void IrcManager::disconnect()
 {
     _connectionMutex.lock();
 
-    auto c = _connection;
-    if (_connection.get() != NULL) {
-        _connection = std::shared_ptr<Communi::IrcConnection>();
-    }
+    auto _readConnection = this->readConnection;
+    auto _writeConnection = this->writeConnection;
 
-    _connectionMutex.unlock();
-}
-
-void IrcManager::send(QString raw)
-{
-    _connectionMutex.lock();
-
-    _connection->sendRaw(raw);
+    this->readConnection.reset();
+    this->writeConnection.reset();
 
     _connectionMutex.unlock();
 }
@@ -187,8 +195,9 @@ void IrcManager::sendJoin(const QString &channel)
 {
     _connectionMutex.lock();
 
-    if (_connection.get() != NULL) {
-        _connection->sendRaw("JOIN #" + channel);
+    if (this->readConnection && this->writeConnection) {
+        this->readConnection->sendRaw("JOIN #" + channel);
+        this->writeConnection->sendRaw("JOIN #" + channel);
     }
 
     _connectionMutex.unlock();
@@ -198,11 +207,8 @@ void IrcManager::sendMessage(const QString &channelName, const QString &message)
 {
     _connectionMutex.lock();
 
-    if (_connection.get() != nullptr) {
-        qDebug() << "IRC Manager send message " << message << " to channel " << channelName;
-        QString xd = "PRIVMSG #" + channelName + " :" + message;
-        qDebug() << xd;
-        _connection->sendRaw(xd);
+    if (this->writeConnection) {
+        this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
     }
 
     _connectionMutex.unlock();
@@ -212,19 +218,25 @@ void IrcManager::partChannel(const QString &channel)
 {
     _connectionMutex.lock();
 
-    if (_connection.get() != NULL) {
-        _connection.get()->sendRaw("PART #" + channel);
+    if (this->readConnection && this->writeConnection) {
+        this->readConnection->sendRaw("PART #" + channel);
+        this->writeConnection->sendRaw("PART #" + channel);
     }
 
     _connectionMutex.unlock();
 }
 
-void IrcManager::messageReceived(Communi::IrcMessage * /*message*/)
+void IrcManager::messageReceived(Communi::IrcMessage *message)
 {
+    qDebug() << "Message received: " << message->command();
     // qInfo(message->command().toStdString().c_str());
+    //
+    for (const auto &param : message->parameters()) {
+        qDebug() << "Param: " << param;
+    }
 
-    /*
     const QString &command = message->command();
+    /*
 
     if (command == "CLEARCHAT") {
     } else if (command == "ROOMSTATE") {

@@ -1,5 +1,4 @@
-#ifndef IRCMANAGER_H
-#define IRCMANAGER_H
+#pragma once
 
 #define TWITCH_MAX_MESSAGELENGTH 500
 
@@ -31,8 +30,6 @@ public:
     void connect();
     void disconnect();
 
-    void send(QString raw);
-
     bool isTwitchBlockedUser(QString const &username);
     bool tryAddIgnoredUser(QString const &username, QString &errorMessage);
     void addIgnoredUser(QString const &username);
@@ -56,9 +53,11 @@ private:
     // variables
     twitch::TwitchUser _account;
 
-    std::shared_ptr<Communi::IrcConnection> _connection;
+    std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
+    std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
+
     QMutex _connectionMutex;
-    long _connectionGeneration;
+    uint32_t connectionGeneration = 0;
 
     QMap<QString, bool> _twitchBlockedUsers;
     QMutex _twitchBlockedUsersMutex;
@@ -66,11 +65,17 @@ private:
     QNetworkAccessManager _accessManager;
 
     // methods
+    Communi::IrcConnection *createConnection(bool doRead);
+
+    void refreshIgnoredUsers(const QString &username, const QString &oauthClient,
+                             const QString &oauthToken);
+    void refreshTwitchEmotes(const QString &username, const QString &oauthClient,
+                             const QString &oauthToken);
+
     void beginConnecting();
 
     void messageReceived(Communi::IrcMessage *message);
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
 };
-}  // namespace chatterino
 
-#endif  // IRCMANAGER_H
+}  // namespace chatterino
