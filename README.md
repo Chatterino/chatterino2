@@ -9,3 +9,17 @@ Chatterino 2 is the second installment of my twitch chat client series "Chatteri
 
 ## code style
 The code is normally formated using clang format in qt creator. [clangformat.txt](https://github.com/fourtf/chatterino2/blob/master/clangformat.txt) contains the style file for clang format.
+
+## third party dependencies
+
+### submodules
+1. run git submodule update --init --recursive
+
+### rapidjson
+
+#### windows
+1. download rapidjson zip from https://github.com/miloyip/rapidjson/releases/latest
+2. extract to C:/local
+
+#### linux
+???
