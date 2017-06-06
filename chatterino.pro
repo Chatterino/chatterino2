@@ -14,6 +14,9 @@ include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# Include ourself
+INCLUDEPATH += src/
+
 TARGET   = chatterino
 TEMPLATE = app
 
@@ -22,10 +25,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # Define warning flags for Chatterino
 win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON = -W4
-# 4714 - function marked as __forceinline not inlined
-# 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
-#        These functions may have a different preferred name, may be insecure or have
-#        a more secure variant, or may be obsolete.
+    # 4714 - function marked as __forceinline not inlined
+    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
+    #        These functions may have a different preferred name, may be insecure or have
+    #        a more secure variant, or may be obsolete.
     QMAKE_CXXFLAGS_WARN_ON += /wd4714
     QMAKE_CXXFLAGS_WARN_ON += /wd4996
 } else {
@@ -42,115 +45,116 @@ win32 {
 
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += main.cpp\
-    channel.cpp \
-    colorscheme.cpp \
-    emojis.cpp \
-    ircmanager.cpp \
-    messages/lazyloadedimage.cpp \
-    messages/link.cpp \
-    messages/message.cpp \
-    messages/word.cpp \
-    messages/wordpart.cpp \
-    resources.cpp \
-    widgets/chatwidget.cpp \
-    widgets/chatwidgetheader.cpp \
-    widgets/chatwidgetheaderbutton.cpp \
-    widgets/chatwidgetinput.cpp \
-    widgets/chatwidgetview.cpp \
-    widgets/mainwindow.cpp \
-    widgets/notebook.cpp \
-    widgets/notebookbutton.cpp \
-    widgets/notebookpage.cpp \
-    widgets/notebookpagedroppreview.cpp \
-    widgets/notebooktab.cpp \
-    widgets/scrollbar.cpp \
-    widgets/scrollbarhighlight.cpp \
-    widgets/settingsdialog.cpp \
-    widgets/settingsdialogtab.cpp \
-    widgets/textinputdialog.cpp \
-    messages/messageref.cpp \
-    logging/loggingmanager.cpp \
-    logging/loggingchannel.cpp \
-    windowmanager.cpp \
-    channelmanager.cpp \
-    fontmanager.cpp \
-    settingsmanager.cpp \
-    emotemanager.cpp \
-    messages/messagebuilder.cpp \
-    twitch/twitchmessagebuilder.cpp \
-    twitch/twitchparsemessage.cpp \
-    widgets/fancybutton.cpp \
-    widgets/titlebar.cpp \
-    appdatapath.cpp \
-    accountmanager.cpp \
-    twitch/twitchuser.cpp \
-    ircaccount.cpp \
-    widgets/accountpopup.cpp
+SOURCES += \
+    src/main.cpp \
+    src/channel.cpp \
+    src/colorscheme.cpp \
+    src/emojis.cpp \
+    src/ircmanager.cpp \
+    src/messages/lazyloadedimage.cpp \
+    src/messages/link.cpp \
+    src/messages/message.cpp \
+    src/messages/word.cpp \
+    src/messages/wordpart.cpp \
+    src/resources.cpp \
+    src/widgets/chatwidget.cpp \
+    src/widgets/chatwidgetheader.cpp \
+    src/widgets/chatwidgetheaderbutton.cpp \
+    src/widgets/chatwidgetinput.cpp \
+    src/widgets/chatwidgetview.cpp \
+    src/widgets/mainwindow.cpp \
+    src/widgets/notebook.cpp \
+    src/widgets/notebookbutton.cpp \
+    src/widgets/notebookpage.cpp \
+    src/widgets/notebookpagedroppreview.cpp \
+    src/widgets/notebooktab.cpp \
+    src/widgets/scrollbar.cpp \
+    src/widgets/scrollbarhighlight.cpp \
+    src/widgets/settingsdialog.cpp \
+    src/widgets/settingsdialogtab.cpp \
+    src/widgets/textinputdialog.cpp \
+    src/messages/messageref.cpp \
+    src/logging/loggingmanager.cpp \
+    src/logging/loggingchannel.cpp \
+    src/windowmanager.cpp \
+    src/channelmanager.cpp \
+    src/fontmanager.cpp \
+    src/settingsmanager.cpp \
+    src/emotemanager.cpp \
+    src/messages/messagebuilder.cpp \
+    src/twitch/twitchmessagebuilder.cpp \
+    src/twitch/twitchparsemessage.cpp \
+    src/widgets/fancybutton.cpp \
+    src/widgets/titlebar.cpp \
+    src/appdatapath.cpp \
+    src/accountmanager.cpp \
+    src/twitch/twitchuser.cpp \
+    src/ircaccount.cpp \
+    src/widgets/accountpopup.cpp
 
 HEADERS  += \
-    asyncexec.h \
-    channel.h \
-    colorscheme.h \
-    common.h \
-    concurrentmap.h \
-    emojis.h \
-    ircmanager.h \
-    messages/lazyloadedimage.h \
-    messages/link.h \
-    messages/message.h \
-    messages/word.h \
-    messages/wordpart.h \
-    resources.h \
-    setting.h \
-    twitch/emotevalue.h \
-    widgets/chatwidget.h \
-    widgets/chatwidgetheader.h \
-    widgets/chatwidgetheaderbutton.h \
-    widgets/chatwidgetinput.h \
-    widgets/chatwidgetview.h \
-    widgets/mainwindow.h \
-    widgets/notebook.h \
-    widgets/notebookbutton.h \
-    widgets/notebookpage.h \
-    widgets/notebookpagedroppreview.h \
-    widgets/notebooktab.h \
-    widgets/scrollbar.h \
-    widgets/scrollbarhighlight.h \
-    widgets/settingsdialog.h \
-    widgets/settingsdialogtab.h \
-    widgets/signallabel.h \
-    widgets/textinputdialog.h \
-    widgets/resizingtextedit.h \
-    settingssnapshot.h \
-    messages/limitedqueue.h \
-    messages/limitedqueuesnapshot.h \
-    messages/messageref.h \
-    logging/loggingmanager.h \
-    logging/loggingchannel.h \
-    channelmanager.h \
-    windowmanager.h \
-    settingsmanager.h \
-    fontmanager.h \
-    emotemanager.h \
-    util/urlfetch.h \
-    messages/messageparseargs.h \
-    messages/messagebuilder.h \
-    twitch/twitchmessagebuilder.h \
-    twitch/twitchparsemessage.h \
-    widgets/fancybutton.h \
-    widgets/titlebar.h \
-    appdatapath.h \
-    accountmanager.h \
-    twitch/twitchuser.h \
-    ircaccount.h \
-    widgets/accountpopup.h \
-    util/distancebetweenpoints.h
+    src/asyncexec.h \
+    src/channel.h \
+    src/colorscheme.h \
+    src/common.h \
+    src/concurrentmap.h \
+    src/emojis.h \
+    src/ircmanager.h \
+    src/messages/lazyloadedimage.h \
+    src/messages/link.h \
+    src/messages/message.h \
+    src/messages/word.h \
+    src/messages/wordpart.h \
+    src/resources.h \
+    src/setting.h \
+    src/twitch/emotevalue.h \
+    src/widgets/chatwidget.h \
+    src/widgets/chatwidgetheader.h \
+    src/widgets/chatwidgetheaderbutton.h \
+    src/widgets/chatwidgetinput.h \
+    src/widgets/chatwidgetview.h \
+    src/widgets/mainwindow.h \
+    src/widgets/notebook.h \
+    src/widgets/notebookbutton.h \
+    src/widgets/notebookpage.h \
+    src/widgets/notebookpagedroppreview.h \
+    src/widgets/notebooktab.h \
+    src/widgets/scrollbar.h \
+    src/widgets/scrollbarhighlight.h \
+    src/widgets/settingsdialog.h \
+    src/widgets/settingsdialogtab.h \
+    src/widgets/signallabel.h \
+    src/widgets/textinputdialog.h \
+    src/widgets/resizingtextedit.h \
+    src/settingssnapshot.h \
+    src/messages/limitedqueue.h \
+    src/messages/limitedqueuesnapshot.h \
+    src/messages/messageref.h \
+    src/logging/loggingmanager.h \
+    src/logging/loggingchannel.h \
+    src/channelmanager.h \
+    src/windowmanager.h \
+    src/settingsmanager.h \
+    src/fontmanager.h \
+    src/emotemanager.h \
+    src/util/urlfetch.h \
+    src/messages/messageparseargs.h \
+    src/messages/messagebuilder.h \
+    src/twitch/twitchmessagebuilder.h \
+    src/twitch/twitchparsemessage.h \
+    src/widgets/fancybutton.h \
+    src/widgets/titlebar.h \
+    src/appdatapath.h \
+    src/accountmanager.h \
+    src/twitch/twitchuser.h \
+    src/ircaccount.h \
+    src/widgets/accountpopup.h \
+    src/util/distancebetweenpoints.h
 
 PRECOMPILED_HEADER =
 
 RESOURCES += \
-    resources.qrc
+    resources/resources.qrc
 
 DISTFILES +=
 
