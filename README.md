@@ -19,7 +19,7 @@ The code is normally formated using clang format in qt creator. [clangformat.txt
 
 #### windows
 1. download rapidjson zip from https://github.com/miloyip/rapidjson/releases/latest
-2. extract to C:/local
+2. extract to `C:/local/rapidjson` so that `C:/local/rapidjson/include/rapidjson/` is a proper path
 
 #### linux
 ???

@@ -1,4 +1,4 @@
 # rapidjson
 win32 {
-    INCLUDEPATH += C:/local/rapidjson/
+    INCLUDEPATH += C:/local/rapidjson/include/
 }
