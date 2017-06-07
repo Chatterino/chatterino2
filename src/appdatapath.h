@@ -1,8 +1,7 @@
-#ifndef APPDATAPATH_H
-#define APPDATAPATH_H
+#pragma once
 
 #include <QString>
-#include <atomic>
+
 #include <mutex>
 
 class Path
@@ -14,5 +13,3 @@ private:
     static QString appdataPath;
     static std::mutex appdataPathMutex;
 };
-
-#endif  // APPDATAPATH_H

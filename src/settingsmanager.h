@@ -1,5 +1,4 @@
-#ifndef APPSETTINGS_H
-#define APPSETTINGS_H
+#pragma once
 
 #include "messages/word.h"
 #include "setting.h"
@@ -82,5 +81,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // APPSETTINGS_H

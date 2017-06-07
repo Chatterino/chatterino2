@@ -1,5 +1,4 @@
-#ifndef DISTANCEBETWEENPOINTS_H
-#define DISTANCEBETWEENPOINTS_H
+#pragma once
 
 #include <math.h>
 
@@ -16,7 +15,6 @@ static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
 
     return sqrt(distance);
 }
-}
-}
 
-#endif  // DISTANCEBETWEENPOINTS_H
+}  // namespace util
+}  // namespace chatterino

@@ -102,5 +102,6 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 
     FancyButton::mouseReleaseEvent(event);
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

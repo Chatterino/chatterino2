@@ -114,4 +114,5 @@ void Emojis::loadEmojis()
                                QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
     }
 }
-}
+
+}  // namespace chatterino

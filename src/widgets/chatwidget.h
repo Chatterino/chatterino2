@@ -1,5 +1,4 @@
-#ifndef CHATWIDGET_H
-#define CHATWIDGET_H
+#pragma once
 
 #include "channel.h"
 #include "messages/limitedqueuesnapshot.h"
@@ -65,5 +64,3 @@ public:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // CHATWIDGET_H

@@ -1,5 +1,4 @@
-#ifndef FANCYBUTTON_H
-#define FANCYBUTTON_H
+#pragma once
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -9,6 +8,7 @@
 
 namespace chatterino {
 namespace widgets {
+
 class FancyButton : public QWidget
 {
     struct ClickEffect {
@@ -49,7 +49,6 @@ private:
 
     void onMouseEffectTimeout();
 };
-}
-}
 
-#endif  // FANCYBUTTON_H
+}  // namespace widgets
+}  // namespace chatterino

@@ -1,5 +1,4 @@
-#ifndef TWITCHMESSAGEBUILDER_H
-#define TWITCHMESSAGEBUILDER_H
+#pragma once
 
 #include "channel.h"
 #include "messages/messagebuilder.h"
@@ -26,6 +25,6 @@ public:
     //        const std::pair<long int, messages::LazyLoadedImage *> &a,
     //        const std::pair<long int, messages::LazyLoadedImage *> &b);
 };
-}
-}
-#endif  // TWITCHMESSAGEBUILDER_H
+
+}  // namespace twitch
+}  // namespace chatterino

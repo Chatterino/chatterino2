@@ -30,4 +30,5 @@ const QString &IrcUser2::getPassword() const
 {
     return _password;
 }
-}
+
+}  // namespace chatterino

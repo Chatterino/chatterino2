@@ -1,5 +1,4 @@
-#ifndef NOTEBOOKBUTTON_H
-#define NOTEBOOKBUTTON_H
+#pragma once
 
 #include "fancybutton.h"
 
@@ -36,5 +35,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // NOTEBOOKBUTTON_H

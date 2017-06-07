@@ -1,5 +1,4 @@
-#ifndef LINK_H
-#define LINK_H
+#pragma once
 
 #include <QString>
 
@@ -42,7 +41,6 @@ private:
     Type type;
     QString value;
 };
-}
-}
 
-#endif  // LINK_H
+}  // namespace messages
+}  // namespace chatterino

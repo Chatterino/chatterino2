@@ -1,5 +1,4 @@
-#ifndef CHANNELS_H
-#define CHANNELS_H
+#pragma once
 
 #include "channel.h"
 
@@ -37,5 +36,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // CHANNELS_H

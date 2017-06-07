@@ -49,8 +49,7 @@ NotebookTab *NotebookPage::getTab() const
     return _tab;
 }
 
-void
-NotebookPage::addChat(bool openChannelNameDialog)
+void NotebookPage::addChat(bool openChannelNameDialog)
 {
     ChatWidget *w = new ChatWidget();
 

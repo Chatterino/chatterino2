@@ -1,5 +1,4 @@
-#ifndef LIMITEDQUEUE_H
-#define LIMITEDQUEUE_H
+#pragma once
 
 #include "messages/limitedqueuesnapshot.h"
 
@@ -96,5 +95,3 @@ private:
 
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // LIMITEDQUEUE_H

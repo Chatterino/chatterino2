@@ -1,5 +1,4 @@
-#ifndef ACCOUNTMANAGER_H
-#define ACCOUNTMANAGER_H
+#pragma once
 
 #include "twitch/twitchuser.h"
 
@@ -35,5 +34,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // ACCOUNTMANAGER_H

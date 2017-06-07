@@ -1,5 +1,4 @@
-#ifndef SETTINGSSNAPSHOT_H
-#define SETTINGSSNAPSHOT_H
+#pragma once
 
 #include "setting.h"
 
@@ -28,6 +27,5 @@ public:
 private:
     std::vector<std::pair<std::reference_wrapper<BaseSetting>, QVariant>> _items;
 };
-}  // namespace chatterino
 
-#endif  // SETTINGSSNAPSHOT_H
+}  // namespace chatterino

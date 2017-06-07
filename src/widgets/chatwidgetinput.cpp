@@ -60,7 +60,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
 
     completer->setWidget(&_edit);
 
-    _edit.keyPressed.connect([this/*, completer*/](QKeyEvent *event) {
+    _edit.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
             auto c = _chatWidget->getChannel();
             if (c == nullptr) {
@@ -137,5 +137,6 @@ void ChatWidgetInput::resizeEvent(QResizeEvent *)
         _edit.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

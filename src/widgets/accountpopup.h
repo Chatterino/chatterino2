@@ -1,5 +1,4 @@
-#ifndef USERPOPUPWIDGET_H
-#define USERPOPUPWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -31,5 +30,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // USERPOPUPWIDGET_H

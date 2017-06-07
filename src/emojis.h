@@ -1,5 +1,4 @@
-#ifndef EMOJIS_H
-#define EMOJIS_H
+#pragma once
 
 #include "concurrentmap.h"
 #include "messages/lazyloadedimage.h"
@@ -7,6 +6,7 @@
 #include <QObject>
 #include <QRegularExpression>
 #include <QString>
+
 #include <unordered_map>
 
 namespace chatterino {
@@ -39,6 +39,5 @@ private:
     {
     }
 };
-}
 
-#endif  // EMOJIS_H
+}  // namespace chatterino

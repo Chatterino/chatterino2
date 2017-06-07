@@ -1,5 +1,4 @@
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#pragma once
 
 #include "ircaccount.h"
 
@@ -25,5 +24,3 @@ private:
 
 }  // namespace twitch
 }  // namespace chatterino
-
-#endif  // ACCOUNT_H

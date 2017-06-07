@@ -150,5 +150,6 @@ Notebook &MainWindow::getNotebook()
 {
     return _notebook;
 }
+
 }  // namespace widgets
 }  // namespace chatterino

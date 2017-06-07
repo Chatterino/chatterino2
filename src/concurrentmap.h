@@ -1,5 +1,4 @@
-#ifndef CONCURRENTMAP_H
-#define CONCURRENTMAP_H
+#pragma once
 
 #include <QMap>
 #include <QMutex>
@@ -66,5 +65,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // CONCURRENTMAP_H

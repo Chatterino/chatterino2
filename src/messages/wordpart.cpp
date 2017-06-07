@@ -102,5 +102,6 @@ int WordPart::getLineNumber()
 {
     return _lineNumber;
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino

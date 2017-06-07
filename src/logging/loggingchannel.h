@@ -1,5 +1,4 @@
-#ifndef LOGGINGCHANNEL_H
-#define LOGGINGCHANNEL_H
+#pragma once
 
 #include "messages/message.h"
 
@@ -35,5 +34,3 @@ private:
 
 }  // namespace logging
 }  // namespace chatterino
-
-#endif  // LOGGINGCHANNEL_H

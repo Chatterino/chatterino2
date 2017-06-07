@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include "widgets/notebook.h"
 #include "widgets/titlebar.h"
@@ -42,5 +41,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // MAINWINDOW_H

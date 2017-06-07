@@ -1,5 +1,4 @@
-#ifndef TEXTINPUTDIALOG_H
-#define TEXTINPUTDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QHBoxLayout>
@@ -39,7 +38,6 @@ private slots:
     void okButtonClicked();
     void cancelButtonClicked();
 };
-}
-}
 
-#endif  // TEXTINPUTDIALOG_H
+}  // namespace widgets
+}  // namespace chatterino

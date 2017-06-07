@@ -38,5 +38,6 @@ void TextInputDialog::cancelButtonClicked()
     reject();
     close();
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

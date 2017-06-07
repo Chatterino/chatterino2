@@ -1,5 +1,4 @@
-#ifndef FONTS_H
-#define FONTS_H
+#pragma once
 
 #include <QFont>
 #include <QFontMetrics>
@@ -50,6 +49,5 @@ private:
 
     int _generation;
 };
-}
 
-#endif  // FONTS_H
+}  // namespace chatterino

@@ -1,5 +1,4 @@
-#ifndef NOTEBOOKPAGEDROPPREVIEW_H
-#define NOTEBOOKPAGEDROPPREVIEW_H
+#pragma once
 
 #include <QPropertyAnimation>
 #include <QWidget>
@@ -23,7 +22,6 @@ protected:
     QRect desiredGeometry;
     bool animate;
 };
+
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // NOTEBOOKPAGEDROPPREVIEW_H

@@ -1,5 +1,4 @@
-#ifndef RESOURCES_H
-#define RESOURCES_H
+#pragma once
 
 #include "messages/lazyloadedimage.h"
 
@@ -108,6 +107,5 @@ private:
     static messages::LazyLoadedImage *buttonBan;
     static messages::LazyLoadedImage *buttonTimeout;
 };
-}  // namespace chatterino
 
-#endif  // RESOURCES_H
+}  // namespace chatterino

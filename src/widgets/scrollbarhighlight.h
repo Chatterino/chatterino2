@@ -1,5 +1,4 @@
-#ifndef SCROLLBARHIGHLIGHT_H
-#define SCROLLBARHIGHLIGHT_H
+#pragma once
 
 #include "QString"
 
@@ -45,5 +44,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // SCROLLBARHIGHLIGHT_H

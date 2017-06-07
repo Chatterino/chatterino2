@@ -1,9 +1,9 @@
-#ifndef MESSAGEREF_H
-#define MESSAGEREF_H
+#pragma once
 
 #include "messages/message.h"
 
 #include <QPixmap>
+
 #include <memory>
 
 namespace chatterino {
@@ -50,5 +50,3 @@ private:
 
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // MESSAGEREF_H

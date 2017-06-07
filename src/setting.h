@@ -1,5 +1,4 @@
-#ifndef SETTING_H
-#define SETTING_H
+#pragma once
 
 #include <QSettings>
 #include <QString>
@@ -73,5 +72,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // SETTING_H

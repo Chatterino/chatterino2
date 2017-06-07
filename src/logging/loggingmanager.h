@@ -1,5 +1,4 @@
-#ifndef LOGGINGMANAGER_H
-#define LOGGINGMANAGER_H
+#pragma once
 
 #include "loggingchannel.h"
 
@@ -13,5 +12,3 @@ std::shared_ptr<Channel> get(const QString &channelName);
 
 }  // namespace logging
 }  // namespace chatterino
-
-#endif  // LOGGINGMANAGER_H

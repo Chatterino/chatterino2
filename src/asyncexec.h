@@ -1,15 +1,16 @@
-#ifndef ASYNCEXEC_H
-#define ASYNCEXEC_H
+#pragma once
 
-#include "qcoreapplication.h"
+#include <QCoreApplication>
 
 #include <QRunnable>
 #include <QThreadPool>
+
 #include <functional>
 
 #define async_exec(a) QThreadPool::globalInstance()->start(new LambdaRunnable(a));
 
-class LambdaRunnable : public QRunnable {
+class LambdaRunnable : public QRunnable
+{
 public:
     LambdaRunnable(std::function<void()> action)
     {
@@ -24,5 +25,3 @@ public:
 private:
     std::function<void()> action;
 };
-
-#endif  // ASYNCEXEC_H

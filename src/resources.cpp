@@ -56,4 +56,5 @@ void Resources::load()
     Resources::buttonTimeout =
         new messages::LazyLoadedImage(new QPixmap(":/images/button_timeout.png"), 0.25);
 }
-}
+
+}  // namespace chatterino

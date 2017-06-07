@@ -1,5 +1,4 @@
-#ifndef SIGNALLABEL_H
-#define SIGNALLABEL_H
+#pragma once
 
 #include <QFlags>
 #include <QLabel>
@@ -52,5 +51,3 @@ protected:
         event->ignore();
     }
 };
-
-#endif  // SIGNALLABEL_H

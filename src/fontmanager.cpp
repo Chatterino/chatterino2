@@ -59,4 +59,5 @@ QFontMetrics &FontManager::getFontMetrics(Type type)
 
     return *_metricsMedium;
 }
-}
+
+}  // namespace chatterino

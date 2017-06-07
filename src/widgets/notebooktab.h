@@ -1,5 +1,4 @@
-#ifndef NOTEBOOKTAB_H
-#define NOTEBOOKTAB_H
+#pragma once
 
 #include <QPropertyAnimation>
 #include <QWidget>
@@ -83,5 +82,3 @@ public:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // NOTEBOOKTAB_H

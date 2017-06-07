@@ -1,5 +1,4 @@
-#ifndef CHATWIDGETINPUT_H
-#define CHATWIDGETINPUT_H
+#pragma once
 
 #include "resizingtextedit.h"
 #include "widgets/chatwidgetheaderbutton.h"
@@ -49,7 +48,6 @@ private slots:
     void editTextChanged();
     //    void editKeyPressed(QKeyEvent *event);
 };
+
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // CHATWIDGETINPUT_H

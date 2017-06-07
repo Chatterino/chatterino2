@@ -14,5 +14,6 @@ Link::Link(Type type, const QString &value)
     , value(value)
 {
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino

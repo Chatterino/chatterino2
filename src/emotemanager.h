@@ -1,5 +1,4 @@
-#ifndef EMOTES_H
-#define EMOTES_H
+#pragma once
 
 #define GIF_FRAME_LENGTH 33
 
@@ -94,5 +93,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // EMOTES_H

@@ -96,7 +96,6 @@ HEADERS  += \
     src/asyncexec.h \
     src/channel.h \
     src/colorscheme.h \
-    src/common.h \
     src/concurrentmap.h \
     src/emojis.h \
     src/ircmanager.h \

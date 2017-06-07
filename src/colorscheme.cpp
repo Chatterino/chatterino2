@@ -171,4 +171,5 @@ void ColorScheme::normalizeColor(QColor &color)
 
     //    color.setHslF(color.hueF(), s, newL);
 }
+
 }  // namespace chatterino

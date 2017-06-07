@@ -137,5 +137,6 @@ void FancyButton::onMouseEffectTimeout()
         update();
     }
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

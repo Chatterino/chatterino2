@@ -1,5 +1,4 @@
-#ifndef RESIZINGTEXTEDIT_H
-#define RESIZINGTEXTEDIT_H
+#pragma once
 
 #include <QKeyEvent>
 #include <QTextEdit>
@@ -50,5 +49,3 @@ protected:
         }
     }
 };
-
-#endif  // RESIZINGTEXTEDIT_H

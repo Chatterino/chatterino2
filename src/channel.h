@@ -1,5 +1,4 @@
-#ifndef CHANNEL_H
-#define CHANNEL_H
+#pragma once
 
 #include "concurrentmap.h"
 #include "logging/loggingchannel.h"
@@ -11,6 +10,7 @@
 #include <QString>
 #include <QVector>
 #include <boost/signals2.hpp>
+
 #include <memory>
 
 namespace chatterino {
@@ -78,5 +78,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // CHANNEL_H

@@ -9,6 +9,7 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 namespace twitch {
+
 TwitchMessageBuilder::TwitchMessageBuilder()
     : MessageBuilder()
     , messageId()
@@ -345,5 +346,6 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
 //{
 //    return a.first < b.first;
 //}
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino

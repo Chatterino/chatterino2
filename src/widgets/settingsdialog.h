@@ -1,5 +1,4 @@
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#pragma once
 
 #include "settingsmanager.h"
 #include "settingssnapshot.h"
@@ -54,5 +53,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // SETTINGSDIALOG_H

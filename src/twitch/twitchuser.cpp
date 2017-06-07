@@ -2,6 +2,7 @@
 
 namespace chatterino {
 namespace twitch {
+
 TwitchUser::TwitchUser(const QString &username, const QString &oauthToken,
                        const QString &oauthClient)
     : IrcUser2(username, username, username, "oauth:" + oauthToken)
@@ -24,5 +25,6 @@ bool TwitchUser::isAnon() const
 {
     return IrcUser2::getNickName().startsWith("justinfan");
 }
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino

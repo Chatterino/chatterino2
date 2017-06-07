@@ -1,5 +1,4 @@
-#ifndef CHATWIDGETHEADERBUTTON_H
-#define CHATWIDGETHEADERBUTTON_H
+#pragma once
 
 #include "widgets/signallabel.h"
 
@@ -45,7 +44,6 @@ private:
     void labelMouseUp();
     void labelMouseDown();
 };
-}
-}
 
-#endif  // CHATWIDGETHEADERBUTTON_H
+}  // namespace widgets
+}  // namespace chatterino

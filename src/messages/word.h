@@ -1,5 +1,4 @@
-#ifndef WORD_H
-#define WORD_H
+#pragma once
 
 #include "fontmanager.h"
 #include "messages/lazyloadedimage.h"
@@ -116,5 +115,3 @@ private:
 
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // WORD_H

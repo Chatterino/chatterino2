@@ -1,5 +1,4 @@
-#ifndef IRCUSER_H
-#define IRCUSER_H
+#pragma once
 
 #include <QString>
 
@@ -24,5 +23,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // IRCUSER_H

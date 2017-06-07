@@ -195,5 +195,6 @@ void ChatWidgetHeader::menuManualReconnect()
 void ChatWidgetHeader::menuShowChangelog()
 {
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

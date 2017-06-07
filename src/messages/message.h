@@ -1,5 +1,4 @@
-#ifndef MESSAGE_H
-#define MESSAGE_H
+#pragma once
 
 #include "messages/message.h"
 #include "messages/messageparseargs.h"
@@ -67,5 +66,3 @@ private:
 
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // MESSAGE_H

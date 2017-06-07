@@ -1,5 +1,4 @@
-#ifndef WORDPART_H
-#define WORDPART_H
+#pragma once
 
 #include <QRect>
 #include <QString>
@@ -48,7 +47,6 @@ private:
 
     bool _trailingSpace;
 };
-}
-}
 
-#endif  // WORDPART_H
+}  // namespace messages
+}  // namespace chatterino

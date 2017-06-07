@@ -1,5 +1,4 @@
-#ifndef TWITCHEMOTEVALUE_H
-#define TWITCHEMOTEVALUE_H
+#pragma once
 
 #include "QString"
 
@@ -28,7 +27,6 @@ private:
     int _id;
     QString _channelName;
 };
-}
-}
 
-#endif  // TWITCHEMOTEVALUE_H
+}  // namespace twitch
+}  // namespace chatterino

@@ -1,5 +1,4 @@
-#ifndef CHATWIDGETHEADER_H
-#define CHATWIDGETHEADER_H
+#pragma once
 
 #include "signallabel.h"
 #include "widgets/chatwidgetheaderbutton.h"
@@ -39,7 +38,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    ChatWidget * const _chatWidget;
+    ChatWidget *const _chatWidget;
 
     QPoint _dragStart;
     bool _dragging;
@@ -69,7 +68,6 @@ private slots:
     void menuManualReconnect();
     void menuShowChangelog();
 };
-}
-}
 
-#endif  // CHATWIDGETHEADER_H
+}  // namespace widgets
+}  // namespace chatterino

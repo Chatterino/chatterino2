@@ -1,5 +1,4 @@
-#ifndef NOTEBOOK_H
-#define NOTEBOOK_H
+#pragma once
 
 #include "widgets/notebookbutton.h"
 #include "widgets/notebookpage.h"
@@ -63,5 +62,3 @@ public:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // NOTEBOOK_H

@@ -1,6 +1,5 @@
 #include "channelmanager.h"
 #include "colorscheme.h"
-#include "common.h"
 #include "emojis.h"
 #include "emotemanager.h"
 #include "ircmanager.h"

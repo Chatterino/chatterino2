@@ -1,5 +1,4 @@
-#ifndef MESSAGEPARSEARGS_H
-#define MESSAGEPARSEARGS_H
+#pragma once
 
 namespace chatterino {
 namespace messages {
@@ -11,7 +10,6 @@ public:
     bool isSentWhisper = false;
     bool includeChannelName = false;
 };
-}
-}
 
-#endif  // MESSAGEPARSEARGS_H
+}  // namespace messages
+}  // namespace chatterino

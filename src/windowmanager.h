@@ -1,5 +1,4 @@
-#ifndef WINDOWS_H
-#define WINDOWS_H
+#pragma once
 
 #include "widgets/mainwindow.h"
 
@@ -35,5 +34,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // WINDOWS_H

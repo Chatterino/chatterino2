@@ -217,7 +217,6 @@ void IrcManager::joinChannel(const QString &channelName)
     this->connectionMutex.unlock();
 }
 
-
 void IrcManager::partChannel(const QString &channelName)
 {
     this->connectionMutex.lock();

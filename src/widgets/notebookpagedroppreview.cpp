@@ -50,5 +50,6 @@ void NotebookPageDropPreview::setBounds(const QRect &rect)
 
     animate = true;
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

@@ -130,5 +130,6 @@ std::vector<short> &Word::getCharacterWidthCache() const
 {
     return _characterWidthCache;
 }
+
 }  // namespace messages
 }  // namespace chatterino

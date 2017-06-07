@@ -23,8 +23,7 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton(int spacing)
     _hbox.addWidget(&_label);
     _hbox.addSpacing(spacing);
 
-    QObject::connect(&_label, &SignalLabel::mouseUp, this,
-                     &ChatWidgetHeaderButton::labelMouseUp);
+    QObject::connect(&_label, &SignalLabel::mouseUp, this, &ChatWidgetHeaderButton::labelMouseUp);
     QObject::connect(&_label, &SignalLabel::mouseDown, this,
                      &ChatWidgetHeaderButton::labelMouseDown);
 }
@@ -94,5 +93,6 @@ void ChatWidgetHeaderButton::labelMouseDown()
 
     update();
 }
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

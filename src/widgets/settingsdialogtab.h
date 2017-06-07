@@ -1,5 +1,4 @@
-#ifndef SETTINGSNOTEBOOKTAB_H
-#define SETTINGSNOTEBOOKTAB_H
+#pragma once
 
 #include <QPaintEvent>
 #include <QWidget>
@@ -37,7 +36,6 @@ private:
 
     bool _selected;
 };
+
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // SETTINGSNOTEBOOKTAB_H

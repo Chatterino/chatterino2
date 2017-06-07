@@ -1,5 +1,4 @@
-#ifndef LIMITEDQUEUESNAPSHOT_H
-#define LIMITEDQUEUESNAPSHOT_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -34,7 +33,6 @@ private:
     int _offset;
     int _length;
 };
+
 }  // namespace messages
 }  // namespace chatterino
-
-#endif  // LIMITEDQUEUESNAPSHOT_H

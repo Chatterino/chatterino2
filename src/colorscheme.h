@@ -1,5 +1,4 @@
-#ifndef COLORSCHEME_H
-#define COLORSCHEME_H
+#pragma once
 
 #include <QBrush>
 #include <QColor>
@@ -89,6 +88,5 @@ private:
     void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to, qreal fromValue,
                                qreal toValue);
 };
-}
 
-#endif  // COLORSCHEME_H
+}  // namespace chatterino
