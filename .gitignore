@@ -44,3 +44,6 @@ moc_*.cpp
 /chatterino
 
 settings.json
+
+# Ignore any files beginning with activate- as they can be used for account credentials
+activate-*
