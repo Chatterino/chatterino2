@@ -16,7 +16,7 @@ namespace chatterino {
 namespace widgets {
 
 bool NotebookPage::isDraggingSplit = false;
-ChatWidget *NotebookPage::draggingSplit = NULL;
+ChatWidget *NotebookPage::draggingSplit = nullptr;
 std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 
 NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
@@ -80,7 +80,7 @@ std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
                 continue;
             }
 
-            widget->setParent(NULL);
+            widget->setParent(nullptr);
 
             bool isLastItem = vbox->count() == 0;
 

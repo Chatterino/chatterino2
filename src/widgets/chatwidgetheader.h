@@ -21,24 +21,22 @@ class ChatWidgetHeader : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChatWidgetHeader(ChatWidget *parent);
+    explicit ChatWidgetHeader(ChatWidget *_chatWidget);
 
-    ChatWidget *getChatWidget() const
-    {
-        return _chatWidget;
-    }
-
+    // Update palette from global color scheme
     void updateColors();
+
+    // Update channel text from chat widget
     void updateChannelText();
 
 protected:
-    void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    ChatWidget *const _chatWidget;
+    ChatWidget *chatWidget;
 
     QPoint _dragStart;
     bool _dragging;

@@ -18,12 +18,22 @@
 namespace chatterino {
 namespace widgets {
 
+// Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
+// ChatWidgetHeader
+//   - Responsible for rendering which channel the ChatWidget is in, and the menu in the top-left of
+//     the chat widget
+// ChatWidgetView
+//   - Responsible for rendering all chat messages, and the scrollbar
+// ChatWidgetInput
+//   - Responsible for rendering and handling user text input
+//
+// Each sub-element has a reference to the parent Chat Widget
 class ChatWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    ChatWidget(QWidget *parent = 0);
+    ChatWidget(QWidget *parent = nullptr);
     ~ChatWidget();
 
     SharedChannel getChannel() const;

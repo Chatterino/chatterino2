@@ -11,9 +11,9 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetHeader::ChatWidgetHeader(ChatWidget *parent)
-    : QWidget()
-    , _chatWidget(parent)
+ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
+    : QWidget(_chatWidget)
+    , chatWidget(_chatWidget)
     , _dragStart()
     , _dragging(false)
     , _leftLabel()
@@ -82,7 +82,7 @@ void ChatWidgetHeader::updateColors()
 
 void ChatWidgetHeader::updateChannelText()
 {
-    const QString &c = _chatWidget->getChannelName();
+    const QString &c = this->chatWidget->getChannelName();
 
     _middleLabel.setText(c.isEmpty() ? "<no channel>" : c);
 }
@@ -108,18 +108,17 @@ void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
     if (_dragging) {
         if (std::abs(_dragStart.x() - event->pos().x()) > 12 ||
             std::abs(_dragStart.y() - event->pos().y()) > 12) {
-            auto chatWidget = _chatWidget;
-            auto page = static_cast<NotebookPage *>(chatWidget->parentWidget());
+            auto page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
 
-            if (page != NULL) {
+            if (page != nullptr) {
                 NotebookPage::isDraggingSplit = true;
-                NotebookPage::draggingSplit = chatWidget;
+                NotebookPage::draggingSplit = this->chatWidget;
 
-                auto originalLocation = page->removeFromLayout(chatWidget);
+                auto originalLocation = page->removeFromLayout(this->chatWidget);
 
                 // page->update();
 
-                QDrag *drag = new QDrag(chatWidget);
+                QDrag *drag = new QDrag(this->chatWidget);
                 QMimeData *mimeData = new QMimeData;
 
                 mimeData->setData("chatterino/split", "xD");
@@ -129,7 +128,7 @@ void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
                 Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
 
                 if (dropAction == Qt::IgnoreAction) {
-                    page->addToLayout(chatWidget, originalLocation);
+                    page->addToLayout(this->chatWidget, originalLocation);
                 }
 
                 NotebookPage::isDraggingSplit = false;
@@ -141,7 +140,7 @@ void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
 void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        _chatWidget->showChangeChannelPopup();
+        this->chatWidget->showChangeChannelPopup();
     }
 }
 
@@ -157,7 +156,7 @@ void ChatWidgetHeader::rightButtonClicked()
 
 void ChatWidgetHeader::menuAddSplit()
 {
-    auto page = static_cast<NotebookPage *>(_chatWidget->parentWidget());
+    auto page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
     page->addChat();
 }
 void ChatWidgetHeader::menuCloseSplit()
@@ -170,12 +169,12 @@ void ChatWidgetHeader::menuMoveSplit()
 void ChatWidgetHeader::menuPopup()
 {
     auto widget = new ChatWidget();
-    widget->setChannelName(_chatWidget->getChannelName());
+    widget->setChannelName(this->chatWidget->getChannelName());
     widget->show();
 }
 void ChatWidgetHeader::menuChangeChannel()
 {
-    _chatWidget->showChangeChannelPopup();
+    this->chatWidget->showChangeChannelPopup();
 }
 void ChatWidgetHeader::menuClearChat()
 {

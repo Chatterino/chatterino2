@@ -82,7 +82,7 @@ void ChatWidget::setChannelName(const QString &name)
     printf("Set channel name xD %s\n", qPrintable(name));
 
     if (channelName.isEmpty()) {
-        _channel = NULL;
+        _channel = nullptr;
     } else {
         _channel = ChannelManager::getInstance().addChannel(channelName);
         printf("Created channel FeelsGoodMan %p\n", _channel.get());
