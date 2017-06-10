@@ -53,12 +53,9 @@ private:
     void leftButtonClicked();
     void rightButtonClicked();
 
-private slots:
-    void menuAddSplit();
-    void menuCloseSplit();
+public slots:
     void menuMoveSplit();
     void menuPopup();
-    void menuChangeChannel();
     void menuClearChat();
     void menuOpenChannel();
     void menuPopupPlayer();

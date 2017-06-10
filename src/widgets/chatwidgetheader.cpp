@@ -40,12 +40,14 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     QObject::connect(&_leftLabel, &ChatWidgetHeaderButton::clicked, this,
                      &ChatWidgetHeader::leftButtonClicked);
 
-    _leftMenu.addAction("Add new split", this, SLOT(menuAddSplit()), QKeySequence(tr("Ctrl+T")));
-    _leftMenu.addAction("Close split", this, SLOT(menuCloseSplit()), QKeySequence(tr("Ctrl+W")));
+    _leftMenu.addAction("Add new split", this->chatWidget, &ChatWidget::doAddSplit,
+                        QKeySequence(tr("Ctrl+T")));
+    _leftMenu.addAction("Close split", this->chatWidget, &ChatWidget::doCloseSplit,
+                        QKeySequence(tr("Ctrl+W")));
     _leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     _leftMenu.addAction("Popup", this, SLOT(menuPopup()));
     _leftMenu.addSeparator();
-    _leftMenu.addAction("Change channel", this, SLOT(menuChangeChannel()),
+    _leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
                         QKeySequence(tr("Ctrl+R")));
     _leftMenu.addAction("Clear chat", this, SLOT(menuClearChat()));
     _leftMenu.addAction("Open channel", this, SLOT(menuOpenChannel()));
@@ -154,43 +156,37 @@ void ChatWidgetHeader::rightButtonClicked()
 {
 }
 
-void ChatWidgetHeader::menuAddSplit()
-{
-    auto page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
-    page->addChat();
-}
-void ChatWidgetHeader::menuCloseSplit()
-{
-    printf("Close split\n");
-}
 void ChatWidgetHeader::menuMoveSplit()
 {
 }
+
 void ChatWidgetHeader::menuPopup()
 {
     auto widget = new ChatWidget();
     widget->setChannelName(this->chatWidget->getChannelName());
     widget->show();
 }
-void ChatWidgetHeader::menuChangeChannel()
-{
-    this->chatWidget->showChangeChannelPopup();
-}
+
 void ChatWidgetHeader::menuClearChat()
 {
 }
+
 void ChatWidgetHeader::menuOpenChannel()
 {
 }
+
 void ChatWidgetHeader::menuPopupPlayer()
 {
 }
+
 void ChatWidgetHeader::menuReloadChannelEmotes()
 {
 }
+
 void ChatWidgetHeader::menuManualReconnect()
 {
 }
+
 void ChatWidgetHeader::menuShowChangelog()
 {
 }

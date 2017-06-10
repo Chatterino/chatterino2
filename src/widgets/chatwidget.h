@@ -10,6 +10,7 @@
 #include "widgets/chatwidgetview.h"
 
 #include <QFont>
+#include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <boost/property_tree/ptree.hpp>
@@ -70,6 +71,17 @@ private:
 public:
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
+
+public slots:
+    // Add new split to the notebook page that this chat widget is in
+    // Maybe we should use this chat widget as a hint to where the new split should be created
+    void doAddSplit();
+
+    // Close current split (chat widget)
+    void doCloseSplit();
+
+    // Show a dialog for changing the current splits/chat widgets channel
+    void doChangeChannel();
 };
 
 }  // namespace widgets

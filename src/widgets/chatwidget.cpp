@@ -1,6 +1,7 @@
 #include "widgets/chatwidget.h"
 #include "channelmanager.h"
 #include "colorscheme.h"
+#include "notebookpage.h"
 #include "settingsmanager.h"
 #include "widgets/textinputdialog.h"
 
@@ -8,6 +9,7 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QPainter>
+#include <QShortcut>
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
@@ -32,6 +34,28 @@ ChatWidget::ChatWidget(QWidget *parent)
     this->_vbox.addWidget(&_header);
     this->_vbox.addWidget(&_view, 1);
     this->_vbox.addWidget(&_input);
+
+    // Initialize widget-wide hotkeys
+    // CTRL+T: Create new split (Add page)
+    {
+        auto s = new QShortcut(QKeySequence("CTRL+T"), this);
+        s->setContext(Qt::WidgetWithChildrenShortcut);
+        connect(s, &QShortcut::activated, this, &ChatWidget::doAddSplit);
+    }
+
+    // CTRL+W: Close Split
+    {
+        auto s = new QShortcut(QKeySequence("CTRL+W"), this);
+        s->setContext(Qt::WidgetWithChildrenShortcut);
+        connect(s, &QShortcut::activated, this, &ChatWidget::doCloseSplit);
+    }
+
+    // CTRL+R: Change Channel
+    {
+        auto s = new QShortcut(QKeySequence("CTRL+R"), this);
+        s->setContext(Qt::WidgetWithChildrenShortcut);
+        connect(s, &QShortcut::activated, this, &ChatWidget::doChangeChannel);
+    }
 }
 
 ChatWidget::~ChatWidget()
@@ -191,6 +215,24 @@ boost::property_tree::ptree ChatWidget::save()
     tree.put("channelName", this->getChannelName().toStdString());
 
     return tree;
+}
+
+/// Slots
+//
+void ChatWidget::doAddSplit()
+{
+    NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
+    page->addChat();
+}
+
+void ChatWidget::doCloseSplit()
+{
+    qDebug() << "Close split for" << this->getChannelName();
+}
+
+void ChatWidget::doChangeChannel()
+{
+    this->showChangeChannelPopup();
 }
 
 }  // namespace widgets
