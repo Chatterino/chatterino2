@@ -1,5 +1,5 @@
-#include "emojis.h"
-#include "emotemanager.h"
+#include "emojis.hpp"
+#include "emotemanager.hpp"
 
 #include <QFile>
 #include <QStringBuilder>

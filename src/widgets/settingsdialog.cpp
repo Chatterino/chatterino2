@@ -1,8 +1,8 @@
-#include "widgets/settingsdialog.h"
-#include "accountmanager.h"
-#include "twitch/twitchuser.h"
-#include "widgets/settingsdialogtab.h"
-#include "windowmanager.h"
+#include "widgets/settingsdialog.hpp"
+#include "accountmanager.hpp"
+#include "twitch/twitchuser.hpp"
+#include "widgets/settingsdialogtab.hpp"
+#include "windowmanager.hpp"
 
 #include <QComboBox>
 #include <QFile>

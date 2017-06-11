@@ -1,4 +1,4 @@
-#include "fontmanager.h"
+#include "fontmanager.hpp"
 
 #define DEFAULT_FONT "Arial"
 

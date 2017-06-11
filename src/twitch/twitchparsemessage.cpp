@@ -1,10 +1,10 @@
-//#include "twitchparsemessage.h"
-//#include "colorscheme.h"
-//#include "emojis.h"
-//#include "emotemanager.h"
-//#include "ircmanager.h"
-//#include "resources.h"
-//#include "twitch/twitchmessagebuilder.h"
+//#include "twitchparsemessage.hpp"
+//#include "colorscheme.hpp"
+//#include "emojis.hpp"
+//#include "emotemanager.hpp"
+//#include "ircmanager.hpp"
+//#include "resources.hpp"
+//#include "twitch/twitchmessagebuilder.hpp"
 //
 //#include <QRegularExpression>
 //

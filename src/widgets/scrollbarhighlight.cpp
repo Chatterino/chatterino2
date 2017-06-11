@@ -1,5 +1,5 @@
-#include "widgets/scrollbarhighlight.h"
-#include "colorscheme.h"
+#include "widgets/scrollbarhighlight.hpp"
+#include "colorscheme.hpp"
 
 namespace chatterino {
 namespace widgets {

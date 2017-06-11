@@ -1,5 +1,5 @@
-#include "widgets/scrollbar.h"
-#include "colorscheme.h"
+#include "widgets/scrollbar.hpp"
+#include "colorscheme.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>

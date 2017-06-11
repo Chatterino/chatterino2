@@ -1,4 +1,4 @@
-#include "messages/link.h"
+#include "messages/link.hpp"
 
 namespace chatterino {
 namespace messages {

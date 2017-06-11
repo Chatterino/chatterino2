@@ -1,7 +1,7 @@
-#include "messagebuilder.h"
-#include "colorscheme.h"
-#include "emotemanager.h"
-#include "resources.h"
+#include "messagebuilder.hpp"
+#include "colorscheme.hpp"
+#include "emotemanager.hpp"
+#include "resources.hpp"
 
 namespace chatterino {
 namespace messages {

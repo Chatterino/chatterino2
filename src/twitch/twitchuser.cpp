@@ -1,4 +1,4 @@
-#include "twitchuser.h"
+#include "twitchuser.hpp"
 
 namespace chatterino {
 namespace twitch {

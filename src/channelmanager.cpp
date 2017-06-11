@@ -1,5 +1,5 @@
-#include "channelmanager.h"
-#include "ircmanager.h"
+#include "channelmanager.hpp"
+#include "ircmanager.hpp"
 
 namespace chatterino {
 

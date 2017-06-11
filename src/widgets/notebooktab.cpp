@@ -1,7 +1,7 @@
-#include "widgets/notebooktab.h"
-#include "colorscheme.h"
-#include "settingsmanager.h"
-#include "widgets/notebook.h"
+#include "widgets/notebooktab.hpp"
+#include "colorscheme.hpp"
+#include "settingsmanager.hpp"
+#include "widgets/notebook.hpp"
 
 #include <QPainter>
 

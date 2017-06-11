@@ -1,10 +1,10 @@
-#include "messages/lazyloadedimage.h"
+#include "messages/lazyloadedimage.hpp"
 
-#include "asyncexec.h"
-#include "emotemanager.h"
-#include "ircmanager.h"
-#include "util/urlfetch.h"
-#include "windowmanager.h"
+#include "asyncexec.hpp"
+#include "emotemanager.hpp"
+#include "ircmanager.hpp"
+#include "util/urlfetch.hpp"
+#include "windowmanager.hpp"
 
 #include <QBuffer>
 #include <QImageReader>

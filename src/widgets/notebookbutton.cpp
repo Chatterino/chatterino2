@@ -1,6 +1,6 @@
-#include "widgets/notebookbutton.h"
-#include "colorscheme.h"
-#include "widgets/fancybutton.h"
+#include "widgets/notebookbutton.hpp"
+#include "colorscheme.hpp"
+#include "widgets/fancybutton.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

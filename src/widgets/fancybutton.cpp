@@ -1,4 +1,4 @@
-#include "fancybutton.h"
+#include "fancybutton.hpp"
 
 #include <QDebug>
 #include <QPainter>

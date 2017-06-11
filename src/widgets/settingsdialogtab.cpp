@@ -1,5 +1,5 @@
-#include "widgets/settingsdialogtab.h"
-#include "widgets/settingsdialog.h"
+#include "widgets/settingsdialogtab.hpp"
+#include "widgets/settingsdialog.hpp"
 
 #include <QPainter>
 #include <QStyleOption>

@@ -1,5 +1,5 @@
-#include "emotemanager.h"
-#include "resources.h"
+#include "emotemanager.hpp"
+#include "resources.hpp"
 
 #include <QDebug>
 #include <QJsonArray>

@@ -1,7 +1,7 @@
-#include "widgets/notebookpage.h"
-#include "colorscheme.h"
-#include "widgets/chatwidget.h"
-#include "widgets/notebooktab.h"
+#include "widgets/notebookpage.hpp"
+#include "colorscheme.hpp"
+#include "widgets/chatwidget.hpp"
+#include "widgets/notebooktab.hpp"
 
 #include <QDebug>
 #include <QHBoxLayout>

@@ -1,5 +1,5 @@
-#include "widgets/chatwidgetheaderbutton.h"
-#include "colorscheme.h"
+#include "widgets/chatwidgetheaderbutton.hpp"
+#include "colorscheme.hpp"
 
 #include <QBrush>
 #include <QPainter>

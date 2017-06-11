@@ -1,9 +1,9 @@
-#include "widgets/chatwidget.h"
-#include "channelmanager.h"
-#include "colorscheme.h"
-#include "notebookpage.h"
-#include "settingsmanager.h"
-#include "widgets/textinputdialog.h"
+#include "widgets/chatwidget.hpp"
+#include "channelmanager.hpp"
+#include "colorscheme.hpp"
+#include "notebookpage.hpp"
+#include "settingsmanager.hpp"
+#include "widgets/textinputdialog.hpp"
 
 #include <QDebug>
 #include <QFont>

@@ -1,9 +1,9 @@
-#include "widgets/notebook.h"
-#include "colorscheme.h"
-#include "widgets/notebookbutton.h"
-#include "widgets/notebookpage.h"
-#include "widgets/notebooktab.h"
-#include "widgets/settingsdialog.h"
+#include "widgets/notebook.hpp"
+#include "colorscheme.hpp"
+#include "widgets/notebookbutton.hpp"
+#include "widgets/notebookpage.hpp"
+#include "widgets/notebooktab.hpp"
+#include "widgets/settingsdialog.hpp"
 
 #include <QDebug>
 #include <QFile>

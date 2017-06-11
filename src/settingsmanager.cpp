@@ -1,5 +1,5 @@
-#include "settingsmanager.h"
-#include "appdatapath.h"
+#include "settingsmanager.hpp"
+#include "appdatapath.hpp"
 
 #include <QDebug>
 #include <QDir>

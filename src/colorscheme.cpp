@@ -1,8 +1,8 @@
 #define LOOKUP_COLOR_COUNT 360
 
-#include "colorscheme.h"
-#include "settingsmanager.h"
-#include "windowmanager.h"
+#include "colorscheme.hpp"
+#include "settingsmanager.hpp"
+#include "windowmanager.hpp"
 
 #include <QColor>
 

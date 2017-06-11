@@ -1,5 +1,5 @@
-#include "windowmanager.h"
-#include "appdatapath.h"
+#include "windowmanager.hpp"
+#include "appdatapath.hpp"
 
 #include <QDebug>
 #include <QStandardPaths>

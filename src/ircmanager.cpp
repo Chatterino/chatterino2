@@ -1,12 +1,12 @@
-#include "ircmanager.h"
-#include "accountmanager.h"
-#include "asyncexec.h"
-#include "channel.h"
-#include "channelmanager.h"
-#include "messages/messageparseargs.h"
-#include "twitch/twitchmessagebuilder.h"
-#include "twitch/twitchparsemessage.h"
-#include "twitch/twitchuser.h"
+#include "ircmanager.hpp"
+#include "accountmanager.hpp"
+#include "asyncexec.hpp"
+#include "channel.hpp"
+#include "channelmanager.hpp"
+#include "messages/messageparseargs.hpp"
+#include "twitch/twitchmessagebuilder.hpp"
+#include "twitch/twitchparsemessage.hpp"
+#include "twitch/twitchuser.hpp"
 
 #include <irccommand.h>
 #include <ircconnection.h>

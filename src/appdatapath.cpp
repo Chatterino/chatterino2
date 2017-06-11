@@ -1,4 +1,4 @@
-#include "appdatapath.h"
+#include "appdatapath.hpp"
 
 #include <QDebug>
 #include <QDir>

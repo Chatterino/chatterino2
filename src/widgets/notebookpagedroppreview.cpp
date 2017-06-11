@@ -1,5 +1,5 @@
-#include "widgets/notebookpagedroppreview.h"
-#include "colorscheme.h"
+#include "widgets/notebookpagedroppreview.hpp"
+#include "colorscheme.hpp"
 
 #include <QDebug>
 #include <QPainter>

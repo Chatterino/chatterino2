@@ -1,5 +1,5 @@
-#include "messages/wordpart.h"
-#include "messages/word.h"
+#include "messages/wordpart.hpp"
+#include "messages/word.hpp"
 
 namespace chatterino {
 namespace messages {

@@ -1,9 +1,9 @@
-#include "widgets/mainwindow.h"
-#include "colorscheme.h"
-#include "settingsmanager.h"
-#include "widgets/chatwidget.h"
-#include "widgets/notebook.h"
-#include "widgets/settingsdialog.h"
+#include "widgets/mainwindow.hpp"
+#include "colorscheme.hpp"
+#include "settingsmanager.hpp"
+#include "widgets/chatwidget.hpp"
+#include "widgets/notebook.hpp"
+#include "widgets/settingsdialog.hpp"
 
 #include <QDebug>
 #include <QPalette>
@@ -12,7 +12,7 @@
 #include <boost/foreach.hpp>
 
 #ifdef USEWINSDK
-#include "Windows.h"
+#include "Windows.hpp"
 #endif
 
 namespace chatterino {

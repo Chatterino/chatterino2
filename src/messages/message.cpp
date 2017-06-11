@@ -1,15 +1,15 @@
-#include "messages/message.h"
-#include "channel.h"
-#include "colorscheme.h"
-#include "emojis.h"
-#include "emotemanager.h"
-#include "fontmanager.h"
-#include "ircmanager.h"
-#include "messages/link.h"
-#include "qcolor.h"
-#include "resources.h"
-#include "settingsmanager.h"
+#include "messages/message.hpp"
+#include "channel.hpp"
+#include "colorscheme.hpp"
+#include "emojis.hpp"
+#include "emotemanager.hpp"
+#include "fontmanager.hpp"
+#include "ircmanager.hpp"
+#include "messages/link.hpp"
+#include "resources.hpp"
+#include "settingsmanager.hpp"
 
+#include <QColor>
 #include <QObjectUserData>
 #include <QStringList>
 

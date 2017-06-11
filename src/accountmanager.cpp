@@ -1,4 +1,4 @@
-﻿#include "accountmanager.h"
+﻿#include "accountmanager.hpp"
 
 namespace chatterino {
 

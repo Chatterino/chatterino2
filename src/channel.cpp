@@ -1,10 +1,10 @@
-#include "channel.h"
-#include "emotemanager.h"
-#include "ircmanager.h"
-#include "logging/loggingmanager.h"
-#include "messages/message.h"
-#include "util/urlfetch.h"
-#include "windowmanager.h"
+#include "channel.hpp"
+#include "emotemanager.hpp"
+#include "ircmanager.hpp"
+#include "logging/loggingmanager.hpp"
+#include "messages/message.hpp"
+#include "util/urlfetch.hpp"
+#include "windowmanager.hpp"
 
 #include <QDebug>
 #include <QJsonArray>

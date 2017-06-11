@@ -1,12 +1,12 @@
-#include "widgets/chatwidgetview.h"
-#include "channelmanager.h"
-#include "colorscheme.h"
-#include "messages/message.h"
-#include "messages/wordpart.h"
-#include "settingsmanager.h"
+#include "widgets/chatwidgetview.hpp"
+#include "channelmanager.hpp"
+#include "colorscheme.hpp"
+#include "messages/message.hpp"
+#include "messages/wordpart.hpp"
+#include "settingsmanager.hpp"
 #include "ui_accountpopupform.h"
-#include "util/distancebetweenpoints.h"
-#include "widgets/chatwidget.h"
+#include "util/distancebetweenpoints.hpp"
+#include "widgets/chatwidget.hpp"
 
 #include <QDebug>
 #include <QGraphicsBlurEffect>

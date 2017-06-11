@@ -1,4 +1,4 @@
-#include "titlebar.h"
+#include "titlebar.hpp"
 
 namespace chatterino {
 namespace widgets {

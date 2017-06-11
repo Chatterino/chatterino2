@@ -1,7 +1,7 @@
-#include "widgets/chatwidgetheader.h"
-#include "colorscheme.h"
-#include "widgets/chatwidget.h"
-#include "widgets/notebookpage.h"
+#include "widgets/chatwidgetheader.hpp"
+#include "colorscheme.hpp"
+#include "widgets/chatwidget.hpp"
+#include "widgets/notebookpage.hpp"
 
 #include <QByteArray>
 #include <QDrag>

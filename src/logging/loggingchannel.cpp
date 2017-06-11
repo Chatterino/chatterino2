@@ -1,5 +1,5 @@
-#include "loggingchannel.h"
-#include "loggingmanager.h"
+#include "loggingchannel.hpp"
+#include "loggingmanager.hpp"
 
 #include <QDir>
 

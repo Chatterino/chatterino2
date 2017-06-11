@@ -1,4 +1,4 @@
-#include "loggingmanager.h"
+#include "loggingmanager.hpp"
 
 #include <QDir>
 #include <QStandardPaths>

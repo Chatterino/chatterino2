@@ -1,13 +1,13 @@
-#include "channelmanager.h"
-#include "colorscheme.h"
-#include "emojis.h"
-#include "emotemanager.h"
-#include "ircmanager.h"
-#include "logging/loggingmanager.h"
-#include "resources.h"
-#include "settingsmanager.h"
-#include "widgets/mainwindow.h"
-#include "windowmanager.h"
+#include "channelmanager.hpp"
+#include "colorscheme.hpp"
+#include "emojis.hpp"
+#include "emotemanager.hpp"
+#include "ircmanager.hpp"
+#include "logging/loggingmanager.hpp"
+#include "resources.hpp"
+#include "settingsmanager.hpp"
+#include "widgets/mainwindow.hpp"
+#include "windowmanager.hpp"
 
 #include <QApplication>
 #include <QClipboard>

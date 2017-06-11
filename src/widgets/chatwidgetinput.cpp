@@ -1,8 +1,8 @@
-#include "widgets/chatwidgetinput.h"
-#include "chatwidget.h"
-#include "colorscheme.h"
-#include "ircmanager.h"
-#include "settingsmanager.h"
+#include "widgets/chatwidgetinput.hpp"
+#include "chatwidget.hpp"
+#include "colorscheme.hpp"
+#include "ircmanager.hpp"
+#include "settingsmanager.hpp"
 
 #include <QCompleter>
 #include <QPainter>
