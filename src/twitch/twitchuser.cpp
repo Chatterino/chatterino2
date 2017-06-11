@@ -8,22 +8,23 @@ TwitchUser::TwitchUser(const QString &username, const QString &oauthToken,
     : IrcUser2(username, username, username, "oauth:" + oauthToken)
     , _oauthClient(oauthClient)
     , _oauthToken(oauthToken)
+    , _isAnon(username.startsWith("justinfan"))
 {
 }
 
 const QString &TwitchUser::getOAuthClient() const
 {
-    return _oauthClient;
+    return this->_oauthClient;
 }
 
 const QString &TwitchUser::getOAuthToken() const
 {
-    return _oauthToken;
+    return this->_oauthToken;
 }
 
 bool TwitchUser::isAnon() const
 {
-    return IrcUser2::getNickName().startsWith("justinfan");
+    return this->_isAnon;
 }
 
 }  // namespace twitch

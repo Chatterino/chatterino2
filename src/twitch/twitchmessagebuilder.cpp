@@ -124,7 +124,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         displayName + (hasLocalizedName ? (" (" + ircMessage->account() + ")") : QString());
 
     if (args.isSentWhisper) {
-        userDisplayString += IrcManager::getInstance().getUser().getUserName() + " -> ";
+        userDisplayString += IrcManager::getInstance().getUser().getUserName();
     }
 
     if (args.isReceivedWhisper) {

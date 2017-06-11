@@ -17,9 +17,7 @@ inline QString getEnvString(const char *target)
 }  // namespace
 
 AccountManager::AccountManager()
-    : _twitchAnon("justinfan64537", "", "")
-    , _twitchUsers()
-    , _twitchUsersMutex()
+    : twitchAnonymousUser("justinfan64537", "", "")
 {
     QString envUsername = getEnvString("CHATTERINO2_USERNAME");
     QString envOauthToken = getEnvString("CHATTERINO2_OAUTH");
@@ -31,32 +29,34 @@ AccountManager::AccountManager()
 
 twitch::TwitchUser &AccountManager::getTwitchAnon()
 {
-    return _twitchAnon;
+    return this->twitchAnonymousUser;
 }
 
 twitch::TwitchUser &AccountManager::getTwitchUser()
 {
-    std::lock_guard<std::mutex> lock(_twitchUsersMutex);
+    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
 
-    if (_twitchUsers.size() == 0) {
-        return _twitchAnon;
+    if (this->twitchUsers.size() == 0) {
+        return this->getTwitchAnon();
     }
 
-    return _twitchUsers.front();
+    return this->twitchUsers.front();
 }
 
 std::vector<twitch::TwitchUser> AccountManager::getTwitchUsers()
 {
-    return std::vector<twitch::TwitchUser>(_twitchUsers);
+    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
+
+    return std::vector<twitch::TwitchUser>(this->twitchUsers);
 }
 
 bool AccountManager::removeTwitchUser(const QString &userName)
 {
-    std::lock_guard<std::mutex> lock(_twitchUsersMutex);
+    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
 
-    for (auto it = _twitchUsers.begin(); it != _twitchUsers.end(); it++) {
+    for (auto it = this->twitchUsers.begin(); it != this->twitchUsers.end(); it++) {
         if ((*it).getUserName() == userName) {
-            _twitchUsers.erase(it);
+            this->twitchUsers.erase(it);
             return true;
         }
     }
@@ -66,9 +66,9 @@ bool AccountManager::removeTwitchUser(const QString &userName)
 
 void AccountManager::addTwitchUser(const twitch::TwitchUser &user)
 {
-    std::lock_guard<std::mutex> lock(_twitchUsersMutex);
+    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
 
-    _twitchUsers.push_back(user);
+    this->twitchUsers.push_back(user);
 }
 
 }  // namespace chatterino

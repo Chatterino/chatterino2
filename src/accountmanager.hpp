@@ -18,19 +18,24 @@ public:
 
     twitch::TwitchUser &getTwitchAnon();
 
-    // Returns first user from _twitchUsers, or _twitchAnon if _twitchUsers is empty
+    // Returns first user from twitchUsers, or twitchAnonymousUser if twitchUsers is empty
     twitch::TwitchUser &getTwitchUser();
 
+    // Return a copy of the current available twitch users
     std::vector<twitch::TwitchUser> getTwitchUsers();
+
+    // Remove twitch user with the given username
     bool removeTwitchUser(const QString &userName);
+
+    // Add twitch user to the list of available twitch users
     void addTwitchUser(const twitch::TwitchUser &user);
 
 private:
     AccountManager();
 
-    twitch::TwitchUser _twitchAnon;
-    std::vector<twitch::TwitchUser> _twitchUsers;
-    std::mutex _twitchUsersMutex;
+    twitch::TwitchUser twitchAnonymousUser;
+    std::vector<twitch::TwitchUser> twitchUsers;
+    std::mutex twitchUsersMutex;
 };
 
 }  // namespace chatterino

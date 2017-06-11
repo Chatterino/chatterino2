@@ -20,6 +20,7 @@ public:
 private:
     QString _oauthClient;
     QString _oauthToken;
+    bool _isAnon;
 };
 
 }  // namespace twitch

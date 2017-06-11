@@ -101,8 +101,6 @@ void ChatWidget::setChannelName(const QString &_newChannelName)
     // update messages
     this->messages.clear();
 
-    printf("Set channel name xD %s\n", qPrintable(_newChannelName));
-
     if (newChannelName.isEmpty()) {
         this->channel = nullptr;
     } else {
