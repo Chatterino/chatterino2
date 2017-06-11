@@ -42,7 +42,7 @@ void Emojis::parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QSt
 
                         if (i - lastSlice != 0) {
                             vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-                                NULL, text.mid(lastSlice, i - lastSlice)));
+                                nullptr, text.mid(lastSlice, i - lastSlice)));
                         }
 
                         vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
@@ -63,7 +63,7 @@ void Emojis::parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QSt
 
     if (lastSlice < text.length()) {
         vector.push_back(
-            std::tuple<messages::LazyLoadedImage *, QString>(NULL, text.mid(lastSlice)));
+            std::tuple<messages::LazyLoadedImage *, QString>(nullptr, text.mid(lastSlice)));
     }
 }
 

@@ -4,23 +4,23 @@
 
 namespace chatterino {
 
-messages::LazyLoadedImage *Resources::badgeStaff(NULL);
-messages::LazyLoadedImage *Resources::badgeAdmin(NULL);
-messages::LazyLoadedImage *Resources::badgeModerator(NULL);
-messages::LazyLoadedImage *Resources::badgeGlobalmod(NULL);
-messages::LazyLoadedImage *Resources::badgeTurbo(NULL);
-messages::LazyLoadedImage *Resources::badgeBroadcaster(NULL);
-messages::LazyLoadedImage *Resources::badgePremium(NULL);
+messages::LazyLoadedImage *Resources::badgeStaff(nullptr);
+messages::LazyLoadedImage *Resources::badgeAdmin(nullptr);
+messages::LazyLoadedImage *Resources::badgeModerator(nullptr);
+messages::LazyLoadedImage *Resources::badgeGlobalmod(nullptr);
+messages::LazyLoadedImage *Resources::badgeTurbo(nullptr);
+messages::LazyLoadedImage *Resources::badgeBroadcaster(nullptr);
+messages::LazyLoadedImage *Resources::badgePremium(nullptr);
 
-messages::LazyLoadedImage *Resources::cheerBadge100000(NULL);
-messages::LazyLoadedImage *Resources::cheerBadge10000(NULL);
-messages::LazyLoadedImage *Resources::cheerBadge5000(NULL);
-messages::LazyLoadedImage *Resources::cheerBadge1000(NULL);
-messages::LazyLoadedImage *Resources::cheerBadge100(NULL);
-messages::LazyLoadedImage *Resources::cheerBadge1(NULL);
+messages::LazyLoadedImage *Resources::cheerBadge100000(nullptr);
+messages::LazyLoadedImage *Resources::cheerBadge10000(nullptr);
+messages::LazyLoadedImage *Resources::cheerBadge5000(nullptr);
+messages::LazyLoadedImage *Resources::cheerBadge1000(nullptr);
+messages::LazyLoadedImage *Resources::cheerBadge100(nullptr);
+messages::LazyLoadedImage *Resources::cheerBadge1(nullptr);
 
-messages::LazyLoadedImage *Resources::buttonBan(NULL);
-messages::LazyLoadedImage *Resources::buttonTimeout(NULL);
+messages::LazyLoadedImage *Resources::buttonBan(nullptr);
+messages::LazyLoadedImage *Resources::buttonTimeout(nullptr);
 
 Resources::Resources()
 {

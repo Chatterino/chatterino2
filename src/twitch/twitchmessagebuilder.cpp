@@ -21,7 +21,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges)
 {
     for (QString badge : badges) {
         if (badge.startsWith("bits/")) {
-            long long int cheer = std::strtoll(badge.mid(5).toStdString().c_str(), NULL, 10);
+            long long int cheer = std::strtoll(badge.mid(5).toStdString().c_str(), nullptr, 10);
             appendWord(Word(EmoteManager::getInstance().getCheerBadge(cheer), Word::BadgeCheer,
                             QString(), QString("Twitch Cheer" + QString::number(cheer))));
         } else if (badge == "staff/1") {
@@ -166,7 +166,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
             if (parameters.length() < 2)
                 continue;
 
-            long int id = std::stol(parameters.at(0).toStdString(), NULL, 10);
+            long int id = std::stol(parameters.at(0).toStdString(), nullptr, 10);
 
             QStringList occurences = parameters.at(1).split(',');
 
@@ -176,8 +176,8 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
                 if (coords.length() < 2)
                     continue;
 
-                long int start = std::stol(coords.at(0).toStdString(), NULL, 10);
-                long int end = std::stol(coords.at(1).toStdString(), NULL, 10);
+                long int start = std::stol(coords.at(0).toStdString(), nullptr, 10);
+                long int end = std::stol(coords.at(1).toStdString(), nullptr, 10);
 
                 if (start >= end || start < 0 || end > ircMessage->content().length())
                     continue;
@@ -235,7 +235,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {
             LazyLoadedImage *image = std::get<0>(tuple);
 
-            if (image == NULL) {  // is text
+            if (image == nullptr) {  // is text
                 QString string = std::get<1>(tuple);
 
                 static QRegularExpression cheerRegex("cheer[1-9][0-9]*");

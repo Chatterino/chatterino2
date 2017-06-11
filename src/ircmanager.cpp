@@ -254,7 +254,7 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     auto c = ChannelManager::getInstance().getChannel(message->target().mid(1));
 
-    if (c != NULL) {
+    if (c != nullptr) {
         messages::MessageParseArgs args;
 
         c->addMessage(twitch::TwitchMessageBuilder::parse(message, c.get(), args));

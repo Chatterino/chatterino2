@@ -63,7 +63,7 @@ public:
 
     int getWidth() const
     {
-        if (_currentPixmap == NULL) {
+        if (_currentPixmap == nullptr) {
             return 16;
         }
         return _currentPixmap->width();
@@ -71,7 +71,7 @@ public:
 
     int getHeight() const
     {
-        if (_currentPixmap == NULL) {
+        if (_currentPixmap == nullptr) {
             return 16;
         }
         return _currentPixmap->height();

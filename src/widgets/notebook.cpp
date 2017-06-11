@@ -67,7 +67,7 @@ void Notebook::removePage(NotebookPage *page)
     int index = _pages.indexOf(page);
 
     if (_pages.size() == 1) {
-        select(NULL);
+        select(nullptr);
     } else if (index == _pages.count() - 1) {
         select(_pages[index - 1]);
     } else {

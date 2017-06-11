@@ -15,7 +15,7 @@ class TextInputDialog : public QDialog
     Q_OBJECT
 
 public:
-    TextInputDialog(QWidget *parent = NULL);
+    TextInputDialog(QWidget *parent = nullptr);
 
     QString getText() const
     {

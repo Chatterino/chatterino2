@@ -42,7 +42,7 @@ private:
 
     void addTabs();
 
-    SettingsDialogTab *_selectedTab = NULL;
+    SettingsDialogTab *_selectedTab = nullptr;
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);

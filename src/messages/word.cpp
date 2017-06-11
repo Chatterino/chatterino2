@@ -22,7 +22,7 @@ Word::Word(LazyLoadedImage *image, Type type, const QString &copytext, const QSt
 // Text word
 Word::Word(const QString &text, Type type, const QColor &color, const QString &copytext,
            const QString &tooltip, const Link &link)
-    : _image(NULL)
+    : _image(nullptr)
     , _text(text)
     , _color(color)
     , _isImage(false)

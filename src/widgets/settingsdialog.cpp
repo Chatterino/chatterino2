@@ -289,7 +289,7 @@ void SettingsDialog::select(SettingsDialogTab *tab)
 {
     _pageStack.setCurrentWidget(tab->getWidget());
 
-    if (_selectedTab != NULL) {
+    if (_selectedTab != nullptr) {
         _selectedTab->setSelected(false);
         _selectedTab->setStyleSheet("color: #FFF");
     }

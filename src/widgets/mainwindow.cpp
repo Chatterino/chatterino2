@@ -65,7 +65,7 @@ void MainWindow::layoutVisibleChatWidgets(Channel *channel)
 {
     auto *page = _notebook.getSelectedPage();
 
-    if (page == NULL) {
+    if (page == nullptr) {
         return;
     }
 
@@ -74,7 +74,7 @@ void MainWindow::layoutVisibleChatWidgets(Channel *channel)
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->getChannel().get()) {
+        if (channel == nullptr || channel == widget->getChannel().get()) {
             widget->layoutMessages();
         }
     }
@@ -84,7 +84,7 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {
     auto *page = _notebook.getSelectedPage();
 
-    if (page == NULL) {
+    if (page == nullptr) {
         return;
     }
 
@@ -93,7 +93,7 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         ChatWidget *widget = *it;
 
-        if (channel == NULL || channel == widget->getChannel().get()) {
+        if (channel == nullptr || channel == widget->getChannel().get()) {
             widget->layoutMessages();
         }
     }
@@ -103,7 +103,7 @@ void MainWindow::repaintGifEmotes()
 {
     auto *page = _notebook.getSelectedPage();
 
-    if (page == NULL) {
+    if (page == nullptr) {
         return;
     }
 

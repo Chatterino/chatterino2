@@ -41,7 +41,7 @@ ScrollBar::~ScrollBar()
 {
     auto highlight = _highlights;
 
-    while (highlight != NULL) {
+    while (highlight != nullptr) {
         auto tmp = highlight->next;
         delete highlight;
         highlight = tmp;
@@ -52,12 +52,12 @@ void ScrollBar::removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> 
 {
     _mutex.lock();
 
-    ScrollBarHighlight *last = NULL;
+    ScrollBarHighlight *last = nullptr;
     ScrollBarHighlight *current = _highlights;
 
-    while (current != NULL) {
+    while (current != nullptr) {
         if (func(*current)) {
-            if (last == NULL) {
+            if (last == nullptr) {
                 _highlights = current->next;
             } else {
                 last->next = current->next;
@@ -79,7 +79,7 @@ void ScrollBar::addHighlight(ScrollBarHighlight *highlight)
 {
     _mutex.lock();
 
-    if (_highlights == NULL) {
+    if (_highlights == nullptr) {
         _highlights = highlight;
     } else {
         highlight->next = _highlights->next;
@@ -224,7 +224,7 @@ void ScrollBar::paintEvent(QPaintEvent *)
 
     //    do {
     //        painter.fillRect();
-    //    } while ((highlight = highlight->next()) != NULL);
+    //    } while ((highlight = highlight->next()) != nullptr);
 
     _mutex.unlock();
 }

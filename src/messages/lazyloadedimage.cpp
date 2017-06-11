@@ -20,7 +20,7 @@ namespace messages {
 
 LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : _currentPixmap(NULL)
+    : _currentPixmap(nullptr)
     , _currentFrame(0)
     , _currentFrameOffset(0)
     , _url(url)

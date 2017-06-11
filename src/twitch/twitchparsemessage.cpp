@@ -137,7 +137,7 @@
 //            if (parameters.length() < 2)
 //                continue;
 //
-//            long int id = std::stol(parameters.at(0).toStdString(), NULL, 10);
+//            long int id = std::stol(parameters.at(0).toStdString(), nullptr, 10);
 //
 //            QStringList occurences = parameters.at(1).split(',');
 //
@@ -148,8 +148,8 @@
 //                    continue;
 //
 //                long int start =
-//                    std::stol(coords.at(0).toStdString(), NULL, 10);
-//                long int end = std::stol(coords.at(1).toStdString(), NULL,
+//                    std::stol(coords.at(0).toStdString(), nullptr, 10);
+//                long int end = std::stol(coords.at(1).toStdString(), nullptr,
 //                10);
 //
 //                if (start >= end || start < 0 ||
@@ -209,7 +209,7 @@
 //        for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {
 //            LazyLoadedImage *image = std::get<0>(tuple);
 //
-//            if (image == NULL) {  // is text
+//            if (image == nullptr) {  // is text
 //                QString string = std::get<1>(tuple);
 //
 //                static QRegularExpression cheerRegex("cheer[1-9][0-9]*");

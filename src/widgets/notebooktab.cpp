@@ -98,7 +98,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 {
     _posAnimationDesired = pos;
 
-    if ((window() != NULL && !window()->isVisible()) || !animated || _posAnimated == false) {
+    if ((window() != nullptr && !window()->isVisible()) || !animated || _posAnimated == false) {
         move(pos);
 
         _posAnimated = true;
