@@ -195,3 +195,4 @@ werr {
 # External dependencies
 include(dependencies/rapidjson.pri)
 include(dependencies/settings.pri)
+include(dependencies/humanize.pri)

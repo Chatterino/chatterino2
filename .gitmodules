@@ -4,3 +4,6 @@
 [submodule "lib/settings"]
 	path = lib/settings
 	url = https://github.com/pajlada/settings
+[submodule "lib/humanize"]
+	path = lib/humanize
+	url = https://github.com/pajlada/humanize.git

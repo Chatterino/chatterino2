@@ -33,14 +33,15 @@ void MessageBuilder::appendTimestamp(time_t time)
 {
     char timeStampBuffer[69];
 
+    // Add word for timestamp with no seconds
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&time));
-    QString timestamp = QString(timeStampBuffer);
-
-    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
-    QString timestampWithSeconds = QString(timeStampBuffer);
-
-    appendWord(Word(timestamp, Word::TimestampNoSeconds,
+    QString timestampNoSeconds(timeStampBuffer);
+    appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
                     ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
+
+    // Add word for timestamp with seconds
+    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
+    QString timestampWithSeconds(timeStampBuffer);
     appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
                     ColorScheme::getInstance().SystemMessageColor, QString(), QString()));
 }
