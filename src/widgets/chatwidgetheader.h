@@ -36,29 +36,29 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    ChatWidget *chatWidget;
+    ChatWidget *const chatWidget;
 
-    QPoint _dragStart;
-    bool _dragging;
+    QPoint dragStart;
+    bool dragging = false;
 
-    QHBoxLayout _hbox;
+    QHBoxLayout hbox;
 
-    ChatWidgetHeaderButton _leftLabel;
-    SignalLabel _middleLabel;
-    ChatWidgetHeaderButton _rightLabel;
+    // top left
+    ChatWidgetHeaderButton leftLabel;
+    QMenu leftMenu;
 
-    QMenu _leftMenu;
-    QMenu _rightMenu;
+    // center
+    SignalLabel channelNameLabel;
+
+    // top right
+    ChatWidgetHeaderButton rightLabel;
+    QMenu rightMenu;
 
     void leftButtonClicked();
     void rightButtonClicked();
 
 public slots:
     void menuMoveSplit();
-    void menuPopup();
-    void menuClearChat();
-    void menuOpenChannel();
-    void menuPopupPlayer();
     void menuReloadChannelEmotes();
     void menuManualReconnect();
     void menuShowChangelog();

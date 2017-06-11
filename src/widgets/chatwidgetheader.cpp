@@ -14,62 +14,55 @@ namespace widgets {
 ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     : QWidget(_chatWidget)
     , chatWidget(_chatWidget)
-    , _dragStart()
-    , _dragging(false)
-    , _leftLabel()
-    , _middleLabel()
-    , _rightLabel()
-    , _leftMenu(this)
-    , _rightMenu(this)
+    , leftMenu(this)
+    , rightMenu(this)
 {
-    setFixedHeight(32);
+    this->setFixedHeight(32);
 
-    updateColors();
-    updateChannelText();
+    this->updateColors();
+    this->updateChannelText();
 
-    setLayout(&_hbox);
-    _hbox.setMargin(0);
-    _hbox.addWidget(&_leftLabel);
-    _hbox.addWidget(&_middleLabel, 1);
-    _hbox.addWidget(&_rightLabel);
+    this->setLayout(&this->hbox);
+    this->hbox.setMargin(0);
+    this->hbox.addWidget(&this->leftLabel);
+    this->hbox.addWidget(&this->channelNameLabel, 1);
+    this->hbox.addWidget(&this->rightLabel);
 
     // left
-    _leftLabel.getLabel().setTextFormat(Qt::RichText);
-    _leftLabel.getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
+    this->leftLabel.getLabel().setTextFormat(Qt::RichText);
+    this->leftLabel.getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
 
-    QObject::connect(&_leftLabel, &ChatWidgetHeaderButton::clicked, this,
-                     &ChatWidgetHeader::leftButtonClicked);
+    connect(&this->leftLabel, &ChatWidgetHeaderButton::clicked, this,
+            &ChatWidgetHeader::leftButtonClicked);
 
-    _leftMenu.addAction("Add new split", this->chatWidget, &ChatWidget::doAddSplit,
-                        QKeySequence(tr("Ctrl+T")));
-    _leftMenu.addAction("Close split", this->chatWidget, &ChatWidget::doCloseSplit,
-                        QKeySequence(tr("Ctrl+W")));
-    _leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
-    _leftMenu.addAction("Popup", this, SLOT(menuPopup()));
-    _leftMenu.addSeparator();
-    _leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
-                        QKeySequence(tr("Ctrl+R")));
-    _leftMenu.addAction("Clear chat", this, SLOT(menuClearChat()));
-    _leftMenu.addAction("Open channel", this, SLOT(menuOpenChannel()));
-    _leftMenu.addAction("Open pop-out player", this, SLOT(menuPopupPlayer()));
-    _leftMenu.addSeparator();
-    _leftMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
-    _leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
-    _leftMenu.addSeparator();
-    _leftMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
+    this->leftMenu.addAction("Add new split", this->chatWidget, &ChatWidget::doAddSplit,
+                             QKeySequence(tr("Ctrl+T")));
+    this->leftMenu.addAction("Close split", this->chatWidget, &ChatWidget::doCloseSplit,
+                             QKeySequence(tr("Ctrl+W")));
+    this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
+    this->leftMenu.addAction("Popup", this->chatWidget, &ChatWidget::doPopup);
+    this->leftMenu.addSeparator();
+    this->leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
+                             QKeySequence(tr("Ctrl+R")));
+    this->leftMenu.addAction("Clear chat", this->chatWidget, &ChatWidget::doClearChat);
+    this->leftMenu.addAction("Open channel", this->chatWidget, &ChatWidget::doOpenChannel);
+    this->leftMenu.addAction("Open popup player", this->chatWidget, &ChatWidget::doOpenPopupPlayer);
+    this->leftMenu.addSeparator();
+    this->leftMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
+    this->leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
+    this->leftMenu.addSeparator();
+    this->leftMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
 
     // middle
-    _middleLabel.setAlignment(Qt::AlignCenter);
+    this->channelNameLabel.setAlignment(Qt::AlignCenter);
 
-    connect(&_middleLabel, &SignalLabel::mouseDoubleClick, this,
+    connect(&this->channelNameLabel, &SignalLabel::mouseDoubleClick, this,
             &ChatWidgetHeader::mouseDoubleClickEvent);
-    //    connect(&this->middleLabel, &SignalLabel::mouseDown, this,
-    //            &ChatWidgetHeader::mouseDoubleClickEvent);
 
     // right
-    _rightLabel.setMinimumWidth(height());
-    _rightLabel.getLabel().setTextFormat(Qt::RichText);
-    _rightLabel.getLabel().setText("ayy");
+    this->rightLabel.setMinimumWidth(this->height());
+    this->rightLabel.getLabel().setTextFormat(Qt::RichText);
+    this->rightLabel.getLabel().setText("ayy");
 }
 
 void ChatWidgetHeader::updateColors()
@@ -77,16 +70,16 @@ void ChatWidgetHeader::updateColors()
     QPalette palette;
     palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
 
-    _leftLabel.setPalette(palette);
-    _middleLabel.setPalette(palette);
-    _rightLabel.setPalette(palette);
+    this->leftLabel.setPalette(palette);
+    this->channelNameLabel.setPalette(palette);
+    this->rightLabel.setPalette(palette);
 }
 
 void ChatWidgetHeader::updateChannelText()
 {
     const QString &c = this->chatWidget->getChannelName();
 
-    _middleLabel.setText(c.isEmpty() ? "<no channel>" : c);
+    this->channelNameLabel.setText(c.isEmpty() ? "<no channel>" : c);
 }
 
 void ChatWidgetHeader::paintEvent(QPaintEvent *)
@@ -100,16 +93,16 @@ void ChatWidgetHeader::paintEvent(QPaintEvent *)
 
 void ChatWidgetHeader::mousePressEvent(QMouseEvent *event)
 {
-    _dragging = true;
+    this->dragging = true;
 
-    _dragStart = event->pos();
+    this->dragStart = event->pos();
 }
 
 void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
 {
-    if (_dragging) {
-        if (std::abs(_dragStart.x() - event->pos().x()) > 12 ||
-            std::abs(_dragStart.y() - event->pos().y()) > 12) {
+    if (this->dragging) {
+        if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
+            std::abs(this->dragStart.y() - event->pos().y()) > 12) {
             auto page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
 
             if (page != nullptr) {
@@ -148,8 +141,8 @@ void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
 
 void ChatWidgetHeader::leftButtonClicked()
 {
-    _leftMenu.move(_leftLabel.mapToGlobal(QPoint(0, _leftLabel.height())));
-    _leftMenu.show();
+    this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
+    this->leftMenu.show();
 }
 
 void ChatWidgetHeader::rightButtonClicked()
@@ -157,25 +150,6 @@ void ChatWidgetHeader::rightButtonClicked()
 }
 
 void ChatWidgetHeader::menuMoveSplit()
-{
-}
-
-void ChatWidgetHeader::menuPopup()
-{
-    auto widget = new ChatWidget();
-    widget->setChannelName(this->chatWidget->getChannelName());
-    widget->show();
-}
-
-void ChatWidgetHeader::menuClearChat()
-{
-}
-
-void ChatWidgetHeader::menuOpenChannel()
-{
-}
-
-void ChatWidgetHeader::menuPopupPlayer()
 {
 }
 

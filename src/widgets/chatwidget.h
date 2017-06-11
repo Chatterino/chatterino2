@@ -82,6 +82,19 @@ public slots:
 
     // Show a dialog for changing the current splits/chat widgets channel
     void doChangeChannel();
+
+    // Open popup copy of this chat widget
+    // XXX: maybe make current chatwidget a popup instead?
+    void doPopup();
+
+    // Clear chat from all messages
+    void doClearChat();
+
+    // Open link to twitch channel in default browser
+    void doOpenChannel();
+
+    // Open popup player of twitch channel in default browser
+    void doOpenPopupPlayer();
 };
 
 }  // namespace widgets

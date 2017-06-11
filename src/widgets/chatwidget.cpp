@@ -235,5 +235,28 @@ void ChatWidget::doChangeChannel()
     this->showChangeChannelPopup();
 }
 
+void ChatWidget::doPopup()
+{
+    // TODO: Copy signals and stuff too
+    auto widget = new ChatWidget();
+    widget->setChannelName(this->getChannelName());
+    widget->show();
+}
+
+void ChatWidget::doClearChat()
+{
+    qDebug() << "[UNIMPLEMENTED]: Clear chat";
+}
+
+void ChatWidget::doOpenChannel()
+{
+    qDebug() << "[UNIMPLEMENTED]: Open twitch.tv/" << this->getChannelName();
+}
+
+void ChatWidget::doOpenPopupPlayer()
+{
+    qDebug() << "[UNIMPLEMENTED]: Open twitch.tv/" << this->getChannelName() << "/popout";
+}
+
 }  // namespace widgets
 }  // namespace chatterino
