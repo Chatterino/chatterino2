@@ -47,6 +47,8 @@ public:
     void layoutMessages();
     void updateGifEmotes();
 
+    void giveFocus();
+
 protected:
     void paintEvent(QPaintEvent *) override;
 

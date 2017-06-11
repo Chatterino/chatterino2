@@ -5,6 +5,7 @@
 #include "windowmanager.hpp"
 
 #include <QComboBox>
+#include <QDebug>
 #include <QFile>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -166,6 +167,7 @@ void SettingsDialog::addTabs()
         auto v = new QVBoxLayout();
         v->addWidget(createCheckbox("Show timestamp", settings.showTimestamps));
         v->addWidget(createCheckbox("Show seconds in timestamp", settings.showTimestampSeconds));
+        v->addWidget(createCheckbox("Show badges", settings.showBadges));
         v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)",
                                     settings.allowDouplicateMessages));
         v->addWidget(createCheckbox("Seperate messages", settings.seperateMessages));
@@ -319,6 +321,22 @@ QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &s
 
     QObject::connect(checkbox, &QCheckBox::toggled, this,
                      [&setting](bool state) { setting.set(state); });
+
+    return checkbox;
+}
+
+QCheckBox *SettingsDialog::createCheckbox(const QString &title,
+                                          pajlada::Settings::Setting<bool> &setting)
+{
+    auto checkbox = new QCheckBox(title);
+
+    // Set checkbox initial state
+    checkbox->setChecked(setting.getValue());
+
+    QObject::connect(checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
+        qDebug() << "update checkbox value";
+        setting = state;  //
+    });
 
     return checkbox;
 }

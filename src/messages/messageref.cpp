@@ -84,7 +84,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
     }
 
     if (newWordTypes) {
-        _currentWordTypes = SettingsManager::getInstance().getWordTypeMask();
+        _currentWordTypes = settings.getWordTypeMask();
     }
 
     // layout
@@ -102,11 +102,12 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
     _wordParts.clear();
 
-    uint32_t flags = SettingsManager::getInstance().getWordTypeMask();
+    uint32_t flags = settings.getWordTypeMask();
 
     for (auto it = _message->getWords().begin(); it != _message->getWords().end(); ++it) {
         Word &word = *it;
 
+        // Check if given word is supposed to be rendered by comparing it to the current setting
         if ((word.getType() & flags) == Word::None) {
             continue;
         }

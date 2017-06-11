@@ -29,7 +29,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *) override;
 
 private:
-    ChatWidget *chatWidget;
+    ChatWidget *const chatWidget;
 
     QHBoxLayout hbox;
     QVBoxLayout vbox;
@@ -46,6 +46,8 @@ private slots:
     }
     void editTextChanged();
     //    void editKeyPressed(QKeyEvent *event);
+
+    friend class ChatWidget;
 };
 
 }  // namespace widgets

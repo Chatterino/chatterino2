@@ -14,6 +14,7 @@
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -46,6 +47,7 @@ private:
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
+    QCheckBox *createCheckbox(const QString &title, pajlada::Settings::Setting<bool> &setting);
 
     void okButtonClicked();
     void cancelButtonClicked();

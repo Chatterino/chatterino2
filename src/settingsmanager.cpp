@@ -17,8 +17,9 @@ SettingsManager::SettingsManager()
     , emoteScale(_settingsItems, "emoteScale", 1.0)
     , mouseScrollMultiplier(_settingsItems, "mouseScrollMultiplier", 1.0)
     , scaleEmotesByLineHeight(_settingsItems, "scaleEmotesByLineHeight", false)
-    , showTimestamps(_settingsItems, "showTimestamps", true)
-    , showTimestampSeconds(_settingsItems, "showTimestampSeconds", false)
+    , showTimestamps("/appearance/messages/showTimestamps", true)
+    , showTimestampSeconds("/appearance/messages/showTimestampSeconds", true)
+    , showBadges("/appearance/messages/showBadges", true)
     , showLastMessageIndicator(_settingsItems, "showLastMessageIndicator", false)
     , allowDouplicateMessages(_settingsItems, "allowDouplicateMessages", true)
     , linksDoubleClickOnly(_settingsItems, "linksDoubleClickOnly", false)
@@ -47,6 +48,7 @@ SettingsManager::SettingsManager()
     this->showTimestamps.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
     this->showTimestampSeconds.valueChanged.connect(
         [this](const auto &) { this->updateWordTypeMask(); });
+    this->showBadges.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
     this->enableBttvEmotes.valueChanged.connect(
         [this](const auto &) { this->updateWordTypeMask(); });
     this->enableEmojis.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
@@ -87,29 +89,36 @@ QSettings &SettingsManager::getQSettings()
 
 void SettingsManager::updateWordTypeMask()
 {
-    uint32_t mask = Word::Text;
+    uint32_t newMaskUint = Word::Text;
 
-    if (showTimestamps.get()) {
-        mask |= showTimestampSeconds.get() ? Word::TimestampWithSeconds : Word::TimestampNoSeconds;
+    if (this->showTimestamps) {
+        if (this->showTimestampSeconds) {
+            newMaskUint |= Word::TimestampWithSeconds;
+        } else {
+            newMaskUint |= Word::TimestampNoSeconds;
+        }
     }
 
-    mask |= enableTwitchEmotes.get() ? Word::TwitchEmoteImage : Word::TwitchEmoteText;
-    mask |= enableFfzEmotes.get() ? Word::FfzEmoteImage : Word::FfzEmoteText;
-    mask |= enableBttvEmotes.get() ? Word::BttvEmoteImage : Word::BttvEmoteText;
-    mask |=
+    newMaskUint |= enableTwitchEmotes.get() ? Word::TwitchEmoteImage : Word::TwitchEmoteText;
+    newMaskUint |= enableFfzEmotes.get() ? Word::FfzEmoteImage : Word::FfzEmoteText;
+    newMaskUint |= enableBttvEmotes.get() ? Word::BttvEmoteImage : Word::BttvEmoteText;
+    newMaskUint |=
         (enableBttvEmotes.get() && enableGifs.get()) ? Word::BttvEmoteImage : Word::BttvEmoteText;
-    mask |= enableEmojis.get() ? Word::EmojiImage : Word::EmojiText;
+    newMaskUint |= enableEmojis.get() ? Word::EmojiImage : Word::EmojiText;
 
-    mask |= Word::BitsAmount;
-    mask |= enableGifs.get() ? Word::BitsAnimated : Word::BitsStatic;
+    newMaskUint |= Word::BitsAmount;
+    newMaskUint |= enableGifs.get() ? Word::BitsAnimated : Word::BitsStatic;
 
-    mask |= Word::Badges;
-    mask |= Word::Username;
+    if (this->showBadges) {
+        newMaskUint |= Word::Badges;
+    }
 
-    Word::Type _mask = (Word::Type)mask;
+    newMaskUint |= Word::Username;
 
-    if (mask != _mask) {
-        _wordTypeMask = _mask;
+    Word::Type newMask = static_cast<Word::Type>(newMaskUint);
+
+    if (newMask != _wordTypeMask) {
+        _wordTypeMask = newMask;
 
         emit wordTypeMaskChanged();
     }

@@ -188,6 +188,11 @@ void ChatWidget::updateGifEmotes()
     this->view.updateGifEmotes();
 }
 
+void ChatWidget::giveFocus()
+{
+    this->input.textInput.setFocus();
+}
+
 void ChatWidget::paintEvent(QPaintEvent *)
 {
     // color the background of the chat

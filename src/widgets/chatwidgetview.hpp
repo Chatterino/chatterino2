@@ -49,7 +49,7 @@ private:
 
     std::vector<GifEmoteData> gifEmotes;
 
-    ChatWidget *chatWidget;
+    ChatWidget *const chatWidget;
 
     ScrollBar scrollBar;
 

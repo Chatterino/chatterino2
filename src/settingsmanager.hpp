@@ -5,6 +5,7 @@
 #include "settingssnapshot.hpp"
 
 #include <QSettings>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 
@@ -36,6 +37,11 @@ private:
     void updateWordTypeMask();
 
 public:
+    // new pajlada settings BBaper
+    pajlada::Settings::Setting<bool> showTimestamps;
+    pajlada::Settings::Setting<bool> showTimestampSeconds;
+    pajlada::Settings::Setting<bool> showBadges;
+
     // Settings
     Setting<QString> theme;
     Setting<float> themeHue;
@@ -43,8 +49,6 @@ public:
     Setting<float> emoteScale;
     Setting<float> mouseScrollMultiplier;
     Setting<bool> scaleEmotesByLineHeight;
-    Setting<bool> showTimestamps;
-    Setting<bool> showTimestampSeconds;
     Setting<bool> showLastMessageIndicator;
     Setting<bool> allowDouplicateMessages;
     Setting<bool> linksDoubleClickOnly;
@@ -76,8 +80,6 @@ public:
         static SettingsManager instance;
         return instance;
     }
-
-private:
 };
 
 }  // namespace chatterino

@@ -50,5 +50,6 @@ QString MessageBuilder::matchLink(const QString &string)
     // TODO: Implement this xD
     return QString();
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
