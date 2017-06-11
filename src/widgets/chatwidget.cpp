@@ -215,7 +215,6 @@ boost::property_tree::ptree ChatWidget::save()
 }
 
 /// Slots
-//
 void ChatWidget::doAddSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
@@ -224,7 +223,8 @@ void ChatWidget::doAddSplit()
 
 void ChatWidget::doCloseSplit()
 {
-    qDebug() << "[UNIMPLEMENTED] Close split for" << this->getChannelName();
+    NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
+    page->removeFromLayout(this);
 }
 
 void ChatWidget::doChangeChannel()
