@@ -12,22 +12,8 @@ namespace widgets {
 
 ScrollBar::ScrollBar(QWidget *widget)
     : QWidget(widget)
-    , _mutex()
     , _currentValueAnimation(this, "currentValue")
     , _highlights(nullptr)
-    , _mouseOverIndex(-1)
-    , _mouseDownIndex(-1)
-    , _lastMousePosition()
-    , _buttonHeight(16)
-    , _trackHeight(100)
-    , _thumbRect()
-    , _maximum()
-    , _minimum()
-    , _largeChange()
-    , _smallChange()
-    , _desiredValue()
-    , _currentValue()
-    , _currentValueChanged()
 {
     resize(16, 100);
 

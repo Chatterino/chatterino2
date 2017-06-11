@@ -7,7 +7,7 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(SharedChannel &channel)
+AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &channel)
     : QWidget(nullptr)
     , _ui(new Ui::AccountPopup)
     , _channel(channel)

@@ -21,29 +21,28 @@ class ChatWidgetInput : public QWidget
     Q_OBJECT
 
 public:
-    ChatWidgetInput(ChatWidget *parent);
+    ChatWidgetInput(ChatWidget *_chatWidget);
     ~ChatWidgetInput();
 
 protected:
-    void paintEvent(QPaintEvent *);
-
-    void resizeEvent(QResizeEvent *);
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void resizeEvent(QResizeEvent *) override;
 
 private:
-    ChatWidget *_chatWidget;
+    ChatWidget *chatWidget;
 
-    QHBoxLayout _hbox;
-    QVBoxLayout _vbox;
-    QHBoxLayout _editContainer;
-    ResizingTextEdit _edit;
-    QLabel _textLengthLabel;
-    ChatWidgetHeaderButton _emotesLabel;
+    QHBoxLayout hbox;
+    QVBoxLayout vbox;
+    QHBoxLayout editContainer;
+    ResizingTextEdit textInput;
+    QLabel textLengthLabel;
+    ChatWidgetHeaderButton emotesLabel;
 
 private slots:
     void refreshTheme();
     void setMessageLengthVisisble(bool value)
     {
-        _textLengthLabel.setHidden(!value);
+        textLengthLabel.setHidden(!value);
     }
     void editTextChanged();
     //    void editKeyPressed(QKeyEvent *event);

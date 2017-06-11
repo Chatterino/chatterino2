@@ -19,23 +19,19 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetView::ChatWidgetView(ChatWidget *parent)
-    : QWidget(parent)
-    , _chatWidget(parent)
-    , _scrollbar(this)
-    , _userPopupWidget(_chatWidget->getChannelRef())
-    , _onlyUpdateEmotes(false)
-    , _mouseDown(false)
-    , _lastPressPosition()
+ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
+    : QWidget(_chatWidget)
+    , chatWidget(_chatWidget)
+    , scrollBar(this)
+    , userPopupWidget(_chatWidget->getChannelRef())
 {
-    setAttribute(Qt::WA_OpaquePaintEvent);
-    _scrollbar.setSmallChange(5);
-    setMouseTracking(true);
+    this->setAttribute(Qt::WA_OpaquePaintEvent);
+    this->setMouseTracking(true);
 
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
                      &ChatWidgetView::wordTypeMaskChanged);
 
-    _scrollbar.getCurrentValueChanged().connect([this] {
+    this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->update();
     });
@@ -49,28 +45,28 @@ ChatWidgetView::~ChatWidgetView()
 
 bool ChatWidgetView::layoutMessages()
 {
-    auto messages = _chatWidget->getMessagesSnapshot();
+    auto messages = this->chatWidget->getMessagesSnapshot();
 
     if (messages.getSize() == 0) {
-        _scrollbar.setVisible(false);
-
+        this->scrollBar.setVisible(false);
         return false;
     }
 
-    bool showScrollbar = false, redraw = false;
+    bool showScrollbar = false;
+    bool redraw = false;
 
     // Bool indicating whether or not we were showing all messages
     // True if one of the following statements are true:
     // The scrollbar was not visible
     // The scrollbar was visible and at the bottom
-    this->showingLatestMessages = this->_scrollbar.isAtBottom() || !this->_scrollbar.isVisible();
+    this->showingLatestMessages = this->scrollBar.isAtBottom() || !this->scrollBar.isVisible();
 
-    int start = _scrollbar.getCurrentValue();
-    int layoutWidth = _scrollbar.isVisible() ? width() - _scrollbar.width() : width();
+    int start = this->scrollBar.getCurrentValue();
+    int layoutWidth = this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width();
 
     // layout the visible messages in the view
     if (messages.getSize() > start) {
-        int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
+        int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
         for (int i = start; i < messages.getSize(); ++i) {
             auto message = messages[i];
@@ -96,21 +92,22 @@ bool ChatWidgetView::layoutMessages()
         h -= message->getHeight();
 
         if (h < 0) {
-            _scrollbar.setLargeChange((messages.getSize() - i) + (qreal)h / message->getHeight());
-            _scrollbar.setDesiredValue(_scrollbar.getDesiredValue());
+            this->scrollBar.setLargeChange((messages.getSize() - i) +
+                                           (qreal)h / message->getHeight());
+            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
 
             showScrollbar = true;
             break;
         }
     }
 
-    _scrollbar.setVisible(showScrollbar);
+    this->scrollBar.setVisible(showScrollbar);
 
     if (!showScrollbar) {
-        _scrollbar.setDesiredValue(0);
+        this->scrollBar.setDesiredValue(0);
     }
 
-    _scrollbar.setMaximum(messages.getSize());
+    this->scrollBar.setMaximum(messages.getSize());
 
     if (this->showingLatestMessages && showScrollbar) {
         // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
@@ -118,7 +115,7 @@ bool ChatWidgetView::layoutMessages()
         // TODO: Do we want to check if the user is currently moving the scrollbar?
         // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
         // seconds or something
-        this->_scrollbar.scrollToBottom();
+        this->scrollBar.scrollToBottom();
     }
 
     return redraw;
@@ -126,26 +123,26 @@ bool ChatWidgetView::layoutMessages()
 
 void ChatWidgetView::updateGifEmotes()
 {
-    _onlyUpdateEmotes = true;
+    this->onlyUpdateEmotes = true;
     this->update();
 }
 
-ScrollBar *ChatWidgetView::getScrollbar()
+ScrollBar &ChatWidgetView::getScrollBar()
 {
-    return &_scrollbar;
+    return this->scrollBar;
 }
 
 void ChatWidgetView::resizeEvent(QResizeEvent *)
 {
-    _scrollbar.resize(_scrollbar.width(), height());
-    _scrollbar.move(width() - _scrollbar.width(), 0);
+    this->scrollBar.resize(this->scrollBar.width(), height());
+    this->scrollBar.move(width() - this->scrollBar.width(), 0);
 
     layoutMessages();
 
     this->update();
 }
 
-void ChatWidgetView::paintEvent(QPaintEvent *event)
+void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter _painter(this);
 
@@ -154,10 +151,10 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
     ColorScheme &scheme = ColorScheme::getInstance();
 
     // only update gif emotes
-    if (_onlyUpdateEmotes) {
-        _onlyUpdateEmotes = false;
+    if (this->onlyUpdateEmotes) {
+        this->onlyUpdateEmotes = false;
 
-        for (GifEmoteData &item : _gifEmotes) {
+        for (const GifEmoteData &item : this->gifEmotes) {
             _painter.fillRect(item.rect, scheme.ChatBackground);
 
             _painter.drawPixmap(item.rect, *item.image->getPixmap());
@@ -167,7 +164,7 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
     }
 
     // update all messages
-    _gifEmotes.clear();
+    this->gifEmotes.clear();
 
     _painter.fillRect(rect(), scheme.ChatBackground);
 
@@ -204,15 +201,15 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 
     painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
 
-    auto messages = _chatWidget->getMessagesSnapshot();
+    auto messages = this->chatWidget->getMessagesSnapshot();
 
-    int start = _scrollbar.getCurrentValue();
+    int start = this->scrollBar.getCurrentValue();
 
     if (start >= messages.getSize()) {
         return;
     }
 
-    int y = -(messages[start].get()->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
+    int y = -(messages[start].get()->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.getSize(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
@@ -276,7 +273,7 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 
                     data.rect = rect;
 
-                    _gifEmotes.push_back(data);
+                    this->gifEmotes.push_back(data);
                 }
             }
         }
@@ -292,7 +289,7 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
         }
     }
 
-    for (GifEmoteData &item : _gifEmotes) {
+    for (GifEmoteData &item : this->gifEmotes) {
         _painter.fillRect(item.rect, scheme.ChatBackground);
 
         _painter.drawPixmap(item.rect, *item.image->getPixmap());
@@ -301,11 +298,11 @@ void ChatWidgetView::paintEvent(QPaintEvent *event)
 
 void ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
-    if (_scrollbar.isVisible()) {
+    if (this->scrollBar.isVisible()) {
         auto mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier.get();
 
-        _scrollbar.setDesiredValue(
-            _scrollbar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);
+        this->scrollBar.setDesiredValue(
+            this->scrollBar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);
     }
 }
 
@@ -337,21 +334,21 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 
 void ChatWidgetView::mousePressEvent(QMouseEvent *event)
 {
-    _mouseDown = true;
-    _lastPressPosition = event->screenPos();
+    this->isMouseDown = true;
+    this->lastPressPosition = event->screenPos();
 }
 
 void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!_mouseDown) {
+    if (!this->isMouseDown) {
         // We didn't grab the mouse press, so we shouldn't be handling the mouse
         // release
         return;
     }
 
-    _mouseDown = false;
+    this->isMouseDown = false;
 
-    float distance = util::distanceBetweenPoints(_lastPressPosition, event->screenPos());
+    float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
 
     qDebug() << "Distance: " << distance;
 
@@ -370,7 +367,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 
     if (!tryGetMessageAt(event->pos(), message, relativePos)) {
         // No message at clicked position
-        _userPopupWidget.hide();
+        this->userPopupWidget.hide();
         return;
     }
 
@@ -385,10 +382,10 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
     switch (link.getType()) {
         case messages::Link::UserInfo:
             auto user = message->getMessage()->getUserName();
-            _userPopupWidget.setName(user);
-            _userPopupWidget.move(event->screenPos().toPoint());
-            _userPopupWidget.show();
-            _userPopupWidget.setFocus();
+            this->userPopupWidget.setName(user);
+            this->userPopupWidget.move(event->screenPos().toPoint());
+            this->userPopupWidget.show();
+            this->userPopupWidget.setFocus();
 
             qDebug() << "Clicked " << user << "s message";
             break;
@@ -398,15 +395,15 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
                                      QPoint &relativePos)
 {
-    auto messages = _chatWidget->getMessagesSnapshot();
+    auto messages = this->chatWidget->getMessagesSnapshot();
 
-    int start = _scrollbar.getCurrentValue();
+    int start = this->scrollBar.getCurrentValue();
 
     if (start >= messages.getSize()) {
         return false;
     }
 
-    int y = -(messages[start]->getHeight() * (fmod(_scrollbar.getCurrentValue(), 1)));
+    int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
     for (int i = start; i < messages.getSize(); ++i) {
         auto message = messages[i];

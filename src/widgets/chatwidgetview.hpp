@@ -14,24 +14,25 @@
 
 namespace chatterino {
 namespace widgets {
+
 class ChatWidget;
 
 class ChatWidgetView : public QWidget
 {
 public:
-    explicit ChatWidgetView(ChatWidget *parent);
+    explicit ChatWidgetView(ChatWidget *_chatWidget);
     ~ChatWidgetView();
 
     bool layoutMessages();
 
     void updateGifEmotes();
-    ScrollBar *getScrollbar();
+    ScrollBar &getScrollBar();
 
 protected:
-    void resizeEvent(QResizeEvent *) override;
+    virtual void resizeEvent(QResizeEvent *) override;
 
-    void paintEvent(QPaintEvent *) override;
-    void wheelEvent(QWheelEvent *event) override;
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -46,22 +47,22 @@ private:
         QRect rect;
     };
 
-    std::vector<GifEmoteData> _gifEmotes;
+    std::vector<GifEmoteData> gifEmotes;
 
-    ChatWidget *_chatWidget;
+    ChatWidget *chatWidget;
 
-    ScrollBar _scrollbar;
+    ScrollBar scrollBar;
 
     // This variable can be used to decide whether or not we should render the "Show latest
     // messages" button
     bool showingLatestMessages = true;
 
-    AccountPopupWidget _userPopupWidget;
-    bool _onlyUpdateEmotes;
+    AccountPopupWidget userPopupWidget;
+    bool onlyUpdateEmotes = false;
 
     // Mouse event variables
-    bool _mouseDown;
-    QPointF _lastPressPosition;
+    bool isMouseDown = false;
+    QPointF lastPressPosition;
 
 private slots:
     void wordTypeMaskChanged()

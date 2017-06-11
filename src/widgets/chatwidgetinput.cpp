@@ -11,44 +11,38 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
-    : _chatWidget(widget)
-    , _hbox()
-    , _vbox()
-    , _editContainer()
-    , _edit()
-    , _textLengthLabel()
-    , _emotesLabel(0)
+ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
+    : QWidget(_chatWidget)
+    , chatWidget(_chatWidget)
 {
-    setLayout(&_hbox);
-    setMaximumHeight(150);
-    _hbox.setMargin(4);
+    this->setMaximumHeight(150);
 
-    _hbox.addLayout(&_editContainer);
-    _hbox.addLayout(&_vbox);
+    this->setLayout(&this->hbox);
 
-    _editContainer.addWidget(&_edit);
-    _editContainer.setMargin(4);
+    this->hbox.setMargin(4);
 
-    _vbox.addWidget(&_textLengthLabel);
-    _vbox.addStretch(1);
-    _vbox.addWidget(&_emotesLabel);
+    this->hbox.addLayout(&this->editContainer);
+    this->hbox.addLayout(&this->vbox);
 
-    _textLengthLabel.setText("100");
-    _textLengthLabel.setAlignment(Qt::AlignRight);
-    _emotesLabel.getLabel().setTextFormat(Qt::RichText);
-    _emotesLabel.getLabel().setText(
+    this->editContainer.addWidget(&this->textInput);
+    this->editContainer.setMargin(4);
+
+    this->vbox.addWidget(&this->textLengthLabel);
+    this->vbox.addStretch(1);
+    this->vbox.addWidget(&this->emotesLabel);
+
+    this->textLengthLabel.setText("100");
+    this->textLengthLabel.setAlignment(Qt::AlignRight);
+
+    this->emotesLabel.getLabel().setTextFormat(Qt::RichText);
+    this->emotesLabel.getLabel().setText(
         "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
         "/>");
 
-    QObject::connect(&_edit, &ResizingTextEdit::textChanged, this,
-                     &ChatWidgetInput::editTextChanged);
+    connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);
 
-    //    QObject::connect(&edit, &ResizingTextEdit::keyPressEvent, this,
-    //                     &ChatWidgetInput::editKeyPressed);
-
-    refreshTheme();
-    setMessageLengthVisisble(SettingsManager::getInstance().showMessageLength.get());
+    this->refreshTheme();
+    this->setMessageLengthVisisble(SettingsManager::getInstance().showMessageLength.get());
 
     QStringList list;
     list.append("asd");
@@ -56,20 +50,20 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *widget)
     list.append("asdg");
     list.append("asdh");
 
-    QCompleter *completer = new QCompleter(list, &_edit);
+    QCompleter *completer = new QCompleter(list, &this->textInput);
 
-    completer->setWidget(&_edit);
+    completer->setWidget(&textInput);
 
-    _edit.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
+    this->textInput.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-            auto c = _chatWidget->getChannel();
+            auto c = this->chatWidget->getChannel();
             if (c == nullptr) {
                 return;
             }
 
-            c->sendMessage(_edit.toPlainText());
+            c->sendMessage(textInput.toPlainText());
             event->accept();
-            _edit.setText(QString());
+            textInput.setText(QString());
         }
         //        else {
         //            completer->setCompletionPrefix("asdf");
@@ -101,9 +95,9 @@ void ChatWidgetInput::refreshTheme()
 
     palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
 
-    _textLengthLabel.setPalette(palette);
+    this->textLengthLabel.setPalette(palette);
 
-    _edit.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
+    this->textInput.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
 }
 
 void ChatWidgetInput::editTextChanged()
@@ -124,17 +118,17 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::getInstance().ChatInputBackground);
+    painter.fillRect(this->rect(), ColorScheme::getInstance().ChatInputBackground);
     painter.setPen(ColorScheme::getInstance().ChatInputBorder);
-    painter.drawRect(0, 0, width() - 1, height() - 1);
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
 void ChatWidgetInput::resizeEvent(QResizeEvent *)
 {
-    if (height() == maximumHeight()) {
-        _edit.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    if (this->height() == this->maximumHeight()) {
+        this->textInput.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     } else {
-        _edit.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        this->textInput.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 }
 

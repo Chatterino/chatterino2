@@ -14,26 +14,26 @@ ChannelManager::ChannelManager()
 {
 }
 
-SharedChannel ChannelManager::getWhispers()
+std::shared_ptr<Channel> ChannelManager::getWhispers()
 {
     return _whispers;
 }
 
-SharedChannel ChannelManager::getMentions()
+std::shared_ptr<Channel> ChannelManager::getMentions()
 {
     return _mentions;
 }
 
-SharedChannel ChannelManager::getEmpty()
+std::shared_ptr<Channel> ChannelManager::getEmpty()
 {
     return _empty;
 }
 
-const std::vector<SharedChannel> ChannelManager::getItems()
+const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()
 {
     QMutexLocker locker(&_channelsMutex);
 
-    std::vector<SharedChannel> items;
+    std::vector<std::shared_ptr<Channel>> items;
 
     for (auto &item : _channels.values()) {
         items.push_back(std::get<0>(item));
@@ -42,7 +42,7 @@ const std::vector<SharedChannel> ChannelManager::getItems()
     return items;
 }
 
-SharedChannel ChannelManager::addChannel(const QString &channel)
+std::shared_ptr<Channel> ChannelManager::addChannel(const QString &channel)
 {
     QMutexLocker locker(&_channelsMutex);
 
@@ -55,7 +55,7 @@ SharedChannel ChannelManager::addChannel(const QString &channel)
     auto it = _channels.find(channelName);
 
     if (it == _channels.end()) {
-        auto channel = SharedChannel(new Channel(channelName));
+        auto channel = std::shared_ptr<Channel>(new Channel(channelName));
         _channels.insert(channelName, std::make_tuple(channel, 1));
 
         IrcManager::getInstance().joinChannel(channelName);

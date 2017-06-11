@@ -37,8 +37,8 @@ public:
     ChatWidget(QWidget *parent = nullptr);
     ~ChatWidget();
 
-    SharedChannel getChannel() const;
-    SharedChannel &getChannelRef();
+    std::shared_ptr<Channel> getChannel() const;
+    std::shared_ptr<Channel> &getChannelRef();
     const QString &getChannelName() const;
     void setChannelName(const QString &name);
 
@@ -51,22 +51,21 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    void attachChannel(std::shared_ptr<Channel> _channel);
+    void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
 
-    messages::LimitedQueue<messages::SharedMessageRef> _messages;
+    messages::LimitedQueue<messages::SharedMessageRef> messages;
 
-    SharedChannel _channel;
-    QString _channelName;
+    std::shared_ptr<Channel> channel;
+    QString channelName;
 
-    QFont _font;
-    QVBoxLayout _vbox;
-    ChatWidgetHeader _header;
-    ChatWidgetView _view;
-    ChatWidgetInput _input;
+    QVBoxLayout vbox;
+    ChatWidgetHeader header;
+    ChatWidgetView view;
+    ChatWidgetInput input;
 
-    boost::signals2::connection _messageAppendedConnection;
-    boost::signals2::connection _messageRemovedConnection;
+    boost::signals2::connection messageAppendedConnection;
+    boost::signals2::connection messageRemovedConnection;
 
 public:
     void load(const boost::property_tree::ptree &tree);

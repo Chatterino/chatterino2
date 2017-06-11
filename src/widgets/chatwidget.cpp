@@ -18,153 +18,152 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
+namespace {
+
+template <typename T>
+inline void ezShortcut(ChatWidget *w, const char *key, T t)
+{
+    auto s = new QShortcut(QKeySequence(key), w);
+    s->setContext(Qt::WidgetWithChildrenShortcut);
+    QObject::connect(s, &QShortcut::activated, w, t);
+}
+
+}  // namespace
+
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
-    , _messages()
-    , _channel(ChannelManager::getInstance().getEmpty())
-    , _channelName(QString())
-    , _vbox(this)
-    , _header(this)
-    , _view(this)
-    , _input(this)
+    , channel(ChannelManager::getInstance().getEmpty())
+    , vbox(this)
+    , header(this)
+    , view(this)
+    , input(this)
 {
-    this->_vbox.setSpacing(0);
-    this->_vbox.setMargin(1);
+    this->vbox.setSpacing(0);
+    this->vbox.setMargin(1);
 
-    this->_vbox.addWidget(&_header);
-    this->_vbox.addWidget(&_view, 1);
-    this->_vbox.addWidget(&_input);
+    this->vbox.addWidget(&this->header);
+    this->vbox.addWidget(&this->view, 1);
+    this->vbox.addWidget(&this->input);
 
-    // Initialize widget-wide hotkeys
+    // Initialize chat widget-wide hotkeys
     // CTRL+T: Create new split (Add page)
-    {
-        auto s = new QShortcut(QKeySequence("CTRL+T"), this);
-        s->setContext(Qt::WidgetWithChildrenShortcut);
-        connect(s, &QShortcut::activated, this, &ChatWidget::doAddSplit);
-    }
+    ezShortcut(this, "CTRL+T", &ChatWidget::doAddSplit);
 
     // CTRL+W: Close Split
-    {
-        auto s = new QShortcut(QKeySequence("CTRL+W"), this);
-        s->setContext(Qt::WidgetWithChildrenShortcut);
-        connect(s, &QShortcut::activated, this, &ChatWidget::doCloseSplit);
-    }
+    ezShortcut(this, "CTRL+W", &ChatWidget::doCloseSplit);
 
     // CTRL+R: Change Channel
-    {
-        auto s = new QShortcut(QKeySequence("CTRL+R"), this);
-        s->setContext(Qt::WidgetWithChildrenShortcut);
-        connect(s, &QShortcut::activated, this, &ChatWidget::doChangeChannel);
-    }
+    ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
 }
 
 ChatWidget::~ChatWidget()
 {
-    detachChannel();
+    this->detachChannel();
 }
 
 std::shared_ptr<Channel> ChatWidget::getChannel() const
 {
-    return _channel;
+    return this->channel;
 }
 
 std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 {
-    return _channel;
+    return this->channel;
 }
 
 const QString &ChatWidget::getChannelName() const
 {
-    return _channelName;
+    return this->channelName;
 }
 
-void ChatWidget::setChannelName(const QString &name)
+void ChatWidget::setChannelName(const QString &_newChannelName)
 {
-    QString channelName = name.trimmed();
+    QString newChannelName = _newChannelName.trimmed();
 
     // return if channel name is the same
-    if (QString::compare(channelName, _channelName, Qt::CaseInsensitive) == 0) {
-        _channelName = channelName;
-        _header.updateChannelText();
+    if (QString::compare(newChannelName, this->channelName, Qt::CaseInsensitive) == 0) {
+        this->channelName = newChannelName;
+        this->header.updateChannelText();
 
         return;
     }
 
     // remove current channel
-    if (!_channelName.isEmpty()) {
-        ChannelManager::getInstance().removeChannel(_channelName);
+    if (!this->channelName.isEmpty()) {
+        ChannelManager::getInstance().removeChannel(this->channelName);
 
-        detachChannel();
+        this->detachChannel();
     }
 
     // update members
-    _channelName = channelName;
+    this->channelName = newChannelName;
 
     // update messages
-    _messages.clear();
+    this->messages.clear();
 
-    printf("Set channel name xD %s\n", qPrintable(name));
+    printf("Set channel name xD %s\n", qPrintable(_newChannelName));
 
-    if (channelName.isEmpty()) {
-        _channel = nullptr;
+    if (newChannelName.isEmpty()) {
+        this->channel = nullptr;
     } else {
-        _channel = ChannelManager::getInstance().addChannel(channelName);
-        printf("Created channel FeelsGoodMan %p\n", _channel.get());
-
-        attachChannel(_channel);
+        this->setChannel(ChannelManager::getInstance().addChannel(newChannelName));
     }
 
     // update header
-    _header.updateChannelText();
+    this->header.updateChannelText();
 
     // update view
-    _view.layoutMessages();
-    _view.update();
+    this->view.layoutMessages();
+    this->view.update();
 }
 
-void ChatWidget::attachChannel(SharedChannel channel)
+void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
+    this->channel = _newChannel;
+
     // on new message
-    _messageAppendedConnection = channel->messageAppended.connect([this](SharedMessage &message) {
-        SharedMessageRef deleted;
+    this->messageAppendedConnection =
+        this->channel->messageAppended.connect([this](SharedMessage &message) {
+            SharedMessageRef deleted;
 
-        auto messageRef = new MessageRef(message);
+            auto messageRef = new MessageRef(message);
 
-        if (_messages.appendItem(SharedMessageRef(messageRef), deleted)) {
-            qreal value = std::max(0.0, _view.getScrollbar()->getDesiredValue() - 1);
+            if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+                qreal value = std::max(0.0, this->view.getScrollBar().getDesiredValue() - 1);
 
-            _view.getScrollbar()->setDesiredValue(value, false);
-        }
-    });
+                this->view.getScrollBar().setDesiredValue(value, false);
+            }
+        });
 
     // on message removed
-    _messageRemovedConnection = _channel->messageRemovedFromStart.connect([](SharedMessage &) {
-        //
-    });
+    this->messageRemovedConnection =
+        this->channel->messageRemovedFromStart.connect([](SharedMessage &) {
+            //
+        });
 
-    auto snapshot = _channel.get()->getMessageSnapshot();
+    auto snapshot = this->channel->getMessageSnapshot();
 
     for (int i = 0; i < snapshot.getSize(); i++) {
         SharedMessageRef deleted;
 
         auto messageRef = new MessageRef(snapshot[i]);
 
-        _messages.appendItem(SharedMessageRef(messageRef), deleted);
+        this->messages.appendItem(SharedMessageRef(messageRef), deleted);
     }
 }
 
 void ChatWidget::detachChannel()
 {
     // on message added
-    _messageAppendedConnection.disconnect();
+    this->messageAppendedConnection.disconnect();
 
     // on message removed
-    _messageRemovedConnection.disconnect();
+    this->messageRemovedConnection.disconnect();
 }
 
 LimitedQueueSnapshot<SharedMessageRef> ChatWidget::getMessagesSnapshot()
 {
-    return _messages.getSnapshot();
+    return this->messages.getSnapshot();
 }
 
 void ChatWidget::showChangeChannelPopup()
@@ -172,7 +171,7 @@ void ChatWidget::showChangeChannelPopup()
     // create new input dialog and execute it
     TextInputDialog dialog(this);
 
-    dialog.setText(_channelName);
+    dialog.setText(this->channelName);
 
     if (dialog.exec() == QDialog::Accepted) {
         setChannelName(dialog.getText());
@@ -181,14 +180,14 @@ void ChatWidget::showChangeChannelPopup()
 
 void ChatWidget::layoutMessages()
 {
-    if (_view.layoutMessages()) {
-        _view.update();
+    if (this->view.layoutMessages()) {
+        this->view.update();
     }
 }
 
 void ChatWidget::updateGifEmotes()
 {
-    _view.updateGifEmotes();
+    this->view.updateGifEmotes();
 }
 
 void ChatWidget::paintEvent(QPaintEvent *)
@@ -227,7 +226,7 @@ void ChatWidget::doAddSplit()
 
 void ChatWidget::doCloseSplit()
 {
-    qDebug() << "Close split for" << this->getChannelName();
+    qDebug() << "[UNIMPLEMENTED] Close split for" << this->getChannelName();
 }
 
 void ChatWidget::doChangeChannel()
@@ -245,17 +244,17 @@ void ChatWidget::doPopup()
 
 void ChatWidget::doClearChat()
 {
-    qDebug() << "[UNIMPLEMENTED]: Clear chat";
+    qDebug() << "[UNIMPLEMENTED] Clear chat";
 }
 
 void ChatWidget::doOpenChannel()
 {
-    qDebug() << "[UNIMPLEMENTED]: Open twitch.tv/" << this->getChannelName();
+    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/" << this->getChannelName();
 }
 
 void ChatWidget::doOpenPopupPlayer()
 {
-    qDebug() << "[UNIMPLEMENTED]: Open twitch.tv/" << this->getChannelName() << "/popout";
+    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/" << this->getChannelName() << "/popout";
 }
 
 }  // namespace widgets

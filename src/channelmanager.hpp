@@ -12,14 +12,14 @@ public:
         return instance;
     }
 
-    SharedChannel getWhispers();
-    SharedChannel getMentions();
-    SharedChannel getEmpty();
+    std::shared_ptr<Channel> getWhispers();
+    std::shared_ptr<Channel> getMentions();
+    std::shared_ptr<Channel> getEmpty();
 
-    const std::vector<SharedChannel> getItems();
+    const std::vector<std::shared_ptr<Channel>> getItems();
 
-    SharedChannel addChannel(const QString &channel);
-    SharedChannel getChannel(const QString &channel);
+    std::shared_ptr<Channel> addChannel(const QString &channel);
+    std::shared_ptr<Channel> getChannel(const QString &channel);
     void removeChannel(const QString &channel);
 
 private:
@@ -27,12 +27,12 @@ private:
 
     ChannelManager();
 
-    QMap<QString, std::tuple<SharedChannel, int>> _channels;
+    QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> _channels;
     QMutex _channelsMutex;
 
-    SharedChannel _whispers;
-    SharedChannel _mentions;
-    SharedChannel _empty;
+    std::shared_ptr<Channel> _whispers;
+    std::shared_ptr<Channel> _mentions;
+    std::shared_ptr<Channel> _empty;
 };
 
 }  // namespace chatterino

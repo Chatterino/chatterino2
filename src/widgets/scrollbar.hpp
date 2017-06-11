@@ -58,21 +58,21 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
     void leaveEvent(QEvent *);
 
-    int _mouseOverIndex;
-    int _mouseDownIndex;
+    int _mouseOverIndex = -1;
+    int _mouseDownIndex = -1;
     QPoint _lastMousePosition;
 
-    int _buttonHeight;
-    int _trackHeight;
+    int _buttonHeight = 16;
+    int _trackHeight = 100;
 
     QRect _thumbRect;
 
-    qreal _maximum;
-    qreal _minimum;
-    qreal _largeChange;
-    qreal _smallChange;
-    qreal _desiredValue;
-    qreal _currentValue;
+    qreal _maximum = 0;
+    qreal _minimum = 0;
+    qreal _largeChange = 0;
+    qreal _smallChange = 5;
+    qreal _desiredValue = 0;
+    qreal _currentValue = 0;
 
     boost::signals2::signal<void()> _currentValueChanged;
 

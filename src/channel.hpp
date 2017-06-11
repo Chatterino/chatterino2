@@ -20,8 +20,6 @@ class Message;
 
 class ChannelManager;
 
-typedef std::shared_ptr<Channel> SharedChannel;
-
 class Channel
 {
 public:
