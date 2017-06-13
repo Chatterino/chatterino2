@@ -41,7 +41,11 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
     int mediumTextLineHeight =
         FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
 
+    /* TODO(pajlada): Re-implement
     bool recalculateImages = _emoteGeneration != EmoteManager::getInstance().getGeneration();
+    */
+    bool recalculateImages = true;
+
     bool recalculateText = _fontGeneration != FontManager::getInstance().getGeneration();
     bool newWordTypes = _currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
 
@@ -53,7 +57,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         return false;
     }
 
-    _emoteGeneration = EmoteManager::getInstance().getGeneration();
+    // _emoteGeneration = EmoteManager::getInstance().getGeneration();
     _fontGeneration = FontManager::getInstance().getGeneration();
 
     for (auto &word : _message->getWords()) {

@@ -3,14 +3,15 @@
 #include "asyncexec.hpp"
 #include "channel.hpp"
 #include "channelmanager.hpp"
+#include "emotemanager.hpp"
 #include "messages/messageparseargs.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchparsemessage.hpp"
 #include "twitch/twitchuser.hpp"
+#include "windowmanager.hpp"
 
 #include <irccommand.h>
 #include <ircconnection.h>
-
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -23,12 +24,15 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-IrcManager IrcManager::instance;
-
 const QString IrcManager::defaultClientId("7ue61iz46fz11y3cugd0l3tawb4taal");
 
-IrcManager::IrcManager()
-    : _account(AccountManager::getInstance().getTwitchUser())
+IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
+                       EmoteManager &_emoteManager, WindowManager &_windowManager)
+    : channelManager(_channelManager)
+    , resources(_resources)
+    , emoteManager(_emoteManager)
+    , windowManager(_windowManager)
+    , _account(AccountManager::getInstance().getTwitchUser())
 {
 }
 
@@ -168,7 +172,7 @@ void IrcManager::beginConnecting()
         this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
         this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
-        for (auto &channel : ChannelManager::getInstance().getItems()) {
+        for (auto &channel : this->channelManager.getItems()) {
             this->writeConnection->sendRaw("JOIN #" + channel->getName());
             this->readConnection->sendRaw("JOIN #" + channel->getName());
         }
@@ -231,12 +235,14 @@ void IrcManager::partChannel(const QString &channelName)
 
 void IrcManager::messageReceived(Communi::IrcMessage *message)
 {
+    /*
     qDebug() << "Message received: " << message->command();
     // qInfo(message->command().toStdString().c_str());
     //
     for (const auto &param : message->parameters()) {
         qDebug() << "Param: " << param;
     }
+    */
 
     /*
     const QString &command = message->command();
@@ -252,12 +258,13 @@ void IrcManager::messageReceived(Communi::IrcMessage *message)
 
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
-    auto c = ChannelManager::getInstance().getChannel(message->target().mid(1));
+    auto c = this->channelManager.getChannel(message->target().mid(1));
 
     if (c != nullptr) {
         messages::MessageParseArgs args;
 
-        c->addMessage(twitch::TwitchMessageBuilder::parse(message, c.get(), args));
+        c->addMessage(twitch::TwitchMessageBuilder::parse(message, c.get(), args, this->resources,
+                                                          this->emoteManager, this->windowManager));
     }
 }
 

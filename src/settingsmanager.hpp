@@ -34,6 +34,7 @@ private:
     messages::Word::Type _wordTypeMask = messages::Word::Default;
 
     // methods
+public: // temporary
     void updateWordTypeMask();
 
 public:

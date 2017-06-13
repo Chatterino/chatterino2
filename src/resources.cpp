@@ -1,60 +1,39 @@
 #include "resources.hpp"
+#include "emotemanager.hpp"
+#include "windowmanager.hpp"
 
 #include <QPixmap>
 
 namespace chatterino {
 
-messages::LazyLoadedImage *Resources::badgeStaff(nullptr);
-messages::LazyLoadedImage *Resources::badgeAdmin(nullptr);
-messages::LazyLoadedImage *Resources::badgeModerator(nullptr);
-messages::LazyLoadedImage *Resources::badgeGlobalmod(nullptr);
-messages::LazyLoadedImage *Resources::badgeTurbo(nullptr);
-messages::LazyLoadedImage *Resources::badgeBroadcaster(nullptr);
-messages::LazyLoadedImage *Resources::badgePremium(nullptr);
+namespace {
 
-messages::LazyLoadedImage *Resources::cheerBadge100000(nullptr);
-messages::LazyLoadedImage *Resources::cheerBadge10000(nullptr);
-messages::LazyLoadedImage *Resources::cheerBadge5000(nullptr);
-messages::LazyLoadedImage *Resources::cheerBadge1000(nullptr);
-messages::LazyLoadedImage *Resources::cheerBadge100(nullptr);
-messages::LazyLoadedImage *Resources::cheerBadge1(nullptr);
-
-messages::LazyLoadedImage *Resources::buttonBan(nullptr);
-messages::LazyLoadedImage *Resources::buttonTimeout(nullptr);
-
-Resources::Resources()
+inline messages::LazyLoadedImage *lli(EmoteManager &emoteManager, WindowManager &windowManager,
+                                      const char *pixmapPath, qreal scale = 1)
 {
+    return new messages::LazyLoadedImage(emoteManager, windowManager, new QPixmap(pixmapPath),
+                                         scale);
 }
 
-void Resources::load()
+}  // namespace
+
+Resources::Resources(EmoteManager &emoteManager, WindowManager &windowManager)
+    : badgeStaff(lli(emoteManager, windowManager, ":/images/staff_bg.png"))
+    , badgeAdmin(lli(emoteManager, windowManager, ":/images/admin_bg.png"))
+    , badgeGlobalModerator(lli(emoteManager, windowManager, ":/images/globalmod_bg.png"))
+    , badgeModerator(lli(emoteManager, windowManager, ":/images/moderator_bg.png"))
+    , badgeTurbo(lli(emoteManager, windowManager, ":/images/turbo_bg.png"))
+    , badgeBroadcaster(lli(emoteManager, windowManager, ":/images/broadcaster_bg.png"))
+    , badgePremium(lli(emoteManager, windowManager, ":/images/twitchprime_bg.png"))
+    , cheerBadge100000(lli(emoteManager, windowManager, ":/images/cheer100000"))
+    , cheerBadge10000(lli(emoteManager, windowManager, ":/images/cheer10000"))
+    , cheerBadge5000(lli(emoteManager, windowManager, ":/images/cheer5000"))
+    , cheerBadge1000(lli(emoteManager, windowManager, ":/images/cheer1000"))
+    , cheerBadge100(lli(emoteManager, windowManager, ":/images/cheer100"))
+    , cheerBadge1(lli(emoteManager, windowManager, ":/images/cheer1"))
+    , buttonBan(lli(emoteManager, windowManager, ":/images/button_ban.png", 0.25))
+    , buttonTimeout(lli(emoteManager, windowManager, ":/images/button_timeout.png", 0.25))
 {
-    // badges
-    Resources::badgeStaff = new messages::LazyLoadedImage(new QPixmap(":/images/staff_bg.png"));
-    Resources::badgeAdmin = new messages::LazyLoadedImage(new QPixmap(":/images/admin_bg.png"));
-    Resources::badgeModerator =
-        new messages::LazyLoadedImage(new QPixmap(":/images/moderator_bg.png"));
-    Resources::badgeGlobalmod =
-        new messages::LazyLoadedImage(new QPixmap(":/images/globalmod_bg.png"));
-    Resources::badgeTurbo = new messages::LazyLoadedImage(new QPixmap(":/images/turbo_bg.png"));
-    Resources::badgeBroadcaster =
-        new messages::LazyLoadedImage(new QPixmap(":/images/broadcaster_bg.png"));
-    Resources::badgePremium =
-        new messages::LazyLoadedImage(new QPixmap(":/images/twitchprime_bg.png"));
-
-    // cheer badges
-    Resources::cheerBadge100000 =
-        new messages::LazyLoadedImage(new QPixmap(":/images/cheer100000"));
-    Resources::cheerBadge10000 = new messages::LazyLoadedImage(new QPixmap(":/images/cheer10000"));
-    Resources::cheerBadge5000 = new messages::LazyLoadedImage(new QPixmap(":/images/cheer5000"));
-    Resources::cheerBadge1000 = new messages::LazyLoadedImage(new QPixmap(":/images/cheer1000"));
-    Resources::cheerBadge100 = new messages::LazyLoadedImage(new QPixmap(":/images/cheer100"));
-    Resources::cheerBadge1 = new messages::LazyLoadedImage(new QPixmap(":/images/cheer1"));
-
-    // button
-    Resources::buttonBan =
-        new messages::LazyLoadedImage(new QPixmap(":/images/button_ban.png"), 0.25);
-    Resources::buttonTimeout =
-        new messages::LazyLoadedImage(new QPixmap(":/images/button_timeout.png"), 0.25);
 }
 
 }  // namespace chatterino

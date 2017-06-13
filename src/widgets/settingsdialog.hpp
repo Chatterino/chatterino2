@@ -17,6 +17,7 @@
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
+
 namespace widgets {
 
 class SettingsDialog : public QWidget

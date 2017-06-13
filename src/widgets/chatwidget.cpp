@@ -30,9 +30,10 @@ inline void ezShortcut(ChatWidget *w, const char *key, T t)
 
 }  // namespace
 
-ChatWidget::ChatWidget(QWidget *parent)
+ChatWidget::ChatWidget(ChannelManager &_channelManager, QWidget *parent)
     : QWidget(parent)
-    , channel(ChannelManager::getInstance().getEmpty())
+    , channelManager(_channelManager)
+    , channel(_channelManager.getEmpty())
     , vbox(this)
     , header(this)
     , view(this)
@@ -90,7 +91,7 @@ void ChatWidget::setChannelName(const QString &_newChannelName)
 
     // remove current channel
     if (!this->channelName.isEmpty()) {
-        ChannelManager::getInstance().removeChannel(this->channelName);
+        this->channelManager.removeChannel(this->channelName);
 
         this->detachChannel();
     }
@@ -104,7 +105,7 @@ void ChatWidget::setChannelName(const QString &_newChannelName)
     if (newChannelName.isEmpty()) {
         this->channel = nullptr;
     } else {
-        this->setChannel(ChannelManager::getInstance().addChannel(newChannelName));
+        this->setChannel(this->channelManager.addChannel(newChannelName));
     }
 
     // update header
@@ -240,7 +241,7 @@ void ChatWidget::doChangeChannel()
 void ChatWidget::doPopup()
 {
     // TODO: Copy signals and stuff too
-    auto widget = new ChatWidget();
+    auto widget = new ChatWidget(this->channelManager);
     widget->setChannelName(this->getChannelName());
     widget->show();
 }

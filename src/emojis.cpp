@@ -46,8 +46,14 @@ void Emojis::parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QSt
                         }
 
                         vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-                            imageCache.getOrAdd(
-                                url, [&url] { return new messages::LazyLoadedImage(url, 0.35); }),
+                            imageCache.getOrAdd(url,
+                                                [/*&url*/] {
+                                                /* TODO: re-implement
+                                                    return new messages::LazyLoadedImage(url,
+                                                                                         0.35);  //
+                                                                                         */
+                                                return nullptr;
+                                                }),
                             QString()));
 
                         i += j - 1;

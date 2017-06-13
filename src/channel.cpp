@@ -3,7 +3,6 @@
 #include "ircmanager.hpp"
 #include "logging/loggingmanager.hpp"
 #include "messages/message.hpp"
-#include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
 #include <QDebug>
@@ -21,8 +20,12 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-Channel::Channel(const QString &channel)
-    : _messages()
+Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
+                 IrcManager &_ircManager, const QString &channel, bool isSpecial)
+    : windowManager(_windowManager)
+    , emoteManager(_emoteManager)
+    , ircManager(_ircManager)
+    , _messages()
     , _name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
     , _bttvChannelEmotes()
     , _ffzChannelEmotes()
@@ -33,7 +36,9 @@ Channel::Channel(const QString &channel)
 {
     qDebug() << "Open channel:" << channel << ". Name: " << _name;
     printf("Channel pointer: %p\n", this);
-    reloadChannelEmotes();
+    if (!isSpecial) {
+        this->reloadChannelEmotes();
+    }
 }
 
 //
@@ -121,82 +126,21 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 
     this->messageAppended(message);
 
-    WindowManager::getInstance().repaintVisibleChatWidgets(this);
+    this->windowManager.repaintVisibleChatWidgets(this);
 }
 
 // private methods
 void Channel::reloadChannelEmotes()
 {
-    reloadBttvEmotes();
-    reloadFfzEmotes();
+    printf("[Channel:%s] Reloading channel emotes\n", qPrintable(this->_name));
+    this->emoteManager.reloadBTTVChannelEmotes(this->_name, this->_bttvChannelEmotes);
+    this->emoteManager.reloadFFZChannelEmotes(this->_name, this->_ffzChannelEmotes);
 }
 
 void Channel::sendMessage(const QString &message)
 {
     qDebug() << "Channel send message: " << message;
-    IrcManager &instance = IrcManager::getInstance();
-    instance.sendMessage(_name, message);
-}
-
-void Channel::reloadBttvEmotes()
-{
-    util::urlJsonFetch(
-        "https://api.betterttv.net/2/channels/" + _name, [this](QJsonObject &rootNode) {
-            auto emotesNode = rootNode.value("emotes").toArray();
-
-            QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
-
-            for (const QJsonValue &emoteNode : emotesNode) {
-                QJsonObject emoteObject = emoteNode.toObject();
-
-                QString id = emoteObject.value("id").toString();
-                QString code = emoteObject.value("code").toString();
-                // emoteObject.value("imageType").toString();
-
-                QString link = linkTemplate;
-                link.detach();
-
-                link = link.replace("{{id}}", id).replace("{{image}}", "1x");
-
-                auto emote = EmoteManager::getInstance().getBttvChannelEmoteFromCaches().getOrAdd(
-                    id, [&code, &link] {
-                        return new LazyLoadedImage(link, 1, code, code + "\nChannel Bttv Emote");
-                    });
-
-                this->getBttvChannelEmotes().insert(code, emote);
-            }
-        });
-}
-
-void Channel::reloadFfzEmotes()
-{
-    util::urlJsonFetch("http://api.frankerfacez.com/v1/room/" + _name, [this](
-                                                                           QJsonObject &rootNode) {
-        auto setsNode = rootNode.value("sets").toObject();
-
-        for (const QJsonValue &setNode : setsNode) {
-            auto emotesNode = setNode.toObject().value("emoticons").toArray();
-
-            for (const QJsonValue &emoteNode : emotesNode) {
-                QJsonObject emoteObject = emoteNode.toObject();
-
-                // margins
-
-                int id = emoteObject.value("id").toInt();
-                QString code = emoteObject.value("name").toString();
-
-                QJsonObject urls = emoteObject.value("urls").toObject();
-                QString url1 = "http:" + urls.value("1").toString();
-
-                auto emote = EmoteManager::getInstance().getFfzChannelEmoteFromCaches().getOrAdd(
-                    id, [&code, &url1] {
-                        return new LazyLoadedImage(url1, 1, code, code + "\nGlobal Ffz Emote");
-                    });
-
-                getFfzChannelEmotes().insert(code, emote);
-            }
-        }
-    });
+    this->ircManager.sendMessage(_name, message);
 }
 
 }  // namespace chatterino

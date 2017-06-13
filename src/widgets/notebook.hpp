@@ -9,6 +9,9 @@
 #include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
+
+class ChannelManager;
+
 namespace widgets {
 
 class Notebook : public QWidget
@@ -18,7 +21,7 @@ class Notebook : public QWidget
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    Notebook(QWidget *parent);
+    Notebook(ChannelManager &_channelManager, QWidget *parent);
 
     NotebookPage *addPage(bool select = false);
 
@@ -46,6 +49,8 @@ public slots:
     void addPageButtonClicked();
 
 private:
+    ChannelManager &channelManager;
+
     QList<NotebookPage *> _pages;
 
     NotebookButton _addButton;

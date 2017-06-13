@@ -1,5 +1,4 @@
 #include "messages/lazyloadedimage.hpp"
-
 #include "asyncexec.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
@@ -18,15 +17,15 @@
 namespace chatterino {
 namespace messages {
 
-LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
+LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
+                                 const QString &url, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : _currentPixmap(nullptr)
-    , _currentFrame(0)
-    , _currentFrameOffset(0)
+    : emoteManager(_emoteManager)
+    , windowManager(_windowManager)
+    , _currentPixmap(nullptr)
     , _url(url)
     , _name(name)
     , _tooltip(tooltip)
-    , _animated(false)
     , _margin(margin)
     , _ishat(isHat)
     , _scale(scale)
@@ -34,14 +33,14 @@ LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString 
 {
 }
 
-LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &name,
+LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
+                                 QPixmap *image, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : _currentPixmap(image)
-    , _currentFrame(0)
-    , _currentFrameOffset(0)
+    : emoteManager(_emoteManager)
+    , windowManager(_windowManager)
+    , _currentPixmap(image)
     , _name(name)
     , _tooltip(tooltip)
-    , _animated(false)
     , _margin(margin)
     , _ishat(isHat)
     , _scale(scale)
@@ -81,11 +80,13 @@ void LazyLoadedImage::loadImage()
         if (_allFrames.size() > 1) {
             _animated = true;
 
-            EmoteManager::getInstance().getGifUpdateSignal().connect([this] { gifUpdateTimout(); });
+            this->emoteManager.getGifUpdateSignal().connect([this] {
+                gifUpdateTimout();  //
+            });
         }
 
-        EmoteManager::getInstance().incGeneration();
-        WindowManager::getInstance().layoutVisibleChatWidgets();
+        this->emoteManager.incGeneration();
+        this->windowManager.layoutVisibleChatWidgets();
     });
 }
 

@@ -6,13 +6,12 @@
 
 namespace chatterino {
 
+class ChannelManager;
+
 class WindowManager
 {
 public:
-    static WindowManager &getInstance()
-    {
-        return instance;
-    }
+    explicit WindowManager(ChannelManager &_channelManager);
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
@@ -25,12 +24,12 @@ public:
     void save();
 
 private:
-    static WindowManager instance;
+    ChannelManager &channelManager;
 
-    WindowManager();
+    std::mutex windowMutex;
 
-    std::mutex _windowMutex;
-    widgets::MainWindow *_mainWindow;
+    // TODO(pajlada): Store as a value instead of a pointer
+    widgets::MainWindow *mainWindow = nullptr;
 };
 
 }  // namespace chatterino

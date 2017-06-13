@@ -1,4 +1,5 @@
 #include "widgets/mainwindow.hpp"
+#include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
 #include "widgets/chatwidget.hpp"
@@ -18,9 +19,10 @@
 namespace chatterino {
 namespace widgets {
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(ChannelManager &_channelManager, QWidget *parent)
     : QWidget(parent)
-    , _notebook(this)
+    , channelManager(_channelManager)
+    , notebook(this->channelManager, this)
     , _loaded(false)
     , _titleBar()
 {
@@ -31,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     //        layout->addWidget(&_titleBar);
     //    }
 
-    layout->addWidget(&_notebook);
+    layout->addWidget(&this->notebook);
     setLayout(layout);
 
     // set margin
@@ -63,7 +65,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::layoutVisibleChatWidgets(Channel *channel)
 {
-    auto *page = _notebook.getSelectedPage();
+    auto *page = this->notebook.getSelectedPage();
 
     if (page == nullptr) {
         return;
@@ -82,7 +84,7 @@ void MainWindow::layoutVisibleChatWidgets(Channel *channel)
 
 void MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {
-    auto *page = _notebook.getSelectedPage();
+    auto *page = this->notebook.getSelectedPage();
 
     if (page == nullptr) {
         return;
@@ -101,7 +103,7 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
 
 void MainWindow::repaintGifEmotes()
 {
-    auto *page = _notebook.getSelectedPage();
+    auto *page = this->notebook.getSelectedPage();
 
     if (page == nullptr) {
         return;
@@ -118,7 +120,7 @@ void MainWindow::repaintGifEmotes()
 
 void MainWindow::load(const boost::property_tree::ptree &tree)
 {
-    this->_notebook.load(tree);
+    this->notebook.load(tree);
 
     _loaded = true;
 }
@@ -129,14 +131,14 @@ boost::property_tree::ptree MainWindow::save()
 
     child.put("type", "main");
 
-    _notebook.save(child);
+    this->notebook.save(child);
 
     return child;
 }
 
 void MainWindow::loadDefaults()
 {
-    _notebook.loadDefaults();
+    this->notebook.loadDefaults();
 
     _loaded = true;
 }
@@ -148,7 +150,7 @@ bool MainWindow::isLoaded() const
 
 Notebook &MainWindow::getNotebook()
 {
-    return _notebook;
+    return this->notebook;
 }
 
 }  // namespace widgets

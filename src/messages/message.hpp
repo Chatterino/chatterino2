@@ -23,8 +23,8 @@ typedef std::shared_ptr<Message> SharedMessage;
 class Message
 {
 public:
-    Message(const QString &text);
-    Message(const QString &text, const std::vector<messages::Word> &words);
+    explicit Message(const QString &text);
+    explicit Message(const QString &text, const std::vector<messages::Word> &words);
 
     bool getCanHighlightTab() const;
     const QString &getTimeoutUser() const;

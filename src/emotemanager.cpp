@@ -1,5 +1,7 @@
 #include "emotemanager.hpp"
 #include "resources.hpp"
+#include "util/urlfetch.hpp"
+#include "windowmanager.hpp"
 
 #include <QDebug>
 #include <QJsonArray>
@@ -18,22 +20,92 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-EmoteManager EmoteManager::instance;
-
-EmoteManager::EmoteManager()
-    : _twitchEmotes()
-    , _bttvEmotes()
-    , _ffzEmotes()
-    , _chatterinoEmotes()
-    , _bttvChannelEmoteFromCaches()
-    , _ffzChannelEmoteFromCaches()
-    , _twitchEmoteFromCache()
-    , _miscImageFromCache()
-    , _gifUpdateTimerSignal()
-    , _gifUpdateTimer()
-    , _gifUpdateTimerInitiated(false)
-    , _generation(0)
+EmoteManager::EmoteManager(WindowManager &_windowManager, Resources &_resources)
+    : windowManager(_windowManager)
+    , resources(_resources)
 {
+    // Note: Do not use this->resources in ctor
+}
+
+void EmoteManager::loadGlobalEmotes()
+{
+    this->loadBTTVEmotes();
+    this->loadFFZEmotes();
+}
+
+void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
+                                           BTTVEmoteMap &channelEmoteMap)
+{
+    printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
+
+    QString url("https://api.betterttv.net/2/channels/" + channelName);
+    util::urlJsonFetch(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
+        channelEmoteMap.clear();
+
+        auto emotesNode = rootNode.value("emotes").toArray();
+
+        QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
+
+        for (const QJsonValue &emoteNode : emotesNode) {
+            QJsonObject emoteObject = emoteNode.toObject();
+
+            QString id = emoteObject.value("id").toString();
+            QString code = emoteObject.value("code").toString();
+            // emoteObject.value("imageType").toString();
+
+            QString link = linkTemplate;
+            link.detach();
+
+            link = link.replace("{{id}}", id).replace("{{image}}", "1x");
+
+            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
+                return new LazyLoadedImage(*this, this->windowManager, link, 1, code,
+                                           code + "\nChannel BTTV Emote");
+            });
+
+            this->bttvChannelEmotes.insert(code, emote);
+            channelEmoteMap.insert(code, emote);
+        }
+    });
+}
+
+void EmoteManager::reloadFFZChannelEmotes(
+    const QString &channelName,
+    ConcurrentMap<QString, messages::LazyLoadedImage *> &channelEmoteMap)
+{
+    printf("[EmoteManager] Reload FFZ Channel Emotes for channel %s\n", qPrintable(channelName));
+
+    QString url("http://api.frankerfacez.com/v1/room/" + channelName);
+
+    util::urlJsonFetch(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
+        channelEmoteMap.clear();
+
+        auto setsNode = rootNode.value("sets").toObject();
+
+        for (const QJsonValue &setNode : setsNode) {
+            auto emotesNode = setNode.toObject().value("emoticons").toArray();
+
+            for (const QJsonValue &emoteNode : emotesNode) {
+                QJsonObject emoteObject = emoteNode.toObject();
+
+                // margins
+                int id = emoteObject.value("id").toInt();
+                QString code = emoteObject.value("name").toString();
+
+                QJsonObject urls = emoteObject.value("urls").toObject();
+                QString url1 = "http:" + urls.value("1").toString();
+
+                auto emote =
+                    this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
+                        return new LazyLoadedImage(*this, this->windowManager, url1, 1, code,
+                                                   code + "\nGlobal FFZ Emote");
+                    });
+
+                this->ffzChannelEmotes.insert(code, emote);
+                channelEmoteMap.insert(code, emote);
+            }
+        }
+    });
 }
 
 ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
@@ -41,12 +113,12 @@ ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
     return _twitchEmotes;
 }
 
-ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBttvEmotes()
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBTTVEmotes()
 {
     return _bttvEmotes;
 }
 
-ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getFfzEmotes()
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getFFZEmotes()
 {
     return _ffzEmotes;
 }
@@ -56,12 +128,12 @@ ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getChatterino
     return _chatterinoEmotes;
 }
 
-ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBttvChannelEmoteFromCaches()
+ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getBTTVChannelEmoteFromCaches()
 {
     return _bttvChannelEmoteFromCaches;
 }
 
-ConcurrentMap<int, messages::LazyLoadedImage *> &EmoteManager::getFfzChannelEmoteFromCaches()
+ConcurrentMap<int, messages::LazyLoadedImage *> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;
 }
@@ -76,13 +148,7 @@ ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getMiscImageF
     return _miscImageFromCache;
 }
 
-void EmoteManager::loadGlobalEmotes()
-{
-    loadBttvEmotes();
-    loadFfzEmotes();
-}
-
-void EmoteManager::loadBttvEmotes()
+void EmoteManager::loadBTTVEmotes()
 {
     // bttv
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -111,8 +177,9 @@ void EmoteManager::loadBttvEmotes()
                 tmp.detach();
                 QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
-                EmoteManager::getBttvEmotes().insert(
-                    code, new LazyLoadedImage(url, 1, code, code + "\nGlobal Bttv Emote"));
+                EmoteManager::getBTTVEmotes().insert(
+                    code, new LazyLoadedImage(*this, this->windowManager, url, 1, code,
+                                              code + "\nGlobal BTTV Emote"));
             }
         }
 
@@ -121,7 +188,7 @@ void EmoteManager::loadBttvEmotes()
     });
 }
 
-void EmoteManager::loadFfzEmotes()
+void EmoteManager::loadFFZEmotes()
 {
     // ffz
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -153,8 +220,9 @@ void EmoteManager::loadFfzEmotes()
                     QJsonObject urls = object.value("urls").toObject();
                     QString url1 = "http:" + urls.value("1").toString();
 
-                    EmoteManager::getBttvEmotes().insert(
-                        code, new LazyLoadedImage(url1, 1, code, code + "\nGlobal Ffz Emote"));
+                    EmoteManager::getBTTVEmotes().insert(
+                        code, new LazyLoadedImage(*this, this->windowManager, url1, 1, code,
+                                                  code + "\nGlobal FFZ Emote"));
                 }
             }
         }
@@ -166,11 +234,12 @@ void EmoteManager::loadFfzEmotes()
 
 LazyLoadedImage *EmoteManager::getTwitchEmoteById(const QString &name, long id)
 {
-    return EmoteManager::_twitchEmoteFromCache.getOrAdd(id, [&name, &id] {
+    return EmoteManager::_twitchEmoteFromCache.getOrAdd(id, [this, &name, &id] {
         qDebug() << "added twitch emote: " << id;
         qreal scale;
         QString url = getTwitchEmoteLink(id, scale);
-        return new LazyLoadedImage(url, scale, name, name + "\nTwitch Emote");
+        return new LazyLoadedImage(*this, this->windowManager, url, scale, name,
+                                   name + "\nTwitch Emote");
     });
 }
 
@@ -188,24 +257,41 @@ QString EmoteManager::getTwitchEmoteLink(long id, qreal &scale)
 LazyLoadedImage *EmoteManager::getCheerImage(long long amount, bool animated)
 {
     // TODO: fix this xD
-    return getCheerBadge(amount);
+    return this->getCheerBadge(amount);
 }
 
 LazyLoadedImage *EmoteManager::getCheerBadge(long long amount)
 {
     if (amount >= 100000) {
-        return Resources::getCheerBadge100000();
+        return this->resources.cheerBadge100000;
     } else if (amount >= 10000) {
-        return Resources::getCheerBadge10000();
+        return this->resources.cheerBadge10000;
     } else if (amount >= 5000) {
-        return Resources::getCheerBadge5000();
+        return this->resources.cheerBadge5000;
     } else if (amount >= 1000) {
-        return Resources::getCheerBadge1000();
+        return this->resources.cheerBadge1000;
     } else if (amount >= 100) {
-        return Resources::getCheerBadge100();
+        return this->resources.cheerBadge100;
     } else {
-        return Resources::getCheerBadge1();
+        return this->resources.cheerBadge1;
     }
+}
+
+boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
+{
+    if (!_gifUpdateTimerInitiated) {
+        _gifUpdateTimerInitiated = true;
+
+        _gifUpdateTimer.setInterval(30);
+        _gifUpdateTimer.start();
+
+        QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
+            _gifUpdateTimerSignal();
+            this->windowManager.repaintGifEmotes();
+        });
+    }
+
+    return _gifUpdateTimerSignal;
 }
 
 }  // namespace chatterino

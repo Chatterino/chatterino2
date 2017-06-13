@@ -18,8 +18,9 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(QWidget *parent)
+Notebook::Notebook(ChannelManager &_channelManager, QWidget *parent)
     : QWidget(parent)
+      , channelManager(_channelManager)
     , _addButton(this)
     , _settingsButton(this)
     , _userButton(this)
@@ -47,7 +48,7 @@ Notebook::Notebook(QWidget *parent)
 NotebookPage *Notebook::addPage(bool select)
 {
     auto tab = new NotebookTab(this);
-    auto page = new NotebookPage(this, tab);
+    auto page = new NotebookPage(this->channelManager, this, tab);
 
     tab->show();
 

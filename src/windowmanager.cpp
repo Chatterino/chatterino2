@@ -1,5 +1,6 @@
 #include "windowmanager.hpp"
 #include "appdatapath.hpp"
+#include "channelmanager.hpp"
 
 #include <QDebug>
 #include <QStandardPaths>
@@ -7,10 +8,9 @@
 #include <boost/property_tree/json_parser.hpp>
 
 namespace chatterino {
-WindowManager WindowManager::instance;
 
-WindowManager::WindowManager()
-    : _mainWindow(nullptr)
+WindowManager::WindowManager(ChannelManager &_channelManager)
+    : channelManager(_channelManager)
 {
 }
 
@@ -23,41 +23,41 @@ static const std::string &getSettingsPath()
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    if (_mainWindow != nullptr) {
-        _mainWindow->layoutVisibleChatWidgets(channel);
+    if (this->mainWindow != nullptr) {
+        this->mainWindow->layoutVisibleChatWidgets(channel);
     }
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (_mainWindow != nullptr) {
-        _mainWindow->repaintVisibleChatWidgets(channel);
+    if (this->mainWindow != nullptr) {
+        this->mainWindow->repaintVisibleChatWidgets(channel);
     }
 }
 
 void WindowManager::repaintGifEmotes()
 {
-    if (_mainWindow != nullptr) {
-        _mainWindow->repaintGifEmotes();
+    if (this->mainWindow != nullptr) {
+        this->mainWindow->repaintGifEmotes();
     }
 }
 
 void WindowManager::updateAll()
 {
-    if (_mainWindow != nullptr) {
-        _mainWindow->update();
+    if (this->mainWindow != nullptr) {
+        this->mainWindow->update();
     }
 }
 
 widgets::MainWindow &WindowManager::getMainWindow()
 {
-    std::lock_guard<std::mutex> lock(_windowMutex);
+    std::lock_guard<std::mutex> lock(this->windowMutex);
 
-    if (_mainWindow == nullptr) {
-        _mainWindow = new widgets::MainWindow();
+    if (this->mainWindow == nullptr) {
+        this->mainWindow = new widgets::MainWindow(this->channelManager);
     }
 
-    return *_mainWindow;
+    return *this->mainWindow;
 }
 
 void WindowManager::load()

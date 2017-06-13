@@ -15,6 +15,9 @@
 #include <boost/signals2.hpp>
 
 namespace chatterino {
+
+class ChannelManager;
+
 namespace widgets {
 
 class NotebookPage : public QWidget
@@ -22,7 +25,7 @@ class NotebookPage : public QWidget
     Q_OBJECT
 
 public:
-    NotebookPage(QWidget *parent, NotebookTab *_tab);
+    NotebookPage(ChannelManager &_channelManager, QWidget *parent, NotebookTab *_tab);
 
     std::pair<int, int> removeFromLayout(ChatWidget *widget);
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);
@@ -49,6 +52,8 @@ protected:
     void dropEvent(QDropEvent *event) override;
 
 private:
+    ChannelManager &channelManager;
+
     struct DropRegion {
         QRect rect;
         std::pair<int, int> position;
@@ -60,7 +65,7 @@ private:
         }
     };
 
-    NotebookTab *_tab;
+    NotebookTab *tab;
 
     QVBoxLayout _parentbox;
     QHBoxLayout _hbox;

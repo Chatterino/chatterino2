@@ -18,12 +18,15 @@ namespace messages {
 class Message;
 }
 
-class ChannelManager;
+class WindowManager;
+class EmoteManager;
+class IrcManager;
 
 class Channel
 {
 public:
-    Channel(const QString &channel);
+    explicit Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
+                     IrcManager &_ircManager, const QString &channel, bool isSpecial = false);
 
     boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
     boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
@@ -51,6 +54,10 @@ public:
     void sendMessage(const QString &message);
 
 private:
+    WindowManager &windowManager;
+    EmoteManager &emoteManager;
+    IrcManager &ircManager;
+
     // variabeles
     messages::LimitedQueue<messages::SharedMessage> _messages;
 
@@ -69,10 +76,6 @@ private:
     QString _streamStatus;
     QString _streamGame;
     // std::shared_ptr<logging::Channel> _loggingChannel;
-
-    // methods
-    void reloadBttvEmotes();
-    void reloadFfzEmotes();
 };
 
 }  // namespace chatterino

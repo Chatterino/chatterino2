@@ -11,6 +11,9 @@
 #include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
+
+class ChannelManager;
+
 namespace widgets {
 
 class MainWindow : public QWidget
@@ -18,7 +21,7 @@ class MainWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(ChannelManager &_channelManager, QWidget *parent = nullptr);
     ~MainWindow();
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
@@ -34,7 +37,9 @@ public:
     Notebook &getNotebook();
 
 private:
-    Notebook _notebook;
+    ChannelManager &channelManager;
+
+    Notebook notebook;
     bool _loaded;
     TitleBar _titleBar;
 };

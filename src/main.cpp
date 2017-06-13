@@ -1,3 +1,4 @@
+#include "application.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "emojis.hpp"
@@ -15,9 +16,6 @@
 #include <QStandardPaths>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/settingmanager.hpp>
-
-using namespace chatterino;
-using namespace chatterino::widgets;
 
 namespace {
 
@@ -68,28 +66,25 @@ int main(int argc, char *argv[])
     }
 
     chatterino::logging::init();
-    SettingsManager::getInstance().load();
-    Resources::load();
-    Emojis::loadEmojis();
-    EmoteManager::getInstance().loadGlobalEmotes();
+    chatterino::SettingsManager::getInstance().load();
+    chatterino::Emojis::loadEmojis();
 
-    ColorScheme::getInstance().init();
+    int ret = 0;
 
-    WindowManager::getInstance().load();
+    {
+        // Initialize application
+        chatterino::Application app;
 
-    MainWindow &w = WindowManager::getInstance().getMainWindow();
-    w.show();
+        // Start the application
+        ret = app.run(a);
 
-    IrcManager::getInstance().connect();
+        // Application will go out of scope here and deinitialize itself
+    }
 
-    int ret = a.exec();
-
-    SettingsManager::getInstance().save();
+    chatterino::SettingsManager::getInstance().save();
 
     // Save settings
     pajlada::Settings::SettingManager::save();
-
-    WindowManager::getInstance().save();
 
     return ret;
 }

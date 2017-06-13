@@ -8,20 +8,25 @@
 
 namespace chatterino {
 
-void ColorScheme::init()
+void ColorScheme::init(WindowManager &windowManager)
 {
     static bool initiated = false;
 
     if (!initiated) {
         initiated = true;
         ColorScheme::getInstance().update();
-        SettingsManager::getInstance().theme.valueChanged.connect(
-            [](const QString &) { ColorScheme::getInstance().update(); });
-        SettingsManager::getInstance().themeHue.valueChanged.connect(
-            [](const float &) { ColorScheme::getInstance().update(); });
 
-        ColorScheme::getInstance().updated.connect(
-            [] { WindowManager::getInstance().repaintVisibleChatWidgets(); });
+        SettingsManager::getInstance().theme.valueChanged.connect([](const QString &) {
+            ColorScheme::getInstance().update();  //
+        });
+
+        SettingsManager::getInstance().themeHue.valueChanged.connect([](const float &) {
+            ColorScheme::getInstance().update();  //
+        });
+
+        ColorScheme::getInstance().updated.connect([&windowManager] {
+            windowManager.repaintVisibleChatWidgets();  //
+        });
     }
 }
 

@@ -16,15 +16,18 @@
 
 namespace chatterino {
 
+class ChannelManager;
+class Resources;
+class EmoteManager;
+class WindowManager;
+
 class IrcManager : public QObject
 {
     Q_OBJECT
 
 public:
-    static IrcManager &getInstance()
-    {
-        return instance;
-    }
+    IrcManager(ChannelManager &_channelManager, Resources &_resources, EmoteManager &_emoteManager,
+               WindowManager &_windowManager);
 
     static const QString defaultClientId;
 
@@ -48,8 +51,10 @@ public:
     void setUser(const twitch::TwitchUser &account);
 
 private:
-    static IrcManager instance;
-    IrcManager();
+    ChannelManager &channelManager;
+    Resources &resources;
+    EmoteManager &emoteManager;
+    WindowManager &windowManager;
 
     // variables
     twitch::TwitchUser _account;

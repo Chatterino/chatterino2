@@ -3,14 +3,14 @@
 
 namespace chatterino {
 
-ChannelManager ChannelManager::instance;
-
-ChannelManager::ChannelManager()
-    : _channels()
-    , _channelsMutex()
-    , _whispers(new Channel(QString("/whispers")))
-    , _mentions(new Channel(QString("/mentions")))
-    , _empty(new Channel(QString("")))
+ChannelManager::ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
+                               IrcManager &_ircManager)
+    : windowManager(_windowManager)
+    , emoteManager(_emoteManager)
+    , ircManager(_ircManager)
+    , _whispers(new Channel(_windowManager, _emoteManager, _ircManager, "/whispers", true))
+    , _mentions(new Channel(_windowManager, _emoteManager, _ircManager, "/mentions", true))
+    , _empty(new Channel(_windowManager, _emoteManager, _ircManager, QString(), true))
 {
 }
 
@@ -55,10 +55,11 @@ std::shared_ptr<Channel> ChannelManager::addChannel(const QString &channel)
     auto it = _channels.find(channelName);
 
     if (it == _channels.end()) {
-        auto channel = std::shared_ptr<Channel>(new Channel(channelName));
+        auto channel = std::shared_ptr<Channel>(
+            new Channel(this->windowManager, this->emoteManager, this->ircManager, channelName));
         _channels.insert(channelName, std::make_tuple(channel, 1));
 
-        IrcManager::getInstance().joinChannel(channelName);
+        this->ircManager.joinChannel(channelName);
 
         return channel;
     }
@@ -114,7 +115,7 @@ void ChannelManager::removeChannel(const QString &channel)
     std::get<1>(a.value())--;
 
     if (std::get<1>(a.value()) == 0) {
-        IrcManager::getInstance().partChannel(c);
+        this->ircManager.partChannel(c);
         _channels.remove(c);
     }
 }

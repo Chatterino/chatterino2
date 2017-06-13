@@ -17,6 +17,9 @@
 #include <boost/signals2/connection.hpp>
 
 namespace chatterino {
+
+class ChannelManager;
+
 namespace widgets {
 
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
@@ -34,7 +37,7 @@ class ChatWidget : public QWidget
     Q_OBJECT
 
 public:
-    ChatWidget(QWidget *parent = nullptr);
+    ChatWidget(ChannelManager &_channelManager, QWidget *parent = nullptr);
     ~ChatWidget();
 
     std::shared_ptr<Channel> getChannel() const;
@@ -53,6 +56,8 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
+    ChannelManager &channelManager;
+
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
 

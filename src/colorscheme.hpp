@@ -6,6 +6,8 @@
 
 namespace chatterino {
 
+class WindowManager;
+
 class ColorScheme
 {
 public:
@@ -67,7 +69,7 @@ public:
         return instance;
     }
 
-    void init();
+    void init(WindowManager &windowManager);
     void normalizeColor(QColor &color);
 
     void update();

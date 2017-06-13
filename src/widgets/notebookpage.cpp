@@ -19,9 +19,10 @@ bool NotebookPage::isDraggingSplit = false;
 ChatWidget *NotebookPage::draggingSplit = nullptr;
 std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 
-NotebookPage::NotebookPage(QWidget *parent, NotebookTab *tab)
+NotebookPage::NotebookPage(ChannelManager &_channelManager, QWidget *parent, NotebookTab *_tab)
     : QWidget(parent)
-    , _tab(tab)
+    , channelManager(_channelManager)
+    , tab(_tab)
     , _parentbox(this)
     , _chatWidgets()
     , _preview(this)
@@ -46,12 +47,12 @@ const std::vector<ChatWidget *> &NotebookPage::getChatWidgets() const
 
 NotebookTab *NotebookPage::getTab() const
 {
-    return _tab;
+    return this->tab;
 }
 
 void NotebookPage::addChat(bool openChannelNameDialog)
 {
-    ChatWidget *w = new ChatWidget();
+    ChatWidget *w = new ChatWidget(this->channelManager);
 
     if (openChannelNameDialog) {
         w->showChangeChannelPopup();
@@ -143,7 +144,7 @@ void NotebookPage::mouseReleaseEvent(QMouseEvent *event)
 {
     if (_hbox.count() == 0 && event->button() == Qt::LeftButton) {
         // "Add Chat" was clicked
-        addToLayout(new ChatWidget(), std::pair<int, int>(-1, -1));
+        addToLayout(new ChatWidget(this->channelManager), std::pair<int, int>(-1, -1));
 
         setCursor(QCursor(Qt::ArrowCursor));
     }
@@ -275,7 +276,7 @@ void NotebookPage::load(const boost::property_tree::ptree &tree)
         for (const auto &v : tree.get_child("columns.")) {
             int row = 0;
             for (const auto &innerV : v.second.get_child("")) {
-                auto widget = new ChatWidget();
+                auto widget = new ChatWidget(this->channelManager);
                 widget->load(innerV.second);
                 addToLayout(widget, std::pair<int, int>(column, row));
                 ++row;

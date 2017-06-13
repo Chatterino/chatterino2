@@ -47,6 +47,7 @@ win32 {
 
 SOURCES += \
     src/main.cpp \
+    src/application.cpp \
     src/channel.cpp \
     src/colorscheme.cpp \
     src/emojis.cpp \
