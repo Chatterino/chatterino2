@@ -37,7 +37,7 @@ public:
     bool isDisabled() const;
     const QString &getId() const;
 
-    const QString _text;
+    const QString text;
 
 private:
     static LazyLoadedImage *badgeStaff;
@@ -50,18 +50,18 @@ private:
 
     static QRegularExpression *cheerRegex;
 
-    bool _highlightTab = false;
-    QString _timeoutUser = "";
-    int _timeoutCount = 0;
-    bool _isDisabled = false;
-    std::chrono::time_point<std::chrono::system_clock> _parseTime;
+    bool highlightTab = false;
+    QString timeoutUser = "";
+    int timeoutCount = 0;
+    bool disabled = false;
+    std::chrono::time_point<std::chrono::system_clock> parseTime;
 
-    QString _userName = "";
-    QString _displayName = "";
-    QString _content;
-    QString _id = "";
+    QString userName = "";
+    QString displayName = "";
+    QString content;
+    QString id = "";
 
-    std::vector<Word> _words;
+    std::vector<Word> words;
 };
 
 }  // namespace messages

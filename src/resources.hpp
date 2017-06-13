@@ -19,6 +19,7 @@ public:
     messages::LazyLoadedImage *badgeTurbo;
     messages::LazyLoadedImage *badgeBroadcaster;
     messages::LazyLoadedImage *badgePremium;
+    messages::LazyLoadedImage *badgeVerified;
 
     messages::LazyLoadedImage *cheerBadge100000;
     messages::LazyLoadedImage *cheerBadge10000;

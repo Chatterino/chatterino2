@@ -44,17 +44,18 @@ public:
         BadgePremium = (1 << 20),
         BadgeChatterino = (1 << 21),
         BadgeCheer = (1 << 22),
+        BadgeVerified = (1 << 23),
         Badges = BadgeStaff | BadgeAdmin | BadgeGlobalMod | BadgeModerator | BadgeTurbo |
-                 BadgeBroadcaster | BadgePremium | BadgeChatterino | BadgeCheer,
+                 BadgeBroadcaster | BadgePremium | BadgeChatterino | BadgeCheer | BadgeVerified,
 
-        Username = (1 << 23),
-        BitsAmount = (1 << 24),
+        Username = (1 << 24),
+        BitsAmount = (1 << 25),
 
-        ButtonBan = (1 << 25),
-        ButtonTimeout = (1 << 26),
+        ButtonBan = (1 << 26),
+        ButtonTimeout = (1 << 27),
 
-        EmojiImage = (1 << 27),
-        EmojiText = (1 << 28),
+        EmojiImage = (1 << 28),
+        EmojiText = (1 << 29),
 
         Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
                   BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |

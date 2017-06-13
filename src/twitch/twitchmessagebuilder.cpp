@@ -335,6 +335,10 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const R
                                               EmoteManager &emoteManager)
 {
     for (QString badge : badges) {
+        if (badge.isEmpty()) {
+            continue;
+        }
+
         if (badge.startsWith("bits/")) {
             long long int cheer = std::strtoll(badge.mid(5).toStdString().c_str(), nullptr, 10);
             appendWord(Word(emoteManager.getCheerBadge(cheer), Word::BadgeCheer, QString(),
@@ -349,8 +353,8 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const R
             appendWord(Word(resources.badgeGlobalModerator, Word::BadgeGlobalMod, QString(),
                             QString("Global Moderator")));
         } else if (badge == "moderator/1") {
-            // TODO: implement this xD
-            appendWord(Word(resources.badgeTurbo, Word::BadgeModerator, QString(),
+            // TODO: Implement custom FFZ moderator badge
+            appendWord(Word(resources.badgeModerator, Word::BadgeModerator, QString(),
                             QString("Channel Moderator")));  // custom badge
         } else if (badge == "turbo/1") {
             appendWord(Word(resources.badgeStaff, Word::BadgeTurbo, QString(),
@@ -361,6 +365,28 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const R
         } else if (badge == "premium/1") {
             appendWord(Word(resources.badgePremium, Word::BadgePremium, QString(),
                             QString("Twitch Prime")));
+
+        } else if (badge.startsWith("partner/")) {
+            int index = badge.midRef(8).toInt();
+            switch (index) {
+                case 1: {
+                    appendWord(Word(resources.badgeVerified, Word::BadgeVerified, QString(),
+                                    "Twitch Verified"));
+                } break;
+                default: {
+                    printf("[TwitchMessageBuilder] Unhandled partner badge index: %d\n", index);
+                } break;
+            }
+        } else if (badge.startsWith("subscriber/")) {
+            int index = badge.midRef(11).toInt();
+            // TODO: Implement subscriber badges here
+            switch (index) {
+                default: {
+                    // printf("[TwitchMessageBuilder] Unhandled subscriber badge index: %d\n", index);
+                } break;
+            }
+        } else {
+            printf("[TwitchMessageBuilder] Unhandled badge: %s\n", qPrintable(badge));
         }
     }
 }

@@ -21,67 +21,66 @@ namespace chatterino {
 namespace messages {
 
 Message::Message(const QString &text)
-    : _text(text)
-    , _words()
+    : text(text)
 {
-    _words.push_back(
+    this->words.push_back(
         Word(text, Word::Text, ColorScheme::getInstance().SystemMessageColor, text, QString()));
 }
 
 Message::Message(const QString &text, const std::vector<Word> &words)
-    : _text(text)
-    , _words(words)
+    : text(text)
+    , words(words)
 {
 }
 
 bool Message::getCanHighlightTab() const
 {
-    return _highlightTab;
+    return this->highlightTab;
 }
 
 const QString &Message::getTimeoutUser() const
 {
-    return _timeoutUser;
+    return this->timeoutUser;
 }
 
 int Message::getTimeoutCount() const
 {
-    return _timeoutCount;
+    return this->timeoutCount;
 }
 
 const QString &Message::getUserName() const
 {
-    return _userName;
+    return this->userName;
 }
 
 const QString &Message::getDisplayName() const
 {
-    return _displayName;
+    return this->displayName;
 }
 
 const QString &Message::getContent() const
 {
-    return _content;
+    return this->content;
 }
 
 const std::chrono::time_point<std::chrono::system_clock> &Message::getParseTime() const
 {
-    return _parseTime;
+    return this->parseTime;
 }
 
 std::vector<Word> &Message::getWords()
 {
-    return _words;
+    return this->words;
 }
 
 bool Message::isDisabled() const
 {
-    return _isDisabled;
+    return this->disabled;
 }
 
 const QString &Message::getId() const
 {
-    return _id;
+    return this->id;
 }
 
 }  // namespace messages
