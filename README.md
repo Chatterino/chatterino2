@@ -1,25 +1,24 @@
 # chatterino 2
 
-Chatterino 2 is the second installment of my twitch chat client series "Chatterino". For now you can check out chatterino 1 at [chatterino.com](http://chatterino.com).
-
-## requirements
-1. download the [boost library](https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.zip/download) and extract it to `C:\local\boost`
-2. download binaries for OpenSSL >= 1.0.2 or compile it from source. [example download](https://indy.fulgan.com/SSL/)
-3. Place libeay32.dll and ssleay32.dll from OpenSSL in a directory in PATH.
+Chatterino 2 is the second installment of the twitch chat client series "Chatterino". For now you can check out chatterino 1 at [chatterino.com](http://chatterino.com).
 
 ## code style
 The code is normally formated using clang format in qt creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
 
-## third party dependencies
+## requirements
 
 ### submodules
-1. run git submodule update --init --recursive
+you need to run `git submodule update --init --recursive` to init the submodules
 
-### rapidjson
-
-#### windows
+### windows
+#### boost
+download the [boost library](https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.zip/download) and extract it to `C:\local\boost`
+#### open-ssl
+1. download binaries for OpenSSL >= 1.0.2 or compile it from source. [example download](https://indy.fulgan.com/SSL/)
+2. Place libeay32.dll and ssleay32.dll from OpenSSL in a directory in PATH.
+#### rapidjson
 1. download rapidjson zip from https://github.com/miloyip/rapidjson/releases/latest
 2. extract to `C:/local/rapidjson` so that `C:/local/rapidjson/include/rapidjson/` is a proper path
 
-#### linux
+### linux
 ???
