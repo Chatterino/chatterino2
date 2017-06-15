@@ -49,6 +49,7 @@ SOURCES += \
     src/main.cpp \
     src/application.cpp \
     src/channel.cpp \
+    src/channeldata.cpp \
     src/colorscheme.cpp \
     src/emojis.cpp \
     src/ircmanager.cpp \

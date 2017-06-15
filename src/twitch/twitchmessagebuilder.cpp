@@ -18,9 +18,17 @@ TwitchMessageBuilder::TwitchMessageBuilder()
 {
 }
 
-SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircMessage,
-                                          Channel *channel, const MessageParseArgs &args,
-                                          const Resources &resources, EmoteManager &emoteManager,
+// When a twitch message is being parsed it makes sense for the builder to have access to:
+//  - The IRC Message
+//  - Message-specific parsing arguments (i.e. if ping sounds are disabled)
+//  - The Channel that the message originated from
+//  - The resources class for Badges, Moderation buttons
+//  - The Emote Manager for all different kinds of emotes
+SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircMessage,  //
+                                          Channel *channel,                              //
+                                          const MessageParseArgs &args,                  //
+                                          Resources &resources,                          //
+                                          EmoteManager &emoteManager,                    //
                                           WindowManager &windowManager)
 {
     TwitchMessageBuilder b;
@@ -37,6 +45,13 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         b.messageId = iterator.value().toString();
     }
 
+    // room id
+    iterator = tags.find("room-id");
+    std::string roomID;
+    if (iterator != std::end(tags)) {
+        roomID = iterator.value().toString().toStdString();
+    }
+
     // timestamps
     iterator = tags.find("tmi-sent-ts");
 
@@ -45,10 +60,12 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     // badges
     iterator = tags.find("badges");
 
+    const auto &channelResources = resources.channels[roomID];
+
     if (iterator != tags.end()) {
         auto badges = iterator.value().toString().split(',');
 
-        b.appendTwitchBadges(badges, resources, emoteManager);
+        b.appendTwitchBadges(badges, resources, emoteManager, channelResources);
     }
 
     // color
@@ -331,8 +348,9 @@ void TwitchMessageBuilder::appendTwitchEmote(
     }
 }
 
-void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const Resources &resources,
-                                              EmoteManager &emoteManager)
+void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resources &resources,
+                                              EmoteManager &emoteManager,
+                                              const Resources::Channel &channelResources)
 {
     for (QString badge : badges) {
         if (badge.isEmpty()) {
@@ -340,9 +358,16 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const R
         }
 
         if (badge.startsWith("bits/")) {
-            long long int cheer = std::strtoll(badge.mid(5).toStdString().c_str(), nullptr, 10);
-            appendWord(Word(emoteManager.getCheerBadge(cheer), Word::BadgeCheer, QString(),
-                            QString("Twitch Cheer" + QString::number(cheer))));
+            if (!resources.bitBadgesLoaded) {
+                // Do nothing
+                continue;
+            }
+
+            QString cheerAmountQS = badge.mid(5);
+            std::string cheerAmountString = cheerAmountQS.toStdString();
+
+            appendWord(Word(resources.cheerBadges[cheerAmountString], Word::BadgeCheer, QString(),
+                            QString("Twitch Cheer" + cheerAmountQS)));
         } else if (badge == "staff/1") {
             appendWord(
                 Word(resources.badgeStaff, Word::BadgeStaff, QString(), QString("Twitch Staff")));
@@ -382,7 +407,8 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, const R
             // TODO: Implement subscriber badges here
             switch (index) {
                 default: {
-                    // printf("[TwitchMessageBuilder] Unhandled subscriber badge index: %d\n", index);
+                    // printf("[TwitchMessageBuilder] Unhandled subscriber badge index: %d\n",
+                    // index);
                 } break;
             }
         } else {

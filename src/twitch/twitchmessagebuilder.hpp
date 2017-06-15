@@ -2,13 +2,13 @@
 
 #include "channel.hpp"
 #include "messages/messagebuilder.hpp"
+#include "resources.hpp"
 
 #include <QString>
 #include <QVariant>
 
 namespace chatterino {
 
-class Resources;
 class EmoteManager;
 class WindowManager;
 
@@ -24,7 +24,7 @@ public:
 
     static messages::SharedMessage parse(const Communi::IrcPrivateMessage *ircMessage,
                                          Channel *channel, const messages::MessageParseArgs &args,
-                                         const Resources &resources, EmoteManager &emoteManager,
+                                         Resources &resources, EmoteManager &emoteManager,
                                          WindowManager &windowManager);
 
     //    static bool sortTwitchEmotes(
@@ -37,8 +37,8 @@ private:
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
                            std::vector<std::pair<long int, messages::LazyLoadedImage *>> &vec,
                            EmoteManager &emoteManager);
-    void appendTwitchBadges(const QStringList &badges, const Resources &resources,
-                            EmoteManager &emoteManager);
+    void appendTwitchBadges(const QStringList &badges, Resources &resources,
+                            EmoteManager &emoteManager, const Resources::Channel &channelResources);
 };
 
 }  // namespace twitch

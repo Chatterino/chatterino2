@@ -2,6 +2,9 @@
 
 #include "messages/lazyloadedimage.hpp"
 
+#include <map>
+#include <mutex>
+
 namespace chatterino {
 
 class EmoteManager;
@@ -28,8 +31,46 @@ public:
     messages::LazyLoadedImage *cheerBadge100;
     messages::LazyLoadedImage *cheerBadge1;
 
+    std::map<std::string, messages::LazyLoadedImage *> cheerBadges;
+
+    struct BadgeVersion {
+        BadgeVersion() = delete;
+
+        explicit BadgeVersion(QJsonObject &&root);
+
+        messages::LazyLoadedImage *badgeImage1x;
+        messages::LazyLoadedImage *badgeImage2x;
+        messages::LazyLoadedImage *badgeImage4x;
+        std::string description;
+        std::string title;
+        std::string clickAction;
+        std::string clickUrl;
+    };
+
+    struct BadgeSet {
+        std::map<std::string, BadgeVersion> versions;
+    };
+
+    std::map<std::string, BadgeSet> badgeSets;
+
+    bool bitBadgesLoaded = false;
+    bool dynamicBadgesLoaded = false;
+
     messages::LazyLoadedImage *buttonBan;
     messages::LazyLoadedImage *buttonTimeout;
+
+    struct Channel {
+        std::string id;
+
+        std::mutex globalMapMutex;
+
+        void loadData();
+
+        // std::atomic<bool> loaded = false;
+    };
+
+    //       channelId
+    std::map<std::string, Channel> channels;
 };
 
 }  // namespace chatterino
