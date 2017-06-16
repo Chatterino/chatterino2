@@ -41,12 +41,11 @@ Resources::Resources(EmoteManager &emoteManager, WindowManager &windowManager)
     util::urlJsonFetch(badgesUrl, [this, &emoteManager, &windowManager](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
-        for (auto it = std::begin(sets); it != std::end(sets); ++it) {
+        for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
+            QJsonObject versions = it.value().toObject().value("versions").toObject();
+
             auto &badgeSet = this->badgeSets[it.key().toStdString()];
-
-            std::map<std::string, BadgeVersion> &versionsMap = badgeSet.versions;
-
-            QJsonObject versions = it.value().value("versions").toObject();
+            auto &versionsMap = badgeSet.versions;
 
             for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
                  ++versionIt) {
@@ -89,6 +88,11 @@ void Resources::Channel::loadData()
         //util::urlJsonFetch()
     }
     */
+}
+
+void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
+{
+    qDebug() << "Load channel data for" << QString::fromStdString(roomID);
 }
 
 }  // namespace chatterino

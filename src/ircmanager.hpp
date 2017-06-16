@@ -80,8 +80,14 @@ private:
 
     void beginConnecting();
 
-    void messageReceived(Communi::IrcMessage *message);
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
+    void messageReceived(Communi::IrcMessage *message);
+
+    void handleRoomStateMessage(Communi::IrcMessage *message);
+    void handleClearChatMessage(Communi::IrcMessage *message);
+    void handleUserStateMessage(Communi::IrcMessage *message);
+    void handleWhisperMessage(Communi::IrcMessage *message);
+    void handleUserNoticeMessage(Communi::IrcMessage *message);
 };
 
 }  // namespace chatterino

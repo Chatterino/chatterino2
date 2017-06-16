@@ -233,29 +233,6 @@ void IrcManager::partChannel(const QString &channelName)
     this->connectionMutex.unlock();
 }
 
-void IrcManager::messageReceived(Communi::IrcMessage *message)
-{
-    /*
-    qDebug() << "Message received: " << message->command();
-    // qInfo(message->command().toStdString().c_str());
-    //
-    for (const auto &param : message->parameters()) {
-        qDebug() << "Param: " << param;
-    }
-    */
-
-    /*
-    const QString &command = message->command();
-
-    if (command == "CLEARCHAT") {
-    } else if (command == "ROOMSTATE") {
-    } else if (command == "USERSTATE") {
-    } else if (command == "WHISPER") {
-    } else if (command == "USERNOTICE") {
-    }
-    */
-}
-
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     auto c = this->channelManager.getChannel(message->target().mid(1));
@@ -266,6 +243,60 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
         c->addMessage(twitch::TwitchMessageBuilder::parse(message, c.get(), args, this->resources,
                                                           this->emoteManager, this->windowManager));
     }
+}
+
+void IrcManager::messageReceived(Communi::IrcMessage *message)
+{
+    if (message->type() == Communi::IrcMessage::Type::Private) {
+        // We already have a handler for private messages
+        return;
+    }
+
+    const QString &command = message->command();
+
+    if (command == "ROOMSTATE") {
+        this->handleRoomStateMessage(message);
+    } else if (command == "CLEARCHAT") {
+        this->handleClearChatMessage(message);
+    } else if (command == "USERSTATE") {
+        this->handleUserStateMessage(message);
+    } else if (command == "WHISPER") {
+        this->handleWhisperMessage(message);
+    } else if (command == "USERNOTICE") {
+        this->handleUserNoticeMessage(message);
+    }
+}
+
+void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
+{
+    const auto &tags = message->tags();
+
+    auto iterator = tags.find("room-id");
+
+    if (iterator != tags.end()) {
+        std::string roomID = iterator.value().toString().toStdString();
+        this->resources.loadChannelData(roomID);
+    }
+}
+
+void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
+{
+    // do nothing
+}
+
+void IrcManager::handleUserStateMessage(Communi::IrcMessage *message)
+{
+    // do nothing
+}
+
+void IrcManager::handleWhisperMessage(Communi::IrcMessage *message)
+{
+    // do nothing
+}
+
+void IrcManager::handleUserNoticeMessage(Communi::IrcMessage *message)
+{
+    // do nothing
 }
 
 bool IrcManager::isTwitchBlockedUser(QString const &username)

@@ -71,6 +71,8 @@ public:
 
     //       channelId
     std::map<std::string, Channel> channels;
+
+    void loadChannelData(const std::string &roomID, bool bypassCache = false);
 };
 
 }  // namespace chatterino

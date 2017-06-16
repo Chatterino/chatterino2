@@ -364,26 +364,25 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             }
 
             QString cheerAmountQS = badge.mid(5);
-            std::string cheerAmountString = cheerAmountQS.toStdString();
+            std::string versionKey = cheerAmountQS.toStdString();
 
             try {
                 auto &badgeSet = resources.badgeSets.at("bits");
 
                 try {
-                    auto &badgeVersion = badgeSet.versions.at(cheerAmountString);
+                    auto &badgeVersion = badgeSet.versions.at(versionKey);
 
                     appendWord(
                         Word(badgeVersion.badgeImage1x, Word::BadgeCheer, QString(),
                              QString("Twitch " + QString::fromStdString(badgeVersion.title))));
                 } catch (const std::exception &e) {
-                    printf("Exception caught: %s\n", e.what());
-                    printf("When trying to fetch the badge version: %s\n",
-                           cheerAmountString.c_str());
-                    // XXX: Version not found
+                    qDebug() << "Exception caught:" << e.what()
+                             << "when trying to fetch badge version " << versionKey.c_str();
                 }
             } catch (const std::exception &e) {
-                printf("Exception caught: %s\n", e.what());
-                // XXX
+                qDebug() << "No badge set with key"
+                         << "bits"
+                         << ". Exception: " << e.what();
             }
 
         } else if (badge == "staff/1") {
@@ -421,6 +420,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                 } break;
             }
         } else if (badge.startsWith("subscriber/")) {
+            qDebug() << "Subscriber badge:" << badge;
             int index = badge.midRef(11).toInt();
             // TODO: Implement subscriber badges here
             switch (index) {
@@ -430,7 +430,40 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                 } break;
             }
         } else {
-            printf("[TwitchMessageBuilder] Unhandled badge: %s\n", qPrintable(badge));
+            if (!resources.dynamicBadgesLoaded) {
+                // Do nothing
+                continue;
+            }
+
+            QStringList parts = badge.split('/');
+
+            if (parts.length() != 2) {
+                qDebug() << "Bad number of parts: " << parts.length() << " in " << parts;
+                continue;
+            }
+
+            Word::Type badgeType = Word::Type::BadgeMiscellaneous;
+
+            std::string badgeSetKey = parts[0].toStdString();
+            std::string versionKey = parts[1].toStdString();
+
+            try {
+                auto &badgeSet = resources.badgeSets.at(badgeSetKey);
+
+                try {
+                    auto &badgeVersion = badgeSet.versions.at(versionKey);
+
+                    appendWord(
+                        Word(badgeVersion.badgeImage1x, badgeType, QString(),
+                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+                } catch (const std::exception &e) {
+                    qDebug() << "Exception caught:" << e.what()
+                             << "when trying to fetch badge version " << versionKey.c_str();
+                }
+            } catch (const std::exception &e) {
+                qDebug() << "No badge set with key" << badgeSetKey.c_str()
+                         << ". Exception: " << e.what();
+            }
         }
     }
 }
