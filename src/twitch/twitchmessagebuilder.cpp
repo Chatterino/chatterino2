@@ -373,7 +373,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                     auto &badgeVersion = badgeSet.versions.at(versionKey);
 
                     appendWord(
-                        Word(badgeVersion.badgeImage1x, Word::BadgeCheer, QString(),
+                        Word(badgeVersion.badgeImage1x, Word::BadgeVanity, QString(),
                              QString("Twitch " + QString::fromStdString(badgeVersion.title))));
                 } catch (const std::exception &e) {
                     qDebug() << "Exception caught:" << e.what()
@@ -386,33 +386,33 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             }
 
         } else if (badge == "staff/1") {
-            appendWord(
-                Word(resources.badgeStaff, Word::BadgeStaff, QString(), QString("Twitch Staff")));
+            appendWord(Word(resources.badgeStaff, Word::BadgeGlobalAuthority, QString(),
+                            QString("Twitch Staff")));
         } else if (badge == "admin/1") {
-            appendWord(
-                Word(resources.badgeAdmin, Word::BadgeAdmin, QString(), QString("Twitch Admin")));
+            appendWord(Word(resources.badgeAdmin, Word::BadgeGlobalAuthority, QString(),
+                            QString("Twitch Admin")));
         } else if (badge == "global_mod/1") {
-            appendWord(Word(resources.badgeGlobalModerator, Word::BadgeGlobalMod, QString(),
+            appendWord(Word(resources.badgeGlobalModerator, Word::BadgeGlobalAuthority, QString(),
                             QString("Global Moderator")));
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            appendWord(Word(resources.badgeModerator, Word::BadgeModerator, QString(),
+            appendWord(Word(resources.badgeModerator, Word::BadgeChannelAuthority, QString(),
                             QString("Channel Moderator")));  // custom badge
         } else if (badge == "turbo/1") {
-            appendWord(Word(resources.badgeStaff, Word::BadgeTurbo, QString(),
+            appendWord(Word(resources.badgeStaff, Word::BadgeVanity, QString(),
                             QString("Turbo Subscriber")));
         } else if (badge == "broadcaster/1") {
-            appendWord(Word(resources.badgeBroadcaster, Word::BadgeBroadcaster, QString(),
+            appendWord(Word(resources.badgeBroadcaster, Word::BadgeChannelAuthority, QString(),
                             QString("Channel Broadcaster")));
         } else if (badge == "premium/1") {
-            appendWord(Word(resources.badgePremium, Word::BadgePremium, QString(),
+            appendWord(Word(resources.badgePremium, Word::BadgeVanity, QString(),
                             QString("Twitch Prime")));
 
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    appendWord(Word(resources.badgeVerified, Word::BadgeVerified, QString(),
+                    appendWord(Word(resources.badgeVerified, Word::BadgeVanity, QString(),
                                     "Twitch Verified"));
                 } break;
                 default: {
@@ -442,7 +442,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                 continue;
             }
 
-            Word::Type badgeType = Word::Type::BadgeMiscellaneous;
+            Word::Type badgeType = Word::Type::BadgeVanity;
 
             std::string badgeSetKey = parts[0].toStdString();
             std::string versionKey = parts[1].toStdString();

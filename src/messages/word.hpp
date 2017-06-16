@@ -35,29 +35,47 @@ public:
         BitsStatic = (1 << 12),
         BitsAnimated = (1 << 13),
 
-        BadgeStaff = (1 << 14),
-        BadgeAdmin = (1 << 15),
-        BadgeGlobalMod = (1 << 16),
-        BadgeModerator = (1 << 17),
-        BadgeTurbo = (1 << 18),
-        BadgeBroadcaster = (1 << 19),
-        BadgePremium = (1 << 20),
-        BadgeChatterino = (1 << 21),
-        BadgeCheer = (1 << 22),
-        BadgeVerified = (1 << 23),
-        BadgeMiscellaneous = (1 << 24),
-        Badges = BadgeStaff | BadgeAdmin | BadgeGlobalMod | BadgeModerator | BadgeTurbo |
-                 BadgeBroadcaster | BadgePremium | BadgeChatterino | BadgeCheer | BadgeVerified |
-                 BadgeMiscellaneous,
+        // Slot 1: Twitch
+        // - Staff badge
+        // - Admin badge
+        // - Global Moderator badge
+        BadgeGlobalAuthority = (1 << 14),
 
-        Username = (1 << 25),
-        BitsAmount = (1 << 26),
+        // Slot 2: Twitch
+        // - Moderator badge
+        // - Broadcaster badge
+        BadgeChannelAuthority = (1 << 15),
 
-        ButtonBan = (1 << 27),
-        ButtonTimeout = (1 << 28),
+        // Slot 3: Twitch
+        // - Subscription badges
+        BadgeSubscription = (1 << 16),
 
-        EmojiImage = (1 << 29),
-        EmojiText = (1 << 30),
+        // Slot 4: Twitch
+        // - Turbo badge
+        // - Prime badge
+        // - Bit badges
+        // - Game badges
+        BadgeVanity = (1 << 17),
+
+        // Slot 5: Chatterino
+        // - Chatterino developer badge
+        // - Chatterino donator badge
+        // - Chatterino top donator badge
+        BadgeChatterino = (1 << 18),
+
+        // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke) custom badge?
+
+        Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription | BadgeVanity |
+                 BadgeChatterino,
+
+        Username = (1 << 19),
+        BitsAmount = (1 << 20),
+
+        ButtonBan = (1 << 21),
+        ButtonTimeout = (1 << 22),
+
+        EmojiImage = (1 << 23),
+        EmojiText = (1 << 34),
 
         Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
                   BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |
