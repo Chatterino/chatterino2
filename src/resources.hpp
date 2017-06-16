@@ -36,7 +36,8 @@ public:
     struct BadgeVersion {
         BadgeVersion() = delete;
 
-        explicit BadgeVersion(QJsonObject &&root);
+        explicit BadgeVersion(QJsonObject &&root, EmoteManager &emoteManager,
+                              WindowManager &windowManager);
 
         messages::LazyLoadedImage *badgeImage1x;
         messages::LazyLoadedImage *badgeImage2x;
@@ -44,7 +45,7 @@ public:
         std::string description;
         std::string title;
         std::string clickAction;
-        std::string clickUrl;
+        std::string clickURL;
     };
 
     struct BadgeSet {
@@ -53,7 +54,6 @@ public:
 
     std::map<std::string, BadgeSet> badgeSets;
 
-    bool bitBadgesLoaded = false;
     bool dynamicBadgesLoaded = false;
 
     messages::LazyLoadedImage *buttonBan;

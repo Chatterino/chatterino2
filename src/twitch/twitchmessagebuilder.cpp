@@ -63,7 +63,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     const auto &channelResources = resources.channels[roomID];
 
     if (iterator != tags.end()) {
-        auto badges = iterator.value().toString().split(',');
+        QStringList badges = iterator.value().toString().split(',');
 
         b.appendTwitchBadges(badges, resources, emoteManager, channelResources);
     }
@@ -358,7 +358,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
         }
 
         if (badge.startsWith("bits/")) {
-            if (!resources.bitBadgesLoaded) {
+            if (!resources.dynamicBadgesLoaded) {
                 // Do nothing
                 continue;
             }
@@ -366,8 +366,26 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             QString cheerAmountQS = badge.mid(5);
             std::string cheerAmountString = cheerAmountQS.toStdString();
 
-            appendWord(Word(resources.cheerBadges[cheerAmountString], Word::BadgeCheer, QString(),
-                            QString("Twitch Cheer" + cheerAmountQS)));
+            try {
+                auto &badgeSet = resources.badgeSets.at("bits");
+
+                try {
+                    auto &badgeVersion = badgeSet.versions.at(cheerAmountString);
+
+                    appendWord(
+                        Word(badgeVersion.badgeImage1x, Word::BadgeCheer, QString(),
+                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+                } catch (const std::exception &e) {
+                    printf("Exception caught: %s\n", e.what());
+                    printf("When trying to fetch the badge version: %s\n",
+                           cheerAmountString.c_str());
+                    // XXX: Version not found
+                }
+            } catch (const std::exception &e) {
+                printf("Exception caught: %s\n", e.what());
+                // XXX
+            }
+
         } else if (badge == "staff/1") {
             appendWord(
                 Word(resources.badgeStaff, Word::BadgeStaff, QString(), QString("Twitch Staff")));

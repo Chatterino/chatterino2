@@ -38,31 +38,41 @@ Resources::Resources(EmoteManager &emoteManager, WindowManager &windowManager)
 {
     QString badgesUrl("https://badges.twitch.tv/v1/badges/global/display?language=en");
 
-    util::urlJsonFetch(badgesUrl, [this](QJsonObject &root) {
+    util::urlJsonFetch(badgesUrl, [this, &emoteManager, &windowManager](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
         for (auto it = std::begin(sets); it != std::end(sets); ++it) {
-            printf("%s\n", qPrintable(it.key()));
-
             auto &badgeSet = this->badgeSets[it.key().toStdString()];
 
             std::map<std::string, BadgeVersion> &versionsMap = badgeSet.versions;
 
-            QJsonObject versions = sets.value("versions").toObject();
+            QJsonObject versions = it.value().value("versions").toObject();
 
             for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
                  ++versionIt) {
-            /*
                 std::string kkey = versionIt.key().toStdString();
                 QJsonObject versionObj = versionIt.value().toObject();
-                versionsMap.emplace(std::make_pair(kkey, versionObj));
-                */
+                BadgeVersion v(std::move(versionObj), emoteManager, windowManager);
+                versionsMap.emplace(kkey, v);
             }
         }
+
+        this->dynamicBadgesLoaded = true;
     });
 }
 
-Resources::BadgeVersion::BadgeVersion(QJsonObject &&root)
+Resources::BadgeVersion::BadgeVersion(QJsonObject &&root, EmoteManager &emoteManager,
+                                      WindowManager &windowManager)
+    : badgeImage1x(new messages::LazyLoadedImage(emoteManager, windowManager,
+                                                 root.value("image_url_1x").toString()))
+    , badgeImage2x(new messages::LazyLoadedImage(emoteManager, windowManager,
+                                                 root.value("image_url_2x").toString()))
+    , badgeImage4x(new messages::LazyLoadedImage(emoteManager, windowManager,
+                                                 root.value("image_url_4x").toString()))
+    , description(root.value("description").toString().toStdString())
+    , title(root.value("title").toString().toStdString())
+    , clickAction(root.value("clickAction").toString().toStdString())
+    , clickURL(root.value("clickURL").toString().toStdString())
 {
 }
 
