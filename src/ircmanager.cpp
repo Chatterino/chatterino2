@@ -207,6 +207,31 @@ void IrcManager::sendMessage(const QString &channelName, const QString &message)
     }
 
     this->connectionMutex.unlock();
+
+    // DEBUGGING
+#if 0
+    Communi::IrcPrivateMessage msg(this->readConnection.get());
+
+    QStringList params{"#pajlada", message};
+
+    qDebug() << params;
+
+    /*
+    if (message == "COMIC SANS LOL") {
+        FontManager::getInstance().currentFontFamily = "Comic Sans MS";
+    } else if (message == "ARIAL LOL") {
+        FontManager::getInstance().currentFontFamily = "Arial";
+    } else if (message == "WINGDINGS LOL") {
+        FontManager::getInstance().currentFontFamily = "Wingdings";
+    }
+    */
+
+    msg.setParameters(params);
+
+    msg.setPrefix("pajlada!pajlada@pajlada");
+
+    this->privateMessageReceived(&msg);
+#endif
 }
 
 void IrcManager::joinChannel(const QString &channelName)
