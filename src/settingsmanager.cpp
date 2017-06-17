@@ -45,10 +45,12 @@ SettingsManager::SettingsManager()
     , hideUserButton(_settingsItems, "hideUserButton", false)
     , useCustomWindowFrame(_settingsItems, "useCustomWindowFrame", true)
 {
-    this->showTimestamps.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
-    this->showTimestampSeconds.valueChanged.connect(
+    this->showTimestamps.getValueChangedSignal().connect(
         [this](const auto &) { this->updateWordTypeMask(); });
-    this->showBadges.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
+    this->showTimestampSeconds.getValueChangedSignal().connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
+    this->showBadges.getValueChangedSignal().connect(
+        [this](const auto &) { this->updateWordTypeMask(); });
     this->enableBttvEmotes.valueChanged.connect(
         [this](const auto &) { this->updateWordTypeMask(); });
     this->enableEmojis.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });

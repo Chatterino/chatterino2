@@ -384,7 +384,6 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                          << "bits"
                          << ". Exception: " << e.what();
             }
-
         } else if (badge == "staff/1") {
             appendWord(Word(resources.badgeStaff, Word::BadgeGlobalAuthority, QString(),
                             QString("Twitch Staff")));
