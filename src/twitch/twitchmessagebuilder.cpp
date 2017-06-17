@@ -399,7 +399,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             appendWord(Word(resources.badgeModerator, Word::BadgeChannelAuthority, QString(),
                             QString("Channel Moderator")));  // custom badge
         } else if (badge == "turbo/1") {
-            appendWord(Word(resources.badgeStaff, Word::BadgeVanity, QString(),
+            appendWord(Word(resources.badgeTurbo, Word::BadgeVanity, QString(),
                             QString("Turbo Subscriber")));
         } else if (badge == "broadcaster/1") {
             appendWord(Word(resources.badgeBroadcaster, Word::BadgeChannelAuthority, QString(),
