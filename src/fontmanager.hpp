@@ -2,52 +2,126 @@
 
 #include <QFont>
 #include <QFontMetrics>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 
 class FontManager
 {
 public:
-    enum Type : char { Medium, MediumBold, MediumItalic, Small, Large, VeryLarge };
+    enum Type : uint8_t {
+        Small,
+        Medium,
+        MediumBold,
+        MediumItalic,
+        Large,
+        VeryLarge,
+    };
 
+    // FontManager is initialized only once, on first use
     static FontManager &getInstance()
     {
+        static FontManager instance;
+
         return instance;
     }
 
     QFont &getFont(Type type);
     QFontMetrics &getFontMetrics(Type type);
 
-    int getGeneration()
+    int getGeneration() const
     {
-        return _generation;
+        return this->generation;
     }
 
     void incGeneration()
     {
-        _generation++;
+        this->generation++;
     }
 
-private:
-    static FontManager instance;
+    pajlada::Settings::Setting<std::string> currentFontFamily;
+    pajlada::Settings::Setting<int> currentFontSize;
 
+private:
     FontManager();
 
-    QFont *_medium;
-    QFont *_mediumBold;
-    QFont *_mediumItalic;
-    QFont *_small;
-    QFont *_large;
-    QFont *_veryLarge;
+    struct FontData {
+        FontData(QFont &&_font)
+            : font(_font)
+            , metrics(this->font)
+        {
+        }
 
-    QFontMetrics *_metricsMedium;
-    QFontMetrics *_metricsMediumBold;
-    QFontMetrics *_metricsMediumItalic;
-    QFontMetrics *_metricsSmall;
-    QFontMetrics *_metricsLarge;
-    QFontMetrics *_metricsVeryLarge;
+        QFont font;
+        QFontMetrics metrics;
+    };
 
-    int _generation;
+    struct Font {
+        Font() = delete;
+
+        explicit Font(const char *fontFamilyName, int mediumSize)
+            : small(QFont(fontFamilyName, mediumSize - 4))
+            , medium(QFont(fontFamilyName, mediumSize))
+            , mediumBold(QFont(fontFamilyName, mediumSize, 50))
+            , mediumItalic(QFont(fontFamilyName, mediumSize, -1, true))
+            , large(QFont(fontFamilyName, mediumSize))
+            , veryLarge(QFont(fontFamilyName, mediumSize))
+        {
+        }
+
+        void setFamily(const char *newFamily)
+        {
+            this->small.font.setFamily(newFamily);
+            this->medium.font.setFamily(newFamily);
+            this->mediumBold.font.setFamily(newFamily);
+            this->mediumItalic.font.setFamily(newFamily);
+            this->large.font.setFamily(newFamily);
+            this->veryLarge.font.setFamily(newFamily);
+
+            this->updateMetrics();
+        }
+
+        void setSize(int newMediumSize)
+        {
+            this->small.font.setPointSize(newMediumSize - 4);
+            this->medium.font.setPointSize(newMediumSize);
+            this->mediumBold.font.setPointSize(newMediumSize);
+            this->mediumItalic.font.setPointSize(newMediumSize);
+            this->large.font.setPointSize(newMediumSize + 2);
+            this->veryLarge.font.setPointSize(newMediumSize + 4);
+
+            this->updateMetrics();
+        }
+
+        void updateMetrics()
+        {
+            this->small.metrics = QFontMetrics(this->small.font);
+            this->medium.metrics = QFontMetrics(this->medium.font);
+            this->mediumBold.metrics = QFontMetrics(this->mediumBold.font);
+            this->mediumItalic.metrics = QFontMetrics(this->mediumItalic.font);
+            this->large.metrics = QFontMetrics(this->large.font);
+            this->veryLarge.metrics = QFontMetrics(this->veryLarge.font);
+        }
+
+        FontData &getFontData(Type type);
+
+        QFont &getFont(Type type);
+        QFontMetrics &getFontMetrics(Type type);
+
+        FontData small;
+        FontData medium;
+        FontData mediumBold;
+        FontData mediumItalic;
+        FontData large;
+        FontData veryLarge;
+    };
+
+    // Future plans:
+    // Could have multiple fonts in here, such as "Menu font", "Application font", "Chat font"
+
+    Font currentFont;
+
+    int generation = 0;
 };
 
 }  // namespace chatterino

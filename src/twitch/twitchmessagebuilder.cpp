@@ -95,7 +95,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
 
     iterator = tags.find("display-name");
     if (iterator == tags.end()) {
-        displayName = ircMessage->account();
+        displayName = b.userName;
     } else {
         displayName = iterator.value().toString();
     }

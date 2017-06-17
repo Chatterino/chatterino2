@@ -1,63 +1,61 @@
 #include "fontmanager.hpp"
 
-#define DEFAULT_FONT "Arial"
+#include <QDebug>
 
 namespace chatterino {
 
-FontManager FontManager::instance;
-
 FontManager::FontManager()
-    : _generation(0)
+    : currentFontFamily("/appearance/currentFontFamily", "Arial")
+    , currentFontSize("/appearance/currentFontSize", 14)
+    , currentFont(this->currentFontFamily.getValue().c_str(), currentFontSize.getValue())
 {
-    _medium = new QFont(DEFAULT_FONT, 14);
-    _mediumBold = new QFont(DEFAULT_FONT, 14);
-    _mediumItalic = new QFont(DEFAULT_FONT, 14);
-    _small = new QFont(DEFAULT_FONT, 10);
-    _large = new QFont(DEFAULT_FONT, 16);
-    _veryLarge = new QFont(DEFAULT_FONT, 18);
-
-    _metricsMedium = new QFontMetrics(*_medium);
-    _metricsMediumBold = new QFontMetrics(*_mediumBold);
-    _metricsMediumItalic = new QFontMetrics(*_mediumItalic);
-    _metricsSmall = new QFontMetrics(*_small);
-    _metricsLarge = new QFontMetrics(*_large);
-    _metricsVeryLarge = new QFontMetrics(*_veryLarge);
+    this->currentFontFamily.valueChanged.connect([this](const std::string &newValue) {
+        this->currentFont.setFamily(newValue.c_str());  //
+    });
+    this->currentFontSize.valueChanged.connect([this](const int &newValue) {
+        this->currentFont.setSize(newValue);  //
+    });
 }
 
 QFont &FontManager::getFont(Type type)
 {
-    if (type == Medium)
-        return *_medium;
-    if (type == MediumBold)
-        return *_mediumBold;
-    if (type == MediumItalic)
-        return *_mediumItalic;
-    if (type == Small)
-        return *_small;
-    if (type == Large)
-        return *_large;
-    if (type == VeryLarge)
-        return *_veryLarge;
-
-    return *_medium;
+    return this->currentFont.getFont(type);
 }
 
 QFontMetrics &FontManager::getFontMetrics(Type type)
 {
-    if (type == Medium)
-        return *_metricsMedium;
-    if (type == MediumBold)
-        return *_metricsMediumBold;
-    if (type == MediumItalic)
-        return *_metricsMediumItalic;
-    if (type == Small)
-        return *_metricsSmall;
-    if (type == Large)
-        return *_metricsLarge;
-    if (type == VeryLarge)
-        return *_metricsVeryLarge;
+    return this->currentFont.getFontMetrics(type);
+}
 
-    return *_metricsMedium;
+FontManager::FontData &FontManager::Font::getFontData(Type type)
+{
+    switch (type) {
+        case Small:
+            return this->small;
+        case Medium:
+            return this->medium;
+        case MediumBold:
+            return this->mediumBold;
+        case MediumItalic:
+            return this->mediumItalic;
+        case Large:
+            return this->large;
+        case VeryLarge:
+            return this->veryLarge;
+        default:
+            qDebug() << "Unknown font type:" << type << ", defaulting to medium";
+            return this->medium;
+    }
+}
+
+QFont &FontManager::Font::getFont(Type type)
+{
+    return this->getFontData(type).font;
+}
+
+QFontMetrics &FontManager::Font::getFontMetrics(Type type)
+{
+    return this->getFontData(type).metrics;
 }
 
 }  // namespace chatterino

@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QDebug>
 #include <QFile>
+#include <QFontDialog>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -108,7 +109,22 @@ void SettingsDialog::addTabs()
         auto form = new QFormLayout();
         auto combo = new QComboBox();
         auto slider = new QSlider(Qt::Horizontal);
+
         auto font = new QPushButton("select");
+        font->connect(font, &QPushButton::clicked, []() {
+            auto fontManager = FontManager::getInstance();
+            QFontDialog dialog(fontManager.getFont(FontManager::Medium));
+
+            dialog.connect(&dialog, &QFontDialog::fontSelected, [&dialog](const QFont &font) {
+                auto fontManager = FontManager::getInstance();
+                fontManager.currentFontFamily = font.family().toStdString();
+                fontManager.currentFontSize = font.pointSize();
+            });
+
+            dialog.show();
+            dialog.exec();
+        });
+
         auto compactTabs = createCheckbox("Hide tab X", settings.hideTabX);
         auto hidePreferencesButton = createCheckbox("Hide preferences button (ctrl+p to show)",
                                                     settings.hidePreferencesButton);

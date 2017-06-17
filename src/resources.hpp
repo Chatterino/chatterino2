@@ -12,6 +12,9 @@ class WindowManager;
 
 class Resources
 {
+    EmoteManager &emoteManager;
+    WindowManager &windowManager;
+
 public:
     explicit Resources(EmoteManager &emoteManager, WindowManager &windowManager);
 
@@ -60,13 +63,9 @@ public:
     messages::LazyLoadedImage *buttonTimeout;
 
     struct Channel {
-        std::string id;
+        std::map<std::string, BadgeSet> badgeSets;
 
-        std::mutex globalMapMutex;
-
-        void loadData();
-
-        // std::atomic<bool> loaded = false;
+        bool loaded = false;
     };
 
     //       channelId
