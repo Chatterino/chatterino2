@@ -1,0 +1,4 @@
+#ifndef BASEWIDGET_HPP
+#define BASEWIDGET_HPP
+
+#endif // BASEWIDGET_HPP

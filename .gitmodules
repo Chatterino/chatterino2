@@ -7,3 +7,6 @@
 [submodule "lib/humanize"]
 	path = lib/humanize
 	url = https://github.com/pajlada/humanize.git
+[submodule "lib/signals"]
+	path = lib/signals
+	url = https://github.com/pajlada/signals.git

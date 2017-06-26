@@ -92,7 +92,8 @@ SOURCES += \
     src/accountmanager.cpp \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \
-    src/widgets/accountpopup.cpp
+    src/widgets/accountpopup.cpp \
+    src/messagefactory.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -150,7 +151,9 @@ HEADERS  += \
     src/twitch/twitchuser.hpp \
     src/ircaccount.hpp \
     src/widgets/accountpopup.hpp \
-    src/util/distancebetweenpoints.hpp
+    src/util/distancebetweenpoints.hpp \
+    src/messagefactory.hpp \
+    src/widgets/basewidget.hpp
 
 PRECOMPILED_HEADER =
 
@@ -197,4 +200,5 @@ werr {
 # External dependencies
 include(dependencies/rapidjson.pri)
 include(dependencies/settings.pri)
+include(dependencies/signals.pri)
 include(dependencies/humanize.pri)
