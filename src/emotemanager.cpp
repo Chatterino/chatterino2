@@ -29,6 +29,7 @@ EmoteManager::EmoteManager(WindowManager &_windowManager, Resources &_resources)
 
 void EmoteManager::loadGlobalEmotes()
 {
+    this->loadEmojis();
     this->loadBTTVEmotes();
     this->loadFFZEmotes();
 }
@@ -39,7 +40,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
-    util::urlJsonFetch(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
+    util::urlFetchJSON(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
         channelEmoteMap.clear();
 
         auto emotesNode = rootNode.value("emotes").toArray();
@@ -77,7 +78,7 @@ void EmoteManager::reloadFFZChannelEmotes(
 
     QString url("http://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::urlJsonFetch(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
+    util::urlFetchJSON(url, [this, &channelEmoteMap](QJsonObject &rootNode) {
         channelEmoteMap.clear();
 
         auto setsNode = rootNode.value("sets").toObject();
@@ -146,6 +147,116 @@ ConcurrentMap<long, messages::LazyLoadedImage *> &EmoteManager::getTwitchEmoteFr
 ConcurrentMap<QString, messages::LazyLoadedImage *> &EmoteManager::getMiscImageFromCache()
 {
     return _miscImageFromCache;
+}
+
+void EmoteManager::loadEmojis()
+{
+    QFile file(":/emojidata.txt");
+    file.open(QFile::ReadOnly);
+    QTextStream in(&file);
+
+    uint unicodeBytes[4];
+
+    while (!in.atEnd()) {
+        // Line example: sunglasses 1f60e
+        QString line = in.readLine();
+
+        if (line.at(0) == '#') {
+            // Ignore lines starting with # (comments)
+            continue;
+        }
+
+        QStringList parts = line.split(' ');
+        if (parts.length() < 2) {
+            continue;
+        }
+
+        QString shortCode = parts[0];
+        QString code = parts[1];
+
+        QStringList unicodeCharacters = code.split('-');
+        if (unicodeCharacters.length() < 1) {
+            continue;
+        }
+
+        int numUnicodeBytes = 0;
+
+        for (const QString &unicodeCharacter : unicodeCharacters) {
+            unicodeBytes[numUnicodeBytes++] = QString(unicodeCharacter).toUInt(nullptr, 16);
+        }
+
+        EmojiData emojiData{
+            QString::fromUcs4(unicodeBytes, numUnicodeBytes),  //
+            code,                                              //
+        };
+
+        shortCodeToEmoji.insert(shortCode, emojiData);
+        emojiToShortCode.insert(emojiData.value, shortCode);
+    }
+
+    /*
+    for (auto const &emoji : shortCodeToEmoji.toStdMap()) {
+        auto iter = firstEmojiChars.find(emoji.first.at(0));
+
+        if (iter != firstEmojiChars.end()) {
+            iter.value().insert(emoji.second.value, emoji.second.value);
+            continue;
+        }
+
+        firstEmojiChars.insert(emoji.first.at(0),
+                               QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
+    }
+    */
+}
+
+void EmoteManager::parseEmojis(
+    std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector, const QString &text)
+{
+    // TODO(pajlada): Add this method to EmoteManager instead
+    long lastSlice = 0;
+
+    for (auto i = 0; i < text.length() - 1; i++) {
+        if (!text.at(i).isLowSurrogate()) {
+            auto iter = firstEmojiChars.find(text.at(i));
+
+            if (iter != firstEmojiChars.end()) {
+                for (auto j = std::min(8, text.length() - i); j > 0; j--) {
+                    QString emojiString = text.mid(i, 2);
+                    auto emojiIter = iter.value().find(emojiString);
+
+                    if (emojiIter != iter.value().end()) {
+                        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
+                                      "emojione/2.2.6/assets/png/" +
+                                      emojiIter.value() + ".png";
+
+                        if (i - lastSlice != 0) {
+                            vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+                                nullptr, text.mid(lastSlice, i - lastSlice)));
+                        }
+
+                        vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+                            emojis.getOrAdd(url,
+                                            [this, &url] {
+                                                return new LazyLoadedImage(
+                                                    *this, this->windowManager, url, 0.35);  //
+                                            }),
+                            QString()));
+
+                        i += j - 1;
+
+                        lastSlice = i + 1;
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (lastSlice < text.length()) {
+        vector.push_back(
+            std::tuple<messages::LazyLoadedImage *, QString>(nullptr, text.mid(lastSlice)));
+    }
 }
 
 void EmoteManager::loadBTTVEmotes()

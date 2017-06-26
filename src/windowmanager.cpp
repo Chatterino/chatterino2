@@ -1,6 +1,7 @@
 #include "windowmanager.hpp"
 #include "appdatapath.hpp"
 #include "channelmanager.hpp"
+#include "colorscheme.hpp"
 
 #include <QDebug>
 #include <QStandardPaths>
@@ -9,8 +10,9 @@
 
 namespace chatterino {
 
-WindowManager::WindowManager(ChannelManager &_channelManager)
+WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme)
     : channelManager(_channelManager)
+    , colorScheme(_colorScheme)
 {
 }
 
@@ -54,7 +56,7 @@ widgets::MainWindow &WindowManager::getMainWindow()
     std::lock_guard<std::mutex> lock(this->windowMutex);
 
     if (this->mainWindow == nullptr) {
-        this->mainWindow = new widgets::MainWindow(this->channelManager);
+        this->mainWindow = new widgets::MainWindow(this->channelManager, this->colorScheme);
     }
 
     return *this->mainWindow;

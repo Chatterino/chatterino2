@@ -10,28 +10,29 @@ template <typename T>
 class LimitedQueueSnapshot
 {
 public:
-    LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> vector, int offset, int size)
-        : _vector(vector)
-        , _offset(offset)
-        , _length(size)
+    LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> _vector, std::size_t _offset,
+                         std::size_t _size)
+        : vector(_vector)
+        , offset(_offset)
+        , length(_size)
     {
     }
 
-    int getSize()
+    std::size_t getLength()
     {
-        return _length;
+        return length;
     }
 
-    T const &operator[](int index) const
+    T const &operator[](std::size_t index) const
     {
-        return _vector->at(index + _offset);
+        return vector->at(index + offset);
     }
 
 private:
-    std::shared_ptr<std::vector<T>> _vector;
+    std::shared_ptr<std::vector<T>> vector;
 
-    int _offset;
-    int _length;
+    std::size_t offset;
+    std::size_t length;
 };
 
 }  // namespace messages

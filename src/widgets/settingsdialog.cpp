@@ -108,10 +108,31 @@ void SettingsDialog::addTabs()
 
         auto form = new QFormLayout();
         auto combo = new QComboBox();
-        auto slider = new QSlider(Qt::Horizontal);
 
-        auto font = new QPushButton("select");
-        font->connect(font, &QPushButton::clicked, []() {
+        auto fontLayout = new QHBoxLayout();
+        auto fontFamilyLabel = new QLabel("Current font family");
+        auto fontSizeLabel = new QLabel("Current font size");
+        auto fontButton = new QPushButton("Select");
+
+        fontLayout->addWidget(fontButton);
+        fontLayout->addWidget(fontFamilyLabel);
+        fontLayout->addWidget(fontSizeLabel);
+
+        {
+            auto fontManager = FontManager::getInstance();
+
+            fontManager.currentFontFamily.getValueChangedSignal().connect(
+                [fontFamilyLabel](const std::string &newValue) {
+                    fontFamilyLabel->setText(QString::fromStdString(newValue));  //
+                });
+
+            fontManager.currentFontSize.getValueChangedSignal().connect(
+                [fontSizeLabel](const int &newValue) {
+                    fontSizeLabel->setText(QString(QString::number(newValue)));  //
+                });
+        }
+
+        fontButton->connect(fontButton, &QPushButton::clicked, []() {
             auto fontManager = FontManager::getInstance();
             QFontDialog dialog(fontManager.getFont(FontManager::Medium));
 
@@ -131,48 +152,61 @@ void SettingsDialog::addTabs()
         auto hideUserButton = createCheckbox("Hide user button", settings.hideUserButton);
 
         form->addRow("Theme:", combo);
-        form->addRow("Theme color:", slider);
-        form->addRow("Font:", font);
-        form->addRow("Tabbar:", compactTabs);
+
+        {
+            auto hbox = new QHBoxLayout();
+
+            auto slider = new QSlider(Qt::Horizontal);
+            // Theme hue
+            slider->setMinimum(0);
+            slider->setMaximum(1000);
+
+            slider->setValue(std::min(std::max(settings.themeHue.getValue(), 0.0), 1.0) * 1000);
+
+            hbox->addWidget(slider);
+
+            auto button = new QPushButton();
+            button->setFlat(true);
+
+            hbox->addWidget(button);
+
+            form->addRow("Theme color:", hbox);
+
+            QObject::connect(slider, &QSlider::valueChanged, this, [&settings, button](int value) {
+                settings.themeHue.setValue(value / 1000.0);
+
+                QPalette pal = button->palette();
+                QColor color;
+                color.setHsvF(settings.themeHue.getValue(), 1.0, 1.0, 1.0);
+                pal.setColor(QPalette::Button, color);
+                button->setAutoFillBackground(true);
+                button->setPalette(pal);
+                button->update();
+
+                // TODO(pajlada): re-implement
+                // this->windowManager.updateAll();
+            });
+        }
+
+        form->addRow("Font:", fontLayout);
+        form->addRow("Tab bar:", compactTabs);
         form->addRow("", hidePreferencesButton);
         form->addRow("", hideUserButton);
 
-        // theme
+        // Theme name
         combo->addItem("White");
         combo->addItem("Light");
         combo->addItem("Dark");
         combo->addItem("Black");
 
-        QString theme = settings.theme.get();
-        theme = theme.toLower();
+        auto xD = QString::fromStdString(settings.themeName);
 
-        if (theme == "light") {
-            combo->setCurrentIndex(0);
-        } else if (theme == "white") {
-            combo->setCurrentIndex(1);
-        } else if (theme == "black") {
-            combo->setCurrentIndex(3);
-        } else {
-            combo->setCurrentIndex(2);
-        }
+        combo->setCurrentText(xD);
 
         QObject::connect(combo, &QComboBox::currentTextChanged, this,
-                         [&settings](const QString &value) { settings.theme.set(value); });
-
-        // theme hue
-        slider->setMinimum(0);
-        slider->setMaximum(1000);
-
-        float hue = settings.themeHue.get();
-
-        slider->setValue(std::min(std::max(hue, (float)0.0), (float)1.0) * 1000);
-
-        QObject::connect(slider, &QSlider::valueChanged, this, [&settings](int value) {
-            settings.themeHue.set(value / 1000.0);
-
-            // TODO(pajlada): re-implement
-            // this->windowManager.updateAll();
-        });
+                         [&settings](const QString &value) {
+                             settings.themeName.setValue(value.toStdString());  //
+                         });
 
         group->setLayout(form);
 

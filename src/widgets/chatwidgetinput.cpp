@@ -12,8 +12,9 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
-    : QWidget(_chatWidget)
+    : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
+    , emotesLabel(this)
 {
     this->setMaximumHeight(150);
 
@@ -93,11 +94,11 @@ void ChatWidgetInput::refreshTheme()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
+    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
 
     this->textLengthLabel.setPalette(palette);
 
-    this->textInput.setStyleSheet(ColorScheme::getInstance().InputStyleSheet);
+    this->textInput.setStyleSheet(this->colorScheme.InputStyleSheet);
 }
 
 void ChatWidgetInput::editTextChanged()
@@ -118,8 +119,8 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), ColorScheme::getInstance().ChatInputBackground);
-    painter.setPen(ColorScheme::getInstance().ChatInputBorder);
+    painter.fillRect(this->rect(), this->colorScheme.ChatInputBackground);
+    painter.setPen(this->colorScheme.ChatInputBorder);
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 

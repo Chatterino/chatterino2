@@ -11,7 +11,12 @@ class WindowManager;
 class ColorScheme
 {
 public:
-    bool IsLightTheme;
+    explicit ColorScheme(WindowManager &windowManager);
+
+    inline bool isLightTheme() const
+    {
+        return this->lightTheme;
+    }
 
     QString InputStyleSheet;
 
@@ -62,13 +67,6 @@ public:
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];
 
-    static ColorScheme &getInstance()
-    {
-        static ColorScheme instance;
-
-        return instance;
-    }
-
     void init(WindowManager &windowManager);
     void normalizeColor(QColor &color);
 
@@ -77,18 +75,15 @@ public:
     boost::signals2::signal<void()> updated;
 
 private:
-    ColorScheme()
-        : updated()
-    {
-    }
+    void setColors(double hue, double multiplier);
 
-    void setColors(float hue, float multiplyer);
+    double middleLookupTable[360] = {};
+    double minLookupTable[360] = {};
 
-    qreal middleLookupTable[360] = {};
-    qreal minLookupTable[360] = {};
+    void fillLookupTableValues(double (&array)[360], double from, double to, double fromValue,
+                               double toValue);
 
-    void fillLookupTableValues(qreal (&array)[360], qreal from, qreal to, qreal fromValue,
-                               qreal toValue);
+    bool lightTheme;
 };
 
 }  // namespace chatterino

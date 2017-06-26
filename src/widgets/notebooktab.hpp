@@ -7,6 +7,9 @@
 #include <boost/signals2/connection.hpp>
 
 namespace chatterino {
+
+class ColorScheme;
+
 namespace widgets {
 
 class Notebook;
@@ -21,6 +24,8 @@ public:
 
     explicit NotebookTab(Notebook *_notebook);
     ~NotebookTab();
+
+    ColorScheme &colorScheme;
 
     void calcSize();
 
@@ -55,20 +60,20 @@ private:
     boost::signals2::connection _hideXConnection;
 
     QPropertyAnimation _posAnimation;
-    bool _posAnimated;
+    bool _posAnimated = false;
     QPoint _posAnimationDesired;
 
     Notebook *_notebook;
 
-    QString _title;
+    QString _title = "<no title>";
 
-    bool _selected;
-    bool _mouseOver;
-    bool _mouseDown;
-    bool _mouseOverX;
-    bool _mouseDownX;
+    bool _selected = false;
+    bool _mouseOver = false;
+    bool _mouseDown = false;
+    bool _mouseOverX = false;
+    bool _mouseDownX = false;
 
-    HighlightStyle _highlightStyle;
+    HighlightStyle _highlightStyle = HighlightStyle::HighlightNone;
 
     QRect getXRect()
     {

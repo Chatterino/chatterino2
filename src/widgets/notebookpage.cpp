@@ -1,6 +1,7 @@
 #include "widgets/notebookpage.hpp"
 #include "colorscheme.hpp"
 #include "widgets/chatwidget.hpp"
+#include "widgets/notebook.hpp"
 #include "widgets/notebooktab.hpp"
 
 #include <QDebug>
@@ -19,8 +20,8 @@ bool NotebookPage::isDraggingSplit = false;
 ChatWidget *NotebookPage::draggingSplit = nullptr;
 std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 
-NotebookPage::NotebookPage(ChannelManager &_channelManager, QWidget *parent, NotebookTab *_tab)
-    : QWidget(parent)
+NotebookPage::NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab)
+    : BaseWidget(parent->colorScheme, parent)
     , channelManager(_channelManager)
     , tab(_tab)
     , _parentbox(this)
@@ -52,7 +53,7 @@ NotebookTab *NotebookPage::getTab() const
 
 void NotebookPage::addChat(bool openChannelNameDialog)
 {
-    ChatWidget *w = new ChatWidget(this->channelManager);
+    ChatWidget *w = this->createChatWidget();
 
     if (openChannelNameDialog) {
         w->showChangeChannelPopup();
@@ -130,9 +131,9 @@ void NotebookPage::addToLayout(ChatWidget *widget,
 void NotebookPage::enterEvent(QEvent *)
 {
     if (_hbox.count() == 0) {
-        setCursor(QCursor(Qt::PointingHandCursor));
+        this->setCursor(QCursor(Qt::PointingHandCursor));
     } else {
-        setCursor(QCursor(Qt::ArrowCursor));
+        this->setCursor(QCursor(Qt::ArrowCursor));
     }
 }
 
@@ -144,9 +145,9 @@ void NotebookPage::mouseReleaseEvent(QMouseEvent *event)
 {
     if (_hbox.count() == 0 && event->button() == Qt::LeftButton) {
         // "Add Chat" was clicked
-        addToLayout(new ChatWidget(this->channelManager), std::pair<int, int>(-1, -1));
+        this->addToLayout(this->createChatWidget(), std::pair<int, int>(-1, -1));
 
-        setCursor(QCursor(Qt::ArrowCursor));
+        this->setCursor(QCursor(Qt::ArrowCursor));
     }
 }
 
@@ -236,16 +237,16 @@ void NotebookPage::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (_hbox.count() == 0) {
-        painter.fillRect(rect(), ColorScheme::getInstance().ChatBackground);
+        painter.fillRect(rect(), this->colorScheme.ChatBackground);
 
-        painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
+        painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);
 
-        painter.setPen(ColorScheme::getInstance().Text);
+        painter.setPen(this->colorScheme.Text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), ColorScheme::getInstance().TabSelectedBackground);
+        painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
 
-        painter.fillRect(0, 0, width(), 2, ColorScheme::getInstance().TabSelectedBackground);
+        painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);
     }
 }
 
@@ -269,6 +270,11 @@ std::pair<int, int> NotebookPage::getChatPosition(const ChatWidget *chatWidget)
     return getWidgetPositionInLayout(layout, chatWidget);
 }
 
+ChatWidget *NotebookPage::createChatWidget()
+{
+    return new ChatWidget(this->channelManager, this);
+}
+
 void NotebookPage::load(const boost::property_tree::ptree &tree)
 {
     try {
@@ -276,7 +282,7 @@ void NotebookPage::load(const boost::property_tree::ptree &tree)
         for (const auto &v : tree.get_child("columns.")) {
             int row = 0;
             for (const auto &innerV : v.second.get_child("")) {
-                auto widget = new ChatWidget(this->channelManager);
+                auto widget = this->createChatWidget();
                 widget->load(innerV.second);
                 addToLayout(widget, std::pair<int, int>(column, row));
                 ++row;

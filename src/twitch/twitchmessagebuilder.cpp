@@ -60,6 +60,8 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     // badges
     iterator = tags.find("badges");
 
+    ColorScheme &colorScheme = windowManager.colorScheme;
+
     const auto &channelResources = resources.channels[roomID];
 
     if (iterator != tags.end()) {
@@ -69,7 +71,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     }
 
     // color
-    QColor usernameColor = ColorScheme::getInstance().SystemMessageColor;
+    QColor &usernameColor = colorScheme.SystemMessageColor;
 
     iterator = tags.find("color");
     if (iterator != tags.end()) {
@@ -79,7 +81,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     // channel name
     if (args.includeChannelName) {
         QString channelName("#" + channel->getName());
-        b.appendWord(Word(channelName, Word::Misc, ColorScheme::getInstance().SystemMessageColor,
+        b.appendWord(Word(channelName, Word::Misc, colorScheme.SystemMessageColor,
                           QString(channelName), QString(),
                           Link(Link::Url, channel->getName() + "\n" + b.messageId)));
     }
@@ -157,7 +159,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
-    QColor textColor = ircMessage->isAction() ? usernameColor : ColorScheme::getInstance().Text;
+    QColor textColor = ircMessage->isAction() ? usernameColor : colorScheme.Text;
 
     const QString &originalMessage = ircMessage->content();
     b.originalMessage = originalMessage;
@@ -184,7 +186,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         // split words
         std::vector<std::tuple<LazyLoadedImage *, QString>> parsed;
 
-        Emojis::parseEmojis(parsed, split);
+        emoteManager.parseEmojis(parsed, split);
 
         for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {
             LazyLoadedImage *image = std::get<0>(tuple);
@@ -257,7 +259,11 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
                 // bttv / ffz emotes
                 LazyLoadedImage *bttvEmote;
 
-                // TODO: Implement this (ignored emotes)
+                // TODO: Implement ignored emotes
+                // Format of ignored emotes:
+                // Emote name: "forsenPuke" - if string in ignoredEmotes
+                // Will match emote regardless of source (i.e. bttv, ffz)
+                // Emote source + name: "bttv:nyanPls"
                 if (emoteManager.getBTTVEmotes().tryGet(string, bttvEmote) ||
                     channel->getBttvChannelEmotes().tryGet(string, bttvEmote) ||
                     emoteManager.getFFZEmotes().tryGet(string, bttvEmote) ||

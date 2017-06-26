@@ -75,7 +75,7 @@ public:
         ButtonTimeout = (1 << 22),
 
         EmojiImage = (1 << 23),
-        EmojiText = (1 << 34),
+        EmojiText = (1 << 24),
 
         Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
                   BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |
@@ -85,6 +85,7 @@ public:
     Word()
     {
     }
+
     explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
                   const QString &getTooltip, const Link &getLink = Link());
     explicit Word(const QString &_text, Type getType, const QColor &getColor,

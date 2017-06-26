@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
 #include "widgets/notebookbutton.hpp"
 #include "widgets/notebookpage.hpp"
 #include "widgets/notebooktab.hpp"
@@ -11,17 +12,18 @@
 namespace chatterino {
 
 class ChannelManager;
+class ColorScheme;
 
 namespace widgets {
 
-class Notebook : public QWidget
+class Notebook : public BaseWidget
 {
     Q_OBJECT
 
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    Notebook(ChannelManager &_channelManager, QWidget *parent);
+    explicit Notebook(ChannelManager &_channelManager, BaseWidget *parent);
 
     NotebookPage *addPage(bool select = false);
 
@@ -30,7 +32,7 @@ public:
 
     NotebookPage *getSelectedPage()
     {
-        return _selectedPage;
+        return selectedPage;
     }
 
     void performLayout(bool animate = true);
@@ -51,13 +53,13 @@ public slots:
 private:
     ChannelManager &channelManager;
 
-    QList<NotebookPage *> _pages;
+    QList<NotebookPage *> pages;
 
-    NotebookButton _addButton;
-    NotebookButton _settingsButton;
-    NotebookButton _userButton;
+    NotebookButton addButton;
+    NotebookButton settingsButton;
+    NotebookButton userButton;
 
-    NotebookPage *_selectedPage;
+    NotebookPage *selectedPage;
 
 public:
     void load(const boost::property_tree::ptree &tree);

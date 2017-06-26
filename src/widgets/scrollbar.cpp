@@ -1,5 +1,6 @@
 #include "widgets/scrollbar.hpp"
 #include "colorscheme.hpp"
+#include "widgets/chatwidgetview.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -10,8 +11,8 @@
 namespace chatterino {
 namespace widgets {
 
-ScrollBar::ScrollBar(QWidget *widget)
-    : QWidget(widget)
+ScrollBar::ScrollBar(ChatWidgetView *parent)
+    : BaseWidget(parent)
     , _currentValueAnimation(this, "currentValue")
     , _highlights(nullptr)
 {
@@ -197,7 +198,7 @@ void ScrollBar::printCurrentState(const QString &prefix) const
 void ScrollBar::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), ColorScheme::getInstance().ScrollbarBG);
+    painter.fillRect(rect(), this->colorScheme.ScrollbarBG);
 
     painter.fillRect(QRect(0, 0, width(), _buttonHeight), QColor(255, 0, 0));
     painter.fillRect(QRect(0, height() - _buttonHeight, width(), _buttonHeight), QColor(255, 0, 0));

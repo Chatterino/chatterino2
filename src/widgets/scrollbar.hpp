@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
 #include "widgets/scrollbarhighlight.hpp"
 
 #include <QMutex>
@@ -8,14 +9,19 @@
 #include <boost/signals2.hpp>
 
 namespace chatterino {
+
+class ColorScheme;
+
 namespace widgets {
 
-class ScrollBar : public QWidget
+class ChatWidgetView;
+
+class ScrollBar : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    ScrollBar(QWidget *parent = 0);
+    ScrollBar(ChatWidgetView *parent = 0);
     ~ScrollBar();
 
     void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);

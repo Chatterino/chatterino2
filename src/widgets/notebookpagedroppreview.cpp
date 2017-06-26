@@ -1,5 +1,4 @@
 #include "widgets/notebookpagedroppreview.hpp"
-#include "colorscheme.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -7,11 +6,9 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookPageDropPreview::NotebookPageDropPreview(QWidget *parent)
-    : QWidget(parent)
+NotebookPageDropPreview::NotebookPageDropPreview(BaseWidget *parent)
+    : BaseWidget(parent)
     , positionAnimation(this, "geometry")
-    , desiredGeometry()
-    , animate(false)
 {
     this->positionAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
     this->setHidden(true);
@@ -21,13 +18,12 @@ void NotebookPageDropPreview::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(8, 8, width() - 17, height() - 17,
-                     ColorScheme::getInstance().DropPreviewBackground);
+    painter.fillRect(8, 8, width() - 17, height() - 17, this->colorScheme.DropPreviewBackground);
 }
 
 void NotebookPageDropPreview::hideEvent(QHideEvent *)
 {
-    animate = false;
+    this->animate = false;
 }
 
 void NotebookPageDropPreview::setBounds(const QRect &rect)
@@ -36,7 +32,7 @@ void NotebookPageDropPreview::setBounds(const QRect &rect)
         return;
     }
 
-    if (animate) {
+    if (this->animate) {
         this->positionAnimation.stop();
         this->positionAnimation.setDuration(50);
         this->positionAnimation.setStartValue(this->geometry());
@@ -48,7 +44,7 @@ void NotebookPageDropPreview::setBounds(const QRect &rect)
 
     this->desiredGeometry = rect;
 
-    animate = true;
+    this->animate = true;
 }
 
 }  // namespace widgets

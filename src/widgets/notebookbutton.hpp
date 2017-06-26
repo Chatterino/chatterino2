@@ -18,7 +18,7 @@ public:
 
     int icon = 0;
 
-    NotebookButton(QWidget *parent);
+    NotebookButton(BaseWidget *parent);
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -28,9 +28,9 @@ signals:
     void clicked();
 
 private:
-    bool _mouseOver = false;
-    bool _mouseDown = false;
-    QPoint _mousePos;
+    bool mouseOver = false;
+    bool mouseDown = false;
+    QPoint mousePos;
 };
 
 }  // namespace widgets

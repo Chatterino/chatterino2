@@ -1,26 +1,27 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
+
 #include <QPropertyAnimation>
 #include <QWidget>
 
 namespace chatterino {
 namespace widgets {
 
-class NotebookPageDropPreview : public QWidget
+class NotebookPageDropPreview : public BaseWidget
 {
 public:
-    NotebookPageDropPreview(QWidget *parent);
+    NotebookPageDropPreview(BaseWidget *parent);
 
     void setBounds(const QRect &rect);
 
 protected:
-    void paintEvent(QPaintEvent *);
-
-    void hideEvent(QHideEvent *);
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void hideEvent(QHideEvent *) override;
 
     QPropertyAnimation positionAnimation;
     QRect desiredGeometry;
-    bool animate;
+    bool animate = false;
 };
 
 }  // namespace widgets

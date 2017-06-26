@@ -5,6 +5,7 @@
 #include "messages/messageref.hpp"
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
+#include "widgets/basewidget.hpp"
 #include "widgets/scrollbar.hpp"
 
 #include <QPaintEvent>
@@ -17,7 +18,7 @@ namespace widgets {
 
 class ChatWidget;
 
-class ChatWidgetView : public QWidget
+class ChatWidgetView : public BaseWidget
 {
 public:
     explicit ChatWidgetView(ChatWidget *_chatWidget);

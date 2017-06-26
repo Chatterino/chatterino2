@@ -19,12 +19,12 @@
 namespace chatterino {
 namespace widgets {
 
-MainWindow::MainWindow(ChannelManager &_channelManager, QWidget *parent)
-    : QWidget(parent)
+MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme)
+    : BaseWidget(_colorScheme, nullptr)
     , channelManager(_channelManager)
+    , colorScheme(_colorScheme)
     , notebook(this->channelManager, this)
-    , _loaded(false)
-    , _titleBar()
+    , windowGeometry("/windows/0/geometry")
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -44,10 +44,17 @@ MainWindow::MainWindow(ChannelManager &_channelManager, QWidget *parent)
     //    }
 
     QPalette palette;
-    palette.setColor(QPalette::Background, ColorScheme::getInstance().TabPanelBackground);
+    palette.setColor(QPalette::Background, this->colorScheme.TabPanelBackground);
     setPalette(palette);
 
-    resize(1280, 800);
+    if (this->windowGeometry->isFilled()) {
+        // Load geometry from settings file
+        this->setGeometry(this->windowGeometry.getValueRef());
+    } else {
+        // Set default geometry
+        // Default position is in the middle of the current monitor or the primary monitor
+        this->resize(1280, 800);
+    }
 
     // Initialize program-wide hotkeys
     {
@@ -122,7 +129,7 @@ void MainWindow::load(const boost::property_tree::ptree &tree)
 {
     this->notebook.load(tree);
 
-    _loaded = true;
+    loaded = true;
 }
 
 boost::property_tree::ptree MainWindow::save()
@@ -140,17 +147,23 @@ void MainWindow::loadDefaults()
 {
     this->notebook.loadDefaults();
 
-    _loaded = true;
+    loaded = true;
 }
 
 bool MainWindow::isLoaded() const
 {
-    return _loaded;
+    return loaded;
 }
 
 Notebook &MainWindow::getNotebook()
 {
     return this->notebook;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    // Save closing window position
+    this->windowGeometry = this->geometry();
 }
 
 }  // namespace widgets

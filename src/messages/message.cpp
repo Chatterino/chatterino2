@@ -20,12 +20,14 @@
 namespace chatterino {
 namespace messages {
 
+/*
 Message::Message(const QString &text)
     : text(text)
 {
     this->words.push_back(
         Word(text, Word::Text, ColorScheme::getInstance().SystemMessageColor, text, QString()));
 }
+*/
 
 Message::Message(const QString &text, const std::vector<Word> &words)
     : text(text)

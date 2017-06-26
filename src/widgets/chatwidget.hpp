@@ -5,6 +5,7 @@
 #include "messages/messageref.hpp"
 #include "messages/word.hpp"
 #include "messages/wordpart.hpp"
+#include "widgets/basewidget.hpp"
 #include "widgets/chatwidgetheader.hpp"
 #include "widgets/chatwidgetinput.hpp"
 #include "widgets/chatwidgetview.hpp"
@@ -19,8 +20,11 @@
 namespace chatterino {
 
 class ChannelManager;
+class ColorScheme;
 
 namespace widgets {
+
+class NotebookPage;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
 // ChatWidgetHeader
@@ -32,12 +36,12 @@ namespace widgets {
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class ChatWidget : public QWidget
+class ChatWidget : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    ChatWidget(ChannelManager &_channelManager, QWidget *parent = nullptr);
+    ChatWidget(ChannelManager &_channelManager, NotebookPage *parent);
     ~ChatWidget();
 
     std::shared_ptr<Channel> getChannel() const;

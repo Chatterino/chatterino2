@@ -40,7 +40,7 @@ Resources::Resources(EmoteManager &em, WindowManager &wm)
 {
     QString badgesUrl("https://badges.twitch.tv/v1/badges/global/display?language=en");
 
-    util::urlJsonFetch(badgesUrl, [this](QJsonObject &root) {
+    util::urlFetchJSON(badgesUrl, [this](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
@@ -86,7 +86,7 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + QString::fromStdString(roomID) +
                   "/display?language=en";
 
-    util::urlJsonFetch(url, [this](QJsonObject &root) {
+    util::urlFetchJSON(url, [this](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {

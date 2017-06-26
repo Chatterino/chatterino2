@@ -1,20 +1,8 @@
 #include "application.hpp"
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
-#include "emojis.hpp"
-#include "emotemanager.hpp"
-#include "ircmanager.hpp"
-#include "logging/loggingmanager.hpp"
-#include "resources.hpp"
-#include "settingsmanager.hpp"
-#include "widgets/mainwindow.hpp"
-#include "windowmanager.hpp"
 
 #include <QApplication>
-#include <QClipboard>
 #include <QDir>
 #include <QStandardPaths>
-#include <boost/signals2.hpp>
 #include <pajlada/settings/settingmanager.hpp>
 
 namespace {
@@ -67,10 +55,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    chatterino::logging::init();
-    chatterino::SettingsManager::getInstance().load();
-    chatterino::Emojis::loadEmojis();
-
     int ret = 0;
 
     {
@@ -82,8 +66,6 @@ int main(int argc, char *argv[])
 
         // Application will go out of scope here and deinitialize itself
     }
-
-    chatterino::SettingsManager::getInstance().save();
 
     // Save settings
     pajlada::Settings::SettingManager::save();

@@ -30,8 +30,8 @@ inline void ezShortcut(ChatWidget *w, const char *key, T t)
 
 }  // namespace
 
-ChatWidget::ChatWidget(ChannelManager &_channelManager, QWidget *parent)
-    : QWidget(parent)
+ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
+    : BaseWidget(parent)
     , channelManager(_channelManager)
     , channel(_channelManager.getEmpty())
     , vbox(this)
@@ -142,7 +142,7 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 
     auto snapshot = this->channel->getMessageSnapshot();
 
-    for (int i = 0; i < snapshot.getSize(); i++) {
+    for (int i = 0; i < snapshot.getLength(); i++) {
         SharedMessageRef deleted;
 
         auto messageRef = new MessageRef(snapshot[i]);
@@ -199,7 +199,7 @@ void ChatWidget::paintEvent(QPaintEvent *)
     // color the background of the chat
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), ColorScheme::getInstance().ChatBackground);
+    painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
 }
 
 void ChatWidget::load(const boost::property_tree::ptree &tree)
@@ -241,7 +241,8 @@ void ChatWidget::doChangeChannel()
 void ChatWidget::doPopup()
 {
     // TODO: Copy signals and stuff too
-    auto widget = new ChatWidget(this->channelManager);
+    auto widget =
+        new ChatWidget(this->channelManager, static_cast<NotebookPage *>(this->parentWidget()));
     widget->setChannelName(this->getChannelName());
     widget->show();
 }

@@ -3,43 +3,50 @@
 #include "QString"
 
 namespace chatterino {
+
+class ColorScheme;
+
 namespace widgets {
+
+class ScrollBar;
 
 class ScrollBarHighlight
 {
 public:
     enum Style { Default, Left, Right, SingleLine };
 
-    ScrollBarHighlight(float getPosition, int getColorIndex, Style getStyle = Default,
+    ScrollBarHighlight(double _position, int _colorIndex, ScrollBar *parent, Style _style = Default,
                        QString _tag = "");
 
-    Style getStyle()
-    {
-        return _style;
-    }
+    ColorScheme &colorScheme;
 
-    float getPosition()
+    double getPosition()
     {
-        return _position;
+        return this->position;
     }
 
     int getColorIndex()
     {
-        return _colorIndex;
+        return this->colorIndex;
+    }
+
+    Style getStyle()
+    {
+        return this->style;
     }
 
     QString getTag()
     {
-        return _tag;
+        return this->tag;
     }
 
     ScrollBarHighlight *next = nullptr;
 
 private:
-    Style _style;
-    float _position;
-    int _colorIndex;
-    QString _tag;
+    double position;
+    int colorIndex;
+    Style style;
+    QString tag;
 };
 
 }  // namespace widgets

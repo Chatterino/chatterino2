@@ -10,17 +10,9 @@ namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : QWidget(notebook)
+    , colorScheme(notebook->colorScheme)
     , _posAnimation(this, "pos")
-    , _posAnimated(false)
-    , _posAnimationDesired()
     , _notebook(notebook)
-    , _title("<no title>")
-    , _selected(false)
-    , _mouseOver(false)
-    , _mouseDown(false)
-    , _mouseOverX(false)
-    , _mouseDownX(false)
-    , _highlightStyle(HighlightNone)
 {
     this->calcSize();
     this->setAcceptDrops(true);
@@ -122,23 +114,21 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     QColor fg = QColor(0, 0, 0);
 
-    auto &colorScheme = ColorScheme::getInstance();
-
     if (_selected) {
-        painter.fillRect(rect(), colorScheme.TabSelectedBackground);
-        fg = colorScheme.TabSelectedText;
+        painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
+        fg = this->colorScheme.TabSelectedText;
     } else if (_mouseOver) {
-        painter.fillRect(rect(), colorScheme.TabHoverBackground);
-        fg = colorScheme.TabHoverText;
+        painter.fillRect(rect(), this->colorScheme.TabHoverBackground);
+        fg = this->colorScheme.TabHoverText;
     } else if (_highlightStyle == HighlightHighlighted) {
-        painter.fillRect(rect(), colorScheme.TabHighlightedBackground);
-        fg = colorScheme.TabHighlightedText;
+        painter.fillRect(rect(), this->colorScheme.TabHighlightedBackground);
+        fg = this->colorScheme.TabHighlightedText;
     } else if (_highlightStyle == HighlightNewMessage) {
-        painter.fillRect(rect(), colorScheme.TabNewMessageBackground);
-        fg = colorScheme.TabHighlightedText;
+        painter.fillRect(rect(), this->colorScheme.TabNewMessageBackground);
+        fg = this->colorScheme.TabHighlightedText;
     } else {
-        painter.fillRect(rect(), colorScheme.TabBackground);
-        fg = colorScheme.TabText;
+        painter.fillRect(rect(), this->colorScheme.TabBackground);
+        fg = this->colorScheme.TabText;
     }
 
     painter.setPen(fg);

@@ -12,9 +12,11 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
-    : QWidget(_chatWidget)
+    : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
+    , leftLabel(this)
     , leftMenu(this)
+    , rightLabel(this)
     , rightMenu(this)
 {
     this->setFixedHeight(32);
@@ -68,7 +70,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
 void ChatWidgetHeader::updateColors()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, ColorScheme::getInstance().Text);
+    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
 
     this->leftLabel.setPalette(palette);
     this->channelNameLabel.setPalette(palette);
@@ -86,8 +88,8 @@ void ChatWidgetHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), ColorScheme::getInstance().ChatHeaderBackground);
-    painter.setPen(ColorScheme::getInstance().ChatHeaderBorder);
+    painter.fillRect(rect(), this->colorScheme.ChatHeaderBackground);
+    painter.setPen(this->colorScheme.ChatHeaderBorder);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 

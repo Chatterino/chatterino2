@@ -6,49 +6,42 @@
 namespace chatterino {
 namespace widgets {
 
-FancyButton::FancyButton(QWidget *parent)
-    : QWidget(parent)
-    , _selected()
-    , _mouseOver()
-    , _mouseDown()
-    , _mousePos()
-    , _hoverMultiplier()
-    , _effectTimer()
-    , _mouseEffectColor(QColor(255, 255, 255))
+FancyButton::FancyButton(BaseWidget *parent)
+    : BaseWidget(parent)
 
 {
-    connect(&_effectTimer, &QTimer::timeout, this, &FancyButton::onMouseEffectTimeout);
+    connect(&effectTimer, &QTimer::timeout, this, &FancyButton::onMouseEffectTimeout);
 
-    _effectTimer.setInterval(20);
-    _effectTimer.start();
+    this->effectTimer.setInterval(20);
+    this->effectTimer.start();
 }
 
 void FancyButton::setMouseEffectColor(QColor color)
 {
-    _mouseEffectColor = color;
+    this->mouseEffectColor = color;
 }
 
 void FancyButton::paintEvent(QPaintEvent *)
 {
     QPainter painter;
 
-    fancyPaint(painter);
+    this->fancyPaint(painter);
 }
 
 void FancyButton::fancyPaint(QPainter &painter)
 {
-    QColor &c = _mouseEffectColor;
+    QColor &c = this->mouseEffectColor;
 
-    if (_hoverMultiplier > 0) {
-        QRadialGradient gradient(_mousePos.x(), _mousePos.y(), 50, _mousePos.x(), _mousePos.y());
+    if (this->hoverMultiplier > 0) {
+        QRadialGradient gradient(mousePos.x(), mousePos.y(), 50, mousePos.x(), mousePos.y());
 
-        gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(), (int)(24 * _hoverMultiplier)));
-        gradient.setColorAt(1, QColor(c.red(), c.green(), c.blue(), (int)(12 * _hoverMultiplier)));
+        gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(), (int)(24 * this->hoverMultiplier)));
+        gradient.setColorAt(1, QColor(c.red(), c.green(), c.blue(), (int)(12 * this->hoverMultiplier)));
 
         painter.fillRect(this->rect(), gradient);
     }
 
-    for (auto effect : _clickEffects) {
+    for (auto effect : this->clickEffects) {
         QRadialGradient gradient(effect.position.x(), effect.position.y(),
                                  effect.progress * (float)width() * 2, effect.position.x(),
                                  effect.position.y());
@@ -65,12 +58,12 @@ void FancyButton::fancyPaint(QPainter &painter)
 
 void FancyButton::enterEvent(QEvent *)
 {
-    _mouseOver = true;
+    this->mouseOver = true;
 }
 
 void FancyButton::leaveEvent(QEvent *)
 {
-    _mouseOver = false;
+    this->mouseOver = false;
 }
 
 void FancyButton::mousePressEvent(QMouseEvent *event)
@@ -79,9 +72,9 @@ void FancyButton::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    _clickEffects.push_back(ClickEffect(event->pos()));
+    this->clickEffects.push_back(ClickEffect(event->pos()));
 
-    _mouseDown = true;
+    this->mouseDown = true;
 }
 
 void FancyButton::mouseReleaseEvent(QMouseEvent *event)
@@ -90,43 +83,43 @@ void FancyButton::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    _mouseDown = false;
+    this->mouseDown = false;
 }
 
 void FancyButton::mouseMoveEvent(QMouseEvent *event)
 {
-    _mousePos = event->pos();
+    this->mousePos = event->pos();
 }
 
 void FancyButton::onMouseEffectTimeout()
 {
     bool performUpdate = false;
 
-    if (_selected) {
-        if (_hoverMultiplier != 0) {
-            _hoverMultiplier = std::max(0.0, _hoverMultiplier - 0.1);
+    if (selected) {
+        if (this->hoverMultiplier != 0) {
+            this->hoverMultiplier = std::max(0.0, this->hoverMultiplier - 0.1);
             performUpdate = true;
         }
-    } else if (_mouseOver) {
-        if (_hoverMultiplier != 1) {
-            _hoverMultiplier = std::min(1.0, _hoverMultiplier + 0.5);
+    } else if (mouseOver) {
+        if (this->hoverMultiplier != 1) {
+            this->hoverMultiplier = std::min(1.0, this->hoverMultiplier + 0.5);
             performUpdate = true;
         }
     } else {
-        if (_hoverMultiplier != 0) {
-            _hoverMultiplier = std::max(0.0, _hoverMultiplier - 0.3);
+        if (this->hoverMultiplier != 0) {
+            this->hoverMultiplier = std::max(0.0, this->hoverMultiplier - 0.3);
             performUpdate = true;
         }
     }
 
-    if (_clickEffects.size() != 0) {
+    if (this->clickEffects.size() != 0) {
         performUpdate = true;
 
-        for (auto it = _clickEffects.begin(); it != _clickEffects.end();) {
-            (*it).progress += _mouseDown ? 0.02 : 0.07;
+        for (auto it = this->clickEffects.begin(); it != this->clickEffects.end();) {
+            (*it).progress += mouseDown ? 0.02 : 0.07;
 
             if ((*it).progress >= 1.0) {
-                it = _clickEffects.erase(it);
+                it = this->clickEffects.erase(it);
             } else {
                 it++;
             }

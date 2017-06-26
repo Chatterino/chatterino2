@@ -8,6 +8,7 @@
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchparsemessage.hpp"
 #include "twitch/twitchuser.hpp"
+#include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
 #include <irccommand.h>
@@ -132,28 +133,29 @@ void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oau
 void IrcManager::refreshTwitchEmotes(const QString &username, const QString &oauthClient,
                                      const QString &oauthToken)
 {
-    QNetworkRequest req(QUrl("https://api.twitch.tv/kraken/users/" + username +
-                             "/emotes?oauth_token=" + oauthToken + "&client_id=" + oauthClient));
-    QNetworkReply *reply = _accessManager.get(req);
+    QString url("https://api.twitch.tv/kraken/users/" + username +
+                "/emotes?oauth_token=" + oauthToken + "&client_id=" + oauthClient);
 
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        QByteArray data = reply->readAll();
-        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-        QJsonObject root = jsonDoc.object();
+    if (true) {
+        util::urlFetchJSONTimeout(url,
+                                  [=](QJsonObject &root) {
+            // nextLink =
+            // root.value("_links").toObject().value("next").toString();
 
-        // nextLink =
-        // root.value("_links").toObject().value("next").toString();
+            auto blocks = root.value("blocks").toArray();
 
-        auto blocks = root.value("blocks").toArray();
-
-        _twitchBlockedUsersMutex.lock();
-        for (QJsonValue block : blocks) {
-            QJsonObject user = block.toObject().value("user").toObject();
-            // display_name
-            _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
-        }
-        _twitchBlockedUsersMutex.unlock();
-    });
+            _twitchBlockedUsersMutex.lock();
+            for (QJsonValue block : blocks) {
+                QJsonObject user = block.toObject().value("user").toObject();
+                // display_name
+                _twitchBlockedUsers.insert(
+                            user.value("name").toString().toLower(), true);
+            }
+            _twitchBlockedUsersMutex.unlock();
+            qDebug() << "XD";
+        },
+        3000, &this->_accessManager);
+    }
 }
 
 void IrcManager::beginConnecting()
@@ -209,14 +211,13 @@ void IrcManager::sendMessage(const QString &channelName, const QString &message)
     this->connectionMutex.unlock();
 
     // DEBUGGING
-#if 0
+    /*
     Communi::IrcPrivateMessage msg(this->readConnection.get());
 
     QStringList params{"#pajlada", message};
 
     qDebug() << params;
 
-    /*
     if (message == "COMIC SANS LOL") {
         FontManager::getInstance().currentFontFamily = "Comic Sans MS";
     } else if (message == "ARIAL LOL") {
@@ -224,14 +225,13 @@ void IrcManager::sendMessage(const QString &channelName, const QString &message)
     } else if (message == "WINGDINGS LOL") {
         FontManager::getInstance().currentFontFamily = "Wingdings";
     }
-    */
 
     msg.setParameters(params);
 
     msg.setPrefix("pajlada!pajlada@pajlada");
 
     this->privateMessageReceived(&msg);
-#endif
+    */
 }
 
 void IrcManager::joinChannel(const QString &channelName)
@@ -260,6 +260,7 @@ void IrcManager::partChannel(const QString &channelName)
 
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
+    this->onPrivateMessage.invoke(message);
     auto c = this->channelManager.getChannel(message->target().mid(1));
 
     if (c != nullptr) {

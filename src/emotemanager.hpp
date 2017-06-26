@@ -3,11 +3,13 @@
 #define GIF_FRAME_LENGTH 33
 
 #include "concurrentmap.hpp"
+#include "emojis.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "twitch/emotevalue.hpp"
 
 #include <QMap>
 #include <QMutex>
+#include <QString>
 #include <QTimer>
 #include <boost/signals2.hpp>
 
@@ -60,16 +62,47 @@ private:
     WindowManager &windowManager;
     Resources &resources;
 
-    ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
+    // Emojis
+    // shortCodeToEmoji maps strings like ":sunglasses:" to the unicode character
+    QMap<QString, EmojiData> shortCodeToEmoji;
 
+    // emojiToShortCode maps the unicode character to the shortcode like ":sunglasses:"
+    QMap<QString, QString> emojiToShortCode;
+
+    // TODO(pajlada): Figure out what this is for
+    QMap<QChar, QMap<QString, QString>> firstEmojiChars;
+
+    ConcurrentMap<QString, messages::LazyLoadedImage *> emojis;
+
+    void loadEmojis();
+
+public:
+    void parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
+                     const QString &text);
+
+private:
+    // Twitch emotes
     ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _chatterinoEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmoteFromCaches;
-    ConcurrentMap<int, messages::LazyLoadedImage *> _ffzChannelEmoteFromCaches;
     ConcurrentMap<long, messages::LazyLoadedImage *> _twitchEmoteFromCache;
+
+    // BTTV emotes
+    ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmoteFromCaches;
+
+    void loadBTTVEmotes();
+
+    // FFZ emotes
+    ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzEmotes;
+    ConcurrentMap<int, messages::LazyLoadedImage *> _ffzChannelEmoteFromCaches;
+
+    void loadFFZEmotes();
+
+    // Chatterino emotes
+    ConcurrentMap<QString, messages::LazyLoadedImage *> _chatterinoEmotes;
+
+    // ???
     ConcurrentMap<QString, messages::LazyLoadedImage *> _miscImageFromCache;
 
     boost::signals2::signal<void()> _gifUpdateTimerSignal;
@@ -80,9 +113,6 @@ private:
 
     // methods
     static QString getTwitchEmoteLink(long id, qreal &scale);
-
-    void loadFFZEmotes();
-    void loadBTTVEmotes();
 };
 
 }  // namespace chatterino

@@ -10,7 +10,7 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookButton::NotebookButton(QWidget *parent)
+NotebookButton::NotebookButton(BaseWidget *parent)
     : FancyButton(parent)
 {
     setMouseEffectColor(QColor(0, 0, 0));
@@ -23,17 +23,15 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    auto &colorScheme = ColorScheme::getInstance();
-
-    if (_mouseDown) {
-        background = colorScheme.TabSelectedBackground;
-        foreground = colorScheme.TabSelectedText;
-    } else if (_mouseOver) {
-        background = colorScheme.TabHoverBackground;
-        foreground = colorScheme.TabSelectedBackground;
+    if (mouseDown) {
+        background = this->colorScheme.TabSelectedBackground;
+        foreground = this->colorScheme.TabSelectedText;
+    } else if (mouseOver) {
+        background = this->colorScheme.TabHoverBackground;
+        foreground = this->colorScheme.TabSelectedBackground;
     } else {
-        background = colorScheme.TabPanelBackground;
-        //        foreground = colorScheme.TabSelectedBackground;
+        background = this->colorScheme.TabPanelBackground;
+        // foreground = this->colorScheme.TabSelectedBackground;
         foreground = QColor(230, 230, 230);
     }
 
@@ -93,7 +91,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        _mouseDown = false;
+        mouseDown = false;
 
         update();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/titlebar.hpp"
 
@@ -9,19 +10,22 @@
 
 #include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
+#include <pajlada/settings/serialize.hpp>
+#include <pajlada/settings/settingdata.hpp>
 
 namespace chatterino {
 
 class ChannelManager;
+class ColorScheme;
 
 namespace widgets {
 
-class MainWindow : public QWidget
+class MainWindow : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(ChannelManager &_channelManager, QWidget *parent = nullptr);
+    explicit MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme);
     ~MainWindow();
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
@@ -36,12 +40,108 @@ public:
 
     Notebook &getNotebook();
 
+protected:
+    virtual void closeEvent(QCloseEvent *event) override;
+
 private:
     ChannelManager &channelManager;
+    ColorScheme &colorScheme;
 
     Notebook notebook;
-    bool _loaded;
-    TitleBar _titleBar;
+    bool loaded = false;
+    TitleBar titleBar;
+
+    class QRectWrapper : public pajlada::Settings::ISettingData, public QRect
+    {
+    public:
+        QRectWrapper()
+            : QRect(-1, -1, -1, -1)
+        {
+        }
+
+        pajlada::Signals::Signal<const QRectWrapper &> valueChanged;
+
+        /*
+        operator const QRect &() const
+        {
+            return static_cast<const QRect &>(*this);
+            // return this->getValue();
+        }
+        */
+
+        const QRectWrapper &getValueRef() const
+        {
+            return *this;
+        }
+
+        virtual rapidjson::Value marshalInto(rapidjson::Document &d) override
+        {
+            using namespace pajlada::Settings;
+
+            rapidjson::Value obj(rapidjson::kObjectType);
+
+            auto _x = serializeToJSON<int>::serialize(this->x(), d.GetAllocator());
+            auto _y = serializeToJSON<int>::serialize(this->y(), d.GetAllocator());
+            auto _width = serializeToJSON<int>::serialize(this->width(), d.GetAllocator());
+            auto _height = serializeToJSON<int>::serialize(this->height(), d.GetAllocator());
+
+            obj.AddMember("x", _x, d.GetAllocator());
+            obj.AddMember("y", _y, d.GetAllocator());
+            obj.AddMember("width", _width, d.GetAllocator());
+            obj.AddMember("height", _height, d.GetAllocator());
+
+            return obj;
+        }
+
+        virtual bool unmarshalFrom(rapidjson::Document &document) override
+        {
+            using namespace pajlada::Settings;
+
+            auto vXp = this->getValueWithSuffix("/x", document);
+            auto vYp = this->getValueWithSuffix("/y", document);
+            auto vWidthp = this->getValueWithSuffix("/width", document);
+            auto vHeightp = this->getValueWithSuffix("/height", document);
+            if (vXp != nullptr) {
+                this->setX(deserializeJSON<int>::deserialize(*vXp));
+                this->filled = true;
+            }
+            if (vYp != nullptr) {
+                this->setY(deserializeJSON<int>::deserialize(*vYp));
+                this->filled = true;
+            }
+            if (vWidthp != nullptr) {
+                this->setWidth(deserializeJSON<int>::deserialize(*vWidthp));
+                this->filled = true;
+            }
+            if (vHeightp != nullptr) {
+                this->setHeight(deserializeJSON<int>::deserialize(*vHeightp));
+                this->filled = true;
+            }
+
+            return true;
+        }
+
+        virtual void registerDocument(rapidjson::Document &d) override
+        {
+            this->valueChanged.connect([this, &d](const auto &) {
+                this->marshalInto(d);  //
+            });
+        }
+
+        QRectWrapper &operator=(const QRect &rhs)
+        {
+            static_cast<QRect &>(*this) = rhs;
+
+            return *this;
+        }
+
+        void setValue(const QRect &rhs)
+        {
+            static_cast<QRect &>(*this) = rhs;
+        }
+    };
+
+    pajlada::Settings::Setting<QRectWrapper, QRectWrapper> windowGeometry;
 };
 
 }  // namespace widgets

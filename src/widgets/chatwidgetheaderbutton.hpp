@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
 #include "widgets/signallabel.hpp"
 
 #include <QHBoxLayout>
@@ -8,38 +9,45 @@
 #include <QWidget>
 
 namespace chatterino {
+
+class ColorScheme;
+
 namespace widgets {
 
-class ChatWidgetHeaderButton : public QWidget
+class ChatWidgetHeader;
+
+class ChatWidgetHeaderButton : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit ChatWidgetHeaderButton(int spacing = 6);
+    explicit ChatWidgetHeaderButton(BaseWidget *parent, int spacing = 6);
 
     SignalLabel &getLabel()
     {
-        return _label;
+        return this->ui.label;
     }
 
 signals:
     void clicked();
 
 protected:
-    void paintEvent(QPaintEvent *) Q_DECL_OVERRIDE;
+    virtual void paintEvent(QPaintEvent *) override;
 
-    void enterEvent(QEvent *) Q_DECL_OVERRIDE;
-    void leaveEvent(QEvent *) Q_DECL_OVERRIDE;
+    virtual void enterEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
 
-    void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    QHBoxLayout _hbox;
-    SignalLabel _label;
+    struct {
+        QHBoxLayout hbox;
+        SignalLabel label;
+    } ui;
 
-    bool _mouseOver;
-    bool _mouseDown;
+    bool mouseOver = false;
+    bool mouseDown = false;
 
     void labelMouseUp();
     void labelMouseDown();

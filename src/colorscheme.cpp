@@ -8,62 +8,65 @@
 
 namespace chatterino {
 
-void ColorScheme::init(WindowManager &windowManager)
+namespace detail {
+
+double getMultiplierByTheme(const std::string &themeName)
 {
-    static bool initiated = false;
-
-    if (!initiated) {
-        initiated = true;
-        ColorScheme::getInstance().update();
-
-        SettingsManager::getInstance().theme.valueChanged.connect([](const QString &) {
-            ColorScheme::getInstance().update();  //
-        });
-
-        SettingsManager::getInstance().themeHue.valueChanged.connect([](const float &) {
-            ColorScheme::getInstance().update();  //
-        });
-
-        ColorScheme::getInstance().updated.connect([&windowManager] {
-            windowManager.repaintVisibleChatWidgets();  //
-        });
+    if (themeName == "Light") {
+        return 0.8;
+    } else if (themeName == "White") {
+        return 1.0;
+    } else if (themeName == "Black") {
+        return -1.0;
+    } else if (themeName == "Dark") {
+        return -0.8;
     }
+
+    return -0.8;
+}
+
+}  // namespace detail
+
+ColorScheme::ColorScheme(WindowManager &windowManager)
+{
+    this->update();
+
+    SettingsManager::getInstance().themeName.getValueChangedSignal().connect([=](const auto &) {
+        this->update();  //
+    });
+
+    SettingsManager::getInstance().themeHue.getValueChangedSignal().connect([=](const auto &) {
+        this->update();  //
+    });
+
+    this->updated.connect([&windowManager] {
+        windowManager.repaintVisibleChatWidgets();  //
+    });
 }
 
 void ColorScheme::update()
 {
-    QString theme = SettingsManager::getInstance().theme.get();
-    theme = theme.toLower();
+    SettingsManager &settings = SettingsManager::getInstance();
 
-    qreal hue = SettingsManager::getInstance().themeHue.get();
-
-    if (theme == "light") {
-        setColors(hue, 0.8);
-    } else if (theme == "white") {
-        setColors(hue, 1);
-    } else if (theme == "black") {
-        setColors(hue, -1);
-    } else {
-        setColors(hue, -0.8);
-    }
+    this->setColors(settings.themeHue, detail::getMultiplierByTheme(settings.themeName));
 }
 
 // hue: theme color (0 - 1)
-// multiplyer: 1 = white, 0.8 = light, -0.8 dark, -1 black
-void ColorScheme::setColors(float hue, float multiplyer)
+// multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
+void ColorScheme::setColors(double hue, double multiplier)
 {
-    IsLightTheme = multiplyer > 0;
+    lightTheme = multiplier > 0;
     bool hasDarkBorder = false;
 
     SystemMessageColor = QColor(140, 127, 127);
 
-    auto getColor = [multiplyer](qreal h, qreal s, qreal l, qreal a = 1.0) {
-        return QColor::fromHslF(h, s, (((l - 0.5) * multiplyer) + 0.5), a);
+    auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
+        return QColor::fromHslF(h, s, (((l - 0.5) * multiplier) + 0.5), a);
     };
 
     DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
 
-    Text = TextCaret = IsLightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
+    Text = TextCaret = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
 
     // tab
     if (hasDarkBorder) {
@@ -119,26 +122,26 @@ void ColorScheme::setColors(float hue, float multiplyer)
     updated();
 }
 
-void ColorScheme::fillLookupTableValues(qreal (&array)[360], qreal from, qreal to, qreal fromValue,
-                                        qreal toValue)
+void ColorScheme::fillLookupTableValues(double (&array)[360], double from, double to,
+                                        double fromValue, double toValue)
 {
-    qreal diff = toValue - fromValue;
+    double diff = toValue - fromValue;
 
     int start = from * LOOKUP_COLOR_COUNT;
     int end = to * LOOKUP_COLOR_COUNT;
     int length = end - start;
 
     for (int i = 0; i < length; i++) {
-        array[start + i] = fromValue + (diff * ((qreal)i / length));
+        array[start + i] = fromValue + (diff * ((double)i / length));
     }
 }
 
 void ColorScheme::normalizeColor(QColor &color)
 {
-    //    qreal l = color.lightnessF();
-    //    qreal s = color.saturationF();
-    //    qreal x = this->colorLookupTable[std::max(0, color.hue())];
-    //    qreal newL = (l - 1) * x + 1;
+    //    double l = color.lightnessF();
+    //    double s = color.saturationF();
+    //    double x = this->colorLookupTable[std::max(0, color.hue())];
+    //    double newL = (l - 1) * x + 1;
 
     //    newL = s * newL + (1 - s) * l;
 
@@ -146,16 +149,16 @@ void ColorScheme::normalizeColor(QColor &color)
 
     //    color.setHslF(color.hueF(), s, newL);
 
-    qreal l = color.lightnessF();
-    qreal s = color.saturationF();
+    double l = color.lightnessF();
+    double s = color.saturationF();
     int h = std::max(0, color.hue());
-    qreal x = this->middleLookupTable[h];
+    double x = this->middleLookupTable[h];
     x = s * 0.5 + (1 - s) * x;
 
-    qreal min = this->minLookupTable[h];
+    double min = this->minLookupTable[h];
     min = (1 - s) * 0.5 + s * min;
 
-    qreal newL;
+    double newL;
 
     if (l < x) {
         newL = l * ((x - min) / x) + min;
@@ -168,7 +171,7 @@ void ColorScheme::normalizeColor(QColor &color)
 
     color.setHslF(color.hueF(), s, newL);
 
-    //    qreal newL = (l - 1) * x + 1;
+    //    double newL = (l - 1) * x + 1;
 
     //    newL = s * newL + (1 - s) * l;
 

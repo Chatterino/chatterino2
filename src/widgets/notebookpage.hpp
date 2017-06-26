@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
 #include "widgets/chatwidget.hpp"
 #include "widgets/notebookpage.hpp"
 #include "widgets/notebookpagedroppreview.hpp"
@@ -20,12 +21,14 @@ class ChannelManager;
 
 namespace widgets {
 
-class NotebookPage : public QWidget
+class NotebookPage : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    NotebookPage(ChannelManager &_channelManager, QWidget *parent, NotebookTab *_tab);
+    NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
+
+    ChannelManager &channelManager;
 
     std::pair<int, int> removeFromLayout(ChatWidget *widget);
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);
@@ -52,8 +55,6 @@ protected:
     void dropEvent(QDropEvent *event) override;
 
 private:
-    ChannelManager &channelManager;
-
     struct DropRegion {
         QRect rect;
         std::pair<int, int> position;
@@ -78,6 +79,8 @@ private:
     void setPreviewRect(QPoint mousePos);
 
     std::pair<int, int> getChatPosition(const ChatWidget *chatWidget);
+
+    ChatWidget *createChatWidget();
 
 public:
     void load(const boost::property_tree::ptree &tree);

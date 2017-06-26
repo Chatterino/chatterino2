@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resizingtextedit.hpp"
+#include "widgets/basewidget.hpp"
 #include "widgets/chatwidgetheaderbutton.hpp"
 
 #include <QHBoxLayout>
@@ -16,7 +17,7 @@ namespace widgets {
 
 class ChatWidget;
 
-class ChatWidgetInput : public QWidget
+class ChatWidgetInput : public BaseWidget
 {
     Q_OBJECT
 

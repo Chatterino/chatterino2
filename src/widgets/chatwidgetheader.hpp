@@ -1,6 +1,7 @@
 #pragma once
 
 #include "signallabel.hpp"
+#include "widgets/basewidget.hpp"
 #include "widgets/chatwidgetheaderbutton.hpp"
 
 #include <QAction>
@@ -13,10 +14,14 @@
 #include <QWidget>
 
 namespace chatterino {
+
+class ColorScheme;
+
 namespace widgets {
+
 class ChatWidget;
 
-class ChatWidgetHeader : public QWidget
+class ChatWidgetHeader : public BaseWidget
 {
     Q_OBJECT
 

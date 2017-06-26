@@ -9,10 +9,10 @@ FontManager::FontManager()
     , currentFontSize("/appearance/currentFontSize", 14)
     , currentFont(this->currentFontFamily.getValue().c_str(), currentFontSize.getValue())
 {
-    this->currentFontFamily.valueChanged.connect([this](const std::string &newValue) {
+    this->currentFontFamily.getValueChangedSignal().connect([this](const std::string &newValue) {
         this->currentFont.setFamily(newValue.c_str());  //
     });
-    this->currentFontSize.valueChanged.connect([this](const int &newValue) {
+    this->currentFontSize.getValueChangedSignal().connect([this](const int &newValue) {
         this->currentFont.setSize(newValue);  //
     });
 }

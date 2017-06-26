@@ -1,5 +1,7 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
+
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPoint>
@@ -9,43 +11,42 @@
 namespace chatterino {
 namespace widgets {
 
-class FancyButton : public QWidget
+class FancyButton : public BaseWidget
 {
     struct ClickEffect {
-        float progress;
+        double progress = 0.0;
         QPoint position;
 
-        ClickEffect(QPoint position)
-            : progress()
-            , position(position)
+        ClickEffect(QPoint _position)
+            : position(_position)
         {
         }
     };
 
 public:
-    FancyButton(QWidget *parent = nullptr);
+    FancyButton(BaseWidget *parent);
 
     void setMouseEffectColor(QColor color);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void enterEvent(QEvent *) override;
-    void leaveEvent(QEvent *) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void enterEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
 
     void fancyPaint(QPainter &painter);
 
 private:
-    bool _selected;
-    bool _mouseOver;
-    bool _mouseDown;
-    QPoint _mousePos;
-    float _hoverMultiplier;
-    QTimer _effectTimer;
-    std::vector<ClickEffect> _clickEffects;
-    QColor _mouseEffectColor;
+    bool selected = false;
+    bool mouseOver = false;
+    bool mouseDown = false;
+    QPoint mousePos;
+    double hoverMultiplier = 0.0;
+    QTimer effectTimer;
+    std::vector<ClickEffect> clickEffects;
+    QColor mouseEffectColor = {255, 255, 255};
 
     void onMouseEffectTimeout();
 };

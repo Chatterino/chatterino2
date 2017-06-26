@@ -20,7 +20,7 @@ namespace chatterino {
 namespace widgets {
 
 ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
-    : QWidget(_chatWidget)
+    : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
     , scrollBar(this)
     , userPopupWidget(_chatWidget->getChannelRef())
@@ -47,7 +47,7 @@ bool ChatWidgetView::layoutMessages()
 {
     auto messages = this->chatWidget->getMessagesSnapshot();
 
-    if (messages.getSize() == 0) {
+    if (messages.getLength() == 0) {
         this->scrollBar.setVisible(false);
         return false;
     }
@@ -65,10 +65,10 @@ bool ChatWidgetView::layoutMessages()
     int layoutWidth = this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width();
 
     // layout the visible messages in the view
-    if (messages.getSize() > start) {
+    if (messages.getLength() > start) {
         int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-        for (int i = start; i < messages.getSize(); ++i) {
+        for (int i = start; i < messages.getLength(); ++i) {
             auto message = messages[i];
 
             redraw |= message->layout(layoutWidth, true);
@@ -84,7 +84,7 @@ bool ChatWidgetView::layoutMessages()
     // layout the messages at the bottom to determine the scrollbar thumb size
     int h = height() - 8;
 
-    for (int i = messages.getSize() - 1; i >= 0; i--) {
+    for (std::size_t i = messages.getLength() - 1; i > 0; i--) {
         auto *message = messages[i].get();
 
         message->layout(layoutWidth, true);
@@ -92,7 +92,7 @@ bool ChatWidgetView::layoutMessages()
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollBar.setLargeChange((messages.getSize() - i) +
+            this->scrollBar.setLargeChange((messages.getLength() - i) +
                                            (qreal)h / message->getHeight());
             this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
 
@@ -107,7 +107,7 @@ bool ChatWidgetView::layoutMessages()
         this->scrollBar.setDesiredValue(0);
     }
 
-    this->scrollBar.setMaximum(messages.getSize());
+    this->scrollBar.setMaximum(messages.getLength());
 
     if (this->showingLatestMessages && showScrollbar) {
         // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
@@ -148,14 +148,12 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
     _painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    ColorScheme &scheme = ColorScheme::getInstance();
-
     // only update gif emotes
     if (this->onlyUpdateEmotes) {
         this->onlyUpdateEmotes = false;
 
         for (const GifEmoteData &item : this->gifEmotes) {
-            _painter.fillRect(item.rect, scheme.ChatBackground);
+            _painter.fillRect(item.rect, this->colorScheme.ChatBackground);
 
             _painter.drawPixmap(item.rect, *item.image->getPixmap());
         }
@@ -166,7 +164,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
     // update all messages
     this->gifEmotes.clear();
 
-    _painter.fillRect(rect(), scheme.ChatBackground);
+    _painter.fillRect(rect(), this->colorScheme.ChatBackground);
 
     // code for tesing colors
     /*
@@ -205,13 +203,13 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
     int start = this->scrollBar.getCurrentValue();
 
-    if (start >= messages.getSize()) {
+    if (start >= messages.getLength()) {
         return;
     }
 
     int y = -(messages[start].get()->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.getSize(); ++i) {
+    for (int i = start; i < messages.getLength(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
 
         std::shared_ptr<QPixmap> bufferPtr = messageRef->buffer;
@@ -228,7 +226,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
         // update messages that have been changed
         if (updateBuffer) {
             QPainter painter(buffer);
-            painter.fillRect(buffer->rect(), scheme.ChatBackground);
+            painter.fillRect(buffer->rect(), this->colorScheme.ChatBackground);
 
             for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
                 // image
@@ -247,7 +245,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
                 else {
                     QColor color = wordPart.getWord().getColor();
 
-                    ColorScheme::getInstance().normalizeColor(color);
+                    this->colorScheme.normalizeColor(color);
 
                     painter.setPen(color);
                     painter.setFont(wordPart.getWord().getFont());
@@ -266,14 +264,14 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
                 messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
 
                 if (lli.getAnimated()) {
-                    GifEmoteData data;
-                    data.image = &lli;
+                    GifEmoteData gifEmoteData;
+                    gifEmoteData.image = &lli;
                     QRect rect(wordPart.getX(), wordPart.getY() + y, wordPart.getWidth(),
                                wordPart.getHeight());
 
-                    data.rect = rect;
+                    gifEmoteData.rect = rect;
 
-                    this->gifEmotes.push_back(data);
+                    this->gifEmotes.push_back(gifEmoteData);
                 }
             }
         }
@@ -290,7 +288,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
     }
 
     for (GifEmoteData &item : this->gifEmotes) {
-        _painter.fillRect(item.rect, scheme.ChatBackground);
+        _painter.fillRect(item.rect, this->colorScheme.ChatBackground);
 
         _painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
@@ -401,13 +399,13 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     int start = this->scrollBar.getCurrentValue();
 
-    if (start >= messages.getSize()) {
+    if (start >= messages.getLength()) {
         return false;
     }
 
     int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.getSize(); ++i) {
+    for (int i = start; i < messages.getLength(); ++i) {
         auto message = messages[i];
 
         if (p.y() < y + message->getHeight()) {

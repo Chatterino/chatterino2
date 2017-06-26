@@ -1,8 +1,10 @@
 #pragma once
 
 #include "channelmanager.hpp"
+#include "colorscheme.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
+#include "messagefactory.hpp"
 #include "resources.hpp"
 #include "windowmanager.hpp"
 
@@ -19,10 +21,12 @@ public:
     int run(QApplication &qtApp);
 
     WindowManager windowManager;
+    ColorScheme colorScheme;
     EmoteManager emoteManager;
     Resources resources;
     ChannelManager channelManager;
     IrcManager ircManager;
+    MessageFactory messageFactory;
 };
 
 }  // namespace chatterino

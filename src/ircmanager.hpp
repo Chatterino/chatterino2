@@ -10,6 +10,7 @@
 #include <QMutex>
 #include <QNetworkAccessManager>
 #include <QString>
+#include <pajlada/signals/signal.hpp>
 
 #include <memory>
 #include <mutex>
@@ -49,6 +50,8 @@ public:
 
     const twitch::TwitchUser &getUser() const;
     void setUser(const twitch::TwitchUser &account);
+
+    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
 private:
     ChannelManager &channelManager;
