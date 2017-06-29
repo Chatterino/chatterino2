@@ -103,6 +103,7 @@ void NotebookPage::addToLayout(ChatWidget *widget,
                                std::pair<int, int> position = std::pair<int, int>(-1, -1))
 {
     _chatWidgets.push_back(widget);
+    widget->giveFocus();
 
     // add vbox at the end
     if (position.first < 0 || position.first >= _hbox.count()) {
