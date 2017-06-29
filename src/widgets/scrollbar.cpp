@@ -13,11 +13,10 @@ namespace widgets {
 
 ScrollBar::ScrollBar(ChatWidgetView *parent)
     : BaseWidget(parent)
-    , _currentValueAnimation(this, "currentValue")
+    , _currentValueAnimation(this, "_currentValue")
     , _highlights(nullptr)
 {
     resize(16, 100);
-
     _currentValueAnimation.setDuration(250);
     _currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
