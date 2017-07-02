@@ -194,6 +194,8 @@ void EmoteManager::loadEmojis()
         this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
 
         this->emojiFirstByte[emojiData.value.at(0)].append(emojiData);
+
+        // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by emojiData.code.length()
     }
 }
 

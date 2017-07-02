@@ -10,121 +10,42 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace twitch {
 
-TwitchMessageBuilder::TwitchMessageBuilder()
-    : MessageBuilder()
-    , messageId()
-    , userName()
+TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel, Resources &_resources,
+                                           EmoteManager &_emoteManager,
+                                           WindowManager &_windowManager,
+                                           const Communi::IrcPrivateMessage *_ircMessage,
+                                           const messages::MessageParseArgs &_args)
+    : channel(_channel)
+    , resources(_resources)
+    , windowManager(_windowManager)
+    , colorScheme(this->windowManager.colorScheme)
+    , emoteManager(_emoteManager)
+    , ircMessage(_ircMessage)
+    , args(_args)
+    , tags(this->ircMessage->tags())
+    , usernameColor(this->colorScheme.SystemMessageColor)
 {
 }
 
-// When a twitch message is being parsed it makes sense for the builder to have access to:
-//  - The IRC Message
-//  - Message-specific parsing arguments (i.e. if ping sounds are disabled)
-//  - The Channel that the message originated from
-//  - The resources class for Badges, Moderation buttons
-//  - The Emote Manager for all different kinds of emotes
-SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircMessage,  //
-                                          Channel *channel,                              //
-                                          const MessageParseArgs &args,                  //
-                                          Resources &resources,                          //
-                                          EmoteManager &emoteManager,                    //
-                                          WindowManager &windowManager)
+SharedMessage TwitchMessageBuilder::parse()
 {
-    TwitchMessageBuilder b;
-
     // The timestamp is always appended to the builder
     // Whether or not will be rendered is decided/checked later
-    b.appendTimestamp();
+    this->appendTimestamp();
 
-    auto tags = ircMessage->tags();
+    this->parseMessageID();
 
-    auto iterator = tags.find("id");
+    this->parseRoomID();
 
-    if (iterator != tags.end()) {
-        b.messageId = iterator.value().toString();
+    this->appendModerationButtons();
+
+    this->parseTwitchBadges();
+
+    if (this->args.includeChannelName) {
+        this->parseChannelName();
     }
 
-    // room id
-    iterator = tags.find("room-id");
-    std::string roomID;
-    if (iterator != std::end(tags)) {
-        roomID = iterator.value().toString().toStdString();
-
-        if (channel->roomID.empty()) {
-            channel->roomID = roomID;
-        }
-    }
-
-    // timestamps
-    iterator = tags.find("tmi-sent-ts");
-
-    b.appendModerationWords(ircMessage, resources);
-
-    // badges
-    iterator = tags.find("badges");
-
-    ColorScheme &colorScheme = windowManager.colorScheme;
-
-    const auto &channelResources = resources.channels[roomID];
-
-    if (iterator != tags.end()) {
-        QStringList badges = iterator.value().toString().split(',');
-
-        b.appendTwitchBadges(badges, resources, emoteManager, channelResources);
-    }
-
-    // color
-    QColor &usernameColor = colorScheme.SystemMessageColor;
-
-    iterator = tags.find("color");
-    if (iterator != tags.end()) {
-        usernameColor = QColor(iterator.value().toString());
-    }
-
-    // channel name
-    if (args.includeChannelName) {
-        QString channelName("#" + channel->getName());
-        b.appendWord(Word(channelName, Word::Misc, colorScheme.SystemMessageColor,
-                          QString(channelName), QString(),
-                          Link(Link::Url, channel->getName() + "\n" + b.messageId)));
-    }
-
-    // username
-    b.userName = ircMessage->nick();
-
-    if (b.userName.isEmpty()) {
-        b.userName = tags.value(QLatin1String("login")).toString();
-    }
-
-    QString displayName;
-
-    iterator = tags.find("display-name");
-    if (iterator == tags.end()) {
-        displayName = b.userName;
-    } else {
-        displayName = iterator.value().toString();
-    }
-
-    bool hasLocalizedName = QString::compare(displayName, ircMessage->account()) == 0;
-    QString userDisplayString =
-        displayName + (hasLocalizedName ? (" (" + ircMessage->account() + ")") : QString());
-
-    if (args.isSentWhisper) {
-        // TODO(pajlada): Re-implement
-        // userDisplayString += IrcManager::getInstance().getUser().getUserName();
-    }
-
-    if (args.isReceivedWhisper) {
-        // TODO(pajlada): Re-implement
-        // userDisplayString += " -> " + IrcManager::getInstance().getUser().getUserName();
-    }
-
-    if (!ircMessage->isAction()) {
-        userDisplayString += ": ";
-    }
-
-    b.appendWord(Word(userDisplayString, Word::Username, usernameColor, userDisplayString,
-                      QString(), Link(Link::UserInfo, b.userName)));
+    this->parseUsername();
 
     // highlights
     // TODO: implement this xD
@@ -132,27 +53,27 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     // bits
     QString bits = "";
 
-    iterator = tags.find("bits");
-    if (iterator != tags.end()) {
+    auto iterator = this->tags.find("bits");
+    if (iterator != this->tags.end()) {
         bits = iterator.value().toString();
     }
 
     // twitch emotes
     std::vector<std::pair<long int, LazyLoadedImage *>> twitchEmotes;
 
-    iterator = tags.find("emotes");
-    if (iterator != tags.end()) {
+    iterator = this->tags.find("emotes");
+    if (iterator != this->tags.end()) {
         QStringList emoteString = iterator.value().toString().split('/');
 
         for (QString emote : emoteString) {
-            b.appendTwitchEmote(ircMessage, emote, twitchEmotes, emoteManager);
+            this->appendTwitchEmote(ircMessage, emote, twitchEmotes, emoteManager);
         }
 
         struct {
-            bool operator()(const std::pair<long int, messages::LazyLoadedImage *> &a,
-                            const std::pair<long int, messages::LazyLoadedImage *> &b)
+            bool operator()(const std::pair<long int, messages::LazyLoadedImage *> &lhs,
+                            const std::pair<long int, messages::LazyLoadedImage *> &rhs)
             {
-                return a.first < b.first;
+                return lhs.first < rhs.first;
             }
         } customLess;
 
@@ -162,10 +83,10 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
-    QColor textColor = ircMessage->isAction() ? usernameColor : colorScheme.Text;
+    QColor textColor = ircMessage->isAction() ? this->usernameColor : this->colorScheme.Text;
 
     const QString &originalMessage = ircMessage->content();
-    b.originalMessage = originalMessage;
+    this->originalMessage = originalMessage;
     QStringList splits = originalMessage.split(' ');
 
     long int i = 0;
@@ -173,12 +94,14 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     for (QString split : splits) {
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
-            b.appendWord(Word(currentTwitchEmote->second, Word::TwitchEmoteImage,
-                              currentTwitchEmote->second->getName(),
-                              currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
-            b.appendWord(Word(currentTwitchEmote->second->getName(), Word::TwitchEmoteText,
-                              textColor, currentTwitchEmote->second->getName(),
-                              currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
+            this->appendWord(
+                Word(currentTwitchEmote->second, Word::TwitchEmoteImage,
+                     currentTwitchEmote->second->getName(),
+                     currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
+            this->appendWord(
+                Word(currentTwitchEmote->second->getName(), Word::TwitchEmoteText, textColor,
+                     currentTwitchEmote->second->getName(),
+                     currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
 
             i += split.length() + 1;
             currentTwitchEmote = std::next(currentTwitchEmote);
@@ -231,31 +154,32 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
                         QString("http://static-cdn.jtvnw.net/bits/dark/static/" + color + "/1");
 
                     LazyLoadedImage *imageAnimated = emoteManager.getMiscImageFromCache().getOrAdd(
-                        bitsLinkAnimated, [&emoteManager, &windowManager, &bitsLinkAnimated] {
-                            return new LazyLoadedImage(emoteManager, windowManager,
+                        bitsLinkAnimated, [this, &bitsLinkAnimated] {
+                            return new LazyLoadedImage(this->emoteManager, this->windowManager,
                                                        bitsLinkAnimated);
                         });
-                    LazyLoadedImage *image = emoteManager.getMiscImageFromCache().getOrAdd(
-                        bitsLink, [&emoteManager, &windowManager, &bitsLink] {
-                            return new LazyLoadedImage(emoteManager, windowManager, bitsLink);
+                    LazyLoadedImage *image =
+                        emoteManager.getMiscImageFromCache().getOrAdd(bitsLink, [this, &bitsLink] {
+                            return new LazyLoadedImage(this->emoteManager, this->windowManager,
+                                                       bitsLink);
                         });
 
-                    b.appendWord(Word(imageAnimated, Word::BitsAnimated, QString("cheer"),
-                                      QString("Twitch Cheer"),
-                                      Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                              "introducing-cheering-celebrate-"
-                                                              "together-da62af41fac6"))));
-                    b.appendWord(Word(image, Word::BitsStatic, QString("cheer"),
-                                      QString("Twitch Cheer"),
-                                      Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                              "introducing-cheering-celebrate-"
-                                                              "together-da62af41fac6"))));
+                    this->appendWord(Word(imageAnimated, Word::BitsAnimated, QString("cheer"),
+                                          QString("Twitch Cheer"),
+                                          Link(Link::Url, QString("https://blog.twitch.tv/"
+                                                                  "introducing-cheering-celebrate-"
+                                                                  "together-da62af41fac6"))));
+                    this->appendWord(Word(image, Word::BitsStatic, QString("cheer"),
+                                          QString("Twitch Cheer"),
+                                          Link(Link::Url, QString("https://blog.twitch.tv/"
+                                                                  "introducing-cheering-celebrate-"
+                                                                  "together-da62af41fac6"))));
 
-                    b.appendWord(Word(QString("x" + string.mid(5)), Word::BitsAmount, bitsColor,
-                                      QString(string.mid(5)), QString("Twitch Cheer"),
-                                      Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                              "introducing-cheering-celebrate-"
-                                                              "together-da62af41fac6"))));
+                    this->appendWord(Word(QString("x" + string.mid(5)), Word::BitsAmount, bitsColor,
+                                          QString(string.mid(5)), QString("Twitch Cheer"),
+                                          Link(Link::Url, QString("https://blog.twitch.tv/"
+                                                                  "introducing-cheering-celebrate-"
+                                                                  "together-da62af41fac6"))));
 
                     continue;
                 }
@@ -269,26 +193,26 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
                 // Will match emote regardless of source (i.e. bttv, ffz)
                 // Emote source + name: "bttv:nyanPls"
                 if (emoteManager.getBTTVEmotes().tryGet(string, bttvEmote) ||
-                    channel->getBttvChannelEmotes().tryGet(string, bttvEmote) ||
+                    this->channel->getBttvChannelEmotes().tryGet(string, bttvEmote) ||
                     emoteManager.getFFZEmotes().tryGet(string, bttvEmote) ||
-                    channel->getFfzChannelEmotes().tryGet(string, bttvEmote) ||
+                    this->channel->getFfzChannelEmotes().tryGet(string, bttvEmote) ||
                     emoteManager.getChatterinoEmotes().tryGet(string, bttvEmote)) {
-                    b.appendWord(Word(bttvEmote, Word::BttvEmoteImage, bttvEmote->getName(),
-                                      bttvEmote->getTooltip(),
-                                      Link(Link::Url, bttvEmote->getUrl())));
+                    this->appendWord(Word(bttvEmote, Word::BttvEmoteImage, bttvEmote->getName(),
+                                          bttvEmote->getTooltip(),
+                                          Link(Link::Url, bttvEmote->getUrl())));
 
                     continue;
                 }
 
                 // actually just a word
-                QString link = b.matchLink(string);
+                QString link = this->matchLink(string);
 
-                b.appendWord(Word(string, Word::Text, textColor, string, QString(),
-                                  link.isEmpty() ? Link() : Link(Link::Url, link)));
+                this->appendWord(Word(string, Word::Text, textColor, string, QString(),
+                                      link.isEmpty() ? Link() : Link(Link::Url, link)));
             } else {  // is emoji
                 static QString emojiTooltip("Emoji");
 
-                b.appendWord(Word(image, Word::EmojiImage, image->getName(), emojiTooltip));
+                this->appendWord(Word(image, Word::EmojiImage, image->getName(), emojiTooltip));
                 Word(image->getName(), Word::EmojiText, textColor, image->getName(), emojiTooltip);
             }
         }
@@ -303,19 +227,92 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     //        HighlightTab = false;
     //    }
 
-    return b.build();
+    return this->build();
 }
 
-void TwitchMessageBuilder::appendModerationWords(const Communi::IrcPrivateMessage *ircMessage,
-                                                 const Resources &resources)
+void TwitchMessageBuilder::parseMessageID()
+{
+    auto iterator = this->tags.find("id");
+
+    if (iterator != this->tags.end()) {
+        this->messageID = iterator.value().toString();
+    }
+}
+
+void TwitchMessageBuilder::parseRoomID()
+{
+    auto iterator = this->tags.find("room-id");
+    if (iterator != std::end(this->tags)) {
+        this->roomID = iterator.value().toString().toStdString();
+
+        if (this->channel->roomID.empty()) {
+            this->channel->roomID = this->roomID;
+        }
+    }
+}
+
+void TwitchMessageBuilder::parseChannelName()
+{
+    QString channelName("#" + this->channel->getName());
+    this->appendWord(Word(channelName, Word::Misc, this->colorScheme.SystemMessageColor,
+                          QString(channelName), QString(),
+                          Link(Link::Url, this->channel->getName() + "\n" + this->messageID)));
+}
+
+void TwitchMessageBuilder::parseUsername()
+{
+    auto iterator = this->tags.find("color");
+    if (iterator != this->tags.end()) {
+        this->usernameColor = QColor(iterator.value().toString());
+    }
+
+    // username
+    this->userName = ircMessage->nick();
+
+    if (this->userName.isEmpty()) {
+        this->userName = this->tags.value(QLatin1String("login")).toString();
+    }
+
+    QString displayName;
+
+    iterator = this->tags.find("display-name");
+    if (iterator == this->tags.end()) {
+        displayName = this->userName;
+    } else {
+        displayName = iterator.value().toString();
+    }
+
+    bool hasLocalizedName = QString::compare(displayName, ircMessage->account()) == 0;
+    QString userDisplayString =
+        displayName + (hasLocalizedName ? (" (" + ircMessage->account() + ")") : QString());
+
+    if (this->args.isSentWhisper) {
+        // TODO(pajlada): Re-implement
+        // userDisplayString += IrcManager::getInstance().getUser().getUserName();
+    }
+
+    if (this->args.isReceivedWhisper) {
+        // TODO(pajlada): Re-implement
+        // userDisplayString += " -> " + IrcManager::getInstance().getUser().getUserName();
+    }
+
+    if (!ircMessage->isAction()) {
+        userDisplayString += ": ";
+    }
+
+    this->appendWord(Word(userDisplayString, Word::Username, this->usernameColor, userDisplayString,
+                          QString(), Link(Link::UserInfo, this->userName)));
+}
+
+void TwitchMessageBuilder::appendModerationButtons()
 {
     // mod buttons
     static QString buttonBanTooltip("Ban user");
     static QString buttonTimeoutTooltip("Timeout user");
 
-    this->appendWord(Word(resources.buttonBan, Word::ButtonBan, QString(), buttonBanTooltip,
+    this->appendWord(Word(this->resources.buttonBan, Word::ButtonBan, QString(), buttonBanTooltip,
                           Link(Link::UserBan, ircMessage->account())));
-    this->appendWord(Word(resources.buttonTimeout, Word::ButtonTimeout, QString(),
+    this->appendWord(Word(this->resources.buttonTimeout, Word::ButtonTimeout, QString(),
                           buttonTimeoutTooltip, Link(Link::UserTimeout, ircMessage->account())));
 }
 
@@ -358,17 +355,26 @@ void TwitchMessageBuilder::appendTwitchEmote(
     }
 }
 
-void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resources &resources,
-                                              EmoteManager &emoteManager,
-                                              const Resources::Channel &channelResources)
+void TwitchMessageBuilder::parseTwitchBadges()
 {
+    const auto &channelResources = this->resources.channels[this->roomID];
+
+    auto iterator = this->tags.find("badges");
+
+    if (iterator == this->tags.end()) {
+        // No badges in this message
+        return;
+    }
+
+    QStringList badges = iterator.value().toString().split(',');
+
     for (QString badge : badges) {
         if (badge.isEmpty()) {
             continue;
         }
 
         if (badge.startsWith("bits/")) {
-            if (!resources.dynamicBadgesLoaded) {
+            if (!this->resources.dynamicBadgesLoaded) {
                 // Do nothing
                 continue;
             }
@@ -377,7 +383,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             std::string versionKey = cheerAmountQS.toStdString();
 
             try {
-                auto &badgeSet = resources.badgeSets.at("bits");
+                auto &badgeSet = this->resources.badgeSets.at("bits");
 
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);
@@ -395,33 +401,33 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                          << ". Exception: " << e.what();
             }
         } else if (badge == "staff/1") {
-            appendWord(Word(resources.badgeStaff, Word::BadgeGlobalAuthority, QString(),
+            appendWord(Word(this->resources.badgeStaff, Word::BadgeGlobalAuthority, QString(),
                             QString("Twitch Staff")));
         } else if (badge == "admin/1") {
-            appendWord(Word(resources.badgeAdmin, Word::BadgeGlobalAuthority, QString(),
+            appendWord(Word(this->resources.badgeAdmin, Word::BadgeGlobalAuthority, QString(),
                             QString("Twitch Admin")));
         } else if (badge == "global_mod/1") {
-            appendWord(Word(resources.badgeGlobalModerator, Word::BadgeGlobalAuthority, QString(),
-                            QString("Global Moderator")));
+            appendWord(Word(this->resources.badgeGlobalModerator, Word::BadgeGlobalAuthority,
+                            QString(), QString("Global Moderator")));
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            appendWord(Word(resources.badgeModerator, Word::BadgeChannelAuthority, QString(),
+            appendWord(Word(this->resources.badgeModerator, Word::BadgeChannelAuthority, QString(),
                             QString("Channel Moderator")));  // custom badge
         } else if (badge == "turbo/1") {
-            appendWord(Word(resources.badgeTurbo, Word::BadgeVanity, QString(),
+            appendWord(Word(this->resources.badgeTurbo, Word::BadgeVanity, QString(),
                             QString("Turbo Subscriber")));
         } else if (badge == "broadcaster/1") {
-            appendWord(Word(resources.badgeBroadcaster, Word::BadgeChannelAuthority, QString(),
-                            QString("Channel Broadcaster")));
+            appendWord(Word(this->resources.badgeBroadcaster, Word::BadgeChannelAuthority,
+                            QString(), QString("Channel Broadcaster")));
         } else if (badge == "premium/1") {
-            appendWord(Word(resources.badgePremium, Word::BadgeVanity, QString(),
+            appendWord(Word(this->resources.badgePremium, Word::BadgeVanity, QString(),
                             QString("Twitch Prime")));
 
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    appendWord(Word(resources.badgeVerified, Word::BadgeVanity, QString(),
+                    appendWord(Word(this->resources.badgeVerified, Word::BadgeVanity, QString(),
                                     "Twitch Verified"));
                 } break;
                 default: {
@@ -454,7 +460,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             }
 
         } else {
-            if (!resources.dynamicBadgesLoaded) {
+            if (!this->resources.dynamicBadgesLoaded) {
                 // Do nothing
                 continue;
             }
@@ -472,7 +478,7 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
             std::string versionKey = parts[1].toStdString();
 
             try {
-                auto &badgeSet = resources.badgeSets.at(badgeSetKey);
+                auto &badgeSet = this->resources.badgeSets.at(badgeSetKey);
 
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);

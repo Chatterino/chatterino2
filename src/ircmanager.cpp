@@ -263,12 +263,16 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
     this->onPrivateMessage.invoke(message);
     auto c = this->channelManager.getChannel(message->target().mid(1));
 
-    if (c != nullptr) {
-        messages::MessageParseArgs args;
-
-        c->addMessage(twitch::TwitchMessageBuilder::parse(message, c.get(), args, this->resources,
-                                                          this->emoteManager, this->windowManager));
+    if (!c) {
+        return;
     }
+
+    messages::MessageParseArgs args;
+
+    twitch::TwitchMessageBuilder builder(c.get(), this->resources, this->emoteManager,
+                                         this->windowManager, message, args);
+
+    c->addMessage(builder.parse());
 }
 
 void IrcManager::messageReceived(Communi::IrcMessage *message)
