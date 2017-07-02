@@ -112,8 +112,7 @@ void ChatWidget::setChannelName(const QString &_newChannelName)
     this->header.updateChannelText();
 
     // update view
-    this->view.layoutMessages();
-    this->view.update();
+    this->layoutMessages(true);
 }
 
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
@@ -177,9 +176,9 @@ void ChatWidget::showChangeChannelPopup()
     }
 }
 
-void ChatWidget::layoutMessages()
+void ChatWidget::layoutMessages(bool forceUpdate)
 {
-    if (this->view.layoutMessages()) {
+    if (this->view.layoutMessages() || forceUpdate) {
         this->view.update();
     }
 }
@@ -249,7 +248,11 @@ void ChatWidget::doPopup()
 
 void ChatWidget::doClearChat()
 {
-    qDebug() << "[UNIMPLEMENTED] Clear chat";
+    // Clear all stored messages in this chat widget
+    this->messages.clear();
+
+    // Layout chat widget messages, and force an update regardless if there are no messages
+    this->layoutMessages(true);
 }
 
 void ChatWidget::doOpenChannel()

@@ -51,7 +51,7 @@ public:
 
     void showChangeChannelPopup();
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
-    void layoutMessages();
+    void layoutMessages(bool forceUpdate = false);
     void updateGifEmotes();
 
     void giveFocus();
