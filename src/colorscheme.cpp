@@ -1,7 +1,6 @@
 #define LOOKUP_COLOR_COUNT 360
 
 #include "colorscheme.hpp"
-#include "settingsmanager.hpp"
 #include "windowmanager.hpp"
 
 #include <QColor>
@@ -28,14 +27,16 @@ double getMultiplierByTheme(const std::string &themeName)
 }  // namespace detail
 
 ColorScheme::ColorScheme(WindowManager &windowManager)
+    : themeName("/appearance/theme/name", "Dark")
+    , themeHue("/appearance/theme/hue", 0.0)
 {
     this->update();
 
-    SettingsManager::getInstance().themeName.getValueChangedSignal().connect([=](const auto &) {
+    this->themeName.getValueChangedSignal().connect([=](const auto &) {
         this->update();  //
     });
 
-    SettingsManager::getInstance().themeHue.getValueChangedSignal().connect([=](const auto &) {
+    this->themeHue.getValueChangedSignal().connect([=](const auto &) {
         this->update();  //
     });
 
@@ -46,9 +47,7 @@ ColorScheme::ColorScheme(WindowManager &windowManager)
 
 void ColorScheme::update()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
-
-    this->setColors(settings.themeHue, detail::getMultiplierByTheme(settings.themeName));
+    this->setColors(this->themeHue, detail::getMultiplierByTheme(this->themeName));
 }
 
 // hue: theme color (0 - 1)

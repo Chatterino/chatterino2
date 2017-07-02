@@ -11,13 +11,11 @@ class SettingsDialog;
 class SettingsDialogTab : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(bool getSelected READ getSelected WRITE setSelected NOTIFY selectedChanged)
 
 public:
-    SettingsDialogTab(SettingsDialog *_dialog, QString _label, QString imageRes);
+    SettingsDialogTab(SettingsDialog *dialog, QString _label, QString imageFileName);
 
     void setSelected(bool selected);
-    bool getSelected() const;
     QWidget *getWidget();
     void setWidget(QWidget *widget);
 
@@ -28,13 +26,16 @@ private:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *event);
 
-    QWidget *_widget;
-    QString _label;
-    QImage _image;
+    struct {
+        QWidget *widget;
+        QString labelText;
+        QImage image;
+    } ui;
 
-    SettingsDialog *_dialog;
+    // Parent settings dialog
+    SettingsDialog *dialog;
 
-    bool _selected;
+    bool selected = false;
 };
 
 }  // namespace widgets

@@ -42,8 +42,6 @@ public:
     pajlada::Settings::Setting<bool> showTimestamps;
     pajlada::Settings::Setting<bool> showTimestampSeconds;
     pajlada::Settings::Setting<bool> showBadges;
-    pajlada::Settings::Setting<std::string> themeName;
-    pajlada::Settings::Setting<double> themeHue;
 
     // Settings
     Setting<QString> selectedUser;

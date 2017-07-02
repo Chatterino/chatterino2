@@ -19,47 +19,48 @@ namespace chatterino {
 namespace widgets {
 
 SettingsDialog::SettingsDialog()
-    : _snapshot(SettingsManager::getInstance().createSnapshot())
+    : snapshot(SettingsManager::getInstance().createSnapshot())
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
-    setStyleSheet(styleSheet);
+    this->setStyleSheet(styleSheet);
 
     QPalette palette;
     palette.setColor(QPalette::Background, QColor("#444"));
-    setPalette(palette);
+    this->setPalette(palette);
 
-    _pageStack.setObjectName("pages");
+    this->ui.pageStack.setObjectName("pages");
 
-    setLayout(&_vbox);
+    this->setLayout(&this->ui.vbox);
 
-    _vbox.addLayout(&_hbox);
+    this->ui.vbox.addLayout(&this->ui.hbox);
 
-    _vbox.addWidget(&_buttonBox);
+    this->ui.vbox.addWidget(&this->ui.buttonBox);
 
     auto tabWidget = new QWidget();
     tabWidget->setObjectName("tabWidget");
 
-    tabWidget->setLayout(&_tabs);
+    tabWidget->setLayout(&this->ui.tabs);
     tabWidget->setFixedWidth(200);
 
-    _hbox.addWidget(tabWidget);
-    _hbox.addLayout(&_pageStack);
+    this->ui.hbox.addWidget(tabWidget);
+    this->ui.hbox.addLayout(&this->ui.pageStack);
 
-    _buttonBox.addButton(&_okButton, QDialogButtonBox::ButtonRole::AcceptRole);
-    _buttonBox.addButton(&_cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
+    this->ui.buttonBox.addButton(&this->ui.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
+    this->ui.buttonBox.addButton(&this->ui.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
 
-    QObject::connect(&_okButton, &QPushButton::clicked, this, &SettingsDialog::okButtonClicked);
-    QObject::connect(&_cancelButton, &QPushButton::clicked, this,
+    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this,
+                     &SettingsDialog::okButtonClicked);
+    QObject::connect(&this->ui.cancelButton, &QPushButton::clicked, this,
                      &SettingsDialog::cancelButtonClicked);
 
-    _okButton.setText("OK");
-    _cancelButton.setText("Cancel");
+    this->ui.okButton.setText("OK");
+    this->ui.cancelButton.setText("Cancel");
 
-    resize(600, 500);
+    this->resize(600, 500);
 
-    addTabs();
+    this->addTabs();
 }
 
 void SettingsDialog::addTabs()
@@ -161,7 +162,9 @@ void SettingsDialog::addTabs()
             slider->setMinimum(0);
             slider->setMaximum(1000);
 
-            slider->setValue(std::min(std::max(settings.themeHue.getValue(), 0.0), 1.0) * 1000);
+            pajlada::Settings::Setting<double> themeHue("/appearance/theme/hue");
+
+            slider->setValue(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 1000);
 
             hbox->addWidget(slider);
 
@@ -172,12 +175,15 @@ void SettingsDialog::addTabs()
 
             form->addRow("Theme color:", hbox);
 
-            QObject::connect(slider, &QSlider::valueChanged, this, [&settings, button](int value) {
-                settings.themeHue.setValue(value / 1000.0);
+            QObject::connect(slider, &QSlider::valueChanged, this, [button](int value) mutable {
+                double newValue = value / 1000.0;
+                pajlada::Settings::Setting<double> themeHue("/appearance/theme/hue");
+
+                themeHue.setValue(newValue);
 
                 QPalette pal = button->palette();
                 QColor color;
-                color.setHsvF(settings.themeHue.getValue(), 1.0, 1.0, 1.0);
+                color.setHsvF(newValue, 1.0, 1.0, 1.0);
                 pal.setColor(QPalette::Button, color);
                 button->setAutoFillBackground(true);
                 button->setPalette(pal);
@@ -193,20 +199,29 @@ void SettingsDialog::addTabs()
         form->addRow("", hidePreferencesButton);
         form->addRow("", hideUserButton);
 
-        // Theme name
-        combo->addItem("White");
-        combo->addItem("Light");
-        combo->addItem("Dark");
-        combo->addItem("Black");
+        {
+            // Theme name
+            combo->addItems({
+                "White",  //
+                "Light",  //
+                "Dark",   //
+                "Black",  //
+            });
+            // combo->addItem("White");
+            // combo->addItem("Light");
+            // combo->addItem("Dark");
+            // combo->addItem("Black");
 
-        auto xD = QString::fromStdString(settings.themeName);
+            QString currentComboText = QString::fromStdString(
+                pajlada::Settings::Setting<std::string>::get("/appearance/theme/name"));
 
-        combo->setCurrentText(xD);
+            combo->setCurrentText(currentComboText);
 
-        QObject::connect(combo, &QComboBox::currentTextChanged, this,
-                         [&settings](const QString &value) {
-                             settings.themeName.setValue(value.toStdString());  //
-                         });
+            QObject::connect(combo, &QComboBox::currentTextChanged, this, [](const QString &value) {
+                pajlada::Settings::Setting<std::string>::set("/appearance/theme/name",
+                                                             value.toStdString());
+            });
+        }
 
         group->setLayout(form);
 
@@ -317,7 +332,7 @@ void SettingsDialog::addTabs()
     addTab(vbox, "Whispers", ":/images/Message_16xLG.png");
 
     // Add stretch
-    _tabs.addStretch(1);
+    this->ui.tabs.addStretch(1);
 }
 
 void SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
@@ -330,27 +345,27 @@ void SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
 
     tab->setWidget(widget);
 
-    _tabs.addWidget(tab, 0, Qt::AlignTop);
+    this->ui.tabs.addWidget(tab, 0, Qt::AlignTop);
 
-    _pageStack.addWidget(widget);
+    this->ui.pageStack.addWidget(widget);
 
-    if (_tabs.count() == 1) {
-        select(tab);
+    if (this->ui.tabs.count() == 1) {
+        this->select(tab);
     }
 }
 
 void SettingsDialog::select(SettingsDialogTab *tab)
 {
-    _pageStack.setCurrentWidget(tab->getWidget());
+    this->ui.pageStack.setCurrentWidget(tab->getWidget());
 
-    if (_selectedTab != nullptr) {
-        _selectedTab->setSelected(false);
-        _selectedTab->setStyleSheet("color: #FFF");
+    if (this->selectedTab != nullptr) {
+        this->selectedTab->setSelected(false);
+        this->selectedTab->setStyleSheet("color: #FFF");
     }
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #555; color: #FFF");
-    _selectedTab = tab;
+    this->selectedTab = tab;
 }
 
 void SettingsDialog::showDialog()
@@ -371,8 +386,9 @@ QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &s
     // Set checkbox initial state
     checkbox->setChecked(setting.get());
 
-    QObject::connect(checkbox, &QCheckBox::toggled, this,
-                     [&setting](bool state) { setting.set(state); });
+    QObject::connect(checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
+        setting.set(state);  //
+    });
 
     return checkbox;
 }
@@ -400,7 +416,8 @@ void SettingsDialog::okButtonClicked()
 
 void SettingsDialog::cancelButtonClicked()
 {
-    _snapshot.apply();
+    // TODO: Re-implement the snapshot feature properly
+    this->snapshot.apply();
 
     this->close();
 }

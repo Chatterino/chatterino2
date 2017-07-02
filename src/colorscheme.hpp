@@ -3,6 +3,7 @@
 #include <QBrush>
 #include <QColor>
 #include <boost/signals2.hpp>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 
@@ -75,6 +76,9 @@ public:
     boost::signals2::signal<void()> updated;
 
 private:
+    pajlada::Settings::Setting<std::string> themeName;
+    pajlada::Settings::Setting<double> themeHue;
+
     void setColors(double hue, double multiplier);
 
     double middleLookupTable[360] = {};
@@ -83,7 +87,7 @@ private:
     void fillLookupTableValues(double (&array)[360], double from, double to, double fromValue,
                                double toValue);
 
-    bool lightTheme;
+    bool lightTheme = false;
 };
 
 }  // namespace chatterino

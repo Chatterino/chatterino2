@@ -7,41 +7,39 @@
 namespace chatterino {
 namespace widgets {
 
-SettingsDialogTab::SettingsDialogTab(SettingsDialog *dialog, QString label, QString imageRes)
-    : _label(label)
-    , _image(QImage(imageRes))
-    , _dialog(dialog)
-    , _selected(false)
+SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, QString _labelText,
+                                     QString imageFileName)
+    : dialog(_dialog)
 {
-    setFixedHeight(32);
+    this->ui.labelText = _labelText;
+    this->ui.image.load(imageFileName);
 
-    setCursor(QCursor(Qt::PointingHandCursor));
+    // XXX: DPI (not sure if this is auto-adjusted with custom DPI)
+    this->setFixedHeight(32);
 
-    setStyleSheet("color: #FFF");
+    this->setCursor(QCursor(Qt::PointingHandCursor));
+
+    this->setStyleSheet("color: #FFF");
 }
 
-void SettingsDialogTab::setSelected(bool selected)
+void SettingsDialogTab::setSelected(bool _selected)
 {
-    if (_selected == selected)
+    if (this->selected == _selected) {
         return;
+    }
 
-    _selected = selected;
+    this->selected = _selected;
     emit selectedChanged(selected);
-}
-
-bool SettingsDialogTab::getSelected() const
-{
-    return _selected;
 }
 
 QWidget *SettingsDialogTab::getWidget()
 {
-    return _widget;
+    return this->ui.widget;
 }
 
 void SettingsDialogTab::setWidget(QWidget *widget)
 {
-    _widget = widget;
+    this->ui.widget = widget;
 }
 
 void SettingsDialogTab::paintEvent(QPaintEvent *)
@@ -51,15 +49,15 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     QStyleOption opt;
     opt.init(this);
 
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
+    this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (height() - _image.width()) / 2;
+    int a = (this->height() - this->ui.image.width()) / 2;
 
-    painter.drawImage(a, a, _image);
+    painter.drawImage(a, a, this->ui.image);
 
-    a = a + a + _image.width();
+    a = a + a + this->ui.image.width();
 
-    painter.drawText(QRect(a, 0, width() - a, height()), _label,
+    painter.drawText(QRect(a, 0, width() - a, height()), this->ui.labelText,
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
@@ -69,7 +67,7 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    _dialog->select(this);
+    this->dialog->select(this);
 }
 
 }  // namespace widgets

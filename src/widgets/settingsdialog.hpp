@@ -30,21 +30,23 @@ public:
     static void showDialog();
 
 private:
-    SettingsSnapshot _snapshot;
+    SettingsSnapshot snapshot;
 
-    QVBoxLayout _tabs;
-    QVBoxLayout _vbox;
-    QHBoxLayout _hbox;
-    QStackedLayout _pageStack;
-    QDialogButtonBox _buttonBox;
-    QPushButton _okButton;
-    QPushButton _cancelButton;
+    struct {
+        QVBoxLayout tabs;
+        QVBoxLayout vbox;
+        QHBoxLayout hbox;
+        QStackedLayout pageStack;
+        QDialogButtonBox buttonBox;
+        QPushButton okButton;
+        QPushButton cancelButton;
+    } ui;
 
     void addTab(QLayout *layout, QString title, QString imageRes);
 
     void addTabs();
 
-    SettingsDialogTab *_selectedTab = nullptr;
+    SettingsDialogTab *selectedTab = nullptr;
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
