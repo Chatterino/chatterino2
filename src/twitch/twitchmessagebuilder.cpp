@@ -50,6 +50,10 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
     std::string roomID;
     if (iterator != std::end(tags)) {
         roomID = iterator.value().toString().toStdString();
+
+        if (channel->roomID.empty()) {
+            channel->roomID = roomID;
+        }
     }
 
     // timestamps

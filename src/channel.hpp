@@ -37,7 +37,6 @@ public:
 
     bool isEmpty() const;
     const QString &getName() const;
-    int getRoomID() const;
     const QString &getSubLink() const;
     const QString &getChannelLink() const;
     const QString &getPopoutPlayerLink() const;
@@ -53,6 +52,8 @@ public:
 
     void sendMessage(const QString &message);
 
+    std::string roomID;
+
 private:
     WindowManager &windowManager;
     EmoteManager &emoteManager;
@@ -62,7 +63,6 @@ private:
     messages::LimitedQueue<messages::SharedMessage> _messages;
 
     QString _name;
-    int _roomID;
 
     ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmotes;
     ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzChannelEmotes;

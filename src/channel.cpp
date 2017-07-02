@@ -64,11 +64,6 @@ const QString &Channel::getName() const
     return _name;
 }
 
-int Channel::getRoomID() const
-{
-    return _roomID;
-}
-
 const QString &Channel::getSubLink() const
 {
     return _subLink;
