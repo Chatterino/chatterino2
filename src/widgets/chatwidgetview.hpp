@@ -35,9 +35,9 @@ protected:
     virtual void paintEvent(QPaintEvent *) override;
     virtual void wheelEvent(QWheelEvent *event) override;
 
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
     bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &message,
                          QPoint &relativePos);

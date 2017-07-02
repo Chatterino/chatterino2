@@ -57,7 +57,7 @@ public:
     void giveFocus();
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+    virtual void paintEvent(QPaintEvent *) override;
 
 private:
     ChannelManager &channelManager;

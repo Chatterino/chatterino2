@@ -39,8 +39,9 @@ private:
     QLabel textLengthLabel;
     ChatWidgetHeaderButton emotesLabel;
 
+    virtual void refreshTheme() override;
+
 private slots:
-    void refreshTheme();
     void setMessageLengthVisisble(bool value)
     {
         textLengthLabel.setHidden(!value);

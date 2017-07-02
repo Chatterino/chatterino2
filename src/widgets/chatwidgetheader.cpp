@@ -21,7 +21,8 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
 {
     this->setFixedHeight(32);
 
-    this->updateColors();
+    this->refreshTheme();
+
     this->updateChannelText();
 
     this->setLayout(&this->hbox);
@@ -65,16 +66,6 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->rightLabel.setMinimumWidth(this->height());
     this->rightLabel.getLabel().setTextFormat(Qt::RichText);
     this->rightLabel.getLabel().setText("ayy");
-}
-
-void ChatWidgetHeader::updateColors()
-{
-    QPalette palette;
-    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
-
-    this->leftLabel.setPalette(palette);
-    this->channelNameLabel.setPalette(palette);
-    this->rightLabel.setPalette(palette);
 }
 
 void ChatWidgetHeader::updateChannelText()
@@ -149,6 +140,16 @@ void ChatWidgetHeader::leftButtonClicked()
 
 void ChatWidgetHeader::rightButtonClicked()
 {
+}
+
+void ChatWidgetHeader::refreshTheme()
+{
+    QPalette palette;
+    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
+
+    this->leftLabel.setPalette(palette);
+    this->channelNameLabel.setPalette(palette);
+    this->rightLabel.setPalette(palette);
 }
 
 void ChatWidgetHeader::menuMoveSplit()

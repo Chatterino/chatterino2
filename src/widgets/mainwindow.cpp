@@ -43,9 +43,7 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     layout->setMargin(0);
     //    }
 
-    QPalette palette;
-    palette.setColor(QPalette::Background, this->colorScheme.TabPanelBackground);
-    setPalette(palette);
+    this->refreshTheme();
 
     if (this->windowGeometry->isFilled()) {
         // Load geometry from settings file
@@ -160,10 +158,17 @@ Notebook &MainWindow::getNotebook()
     return this->notebook;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     // Save closing window position
     this->windowGeometry = this->geometry();
+}
+
+void MainWindow::refreshTheme()
+{
+    QPalette palette;
+    palette.setColor(QPalette::Background, this->colorScheme.TabPanelBackground);
+    this->setPalette(palette);
 }
 
 }  // namespace widgets

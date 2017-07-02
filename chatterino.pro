@@ -93,7 +93,8 @@ SOURCES += \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \
     src/widgets/accountpopup.cpp \
-    src/messagefactory.cpp
+    src/messagefactory.cpp \
+    src/widgets/basewidget.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \

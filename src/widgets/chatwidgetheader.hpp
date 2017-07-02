@@ -28,9 +28,6 @@ class ChatWidgetHeader : public BaseWidget
 public:
     explicit ChatWidgetHeader(ChatWidget *_chatWidget);
 
-    // Update palette from global color scheme
-    void updateColors();
-
     // Update channel text from chat widget
     void updateChannelText();
 
@@ -61,6 +58,8 @@ private:
 
     void leftButtonClicked();
     void rightButtonClicked();
+
+    virtual void refreshTheme() override;
 
 public slots:
     void menuMoveSplit();

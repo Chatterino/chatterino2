@@ -118,7 +118,7 @@ void ColorScheme::setColors(double hue, double multiplier)
                       "border:" + TabSelectedBackground.name() + ";" + "color:" + Text.name() +
                       ";" + "selection-background-color:" + TabSelectedBackground.name();
 
-    updated();
+    this->updated();
 }
 
 void ColorScheme::fillLookupTableValues(double (&array)[360], double from, double to,

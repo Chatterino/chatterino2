@@ -44,6 +44,8 @@ protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
+    virtual void refreshTheme() override;
+
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
 

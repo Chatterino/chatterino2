@@ -68,7 +68,6 @@ public:
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];
 
-    void init(WindowManager &windowManager);
     void normalizeColor(QColor &color);
 
     void update();
