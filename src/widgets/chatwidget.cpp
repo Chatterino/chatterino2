@@ -224,7 +224,7 @@ boost::property_tree::ptree ChatWidget::save()
 void ChatWidget::doAddSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
-    page->addChat();
+    page->addChat(true);
 }
 
 void ChatWidget::doCloseSplit()
