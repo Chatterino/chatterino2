@@ -41,8 +41,6 @@ public:
     bool tryRemoveIgnoredUser(QString const &username, QString &errorMessage);
     void removeIgnoredUser(QString const &username);
 
-    QNetworkAccessManager &getAccessManager();
-
     void sendMessage(const QString &channelName, const QString &message);
 
     void joinChannel(const QString &channelName);
@@ -71,7 +69,7 @@ private:
     QMap<QString, bool> _twitchBlockedUsers;
     QMutex _twitchBlockedUsersMutex;
 
-    QNetworkAccessManager _accessManager;
+    QNetworkAccessManager networkAccessManager;
 
     // methods
     Communi::IrcConnection *createConnection(bool doRead);

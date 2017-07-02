@@ -43,16 +43,16 @@ public:
     static std::pair<int, int> dropPosition;
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+    virtual void paintEvent(QPaintEvent *) override;
 
-    void enterEvent(QEvent *) override;
-    void leaveEvent(QEvent *) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void enterEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void dragMoveEvent(QDragMoveEvent *event) override;
+    virtual void dragLeaveEvent(QDragLeaveEvent *event) override;
+    virtual void dropEvent(QDropEvent *event) override;
 
 private:
     struct DropRegion {
@@ -68,13 +68,16 @@ private:
 
     NotebookTab *tab;
 
-    QVBoxLayout _parentbox;
-    QHBoxLayout _hbox;
+    struct {
+        QVBoxLayout parentLayout;
 
-    std::vector<ChatWidget *> _chatWidgets;
-    std::vector<DropRegion> _dropRegions;
+        QHBoxLayout hbox;
+    } ui;
 
-    NotebookPageDropPreview _preview;
+    std::vector<ChatWidget *> chatWidgets;
+    std::vector<DropRegion> dropRegions;
+
+    NotebookPageDropPreview dropPreview;
 
     void setPreviewRect(QPoint mousePos);
 

@@ -137,24 +137,24 @@ void IrcManager::refreshTwitchEmotes(const QString &username, const QString &oau
                 "/emotes?oauth_token=" + oauthToken + "&client_id=" + oauthClient);
 
     if (true) {
-        util::urlFetchJSONTimeout(url,
-                                  [=](QJsonObject &root) {
-            // nextLink =
-            // root.value("_links").toObject().value("next").toString();
+        util::urlFetchJSONTimeout(
+            url,
+            [=](QJsonObject &root) {
+                // nextLink =
+                // root.value("_links").toObject().value("next").toString();
 
-            auto blocks = root.value("blocks").toArray();
+                auto blocks = root.value("blocks").toArray();
 
-            _twitchBlockedUsersMutex.lock();
-            for (QJsonValue block : blocks) {
-                QJsonObject user = block.toObject().value("user").toObject();
-                // display_name
-                _twitchBlockedUsers.insert(
-                            user.value("name").toString().toLower(), true);
-            }
-            _twitchBlockedUsersMutex.unlock();
-            qDebug() << "XD";
-        },
-        3000, &this->_accessManager);
+                _twitchBlockedUsersMutex.lock();
+                for (QJsonValue block : blocks) {
+                    QJsonObject user = block.toObject().value("user").toObject();
+                    // display_name
+                    _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
+                }
+                _twitchBlockedUsersMutex.unlock();
+                qDebug() << "XD";
+            },
+            3000, &this->networkAccessManager);
     }
 }
 
@@ -341,7 +341,7 @@ bool IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessag
              "&client_id=" + _account.getOAuthClient());
 
     QNetworkRequest request(url);
-    auto reply = _accessManager.put(request, QByteArray());
+    auto reply = this->networkAccessManager.put(request, QByteArray());
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
@@ -373,7 +373,7 @@ bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMes
              "&client_id=" + _account.getOAuthClient());
 
     QNetworkRequest request(url);
-    auto reply = _accessManager.deleteResource(request);
+    auto reply = this->networkAccessManager.deleteResource(request);
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
@@ -398,8 +398,4 @@ void IrcManager::removeIgnoredUser(QString const &username)
     }
 }
 
-QNetworkAccessManager &IrcManager::getAccessManager()
-{
-    return _accessManager;
-}
 }  // namespace chatterino
