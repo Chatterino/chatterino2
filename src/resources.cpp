@@ -86,13 +86,15 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + QString::fromStdString(roomID) +
                   "/display?language=en";
 
-    util::urlFetchJSON(url, [this](QJsonObject &root) {
+    util::urlFetchJSON(url, [this, roomID](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
+
+        Resources::Channel &ch = this->channels[roomID];
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
             QJsonObject versions = it.value().toObject().value("versions").toObject();
 
-            auto &badgeSet = this->badgeSets[it.key().toStdString()];
+            auto &badgeSet = ch.badgeSets[it.key().toStdString()];
             auto &versionsMap = badgeSet.versions;
 
             for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
@@ -104,7 +106,7 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
             }
         }
 
-        this->dynamicBadgesLoaded = true;
+        ch.loaded = true;
     });
 }
 

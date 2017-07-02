@@ -425,15 +425,30 @@ void TwitchMessageBuilder::appendTwitchBadges(const QStringList &badges, Resourc
                 } break;
             }
         } else if (badge.startsWith("subscriber/")) {
-            qDebug() << "Subscriber badge:" << badge;
-            int index = badge.midRef(11).toInt();
-            // TODO: Implement subscriber badges here
-            switch (index) {
-                default: {
-                    // printf("[TwitchMessageBuilder] Unhandled subscriber badge index: %d\n",
-                    // index);
-                } break;
+            if (channelResources.loaded == false) {
+                qDebug() << "Channel resources are not loaded, can't add the subscriber badge";
+                continue;
             }
+
+            try {
+                const auto &badgeSet = channelResources.badgeSets.at("subscriber");
+
+                std::string versionKey = badge.mid(11).toStdString();
+
+                try {
+                    auto &badgeVersion = badgeSet.versions.at(versionKey);
+
+                    appendWord(
+                        Word(badgeVersion.badgeImage1x, Word::Type::BadgeSubscription, QString(),
+                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+                } catch (const std::exception &e) {
+                    qDebug() << "Exception caught:" << e.what()
+                             << "when trying to fetch badge version " << versionKey.c_str();
+                }
+            } catch (const std::exception &e) {
+                qDebug() << "No channel badge set with key `subscriber`. Exception: " << e.what();
+            }
+
         } else {
             if (!resources.dynamicBadgesLoaded) {
                 // Do nothing
