@@ -1,6 +1,5 @@
 #include "twitch/twitchmessagebuilder.hpp"
 #include "colorscheme.hpp"
-#include "emojis.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
 #include "resources.hpp"
@@ -190,6 +189,7 @@ SharedMessage TwitchMessageBuilder::parse(const Communi::IrcPrivateMessage *ircM
         // split words
         std::vector<std::tuple<LazyLoadedImage *, QString>> parsed;
 
+        // Parse emojis and take all non-emojis and put them in parsed as full text-words
         emoteManager.parseEmojis(parsed, split);
 
         for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {

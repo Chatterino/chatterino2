@@ -188,74 +188,102 @@ void EmoteManager::loadEmojis()
         EmojiData emojiData{
             QString::fromUcs4(unicodeBytes, numUnicodeBytes),  //
             code,                                              //
+            shortCode,                                         //
         };
 
-        shortCodeToEmoji.insert(shortCode, emojiData);
-        emojiToShortCode.insert(emojiData.value, shortCode);
+        this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
+
+        this->emojiFirstByte[emojiData.value.at(0)].append(emojiData);
     }
-
-    /*
-    for (auto const &emoji : shortCodeToEmoji.toStdMap()) {
-        auto iter = firstEmojiChars.find(emoji.first.at(0));
-
-        if (iter != firstEmojiChars.end()) {
-            iter.value().insert(emoji.second.value, emoji.second.value);
-            continue;
-        }
-
-        firstEmojiChars.insert(emoji.first.at(0),
-                               QMap<QString, QString>{{emoji.second.value, emoji.second.code}});
-    }
-    */
 }
 
 void EmoteManager::parseEmojis(
-    std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector, const QString &text)
+    std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &parsedWords, const QString &text)
 {
-    // TODO(pajlada): Add this method to EmoteManager instead
-    long lastSlice = 0;
+    int lastParsedEmojiEndIndex = 0;
 
     for (auto i = 0; i < text.length() - 1; i++) {
-        if (!text.at(i).isLowSurrogate()) {
-            auto iter = firstEmojiChars.find(text.at(i));
+        const QChar character = text.at(i);
 
-            if (iter != firstEmojiChars.end()) {
-                for (auto j = std::min(8, text.length() - i); j > 0; j--) {
-                    QString emojiString = text.mid(i, 2);
-                    auto emojiIter = iter.value().find(emojiString);
+        if (character.isLowSurrogate()) {
+            continue;
+        }
 
-                    if (emojiIter != iter.value().end()) {
-                        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
-                                      "emojione/2.2.6/assets/png/" +
-                                      emojiIter.value() + ".png";
+        auto it = this->emojiFirstByte.find(character);
+        if (it == this->emojiFirstByte.end()) {
+            // No emoji starts with this character
+            continue;
+        }
 
-                        if (i - lastSlice != 0) {
-                            vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-                                nullptr, text.mid(lastSlice, i - lastSlice)));
-                        }
+        const QVector<EmojiData> possibleEmojis = it.value();
 
-                        vector.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-                            emojis.getOrAdd(url,
-                                            [this, &url] {
-                                                return new LazyLoadedImage(
-                                                    *this, this->windowManager, url, 0.35);  //
-                                            }),
-                            QString()));
+        int remainingCharacters = text.length() - i;
 
-                        i += j - 1;
+        EmojiData matchedEmoji;
 
-                        lastSlice = i + 1;
+        int matchedEmojiLength = 0;
 
-                        break;
-                    }
+        for (const EmojiData &emoji : possibleEmojis) {
+            if (remainingCharacters < emoji.value.length()) {
+                // It cannot be this emoji, there's not enough space for it
+                continue;
+            }
+
+            bool match = true;
+
+            for (int j = 1; j < emoji.value.length(); ++j) {
+                if (text.at(i + j) != emoji.value.at(j)) {
+                    match = false;
+
+                    break;
                 }
             }
+
+            if (match) {
+                matchedEmoji = emoji;
+                matchedEmojiLength = emoji.value.length();
+
+                break;
+            }
         }
+
+        if (matchedEmojiLength == 0) {
+            continue;
+        }
+
+        int currentParsedEmojiFirstIndex = i;
+        int currentParsedEmojiEndIndex = i + (matchedEmojiLength);
+
+        int charactersFromLastParsedEmoji = currentParsedEmojiFirstIndex - lastParsedEmojiEndIndex;
+
+        if (charactersFromLastParsedEmoji > 0) {
+            // Add characters inbetween emojis
+            parsedWords.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+                nullptr, text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji)));
+        }
+
+        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
+                      "emojione/2.2.6/assets/png/" +
+                      matchedEmoji.code + ".png";
+
+        // Create or fetch cached emoji image
+        auto emojiImage = this->emojiCache.getOrAdd(url, [this, &url] {
+            return new LazyLoadedImage(*this, this->windowManager, url, 0.35);  //
+        });
+
+        // Push the emoji as a word to parsedWords
+        parsedWords.push_back(
+            std::tuple<messages::LazyLoadedImage *, QString>(emojiImage, QString()));
+
+        lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
+
+        i += matchedEmojiLength - 1;
     }
 
-    if (lastSlice < text.length()) {
-        vector.push_back(
-            std::tuple<messages::LazyLoadedImage *, QString>(nullptr, text.mid(lastSlice)));
+    if (lastParsedEmojiEndIndex < text.length()) {
+        // Add remaining characters
+        parsedWords.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
+            nullptr, text.mid(lastParsedEmojiEndIndex)));
     }
 }
 

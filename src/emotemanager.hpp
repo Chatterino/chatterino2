@@ -62,44 +62,42 @@ private:
     WindowManager &windowManager;
     Resources &resources;
 
-    // Emojis
-    // shortCodeToEmoji maps strings like ":sunglasses:" to the unicode character
-    QMap<QString, EmojiData> shortCodeToEmoji;
+    /// Emojis
+    // shortCodeToEmoji maps strings like "sunglasses" to its emoji
+    QMap<QString, EmojiData> emojiShortCodeToEmoji;
 
-    // emojiToShortCode maps the unicode character to the shortcode like ":sunglasses:"
-    QMap<QString, QString> emojiToShortCode;
+    // Maps the first character of the emoji unicode string to a vector of possible emojis
+    QMap<QChar, QVector<EmojiData>> emojiFirstByte;
 
-    // TODO(pajlada): Figure out what this is for
-    QMap<QChar, QMap<QString, QString>> firstEmojiChars;
-
-    ConcurrentMap<QString, messages::LazyLoadedImage *> emojis;
+    //            url      Emoji-one image
+    ConcurrentMap<QString, messages::LazyLoadedImage *> emojiCache;
 
     void loadEmojis();
 
 public:
-    void parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &vector,
+    void parseEmojis(std::vector<std::tuple<messages::LazyLoadedImage *, QString>> &parsedWords,
                      const QString &text);
 
 private:
-    // Twitch emotes
+    /// Twitch emotes
     ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
     ConcurrentMap<long, messages::LazyLoadedImage *> _twitchEmoteFromCache;
 
-    // BTTV emotes
+    /// BTTV emotes
     ConcurrentMap<QString, messages::LazyLoadedImage *> bttvChannelEmotes;
     ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvEmotes;
     ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmoteFromCaches;
 
     void loadBTTVEmotes();
 
-    // FFZ emotes
+    /// FFZ emotes
     ConcurrentMap<QString, messages::LazyLoadedImage *> ffzChannelEmotes;
     ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzEmotes;
     ConcurrentMap<int, messages::LazyLoadedImage *> _ffzChannelEmoteFromCaches;
 
     void loadFFZEmotes();
 
-    // Chatterino emotes
+    /// Chatterino emotes
     ConcurrentMap<QString, messages::LazyLoadedImage *> _chatterinoEmotes;
 
     // ???
