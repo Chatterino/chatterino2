@@ -46,14 +46,15 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
 
     QStringList list;
-    list.append("asd");
+    /*list.append("asd");
     list.append("asdf");
     list.append("asdg");
     list.append("asdh");
-
+*/
+    list << "Kappa" << "asd" << "asdf" << "asdg";
     QCompleter *completer = new QCompleter(list, &this->textInput);
 
-    completer->setWidget(&textInput);
+    this->textInput.setCompleter(completer);
 
     this->textInput.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
