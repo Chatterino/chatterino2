@@ -43,7 +43,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);
 
     this->refreshTheme();
-    this->setMessageLengthVisisble(SettingsManager::getInstance().showMessageLength.get());
+    this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
 
     QStringList list;
     list.append("asd");
@@ -76,7 +76,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     /* XXX(pajlada): FIX THIS
     QObject::connect(&Settings::getInstance().showMessageLength,
                      &BoolSetting::valueChanged, this,
-                     &ChatWidgetInput::setMessageLengthVisisble);
+                     &ChatWidgetInput::setMessageLengthVisible);
                      */
 }
 
@@ -86,7 +86,7 @@ ChatWidgetInput::~ChatWidgetInput()
     QObject::disconnect(
         &Settings::getInstance().getShowMessageLength(),
         &BoolSetting::valueChanged, this,
-        &ChatWidgetInput::setMessageLengthVisisble);
+        &ChatWidgetInput::setMessageLengthVisible);
         */
 }
 
