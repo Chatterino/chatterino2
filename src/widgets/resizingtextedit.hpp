@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCompleter>
 #include <QKeyEvent>
 #include <QTextEdit>
 #include <boost/signals2.hpp>
@@ -7,45 +8,26 @@
 class ResizingTextEdit : public QTextEdit
 {
 public:
-    ResizingTextEdit()
-        : keyPressed()
-    {
-        auto sizePolicy = this->sizePolicy();
-        sizePolicy.setHeightForWidth(true);
-        sizePolicy.setVerticalPolicy(QSizePolicy::Preferred);
-        this->setSizePolicy(sizePolicy);
+    ResizingTextEdit();
 
-        QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
-    }
+    QSize sizeHint() const override;
 
-    QSize sizeHint() const override
-    {
-        return QSize(this->width(), this->heightForWidth(this->width()));
-    }
-
-    bool hasHeightForWidth() const override
-    {
-        return true;
-    }
+    bool hasHeightForWidth() const override;
 
     boost::signals2::signal<void(QKeyEvent *)> keyPressed;
 
+    void setCompleter(QCompleter *c);
+    QCompleter *getCompleter() const;
+
 protected:
-    int heightForWidth(int) const override
-    {
-        auto margins = this->contentsMargins();
+    int heightForWidth(int) const override;
+    void keyPressEvent(QKeyEvent *event) override;
 
-        return margins.top() + document()->size().height() + margins.bottom() + 5;
-    }
+private:
+    QCompleter *completer = nullptr;
+    QString textUnderCursor() const;
+    bool nextCompletion = false;
 
-    void keyPressEvent(QKeyEvent *event) override
-    {
-        event->ignore();
-
-        keyPressed(event);
-
-        if (!event->isAccepted()) {
-            QTextEdit::keyPressEvent(event);
-        }
-    }
+private slots:
+    void insertCompletion(const QString &completion);
 };

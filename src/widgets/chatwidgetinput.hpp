@@ -42,7 +42,7 @@ private:
     virtual void refreshTheme() override;
 
 private slots:
-    void setMessageLengthVisisble(bool value)
+    void setMessageLengthVisible(bool value)
     {
         textLengthLabel.setHidden(!value);
     }

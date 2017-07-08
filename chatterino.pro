@@ -94,7 +94,8 @@ SOURCES += \
     src/ircaccount.cpp \
     src/widgets/accountpopup.cpp \
     src/messagefactory.cpp \
-    src/widgets/basewidget.cpp
+    src/widgets/basewidget.cpp \
+    src/widgets/resizingtextedit.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \

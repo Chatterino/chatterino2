@@ -43,17 +43,18 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);
 
     this->refreshTheme();
-    this->setMessageLengthVisisble(SettingsManager::getInstance().showMessageLength.get());
+    this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
 
     QStringList list;
-    list.append("asd");
+    /*list.append("asd");
     list.append("asdf");
     list.append("asdg");
     list.append("asdh");
-
+*/
+    list << "Kappa" << "asd" << "asdf" << "asdg";
     QCompleter *completer = new QCompleter(list, &this->textInput);
 
-    completer->setWidget(&textInput);
+    this->textInput.setCompleter(completer);
 
     this->textInput.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
@@ -76,7 +77,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     /* XXX(pajlada): FIX THIS
     QObject::connect(&Settings::getInstance().showMessageLength,
                      &BoolSetting::valueChanged, this,
-                     &ChatWidgetInput::setMessageLengthVisisble);
+                     &ChatWidgetInput::setMessageLengthVisible);
                      */
 }
 
@@ -86,7 +87,7 @@ ChatWidgetInput::~ChatWidgetInput()
     QObject::disconnect(
         &Settings::getInstance().getShowMessageLength(),
         &BoolSetting::valueChanged, this,
-        &ChatWidgetInput::setMessageLengthVisisble);
+        &ChatWidgetInput::setMessageLengthVisible);
         */
 }
 
