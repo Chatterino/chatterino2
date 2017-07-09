@@ -1,7 +1,6 @@
 #include "widgets/resizingtextedit.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
-    : keyPressed()
 {
     auto sizePolicy = this->sizePolicy();
     sizePolicy.setHeightForWidth(true);
@@ -9,6 +8,8 @@ ResizingTextEdit::ResizingTextEdit()
     this->setSizePolicy(sizePolicy);
 
     QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
+
+    this->setFocusPolicy(Qt::ClickFocus);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -43,9 +44,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     if (event->key() == Qt::Key_Tab) {
         QString currentCompletionPrefix = this->textUnderCursor();
+
         if (!currentCompletionPrefix.size()) {
             return;
         }
+
         if (!this->nextCompletion) {
             // first selection
             this->completer->setCompletionPrefix(currentCompletionPrefix);
@@ -59,6 +62,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // wrap over and start again
             this->completer->setCurrentRow(0);
         }
+
         this->completer->complete();
         return;
     }
