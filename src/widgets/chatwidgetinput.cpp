@@ -45,18 +45,12 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     this->refreshTheme();
     this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
 
-    QStringList list;
-    /*list.append("asd");
-    list.append("asdf");
-    list.append("asdg");
-    list.append("asdh");
-*/
-    list << "Kappa" << "asd" << "asdf" << "asdg";
-    QCompleter *completer = new QCompleter(list, &this->textInput);
+    // TODO: Fill in this QCompleter model using our CompletionManager
+    auto completer = new QCompleter();
 
     this->textInput.setCompleter(completer);
 
-    this->textInput.keyPressed.connect([this /*, completer*/](QKeyEvent *event) {
+    this->textInput.keyPressed.connect([this](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
             auto c = this->chatWidget->getChannel();
             if (c == nullptr) {
@@ -67,11 +61,6 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
             event->accept();
             textInput.setText(QString());
         }
-        //        else {
-        //            completer->setCompletionPrefix("asdf");
-        //            completer->complete();
-        //            //            completer->popup();
-        //        }
     });
 
     /* XXX(pajlada): FIX THIS
