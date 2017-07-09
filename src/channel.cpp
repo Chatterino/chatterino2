@@ -26,6 +26,8 @@ Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
     , emoteManager(_emoteManager)
     , ircManager(_ircManager)
     , _name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
+    , bttvChannelEmotes(this->emoteManager.bttvChannels[channel])
+    , ffzChannelEmotes(this->emoteManager.ffzChannels[channel])
     , _subLink("https://www.twitch.tv/" + _name + "/subscribe?ref=in_chat_subscriber_link")
     , _channelLink("https://twitch.tv/" + _name)
     , _popoutPlayerLink("https://player.twitch.tv/?channel=" + _name)
@@ -41,14 +43,14 @@ Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
 //
 // properties
 //
-ConcurrentMap<QString, messages::LazyLoadedImage *> &Channel::getBttvChannelEmotes()
+EmoteManager::EmoteMap &Channel::getBTTVChannelEmotes()
 {
-    return _bttvChannelEmotes;
+    return this->bttvChannelEmotes;
 }
 
-ConcurrentMap<QString, messages::LazyLoadedImage *> &Channel::getFfzChannelEmotes()
+EmoteManager::EmoteMap &Channel::getFFZChannelEmotes()
 {
-    return _ffzChannelEmotes;
+    return this->ffzChannelEmotes;
 }
 
 bool Channel::isEmpty() const
@@ -125,8 +127,8 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 void Channel::reloadChannelEmotes()
 {
     printf("[Channel:%s] Reloading channel emotes\n", qPrintable(this->_name));
-    this->emoteManager.reloadBTTVChannelEmotes(this->_name, this->_bttvChannelEmotes);
-    this->emoteManager.reloadFFZChannelEmotes(this->_name, this->_ffzChannelEmotes);
+    this->emoteManager.reloadBTTVChannelEmotes(this->_name);
+    this->emoteManager.reloadFFZChannelEmotes(this->_name);
 }
 
 void Channel::sendMessage(const QString &message)

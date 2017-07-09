@@ -1,6 +1,7 @@
 #pragma once
 
 #include "concurrentmap.hpp"
+#include "emotemanager.hpp"
 #include "logging/loggingchannel.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/limitedqueue.hpp"
@@ -19,7 +20,6 @@ class Message;
 }
 
 class WindowManager;
-class EmoteManager;
 class IrcManager;
 
 class Channel
@@ -32,8 +32,8 @@ public:
     boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
 
     // properties
-    ConcurrentMap<QString, messages::LazyLoadedImage *> &getBttvChannelEmotes();
-    ConcurrentMap<QString, messages::LazyLoadedImage *> &getFfzChannelEmotes();
+    EmoteManager::EmoteMap &getBTTVChannelEmotes();
+    EmoteManager::EmoteMap &getFFZChannelEmotes();
 
     bool isEmpty() const;
     const QString &getName() const;
@@ -64,8 +64,8 @@ private:
 
     QString _name;
 
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _bttvChannelEmotes;
-    ConcurrentMap<QString, messages::LazyLoadedImage *> _ffzChannelEmotes;
+    EmoteManager::EmoteMap &bttvChannelEmotes;
+    EmoteManager::EmoteMap &ffzChannelEmotes;
 
     QString _subLink;
     QString _channelLink;

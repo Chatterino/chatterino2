@@ -1,5 +1,6 @@
 #pragma once
 
+#include "emotemanager.hpp"
 #include "messages/messagebuilder.hpp"
 #include "resources.hpp"
 
@@ -8,7 +9,6 @@
 
 namespace chatterino {
 
-class EmoteManager;
 class WindowManager;
 class Channel;
 class ColorScheme;
@@ -55,7 +55,7 @@ private:
 
     void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long int, messages::LazyLoadedImage *>> &vec,
+                           std::vector<std::pair<long, EmoteData>> &vec,
                            EmoteManager &emoteManager);
 
     void parseTwitchBadges();

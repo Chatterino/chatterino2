@@ -95,7 +95,8 @@ SOURCES += \
     src/widgets/accountpopup.cpp \
     src/messagefactory.cpp \
     src/widgets/basewidget.cpp \
-    src/widgets/resizingtextedit.cpp
+    src/widgets/resizingtextedit.cpp \
+    src/completionmanager.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -155,7 +156,8 @@ HEADERS  += \
     src/widgets/accountpopup.hpp \
     src/util/distancebetweenpoints.hpp \
     src/messagefactory.hpp \
-    src/widgets/basewidget.hpp
+    src/widgets/basewidget.hpp \
+    src/completionmanager.hpp
 
 PRECOMPILED_HEADER =
 

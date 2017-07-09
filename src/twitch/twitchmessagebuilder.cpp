@@ -59,7 +59,7 @@ SharedMessage TwitchMessageBuilder::parse()
     }
 
     // twitch emotes
-    std::vector<std::pair<long int, LazyLoadedImage *>> twitchEmotes;
+    std::vector<std::pair<long, EmoteData>> twitchEmotes;
 
     iterator = this->tags.find("emotes");
     if (iterator != this->tags.end()) {
@@ -70,8 +70,8 @@ SharedMessage TwitchMessageBuilder::parse()
         }
 
         struct {
-            bool operator()(const std::pair<long int, messages::LazyLoadedImage *> &lhs,
-                            const std::pair<long int, messages::LazyLoadedImage *> &rhs)
+            bool operator()(const std::pair<long, EmoteData> &lhs,
+                            const std::pair<long, EmoteData> &rhs)
             {
                 return lhs.first < rhs.first;
             }
@@ -95,13 +95,13 @@ SharedMessage TwitchMessageBuilder::parse()
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
             this->appendWord(
-                Word(currentTwitchEmote->second, Word::TwitchEmoteImage,
-                     currentTwitchEmote->second->getName(),
-                     currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
+                Word(currentTwitchEmote->second.image, Word::TwitchEmoteImage,
+                     currentTwitchEmote->second.image->getName(),
+                     currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
             this->appendWord(
-                Word(currentTwitchEmote->second->getName(), Word::TwitchEmoteText, textColor,
-                     currentTwitchEmote->second->getName(),
-                     currentTwitchEmote->second->getName() + QString("\nTwitch Emote")));
+                Word(currentTwitchEmote->second.image->getName(), Word::TwitchEmoteText, textColor,
+                     currentTwitchEmote->second.image->getName(),
+                     currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
 
             i += split.length() + 1;
             currentTwitchEmote = std::next(currentTwitchEmote);
@@ -110,15 +110,15 @@ SharedMessage TwitchMessageBuilder::parse()
         }
 
         // split words
-        std::vector<std::tuple<LazyLoadedImage *, QString>> parsed;
+        std::vector<std::tuple<EmoteData, QString>> parsed;
 
         // Parse emojis and take all non-emojis and put them in parsed as full text-words
         emoteManager.parseEmojis(parsed, split);
 
-        for (const std::tuple<LazyLoadedImage *, QString> &tuple : parsed) {
-            LazyLoadedImage *image = std::get<0>(tuple);
+        for (const auto &tuple : parsed) {
+            const EmoteData &emoteData = std::get<0>(tuple);
 
-            if (image == nullptr) {  // is text
+            if (emoteData.image == nullptr) {  // is text
                 QString string = std::get<1>(tuple);
 
                 static QRegularExpression cheerRegex("cheer[1-9][0-9]*");
@@ -153,13 +153,13 @@ SharedMessage TwitchMessageBuilder::parse()
                     QString bitsLink =
                         QString("http://static-cdn.jtvnw.net/bits/dark/static/" + color + "/1");
 
-                    LazyLoadedImage *imageAnimated = emoteManager.getMiscImageFromCache().getOrAdd(
+                    LazyLoadedImage *imageAnimated = emoteManager.miscImageCache.getOrAdd(
                         bitsLinkAnimated, [this, &bitsLinkAnimated] {
                             return new LazyLoadedImage(this->emoteManager, this->windowManager,
                                                        bitsLinkAnimated);
                         });
                     LazyLoadedImage *image =
-                        emoteManager.getMiscImageFromCache().getOrAdd(bitsLink, [this, &bitsLink] {
+                        emoteManager.miscImageCache.getOrAdd(bitsLink, [this, &bitsLink] {
                             return new LazyLoadedImage(this->emoteManager, this->windowManager,
                                                        bitsLink);
                         });
@@ -185,21 +185,21 @@ SharedMessage TwitchMessageBuilder::parse()
                 }
 
                 // bttv / ffz emotes
-                LazyLoadedImage *bttvEmote;
+                EmoteData emoteData;
 
                 // TODO: Implement ignored emotes
                 // Format of ignored emotes:
                 // Emote name: "forsenPuke" - if string in ignoredEmotes
                 // Will match emote regardless of source (i.e. bttv, ffz)
                 // Emote source + name: "bttv:nyanPls"
-                if (emoteManager.getBTTVEmotes().tryGet(string, bttvEmote) ||
-                    this->channel->getBttvChannelEmotes().tryGet(string, bttvEmote) ||
-                    emoteManager.getFFZEmotes().tryGet(string, bttvEmote) ||
-                    this->channel->getFfzChannelEmotes().tryGet(string, bttvEmote) ||
-                    emoteManager.getChatterinoEmotes().tryGet(string, bttvEmote)) {
-                    this->appendWord(Word(bttvEmote, Word::BttvEmoteImage, bttvEmote->getName(),
-                                          bttvEmote->getTooltip(),
-                                          Link(Link::Url, bttvEmote->getUrl())));
+                if (emoteManager.getBTTVEmotes().tryGet(string, emoteData) ||
+                    this->channel->getBTTVChannelEmotes().tryGet(string, emoteData) ||
+                    emoteManager.getFFZEmotes().tryGet(string, emoteData) ||
+                    this->channel->getFFZChannelEmotes().tryGet(string, emoteData) ||
+                    emoteManager.getChatterinoEmotes().tryGet(string, emoteData)) {
+                    this->appendWord(Word(emoteData.image, Word::BttvEmoteImage,
+                                          emoteData.image->getName(), emoteData.image->getTooltip(),
+                                          Link(Link::Url, emoteData.image->getUrl())));
 
                     continue;
                 }
@@ -212,8 +212,10 @@ SharedMessage TwitchMessageBuilder::parse()
             } else {  // is emoji
                 static QString emojiTooltip("Emoji");
 
-                this->appendWord(Word(image, Word::EmojiImage, image->getName(), emojiTooltip));
-                Word(image->getName(), Word::EmojiText, textColor, image->getName(), emojiTooltip);
+                this->appendWord(Word(emoteData.image, Word::EmojiImage, emoteData.image->getName(),
+                                      emojiTooltip));
+                Word(emoteData.image->getName(), Word::EmojiText, textColor,
+                     emoteData.image->getName(), emojiTooltip);
             }
         }
 
@@ -316,9 +318,10 @@ void TwitchMessageBuilder::appendModerationButtons()
                           buttonTimeoutTooltip, Link(Link::UserTimeout, ircMessage->account())));
 }
 
-void TwitchMessageBuilder::appendTwitchEmote(
-    const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
-    std::vector<std::pair<long int, messages::LazyLoadedImage *>> &vec, EmoteManager &emoteManager)
+void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage,
+                                             const QString &emote,
+                                             std::vector<std::pair<long int, EmoteData>> &vec,
+                                             EmoteManager &emoteManager)
 {
     if (!emote.contains(':')) {
         return;
@@ -350,8 +353,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
 
         QString name = ircMessage->content().mid(start, end - start + 1);
 
-        vec.push_back(std::pair<long int, LazyLoadedImage *>(
-            start, emoteManager.getTwitchEmoteById(name, id)));
+        vec.push_back(
+            std::pair<long int, EmoteData>(start, emoteManager.getTwitchEmoteById(id, name)));
     }
 }
 

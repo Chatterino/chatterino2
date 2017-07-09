@@ -7,6 +7,7 @@
 #include "messagefactory.hpp"
 #include "resources.hpp"
 #include "windowmanager.hpp"
+#include "completionmanager.hpp"
 
 #include <QApplication>
 
@@ -20,6 +21,7 @@ public:
 
     int run(QApplication &qtApp);
 
+    CompletionManager completionManager;
     WindowManager windowManager;
     ColorScheme colorScheme;
     EmoteManager emoteManager;
