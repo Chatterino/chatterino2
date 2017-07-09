@@ -70,9 +70,13 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
 
 void ChatWidgetHeader::updateChannelText()
 {
-    const QString &c = this->chatWidget->getChannelName();
+    const std::string channelName = this->chatWidget->channelName;
 
-    this->channelNameLabel.setText(c.isEmpty() ? "<no channel>" : c);
+    if (channelName.empty()) {
+        this->channelNameLabel.setText("<no channel>");
+    } else {
+        this->channelNameLabel.setText(QString::fromStdString(channelName));
+    }
 }
 
 void ChatWidgetHeader::paintEvent(QPaintEvent *)

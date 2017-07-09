@@ -13,6 +13,8 @@
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
+#include <functional>
+
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -30,6 +32,8 @@ inline void ezShortcut(ChatWidget *w, const char *key, T t)
 
 }  // namespace
 
+static int index = 0;
+
 ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     : BaseWidget(parent)
     , channelManager(_channelManager)
@@ -38,6 +42,7 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     , header(this)
     , view(this)
     , input(this)
+    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
@@ -55,6 +60,11 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
 
     // CTRL+R: Change Channel
     ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
+
+    this->channelName.getValueChangedSignal().connect(
+        std::bind(&ChatWidget::channelNameUpdated, this, std::placeholders::_1));
+
+    this->channelNameUpdated(this->channelName.getValue());
 }
 
 ChatWidget::~ChatWidget()
@@ -70,49 +80,6 @@ std::shared_ptr<Channel> ChatWidget::getChannel() const
 std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 {
     return this->channel;
-}
-
-const QString &ChatWidget::getChannelName() const
-{
-    return this->channelName;
-}
-
-void ChatWidget::setChannelName(const QString &_newChannelName)
-{
-    QString newChannelName = _newChannelName.trimmed();
-
-    // return if channel name is the same
-    if (QString::compare(newChannelName, this->channelName, Qt::CaseInsensitive) == 0) {
-        this->channelName = newChannelName;
-        this->header.updateChannelText();
-
-        return;
-    }
-
-    // remove current channel
-    if (!this->channelName.isEmpty()) {
-        this->channelManager.removeChannel(this->channelName);
-
-        this->detachChannel();
-    }
-
-    // update members
-    this->channelName = newChannelName;
-
-    // update messages
-    this->messages.clear();
-
-    if (newChannelName.isEmpty()) {
-        this->channel = nullptr;
-    } else {
-        this->setChannel(this->channelManager.addChannel(newChannelName));
-    }
-
-    // update header
-    this->header.updateChannelText();
-
-    // update view
-    this->layoutMessages(true);
 }
 
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
@@ -159,6 +126,31 @@ void ChatWidget::detachChannel()
     this->messageRemovedConnection.disconnect();
 }
 
+void ChatWidget::channelNameUpdated(const std::string &newChannelName)
+{
+    // remove current channel
+    if (!this->channel->isEmpty()) {
+        this->channelManager.removeChannel(this->channel->getName());
+
+        this->detachChannel();
+    }
+
+    // update messages
+    this->messages.clear();
+
+    if (newChannelName.empty()) {
+        this->channel = nullptr;
+    } else {
+        this->setChannel(this->channelManager.addChannel(QString::fromStdString(newChannelName)));
+    }
+
+    // update header
+    this->header.updateChannelText();
+
+    // update view
+    this->layoutMessages(true);
+}
+
 LimitedQueueSnapshot<SharedMessageRef> ChatWidget::getMessagesSnapshot()
 {
     return this->messages.getSnapshot();
@@ -169,10 +161,12 @@ void ChatWidget::showChangeChannelPopup()
     // create new input dialog and execute it
     TextInputDialog dialog(this);
 
-    dialog.setText(this->channelName);
+    dialog.setText(QString::fromStdString(this->channelName));
 
     if (dialog.exec() == QDialog::Accepted) {
-        setChannelName(dialog.getText());
+        QString newChannelName = dialog.getText().trimmed();
+
+        this->channelName = newChannelName.toStdString();
     }
 }
 
@@ -205,7 +199,7 @@ void ChatWidget::load(const boost::property_tree::ptree &tree)
 {
     // load tab text
     try {
-        this->setChannelName(QString::fromStdString(tree.get<std::string>("channelName")));
+        this->channelName = tree.get<std::string>("channelName");
     } catch (boost::property_tree::ptree_error) {
     }
 }
@@ -214,7 +208,7 @@ boost::property_tree::ptree ChatWidget::save()
 {
     boost::property_tree::ptree tree;
 
-    tree.put("channelName", this->getChannelName().toStdString());
+    tree.put("channelName", this->channelName.getValue());
 
     return tree;
 }
@@ -242,7 +236,7 @@ void ChatWidget::doPopup()
     // TODO: Copy signals and stuff too
     auto widget =
         new ChatWidget(this->channelManager, static_cast<NotebookPage *>(this->parentWidget()));
-    widget->setChannelName(this->getChannelName());
+    widget->channelName = this->channelName;
     widget->show();
 }
 
@@ -257,12 +251,14 @@ void ChatWidget::doClearChat()
 
 void ChatWidget::doOpenChannel()
 {
-    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/" << this->getChannelName();
+    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
+             << QString::fromStdString(this->channelName.getValue());
 }
 
 void ChatWidget::doOpenPopupPlayer()
 {
-    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/" << this->getChannelName() << "/popout";
+    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
+             << QString::fromStdString(this->channelName.getValue()) << "/popout";
 }
 
 }  // namespace widgets

@@ -46,8 +46,6 @@ public:
 
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();
-    const QString &getChannelName() const;
-    void setChannelName(const QString &name);
 
     void showChangeChannelPopup();
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
@@ -55,6 +53,8 @@ public:
     void updateGifEmotes();
 
     void giveFocus();
+
+    pajlada::Settings::Setting<std::string> channelName;
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -65,10 +65,11 @@ private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
 
+    void channelNameUpdated(const std::string &newChannelName);
+
     messages::LimitedQueue<messages::SharedMessageRef> messages;
 
     std::shared_ptr<Channel> channel;
-    QString channelName;
 
     QVBoxLayout vbox;
     ChatWidgetHeader header;
