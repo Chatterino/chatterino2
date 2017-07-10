@@ -139,7 +139,7 @@ void ChatWidget::channelNameUpdated(const std::string &newChannelName)
     this->messages.clear();
 
     if (newChannelName.empty()) {
-        this->channel = nullptr;
+        this->channel = this->channelManager.getEmpty();
     } else {
         this->setChannel(this->channelManager.addChannel(QString::fromStdString(newChannelName)));
     }
