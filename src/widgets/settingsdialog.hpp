@@ -6,6 +6,7 @@
 
 #include <QButtonGroup>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QListView>
@@ -32,6 +33,8 @@ public:
 private:
     SettingsSnapshot snapshot;
 
+    pajlada::Settings::Setting<int> usernameDisplayMode;
+
     struct {
         QVBoxLayout tabs;
         QVBoxLayout vbox;
@@ -51,6 +54,9 @@ private:
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
     QCheckBox *createCheckbox(const QString &title, pajlada::Settings::Setting<bool> &setting);
+    QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<int> &setting,
+                                QStringList items,
+                                std::function<void(QString, pajlada::Settings::Setting<int> &)> cb);
 
     void okButtonClicked();
     void cancelButtonClicked();

@@ -1,5 +1,6 @@
 #include "widgets/settingsdialog.hpp"
 #include "accountmanager.hpp"
+#include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
 #include "widgets/settingsdialogtab.hpp"
 #include "windowmanager.hpp"
@@ -20,6 +21,9 @@ namespace widgets {
 
 SettingsDialog::SettingsDialog()
     : snapshot(SettingsManager::getInstance().createSnapshot())
+    , usernameDisplayMode(
+          "/appearance/messages/usernameDisplayMode",
+          twitch::TwitchMessageBuilder::UsernameDisplayMode::UsernameAndLocalizedName)
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
@@ -239,6 +243,19 @@ void SettingsDialog::addTabs()
                                     settings.allowDouplicateMessages));
         v->addWidget(createCheckbox("Seperate messages", settings.seperateMessages));
         v->addWidget(createCheckbox("Show message length", settings.showMessageLength));
+        v->addLayout(this->createCombobox(
+            "Username display mode", this->usernameDisplayMode,
+            {"Username (Localized name)", "Username", "Localized name"},
+            [](const QString &newValue, pajlada::Settings::Setting<int> &setting) {
+                if (newValue == "Username (Localized name)") {
+                    setting =
+                        twitch::TwitchMessageBuilder::UsernameDisplayMode::UsernameAndLocalizedName;
+                } else if (newValue == "Username") {
+                    setting = twitch::TwitchMessageBuilder::UsernameDisplayMode::Username;
+                } else if (newValue == "Localized name") {
+                    setting = twitch::TwitchMessageBuilder::UsernameDisplayMode::LocalizedName;
+                }
+            }));
 
         group->setLayout(v);
 
@@ -407,6 +424,26 @@ QCheckBox *SettingsDialog::createCheckbox(const QString &title,
     });
 
     return checkbox;
+}
+
+QHBoxLayout *SettingsDialog::createCombobox(
+    const QString &title, pajlada::Settings::Setting<int> &setting, QStringList items,
+    std::function<void(QString, pajlada::Settings::Setting<int> &)> cb)
+{
+    auto box = new QHBoxLayout();
+    auto label = new QLabel(title);
+    auto widget = new QComboBox();
+    widget->addItems(items);
+
+    QObject::connect(widget, &QComboBox::currentTextChanged, this,
+                     [&setting, cb](const QString &newValue) {
+                         cb(newValue, setting);  //
+                     });
+
+    box->addWidget(label);
+    box->addWidget(widget);
+
+    return box;
 }
 
 void SettingsDialog::okButtonClicked()

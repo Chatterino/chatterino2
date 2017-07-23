@@ -265,18 +265,50 @@ void TwitchMessageBuilder::parseUsername()
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
 
-    QString displayName;
+    QString username = this->userName;
+    QString localizedName;
 
     iterator = this->tags.find("display-name");
-    if (iterator == this->tags.end()) {
-        displayName = this->userName;
-    } else {
-        displayName = iterator.value().toString();
+    if (iterator != this->tags.end()) {
+        QString displayName = iterator.value().toString();
+
+        if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
+            username = displayName;
+        } else {
+            localizedName = displayName;
+        }
     }
 
-    bool hasLocalizedName = QString::compare(displayName, ircMessage->account()) == 0;
-    QString userDisplayString =
-        displayName + (hasLocalizedName ? (" (" + ircMessage->account() + ")") : QString());
+    bool hasLocalizedName = !localizedName.isEmpty();
+
+    // The full string that will be rendered in the chat widget
+    QString usernameString;
+
+    pajlada::Settings::Setting<int> usernameDisplayMode(
+        "/appearance/messages/usernameDisplayMode", UsernameDisplayMode::UsernameAndLocalizedName);
+
+    switch (usernameDisplayMode.getValue()) {
+        case UsernameDisplayMode::Username: {
+            usernameString = username;
+        } break;
+
+        case UsernameDisplayMode::LocalizedName: {
+            if (hasLocalizedName) {
+                usernameString = localizedName;
+            } else {
+                usernameString = username;
+            }
+        } break;
+
+        default:
+        case UsernameDisplayMode::UsernameAndLocalizedName: {
+            if (hasLocalizedName) {
+                usernameString = username + "(" + localizedName + ")";
+            } else {
+                usernameString = username;
+            }
+        } break;
+    }
 
     if (this->args.isSentWhisper) {
         // TODO(pajlada): Re-implement
@@ -289,10 +321,10 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     if (!ircMessage->isAction()) {
-        userDisplayString += ": ";
+        usernameString += ": ";
     }
 
-    this->appendWord(Word(userDisplayString, Word::Username, this->usernameColor, userDisplayString,
+    this->appendWord(Word(usernameString, Word::Username, this->usernameColor, usernameString,
                           QString(), Link(Link::UserInfo, this->userName)));
 }
 
