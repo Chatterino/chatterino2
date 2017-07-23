@@ -79,8 +79,6 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
         this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
-    this->refreshTwitchEmotes(username, oauthClient, oauthToken);
-
     if (doRead) {
         connection->sendCommand(
             Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
@@ -128,34 +126,6 @@ void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oau
 
         manager->deleteLater();
     });
-}
-
-void IrcManager::refreshTwitchEmotes(const QString &username, const QString &oauthClient,
-                                     const QString &oauthToken)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + username +
-                "/emotes?oauth_token=" + oauthToken + "&client_id=" + oauthClient);
-
-    if (true) {
-        util::urlFetchJSONTimeout(
-            url,
-            [=](QJsonObject &root) {
-                // nextLink =
-                // root.value("_links").toObject().value("next").toString();
-
-                auto blocks = root.value("blocks").toArray();
-
-                _twitchBlockedUsersMutex.lock();
-                for (QJsonValue block : blocks) {
-                    QJsonObject user = block.toObject().value("user").toObject();
-                    // display_name
-                    _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
-                }
-                _twitchBlockedUsersMutex.unlock();
-                qDebug() << "XD";
-            },
-            3000, &this->networkAccessManager);
-    }
 }
 
 void IrcManager::beginConnecting()
@@ -305,6 +275,7 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
 
     if (iterator != tags.end()) {
         std::string roomID = iterator.value().toString().toStdString();
+
         this->resources.loadChannelData(roomID);
     }
 }

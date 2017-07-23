@@ -25,6 +25,7 @@ std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
 NotebookPage::NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab)
     : BaseWidget(parent->colorScheme, parent)
     , channelManager(_channelManager)
+    , completionManager(parent->completionManager)
     , tab(_tab)
     , dropPreview(this)
 {

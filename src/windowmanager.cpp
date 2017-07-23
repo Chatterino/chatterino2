@@ -10,9 +10,11 @@
 
 namespace chatterino {
 
-WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme)
+WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                             CompletionManager &_completionManager)
     : channelManager(_channelManager)
     , colorScheme(_colorScheme)
+    , completionManager(_completionManager)
 {
 }
 
@@ -56,7 +58,8 @@ widgets::MainWindow &WindowManager::getMainWindow()
     std::lock_guard<std::mutex> lock(this->windowMutex);
 
     if (this->mainWindow == nullptr) {
-        this->mainWindow = new widgets::MainWindow(this->channelManager, this->colorScheme);
+        this->mainWindow = new widgets::MainWindow(this->channelManager, this->colorScheme,
+                                                   this->completionManager);
     }
 
     return *this->mainWindow;

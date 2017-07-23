@@ -1,6 +1,7 @@
 #include "widgets/chatwidgetinput.hpp"
 #include "chatwidget.hpp"
 #include "colorscheme.hpp"
+#include "completionmanager.hpp"
 #include "ircmanager.hpp"
 #include "settingsmanager.hpp"
 
@@ -45,8 +46,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
     this->refreshTheme();
     this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
 
-    // TODO: Fill in this QCompleter model using our CompletionManager
-    auto completer = new QCompleter();
+    auto completer = new QCompleter(
+        this->chatWidget->completionManager.createModel(this->chatWidget->channelName));
 
     this->textInput.setCompleter(completer);
 

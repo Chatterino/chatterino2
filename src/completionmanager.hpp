@@ -1,12 +1,15 @@
 #pragma once
 
-#include <QAbstractItemModel>
+#include <QAbstractListModel>
+#include <QVector>
 
 #include <string>
 
 namespace chatterino {
 
-class CompletionModel : public QAbstractItemModel
+class EmoteManager;
+
+class CompletionModel : public QAbstractListModel
 {
 public:
     virtual int columnCount(const QModelIndex & /*parent*/) const override
@@ -16,34 +19,27 @@ public:
 
     virtual QVariant data(const QModelIndex &index, int role) const override
     {
-        // TODO: Implement
-        return QVariant();
-    }
-
-    virtual QModelIndex index(int row, int column, const QModelIndex &parent) const override
-    {
-        // TODO: Implement
-        return QModelIndex();
-    }
-
-    virtual QModelIndex parent(const QModelIndex &child) const override
-    {
-        return QModelIndex();
+        // TODO: Implement more safely
+        return QVariant(this->emotes.at(index.row()));
     }
 
     virtual int rowCount(const QModelIndex &parent) const override
     {
-        return 1;
+        return this->emotes.size();
     }
+
+    QVector<QString> emotes;
 };
 
 class CompletionManager
 {
-    CompletionManager();
+    CompletionManager(EmoteManager &_emoteManager);
+
+    EmoteManager &emoteManager;
 
 public:
     CompletionModel *createModel(const std::string &channelName);
-    void updateModel(CompletionModel *model, const std::string &channelName);
+    void updateModel(CompletionModel *model, const std::string &channelName = std::string());
 
     friend class Application;
 };

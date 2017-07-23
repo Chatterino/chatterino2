@@ -21,6 +21,7 @@ namespace chatterino {
 
 class ChannelManager;
 class ColorScheme;
+class CompletionManager;
 
 namespace widgets {
 
@@ -59,9 +60,11 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *) override;
 
-private:
+public:
     ChannelManager &channelManager;
+    CompletionManager &completionManager;
 
+private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
 

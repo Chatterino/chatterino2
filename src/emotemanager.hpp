@@ -5,6 +5,7 @@
 #include "concurrentmap.hpp"
 #include "emojis.hpp"
 #include "messages/lazyloadedimage.hpp"
+#include "signalvector.hpp"
 #include "twitch/emotevalue.hpp"
 
 #include <QMap>
@@ -88,11 +89,26 @@ private:
 public:
     void parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
 
-private:
     /// Twitch emotes
-    //               username             emote code
-    ConcurrentStdMap<QString, std::vector<QString>> twitchAccountEmotes;
+    void refreshTwitchEmotes(const std::string &roomID);
 
+    struct TwitchAccountEmoteData {
+        struct TwitchEmote {
+            std::string id;
+            std::string code;
+        };
+
+        //       emote set
+        std::map<std::string, std::vector<TwitchEmote>> emoteSets;
+
+        std::vector<std::string> emoteCodes;
+
+        bool filled = false;
+    };
+
+    std::map<std::string, TwitchAccountEmoteData> twitchAccountEmotes;
+
+private:
     //            emote code
     ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
 
@@ -105,6 +121,9 @@ private:
 public:
     ConcurrentMap<QString, EmoteMap> bttvChannels;
     EmoteMap bttvGlobalEmotes;
+    SignalVector<std::string> bttvGlobalEmoteCodes;
+    //       roomID
+    std::map<std::string, SignalVector<std::string>> bttvChannelEmoteCodes;
     EmoteMap _bttvChannelEmoteFromCaches;
 
 private:
@@ -116,6 +135,8 @@ private:
 public:
     ConcurrentMap<QString, EmoteMap> ffzChannels;
     EmoteMap ffzGlobalEmotes;
+    SignalVector<std::string> ffzGlobalEmoteCodes;
+    std::map<std::string, SignalVector<std::string>> ffzChannelEmoteCodes;
 
 private:
     ConcurrentMap<int, EmoteData> _ffzChannelEmoteFromCaches;

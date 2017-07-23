@@ -8,14 +8,17 @@ namespace chatterino {
 
 class ChannelManager;
 class ColorScheme;
+class CompletionManager;
 
 class WindowManager
 {
 public:
-    explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme);
+    explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                           CompletionManager &_completionManager);
 
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
+    CompletionManager &completionManager;
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);

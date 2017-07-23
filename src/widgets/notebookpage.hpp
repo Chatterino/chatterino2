@@ -18,6 +18,7 @@
 namespace chatterino {
 
 class ChannelManager;
+class CompletionManager;
 
 namespace widgets {
 
@@ -29,6 +30,7 @@ public:
     NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
 
     ChannelManager &channelManager;
+    CompletionManager &completionManager;
 
     std::pair<int, int> removeFromLayout(ChatWidget *widget);
     void addToLayout(ChatWidget *widget, std::pair<int, int> position);

@@ -76,8 +76,6 @@ private:
 
     void refreshIgnoredUsers(const QString &username, const QString &oauthClient,
                              const QString &oauthToken);
-    void refreshTwitchEmotes(const QString &username, const QString &oauthClient,
-                             const QString &oauthToken);
 
     void beginConnecting();
 

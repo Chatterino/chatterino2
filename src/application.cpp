@@ -9,7 +9,8 @@ namespace chatterino {
 // It will create the instances of the major classes, and connect their signals to each other
 
 Application::Application()
-    : windowManager(this->channelManager, this->colorScheme)
+    : completionManager(this->emoteManager)
+    , windowManager(this->channelManager, this->colorScheme, this->completionManager)
     , colorScheme(this->windowManager)
     , emoteManager(this->windowManager, this->resources)
     , resources(this->emoteManager, this->windowManager)

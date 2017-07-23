@@ -19,10 +19,12 @@
 namespace chatterino {
 namespace widgets {
 
-MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme)
+MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                       CompletionManager &_completionManager)
     : BaseWidget(_colorScheme, nullptr)
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
+    , completionManager(_completionManager)
     , notebook(this->channelManager, this)
     , windowGeometry("/windows/0/geometry")
 {

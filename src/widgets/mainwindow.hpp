@@ -17,6 +17,7 @@ namespace chatterino {
 
 class ChannelManager;
 class ColorScheme;
+class CompletionManager;
 
 namespace widgets {
 
@@ -25,7 +26,8 @@ class MainWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme);
+    explicit MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                        CompletionManager &_completionManager);
     ~MainWindow();
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
@@ -48,6 +50,7 @@ private:
 
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
+    CompletionManager &completionManager;
 
     Notebook notebook;
     bool loaded = false;
@@ -144,6 +147,8 @@ private:
     };
 
     pajlada::Settings::Setting<QRectWrapper, QRectWrapper> windowGeometry;
+
+    friend class Notebook;
 };
 
 }  // namespace widgets

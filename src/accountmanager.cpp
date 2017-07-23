@@ -1,5 +1,7 @@
 ﻿#include "accountmanager.hpp"
 
+#include <pajlada/settings/setting.hpp>
+
 namespace chatterino {
 
 namespace {
@@ -25,6 +27,9 @@ AccountManager::AccountManager()
     if (!envUsername.isEmpty() && !envOauthToken.isEmpty()) {
         this->addTwitchUser(twitch::TwitchUser(envUsername, envOauthToken, ""));
     }
+
+    pajlada::Settings::Setting<std::string>::set(
+        "/accounts/current/roomID", "11148817", pajlada::Settings::SettingOption::DoNotWriteToJSON);
 }
 
 twitch::TwitchUser &AccountManager::getTwitchAnon()

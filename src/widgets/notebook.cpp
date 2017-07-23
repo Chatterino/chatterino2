@@ -1,5 +1,6 @@
 #include "widgets/notebook.hpp"
 #include "colorscheme.hpp"
+#include "widgets/mainwindow.hpp"
 #include "widgets/notebookbutton.hpp"
 #include "widgets/notebookpage.hpp"
 #include "widgets/notebooktab.hpp"
@@ -18,9 +19,10 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(ChannelManager &_channelManager, BaseWidget *parent)
+Notebook::Notebook(ChannelManager &_channelManager, MainWindow *parent)
     : BaseWidget(parent)
     , channelManager(_channelManager)
+    , completionManager(parent->completionManager)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)

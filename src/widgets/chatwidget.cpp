@@ -37,6 +37,7 @@ static int index = 0;
 ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     : BaseWidget(parent)
     , channelManager(_channelManager)
+    , completionManager(parent->completionManager)
     , channel(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)

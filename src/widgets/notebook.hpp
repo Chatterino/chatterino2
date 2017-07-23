@@ -12,9 +12,11 @@
 namespace chatterino {
 
 class ChannelManager;
-class ColorScheme;
+class CompletionManager;
 
 namespace widgets {
+
+class MainWindow;
 
 class Notebook : public BaseWidget
 {
@@ -23,7 +25,7 @@ class Notebook : public BaseWidget
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    explicit Notebook(ChannelManager &_channelManager, BaseWidget *parent);
+    explicit Notebook(ChannelManager &_channelManager, MainWindow *parent);
 
     NotebookPage *addPage(bool select = false);
 
@@ -50,9 +52,11 @@ public slots:
     void usersButtonClicked();
     void addPageButtonClicked();
 
-private:
+public:
     ChannelManager &channelManager;
+    CompletionManager &completionManager;
 
+private:
     QList<NotebookPage *> pages;
 
     NotebookButton addButton;

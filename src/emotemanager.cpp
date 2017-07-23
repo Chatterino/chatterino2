@@ -1,4 +1,5 @@
 #include "emotemanager.hpp"
+#include "common.hpp"
 #include "resources.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
@@ -25,6 +26,12 @@ EmoteManager::EmoteManager(WindowManager &_windowManager, Resources &_resources)
     , resources(_resources)
 {
     // Note: Do not use this->resources in ctor
+    pajlada::Settings::Setting<std::string> roomID(
+        "/accounts/current/roomID", "", pajlada::Settings::SettingOption::DoNotWriteToJSON);
+
+    roomID.getValueChangedSignal().connect([this](const std::string &roomID) {
+        this->refreshTwitchEmotes(roomID);  //
+    });
 }
 
 void EmoteManager::loadGlobalEmotes()
@@ -48,6 +55,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName)
 
         QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
 
+        std::vector<std::string> codes;
         for (const QJsonValue &emoteNode : emotesNode) {
             QJsonObject emoteObject = emoteNode.toObject();
 
@@ -67,7 +75,10 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName)
 
             this->bttvChannelEmotes.insert(code, emote);
             channelEmoteMap.insert(code, emote);
+            codes.push_back(code.toStdString());
         }
+
+        this->bttvChannelEmoteCodes[channelName.toStdString()] = codes;
     });
 }
 
@@ -84,6 +95,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName)
 
         auto setsNode = rootNode.value("sets").toObject();
 
+        std::vector<std::string> codes;
         for (const QJsonValue &setNode : setsNode) {
             auto emotesNode = setNode.toObject().value("emoticons").toArray();
 
@@ -105,7 +117,10 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName)
 
                 this->ffzChannelEmotes.insert(code, emote);
                 channelEmoteMap.insert(code, emote);
+                codes.push_back(code.toStdString());
             }
+
+            this->ffzChannelEmoteCodes[channelName.toStdString()] = codes;
         }
     });
 }
@@ -279,9 +294,61 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
     }
 }
 
+void EmoteManager::refreshTwitchEmotes(const std::string &roomID)
+{
+    std::string oauthClient =
+        pajlada::Settings::Setting<std::string>::get("/accounts/" + roomID + "/oauthClient");
+    std::string oauthToken =
+        pajlada::Settings::Setting<std::string>::get("/accounts/" + roomID + "/oauthToken");
+
+    TwitchAccountEmoteData &emoteData = this->twitchAccountEmotes[roomID];
+
+    if (emoteData.filled) {
+        qDebug() << "Already loaded for room id " << qS(roomID);
+        return;
+    }
+
+    qDebug() << "Loading emotes for room id " << qS(roomID);
+
+    if (oauthClient.empty() || oauthToken.empty()) {
+        qDebug() << "Missing oauth client/token";
+        return;
+    }
+
+    // api:v5
+    QString url("https://api.twitch.tv/kraken/users/" + qS(roomID) +
+                "/emotes?api_version=5&oauth_token=" + qS(oauthToken) +
+                "&client_id=" + qS(oauthClient));
+
+    qDebug() << url;
+
+    util::urlFetchJSONTimeout(
+        url,
+        [=, &emoteData](QJsonObject &root) {
+            emoteData.emoteSets.clear();
+            emoteData.emoteCodes.clear();
+
+            auto emoticonSets = root.value("emoticon_sets").toObject();
+            for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
+                std::string emoteSetString = it.key().toStdString();
+                QJsonArray emoteSetList = it.value().toArray();
+
+                for (QJsonValue emoteValue : emoteSetList) {
+                    QJsonObject emoticon = emoteValue.toObject();
+                    std::string id = emoticon["id"].toString().toStdString();
+                    std::string code = emoticon["code"].toString().toStdString();
+                    emoteData.emoteSets[emoteSetString].push_back({id, code});
+                    emoteData.emoteCodes.push_back(code);
+                }
+            }
+
+            emoteData.filled = true;
+        },
+        3000);
+}
+
 void EmoteManager::loadBTTVEmotes()
 {
-    // bttv
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
     QUrl url("https://api.betterttv.net/2/emotes");
@@ -299,6 +366,7 @@ void EmoteManager::loadBTTVEmotes()
 
             QString linkTemplate = "https:" + root.value("urlTemplate").toString();
 
+            std::vector<std::string> codes;
             for (const QJsonValue &emote : emotes) {
                 QString id = emote.toObject().value("id").toString();
                 QString code = emote.toObject().value("code").toString();
@@ -311,7 +379,10 @@ void EmoteManager::loadBTTVEmotes()
                 this->bttvGlobalEmotes.insert(
                     code, new LazyLoadedImage(*this, this->windowManager, url, 1, code,
                                               code + "\nGlobal BTTV Emote"));
+                codes.push_back(code.toStdString());
             }
+
+            this->bttvGlobalEmoteCodes = codes;
         }
 
         reply->deleteLater();
@@ -321,7 +392,6 @@ void EmoteManager::loadBTTVEmotes()
 
 void EmoteManager::loadFFZEmotes()
 {
-    // ffz
     QNetworkAccessManager *manager = new QNetworkAccessManager();
 
     QUrl url("https://api.frankerfacez.com/v1/set/global");
@@ -337,6 +407,7 @@ void EmoteManager::loadFFZEmotes()
 
             auto sets = root.value("sets").toObject();
 
+            std::vector<std::string> codes;
             for (const QJsonValue &set : sets) {
                 auto emoticons = set.toObject().value("emoticons").toArray();
 
@@ -354,7 +425,10 @@ void EmoteManager::loadFFZEmotes()
                     this->ffzGlobalEmotes.insert(
                         code, new LazyLoadedImage(*this, this->windowManager, url1, 1, code,
                                                   code + "\nGlobal FFZ Emote"));
+                    codes.push_back(code.toStdString());
                 }
+
+                this->ffzGlobalEmoteCodes = codes;
             }
         }
 
