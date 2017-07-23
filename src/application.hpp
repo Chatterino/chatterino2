@@ -2,12 +2,12 @@
 
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
+#include "completionmanager.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
 #include "messagefactory.hpp"
 #include "resources.hpp"
 #include "windowmanager.hpp"
-#include "completionmanager.hpp"
 
 #include <QApplication>
 

@@ -115,14 +115,9 @@ ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
     return _twitchEmotes;
 }
 
-EmoteManager::EmoteMap &EmoteManager::getBTTVEmotes()
-{
-    return _bttvEmotes;
-}
-
 EmoteManager::EmoteMap &EmoteManager::getFFZEmotes()
 {
-    return _ffzEmotes;
+    return ffzGlobalEmotes;
 }
 
 EmoteManager::EmoteMap &EmoteManager::getChatterinoEmotes()
@@ -313,7 +308,7 @@ void EmoteManager::loadBTTVEmotes()
                 tmp.detach();
                 QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
-                EmoteManager::getBTTVEmotes().insert(
+                this->bttvGlobalEmotes.insert(
                     code, new LazyLoadedImage(*this, this->windowManager, url, 1, code,
                                               code + "\nGlobal BTTV Emote"));
             }
@@ -356,7 +351,7 @@ void EmoteManager::loadFFZEmotes()
                     QJsonObject urls = object.value("urls").toObject();
                     QString url1 = "http:" + urls.value("1").toString();
 
-                    EmoteManager::getBTTVEmotes().insert(
+                    this->ffzGlobalEmotes.insert(
                         code, new LazyLoadedImage(*this, this->windowManager, url1, 1, code,
                                                   code + "\nGlobal FFZ Emote"));
                 }

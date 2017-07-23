@@ -26,17 +26,12 @@ class Channel
 {
 public:
     explicit Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
-                     IrcManager &_ircManager, const QString &channel, bool isSpecial = false);
+                     IrcManager &_ircManager, const QString &channelName, bool isSpecial = false);
 
     boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
     boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
 
-    // properties
-    EmoteManager::EmoteMap &getBTTVChannelEmotes();
-    EmoteManager::EmoteMap &getFFZChannelEmotes();
-
     bool isEmpty() const;
-    const QString &getName() const;
     const QString &getSubLink() const;
     const QString &getChannelLink() const;
     const QString &getPopoutPlayerLink() const;
@@ -53,20 +48,21 @@ public:
     void sendMessage(const QString &message);
 
     std::string roomID;
+    const QString name;
 
 private:
     WindowManager &windowManager;
     EmoteManager &emoteManager;
     IrcManager &ircManager;
 
-    // variabeles
+    // variables
     messages::LimitedQueue<messages::SharedMessage> _messages;
 
-    QString _name;
+public:
+    const EmoteManager::EmoteMap &bttvChannelEmotes;
+    const EmoteManager::EmoteMap &ffzChannelEmotes;
 
-    EmoteManager::EmoteMap &bttvChannelEmotes;
-    EmoteManager::EmoteMap &ffzChannelEmotes;
-
+private:
     QString _subLink;
     QString _channelLink;
     QString _popoutPlayerLink;

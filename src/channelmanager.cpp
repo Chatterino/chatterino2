@@ -8,56 +8,45 @@ ChannelManager::ChannelManager(WindowManager &_windowManager, EmoteManager &_emo
     : windowManager(_windowManager)
     , emoteManager(_emoteManager)
     , ircManager(_ircManager)
-    , _whispers(new Channel(_windowManager, _emoteManager, _ircManager, "/whispers", true))
-    , _mentions(new Channel(_windowManager, _emoteManager, _ircManager, "/mentions", true))
-    , _empty(new Channel(_windowManager, _emoteManager, _ircManager, QString(), true))
+    , whispersChannel(new Channel(_windowManager, _emoteManager, _ircManager, "/whispers", true))
+    , mentionsChannel(new Channel(_windowManager, _emoteManager, _ircManager, "/mentions", true))
+    , emptyChannel(new Channel(_windowManager, _emoteManager, _ircManager, "", true))
 {
-}
-
-std::shared_ptr<Channel> ChannelManager::getWhispers()
-{
-    return _whispers;
-}
-
-std::shared_ptr<Channel> ChannelManager::getMentions()
-{
-    return _mentions;
-}
-
-std::shared_ptr<Channel> ChannelManager::getEmpty()
-{
-    return _empty;
 }
 
 const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()
 {
-    QMutexLocker locker(&_channelsMutex);
+    QMutexLocker locker(&this->channelsMutex);
 
     std::vector<std::shared_ptr<Channel>> items;
 
-    for (auto &item : _channels.values()) {
+    for (auto &item : this->channels.values()) {
         items.push_back(std::get<0>(item));
     }
 
     return items;
 }
 
-std::shared_ptr<Channel> ChannelManager::addChannel(const QString &channel)
+std::shared_ptr<Channel> ChannelManager::addChannel(const QString &rawChannelName)
 {
-    QMutexLocker locker(&_channelsMutex);
+    QString channelName = rawChannelName.toLower();
 
-    QString channelName = channel.toLower();
-
-    if (channel.length() > 1 && channel.at(0) == '/') {
-        return getChannel(channel);
+    if (channelName.length() > 1 && channelName.at(0) == '/') {
+        return this->getChannel(channelName);
     }
 
-    auto it = _channels.find(channelName);
+    if (channelName.length() > 0 && channelName.at(0) == '#') {
+        channelName = channelName.mid(1);
+    }
 
-    if (it == _channels.end()) {
-        auto channel = std::shared_ptr<Channel>(
-            new Channel(this->windowManager, this->emoteManager, this->ircManager, channelName));
-        _channels.insert(channelName, std::make_tuple(channel, 1));
+    QMutexLocker locker(&this->channelsMutex);
+
+    auto it = this->channels.find(channelName);
+
+    if (it == this->channels.end()) {
+        auto channel = std::make_shared<Channel>(this->windowManager, this->emoteManager,
+                                                 this->ircManager, channelName);
+        this->channels.insert(channelName, std::make_tuple(channel, 1));
 
         this->ircManager.joinChannel(channelName);
 
@@ -71,26 +60,26 @@ std::shared_ptr<Channel> ChannelManager::addChannel(const QString &channel)
 
 std::shared_ptr<Channel> ChannelManager::getChannel(const QString &channel)
 {
-    QMutexLocker locker(&_channelsMutex);
+    QMutexLocker locker(&this->channelsMutex);
 
     QString c = channel.toLower();
 
     if (channel.length() > 1 && channel.at(0) == '/') {
         if (c == "/whispers") {
-            return _whispers;
+            return whispersChannel;
         }
 
         if (c == "/mentions") {
-            return _mentions;
+            return mentionsChannel;
         }
 
-        return _empty;
+        return emptyChannel;
     }
 
-    auto a = _channels.find(c);
+    auto a = this->channels.find(c);
 
-    if (a == _channels.end()) {
-        return _empty;
+    if (a == this->channels.end()) {
+        return emptyChannel;
     }
 
     return std::get<0>(a.value());
@@ -98,7 +87,7 @@ std::shared_ptr<Channel> ChannelManager::getChannel(const QString &channel)
 
 void ChannelManager::removeChannel(const QString &channel)
 {
-    QMutexLocker locker(&_channelsMutex);
+    QMutexLocker locker(&this->channelsMutex);
 
     if (channel.length() > 1 && channel.at(0) == '/') {
         return;
@@ -106,9 +95,9 @@ void ChannelManager::removeChannel(const QString &channel)
 
     QString c = channel.toLower();
 
-    auto a = _channels.find(c);
+    auto a = this->channels.find(c);
 
-    if (a == _channels.end()) {
+    if (a == this->channels.end()) {
         return;
     }
 
@@ -116,7 +105,7 @@ void ChannelManager::removeChannel(const QString &channel)
 
     if (std::get<1>(a.value()) == 0) {
         this->ircManager.partChannel(c);
-        _channels.remove(c);
+        this->channels.remove(c);
     }
 }
 

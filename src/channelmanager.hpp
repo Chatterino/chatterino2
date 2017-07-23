@@ -13,13 +13,13 @@ class IrcManager;
 
 class ChannelManager
 {
+    WindowManager &windowManager;
+    EmoteManager &emoteManager;
+    IrcManager &ircManager;
+
 public:
     explicit ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
                             IrcManager &_ircManager);
-
-    std::shared_ptr<Channel> getWhispers();
-    std::shared_ptr<Channel> getMentions();
-    std::shared_ptr<Channel> getEmpty();
 
     const std::vector<std::shared_ptr<Channel>> getItems();
 
@@ -29,20 +29,17 @@ public:
 
     const std::string &getUserID(const std::string &username);
 
-private:
-    WindowManager &windowManager;
-    EmoteManager &emoteManager;
-    IrcManager &ircManager;
+    // Special channels
+    const std::shared_ptr<Channel> whispersChannel;
+    const std::shared_ptr<Channel> mentionsChannel;
+    const std::shared_ptr<Channel> emptyChannel;
 
+private:
     std::map<std::string, std::string> usernameToID;
     std::map<std::string, ChannelData> channelDatas;
 
-    QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> _channels;
-    QMutex _channelsMutex;
-
-    std::shared_ptr<Channel> _whispers;
-    std::shared_ptr<Channel> _mentions;
-    std::shared_ptr<Channel> _empty;
+    QMutex channelsMutex;
+    QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> channels;
 };
 
 }  // namespace chatterino

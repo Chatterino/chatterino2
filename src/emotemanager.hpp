@@ -44,7 +44,6 @@ public:
     void reloadFFZChannelEmotes(const QString &channelName);
 
     ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
-    EmoteMap &getBTTVEmotes();
     EmoteMap &getFFZEmotes();
     EmoteMap &getChatterinoEmotes();
     EmoteMap &getBTTVChannelEmoteFromCaches();
@@ -91,7 +90,13 @@ public:
 
 private:
     /// Twitch emotes
+    //               username             emote code
+    ConcurrentStdMap<QString, std::vector<QString>> twitchAccountEmotes;
+
+    //            emote code
     ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
+
+    //        emote id
     ConcurrentMap<long, EmoteData> _twitchEmoteFromCache;
 
     /// BTTV emotes
@@ -99,11 +104,10 @@ private:
 
 public:
     ConcurrentMap<QString, EmoteMap> bttvChannels;
-
-private:
-    EmoteMap _bttvEmotes;
+    EmoteMap bttvGlobalEmotes;
     EmoteMap _bttvChannelEmoteFromCaches;
 
+private:
     void loadBTTVEmotes();
 
     /// FFZ emotes
@@ -111,9 +115,9 @@ private:
 
 public:
     ConcurrentMap<QString, EmoteMap> ffzChannels;
+    EmoteMap ffzGlobalEmotes;
 
 private:
-    EmoteMap _ffzEmotes;
     ConcurrentMap<int, EmoteData> _ffzChannelEmoteFromCaches;
 
     void loadFFZEmotes();

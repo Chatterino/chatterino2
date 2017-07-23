@@ -37,7 +37,7 @@ static int index = 0;
 ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     : BaseWidget(parent)
     , channelManager(_channelManager)
-    , channel(_channelManager.getEmpty())
+    , channel(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)
     , view(this)
@@ -130,7 +130,7 @@ void ChatWidget::channelNameUpdated(const std::string &newChannelName)
 {
     // remove current channel
     if (!this->channel->isEmpty()) {
-        this->channelManager.removeChannel(this->channel->getName());
+        this->channelManager.removeChannel(this->channel->name);
 
         this->detachChannel();
     }
@@ -139,7 +139,7 @@ void ChatWidget::channelNameUpdated(const std::string &newChannelName)
     this->messages.clear();
 
     if (newChannelName.empty()) {
-        this->channel = this->channelManager.getEmpty();
+        this->channel = this->channelManager.emptyChannel;
     } else {
         this->setChannel(this->channelManager.addChannel(QString::fromStdString(newChannelName)));
     }

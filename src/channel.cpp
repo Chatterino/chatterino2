@@ -14,27 +14,25 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-#include <memory>
-
 using namespace chatterino::messages;
 
 namespace chatterino {
 
 Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
-                 IrcManager &_ircManager, const QString &channel, bool isSpecial)
+                 IrcManager &_ircManager, const QString &channelName, bool isSpecial)
     : windowManager(_windowManager)
     , emoteManager(_emoteManager)
     , ircManager(_ircManager)
-    , _name((channel.length() > 0 && channel[0] == '#') ? channel.mid(1) : channel)
-    , bttvChannelEmotes(this->emoteManager.bttvChannels[channel])
-    , ffzChannelEmotes(this->emoteManager.ffzChannels[channel])
-    , _subLink("https://www.twitch.tv/" + _name + "/subscribe?ref=in_chat_subscriber_link")
-    , _channelLink("https://twitch.tv/" + _name)
-    , _popoutPlayerLink("https://player.twitch.tv/?channel=" + _name)
+    , name(channelName)
+    , bttvChannelEmotes(this->emoteManager.bttvChannels[channelName])
+    , ffzChannelEmotes(this->emoteManager.ffzChannels[channelName])
+    , _subLink("https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link")
+    , _channelLink("https://twitch.tv/" + name)
+    , _popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
 //    , _loggingChannel(logging::get(_name))
 {
-    qDebug() << "Open channel:" << channel << ". Name: " << _name;
-    printf("Channel pointer: %p\n", this);
+    qDebug() << "Open channel:" << this->name;
+
     if (!isSpecial) {
         this->reloadChannelEmotes();
     }
@@ -43,24 +41,10 @@ Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
 //
 // properties
 //
-EmoteManager::EmoteMap &Channel::getBTTVChannelEmotes()
-{
-    return this->bttvChannelEmotes;
-}
-
-EmoteManager::EmoteMap &Channel::getFFZChannelEmotes()
-{
-    return this->ffzChannelEmotes;
-}
 
 bool Channel::isEmpty() const
 {
-    return _name.isEmpty();
-}
-
-const QString &Channel::getName() const
-{
-    return _name;
+    return name.isEmpty();
 }
 
 const QString &Channel::getSubLink() const
@@ -126,15 +110,15 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 // private methods
 void Channel::reloadChannelEmotes()
 {
-    printf("[Channel:%s] Reloading channel emotes\n", qPrintable(this->_name));
-    this->emoteManager.reloadBTTVChannelEmotes(this->_name);
-    this->emoteManager.reloadFFZChannelEmotes(this->_name);
+    printf("[Channel:%s] Reloading channel emotes\n", qPrintable(this->name));
+    this->emoteManager.reloadBTTVChannelEmotes(this->name);
+    this->emoteManager.reloadFFZChannelEmotes(this->name);
 }
 
 void Channel::sendMessage(const QString &message)
 {
     qDebug() << "Channel send message: " << message;
-    this->ircManager.sendMessage(_name, message);
+    this->ircManager.sendMessage(name, message);
 }
 
 }  // namespace chatterino

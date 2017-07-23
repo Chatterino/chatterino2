@@ -184,27 +184,17 @@ SharedMessage TwitchMessageBuilder::parse()
                     continue;
                 }
 
-                // bttv / ffz emotes
-                EmoteData emoteData;
-
                 // TODO: Implement ignored emotes
                 // Format of ignored emotes:
                 // Emote name: "forsenPuke" - if string in ignoredEmotes
                 // Will match emote regardless of source (i.e. bttv, ffz)
                 // Emote source + name: "bttv:nyanPls"
-                if (emoteManager.getBTTVEmotes().tryGet(string, emoteData) ||
-                    this->channel->getBTTVChannelEmotes().tryGet(string, emoteData) ||
-                    emoteManager.getFFZEmotes().tryGet(string, emoteData) ||
-                    this->channel->getFFZChannelEmotes().tryGet(string, emoteData) ||
-                    emoteManager.getChatterinoEmotes().tryGet(string, emoteData)) {
-                    this->appendWord(Word(emoteData.image, Word::BttvEmoteImage,
-                                          emoteData.image->getName(), emoteData.image->getTooltip(),
-                                          Link(Link::Url, emoteData.image->getUrl())));
-
+                if (this->tryAppendEmote(string)) {
+                    // Successfully appended an emote
                     continue;
                 }
 
-                // actually just a word
+                // Actually just text
                 QString link = this->matchLink(string);
 
                 this->appendWord(Word(string, Word::Text, textColor, string, QString(),
@@ -255,10 +245,10 @@ void TwitchMessageBuilder::parseRoomID()
 
 void TwitchMessageBuilder::parseChannelName()
 {
-    QString channelName("#" + this->channel->getName());
+    QString channelName("#" + this->channel->name);
     this->appendWord(Word(channelName, Word::Misc, this->colorScheme.SystemMessageColor,
                           QString(channelName), QString(),
-                          Link(Link::Url, this->channel->getName() + "\n" + this->messageID)));
+                          Link(Link::Url, this->channel->name + "\n" + this->messageID)));
 }
 
 void TwitchMessageBuilder::parseUsername()
@@ -356,6 +346,40 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *i
         vec.push_back(
             std::pair<long int, EmoteData>(start, emoteManager.getTwitchEmoteById(id, name)));
     }
+}
+
+bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
+{
+    EmoteData emoteData;
+
+    if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
+        // BTTV Global Emote
+        return this->appendEmote(emoteData);
+    } else if (this->channel->bttvChannelEmotes.tryGet(emoteString, emoteData)) {
+        // BTTV Channel Emote
+        return this->appendEmote(emoteData);
+    } else if (emoteManager.ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
+        // FFZ Global Emote
+        return this->appendEmote(emoteData);
+    } else if (this->channel->ffzChannelEmotes.tryGet(emoteString, emoteData)) {
+        // FFZ Channel Emote
+        return this->appendEmote(emoteData);
+    } else if (emoteManager.getChatterinoEmotes().tryGet(emoteString, emoteData)) {
+        // Chatterino Emote
+        return this->appendEmote(emoteData);
+    }
+
+    return false;
+}
+
+bool TwitchMessageBuilder::appendEmote(EmoteData &emoteData)
+{
+    this->appendWord(Word(emoteData.image, Word::BttvEmoteImage, emoteData.image->getName(),
+                          emoteData.image->getTooltip(),
+                          Link(Link::Url, emoteData.image->getUrl())));
+
+    // Perhaps check for ignored emotes here?
+    return true;
 }
 
 void TwitchMessageBuilder::parseTwitchBadges()

@@ -24,7 +24,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &channel)
     });
 
     connect(_ui->btnPurge, &QPushButton::clicked, [=]() {
-        qDebug() << "xD: " << _channel->getName();
+        qDebug() << "xD: " << _channel->name;
         printf("Channel pointer in dialog: %p\n", _channel.get());
 
         //_channel->sendMessage(QString(".timeout %1 0").arg(_ui->lblUsername->text()));
