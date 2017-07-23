@@ -60,7 +60,10 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
 
             c->sendMessage(textInput.toPlainText());
             event->accept();
-            textInput.setText(QString());
+            if(!(event->modifiers() == Qt::ControlModifier))
+            {
+                textInput.setText(QString());
+            }
         }
     });
 
