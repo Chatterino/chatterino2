@@ -57,10 +57,34 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
             if (c == nullptr) {
                 return;
             }
-
             c->sendMessage(textInput.toPlainText());
+            prevMsg.append(textInput.toPlainText());
             event->accept();
-            textInput.setText(QString());
+            if(!(event->modifiers() == Qt::ControlModifier))
+            {
+                textInput.setText(QString());
+                prevIndex = 0;
+            }
+            else if(textInput.toPlainText() == prevMsg.at(prevMsg.size()-1))
+            {
+                prevMsg.removeLast();
+            }
+            prevIndex = prevMsg.size();
+        }
+        else if(event->key() == Qt::Key_Up){
+            if(prevMsg.size() && prevIndex){
+                prevIndex--;
+                textInput.setText(prevMsg.at(prevIndex));
+            }
+        }
+        else if(event->key() == Qt::Key_Down){
+            if(prevIndex != (prevMsg.size() - 1) && prevIndex != prevMsg.size()){
+                prevIndex++;
+                textInput.setText(prevMsg.at(prevIndex));
+            } else {
+                prevIndex = prevMsg.size();
+                textInput.setText(QString());
+            }
         }
     });
 
