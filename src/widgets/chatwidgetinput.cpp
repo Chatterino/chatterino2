@@ -57,7 +57,6 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
             if (c == nullptr) {
                 return;
             }
-
             c->sendMessage(textInput.toPlainText());
             prevMsg.append(textInput.toPlainText());
             event->accept();
@@ -66,9 +65,9 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
                 textInput.setText(QString());
                 prevIndex = 0;
             }
-            else if(textInput.toPlainText() == prevMsg.at(1))
+            else if(textInput.toPlainText() == prevMsg.at(prevMsg.size()-1))
             {
-                prevMsg.removeFirst();
+                prevMsg.removeLast();
             }
             prevIndex = prevMsg.size();
         }
