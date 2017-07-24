@@ -38,7 +38,8 @@ private:
     ResizingTextEdit textInput;
     QLabel textLengthLabel;
     ChatWidgetHeaderButton emotesLabel;
-
+    QStringList prevMsg;
+    unsigned int prevIndex = 0;
     virtual void refreshTheme() override;
 
 private slots:
