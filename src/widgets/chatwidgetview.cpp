@@ -9,6 +9,7 @@
 #include "widgets/chatwidget.hpp"
 
 #include <QDebug>
+#include <QDesktopServices>
 #include <QGraphicsBlurEffect>
 #include <QPainter>
 
@@ -380,7 +381,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
     auto &link = hoverWord.getLink();
 
     switch (link.getType()) {
-        case messages::Link::UserInfo:
+        case messages::Link::UserInfo:{
             auto user = message->getMessage()->getUserName();
             this->userPopupWidget.setName(user);
             this->userPopupWidget.move(event->screenPos().toPoint());
@@ -389,6 +390,11 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 
             qDebug() << "Clicked " << user << "s message";
             break;
+        }
+    case messages::Link::Url:{
+            QDesktopServices::openUrl(QUrl(link.getValue()));
+            break;
+        }
     }
 }
 
