@@ -3,6 +3,7 @@
 #include "messages/message.hpp"
 
 #include <ctime>
+#include <QRegularExpression>
 
 namespace chatterino {
 namespace messages {
@@ -19,6 +20,7 @@ public:
     void appendTimestamp(std::time_t time);
 
     QString matchLink(const QString &string);
+    QRegularExpression regex;
 
     QString originalMessage;
 
