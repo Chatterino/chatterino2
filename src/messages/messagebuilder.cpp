@@ -10,7 +10,7 @@ MessageBuilder::MessageBuilder()
     : _words()
 {
     _parseTime = std::chrono::system_clock::now();
-    regex.setPattern("\\bhttps?:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[A-Z0-9+&@#\/%=~_|]");
+    regex.setPattern("(\\bhttps?:\/\/)?[-A-Z0-9+&@#\/%?=~_|!:,.;]*[A-Z0-9+&@#\/%=~_|]");
     regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 }
 
@@ -54,8 +54,11 @@ void MessageBuilder::appendTimestamp(time_t time)
 
 QString MessageBuilder::matchLink(const QString &string)
 {
-    QRegularExpressionMatch match = regex.match(string);
-    return match.captured();
+    QString match = regex.match(string,0,QRegularExpression::PartialPreferCompleteMatch,QRegularExpression::NoMatchOption).captured();
+    if(!match.contains(QRegularExpression("\\bhttps?:\/\/"))){
+        match.insert(0,"https://");
+    }
+    return match;
 }
 
 }  // namespace messages
