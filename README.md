@@ -22,3 +22,11 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 
 ### linux
 ???
+
+### Mac OSX
+1. Install XCode and XCode Command Line Utilites
+2. Install QT Creator
+3. Install brew https://brew.sh/
+4. `brew install boost openssl rapidjson`
+5. Build the garbage using QT creator
+6. gachiGASM
