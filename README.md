@@ -21,7 +21,10 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 2. extract to `C:/local/rapidjson` so that `C:/local/rapidjson/include/rapidjson/` is a proper path
 
 ### linux
-???
+1. Install QT Creator `sudo apt-get install qt5-default`
+1. Install boost-dev  `sudo apt-get install libboost-all-dev`
+1. Copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory
+1. Open `chatterino.pro` with QT Creator and build
 
 ### Mac OSX
 1. Install XCode and XCode Command Line Utilites
