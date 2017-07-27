@@ -56,6 +56,7 @@ private:
     bool loaded = false;
     TitleBar titleBar;
 
+    /*
     class QRectWrapper : public pajlada::Settings::ISettingData, public QRect
     {
     public:
@@ -65,14 +66,6 @@ private:
         }
 
         pajlada::Signals::Signal<const QRectWrapper &> valueChanged;
-
-        /*
-        operator const QRect &() const
-        {
-            return static_cast<const QRect &>(*this);
-            // return this->getValue();
-        }
-        */
 
         const QRectWrapper &getValueRef() const
         {
@@ -145,8 +138,9 @@ private:
             static_cast<QRect &>(*this) = rhs;
         }
     };
+    */
 
-    pajlada::Settings::Setting<QRectWrapper, QRectWrapper> windowGeometry;
+    //pajlada::Settings::Setting<QRectWrapper> windowGeometry;
 
     friend class Notebook;
 };

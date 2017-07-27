@@ -26,7 +26,7 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
     , notebook(this->channelManager, this)
-    , windowGeometry("/windows/0/geometry")
+    // , windowGeometry("/windows/0/geometry")
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -47,9 +47,9 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
 
     this->refreshTheme();
 
-    if (this->windowGeometry->isFilled()) {
+    if (/*this->windowGeometry->isFilled()*/ false) {
         // Load geometry from settings file
-        this->setGeometry(this->windowGeometry.getValueRef());
+        // this->setGeometry(this->windowGeometry.getValueRef());
     } else {
         // Set default geometry
         // Default position is in the middle of the current monitor or the primary monitor
@@ -163,7 +163,7 @@ Notebook &MainWindow::getNotebook()
 void MainWindow::closeEvent(QCloseEvent *)
 {
     // Save closing window position
-    this->windowGeometry = this->geometry();
+    // this->windowGeometry = this->geometry();
 }
 
 void MainWindow::refreshTheme()
