@@ -96,7 +96,8 @@ SOURCES += \
     src/messagefactory.cpp \
     src/widgets/basewidget.cpp \
     src/widgets/resizingtextedit.cpp \
-    src/completionmanager.cpp
+    src/completionmanager.cpp \
+    src/widgets/logindialog.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \

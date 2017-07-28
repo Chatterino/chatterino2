@@ -68,6 +68,9 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
     QString username = _account.getUserName();
     QString oauthClient = _account.getOAuthClient();
     QString oauthToken = _account.getOAuthToken();
+    if (!oauthToken.startsWith("oauth:")) {
+        oauthToken.prepend("oauth:");
+    }
 
     connection->setUserName(username);
     connection->setNickName(username);

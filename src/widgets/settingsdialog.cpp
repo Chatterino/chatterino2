@@ -2,6 +2,7 @@
 #include "accountmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
+#include "widgets/logindialog.hpp"
 #include "widgets/settingsdialogtab.hpp"
 #include "windowmanager.hpp"
 
@@ -80,8 +81,18 @@ void SettingsDialog::addTabs()
         // add remove buttons
         auto buttonBox = new QDialogButtonBox(this);
 
-        auto addButton = new QPushButton("add", this);
-        auto removeButton = new QPushButton("remove", this);
+        auto addButton = new QPushButton("Add", this);
+        auto removeButton = new QPushButton("Remove", this);
+
+        connect(addButton, &QPushButton::clicked, []() {
+            // TODO: fix memory leak :bbaper:
+            auto loginWidget = new LoginWidget();
+            loginWidget->show();
+        });
+
+        connect(removeButton, &QPushButton::clicked, []() {
+            qDebug() << "TODO: Implement";  //
+        });
 
         buttonBox->addButton(addButton, QDialogButtonBox::YesRole);
         buttonBox->addButton(removeButton, QDialogButtonBox::NoRole);
@@ -90,10 +101,6 @@ void SettingsDialog::addTabs()
 
         // listview
         auto listWidget = new QListWidget(this);
-
-        listWidget->addItem("xD");
-        listWidget->addItem("vi von");
-        listWidget->addItem("monkaS");
 
         for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
             listWidget->addItem(user.getUserName());

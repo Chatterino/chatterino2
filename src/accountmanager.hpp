@@ -16,6 +16,8 @@ public:
         return instance;
     }
 
+    void load();
+
     twitch::TwitchUser &getTwitchAnon();
 
     // Returns first user from twitchUsers, or twitchAnonymousUser if twitchUsers is empty

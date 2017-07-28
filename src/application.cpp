@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "accountmanager.hpp"
 #include "colorscheme.hpp"
 #include "logging/loggingmanager.hpp"
 #include "settingsmanager.hpp"
@@ -24,6 +25,10 @@ Application::Application()
 
     // Initialize everything we need
     this->emoteManager.loadGlobalEmotes();
+
+    AccountManager::getInstance().load();
+
+    this->ircManager.setUser(AccountManager::getInstance().getTwitchUser());
 
     // XXX
     SettingsManager::getInstance().updateWordTypeMask();

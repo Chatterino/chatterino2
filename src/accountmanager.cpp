@@ -1,4 +1,5 @@
 ﻿#include "accountmanager.hpp"
+#include "common.hpp"
 
 #include <pajlada/settings/setting.hpp>
 
@@ -30,6 +31,34 @@ AccountManager::AccountManager()
 
     pajlada::Settings::Setting<std::string>::set(
         "/accounts/current/roomID", "11148817", pajlada::Settings::SettingOption::DoNotWriteToJSON);
+}
+
+void AccountManager::load()
+{
+    auto keys = pajlada::Settings::SettingManager::getObjectKeys("/accounts");
+
+    for (const auto &uid : keys) {
+        if (uid == "current") {
+            continue;
+        }
+
+        std::string username =
+            pajlada::Settings::Setting<std::string>::get("/accounts/" + uid + "/username");
+        std::string userID =
+            pajlada::Settings::Setting<std::string>::get("/accounts/" + uid + "/userID");
+        std::string clientID =
+            pajlada::Settings::Setting<std::string>::get("/accounts/" + uid + "/clientID");
+        std::string oauthToken =
+            pajlada::Settings::Setting<std::string>::get("/accounts/" + uid + "/oauthToken");
+
+        if (username.empty() || userID.empty() || clientID.empty() || oauthToken.empty()) {
+            continue;
+        }
+
+        twitch::TwitchUser user(qS(username), qS(oauthToken), qS(clientID));
+
+        this->addTwitchUser(user);
+    }
 }
 
 twitch::TwitchUser &AccountManager::getTwitchAnon()
