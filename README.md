@@ -21,6 +21,8 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 2. extract to `C:/local/rapidjson` so that `C:/local/rapidjson/include/rapidjson/` is a proper path
 
 ### linux
+#### Ubuntu 16.04.2 LTS
+*most likely works the same for other Debian-like distros*
 1. Install QT Creator `sudo apt-get install qt5-default`
 1. Install boost-dev  `sudo apt-get install libboost-all-dev`
 1. Copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory
