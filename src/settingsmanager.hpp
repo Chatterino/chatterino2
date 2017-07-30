@@ -34,7 +34,7 @@ private:
     messages::Word::Type _wordTypeMask = messages::Word::Default;
 
     // methods
-public: // temporary
+public:  // temporary
     void updateWordTypeMask();
 
 public:
@@ -62,7 +62,7 @@ public:
     Setting<bool> enableHighlightTaskbar;
     Setting<bool> customHighlightSound;
     Setting<QString> pathHighlightSound;
-    Setting<QMap<QString,QPair<bool,bool>>> highlightProperties;
+    Setting<QMap<QString, QPair<bool, bool>>> highlightProperties;
     Setting<bool> enableTwitchEmotes;
     Setting<bool> enableBttvEmotes;
     Setting<bool> enableFfzEmotes;

@@ -9,15 +9,15 @@
 #include <QComboBox>
 #include <QDebug>
 #include <QFile>
+#include <QFileDialog>
 #include <QFontDialog>
 #include <QFormLayout>
-#include <QFileDialog>
 #include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QPalette>
-#include <QTextEdit>
 #include <QResource>
+#include <QTextEdit>
 
 namespace chatterino {
 namespace widgets {
@@ -108,10 +108,11 @@ void SettingsDialog::addTabs()
             listWidget->addItem(user.getUserName());
         }
 
-        if(listWidget->count()){
+        if (listWidget->count()) {
             int itemIndex = 0;
-            for(; itemIndex < listWidget->count(); ++itemIndex){
-                if(listWidget->item(itemIndex)->text().compare(settings.selectedUser.get(),Qt::CaseInsensitive)){
+            for (; itemIndex < listWidget->count(); ++itemIndex) {
+                if (listWidget->item(itemIndex)->text().compare(settings.selectedUser.get(),
+                                                                Qt::CaseInsensitive)) {
                     ++itemIndex;
                     break;
                 }
@@ -119,9 +120,9 @@ void SettingsDialog::addTabs()
             listWidget->setCurrentRow(itemIndex);
         }
 
-        QObject::connect(listWidget,&QListWidget::clicked,this,[&,listWidget]{
-            if(!listWidget->selectedItems().isEmpty()){
-            settings.selectedUser.set(listWidget->currentItem()->text());
+        QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
+            if (!listWidget->selectedItems().isEmpty()) {
+                settings.selectedUser.set(listWidget->currentItem()->text());
             }
         });
 
@@ -374,14 +375,17 @@ void SettingsDialog::addTabs()
     auto soundForm = new QFormLayout();
     {
         vbox->addWidget(createCheckbox("Enable Highlighting", settings.enableHighlights));
-        vbox->addWidget(createCheckbox("Highlight messages containing your name", settings.enableHighlightsSelf));
-        vbox->addWidget(createCheckbox("Play sound when your name is mentioned", settings.enableHighlightSound));
-        vbox->addWidget(createCheckbox("Flash taskbar when your name is mentioned", settings.enableHighlightTaskbar));
+        vbox->addWidget(createCheckbox("Highlight messages containing your name",
+                                       settings.enableHighlightsSelf));
+        vbox->addWidget(createCheckbox("Play sound when your name is mentioned",
+                                       settings.enableHighlightSound));
+        vbox->addWidget(createCheckbox("Flash taskbar when your name is mentioned",
+                                       settings.enableHighlightTaskbar));
         customSound->addWidget(createCheckbox("Custom sound", settings.customHighlightSound));
         auto selectBtn = new QPushButton("Select");
-        QObject::connect(selectBtn,&QPushButton::clicked,this,[&settings,this]{
-            auto fileName = QFileDialog::getOpenFileName(this,
-                tr("Open Sound"), "", tr("Image Files (*.mp3 *.wav)"));
+        QObject::connect(selectBtn, &QPushButton::clicked, this, [&settings, this] {
+            auto fileName = QFileDialog::getOpenFileName(this, tr("Open Sound"), "",
+                                                         tr("Image Files (*.mp3 *.wav)"));
             settings.pathHighlightSound.set(fileName);
         });
         customSound->addWidget(selectBtn);
@@ -390,80 +394,88 @@ void SettingsDialog::addTabs()
     soundForm->addRow(customSound);
 
     {
-    auto hbox = new QHBoxLayout();
-    auto addBtn = new QPushButton("Add");
-    auto editBtn = new QPushButton("Edit");
-    auto delBtn = new QPushButton("Remove");
+        auto hbox = new QHBoxLayout();
+        auto addBtn = new QPushButton("Add");
+        auto editBtn = new QPushButton("Edit");
+        auto delBtn = new QPushButton("Remove");
 
-    QObject::connect(addBtn,&QPushButton::clicked,this,[highlights,this,&settings]{
-        auto show = new QWidget();
-        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
+        QObject::connect(addBtn, &QPushButton::clicked, this, [highlights, this, &settings] {
+            auto show = new QWidget();
+            auto box = new QBoxLayout(QBoxLayout::TopToBottom);
 
-        auto edit = new QLineEdit();
-        auto add = new QPushButton("Add");
+            auto edit = new QLineEdit();
+            auto add = new QPushButton("Add");
 
-        auto sound = new QCheckBox("Play sound");
-        auto task = new QCheckBox("Flash taskbar");
+            auto sound = new QCheckBox("Play sound");
+            auto task = new QCheckBox("Flash taskbar");
 
-        QObject::connect(add,&QPushButton::clicked,this,[=,&settings]{
-            if(edit->text().length()){
-                highlights->addItem(edit->text());
-                settings.highlightProperties.insertMap(edit->text(),sound->isChecked(),task->isChecked());
-                show->close();
+            QObject::connect(add, &QPushButton::clicked, this, [=, &settings] {
+                if (edit->text().length()) {
+                    highlights->addItem(edit->text());
+                    settings.highlightProperties.insertMap(edit->text(), sound->isChecked(),
+                                                           task->isChecked());
+                    show->close();
+                }
+            });
+            box->addWidget(edit);
+            box->addWidget(add);
+            box->addWidget(sound);
+            box->addWidget(task);
+            show->setLayout(box);
+            show->show();
+        });
+        QObject::connect(editBtn, &QPushButton::clicked, this, [highlights, this, &settings] {
+            if (!highlights->selectedItems().isEmpty()) {
+                auto show = new QWidget();
+                auto box = new QBoxLayout(QBoxLayout::TopToBottom);
+
+                auto edit = new QLineEdit();
+                edit->setText(highlights->selectedItems().first()->text());
+                auto add = new QPushButton("Apply");
+
+                auto sound = new QCheckBox("Play sound");
+                auto task = new QCheckBox("Flash taskbar");
+
+                QObject::connect(add, &QPushButton::clicked, this, [=, &settings] {
+                    if (edit->text().length()) {
+                        settings.highlightProperties.getnonConst().remove(
+                            highlights->selectedItems().first()->text());
+                        delete highlights->selectedItems().first();
+                        highlights->addItem(edit->text());
+                        settings.highlightProperties.insertMap(edit->text(), sound->isChecked(),
+                                                               task->isChecked());
+                        show->close();
+                    }
+                });
+                box->addWidget(edit);
+                box->addWidget(add);
+                box->addWidget(sound);
+                sound->setChecked(settings.highlightProperties.get()
+                                      .value(highlights->selectedItems().first()->text())
+                                      .first);
+                box->addWidget(task);
+                task->setChecked(settings.highlightProperties.get()
+                                     .value(highlights->selectedItems().first()->text())
+                                     .second);
+                show->setLayout(box);
+                show->show();
             }
         });
-        box->addWidget(edit);
-        box->addWidget(add);
-        box->addWidget(sound);
-        box->addWidget(task);
-        show->setLayout(box);
-        show->show();
-    });
-    QObject::connect(editBtn,&QPushButton::clicked,this,[highlights,this,&settings]{
-        if(!highlights->selectedItems().isEmpty()){
-        auto show = new QWidget();
-        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
-
-        auto edit = new QLineEdit();
-        edit->setText(highlights->selectedItems().first()->text());
-        auto add = new QPushButton("Apply");
-
-        auto sound = new QCheckBox("Play sound");
-        auto task = new QCheckBox("Flash taskbar");
-
-        QObject::connect(add,&QPushButton::clicked,this,[=,&settings]{
-            if(edit->text().length()){
-                settings.highlightProperties.getnonConst().remove(highlights->selectedItems().first()->text());
+        QObject::connect(delBtn, &QPushButton::clicked, this, [highlights, &settings] {
+            if (!highlights->selectedItems().isEmpty()) {
+                settings.highlightProperties.getnonConst().remove(
+                    highlights->selectedItems().first()->text());
                 delete highlights->selectedItems().first();
-                highlights->addItem(edit->text());
-                settings.highlightProperties.insertMap(edit->text(),sound->isChecked(),task->isChecked());
-                show->close();
             }
         });
-        box->addWidget(edit);
-        box->addWidget(add);
-        box->addWidget(sound);
-        sound->setChecked(settings.highlightProperties.get().value(highlights->selectedItems().first()->text()).first);
-        box->addWidget(task);
-        task->setChecked(settings.highlightProperties.get().value(highlights->selectedItems().first()->text()).second);
-        show->setLayout(box);
-        show->show();
-        }
-    });
-    QObject::connect(delBtn,&QPushButton::clicked,this,[highlights,&settings]{
-        if(!highlights->selectedItems().isEmpty()){
-        settings.highlightProperties.getnonConst().remove(highlights->selectedItems().first()->text());
-        delete highlights->selectedItems().first();
-        }
-    });
-    vbox->addLayout(soundForm);
-    vbox->addWidget(highlights);
+        vbox->addLayout(soundForm);
+        vbox->addWidget(highlights);
 
-    hbox->addWidget(addBtn);
-    hbox->addWidget(editBtn);
-    hbox->addWidget(delBtn);
+        hbox->addWidget(addBtn);
+        hbox->addWidget(editBtn);
+        hbox->addWidget(delBtn);
 
-    vbox->addLayout(hbox);
+        vbox->addLayout(hbox);
     }
     vbox->addStretch(1);
     addTab(vbox, "Highlighting", ":/images/format_Bold_16xLG.png");
@@ -586,9 +598,8 @@ void SettingsDialog::cancelButtonClicked()
 
     QStringList list = instance.highlightProperties.get().keys();
     list.removeDuplicates();
-    while(globalHighlights->count()>0)
-    {
-      delete globalHighlights->takeItem(0);
+    while (globalHighlights->count() > 0) {
+        delete globalHighlights->takeItem(0);
     }
     globalHighlights->addItems(list);
 

@@ -52,7 +52,7 @@ private:
 
     SettingsDialogTab *selectedTab = nullptr;
 
-    QListWidget* globalHighlights;
+    QListWidget *globalHighlights;
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);

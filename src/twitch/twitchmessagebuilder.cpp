@@ -57,32 +57,34 @@ SharedMessage TwitchMessageBuilder::parse()
     this->originalMessage = originalMessage;
     SettingsManager &settings = SettingsManager::getInstance();
     static auto player = new QMediaPlayer;
-    if(settings.customHighlightSound.get()){
-    player->setMedia(QUrl(settings.pathHighlightSound.get()));
+    if (settings.customHighlightSound.get()) {
+        player->setMedia(QUrl(settings.pathHighlightSound.get()));
     } else {
         player->setMedia(QUrl("qrc:/sounds/ping2.wav"));
     }
-    if(settings.enableHighlights.get() && ircMessage->nick().compare(settings.selectedUser.get(), Qt::CaseInsensitive)){
-        if(settings.enableHighlightsSelf.get() && originalMessage.contains(settings.selectedUser.get(), Qt::CaseInsensitive)){
+    if (settings.enableHighlights.get() &&
+        ircMessage->nick().compare(settings.selectedUser.get(), Qt::CaseInsensitive)) {
+        if (settings.enableHighlightsSelf.get() &&
+            originalMessage.contains(settings.selectedUser.get(), Qt::CaseInsensitive)) {
             this->setHighlight(true);
-            if(settings.enableHighlightSound.get()){
+            if (settings.enableHighlightSound.get()) {
                 player->play();
             }
-            if(settings.enableHighlightTaskbar.get()){
-                QApplication::alert(windowManager.getMainWindow().window(),2500);
+            if (settings.enableHighlightTaskbar.get()) {
+                QApplication::alert(windowManager.getMainWindow().window(), 2500);
             }
         } else {
             QStringList lines = settings.highlightProperties.get().keys();
-            for(QString string : lines){
-                if(originalMessage.contains(string,Qt::CaseInsensitive)){
+            for (QString string : lines) {
+                if (originalMessage.contains(string, Qt::CaseInsensitive)) {
                     this->setHighlight(true);
                     // Sound
-                    if(settings.highlightProperties.get().value(string).first){
+                    if (settings.highlightProperties.get().value(string).first) {
                         player->play();
                     }
                     // Taskbar
-                    if(settings.highlightProperties.get().value(string).second){
-                        QApplication::alert(windowManager.getMainWindow().window(),2500);
+                    if (settings.highlightProperties.get().value(string).second) {
+                        QApplication::alert(windowManager.getMainWindow().window(), 2500);
                     }
                 }
             }

@@ -227,7 +227,9 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
         // update messages that have been changed
         if (updateBuffer) {
             QPainter painter(buffer);
-            painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab()) ? this->colorScheme.ChatBackgroundHighlighted : this->colorScheme.ChatBackground);
+            painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+                                                 ? this->colorScheme.ChatBackgroundHighlighted
+                                                 : this->colorScheme.ChatBackground);
             for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
                 // image
                 if (wordPart.getWord().isImage()) {
@@ -380,7 +382,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
     auto &link = hoverWord.getLink();
 
     switch (link.getType()) {
-        case messages::Link::UserInfo:{
+        case messages::Link::UserInfo: {
             auto user = message->getMessage()->getUserName();
             this->userPopupWidget.setName(user);
             this->userPopupWidget.move(event->screenPos().toPoint());
@@ -390,7 +392,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
             qDebug() << "Clicked " << user << "s message";
             break;
         }
-    case messages::Link::Url:{
+        case messages::Link::Url: {
             QDesktopServices::openUrl(QUrl(link.getValue()));
             break;
         }

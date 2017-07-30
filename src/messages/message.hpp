@@ -24,7 +24,8 @@ class Message
 {
 public:
     // explicit Message(const QString &text);
-    explicit Message(const QString &text, const std::vector<messages::Word> &words, const bool &highlight);
+    explicit Message(const QString &text, const std::vector<messages::Word> &words,
+                     const bool &highlight);
 
     bool getCanHighlightTab() const;
     const QString &getTimeoutUser() const;

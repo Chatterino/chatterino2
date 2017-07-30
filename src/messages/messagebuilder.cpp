@@ -16,7 +16,7 @@ MessageBuilder::MessageBuilder()
 
 SharedMessage MessageBuilder::build()
 {
-    return SharedMessage(new Message(this->originalMessage, _words,highlight));
+    return SharedMessage(new Message(this->originalMessage, _words, highlight));
 }
 
 void MessageBuilder::appendWord(const Word &word)
@@ -31,7 +31,8 @@ void MessageBuilder::appendTimestamp()
     appendTimestamp(t);
 }
 
-void MessageBuilder::setHighlight(const bool &value){
+void MessageBuilder::setHighlight(const bool &value)
+{
     highlight = value;
 }
 
@@ -58,9 +59,12 @@ void MessageBuilder::appendTimestamp(time_t time)
 
 QString MessageBuilder::matchLink(const QString &string)
 {
-    QString match = regex.match(string,0,QRegularExpression::PartialPreferCompleteMatch,QRegularExpression::NoMatchOption).captured();
-    if(!match.contains(QRegularExpression("\\bhttps?:\/\/"))){
-        match.insert(0,"https://");
+    QString match = regex
+                        .match(string, 0, QRegularExpression::PartialPreferCompleteMatch,
+                               QRegularExpression::NoMatchOption)
+                        .captured();
+    if (!match.contains(QRegularExpression("\\bhttps?:\/\/"))) {
+        match.insert(0, "https://");
     }
     return match;
 }

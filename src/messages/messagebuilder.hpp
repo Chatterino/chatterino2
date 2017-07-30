@@ -2,8 +2,9 @@
 
 #include "messages/message.hpp"
 
-#include <ctime>
 #include <QRegularExpression>
+
+#include <ctime>
 
 namespace chatterino {
 namespace messages {
