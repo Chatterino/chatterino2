@@ -123,7 +123,12 @@ void NotebookPage::addChat(bool openChannelNameDialog)
     ChatWidget *w = this->createChatWidget();
 
     if (openChannelNameDialog) {
-        w->showChangeChannelPopup();
+        bool ret = w->showChangeChannelPopup("Open channel", true);
+
+        if (!ret) {
+            delete w;
+            return;
+        }
     }
 
     this->addToLayout(w, std::pair<int, int>(-1, -1));

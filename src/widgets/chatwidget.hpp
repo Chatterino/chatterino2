@@ -48,7 +48,7 @@ public:
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();
 
-    void showChangeChannelPopup();
+    bool showChangeChannelPopup(const char *dialogTitle, bool empty = false);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
     void layoutMessages(bool forceUpdate = false);
     void updateGifEmotes();

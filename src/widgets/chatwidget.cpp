@@ -157,18 +157,26 @@ LimitedQueueSnapshot<SharedMessageRef> ChatWidget::getMessagesSnapshot()
     return this->messages.getSnapshot();
 }
 
-void ChatWidget::showChangeChannelPopup()
+bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
 {
     // create new input dialog and execute it
     TextInputDialog dialog(this);
 
-    dialog.setText(QString::fromStdString(this->channelName));
+    dialog.setWindowTitle(dialogTitle);
+
+    if (!empty) {
+        dialog.setText(QString::fromStdString(this->channelName));
+    }
 
     if (dialog.exec() == QDialog::Accepted) {
         QString newChannelName = dialog.getText().trimmed();
 
         this->channelName = newChannelName.toStdString();
+
+        return true;
     }
+
+    return false;
 }
 
 void ChatWidget::layoutMessages(bool forceUpdate)
@@ -229,7 +237,7 @@ void ChatWidget::doCloseSplit()
 
 void ChatWidget::doChangeChannel()
 {
-    this->showChangeChannelPopup();
+    this->showChangeChannelPopup("Change channel");
 }
 
 void ChatWidget::doPopup()
