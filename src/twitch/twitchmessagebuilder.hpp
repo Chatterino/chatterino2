@@ -59,6 +59,7 @@ private:
     void parseRoomID();
     void parseChannelName();
     void parseUsername();
+    void parseHighlights();
 
     void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,

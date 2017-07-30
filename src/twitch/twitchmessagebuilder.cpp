@@ -34,6 +34,10 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel, Resources &_resour
 
 SharedMessage TwitchMessageBuilder::parse()
 {
+    SettingsManager &settings = SettingsManager::getInstance();
+
+    this->originalMessage = this->ircMessage->content();
+
     // The timestamp is always appended to the builder
     // Whether or not will be rendered is decided/checked later
     this->appendTimestamp();
@@ -53,42 +57,8 @@ SharedMessage TwitchMessageBuilder::parse()
     this->parseUsername();
 
     // highlights
-    const QString &originalMessage = ircMessage->content();
-    this->originalMessage = originalMessage;
-    SettingsManager &settings = SettingsManager::getInstance();
-    static auto player = new QMediaPlayer;
-    if (settings.customHighlightSound.get()) {
-        player->setMedia(QUrl(settings.pathHighlightSound.get()));
-    } else {
-        player->setMedia(QUrl("qrc:/sounds/ping2.wav"));
-    }
-    if (settings.enableHighlights.get() &&
-        ircMessage->nick().compare(settings.selectedUser.get(), Qt::CaseInsensitive)) {
-        if (settings.enableHighlightsSelf.get() &&
-            originalMessage.contains(settings.selectedUser.get(), Qt::CaseInsensitive)) {
-            this->setHighlight(true);
-            if (settings.enableHighlightSound.get()) {
-                player->play();
-            }
-            if (settings.enableHighlightTaskbar.get()) {
-                QApplication::alert(windowManager.getMainWindow().window(), 2500);
-            }
-        } else {
-            QStringList lines = settings.highlightProperties.get().keys();
-            for (QString string : lines) {
-                if (originalMessage.contains(string, Qt::CaseInsensitive)) {
-                    this->setHighlight(true);
-                    // Sound
-                    if (settings.highlightProperties.get().value(string).first) {
-                        player->play();
-                    }
-                    // Taskbar
-                    if (settings.highlightProperties.get().value(string).second) {
-                        QApplication::alert(windowManager.getMainWindow().window(), 2500);
-                    }
-                }
-            }
-        }
+    if (settings.enableHighlights.get()) {
+        this->parseHighlights();
     }
 
     // bits
@@ -126,7 +96,7 @@ SharedMessage TwitchMessageBuilder::parse()
     // words
     QColor textColor = ircMessage->isAction() ? this->usernameColor : this->colorScheme.Text;
 
-    QStringList splits = originalMessage.split(' ');
+    QStringList splits = this->originalMessage.split(' ');
 
     long int i = 0;
 
@@ -365,6 +335,85 @@ void TwitchMessageBuilder::parseUsername()
 
     this->appendWord(Word(usernameString, Word::Username, this->usernameColor, usernameString,
                           QString(), Link(Link::UserInfo, this->userName)));
+}
+
+void TwitchMessageBuilder::parseHighlights()
+{
+    static auto player = new QMediaPlayer;
+    SettingsManager &settings = SettingsManager::getInstance();
+
+    if (this->ircMessage->nick() == settings.selectedUser.get()) {
+        // Do nothing. Highlights cannot be triggered by yourself
+        return;
+    }
+
+    if (settings.customHighlightSound.get()) {
+        player->setMedia(QUrl(settings.pathHighlightSound.get()));
+    } else {
+        player->setMedia(QUrl("qrc:/sounds/ping2.wav"));
+    }
+
+    struct Highlight {
+        Highlight(const QString &_target, bool _sound, bool _alert)
+            : target(_target)
+            , sound(_sound)
+            , alert(_alert)
+        {
+        }
+
+        QString target;
+        bool sound;
+        bool alert;
+    };
+
+    // TODO: This vector should only be rebuilt upon highlights being changed
+    std::vector<Highlight> activeHighlights;
+
+    if (settings.enableHighlightsSelf.get() && settings.selectedUser.get().size() > 0) {
+        activeHighlights.emplace_back(settings.selectedUser.get(),
+                                      settings.enableHighlightSound.get(),
+                                      settings.enableHighlightTaskbar.get());
+    }
+    const auto &highlightProperties = settings.highlightProperties.get();
+
+    for (auto it = highlightProperties.begin(); it != highlightProperties.end(); ++it) {
+        auto properties = it.value();
+        activeHighlights.emplace_back(it.key(), properties.first, properties.second);
+    }
+
+    bool doHighlight = true;
+    bool playSound = false;
+    bool doAlert = false;
+
+    for (const Highlight &highlight : activeHighlights) {
+        if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
+            doHighlight = true;
+
+            if (highlight.sound) {
+                playSound = true;
+            }
+
+            if (highlight.alert) {
+                doAlert = true;
+            }
+
+            if (playSound && doAlert) {
+                // Break if no further action can be taken from other highlights
+                // This might change if highlights can have custom colors/sounds/actions
+                break;
+            }
+        }
+    }
+
+    this->setHighlight(doHighlight);
+
+    if (playSound) {
+        player->play();
+    }
+
+    if (doAlert) {
+        QApplication::alert(windowManager.getMainWindow().window(), 2500);
+    }
 }
 
 void TwitchMessageBuilder::appendModerationButtons()
