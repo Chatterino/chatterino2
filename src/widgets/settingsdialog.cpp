@@ -385,7 +385,7 @@ void SettingsDialog::addTabs()
         auto selectBtn = new QPushButton("Select");
         QObject::connect(selectBtn, &QPushButton::clicked, this, [&settings, this] {
             auto fileName = QFileDialog::getOpenFileName(this, tr("Open Sound"), "",
-                                                         tr("Image Files (*.mp3 *.wav)"));
+                                                         tr("Audio Files (*.mp3 *.wav)"));
             settings.pathHighlightSound.set(fileName);
         });
         customSound->addWidget(selectBtn);
