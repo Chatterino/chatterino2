@@ -143,5 +143,10 @@ void ChatWidgetInput::resizeEvent(QResizeEvent *)
     }
 }
 
+void ChatWidgetInput::mousePressEvent(QMouseEvent *)
+{
+    this->chatWidget->giveFocus();
+}
+
 }  // namespace widgets
 }  // namespace chatterino

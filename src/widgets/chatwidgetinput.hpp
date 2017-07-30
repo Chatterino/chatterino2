@@ -29,6 +29,8 @@ protected:
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
 
+    virtual void mousePressEvent(QMouseEvent *event) override;
+
 private:
     ChatWidget *const chatWidget;
 
