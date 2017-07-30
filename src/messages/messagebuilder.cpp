@@ -16,7 +16,7 @@ MessageBuilder::MessageBuilder()
 
 SharedMessage MessageBuilder::build()
 {
-    return SharedMessage(new Message(this->originalMessage, _words));
+    return SharedMessage(new Message(this->originalMessage, _words,highlight));
 }
 
 void MessageBuilder::appendWord(const Word &word)
@@ -29,6 +29,10 @@ void MessageBuilder::appendTimestamp()
     time_t t;
     time(&t);
     appendTimestamp(t);
+}
+
+void MessageBuilder::setHighlight(const bool &value){
+    highlight = value;
 }
 
 void MessageBuilder::appendTimestamp(time_t time)

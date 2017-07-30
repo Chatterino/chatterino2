@@ -53,6 +53,7 @@ private:
     std::string roomID;
 
     QColor usernameColor;
+    bool highlight;
 
     void parseMessageID();
     void parseRoomID();

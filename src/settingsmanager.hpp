@@ -57,9 +57,12 @@ public:
     Setting<bool> mentionUsersWithAt;
     Setting<bool> allowCommandsAtEnd;
     Setting<bool> enableHighlights;
+    Setting<bool> enableHighlightsSelf;
     Setting<bool> enableHighlightSound;
     Setting<bool> enableHighlightTaskbar;
     Setting<bool> customHighlightSound;
+    Setting<QString> pathHighlightSound;
+    Setting<QMap<QString,QPair<bool,bool>>> highlightProperties;
     Setting<bool> enableTwitchEmotes;
     Setting<bool> enableBttvEmotes;
     Setting<bool> enableFfzEmotes;

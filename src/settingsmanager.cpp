@@ -27,9 +27,12 @@ SettingsManager::SettingsManager()
     , mentionUsersWithAt(_settingsItems, "mentionUsersWithAt", false)
     , allowCommandsAtEnd(_settingsItems, "allowCommandsAtEnd", false)
     , enableHighlights(_settingsItems, "enableHighlights", true)
+    , enableHighlightsSelf(_settingsItems,"enableHighlightsSelf", true)
     , enableHighlightSound(_settingsItems, "enableHighlightSound", true)
     , enableHighlightTaskbar(_settingsItems, "enableHighlightTaskbar", true)
     , customHighlightSound(_settingsItems, "customHighlightSound", false)
+    , pathHighlightSound(_settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
+    , highlightProperties(_settingsItems,"highlightProperties",QMap<QString,QPair<bool,bool>>())
     , enableTwitchEmotes(_settingsItems, "enableTwitchEmotes", true)
     , enableBttvEmotes(_settingsItems, "enableBttvEmotes", true)
     , enableFfzEmotes(_settingsItems, "enableFfzEmotes", true)
@@ -61,16 +64,43 @@ SettingsManager::SettingsManager()
 void SettingsManager::save()
 {
     for (auto &item : _settingsItems) {
-        _settings.setValue(item.get().getName(), item.get().getVariant());
+        if(item.get().getName() != "highlightProperties"){
+            _settings.setValue(item.get().getName(), item.get().getVariant());
+        } else {
+            _settings.beginGroup("Highlights");
+            QStringList list = highlightProperties.get().keys();
+            list.removeAll("");
+            _settings.remove("");
+            for (auto string : list){
+                _settings.beginGroup(string);
+                _settings.setValue("highlightSound",highlightProperties.get().value(string).first);
+                _settings.setValue("highlightTask",highlightProperties.get().value(string).second);
+                _settings.endGroup();
+            }
+            _settings.endGroup();
+        }
     }
 }
 
 void SettingsManager::load()
 {
     for (auto &item : _settingsItems) {
-        item.get().setVariant(_settings.value(item.get().getName()));
+        if(item.get().getName() != "highlightProperties"){
+            item.get().setVariant(_settings.value(item.get().getName()));
+        } else {
+            _settings.beginGroup("Highlights");
+            QStringList list = _settings.childGroups();
+            qDebug() << list.join(",");
+            for (auto string : list){
+                _settings.beginGroup(string);
+                highlightProperties.insertMap(string,_settings.value("highlightSound").toBool(),_settings.value("highlightTask").toBool());
+                _settings.endGroup();
+            }
+            _settings.endGroup();
+        }
     }
 }
+
 
 Word::Type SettingsManager::getWordTypeMask()
 {
@@ -129,7 +159,11 @@ SettingsSnapshot SettingsManager::createSnapshot()
     SettingsSnapshot snapshot;
 
     for (auto &item : this->_settingsItems) {
+        if(item.get().getName() != "highlightProperties"){
         snapshot.addItem(item, item.get().getVariant());
+        } else {
+            snapshot._mapItems = highlightProperties.get();
+        }
     }
 
     return snapshot;

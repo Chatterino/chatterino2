@@ -43,6 +43,10 @@ public:
         return _value;
     }
 
+    T &getnonConst() {
+        return _value;
+    }
+
     void set(const T &newValue)
     {
         if (_value != newValue) {
@@ -64,6 +68,12 @@ public:
             set(value.value<T>());
         }
     }
+
+    void insertMap(QString id, bool sound, bool task){
+        QPair<bool,bool> pair(sound,task);
+        _value.insert(id,pair);
+    }
+
 
     boost::signals2::signal<void(const T &newValue)> valueChanged;
 

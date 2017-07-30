@@ -11,10 +11,12 @@
 #include <QFile>
 #include <QFontDialog>
 #include <QFormLayout>
+#include <QFileDialog>
 #include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QPalette>
+#include <QTextEdit>
 #include <QResource>
 
 namespace chatterino {
@@ -105,6 +107,23 @@ void SettingsDialog::addTabs()
         for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
             listWidget->addItem(user.getUserName());
         }
+
+        if(listWidget->count()){
+            int itemIndex = 0;
+            for(; itemIndex < listWidget->count(); ++itemIndex){
+                if(listWidget->item(itemIndex)->text().compare(settings.selectedUser.get(),Qt::CaseInsensitive)){
+                    ++itemIndex;
+                    break;
+                }
+            }
+            listWidget->setCurrentRow(itemIndex);
+        }
+
+        QObject::connect(listWidget,&QListWidget::clicked,this,[&,listWidget]{
+            if(!listWidget->selectedItems().isEmpty()){
+            settings.selectedUser.set(listWidget->currentItem()->text());
+            }
+        });
 
         vbox->addWidget(listWidget);
     }
@@ -347,6 +366,105 @@ void SettingsDialog::addTabs()
 
     // Highlighting
     vbox = new QVBoxLayout();
+    auto highlights = new QListWidget();
+    globalHighlights = highlights;
+    QStringList items = settings.highlightProperties.get().keys();
+    highlights->addItems(items);
+    auto customSound = new QHBoxLayout();
+    auto soundForm = new QFormLayout();
+    {
+        vbox->addWidget(createCheckbox("Enable Highlighting", settings.enableHighlights));
+        vbox->addWidget(createCheckbox("Highlight messages containing your name", settings.enableHighlightsSelf));
+        vbox->addWidget(createCheckbox("Play sound when your name is mentioned", settings.enableHighlightSound));
+        vbox->addWidget(createCheckbox("Flash taskbar when your name is mentioned", settings.enableHighlightTaskbar));
+        customSound->addWidget(createCheckbox("Custom sound", settings.customHighlightSound));
+        auto selectBtn = new QPushButton("Select");
+        QObject::connect(selectBtn,&QPushButton::clicked,this,[&settings,this]{
+            auto fileName = QFileDialog::getOpenFileName(this,
+                tr("Open Sound"), "", tr("Image Files (*.mp3 *.wav)"));
+            settings.pathHighlightSound.set(fileName);
+        });
+        customSound->addWidget(selectBtn);
+    }
+
+    soundForm->addRow(customSound);
+
+    {
+    auto hbox = new QHBoxLayout();
+    auto addBtn = new QPushButton("Add");
+    auto editBtn = new QPushButton("Edit");
+    auto delBtn = new QPushButton("Remove");
+
+    QObject::connect(addBtn,&QPushButton::clicked,this,[highlights,this,&settings]{
+        auto show = new QWidget();
+        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
+
+        auto edit = new QLineEdit();
+        auto add = new QPushButton("Add");
+
+        auto sound = new QCheckBox("Play sound");
+        auto task = new QCheckBox("Flash taskbar");
+
+        QObject::connect(add,&QPushButton::clicked,this,[=,&settings]{
+            if(edit->text().length()){
+                highlights->addItem(edit->text());
+                settings.highlightProperties.insertMap(edit->text(),sound->isChecked(),task->isChecked());
+                show->close();
+            }
+        });
+        box->addWidget(edit);
+        box->addWidget(add);
+        box->addWidget(sound);
+        box->addWidget(task);
+        show->setLayout(box);
+        show->show();
+    });
+    QObject::connect(editBtn,&QPushButton::clicked,this,[highlights,this,&settings]{
+        if(!highlights->selectedItems().isEmpty()){
+        auto show = new QWidget();
+        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
+
+        auto edit = new QLineEdit();
+        edit->setText(highlights->selectedItems().first()->text());
+        auto add = new QPushButton("Apply");
+
+        auto sound = new QCheckBox("Play sound");
+        auto task = new QCheckBox("Flash taskbar");
+
+        QObject::connect(add,&QPushButton::clicked,this,[=,&settings]{
+            if(edit->text().length()){
+                settings.highlightProperties.getnonConst().remove(highlights->selectedItems().first()->text());
+                delete highlights->selectedItems().first();
+                highlights->addItem(edit->text());
+                settings.highlightProperties.insertMap(edit->text(),sound->isChecked(),task->isChecked());
+                show->close();
+            }
+        });
+        box->addWidget(edit);
+        box->addWidget(add);
+        box->addWidget(sound);
+        sound->setChecked(settings.highlightProperties.get().value(highlights->selectedItems().first()->text()).first);
+        box->addWidget(task);
+        task->setChecked(settings.highlightProperties.get().value(highlights->selectedItems().first()->text()).second);
+        show->setLayout(box);
+        show->show();
+        }
+    });
+    QObject::connect(delBtn,&QPushButton::clicked,this,[highlights,&settings]{
+        if(!highlights->selectedItems().isEmpty()){
+        settings.highlightProperties.getnonConst().remove(highlights->selectedItems().first()->text());
+        delete highlights->selectedItems().first();
+        }
+    });
+    vbox->addLayout(soundForm);
+    vbox->addWidget(highlights);
+
+    hbox->addWidget(addBtn);
+    hbox->addWidget(editBtn);
+    hbox->addWidget(delBtn);
+
+    vbox->addLayout(hbox);
+    }
     vbox->addStretch(1);
     addTab(vbox, "Highlighting", ":/images/format_Bold_16xLG.png");
 
@@ -461,7 +579,18 @@ void SettingsDialog::okButtonClicked()
 void SettingsDialog::cancelButtonClicked()
 {
     // TODO: Re-implement the snapshot feature properly
+    auto &instance = SettingsManager::getInstance();
+
     this->snapshot.apply();
+    instance.highlightProperties.set(this->snapshot._mapItems);
+
+    QStringList list = instance.highlightProperties.get().keys();
+    list.removeDuplicates();
+    while(globalHighlights->count()>0)
+    {
+      delete globalHighlights->takeItem(0);
+    }
+    globalHighlights->addItems(list);
 
     this->close();
 }

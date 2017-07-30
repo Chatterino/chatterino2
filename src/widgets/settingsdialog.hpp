@@ -10,6 +10,7 @@
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QListView>
+#include <QListWidget>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QStackedLayout>
@@ -50,6 +51,8 @@ private:
     void addTabs();
 
     SettingsDialogTab *selectedTab = nullptr;
+
+    QListWidget* globalHighlights;
 
     /// Widget creation helpers
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);

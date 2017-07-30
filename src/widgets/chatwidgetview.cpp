@@ -227,8 +227,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
         // update messages that have been changed
         if (updateBuffer) {
             QPainter painter(buffer);
-            painter.fillRect(buffer->rect(), this->colorScheme.ChatBackground);
-
+            painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab()) ? this->colorScheme.ChatBackgroundHighlighted : this->colorScheme.ChatBackground);
             for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
                 // image
                 if (wordPart.getWord().isImage()) {
