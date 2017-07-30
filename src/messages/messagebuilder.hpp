@@ -18,6 +18,7 @@ public:
     void appendWord(const Word &word);
     void appendTimestamp();
     void appendTimestamp(std::time_t time);
+    void setHighlight(const bool &value);
 
     QString matchLink(const QString &string);
     QRegularExpression regex;
@@ -26,6 +27,7 @@ public:
 
 private:
     std::vector<Word> _words;
+    bool highlight = false;
     std::chrono::time_point<std::chrono::system_clock> _parseTime;
 };
 
