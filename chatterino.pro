@@ -51,7 +51,6 @@ SOURCES += \
     src/channel.cpp \
     src/channeldata.cpp \
     src/colorscheme.cpp \
-    src/emojis.cpp \
     src/ircmanager.cpp \
     src/messages/lazyloadedimage.cpp \
     src/messages/link.cpp \

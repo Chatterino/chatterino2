@@ -4,7 +4,6 @@
 #include "messages/lazyloadedimage.hpp"
 
 #include <QObject>
-#include <QRegularExpression>
 #include <QString>
 
 #include <unordered_map>
@@ -19,15 +18,6 @@ struct EmojiData {
 
     // i.e. thinking
     QString shortCode;
-};
-
-class Emojis
-{
-public:
-    static QString replaceShortCodes(const QString &text);
-
-private:
-    static QRegularExpression findShortCodesRegex;
 };
 
 }  // namespace chatterino
