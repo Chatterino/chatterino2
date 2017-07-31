@@ -381,12 +381,14 @@ void TwitchMessageBuilder::parseHighlights()
         activeHighlights.emplace_back(it.key(), properties.first, properties.second);
     }
 
-    bool doHighlight = true;
+    bool doHighlight = false;
     bool playSound = false;
     bool doAlert = false;
 
     for (const Highlight &highlight : activeHighlights) {
         if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
+            qDebug() << "Highlight because " << this->originalMessage << " contains "
+                     << highlight.target;
             doHighlight = true;
 
             if (highlight.sound) {
