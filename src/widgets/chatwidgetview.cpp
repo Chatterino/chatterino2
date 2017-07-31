@@ -383,7 +383,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 
     switch (link.getType()) {
         case messages::Link::UserInfo: {
-            auto user = message->getMessage()->getUserName();
+            auto user = link.getValue();
             this->userPopupWidget.setName(user);
             this->userPopupWidget.move(event->screenPos().toPoint());
             this->userPopupWidget.show();
