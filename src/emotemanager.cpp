@@ -199,6 +199,7 @@ void EmoteManager::loadEmojis()
         };
 
         this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
+        this->emojiShortCodes.push_back(shortCode.toStdString());
 
         this->emojiFirstByte[emojiData.value.at(0)].append(emojiData);
 

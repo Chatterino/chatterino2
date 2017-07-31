@@ -94,6 +94,8 @@ public:
 
     QString replaceShortCodes(const QString &text);
 
+    std::vector<std::string> emojiShortCodes;
+
     /// Twitch emotes
     void refreshTwitchEmotes(const std::string &roomID);
 

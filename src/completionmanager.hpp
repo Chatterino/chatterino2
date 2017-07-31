@@ -28,6 +28,8 @@ public:
         return this->emotes.size();
     }
 
+    void addString(const std::string &str);
+
     QVector<QString> emotes;
 };
 

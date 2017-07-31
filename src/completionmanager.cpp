@@ -4,6 +4,12 @@
 
 namespace chatterino {
 
+void CompletionModel::addString(const std::string &str)
+{
+    // Always add a space at the end of completions
+    this->emotes.push_back(qS(str) + " ");
+}
+
 CompletionManager::CompletionManager(EmoteManager &_emoteManager)
     : emoteManager(_emoteManager)
 {
@@ -40,30 +46,35 @@ void CompletionManager::updateModel(CompletionModel *model, const std::string &c
 
     for (const auto &m : this->emoteManager.twitchAccountEmotes) {
         for (const auto &emoteName : m.second.emoteCodes) {
-            model->emotes.push_back(qS(emoteName));
+            model->addString(emoteName);
         }
     }
 
     std::vector<std::string> &bttvGlobalEmoteCodes = this->emoteManager.bttvGlobalEmoteCodes;
     for (const auto &m : bttvGlobalEmoteCodes) {
-        model->emotes.push_back(qS(m));
+        model->addString(m);
     }
 
     std::vector<std::string> &ffzGlobalEmoteCodes = this->emoteManager.ffzGlobalEmoteCodes;
     for (const auto &m : ffzGlobalEmoteCodes) {
-        model->emotes.push_back(qS(m));
+        model->addString(m);
     }
 
     std::vector<std::string> &bttvChannelEmoteCodes =
         this->emoteManager.bttvChannelEmoteCodes[channelName];
     for (const auto &m : bttvChannelEmoteCodes) {
-        model->emotes.push_back(qS(m));
+        model->addString(m);
     }
 
     std::vector<std::string> &ffzChannelEmoteCodes =
         this->emoteManager.ffzChannelEmoteCodes[channelName];
     for (const auto &m : ffzChannelEmoteCodes) {
-        model->emotes.push_back(qS(m));
+        model->addString(m);
+    }
+
+    const auto &emojiShortCodes = this->emoteManager.emojiShortCodes;
+    for (const auto &m : emojiShortCodes) {
+        model->addString(":" + m + ":");
     }
 }
 

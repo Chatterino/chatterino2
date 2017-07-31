@@ -25,7 +25,10 @@ protected:
 
 private:
     QCompleter *completer = nullptr;
-    QString textUnderCursor() const;
+
+    // hadSpace is set to true in case the "textUnderCursor" word was after a space
+    QString textUnderCursor(bool *hadSpace = nullptr) const;
+
     bool nextCompletion = false;
 
 private slots:
