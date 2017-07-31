@@ -7,8 +7,6 @@ namespace chatterino {
 struct SettingsSnapshot {
 public:
     SettingsSnapshot()
-        : _items()
-        , _mapItems()
     {
     }
 
