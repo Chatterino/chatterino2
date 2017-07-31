@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>131</height>
+    <width>317</width>
+    <height>145</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,59 +19,71 @@
   <property name="windowTitle">
    <string>AccountPopup</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="0">
-    <widget class="QPushButton" name="btnPurge">
-     <property name="text">
-      <string>Purge</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="1" rowspan="2" colspan="2">
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Views</string>
+        <string>Views:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QLabel" name="lblViews">
        <property name="text">
-        <string>420</string>
+        <string>Loading...</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Followers</string>
+        <string>Followers:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="lblFollowers">
        <property name="text">
-        <string>69</string>
+        <string>Loading...</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Account Age</string>
+        <string>Created at:</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLabel" name="lblAccountAge">
        <property name="text">
-        <string>6 years</string>
+        <string>Loading...</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="0" column="0" rowspan="3">
+    <widget class="QLabel" name="lblAvatar">
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Loading...</string>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item row="0" column="1" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -91,7 +103,7 @@
         </font>
        </property>
        <property name="text">
-        <string>USERNAME</string>
+        <string>Loading...</string>
        </property>
       </widget>
      </item>
@@ -109,13 +121,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="0" column="0" rowspan="3">
-    <widget class="QLabel" name="lblAvatar">
-     <property name="text">
-      <string>AVATAR</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
