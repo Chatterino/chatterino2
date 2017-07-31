@@ -10,6 +10,7 @@
 
 #include <QMap>
 #include <QMutex>
+#include <QRegularExpression>
 #include <QString>
 #include <QTimer>
 #include <boost/signals2.hpp>
@@ -75,6 +76,8 @@ private:
     Resources &resources;
 
     /// Emojis
+    QRegularExpression findShortCodesRegex;
+
     // shortCodeToEmoji maps strings like "sunglasses" to its emoji
     QMap<QString, EmojiData> emojiShortCodeToEmoji;
 
@@ -88,6 +91,8 @@ private:
 
 public:
     void parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
+
+    QString replaceShortCodes(const QString &text);
 
     /// Twitch emotes
     void refreshTwitchEmotes(const std::string &roomID);

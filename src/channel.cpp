@@ -118,7 +118,11 @@ void Channel::reloadChannelEmotes()
 void Channel::sendMessage(const QString &message)
 {
     qDebug() << "Channel send message: " << message;
-    this->ircManager.sendMessage(name, message);
+
+    // Do last message processing
+    QString parsedMessage = this->emoteManager.replaceShortCodes(message);
+
+    this->ircManager.sendMessage(name, parsedMessage);
 }
 
 }  // namespace chatterino

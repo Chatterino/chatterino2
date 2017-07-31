@@ -24,6 +24,7 @@ namespace chatterino {
 EmoteManager::EmoteManager(WindowManager &_windowManager, Resources &_resources)
     : windowManager(_windowManager)
     , resources(_resources)
+    , findShortCodesRegex(":([-+\\w]+):")
 {
     // Note: Do not use this->resources in ctor
     pajlada::Settings::Setting<std::string> roomID(
@@ -292,6 +293,36 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
         parsedWords.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
             nullptr, text.mid(lastParsedEmojiEndIndex)));
     }
+}
+
+QString EmoteManager::replaceShortCodes(const QString &text)
+{
+    QString ret(text);
+    auto it = this->findShortCodesRegex.globalMatch(text);
+
+    int32_t offset = 0;
+
+    while (it.hasNext()) {
+        auto match = it.next();
+
+        auto capturedString = match.captured();
+
+        QString matchString = capturedString.toLower().mid(1, capturedString.size() - 2);
+
+        auto emojiIt = this->emojiShortCodeToEmoji.constFind(matchString);
+
+        if (emojiIt == this->emojiShortCodeToEmoji.constEnd()) {
+            continue;
+        }
+
+        auto emojiData = emojiIt.value();
+
+        ret.replace(offset + match.capturedStart(), match.capturedLength(), emojiData.value);
+
+        offset += emojiData.value.size() - match.capturedLength();
+    }
+
+    return ret;
 }
 
 void EmoteManager::refreshTwitchEmotes(const std::string &roomID)
