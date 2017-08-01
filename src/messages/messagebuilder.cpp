@@ -10,7 +10,7 @@ MessageBuilder::MessageBuilder()
     : _words()
 {
     _parseTime = std::chrono::system_clock::now();
-    regex.setPattern("[[:ascii:]]*\.[A-Z]+\\/?[[:ascii:]]*");
+    regex.setPattern("[[:ascii:]]*\\.[A-Z]+\\/?[[:ascii:]]*");
     regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
 }
 
