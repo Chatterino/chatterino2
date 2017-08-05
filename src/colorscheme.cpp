@@ -97,6 +97,9 @@ void ColorScheme::setColors(double hue, double multiplier)
     ChatInputBorder = getColor(0, 0.1, 0.9);
 
     ScrollbarBG = ChatBackground;
+	ScrollbarThumb = getColor(0, 0.1, 0.85);
+	ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
+	ScrollbarArrow = getColor(0, 0.1, 0.4);
 
     // generate color lookuptable
     fillLookupTableValues(this->middleLookupTable, 0.000, 0.166, 0.66, 0.5);

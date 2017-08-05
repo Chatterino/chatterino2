@@ -49,6 +49,7 @@ public:
     QColor TextFocused;
     QColor Menu;
     QColor MenuBorder;
+
     QColor ScrollbarBG;
     QColor ScrollbarThumb;
     QColor ScrollbarThumbSelected;
