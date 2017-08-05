@@ -5,6 +5,8 @@
 
 #include <QColor>
 
+#include <math.h>
+
 namespace chatterino {
 
 namespace detail {
@@ -102,21 +104,6 @@ void ColorScheme::setColors(double hue, double multiplier)
 	ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
 	ScrollbarArrow = getColor(0, 0.1, 0.4);
 
-    // generate color lookuptable
-    fillLookupTableValues(this->middleLookupTable, 0.000, 0.166, 0.66, 0.5);
-    fillLookupTableValues(this->middleLookupTable, 0.166, 0.333, 0.5, 0.55);
-    fillLookupTableValues(this->middleLookupTable, 0.333, 0.500, 0.55, 0.45);
-    fillLookupTableValues(this->middleLookupTable, 0.500, 0.666, 0.45, 0.80);
-    fillLookupTableValues(this->middleLookupTable, 0.666, 0.833, 0.80, 0.61);
-    fillLookupTableValues(this->middleLookupTable, 0.833, 1.000, 0.61, 0.66);
-
-    fillLookupTableValues(this->minLookupTable, 0.000, 0.166, 0.33, 0.23);
-    fillLookupTableValues(this->minLookupTable, 0.166, 0.333, 0.23, 0.27);
-    fillLookupTableValues(this->minLookupTable, 0.333, 0.500, 0.27, 0.23);
-    fillLookupTableValues(this->minLookupTable, 0.500, 0.666, 0.23, 0.50);
-    fillLookupTableValues(this->minLookupTable, 0.666, 0.833, 0.50, 0.30);
-    fillLookupTableValues(this->minLookupTable, 0.833, 1.000, 0.30, 0.33);
-
     // stylesheet
     InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
                       "border:" + TabSelectedBackground.name() + ";" + "color:" + Text.name() +
@@ -125,62 +112,19 @@ void ColorScheme::setColors(double hue, double multiplier)
     this->updated();
 }
 
-void ColorScheme::fillLookupTableValues(double (&array)[360], double from, double to,
-                                        double fromValue, double toValue)
-{
-    double diff = toValue - fromValue;
-
-    int start = from * LOOKUP_COLOR_COUNT;
-    int end = to * LOOKUP_COLOR_COUNT;
-    int length = end - start;
-
-    for (int i = 0; i < length; i++) {
-        array[start + i] = fromValue + (diff * ((double)i / length));
-    }
-}
-
 void ColorScheme::normalizeColor(QColor &color)
 {
-    //    double l = color.lightnessF();
-    //    double s = color.saturationF();
-    //    double x = this->colorLookupTable[std::max(0, color.hue())];
-    //    double newL = (l - 1) * x + 1;
+	if (this->lightTheme) {
+		
+	} else {
+		if (color.lightnessF() < 0.5f) {
+			color.setHslF(color.hueF(), color.saturationF(), 0.5f);
+		}
 
-    //    newL = s * newL + (1 - s) * l;
-
-    //    newL = newL > 0.5 ? newL : newL / 2 + 0.25;
-
-    //    color.setHslF(color.hueF(), s, newL);
-
-    double l = color.lightnessF();
-    double s = color.saturationF();
-    int h = std::max(0, color.hue());
-    double x = this->middleLookupTable[h];
-    x = s * 0.5 + (1 - s) * x;
-
-    double min = this->minLookupTable[h];
-    min = (1 - s) * 0.5 + s * min;
-
-    double newL;
-
-    if (l < x) {
-        newL = l * ((x - min) / x) + min;
-
-        //        newL = (l * ((x - min) / x) + min);
-        //        newL = (1 - s) * newL + s * l;
-    } else {
-        newL = l;
-    }
-
-    color.setHslF(color.hueF(), s, newL);
-
-    //    double newL = (l - 1) * x + 1;
-
-    //    newL = s * newL + (1 - s) * l;
-
-    //    newL = newL > 0.5 ? newL : newL / 2 + 0.25;
-
-    //    color.setHslF(color.hueF(), s, newL);
+		if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
+			color.setHslF(color.hueF(), color.saturationF(), color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) * color.saturationF() * 0.2);
+		}
+	}
 }
 
 }  // namespace chatterino
