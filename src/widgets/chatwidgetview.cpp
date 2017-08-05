@@ -35,6 +35,8 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->update();
+
+		this->layoutMessages();
     });
 }
 
