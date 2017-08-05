@@ -162,7 +162,7 @@ void NotebookPage::dragEnterEvent(QDragEnterEvent *event)
     if (!event->mimeData()->hasFormat("chatterino/split"))
         return;
 
-    if (isDraggingSplit) {
+    if (!isDraggingSplit) {
         return;
     }
 
