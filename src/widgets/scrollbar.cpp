@@ -82,7 +82,7 @@ void ScrollBar::scrollToBottom()
 
 bool ScrollBar::isAtBottom() const
 {
-    return ((this->getMaximum() - this->getLargeChange()) - this->getCurrentValue()) <= 1;
+    return ((this->getMaximum() - this->getLargeChange()) - this->getCurrentValue()) <= 0.00001;
 }
 
 void ScrollBar::setMaximum(qreal value)
