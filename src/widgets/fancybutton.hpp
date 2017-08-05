@@ -29,6 +29,10 @@ public:
     void setMouseEffectColor(QColor color);
 
 protected:
+    bool selected = false;
+    bool mouseOver = false;
+    bool mouseDown = false;
+
     virtual void paintEvent(QPaintEvent *) override;
     virtual void enterEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
@@ -39,9 +43,6 @@ protected:
     void fancyPaint(QPainter &painter);
 
 private:
-    bool selected = false;
-    bool mouseOver = false;
-    bool mouseDown = false;
     QPoint mousePos;
     double hoverMultiplier = 0.0;
     QTimer effectTimer;

@@ -28,8 +28,6 @@ signals:
     void clicked();
 
 private:
-    bool mouseOver = false;
-    bool mouseDown = false;
     QPoint mousePos;
 };
 
