@@ -204,10 +204,18 @@ SharedMessage TwitchMessageBuilder::parse()
                 }
 
                 // Actually just text
-                QString link = this->matchLink(string);
+                QString linkString = this->matchLink(string);
 
-                this->appendWord(Word(string, Word::Text, textColor, string, QString(),
-                                      link.isEmpty() ? Link() : Link(Link::Url, link)));
+				Link link;
+
+				if (linkString.isEmpty()) {
+					link = Link();
+				} else {
+					link = Link(Link::Url, linkString);
+					textColor = this->colorScheme.TextLink;
+				}
+
+                this->appendWord(Word(string, Word::Text, textColor, string, QString(), link));
             } else {  // is emoji
                 static QString emojiTooltip("Emoji");
 

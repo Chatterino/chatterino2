@@ -22,7 +22,7 @@ public:
     void setHighlight(const bool &value);
 
     QString matchLink(const QString &string);
-    QRegularExpression regex;
+    QRegularExpression linkRegex;
 
     QString originalMessage;
 

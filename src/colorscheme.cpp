@@ -66,6 +66,7 @@ void ColorScheme::setColors(double hue, double multiplier)
     DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
 
     Text = TextCaret = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
+	TextLink = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
 
     // tab
     if (hasDarkBorder) {

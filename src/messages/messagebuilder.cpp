@@ -10,8 +10,8 @@ MessageBuilder::MessageBuilder()
     : _words()
 {
     _parseTime = std::chrono::system_clock::now();
-    regex.setPattern("[[:ascii:]]*\\.[A-Z]+\\/?[[:ascii:]]*");
-    regex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+    linkRegex.setPattern("[[:ascii:]]*\\.[a-zA-Z]+\\/?[[:ascii:]]*");
 }
 
 SharedMessage MessageBuilder::build()
@@ -59,10 +59,15 @@ void MessageBuilder::appendTimestamp(time_t time)
 
 QString MessageBuilder::matchLink(const QString &string)
 {
-    auto match = regex.match(string);
+    auto match = linkRegex.match(string);
+	
+	if (!match.hasMatch()) {
+		return QString();
+	}
+
     QString captured = match.captured();
 
-    if (!captured.contains(QRegularExpression("\\bhttps?:\/\/")) && match.hasMatch()) {
+    if (!captured.contains(QRegularExpression("\\bhttps?://"))) {
         captured.insert(0, "http://");
     }
     return captured;
