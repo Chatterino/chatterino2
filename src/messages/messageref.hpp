@@ -41,7 +41,9 @@ private:
 
     int _currentLayoutWidth = -1;
     int _fontGeneration = -1;
+    /* TODO(pajlada): Re-implement
     int _emoteGeneration = -1;
+    */
     Word::Type _currentWordTypes = Word::None;
 
     // methods

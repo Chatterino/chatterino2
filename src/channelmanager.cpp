@@ -111,15 +111,16 @@ void ChannelManager::removeChannel(const QString &channel)
 
 const std::string &ChannelManager::getUserID(const std::string &username)
 {
+    /* TODO: Implement
     auto it = this->usernameToID.find(username);
 
-    /*
     if (it != std::end(this->usernameToID)) {
         return *it;
     }
     */
 
-    return "xd";
+    static std::string temporary = "xd";
+    return temporary;
 }
 
 }  // namespace chatterino

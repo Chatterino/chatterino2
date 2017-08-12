@@ -6,13 +6,13 @@
 #include "widgets/textinputdialog.hpp"
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QFont>
 #include <QFontDatabase>
 #include <QPainter>
+#include <QProcess>
 #include <QShortcut>
 #include <QVBoxLayout>
-#include <QFileInfo>
-#include <QProcess>
 #include <boost/signals2.hpp>
 
 #include <functional>
@@ -40,12 +40,12 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     : BaseWidget(parent)
     , channelManager(_channelManager)
     , completionManager(parent->completionManager)
+    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
     , channel(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)
     , view(this)
     , input(this)
-    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
@@ -288,9 +288,9 @@ void ChatWidget::doOpenStreamlink()
     // TODO(Confuseh): Add quality switcher
     if (fileinfo.exists() && fileinfo.isExecutable()) {
         // works on leenux, idk whether it would work on whindows or mehOS
-        QProcess::startDetached(path,
-                                QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
-                                             "best"}));
+        QProcess::startDetached(
+            path, QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
+                               "best"}));
     }
 }
 

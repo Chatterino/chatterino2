@@ -56,14 +56,15 @@ public:
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
 
-    pajlada::Settings::Setting<std::string> channelName;
-
 protected:
     virtual void paintEvent(QPaintEvent *) override;
 
 public:
     ChannelManager &channelManager;
     CompletionManager &completionManager;
+
+    pajlada::Settings::Setting<std::string> channelName;
+
 private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();

@@ -31,13 +31,13 @@ LoginWidget::LoginWidget()
         this->close();  //
     });
 
-    connect(&this->ui.loginButton, &QPushButton::clicked, [this]() {
+    connect(&this->ui.loginButton, &QPushButton::clicked, []() {
         printf("open login in browser\n");
         QDesktopServices::openUrl(QUrl("https://pajlada.se/chatterino/#chatterino"));
 
     });
 
-    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, [this]() {
+    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, []() {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString clipboardString = clipboard->text();
         QStringList parameters = clipboardString.split(';');

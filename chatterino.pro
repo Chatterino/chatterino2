@@ -92,7 +92,6 @@ SOURCES += \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \
     src/widgets/accountpopup.cpp \
-    src/messagefactory.cpp \
     src/widgets/basewidget.cpp \
     src/widgets/resizingtextedit.cpp \
     src/completionmanager.cpp \
@@ -155,7 +154,6 @@ HEADERS  += \
     src/ircaccount.hpp \
     src/widgets/accountpopup.hpp \
     src/util/distancebetweenpoints.hpp \
-    src/messagefactory.hpp \
     src/widgets/basewidget.hpp \
     src/completionmanager.hpp
 

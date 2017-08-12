@@ -31,8 +31,8 @@ Message::Message(const QString &text)
 
 Message::Message(const QString &text, const std::vector<Word> &words, const bool &highlight)
     : text(text)
-    , words(words)
     , highlightTab(highlight)
+    , words(words)
 {
 }
 

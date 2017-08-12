@@ -168,7 +168,7 @@ void SettingsDialog::addTabs()
             auto fontManager = FontManager::getInstance();
             QFontDialog dialog(fontManager.getFont(FontManager::Medium));
 
-            dialog.connect(&dialog, &QFontDialog::fontSelected, [&dialog](const QFont &font) {
+            dialog.connect(&dialog, &QFontDialog::fontSelected, [](const QFont &font) {
                 auto fontManager = FontManager::getInstance();
                 fontManager.currentFontFamily = font.family().toStdString();
                 fontManager.currentFontSize = font.pointSize();
@@ -590,9 +590,7 @@ QLineEdit *SettingsDialog::createLineEdit(pajlada::Settings::Setting<std::string
     auto widget = new QLineEdit(QString::fromStdString(setting.getValue()));
 
     QObject::connect(widget, &QLineEdit::textChanged, this,
-                     [&setting](const QString &newValue) {
-                        setting = newValue.toStdString();
-                     });
+                     [&setting](const QString &newValue) { setting = newValue.toStdString(); });
 
     return widget;
 }

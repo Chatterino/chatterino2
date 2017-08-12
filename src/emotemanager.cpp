@@ -1,6 +1,5 @@
 #include "emotemanager.hpp"
 #include "common.hpp"
-#include "resources.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
@@ -21,12 +20,10 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-EmoteManager::EmoteManager(WindowManager &_windowManager, Resources &_resources)
+EmoteManager::EmoteManager(WindowManager &_windowManager)
     : windowManager(_windowManager)
-    , resources(_resources)
     , findShortCodesRegex(":([-+\\w]+):")
 {
-    // Note: Do not use this->resources in ctor
     pajlada::Settings::Setting<std::string> roomID(
         "/accounts/current/roomID", "", pajlada::Settings::SettingOption::DoNotWriteToJSON);
 

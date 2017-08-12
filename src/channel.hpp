@@ -24,6 +24,10 @@ class IrcManager;
 
 class Channel
 {
+    WindowManager &windowManager;
+    EmoteManager &emoteManager;
+    IrcManager &ircManager;
+
 public:
     explicit Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
                      IrcManager &_ircManager, const QString &channelName, bool isSpecial = false);
@@ -51,10 +55,6 @@ public:
     const QString name;
 
 private:
-    WindowManager &windowManager;
-    EmoteManager &emoteManager;
-    IrcManager &ircManager;
-
     // variables
     messages::LimitedQueue<messages::SharedMessage> _messages;
 

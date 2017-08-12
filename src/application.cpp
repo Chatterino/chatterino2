@@ -13,11 +13,10 @@ Application::Application()
     : completionManager(this->emoteManager)
     , windowManager(this->channelManager, this->colorScheme, this->completionManager)
     , colorScheme(this->windowManager)
-    , emoteManager(this->windowManager, this->resources)
+    , emoteManager(this->windowManager)
     , resources(this->emoteManager, this->windowManager)
     , channelManager(this->windowManager, this->emoteManager, this->ircManager)
     , ircManager(this->channelManager, this->resources, this->emoteManager, this->windowManager)
-    , messageFactory(this->resources, this->emoteManager, this->windowManager)
 {
     // TODO(pajlada): Get rid of all singletons
     logging::init();
@@ -34,21 +33,6 @@ Application::Application()
     SettingsManager::getInstance().updateWordTypeMask();
 
     this->windowManager.load();
-
-    this->ircManager.onPrivateMessage.connect([=](Communi::IrcPrivateMessage *message) {
-        QString channelName = message->target().mid(1);
-
-        auto channel = this->channelManager.getChannel(channelName);
-
-        if (channel == nullptr) {
-            // The message doesn't have a channel we listen to
-            return;
-        }
-
-        messages::MessageParseArgs args;
-
-        this->messageFactory.buildMessage(message, *channel.get(), args);
-    });
 }
 
 Application::~Application()

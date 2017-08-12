@@ -18,7 +18,6 @@
 namespace chatterino {
 
 class WindowManager;
-class Resources;
 
 struct EmoteData {
     EmoteData()
@@ -38,7 +37,7 @@ class EmoteManager
 public:
     using EmoteMap = ConcurrentMap<QString, EmoteData>;
 
-    EmoteManager(WindowManager &_windowManager, Resources &_resources);
+    explicit EmoteManager(WindowManager &_windowManager);
 
     void loadGlobalEmotes();
 
@@ -73,7 +72,6 @@ public:
 
 private:
     WindowManager &windowManager;
-    Resources &resources;
 
     /// Emojis
     QRegularExpression findShortCodesRegex;

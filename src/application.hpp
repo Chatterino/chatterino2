@@ -5,7 +5,6 @@
 #include "completionmanager.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
-#include "messagefactory.hpp"
 #include "resources.hpp"
 #include "windowmanager.hpp"
 
@@ -28,7 +27,6 @@ public:
     Resources resources;
     ChannelManager channelManager;
     IrcManager ircManager;
-    MessageFactory messageFactory;
 };
 
 }  // namespace chatterino
