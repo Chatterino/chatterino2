@@ -53,7 +53,8 @@ public:
     void layoutMessages(bool forceUpdate = false);
     void updateGifEmotes();
 
-    void giveFocus();
+    void giveFocus(Qt::FocusReason reason);
+    bool hasFocus() const;
 
     pajlada::Settings::Setting<std::string> channelName;
 

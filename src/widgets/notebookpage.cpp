@@ -82,7 +82,7 @@ void NotebookPage::addToLayout(ChatWidget *widget,
                                std::pair<int, int> position = std::pair<int, int>(-1, -1))
 {
     this->chatWidgets.push_back(widget);
-    widget->giveFocus();
+    widget->giveFocus(Qt::MouseFocusReason);
 
     // add vbox at the end
     if (position.first < 0 || position.first >= this->ui.hbox.count()) {
@@ -90,6 +90,7 @@ void NotebookPage::addToLayout(ChatWidget *widget,
         vbox->addWidget(widget);
 
         this->ui.hbox.addLayout(vbox, 1);
+        this->refreshCurrentFocusCoordinates();
         return;
     }
 
@@ -99,6 +100,7 @@ void NotebookPage::addToLayout(ChatWidget *widget,
         vbox->addWidget(widget);
 
         this->ui.hbox.insertLayout(position.first, vbox, 1);
+        this->refreshCurrentFocusCoordinates();
         return;
     }
 
@@ -106,6 +108,8 @@ void NotebookPage::addToLayout(ChatWidget *widget,
     auto vbox = static_cast<QVBoxLayout *>(this->ui.hbox.itemAt(position.first));
 
     vbox->insertWidget(std::max(0, std::min(vbox->count(), position.second)), widget);
+
+    this->refreshCurrentFocusCoordinates();
 }
 
 const std::vector<ChatWidget *> &NotebookPage::getChatWidgets() const
@@ -132,6 +136,103 @@ void NotebookPage::addChat(bool openChannelNameDialog)
     }
 
     this->addToLayout(w, std::pair<int, int>(-1, -1));
+}
+
+void NotebookPage::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
+{
+    int setX = -1;
+    int setY = -1;
+    bool doBreak = false;
+    for (int x = 0; x < this->ui.hbox.count(); ++x) {
+        QLayoutItem *item = this->ui.hbox.itemAt(x);
+        if (item->isEmpty()) {
+            setX = x;
+            break;
+        }
+        QVBoxLayout *vbox = static_cast<QVBoxLayout *>(item->layout());
+
+        for (int y = 0; y < vbox->count(); ++y) {
+            QLayoutItem *innerItem = vbox->itemAt(y);
+
+            if (innerItem->isEmpty()) {
+                setX = x;
+                setY = y;
+                doBreak = true;
+                break;
+            }
+
+            QWidget *w = innerItem->widget();
+            if (w) {
+                ChatWidget *chatWidget = static_cast<ChatWidget *>(w);
+                if (chatWidget->hasFocus()) {
+                    setX = x;
+                    setY = y;
+                    doBreak = true;
+                    break;
+                }
+            }
+        }
+
+        if (doBreak) {
+            break;
+        }
+    }
+
+    if (setX != -1) {
+        this->currentX = setX;
+
+        if (setY != -1) {
+            this->currentY = setY;
+
+            if (alsoSetLastRequested) {
+                this->lastRequestedY[setX] = setY;
+            }
+        }
+    }
+}
+
+void NotebookPage::requestFocus(int requestedX, int requestedY)
+{
+    // XXX: Perhaps if we request an Y coordinate out of bounds, we shuold set all previously set
+    // requestedYs to 0 (if -1 is requested) or that x-coordinates vbox count (if requestedY >=
+    // currentvbox.count() is requested)
+    if (requestedX < 0 || requestedX >= this->ui.hbox.count()) {
+        return;
+    }
+
+    QLayoutItem *item = this->ui.hbox.itemAt(requestedX);
+    QWidget *xW = item->widget();
+    if (item->isEmpty()) {
+        qDebug() << "Requested hbox item " << requestedX << "is empty";
+        if (xW) {
+            qDebug() << "but xW is not null";
+            // TODO: figure out what to do here
+        }
+        return;
+    }
+
+    QVBoxLayout *vbox = static_cast<QVBoxLayout *>(item->layout());
+
+    if (requestedY < 0) {
+        requestedY = 0;
+    } else if (requestedY >= vbox->count()) {
+        requestedY = vbox->count() - 1;
+    }
+
+    this->lastRequestedY[requestedX] = requestedY;
+
+    QLayoutItem *innerItem = vbox->itemAt(requestedY);
+
+    if (innerItem->isEmpty()) {
+        qDebug() << "Requested vbox item " << requestedY << "is empty";
+        return;
+    }
+
+    QWidget *w = innerItem->widget();
+    if (w) {
+        ChatWidget *chatWidget = static_cast<ChatWidget *>(w);
+        chatWidget->giveFocus(Qt::OtherFocusReason);
+    }
 }
 
 void NotebookPage::enterEvent(QEvent *)
@@ -240,6 +341,17 @@ void NotebookPage::dropEvent(QDropEvent *event)
     this->dropPreview.hide();
 }
 
+bool NotebookPage::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::FocusIn) {
+        QFocusEvent *focusEvent = static_cast<QFocusEvent *>(event);
+
+        this->refreshCurrentFocusCoordinates((focusEvent->reason() == Qt::MouseFocusReason));
+    }
+
+    return false;
+}
+
 void NotebookPage::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -257,6 +369,14 @@ void NotebookPage::paintEvent(QPaintEvent *)
 
         painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);
     }
+}
+
+void NotebookPage::showEvent(QShowEvent *event)
+{
+    // Whenever this notebook page is shown, give focus to the last focused chat widget
+    // If this is the first time this notebook page is shown, it will give focus to the top-left
+    // chat widget
+    this->requestFocus(this->currentX, this->currentY);
 }
 
 static std::pair<int, int> getWidgetPositionInLayout(QLayout *layout, const ChatWidget *chatWidget)

@@ -3,6 +3,7 @@
 #include "colorscheme.hpp"
 #include "completionmanager.hpp"
 #include "ircmanager.hpp"
+#include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 
 #include <QCompleter>
@@ -71,17 +72,61 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
             }
             prevIndex = prevMsg.size();
         } else if (event->key() == Qt::Key_Up) {
-            if (prevMsg.size() && prevIndex) {
-                prevIndex--;
-                textInput.setText(prevMsg.at(prevIndex));
+            if (event->modifiers() == Qt::AltModifier) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                int reqX = page->currentX;
+                int reqY = page->lastRequestedY[reqX] - 1;
+
+                qDebug() << "Alt+Down to" << reqX << "/" << reqY;
+
+                page->requestFocus(reqX, reqY);
+            } else {
+                if (prevMsg.size() && prevIndex) {
+                    prevIndex--;
+                    textInput.setText(prevMsg.at(prevIndex));
+                }
             }
         } else if (event->key() == Qt::Key_Down) {
-            if (prevIndex != (prevMsg.size() - 1) && prevIndex != prevMsg.size()) {
-                prevIndex++;
-                textInput.setText(prevMsg.at(prevIndex));
+            if (event->modifiers() == Qt::AltModifier) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                int reqX = page->currentX;
+                int reqY = page->lastRequestedY[reqX] + 1;
+
+                qDebug() << "Alt+Down to" << reqX << "/" << reqY;
+
+                page->requestFocus(reqX, reqY);
             } else {
-                prevIndex = prevMsg.size();
-                textInput.setText(QString());
+                if (prevIndex != (prevMsg.size() - 1) && prevIndex != prevMsg.size()) {
+                    prevIndex++;
+                    textInput.setText(prevMsg.at(prevIndex));
+                } else {
+                    prevIndex = prevMsg.size();
+                    textInput.setText(QString());
+                }
+            }
+        } else if (event->key() == Qt::Key_Left) {
+            if (event->modifiers() == Qt::AltModifier) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                int reqX = page->currentX - 1;
+                int reqY = page->lastRequestedY[reqX];
+
+                qDebug() << "Alt+Left to" << reqX << "/" << reqY;
+
+                page->requestFocus(reqX, reqY);
+            }
+        } else if (event->key() == Qt::Key_Right) {
+            if (event->modifiers() == Qt::AltModifier) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                int reqX = page->currentX + 1;
+                int reqY = page->lastRequestedY[reqX];
+
+                qDebug() << "Alt+Right to" << reqX << "/" << reqY;
+
+                page->requestFocus(reqX, reqY);
             }
         }
     });
@@ -148,7 +193,7 @@ void ChatWidgetInput::resizeEvent(QResizeEvent *)
 
 void ChatWidgetInput::mousePressEvent(QMouseEvent *)
 {
-    this->chatWidget->giveFocus();
+    this->chatWidget->giveFocus(Qt::MouseFocusReason);
 }
 
 }  // namespace widgets

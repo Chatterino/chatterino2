@@ -339,7 +339,7 @@ void ChatWidgetView::mousePressEvent(QMouseEvent *event)
     this->isMouseDown = true;
     this->lastPressPosition = event->screenPos();
 
-    this->chatWidget->giveFocus();
+    this->chatWidget->giveFocus(Qt::MouseFocusReason);
 }
 
 void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)

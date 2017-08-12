@@ -68,6 +68,8 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
         std::bind(&ChatWidget::channelNameUpdated, this, std::placeholders::_1));
 
     this->channelNameUpdated(this->channelName.getValue());
+
+    this->input.textInput.installEventFilter(parent);
 }
 
 ChatWidget::~ChatWidget()
@@ -193,9 +195,14 @@ void ChatWidget::updateGifEmotes()
     this->view.updateGifEmotes();
 }
 
-void ChatWidget::giveFocus()
+void ChatWidget::giveFocus(Qt::FocusReason reason)
 {
-    this->input.textInput.setFocus();
+    this->input.textInput.setFocus(reason);
+}
+
+bool ChatWidget::hasFocus() const
+{
+    return this->input.textInput.hasFocus();
 }
 
 void ChatWidget::paintEvent(QPaintEvent *)

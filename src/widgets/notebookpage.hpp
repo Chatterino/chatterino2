@@ -44,8 +44,18 @@ public:
     static ChatWidget *draggingSplit;
     static std::pair<int, int> dropPosition;
 
+    int currentX = 0;
+    int currentY = 0;
+    std::map<int, int> lastRequestedY;
+
+    void refreshCurrentFocusCoordinates(bool alsoSetLastRequested = false);
+    void requestFocus(int x, int y);
+
 protected:
+    virtual bool eventFilter(QObject *object, QEvent *event) override;
     virtual void paintEvent(QPaintEvent *) override;
+
+    virtual void showEvent(QShowEvent *) override;
 
     virtual void enterEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
