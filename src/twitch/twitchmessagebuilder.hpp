@@ -59,6 +59,7 @@ private:
     void parseRoomID();
     void parseChannelName();
     void parseUsername();
+    void appendUsername();
     void parseHighlights();
 
     void appendModerationButtons();

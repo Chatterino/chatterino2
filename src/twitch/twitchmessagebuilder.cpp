@@ -38,6 +38,8 @@ SharedMessage TwitchMessageBuilder::parse()
 
     this->originalMessage = this->ircMessage->content();
 
+    this->parseUsername();
+
     // The timestamp is always appended to the builder
     // Whether or not will be rendered is decided/checked later
     this->appendTimestamp();
@@ -54,7 +56,7 @@ SharedMessage TwitchMessageBuilder::parse()
         this->parseChannelName();
     }
 
-    this->parseUsername();
+    this->appendUsername();
 
     // highlights
     if (settings.enableHighlights.get()) {
@@ -282,11 +284,14 @@ void TwitchMessageBuilder::parseUsername()
     if (this->userName.isEmpty()) {
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
+}
 
+void TwitchMessageBuilder::appendUsername()
+{
     QString username = this->userName;
     QString localizedName;
 
-    iterator = this->tags.find("display-name");
+    auto iterator = this->tags.find("display-name");
     if (iterator != this->tags.end()) {
         QString displayName = iterator.value().toString();
 
