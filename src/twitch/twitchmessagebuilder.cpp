@@ -52,6 +52,8 @@ SharedMessage TwitchMessageBuilder::parse()
 
     this->parseTwitchBadges();
 
+    this->parseChatterinoBadges();
+
     if (this->args.includeChannelName) {
         this->parseChannelName();
     }
@@ -659,6 +661,20 @@ void TwitchMessageBuilder::parseTwitchBadges()
             }
         }
     }
+}
+
+void TwitchMessageBuilder::parseChatterinoBadges()
+{
+    auto &badges = this->resources.chatterinoBadges;
+    auto it = badges.find(this->userName.toStdString());
+
+    if (it == badges.end()) {
+        return;
+    }
+
+    const auto badge = it->second;
+
+    this->appendWord(Word(badge->image, Word::BadgeChatterino, QString(), badge->tooltip.c_str()));
 }
 
 // bool

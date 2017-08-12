@@ -70,6 +70,7 @@ private:
     bool appendEmote(EmoteData &emoteData);
 
     void parseTwitchBadges();
+    void parseChatterinoBadges();
 };
 
 }  // namespace twitch

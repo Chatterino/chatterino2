@@ -3,6 +3,7 @@
 #include "messages/lazyloadedimage.hpp"
 
 #include <map>
+#include <memory>
 #include <mutex>
 
 namespace chatterino {
@@ -71,7 +72,23 @@ public:
     //       channelId
     std::map<std::string, Channel> channels;
 
+    // Chatterino badges
+    struct ChatterinoBadge {
+        ChatterinoBadge(const std::string &_tooltip, messages::LazyLoadedImage *_image)
+            : tooltip(_tooltip)
+            , image(_image)
+        {
+        }
+
+        std::string tooltip;
+        messages::LazyLoadedImage *image;
+    };
+
+    //       username
+    std::map<std::string, std::shared_ptr<ChatterinoBadge>> chatterinoBadges;
+
     void loadChannelData(const std::string &roomID, bool bypassCache = false);
+    void loadChatterinoBadges();
 };
 
 }  // namespace chatterino

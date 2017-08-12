@@ -60,6 +60,8 @@ Resources::Resources(EmoteManager &em, WindowManager &wm)
 
         this->dynamicBadgesLoaded = true;
     });
+
+    this->loadChatterinoBadges();
 }
 
 Resources::BadgeVersion::BadgeVersion(QJsonObject &&root, EmoteManager &emoteManager,
@@ -107,6 +109,38 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
         }
 
         ch.loaded = true;
+    });
+}
+
+void Resources::loadChatterinoBadges()
+{
+    this->chatterinoBadges.clear();
+
+    QString url = "https://fourtf.com/chatterino/badges.json";
+
+    util::urlFetchJSON(url, [this](QJsonObject &root) {
+        QJsonArray badgeVariants = root.value("badges").toArray();
+
+        for (QJsonArray::iterator it = badgeVariants.begin(); it != badgeVariants.end(); ++it) {
+            QJsonObject badgeVariant = it->toObject();
+            const std::string badgeVariantTooltip =
+                badgeVariant.value("tooltip").toString().toStdString();
+            const QString &badgeVariantImageURL = badgeVariant.value("image").toString();
+
+            auto badgeVariantPtr = std::make_shared<ChatterinoBadge>(
+                badgeVariantTooltip,
+                new messages::LazyLoadedImage(this->emoteManager, this->windowManager,
+                                              badgeVariantImageURL));
+
+            QJsonArray badgeVariantUsers = badgeVariant.value("users").toArray();
+
+            for (QJsonArray::iterator it = badgeVariantUsers.begin(); it != badgeVariantUsers.end();
+                 ++it) {
+                const std::string username = it->toString().toStdString();
+                this->chatterinoBadges[username] =
+                    std::shared_ptr<ChatterinoBadge>(badgeVariantPtr);
+            }
+        }
     });
 }
 
