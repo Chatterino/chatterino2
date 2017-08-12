@@ -94,13 +94,14 @@ SharedMessage TwitchMessageBuilder::parse()
     auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
-    QColor textColor = ircMessage->isAction() ? this->usernameColor : this->colorScheme.Text;
 
     QStringList splits = this->originalMessage.split(' ');
 
     long int i = 0;
 
     for (QString split : splits) {
+        QColor textColor = ircMessage->isAction() ? this->usernameColor : this->colorScheme.Text;
+
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
             this->appendWord(
