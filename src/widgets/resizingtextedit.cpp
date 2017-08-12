@@ -6,6 +6,7 @@ ResizingTextEdit::ResizingTextEdit()
     sizePolicy.setHeightForWidth(true);
     sizePolicy.setVerticalPolicy(QSizePolicy::Preferred);
     this->setSizePolicy(sizePolicy);
+    this->setAcceptRichText(false);
 
     QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
 

@@ -20,8 +20,8 @@ public:
     QCompleter *getCompleter() const;
 
 protected:
-    int heightForWidth(int) const override;
-    void keyPressEvent(QKeyEvent *event) override;
+    virtual int heightForWidth(int) const override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QCompleter *completer = nullptr;
