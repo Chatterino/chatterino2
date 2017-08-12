@@ -36,7 +36,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->update();
 
-		this->layoutMessages();
+        this->layoutMessages();
     });
 }
 

@@ -26,7 +26,7 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
     , notebook(this->channelManager, this)
-    // , windowGeometry("/windows/0/geometry")
+// , windowGeometry("/windows/0/geometry")
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
 

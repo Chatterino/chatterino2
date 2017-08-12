@@ -41,15 +41,14 @@ void AccountPopupWidget::getUserId()
     QUrl nameUrl("https://api.twitch.tv/kraken/users?login=" + _ui->lblUsername->text());
 
     QNetworkRequest req(nameUrl);
-    req.setRawHeader(QByteArray("Accept"),QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"),QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
+    req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
+    req.setRawHeader(QByteArray("Client-ID"), QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
 
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
 
-    QObject::connect(reply,&QNetworkReply::finished,this,[=]
-    {
-        if(reply->error() == QNetworkReply::NoError){
+    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+        if (reply->error() == QNetworkReply::NoError) {
             auto doc = QJsonDocument::fromJson(reply->readAll());
             auto obj = doc.object();
             auto array = obj.value("users").toArray();
@@ -59,7 +58,6 @@ void AccountPopupWidget::getUserId()
             getUserData();
         }
     });
-
 }
 
 void AccountPopupWidget::getUserData()
@@ -67,26 +65,23 @@ void AccountPopupWidget::getUserData()
     QUrl idUrl("https://api.twitch.tv/kraken/channels/" + userID);
 
     QNetworkRequest req(idUrl);
-    req.setRawHeader(QByteArray("Accept"),QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"),QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
+    req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
+    req.setRawHeader(QByteArray("Client-ID"), QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
 
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
 
-    QObject::connect(reply,&QNetworkReply::finished,this,[=]
-    {
-        if(reply->error() == QNetworkReply::NoError){
+    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+        if (reply->error() == QNetworkReply::NoError) {
             auto doc = QJsonDocument::fromJson(reply->readAll());
             auto obj = doc.object();
 
             _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
             _ui->lblViews->setText(QString::number(obj.value("views").toInt()));
-            _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T",0,0));
+            _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
 
             loadAvatar(QUrl(obj.value("logo").toString()));
-        }
-        else
-        {
+        } else {
             _ui->lblFollowers->setText("ERROR");
             _ui->lblViews->setText("ERROR");
             _ui->lblAccountAge->setText("ERROR");
@@ -96,36 +91,26 @@ void AccountPopupWidget::getUserData()
 
 void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 {
-    if(!avatarMap.tryGet(userID,this->avatar))
-    {
-        if(!avatarUrl.isEmpty())
-        {
+    if (!avatarMap.tryGet(userID, this->avatar)) {
+        if (!avatarUrl.isEmpty()) {
             QNetworkRequest req(avatarUrl);
             static auto manager = new QNetworkAccessManager();
             auto *reply = manager->get(req);
 
-            QObject::connect(reply,&QNetworkReply::finished,this,[=]
-            {
-                if(reply->error() == QNetworkReply::NoError)
-                {
+            QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+                if (reply->error() == QNetworkReply::NoError) {
                     const auto data = reply->readAll();
                     this->avatar.loadFromData(data);
-                    this->avatarMap.insert(userID,avatar);
+                    this->avatarMap.insert(userID, avatar);
                     _ui->lblAvatar->setPixmap(avatar);
-                }
-                else
-                {
+                } else {
                     _ui->lblAvatar->setText("ERROR");
                 }
             });
-        }
-        else
-        {
+        } else {
             _ui->lblAvatar->setText("No Avatar");
         }
-    }
-    else
-    {
+    } else {
         _ui->lblAvatar->setPixmap(this->avatar);
     }
 }
@@ -140,7 +125,6 @@ void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
     _ui->lblUsername->setText("Loading...");
     _ui->lblAvatar->setText("Loading...");
 }
-
 
 }  // namespace widgets
 }  // namespace chatterino

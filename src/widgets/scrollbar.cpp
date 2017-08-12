@@ -200,16 +200,17 @@ void ScrollBar::paintEvent(QPaintEvent *)
     painter.fillRect(rect(), this->colorScheme.ScrollbarBG);
 
     painter.fillRect(QRect(0, 0, width(), _buttonHeight), this->colorScheme.ScrollbarArrow);
-    painter.fillRect(QRect(0, height() - _buttonHeight, width(), _buttonHeight), this->colorScheme.ScrollbarArrow);
+    painter.fillRect(QRect(0, height() - _buttonHeight, width(), _buttonHeight),
+                     this->colorScheme.ScrollbarArrow);
 
-	// mouse over thumb
-	if (this->_mouseDownIndex == 2) {
-		painter.fillRect(_thumbRect, this->colorScheme.ScrollbarThumbSelected);
-	}
-	// mouse not over thumb
-	else {
-		painter.fillRect(_thumbRect, this->colorScheme.ScrollbarThumb);
-	}
+    // mouse over thumb
+    if (this->_mouseDownIndex == 2) {
+        painter.fillRect(_thumbRect, this->colorScheme.ScrollbarThumbSelected);
+    }
+    // mouse not over thumb
+    else {
+        painter.fillRect(_thumbRect, this->colorScheme.ScrollbarThumb);
+    }
 
     //    ScrollBarHighlight *highlight = highlights;
 

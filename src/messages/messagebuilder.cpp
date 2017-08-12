@@ -60,10 +60,10 @@ void MessageBuilder::appendTimestamp(time_t time)
 QString MessageBuilder::matchLink(const QString &string)
 {
     auto match = linkRegex.match(string);
-	
-	if (!match.hasMatch()) {
-		return QString();
-	}
+
+    if (!match.hasMatch()) {
+        return QString();
+    }
 
     QString captured = match.captured();
 

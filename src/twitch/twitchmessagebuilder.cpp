@@ -207,14 +207,14 @@ SharedMessage TwitchMessageBuilder::parse()
                 // Actually just text
                 QString linkString = this->matchLink(string);
 
-				Link link;
+                Link link;
 
-				if (linkString.isEmpty()) {
-					link = Link();
-				} else {
-					link = Link(Link::Url, linkString);
-					textColor = this->colorScheme.TextLink;
-				}
+                if (linkString.isEmpty()) {
+                    link = Link();
+                } else {
+                    link = Link(Link::Url, linkString);
+                    textColor = this->colorScheme.TextLink;
+                }
 
                 this->appendWord(Word(string, Word::Text, textColor, string, QString(), link));
             } else {  // is emoji

@@ -68,7 +68,7 @@ void ColorScheme::setColors(double hue, double multiplier)
     DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
 
     Text = TextCaret = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
-	TextLink = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    TextLink = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
 
     // tab
     if (hasDarkBorder) {
@@ -100,9 +100,9 @@ void ColorScheme::setColors(double hue, double multiplier)
     ChatInputBorder = getColor(0, 0.1, 0.9);
 
     ScrollbarBG = ChatBackground;
-	ScrollbarThumb = getColor(0, 0.1, 0.85);
-	ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
-	ScrollbarArrow = getColor(0, 0.1, 0.4);
+    ScrollbarThumb = getColor(0, 0.1, 0.85);
+    ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
+    ScrollbarArrow = getColor(0, 0.1, 0.4);
 
     // stylesheet
     InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
@@ -114,17 +114,19 @@ void ColorScheme::setColors(double hue, double multiplier)
 
 void ColorScheme::normalizeColor(QColor &color)
 {
-	if (this->lightTheme) {
-		
-	} else {
-		if (color.lightnessF() < 0.5f) {
-			color.setHslF(color.hueF(), color.saturationF(), 0.5f);
-		}
+    if (this->lightTheme) {
+    } else {
+        if (color.lightnessF() < 0.5f) {
+            color.setHslF(color.hueF(), color.saturationF(), 0.5f);
+        }
 
-		if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-			color.setHslF(color.hueF(), color.saturationF(), color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) * color.saturationF() * 0.2);
-		}
-	}
+        if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                         color.saturationF() * 0.2);
+        }
+    }
 }
 
 }  // namespace chatterino

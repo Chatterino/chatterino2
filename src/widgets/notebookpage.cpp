@@ -252,7 +252,7 @@ void NotebookPage::paintEvent(QPaintEvent *)
         painter.setPen(this->colorScheme.Text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
-        //painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
+        // painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
         painter.fillRect(rect(), QColor(127, 127, 127));
 
         painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);

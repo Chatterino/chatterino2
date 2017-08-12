@@ -35,8 +35,10 @@ void FancyButton::fancyPaint(QPainter &painter)
     if (this->hoverMultiplier > 0) {
         QRadialGradient gradient(mousePos.x(), mousePos.y(), 50, mousePos.x(), mousePos.y());
 
-        gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(), (int)(24 * this->hoverMultiplier)));
-        gradient.setColorAt(1, QColor(c.red(), c.green(), c.blue(), (int)(12 * this->hoverMultiplier)));
+        gradient.setColorAt(
+            0, QColor(c.red(), c.green(), c.blue(), (int)(24 * this->hoverMultiplier)));
+        gradient.setColorAt(
+            1, QColor(c.red(), c.green(), c.blue(), (int)(12 * this->hoverMultiplier)));
 
         painter.fillRect(this->rect(), gradient);
     }

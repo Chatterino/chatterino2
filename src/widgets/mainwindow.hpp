@@ -140,7 +140,7 @@ private:
     };
     */
 
-    //pajlada::Settings::Setting<QRectWrapper> windowGeometry;
+    // pajlada::Settings::Setting<QRectWrapper> windowGeometry;
 
     friend class Notebook;
 };

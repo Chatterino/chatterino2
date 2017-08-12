@@ -35,7 +35,7 @@ private:
     QString userID;
     QPixmap avatar;
 
-    ConcurrentMap<QString,QPixmap> avatarMap;
+    ConcurrentMap<QString, QPixmap> avatarMap;
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override;
