@@ -43,6 +43,8 @@ public:
     pajlada::Settings::Setting<bool> showTimestampSeconds;
     pajlada::Settings::Setting<bool> showBadges;
 
+    pajlada::Settings::Setting<std::string> streamlinkPath;
+
     // Settings
     Setting<QString> selectedUser;
     Setting<float> emoteScale;

@@ -50,6 +50,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->leftMenu.addAction("Clear chat", this->chatWidget, &ChatWidget::doClearChat);
     this->leftMenu.addAction("Open channel", this->chatWidget, &ChatWidget::doOpenChannel);
     this->leftMenu.addAction("Open popup player", this->chatWidget, &ChatWidget::doOpenPopupPlayer);
+    this->leftMenu.addAction("Open in Streamlink", this->chatWidget, &ChatWidget::doOpenStreamlink);
     this->leftMenu.addSeparator();
     this->leftMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
     this->leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
