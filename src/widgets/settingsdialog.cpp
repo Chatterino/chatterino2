@@ -585,13 +585,13 @@ QHBoxLayout *SettingsDialog::createCombobox(
     return box;
 }
 
-QLineEdit *SettingsDialog::createLineEdit(Setting<QString> &setting)
+QLineEdit *SettingsDialog::createLineEdit(pajlada::Settings::Setting<std::string> &setting)
 {
-    auto widget = new QLineEdit(setting.get());
+    auto widget = new QLineEdit(QString::fromStdString(setting.getValue()));
 
     QObject::connect(widget, &QLineEdit::textChanged, this,
                      [&setting](const QString &newValue) {
-                        setting.set(newValue);
+                        setting = newValue.toStdString();
                      });
 
     return widget;

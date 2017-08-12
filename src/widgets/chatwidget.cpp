@@ -275,12 +275,15 @@ void ChatWidget::doOpenPopupPlayer()
 void ChatWidget::doOpenStreamlink()
 {
     SettingsManager &settings = SettingsManager::getInstance();
-    QFileInfo fileinfo = QFileInfo(settings.streamlinkPath.get());
+    QString path = QString::fromStdString(settings.streamlinkPath.getValue());
+    QFileInfo fileinfo = QFileInfo(path);
     // TODO(Confuseh): Add default checks for streamlink/livestreamer
     // TODO(Confuseh): Add quality switcher
     if (fileinfo.exists() && fileinfo.isExecutable()) {
         // works on leenux, idk whether it would work on whindows or mehOS
-        QProcess::startDetached(settings.streamlinkPath.get(), QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()), "best"}));
+        QProcess::startDetached(path,
+                                QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
+                                             "best"}));
     }
 }
 

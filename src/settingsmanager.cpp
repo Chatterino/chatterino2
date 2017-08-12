@@ -14,6 +14,7 @@ SettingsManager::SettingsManager()
     , showTimestamps("/appearance/messages/showTimestamps", true)
     , showTimestampSeconds("/appearance/messages/showTimestampSeconds", true)
     , showBadges("/appearance/messages/showBadges", true)
+    , streamlinkPath("/behaviour/streamlinkPath", "")
     , selectedUser(_settingsItems, "selectedUser", "")
     , emoteScale(_settingsItems, "emoteScale", 1.0)
     , mouseScrollMultiplier(_settingsItems, "mouseScrollMultiplier", 1.0)
@@ -45,7 +46,6 @@ SettingsManager::SettingsManager()
     , hidePreferencesButton(_settingsItems, "hidePreferencesButton", false)
     , hideUserButton(_settingsItems, "hideUserButton", false)
     , useCustomWindowFrame(_settingsItems, "useCustomWindowFrame", true)
-    , streamlinkPath(_settingsItems, "streamlinkPath", "")
 {
     this->showTimestamps.getValueChangedSignal().connect(
         [this](const auto &) { this->updateWordTypeMask(); });

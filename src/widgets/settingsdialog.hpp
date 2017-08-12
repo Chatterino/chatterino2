@@ -60,7 +60,7 @@ private:
     QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<int> &setting,
                                 QStringList items,
                                 std::function<void(QString, pajlada::Settings::Setting<int> &)> cb);
-    QLineEdit *createLineEdit(Setting<QString> &setting);
+    QLineEdit *createLineEdit(pajlada::Settings::Setting<std::string> &setting);
 
     void okButtonClicked();
     void cancelButtonClicked();
