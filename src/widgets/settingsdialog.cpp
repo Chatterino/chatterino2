@@ -312,6 +312,8 @@ void SettingsDialog::addTabs()
         auto scroll = new QSlider(Qt::Horizontal);
         form->addRow("Mouse scroll speed:", scroll);
 
+        form->addRow("Streamlink Path", createLineEdit(settings.streamlinkPath));
+
         //        v->addWidget(scroll);
         //        v->addStretch(1);
         //        vbox->addLayout(v);
@@ -581,6 +583,18 @@ QHBoxLayout *SettingsDialog::createCombobox(
     box->addWidget(widget);
 
     return box;
+}
+
+QLineEdit *SettingsDialog::createLineEdit(Setting<QString> &setting)
+{
+    auto widget = new QLineEdit(setting.get());
+
+    QObject::connect(widget, &QLineEdit::textChanged, this,
+                     [&setting](const QString &newValue) {
+                        setting.set(newValue);
+                     });
+
+    return widget;
 }
 
 void SettingsDialog::okButtonClicked()

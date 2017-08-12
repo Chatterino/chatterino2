@@ -45,6 +45,7 @@ SettingsManager::SettingsManager()
     , hidePreferencesButton(_settingsItems, "hidePreferencesButton", false)
     , hideUserButton(_settingsItems, "hideUserButton", false)
     , useCustomWindowFrame(_settingsItems, "useCustomWindowFrame", true)
+    , streamlinkPath(_settingsItems, "streamlinkPath", "")
 {
     this->showTimestamps.getValueChangedSignal().connect(
         [this](const auto &) { this->updateWordTypeMask(); });

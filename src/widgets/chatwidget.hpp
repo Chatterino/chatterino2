@@ -63,7 +63,6 @@ protected:
 public:
     ChannelManager &channelManager;
     CompletionManager &completionManager;
-
 private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
@@ -109,6 +108,9 @@ public slots:
 
     // Open popup player of twitch channel in default browser
     void doOpenPopupPlayer();
+
+    // Open twitch channel stream through streamlink
+    void doOpenStreamlink();
 };
 
 }  // namespace widgets

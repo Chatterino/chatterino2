@@ -76,6 +76,8 @@ public:
     Setting<bool> hideUserButton;
     Setting<bool> useCustomWindowFrame;
 
+    Setting<QString> streamlinkPath;
+
 public:
     static SettingsManager &getInstance()
     {

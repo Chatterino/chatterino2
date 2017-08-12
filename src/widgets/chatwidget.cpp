@@ -11,6 +11,8 @@
 #include <QPainter>
 #include <QShortcut>
 #include <QVBoxLayout>
+#include <QFileInfo>
+#include <QProcess>
 #include <boost/signals2.hpp>
 
 #include <functional>
@@ -268,6 +270,18 @@ void ChatWidget::doOpenPopupPlayer()
 {
     qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
              << QString::fromStdString(this->channelName.getValue()) << "/popout";
+}
+
+void ChatWidget::doOpenStreamlink()
+{
+    SettingsManager &settings = SettingsManager::getInstance();
+    QFileInfo fileinfo = QFileInfo(settings.streamlinkPath.get());
+    // TODO(Confuseh): Add default checks for streamlink/livestreamer
+    // TODO(Confuseh): Add quality switcher
+    if (fileinfo.exists() && fileinfo.isExecutable()) {
+        // works on leenux, idk whether it would work on whindows or mehOS
+        QProcess::startDetached(settings.streamlinkPath.get(), QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()), "best"}));
+    }
 }
 
 }  // namespace widgets
