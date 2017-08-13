@@ -9,8 +9,7 @@ namespace chatterino {
 namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *_notebook)
-    : QWidget(_notebook)
-    , colorScheme(_notebook->colorScheme)
+    : BaseWidget(_notebook)
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
 {

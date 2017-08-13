@@ -1,7 +1,8 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
+
 #include <QPropertyAnimation>
-#include <QWidget>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/signals2.hpp>
 #include <boost/signals2/connection.hpp>
@@ -15,7 +16,7 @@ namespace widgets {
 class Notebook;
 class NotebookPage;
 
-class NotebookTab : public QWidget
+class NotebookTab : public BaseWidget
 {
     Q_OBJECT
 
@@ -24,8 +25,6 @@ public:
 
     explicit NotebookTab(Notebook *_notebook);
     ~NotebookTab();
-
-    ColorScheme &colorScheme;
 
     void calcSize();
 
