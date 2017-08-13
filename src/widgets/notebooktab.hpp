@@ -32,8 +32,8 @@ public:
     NotebookPage *page;
 
     const QString &getTitle() const;
-    void setTitle(const QString &title);
-    bool getSelected();
+    void setTitle(const QString &newTitle);
+    bool isSelected() const;
     void setSelected(bool value);
 
     HighlightStyle getHighlightStyle() const;
@@ -57,23 +57,23 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    boost::signals2::connection _hideXConnection;
+    boost::signals2::connection hideXConnection;
 
-    QPropertyAnimation _posAnimation;
-    bool _posAnimated = false;
-    QPoint _posAnimationDesired;
+    QPropertyAnimation positionChangedAnimation;
+    bool positionChangedAnimationRunning = false;
+    QPoint positionAnimationDesiredPoint;
 
-    Notebook *_notebook;
+    Notebook *notebook;
 
-    QString _title = "<no title>";
+    QString title = "<no title>";
 
-    bool _selected = false;
-    bool _mouseOver = false;
-    bool _mouseDown = false;
-    bool _mouseOverX = false;
-    bool _mouseDownX = false;
+    bool selected = false;
+    bool mouseOver = false;
+    bool mouseDown = false;
+    bool mouseOverX = false;
+    bool mouseDownX = false;
 
-    HighlightStyle _highlightStyle = HighlightStyle::HighlightNone;
+    HighlightStyle highlightStyle = HighlightStyle::HighlightNone;
 
     QRect getXRect()
     {
