@@ -26,25 +26,24 @@ Notebook::Notebook(ChannelManager &_channelManager, MainWindow *parent)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)
-    , selectedPage(nullptr)
 {
-    connect(&settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
-    connect(&userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
-    connect(&addButton, SIGNAL(clicked()), this, SLOT(addPageButtonClicked()));
+    this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
+    this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
+    this->connect(&this->addButton, SIGNAL(clicked()), this, SLOT(addPageButtonClicked()));
 
-    settingsButton.resize(24, 24);
-    settingsButton.icon = NotebookButton::IconSettings;
+    this->settingsButton.resize(24, 24);
+    this->settingsButton.icon = NotebookButton::IconSettings;
 
-    userButton.resize(24, 24);
-    userButton.move(24, 0);
-    userButton.icon = NotebookButton::IconUser;
+    this->userButton.resize(24, 24);
+    this->userButton.move(24, 0);
+    this->userButton.icon = NotebookButton::IconUser;
 
-    addButton.resize(24, 24);
+    this->addButton.resize(24, 24);
 
     SettingsManager::getInstance().hidePreferencesButton.valueChanged.connect(
-        [this](const bool &) { performLayout(); });
+        [this](const bool &) { this->performLayout(); });
     SettingsManager::getInstance().hideUserButton.valueChanged.connect(
-        [this](const bool &) { performLayout(); });
+        [this](const bool &) { this->performLayout(); });
 }
 
 NotebookPage *Notebook::addPage(bool select)
@@ -54,45 +53,46 @@ NotebookPage *Notebook::addPage(bool select)
 
     tab->show();
 
-    if (select || pages.count() == 0) {
+    if (select || this->pages.count() == 0) {
         this->select(page);
     }
 
-    pages.append(page);
+    this->pages.append(page);
 
-    performLayout();
+    this->performLayout();
 
     return page;
 }
 
 void Notebook::removePage(NotebookPage *page)
 {
-    int index = pages.indexOf(page);
+    int index = this->pages.indexOf(page);
 
-    if (pages.size() == 1) {
+    if (this->pages.size() == 1) {
         select(nullptr);
-    } else if (index == pages.count() - 1) {
-        select(pages[index - 1]);
+    } else if (index == this->pages.count() - 1) {
+        select(this->pages[index - 1]);
     } else {
-        select(pages[index + 1]);
+        select(this->pages[index + 1]);
     }
 
     delete page->getTab();
     delete page;
 
-    pages.removeOne(page);
+    this->pages.removeOne(page);
 
-    if (pages.size() == 0) {
+    if (this->pages.size() == 0) {
         addPage();
     }
 
-    performLayout();
+    this->performLayout();
 }
 
 void Notebook::select(NotebookPage *page)
 {
-    if (page == selectedPage)
+    if (page == this->selectedPage) {
         return;
+    }
 
     if (page != nullptr) {
         page->setHidden(false);
@@ -100,21 +100,21 @@ void Notebook::select(NotebookPage *page)
         page->getTab()->raise();
     }
 
-    if (selectedPage != nullptr) {
-        selectedPage->setHidden(true);
-        selectedPage->getTab()->setSelected(false);
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->setHidden(true);
+        this->selectedPage->getTab()->setSelected(false);
     }
 
-    selectedPage = page;
+    this->selectedPage = page;
 
-    performLayout();
+    this->performLayout();
 }
 
 NotebookPage *Notebook::tabAt(QPoint point, int &index)
 {
     int i = 0;
 
-    for (auto *page : pages) {
+    for (auto *page : this->pages) {
         if (page->getTab()->getDesiredRect().contains(point)) {
             index = i;
             return page;
@@ -129,9 +129,9 @@ NotebookPage *Notebook::tabAt(QPoint point, int &index)
 
 void Notebook::rearrangePage(NotebookPage *page, int index)
 {
-    pages.move(pages.indexOf(page), index);
+    this->pages.move(this->pages.indexOf(page), index);
 
-    performLayout();
+    this->performLayout();
 }
 
 void Notebook::nextTab()
@@ -165,26 +165,27 @@ void Notebook::performLayout(bool animated)
     int x = 0, y = 0;
 
     if (SettingsManager::getInstance().hidePreferencesButton.get()) {
-        settingsButton.hide();
+        this->settingsButton.hide();
     } else {
-        settingsButton.show();
+        this->settingsButton.show();
         x += 24;
     }
     if (SettingsManager::getInstance().hideUserButton.get()) {
-        userButton.hide();
+        this->userButton.hide();
     } else {
-        userButton.move(x, 0);
-        userButton.show();
+        this->userButton.move(x, 0);
+        this->userButton.show();
         x += 24;
     }
 
     int tabHeight = 16;
     bool first = true;
 
-    for (auto &i : pages) {
+    for (auto &i : this->pages) {
         tabHeight = i->getTab()->height();
 
-        if (!first && (i == pages.last() ? tabHeight : 0) + x + i->getTab()->width() > width()) {
+        if (!first &&
+            (i == this->pages.last() ? tabHeight : 0) + x + i->getTab()->width() > width()) {
             y += i->getTab()->height();
             i->getTab()->moveAnimated(QPoint(0, y), animated);
             x = i->getTab()->width();
@@ -196,17 +197,17 @@ void Notebook::performLayout(bool animated)
         first = false;
     }
 
-    addButton.move(x, y);
+    this->addButton.move(x, y);
 
-    if (selectedPage != nullptr) {
-        selectedPage->move(0, y + tabHeight);
-        selectedPage->resize(width(), height() - y - tabHeight);
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->move(0, y + tabHeight);
+        this->selectedPage->resize(width(), height() - y - tabHeight);
     }
 }
 
 void Notebook::resizeEvent(QResizeEvent *)
 {
-    performLayout(false);
+    this->performLayout(false);
 }
 
 void Notebook::settingsButtonClicked()
@@ -239,7 +240,7 @@ void Notebook::load(const boost::property_tree::ptree &tree)
         // can't read tabs
     }
 
-    if (pages.size() == 0) {
+    if (this->pages.size() == 0) {
         // No pages saved, show default stuff
         loadDefaults();
     }
@@ -250,7 +251,7 @@ void Notebook::save(boost::property_tree::ptree &tree)
     boost::property_tree::ptree tabs;
 
     // Iterate through all tabs and add them to our tabs property thing
-    for (const auto &page : pages) {
+    for (const auto &page : this->pages) {
         boost::property_tree::ptree pTab = page->getTab()->save();
 
         boost::property_tree::ptree pChats = page->save();

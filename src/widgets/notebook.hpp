@@ -32,7 +32,7 @@ public:
     void removePage(NotebookPage *page);
     void select(NotebookPage *page);
 
-    NotebookPage *getSelectedPage()
+    NotebookPage *getSelectedPage() const
     {
         return selectedPage;
     }
@@ -66,7 +66,7 @@ private:
     NotebookButton settingsButton;
     NotebookButton userButton;
 
-    NotebookPage *selectedPage;
+    NotebookPage *selectedPage = nullptr;
 
 public:
     void load(const boost::property_tree::ptree &tree);
