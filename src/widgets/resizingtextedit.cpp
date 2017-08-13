@@ -71,9 +71,15 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
     event->ignore();
 
-    keyPressed(event);
+    this->keyPressed(event);
 
-    if (event->key() == Qt::Key_Tab) {
+    if (event->key() == Qt::Key_Backtab) {
+        // Ignore for now. We want to use it for autocomplete later
+        return;
+    }
+
+    if (event->key() == Qt::Key_Tab &&
+        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier) {
         QString currentCompletionPrefix = this->textUnderCursor();
 
         if (!currentCompletionPrefix.size()) {
