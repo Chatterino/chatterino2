@@ -134,6 +134,32 @@ void Notebook::rearrangePage(NotebookPage *page, int index)
     performLayout();
 }
 
+void Notebook::nextTab()
+{
+    if (this->pages.size() <= 1) {
+        return;
+    }
+
+    int index = (this->pages.indexOf(this->selectedPage) + 1) % this->pages.size();
+
+    this->select(this->pages[index]);
+}
+
+void Notebook::previousTab()
+{
+    if (this->pages.size() <= 1) {
+        return;
+    }
+
+    int index = (this->pages.indexOf(this->selectedPage) - 1);
+
+    if (index < 0) {
+        index += this->pages.size();
+    }
+
+    this->select(this->pages[index]);
+}
+
 void Notebook::performLayout(bool animated)
 {
     int x = 0, y = 0;

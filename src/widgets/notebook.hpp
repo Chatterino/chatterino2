@@ -42,6 +42,9 @@ public:
     NotebookPage *tabAt(QPoint point, int &index);
     void rearrangePage(NotebookPage *page, int index);
 
+    void nextTab();
+    void previousTab();
+
 protected:
     void resizeEvent(QResizeEvent *);
 

@@ -3,6 +3,7 @@
 #include "colorscheme.hpp"
 #include "completionmanager.hpp"
 #include "ircmanager.hpp"
+#include "notebook.hpp"
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 
@@ -127,6 +128,22 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
                 qDebug() << "Alt+Right to" << reqX << "/" << reqY;
 
                 page->requestFocus(reqX, reqY);
+            }
+        } else if (event->key() == Qt::Key_Tab) {
+            if (event->modifiers() == Qt::ControlModifier) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+
+                notebook->nextTab();
+            }
+        } else if (event->key() == Qt::Key_Backtab) {
+            if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) {
+                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+
+                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+
+                notebook->previousTab();
             }
         }
     });
