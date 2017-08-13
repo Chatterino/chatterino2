@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 
 namespace chatterino {
 
@@ -19,7 +20,7 @@ public:
 
     bool tryGet(const TKey &name, TValue &value) const
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(this->mutex.get());
 
         auto a = this->data.find(name);
         if (a == this->data.end()) {
@@ -33,7 +34,7 @@ public:
 
     TValue getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(this->mutex.get());
 
         auto a = this->data.find(name);
         if (a == this->data.end()) {
@@ -47,36 +48,41 @@ public:
 
     TValue &operator[](const TKey &name)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(this->mutex.get());
 
         return this->data[name];
     }
 
     ConcurrentMap(const ConcurrentMap &o)
+        : mutex(std::move(o.mutex))
+        , data(std::move(o.data))
     {
     }
 
     ConcurrentMap &operator=(const ConcurrentMap &rhs)
     {
+        this->mutex = std::move(rhs.mutex);
+        this->data = std::move(rhs.data);
+
         return *this;
     }
 
     void clear()
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(this->mutex.get());
 
         this->data.clear();
     }
 
     void insert(const TKey &name, const TValue &value)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(this->mutex.get());
 
         this->data.insert(name, value);
     }
 
 private:
-    mutable QMutex mutex;
+    mutable std::unique_ptr<QMutex> mutex;
     QMap<TKey, TValue> data;
 };
 
