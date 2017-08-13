@@ -2,6 +2,7 @@
 
 #include "widgets/basewidget.hpp"
 
+#include <QMenu>
 #include <QPropertyAnimation>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/signals2.hpp>
@@ -64,8 +65,12 @@ private:
 
     Notebook *notebook;
 
-    QString title = "<no title>";
+    QString title;
 
+public:
+    bool useDefaultBehaviour = true;
+
+private:
     bool selected = false;
     bool mouseOver = false;
     bool mouseDown = false;
@@ -73,6 +78,8 @@ private:
     bool mouseDownX = false;
 
     HighlightStyle highlightStyle = HighlightStyle::HighlightNone;
+
+    QMenu menu;
 
     QRect getXRect()
     {

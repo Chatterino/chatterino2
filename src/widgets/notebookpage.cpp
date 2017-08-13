@@ -50,6 +50,8 @@ std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
     auto it = std::find(std::begin(this->chatWidgets), std::end(this->chatWidgets), widget);
     if (it != std::end(this->chatWidgets)) {
         this->chatWidgets.erase(it);
+
+        this->refreshTitle();
     }
 
     // remove from box and return location
@@ -82,6 +84,9 @@ void NotebookPage::addToLayout(ChatWidget *widget,
                                std::pair<int, int> position = std::pair<int, int>(-1, -1))
 {
     this->chatWidgets.push_back(widget);
+
+    this->refreshTitle();
+
     widget->giveFocus(Qt::MouseFocusReason);
 
     // add vbox at the end
@@ -402,6 +407,27 @@ std::pair<int, int> NotebookPage::getChatPosition(const ChatWidget *chatWidget)
 ChatWidget *NotebookPage::createChatWidget()
 {
     return new ChatWidget(this->channelManager, this);
+}
+
+void NotebookPage::refreshTitle()
+{
+    if (!this->tab->useDefaultBehaviour) {
+        return;
+    }
+
+    QString newTitle = "";
+    bool first = true;
+
+    for (const auto &chatWidget : this->chatWidgets) {
+        if (!first) {
+            newTitle += ", ";
+        }
+        newTitle += QString::fromStdString(chatWidget->channelName.getValue());
+
+        first = false;
+    }
+
+    this->tab->setTitle(newTitle);
 }
 
 void NotebookPage::load(const boost::property_tree::ptree &tree)

@@ -2,7 +2,9 @@
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
 #include "widgets/notebook.hpp"
+#include "widgets/textinputdialog.hpp"
 
+#include <QDebug>
 #include <QPainter>
 
 namespace chatterino {
@@ -12,6 +14,7 @@ NotebookTab::NotebookTab(Notebook *_notebook)
     : BaseWidget(_notebook)
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
+    , menu(this)
 {
     this->calcSize();
     this->setAcceptDrops(true);
@@ -22,6 +25,37 @@ NotebookTab::NotebookTab(Notebook *_notebook)
         boost::bind(&NotebookTab::hideTabXChanged, this, _1));
 
     this->setMouseTracking(true);
+
+    this->menu.addAction("Rename", [this]() {
+        TextInputDialog d(this);
+
+        d.setWindowTitle("Change tab title (Leave empty for default behaviour)");
+        if (this->useDefaultBehaviour) {
+            d.setText("");
+        } else {
+            d.setText(this->getTitle());
+        }
+
+        if (d.exec() == QDialog::Accepted) {
+            QString newTitle = d.getText();
+            if (newTitle.isEmpty()) {
+                this->useDefaultBehaviour = true;
+                this->page->refreshTitle();
+            } else {
+                this->useDefaultBehaviour = false;
+                this->setTitle(newTitle);
+            }
+        }
+    });
+
+    this->menu.addAction("Close", [=]() {
+        // this->notebook->removePage(this->page);  //
+        qDebug() << "TODO: Implement";  //
+    });
+
+    this->menu.addAction("Enable highlights on new message", []() {
+        qDebug() << "TODO: Implement";  //
+    });
 }
 
 NotebookTab::~NotebookTab()
@@ -50,6 +84,8 @@ const QString &NotebookTab::getTitle() const
 void NotebookTab::setTitle(const QString &newTitle)
 {
     this->title = newTitle;
+
+    this->calcSize();
 }
 
 bool NotebookTab::isSelected() const
@@ -163,7 +199,17 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
 
     this->update();
 
-    this->notebook->select(page);
+    switch (event->button()) {
+        case Qt::LeftButton: {
+            this->notebook->select(page);
+        } break;
+
+        case Qt::RightButton: {
+            this->notebook->select(page);
+
+            this->menu.popup(event->globalPos());
+        } break;
+    }
 }
 
 void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
@@ -229,7 +275,13 @@ void NotebookTab::load(const boost::property_tree::ptree &tree)
 {
     // Load tab title
     try {
-        this->setTitle(QString::fromStdString(tree.get<std::string>("title")));
+        QString newTitle = QString::fromStdString(tree.get<std::string>("title"));
+        if (newTitle.isEmpty()) {
+            this->useDefaultBehaviour = true;
+        } else {
+            this->setTitle(newTitle);
+            this->useDefaultBehaviour = false;
+        }
     } catch (boost::property_tree::ptree_error) {
     }
 }
@@ -238,7 +290,11 @@ boost::property_tree::ptree NotebookTab::save()
 {
     boost::property_tree::ptree tree;
 
-    tree.put("title", this->getTitle().toStdString());
+    if (this->useDefaultBehaviour) {
+        tree.put("title", "");
+    } else {
+        tree.put("title", this->getTitle().toStdString());
+    }
 
     return tree;
 }

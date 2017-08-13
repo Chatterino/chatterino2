@@ -98,6 +98,8 @@ private:
     ChatWidget *createChatWidget();
 
 public:
+    void refreshTitle();
+
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
 };
