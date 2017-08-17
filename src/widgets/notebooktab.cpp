@@ -4,9 +4,9 @@
 #include "widgets/notebook.hpp"
 #include "widgets/textinputdialog.hpp"
 
+#include <QApplication>
 #include <QDebug>
 #include <QPainter>
-#include <QApplication>
 
 namespace chatterino {
 namespace widgets {
@@ -50,8 +50,9 @@ NotebookTab::NotebookTab(Notebook *_notebook)
     });
 
     this->menu.addAction("Close", [=]() {
-        // this->notebook->removePage(this->page);  //
-        qDebug() << "TODO: Implement";  //
+        this->notebook->removePage(this->page);
+
+        qDebug() << "lmoa";
     });
 
     this->menu.addAction("Enable highlights on new message", []() {
@@ -205,14 +206,10 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
 
     this->update();
 
+    this->notebook->select(page);
+
     switch (event->button()) {
-        case Qt::LeftButton: {
-            this->notebook->select(page);
-        } break;
-
         case Qt::RightButton: {
-            this->notebook->select(page);
-
             this->menu.popup(event->globalPos());
         } break;
     }
@@ -222,13 +219,19 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
     this->mouseDown = false;
 
-    if (!SettingsManager::getInstance().hideTabX.get() && this->mouseDownX &&
-        this->getXRect().contains(event->pos())) {
-        this->mouseDownX = false;
-
-        this->notebook->removePage(this->page);
+    if (event->button() == Qt::MiddleButton) {
+        if (this->rect().contains(event->pos())) {
+            this->notebook->removePage(this->page);
+        }
     } else {
-        this->update();
+        if (!SettingsManager::getInstance().hideTabX.get() && this->mouseDownX &&
+            this->getXRect().contains(event->pos())) {
+            this->mouseDownX = false;
+
+            this->notebook->removePage(this->page);
+        } else {
+            this->update();
+        }
     }
 }
 

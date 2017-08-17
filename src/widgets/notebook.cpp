@@ -76,8 +76,8 @@ void Notebook::removePage(NotebookPage *page)
         select(this->pages[index + 1]);
     }
 
-    delete page->getTab();
-    delete page;
+    page->getTab()->deleteLater();
+    page->deleteLater();
 
     this->pages.removeOne(page);
 
