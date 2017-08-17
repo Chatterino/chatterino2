@@ -90,6 +90,9 @@ void ColorScheme::setColors(double hue, double multiplier)
     TabSelectedText = QColor(255, 255, 255);
     TabSelectedBackground = getColor(hue, 0.5, 0.5);
 
+    TabSelectedUnfocusedText = QColor(255, 255, 255);
+    TabSelectedUnfocusedBackground = getColor(hue, 0, 0.5);
+
     TabHighlightedText = QColor(0, 0, 0);
     TabHighlightedBackground = getColor(hue, 0.5, 0.2);
 

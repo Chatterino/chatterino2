@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QApplication>
 
 namespace chatterino {
 namespace widgets {
@@ -154,8 +155,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QColor fg = QColor(0, 0, 0);
 
     if (this->selected) {
-        painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
-        fg = this->colorScheme.TabSelectedText;
+        if (this->window() == QApplication::activeWindow()) {
+            painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
+            fg = this->colorScheme.TabSelectedText;
+        } else {
+            painter.fillRect(rect(), this->colorScheme.TabSelectedUnfocusedBackground);
+            fg = this->colorScheme.TabSelectedUnfocusedText;
+        }
     } else if (this->mouseOver) {
         painter.fillRect(rect(), this->colorScheme.TabHoverBackground);
         fg = this->colorScheme.TabHoverText;
