@@ -26,7 +26,9 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     , scrollBar(this)
     , userPopupWidget(_chatWidget->getChannelRef())
 {
+#ifndef Q_OS_MAC
     this->setAttribute(Qt::WA_OpaquePaintEvent);
+#endif
     this->setMouseTracking(true);
 
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
@@ -152,6 +154,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
     _painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // only update gif emotes
+#ifndef Q_OS_MAC
     if (this->onlyUpdateEmotes) {
         this->onlyUpdateEmotes = false;
 
@@ -163,6 +166,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
         return;
     }
+#endif
 
     // update all messages
     this->gifEmotes.clear();
