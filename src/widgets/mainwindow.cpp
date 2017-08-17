@@ -169,7 +169,7 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::refreshTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Background, this->colorScheme.TabPanelBackground);
+    palette.setColor(QPalette::Background, this->colorScheme.TabBackground);
     this->setPalette(palette);
 }
 

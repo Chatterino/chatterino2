@@ -27,6 +27,7 @@ public:
 
     QColor TooltipBackground;
     QColor TooltipText;
+
     QColor ChatSeperator;
     QColor ChatBackground;
     QColor ChatBackgroundHighlighted;
@@ -55,16 +56,19 @@ public:
     QColor ScrollbarThumbSelected;
     QColor ScrollbarArrow;
 
-    QColor TabPanelBackground;
-    QColor TabBackground;
-    QColor TabHoverBackground;
-    QColor TabSelectedBackground;
-    QColor TabHighlightedBackground;
-    QBrush TabNewMessageBackground;
     QColor TabText;
+    QColor TabBackground;
+
     QColor TabHoverText;
+    QColor TabHoverBackground;
+
     QColor TabSelectedText;
+    QColor TabSelectedBackground;
+
     QColor TabHighlightedText;
+    QColor TabHighlightedBackground;
+
+    QBrush TabNewMessageBackground;
 
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];

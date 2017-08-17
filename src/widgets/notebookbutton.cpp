@@ -23,7 +23,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    background = this->colorScheme.TabPanelBackground;
+    background = this->colorScheme.TabBackground;
 
     if (mouseDown) {
         // background = this->colorScheme.TabSelectedBackground;

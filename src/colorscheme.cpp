@@ -62,7 +62,7 @@ void ColorScheme::setColors(double hue, double multiplier)
     SystemMessageColor = QColor(140, 127, 127);
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
-        return QColor::fromHslF(h, s, (((l - 0.5) * multiplier) + 0.5), a);
+        return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
     };
 
     DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
@@ -71,26 +71,29 @@ void ColorScheme::setColors(double hue, double multiplier)
     TextLink = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
 
     // tab
-    if (hasDarkBorder) {
-        //    TabPanelBackground = getColor(hue, 0, 0.8);
-        //    TabBackground = getColor(hue, 0, 0.8);
-        //    TabHoverBackground = getColor(hue, 0, 0.8);
-    } else {
-        TabPanelBackground = QColor(255, 255, 255);
-        TabBackground = QColor(255, 255, 255);
-        TabHoverBackground = getColor(hue, 0, 0.05);
-    }
-    TabSelectedBackground = getColor(hue, 0.5, 0.5);
-    TabHighlightedBackground = getColor(hue, 0.5, 0.2);
-    TabNewMessageBackground = QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
-    if (hasDarkBorder) {
-        //    TabText = QColor(210, 210, 210);
-        //    TabHoverText = QColor(210, 210, 210);
+    if (true) {
         TabText = QColor(0, 0, 0);
+        TabBackground = QColor(255, 255, 255);
+
+        TabHoverText = QColor(0, 0, 0);
+        TabHoverBackground = getColor(hue, 0, 0.05);
+    } else {
+        // Ubuntu style
+        // TODO: add setting for this
+        TabText = QColor(210, 210, 210);
+        TabBackground = QColor(61, 60, 56);
+
+        TabHoverText = QColor(210, 210, 210);
+        TabHoverBackground = QColor(73, 72, 68);
     }
-    TabHoverText = QColor(0, 0, 0);
+
     TabSelectedText = QColor(255, 255, 255);
+    TabSelectedBackground = getColor(hue, 0.5, 0.5);
+
     TabHighlightedText = QColor(0, 0, 0);
+    TabHighlightedBackground = getColor(hue, 0.5, 0.2);
+
+    TabNewMessageBackground = QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
 
     // Chat
     ChatBackground = getColor(0, 0.1, 1);
@@ -98,7 +101,9 @@ void ColorScheme::setColors(double hue, double multiplier)
     ChatHeaderBorder = getColor(0, 0.1, 0.85);
     ChatInputBackground = getColor(0, 0.1, 0.95);
     ChatInputBorder = getColor(0, 0.1, 0.9);
+    ChatSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
 
+    // Scrollbar
     ScrollbarBG = ChatBackground;
     ScrollbarThumb = getColor(0, 0.1, 0.85);
     ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
@@ -115,16 +120,17 @@ void ColorScheme::setColors(double hue, double multiplier)
 void ColorScheme::normalizeColor(QColor &color)
 {
     if (this->lightTheme) {
+        // TODO: write some codes
     } else {
         if (color.lightnessF() < 0.5f) {
             color.setHslF(color.hueF(), color.saturationF(), 0.5f);
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(
-                color.hueF(), color.saturationF(),
-                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                         color.saturationF() * 0.2);
+            color.setHslF(color.hueF(), color.saturationF(),
+                          color.lightnessF() +
+                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                  color.saturationF() * 0.2);
         }
     }
 }
