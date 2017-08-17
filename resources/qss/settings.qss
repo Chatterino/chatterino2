@@ -13,3 +13,7 @@ SettingsDialogTab:hover {
 QLabel, QCheckBox, QGroupBox, SettingsDialogTab {
     color: white;
 }
+
+QGroupBox {
+    background-color: #444;
+}
