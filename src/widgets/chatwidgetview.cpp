@@ -173,39 +173,6 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
     _painter.fillRect(rect(), this->colorScheme.ChatBackground);
 
-    // code for tesing colors
-    /*
-    QColor color;
-    static ConcurrentMap<qreal, QImage *> imgCache;
-
-    std::function<QImage *(qreal)> getImg = [&scheme](qreal light) {
-        return imgCache.getOrAdd(light, [&scheme, &light] {
-            QImage *img = new QImage(150, 50, QImage::Format_RGB32);
-
-            QColor color;
-
-            for (int j = 0; j < 50; j++) {
-                for (qreal i = 0; i < 150; i++) {
-                    color = QColor::fromHslF(i / 150.0, light, j / 50.0);
-
-                    scheme.normalizeColor(color);
-
-                    img->setPixelColor(i, j, color);
-                }
-            }
-
-            return img;
-        });
-    };
-
-    for (qreal k = 0; k < 4.8; k++) {
-        auto img = getImg(k / 5);
-
-        painter.drawImage(QRect(k * 150, 0, 150, 150), *img);
-    }
-
-    painter.fillRect(QRect(0, 9, 500, 2), QColor(0, 0, 0));*/
-
     auto messages = this->chatWidget->getMessagesSnapshot();
 
     int start = this->scrollBar.getCurrentValue();
