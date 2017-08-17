@@ -71,6 +71,8 @@ private:
 
     void channelNameUpdated(const std::string &newChannelName);
 
+    NotebookPage &parentPage;
+
     messages::LimitedQueue<messages::SharedMessageRef> messages;
 
     std::shared_ptr<Channel> channel;

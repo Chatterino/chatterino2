@@ -43,6 +43,8 @@ NotebookPage::NotebookPage(ChannelManager &_channelManager, Notebook *parent, No
 
     this->ui.hbox.setSpacing(1);
     this->ui.hbox.setMargin(0);
+
+    this->refreshTitle();
 }
 
 std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
@@ -421,12 +423,22 @@ void NotebookPage::refreshTitle()
     bool first = true;
 
     for (const auto &chatWidget : this->chatWidgets) {
+        auto channelName = QString::fromStdString(chatWidget->channelName.getValue());
+
+        if (channelName.isEmpty()) {
+            continue;
+        }
+
         if (!first) {
             newTitle += ", ";
         }
-        newTitle += QString::fromStdString(chatWidget->channelName.getValue());
+        newTitle += channelName;
 
         first = false;
+    }
+
+    if (newTitle.isEmpty()) {
+        newTitle = "empty";
     }
 
     this->tab->setTitle(newTitle);

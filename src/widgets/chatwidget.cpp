@@ -38,6 +38,7 @@ static int index = 0;
 
 ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     : BaseWidget(parent)
+    , parentPage(*parent)
     , channelManager(_channelManager)
     , completionManager(parent->completionManager)
     , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
@@ -176,6 +177,7 @@ bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
         QString newChannelName = dialog.getText().trimmed();
 
         this->channelName = newChannelName.toStdString();
+        this->parentPage.refreshTitle();
 
         return true;
     }
