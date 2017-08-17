@@ -25,7 +25,7 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 *most likely works the same for other Debian-like distros*
 1. Install QT Creator `sudo apt-get install qtcreator qtmultimedia5-dev`
 1. Install boost-dev  `sudo apt-get install libboost-all-dev`
-1. Copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory
+1. Copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory so that the file `<chatterino2 directory>/rapidjson/document.h` exists
 1. Open `chatterino.pro` with QT Creator and build
 
 ### Mac OSX
