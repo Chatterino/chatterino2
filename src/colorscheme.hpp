@@ -68,6 +68,9 @@ public:
     QColor TabHighlightedText;
     QColor TabHighlightedBackground;
 
+    QColor TabSelectedUnfocusedText;
+    QColor TabSelectedUnfocusedBackground;
+
     QBrush TabNewMessageBackground;
 
     const int HighlightColorCount = 3;

@@ -4,6 +4,7 @@
 #include "widgets/notebook.hpp"
 #include "widgets/notebooktab.hpp"
 
+#include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMimeData>
@@ -364,15 +365,17 @@ void NotebookPage::paintEvent(QPaintEvent *)
     if (this->ui.hbox.count() == 0) {
         painter.fillRect(rect(), this->colorScheme.ChatBackground);
 
-        painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);
-
         painter.setPen(this->colorScheme.Text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
         painter.fillRect(rect(), this->colorScheme.ChatSeperator);
-
-        painter.fillRect(0, 0, width(), 2, this->colorScheme.TabSelectedBackground);
     }
+
+    QColor accentColor = (QApplication::activeWindow() == this->window()
+                              ? this->colorScheme.TabSelectedBackground
+                              : this->colorScheme.TabSelectedUnfocusedBackground);
+
+    painter.fillRect(0, 0, width(), 2, accentColor);
 }
 
 void NotebookPage::showEvent(QShowEvent *event)
