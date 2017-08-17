@@ -231,7 +231,15 @@ SharedMessage TwitchMessageBuilder::parse()
             }
         }
 
-        i += split.length() + 1;
+        for (int j = 0; j < split.size(); j++) {
+            i++;
+
+            if (split.at(j).isHighSurrogate()) {
+                j++;
+            }
+        }
+
+        i++;
     }
 
     // TODO: Implement this xD
