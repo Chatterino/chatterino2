@@ -25,6 +25,10 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     , chatWidget(_chatWidget)
     , scrollBar(this)
     , userPopupWidget(_chatWidget->getChannelRef())
+    , selectionStart(0, 0)
+    , selectionEnd(0, 0)
+    , selectionMin(0, 0)
+    , selectionMax(0, 0)
 {
 #ifndef Q_OS_MAC
     this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -147,21 +151,41 @@ void ChatWidgetView::resizeEvent(QResizeEvent *)
     this->update();
 }
 
+void ChatWidgetView::setSelection(SelectionItem start, SelectionItem end)
+{
+    // selections
+    SelectionItem min = selectionStart;
+    SelectionItem max = selectionEnd;
+
+    if (max.isSmallerThan(min)) {
+        std::swap(min, max);
+    }
+
+    this->selectionStart = start;
+    this->selectionEnd = end;
+
+    this->selectionMin = min;
+    this->selectionMax = max;
+
+    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
+             << max.charIndex;
+}
+
 void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 {
-    QPainter _painter(this);
+    QPainter painter(this);
 
-    _painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    // only update gif emotes
+// only update gif emotes
 #ifndef Q_OS_MAC
     if (this->onlyUpdateEmotes) {
         this->onlyUpdateEmotes = false;
 
         for (const GifEmoteData &item : this->gifEmotes) {
-            _painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+            painter.fillRect(item.rect, this->colorScheme.ChatBackground);
 
-            _painter.drawPixmap(item.rect, *item.image->getPixmap());
+            painter.drawPixmap(item.rect, *item.image->getPixmap());
         }
 
         return;
@@ -171,8 +195,21 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
     // update all messages
     this->gifEmotes.clear();
 
-    _painter.fillRect(rect(), this->colorScheme.ChatBackground);
+    painter.fillRect(rect(), this->colorScheme.ChatBackground);
 
+    // draw messages
+    this->drawMessages(painter);
+
+    // draw gif emotes
+    for (GifEmoteData &item : this->gifEmotes) {
+        painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+
+        painter.drawPixmap(item.rect, *item.image->getPixmap());
+    }
+}
+
+void ChatWidgetView::drawMessages(QPainter &painter)
+{
     auto messages = this->chatWidget->getMessagesSnapshot();
 
     int start = this->scrollBar.getCurrentValue();
@@ -183,7 +220,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
     int y = -(messages[start].get()->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.getLength(); ++i) {
+    for (size_t i = start; i < messages.getLength(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
 
         std::shared_ptr<QPixmap> bufferPtr = messageRef->buffer;
@@ -199,38 +236,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
         // update messages that have been changed
         if (updateBuffer) {
-            QPainter painter(buffer);
-            painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
-                                                 ? this->colorScheme.ChatBackgroundHighlighted
-                                                 : this->colorScheme.ChatBackground);
-            for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
-                // image
-                if (wordPart.getWord().isImage()) {
-                    messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
-
-                    const QPixmap *image = lli.getPixmap();
-
-                    if (image != nullptr) {
-                        painter.drawPixmap(QRect(wordPart.getX(), wordPart.getY(),
-                                                 wordPart.getWidth(), wordPart.getHeight()),
-                                           *image);
-                    }
-                }
-                // text
-                else {
-                    QColor color = wordPart.getWord().getColor();
-
-                    this->colorScheme.normalizeColor(color);
-
-                    painter.setPen(color);
-                    painter.setFont(wordPart.getWord().getFont());
-
-                    painter.drawText(QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
-                                     wordPart.getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
-                }
-            }
-
-            messageRef->updateBuffer = false;
+            this->updateMessageBuffer(messageRef, buffer, i);
         }
 
         // get gif emotes
@@ -253,7 +259,7 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
         messageRef->buffer = bufferPtr;
 
-        _painter.drawPixmap(0, y, *buffer);
+        painter.drawPixmap(0, y, *buffer);
 
         y += messageRef->getHeight();
 
@@ -261,12 +267,53 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
             break;
         }
     }
+}
 
-    for (GifEmoteData &item : this->gifEmotes) {
-        _painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer,
+                                         int messageIndex)
+{
+    QPainter painter(buffer);
 
-        _painter.drawPixmap(item.rect, *item.image->getPixmap());
+    // draw background
+    // if (this->selectionMin.messageIndex <= messageIndex &&
+    //    this->selectionMax.messageIndex >= messageIndex) {
+    //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
+    //} else {
+    painter.fillRect(buffer->rect(),
+                     (messageRef->getMessage()->getCanHighlightTab())
+                         ? this->colorScheme.ChatBackgroundHighlighted
+                         : this->colorScheme.ChatBackground);
+    //}
+
+    // draw messages
+    for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
+        // image
+        if (wordPart.getWord().isImage()) {
+            messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
+
+            const QPixmap *image = lli.getPixmap();
+
+            if (image != nullptr) {
+                painter.drawPixmap(QRect(wordPart.getX(), wordPart.getY(), wordPart.getWidth(),
+                                         wordPart.getHeight()),
+                                   *image);
+            }
+        }
+        // text
+        else {
+            QColor color = wordPart.getWord().getColor();
+
+            this->colorScheme.normalizeColor(color);
+
+            painter.setPen(color);
+            painter.setFont(wordPart.getWord().getFont());
+
+            painter.drawText(QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
+                             wordPart.getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        }
     }
+
+    messageRef->updateBuffer = false;
 }
 
 void ChatWidgetView::wheelEvent(QWheelEvent *event)
@@ -283,14 +330,20 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 {
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
+    int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), message, relativePos)) {
+    if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
         return;
     }
 
-    // int index = message->getSelectionIndex(relativePos);
-    // qDebug() << index;
+    if (this->selecting) {
+        int index = message->getSelectionIndex(relativePos);
+
+        this->setSelection(this->selectionStart, SelectionItem(messageIndex, index));
+
+        this->repaint();
+    }
 
     messages::Word hoverWord;
     if (!message->tryGetWordPart(relativePos, hoverWord)) {
@@ -307,10 +360,29 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
 
 void ChatWidgetView::mousePressEvent(QMouseEvent *event)
 {
+    this->chatWidget->giveFocus(Qt::MouseFocusReason);
+
     this->isMouseDown = true;
+
     this->lastPressPosition = event->screenPos();
 
-    this->chatWidget->giveFocus(Qt::MouseFocusReason);
+    std::shared_ptr<messages::MessageRef> message;
+    QPoint relativePos;
+    int messageIndex;
+
+    if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
+        setCursor(Qt::ArrowCursor);
+
+        return;
+    }
+
+    int index = message->getSelectionIndex(relativePos);
+
+    auto selectionItem = SelectionItem(messageIndex, index);
+    this->setSelection(selectionItem, selectionItem);
+    this->selecting = true;
+
+    this->repaint();
 }
 
 void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
@@ -322,6 +394,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     this->isMouseDown = false;
+    this->selecting = false;
 
     float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
 
@@ -339,8 +412,9 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
+    int messageIndex;
 
-    if (!tryGetMessageAt(event->pos(), message, relativePos)) {
+    if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         // No message at clicked position
         this->userPopupWidget.hide();
         return;
@@ -373,7 +447,7 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
 }
 
 bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
-                                     QPoint &relativePos)
+                                     QPoint &relativePos, int &index)
 {
     auto messages = this->chatWidget->getMessagesSnapshot();
 
@@ -391,6 +465,7 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
         if (p.y() < y + message->getHeight()) {
             relativePos = QPoint(p.x(), p.y() - y);
             _message = message;
+            index = i;
             return true;
         }
 

@@ -16,6 +16,23 @@
 namespace chatterino {
 namespace widgets {
 
+struct SelectionItem {
+    int messageIndex;
+    int charIndex;
+
+    SelectionItem(int _messageIndex, int _charIndex)
+    {
+        this->messageIndex = _messageIndex;
+        this->charIndex = _charIndex;
+    }
+
+    bool isSmallerThan(SelectionItem &other)
+    {
+        return messageIndex < other.messageIndex ||
+               (messageIndex == other.messageIndex && charIndex < other.charIndex);
+    }
+};
+
 class ChatWidget;
 
 class ChatWidgetView : public BaseWidget
@@ -40,13 +57,17 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
     bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &message,
-                         QPoint &relativePos);
+                         QPoint &relativePos, int &index);
 
 private:
     struct GifEmoteData {
         messages::LazyLoadedImage *image;
         QRect rect;
     };
+
+    void drawMessages(QPainter &painter);
+    void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
+    void setSelection(SelectionItem start, SelectionItem end);
 
     std::vector<GifEmoteData> gifEmotes;
 
@@ -64,6 +85,12 @@ private:
     // Mouse event variables
     bool isMouseDown = false;
     QPointF lastPressPosition;
+
+    SelectionItem selectionStart;
+    SelectionItem selectionEnd;
+    SelectionItem selectionMin;
+    SelectionItem selectionMax;
+    bool selecting = false;
 
 private slots:
     void wordTypeMaskChanged()
