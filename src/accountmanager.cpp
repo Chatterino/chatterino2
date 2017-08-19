@@ -22,15 +22,6 @@ inline QString getEnvString(const char *target)
 AccountManager::AccountManager()
     : twitchAnonymousUser("justinfan64537", "", "")
 {
-    QString envUsername = getEnvString("CHATTERINO2_USERNAME");
-    QString envOauthToken = getEnvString("CHATTERINO2_OAUTH");
-
-    if (!envUsername.isEmpty() && !envOauthToken.isEmpty()) {
-        this->addTwitchUser(twitch::TwitchUser(envUsername, envOauthToken, ""));
-    }
-
-    pajlada::Settings::Setting<std::string>::set(
-        "/accounts/current/roomID", "11148817", pajlada::Settings::SettingOption::DoNotWriteToJSON);
 }
 
 void AccountManager::load()
@@ -58,6 +49,8 @@ void AccountManager::load()
         twitch::TwitchUser user(qS(username), qS(oauthToken), qS(clientID));
 
         this->addTwitchUser(user);
+
+        printf("Adding user %s(%s)\n", username.c_str(), userID.c_str());
     }
 }
 
