@@ -108,21 +108,22 @@ void SettingsDialog::addTabs()
             listWidget->addItem(user.getUserName());
         }
 
-        if (listWidget->count()) {
-            int itemIndex = 0;
-            for (; itemIndex < listWidget->count(); ++itemIndex) {
-                if (listWidget->item(itemIndex)->text().compare(settings.selectedUser.get(),
-                                                                Qt::CaseInsensitive)) {
-                    ++itemIndex;
+        if (listWidget->count() > 0) {
+            const auto &currentUser = AccountManager::getInstance().getTwitchUser();
+            QString currentUsername = currentUser.getUserName();
+            for (int i = 0; i < listWidget->count(); ++i) {
+                QString itemText = listWidget->item(i)->text();
+                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
+                    listWidget->setCurrentRow(i);
                     break;
                 }
             }
-            listWidget->setCurrentRow(itemIndex);
         }
 
         QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
             if (!listWidget->selectedItems().isEmpty()) {
-                settings.selectedUser.set(listWidget->currentItem()->text());
+                AccountManager::getInstance().setCurrentTwitchUser(
+                    listWidget->currentItem()->text());
             }
         });
 

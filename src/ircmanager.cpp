@@ -31,8 +31,13 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
     , resources(_resources)
     , emoteManager(_emoteManager)
     , windowManager(_windowManager)
-    , _account(AccountManager::getInstance().getTwitchUser())
+    , _account(AccountManager::getInstance().getTwitchAnon())
+    , currentUser("/accounts/current")
 {
+    this->currentUser.getValueChangedSignal().connect([](const auto &newUsername) {
+        // TODO: Implement
+        qDebug() << "Current user changed, fetch new credentials and reconnect";
+    });
 }
 
 const twitch::TwitchUser &IrcManager::getUser() const

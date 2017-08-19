@@ -46,7 +46,6 @@ public:
     pajlada::Settings::Setting<std::string> streamlinkPath;
 
     // Settings
-    Setting<QString> selectedUser;
     Setting<float> emoteScale;
     Setting<float> mouseScrollMultiplier;
     Setting<bool> scaleEmotesByLineHeight;

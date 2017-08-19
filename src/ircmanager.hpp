@@ -58,6 +58,8 @@ private:
     // variables
     twitch::TwitchUser _account;
 
+    pajlada::Settings::Setting<std::string> currentUser;
+
     std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
     std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
 

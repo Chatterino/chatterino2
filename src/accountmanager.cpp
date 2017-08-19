@@ -67,7 +67,22 @@ twitch::TwitchUser &AccountManager::getTwitchUser()
         return this->getTwitchAnon();
     }
 
+    std::string currentUser = pajlada::Settings::Setting<std::string>::get("/accounts/current");
+
+    QString currentUsername = QString::fromStdString(currentUser);
+
+    for (auto &user : this->twitchUsers) {
+        if (user.getUserName() == currentUsername) {
+            return user;
+        }
+    }
+
     return this->twitchUsers.front();
+}
+
+void AccountManager::setCurrentTwitchUser(const QString &username)
+{
+    pajlada::Settings::Setting<std::string>::set("/accounts/current", username.toStdString());
 }
 
 std::vector<twitch::TwitchUser> AccountManager::getTwitchUsers()

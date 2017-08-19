@@ -279,10 +279,9 @@ void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixm
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(),
-                     (messageRef->getMessage()->getCanHighlightTab())
-                         ? this->colorScheme.ChatBackgroundHighlighted
-                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+                                         ? this->colorScheme.ChatBackgroundHighlighted
+                                         : this->colorScheme.ChatBackground);
     //}
 
     // draw messages
