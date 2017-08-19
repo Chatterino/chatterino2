@@ -30,8 +30,6 @@ public:
     IrcManager(ChannelManager &_channelManager, Resources &_resources, EmoteManager &_emoteManager,
                WindowManager &_windowManager);
 
-    static const QString defaultClientId;
-
     void connect();
     void disconnect();
 

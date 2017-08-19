@@ -25,8 +25,6 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-const QString IrcManager::defaultClientId("7ue61iz46fz11y3cugd0l3tawb4taal");
-
 IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
                        EmoteManager &_emoteManager, WindowManager &_windowManager)
     : channelManager(_channelManager)

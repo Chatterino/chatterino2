@@ -1,5 +1,6 @@
 #include "widgets/accountpopup.hpp"
 #include "channel.hpp"
+#include "credentials.hpp"
 #include "ui_accountpopupform.h"
 
 #include <QDebug>
@@ -42,7 +43,7 @@ void AccountPopupWidget::getUserId()
 
     QNetworkRequest req(nameUrl);
     req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"), QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
+    req.setRawHeader(QByteArray("Client-ID"), getDefaultClientID());
 
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
@@ -66,7 +67,7 @@ void AccountPopupWidget::getUserData()
 
     QNetworkRequest req(idUrl);
     req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"), QByteArray("7ue61iz46fz11y3cugd0l3tawb4taal"));
+    req.setRawHeader(QByteArray("Client-ID"), getDefaultClientID());
 
     static auto manager = new QNetworkAccessManager();
     auto *reply = manager->get(req);
