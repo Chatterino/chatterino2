@@ -95,7 +95,8 @@ SOURCES += \
     src/widgets/basewidget.cpp \
     src/widgets/resizingtextedit.cpp \
     src/completionmanager.cpp \
-    src/widgets/logindialog.cpp
+    src/widgets/logindialog.cpp \
+    src/widgets/qualitypopup.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -155,7 +156,8 @@ HEADERS  += \
     src/widgets/accountpopup.hpp \
     src/util/distancebetweenpoints.hpp \
     src/widgets/basewidget.hpp \
-    src/completionmanager.hpp
+    src/completionmanager.hpp \
+    src/widgets/qualitypopup.h
 
 PRECOMPILED_HEADER =
 
