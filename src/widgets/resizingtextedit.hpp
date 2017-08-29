@@ -34,7 +34,7 @@ protected:
 private:
     QCompleter *completer = nullptr;
 
-    FontManager::Type _font = FontManager::Small;
+    FontManager::Type _font = FontManager::Medium;
 
     // hadSpace is set to true in case the "textUnderCursor" word was after a space
     QString textUnderCursor(bool *hadSpace = nullptr) const;
