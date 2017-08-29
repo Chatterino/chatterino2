@@ -7,7 +7,6 @@
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 
-#include <QFont>
 #include <QCompleter>
 #include <QPainter>
 #include <boost/signals2.hpp>
@@ -166,11 +165,6 @@ ChatWidgetInput::~ChatWidgetInput()
         */
 }
 
-QFont &ChatWidgetInput::getFont() const
-{
-    return FontManager::getInstance().getFont(_font);
-}
-
 void ChatWidgetInput::refreshTheme()
 {
     QPalette palette;
@@ -180,7 +174,6 @@ void ChatWidgetInput::refreshTheme()
     this->textLengthLabel.setPalette(palette);
 
     this->textInput.setStyleSheet(this->colorScheme.InputStyleSheet);
-    this->textInput.setFont(this->getFont());
 }
 
 void ChatWidgetInput::editTextChanged()
@@ -204,6 +197,8 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
     painter.fillRect(this->rect(), this->colorScheme.ChatInputBackground);
     painter.setPen(this->colorScheme.ChatInputBorder);
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+
+    this->textInput.setFont(textInput.getFont());
 }
 
 void ChatWidgetInput::resizeEvent(QResizeEvent *)

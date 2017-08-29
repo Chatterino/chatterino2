@@ -1,11 +1,9 @@
 #pragma once
 
-#include "fontmanager.hpp"
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/chatwidgetheaderbutton.hpp"
 
-#include <QFont>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -42,8 +40,6 @@ private:
     ResizingTextEdit textInput;
     QLabel textLengthLabel;
     ChatWidgetHeaderButton emotesLabel;
-    FontManager::Type _font = FontManager::Small;
-    QFont &getFont() const;
     QStringList prevMsg;
     unsigned int prevIndex = 0;
     virtual void refreshTheme() override;
