@@ -1,5 +1,8 @@
 #include "widgets/resizingtextedit.hpp"
 
+namespace chatterino {
+namespace widgets {
+
 ResizingTextEdit::ResizingTextEdit()
 {
     auto sizePolicy = this->sizePolicy();
@@ -28,6 +31,11 @@ int ResizingTextEdit::heightForWidth(int) const
     auto margins = this->contentsMargins();
 
     return margins.top() + document()->size().height() + margins.bottom() + 5;
+}
+
+QFont &ResizingTextEdit::getFont() const
+{
+    return FontManager::getInstance().getFont(_font);
 }
 
 QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
@@ -161,3 +169,6 @@ QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer;
 }
+
+}  // namespace widgets
+}  // namespace chatterino
