@@ -53,6 +53,11 @@ public:
 
     std::string roomID;
     const QString name;
+    bool isLive;
+    QString streamViewerCount;
+    QString streamStatus;
+    QString streamGame;
+    QString streamUptime;
 
 private:
     // variables
@@ -67,10 +72,6 @@ private:
     QString _channelLink;
     QString _popoutPlayerLink;
 
-    bool _isLive;
-    int _streamViewerCount;
-    QString _streamStatus;
-    QString _streamGame;
     // std::shared_ptr<logging::Channel> _loggingChannel;
 };
 

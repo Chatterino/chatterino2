@@ -244,6 +244,9 @@ void ChatWidget::doCloseSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
     page->removeFromLayout(this);
+    QTimer* timer = this->header.findChild<QTimer*>();
+    timer->stop();
+    timer->deleteLater();
 }
 
 void ChatWidget::doChangeChannel()
