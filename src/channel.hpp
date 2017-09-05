@@ -39,10 +39,6 @@ public:
     const QString &getSubLink() const;
     const QString &getChannelLink() const;
     const QString &getPopoutPlayerLink() const;
-    bool getIsLive() const;
-    int getStreamViewerCount() const;
-    const QString &getStreamStatus() const;
-    const QString &getStreamGame() const;
     messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
     // methods
@@ -58,6 +54,9 @@ public:
     QString streamStatus;
     QString streamGame;
     QString streamUptime;
+
+    void setRoomID(std::string id);
+    boost::signals2::signal<void()> roomIDchanged;
 
 private:
     // variables

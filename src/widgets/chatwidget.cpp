@@ -91,6 +91,9 @@ std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
     this->channel = _newChannel;
+    this->channel->roomIDchanged.connect([this](){
+        this->header.checkLive();
+    });
 
     // on new message
     this->messageAppendedConnection =

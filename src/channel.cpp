@@ -63,6 +63,12 @@ const QString &Channel::getPopoutPlayerLink() const
     return _popoutPlayerLink;
 }
 
+void Channel::setRoomID(std::string id)
+{
+    this->roomID = id;
+    this->roomIDchanged();
+}
+
 messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnapshot()
 {
     return _messages.getSnapshot();
