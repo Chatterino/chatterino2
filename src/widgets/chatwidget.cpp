@@ -91,6 +91,9 @@ std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
     this->channel = _newChannel;
+    this->channel->roomIDchanged.connect([this](){
+        this->header.checkLive();
+    });
 
     // on new message
     this->messageAppendedConnection =
@@ -244,6 +247,9 @@ void ChatWidget::doCloseSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
     page->removeFromLayout(this);
+    QTimer* timer = this->header.findChild<QTimer*>();
+    timer->stop();
+    timer->deleteLater();
 }
 
 void ChatWidget::doChangeChannel()
