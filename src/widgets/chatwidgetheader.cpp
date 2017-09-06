@@ -45,6 +45,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
                              QKeySequence(tr("Ctrl+W")));
     this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     this->leftMenu.addAction("Popup", this->chatWidget, &ChatWidget::doPopup);
+    this->leftMenu.addAction("Open viewer list", this->chatWidget, &ChatWidget::doOpenViewerList);
     this->leftMenu.addSeparator();
     this->leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
                              QKeySequence(tr("Ctrl+R")));

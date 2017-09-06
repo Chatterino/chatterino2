@@ -3,12 +3,15 @@
 #include "colorscheme.hpp"
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
+#include "util/urlfetch.hpp"
 #include "widgets/textinputdialog.hpp"
 
 #include <QDebug>
+#include <QDockWidget>
 #include <QFileInfo>
 #include <QFont>
 #include <QFontDatabase>
+#include <QListWidget>
 #include <QPainter>
 #include <QProcess>
 #include <QShortcut>
@@ -300,6 +303,93 @@ void ChatWidget::doOpenStreamlink()
             path, QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
                                "best"}));
     }
+}
+
+void ChatWidget::doOpenViewerList()
+{
+    auto viewerDock = new QDockWidget("Viewer List",this);
+    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                            QDockWidget::DockWidgetClosable |
+                            QDockWidget::DockWidgetFloatable);
+    viewerDock->setMaximumHeight(this->height());
+    viewerDock->resize(0.5*this->width(),this->height());
+
+    auto multiWidget = new QWidget(viewerDock);
+    auto dockVbox = new QVBoxLayout(viewerDock);
+    auto searchBar = new QLineEdit(viewerDock);
+
+    auto chattersList = new QListWidget();
+    auto resultList = new QListWidget();
+
+    auto modLabel = new QListWidgetItem("Moderators");
+    modLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    auto staffLabel = new QListWidgetItem("Staff");
+    staffLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    auto adminLabel = new QListWidgetItem("Admins");
+    adminLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    auto gmodLabel = new QListWidgetItem("Global Moderators");
+    gmodLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    auto viewerLabel = new QListWidgetItem("Viewers");
+    viewerLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    auto loadingLabel = new QLabel("Loading...");
+
+    util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters",[=](QJsonObject obj){
+        QJsonObject chattersObj = obj.value("chatters").toObject();
+
+        loadingLabel->hide();
+        chattersList->addItem(modLabel);
+        foreach (const QJsonValue & v, chattersObj.value("moderators").toArray())
+            chattersList->addItem(v.toString());
+        chattersList->addItem(staffLabel);
+        foreach (const QJsonValue & v, chattersObj.value("staff").toArray())
+            chattersList->addItem(v.toString());
+        chattersList->addItem(adminLabel);
+        foreach (const QJsonValue & v, chattersObj.value("admins").toArray())
+            chattersList->addItem(v.toString());
+        chattersList->addItem(gmodLabel);
+        foreach (const QJsonValue & v, chattersObj.value("global_mods").toArray())
+            chattersList->addItem(v.toString());
+        chattersList->addItem(viewerLabel);
+        foreach (const QJsonValue & v, chattersObj.value("viewers").toArray())
+            chattersList->addItem(v.toString());
+    });
+
+    searchBar->setPlaceholderText("Search User...");
+    QObject::connect(searchBar,&QLineEdit::textEdited,this,[=](){
+        auto query = searchBar->text();
+        if(!query.isEmpty())
+        {
+            auto results = chattersList->findItems(query,Qt::MatchStartsWith);
+            chattersList->hide();
+            resultList->clear();
+            for (auto & item : results)
+            {
+                resultList->addItem(item->text());
+            }
+            resultList->show();
+        }
+        else
+        {
+            resultList->hide();
+            chattersList->show();
+        }
+    });
+
+    QObject::connect(viewerDock,&QDockWidget::topLevelChanged,this,[=](){
+        viewerDock->setMinimumWidth(300);
+    });
+
+    dockVbox->addWidget(searchBar);
+    dockVbox->addWidget(loadingLabel);
+    dockVbox->addWidget(chattersList);
+    dockVbox->addWidget(resultList);
+    resultList->hide();
+
+    multiWidget->setStyleSheet(this->colorScheme.InputStyleSheet);
+    multiWidget->setLayout(dockVbox);
+    viewerDock->setWidget(multiWidget);
+    viewerDock->show();
 }
 
 }  // namespace widgets
