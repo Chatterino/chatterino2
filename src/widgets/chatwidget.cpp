@@ -322,37 +322,27 @@ void ChatWidget::doOpenViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
-    auto modLabel = new QListWidgetItem("Moderators");
-    modLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
-    auto staffLabel = new QListWidgetItem("Staff");
-    staffLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
-    auto adminLabel = new QListWidgetItem("Admins");
-    adminLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
-    auto gmodLabel = new QListWidgetItem("Global Moderators");
-    gmodLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
-    auto viewerLabel = new QListWidgetItem("Viewers");
-    viewerLabel->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+    static QStringList labels = {"Moderators", "Staff", "Admins", "Global Moderators", "Viewers"};
+    static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
+    QList<QListWidgetItem*> labelList;
+    for(auto &x : labels)
+    {
+        auto label = new QListWidgetItem(x);
+        label->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+        labelList.append(label);
+    }
     auto loadingLabel = new QLabel("Loading...");
 
     util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters",[=](QJsonObject obj){
         QJsonObject chattersObj = obj.value("chatters").toObject();
 
         loadingLabel->hide();
-        chattersList->addItem(modLabel);
-        foreach (const QJsonValue & v, chattersObj.value("moderators").toArray())
-            chattersList->addItem(v.toString());
-        chattersList->addItem(staffLabel);
-        foreach (const QJsonValue & v, chattersObj.value("staff").toArray())
-            chattersList->addItem(v.toString());
-        chattersList->addItem(adminLabel);
-        foreach (const QJsonValue & v, chattersObj.value("admins").toArray())
-            chattersList->addItem(v.toString());
-        chattersList->addItem(gmodLabel);
-        foreach (const QJsonValue & v, chattersObj.value("global_mods").toArray())
-            chattersList->addItem(v.toString());
-        chattersList->addItem(viewerLabel);
-        foreach (const QJsonValue & v, chattersObj.value("viewers").toArray())
-            chattersList->addItem(v.toString());
+        for(int i = 0; i < jsonLabels.size(); i++)
+        {
+            chattersList->addItem(labelList.at(i));
+            foreach (const QJsonValue & v, chattersObj.value(jsonLabels.at(i)).toArray())
+                chattersList->addItem(v.toString());
+        }
     });
 
     searchBar->setPlaceholderText("Search User...");
@@ -365,7 +355,8 @@ void ChatWidget::doOpenViewerList()
             resultList->clear();
             for (auto & item : results)
             {
-                resultList->addItem(item->text());
+                if(!labels.contains(item->text()))
+                    resultList->addItem(item->text());
             }
             resultList->show();
         }
