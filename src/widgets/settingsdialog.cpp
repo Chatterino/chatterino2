@@ -313,7 +313,14 @@ void SettingsDialog::addTabs()
         auto scroll = new QSlider(Qt::Horizontal);
         form->addRow("Mouse scroll speed:", scroll);
 
-        form->addRow("Streamlink Path", createLineEdit(settings.streamlinkPath));
+        form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
+        form->addRow(this->createCombobox(
+            "Preferred quality:", settings.preferredQuality,
+            {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
+            [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
+                setting = newValue.toStdString();
+            })
+        );
 
         //        v->addWidget(scroll);
         //        v->addStretch(1);
@@ -574,6 +581,27 @@ QHBoxLayout *SettingsDialog::createCombobox(
     auto label = new QLabel(title);
     auto widget = new QComboBox();
     widget->addItems(items);
+
+    QObject::connect(widget, &QComboBox::currentTextChanged, this,
+                     [&setting, cb](const QString &newValue) {
+                         cb(newValue, setting);  //
+                     });
+
+    box->addWidget(label);
+    box->addWidget(widget);
+
+    return box;
+}
+
+QHBoxLayout *SettingsDialog::createCombobox(
+    const QString &title, pajlada::Settings::Setting<std::string> &setting, QStringList items,
+    std::function<void(QString, pajlada::Settings::Setting<std::string> &)> cb)
+{
+    auto box = new QHBoxLayout();
+    auto label = new QLabel(title);
+    auto widget = new QComboBox();
+    widget->addItems(items);
+    widget->setCurrentText(QString::fromStdString(setting.getValue()));
 
     QObject::connect(widget, &QComboBox::currentTextChanged, this,
                      [&setting, cb](const QString &newValue) {

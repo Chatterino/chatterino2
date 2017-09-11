@@ -5,6 +5,7 @@
 #include "settingsmanager.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/textinputdialog.hpp"
+#include "widgets/qualitypopup.h"
 
 #include <QDebug>
 #include <QDockWidget>
@@ -293,15 +294,65 @@ void ChatWidget::doOpenPopupPlayer()
 void ChatWidget::doOpenStreamlink()
 {
     SettingsManager &settings = SettingsManager::getInstance();
+    QString preferredQuality = QString::fromStdString(settings.preferredQuality.getValue()).toLower();
+    // TODO(Confuseh): Default streamlink paths
     QString path = QString::fromStdString(settings.streamlinkPath.getValue());
+    QString channel = QString::fromStdString(this->channelName.getValue());
     QFileInfo fileinfo = QFileInfo(path);
-    // TODO(Confuseh): Add default checks for streamlink/livestreamer
-    // TODO(Confuseh): Add quality switcher
     if (fileinfo.exists() && fileinfo.isExecutable()) {
-        // works on leenux, idk whether it would work on whindows or mehOS
-        QProcess::startDetached(
-            path, QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
-                               "best"}));
+        if (preferredQuality != "choose") {
+            QStringList args = {"twitch.tv/" + channel};
+            QString quality = "";
+            QString exclude = "";
+            if (preferredQuality == "high") {
+                exclude = ">720p30";
+                quality = "high,best";
+            } else if (preferredQuality == "medium") {
+                exclude = ">540p30";
+                quality = "medium,best";
+            } else if (preferredQuality == "low") {
+                exclude = ">360p30";
+                quality = "low,best";
+            } else if (preferredQuality == "audio only") {
+                quality = "audio,audio_only";
+            } else {
+                quality = "best";
+            }
+            if (quality != "")
+                args << quality;
+            if (exclude != "")
+                args << "--stream-sorting-excludes" << exclude;
+            QProcess::startDetached(path, args);
+        } else {
+            QProcess *p = new QProcess();
+            // my god that signal though
+            QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
+                             [path, channel, p](int exitCode) {
+                if (exitCode > 0) {
+                    return;
+                }
+                QString lastLine = QString(p->readAllStandardOutput());
+                lastLine = lastLine.trimmed().split('\n').last();
+                if (lastLine.startsWith("Available streams: ")) {
+                    QStringList options;
+                    QStringList split = lastLine.right(lastLine.length() - 19).split(", ");
+
+                    for (int i = split.length() - 1; i >= 0; i--) {
+                        QString option = split.at(i);
+                        if (option.endsWith(" (worst)")) {
+                            options << option.left(option.length() - 8);
+                        } else if (option.endsWith(" (best)")) {
+                            options << option.left(option.length() - 7);
+                        } else {
+                            options << option;
+                        }
+                    }
+
+                    QualityPopup::showDialog(channel, path, options);
+                }
+            });
+            p->start(path, {"twitch.tv/" + channel});
+        }
     }
 }
 
