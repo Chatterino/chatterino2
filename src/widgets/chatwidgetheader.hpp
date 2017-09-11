@@ -27,9 +27,9 @@ class ChatWidgetHeader : public BaseWidget
 
 public:
     explicit ChatWidgetHeader(ChatWidget *_chatWidget);
-
     // Update channel text from chat widget
     void updateChannelText();
+    void checkLive();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -66,6 +66,7 @@ public slots:
     void menuReloadChannelEmotes();
     void menuManualReconnect();
     void menuShowChangelog();
+
 };
 
 }  // namespace widgets

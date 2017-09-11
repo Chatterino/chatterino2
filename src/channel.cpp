@@ -29,6 +29,7 @@ Channel::Channel(WindowManager &_windowManager, EmoteManager &_emoteManager,
     , _subLink("https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link")
     , _channelLink("https://twitch.tv/" + name)
     , _popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
+    , isLive(false)
 //    , _loggingChannel(logging::get(_name))
 {
     qDebug() << "Open channel:" << this->name;
@@ -62,24 +63,10 @@ const QString &Channel::getPopoutPlayerLink() const
     return _popoutPlayerLink;
 }
 
-bool Channel::getIsLive() const
+void Channel::setRoomID(std::string id)
 {
-    return _isLive;
-}
-
-int Channel::getStreamViewerCount() const
-{
-    return _streamViewerCount;
-}
-
-const QString &Channel::getStreamStatus() const
-{
-    return _streamStatus;
-}
-
-const QString &Channel::getStreamGame() const
-{
-    return _streamGame;
+    this->roomID = id;
+    this->roomIDchanged();
 }
 
 messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnapshot()

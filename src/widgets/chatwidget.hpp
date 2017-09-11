@@ -115,6 +115,9 @@ public slots:
 
     // Open twitch channel stream through streamlink
     void doOpenStreamlink();
+
+    // Open viewer list of the channel
+    void doOpenViewerList();
 };
 
 }  // namespace widgets

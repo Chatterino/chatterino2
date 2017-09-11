@@ -2,6 +2,7 @@
 #include "colorscheme.hpp"
 #include "widgets/chatwidget.hpp"
 #include "widgets/notebookpage.hpp"
+#include "util/urlfetch.hpp"
 
 #include <QByteArray>
 #include <QDrag>
@@ -44,6 +45,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
                              QKeySequence(tr("Ctrl+W")));
     this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     this->leftMenu.addAction("Popup", this->chatWidget, &ChatWidget::doPopup);
+    this->leftMenu.addAction("Open viewer list", this->chatWidget, &ChatWidget::doOpenViewerList);
     this->leftMenu.addSeparator();
     this->leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
                              QKeySequence(tr("Ctrl+R")));
@@ -67,16 +69,36 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->rightLabel.setMinimumWidth(this->height());
     this->rightLabel.getLabel().setTextFormat(Qt::RichText);
     this->rightLabel.getLabel().setText("ayy");
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, checkLive);
+    timer->start(60000);
 }
 
 void ChatWidgetHeader::updateChannelText()
 {
     const std::string channelName = this->chatWidget->channelName;
-
     if (channelName.empty()) {
         this->channelNameLabel.setText("<no channel>");
     } else {
-        this->channelNameLabel.setText(QString::fromStdString(channelName));
+        if(this->chatWidget->getChannelRef()->isLive)
+        {
+            auto channel = this->chatWidget->getChannelRef();
+            this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
+            this->setToolTip("<style>.center    { text-align: center; }</style>" \
+                             "<p class = \"center\">" + \
+                             channel->streamStatus + "<br><br>" + \
+                             channel->streamGame + "<br>" \
+                             "Live for " + channel->streamUptime + \
+                             " with " + channel->streamViewerCount + " viewers" \
+                             "</p>"
+                             );
+        }
+        else
+        {
+            this->channelNameLabel.setText(QString::fromStdString(channelName));
+            this->setToolTip("");
+        }
     }
 }
 
@@ -171,6 +193,31 @@ void ChatWidgetHeader::menuManualReconnect()
 
 void ChatWidgetHeader::menuShowChangelog()
 {
+}
+
+void ChatWidgetHeader::checkLive()
+{
+    auto channel = this->chatWidget->getChannelRef();
+    auto id = QString::fromStdString(channel->roomID);
+    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id,[=](QJsonObject obj){
+       if(obj.value("stream").isNull())
+       {
+           channel->isLive = false;
+           this->updateChannelText();
+       }
+       else
+       {
+           channel->isLive = true;
+           auto stream = obj.value("stream").toObject();
+           channel->streamViewerCount = QString::number(stream.value("viewers").toDouble());
+           channel->streamGame = stream.value("game").toString();
+           channel->streamStatus = stream.value("channel").toObject().value("status").toString();
+           QDateTime since = QDateTime::fromString(stream.value("created_at").toString(),Qt::ISODate);
+           auto diff = since.secsTo(QDateTime::currentDateTime());
+           channel->streamUptime = QString::number(diff/3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+           this->updateChannelText();
+       }
+    });
 }
 
 }  // namespace widgets

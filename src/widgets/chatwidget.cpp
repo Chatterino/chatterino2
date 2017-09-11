@@ -3,12 +3,15 @@
 #include "colorscheme.hpp"
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
+#include "util/urlfetch.hpp"
 #include "widgets/textinputdialog.hpp"
 
 #include <QDebug>
+#include <QDockWidget>
 #include <QFileInfo>
 #include <QFont>
 #include <QFontDatabase>
+#include <QListWidget>
 #include <QPainter>
 #include <QProcess>
 #include <QShortcut>
@@ -91,6 +94,9 @@ std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
     this->channel = _newChannel;
+    this->channel->roomIDchanged.connect([this](){
+        this->header.checkLive();
+    });
 
     // on new message
     this->messageAppendedConnection =
@@ -244,6 +250,9 @@ void ChatWidget::doCloseSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
     page->removeFromLayout(this);
+    QTimer* timer = this->header.findChild<QTimer*>();
+    timer->stop();
+    timer->deleteLater();
 }
 
 void ChatWidget::doChangeChannel()
@@ -294,6 +303,84 @@ void ChatWidget::doOpenStreamlink()
             path, QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
                                "best"}));
     }
+}
+
+void ChatWidget::doOpenViewerList()
+{
+    auto viewerDock = new QDockWidget("Viewer List",this);
+    viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
+                            QDockWidget::DockWidgetClosable |
+                            QDockWidget::DockWidgetFloatable);
+    viewerDock->setMaximumHeight(this->height());
+    viewerDock->resize(0.5*this->width(),this->height());
+
+    auto multiWidget = new QWidget(viewerDock);
+    auto dockVbox = new QVBoxLayout(viewerDock);
+    auto searchBar = new QLineEdit(viewerDock);
+
+    auto chattersList = new QListWidget();
+    auto resultList = new QListWidget();
+
+    static QStringList labels = {"Moderators", "Staff", "Admins", "Global Moderators", "Viewers"};
+    static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
+    QList<QListWidgetItem*> labelList;
+    for(auto &x : labels)
+    {
+        auto label = new QListWidgetItem(x);
+        label->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+        labelList.append(label);
+    }
+    auto loadingLabel = new QLabel("Loading...");
+
+    util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters",[=](QJsonObject obj){
+        QJsonObject chattersObj = obj.value("chatters").toObject();
+
+        loadingLabel->hide();
+        for(int i = 0; i < jsonLabels.size(); i++)
+        {
+            chattersList->addItem(labelList.at(i));
+            foreach (const QJsonValue & v, chattersObj.value(jsonLabels.at(i)).toArray())
+                chattersList->addItem(v.toString());
+        }
+    });
+
+    searchBar->setPlaceholderText("Search User...");
+    QObject::connect(searchBar,&QLineEdit::textEdited,this,[=](){
+        auto query = searchBar->text();
+        if(!query.isEmpty())
+        {
+            auto results = chattersList->findItems(query,Qt::MatchStartsWith);
+            chattersList->hide();
+            resultList->clear();
+            for (auto & item : results)
+            {
+                if(!labels.contains(item->text()))
+                    resultList->addItem(item->text());
+            }
+            resultList->show();
+        }
+        else
+        {
+            resultList->hide();
+            chattersList->show();
+        }
+    });
+
+    QObject::connect(viewerDock,&QDockWidget::topLevelChanged,this,[=](){
+        viewerDock->setMinimumWidth(300);
+    });
+
+    dockVbox->addWidget(searchBar);
+    dockVbox->addWidget(loadingLabel);
+    dockVbox->addWidget(chattersList);
+    dockVbox->addWidget(resultList);
+    resultList->hide();
+
+    multiWidget->setStyleSheet(this->colorScheme.InputStyleSheet);
+    multiWidget->setLayout(dockVbox);
+    viewerDock->setWidget(multiWidget);
+    viewerDock->show();
 }
 
 }  // namespace widgets
