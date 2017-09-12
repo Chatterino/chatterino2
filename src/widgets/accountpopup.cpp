@@ -1,5 +1,4 @@
 #include "widgets/accountpopup.hpp"
-#include "channel.hpp"
 #include "credentials.hpp"
 #include "ui_accountpopupform.h"
 
@@ -14,10 +13,9 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &channel)
+AccountPopupWidget::AccountPopupWidget()
     : QWidget(nullptr)
     , _ui(new Ui::AccountPopup)
-    , _channel(channel)
 {
     _ui->setupUi(this);
 

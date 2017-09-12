@@ -19,7 +19,7 @@ class AccountPopupWidget : public QWidget
 {
     Q_OBJECT
 public:
-    AccountPopupWidget(std::shared_ptr<Channel> &channel);
+    AccountPopupWidget();
 
     void setName(const QString &name);
 
@@ -29,8 +29,6 @@ private:
     void getUserId();
     void getUserData();
     void loadAvatar(const QUrl &avatarUrl);
-
-    std::shared_ptr<Channel> &_channel;
 
     QString userID;
     QPixmap avatar;

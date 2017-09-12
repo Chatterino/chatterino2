@@ -68,6 +68,7 @@ public:
 private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
+    void doOpenUserPopupWidget(QString user);
 
     void channelNameUpdated(const std::string &newChannelName);
 
@@ -84,6 +85,8 @@ private:
 
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageRemovedConnection;
+
+    AccountPopupWidget userPopupWidget;
 
 public:
     void load(const boost::property_tree::ptree &tree);
