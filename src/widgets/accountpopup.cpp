@@ -14,7 +14,7 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &channel)
+AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     : QWidget(nullptr)
     , _ui(new Ui::AccountPopup)
     , _channel(channel)
@@ -29,6 +29,11 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> &channel)
     connect(_ui->btnClose, &QPushButton::clicked, [=]() {
         hide();  //
     });
+}
+
+void AccountPopupWidget::setChannel(std::shared_ptr<Channel> channel)
+{
+    this->_channel = channel;
 }
 
 void AccountPopupWidget::setName(const QString &name)
