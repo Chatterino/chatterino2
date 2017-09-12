@@ -282,6 +282,9 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
     if (iterator != tags.end()) {
         std::string roomID = iterator.value().toString().toStdString();
 
+        auto channel = QString(message->toData()).split("#").at(1);
+        channelManager.getChannel(channel)->setRoomID(roomID);
+
         this->resources.loadChannelData(roomID);
     }
 }

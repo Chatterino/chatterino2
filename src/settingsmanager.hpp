@@ -44,6 +44,7 @@ public:
     pajlada::Settings::Setting<bool> showBadges;
 
     pajlada::Settings::Setting<std::string> streamlinkPath;
+    pajlada::Settings::Setting<std::string> preferredQuality;
 
     // Settings
     Setting<float> emoteScale;

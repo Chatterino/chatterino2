@@ -39,10 +39,6 @@ public:
     const QString &getSubLink() const;
     const QString &getChannelLink() const;
     const QString &getPopoutPlayerLink() const;
-    bool getIsLive() const;
-    int getStreamViewerCount() const;
-    const QString &getStreamStatus() const;
-    const QString &getStreamGame() const;
     messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
     // methods
@@ -53,6 +49,14 @@ public:
 
     std::string roomID;
     const QString name;
+    bool isLive;
+    QString streamViewerCount;
+    QString streamStatus;
+    QString streamGame;
+    QString streamUptime;
+
+    void setRoomID(std::string id);
+    boost::signals2::signal<void()> roomIDchanged;
 
 private:
     // variables
@@ -67,10 +71,6 @@ private:
     QString _channelLink;
     QString _popoutPlayerLink;
 
-    bool _isLive;
-    int _streamViewerCount;
-    QString _streamStatus;
-    QString _streamGame;
     // std::shared_ptr<logging::Channel> _loggingChannel;
 };
 
