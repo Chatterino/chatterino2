@@ -118,6 +118,9 @@ public slots:
 
     // Copy text from chat
     void doCopy();
+
+    // Open viewer list of the channel
+    void doOpenViewerList();
 };
 
 }  // namespace widgets

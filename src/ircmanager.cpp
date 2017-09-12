@@ -25,16 +25,19 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-const QString IrcManager::defaultClientId("7ue61iz46fz11y3cugd0l3tawb4taal");
-
 IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
                        EmoteManager &_emoteManager, WindowManager &_windowManager)
     : channelManager(_channelManager)
     , resources(_resources)
     , emoteManager(_emoteManager)
     , windowManager(_windowManager)
-    , _account(AccountManager::getInstance().getTwitchUser())
+    , _account(AccountManager::getInstance().getTwitchAnon())
+    , currentUser("/accounts/current")
 {
+    this->currentUser.getValueChangedSignal().connect([](const auto &newUsername) {
+        // TODO: Implement
+        qDebug() << "Current user changed, fetch new credentials and reconnect";
+    });
 }
 
 const twitch::TwitchUser &IrcManager::getUser() const
@@ -278,6 +281,9 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
 
     if (iterator != tags.end()) {
         std::string roomID = iterator.value().toString().toStdString();
+
+        auto channel = QString(message->toData()).split("#").at(1);
+        channelManager.getChannel(channel)->setRoomID(roomID);
 
         this->resources.loadChannelData(roomID);
     }

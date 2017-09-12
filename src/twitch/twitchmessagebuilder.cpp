@@ -365,8 +365,11 @@ void TwitchMessageBuilder::parseHighlights()
 {
     static auto player = new QMediaPlayer;
     SettingsManager &settings = SettingsManager::getInstance();
+    static pajlada::Settings::Setting<std::string> currentUser("/accounts/currentUser");
 
-    if (this->ircMessage->nick() == settings.selectedUser.get()) {
+    QString currentUsername = QString::fromStdString(currentUser.getValue());
+
+    if (this->ircMessage->nick() == currentUsername) {
         // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
@@ -393,9 +396,8 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     std::vector<Highlight> activeHighlights;
 
-    if (settings.enableHighlightsSelf.get() && settings.selectedUser.get().size() > 0) {
-        activeHighlights.emplace_back(settings.selectedUser.get(),
-                                      settings.enableHighlightSound.get(),
+    if (settings.enableHighlightsSelf.get() && currentUsername.size() > 0) {
+        activeHighlights.emplace_back(currentUsername, settings.enableHighlightSound.get(),
                                       settings.enableHighlightTaskbar.get());
     }
     const auto &highlightProperties = settings.highlightProperties.get();

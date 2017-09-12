@@ -29,6 +29,8 @@ public:
     // Remove twitch user with the given username
     bool removeTwitchUser(const QString &userName);
 
+    void setCurrentTwitchUser(const QString &username);
+
     // Add twitch user to the list of available twitch users
     void addTwitchUser(const twitch::TwitchUser &user);
 
