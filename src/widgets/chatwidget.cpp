@@ -48,6 +48,7 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     , completionManager(parent->completionManager)
     , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
     , channel(_channelManager.emptyChannel)
+    , userPopupWidget(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)
     , view(this)
@@ -99,6 +100,8 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
     this->channel->roomIDchanged.connect([this](){
         this->header.checkLive();
     });
+
+    this->userPopupWidget.setChannel(_newChannel);
 
     // on new message
     this->messageAppendedConnection =
