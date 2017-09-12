@@ -87,6 +87,7 @@ private:
     pajlada::Settings::Setting<double> themeHue;
 
     void setColors(double hue, double multiplier);
+    QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
 
     double middleLookupTable[360] = {};
     double minLookupTable[360] = {};

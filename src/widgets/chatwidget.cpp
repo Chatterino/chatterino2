@@ -5,6 +5,8 @@
 #include "settingsmanager.hpp"
 #include "widgets/textinputdialog.hpp"
 
+#include <QApplication>
+#include <QClipboard>
 #include <QDebug>
 #include <QFileInfo>
 #include <QFont>
@@ -65,6 +67,9 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     // CTRL+R: Change Channel
     ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
 
+    // CTRL+C: Copy
+    ezShortcut(this, "CTRL+B", &ChatWidget::doCopy);
+
     this->channelName.getValueChangedSignal().connect(
         std::bind(&ChatWidget::channelNameUpdated, this, std::placeholders::_1));
 
@@ -108,8 +113,11 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 
     // on message removed
     this->messageRemovedConnection =
-        this->channel->messageRemovedFromStart.connect([](SharedMessage &) {
-            //
+        this->channel->messageRemovedFromStart.connect([this](SharedMessage &) {
+            this->view.selection.min.messageIndex--;
+            this->view.selection.max.messageIndex--;
+            this->view.selection.start.messageIndex--;
+            this->view.selection.end.messageIndex--;
         });
 
     auto snapshot = this->channel->getMessageSnapshot();
@@ -294,6 +302,11 @@ void ChatWidget::doOpenStreamlink()
             path, QStringList({"twitch.tv/" + QString::fromStdString(this->channelName.getValue()),
                                "best"}));
     }
+}
+
+void ChatWidget::doCopy()
+{
+    QApplication::clipboard()->setText(this->view.getSelectedText());
 }
 
 }  // namespace widgets

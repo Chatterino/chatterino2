@@ -100,6 +100,7 @@ void ColorScheme::setColors(double hue, double multiplier)
 
     // Chat
     ChatBackground = getColor(0, 0.1, 1);
+    ChatBackgroundHighlighted = blendColors(TabSelectedBackground, ChatBackground, 0.8);
     ChatHeaderBackground = getColor(0, 0.1, 0.9);
     ChatHeaderBorder = getColor(0, 0.1, 0.85);
     ChatInputBackground = getColor(0, 0.1, 0.95);
@@ -118,6 +119,15 @@ void ColorScheme::setColors(double hue, double multiplier)
                       ";" + "selection-background-color:" + TabSelectedBackground.name();
 
     this->updated();
+}
+
+QColor ColorScheme::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
+{
+    int r = color1.red() * (1 - ratio) + color2.red() * ratio;
+    int g = color1.green() * (1 - ratio) + color2.green() * ratio;
+    int b = color1.blue() * (1 - ratio) + color2.blue() * ratio;
+
+    return QColor(r, g, b, 255);
 }
 
 void ColorScheme::normalizeColor(QColor &color)

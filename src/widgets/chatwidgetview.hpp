@@ -20,16 +20,58 @@ struct SelectionItem {
     int messageIndex;
     int charIndex;
 
+    SelectionItem()
+    {
+        messageIndex = charIndex = 0;
+    }
+
     SelectionItem(int _messageIndex, int _charIndex)
     {
         this->messageIndex = _messageIndex;
         this->charIndex = _charIndex;
     }
 
-    bool isSmallerThan(SelectionItem &other)
+    bool isSmallerThan(const SelectionItem &other) const
     {
-        return messageIndex < other.messageIndex ||
-               (messageIndex == other.messageIndex && charIndex < other.charIndex);
+        return this->messageIndex < other.messageIndex ||
+               (this->messageIndex == other.messageIndex && this->charIndex < other.charIndex);
+    }
+
+    bool equals(const SelectionItem &other) const
+    {
+        return this->messageIndex == other.messageIndex && this->charIndex == other.charIndex;
+    }
+};
+
+struct Selection {
+    SelectionItem start;
+    SelectionItem end;
+    SelectionItem min;
+    SelectionItem max;
+
+    Selection()
+    {
+    }
+
+    Selection(const SelectionItem &start, const SelectionItem &end)
+        : start(start)
+        , end(end)
+        , min(start)
+        , max(end)
+    {
+        if (max.isSmallerThan(min)) {
+            std::swap(this->min, this->max);
+        }
+    }
+
+    bool isEmpty() const
+    {
+        return this->start.equals(this->end);
+    }
+
+    bool isSingleMessage() const
+    {
+        return this->min.messageIndex == this->max.messageIndex;
     }
 };
 
@@ -37,6 +79,8 @@ class ChatWidget;
 
 class ChatWidgetView : public BaseWidget
 {
+    friend class ChatWidget;
+
 public:
     explicit ChatWidgetView(ChatWidget *_chatWidget);
     ~ChatWidgetView();
@@ -45,6 +89,7 @@ public:
 
     void updateGifEmotes();
     ScrollBar &getScrollBar();
+    QString getSelectedText() const;
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -67,7 +112,9 @@ private:
 
     void drawMessages(QPainter &painter);
     void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
-    void setSelection(SelectionItem start, SelectionItem end);
+    void drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef, int messageIndex,
+                              int bufferHeight);
+    void setSelection(const SelectionItem &start, const SelectionItem &end);
 
     std::vector<GifEmoteData> gifEmotes;
 
@@ -86,10 +133,7 @@ private:
     bool isMouseDown = false;
     QPointF lastPressPosition;
 
-    SelectionItem selectionStart;
-    SelectionItem selectionEnd;
-    SelectionItem selectionMin;
-    SelectionItem selectionMax;
+    Selection selection;
     bool selecting = false;
 
 private slots:

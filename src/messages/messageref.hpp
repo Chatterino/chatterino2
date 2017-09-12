@@ -28,7 +28,7 @@ public:
     std::shared_ptr<QPixmap> buffer = nullptr;
     bool updateBuffer = false;
 
-    bool tryGetWordPart(QPoint point, messages::Word &word);
+    const messages::Word *tryGetWordPart(QPoint point);
 
     int getSelectionIndex(QPoint position);
 

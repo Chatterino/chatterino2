@@ -25,66 +25,18 @@ public:
                              const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                              bool isHat = false);
 
-    const QPixmap *getPixmap()
-    {
-        if (!_isLoading) {
-            _isLoading = true;
-
-            loadImage();
-        }
-        return _currentPixmap;
-    }
-
-    qreal getScale() const
-    {
-        return _scale;
-    }
-
-    const QString &getUrl() const
-    {
-        return _url;
-    }
-
-    const QString &getName() const
-    {
-        return _name;
-    }
-
-    const QString &getTooltip() const
-    {
-        return _tooltip;
-    }
-
-    const QMargins &getMargin() const
-    {
-        return _margin;
-    }
-
-    bool getAnimated() const
-    {
-        return _animated;
-    }
-
-    bool isHat() const
-    {
-        return _ishat;
-    }
-
-    int getWidth() const
-    {
-        if (_currentPixmap == nullptr) {
-            return 16;
-        }
-        return _currentPixmap->width();
-    }
-
-    int getHeight() const
-    {
-        if (_currentPixmap == nullptr) {
-            return 16;
-        }
-        return _currentPixmap->height();
-    }
+    const QPixmap *getPixmap();
+    qreal getScale() const;
+    const QString &getUrl() const;
+    const QString &getName() const;
+    const QString &getTooltip() const;
+    const QMargins &getMargin() const;
+    bool getAnimated() const;
+    bool isHat() const;
+    int getWidth() const;
+    int getScaledWidth() const;
+    int getHeight() const;
+    int getScaledHeight() const;
 
 private:
     EmoteManager &emoteManager;
@@ -95,20 +47,20 @@ private:
         int duration;
     };
 
-    QPixmap *_currentPixmap;
-    std::vector<FrameData> _allFrames;
-    int _currentFrame = 0;
-    int _currentFrameOffset = 0;
+    QPixmap *currentPixmap;
+    std::vector<FrameData> allFrames;
+    int currentFrame = 0;
+    int currentFrameOffset = 0;
 
-    QString _url;
-    QString _name;
-    QString _tooltip;
-    bool _animated = false;
-    QMargins _margin;
-    bool _ishat;
-    qreal _scale;
+    QString url;
+    QString name;
+    QString tooltip;
+    bool animated = false;
+    QMargins margin;
+    bool ishat;
+    qreal scale;
 
-    bool _isLoading;
+    bool isLoading;
 
     void loadImage();
 

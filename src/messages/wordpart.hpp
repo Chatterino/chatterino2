@@ -30,7 +30,8 @@ public:
     const QString getCopyText() const;
     int hasTrailingSpace() const;
     const QString &getText() const;
-    int getLineNumber();
+    int getLineNumber() const;
+    int getCharacterLength() const;
 
 private:
     Word &_word;

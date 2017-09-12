@@ -110,29 +110,30 @@ public:
     int getXOffset() const;
     int getYOffset() const;
     void setOffset(int _xOffset, int _yOffset);
+    int getCharacterLength() const;
 
     std::vector<short> &getCharacterWidthCache() const;
 
 private:
-    LazyLoadedImage *_image;
-    QString _text;
-    QColor _color;
+    LazyLoadedImage *image;
+    QString text;
+    QColor color;
     bool _isImage;
 
-    Type _type;
-    QString _copyText;
-    QString _tooltip;
+    Type type;
+    QString copyText;
+    QString tooltip;
 
-    int _width = 16;
-    int _height = 16;
-    int _xOffset = 0;
-    int _yOffset = 0;
+    int width = 16;
+    int height = 16;
+    int xOffset = 0;
+    int yOffset = 0;
 
-    bool _hasTrailingSpace;
-    FontManager::Type _font = FontManager::Medium;
-    Link _link;
+    bool _hasTrailingSpace = true;
+    FontManager::Type font = FontManager::Medium;
+    Link link;
 
-    mutable std::vector<short> _characterWidthCache;
+    mutable std::vector<short> charWidthCache;
 };
 
 }  // namespace messages

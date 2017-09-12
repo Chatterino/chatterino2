@@ -14,7 +14,7 @@ WordPart::WordPart(Word &word, int x, int y, int lineNumber, const QString &copy
     , _width(word.getWidth())
     , _height(word.getHeight())
     , _lineNumber(lineNumber)
-    , _trailingSpace(word.hasTrailingSpace() & allowTrailingSpace)
+    , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
 {
 }
 
@@ -28,7 +28,7 @@ WordPart::WordPart(Word &word, int x, int y, int width, int height, int lineNumb
     , _width(width)
     , _height(height)
     , _lineNumber(lineNumber)
-    , _trailingSpace(word.hasTrailingSpace() & allowTrailingSpace)
+    , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
 {
 }
 
@@ -80,7 +80,7 @@ int WordPart::getBottom() const
 
 QRect WordPart::getRect() const
 {
-    return QRect(_x, _y, _width, _height);
+    return QRect(_x, _y, _width, _height - 1);
 }
 
 const QString WordPart::getCopyText() const
@@ -98,9 +98,16 @@ const QString &WordPart::getText() const
     return _text;
 }
 
-int WordPart::getLineNumber()
+int WordPart::getLineNumber() const
 {
     return _lineNumber;
+}
+
+int WordPart::getCharacterLength() const
+{
+    //    return (this->getWord().isImage() ? 1 : this->getText().length()) + (_trailingSpace ? 1 :
+    //    0);
+    return this->getWord().isImage() ? 2 : this->getText().length() + 1;
 }
 
 }  // namespace messages

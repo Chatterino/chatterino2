@@ -16,7 +16,7 @@ public:
 
     SharedMessage build();
 
-    void appendWord(const Word &word);
+    void appendWord(const Word &&word);
     void appendTimestamp();
     void appendTimestamp(std::time_t time);
     void setHighlight(const bool &value);
@@ -27,6 +27,7 @@ public:
     QString originalMessage;
 
 private:
+    std::shared_ptr<messages::Message> message;
     std::vector<Word> _words;
     bool highlight = false;
     std::chrono::time_point<std::chrono::system_clock> _parseTime;

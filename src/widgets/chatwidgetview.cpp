@@ -1,8 +1,9 @@
 #include "widgets/chatwidgetview.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
+#include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
-#include "messages/wordpart.hpp"
+#include "messages/messageref.hpp"
 #include "settingsmanager.hpp"
 #include "ui_accountpopupform.h"
 #include "util/distancebetweenpoints.hpp"
@@ -14,8 +15,10 @@
 #include <QPainter>
 
 #include <math.h>
+#include <algorithm>
 #include <chrono>
 #include <functional>
+#include <memory>
 
 namespace chatterino {
 namespace widgets {
@@ -25,10 +28,6 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     , chatWidget(_chatWidget)
     , scrollBar(this)
     , userPopupWidget(_chatWidget->getChannelRef())
-    , selectionStart(0, 0)
-    , selectionEnd(0, 0)
-    , selectionMin(0, 0)
-    , selectionMax(0, 0)
 {
 #ifndef Q_OS_MAC
     this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -70,14 +69,14 @@ bool ChatWidgetView::layoutMessages()
     // The scrollbar was visible and at the bottom
     this->showingLatestMessages = this->scrollBar.isAtBottom() || !this->scrollBar.isVisible();
 
-    int start = this->scrollBar.getCurrentValue();
+    size_t start = this->scrollBar.getCurrentValue();
     int layoutWidth = this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width();
 
     // layout the visible messages in the view
     if (messages.getLength() > start) {
         int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-        for (int i = start; i < messages.getLength(); ++i) {
+        for (size_t i = start; i < messages.getLength(); ++i) {
             auto message = messages[i];
 
             redraw |= message->layout(layoutWidth, true);
@@ -141,6 +140,97 @@ ScrollBar &ChatWidgetView::getScrollBar()
     return this->scrollBar;
 }
 
+QString ChatWidgetView::getSelectedText() const
+{
+    messages::LimitedQueueSnapshot<messages::SharedMessageRef> messages =
+        this->chatWidget->getMessagesSnapshot();
+
+    QString text;
+    bool isSingleMessage = this->selection.isSingleMessage();
+
+    size_t i = std::max(0, this->selection.min.messageIndex);
+
+    int charIndex = 0;
+
+    bool first = true;
+
+    for (const messages::WordPart &part : messages[i]->getWordParts()) {
+        int charLength = part.getCharacterLength();
+
+        if (charIndex + charLength < this->selection.min.charIndex) {
+            charIndex += charLength;
+            continue;
+        }
+
+        if (first) {
+            first = false;
+
+            if (part.getWord().isText()) {
+                text += part.getText().mid(this->selection.min.charIndex - charIndex);
+            } else {
+                text += part.getCopyText();
+            }
+        }
+
+        if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
+            if (part.getWord().isText()) {
+                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
+            } else {
+                text += part.getCopyText();
+            }
+            return text;
+        }
+
+        text += part.getCopyText();
+
+        if (part.hasTrailingSpace()) {
+            text += " ";
+        }
+
+        charIndex += charLength;
+    }
+
+    text += "\n";
+
+    for (i++; i < this->selection.max.messageIndex; i++) {
+        for (const messages::WordPart &part : messages[i]->getWordParts()) {
+            text += part.getCopyText();
+
+            if (part.hasTrailingSpace()) {
+                text += " ";
+            }
+        }
+        text += "\n";
+    }
+
+    charIndex = 0;
+
+    for (const messages::WordPart &part :
+         messages[this->selection.max.messageIndex]->getWordParts()) {
+        int charLength = part.getCharacterLength();
+
+        if (charIndex + charLength >= this->selection.max.charIndex) {
+            if (part.getWord().isText()) {
+                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
+            } else {
+                text += part.getCopyText();
+            }
+
+            return text;
+        }
+
+        text += part.getCopyText();
+
+        if (part.hasTrailingSpace()) {
+            text += " ";
+        }
+
+        charIndex += charLength;
+    }
+
+    return text;
+}
+
 void ChatWidgetView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
@@ -151,24 +241,13 @@ void ChatWidgetView::resizeEvent(QResizeEvent *)
     this->update();
 }
 
-void ChatWidgetView::setSelection(SelectionItem start, SelectionItem end)
+void ChatWidgetView::setSelection(const SelectionItem &start, const SelectionItem &end)
 {
     // selections
-    SelectionItem min = selectionStart;
-    SelectionItem max = selectionEnd;
+    this->selection = Selection(start, end);
 
-    if (max.isSmallerThan(min)) {
-        std::swap(min, max);
-    }
-
-    this->selectionStart = start;
-    this->selectionEnd = end;
-
-    this->selectionMin = min;
-    this->selectionMax = max;
-
-    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
-             << max.charIndex;
+    //    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
+    //             << max.charIndex;
 }
 
 void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
@@ -212,7 +291,7 @@ void ChatWidgetView::drawMessages(QPainter &painter)
 {
     auto messages = this->chatWidget->getMessagesSnapshot();
 
-    int start = this->scrollBar.getCurrentValue();
+    size_t start = this->scrollBar.getCurrentValue();
 
     if (start >= messages.getLength()) {
         return;
@@ -233,6 +312,8 @@ void ChatWidgetView::drawMessages(QPainter &painter)
             bufferPtr = std::shared_ptr<QPixmap>(buffer);
             updateBuffer = true;
         }
+
+        updateBuffer |= this->selecting;
 
         // update messages that have been changed
         if (updateBuffer) {
@@ -275,17 +356,17 @@ void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixm
     QPainter painter(buffer);
 
     // draw background
-    // if (this->selectionMin.messageIndex <= messageIndex &&
-    //    this->selectionMax.messageIndex >= messageIndex) {
-    //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
-    //} else {
     painter.fillRect(buffer->rect(),
                      (messageRef->getMessage()->getCanHighlightTab())
                          ? this->colorScheme.ChatBackgroundHighlighted
                          : this->colorScheme.ChatBackground);
-    //}
 
-    // draw messages
+    // draw selection
+    if (!selection.isEmpty()) {
+        drawMessageSelection(painter, messageRef, messageIndex, buffer->height());
+    }
+
+    // draw message
     for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
         // image
         if (wordPart.getWord().isImage()) {
@@ -316,6 +397,155 @@ void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixm
     messageRef->updateBuffer = false;
 }
 
+void ChatWidgetView::drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef,
+                                          int messageIndex, int bufferHeight)
+{
+    if (this->selection.min.messageIndex > messageIndex ||
+        this->selection.max.messageIndex < messageIndex) {
+        return;
+    }
+
+    QColor selectionColor(255, 255, 255, 63);
+
+    int charIndex = 0;
+    size_t i = 0;
+    auto &parts = messageRef->getWordParts();
+
+    int currentLineNumber = 0;
+    QRect rect;
+
+    if (parts.size() > 0) {
+        if (selection.min.messageIndex == messageIndex) {
+            rect.setTop(parts.at(0).getY());
+        }
+        rect.setLeft(parts.at(0).getX());
+    }
+
+    // skip until selection start
+    if (this->selection.min.messageIndex == messageIndex && this->selection.min.charIndex != 0) {
+        for (; i < parts.size(); i++) {
+            const messages::WordPart &part = parts.at(i);
+            auto characterLength = part.getCharacterLength();
+
+            if (characterLength + charIndex > selection.min.charIndex) {
+                break;
+            }
+
+            charIndex += characterLength;
+            currentLineNumber = part.getLineNumber();
+        }
+
+        if (i >= parts.size()) {
+            return;
+        }
+
+        // handle word that has a cut of selection
+        const messages::WordPart &part = parts.at(i);
+
+        // check if selection if single word
+        int characterLength = part.getCharacterLength();
+        bool isSingleWord = charIndex + characterLength > this->selection.max.charIndex &&
+                            this->selection.max.messageIndex == messageIndex;
+
+        rect = part.getRect();
+        currentLineNumber = part.getLineNumber();
+
+        if (part.getWord().isText()) {
+            int offset = this->selection.min.charIndex - charIndex;
+
+            std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
+
+            for (int j = 0; j < offset; j++) {
+                rect.setLeft(rect.left() + characterWidth[j]);
+            }
+
+            if (isSingleWord) {
+                int length = (this->selection.max.charIndex - charIndex) - offset;
+
+                rect.setRight(part.getX());
+
+                for (int j = 0; j < offset + length; j++) {
+                    rect.setRight(rect.right() + characterWidth[j]);
+                }
+
+                painter.fillRect(rect, selectionColor);
+
+                return;
+            }
+        } else {
+            if (isSingleWord) {
+                if (charIndex + 1 != this->selection.max.charIndex) {
+                    rect.setRight(part.getX() + part.getWord().getImage().getScaledWidth());
+                }
+                painter.fillRect(rect, selectionColor);
+
+                return;
+            }
+
+            if (charIndex != this->selection.min.charIndex) {
+                rect.setLeft(part.getX() + part.getWord().getImage().getScaledWidth());
+            }
+        }
+
+        i++;
+        charIndex += characterLength;
+    }
+
+    // go through lines and draw selection
+    for (; i < parts.size(); i++) {
+        const messages::WordPart &part = parts.at(i);
+
+        int charLength = part.getCharacterLength();
+
+        bool isLastSelectedWord = this->selection.max.messageIndex == messageIndex &&
+                                  charIndex + charLength > this->selection.max.charIndex;
+
+        if (part.getLineNumber() == currentLineNumber) {
+            rect.setLeft(std::min(rect.left(), part.getX()));
+            rect.setTop(std::min(rect.top(), part.getY()));
+            rect.setRight(std::max(rect.right(), part.getRight()));
+            rect.setBottom(std::max(rect.bottom(), part.getBottom() - 1));
+        } else {
+            painter.fillRect(rect, selectionColor);
+
+            currentLineNumber = part.getLineNumber();
+
+            rect = part.getRect();
+        }
+
+        if (isLastSelectedWord) {
+            if (part.getWord().isText()) {
+                int offset = this->selection.min.charIndex - charIndex;
+
+                std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
+
+                int length = (this->selection.max.charIndex - charIndex) - offset;
+
+                rect.setRight(part.getX());
+
+                for (int j = 0; j < offset + length; j++) {
+                    rect.setRight(rect.right() + characterWidth[j]);
+                }
+            } else {
+                if (this->selection.max.charIndex == charIndex) {
+                    rect.setRight(part.getX());
+                }
+            }
+            painter.fillRect(rect, selectionColor);
+
+            return;
+        }
+
+        charIndex += charLength;
+    }
+
+    if (this->selection.max.messageIndex != messageIndex) {
+        rect.setBottom(bufferHeight);
+    }
+
+    painter.fillRect(rect, selectionColor);
+}
+
 void ChatWidgetView::wheelEvent(QWheelEvent *event)
 {
     if (this->scrollBar.isVisible()) {
@@ -340,18 +570,18 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     if (this->selecting) {
         int index = message->getSelectionIndex(relativePos);
 
-        this->setSelection(this->selectionStart, SelectionItem(messageIndex, index));
+        this->setSelection(this->selection.start, SelectionItem(messageIndex, index));
 
         this->repaint();
     }
 
-    messages::Word hoverWord;
-    if (!message->tryGetWordPart(relativePos, hoverWord)) {
+    const messages::Word *hoverWord;
+    if ((hoverWord = message->tryGetWordPart(relativePos)) == nullptr) {
         setCursor(Qt::ArrowCursor);
         return;
     }
 
-    if (hoverWord.getLink().isValid()) {
+    if (hoverWord->getLink().isValid()) {
         setCursor(Qt::PointingHandCursor);
     } else {
         setCursor(Qt::ArrowCursor);
@@ -420,13 +650,13 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    messages::Word hoverWord;
+    const messages::Word *hoverWord;
 
-    if (!message->tryGetWordPart(relativePos, hoverWord)) {
+    if ((hoverWord = message->tryGetWordPart(relativePos)) == nullptr) {
         return;
     }
 
-    auto &link = hoverWord.getLink();
+    auto &link = hoverWord->getLink();
 
     switch (link.getType()) {
         case messages::Link::UserInfo: {
@@ -451,7 +681,7 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 {
     auto messages = this->chatWidget->getMessagesSnapshot();
 
-    int start = this->scrollBar.getCurrentValue();
+    size_t start = this->scrollBar.getCurrentValue();
 
     if (start >= messages.getLength()) {
         return false;
@@ -459,7 +689,7 @@ bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::Message
 
     int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (int i = start; i < messages.getLength(); ++i) {
+    for (size_t i = start; i < messages.getLength(); ++i) {
         auto message = messages[i];
 
         if (p.y() < y + message->getHeight()) {

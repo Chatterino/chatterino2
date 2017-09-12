@@ -115,6 +115,9 @@ public slots:
 
     // Open twitch channel stream through streamlink
     void doOpenStreamlink();
+
+    // Copy text from chat
+    void doCopy();
 };
 
 }  // namespace widgets

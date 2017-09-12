@@ -7,21 +7,19 @@ namespace chatterino {
 namespace messages {
 
 MessageBuilder::MessageBuilder()
-    : _words()
+    : message(new Message)
 {
     _parseTime = std::chrono::system_clock::now();
-
-    linkRegex.setPattern("[[:ascii:]]*\\.[a-zA-Z]+\\/?[[:ascii:]]*");
 }
 
 SharedMessage MessageBuilder::build()
 {
-    return SharedMessage(new Message(this->originalMessage, _words, highlight));
+    return this->message;
 }
 
-void MessageBuilder::appendWord(const Word &word)
+void MessageBuilder::appendWord(const Word &&word)
 {
-    _words.push_back(word);
+    this->message->getWords().push_back(word);
 }
 
 void MessageBuilder::appendTimestamp()
@@ -59,6 +57,9 @@ void MessageBuilder::appendTimestamp(time_t time)
 
 QString MessageBuilder::matchLink(const QString &string)
 {
+    static QRegularExpression linkRegex("[[:ascii:]]*\\.[a-zA-Z]+\\/?[[:ascii:]]*");
+    static QRegularExpression httpRegex("\\bhttps?://");
+
     auto match = linkRegex.match(string);
 
     if (!match.hasMatch()) {
@@ -67,7 +68,7 @@ QString MessageBuilder::matchLink(const QString &string)
 
     QString captured = match.captured();
 
-    if (!captured.contains(QRegularExpression("\\bhttps?://"))) {
+    if (!captured.contains(httpRegex)) {
         captured.insert(0, "http://");
     }
     return captured;

@@ -29,12 +29,12 @@ Message::Message(const QString &text)
 }
 */
 
-Message::Message(const QString &text, const std::vector<Word> &words, const bool &highlight)
-    : text(text)
-    , highlightTab(highlight)
-    , words(words)
-{
-}
+//Message::Message(const QString &text, const std::vector<Word> &words, const bool &highlight)
+//    : text(text)
+//    , highlightTab(highlight)
+//    , words(words)
+//{
+//}
 
 bool Message::getCanHighlightTab() const
 {

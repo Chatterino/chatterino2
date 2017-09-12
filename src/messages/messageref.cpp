@@ -6,8 +6,8 @@
 
 #define MARGIN_LEFT 8
 #define MARGIN_RIGHT 8
-#define MARGIN_TOP 8
-#define MARGIN_BOTTOM 8
+#define MARGIN_TOP 4
+#define MARGIN_BOTTOM 4
 
 using namespace chatterino::messages;
 
@@ -142,18 +142,12 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
             std::vector<short> &charWidths = word.getCharacterWidthCache();
 
-            if (charWidths.size() == 0) {
-                for (int i = 0; i < text.length(); i++) {
-                    charWidths.push_back(metrics.charWidth(text, i));
-                }
-            }
-
             for (int i = 2; i <= text.length(); i++) {
                 if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
                     QString mid = text.mid(start, i - start - 1);
 
                     _wordParts.push_back(WordPart(word, MARGIN_LEFT, y, width, word.getHeight(),
-                                                  lineNumber, mid, mid));
+                                                  lineNumber, mid, mid, false));
 
                     y += metrics.height();
 
@@ -193,6 +187,8 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
             y += lineHeight;
 
+            lineNumber++;
+
             _wordParts.push_back(
                 WordPart(word, MARGIN_LEFT, y - word.getHeight(), lineNumber, word.getCopyText()));
 
@@ -202,8 +198,6 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
             x = word.getWidth() + MARGIN_LEFT;
             x += spaceWidth;
-
-            lineNumber++;
         }
     }
 
@@ -213,6 +207,8 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         sizeChanged = true;
         _height = y + lineHeight;
     }
+
+    _height += MARGIN_BOTTOM;
 
     if (sizeChanged) {
         buffer = nullptr;
@@ -237,17 +233,16 @@ void MessageRef::alignWordParts(int lineStart, int lineHeight)
     }
 }
 
-bool MessageRef::tryGetWordPart(QPoint point, Word &word)
+const Word *MessageRef::tryGetWordPart(QPoint point)
 {
     // go through all words and return the first one that contains the point.
     for (WordPart &wordPart : _wordParts) {
         if (wordPart.getRect().contains(point)) {
-            word = wordPart.getWord();
-            return true;
+            return &wordPart.getWord();
         }
     }
 
-    return false;
+    return nullptr;
 }
 
 int MessageRef::getSelectionIndex(QPoint position)
@@ -259,7 +254,7 @@ int MessageRef::getSelectionIndex(QPoint position)
     // find out in which line the cursor is
     int lineNumber = 0, lineStart = 0, lineEnd = 0;
 
-    for (int i = 0; i < _wordParts.size(); i++) {
+    for (size_t i = 0; i < _wordParts.size(); i++) {
         WordPart &part = _wordParts[i];
 
         if (part.getLineNumber() != 0 && position.y() < part.getY()) {
@@ -267,11 +262,11 @@ int MessageRef::getSelectionIndex(QPoint position)
         }
 
         if (part.getLineNumber() != lineNumber) {
-            lineStart = i - 1;
+            lineStart = i;
             lineNumber = part.getLineNumber();
         }
 
-        lineEnd = part.getLineNumber() == 0 ? i : i + 1;
+        lineEnd = i + 1;
     }
 
     // count up to the cursor
@@ -293,15 +288,19 @@ int MessageRef::getSelectionIndex(QPoint position)
 
         // cursor is right of the word part
         if (position.x() > part.getX() + part.getWidth()) {
-            index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
+            index += part.getCharacterLength();
             continue;
         }
 
         // cursor is over the word part
         if (part.getWord().isImage()) {
-            index++;
+            if (position.x() - part.getX() > part.getWidth() / 2) {
+                index++;
+            }
         } else {
-            auto text = part.getWord().getText();
+            // TODO: use word.getCharacterWidthCache();
+
+            auto text = part.getText();
 
             int x = part.getX();
 
