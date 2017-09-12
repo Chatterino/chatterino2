@@ -197,6 +197,8 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
     painter.fillRect(this->rect(), this->colorScheme.ChatInputBackground);
     painter.setPen(this->colorScheme.ChatInputBorder);
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+
+    this->textInput.setFont(textInput.getFont());
 }
 
 void ChatWidgetInput::resizeEvent(QResizeEvent *)
