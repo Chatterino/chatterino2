@@ -155,7 +155,7 @@ void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
 void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        this->chatWidget->showChangeChannelPopup("Change channel");
+        this->chatWidget->doChangeChannel();
     }
 }
 
