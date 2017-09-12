@@ -68,6 +68,7 @@ public:
 private:
     void setChannel(std::shared_ptr<Channel> newChannel);
     void detachChannel();
+    void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
 
     void channelNameUpdated(const std::string &newChannelName);
 

@@ -104,6 +104,8 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
         this->header.checkLive();
     });
 
+    this->view.userPopupWidget.setChannel(_newChannel);
+
     // on new message
     this->messageAppendedConnection =
         this->channel->messageAppended.connect([this](SharedMessage &message) {
@@ -267,6 +269,12 @@ void ChatWidget::doCloseSplit()
 void ChatWidget::doChangeChannel()
 {
     this->showChangeChannelPopup("Change channel");
+    auto popup = this->findChildren<QDockWidget*>();
+    if(popup.at(0)->isVisible() && !popup.at(0)->isFloating())
+    {
+        popup.at(0)->hide();
+        doOpenViewerList();
+    }
 }
 
 void ChatWidget::doPopup()
@@ -371,9 +379,10 @@ void ChatWidget::doOpenViewerList()
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                             QDockWidget::DockWidgetClosable |
                             QDockWidget::DockWidgetFloatable);
-    viewerDock->setMaximumHeight(this->height());
-    viewerDock->resize(0.5*this->width(),this->height());
+    viewerDock->resize(0.5*this->width(),this->height() - this->header.height() - this->input.height());
+    viewerDock->move(0,this->header.height());
 
+    auto accountPopup = new AccountPopupWidget(this->channel);
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
     auto searchBar = new QLineEdit(viewerDock);
@@ -430,6 +439,20 @@ void ChatWidget::doOpenViewerList()
         viewerDock->setMinimumWidth(300);
     });
 
+    QObject::connect(chattersList,&QListWidget::doubleClicked,this,[=](){
+        if(!labels.contains(chattersList->currentItem()->text()))
+        {
+            doOpenAccountPopupWidget(accountPopup,chattersList->currentItem()->text());
+        }
+    });
+
+    QObject::connect(resultList,&QListWidget::doubleClicked,this,[=](){
+        if(!labels.contains(resultList->currentItem()->text()))
+        {
+            doOpenAccountPopupWidget(accountPopup,resultList->currentItem()->text());
+        }
+    });
+
     dockVbox->addWidget(searchBar);
     dockVbox->addWidget(loadingLabel);
     dockVbox->addWidget(chattersList);
@@ -440,6 +463,14 @@ void ChatWidget::doOpenViewerList()
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();
+}
+
+void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
+{
+    widget->setName(user);
+    widget->move(QCursor::pos());
+    widget->show();
+    widget->setFocus();
 }
 
 void ChatWidget::doCopy()
