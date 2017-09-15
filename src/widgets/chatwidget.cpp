@@ -18,6 +18,7 @@
 #include <QPainter>
 #include <QProcess>
 #include <QShortcut>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
@@ -52,7 +53,7 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     , vbox(this)
     , header(this)
     , view(this)
-    , input(this)
+    , input(this, _channelManager.getEmoteManager())
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
@@ -80,11 +81,15 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     this->channelNameUpdated(this->channelName.getValue());
 
     this->input.textInput.installEventFilter(parent);
+
+    connect(&view, &this->view.mousePressEvent, this, [&](QMouseEvent *) {
+        QTimer::singleShot(10, [this] { this->giveFocus(Qt::MouseFocusReason); });
+    });
 }
 
 ChatWidget::~ChatWidget()
 {
-    this->detachChannel();
+    channelNameUpdated("");
 }
 
 std::shared_ptr<Channel> ChatWidget::getChannel() const
@@ -99,82 +104,33 @@ std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
+    this->view.setChannel(_newChannel);
+
     this->channel = _newChannel;
-    this->channel->roomIDchanged.connect([this]() { this->header.checkLive(); });
 
-    this->view.userPopupWidget.setChannel(_newChannel);
-
-    // on new message
-    this->messageAppendedConnection =
-        this->channel->messageAppended.connect([this](SharedMessage &message) {
-            SharedMessageRef deleted;
-
-            auto messageRef = new MessageRef(message);
-
-            if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
-                qreal value = std::max(0.0, this->view.getScrollBar().getDesiredValue() - 1);
-
-                this->view.getScrollBar().setDesiredValue(value, false);
-            }
-        });
-
-    // on message removed
-    this->messageRemovedConnection =
-        this->channel->messageRemovedFromStart.connect([this](SharedMessage &) {
-            this->view.selection.min.messageIndex--;
-            this->view.selection.max.messageIndex--;
-            this->view.selection.start.messageIndex--;
-            this->view.selection.end.messageIndex--;
-        });
-
-    auto snapshot = this->channel->getMessageSnapshot();
-
-    for (size_t i = 0; i < snapshot.getLength(); i++) {
-        SharedMessageRef deleted;
-
-        auto messageRef = new MessageRef(snapshot[i]);
-
-        this->messages.appendItem(SharedMessageRef(messageRef), deleted);
+    twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(_newChannel.get());
+    if (twitchChannel != nullptr) {
+        twitchChannel->roomIDchanged.connect([this]() { this->header.checkLive(); });
     }
-}
-
-void ChatWidget::detachChannel()
-{
-    // on message added
-    this->messageAppendedConnection.disconnect();
-
-    // on message removed
-    this->messageRemovedConnection.disconnect();
 }
 
 void ChatWidget::channelNameUpdated(const std::string &newChannelName)
 {
     // remove current channel
     if (!this->channel->isEmpty()) {
-        this->channelManager.removeChannel(this->channel->name);
-
-        this->detachChannel();
+        this->channelManager.removeTwitchChannel(this->channel->name);
     }
 
     // update messages
-    this->messages.clear();
-
     if (newChannelName.empty()) {
-        this->channel = this->channelManager.emptyChannel;
+        this->setChannel(this->channelManager.emptyChannel);
     } else {
-        this->setChannel(this->channelManager.addChannel(QString::fromStdString(newChannelName)));
+        this->setChannel(
+            this->channelManager.addTwitchChannel(QString::fromStdString(newChannelName)));
     }
 
     // update header
     this->header.updateChannelText();
-
-    // update view
-    this->layoutMessages(true);
-}
-
-LimitedQueueSnapshot<SharedMessageRef> ChatWidget::getMessagesSnapshot()
-{
-    return this->messages.getSnapshot();
 }
 
 bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
@@ -202,9 +158,12 @@ bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
 
 void ChatWidget::layoutMessages(bool forceUpdate)
 {
-    if (this->view.layoutMessages() || forceUpdate) {
-        this->view.update();
-    }
+    this->view.layoutMessages();
+    this->view.update();
+
+    //    if (this->view.layoutMessages() || forceUpdate) {
+    //        this->view.update();
+    //    }
 }
 
 void ChatWidget::updateGifEmotes()
@@ -285,11 +244,7 @@ void ChatWidget::doPopup()
 
 void ChatWidget::doClearChat()
 {
-    // Clear all stored messages in this chat widget
-    this->messages.clear();
-
-    // Layout chat widget messages, and force an update regardless if there are no messages
-    this->layoutMessages(true);
+    view.clearMessages();
 }
 
 void ChatWidget::doOpenChannel()

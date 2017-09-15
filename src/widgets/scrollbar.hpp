@@ -14,14 +14,14 @@ class ColorScheme;
 
 namespace widgets {
 
-class ChatWidgetView;
+class ChannelView;
 
 class ScrollBar : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    ScrollBar(ChatWidgetView *parent = 0);
+    ScrollBar(ChannelView *parent = 0);
     ~ScrollBar();
 
     void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);

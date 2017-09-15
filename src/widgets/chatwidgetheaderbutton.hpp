@@ -28,7 +28,7 @@ public:
     }
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
+    //    virtual void paintEvent(QPaintEvent *) override;
 
 private:
     struct {

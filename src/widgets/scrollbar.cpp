@@ -1,6 +1,6 @@
 #include "widgets/scrollbar.hpp"
 #include "colorscheme.hpp"
-#include "widgets/chatwidgetview.hpp"
+#include "widgets/channelview.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -11,7 +11,7 @@
 namespace chatterino {
 namespace widgets {
 
-ScrollBar::ScrollBar(ChatWidgetView *parent)
+ScrollBar::ScrollBar(ChannelView *parent)
     : BaseWidget(parent)
     , _currentValueAnimation(this, "_currentValue")
     , _highlights(nullptr)

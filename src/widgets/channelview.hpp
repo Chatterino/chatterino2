@@ -2,6 +2,7 @@
 
 #include "channel.hpp"
 #include "messages/lazyloadedimage.hpp"
+#include "messages/limitedqueuesnapshot.hpp"
 #include "messages/messageref.hpp"
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
@@ -12,6 +13,8 @@
 #include <QScroller>
 #include <QWheelEvent>
 #include <QWidget>
+
+#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -75,21 +78,23 @@ struct Selection {
     }
 };
 
-class ChatWidget;
-
-class ChatWidgetView : public BaseWidget
+class ChannelView : public BaseWidget
 {
-    friend class ChatWidget;
+    Q_OBJECT
 
 public:
-    explicit ChatWidgetView(ChatWidget *_chatWidget);
-    ~ChatWidgetView();
-
-    bool layoutMessages();
+    explicit ChannelView(BaseWidget *parent = 0);
+    ~ChannelView();
 
     void updateGifEmotes();
     ScrollBar &getScrollBar();
-    QString getSelectedText() const;
+    QString getSelectedText();
+
+    void setChannel(std::shared_ptr<Channel> channel);
+    messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
+    bool layoutMessages();
+
+    void clearMessages();
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -110,15 +115,17 @@ private:
         QRect rect;
     };
 
+    void detachChannel();
+
     void drawMessages(QPainter &painter);
     void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
     void drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef, int messageIndex,
                               int bufferHeight);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
 
-    std::vector<GifEmoteData> gifEmotes;
+    std::shared_ptr<Channel> channel;
 
-    ChatWidget *const chatWidget;
+    std::vector<GifEmoteData> gifEmotes;
 
     ScrollBar scrollBar;
 
@@ -135,6 +142,11 @@ private:
 
     Selection selection;
     bool selecting = false;
+
+    messages::LimitedQueue<messages::SharedMessageRef> messages;
+
+    boost::signals2::connection messageAppendedConnection;
+    boost::signals2::connection messageRemovedConnection;
 
 private slots:
     void wordTypeMaskChanged()

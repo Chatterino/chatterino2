@@ -24,7 +24,7 @@ class Message
 {
 public:
     // explicit Message(const QString &text);
-    //explicit Message(const QString &text, const std::vector<messages::Word> &words,
+    // explicit Message(const QString &text, const std::vector<messages::Word> &words,
     //                 const bool &highlight);
 
     bool getCanHighlightTab() const;
@@ -39,6 +39,7 @@ public:
     const QString &getId() const;
 
     const QString text;
+    bool centered = false;
 
 private:
     static LazyLoadedImage *badgeStaff;

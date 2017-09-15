@@ -2,6 +2,7 @@
 
 #include "channel.hpp"
 #include "channeldata.hpp"
+#include "twitch/twitchchannel.hpp"
 
 #include <map>
 
@@ -23,23 +24,24 @@ public:
 
     const std::vector<std::shared_ptr<Channel>> getItems();
 
-    std::shared_ptr<Channel> addChannel(const QString &channel);
-    std::shared_ptr<Channel> getChannel(const QString &channel);
-    void removeChannel(const QString &channel);
+    std::shared_ptr<twitch::TwitchChannel> addTwitchChannel(const QString &channel);
+    std::shared_ptr<twitch::TwitchChannel> getTwitchChannel(const QString &channel);
+    void removeTwitchChannel(const QString &channel);
 
     const std::string &getUserID(const std::string &username);
+    EmoteManager &getEmoteManager();
 
     // Special channels
-    const std::shared_ptr<Channel> whispersChannel;
-    const std::shared_ptr<Channel> mentionsChannel;
-    const std::shared_ptr<Channel> emptyChannel;
+    const std::shared_ptr<twitch::TwitchChannel> whispersChannel;
+    const std::shared_ptr<twitch::TwitchChannel> mentionsChannel;
+    const std::shared_ptr<twitch::TwitchChannel> emptyChannel;
 
 private:
     std::map<std::string, std::string> usernameToID;
     std::map<std::string, ChannelData> channelDatas;
 
     QMutex channelsMutex;
-    QMap<QString, std::tuple<std::shared_ptr<Channel>, int>> channels;
+    QMap<QString, std::tuple<std::shared_ptr<twitch::TwitchChannel>, int>> twitchChannels;
 };
 
 }  // namespace chatterino

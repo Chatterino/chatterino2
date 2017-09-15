@@ -77,9 +77,11 @@ public:
         EmojiImage = (1 << 23),
         EmojiText = (1 << 24),
 
+        AlwaysShow = (1 << 25),
+
         Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
                   BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |
-                  ButtonBan | ButtonTimeout
+                  ButtonBan | ButtonTimeout | AlwaysShow
     };
 
     Word()

@@ -12,7 +12,7 @@ MessageBuilder::MessageBuilder()
     _parseTime = std::chrono::system_clock::now();
 }
 
-SharedMessage MessageBuilder::build()
+SharedMessage MessageBuilder::getMessage()
 {
     return this->message;
 }

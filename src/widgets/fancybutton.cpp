@@ -23,7 +23,7 @@ void FancyButton::setMouseEffectColor(QColor color)
 
 void FancyButton::paintEvent(QPaintEvent *)
 {
-    QPainter painter;
+    QPainter painter(this);
 
     this->fancyPaint(painter);
 }

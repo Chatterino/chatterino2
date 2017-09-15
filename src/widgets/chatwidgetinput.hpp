@@ -1,5 +1,6 @@
 #pragma once
 
+#include "emotemanager.hpp"
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/chatwidgetheaderbutton.hpp"
@@ -25,7 +26,7 @@ class ChatWidgetInput : public BaseWidget
     Q_OBJECT
 
 public:
-    ChatWidgetInput(ChatWidget *_chatWidget);
+    ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &);
     ~ChatWidgetInput();
 
 protected:
@@ -37,6 +38,7 @@ protected:
 private:
     ChatWidget *const chatWidget;
     EmotePopup *emotePopup = nullptr;
+    EmoteManager &emoteManager;
 
     boost::signals2::connection textLengthVisibleChangedConnection;
     QHBoxLayout hbox;

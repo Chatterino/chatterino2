@@ -32,17 +32,19 @@ struct EmoteData {
     messages::LazyLoadedImage *image = nullptr;
 };
 
+typedef ConcurrentMap<QString, EmoteData> EmoteMap;
+
 class EmoteManager
 {
 public:
-    using EmoteMap = ConcurrentMap<QString, EmoteData>;
-
     explicit EmoteManager(WindowManager &_windowManager);
 
     void loadGlobalEmotes();
 
-    void reloadBTTVChannelEmotes(const QString &channelName);
-    void reloadFFZChannelEmotes(const QString &channelName);
+    void reloadBTTVChannelEmotes(const QString &channelName,
+                                 std::weak_ptr<EmoteMap> channelEmoteMap);
+    void reloadFFZChannelEmotes(const QString &channelName,
+                                std::weak_ptr<EmoteMap> channelEmoteMap);
 
     ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
     EmoteMap &getFFZEmotes();

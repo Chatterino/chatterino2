@@ -1,5 +1,6 @@
 #include "widgets/chatwidgetheader.hpp"
 #include "colorscheme.hpp"
+#include "twitch/twitchchannel.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/chatwidget.hpp"
 #include "widgets/notebookpage.hpp"
@@ -81,16 +82,22 @@ void ChatWidgetHeader::updateChannelText()
     if (channelName.empty()) {
         this->channelNameLabel.setText("<no channel>");
     } else {
-        if (this->chatWidget->getChannelRef()->isLive) {
-            auto channel = this->chatWidget->getChannelRef();
+        auto channel = this->chatWidget->getChannel();
+
+        twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+
+        if (channel->isEmpty()) {
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
-            this->setToolTip(
-                "<style>.center    { text-align: center; }</style>"
-                "<p class = \"center\">" +
-                channel->streamStatus + "<br><br>" + channel->streamGame + "<br>"
-                                                                           "Live for " +
-                channel->streamUptime + " with " + channel->streamViewerCount + " viewers"
-                                                                                "</p>");
+            if (twitchChannel != nullptr) {
+                this->setToolTip("<style>.center    { text-align: center; }</style>"
+                                 "<p class = \"center\">" +
+                                 twitchChannel->streamStatus + "<br><br>" +
+                                 twitchChannel->streamGame + "<br>"
+                                                             "Live for " +
+                                 twitchChannel->streamUptime + " with " +
+                                 twitchChannel->streamViewerCount + " viewers"
+                                                                    "</p>");
+            }
         } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
@@ -157,7 +164,7 @@ void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
 
 void ChatWidgetHeader::leftButtonClicked()
 {
-    QTimer::singleShot(100, [&] {
+    QTimer::singleShot(80, [&] {
         this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
         this->leftMenu.show();
     });
@@ -193,10 +200,18 @@ void ChatWidgetHeader::menuShowChangelog()
 {
 }
 
+// TODO: this needs to be moved out of here
 void ChatWidgetHeader::checkLive()
 {
-    auto channel = this->chatWidget->getChannelRef();
+    twitch::TwitchChannel *channel =
+        dynamic_cast<twitch::TwitchChannel *>(this->chatWidget->getChannel().get());
+
+    if (channel == nullptr) {
+        return;
+    }
+
     auto id = QString::fromStdString(channel->roomID);
+
     util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, [=](QJsonObject obj) {
         if (obj.value("stream").isNull()) {
             channel->isLive = false;

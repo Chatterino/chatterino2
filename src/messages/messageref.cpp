@@ -129,7 +129,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
         // word wrapping
         if (word.isText() && word.getWidth() + MARGIN_LEFT > right) {
-            alignWordParts(lineStart, lineHeight);
+            alignWordParts(lineStart, lineHeight, width);
 
             y += lineHeight;
 
@@ -183,7 +183,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             first = false;
         } else {
             // doesn't fit in the line
-            alignWordParts(lineStart, lineHeight);
+            alignWordParts(lineStart, lineHeight, width);
 
             y += lineHeight;
 
@@ -201,7 +201,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         }
     }
 
-    alignWordParts(lineStart, lineHeight);
+    alignWordParts(lineStart, lineHeight, width);
 
     if (_height != y + lineHeight) {
         sizeChanged = true;
@@ -224,12 +224,18 @@ const std::vector<WordPart> &MessageRef::getWordParts() const
     return _wordParts;
 }
 
-void MessageRef::alignWordParts(int lineStart, int lineHeight)
+void MessageRef::alignWordParts(int lineStart, int lineHeight, int width)
 {
-    for (size_t i = lineStart; i < _wordParts.size(); i++) {
-        WordPart &wordPart2 = _wordParts.at(i);
+    int xOffset = 0;
 
-        wordPart2.setY(wordPart2.getY() + lineHeight);
+    if (this->_message->centered && _wordParts.size() > 0) {
+        xOffset = (width - this->_wordParts.at(_wordParts.size() - 1).getRight()) / 2;
+    }
+
+    for (size_t i = lineStart; i < this->_wordParts.size(); i++) {
+        WordPart &wordPart2 = this->_wordParts.at(i);
+
+        wordPart2.setPosition(wordPart2.getX() + xOffset, wordPart2.getY() + lineHeight);
     }
 }
 

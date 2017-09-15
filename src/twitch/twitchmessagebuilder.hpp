@@ -3,6 +3,7 @@
 #include "emotemanager.hpp"
 #include "messages/messagebuilder.hpp"
 #include "resources.hpp"
+#include "twitch/twitchchannel.hpp"
 
 #include <QString>
 #include <QVariant>
@@ -26,12 +27,13 @@ public:
 
     TwitchMessageBuilder() = delete;
 
-    explicit TwitchMessageBuilder(Channel *_channel, Resources &_resources,
+    explicit TwitchMessageBuilder(TwitchChannel *_channel, Resources &_resources,
                                   EmoteManager &_emoteManager, WindowManager &_windowManager,
                                   const Communi::IrcPrivateMessage *_ircMessage,
                                   const messages::MessageParseArgs &_args);
 
     Channel *channel;
+    TwitchChannel *twitchChannel;
     Resources &resources;
     WindowManager &windowManager;
     ColorScheme &colorScheme;

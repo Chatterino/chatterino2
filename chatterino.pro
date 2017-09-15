@@ -62,7 +62,6 @@ SOURCES += \
     src/widgets/chatwidgetheader.cpp \
     src/widgets/chatwidgetheaderbutton.cpp \
     src/widgets/chatwidgetinput.cpp \
-    src/widgets/chatwidgetview.cpp \
     src/widgets/mainwindow.cpp \
     src/widgets/notebook.cpp \
     src/widgets/notebookbutton.cpp \
@@ -97,7 +96,9 @@ SOURCES += \
     src/completionmanager.cpp \
     src/widgets/logindialog.cpp \
     src/widgets/qualitypopup.cpp \
-    src/widgets/emotepopup.cpp
+    src/widgets/emotepopup.cpp \
+    src/widgets/channelview.cpp \
+    src/twitch/twitchchannel.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -118,7 +119,6 @@ HEADERS  += \
     src/widgets/chatwidgetheader.hpp \
     src/widgets/chatwidgetheaderbutton.hpp \
     src/widgets/chatwidgetinput.hpp \
-    src/widgets/chatwidgetview.hpp \
     src/widgets/mainwindow.hpp \
     src/widgets/notebook.hpp \
     src/widgets/notebookbutton.hpp \
@@ -159,7 +159,9 @@ HEADERS  += \
     src/widgets/basewidget.hpp \
     src/completionmanager.hpp \
     src/widgets/qualitypopup.h \
-    src/widgets/emotepopup.h
+    src/widgets/emotepopup.h \
+    src/widgets/channelview.hpp \
+    src/twitch/twitchchannel.hpp
 
 PRECOMPILED_HEADER =
 

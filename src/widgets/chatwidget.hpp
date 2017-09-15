@@ -6,9 +6,9 @@
 #include "messages/word.hpp"
 #include "messages/wordpart.hpp"
 #include "widgets/basewidget.hpp"
+#include "widgets/channelview.hpp"
 #include "widgets/chatwidgetheader.hpp"
 #include "widgets/chatwidgetinput.hpp"
-#include "widgets/chatwidgetview.hpp"
 
 #include <QFont>
 #include <QShortcut>
@@ -49,12 +49,12 @@ public:
     std::shared_ptr<Channel> &getChannelRef();
 
     bool showChangeChannelPopup(const char *dialogTitle, bool empty = false);
-    messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
-    void layoutMessages(bool forceUpdate = false);
-    void updateGifEmotes();
 
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
+
+    void layoutMessages(bool forceUpdate = false);
+    void updateGifEmotes();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -67,24 +67,20 @@ public:
 
 private:
     void setChannel(std::shared_ptr<Channel> newChannel);
-    void detachChannel();
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
 
     void channelNameUpdated(const std::string &newChannelName);
 
     NotebookPage &parentPage;
 
-    messages::LimitedQueue<messages::SharedMessageRef> messages;
-
     std::shared_ptr<Channel> channel;
 
     QVBoxLayout vbox;
     ChatWidgetHeader header;
-    ChatWidgetView view;
+    ChannelView view;
     ChatWidgetInput input;
 
-    boost::signals2::connection messageAppendedConnection;
-    boost::signals2::connection messageRemovedConnection;
+    boost::signals2::connection channelIDChangedConnection;
 
 public:
     void load(const boost::property_tree::ptree &tree);

@@ -47,7 +47,7 @@ private:
     Word::Type _currentWordTypes = Word::None;
 
     // methods
-    void alignWordParts(int lineStart, int lineHeight);
+    void alignWordParts(int lineStart, int lineHeight, int width);
 };
 
 }  // namespace messages

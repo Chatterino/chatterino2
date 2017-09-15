@@ -46,12 +46,12 @@ void WindowManager::repaintGifEmotes()
     }
 }
 
-void WindowManager::updateAll()
-{
-    if (this->mainWindow != nullptr) {
-        this->mainWindow->update();
-    }
-}
+// void WindowManager::updateAll()
+//{
+//    if (this->mainWindow != nullptr) {
+//        this->mainWindow->update();
+//    }
+//}
 
 widgets::MainWindow &WindowManager::getMainWindow()
 {

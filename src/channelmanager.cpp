@@ -1,6 +1,8 @@
 #include "channelmanager.hpp"
 #include "ircmanager.hpp"
 
+using namespace chatterino::twitch;
+
 namespace chatterino {
 
 ChannelManager::ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
@@ -8,9 +10,9 @@ ChannelManager::ChannelManager(WindowManager &_windowManager, EmoteManager &_emo
     : windowManager(_windowManager)
     , emoteManager(_emoteManager)
     , ircManager(_ircManager)
-    , whispersChannel(new Channel(_windowManager, _emoteManager, _ircManager, "/whispers", true))
-    , mentionsChannel(new Channel(_windowManager, _emoteManager, _ircManager, "/mentions", true))
-    , emptyChannel(new Channel(_windowManager, _emoteManager, _ircManager, "", true))
+    , whispersChannel(new TwitchChannel(_emoteManager, _ircManager, "/whispers", true))
+    , mentionsChannel(new TwitchChannel(_emoteManager, _ircManager, "/mentions", true))
+    , emptyChannel(new TwitchChannel(_emoteManager, _ircManager, "", true))
 {
 }
 
@@ -20,19 +22,19 @@ const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()
 
     std::vector<std::shared_ptr<Channel>> items;
 
-    for (auto &item : this->channels.values()) {
+    for (auto &item : this->twitchChannels.values()) {
         items.push_back(std::get<0>(item));
     }
 
     return items;
 }
 
-std::shared_ptr<Channel> ChannelManager::addChannel(const QString &rawChannelName)
+std::shared_ptr<TwitchChannel> ChannelManager::addTwitchChannel(const QString &rawChannelName)
 {
     QString channelName = rawChannelName.toLower();
 
     if (channelName.length() > 1 && channelName.at(0) == '/') {
-        return this->getChannel(channelName);
+        return this->getTwitchChannel(channelName);
     }
 
     if (channelName.length() > 0 && channelName.at(0) == '#') {
@@ -41,12 +43,13 @@ std::shared_ptr<Channel> ChannelManager::addChannel(const QString &rawChannelNam
 
     QMutexLocker locker(&this->channelsMutex);
 
-    auto it = this->channels.find(channelName);
+    auto it = this->twitchChannels.find(channelName);
 
-    if (it == this->channels.end()) {
-        auto channel = std::make_shared<Channel>(this->windowManager, this->emoteManager,
-                                                 this->ircManager, channelName);
-        this->channels.insert(channelName, std::make_tuple(channel, 1));
+    if (it == this->twitchChannels.end()) {
+        auto channel =
+            std::make_shared<TwitchChannel>(this->emoteManager, this->ircManager, channelName);
+
+        this->twitchChannels.insert(channelName, std::make_tuple(channel, 1));
 
         this->ircManager.joinChannel(channelName);
 
@@ -58,7 +61,7 @@ std::shared_ptr<Channel> ChannelManager::addChannel(const QString &rawChannelNam
     return std::get<0>(it.value());
 }
 
-std::shared_ptr<Channel> ChannelManager::getChannel(const QString &channel)
+std::shared_ptr<TwitchChannel> ChannelManager::getTwitchChannel(const QString &channel)
 {
     QMutexLocker locker(&this->channelsMutex);
 
@@ -76,16 +79,16 @@ std::shared_ptr<Channel> ChannelManager::getChannel(const QString &channel)
         return emptyChannel;
     }
 
-    auto a = this->channels.find(c);
+    auto a = this->twitchChannels.find(c);
 
-    if (a == this->channels.end()) {
+    if (a == this->twitchChannels.end()) {
         return emptyChannel;
     }
 
     return std::get<0>(a.value());
 }
 
-void ChannelManager::removeChannel(const QString &channel)
+void ChannelManager::removeTwitchChannel(const QString &channel)
 {
     QMutexLocker locker(&this->channelsMutex);
 
@@ -95,9 +98,9 @@ void ChannelManager::removeChannel(const QString &channel)
 
     QString c = channel.toLower();
 
-    auto a = this->channels.find(c);
+    auto a = this->twitchChannels.find(c);
 
-    if (a == this->channels.end()) {
+    if (a == this->twitchChannels.end()) {
         return;
     }
 
@@ -105,7 +108,7 @@ void ChannelManager::removeChannel(const QString &channel)
 
     if (std::get<1>(a.value()) == 0) {
         this->ircManager.partChannel(c);
-        this->channels.remove(c);
+        this->twitchChannels.remove(c);
     }
 }
 
@@ -121,6 +124,11 @@ const std::string &ChannelManager::getUserID(const std::string &username)
 
     static std::string temporary = "xd";
     return temporary;
+}
+
+EmoteManager &ChannelManager::getEmoteManager()
+{
+    return this->emoteManager;
 }
 
 }  // namespace chatterino

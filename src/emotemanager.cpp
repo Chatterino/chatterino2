@@ -39,15 +39,19 @@ void EmoteManager::loadGlobalEmotes()
     this->loadFFZEmotes();
 }
 
-void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName)
+void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
 {
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
-    util::urlFetchJSON(url, [this, channelName](QJsonObject &rootNode) {
-        EmoteMap &channelEmoteMap = this->bttvChannels[channelName];
+    util::urlFetchJSON(url, [this, channelName, _map](QJsonObject &rootNode) {
+        auto map = _map.lock();
 
-        channelEmoteMap.clear();
+        if (_map.expired()) {
+            return;
+        }
+
+        map->clear();
 
         auto emotesNode = rootNode.value("emotes").toArray();
 
@@ -72,7 +76,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName)
             });
 
             this->bttvChannelEmotes.insert(code, emote);
-            channelEmoteMap.insert(code, emote);
+            map->insert(code, emote);
             codes.push_back(code.toStdString());
         }
 
@@ -80,16 +84,20 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName)
     });
 }
 
-void EmoteManager::reloadFFZChannelEmotes(const QString &channelName)
+void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
 {
     printf("[EmoteManager] Reload FFZ Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("http://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::urlFetchJSON(url, [this, channelName](QJsonObject &rootNode) {
-        EmoteMap &channelEmoteMap = this->ffzChannels[channelName];
+    util::urlFetchJSON(url, [this, channelName, _map](QJsonObject &rootNode) {
+        auto map = _map.lock();
 
-        channelEmoteMap.clear();
+        if (_map.expired()) {
+            return;
+        }
+
+        map->clear();
 
         auto setsNode = rootNode.value("sets").toObject();
 
@@ -114,7 +122,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName)
                     });
 
                 this->ffzChannelEmotes.insert(code, emote);
-                channelEmoteMap.insert(code, emote);
+                map->insert(code, emote);
                 codes.push_back(code.toStdString());
             }
 
@@ -128,17 +136,17 @@ ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
     return _twitchEmotes;
 }
 
-EmoteManager::EmoteMap &EmoteManager::getFFZEmotes()
+EmoteMap &EmoteManager::getFFZEmotes()
 {
     return ffzGlobalEmotes;
 }
 
-EmoteManager::EmoteMap &EmoteManager::getChatterinoEmotes()
+EmoteMap &EmoteManager::getChatterinoEmotes()
 {
     return _chatterinoEmotes;
 }
 
-EmoteManager::EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
+EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
 {
     return _bttvChannelEmoteFromCaches;
 }

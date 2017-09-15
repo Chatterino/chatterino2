@@ -23,12 +23,12 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton(BaseWidget *parent, int spacing)
     this->setMouseEffectColor(QColor(255, 255, 255, 63));
 }
 
-void ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
+// void ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
+//{
+//    QPainter painter(this);
 
-    this->fancyPaint(painter);
-}
+//    this->fancyPaint(painter);
+//}
 
 }  // namespace widgets
 }  // namespace chatterino

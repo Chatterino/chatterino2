@@ -14,7 +14,7 @@ class MessageBuilder
 public:
     MessageBuilder();
 
-    SharedMessage build();
+    SharedMessage getMessage();
 
     void appendWord(const Word &&word);
     void appendTimestamp();

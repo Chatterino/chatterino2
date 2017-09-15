@@ -146,6 +146,8 @@ void SettingsManager::updateWordTypeMask()
 
     newMaskUint |= Word::Username;
 
+    newMaskUint |= Word::AlwaysShow;
+
     Word::Type newMask = static_cast<Word::Type>(newMaskUint);
 
     if (newMask != _wordTypeMask) {

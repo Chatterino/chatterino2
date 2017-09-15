@@ -1,4 +1,4 @@
-#include "widgets/chatwidgetview.hpp"
+#include "widgets/channelview.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
@@ -20,14 +20,15 @@
 #include <functional>
 #include <memory>
 
+using namespace chatterino::messages;
+
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
-    : BaseWidget(_chatWidget)
-    , chatWidget(_chatWidget)
+ChannelView::ChannelView(BaseWidget *parent)
+    : BaseWidget(parent)
     , scrollBar(this)
-    , userPopupWidget(_chatWidget->getChannelRef())
+    , userPopupWidget(std::shared_ptr<Channel>())
 {
 #ifndef Q_OS_MAC
 //    this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -35,7 +36,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     this->setMouseTracking(true);
 
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
-                     &ChatWidgetView::wordTypeMaskChanged);
+                     &ChannelView::wordTypeMaskChanged);
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
@@ -45,15 +46,15 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     });
 }
 
-ChatWidgetView::~ChatWidgetView()
+ChannelView::~ChannelView()
 {
     QObject::disconnect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged,
-                        this, &ChatWidgetView::wordTypeMaskChanged);
+                        this, &ChannelView::wordTypeMaskChanged);
 }
 
-bool ChatWidgetView::layoutMessages()
+bool ChannelView::layoutMessages()
 {
-    auto messages = this->chatWidget->getMessagesSnapshot();
+    auto messages = this->getMessagesSnapshot();
 
     if (messages.getLength() == 0) {
         this->scrollBar.setVisible(false);
@@ -130,21 +131,30 @@ bool ChatWidgetView::layoutMessages()
     return redraw;
 }
 
-void ChatWidgetView::updateGifEmotes()
+void ChannelView::clearMessages()
+{
+    // Clear all stored messages in this chat widget
+    this->messages.clear();
+
+    // Layout chat widget messages, and force an update regardless if there are no messages
+    this->layoutMessages();
+    this->update();
+}
+
+void ChannelView::updateGifEmotes()
 {
     this->onlyUpdateEmotes = true;
     this->update();
 }
 
-ScrollBar &ChatWidgetView::getScrollBar()
+ScrollBar &ChannelView::getScrollBar()
 {
     return this->scrollBar;
 }
 
-QString ChatWidgetView::getSelectedText() const
+QString ChannelView::getSelectedText()
 {
-    messages::LimitedQueueSnapshot<messages::SharedMessageRef> messages =
-        this->chatWidget->getMessagesSnapshot();
+    LimitedQueueSnapshot<SharedMessageRef> messages = this->getMessagesSnapshot();
 
     QString text;
     bool isSingleMessage = this->selection.isSingleMessage();
@@ -232,7 +242,72 @@ QString ChatWidgetView::getSelectedText() const
     return text;
 }
 
-void ChatWidgetView::resizeEvent(QResizeEvent *)
+messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
+{
+    return this->messages.getSnapshot();
+}
+
+void ChannelView::setChannel(std::shared_ptr<Channel> channel)
+{
+    if (this->channel) {
+        this->detachChannel();
+    }
+    this->messages.clear();
+
+    // on new message
+    this->messageAppendedConnection =
+        channel->messageAppended.connect([this](SharedMessage &message) {
+            SharedMessageRef deleted;
+
+            auto messageRef = new MessageRef(message);
+
+            if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+                qreal value = std::max(0.0, this->getScrollBar().getDesiredValue() - 1);
+
+                this->getScrollBar().setDesiredValue(value, false);
+            }
+
+            layoutMessages();
+            update();
+        });
+
+    // on message removed
+    this->messageRemovedConnection =
+        channel->messageRemovedFromStart.connect([this](SharedMessage &) {
+            this->selection.min.messageIndex--;
+            this->selection.max.messageIndex--;
+            this->selection.start.messageIndex--;
+            this->selection.end.messageIndex--;
+
+            layoutMessages();
+            update();
+        });
+
+    auto snapshot = channel->getMessageSnapshot();
+
+    for (size_t i = 0; i < snapshot.getLength(); i++) {
+        SharedMessageRef deleted;
+
+        auto messageRef = new MessageRef(snapshot[i]);
+
+        this->messages.appendItem(SharedMessageRef(messageRef), deleted);
+    }
+
+    this->channel = channel;
+
+    this->userPopupWidget.setChannel(channel);
+}
+
+void ChannelView::detachChannel()
+{
+    // on message added
+    this->messageAppendedConnection.disconnect();
+
+    // on message removed
+    this->messageRemovedConnection.disconnect();
+}
+
+void ChannelView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
     this->scrollBar.move(width() - this->scrollBar.width(), 0);
@@ -242,7 +317,7 @@ void ChatWidgetView::resizeEvent(QResizeEvent *)
     this->update();
 }
 
-void ChatWidgetView::setSelection(const SelectionItem &start, const SelectionItem &end)
+void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &end)
 {
     // selections
     this->selection = Selection(start, end);
@@ -251,7 +326,7 @@ void ChatWidgetView::setSelection(const SelectionItem &start, const SelectionIte
     //             << max.charIndex;
 }
 
-void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
+void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
     QPainter painter(this);
 
@@ -288,9 +363,9 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
     }
 }
 
-void ChatWidgetView::drawMessages(QPainter &painter)
+void ChannelView::drawMessages(QPainter &painter)
 {
-    auto messages = this->chatWidget->getMessagesSnapshot();
+    auto messages = this->getMessagesSnapshot();
 
     size_t start = this->scrollBar.getCurrentValue();
 
@@ -341,7 +416,9 @@ void ChatWidgetView::drawMessages(QPainter &painter)
 
         messageRef->buffer = bufferPtr;
 
+        //        if (buffer != nullptr) {
         painter.drawPixmap(0, y, *buffer);
+        //        }
 
         y += messageRef->getHeight();
 
@@ -351,8 +428,8 @@ void ChatWidgetView::drawMessages(QPainter &painter)
     }
 }
 
-void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer,
-                                         int messageIndex)
+void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer,
+                                      int messageIndex)
 {
     QPainter painter(buffer);
 
@@ -403,8 +480,8 @@ void ChatWidgetView::updateMessageBuffer(messages::MessageRef *messageRef, QPixm
     messageRef->updateBuffer = false;
 }
 
-void ChatWidgetView::drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef,
-                                          int messageIndex, int bufferHeight)
+void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef,
+                                       int messageIndex, int bufferHeight)
 {
     if (this->selection.min.messageIndex > messageIndex ||
         this->selection.max.messageIndex < messageIndex) {
@@ -552,7 +629,7 @@ void ChatWidgetView::drawMessageSelection(QPainter &painter, messages::MessageRe
     painter.fillRect(rect, selectionColor);
 }
 
-void ChatWidgetView::wheelEvent(QWheelEvent *event)
+void ChannelView::wheelEvent(QWheelEvent *event)
 {
     if (this->scrollBar.isVisible()) {
         auto mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier.get();
@@ -562,7 +639,7 @@ void ChatWidgetView::wheelEvent(QWheelEvent *event)
     }
 }
 
-void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
+void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
@@ -594,10 +671,8 @@ void ChatWidgetView::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void ChatWidgetView::mousePressEvent(QMouseEvent *event)
+void ChannelView::mousePressEvent(QMouseEvent *event)
 {
-    this->chatWidget->giveFocus(Qt::MouseFocusReason);
-
     this->isMouseDown = true;
 
     this->lastPressPosition = event->screenPos();
@@ -621,7 +696,7 @@ void ChatWidgetView::mousePressEvent(QMouseEvent *event)
     this->repaint();
 }
 
-void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
+void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!this->isMouseDown) {
         // We didn't grab the mouse press, so we shouldn't be handling the mouse
@@ -682,10 +757,10 @@ void ChatWidgetView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-bool ChatWidgetView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
-                                     QPoint &relativePos, int &index)
+bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
+                                  QPoint &relativePos, int &index)
 {
-    auto messages = this->chatWidget->getMessagesSnapshot();
+    auto messages = this->getMessagesSnapshot();
 
     size_t start = this->scrollBar.getCurrentValue();
 

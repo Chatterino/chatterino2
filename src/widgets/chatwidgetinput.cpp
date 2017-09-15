@@ -13,9 +13,10 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
+ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteManager)
     : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
+    , emoteManager(emoteManager)
     , emotesLabel(this)
 {
     this->setMaximumHeight(150);
@@ -46,10 +47,12 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
 
     connect(&this->emotesLabel, &ChatWidgetHeaderButton::clicked, [this] {
         if (this->emotePopup == nullptr) {
-            this->emotePopup = new EmotePopup();
+            this->emotePopup = new EmotePopup(this->colorScheme, this->emoteManager);
         }
 
-        this->emotePopup->show();  //
+        this->emotePopup->resize(300, 500);
+        this->emotePopup->loadChannel(this->chatWidget->getChannel());
+        this->emotePopup->show();
     });
 
     connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);

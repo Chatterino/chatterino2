@@ -15,12 +15,13 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace twitch {
 
-TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel, Resources &_resources,
+TwitchMessageBuilder::TwitchMessageBuilder(TwitchChannel *_channel, Resources &_resources,
                                            EmoteManager &_emoteManager,
                                            WindowManager &_windowManager,
                                            const Communi::IrcPrivateMessage *_ircMessage,
                                            const messages::MessageParseArgs &_args)
     : channel(_channel)
+    , twitchChannel(_channel)
     , resources(_resources)
     , windowManager(_windowManager)
     , colorScheme(this->windowManager.colorScheme)
@@ -249,7 +250,7 @@ SharedMessage TwitchMessageBuilder::parse()
     //        HighlightTab = false;
     //    }
 
-    return this->build();
+    return this->getMessage();
 }
 
 void TwitchMessageBuilder::parseMessageID()
@@ -264,11 +265,12 @@ void TwitchMessageBuilder::parseMessageID()
 void TwitchMessageBuilder::parseRoomID()
 {
     auto iterator = this->tags.find("room-id");
+
     if (iterator != std::end(this->tags)) {
         this->roomID = iterator.value().toString().toStdString();
 
-        if (this->channel->roomID.empty()) {
-            this->channel->roomID = this->roomID;
+        if (this->twitchChannel->roomID.empty()) {
+            this->twitchChannel->roomID = this->roomID;
         }
     }
 }
@@ -503,13 +505,13 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
     if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
         return this->appendEmote(emoteData);
-    } else if (this->channel->bttvChannelEmotes.tryGet(emoteString, emoteData)) {
+    } else if (this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
         return this->appendEmote(emoteData);
     } else if (emoteManager.ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
         return this->appendEmote(emoteData);
-    } else if (this->channel->ffzChannelEmotes.tryGet(emoteString, emoteData)) {
+    } else if (this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
         return this->appendEmote(emoteData);
     } else if (emoteManager.getChatterinoEmotes().tryGet(emoteString, emoteData)) {

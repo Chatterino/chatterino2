@@ -237,7 +237,7 @@ void IrcManager::partChannel(const QString &channelName)
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     this->onPrivateMessage.invoke(message);
-    auto c = this->channelManager.getChannel(message->target().mid(1));
+    auto c = this->channelManager.getTwitchChannel(message->target().mid(1));
 
     if (!c) {
         return;
@@ -283,7 +283,7 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
         std::string roomID = iterator.value().toString().toStdString();
 
         auto channel = QString(message->toData()).split("#").at(1);
-        channelManager.getChannel(channel)->setRoomID(roomID);
+        channelManager.getTwitchChannel(channel)->setRoomID(roomID);
 
         this->resources.loadChannelData(roomID);
     }

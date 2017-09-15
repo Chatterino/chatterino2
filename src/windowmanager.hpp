@@ -23,7 +23,7 @@ public:
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
-    void updateAll();
+    // void updateAll();
 
     widgets::MainWindow &getMainWindow();
 
