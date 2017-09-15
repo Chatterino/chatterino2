@@ -86,6 +86,10 @@ void FancyButton::mouseReleaseEvent(QMouseEvent *event)
     }
 
     this->mouseDown = false;
+
+    if (this->rect().contains(event->pos())) {
+        emit clicked();
+    }
 }
 
 void FancyButton::mouseMoveEvent(QMouseEvent *event)

@@ -1,8 +1,8 @@
 #include "widgets/chatwidgetheader.hpp"
 #include "colorscheme.hpp"
+#include "util/urlfetch.hpp"
 #include "widgets/chatwidget.hpp"
 #include "widgets/notebookpage.hpp"
-#include "util/urlfetch.hpp"
 
 #include <QByteArray>
 #include <QDrag>
@@ -81,21 +81,17 @@ void ChatWidgetHeader::updateChannelText()
     if (channelName.empty()) {
         this->channelNameLabel.setText("<no channel>");
     } else {
-        if(this->chatWidget->getChannelRef()->isLive)
-        {
+        if (this->chatWidget->getChannelRef()->isLive) {
             auto channel = this->chatWidget->getChannelRef();
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
-            this->setToolTip("<style>.center    { text-align: center; }</style>" \
-                             "<p class = \"center\">" + \
-                             channel->streamStatus + "<br><br>" + \
-                             channel->streamGame + "<br>" \
-                             "Live for " + channel->streamUptime + \
-                             " with " + channel->streamViewerCount + " viewers" \
-                             "</p>"
-                             );
-        }
-        else
-        {
+            this->setToolTip(
+                "<style>.center    { text-align: center; }</style>"
+                "<p class = \"center\">" +
+                channel->streamStatus + "<br><br>" + channel->streamGame + "<br>"
+                                                                           "Live for " +
+                channel->streamUptime + " with " + channel->streamViewerCount + " viewers"
+                                                                                "</p>");
+        } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
         }
@@ -161,8 +157,10 @@ void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
 
 void ChatWidgetHeader::leftButtonClicked()
 {
-    this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
-    this->leftMenu.show();
+    QTimer::singleShot(100, [&] {
+        this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
+        this->leftMenu.show();
+    });
 }
 
 void ChatWidgetHeader::rightButtonClicked()
@@ -199,24 +197,23 @@ void ChatWidgetHeader::checkLive()
 {
     auto channel = this->chatWidget->getChannelRef();
     auto id = QString::fromStdString(channel->roomID);
-    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id,[=](QJsonObject obj){
-       if(obj.value("stream").isNull())
-       {
-           channel->isLive = false;
-           this->updateChannelText();
-       }
-       else
-       {
-           channel->isLive = true;
-           auto stream = obj.value("stream").toObject();
-           channel->streamViewerCount = QString::number(stream.value("viewers").toDouble());
-           channel->streamGame = stream.value("game").toString();
-           channel->streamStatus = stream.value("channel").toObject().value("status").toString();
-           QDateTime since = QDateTime::fromString(stream.value("created_at").toString(),Qt::ISODate);
-           auto diff = since.secsTo(QDateTime::currentDateTime());
-           channel->streamUptime = QString::number(diff/3600) + "h " + QString::number(diff % 3600 / 60) + "m";
-           this->updateChannelText();
-       }
+    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, [=](QJsonObject obj) {
+        if (obj.value("stream").isNull()) {
+            channel->isLive = false;
+            this->updateChannelText();
+        } else {
+            channel->isLive = true;
+            auto stream = obj.value("stream").toObject();
+            channel->streamViewerCount = QString::number(stream.value("viewers").toDouble());
+            channel->streamGame = stream.value("game").toString();
+            channel->streamStatus = stream.value("channel").toObject().value("status").toString();
+            QDateTime since =
+                QDateTime::fromString(stream.value("created_at").toString(), Qt::ISODate);
+            auto diff = since.secsTo(QDateTime::currentDateTime());
+            channel->streamUptime =
+                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+            this->updateChannelText();
+        }
     });
 }
 

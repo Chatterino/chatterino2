@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
+#include "widgets/fancybutton.hpp"
 #include "widgets/signallabel.hpp"
 
 #include <QHBoxLayout>
@@ -16,10 +17,8 @@ namespace widgets {
 
 class ChatWidgetHeader;
 
-class ChatWidgetHeaderButton : public BaseWidget
+class ChatWidgetHeaderButton : public FancyButton
 {
-    Q_OBJECT
-
 public:
     explicit ChatWidgetHeaderButton(BaseWidget *parent, int spacing = 6);
 
@@ -28,29 +27,14 @@ public:
         return this->ui.label;
     }
 
-signals:
-    void clicked();
-
 protected:
     virtual void paintEvent(QPaintEvent *) override;
-
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     struct {
         QHBoxLayout hbox;
         SignalLabel label;
     } ui;
-
-    bool mouseOver = false;
-    bool mouseDown = false;
-
-    void labelMouseUp();
-    void labelMouseDown();
 };
 
 }  // namespace widgets

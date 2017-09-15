@@ -4,8 +4,8 @@
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 #include "util/urlfetch.hpp"
-#include "widgets/textinputdialog.hpp"
 #include "widgets/qualitypopup.h"
+#include "widgets/textinputdialog.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -100,9 +100,7 @@ std::shared_ptr<Channel> &ChatWidget::getChannelRef()
 void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 {
     this->channel = _newChannel;
-    this->channel->roomIDchanged.connect([this](){
-        this->header.checkLive();
-    });
+    this->channel->roomIDchanged.connect([this]() { this->header.checkLive(); });
 
     this->view.userPopupWidget.setChannel(_newChannel);
 
@@ -131,7 +129,7 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 
     auto snapshot = this->channel->getMessageSnapshot();
 
-    for (int i = 0; i < snapshot.getLength(); i++) {
+    for (size_t i = 0; i < snapshot.getLength(); i++) {
         SharedMessageRef deleted;
 
         auto messageRef = new MessageRef(snapshot[i]);
@@ -261,7 +259,7 @@ void ChatWidget::doCloseSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
     page->removeFromLayout(this);
-    QTimer* timer = this->header.findChild<QTimer*>();
+    QTimer *timer = this->header.findChild<QTimer *>();
     timer->stop();
     timer->deleteLater();
 }
@@ -269,9 +267,8 @@ void ChatWidget::doCloseSplit()
 void ChatWidget::doChangeChannel()
 {
     this->showChangeChannelPopup("Change channel");
-    auto popup = this->findChildren<QDockWidget*>();
-    if(popup.at(0)->isVisible() && !popup.at(0)->isFloating())
-    {
+    auto popup = this->findChildren<QDockWidget *>();
+    if (popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
         popup.at(0)->hide();
         doOpenViewerList();
     }
@@ -310,7 +307,8 @@ void ChatWidget::doOpenPopupPlayer()
 void ChatWidget::doOpenStreamlink()
 {
     SettingsManager &settings = SettingsManager::getInstance();
-    QString preferredQuality = QString::fromStdString(settings.preferredQuality.getValue()).toLower();
+    QString preferredQuality =
+        QString::fromStdString(settings.preferredQuality.getValue()).toLower();
     // TODO(Confuseh): Default streamlink paths
     QString path = QString::fromStdString(settings.streamlinkPath.getValue());
     QString channel = QString::fromStdString(this->channelName.getValue());
@@ -344,29 +342,30 @@ void ChatWidget::doOpenStreamlink()
             // my god that signal though
             QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
                              [path, channel, p](int exitCode) {
-                if (exitCode > 0) {
-                    return;
-                }
-                QString lastLine = QString(p->readAllStandardOutput());
-                lastLine = lastLine.trimmed().split('\n').last();
-                if (lastLine.startsWith("Available streams: ")) {
-                    QStringList options;
-                    QStringList split = lastLine.right(lastLine.length() - 19).split(", ");
+                                 if (exitCode > 0) {
+                                     return;
+                                 }
+                                 QString lastLine = QString(p->readAllStandardOutput());
+                                 lastLine = lastLine.trimmed().split('\n').last();
+                                 if (lastLine.startsWith("Available streams: ")) {
+                                     QStringList options;
+                                     QStringList split =
+                                         lastLine.right(lastLine.length() - 19).split(", ");
 
-                    for (int i = split.length() - 1; i >= 0; i--) {
-                        QString option = split.at(i);
-                        if (option.endsWith(" (worst)")) {
-                            options << option.left(option.length() - 8);
-                        } else if (option.endsWith(" (best)")) {
-                            options << option.left(option.length() - 7);
-                        } else {
-                            options << option;
-                        }
-                    }
+                                     for (int i = split.length() - 1; i >= 0; i--) {
+                                         QString option = split.at(i);
+                                         if (option.endsWith(" (worst)")) {
+                                             options << option.left(option.length() - 8);
+                                         } else if (option.endsWith(" (best)")) {
+                                             options << option.left(option.length() - 7);
+                                         } else {
+                                             options << option;
+                                         }
+                                     }
 
-                    QualityPopup::showDialog(channel, path, options);
-                }
-            });
+                                     QualityPopup::showDialog(channel, path, options);
+                                 }
+                             });
             p->start(path, {"twitch.tv/" + channel});
         }
     }
@@ -374,13 +373,13 @@ void ChatWidget::doOpenStreamlink()
 
 void ChatWidget::doOpenViewerList()
 {
-    auto viewerDock = new QDockWidget("Viewer List",this);
+    auto viewerDock = new QDockWidget("Viewer List", this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
-                            QDockWidget::DockWidgetClosable |
-                            QDockWidget::DockWidgetFloatable);
-    viewerDock->resize(0.5*this->width(),this->height() - this->header.height() - this->input.height());
-    viewerDock->move(0,this->header.height());
+                            QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetFloatable);
+    viewerDock->resize(0.5 * this->width(),
+                       this->height() - this->header.height() - this->input.height());
+    viewerDock->move(0, this->header.height());
 
     auto accountPopup = new AccountPopupWidget(this->channel);
     auto multiWidget = new QWidget(viewerDock);
@@ -392,64 +391,56 @@ void ChatWidget::doOpenViewerList()
 
     static QStringList labels = {"Moderators", "Staff", "Admins", "Global Moderators", "Viewers"};
     static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
-    QList<QListWidgetItem*> labelList;
-    for(auto &x : labels)
-    {
+    QList<QListWidgetItem *> labelList;
+    for (auto &x : labels) {
         auto label = new QListWidgetItem(x);
         label->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters",[=](QJsonObject obj){
-        QJsonObject chattersObj = obj.value("chatters").toObject();
+    util::twitch::get(
+        "https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", [=](QJsonObject obj) {
+            QJsonObject chattersObj = obj.value("chatters").toObject();
 
-        loadingLabel->hide();
-        for(int i = 0; i < jsonLabels.size(); i++)
-        {
-            chattersList->addItem(labelList.at(i));
-            foreach (const QJsonValue & v, chattersObj.value(jsonLabels.at(i)).toArray())
-                chattersList->addItem(v.toString());
-        }
-    });
+            loadingLabel->hide();
+            for (int i = 0; i < jsonLabels.size(); i++) {
+                chattersList->addItem(labelList.at(i));
+                foreach (const QJsonValue &v, chattersObj.value(jsonLabels.at(i)).toArray())
+                    chattersList->addItem(v.toString());
+            }
+        });
 
     searchBar->setPlaceholderText("Search User...");
-    QObject::connect(searchBar,&QLineEdit::textEdited,this,[=](){
+    QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {
         auto query = searchBar->text();
-        if(!query.isEmpty())
-        {
-            auto results = chattersList->findItems(query,Qt::MatchStartsWith);
+        if (!query.isEmpty()) {
+            auto results = chattersList->findItems(query, Qt::MatchStartsWith);
             chattersList->hide();
             resultList->clear();
-            for (auto & item : results)
-            {
-                if(!labels.contains(item->text()))
+            for (auto &item : results) {
+                if (!labels.contains(item->text()))
                     resultList->addItem(item->text());
             }
             resultList->show();
-        }
-        else
-        {
+        } else {
             resultList->hide();
             chattersList->show();
         }
     });
 
-    QObject::connect(viewerDock,&QDockWidget::topLevelChanged,this,[=](){
-        viewerDock->setMinimumWidth(300);
-    });
+    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this,
+                     [=]() { viewerDock->setMinimumWidth(300); });
 
-    QObject::connect(chattersList,&QListWidget::doubleClicked,this,[=](){
-        if(!labels.contains(chattersList->currentItem()->text()))
-        {
-            doOpenAccountPopupWidget(accountPopup,chattersList->currentItem()->text());
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
+        if (!labels.contains(chattersList->currentItem()->text())) {
+            doOpenAccountPopupWidget(accountPopup, chattersList->currentItem()->text());
         }
     });
 
-    QObject::connect(resultList,&QListWidget::doubleClicked,this,[=](){
-        if(!labels.contains(resultList->currentItem()->text()))
-        {
-            doOpenAccountPopupWidget(accountPopup,resultList->currentItem()->text());
+    QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
+        if (!labels.contains(resultList->currentItem()->text())) {
+            doOpenAccountPopupWidget(accountPopup, resultList->currentItem()->text());
         }
     });
 

@@ -111,7 +111,7 @@ void ColorScheme::setColors(double hue, double multiplier)
     ScrollbarBG = ChatBackground;
     ScrollbarThumb = getColor(0, 0.1, 0.85);
     ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
-    ScrollbarArrow = getColor(0, 0.1, 0.4);
+    ScrollbarArrow = getColor(0, 0.1, 0.9);
 
     // stylesheet
     InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +

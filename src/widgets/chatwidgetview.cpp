@@ -30,7 +30,7 @@ ChatWidgetView::ChatWidgetView(ChatWidget *_chatWidget)
     , userPopupWidget(_chatWidget->getChannelRef())
 {
 #ifndef Q_OS_MAC
-    this->setAttribute(Qt::WA_OpaquePaintEvent);
+//    this->setAttribute(Qt::WA_OpaquePaintEvent);
 #endif
     this->setMouseTracking(true);
 
@@ -70,7 +70,8 @@ bool ChatWidgetView::layoutMessages()
     this->showingLatestMessages = this->scrollBar.isAtBottom() || !this->scrollBar.isVisible();
 
     size_t start = this->scrollBar.getCurrentValue();
-    int layoutWidth = this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width();
+    int layoutWidth =
+        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
 
     // layout the visible messages in the view
     if (messages.getLength() > start) {
@@ -258,17 +259,17 @@ void ChatWidgetView::paintEvent(QPaintEvent * /*event*/)
 
 // only update gif emotes
 #ifndef Q_OS_MAC
-    if (this->onlyUpdateEmotes) {
-        this->onlyUpdateEmotes = false;
+//    if (this->onlyUpdateEmotes) {
+//        this->onlyUpdateEmotes = false;
 
-        for (const GifEmoteData &item : this->gifEmotes) {
-            painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+//        for (const GifEmoteData &item : this->gifEmotes) {
+//            painter.fillRect(item.rect, this->colorScheme.ChatBackground);
 
-            painter.drawPixmap(item.rect, *item.image->getPixmap());
-        }
+//            painter.drawPixmap(item.rect, *item.image->getPixmap());
+//        }
 
-        return;
-    }
+//        return;
+//    }
 #endif
 
     // update all messages

@@ -13,6 +13,8 @@ namespace widgets {
 
 class FancyButton : public BaseWidget
 {
+    Q_OBJECT
+
     struct ClickEffect {
         double progress = 0.0;
         QPoint position;
@@ -27,6 +29,9 @@ public:
     FancyButton(BaseWidget *parent);
 
     void setMouseEffectColor(QColor color);
+
+signals:
+    void clicked();
 
 protected:
     bool selected = false;

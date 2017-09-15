@@ -9,7 +9,6 @@
 
 #include <QCompleter>
 #include <QPainter>
-#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -23,13 +22,15 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
 
     this->setLayout(&this->hbox);
 
-    this->hbox.setMargin(4);
+    this->hbox.setMargin(0);
 
     this->hbox.addLayout(&this->editContainer);
     this->hbox.addLayout(&this->vbox);
 
     this->editContainer.addWidget(&this->textInput);
     this->editContainer.setMargin(4);
+
+    this->emotesLabel.setMinimumHeight(24);
 
     this->vbox.addWidget(&this->textLengthLabel);
     this->vbox.addStretch(1);
@@ -43,10 +44,18 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
         "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
         "/>");
 
+    connect(&this->emotesLabel, &ChatWidgetHeaderButton::clicked, [this] {
+        if (this->emotePopup == nullptr) {
+            this->emotePopup = new EmotePopup();
+        }
+
+        this->emotePopup->show();  //
+    });
+
     connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);
 
     this->refreshTheme();
-    this->setMessageLengthVisible(SettingsManager::getInstance().showMessageLength.get());
+    textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength.get());
 
     auto completer = new QCompleter(
         this->chatWidget->completionManager.createModel(this->chatWidget->channelName));
@@ -148,21 +157,14 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget)
         }
     });
 
-    /* XXX(pajlada): FIX THIS
-    QObject::connect(&Settings::getInstance().showMessageLength,
-                     &BoolSetting::valueChanged, this,
-                     &ChatWidgetInput::setMessageLengthVisible);
-                     */
+    this->textLengthVisibleChangedConnection =
+        SettingsManager::getInstance().showMessageLength.valueChanged.connect(
+            [this](const bool &value) { this->textLengthLabel.setHidden(!value); });
 }
 
 ChatWidgetInput::~ChatWidgetInput()
 {
-    /* XXX(pajlada): FIX THIS
-    QObject::disconnect(
-        &Settings::getInstance().getShowMessageLength(),
-        &BoolSetting::valueChanged, this,
-        &ChatWidgetInput::setMessageLengthVisible);
-        */
+    this->textLengthVisibleChangedConnection.disconnect();
 }
 
 void ChatWidgetInput::refreshTheme()

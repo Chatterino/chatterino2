@@ -212,7 +212,7 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::settingsButtonClicked()
 {
-    SettingsDialog::showDialog();
+    QTimer::singleShot(100, [this] { SettingsDialog::showDialog(); });
 }
 
 void Notebook::usersButtonClicked()
@@ -221,7 +221,7 @@ void Notebook::usersButtonClicked()
 
 void Notebook::addPageButtonClicked()
 {
-    addPage(true);
+    QTimer::singleShot(100, [this] { this->addPage(true); });
 }
 
 void Notebook::load(const boost::property_tree::ptree &tree)

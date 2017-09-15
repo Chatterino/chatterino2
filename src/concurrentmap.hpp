@@ -81,6 +81,18 @@ public:
         this->data.insert(name, value);
     }
 
+    void each(std::function<void(const TKey &name, const TValue &value)> &func) const
+    {
+        QMutexLocker lock(this->mutex.get());
+
+        QMapIterator<TKey, TValue> it(this->data);
+
+        while (it.hasNext()) {
+            it.next();
+            func(it.key(), it.value());
+        }
+    }
+
 private:
     mutable std::unique_ptr<QMutex> mutex;
     QMap<TKey, TValue> data;
