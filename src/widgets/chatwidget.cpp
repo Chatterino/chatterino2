@@ -82,9 +82,7 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
 
     this->input.textInput.installEventFilter(parent);
 
-    connect(&view, &this->view.mousePressEvent, this, [&](QMouseEvent *) {
-        QTimer::singleShot(10, [this] { this->giveFocus(Qt::MouseFocusReason); });
-    });
+    this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
 }
 
 ChatWidget::~ChatWidget()

@@ -96,6 +96,8 @@ public:
 
     void clearMessages();
 
+    boost::signals2::signal<void(QMouseEvent *)> mouseDown;
+
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
 

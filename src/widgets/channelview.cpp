@@ -681,6 +681,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
+    this->mouseDown(event);
+
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
 

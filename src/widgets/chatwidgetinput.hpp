@@ -3,8 +3,8 @@
 #include "emotemanager.hpp"
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/rippleeffectlabel.hpp"
 #include "widgets/emotepopup.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
