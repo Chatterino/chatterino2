@@ -151,6 +151,11 @@ EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
     return _bttvChannelEmoteFromCaches;
 }
 
+EmoteMap &EmoteManager::getEmojis()
+{
+    return this->emojis;
+}
+
 ConcurrentMap<int, EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;
@@ -208,7 +213,15 @@ void EmoteManager::loadEmojis()
 
         this->emojiFirstByte[emojiData.value.at(0)].append(emojiData);
 
-        // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by emojiData.code.length()
+        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
+                      "emojione/2.2.6/assets/png/" +
+                      code + ".png";
+
+        this->emojis.insert(code,
+                            EmoteData(new LazyLoadedImage(*this, this->windowManager, url, 0.35)));
+
+        // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
+        // emojiData.code.length()
     }
 }
 

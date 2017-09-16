@@ -2,7 +2,7 @@
 
 #include "signallabel.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/chatwidgetheaderbutton.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 
 #include <QAction>
 #include <QHBoxLayout>
@@ -46,14 +46,14 @@ private:
     QHBoxLayout hbox;
 
     // top left
-    ChatWidgetHeaderButton leftLabel;
+    RippleEffectLabel leftLabel;
     QMenu leftMenu;
 
     // center
     SignalLabel channelNameLabel;
 
     // top right
-    ChatWidgetHeaderButton rightLabel;
+    RippleEffectLabel rightLabel;
     QMenu rightMenu;
 
     void leftButtonClicked();

@@ -45,7 +45,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
         "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
         "/>");
 
-    connect(&this->emotesLabel, &ChatWidgetHeaderButton::clicked, [this] {
+    connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
         if (this->emotePopup == nullptr) {
             this->emotePopup = new EmotePopup(this->colorScheme, this->emoteManager);
         }

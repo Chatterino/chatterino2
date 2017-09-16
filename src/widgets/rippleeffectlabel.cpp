@@ -1,4 +1,4 @@
-#include "widgets/chatwidgetheaderbutton.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 #include "colorscheme.hpp"
 #include "widgets/chatwidgetheader.hpp"
 
@@ -8,7 +8,7 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetHeaderButton::ChatWidgetHeaderButton(BaseWidget *parent, int spacing)
+RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     : FancyButton(parent)
 {
     setLayout(&this->ui.hbox);
@@ -22,13 +22,6 @@ ChatWidgetHeaderButton::ChatWidgetHeaderButton(BaseWidget *parent, int spacing)
 
     this->setMouseEffectColor(QColor(255, 255, 255, 63));
 }
-
-// void ChatWidgetHeaderButton::paintEvent(QPaintEvent *)
-//{
-//    QPainter painter(this);
-
-//    this->fancyPaint(painter);
-//}
 
 }  // namespace widgets
 }  // namespace chatterino

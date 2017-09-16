@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fancybutton.hpp"
+#include "rippleeffectbutton.hpp"
 
 #include <QWidget>
 

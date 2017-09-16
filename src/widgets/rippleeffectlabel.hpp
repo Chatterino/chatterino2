@@ -1,7 +1,7 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
-#include "widgets/fancybutton.hpp"
+#include "widgets/rippleeffectbutton.hpp"
 #include "widgets/signallabel.hpp"
 
 #include <QHBoxLayout>
@@ -15,20 +15,15 @@ class ColorScheme;
 
 namespace widgets {
 
-class ChatWidgetHeader;
-
-class ChatWidgetHeaderButton : public FancyButton
+class RippleEffectLabel : public FancyButton
 {
 public:
-    explicit ChatWidgetHeaderButton(BaseWidget *parent, int spacing = 6);
+    explicit RippleEffectLabel(BaseWidget *parent, int spacing = 6);
 
     SignalLabel &getLabel()
     {
         return this->ui.label;
     }
-
-protected:
-    //    virtual void paintEvent(QPaintEvent *) override;
 
 private:
     struct {

@@ -3,8 +3,8 @@
 #include "emotemanager.hpp"
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/chatwidgetheaderbutton.hpp"
-#include "widgets/emotepopup.h"
+#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/emotepopup.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -46,7 +46,7 @@ private:
     QHBoxLayout editContainer;
     ResizingTextEdit textInput;
     QLabel textLengthLabel;
-    ChatWidgetHeaderButton emotesLabel;
+    RippleEffectLabel emotesLabel;
     QStringList prevMsg;
     unsigned int prevIndex = 0;
     virtual void refreshTheme() override;

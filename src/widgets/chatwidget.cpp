@@ -4,7 +4,7 @@
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 #include "util/urlfetch.hpp"
-#include "widgets/qualitypopup.h"
+#include "widgets/qualitypopup.hpp"
 #include "widgets/textinputdialog.hpp"
 
 #include <QApplication>

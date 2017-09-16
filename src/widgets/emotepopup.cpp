@@ -1,4 +1,4 @@
-#include "emotepopup.h"
+#include "emotepopup.hpp"
 
 #include <QHBoxLayout>
 
@@ -64,7 +64,9 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
 
-    view->setChannel(emoteChannel);
+    //    addEmotes(this->emoteManager.getEmojis(), "Emojis", "Emoji");
+
+    this->view->setChannel(emoteChannel);
 }
 }
 }

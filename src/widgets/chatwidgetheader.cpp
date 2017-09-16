@@ -37,7 +37,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->leftLabel.getLabel().setTextFormat(Qt::RichText);
     this->leftLabel.getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
 
-    connect(&this->leftLabel, &ChatWidgetHeaderButton::clicked, this,
+    connect(&this->leftLabel, &RippleEffectLabel::clicked, this,
             &ChatWidgetHeader::leftButtonClicked);
 
     this->leftMenu.addAction("Add new split", this->chatWidget, &ChatWidget::doAddSplit,

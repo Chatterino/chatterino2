@@ -60,7 +60,6 @@ SOURCES += \
     src/resources.cpp \
     src/widgets/chatwidget.cpp \
     src/widgets/chatwidgetheader.cpp \
-    src/widgets/chatwidgetheaderbutton.cpp \
     src/widgets/chatwidgetinput.cpp \
     src/widgets/mainwindow.cpp \
     src/widgets/notebook.cpp \
@@ -84,7 +83,6 @@ SOURCES += \
     src/messages/messagebuilder.cpp \
     src/twitch/twitchmessagebuilder.cpp \
     src/twitch/twitchparsemessage.cpp \
-    src/widgets/fancybutton.cpp \
     src/widgets/titlebar.cpp \
     src/appdatapath.cpp \
     src/accountmanager.cpp \
@@ -98,7 +96,9 @@ SOURCES += \
     src/widgets/qualitypopup.cpp \
     src/widgets/emotepopup.cpp \
     src/widgets/channelview.cpp \
-    src/twitch/twitchchannel.cpp
+    src/twitch/twitchchannel.cpp \
+    src/widgets/rippleeffectlabel.cpp \
+    src/widgets/rippleeffectbutton.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -117,7 +117,6 @@ HEADERS  += \
     src/twitch/emotevalue.hpp \
     src/widgets/chatwidget.hpp \
     src/widgets/chatwidgetheader.hpp \
-    src/widgets/chatwidgetheaderbutton.hpp \
     src/widgets/chatwidgetinput.hpp \
     src/widgets/mainwindow.hpp \
     src/widgets/notebook.hpp \
@@ -148,7 +147,6 @@ HEADERS  += \
     src/messages/messagebuilder.hpp \
     src/twitch/twitchmessagebuilder.hpp \
     src/twitch/twitchparsemessage.hpp \
-    src/widgets/fancybutton.hpp \
     src/widgets/titlebar.hpp \
     src/appdatapath.hpp \
     src/accountmanager.hpp \
@@ -158,10 +156,12 @@ HEADERS  += \
     src/util/distancebetweenpoints.hpp \
     src/widgets/basewidget.hpp \
     src/completionmanager.hpp \
-    src/widgets/qualitypopup.h \
-    src/widgets/emotepopup.h \
     src/widgets/channelview.hpp \
-    src/twitch/twitchchannel.hpp
+    src/twitch/twitchchannel.hpp \
+    src/widgets/rippleeffectbutton.hpp \
+    src/widgets/rippleeffectlabel.hpp \
+    src/widgets/qualitypopup.hpp \
+    src/widgets/emotepopup.hpp
 
 PRECOMPILED_HEADER =
 

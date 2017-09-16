@@ -1,4 +1,4 @@
-#include "qualitypopup.h"
+#include "qualitypopup.hpp"
 
 #include <QProcess>
 
