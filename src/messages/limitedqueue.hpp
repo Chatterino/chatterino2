@@ -47,7 +47,7 @@ public:
                 auto newVector = std::make_shared<std::vector<T>>();
                 newVector->reserve(_limit + _buffer);
 
-                for (unsigned int i = 0; i < _limit - 1; i++) {
+                for (unsigned int i = 0; i < _limit; ++i) {
                     newVector->push_back(_vector->at(i + _offset));
                 }
                 newVector->push_back(item);
