@@ -85,6 +85,7 @@ private:
 public:
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
+    bool testEnabled = false;
 
 public slots:
     // Add new split to the notebook page that this chat widget is in
@@ -118,6 +119,9 @@ public slots:
 
     // Open viewer list of the channel
     void doOpenViewerList();
+
+    void doToggleMessageSpawning();
+    void test();
 };
 
 }  // namespace widgets

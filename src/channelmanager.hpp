@@ -14,13 +14,13 @@ class IrcManager;
 
 class ChannelManager
 {
-    WindowManager &windowManager;
-    EmoteManager &emoteManager;
-    IrcManager &ircManager;
-
 public:
     explicit ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
                             IrcManager &_ircManager);
+
+    WindowManager &windowManager;
+    EmoteManager &emoteManager;
+    IrcManager &ircManager;
 
     const std::vector<std::shared_ptr<Channel>> getItems();
 

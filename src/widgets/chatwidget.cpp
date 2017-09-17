@@ -3,6 +3,7 @@
 #include "colorscheme.hpp"
 #include "notebookpage.hpp"
 #include "settingsmanager.hpp"
+#include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/qualitypopup.hpp"
 #include "widgets/textinputdialog.hpp"
@@ -23,6 +24,7 @@
 #include <boost/signals2.hpp>
 
 #include <functional>
+#include <random>
 
 using namespace chatterino::messages;
 
@@ -75,6 +77,11 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     // CTRL+C: Copy
     ezShortcut(this, "CTRL+B", &ChatWidget::doCopy);
 
+#ifndef NDEBUG
+    // F12: Toggle message spawning
+    ezShortcut(this, "ALT+Q", &ChatWidget::doToggleMessageSpawning);
+#endif
+
     this->channelName.getValueChangedSignal().connect(
         std::bind(&ChatWidget::channelNameUpdated, this, std::placeholders::_1));
 
@@ -83,6 +90,10 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     this->input.textInput.installEventFilter(parent);
 
     this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &ChatWidget::test);
+    timer->start(1000);
 }
 
 ChatWidget::~ChatWidget()
@@ -420,6 +431,81 @@ void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString us
 void ChatWidget::doCopy()
 {
     QApplication::clipboard()->setText(this->view.getSelectedText());
+}
+
+static std::vector<std::string> usernameVariants = {
+    "pajlada",                 //
+    "trump",                   //
+    "Chancu",                  //
+    "pajaWoman",               //
+    "fourtf",                  //
+    "weneedmoreautisticbots",  //
+    "fourtfbot",               //
+    "pajbot",                  //
+    "snusbot",                 //
+};
+
+static std::vector<std::string> messageVariants = {
+    "hehe",                                         //
+    "lol pajlada",                                  //
+    "hehe BANNEDWORD",                              //
+    "someone ordered pizza",                        //
+    "for ice poseidon",                             //
+    "and delivery guy said it is for enza denino",  //
+    "!gn",                                          //
+    "for my laptop",                                //
+    "should I buy a Herschel backpack?",            //
+};
+
+template <typename Iter, typename RandomGenerator>
+static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
+{
+    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+    std::advance(start, dis(g));
+    return start;
+}
+
+template <typename Iter>
+static Iter select_randomly(Iter start, Iter end)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    return select_randomly(start, end, gen);
+}
+
+void ChatWidget::test()
+{
+    if (this->testEnabled) {
+        messages::MessageParseArgs args;
+
+        auto message =
+            new Communi::IrcPrivateMessage(this->channelManager.ircManager.readConnection.get());
+
+        std::string text = *(select_randomly(messageVariants.begin(), messageVariants.end()));
+        std::string username = *(select_randomly(usernameVariants.begin(), usernameVariants.end()));
+        std::string usernameString = username + "!" + username + "@" + username;
+
+        QStringList params{"#pajlada", text.c_str()};
+
+        qDebug() << params;
+
+        message->setParameters(params);
+
+        message->setPrefix(usernameString.c_str());
+
+        auto twitchChannel = std::dynamic_pointer_cast<twitch::TwitchChannel>(this->channel);
+
+        twitch::TwitchMessageBuilder builder(
+            twitchChannel.get(), this->channelManager.ircManager.resources,
+            this->channelManager.emoteManager, this->channelManager.windowManager, message, args);
+
+        twitchChannel->addMessage(builder.parse());
+    }
+}
+
+void ChatWidget::doToggleMessageSpawning()
+{
+    this->testEnabled = !this->testEnabled;
 }
 
 }  // namespace widgets

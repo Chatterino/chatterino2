@@ -49,20 +49,23 @@ public:
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
-private:
     ChannelManager &channelManager;
     Resources &resources;
     EmoteManager &emoteManager;
     WindowManager &windowManager;
 
+private:
     // variables
     twitch::TwitchUser _account;
 
     pajlada::Settings::Setting<std::string> currentUser;
 
     std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
+
+public:
     std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
 
+private:
     std::mutex connectionMutex;
     uint32_t connectionGeneration = 0;
 
