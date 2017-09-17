@@ -8,6 +8,7 @@
 #include "ui_accountpopupform.h"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/chatwidget.hpp"
+#include "windowmanager.hpp"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -25,8 +26,9 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-ChannelView::ChannelView(BaseWidget *parent)
+ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
     : BaseWidget(parent)
+    , windowManager(windowManager)
     , scrollBar(this)
     , userPopupWidget(std::shared_ptr<Channel>())
 {
@@ -44,6 +46,9 @@ ChannelView::ChannelView(BaseWidget *parent)
 
         this->layoutMessages();
     });
+
+    this->repaintGifsConnection =
+        windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
 }
 
 ChannelView::~ChannelView()

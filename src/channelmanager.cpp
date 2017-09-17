@@ -131,4 +131,9 @@ EmoteManager &ChannelManager::getEmoteManager()
     return this->emoteManager;
 }
 
+WindowManager &ChannelManager::getWindowManager()
+{
+    return this->windowManager;
+}
+
 }  // namespace chatterino

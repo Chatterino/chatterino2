@@ -41,9 +41,7 @@ void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 
 void WindowManager::repaintGifEmotes()
 {
-    if (this->mainWindow != nullptr) {
-        this->mainWindow->repaintGifEmotes();
-    }
+    this->repaintGifs();
 }
 
 // void WindowManager::updateAll()

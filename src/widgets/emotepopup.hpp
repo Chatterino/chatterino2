@@ -11,7 +11,7 @@ namespace widgets {
 class EmotePopup : public BaseWidget
 {
 public:
-    explicit EmotePopup(ColorScheme &, EmoteManager &);
+    explicit EmotePopup(ColorScheme &, EmoteManager &, WindowManager &);
 
     void loadChannel(std::shared_ptr<Channel> channel);
 

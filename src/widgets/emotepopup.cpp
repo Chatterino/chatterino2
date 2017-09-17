@@ -11,7 +11,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager)
+EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager,
+                       WindowManager &windowManager)
     : BaseWidget(colorScheme, 0)
     , emoteManager(emoteManager)
 {
@@ -19,7 +20,7 @@ EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager)
     this->setLayout(layout);
     layout->setMargin(0);
 
-    view = new ChannelView(this);
+    view = new ChannelView(windowManager, this);
     layout->addWidget(view);
 }
 

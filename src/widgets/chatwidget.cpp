@@ -52,8 +52,8 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     , channel(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)
-    , view(this)
-    , input(this, _channelManager.getEmoteManager())
+    , view(_channelManager.getWindowManager(), this)
+    , input(this, _channelManager.getEmoteManager(), _channelManager.getWindowManager())
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
@@ -87,7 +87,7 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
 
 ChatWidget::~ChatWidget()
 {
-    channelNameUpdated("");
+    this->channelNameUpdated("");
 }
 
 std::shared_ptr<Channel> ChatWidget::getChannel() const

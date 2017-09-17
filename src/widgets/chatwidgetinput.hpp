@@ -26,7 +26,7 @@ class ChatWidgetInput : public BaseWidget
     Q_OBJECT
 
 public:
-    ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &);
+    ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &, WindowManager &);
     ~ChatWidgetInput();
 
 protected:
@@ -39,6 +39,7 @@ private:
     ChatWidget *const chatWidget;
     EmotePopup *emotePopup = nullptr;
     EmoteManager &emoteManager;
+    WindowManager &windowManager;
 
     boost::signals2::connection textLengthVisibleChangedConnection;
     QHBoxLayout hbox;

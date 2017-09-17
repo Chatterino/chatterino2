@@ -30,6 +30,7 @@ public:
 
     const std::string &getUserID(const std::string &username);
     EmoteManager &getEmoteManager();
+    WindowManager &getWindowManager();
 
     // Special channels
     const std::shared_ptr<twitch::TwitchChannel> whispersChannel;

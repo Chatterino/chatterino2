@@ -30,6 +30,8 @@ public:
     void load();
     void save();
 
+    boost::signals2::signal<void()> repaintGifs;
+
 private:
     std::mutex windowMutex;
 

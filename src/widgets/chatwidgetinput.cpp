@@ -13,10 +13,12 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteManager)
+ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteManager,
+                                 WindowManager &windowManager)
     : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
     , emoteManager(emoteManager)
+    , windowManager(windowManager)
     , emotesLabel(this)
 {
     this->setMaximumHeight(150);
@@ -47,7 +49,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
         if (this->emotePopup == nullptr) {
-            this->emotePopup = new EmotePopup(this->colorScheme, this->emoteManager);
+            this->emotePopup =
+                new EmotePopup(this->colorScheme, this->emoteManager, this->windowManager);
         }
 
         this->emotePopup->resize(300, 500);

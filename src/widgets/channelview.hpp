@@ -83,7 +83,7 @@ class ChannelView : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = 0);
+    explicit ChannelView(WindowManager &windowManager, BaseWidget *parent = 0);
     ~ChannelView();
 
     void updateGifEmotes();
@@ -117,6 +117,8 @@ private:
         QRect rect;
     };
 
+    WindowManager &windowManager;
+
     void detachChannel();
 
     void drawMessages(QPainter &painter);
@@ -149,6 +151,7 @@ private:
 
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageRemovedConnection;
+    boost::signals2::connection repaintGifsConnection;
 
 private slots:
     void wordTypeMaskChanged()

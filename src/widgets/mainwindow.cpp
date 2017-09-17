@@ -108,23 +108,6 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
     }
 }
 
-void MainWindow::repaintGifEmotes()
-{
-    auto *page = this->notebook.getSelectedPage();
-
-    if (page == nullptr) {
-        return;
-    }
-
-    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
-
-    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        ChatWidget *widget = *it;
-
-        widget->updateGifEmotes();
-    }
-}
-
 void MainWindow::load(const boost::property_tree::ptree &tree)
 {
     this->notebook.load(tree);
