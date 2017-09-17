@@ -72,7 +72,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->rightLabel.getLabel().setText("ayy");
 
     QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, checkLive);
+    connect(timer, &QTimer::timeout, this, &ChatWidgetHeader::checkLive);
     timer->start(60000);
 }
 
