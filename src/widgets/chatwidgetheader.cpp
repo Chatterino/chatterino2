@@ -85,8 +85,7 @@ void ChatWidgetHeader::updateChannelText()
         auto channel = this->chatWidget->getChannel();
 
         twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
-
-        if (channel->isEmpty()) {
+        if (twitchChannel->isLive) {
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
             if (twitchChannel != nullptr) {
                 this->setToolTip("<style>.center    { text-align: center; }</style>"
