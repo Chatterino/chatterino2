@@ -85,19 +85,17 @@ void ChatWidgetHeader::updateChannelText()
         auto channel = this->chatWidget->getChannel();
 
         twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
-
-        if (channel->isEmpty()) {
+        
+        if (twitchChannel != nullptr && twitchChannel->isLive) {
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
-            if (twitchChannel != nullptr) {
-                this->setToolTip("<style>.center    { text-align: center; }</style>"
-                                 "<p class = \"center\">" +
-                                 twitchChannel->streamStatus + "<br><br>" +
-                                 twitchChannel->streamGame + "<br>"
-                                                             "Live for " +
-                                 twitchChannel->streamUptime + " with " +
-                                 twitchChannel->streamViewerCount + " viewers"
-                                                                    "</p>");
-            }
+            this->setToolTip("<style>.center    { text-align: center; }</style>"
+                             "<p class = \"center\">" +
+                             twitchChannel->streamStatus + "<br><br>" +
+                             twitchChannel->streamGame + "<br>"
+                                                         "Live for " +
+                             twitchChannel->streamUptime + " with " +
+                             twitchChannel->streamViewerCount + " viewers"
+                                                                "</p>");
         } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
