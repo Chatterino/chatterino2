@@ -170,6 +170,19 @@ QString ChannelView::getSelectedText()
 
     bool first = true;
 
+    auto addPart = [&](const WordPart &part, int from = 0, int to = -1) {
+        if (part.getCopyText().isEmpty()) {
+            return;
+        }
+
+        if (part.getWord().isText()) {
+            text += part.getText().mid(from, to);
+        } else {
+            text += part.getCopyText();
+        }
+    };
+
+    // first line
     for (const messages::WordPart &part : messages[i]->getWordParts()) {
         int charLength = part.getCharacterLength();
 
@@ -180,27 +193,25 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
-            if (part.getWord().isText()) {
-                text += part.getText().mid(this->selection.min.charIndex - charIndex);
+            if (isSingleWord) {
+                // return single word
+                addPart(part, this->selection.min.charIndex - charIndex,
+                        this->selection.max.charIndex - this->selection.min.charIndex);
+                return text;
             } else {
-                text += part.getCopyText();
+                // add first word of the selection
+                addPart(part, this->selection.min.charIndex - charIndex);
             }
-        }
+        } else if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
+            addPart(part, 0, this->selection.max.charIndex - charIndex);
 
-        if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
-            if (part.getWord().isText()) {
-                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
-            } else {
-                text += part.getCopyText();
-            }
             return text;
-        }
-
-        text += part.getCopyText();
-
-        if (part.hasTrailingSpace()) {
-            text += " ";
+        } else {
+            text += part.getCopyText() + (part.hasTrailingSpace() ? " " : "");
         }
 
         charIndex += charLength;
@@ -208,17 +219,21 @@ QString ChannelView::getSelectedText()
 
     text += "\n";
 
+    // middle lines
     for (i++; i < this->selection.max.messageIndex; i++) {
         for (const messages::WordPart &part : messages[i]->getWordParts()) {
-            text += part.getCopyText();
+            if (!part.getCopyText().isEmpty()) {
+                text += part.getCopyText();
 
-            if (part.hasTrailingSpace()) {
-                text += " ";
+                if (part.hasTrailingSpace()) {
+                    text += " ";
+                }
             }
         }
         text += "\n";
     }
 
+    // last line
     charIndex = 0;
 
     for (const messages::WordPart &part :
@@ -226,11 +241,7 @@ QString ChannelView::getSelectedText()
         int charLength = part.getCharacterLength();
 
         if (charIndex + charLength >= this->selection.max.charIndex) {
-            if (part.getWord().isText()) {
-                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
-            } else {
-                text += part.getCopyText();
-            }
+            addPart(part, 0, this->selection.max.charIndex - charIndex);
 
             return text;
         }
