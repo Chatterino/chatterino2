@@ -3,6 +3,7 @@
 #include "fontmanager.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/link.hpp"
+#include "messages/messagecolor.h"
 
 #include <stdint.h>
 #include <QRect>
@@ -90,7 +91,7 @@ public:
 
     explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
                   const QString &getTooltip, const Link &getLink = Link());
-    explicit Word(const QString &_text, Type getType, const QColor &getColor,
+    explicit Word(const QString &_text, Type getType, const MessageColor &getColor,
                   const QString &copytext, const QString &getTooltip, const Link &getLink = Link());
 
     LazyLoadedImage &getImage() const;
@@ -107,7 +108,7 @@ public:
     QFontMetrics &getFontMetrics() const;
     Type getType() const;
     const QString &getTooltip() const;
-    const QColor &getColor() const;
+    const MessageColor &getColor() const;
     const Link &getLink() const;
     int getXOffset() const;
     int getYOffset() const;
@@ -119,7 +120,7 @@ public:
 private:
     LazyLoadedImage *image;
     QString text;
-    QColor color;
+    MessageColor color;
     bool _isImage;
 
     Type type;

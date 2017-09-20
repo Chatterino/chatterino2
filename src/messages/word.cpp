@@ -17,7 +17,7 @@ Word::Word(LazyLoadedImage *image, Type type, const QString &copytext, const QSt
 }
 
 // Text word
-Word::Word(const QString &text, Type type, const QColor &color, const QString &copytext,
+Word::Word(const QString &text, Type type, const MessageColor &color, const QString &copytext,
            const QString &tooltip, const Link &link)
     : image(nullptr)
     , text(text)
@@ -96,7 +96,7 @@ const QString &Word::getTooltip() const
     return this->tooltip;
 }
 
-const QColor &Word::getColor() const
+const MessageColor &Word::getColor() const
 {
     return this->color;
 }

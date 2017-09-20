@@ -470,7 +470,7 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
         }
         // text
         else {
-            QColor color = wordPart.getWord().getColor();
+            QColor color = wordPart.getWord().getColor().getColor(this->colorScheme);
 
             this->colorScheme.normalizeColor(color);
 

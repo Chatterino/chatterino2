@@ -74,8 +74,8 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     // CTRL+R: Change Channel
     ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
 
-    // CTRL+C: Copy
-    ezShortcut(this, "CTRL+B", &ChatWidget::doCopy);
+// CTRL+C: Copy
+//    ezShortcut(this, "CTRL+B", &ChatWidget::doCopy);
 
 #ifndef NDEBUG
     // F12: Toggle message spawning

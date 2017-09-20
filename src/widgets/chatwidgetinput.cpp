@@ -160,6 +160,10 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
 
                 notebook->previousTab();
             }
+        } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
+            event->accept();
+
+            this->chatWidget->doCopy();
         }
     });
 
@@ -187,16 +191,6 @@ void ChatWidgetInput::refreshTheme()
 void ChatWidgetInput::editTextChanged()
 {
 }
-
-// void
-// ChatWidgetInput::editKeyPressed(QKeyEvent *event)
-//{
-//    if (event->key() == Qt::Key_Enter) {
-//        event->accept();
-//        IrcManager::send("PRIVMSG #" +  edit.toPlainText();
-//        edit.setText(QString());
-//    }
-//}
 
 void ChatWidgetInput::paintEvent(QPaintEvent *)
 {

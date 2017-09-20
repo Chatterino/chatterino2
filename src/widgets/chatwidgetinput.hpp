@@ -54,7 +54,6 @@ private:
 
 private slots:
     void editTextChanged();
-    //    void editKeyPressed(QKeyEvent *event);
 
     friend class ChatWidget;
 };
