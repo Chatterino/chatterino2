@@ -13,7 +13,7 @@ template <typename T>
 class LimitedQueue
 {
 public:
-    LimitedQueue(int limit = 100, int buffer = 25)
+    LimitedQueue(int limit = 1000, int buffer = 250)
         : _offset(0)
         , _limit(limit)
         , _buffer(buffer)
