@@ -163,7 +163,8 @@ HEADERS  += \
     src/widgets/rippleeffectlabel.hpp \
     src/widgets/qualitypopup.hpp \
     src/widgets/emotepopup.hpp \
-    src/messages/messagecolor.hpp
+    src/messages/messagecolor.hpp \
+    src/util/nativeeventhelper.hpp
 
 PRECOMPILED_HEADER =
 

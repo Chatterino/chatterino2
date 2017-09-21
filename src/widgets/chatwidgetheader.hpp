@@ -36,6 +36,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
     ChatWidget *const chatWidget;
@@ -66,7 +67,6 @@ public slots:
     void menuReloadChannelEmotes();
     void menuManualReconnect();
     void menuShowChangelog();
-
 };
 
 }  // namespace widgets

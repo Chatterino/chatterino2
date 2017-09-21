@@ -10,15 +10,16 @@ namespace widgets {
 
 RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     : RippleEffectButton(parent)
+    , label(this)
 {
-    setLayout(&this->ui.hbox);
+    setLayout(&this->hbox);
 
-    this->ui.label.setAlignment(Qt::AlignCenter);
+    this->label.setAlignment(Qt::AlignCenter);
 
-    this->ui.hbox.setMargin(0);
-    this->ui.hbox.addSpacing(spacing);
-    this->ui.hbox.addWidget(&this->ui.label);
-    this->ui.hbox.addSpacing(spacing);
+    this->hbox.setMargin(0);
+    this->hbox.addSpacing(spacing);
+    this->hbox.addWidget(&this->label);
+    this->hbox.addSpacing(spacing);
 
     this->setMouseEffectColor(QColor(255, 255, 255, 63));
 }

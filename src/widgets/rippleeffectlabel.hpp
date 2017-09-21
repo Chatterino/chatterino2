@@ -22,14 +22,12 @@ public:
 
     SignalLabel &getLabel()
     {
-        return this->ui.label;
+        return this->label;
     }
 
 private:
-    struct {
-        QHBoxLayout hbox;
-        SignalLabel label;
-    } ui;
+    QHBoxLayout hbox;
+    SignalLabel label;
 };
 
 }  // namespace widgets

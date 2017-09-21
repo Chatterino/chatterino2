@@ -83,7 +83,9 @@ private:
 
     QRect getXRect()
     {
-        return QRect(this->width() - 20, 4, 16, 16);
+        float scale = this->getDpiMultiplier();
+        return QRect(this->width() - static_cast<int>(20 * scale), static_cast<int>(4 * scale),
+                     static_cast<int>(16 * scale), static_cast<int>(16 * scale));
     }
 
 public:

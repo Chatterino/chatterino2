@@ -13,10 +13,6 @@
 #include <QVBoxLayout>
 #include <boost/foreach.hpp>
 
-#ifdef USEWINSDK
-#include "windows.h"
-#endif
-
 namespace chatterino {
 namespace widgets {
 
@@ -27,6 +23,7 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
     , notebook(this->channelManager, this)
+    , dpi(this->getDpiMultiplier())
 // , windowGeometry("/windows/0/geometry")
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -70,19 +67,6 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
 MainWindow::~MainWindow()
 {
 }
-
-#ifdef USEWINSDK
-bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
-{
-    MSG *msg = reinterpret_cast<MSG *>(message);
-
-    if (msg->message == 0x02E0) {
-        qDebug() << "dpi changed";
-    }
-
-    return QWidget::nativeEvent(eventType, message, result);
-}
-#endif
 
 void MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {

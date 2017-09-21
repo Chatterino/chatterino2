@@ -42,11 +42,10 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
-#ifdef USEWINSDK
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-#endif
 
 private:
+    float dpi;
+
     virtual void refreshTheme() override;
 
     ChannelManager &channelManager;

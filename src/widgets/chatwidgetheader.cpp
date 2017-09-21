@@ -21,8 +21,6 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     , rightLabel(this)
     , rightMenu(this)
 {
-    this->setFixedHeight(32);
-
     this->refreshTheme();
 
     this->updateChannelText();
@@ -76,6 +74,11 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     timer->start(60000);
 }
 
+void ChatWidgetHeader::resizeEvent(QResizeEvent *event)
+{
+    this->setFixedHeight(static_cast<float>(32 * getDpiMultiplier()));
+}
+
 void ChatWidgetHeader::updateChannelText()
 {
     const std::string channelName = this->chatWidget->channelName;
@@ -85,14 +88,14 @@ void ChatWidgetHeader::updateChannelText()
         auto channel = this->chatWidget->getChannel();
 
         twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
-        
+
         if (twitchChannel != nullptr && twitchChannel->isLive) {
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
             this->setToolTip("<style>.center    { text-align: center; }</style>"
                              "<p class = \"center\">" +
-                             twitchChannel->streamStatus + "<br><br>" +
-                             twitchChannel->streamGame + "<br>"
-                                                         "Live for " +
+                             twitchChannel->streamStatus + "<br><br>" + twitchChannel->streamGame +
+                             "<br>"
+                             "Live for " +
                              twitchChannel->streamUptime + " with " +
                              twitchChannel->streamViewerCount + " viewers"
                                                                 "</p>");

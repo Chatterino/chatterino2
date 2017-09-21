@@ -67,10 +67,14 @@ NotebookTab::~NotebookTab()
 
 void NotebookTab::calcSize()
 {
+    float scale = getDpiMultiplier();
+
     if (SettingsManager::getInstance().hideTabX.get()) {
-        this->resize(fontMetrics().width(title) + 8, 24);
+        this->resize(static_cast<int>((fontMetrics().width(title) + 16) * scale),
+                     static_cast<int>(24 * scale));
     } else {
-        this->resize(fontMetrics().width(title) + 8 + 24, 24);
+        this->resize(static_cast<int>((fontMetrics().width(title) + 8 + 24) * scale),
+                     static_cast<int>(24 * scale));
     }
 
     if (this->parent() != nullptr) {
@@ -179,8 +183,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     painter.setPen(fg);
 
-    QRect rect(0, 0, this->width() - (SettingsManager::getInstance().hideTabX.get() ? 0 : 16),
-               this->height());
+    float scale = this->getDpiMultiplier();
+    int rectW = (SettingsManager::getInstance().hideTabX.get() ? 0 : static_cast<int>(16) * scale);
+    QRect rect(0, 0, this->width() - rectW, this->height());
 
     painter.drawText(rect, title, QTextOption(Qt::AlignCenter));
 
@@ -194,8 +199,10 @@ void NotebookTab::paintEvent(QPaintEvent *)
             }
         }
 
-        painter.drawLine(xRect.topLeft() + QPoint(4, 4), xRect.bottomRight() + QPoint(-4, -4));
-        painter.drawLine(xRect.topRight() + QPoint(-4, 4), xRect.bottomLeft() + QPoint(4, -4));
+        int a = static_cast<int>(scale * 4);
+
+        painter.drawLine(xRect.topLeft() + QPoint(a, a), xRect.bottomRight() + QPoint(-a, -a));
+        painter.drawLine(xRect.topRight() + QPoint(-a, a), xRect.bottomLeft() + QPoint(a, -a));
     }
 }
 
