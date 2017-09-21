@@ -1,4 +1,5 @@
 #include "widgets/accountpopup.hpp"
+#include "util/urlfetch.hpp"
 #include "accountmanager.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
@@ -44,18 +45,32 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
         button->setFocusProxy(this);
     }
 
-    timeout(this->_ui->purge,1);
-    timeout(this->_ui->min1,60);
-    timeout(this->_ui->min10,600);
-    timeout(this->_ui->hour1,3600);
-    timeout(this->_ui->hour24,86400);
+    timeout(this->_ui->purge, 1);
+    timeout(this->_ui->min1, 60);
+    timeout(this->_ui->min10, 600);
+    timeout(this->_ui->hour1, 3600);
+    timeout(this->_ui->hour24, 86400);
 
-    sendCommand(this->_ui->ban,"/ban ");
-    sendCommand(this->_ui->unBan,"/unban ");
+    sendCommand(this->_ui->ban, "/ban ");
+    sendCommand(this->_ui->unBan, "/unban ");
+    sendCommand(this->_ui->mod, "/mod ");
+    sendCommand(this->_ui->unMod, "/unmod ");
 
-    sendCommand(this->_ui->mod,"/mod ");
-    sendCommand(this->_ui->unMod,"/unmod ");
+    QObject::connect(this->_ui->follow, &QPushButton::clicked, this, [=](){
+        auto manager = new QNetworkAccessManager();
 
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
+                        AccountManager::getInstance().getTwitchUser().getUserId() +
+                        "/follows/channels/" + this->userID);
+
+        QNetworkRequest request(requestUrl);
+
+        request.setRawHeader("Client-ID", getDefaultClientID());
+        request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+        request.setRawHeader("Authorization", "OAuth " +
+                             AccountManager::getInstance().getTwitchUser().getOAuthToken().toUtf8());
+        manager->put(request,"");
+    });
 
     updateButtons(this->_ui->userLayout,false);
     updateButtons(this->_ui->modLayout,false);
@@ -64,6 +79,11 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     // Close button
     connect(_ui->btnClose, &QPushButton::clicked, [=]() {
         hide();  //
+    });
+
+    util::twitch::getUserID(AccountManager::getInstance().getTwitchUser().getNickName(),
+                            [=](const QString &id){
+        AccountManager::getInstance().getTwitchUser().setUserId(id);
     });
 }
 
@@ -80,54 +100,20 @@ void AccountPopupWidget::setChannel(std::shared_ptr<Channel> channel)
 
 void AccountPopupWidget::getUserId()
 {
-    QUrl nameUrl("https://api.twitch.tv/kraken/users?login=" + _ui->lblUsername->text());
-
-    QNetworkRequest req(nameUrl);
-    req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"), getDefaultClientID());
-
-    static auto manager = new QNetworkAccessManager();
-    auto *reply = manager->get(req);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
-        if (reply->error() == QNetworkReply::NoError) {
-            auto doc = QJsonDocument::fromJson(reply->readAll());
-            auto obj = doc.object();
-            auto array = obj.value("users").toArray();
-
-            userID = array.at(0).toObject().value("_id").toString();
-
-            getUserData();
-        }
+    util::twitch::getUserID(this->_ui->lblUsername->text(),[=](const QString &id){
+        userID = id;
+        getUserData();
     });
 }
 
 void AccountPopupWidget::getUserData()
 {
-    QUrl idUrl("https://api.twitch.tv/kraken/channels/" + userID);
+    util::twitch::get("https://api.twitch.tv/kraken/channels/" + userID,[=](const QJsonObject &obj){
+        _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
+        _ui->lblViews->setText(QString::number(obj.value("views").toInt()));
+        _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
 
-    QNetworkRequest req(idUrl);
-    req.setRawHeader(QByteArray("Accept"), QByteArray("application/vnd.twitchtv.v5+json"));
-    req.setRawHeader(QByteArray("Client-ID"), getDefaultClientID());
-
-    static auto manager = new QNetworkAccessManager();
-    auto *reply = manager->get(req);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
-        if (reply->error() == QNetworkReply::NoError) {
-            auto doc = QJsonDocument::fromJson(reply->readAll());
-            auto obj = doc.object();
-
-            _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
-            _ui->lblViews->setText(QString::number(obj.value("views").toInt()));
-            _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
-
-            loadAvatar(QUrl(obj.value("logo").toString()));
-        } else {
-            _ui->lblFollowers->setText("ERROR");
-            _ui->lblViews->setText("ERROR");
-            _ui->lblAccountAge->setText("ERROR");
-        }
+        loadAvatar(QUrl(obj.value("logo").toString()));
     });
 }
 

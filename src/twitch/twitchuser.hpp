@@ -14,12 +14,15 @@ public:
 
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
+    const QString &getUserId() const;
+    void setUserId(QString id);
 
     bool isAnon() const;
 
 private:
     QString _oauthClient;
     QString _oauthToken;
+    QString _userId;
     bool _isAnon;
 };
 
