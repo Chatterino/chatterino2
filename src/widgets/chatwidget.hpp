@@ -9,6 +9,7 @@
 #include "widgets/channelview.hpp"
 #include "widgets/chatwidgetheader.hpp"
 #include "widgets/chatwidgetinput.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 
 #include <QFont>
 #include <QShortcut>

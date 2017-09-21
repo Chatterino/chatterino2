@@ -11,7 +11,7 @@ namespace chatterino {
 namespace widgets {
 
 NotebookButton::NotebookButton(BaseWidget *parent)
-    : FancyButton(parent)
+    : RippleEffectButton(parent)
 {
     setMouseEffectColor(QColor(0, 0, 0));
 }
@@ -99,7 +99,7 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
         emit clicked();
     }
 
-    FancyButton::mouseReleaseEvent(event);
+    RippleEffectButton::mouseReleaseEvent(event);
 }
 
 }  // namespace widgets

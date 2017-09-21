@@ -178,21 +178,21 @@ win32 {
 }
 
 # Optional dependency on windows sdk 7.1
-#win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
-#    LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
-#        -ldwmapi \
-#        -lgdi32
-#
+win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
+    LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
+        -ldwmapi \
+        -lgdi32
+
 #    SOURCES += platform/borderless/qwinwidget.cpp \
 #        platform/borderless/winnativewindow.cpp \
 #        platform/borderless/widget.cpp
-#
+
 #    HEADERS += platform/borderless/qwinwidget.h \
 #        platform/borderless/winnativewindow.h \
 #        platform/borderless/widget.h
-#
-#    DEFINES += "USEWINSDK"
-#}
+
+    DEFINES += "USEWINSDK"
+}
 
 macx {
     INCLUDEPATH += /usr/local/include

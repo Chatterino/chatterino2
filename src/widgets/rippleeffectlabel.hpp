@@ -15,7 +15,7 @@ class ColorScheme;
 
 namespace widgets {
 
-class RippleEffectLabel : public FancyButton
+class RippleEffectLabel : public RippleEffectButton
 {
 public:
     explicit RippleEffectLabel(BaseWidget *parent, int spacing = 6);

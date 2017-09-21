@@ -9,7 +9,7 @@ namespace chatterino {
 namespace widgets {
 
 RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
-    : FancyButton(parent)
+    : RippleEffectButton(parent)
 {
     setLayout(&this->ui.hbox);
 

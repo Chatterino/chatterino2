@@ -301,9 +301,11 @@ void SettingsDialog::addTabs()
         auto form = new QFormLayout();
 
         form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
-        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in commands)",
-                                                 settings.mentionUsersWithAt));
-        form->addRow("", createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+        //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
+        //        commands)",
+        //                                                 settings.mentionUsersWithAt));
+        form->addRow("Messages:",
+                     createCheckbox("Hide input box if empty", settings.hideEmptyInput));
         form->addRow("", createCheckbox("Show last read message indicator",
                                         settings.showLastMessageIndicator));
 

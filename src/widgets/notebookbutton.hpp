@@ -7,7 +7,7 @@
 namespace chatterino {
 namespace widgets {
 
-class NotebookButton : public FancyButton
+class NotebookButton : public RippleEffectButton
 {
     Q_OBJECT
 

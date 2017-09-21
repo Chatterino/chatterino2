@@ -7,13 +7,14 @@
 #include "widgets/settingsdialog.hpp"
 
 #include <QDebug>
+#include <QLibrary>
 #include <QPalette>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <boost/foreach.hpp>
 
 #ifdef USEWINSDK
-#include "Windows.hpp"
+#include "windows.h"
 #endif
 
 namespace chatterino {
@@ -70,24 +71,18 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::layoutVisibleChatWidgets(Channel *channel)
+#ifdef USEWINSDK
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-    auto *page = this->notebook.getSelectedPage();
+    MSG *msg = reinterpret_cast<MSG *>(message);
 
-    if (page == nullptr) {
-        return;
+    if (msg->message == 0x02E0) {
+        qDebug() << "dpi changed";
     }
 
-    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
-
-    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        ChatWidget *widget = *it;
-
-        if (channel == nullptr || channel == widget->getChannel().get()) {
-            widget->layoutMessages();
-        }
-    }
+    return QWidget::nativeEvent(eventType, message, result);
 }
+#endif
 
 void MainWindow::repaintVisibleChatWidgets(Channel *channel)
 {

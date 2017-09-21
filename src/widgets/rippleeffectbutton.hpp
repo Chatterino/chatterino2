@@ -11,7 +11,7 @@
 namespace chatterino {
 namespace widgets {
 
-class FancyButton : public BaseWidget
+class RippleEffectButton : public BaseWidget
 {
     Q_OBJECT
 
@@ -26,7 +26,7 @@ class FancyButton : public BaseWidget
     };
 
 public:
-    FancyButton(BaseWidget *parent);
+    RippleEffectButton(BaseWidget *parent);
 
     void setMouseEffectColor(QColor color);
 

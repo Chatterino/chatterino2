@@ -31,6 +31,7 @@ public:
     void save();
 
     boost::signals2::signal<void()> repaintGifs;
+    boost::signals2::signal<void()> layout;
 
 private:
     std::mutex windowMutex;

@@ -7,6 +7,7 @@
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 #include "widgets/scrollbar.hpp"
 
 #include <QPaintEvent>
@@ -135,6 +136,7 @@ private:
     std::vector<GifEmoteData> gifEmotes;
 
     ScrollBar scrollBar;
+    RippleEffectLabel *goToBottom;
 
     // This variable can be used to decide whether or not we should render the "Show latest
     // messages" button
@@ -155,6 +157,7 @@ private:
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageRemovedConnection;
     boost::signals2::connection repaintGifsConnection;
+    boost::signals2::connection layoutConnection;
 
 private slots:
     void wordTypeMaskChanged()

@@ -42,13 +42,24 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
-        this->update();
-
         this->layoutMessages();
+
+        this->goToBottom->setVisible(this->scrollBar.isVisible() && !this->scrollBar.isAtBottom());
+
+        this->update();
     });
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
+    this->layoutConnection = windowManager.repaintGifs.connect([&] { this->layout(); });
+
+    this->goToBottom = new RippleEffectLabel(this, 0);
+    this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.5); color: #FFF;");
+    this->goToBottom->getLabel().setText("Jump to bottom");
+    this->goToBottom->setVisible(false);
+
+    connect(goToBottom, &RippleEffectLabel::clicked, this,
+            [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
 }
 
 ChannelView::~ChannelView()
@@ -339,6 +350,10 @@ void ChannelView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
     this->scrollBar.move(width() - this->scrollBar.width(), 0);
+
+    this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
+
+    this->scrollBar.raise();
 
     layoutMessages();
 
