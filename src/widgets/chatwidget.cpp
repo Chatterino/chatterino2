@@ -236,7 +236,7 @@ void ChatWidget::doChangeChannel()
 {
     this->showChangeChannelPopup("Change channel");
     auto popup = this->findChildren<QDockWidget *>();
-    if (popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
+    if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
         popup.at(0)->hide();
         doOpenViewerList();
     }
@@ -424,6 +424,7 @@ void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString us
 {
     widget->setName(user);
     widget->move(QCursor::pos());
+    widget->updatePermissions();
     widget->show();
     widget->setFocus();
 }

@@ -1,4 +1,5 @@
 #include "widgets/accountpopup.hpp"
+#include "accountmanager.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
 #include "ui_accountpopupform.h"
@@ -25,6 +26,41 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 
     setWindowFlags(Qt::FramelessWindowHint);
 
+    permission = permissions::User;
+    for(auto button : this->_ui->profileLayout->findChildren<QPushButton*>())
+    {
+        button->setFocusProxy(this);
+    }
+    for(auto button: this->_ui->userLayout->findChildren<QPushButton*>())
+    {
+        button->setFocusProxy(this);
+    }
+    for(auto button: this->_ui->modLayout->findChildren<QPushButton*>())
+    {
+        button->setFocusProxy(this);
+    }
+    for(auto button: this->_ui->ownerLayout->findChildren<QPushButton*>())
+    {
+        button->setFocusProxy(this);
+    }
+
+    timeout(this->_ui->purge,1);
+    timeout(this->_ui->min1,60);
+    timeout(this->_ui->min10,600);
+    timeout(this->_ui->hour1,3600);
+    timeout(this->_ui->hour24,86400);
+
+    sendCommand(this->_ui->ban,"/ban ");
+    sendCommand(this->_ui->unBan,"/unban ");
+
+    sendCommand(this->_ui->mod,"/mod ");
+    sendCommand(this->_ui->unMod,"/unmod ");
+
+
+    updateButtons(this->_ui->userLayout,false);
+    updateButtons(this->_ui->modLayout,false);
+    updateButtons(this->_ui->ownerLayout,false);
+
     // Close button
     connect(_ui->btnClose, &QPushButton::clicked, [=]() {
         hide();  //
@@ -44,7 +80,6 @@ void AccountPopupWidget::setChannel(std::shared_ptr<Channel> channel)
 
 void AccountPopupWidget::getUserId()
 {
-    qDebug() << this->_channel.get()->name;
     QUrl nameUrl("https://api.twitch.tv/kraken/users?login=" + _ui->lblUsername->text());
 
     QNetworkRequest req(nameUrl);
@@ -122,15 +157,74 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
     }
 }
 
+void AccountPopupWidget::updatePermissions()
+{
+    if(this->_channel.get()->name == AccountManager::getInstance().getTwitchUser().getNickName())
+    {
+        permission = permissions::Owner;
+    }
+    else if(this->_channel->modList.contains(AccountManager::getInstance().getTwitchUser().getNickName()))
+    {
+        permission = permissions::Mod;
+    }
+}
+
+void AccountPopupWidget::updateButtons(QWidget* layout, bool state)
+{
+    for(auto button : layout->findChildren<QPushButton*>())
+    {
+        button->setVisible(state);
+    }
+}
+
+void AccountPopupWidget::timeout(QPushButton *button, int time)
+{
+    QObject::connect(button, &QPushButton::clicked, this, [=](){
+       this->_channel->sendMessage("/timeout " + this->_ui->lblUsername->text() + " " + QString::number(time));
+    });
+}
+
+void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
+{
+    QObject::connect(button, &QPushButton::clicked, this, [=](){
+       this->_channel->sendMessage(command + this->_ui->lblUsername->text());
+    });
+}
+
 void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
 {
-    hide();
-
+    this->hide();
     _ui->lblFollowers->setText("Loading...");
     _ui->lblViews->setText("Loading...");
     _ui->lblAccountAge->setText("Loading...");
     _ui->lblUsername->setText("Loading...");
     _ui->lblAvatar->setText("Loading...");
+}
+
+void AccountPopupWidget::showEvent(QShowEvent *event)
+{
+    if(this->_ui->lblUsername->text() != AccountManager::getInstance().getTwitchUser().getNickName())
+    {    
+        updateButtons(this->_ui->userLayout, true);
+        if(permission != permissions::User)
+        {
+            if(!this->_channel->modList.contains(this->_ui->lblUsername->text()))
+            {
+                updateButtons(this->_ui->modLayout, true);
+            }
+            if(permission == permissions::Owner)
+            {
+                updateButtons(this->_ui->ownerLayout, true);
+                updateButtons(this->_ui->modLayout, true);
+            }
+        }
+    }
+    else
+    {
+        updateButtons(this->_ui->modLayout, false);
+        updateButtons(this->_ui->userLayout, false);
+        updateButtons(this->_ui->ownerLayout, false);
+    }
 }
 
 }  // namespace widgets
