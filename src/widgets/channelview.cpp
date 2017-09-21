@@ -258,6 +258,18 @@ QString ChannelView::getSelectedText()
     return text;
 }
 
+bool ChannelView::hasSelection()
+{
+    return !this->selection.isEmpty();
+}
+
+void ChannelView::clearSelection()
+{
+    this->selection = Selection();
+    layoutMessages();
+    update();
+}
+
 messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
 {
     return this->messages.getSnapshot();
@@ -337,6 +349,8 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 {
     // selections
     this->selection = Selection(start, end);
+
+    this->selectionChanged();
 
     //    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
     //             << max.charIndex;
@@ -552,10 +566,8 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
         if (part.getWord().isText()) {
             int offset = this->selection.min.charIndex - charIndex;
 
-            std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
-
             for (int j = 0; j < offset; j++) {
-                rect.setLeft(rect.left() + characterWidth[j]);
+                rect.setLeft(rect.left() + part.getCharacterWidth(j));
             }
 
             if (isSingleWord) {
@@ -564,7 +576,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + characterWidth[j]);
+                    rect.setRight(rect.right() + part.getCharacterWidth(j));
                 }
 
                 painter.fillRect(rect, selectionColor);
@@ -616,14 +628,12 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
             if (part.getWord().isText()) {
                 int offset = this->selection.min.charIndex - charIndex;
 
-                std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
-
                 int length = (this->selection.max.charIndex - charIndex) - offset;
 
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + characterWidth[j]);
+                    rect.setRight(rect.right() + part.getCharacterWidth(j));
                 }
             } else {
                 if (this->selection.max.charIndex == charIndex) {

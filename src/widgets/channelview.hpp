@@ -89,6 +89,8 @@ public:
     void updateGifEmotes();
     ScrollBar &getScrollBar();
     QString getSelectedText();
+    bool hasSelection();
+    void clearSelection();
 
     void setChannel(std::shared_ptr<Channel> channel);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
@@ -97,6 +99,7 @@ public:
     void clearMessages();
 
     boost::signals2::signal<void(QMouseEvent *)> mouseDown;
+    boost::signals2::signal<void()> selectionChanged;
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;

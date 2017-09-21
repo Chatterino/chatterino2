@@ -141,13 +141,16 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             int width = 0;
 
             std::vector<short> &charWidths = word.getCharacterWidthCache();
+            int charOffset = 0;
 
             for (int i = 2; i <= text.length(); i++) {
                 if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
                     QString mid = text.mid(start, i - start - 1);
 
                     _wordParts.push_back(WordPart(word, MARGIN_LEFT, y, width, word.getHeight(),
-                                                  lineNumber, mid, mid, false));
+                                                  lineNumber, mid, mid, false, charOffset));
+
+                    charOffset = i;
 
                     y += metrics.height();
 
@@ -162,7 +165,7 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             width = metrics.width(mid);
 
             _wordParts.push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(), width,
-                                          word.getHeight(), lineNumber, mid, mid));
+                                          word.getHeight(), lineNumber, mid, mid, charOffset));
             x = width + MARGIN_LEFT + spaceWidth;
 
             lineHeight = word.getHeight();

@@ -15,11 +15,13 @@ WordPart::WordPart(Word &word, int x, int y, int lineNumber, const QString &copy
     , _height(word.getHeight())
     , _lineNumber(lineNumber)
     , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
+    , wordCharOffset(0)
 {
 }
 
 WordPart::WordPart(Word &word, int x, int y, int width, int height, int lineNumber,
-                   const QString &copyText, const QString &customText, bool allowTrailingSpace)
+                   const QString &copyText, const QString &customText, bool allowTrailingSpace,
+                   int wordCharOffset)
     : _word(word)
     , _copyText(copyText)
     , _text(customText)
@@ -29,6 +31,7 @@ WordPart::WordPart(Word &word, int x, int y, int width, int height, int lineNumb
     , _height(height)
     , _lineNumber(lineNumber)
     , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
+    , wordCharOffset(wordCharOffset)
 {
 }
 
@@ -110,5 +113,9 @@ int WordPart::getCharacterLength() const
     return this->getWord().isImage() ? 2 : this->getText().length() + 1;
 }
 
+short WordPart::getCharacterWidth(int index) const
+{
+    return this->getWord().getCharacterWidthCache().at(index + this->wordCharOffset);
+}
 }  // namespace messages
 }  // namespace chatterino

@@ -29,6 +29,8 @@ public:
     ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &, WindowManager &);
     ~ChatWidgetInput();
 
+    void clearSelection();
+
 protected:
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
