@@ -34,17 +34,17 @@ public:
 
 private:
     // variables
-    SharedMessage _message;
-    std::vector<messages::WordPart> _wordParts;
+    SharedMessage message;
+    std::vector<messages::WordPart> wordParts;
 
-    int _height = 0;
+    int height = 0;
 
-    int _currentLayoutWidth = -1;
-    int _fontGeneration = -1;
+    int currentLayoutWidth = -1;
+    int fontGeneration = -1;
     /* TODO(pajlada): Re-implement
-    int _emoteGeneration = -1;
+    int emoteGeneration = -1;
     */
-    Word::Type _currentWordTypes = Word::None;
+    Word::Type currentWordTypes = Word::None;
 
     // methods
     void alignWordParts(int lineStart, int lineHeight, int width);

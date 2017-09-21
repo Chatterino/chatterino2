@@ -1,15 +1,15 @@
-#include "messagecolor.h"
+#include "messagecolor.hpp"
 
 namespace chatterino {
 namespace messages {
-MessageColor::MessageColor(const QColor &color)
+MessageColor::MessageColor(const QColor &_color)
     : type(Type::Custom)
-    , color(color)
+    , color(_color)
 {
 }
 
-MessageColor::MessageColor(Type type)
-    : type(type)
+MessageColor::MessageColor(Type _type)
+    : type(_type)
 {
 }
 

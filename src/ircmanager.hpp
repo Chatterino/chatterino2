@@ -27,8 +27,8 @@ class IrcManager : public QObject
     Q_OBJECT
 
 public:
-    IrcManager(ChannelManager &_channelManager, Resources &_resources, EmoteManager &_emoteManager,
-               WindowManager &_windowManager);
+    IrcManager(ChannelManager &channelManager, Resources &resources, EmoteManager &emoteManager,
+               WindowManager &windowManager);
 
     void connect();
     void disconnect();
@@ -56,7 +56,7 @@ public:
 
 private:
     // variables
-    twitch::TwitchUser _account;
+    twitch::TwitchUser account;
 
     pajlada::Settings::Setting<std::string> currentUser;
 
@@ -69,8 +69,8 @@ private:
     std::mutex connectionMutex;
     uint32_t connectionGeneration = 0;
 
-    QMap<QString, bool> _twitchBlockedUsers;
-    QMutex _twitchBlockedUsersMutex;
+    QMap<QString, bool> twitchBlockedUsers;
+    QMutex twitchBlockedUsersMutex;
 
     QNetworkAccessManager networkAccessManager;
 

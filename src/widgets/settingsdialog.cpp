@@ -319,8 +319,7 @@ void SettingsDialog::addTabs()
             {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
             [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
                 setting = newValue.toStdString();
-            })
-        );
+            }));
 
         //        v->addWidget(scroll);
         //        v->addStretch(1);
@@ -635,7 +634,7 @@ void SettingsDialog::cancelButtonClicked()
     auto &instance = SettingsManager::getInstance();
 
     this->snapshot.apply();
-    instance.highlightProperties.set(this->snapshot._mapItems);
+    instance.highlightProperties.set(this->snapshot.mapItems);
 
     QStringList list = instance.highlightProperties.get().keys();
     list.removeDuplicates();

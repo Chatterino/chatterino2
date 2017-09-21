@@ -3,7 +3,7 @@
 #include "fontmanager.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/link.hpp"
-#include "messages/messagecolor.h"
+#include "messages/messagecolor.hpp"
 
 #include <stdint.h>
 #include <QRect>

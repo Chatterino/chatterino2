@@ -22,22 +22,6 @@ public:
     QSettings &getQSettings();
     SettingsSnapshot createSnapshot();
 
-signals:
-    void wordTypeMaskChanged();
-
-private:
-    SettingsManager();
-
-    // variables
-    QSettings _settings;
-    std::vector<std::reference_wrapper<BaseSetting>> _settingsItems;
-    messages::Word::Type _wordTypeMask = messages::Word::Default;
-
-    // methods
-public:  // temporary
-    void updateWordTypeMask();
-
-public:
     // new pajlada settings BBaper
     pajlada::Settings::Setting<bool> showTimestamps;
     pajlada::Settings::Setting<bool> showTimestampSeconds;
@@ -78,12 +62,22 @@ public:
     Setting<bool> hideUserButton;
     Setting<bool> useCustomWindowFrame;
 
-public:
     static SettingsManager &getInstance()
     {
         static SettingsManager instance;
         return instance;
     }
+    void updateWordTypeMask();
+
+signals:
+    void wordTypeMaskChanged();
+
+private:
+    SettingsManager();
+
+    QSettings settings;
+    std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
+    messages::Word::Type wordTypeMask = messages::Word::Default;
 };
 
 }  // namespace chatterino

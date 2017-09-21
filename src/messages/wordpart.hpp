@@ -36,17 +36,17 @@ public:
     short getCharacterWidth(int index) const;
 
 private:
-    Word &_word;
+    Word &word;
 
-    QString _copyText;
-    QString _text;
+    QString copyText;
+    QString text;
 
-    int _x;
-    int _y;
-    int _width;
-    int _height;
+    int x;
+    int y;
+    int width;
+    int height;
 
-    int _lineNumber;
+    int lineNumber;
 
     bool _trailingSpace;
     int wordCharOffset;
