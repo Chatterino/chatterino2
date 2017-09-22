@@ -9,6 +9,7 @@
 #include "widgets/channelview.hpp"
 #include "widgets/chatwidgetheader.hpp"
 #include "widgets/chatwidgetinput.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 
 #include <QFont>
 #include <QShortcut>
@@ -39,6 +40,8 @@ class NotebookPage;
 // Each sub-element has a reference to the parent Chat Widget
 class ChatWidget : public BaseWidget
 {
+    friend class ChatWidgetInput;
+
     Q_OBJECT
 
 public:

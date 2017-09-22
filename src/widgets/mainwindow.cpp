@@ -7,14 +7,11 @@
 #include "widgets/settingsdialog.hpp"
 
 #include <QDebug>
+#include <QLibrary>
 #include <QPalette>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <boost/foreach.hpp>
-
-#ifdef USEWINSDK
-#include "Windows.hpp"
-#endif
 
 namespace chatterino {
 namespace widgets {
@@ -26,6 +23,7 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
     , notebook(this->channelManager, this)
+    , dpi(this->getDpiMultiplier())
 // , windowGeometry("/windows/0/geometry")
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -68,25 +66,6 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
 
 MainWindow::~MainWindow()
 {
-}
-
-void MainWindow::layoutVisibleChatWidgets(Channel *channel)
-{
-    auto *page = this->notebook.getSelectedPage();
-
-    if (page == nullptr) {
-        return;
-    }
-
-    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
-
-    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        ChatWidget *widget = *it;
-
-        if (channel == nullptr || channel == widget->getChannel().get()) {
-            widget->layoutMessages();
-        }
-    }
 }
 
 void MainWindow::repaintVisibleChatWidgets(Channel *channel)

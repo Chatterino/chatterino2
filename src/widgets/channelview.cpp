@@ -42,13 +42,24 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
-        this->update();
-
         this->layoutMessages();
+
+        this->goToBottom->setVisible(this->scrollBar.isVisible() && !this->scrollBar.isAtBottom());
+
+        this->update();
     });
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
+    this->layoutConnection = windowManager.repaintGifs.connect([&] { this->layout(); });
+
+    this->goToBottom = new RippleEffectLabel(this, 0);
+    this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.5); color: #FFF;");
+    this->goToBottom->getLabel().setText("Jump to bottom");
+    this->goToBottom->setVisible(false);
+
+    connect(goToBottom, &RippleEffectLabel::clicked, this,
+            [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
 }
 
 ChannelView::~ChannelView()
@@ -170,6 +181,19 @@ QString ChannelView::getSelectedText()
 
     bool first = true;
 
+    auto addPart = [&](const WordPart &part, int from = 0, int to = -1) {
+        if (part.getCopyText().isEmpty()) {
+            return;
+        }
+
+        if (part.getWord().isText()) {
+            text += part.getText().mid(from, to);
+        } else {
+            text += part.getCopyText();
+        }
+    };
+
+    // first line
     for (const messages::WordPart &part : messages[i]->getWordParts()) {
         int charLength = part.getCharacterLength();
 
@@ -180,27 +204,25 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
-            if (part.getWord().isText()) {
-                text += part.getText().mid(this->selection.min.charIndex - charIndex);
+            if (isSingleWord) {
+                // return single word
+                addPart(part, this->selection.min.charIndex - charIndex,
+                        this->selection.max.charIndex - this->selection.min.charIndex);
+                return text;
             } else {
-                text += part.getCopyText();
+                // add first word of the selection
+                addPart(part, this->selection.min.charIndex - charIndex);
             }
-        }
+        } else if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
+            addPart(part, 0, this->selection.max.charIndex - charIndex);
 
-        if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
-            if (part.getWord().isText()) {
-                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
-            } else {
-                text += part.getCopyText();
-            }
             return text;
-        }
-
-        text += part.getCopyText();
-
-        if (part.hasTrailingSpace()) {
-            text += " ";
+        } else {
+            text += part.getCopyText() + (part.hasTrailingSpace() ? " " : "");
         }
 
         charIndex += charLength;
@@ -208,17 +230,21 @@ QString ChannelView::getSelectedText()
 
     text += "\n";
 
+    // middle lines
     for (i++; i < this->selection.max.messageIndex; i++) {
         for (const messages::WordPart &part : messages[i]->getWordParts()) {
-            text += part.getCopyText();
+            if (!part.getCopyText().isEmpty()) {
+                text += part.getCopyText();
 
-            if (part.hasTrailingSpace()) {
-                text += " ";
+                if (part.hasTrailingSpace()) {
+                    text += " ";
+                }
             }
         }
         text += "\n";
     }
 
+    // last line
     charIndex = 0;
 
     for (const messages::WordPart &part :
@@ -226,11 +252,7 @@ QString ChannelView::getSelectedText()
         int charLength = part.getCharacterLength();
 
         if (charIndex + charLength >= this->selection.max.charIndex) {
-            if (part.getWord().isText()) {
-                text += part.getText().mid(0, this->selection.max.charIndex - charIndex);
-            } else {
-                text += part.getCopyText();
-            }
+            addPart(part, 0, this->selection.max.charIndex - charIndex);
 
             return text;
         }
@@ -245,6 +267,18 @@ QString ChannelView::getSelectedText()
     }
 
     return text;
+}
+
+bool ChannelView::hasSelection()
+{
+    return !this->selection.isEmpty();
+}
+
+void ChannelView::clearSelection()
+{
+    this->selection = Selection();
+    layoutMessages();
+    update();
 }
 
 messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
@@ -317,6 +351,10 @@ void ChannelView::resizeEvent(QResizeEvent *)
     this->scrollBar.resize(this->scrollBar.width(), height());
     this->scrollBar.move(width() - this->scrollBar.width(), 0);
 
+    this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
+
+    this->scrollBar.raise();
+
     layoutMessages();
 
     this->update();
@@ -326,6 +364,8 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 {
     // selections
     this->selection = Selection(start, end);
+
+    this->selectionChanged();
 
     //    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
     //             << max.charIndex;
@@ -470,7 +510,7 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
         }
         // text
         else {
-            QColor color = wordPart.getWord().getColor();
+            QColor color = wordPart.getWord().getColor().getColor(this->colorScheme);
 
             this->colorScheme.normalizeColor(color);
 
@@ -541,10 +581,8 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
         if (part.getWord().isText()) {
             int offset = this->selection.min.charIndex - charIndex;
 
-            std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
-
             for (int j = 0; j < offset; j++) {
-                rect.setLeft(rect.left() + characterWidth[j]);
+                rect.setLeft(rect.left() + part.getCharacterWidth(j));
             }
 
             if (isSingleWord) {
@@ -553,7 +591,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + characterWidth[j]);
+                    rect.setRight(rect.right() + part.getCharacterWidth(j));
                 }
 
                 painter.fillRect(rect, selectionColor);
@@ -605,14 +643,12 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
             if (part.getWord().isText()) {
                 int offset = this->selection.min.charIndex - charIndex;
 
-                std::vector<short> &characterWidth = part.getWord().getCharacterWidthCache();
-
                 int length = (this->selection.max.charIndex - charIndex) - offset;
 
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + characterWidth[j]);
+                    rect.setRight(rect.right() + part.getCharacterWidth(j));
                 }
             } else {
                 if (this->selection.max.charIndex == charIndex) {

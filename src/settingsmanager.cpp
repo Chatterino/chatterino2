@@ -10,43 +10,44 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 SettingsManager::SettingsManager()
-    : _settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
+    : settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
     , showTimestamps("/appearance/messages/showTimestamps", true)
     , showTimestampSeconds("/appearance/messages/showTimestampSeconds", true)
     , showBadges("/appearance/messages/showBadges", true)
     , streamlinkPath("/behaviour/streamlink/path", "")
     , preferredQuality("/behaviour/streamlink/quality", "Choose")
-    , emoteScale(_settingsItems, "emoteScale", 1.0)
-    , mouseScrollMultiplier(_settingsItems, "mouseScrollMultiplier", 1.0)
-    , scaleEmotesByLineHeight(_settingsItems, "scaleEmotesByLineHeight", false)
-    , showLastMessageIndicator(_settingsItems, "showLastMessageIndicator", false)
-    , allowDouplicateMessages(_settingsItems, "allowDouplicateMessages", true)
-    , linksDoubleClickOnly(_settingsItems, "linksDoubleClickOnly", false)
-    , hideEmptyInput(_settingsItems, "hideEmptyInput", false)
-    , showMessageLength(_settingsItems, "showMessageLength", false)
-    , seperateMessages(_settingsItems, "seperateMessages", false)
-    , mentionUsersWithAt(_settingsItems, "mentionUsersWithAt", false)
-    , allowCommandsAtEnd(_settingsItems, "allowCommandsAtEnd", false)
-    , enableHighlights(_settingsItems, "enableHighlights", true)
-    , enableHighlightsSelf(_settingsItems, "enableHighlightsSelf", true)
-    , enableHighlightSound(_settingsItems, "enableHighlightSound", true)
-    , enableHighlightTaskbar(_settingsItems, "enableHighlightTaskbar", true)
-    , customHighlightSound(_settingsItems, "customHighlightSound", false)
-    , pathHighlightSound(_settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
-    , highlightProperties(_settingsItems, "highlightProperties", QMap<QString, QPair<bool, bool>>())
+    , emoteScale(this->settingsItems, "emoteScale", 1.0)
+    , mouseScrollMultiplier(this->settingsItems, "mouseScrollMultiplier", 1.0)
+    , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight", false)
+    , showLastMessageIndicator(this->settingsItems, "showLastMessageIndicator", false)
+    , allowDouplicateMessages(this->settingsItems, "allowDouplicateMessages", true)
+    , linksDoubleClickOnly(this->settingsItems, "linksDoubleClickOnly", false)
+    , hideEmptyInput(this->settingsItems, "hideEmptyInput", false)
+    , showMessageLength(this->settingsItems, "showMessageLength", false)
+    , seperateMessages(this->settingsItems, "seperateMessages", false)
+    , mentionUsersWithAt(this->settingsItems, "mentionUsersWithAt", false)
+    , allowCommandsAtEnd(this->settingsItems, "allowCommandsAtEnd", false)
+    , enableHighlights(this->settingsItems, "enableHighlights", true)
+    , enableHighlightsSelf(this->settingsItems, "enableHighlightsSelf", true)
+    , enableHighlightSound(this->settingsItems, "enableHighlightSound", true)
+    , enableHighlightTaskbar(this->settingsItems, "enableHighlightTaskbar", true)
+    , customHighlightSound(this->settingsItems, "customHighlightSound", false)
+    , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
+    , highlightProperties(this->settingsItems, "highlightProperties",
+                          QMap<QString, QPair<bool, bool>>())
     , blacklistedUsers(_settingsItems, "blacklistedUsers", "")
-    , enableTwitchEmotes(_settingsItems, "enableTwitchEmotes", true)
-    , enableBttvEmotes(_settingsItems, "enableBttvEmotes", true)
-    , enableFfzEmotes(_settingsItems, "enableFfzEmotes", true)
-    , enableEmojis(_settingsItems, "enableEmojis", true)
-    , enableGifAnimations(_settingsItems, "enableGifAnimations", true)
-    , enableGifs(_settingsItems, "enableGifs", true)
-    , inlineWhispers(_settingsItems, "inlineWhispers", true)
-    , windowTopMost(_settingsItems, "windowTopMost", false)
-    , hideTabX(_settingsItems, "hideTabX", false)
-    , hidePreferencesButton(_settingsItems, "hidePreferencesButton", false)
-    , hideUserButton(_settingsItems, "hideUserButton", false)
-    , useCustomWindowFrame(_settingsItems, "useCustomWindowFrame", true)
+    , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
+    , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
+    , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
+    , enableEmojis(this->settingsItems, "enableEmojis", true)
+    , enableGifAnimations(this->settingsItems, "enableGifAnimations", true)
+    , enableGifs(this->settingsItems, "enableGifs", true)
+    , inlineWhispers(this->settingsItems, "inlineWhispers", true)
+    , windowTopMost(this->settingsItems, "windowTopMost", false)
+    , hideTabX(this->settingsItems, "hideTabX", false)
+    , hidePreferencesButton(this->settingsItems, "hidePreferencesButton", false)
+    , hideUserButton(this->settingsItems, "hideUserButton", false)
+    , useCustomWindowFrame(this->settingsItems, "useCustomWindowFrame", true)
 {
     this->showTimestamps.getValueChangedSignal().connect(
         [this](const auto &) { this->updateWordTypeMask(); });
@@ -65,48 +66,51 @@ SettingsManager::SettingsManager()
 
 void SettingsManager::save()
 {
-    for (auto &item : _settingsItems) {
+    for (auto &item : this->settingsItems) {
         if (item.get().getName() != "highlightProperties") {
-            _settings.setValue(item.get().getName(), item.get().getVariant());
+            this->settings.setValue(item.get().getName(), item.get().getVariant());
         } else {
-            _settings.beginGroup("Highlights");
+            this->settings.beginGroup("Highlights");
             QStringList list = highlightProperties.get().keys();
             list.removeAll("");
-            _settings.remove("");
+            this->settings.remove("");
             for (auto string : list) {
-                _settings.beginGroup(string);
-                _settings.setValue("highlightSound", highlightProperties.get().value(string).first);
-                _settings.setValue("highlightTask", highlightProperties.get().value(string).second);
-                _settings.endGroup();
+                this->settings.beginGroup(string);
+                this->settings.setValue("highlightSound",
+                                        highlightProperties.get().value(string).first);
+                this->settings.setValue("highlightTask",
+                                        highlightProperties.get().value(string).second);
+                this->settings.endGroup();
             }
-            _settings.endGroup();
+            this->settings.endGroup();
         }
     }
 }
 
 void SettingsManager::load()
 {
-    for (auto &item : _settingsItems) {
+    for (auto &item : this->settingsItems) {
         if (item.get().getName() != "highlightProperties") {
-            item.get().setVariant(_settings.value(item.get().getName()));
+            item.get().setVariant(this->settings.value(item.get().getName()));
         } else {
-            _settings.beginGroup("Highlights");
-            QStringList list = _settings.childGroups();
+            this->settings.beginGroup("Highlights");
+            QStringList list = this->settings.childGroups();
             qDebug() << list.join(",");
             for (auto string : list) {
-                _settings.beginGroup(string);
-                highlightProperties.insertMap(string, _settings.value("highlightSound").toBool(),
-                                              _settings.value("highlightTask").toBool());
-                _settings.endGroup();
+                this->settings.beginGroup(string);
+                highlightProperties.insertMap(string,
+                                              this->settings.value("highlightSound").toBool(),
+                                              this->settings.value("highlightTask").toBool());
+                this->settings.endGroup();
             }
-            _settings.endGroup();
+            this->settings.endGroup();
         }
     }
 }
 
 Word::Type SettingsManager::getWordTypeMask()
 {
-    return _wordTypeMask;
+    return this->wordTypeMask;
 }
 
 bool SettingsManager::isIgnoredEmote(const QString &)
@@ -116,7 +120,7 @@ bool SettingsManager::isIgnoredEmote(const QString &)
 
 QSettings &SettingsManager::getQSettings()
 {
-    return _settings;
+    return this->settings;
 }
 
 void SettingsManager::updateWordTypeMask()
@@ -151,8 +155,8 @@ void SettingsManager::updateWordTypeMask()
 
     Word::Type newMask = static_cast<Word::Type>(newMaskUint);
 
-    if (newMask != _wordTypeMask) {
-        _wordTypeMask = newMask;
+    if (newMask != this->wordTypeMask) {
+        this->wordTypeMask = newMask;
 
         emit wordTypeMaskChanged();
     }
@@ -162,11 +166,11 @@ SettingsSnapshot SettingsManager::createSnapshot()
 {
     SettingsSnapshot snapshot;
 
-    for (auto &item : this->_settingsItems) {
+    for (auto &item : this->settingsItems) {
         if (item.get().getName() != "highlightProperties") {
             snapshot.addItem(item, item.get().getVariant());
         } else {
-            snapshot._mapItems = highlightProperties.get();
+            snapshot.mapItems = highlightProperties.get();
         }
     }
 

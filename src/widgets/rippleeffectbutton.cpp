@@ -6,29 +6,29 @@
 namespace chatterino {
 namespace widgets {
 
-FancyButton::FancyButton(BaseWidget *parent)
+RippleEffectButton::RippleEffectButton(BaseWidget *parent)
     : BaseWidget(parent)
 
 {
-    connect(&effectTimer, &QTimer::timeout, this, &FancyButton::onMouseEffectTimeout);
+    connect(&effectTimer, &QTimer::timeout, this, &RippleEffectButton::onMouseEffectTimeout);
 
     this->effectTimer.setInterval(20);
     this->effectTimer.start();
 }
 
-void FancyButton::setMouseEffectColor(QColor color)
+void RippleEffectButton::setMouseEffectColor(QColor color)
 {
     this->mouseEffectColor = color;
 }
 
-void FancyButton::paintEvent(QPaintEvent *)
+void RippleEffectButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
     this->fancyPaint(painter);
 }
 
-void FancyButton::fancyPaint(QPainter &painter)
+void RippleEffectButton::fancyPaint(QPainter &painter)
 {
     QColor &c = this->mouseEffectColor;
 
@@ -58,17 +58,17 @@ void FancyButton::fancyPaint(QPainter &painter)
     }
 }
 
-void FancyButton::enterEvent(QEvent *)
+void RippleEffectButton::enterEvent(QEvent *)
 {
     this->mouseOver = true;
 }
 
-void FancyButton::leaveEvent(QEvent *)
+void RippleEffectButton::leaveEvent(QEvent *)
 {
     this->mouseOver = false;
 }
 
-void FancyButton::mousePressEvent(QMouseEvent *event)
+void RippleEffectButton::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton) {
         return;
@@ -79,7 +79,7 @@ void FancyButton::mousePressEvent(QMouseEvent *event)
     this->mouseDown = true;
 }
 
-void FancyButton::mouseReleaseEvent(QMouseEvent *event)
+void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() != Qt::LeftButton) {
         return;
@@ -92,12 +92,12 @@ void FancyButton::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void FancyButton::mouseMoveEvent(QMouseEvent *event)
+void RippleEffectButton::mouseMoveEvent(QMouseEvent *event)
 {
     this->mousePos = event->pos();
 }
 
-void FancyButton::onMouseEffectTimeout()
+void RippleEffectButton::onMouseEffectTimeout()
 {
     bool performUpdate = false;
 

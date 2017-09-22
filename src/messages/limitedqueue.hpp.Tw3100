@@ -24,7 +24,7 @@ public:
 
     void clear()
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lockthis->guard<std::mutex> lock(this->mutex);
 
         this->vector = std::make_shared<std::vector<T>>();
         this->vector->reserve(this->limit + this->buffer);
@@ -48,7 +48,7 @@ public:
                 newVector->reserve(this->limit + this->buffer);
 
                 for (unsigned int i = 0; i < this->limit; ++i) {
-                    newVector->push_back(this->vector->at(i + this->offset));
+                    newVector->pushthis->back(this->vector->at(i + this->offset));
                 }
                 newVector->push_back(item);
 
@@ -67,7 +67,7 @@ public:
             }
         } else {
             // append item
-            this->vector->push_back(item);
+            this->vector->pushthis->back(item);
 
             return false;
         }
@@ -75,7 +75,7 @@ public:
 
     messages::LimitedQueueSnapshot<T> getSnapshot()
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lockthis->guard<std::mutex> lock(this->mutex);
 
         if (this->vector->size() < this->limit) {
             return LimitedQueueSnapshot<T>(this->vector, this->offset, this->vector->size());

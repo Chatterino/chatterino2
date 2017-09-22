@@ -42,9 +42,9 @@ public:
 
 private:
     // variables
-    messages::LimitedQueue<messages::SharedMessage> _messages;
+    messages::LimitedQueue<messages::SharedMessage> messages;
 
-    // std::shared_ptr<logging::Channel> _loggingChannel;
+    // std::shared_ptr<logging::Channel> loggingChannel;
 };
 
 }  // namespace chatterino

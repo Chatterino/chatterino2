@@ -15,7 +15,8 @@ public:
              bool allowTrailingSpace = true);
 
     WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight, int _lineNumber,
-             const QString &getCopyText, const QString &customText, bool allowTrailingSpace = true);
+             const QString &getCopyText, const QString &customText, bool allowTrailingSpace = true,
+             int wordCharOffset = 0);
 
     const Word &getWord() const;
     int getWidth() const;
@@ -32,21 +33,23 @@ public:
     const QString &getText() const;
     int getLineNumber() const;
     int getCharacterLength() const;
+    short getCharacterWidth(int index) const;
 
 private:
-    Word &_word;
+    Word &word;
 
-    QString _copyText;
-    QString _text;
+    QString copyText;
+    QString text;
 
-    int _x;
-    int _y;
-    int _width;
-    int _height;
+    int x;
+    int y;
+    int width;
+    int height;
 
-    int _lineNumber;
+    int lineNumber;
 
     bool _trailingSpace;
+    int wordCharOffset;
 };
 
 }  // namespace messages

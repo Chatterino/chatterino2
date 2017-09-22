@@ -7,6 +7,7 @@
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
+#include "widgets/rippleeffectlabel.hpp"
 #include "widgets/scrollbar.hpp"
 
 #include <QPaintEvent>
@@ -89,6 +90,8 @@ public:
     void updateGifEmotes();
     ScrollBar &getScrollBar();
     QString getSelectedText();
+    bool hasSelection();
+    void clearSelection();
 
     void setChannel(std::shared_ptr<Channel> channel);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
@@ -97,6 +100,7 @@ public:
     void clearMessages();
 
     boost::signals2::signal<void(QMouseEvent *)> mouseDown;
+    boost::signals2::signal<void()> selectionChanged;
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;
@@ -132,6 +136,7 @@ private:
     std::vector<GifEmoteData> gifEmotes;
 
     ScrollBar scrollBar;
+    RippleEffectLabel *goToBottom;
 
     // This variable can be used to decide whether or not we should render the "Show latest
     // messages" button
@@ -152,6 +157,7 @@ private:
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageRemovedConnection;
     boost::signals2::connection repaintGifsConnection;
+    boost::signals2::connection layoutConnection;
 
 private slots:
     void wordTypeMaskChanged()

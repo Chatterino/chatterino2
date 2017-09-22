@@ -301,9 +301,11 @@ void SettingsDialog::addTabs()
         auto form = new QFormLayout();
 
         form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
-        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in commands)",
-                                                 settings.mentionUsersWithAt));
-        form->addRow("", createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+        //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
+        //        commands)",
+        //                                                 settings.mentionUsersWithAt));
+        form->addRow("Messages:",
+                     createCheckbox("Hide input box if empty", settings.hideEmptyInput));
         form->addRow("", createCheckbox("Show last read message indicator",
                                         settings.showLastMessageIndicator));
 
@@ -319,8 +321,7 @@ void SettingsDialog::addTabs()
             {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
             [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
                 setting = newValue.toStdString();
-            })
-        );
+            }));
 
         //        v->addWidget(scroll);
         //        v->addStretch(1);
@@ -663,7 +664,7 @@ void SettingsDialog::cancelButtonClicked()
     auto &instance = SettingsManager::getInstance();
 
     this->snapshot.apply();
-    instance.highlightProperties.set(this->snapshot._mapItems);
+    instance.highlightProperties.set(this->snapshot.mapItems);
 
     QStringList list = instance.highlightProperties.get().keys();
     list.removeDuplicates();

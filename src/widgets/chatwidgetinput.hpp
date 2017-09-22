@@ -29,6 +29,8 @@ public:
     ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &, WindowManager &);
     ~ChatWidgetInput();
 
+    void clearSelection();
+
 protected:
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
@@ -54,7 +56,6 @@ private:
 
 private slots:
     void editTextChanged();
-    //    void editKeyPressed(QKeyEvent *event);
 
     friend class ChatWidget;
 };

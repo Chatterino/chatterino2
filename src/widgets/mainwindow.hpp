@@ -4,9 +4,9 @@
 #include "widgets/notebook.hpp"
 #include "widgets/titlebar.hpp"
 
-#ifdef USEWINSDK
-#include <platform/borderless/qwinwidget.h>
-#endif
+//#ifdef USEWINSDK
+//#include <platform/borderless/qwinwidget.h>
+//#endif
 
 #include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
@@ -30,7 +30,6 @@ public:
                         CompletionManager &_completionManager);
     ~MainWindow();
 
-    void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
     void load(const boost::property_tree::ptree &tree);
@@ -45,6 +44,8 @@ protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
+    float dpi;
+
     virtual void refreshTheme() override;
 
     ChannelManager &channelManager;

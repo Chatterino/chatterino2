@@ -105,7 +105,8 @@ SharedMessage TwitchMessageBuilder::parse()
     long int i = 0;
 
     for (QString split : splits) {
-        QColor textColor = ircMessage->isAction() ? this->usernameColor : this->colorScheme.Text;
+        MessageColor textColor = ircMessage->isAction() ? MessageColor(this->usernameColor)
+                                                        : MessageColor(MessageColor::Text);
 
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
@@ -184,17 +185,18 @@ SharedMessage TwitchMessageBuilder::parse()
                                           Link(Link::Url, QString("https://blog.twitch.tv/"
                                                                   "introducing-cheering-celebrate-"
                                                                   "together-da62af41fac6"))));
-                    this->appendWord(Word(image, Word::BitsStatic, QString("cheer"),
-                                          QString("Twitch Cheer"),
-                                          Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                                  "introducing-cheering-celebrate-"
-                                                                  "together-da62af41fac6"))));
+                    this->appendWord(Word(
+                        image, Word::BitsStatic, QString("cheer"), QString("Twitch Cheer"),
+                        Link(Link::Url,
+                             QString("https://blog.twitch.tv/"
+                                     "introducing-cheering-celebrate-together-da62af41fac6"))));
 
-                    this->appendWord(Word(QString("x" + string.mid(5)), Word::BitsAmount, bitsColor,
-                                          QString(string.mid(5)), QString("Twitch Cheer"),
-                                          Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                                  "introducing-cheering-celebrate-"
-                                                                  "together-da62af41fac6"))));
+                    this->appendWord(Word(
+                        QString("x" + string.mid(5)), Word::BitsAmount, MessageColor(bitsColor),
+                        QString(string.mid(5)), QString("Twitch Cheer"),
+                        Link(Link::Url,
+                             QString("https://blog.twitch.tv/"
+                                     "introducing-cheering-celebrate-together-da62af41fac6"))));
 
                     continue;
                 }
@@ -218,7 +220,7 @@ SharedMessage TwitchMessageBuilder::parse()
                     link = Link();
                 } else {
                     link = Link(Link::Url, linkString);
-                    textColor = this->colorScheme.TextLink;
+                    textColor = MessageColor(MessageColor::Link);
                 }
 
                 this->appendWord(Word(string, Word::Text, textColor, string, QString(), link));
@@ -278,7 +280,7 @@ void TwitchMessageBuilder::parseRoomID()
 void TwitchMessageBuilder::parseChannelName()
 {
     QString channelName("#" + this->channel->name);
-    this->appendWord(Word(channelName, Word::Misc, this->colorScheme.SystemMessageColor,
+    this->appendWord(Word(channelName, Word::Misc, MessageColor(MessageColor::System),
                           QString(channelName), QString(),
                           Link(Link::Url, this->channel->name + "\n" + this->messageID)));
 }
@@ -359,8 +361,8 @@ void TwitchMessageBuilder::appendUsername()
         usernameString += ": ";
     }
 
-    this->appendWord(Word(usernameString, Word::Username, this->usernameColor, usernameString,
-                          QString(), Link(Link::UserInfo, this->userName)));
+    this->appendWord(Word(usernameString, Word::Username, MessageColor(this->usernameColor),
+                          usernameString, QString(), Link(Link::UserInfo, this->userName)));
 }
 
 void TwitchMessageBuilder::parseHighlights()

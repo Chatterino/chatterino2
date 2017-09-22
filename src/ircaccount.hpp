@@ -16,10 +16,10 @@ public:
     const QString &getPassword() const;
 
 private:
-    QString _userName;
-    QString _nickName;
-    QString _realName;
-    QString _password;
+    QString userName;
+    QString nickName;
+    QString realName;
+    QString password;
 };
 
 }  // namespace chatterino

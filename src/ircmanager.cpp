@@ -31,7 +31,7 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
     , resources(_resources)
     , emoteManager(_emoteManager)
     , windowManager(_windowManager)
-    , _account(AccountManager::getInstance().getTwitchAnon())
+    , account(AccountManager::getInstance().getTwitchAnon())
     , currentUser("/accounts/current")
 {
     this->currentUser.getValueChangedSignal().connect([](const auto &newUsername) {
@@ -42,12 +42,12 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
 
 const twitch::TwitchUser &IrcManager::getUser() const
 {
-    return _account;
+    return this->account;
 }
 
 void IrcManager::setUser(const twitch::TwitchUser &account)
 {
-    _account = account;
+    this->account = account;
 }
 
 void IrcManager::connect()
@@ -68,9 +68,9 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
                          &IrcManager::privateMessageReceived);
     }
 
-    QString username = _account.getUserName();
-    QString oauthClient = _account.getOAuthClient();
-    QString oauthToken = _account.getOAuthToken();
+    QString username = this->account.getUserName();
+    QString oauthClient = this->account.getOAuthClient();
+    QString oauthToken = this->account.getOAuthToken();
     if (!oauthToken.startsWith("oauth:")) {
         oauthToken.prepend("oauth:");
     }
@@ -79,7 +79,7 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
     connection->setNickName(username);
     connection->setRealName(username);
 
-    if (!_account.isAnon()) {
+    if (!this->account.isAnon()) {
         connection->setPassword(oauthToken);
 
         this->refreshIgnoredUsers(username, oauthClient, oauthToken);
@@ -109,26 +109,26 @@ void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oau
     QNetworkReply *reply = manager->get(req);
 
     QObject::connect(reply, &QNetworkReply::finished, [=] {
-        _twitchBlockedUsersMutex.lock();
-        _twitchBlockedUsers.clear();
-        _twitchBlockedUsersMutex.unlock();
+        this->twitchBlockedUsersMutex.lock();
+        this->twitchBlockedUsers.clear();
+        this->twitchBlockedUsersMutex.unlock();
 
         QByteArray data = reply->readAll();
         QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
         QJsonObject root = jsonDoc.object();
 
         // nextLink =
-        // root.value("_links").toObject().value("next").toString();
+        // root.value("this->links").toObject().value("next").toString();
 
         auto blocks = root.value("blocks").toArray();
 
-        _twitchBlockedUsersMutex.lock();
+        this->twitchBlockedUsersMutex.lock();
         for (QJsonValue block : blocks) {
             QJsonObject user = block.toObject().value("user").toObject();
-            // display_name
-            _twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
+            // displaythis->name
+            this->twitchBlockedUsers.insert(user.value("name").toString().toLower(), true);
         }
-        _twitchBlockedUsersMutex.unlock();
+        this->twitchBlockedUsersMutex.unlock();
 
         manager->deleteLater();
     });
@@ -325,27 +325,27 @@ void IrcManager::handleModeMessage(Communi::IrcMessage *message)
 
 bool IrcManager::isTwitchBlockedUser(QString const &username)
 {
-    QMutexLocker locker(&_twitchBlockedUsersMutex);
+    QMutexLocker locker(&this->twitchBlockedUsersMutex);
 
-    auto iterator = _twitchBlockedUsers.find(username);
+    auto iterator = this->twitchBlockedUsers.find(username);
 
-    return iterator != _twitchBlockedUsers.end();
+    return iterator != this->twitchBlockedUsers.end();
 }
 
 bool IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
 {
-    QUrl url("https://api.twitch.tv/kraken/users/" + _account.getUserName() + "/blocks/" +
-             username + "?oauth_token=" + _account.getOAuthToken() +
-             "&client_id=" + _account.getOAuthClient());
+    QUrl url("https://api.twitch.tv/kraken/users/" + this->account.getUserName() + "/blocks/" +
+             username + "?oauth_token=" + this->account.getOAuthToken() +
+             "&client_id=" + this->account.getOAuthClient());
 
     QNetworkRequest request(url);
     auto reply = this->networkAccessManager.put(request, QByteArray());
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
-        _twitchBlockedUsersMutex.lock();
-        _twitchBlockedUsers.insert(username, true);
-        _twitchBlockedUsersMutex.unlock();
+        this->twitchBlockedUsersMutex.lock();
+        this->twitchBlockedUsers.insert(username, true);
+        this->twitchBlockedUsersMutex.unlock();
 
         return true;
     }
@@ -366,18 +366,18 @@ void IrcManager::addIgnoredUser(QString const &username)
 
 bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
 {
-    QUrl url("https://api.twitch.tv/kraken/users/" + _account.getUserName() + "/blocks/" +
-             username + "?oauth_token=" + _account.getOAuthToken() +
-             "&client_id=" + _account.getOAuthClient());
+    QUrl url("https://api.twitch.tv/kraken/users/" + this->account.getUserName() + "/blocks/" +
+             username + "?oauth_token=" + this->account.getOAuthToken() +
+             "&client_id=" + this->account.getOAuthClient());
 
     QNetworkRequest request(url);
     auto reply = this->networkAccessManager.deleteResource(request);
     reply->waitForReadyRead(10000);
 
     if (reply->error() == QNetworkReply::NoError) {
-        _twitchBlockedUsersMutex.lock();
-        _twitchBlockedUsers.remove(username);
-        _twitchBlockedUsersMutex.unlock();
+        this->twitchBlockedUsersMutex.lock();
+        this->twitchBlockedUsers.remove(username);
+        this->twitchBlockedUsersMutex.unlock();
 
         return true;
     }

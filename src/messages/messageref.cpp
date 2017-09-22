@@ -14,40 +14,40 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace messages {
 
-MessageRef::MessageRef(SharedMessage message)
-    : _message(message)
-    , _wordParts()
+MessageRef::MessageRef(SharedMessage _message)
+    : message(_message)
+    , wordParts()
 {
 }
 
 Message *MessageRef::getMessage()
 {
-    return _message.get();
+    return this->message.get();
 }
 
 int MessageRef::getHeight() const
 {
-    return _height;
+    return this->height;
 }
 
 bool MessageRef::layout(int width, bool enableEmoteMargins)
 {
     auto &settings = SettingsManager::getInstance();
 
-    bool sizeChanged = width != _currentLayoutWidth;
-    bool redraw = width != _currentLayoutWidth;
+    bool sizeChanged = width != this->currentLayoutWidth;
+    bool redraw = width != this->currentLayoutWidth;
     int spaceWidth = 4;
 
     int mediumTextLineHeight =
         FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
 
     /* TODO(pajlada): Re-implement
-    bool recalculateImages = _emoteGeneration != EmoteManager::getInstance().getGeneration();
+    bool recalculateImages = this->emoteGeneration != EmoteManager::getInstance().getGeneration();
     */
     bool recalculateImages = true;
 
-    bool recalculateText = _fontGeneration != FontManager::getInstance().getGeneration();
-    bool newWordTypes = _currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
+    bool recalculateText = this->fontGeneration != FontManager::getInstance().getGeneration();
+    bool newWordTypes = this->currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
 
     qreal emoteScale = settings.emoteScale.get();
     bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
@@ -57,10 +57,10 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         return false;
     }
 
-    // _emoteGeneration = EmoteManager::getInstance().getGeneration();
-    _fontGeneration = FontManager::getInstance().getGeneration();
+    // this->emoteGeneration = EmoteManager::getInstance().getGeneration();
+    this->fontGeneration = FontManager::getInstance().getGeneration();
 
-    for (auto &word : _message->getWords()) {
+    for (auto &word : this->message->getWords()) {
         if (word.isImage()) {
             if (!recalculateImages) {
                 continue;
@@ -88,11 +88,11 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
     }
 
     if (newWordTypes) {
-        _currentWordTypes = settings.getWordTypeMask();
+        this->currentWordTypes = settings.getWordTypeMask();
     }
 
     // layout
-    _currentLayoutWidth = width;
+    this->currentLayoutWidth = width;
 
     int x = MARGIN_LEFT;
     int y = MARGIN_TOP;
@@ -104,11 +104,11 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
     int lineHeight = 0;
     bool first = true;
 
-    _wordParts.clear();
+    this->wordParts.clear();
 
     uint32_t flags = settings.getWordTypeMask();
 
-    for (auto it = _message->getWords().begin(); it != _message->getWords().end(); ++it) {
+    for (auto it = this->message->getWords().begin(); it != this->message->getWords().end(); ++it) {
         Word &word = *it;
 
         // Check if given word is supposed to be rendered by comparing it to the current setting
@@ -141,13 +141,17 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             int width = 0;
 
             std::vector<short> &charWidths = word.getCharacterWidthCache();
+            int charOffset = 0;
 
             for (int i = 2; i <= text.length(); i++) {
                 if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
                     QString mid = text.mid(start, i - start - 1);
 
-                    _wordParts.push_back(WordPart(word, MARGIN_LEFT, y, width, word.getHeight(),
-                                                  lineNumber, mid, mid, false));
+                    this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y, width,
+                                                       word.getHeight(), lineNumber, mid, mid,
+                                                       false, charOffset));
+
+                    charOffset = i;
 
                     y += metrics.height();
 
@@ -161,18 +165,18 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             QString mid(text.mid(start));
             width = metrics.width(mid);
 
-            _wordParts.push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(), width,
-                                          word.getHeight(), lineNumber, mid, mid));
+            this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(), width,
+                                               word.getHeight(), lineNumber, mid, mid, charOffset));
             x = width + MARGIN_LEFT + spaceWidth;
 
             lineHeight = word.getHeight();
 
-            lineStart = _wordParts.size() - 1;
+            lineStart = this->wordParts.size() - 1;
 
             first = false;
         } else if (first || x + word.getWidth() + xOffset <= right) {
             // fits in the line
-            _wordParts.push_back(
+            this->wordParts.push_back(
                 WordPart(word, x, y - word.getHeight(), lineNumber, word.getCopyText()));
 
             x += word.getWidth() + xOffset;
@@ -189,10 +193,10 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
             lineNumber++;
 
-            _wordParts.push_back(
+            this->wordParts.push_back(
                 WordPart(word, MARGIN_LEFT, y - word.getHeight(), lineNumber, word.getCopyText()));
 
-            lineStart = _wordParts.size() - 1;
+            lineStart = this->wordParts.size() - 1;
 
             lineHeight = word.getHeight();
 
@@ -203,12 +207,12 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
     alignWordParts(lineStart, lineHeight, width);
 
-    if (_height != y + lineHeight) {
+    if (this->height != y + lineHeight) {
         sizeChanged = true;
-        _height = y + lineHeight;
+        this->height = y + lineHeight;
     }
 
-    _height += MARGIN_BOTTOM;
+    this->height += MARGIN_BOTTOM;
 
     if (sizeChanged) {
         buffer = nullptr;
@@ -221,19 +225,19 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
 const std::vector<WordPart> &MessageRef::getWordParts() const
 {
-    return _wordParts;
+    return this->wordParts;
 }
 
 void MessageRef::alignWordParts(int lineStart, int lineHeight, int width)
 {
     int xOffset = 0;
 
-    if (this->_message->centered && _wordParts.size() > 0) {
-        xOffset = (width - this->_wordParts.at(_wordParts.size() - 1).getRight()) / 2;
+    if (this->message->centered && this->wordParts.size() > 0) {
+        xOffset = (width - this->wordParts.at(this->wordParts.size() - 1).getRight()) / 2;
     }
 
-    for (size_t i = lineStart; i < this->_wordParts.size(); i++) {
-        WordPart &wordPart2 = this->_wordParts.at(i);
+    for (size_t i = lineStart; i < this->wordParts.size(); i++) {
+        WordPart &wordPart2 = this->wordParts.at(i);
 
         wordPart2.setPosition(wordPart2.getX() + xOffset, wordPart2.getY() + lineHeight);
     }
@@ -242,7 +246,7 @@ void MessageRef::alignWordParts(int lineStart, int lineHeight, int width)
 const Word *MessageRef::tryGetWordPart(QPoint point)
 {
     // go through all words and return the first one that contains the point.
-    for (WordPart &wordPart : _wordParts) {
+    for (WordPart &wordPart : this->wordParts) {
         if (wordPart.getRect().contains(point)) {
             return &wordPart.getWord();
         }
@@ -253,15 +257,15 @@ const Word *MessageRef::tryGetWordPart(QPoint point)
 
 int MessageRef::getSelectionIndex(QPoint position)
 {
-    if (_wordParts.size() == 0) {
+    if (this->wordParts.size() == 0) {
         return 0;
     }
 
     // find out in which line the cursor is
     int lineNumber = 0, lineStart = 0, lineEnd = 0;
 
-    for (size_t i = 0; i < _wordParts.size(); i++) {
-        WordPart &part = _wordParts[i];
+    for (size_t i = 0; i < this->wordParts.size(); i++) {
+        WordPart &part = this->wordParts[i];
 
         if (part.getLineNumber() != 0 && position.y() < part.getY()) {
             break;
@@ -279,13 +283,13 @@ int MessageRef::getSelectionIndex(QPoint position)
     int index = 0;
 
     for (int i = 0; i < lineStart; i++) {
-        WordPart &part = _wordParts[i];
+        WordPart &part = this->wordParts[i];
 
         index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
     }
 
     for (int i = lineStart; i < lineEnd; i++) {
-        WordPart &part = _wordParts[i];
+        WordPart &part = this->wordParts[i];
 
         // curser is left of the word part
         if (position.x() < part.getX()) {

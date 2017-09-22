@@ -74,9 +74,6 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     // CTRL+R: Change Channel
     ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
 
-    // CTRL+C: Copy
-    ezShortcut(this, "CTRL+B", &ChatWidget::doCopy);
-
 #ifndef NDEBUG
     // F12: Toggle message spawning
     ezShortcut(this, "ALT+Q", &ChatWidget::doToggleMessageSpawning);
@@ -90,6 +87,11 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     this->input.textInput.installEventFilter(parent);
 
     this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
+    this->view.selectionChanged.connect([this]() {
+        if (view.hasSelection()) {
+            this->input.clearSelection();
+        }
+    });
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &ChatWidget::test);

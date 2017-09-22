@@ -27,9 +27,7 @@ static const std::string &getSettingsPath()
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    if (this->mainWindow != nullptr) {
-        this->mainWindow->layoutVisibleChatWidgets(channel);
-    }
+    this->layout();
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)

@@ -38,21 +38,17 @@ void MessageBuilder::appendTimestamp(time_t time)
 {
     char timeStampBuffer[69];
 
-    // TODO(pajlada): Fix this
-    QColor systemMessageColor(140, 127, 127);
-    // QColor &systemMessageColor = ColorScheme::getInstance().SystemMessageColor;
-
     // Add word for timestamp with no seconds
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&time));
     QString timestampNoSeconds(timeStampBuffer);
-    appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds, systemMessageColor, QString(),
-                    QString()));
+    appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
+                    MessageColor(MessageColor::System), QString(), QString()));
 
     // Add word for timestamp with seconds
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds(timeStampBuffer);
-    appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds, systemMessageColor, QString(),
-                    QString()));
+    appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
+                    MessageColor(MessageColor::System), QString(), QString()));
 }
 
 QString MessageBuilder::matchLink(const QString &string)

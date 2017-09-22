@@ -10,7 +10,7 @@ class BaseSetting
 {
 public:
     BaseSetting(const QString &_name)
-        : _name(_name)
+        : name(_name)
     {
     }
 
@@ -19,11 +19,11 @@ public:
 
     const QString &getName() const
     {
-        return _name;
+        return this->name;
     }
 
 private:
-    QString _name;
+    QString name;
 };
 
 template <typename T>
@@ -33,25 +33,25 @@ public:
     Setting(std::vector<std::reference_wrapper<BaseSetting>> &settingItems, const QString &_name,
             const T &defaultValue)
         : BaseSetting(_name)
-        , _value(defaultValue)
+        , value(defaultValue)
     {
         settingItems.push_back(*this);
     }
 
     const T &get() const
     {
-        return _value;
+        return this->value;
     }
 
     T &getnonConst()
     {
-        return _value;
+        return this->value;
     }
 
     void set(const T &newValue)
     {
-        if (_value != newValue) {
-            _value = newValue;
+        if (this->value != newValue) {
+            this->value = newValue;
 
             valueChanged(newValue);
         }
@@ -59,7 +59,7 @@ public:
 
     virtual QVariant getVariant() final
     {
-        return QVariant::fromValue(_value);
+        return QVariant::fromValue(this->value);
     }
 
     virtual void setVariant(QVariant value) final
@@ -73,13 +73,13 @@ public:
     void insertMap(QString id, bool sound, bool task)
     {
         QPair<bool, bool> pair(sound, task);
-        _value.insert(id, pair);
+        this->value.insert(id, pair);
     }
 
     boost::signals2::signal<void(const T &newValue)> valueChanged;
 
 private:
-    T _value;
+    T value;
 };
 
 }  // namespace chatterino

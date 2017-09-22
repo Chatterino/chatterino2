@@ -98,7 +98,8 @@ SOURCES += \
     src/widgets/channelview.cpp \
     src/twitch/twitchchannel.cpp \
     src/widgets/rippleeffectlabel.cpp \
-    src/widgets/rippleeffectbutton.cpp
+    src/widgets/rippleeffectbutton.cpp \
+    src/messages/messagecolor.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -161,7 +162,9 @@ HEADERS  += \
     src/widgets/rippleeffectbutton.hpp \
     src/widgets/rippleeffectlabel.hpp \
     src/widgets/qualitypopup.hpp \
-    src/widgets/emotepopup.hpp
+    src/widgets/emotepopup.hpp \
+    src/messages/messagecolor.hpp \
+    src/util/nativeeventhelper.hpp
 
 PRECOMPILED_HEADER =
 
@@ -176,21 +179,21 @@ win32 {
 }
 
 # Optional dependency on windows sdk 7.1
-#win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
-#    LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
-#        -ldwmapi \
-#        -lgdi32
-#
+win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
+    LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
+        -ldwmapi \
+        -lgdi32
+
 #    SOURCES += platform/borderless/qwinwidget.cpp \
 #        platform/borderless/winnativewindow.cpp \
 #        platform/borderless/widget.cpp
-#
+
 #    HEADERS += platform/borderless/qwinwidget.h \
 #        platform/borderless/winnativewindow.h \
 #        platform/borderless/widget.h
-#
-#    DEFINES += "USEWINSDK"
-#}
+
+    DEFINES += "USEWINSDK"
+}
 
 macx {
     INCLUDEPATH += /usr/local/include

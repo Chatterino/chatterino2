@@ -4,103 +4,108 @@
 namespace chatterino {
 namespace messages {
 
-WordPart::WordPart(Word &word, int x, int y, int lineNumber, const QString &copyText,
-                   bool allowTrailingSpace)
-    : _word(word)
-    , _copyText(copyText)
-    , _text(word.isText() ? _word.getText() : QString())
-    , _x(x)
-    , _y(y)
-    , _width(word.getWidth())
-    , _height(word.getHeight())
-    , _lineNumber(lineNumber)
-    , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
+WordPart::WordPart(Word &_word, int _x, int _y, int _lineNumber, const QString &_copyText,
+                   bool _allowTrailingSpace)
+    : word(_word)
+    , copyText(_copyText)
+    , text(_word.isText() ? _word.getText() : QString())
+    , x(_x)
+    , y(_y)
+    , width(_word.getWidth())
+    , height(_word.getHeight())
+    , lineNumber(_lineNumber)
+    , _trailingSpace(!_word.getCopyText().isEmpty() &&
+                     _word.hasTrailingSpace() & _allowTrailingSpace)
+    , wordCharOffset(0)
 {
 }
 
-WordPart::WordPart(Word &word, int x, int y, int width, int height, int lineNumber,
-                   const QString &copyText, const QString &customText, bool allowTrailingSpace)
-    : _word(word)
-    , _copyText(copyText)
-    , _text(customText)
-    , _x(x)
-    , _y(y)
-    , _width(width)
-    , _height(height)
-    , _lineNumber(lineNumber)
-    , _trailingSpace(!word.getCopyText().isEmpty() && word.hasTrailingSpace() & allowTrailingSpace)
+WordPart::WordPart(Word &_word, int _x, int _y, int _width, int _height, int _lineNumber,
+                   const QString &_copyText, const QString &_customText, bool _allowTrailingSpace,
+                   int _wordCharOffset)
+    : word(_word)
+    , copyText(_copyText)
+    , text(_customText)
+    , x(_x)
+    , y(_y)
+    , width(_width)
+    , height(_height)
+    , lineNumber(_lineNumber)
+    , _trailingSpace(!_word.getCopyText().isEmpty() &&
+                     _word.hasTrailingSpace() & _allowTrailingSpace)
+    , wordCharOffset(_wordCharOffset)
 {
 }
 
 const Word &WordPart::getWord() const
 {
-    return _word;
+    return this->word;
 }
 
 int WordPart::getWidth() const
 {
-    return _width;
+    return this->width;
 }
 
 int WordPart::getHeight() const
 {
-    return _height;
+    return this->height;
 }
 
 int WordPart::getX() const
 {
-    return _x;
+    return this->x;
 }
 
 int WordPart::getY() const
 {
-    return _y;
+    return this->y;
 }
 
 void WordPart::setPosition(int x, int y)
 {
-    _x = x;
-    _y = y;
+    this->x = x;
+    this->y = y;
 }
 
 void WordPart::setY(int y)
 {
-    _y = y;
+    this->y = y;
 }
 
 int WordPart::getRight() const
 {
-    return _x + _width;
+    return this->x + this->width;
 }
 
 int WordPart::getBottom() const
 {
-    return _y + _height;
+    return this->y + this->height;
 }
 
 QRect WordPart::getRect() const
 {
-    return QRect(_x, _y, _width, _height - 1);
+    return QRect(this->x, this->y, this->width, this->height - 1);
 }
 
 const QString WordPart::getCopyText() const
 {
-    return _copyText;
+    return this->copyText;
 }
 
 int WordPart::hasTrailingSpace() const
 {
-    return _trailingSpace;
+    return this->_trailingSpace;
 }
 
 const QString &WordPart::getText() const
 {
-    return _text;
+    return this->text;
 }
 
 int WordPart::getLineNumber() const
 {
-    return _lineNumber;
+    return this->lineNumber;
 }
 
 int WordPart::getCharacterLength() const
@@ -110,5 +115,9 @@ int WordPart::getCharacterLength() const
     return this->getWord().isImage() ? 2 : this->getText().length() + 1;
 }
 
+short WordPart::getCharacterWidth(int index) const
+{
+    return this->getWord().getCharacterWidthCache().at(index + this->wordCharOffset);
+}
 }  // namespace messages
 }  // namespace chatterino

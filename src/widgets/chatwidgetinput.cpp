@@ -160,17 +160,38 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
 
                 notebook->previousTab();
             }
+        } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
+            if (this->chatWidget->view.hasSelection()) {
+                this->chatWidget->doCopy();
+                event->accept();
+            }
         }
     });
 
     this->textLengthVisibleChangedConnection =
         SettingsManager::getInstance().showMessageLength.valueChanged.connect(
             [this](const bool &value) { this->textLengthLabel.setHidden(!value); });
+
+    QObject::connect(&this->textInput, &QTextEdit::copyAvailable, [this](bool available) {
+        if (available) {
+            this->chatWidget->view.clearSelection();
+        }
+    });
 }
 
 ChatWidgetInput::~ChatWidgetInput()
 {
     this->textLengthVisibleChangedConnection.disconnect();
+}
+
+void ChatWidgetInput::clearSelection()
+{
+    QTextCursor c = this->textInput.textCursor();
+
+    c.setPosition(c.position());
+    c.setPosition(c.position(), QTextCursor::KeepAnchor);
+
+    this->textInput.setTextCursor(c);
 }
 
 void ChatWidgetInput::refreshTheme()
@@ -187,16 +208,6 @@ void ChatWidgetInput::refreshTheme()
 void ChatWidgetInput::editTextChanged()
 {
 }
-
-// void
-// ChatWidgetInput::editKeyPressed(QKeyEvent *event)
-//{
-//    if (event->key() == Qt::Key_Enter) {
-//        event->accept();
-//        IrcManager::send("PRIVMSG #" +  edit.toPlainText();
-//        edit.setText(QString());
-//    }
-//}
 
 void ChatWidgetInput::paintEvent(QPaintEvent *)
 {

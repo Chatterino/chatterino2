@@ -31,14 +31,10 @@ Notebook::Notebook(ChannelManager &_channelManager, MainWindow *parent)
     this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
     this->connect(&this->addButton, SIGNAL(clicked()), this, SLOT(addPageButtonClicked()));
 
-    this->settingsButton.resize(24, 24);
     this->settingsButton.icon = NotebookButton::IconSettings;
 
-    this->userButton.resize(24, 24);
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
-
-    this->addButton.resize(24, 24);
 
     SettingsManager::getInstance().hidePreferencesButton.valueChanged.connect(
         [this](const bool &) { this->performLayout(); });
@@ -163,27 +159,26 @@ void Notebook::previousTab()
 void Notebook::performLayout(bool animated)
 {
     int x = 0, y = 0;
+    float scale = this->getDpiMultiplier();
 
     if (SettingsManager::getInstance().hidePreferencesButton.get()) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
-        x += 24;
+        x += settingsButton.width();
     }
     if (SettingsManager::getInstance().hideUserButton.get()) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);
         this->userButton.show();
-        x += 24;
+        x += userButton.width();
     }
 
-    int tabHeight = 16;
+    int tabHeight = static_cast<int>(24 * scale);
     bool first = true;
 
     for (auto &i : this->pages) {
-        tabHeight = i->getTab()->height();
-
         if (!first &&
             (i == this->pages.last() ? tabHeight : 0) + x + i->getTab()->width() > width()) {
             y += i->getTab()->height();
@@ -207,6 +202,16 @@ void Notebook::performLayout(bool animated)
 
 void Notebook::resizeEvent(QResizeEvent *)
 {
+    float scale = this->getDpiMultiplier();
+
+    this->settingsButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
+    this->userButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
+    this->addButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
+
+    for (auto &i : this->pages) {
+        i->getTab()->calcSize();
+    }
+
     this->performLayout(false);
 }
 

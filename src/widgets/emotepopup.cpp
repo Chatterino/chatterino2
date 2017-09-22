@@ -39,7 +39,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         messages::MessageBuilder builder1;
 
         builder1.appendWord(
-            Word(title, Word::Type::Text, QColor(255, 255, 255), QString(), QString()));
+            Word(title, Word::Type::Text, MessageColor(MessageColor::Text), QString(), QString()));
 
         builder1.getMessage()->centered = true;
         emoteChannel->addMessage(builder1.getMessage());

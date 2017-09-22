@@ -22,20 +22,9 @@ public:
     Link();
     Link(Type getType, const QString &getValue);
 
-    bool isValid() const
-    {
-        return type != None;
-    }
-
-    Type getType() const
-    {
-        return type;
-    }
-
-    const QString &getValue() const
-    {
-        return value;
-    }
+    bool isValid() const;
+    Type getType() const;
+    const QString &getValue() const;
 
 private:
     Type type;
