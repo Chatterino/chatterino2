@@ -395,6 +395,8 @@ void TwitchMessageBuilder::parseHighlights()
         bool alert;
     };
 
+    QStringList blackList = settings.blacklistedUsers.getnonConst().split("\n",QString::SkipEmptyParts);
+
     // TODO: This vector should only be rebuilt upon highlights being changed
     std::vector<Highlight> activeHighlights;
 
@@ -402,6 +404,7 @@ void TwitchMessageBuilder::parseHighlights()
         activeHighlights.emplace_back(currentUsername, settings.enableHighlightSound.get(),
                                       settings.enableHighlightTaskbar.get());
     }
+
     const auto &highlightProperties = settings.highlightProperties.get();
 
     for (auto it = highlightProperties.begin(); it != highlightProperties.end(); ++it) {
@@ -412,37 +415,39 @@ void TwitchMessageBuilder::parseHighlights()
     bool doHighlight = false;
     bool playSound = false;
     bool doAlert = false;
+    if(!blackList.contains(this->ircMessage->nick(),Qt::CaseInsensitive))
+    {
+        for (const Highlight &highlight : activeHighlights) {
+            if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
+                qDebug() << "Highlight because " << this->originalMessage << " contains "
+                         << highlight.target;
+                doHighlight = true;
 
-    for (const Highlight &highlight : activeHighlights) {
-        if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
-            qDebug() << "Highlight because " << this->originalMessage << " contains "
-                     << highlight.target;
-            doHighlight = true;
+                if (highlight.sound) {
+                    playSound = true;
+                }
 
-            if (highlight.sound) {
-                playSound = true;
-            }
+                if (highlight.alert) {
+                    doAlert = true;
+                }
 
-            if (highlight.alert) {
-                doAlert = true;
-            }
-
-            if (playSound && doAlert) {
-                // Break if no further action can be taken from other highlights
-                // This might change if highlights can have custom colors/sounds/actions
-                break;
+                if (playSound && doAlert) {
+                    // Break if no further action can be taken from other highlights
+                    // This might change if highlights can have custom colors/sounds/actions
+                    break;
+                }
             }
         }
-    }
 
-    this->setHighlight(doHighlight);
+        this->setHighlight(doHighlight);
 
-    if (playSound) {
-        player->play();
-    }
+        if (playSound) {
+            player->play();
+        }
 
-    if (doAlert) {
-        QApplication::alert(windowManager.getMainWindow().window(), 2500);
+        if (doAlert) {
+            QApplication::alert(windowManager.getMainWindow().window(), 2500);
+        }
     }
 }
 

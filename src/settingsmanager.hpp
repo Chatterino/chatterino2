@@ -65,6 +65,7 @@ public:
     Setting<bool> customHighlightSound;
     Setting<QString> pathHighlightSound;
     Setting<QMap<QString, QPair<bool, bool>>> highlightProperties;
+    Setting<QString> blacklistedUsers;
     Setting<bool> enableTwitchEmotes;
     Setting<bool> enableBttvEmotes;
     Setting<bool> enableFfzEmotes;

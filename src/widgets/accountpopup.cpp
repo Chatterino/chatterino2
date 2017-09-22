@@ -3,9 +3,12 @@
 #include "accountmanager.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
+#include "settingsmanager.hpp"
 #include "ui_accountpopupform.h"
 
+#include <QClipboard>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -26,6 +29,8 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     resize(0, 0);
 
     setWindowFlags(Qt::FramelessWindowHint);
+
+    SettingsManager &settings = SettingsManager::getInstance();
 
     permission = permissions::User;
     for(auto button : this->_ui->profileLayout->findChildren<QPushButton*>())
@@ -56,21 +61,53 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     sendCommand(this->_ui->mod, "/mod ");
     sendCommand(this->_ui->unMod, "/unmod ");
 
-    QObject::connect(this->_ui->follow, &QPushButton::clicked, this, [=](){
-        auto manager = new QNetworkAccessManager();
+    QObject::connect(this->_ui->profile, &QPushButton::clicked, this, [=](){
+        QDesktopServices::openUrl(QUrl("https://twitch.tv/" +
+                                       this->_ui->lblUsername->text()));
+    });
 
+    QObject::connect(this->_ui->sendMessage, &QPushButton::clicked, this, [=](){
+        QDesktopServices::openUrl(QUrl("https://www.twitch.tv/message/compose?to=" +
+                                       this->_ui->lblUsername->text()));
+    });
+
+    QObject::connect(this->_ui->copy, &QPushButton::clicked, this, [=](){
+        QApplication::clipboard()->setText(this->_ui->lblUsername->text());
+    });
+
+    QObject::connect(this->_ui->follow, &QPushButton::clicked, this, [=](){
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
                         AccountManager::getInstance().getTwitchUser().getUserId() +
                         "/follows/channels/" + this->userID);
 
-        QNetworkRequest request(requestUrl);
-
-        request.setRawHeader("Client-ID", getDefaultClientID());
-        request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-        request.setRawHeader("Authorization", "OAuth " +
-                             AccountManager::getInstance().getTwitchUser().getOAuthToken().toUtf8());
-        manager->put(request,"");
+        util::twitch::put(requestUrl,[](QJsonObject obj){});
     });
+
+    QObject::connect(this->_ui->ignore, &QPushButton::clicked, this, [=](){
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
+                        AccountManager::getInstance().getTwitchUser().getUserId() +
+                        "/blocks/" + this->userID);
+
+        util::twitch::put(requestUrl,[](QJsonObject obj){});
+    });
+
+    QObject::connect(this->_ui->disableHighlights, &QPushButton::clicked, this, [=, &settings](){
+        QString str = settings.blacklistedUsers.getnonConst();
+        str.append(this->_ui->lblUsername->text() + "\n");
+        settings.blacklistedUsers.set(str);
+        this->_ui->disableHighlights->hide();
+        this->_ui->enableHighlights->show();
+    });
+
+    QObject::connect(this->_ui->enableHighlights, &QPushButton::clicked, this, [=, &settings](){
+        QString str = settings.blacklistedUsers.getnonConst();
+        QStringList list = str.split("\n");
+        list.removeAll(this->_ui->lblUsername->text());
+        settings.blacklistedUsers.set(list.join("\n"));
+        this->_ui->enableHighlights->hide();
+        this->_ui->disableHighlights->show();
+    });
+
 
     updateButtons(this->_ui->userLayout,false);
     updateButtons(this->_ui->modLayout,false);
@@ -211,6 +248,20 @@ void AccountPopupWidget::showEvent(QShowEvent *event)
         updateButtons(this->_ui->userLayout, false);
         updateButtons(this->_ui->ownerLayout, false);
     }
+
+    QString blacklisted = SettingsManager::getInstance().blacklistedUsers.getnonConst();
+    QStringList list = blacklisted.split("\n",QString::SkipEmptyParts);
+    if(list.contains(this->_ui->lblUsername->text(),Qt::CaseInsensitive))
+    {
+        this->_ui->disableHighlights->hide();
+        this->_ui->enableHighlights->show();
+    }
+    else
+    {
+        this->_ui->disableHighlights->show();
+        this->_ui->enableHighlights->hide();
+    }
+
 }
 
 }  // namespace widgets

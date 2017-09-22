@@ -378,9 +378,12 @@ void SettingsDialog::addTabs()
     // Highlighting
     vbox = new QVBoxLayout();
     auto highlights = new QListWidget();
+    auto blacklistedUsers = new QTextEdit();
     globalHighlights = highlights;
     QStringList items = settings.highlightProperties.get().keys();
     highlights->addItems(items);
+    blacklistedUsers->setText(settings.blacklistedUsers.getnonConst());
+    auto highlightTab = new QTabWidget();
     auto customSound = new QHBoxLayout();
     auto soundForm = new QFormLayout();
     {
@@ -402,6 +405,7 @@ void SettingsDialog::addTabs()
     }
 
     soundForm->addRow(customSound);
+
 
     {
         auto hbox = new QHBoxLayout();
@@ -479,14 +483,38 @@ void SettingsDialog::addTabs()
             }
         });
         vbox->addLayout(soundForm);
-        vbox->addWidget(highlights);
+        auto layoutVbox = new QVBoxLayout();
+        auto btnHbox = new QHBoxLayout();
 
-        hbox->addWidget(addBtn);
-        hbox->addWidget(editBtn);
-        hbox->addWidget(delBtn);
+        auto highlightWidget = new QWidget();
+        auto btnWidget = new QWidget();
+
+        btnHbox->addWidget(addBtn);
+        btnHbox->addWidget(editBtn);
+        btnHbox->addWidget(delBtn);
+        btnWidget->setLayout(btnHbox);
+
+        layoutVbox->addWidget(highlights);
+        layoutVbox->addWidget(btnWidget);
+        highlightWidget->setLayout(layoutVbox);
+
+        highlightTab->addTab(highlightWidget,"Highlights");
+        highlightTab->addTab(blacklistedUsers,"Disabled Users");
+        vbox->addWidget(highlightTab);
 
         vbox->addLayout(hbox);
     }
+
+    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this, [=, &settings](){
+        QStringList list = blacklistedUsers->toPlainText().split("\n",QString::SkipEmptyParts);
+        list.removeDuplicates();
+        settings.blacklistedUsers.set(list.join("\n") + "\n");
+    });
+
+    settings.blacklistedUsers.valueChanged.connect([=](const QString &str){
+        blacklistedUsers->setPlainText(str);
+    });
+
     vbox->addStretch(1);
     addTab(vbox, "Highlighting", ":/images/format_Bold_16xLG.png");
 

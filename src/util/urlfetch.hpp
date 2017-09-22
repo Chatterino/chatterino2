@@ -1,6 +1,7 @@
 #pragma once
 
 #include "credentials.hpp"
+#include "accountmanager.hpp"
 
 #include <QEventLoop>
 #include <QJsonArray>
@@ -74,6 +75,32 @@ static void getUserID(QString username, std::function<void(QString)> successCall
             return;
         }
         successCallback(id.toString());
+    });
+}
+static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
+{
+    auto manager = new QNetworkAccessManager();
+    QNetworkRequest request(url);
+
+    request.setRawHeader("Client-ID", getDefaultClientID());
+    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    request.setRawHeader("Authorization", "OAuth " +
+                 AccountManager::getInstance().getTwitchUser().getOAuthToken().toUtf8());
+    QNetworkReply *reply = manager->put(request,"");
+    QObject::connect(reply, &QNetworkReply::finished, [=](){
+       if(reply->error() == QNetworkReply::NetworkError::NoError)
+       {
+           QByteArray data = reply->readAll();
+           QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+           if(!jsonDoc.isNull())
+           {
+               QJsonObject rootNode = jsonDoc.object();
+
+               successCallback(rootNode);
+           }
+       }
+       reply->deleteLater();
+       manager->deleteLater();
     });
 }
 

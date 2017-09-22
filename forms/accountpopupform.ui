@@ -209,6 +209,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="enableHighlights">
+        <property name="text">
+         <string>Enable Highlights</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="sendMessage">
         <property name="text">
          <string>Message</string>
