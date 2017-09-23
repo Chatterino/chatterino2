@@ -30,7 +30,7 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
     : BaseWidget(parent)
     , windowManager(windowManager)
     , scrollBar(this)
-    , userPopupWidget(std::shared_ptr<Channel>())
+    , userPopupWidget(std::shared_ptr<twitch::TwitchChannel>())
 {
 #ifndef Q_OS_MAC
 //    this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -787,6 +787,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             auto user = link.getValue();
             this->userPopupWidget.setName(user);
             this->userPopupWidget.move(event->screenPos().toPoint());
+            this->userPopupWidget.updatePermissions();
             this->userPopupWidget.show();
             this->userPopupWidget.setFocus();
 

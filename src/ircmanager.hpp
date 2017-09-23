@@ -90,6 +90,7 @@ private:
     void handleUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message);
+    void handleModeMessage(Communi::IrcMessage *message);
 };
 
 }  // namespace chatterino
