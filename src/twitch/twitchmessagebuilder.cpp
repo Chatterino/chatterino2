@@ -245,13 +245,6 @@ SharedMessage TwitchMessageBuilder::parse()
         i++;
     }
 
-    // TODO: Implement this xD
-    //    if (!isReceivedWhisper &&
-    //    AppSettings.HighlightIgnoredUsers.ContainsKey(Username))
-    //    {
-    //        HighlightTab = false;
-    //    }
-
     return this->getMessage();
 }
 
@@ -397,7 +390,7 @@ void TwitchMessageBuilder::parseHighlights()
         bool alert;
     };
 
-    QStringList blackList = settings.blacklistedUsers.getnonConst().split("\n",QString::SkipEmptyParts);
+    QStringList blackList = settings.highlightUserBlacklist.get().split("\n",QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     std::vector<Highlight> activeHighlights;

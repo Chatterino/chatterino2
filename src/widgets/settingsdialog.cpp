@@ -379,11 +379,11 @@ void SettingsDialog::addTabs()
     // Highlighting
     vbox = new QVBoxLayout();
     auto highlights = new QListWidget();
-    auto blacklistedUsers = new QTextEdit();
+    auto highlightUserBlacklist = new QTextEdit();
     globalHighlights = highlights;
     QStringList items = settings.highlightProperties.get().keys();
     highlights->addItems(items);
-    blacklistedUsers->setText(settings.blacklistedUsers.getnonConst());
+    highlightUserBlacklist->setText(settings.highlightUserBlacklist.getnonConst());
     auto highlightTab = new QTabWidget();
     auto customSound = new QHBoxLayout();
     auto soundForm = new QFormLayout();
@@ -500,20 +500,20 @@ void SettingsDialog::addTabs()
         highlightWidget->setLayout(layoutVbox);
 
         highlightTab->addTab(highlightWidget,"Highlights");
-        highlightTab->addTab(blacklistedUsers,"Disabled Users");
+        highlightTab->addTab(highlightUserBlacklist,"Disabled Users");
         vbox->addWidget(highlightTab);
 
         vbox->addLayout(hbox);
     }
 
     QObject::connect(&this->ui.okButton, &QPushButton::clicked, this, [=, &settings](){
-        QStringList list = blacklistedUsers->toPlainText().split("\n",QString::SkipEmptyParts);
+        QStringList list = highlightUserBlacklist->toPlainText().split("\n",QString::SkipEmptyParts);
         list.removeDuplicates();
-        settings.blacklistedUsers.set(list.join("\n") + "\n");
+        settings.highlightUserBlacklist.set(list.join("\n") + "\n");
     });
 
-    settings.blacklistedUsers.valueChanged.connect([=](const QString &str){
-        blacklistedUsers->setPlainText(str);
+    settings.highlightUserBlacklist.valueChanged.connect([=](const QString &str){
+        highlightUserBlacklist->setPlainText(str);
     });
 
     vbox->addStretch(1);

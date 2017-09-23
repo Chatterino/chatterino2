@@ -15,7 +15,7 @@ public:
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
     const QString &getUserId() const;
-    void setUserId(QString id);
+    void setUserId(const QString &id);
 
     bool isAnon() const;
 

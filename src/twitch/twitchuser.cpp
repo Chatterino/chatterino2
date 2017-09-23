@@ -28,7 +28,7 @@ const QString &TwitchUser::getUserId() const
     return this->_userId;
 }
 
-void TwitchUser::setUserId(QString id)
+void TwitchUser::setUserId(const QString &id)
 {
     this->_userId = id;
 }

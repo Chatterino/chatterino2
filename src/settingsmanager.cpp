@@ -35,7 +35,7 @@ SettingsManager::SettingsManager()
     , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
-    , blacklistedUsers(_settingsItems, "blacklistedUsers", "")
+    , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
     , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
     , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
     , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
