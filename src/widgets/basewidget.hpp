@@ -32,6 +32,7 @@ protected:
 #ifdef USEWINSDK
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
+    void initAsWindow();
 
 private:
     float dpiMultiplier = 1.f;

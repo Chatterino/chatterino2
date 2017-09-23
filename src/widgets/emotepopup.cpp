@@ -16,6 +16,8 @@ EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager,
     : BaseWidget(colorScheme, 0)
     , emoteManager(emoteManager)
 {
+    this->initAsWindow();
+
     QHBoxLayout *layout = new QHBoxLayout(this);
     this->setLayout(layout);
     layout->setMargin(0);
@@ -69,5 +71,5 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
     this->view->setChannel(emoteChannel);
 }
-}
-}
+}  // namespace widgets
+}  // namespace chatterino

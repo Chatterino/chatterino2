@@ -51,6 +51,17 @@ void BaseWidget::init()
     });
 }
 
+void BaseWidget::initAsWindow()
+{
+#ifdef USEWINSDK
+    auto dpi = util::getWindowDpi(this->winId());
+
+    if (dpi) {
+        this->dpiMultiplier = dpi.value() / 96.f;
+    }
+#endif
+}
+
 void BaseWidget::refreshTheme()
 {
     // Do any color scheme updates here

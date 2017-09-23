@@ -22,14 +22,16 @@ public:
         MSG *msg = reinterpret_cast<MSG *>(message);
 
         if (msg->message == WM_NCCREATE) {
-            typedef BOOL(WINAPI * EnableNonClientDpiScaling)(HWND);
             QLibrary user32("user32.dll", NULL);
+            {
+                typedef BOOL(WINAPI * EnableNonClientDpiScaling)(HWND);
 
-            EnableNonClientDpiScaling enableNonClientDpiScaling =
-                (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
+                EnableNonClientDpiScaling enableNonClientDpiScaling =
+                    (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
 
-            if (enableNonClientDpiScaling)
-                enableNonClientDpiScaling(msg->hwnd);
+                if (enableNonClientDpiScaling)
+                    enableNonClientDpiScaling(msg->hwnd);
+            }
         }
         return false;
     }

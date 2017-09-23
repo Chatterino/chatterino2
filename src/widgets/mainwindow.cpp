@@ -26,6 +26,8 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     , dpi(this->getDpiMultiplier())
 // , windowGeometry("/windows/0/geometry")
 {
+    this->initAsWindow();
+
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     // add titlebar
