@@ -20,13 +20,16 @@ inline QString getEnvString(const char *target)
 }  // namespace
 
 AccountManager::AccountManager()
-    : twitchAnonymousUser("justinfan64537", "", "")
+    : currentUser("/accounts/current", "")
+    , twitchAnonymousUser("justinfan64537", "", "")
 {
 }
 
 void AccountManager::load()
 {
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/accounts");
+
+    bool first = true;
 
     for (const auto &uid : keys) {
         if (uid == "current") {
@@ -44,6 +47,11 @@ void AccountManager::load()
 
         if (username.empty() || userID.empty() || clientID.empty() || oauthToken.empty()) {
             continue;
+        }
+
+        if (first) {
+            this->setCurrentTwitchUser(qS(username));
+            first = false;
         }
 
         twitch::TwitchUser user(qS(username), qS(oauthToken), qS(clientID));
@@ -67,9 +75,7 @@ twitch::TwitchUser &AccountManager::getTwitchUser()
         return this->getTwitchAnon();
     }
 
-    std::string currentUser = pajlada::Settings::Setting<std::string>::get("/accounts/current");
-
-    QString currentUsername = QString::fromStdString(currentUser);
+    QString currentUsername = QString::fromStdString(this->currentUser);
 
     for (auto &user : this->twitchUsers) {
         if (user.getUserName() == currentUsername) {
@@ -82,7 +88,7 @@ twitch::TwitchUser &AccountManager::getTwitchUser()
 
 void AccountManager::setCurrentTwitchUser(const QString &username)
 {
-    pajlada::Settings::Setting<std::string>::set("/accounts/current", username.toStdString());
+    this->currentUser.setValue(username.toStdString());
 }
 
 std::vector<twitch::TwitchUser> AccountManager::getTwitchUsers()

@@ -2,6 +2,8 @@
 
 #include "twitch/twitchuser.hpp"
 
+#include <pajlada/settings/setting.hpp>
+
 #include <mutex>
 #include <vector>
 
@@ -36,6 +38,8 @@ public:
 
 private:
     AccountManager();
+
+    pajlada::Settings::Setting<std::string> currentUser;
 
     twitch::TwitchUser twitchAnonymousUser;
     std::vector<twitch::TwitchUser> twitchUsers;

@@ -362,7 +362,7 @@ void TwitchMessageBuilder::parseHighlights()
 {
     static auto player = new QMediaPlayer;
     SettingsManager &settings = SettingsManager::getInstance();
-    static pajlada::Settings::Setting<std::string> currentUser("/accounts/currentUser");
+    static pajlada::Settings::Setting<std::string> currentUser("/accounts/current");
 
     QString currentUsername = QString::fromStdString(currentUser.getValue());
 
