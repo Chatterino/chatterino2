@@ -19,7 +19,7 @@ public:
     void appendWord(const Word &&word);
     void appendTimestamp();
     void appendTimestamp(std::time_t time);
-    void setHighlight(const bool &value);
+    void setHighlight(bool value);
 
     QString matchLink(const QString &string);
     QRegularExpression linkRegex;

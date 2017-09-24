@@ -7,11 +7,6 @@
 #include "ircmanager.hpp"
 #include "messages/link.hpp"
 #include "resources.hpp"
-#include "settingsmanager.hpp"
-
-#include <QColor>
-#include <QObjectUserData>
-#include <QStringList>
 
 #include <ctime>
 #include <list>
@@ -20,25 +15,14 @@
 namespace chatterino {
 namespace messages {
 
-/*
-Message::Message(const QString &text)
-    : text(text)
-{
-    this->words.push_back(
-        Word(text, Word::Text, ColorScheme::getInstance().SystemMessageColor, text, QString()));
-}
-*/
-
-//Message::Message(const QString &text, const std::vector<Word> &words, const bool &highlight)
-//    : text(text)
-//    , highlightTab(highlight)
-//    , words(words)
-//{
-//}
-
 bool Message::getCanHighlightTab() const
 {
     return this->highlightTab;
+}
+
+void Message::setHighlight(bool value)
+{
+    this->highlightTab = value;
 }
 
 const QString &Message::getTimeoutUser() const

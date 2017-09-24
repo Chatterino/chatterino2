@@ -1,15 +1,10 @@
 #pragma once
 
-#include "messages/message.hpp"
-#include "messages/messageparseargs.hpp"
 #include "messages/word.hpp"
-#include "messages/wordpart.hpp"
-
-#include <IrcMessage>
-#include <QVector>
 
 #include <chrono>
 #include <memory>
+#include <vector>
 
 namespace chatterino {
 
@@ -23,11 +18,8 @@ typedef std::shared_ptr<Message> SharedMessage;
 class Message
 {
 public:
-    // explicit Message(const QString &text);
-    // explicit Message(const QString &text, const std::vector<messages::Word> &words,
-    //                 const bool &highlight);
-
     bool getCanHighlightTab() const;
+    void setHighlight(bool value);
     const QString &getTimeoutUser() const;
     int getTimeoutCount() const;
     const QString &getUserName() const;
@@ -52,7 +44,9 @@ private:
 
     static QRegularExpression *cheerRegex;
 
+    // what is highlightTab?
     bool highlightTab = false;
+
     QString timeoutUser = "";
     int timeoutCount = 0;
     bool disabled = false;

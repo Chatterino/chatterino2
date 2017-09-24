@@ -1,6 +1,7 @@
 #pragma once
 
 #include "messages/message.hpp"
+#include "messages/wordpart.hpp"
 
 #include <QPixmap>
 
@@ -28,14 +29,14 @@ public:
     std::shared_ptr<QPixmap> buffer = nullptr;
     bool updateBuffer = false;
 
-    const messages::Word *tryGetWordPart(QPoint point);
+    const Word *tryGetWordPart(QPoint point);
 
     int getSelectionIndex(QPoint position);
 
 private:
     // variables
     SharedMessage message;
-    std::vector<messages::WordPart> wordParts;
+    std::vector<WordPart> wordParts;
 
     int height = 0;
 

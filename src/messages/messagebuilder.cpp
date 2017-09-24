@@ -24,14 +24,14 @@ void MessageBuilder::appendWord(const Word &&word)
 
 void MessageBuilder::appendTimestamp()
 {
-    time_t t;
+    std::time_t t;
     time(&t);
-    appendTimestamp(t);
+    this->appendTimestamp(t);
 }
 
-void MessageBuilder::setHighlight(const bool &value)
+void MessageBuilder::setHighlight(bool value)
 {
-    highlight = value;
+    this->message->setHighlight(value);
 }
 
 void MessageBuilder::appendTimestamp(time_t time)
@@ -41,14 +41,14 @@ void MessageBuilder::appendTimestamp(time_t time)
     // Add word for timestamp with no seconds
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&time));
     QString timestampNoSeconds(timeStampBuffer);
-    appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                    MessageColor(MessageColor::System), QString(), QString()));
+    this->appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
+                          MessageColor(MessageColor::System), QString(), QString()));
 
     // Add word for timestamp with seconds
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds(timeStampBuffer);
-    appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                    MessageColor(MessageColor::System), QString(), QString()));
+    this->appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
+                          MessageColor(MessageColor::System), QString(), QString()));
 }
 
 QString MessageBuilder::matchLink(const QString &string)
@@ -67,6 +67,7 @@ QString MessageBuilder::matchLink(const QString &string)
     if (!captured.contains(httpRegex)) {
         captured.insert(0, "http://");
     }
+
     return captured;
 }
 

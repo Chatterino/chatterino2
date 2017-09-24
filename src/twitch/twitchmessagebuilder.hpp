@@ -2,6 +2,7 @@
 
 #include "emotemanager.hpp"
 #include "messages/messagebuilder.hpp"
+#include "messages/messageparseargs.hpp"
 #include "resources.hpp"
 #include "twitch/twitchchannel.hpp"
 

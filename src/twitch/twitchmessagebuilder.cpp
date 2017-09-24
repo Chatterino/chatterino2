@@ -390,7 +390,8 @@ void TwitchMessageBuilder::parseHighlights()
         bool alert;
     };
 
-    QStringList blackList = settings.highlightUserBlacklist.get().split("\n",QString::SkipEmptyParts);
+    QStringList blackList =
+        settings.highlightUserBlacklist.get().split("\n", QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     std::vector<Highlight> activeHighlights;
@@ -410,8 +411,7 @@ void TwitchMessageBuilder::parseHighlights()
     bool doHighlight = false;
     bool playSound = false;
     bool doAlert = false;
-    if(!blackList.contains(this->ircMessage->nick(),Qt::CaseInsensitive))
-    {
+    if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
         for (const Highlight &highlight : activeHighlights) {
             if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
                 qDebug() << "Highlight because " << this->originalMessage << " contains "

@@ -1,4 +1,4 @@
-#include "messageref.hpp"
+#include "messages/messageref.hpp"
 #include "emotemanager.hpp"
 #include "settingsmanager.hpp"
 
