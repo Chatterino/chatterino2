@@ -1,5 +1,6 @@
 #include "twitch/twitchmessagebuilder.hpp"
 #include "colorscheme.hpp"
+#include "debug/log.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
 #include "resources.hpp"
@@ -414,8 +415,8 @@ void TwitchMessageBuilder::parseHighlights()
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
         for (const Highlight &highlight : activeHighlights) {
             if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
-                qDebug() << "Highlight because " << this->originalMessage << " contains "
-                         << highlight.target;
+                debug::Log("Highlight because {} contains {}", this->originalMessage,
+                           highlight.target);
                 doHighlight = true;
 
                 if (highlight.sound) {
@@ -569,13 +570,11 @@ void TwitchMessageBuilder::parseTwitchBadges()
                         Word(badgeVersion.badgeImage1x, Word::BadgeVanity, QString(),
                              QString("Twitch " + QString::fromStdString(badgeVersion.title))));
                 } catch (const std::exception &e) {
-                    qDebug() << "Exception caught:" << e.what()
-                             << "when trying to fetch badge version " << versionKey.c_str();
+                    debug::Log("Exception caught: {} when trying to fetch badge version {}",
+                               e.what(), versionKey);
                 }
             } catch (const std::exception &e) {
-                qDebug() << "No badge set with key"
-                         << "bits"
-                         << ". Exception: " << e.what();
+                debug::Log("No badge set with key bits. Exception: {}", e.what());
             }
         } else if (badge == "staff/1") {
             appendWord(Word(this->resources.badgeStaff, Word::BadgeGlobalAuthority, QString(),

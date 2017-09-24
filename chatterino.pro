@@ -164,7 +164,8 @@ HEADERS  += \
     src/widgets/qualitypopup.hpp \
     src/widgets/emotepopup.hpp \
     src/messages/messagecolor.hpp \
-    src/util/nativeeventhelper.hpp
+    src/util/nativeeventhelper.hpp \
+    src/debug/log.hpp
 
 PRECOMPILED_HEADER =
 
@@ -176,6 +177,11 @@ DISTFILES +=
 # Include boost
 win32 {
     INCLUDEPATH += C:\local\boost\
+}
+
+win32 {
+    LIBS += -luser32
+    LIBS += -lgdi32
 }
 
 # Optional dependency on windows sdk 7.1
