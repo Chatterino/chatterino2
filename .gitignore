@@ -67,3 +67,5 @@ tags
 
 # rapidjson directory
 rapidjson/*
+
+Thumbs.db
