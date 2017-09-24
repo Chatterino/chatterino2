@@ -1,4 +1,4 @@
 # fmt
-SOURCES += $$PWD/../lib/fmt/fmt/format.cc
+SOURCES += $$PWD/../lib/fmt/fmt/format.cpp
 
 INCLUDEPATH += $$PWD/../lib/fmt/
