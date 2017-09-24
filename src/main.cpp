@@ -73,8 +73,6 @@ int main(int argc, char *argv[])
     a.installNativeEventFilter(new DpiNativeEventFilter);
 #endif
 
-    a.setAttribute(Qt::AA_EnableHighDpiScaling, true);
-
     // Options
     bool portable = false;
 
