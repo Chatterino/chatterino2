@@ -5,6 +5,7 @@
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
+#include <thread>
 #include <QBuffer>
 #include <QImageReader>
 #include <QNetworkAccessManager>
@@ -50,60 +51,70 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    util::urlFetch(this->url, [=](QNetworkReply &reply) {
-        QByteArray array = reply.readAll();
-        QBuffer buffer(&array);
-        buffer.open(QIODevice::ReadOnly);
+	std::thread([=] () {
+		QNetworkRequest request;
+		request.setUrl(QUrl(this->url));
+		QNetworkAccessManager NaM;
+		QEventLoop eventLoop;
+		QNetworkReply *reply = NaM.get(request);
+		QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+		eventLoop.exec(); // Wait until response is read.
 
-        QImage image;
-        QImageReader reader(&buffer);
+		qDebug() << "Received emote " << this->url;
+		QByteArray array = reply->readAll();
+		QBuffer buffer(&array);
+		buffer.open(QIODevice::ReadOnly);
 
-        bool first = true;
+		QImage image;
+		QImageReader reader(&buffer);
 
-        for (int index = 0; index < reader.imageCount(); ++index) {
-            if (reader.read(&image)) {
-                auto pixmap = new QPixmap(QPixmap::fromImage(image));
+		bool first = true;
 
-                if (first) {
-                    first = false;
-                    this->currentPixmap = pixmap;
-                }
+		for (int index = 0; index < reader.imageCount(); ++index) {
+			if (reader.read(&image)) {
+				auto pixmap = new QPixmap(QPixmap::fromImage(image));
 
-                FrameData data;
-                data.duration = std::max(20, reader.nextImageDelay());
-                data.image = pixmap;
+				if (first) {
+					first = false;
+					this->currentPixmap = pixmap;
+				}
 
-                this->allFrames.push_back(data);
-            }
-        }
+				FrameData data;
+				data.duration = std::max(20, reader.nextImageDelay());
+				data.image = pixmap;
 
-        if (this->allFrames.size() > 1) {
-            this->animated = true;
+				this->allFrames.push_back(data);
+			}
+		}
 
-            this->emoteManager.getGifUpdateSignal().connect([this] {
-                gifUpdateTimout();  //
-            });
-        }
+		if (this->allFrames.size() > 1) {
+			this->animated = true;
+		}
 
-        this->emoteManager.incGeneration();
-        this->windowManager.layoutVisibleChatWidgets();
-    });
+		this->emoteManager.incGeneration();
+		this->windowManager.layoutVisibleChatWidgets();
+
+		delete reply;
+	}).detach();
+	this->emoteManager.getGifUpdateSignal().connect([=] () { this->gifUpdateTimout(); }); // For some reason when Boost signal is in thread scope and thread deletes the signal doesn't work, so this is the fix.
 }
 
 void LazyLoadedImage::gifUpdateTimout()
 {
-    this->currentFrameOffset += GIF_FRAME_LENGTH;
+	if (animated) {
+		this->currentFrameOffset += GIF_FRAME_LENGTH;
 
-    while (true) {
-        if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
-            this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
-            this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
-        } else {
-            break;
-        }
-    }
+		while (true) {
+			if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
+				this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
+				this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
+			} else {
+				break;
+			}
+		}
 
-    this->currentPixmap = this->allFrames[this->currentFrame].image;
+		this->currentPixmap = this->allFrames[this->currentFrame].image;
+	}
 }
 
 const QPixmap *LazyLoadedImage::getPixmap()
