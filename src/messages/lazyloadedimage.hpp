@@ -63,7 +63,6 @@ private:
     bool isLoading;
 
     void loadImage();
-
     void gifUpdateTimout();
 };
 
