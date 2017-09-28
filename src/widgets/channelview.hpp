@@ -14,6 +14,7 @@
 #include <QScroller>
 #include <QWheelEvent>
 #include <QWidget>
+#include <QtWebEngineWidgets/QWebEngineView>
 
 #include <boost/signals2.hpp>
 
@@ -158,6 +159,9 @@ private:
     boost::signals2::connection messageRemovedConnection;
     boost::signals2::connection repaintGifsConnection;
     boost::signals2::connection layoutConnection;
+
+    QWebEngineView web;
+    QVBoxLayout vbox;
 
 private slots:
     void wordTypeMaskChanged()

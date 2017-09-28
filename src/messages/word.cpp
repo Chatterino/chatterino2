@@ -127,6 +127,11 @@ int Word::getCharacterLength() const
     return this->isImage() ? 2 : this->getText().length() + 1;
 }
 
+const QString &Word::getEmoteURL() const
+{
+    return emoteURL;
+}
+
 std::vector<short> &Word::getCharacterWidthCache() const
 {
     // lock not required because there is only one gui thread

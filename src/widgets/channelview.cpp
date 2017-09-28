@@ -35,7 +35,7 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 #ifndef Q_OS_MAC
 //    this->setAttribute(Qt::WA_OpaquePaintEvent);
 #endif
-    this->setMouseTracking(true);
+    /*this->setMouseTracking(true);
 
     QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
                      &ChannelView::wordTypeMaskChanged);
@@ -59,7 +59,14 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
     this->goToBottom->setVisible(false);
 
     connect(goToBottom, &RippleEffectLabel::clicked, this,
-            [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
+            [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });*/
+
+    setLayout(&vbox);
+    vbox.addWidget(&web);
+
+    web.load(QUrl("qrc:/chat.html"));
+    web.page()->setBackgroundColor(this->colorScheme.ChatBackground);
+    web.setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
 }
 
 ChannelView::~ChannelView()
@@ -112,7 +119,6 @@ bool ChannelView::layoutMessages()
 
     for (std::size_t i = messages.getLength() - 1; i > 0; i--) {
         auto *message = messages[i].get();
-
         message->layout(layoutWidth, true);
 
         h -= message->getHeight();
@@ -296,18 +302,29 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
     // on new message
     this->messageAppendedConnection =
         channel->messageAppended.connect([this](SharedMessage &message) {
-            SharedMessageRef deleted;
+            //SharedMessageRef deleted;
 
-            auto messageRef = new MessageRef(message);
+            auto command = QString("addMessage('%1','%2'").arg("", "");
+            for (const auto &word : message->getWords()) {
+                command += ",";
+                if (word.isText()) {
+                    command += "{type:'text', data:'" +  word.getText() + "'}";
+                } else {
+                    command += "{type:'emote', data:'" + word.getEmoteURL() + "'}";
+                }
+            }
+            command += ");";
+            qDebug() << command;
+            web.page()->runJavaScript(command);
 
-            if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+            /*if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
                 qreal value = std::max(0.0, this->getScrollBar().getDesiredValue() - 1);
 
                 this->getScrollBar().setDesiredValue(value, false);
-            }
+            }*/
 
-            layoutMessages();
-            update();
+            //layoutMessages();
+            //update();
         });
 
     // on message removed
@@ -348,7 +365,7 @@ void ChannelView::detachChannel()
 
 void ChannelView::resizeEvent(QResizeEvent *)
 {
-    this->scrollBar.resize(this->scrollBar.width(), height());
+    /*this->scrollBar.resize(this->scrollBar.width(), height());
     this->scrollBar.move(width() - this->scrollBar.width(), 0);
 
     this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
@@ -357,7 +374,7 @@ void ChannelView::resizeEvent(QResizeEvent *)
 
     layoutMessages();
 
-    this->update();
+    this->update();*/
 }
 
 void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &end)

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Roboto, serif;
+        }
+
+        html {
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        .chat > * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .chat-username:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .chat-element {
+            display: inline;
+        }
+
+        .chat-textual {
+            padding-right: 2px;
+        }
+
+        .chat-emote {
+            transform: translateY(25%);
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div id="chat" class="chat">
+
+    </div>
+</div>
+<script type="text/html" id="messageTemplate">
+    <div class="chat-element chat-textual">
+        <span style="color: blue;" class="chat-username">{{username}}</span>:
+    </div>
+</script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+<script>
+    let CHANNEL;
+
+    window.onload = () => {
+        new QWebChannel(qt.webChannelTransport, (channel) => {
+            CHANNEL = channel;
+        })
+    };
+
+    function addMessage(username, color, ...parts) {
+        let main = $('<div>');
+        let tmpl = $('#messageTemplate').html();
+        main.html(tmpl);
+
+        for (let part of parts) {
+            if (part.type === 'text') {
+                let msg = $('<div class="chat-element chat-textual"></div>');
+                msg.html(part.data);
+                main.append(msg);
+            } else if (part.type === 'emote') {
+                let msg = $('<img class="chat-element chat-emote"/>');
+                msg.attr('src', part.data);
+                main.append(msg);
+            }
+        }
+        $('#chat').append(main);
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function test() {
+        if (CHANNEL) CHANNEL.objects.test.testMethod();
+    }
+</script>
+</body>
+</html>

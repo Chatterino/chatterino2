@@ -114,6 +114,7 @@ public:
     int getYOffset() const;
     void setOffset(int _xOffset, int _yOffset);
     int getCharacterLength() const;
+    const QString &getEmoteURL() const;
 
     std::vector<short> &getCharacterWidthCache() const;
 
@@ -122,6 +123,7 @@ private:
     QString text;
     MessageColor color;
     bool _isImage;
+    QString emoteURL;
 
     Type type;
     QString copyText;

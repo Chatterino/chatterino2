@@ -77,16 +77,6 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
     if (page == nullptr) {
         return;
     }
-
-    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
-
-    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        ChatWidget *widget = *it;
-
-        if (channel == nullptr || channel == widget->getChannel().get()) {
-            widget->layoutMessages();
-        }
-    }
 }
 
 void MainWindow::load(const boost::property_tree::ptree &tree)

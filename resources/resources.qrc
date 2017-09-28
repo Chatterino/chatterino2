@@ -32,6 +32,7 @@
         <file>images/UserProfile_22x.png</file>
         <file>images/VSO_Link_blue_16x.png</file>
         <file>sounds/ping2.wav</file>
+        <file>chat.html</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

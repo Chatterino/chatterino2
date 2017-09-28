@@ -196,7 +196,6 @@ void ChatWidget::paintEvent(QPaintEvent *)
 {
     // color the background of the chat
     QPainter painter(this);
-
     painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
 }
 
