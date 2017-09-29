@@ -9,9 +9,6 @@ CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
 
-DEFINES += IRC_NAMESPACE=Communi
-include(lib/libcommuni/src/src.pri)
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 # Include ourself
@@ -220,3 +217,6 @@ include(dependencies/settings.pri)
 include(dependencies/signals.pri)
 include(dependencies/humanize.pri)
 include(dependencies/fmt.pri)
+DEFINES += IRC_NAMESPACE=Communi
+include(dependencies/libcommuni.pri)
+
