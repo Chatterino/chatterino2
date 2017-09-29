@@ -25,23 +25,6 @@ static const std::string &getSettingsPath()
     return path;
 }
 
-void WindowManager::layoutVisibleChatWidgets(Channel *channel)
-{
-    this->layout();
-}
-
-void WindowManager::repaintVisibleChatWidgets(Channel *channel)
-{
-    if (this->mainWindow != nullptr) {
-        this->mainWindow->repaintVisibleChatWidgets(channel);
-    }
-}
-
-void WindowManager::repaintGifEmotes()
-{
-    this->repaintGifs();
-}
-
 // void WindowManager::updateAll()
 //{
 //    if (this->mainWindow != nullptr) {

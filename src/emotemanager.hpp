@@ -68,8 +68,6 @@ public:
         _generation++;
     }
 
-    boost::signals2::signal<void()> &getGifUpdateSignal();
-
     // Bit badge/emotes?
     ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
 
@@ -157,7 +155,6 @@ private:
 
     boost::signals2::signal<void()> _gifUpdateTimerSignal;
     QTimer _gifUpdateTimer;
-    bool _gifUpdateTimerInitiated = false;
 
     int _generation = 0;
 

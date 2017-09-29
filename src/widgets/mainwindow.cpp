@@ -70,15 +70,6 @@ MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::repaintVisibleChatWidgets(Channel *channel)
-{
-    auto *page = this->notebook.getSelectedPage();
-
-    if (page == nullptr) {
-        return;
-    }
-}
-
 void MainWindow::load(const boost::property_tree::ptree &tree)
 {
     this->notebook.load(tree);

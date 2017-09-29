@@ -517,21 +517,4 @@ EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
     return EmoteData();
 }
 
-boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
-{
-    if (!_gifUpdateTimerInitiated) {
-        _gifUpdateTimerInitiated = true;
-
-        _gifUpdateTimer.setInterval(30);
-        _gifUpdateTimer.start();
-
-        QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
-            _gifUpdateTimerSignal();
-            this->windowManager.repaintGifEmotes();
-        });
-    }
-
-    return _gifUpdateTimerSignal;
-}
-
 }  // namespace chatterino

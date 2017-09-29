@@ -160,23 +160,12 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
 
                 notebook->previousTab();
             }
-        } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
-            if (this->chatWidget->view.hasSelection()) {
-                this->chatWidget->doCopy();
-                event->accept();
-            }
         }
     });
 
     this->textLengthVisibleChangedConnection =
         SettingsManager::getInstance().showMessageLength.valueChanged.connect(
             [this](const bool &value) { this->textLengthLabel.setHidden(!value); });
-
-    QObject::connect(&this->textInput, &QTextEdit::copyAvailable, [this](bool available) {
-        if (available) {
-            this->chatWidget->view.clearSelection();
-        }
-    });
 }
 
 ChatWidgetInput::~ChatWidgetInput()

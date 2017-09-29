@@ -56,9 +56,6 @@ public:
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
 
-    void layoutMessages(bool forceUpdate = false);
-    void updateGifEmotes();
-
 protected:
     virtual void paintEvent(QPaintEvent *) override;
 
@@ -116,9 +113,6 @@ public slots:
 
     // Open twitch channel stream through streamlink
     void doOpenStreamlink();
-
-    // Copy text from chat
-    void doCopy();
 
     // Open viewer list of the channel
     void doOpenViewerList();
