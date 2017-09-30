@@ -89,56 +89,32 @@ public:
     {
     }
 
-    explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
-                  const QString &getTooltip, const Link &getLink = Link());
+    explicit Word(const QString &imageURL, Type getType, const QString &getTooltip,
+                  const Link &getLink = Link());
     explicit Word(const QString &_text, Type getType, const MessageColor &getColor,
-                  const QString &copytext, const QString &getTooltip, const Link &getLink = Link());
+                  const QString &getTooltip, const Link &getLink = Link());
 
-    LazyLoadedImage &getImage() const;
+    const QString &getImageURL() const;
     const QString &getText() const;
-    int getWidth() const;
-    int getHeight() const;
-    void setSize(int _width, int _height);
 
     bool isImage() const;
     bool isText() const;
     const QString &getCopyText() const;
-    bool hasTrailingSpace() const;
-    QFont &getFont() const;
-    QFontMetrics &getFontMetrics() const;
     Type getType() const;
     const QString &getTooltip() const;
     const MessageColor &getColor() const;
     const Link &getLink() const;
-    int getXOffset() const;
-    int getYOffset() const;
-    void setOffset(int _xOffset, int _yOffset);
-    int getCharacterLength() const;
-    const QString &getEmoteURL() const;
-
-    std::vector<short> &getCharacterWidthCache() const;
 
 private:
-    LazyLoadedImage *image;
+    QString imageURL;
     QString text;
     MessageColor color;
     bool _isImage;
-    QString emoteURL;
 
     Type type;
     QString copyText;
     QString tooltip;
-
-    int width = 16;
-    int height = 16;
-    int xOffset = 0;
-    int yOffset = 0;
-
-    bool _hasTrailingSpace = true;
-    FontManager::Type font = FontManager::Medium;
     Link link;
-
-    mutable std::vector<short> charWidthCache;
 };
 
 }  // namespace messages

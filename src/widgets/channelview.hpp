@@ -3,7 +3,6 @@
 #include "channel.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageref.hpp"
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
@@ -30,7 +29,7 @@ public:
     ~ChannelView();
 
     void setChannel(std::shared_ptr<Channel> channel);
-    messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
+    void addMessage(messages::SharedMessage &message);
 
     void clearMessages();
 
@@ -50,10 +49,7 @@ private:
 
     AccountPopupWidget userPopupWidget;
 
-    messages::LimitedQueue<messages::SharedMessageRef> messages;
-
     boost::signals2::connection messageAppendedConnection;
-    boost::signals2::connection messageRemovedConnection;
     QWebEngineView web;
     QVBoxLayout vbox;
 };

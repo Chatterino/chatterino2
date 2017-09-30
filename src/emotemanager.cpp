@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}.0"
+#define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/%1/%2.0"
 
 using namespace chatterino::messages;
 
@@ -67,13 +67,9 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
 
             QString link = linkTemplate;
             link.detach();
+            link.replace("{{id}}", id).replace("{{image}}", "1x");
 
-            link = link.replace("{{id}}", id).replace("{{image}}", "1x");
-
-            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
-                return EmoteData(new LazyLoadedImage(*this, this->windowManager, link, 1, code,
-                                                     code + "\nChannel BTTV Emote"));
-            });
+            Emote emote(code, link, channelName);
 
             this->bttvChannelEmotes.insert(code, emote);
             map->insert(code, emote);
@@ -115,11 +111,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
                 QJsonObject urls = emoteObject.value("urls").toObject();
                 QString url1 = "http:" + urls.value("1").toString();
 
-                auto emote =
-                    this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
-                        return EmoteData(new LazyLoadedImage(*this, this->windowManager, url1, 1,
-                                                             code, code + "\nGlobal FFZ Emote"));
-                    });
+                Emote emote(code, url1, channelName);
 
                 this->ffzChannelEmotes.insert(code, emote);
                 map->insert(code, emote);
@@ -146,24 +138,9 @@ EmoteMap &EmoteManager::getChatterinoEmotes()
     return _chatterinoEmotes;
 }
 
-EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
-{
-    return _bttvChannelEmoteFromCaches;
-}
-
 EmoteMap &EmoteManager::getEmojis()
 {
     return this->emojis;
-}
-
-ConcurrentMap<int, EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
-{
-    return _ffzChannelEmoteFromCaches;
-}
-
-ConcurrentMap<long, EmoteData> &EmoteManager::getTwitchEmoteFromCache()
-{
-    return _twitchEmoteFromCache;
 }
 
 void EmoteManager::loadEmojis()
@@ -203,9 +180,9 @@ void EmoteManager::loadEmojis()
         }
 
         EmojiData emojiData{
-            QString::fromUcs4(unicodeBytes, numUnicodeBytes),  //
-            code,                                              //
-            shortCode,                                         //
+            QString::fromUcs4(unicodeBytes, numUnicodeBytes),
+            code,
+            shortCode,
         };
 
         this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
@@ -217,16 +194,15 @@ void EmoteManager::loadEmojis()
                       "emojione/2.2.6/assets/png/" +
                       code + ".png";
 
-        this->emojis.insert(code,
-                            EmoteData(new LazyLoadedImage(*this, this->windowManager, url, 0.35)));
+        this->emojis.insert(code, Emote(code, url));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
         // emojiData.code.length()
     }
 }
 
-void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords,
-                               const QString &text)
+void EmoteManager::parseEmojis(
+    std::vector<std::tuple<std::unique_ptr<Emote>, QString>> &parsedWords, const QString &text)
 {
     int lastParsedEmojiEndIndex = 0;
 
@@ -286,8 +262,9 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
 
         if (charactersFromLastParsedEmoji > 0) {
             // Add characters inbetween emojis
-            parsedWords.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-                nullptr, text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji)));
+            parsedWords.push_back(std::tuple<std::unique_ptr<Emote>, QString>(
+                std::unique_ptr<Emote>(nullptr),
+                text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji)));
         }
 
         QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
@@ -295,12 +272,11 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
                       matchedEmoji.code + ".png";
 
         // Create or fetch cached emoji image
-        auto emojiImage = this->emojiCache.getOrAdd(url, [this, &url] {
-            return EmoteData(new LazyLoadedImage(*this, this->windowManager, url, 0.35));  //
-        });
+        Emote *emojiImage = new Emote(url, "");
 
         // Push the emoji as a word to parsedWords
-        parsedWords.push_back(std::tuple<EmoteData, QString>(emojiImage, QString()));
+        parsedWords.push_back(std::tuple<std::unique_ptr<Emote>, QString>(
+            std::unique_ptr<Emote>(emojiImage), QString()));
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 
@@ -309,8 +285,8 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
 
     if (lastParsedEmojiEndIndex < text.length()) {
         // Add remaining characters
-        parsedWords.push_back(std::tuple<messages::LazyLoadedImage *, QString>(
-            nullptr, text.mid(lastParsedEmojiEndIndex)));
+        parsedWords.push_back(std::tuple<std::unique_ptr<Emote>, QString>(
+            std::unique_ptr<Emote>(nullptr), text.mid(lastParsedEmojiEndIndex)));
     }
 }
 
@@ -420,15 +396,12 @@ void EmoteManager::loadBTTVEmotes()
             for (const QJsonValue &emote : emotes) {
                 QString id = emote.toObject().value("id").toString();
                 QString code = emote.toObject().value("code").toString();
-                // emote.value("imageType").toString();
 
-                QString tmp = linkTemplate;
-                tmp.detach();
-                QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
+                QString url = linkTemplate;
+                url.detach();
+                url.replace("{{id}}", id).replace("{{image}}", "1x");
 
-                this->bttvGlobalEmotes.insert(
-                    code, new LazyLoadedImage(*this, this->windowManager, url, 1, code,
-                                              code + "\nGlobal BTTV Emote"));
+                this->bttvGlobalEmotes.insert(code, Emote(code, url));
                 codes.push_back(code.toStdString());
             }
 
@@ -472,9 +445,7 @@ void EmoteManager::loadFFZEmotes()
                     QJsonObject urls = object.value("urls").toObject();
                     QString url1 = "http:" + urls.value("1").toString();
 
-                    this->ffzGlobalEmotes.insert(
-                        code, new LazyLoadedImage(*this, this->windowManager, url1, 1, code,
-                                                  code + "\nGlobal FFZ Emote"));
+                    this->ffzGlobalEmotes.insert(code, Emote(code, url1));
                     codes.push_back(code.toStdString());
                 }
 
@@ -489,32 +460,34 @@ void EmoteManager::loadFFZEmotes()
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
-EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
+Emote EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
 {
-    return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &id] {
-        qDebug() << "added twitch emote: " << id;
-        qreal scale;
-        QString url = getTwitchEmoteLink(id, scale);
-        return new LazyLoadedImage(*this, this->windowManager, url, scale, emoteName,
-                                   emoteName + "\nTwitch Emote");
-    });
+    qreal scale;
+    QString url = getTwitchEmoteLink(id, scale);
+    return Emote(emoteName, url);
 }
 
 QString EmoteManager::getTwitchEmoteLink(long id, qreal &scale)
 {
     scale = .5;
 
-    QString value = TWITCH_EMOTE_TEMPLATE;
+    QString value(TWITCH_EMOTE_TEMPLATE);
 
-    value.detach();
-
-    return value.replace("{id}", QString::number(id)).replace("{scale}", "2");
+    return value.arg(QString::number(id), "1");
 }
 
-EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
+Emote EmoteManager::getCheerImage(long long amount, bool animated)
 {
-    // TODO: fix this xD
-    return EmoteData();
+    // TODO: Implement cheers
+}
+
+Emote::Emote(const QString &emoteName, const QString &emoteUrl, const QString &emoteChannel,
+             const QString &emoteCreator)
+    : name(emoteName)
+    , url(emoteUrl)
+    , channel(emoteChannel)
+    , creator(emoteCreator)
+{
 }
 
 }  // namespace chatterino

@@ -53,7 +53,6 @@ SOURCES += \
     src/messages/link.cpp \
     src/messages/message.cpp \
     src/messages/word.cpp \
-    src/messages/wordpart.cpp \
     src/resources.cpp \
     src/widgets/chatwidget.cpp \
     src/widgets/chatwidgetheader.cpp \
@@ -69,7 +68,6 @@ SOURCES += \
     src/widgets/settingsdialog.cpp \
     src/widgets/settingsdialogtab.cpp \
     src/widgets/textinputdialog.cpp \
-    src/messages/messageref.cpp \
     src/logging/loggingmanager.cpp \
     src/logging/loggingchannel.cpp \
     src/windowmanager.cpp \
@@ -109,7 +107,6 @@ HEADERS  += \
     src/messages/link.hpp \
     src/messages/message.hpp \
     src/messages/word.hpp \
-    src/messages/wordpart.hpp \
     src/resources.hpp \
     src/setting.hpp \
     src/twitch/emotevalue.hpp \
@@ -132,7 +129,6 @@ HEADERS  += \
     src/settingssnapshot.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
-    src/messages/messageref.hpp \
     src/logging/loggingmanager.hpp \
     src/logging/loggingchannel.hpp \
     src/channelmanager.hpp \

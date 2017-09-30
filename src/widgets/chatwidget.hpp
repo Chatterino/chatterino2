@@ -2,9 +2,7 @@
 
 #include "channel.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageref.hpp"
 #include "messages/word.hpp"
-#include "messages/wordpart.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/channelview.hpp"
 #include "widgets/chatwidgetheader.hpp"

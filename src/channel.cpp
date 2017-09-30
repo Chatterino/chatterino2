@@ -19,7 +19,6 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 Channel::Channel()
-//    , loggingChannel(logging::get(name))
 {
 }
 
@@ -36,10 +35,6 @@ messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnaps
 void Channel::addMessage(std::shared_ptr<Message> message)
 {
     std::shared_ptr<Message> deleted;
-
-    //    if (_loggingChannel.get() != nullptr) {
-    //        _loggingChannel->append(message);
-    //    }
 
     if (this->messages.appendItem(message, deleted)) {
         messageRemovedFromStart(deleted);

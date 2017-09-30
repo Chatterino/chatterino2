@@ -46,11 +46,6 @@
 
     </div>
 </div>
-<script type="text/html" id="messageTemplate">
-    <div class="chat-element chat-textual">
-        <span style="color: blue;" class="chat-username">{{username}}</span>:
-    </div>
-</script>
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
 <script>
@@ -62,14 +57,13 @@
         })
     };
 
-    function addMessage(username, color, ...parts) {
+    function addMessage(...parts) {
         let main = $('<div>');
-        let tmpl = $('#messageTemplate').html();
-        main.html(tmpl);
 
         for (let part of parts) {
             if (part.type === 'text') {
                 let msg = $('<div class="chat-element chat-textual"></div>');
+                msg.css('color', part.color);
                 msg.html(part.data);
                 main.append(msg);
             } else if (part.type === 'emote') {
@@ -80,6 +74,10 @@
         }
         $('#chat').append(main);
         window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function clearMessages() {
+        $('#chat').empty();
     }
 
     function test() {
