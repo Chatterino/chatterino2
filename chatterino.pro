@@ -99,7 +99,8 @@ SOURCES += \
     src/twitch/twitchchannel.cpp \
     src/widgets/rippleeffectlabel.cpp \
     src/widgets/rippleeffectbutton.cpp \
-    src/messages/messagecolor.cpp
+    src/messages/messagecolor.cpp \
+    src/messages/imageloader.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -165,7 +166,8 @@ HEADERS  += \
     src/widgets/emotepopup.hpp \
     src/messages/messagecolor.hpp \
     src/util/nativeeventhelper.hpp \
-    src/debug/log.hpp
+    src/debug/log.hpp \
+    src/messages/imageloader.hpp
 
 PRECOMPILED_HEADER =
 
