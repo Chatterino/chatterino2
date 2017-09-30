@@ -217,7 +217,7 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::settingsButtonClicked()
 {
-    QTimer::singleShot(80, [this] { SettingsDialog::showDialog(); });
+    QTimer::singleShot(80, [] { SettingsDialog::showDialog(); });
 }
 
 void Notebook::usersButtonClicked()

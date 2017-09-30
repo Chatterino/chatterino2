@@ -66,13 +66,14 @@ private:
 
     void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, EmoteData>> &vec,
-                           EmoteManager &emoteManager);
+                           std::vector<std::pair<long, Emote>> &vec, EmoteManager &emoteManager);
     bool tryAppendEmote(QString &emoteString);
-    bool appendEmote(EmoteData &emoteData);
+    bool appendEmote(Emote &emote);
 
+    /* TODO: Implement badges
     void parseTwitchBadges();
     void parseChatterinoBadges();
+    */
 };
 
 }  // namespace twitch

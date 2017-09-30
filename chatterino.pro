@@ -4,13 +4,10 @@
 #
 #-------------------------------------------------
 
-QT      += core gui network multimedia
+QT      += core gui network multimedia webengine webenginewidgets webchannel
 CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
-
-DEFINES += IRC_NAMESPACE=Communi
-include(lib/libcommuni/src/src.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -56,7 +53,6 @@ SOURCES += \
     src/messages/link.cpp \
     src/messages/message.cpp \
     src/messages/word.cpp \
-    src/messages/wordpart.cpp \
     src/resources.cpp \
     src/widgets/chatwidget.cpp \
     src/widgets/chatwidgetheader.cpp \
@@ -72,7 +68,6 @@ SOURCES += \
     src/widgets/settingsdialog.cpp \
     src/widgets/settingsdialogtab.cpp \
     src/widgets/textinputdialog.cpp \
-    src/messages/messageref.cpp \
     src/logging/loggingmanager.cpp \
     src/logging/loggingchannel.cpp \
     src/windowmanager.cpp \
@@ -112,7 +107,6 @@ HEADERS  += \
     src/messages/link.hpp \
     src/messages/message.hpp \
     src/messages/word.hpp \
-    src/messages/wordpart.hpp \
     src/resources.hpp \
     src/setting.hpp \
     src/twitch/emotevalue.hpp \
@@ -135,7 +129,6 @@ HEADERS  += \
     src/settingssnapshot.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
-    src/messages/messageref.hpp \
     src/logging/loggingmanager.hpp \
     src/logging/loggingchannel.hpp \
     src/channelmanager.hpp \
@@ -220,3 +213,6 @@ include(dependencies/settings.pri)
 include(dependencies/signals.pri)
 include(dependencies/humanize.pri)
 include(dependencies/fmt.pri)
+DEFINES += IRC_NAMESPACE=Communi
+include(dependencies/libcommuni.pri)
+

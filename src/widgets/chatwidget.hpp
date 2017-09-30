@@ -2,9 +2,7 @@
 
 #include "channel.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageref.hpp"
 #include "messages/word.hpp"
-#include "messages/wordpart.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/channelview.hpp"
 #include "widgets/chatwidgetheader.hpp"
@@ -55,9 +53,6 @@ public:
 
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
-
-    void layoutMessages(bool forceUpdate = false);
-    void updateGifEmotes();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -116,9 +111,6 @@ public slots:
 
     // Open twitch channel stream through streamlink
     void doOpenStreamlink();
-
-    // Copy text from chat
-    void doCopy();
 
     // Open viewer list of the channel
     void doOpenViewerList();

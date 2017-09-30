@@ -41,10 +41,6 @@ ColorScheme::ColorScheme(WindowManager &windowManager)
     this->themeHue.getValueChangedSignal().connect([=](const auto &) {
         this->update();  //
     });
-
-    this->updated.connect([&windowManager] {
-        windowManager.repaintVisibleChatWidgets();  //
-    });
 }
 
 void ColorScheme::update()
@@ -57,7 +53,7 @@ void ColorScheme::update()
 void ColorScheme::setColors(double hue, double multiplier)
 {
     lightTheme = multiplier > 0;
-    bool hasDarkBorder = false;
+    // bool hasDarkBorder = false;
 
     SystemMessageColor = QColor(140, 127, 127);
 
@@ -140,10 +136,10 @@ void ColorScheme::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() +
-                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                  color.saturationF() * 0.2);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                         color.saturationF() * 0.2);
         }
     }
 }

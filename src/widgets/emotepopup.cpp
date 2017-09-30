@@ -41,7 +41,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         messages::MessageBuilder builder1;
 
         builder1.appendWord(
-            Word(title, Word::Type::Text, MessageColor(MessageColor::Text), QString(), QString()));
+            Word(title, Word::Type::Text, MessageColor(MessageColor::Text), QString()));
 
         builder1.getMessage()->centered = true;
         emoteChannel->addMessage(builder1.getMessage());
@@ -50,11 +50,12 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         messages::MessageBuilder builder2;
         builder2.getMessage()->centered = true;
 
-        map.each([&](const QString &key, const EmoteData &value) {
-            builder2.appendWord(Word(value.image, Word::Type::AlwaysShow, key, emoteDesc,
+        /*
+        map.each([&](const QString &key, const QString &value) {
+            builder2.appendWord(Word(value, Word::Type::AlwaysShow, key, emoteDesc,
                                      Link(Link::Type::InsertText, key)));
         });
-
+*/
         emoteChannel->addMessage(builder2.getMessage());
     };
 

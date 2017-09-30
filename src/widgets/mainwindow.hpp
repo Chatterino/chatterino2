@@ -30,8 +30,6 @@ public:
                         CompletionManager &_completionManager);
     ~MainWindow();
 
-    void repaintVisibleChatWidgets(Channel *channel = nullptr);
-
     void load(const boost::property_tree::ptree &tree);
     boost::property_tree::ptree save();
     void loadDefaults();

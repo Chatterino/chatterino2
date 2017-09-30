@@ -5,13 +5,13 @@
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
-#include <thread>
 #include <QBuffer>
 #include <QImageReader>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
+#include <thread>
 
 #include <functional>
 
@@ -22,7 +22,6 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
                                  const QString &url, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
     : emoteManager(_emoteManager)
-    , windowManager(_windowManager)
     , currentPixmap(nullptr)
     , url(url)
     , name(name)
@@ -38,7 +37,6 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
                                  QPixmap *image, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
     : emoteManager(_emoteManager)
-    , windowManager(_windowManager)
     , currentPixmap(image)
     , name(name)
     , tooltip(tooltip)
@@ -51,70 +49,51 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-	std::thread([=] () {
-		QNetworkRequest request;
-		request.setUrl(QUrl(this->url));
-		QNetworkAccessManager NaM;
-		QEventLoop eventLoop;
-		QNetworkReply *reply = NaM.get(request);
-		QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-		eventLoop.exec(); // Wait until response is read.
+    std::thread([=]() {
+        QNetworkRequest request;
+        request.setUrl(QUrl(this->url));
+        QNetworkAccessManager NaM;
+        QEventLoop eventLoop;
+        QNetworkReply *reply = NaM.get(request);
+        QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+        eventLoop.exec();  // Wait until response is read.
 
-		qDebug() << "Received emote " << this->url;
-		QByteArray array = reply->readAll();
-		QBuffer buffer(&array);
-		buffer.open(QIODevice::ReadOnly);
+        qDebug() << "Received emote " << this->url;
+        QByteArray array = reply->readAll();
+        QBuffer buffer(&array);
+        buffer.open(QIODevice::ReadOnly);
 
-		QImage image;
-		QImageReader reader(&buffer);
+        QImage image;
+        QImageReader reader(&buffer);
 
-		bool first = true;
+        bool first = true;
 
-		for (int index = 0; index < reader.imageCount(); ++index) {
-			if (reader.read(&image)) {
-				auto pixmap = new QPixmap(QPixmap::fromImage(image));
+        for (int index = 0; index < reader.imageCount(); ++index) {
+            if (reader.read(&image)) {
+                auto pixmap = new QPixmap(QPixmap::fromImage(image));
 
-				if (first) {
-					first = false;
-					this->currentPixmap = pixmap;
-				}
+                if (first) {
+                    first = false;
+                    this->currentPixmap = pixmap;
+                }
 
-				FrameData data;
-				data.duration = std::max(20, reader.nextImageDelay());
-				data.image = pixmap;
+                FrameData data;
+                data.duration = std::max(20, reader.nextImageDelay());
+                data.image = pixmap;
 
-				this->allFrames.push_back(data);
-			}
-		}
+                this->allFrames.push_back(data);
+            }
+        }
 
-		if (this->allFrames.size() > 1) {
-			this->animated = true;
-		}
+        if (this->allFrames.size() > 1) {
+            this->animated = true;
+        }
 
-		this->emoteManager.incGeneration();
-		this->windowManager.layoutVisibleChatWidgets();
+        this->emoteManager.incGeneration();
 
-		delete reply;
-	}).detach();
-	this->emoteManager.getGifUpdateSignal().connect([=] () { this->gifUpdateTimout(); }); // For some reason when Boost signal is in thread scope and thread deletes the signal doesn't work, so this is the fix.
-}
-
-void LazyLoadedImage::gifUpdateTimout()
-{
-	if (animated) {
-		this->currentFrameOffset += GIF_FRAME_LENGTH;
-
-		while (true) {
-			if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
-				this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
-				this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
-			} else {
-				break;
-			}
-		}
-
-		this->currentPixmap = this->allFrames[this->currentFrame].image;
-	}
+        delete reply;
+    })
+        .detach();
 }
 
 const QPixmap *LazyLoadedImage::getPixmap()

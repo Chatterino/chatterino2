@@ -29,7 +29,6 @@ public:
 private:
     std::shared_ptr<messages::Message> message;
     std::vector<Word> _words;
-    bool highlight = false;
     std::chrono::time_point<std::chrono::system_clock> _parseTime;
 };
 

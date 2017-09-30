@@ -40,7 +40,6 @@ public:
 
 private:
     EmoteManager &emoteManager;
-    WindowManager &windowManager;
 
     struct FrameData {
         QPixmap *image;
@@ -49,8 +48,6 @@ private:
 
     QPixmap *currentPixmap;
     std::vector<FrameData> allFrames;
-    int currentFrame = 0;
-    int currentFrameOffset = 0;
 
     QString url;
     QString name;
@@ -63,7 +60,6 @@ private:
     bool isLoading;
 
     void loadImage();
-    void gifUpdateTimout();
 };
 
 }  // namespace messages

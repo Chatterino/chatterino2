@@ -20,18 +20,10 @@ public:
     ColorScheme &colorScheme;
     CompletionManager &completionManager;
 
-    void layoutVisibleChatWidgets(Channel *channel = nullptr);
-    void repaintVisibleChatWidgets(Channel *channel = nullptr);
-    void repaintGifEmotes();
-    // void updateAll();
-
     widgets::MainWindow &getMainWindow();
 
     void load();
     void save();
-
-    boost::signals2::signal<void()> repaintGifs;
-    boost::signals2::signal<void()> layout;
 
 private:
     std::mutex windowMutex;

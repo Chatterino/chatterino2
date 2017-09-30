@@ -19,20 +19,26 @@ namespace chatterino {
 
 class WindowManager;
 
-struct EmoteData {
-    EmoteData()
-    {
-    }
+class Emote
+{
+public:
+    Emote() = default;
 
-    EmoteData(messages::LazyLoadedImage *_image)
-        : image(_image)
-    {
-    }
+    /**
+     * @param emoteName name of the emote (what chatter writes in chat)
+     * @param emoteChannel name of the channel which possesses this emote
+     * @param emoteCreator name of the user (FFZ / BTTV) who made this emote
+     */
+    Emote(const QString &emoteName, const QString &emoteUrl, const QString &emoteChannel = "",
+          const QString &emoteCreator = "");
 
-    messages::LazyLoadedImage *image = nullptr;
+    QString name;
+    QString url;
+    QString channel;
+    QString creator;
 };
 
-typedef ConcurrentMap<QString, EmoteData> EmoteMap;
+typedef ConcurrentMap<QString, Emote> EmoteMap;
 
 class EmoteManager
 {
@@ -49,14 +55,11 @@ public:
     ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
     EmoteMap &getFFZEmotes();
     EmoteMap &getChatterinoEmotes();
-    EmoteMap &getBTTVChannelEmoteFromCaches();
     EmoteMap &getEmojis();
-    ConcurrentMap<int, EmoteData> &getFFZChannelEmoteFromCaches();
-    ConcurrentMap<long, EmoteData> &getTwitchEmoteFromCache();
 
-    EmoteData getCheerImage(long long int amount, bool animated);
+    Emote getCheerImage(long long int amount, bool animated);
 
-    EmoteData getTwitchEmoteById(long int id, const QString &emoteName);
+    Emote getTwitchEmoteById(long int id, const QString &emoteName);
 
     int getGeneration()
     {
@@ -67,8 +70,6 @@ public:
     {
         _generation++;
     }
-
-    boost::signals2::signal<void()> &getGifUpdateSignal();
 
     // Bit badge/emotes?
     ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
@@ -92,7 +93,8 @@ private:
     void loadEmojis();
 
 public:
-    void parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
+    void parseEmojis(std::vector<std::tuple<std::unique_ptr<Emote>, QString>> &parsedWords,
+                     const QString &text);
 
     QString replaceShortCodes(const QString &text);
 
@@ -121,9 +123,6 @@ private:
     //            emote code
     ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
 
-    //        emote id
-    ConcurrentMap<long, EmoteData> _twitchEmoteFromCache;
-
     /// BTTV emotes
     EmoteMap bttvChannelEmotes;
 
@@ -148,8 +147,6 @@ public:
     std::map<std::string, SignalVector<std::string>> ffzChannelEmoteCodes;
 
 private:
-    ConcurrentMap<int, EmoteData> _ffzChannelEmoteFromCaches;
-
     void loadFFZEmotes();
 
     /// Chatterino emotes
@@ -157,7 +154,6 @@ private:
 
     boost::signals2::signal<void()> _gifUpdateTimerSignal;
     QTimer _gifUpdateTimer;
-    bool _gifUpdateTimerInitiated = false;
 
     int _generation = 0;
 

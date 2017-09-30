@@ -86,13 +86,6 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
 
     this->input.textInput.installEventFilter(parent);
 
-    this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
-    this->view.selectionChanged.connect([this]() {
-        if (view.hasSelection()) {
-            this->input.clearSelection();
-        }
-    });
-
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &ChatWidget::test);
     timer->start(1000);
@@ -167,21 +160,6 @@ bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
     return false;
 }
 
-void ChatWidget::layoutMessages(bool forceUpdate)
-{
-    this->view.layoutMessages();
-    this->view.update();
-
-    //    if (this->view.layoutMessages() || forceUpdate) {
-    //        this->view.update();
-    //    }
-}
-
-void ChatWidget::updateGifEmotes()
-{
-    this->view.updateGifEmotes();
-}
-
 void ChatWidget::giveFocus(Qt::FocusReason reason)
 {
     this->input.textInput.setFocus(reason);
@@ -196,7 +174,6 @@ void ChatWidget::paintEvent(QPaintEvent *)
 {
     // color the background of the chat
     QPainter painter(this);
-
     painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
 }
 
@@ -429,11 +406,6 @@ void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString us
     widget->updatePermissions();
     widget->show();
     widget->setFocus();
-}
-
-void ChatWidget::doCopy()
-{
-    QApplication::clipboard()->setText(this->view.getSelectedText());
 }
 
 static std::vector<std::string> usernameVariants = {
