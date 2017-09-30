@@ -18,7 +18,7 @@ namespace messages {
 
 ImageLoader::ImageLoader()
 {
-    this->worker = std::thread(&ImageLoader::run, this);
+    std::thread(&ImageLoader::run, this).detach();
 }
 
 ImageLoader::~ImageLoader()
@@ -29,14 +29,10 @@ ImageLoader::~ImageLoader()
         this->ready = true;
     }
     this->cv.notify_all();
-    qDebug() << "notified waiting";
-    this->worker.join();
-    qDebug() << "destruct";
 }
 
 void ImageLoader::run()
 {
-    this->eventLoop.reset(new QEventLoop());
     while (true) {
         std::unique_lock<std::mutex> lk(this->workerM);
         if (!this->ready) {
@@ -52,17 +48,14 @@ void ImageLoader::run()
         this->ready = false;
         lk.unlock();
         for (auto &lli : current) {
-            if (this->exit)
-                return;
             QNetworkRequest request;
             request.setUrl(QUrl(lli->url));
             QNetworkAccessManager NaM;
             QNetworkReply *reply = NaM.get(request);
-            QObject::connect(reply, &QNetworkReply::finished, this->eventLoop.get(),
-                             &QEventLoop::quit);
-            qDebug() << "eve1";
-            this->eventLoop->exec();  // Wait until response is read.
-            qDebug() << "eve2";
+            QEventLoop eventLoop;
+            QObject::connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+            // Wait until response is read.
+            eventLoop.exec();
             qDebug() << "Received emote " << lli->url;
             QByteArray array = reply->readAll();
             QBuffer buffer(&array);

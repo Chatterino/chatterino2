@@ -22,13 +22,11 @@ public:
 
 private:
     void run();
-    std::thread worker;
     std::mutex workerM;
     std::vector<chatterino::messages::LazyLoadedImage *> toProcess;
     bool ready = false;
     std::condition_variable cv;
     bool exit = false;
-    std::unique_ptr<QEventLoop> eventLoop;
 };
 
 }  // namespace messages
