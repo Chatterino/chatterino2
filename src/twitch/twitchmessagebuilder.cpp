@@ -526,8 +526,7 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 bool TwitchMessageBuilder::appendEmote(EmoteData &emoteData)
 {
     this->appendWord(Word(emoteData.image, Word::BttvEmoteImage, emoteData.image->getName(),
-                          emoteData.image->getTooltip(),
-                          Link(Link::Url, emoteData.image->getUrl())));
+                          emoteData.image->getTooltip()));
 
     // Perhaps check for ignored emotes here?
     return true;
