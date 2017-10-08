@@ -25,20 +25,23 @@ public slots:
     void handleLoad(LazyLoadedImage *lli, QNetworkReply *reply);
 };
 
+class ImageLoaderRequester : public QObject
+{
+    Q_OBJECT
+signals:
+    void request(chatterino::messages::LazyLoadedImage *lli, QNetworkAccessManager *nam);
+};
+
 class ImageLoaderManager : public QObject
 {
     Q_OBJECT
     QThread workerThread;
     QNetworkAccessManager *NaM;
-    ImageLoaderWorker *worker;
 
 public:
     ImageLoaderManager();
     ~ImageLoaderManager();
     void queue(chatterino::messages::LazyLoadedImage *lli);
-
-signals:
-    void request(chatterino::messages::LazyLoadedImage *lli, QNetworkAccessManager *nam);
 };
 
 }  // namespace messages

@@ -18,29 +18,24 @@ namespace messages {
 
 ImageLoaderManager::ImageLoaderManager()
     : NaM(new QNetworkAccessManager)
-    , worker(new ImageLoaderWorker)
 {
-    qDebug() << "imagloead" << QThread::currentThread();
-    qDebug() << "worker: " << &this->workerThread;
+    qDebug() << "imageloaderthread" << QThread::currentThread();
+    qDebug() << "workerthread: " << &this->workerThread;
     this->NaM->moveToThread(&this->workerThread);
-    this->worker->moveToThread(&this->workerThread);
-    qDebug() << "555;";
-    QObject::connect(this, &ImageLoaderManager::request, this->worker,
-                     &ImageLoaderWorker::handleRequest);
-    qDebug() << "222";
     this->workerThread.start();
 }
 
 ImageLoaderManager::~ImageLoaderManager()
 {
     this->workerThread.quit();
+    this->workerThread.wait();
 }
 
 void ImageLoaderWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManager *nam)
 {
     QNetworkRequest request;
     request.setUrl(QUrl(lli->getUrl()));
-    qDebug() << "keepo";
+    qDebug() << "handleRequest: " << lli->getUrl();
     QNetworkReply *reply = nam->get(request);
     QObject::connect(reply, &QNetworkReply::finished,
                      [lli, reply, this]() { this->handleLoad(lli, reply); });
@@ -49,22 +44,12 @@ void ImageLoaderWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManage
 
 void ImageLoaderManager::queue(chatterino::messages::LazyLoadedImage *lli)
 {
-    /*
-    ImageLoaderWorker *worker = new ImageLoaderWorker(lli);
-    qDebug() << "queue: " << QThread::currentThread();
-    QNetworkRequest request;
-    request.setUrl(QUrl(lli->getUrl()));
-    qDebug() << "keepo";
-    worker->reply = this->NaM.get(request);
-    qDebug() << "kappa";
-    worker->moveToThread(&this->workerThread);
-    /*QObject::connect(worker->reply, &QNetworkReply::finished, worker,
-                     &ImageLoaderWorker::handleLoad, Qt::ConnectionType::QueuedConnection);
-    */
-    /*QObject::connect(worker->reply, &QNetworkReply::finished, worker,
-                     [worker](){worker->handleLoad();});
-    */
-    emit request(lli, this->NaM);
+    ImageLoaderRequester requester;
+    ImageLoaderWorker *workerer = new ImageLoaderWorker;
+    workerer->moveToThread(&this->workerThread);
+    QObject::connect(&requester, &ImageLoaderRequester::request, workerer,
+                     &ImageLoaderWorker::handleRequest);
+    emit requester.request(lli, this->NaM);
     qDebug() << lli->getUrl();
 }
 
@@ -107,7 +92,6 @@ void ImageLoaderWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, Q
 
     delete reply;
     delete this;
-    qDebug() << "Keeeeeee";
 }
 
 }  // namespace messages
