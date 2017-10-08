@@ -10,9 +10,9 @@ class WindowManager;
 
 namespace messages {
 
-class ImageLoader;
+class ImageLoaderManager;
 
-class LazyLoadedImage : QObject
+class LazyLoadedImage : public QObject
 {
 public:
     LazyLoadedImage() = delete;
@@ -67,8 +67,8 @@ private:
     void loadImage();
     void gifUpdateTimout();
 
-    static ImageLoader imageLoader;
-    friend class ImageLoader;
+    //static ImageLoaderManager imageLoader;
+    friend class ImageLoaderWorker;
 };
 
 }  // namespace messages

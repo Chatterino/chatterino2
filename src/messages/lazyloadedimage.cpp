@@ -2,7 +2,7 @@
 #include "asyncexec.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
-#include "messages/imageloader.hpp"
+#include "messages/imageloadermanager.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
@@ -18,8 +18,6 @@
 
 namespace chatterino {
 namespace messages {
-
-ImageLoader LazyLoadedImage::imageLoader;
 
 LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
                                  const QString &url, qreal scale, const QString &name,
@@ -54,7 +52,8 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    LazyLoadedImage::imageLoader.push_back(this);
+    static ImageLoaderManager imageLoader;
+    imageLoader.queue(this);
 
     this->emoteManager.getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();
