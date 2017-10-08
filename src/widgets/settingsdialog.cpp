@@ -484,6 +484,9 @@ void SettingsDialog::addTabs()
             }
         });
         vbox->addLayout(soundForm);
+        vbox->addWidget(
+            createCheckbox("Always play highlight sound (Even if Chatterino is focused)",
+                           settings.highlightAlwaysPlaySound));
         auto layoutVbox = new QVBoxLayout();
         auto btnHbox = new QHBoxLayout();
 

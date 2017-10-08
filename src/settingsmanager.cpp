@@ -36,6 +36,7 @@ SettingsManager::SettingsManager()
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
+    , highlightAlwaysPlaySound("/highlighting/alwaysPlaySound", false)
     , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
     , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
     , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
