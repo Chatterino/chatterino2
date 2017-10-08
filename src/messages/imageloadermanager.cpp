@@ -4,24 +4,17 @@
 #include "windowmanager.hpp"
 
 #include <QBuffer>
-#include <QDebug>
-#include <QEventLoop>
 #include <QImageReader>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-#include <sstream>
-
 namespace chatterino {
 namespace messages {
 
 ImageLoaderManager::ImageLoaderManager()
-    : NaM(new QNetworkAccessManager)
 {
-    qDebug() << "imageloaderthread" << QThread::currentThread();
-    qDebug() << "workerthread: " << &this->workerThread;
-    this->NaM->moveToThread(&this->workerThread);
+    this->NaM.moveToThread(&this->workerThread);
     this->workerThread.start();
 }
 
@@ -33,30 +26,28 @@ ImageLoaderManager::~ImageLoaderManager()
 
 void ImageLoaderWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManager *nam)
 {
-    QNetworkRequest request;
-    request.setUrl(QUrl(lli->getUrl()));
-    qDebug() << "handleRequest: " << lli->getUrl();
+    QNetworkRequest request(QUrl(lli->getUrl()));
     QNetworkReply *reply = nam->get(request);
+
     QObject::connect(reply, &QNetworkReply::finished,
                      [lli, reply, this]() { this->handleLoad(lli, reply); });
-
 }
 
 void ImageLoaderManager::queue(chatterino::messages::LazyLoadedImage *lli)
 {
     ImageLoaderRequester requester;
-    ImageLoaderWorker *workerer = new ImageLoaderWorker;
-    workerer->moveToThread(&this->workerThread);
-    QObject::connect(&requester, &ImageLoaderRequester::request, workerer,
+    ImageLoaderWorker *worker = new ImageLoaderWorker;
+
+    worker->moveToThread(&this->workerThread);
+
+    QObject::connect(&requester, &ImageLoaderRequester::request, worker,
                      &ImageLoaderWorker::handleRequest);
-    emit requester.request(lli, this->NaM);
-    qDebug() << lli->getUrl();
+
+    emit requester.request(lli, &this->NaM);
 }
 
 void ImageLoaderWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply)
 {
-    qDebug() << "Received emote " << lli->url;
-    qDebug() << QThread::currentThread();
     QByteArray array = reply->readAll();
     QBuffer buffer(&array);
     buffer.open(QIODevice::ReadOnly);

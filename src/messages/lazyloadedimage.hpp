@@ -67,7 +67,6 @@ private:
     void loadImage();
     void gifUpdateTimout();
 
-    //static ImageLoaderManager imageLoader;
     friend class ImageLoaderWorker;
 };
 
