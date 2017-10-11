@@ -16,6 +16,8 @@
 
 #include <functional>
 
+#include "networkmanager.hpp"
+
 namespace chatterino {
 namespace util {
 
@@ -146,6 +148,7 @@ static void urlFetch(const QString &url, std::function<void(QNetworkReply &)> su
 static void urlFetchJSON(const QString &url, std::function<void(QJsonObject &)> successCallback,
                          QNetworkAccessManager *manager = nullptr)
 {
+    /*
     urlFetch(url,
              [=](QNetworkReply &reply) {
                  QByteArray data = reply.readAll();
@@ -160,6 +163,23 @@ static void urlFetchJSON(const QString &url, std::function<void(QJsonObject &)> 
                  successCallback(rootNode);
              },
              manager);
+             */
+    qDebug() << "urlfetch";
+    chatterino::util::NetworkManager::queue(QUrl(url), [=](QNetworkReply *reply){
+        QByteArray data = reply->readAll();
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+
+        if (jsonDoc.isNull()) {
+            return;
+        }
+
+        qDebug() << "urlKeepofetch";
+
+        QJsonObject rootNode = jsonDoc.object();
+
+        successCallback(rootNode);
+        reply->deleteLater();
+    });
 }
 
 static void urlFetchTimeout(const QString &url,
