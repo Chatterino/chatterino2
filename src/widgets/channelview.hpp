@@ -12,6 +12,7 @@
 
 #include <QPaintEvent>
 #include <QScroller>
+#include <QTimer>
 #include <QWheelEvent>
 #include <QWidget>
 
@@ -88,6 +89,7 @@ public:
     ~ChannelView();
 
     void updateGifEmotes();
+    void queueUpdate();
     ScrollBar &getScrollBar();
     QString getSelectedText();
     bool hasSelection();
@@ -95,7 +97,7 @@ public:
 
     void setChannel(std::shared_ptr<Channel> channel);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
-    bool layoutMessages();
+    void layoutMessages();
 
     void clearMessages();
 
@@ -122,8 +124,11 @@ private:
     };
 
     WindowManager &windowManager;
+    QTimer updateTimer;
+    bool updateQueued = false;
 
     void detachChannel();
+    void actuallyLayoutMessages();
 
     void drawMessages(QPainter &painter);
     void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);

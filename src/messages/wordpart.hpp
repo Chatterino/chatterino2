@@ -33,7 +33,7 @@ public:
     const QString &getText() const;
     int getLineNumber() const;
     int getCharacterLength() const;
-    short getCharacterWidth(int index) const;
+    short getCharWidth(int index) const;
 
 private:
     Word &word;

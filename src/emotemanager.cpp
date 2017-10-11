@@ -20,10 +20,14 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
+EmoteManager *EmoteManager::instance = nullptr;
+
 EmoteManager::EmoteManager(WindowManager &_windowManager)
     : windowManager(_windowManager)
     , findShortCodesRegex(":([-+\\w]+):")
 {
+    this->instance = this;
+
     pajlada::Settings::Setting<std::string> roomID(
         "/accounts/current/roomID", "", pajlada::Settings::SettingOption::DoNotWriteToJSON);
 

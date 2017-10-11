@@ -1,4 +1,5 @@
 #include "messages/word.hpp"
+#include "util/benchmark.hpp"
 
 namespace chatterino {
 namespace messages {
@@ -125,6 +126,11 @@ void Word::setOffset(int xOffset, int yOffset)
 int Word::getCharacterLength() const
 {
     return this->isImage() ? 2 : this->getText().length() + 1;
+}
+
+short Word::getCharWidth(int index) const
+{
+    return this->getCharacterWidthCache().at(index);
 }
 
 std::vector<short> &Word::getCharacterWidthCache() const

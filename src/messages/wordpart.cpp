@@ -115,9 +115,9 @@ int WordPart::getCharacterLength() const
     return this->getWord().isImage() ? 2 : this->getText().length() + 1;
 }
 
-short WordPart::getCharacterWidth(int index) const
+short WordPart::getCharWidth(int index) const
 {
-    return this->getWord().getCharacterWidthCache().at(index + this->wordCharOffset);
+    return this->getWord().getCharWidth(index + this->wordCharOffset);
 }
 }  // namespace messages
 }  // namespace chatterino

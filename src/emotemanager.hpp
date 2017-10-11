@@ -39,6 +39,8 @@ class EmoteManager
 public:
     explicit EmoteManager(WindowManager &_windowManager);
 
+    static EmoteManager *instance;
+
     void loadGlobalEmotes();
 
     void reloadBTTVChannelEmotes(const QString &channelName,

@@ -3,6 +3,7 @@
 #include "messages/lazyloadedimage.hpp"
 #include "windowmanager.hpp"
 
+#include <QApplication>
 #include <QBuffer>
 #include <QImageReader>
 #include <QNetworkAccessManager>
@@ -81,7 +82,7 @@ void ImageLoaderWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, Q
     lli->emoteManager.incGeneration();
     lli->windowManager.layoutVisibleChatWidgets();
 
-    delete reply;
+    reply->deleteLater();
     delete this;
 }
 

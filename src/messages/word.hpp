@@ -115,7 +115,7 @@ public:
     void setOffset(int _xOffset, int _yOffset);
     int getCharacterLength() const;
 
-    std::vector<short> &getCharacterWidthCache() const;
+    short getCharWidth(int index) const;
 
 private:
     LazyLoadedImage *image;
@@ -136,6 +136,7 @@ private:
     FontManager::Type font = FontManager::Medium;
     Link link;
 
+    std::vector<short> &getCharacterWidthCache() const;
     mutable std::vector<short> charWidthCache;
 };
 

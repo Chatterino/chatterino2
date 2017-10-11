@@ -167,14 +167,9 @@ bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
     return false;
 }
 
-void ChatWidget::layoutMessages(bool forceUpdate)
+void ChatWidget::layoutMessages()
 {
     this->view.layoutMessages();
-    this->view.update();
-
-    //    if (this->view.layoutMessages() || forceUpdate) {
-    //        this->view.update();
-    //    }
 }
 
 void ChatWidget::updateGifEmotes()

@@ -6,6 +6,7 @@
 #include "messages/messageref.hpp"
 #include "settingsmanager.hpp"
 #include "ui_accountpopupform.h"
+#include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/chatwidget.hpp"
 #include "windowmanager.hpp"
@@ -46,12 +47,12 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 
         this->goToBottom->setVisible(this->scrollBar.isVisible() && !this->scrollBar.isAtBottom());
 
-        this->update();
+        this->queueUpdate();
     });
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
-    this->layoutConnection = windowManager.repaintGifs.connect([&] { this->layout(); });
+    this->layoutConnection = windowManager.layout.connect([&] { this->layoutMessages(); });
 
     this->goToBottom = new RippleEffectLabel(this, 0);
     this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.5); color: #FFF;");
@@ -60,6 +61,16 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 
     connect(goToBottom, &RippleEffectLabel::clicked, this,
             [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
+
+    this->updateTimer.setInterval(1000 / 60);
+    this->updateTimer.setSingleShot(true);
+    connect(&this->updateTimer, &QTimer::timeout, this, [this] {
+        if (this->updateQueued) {
+            this->update();
+        }
+
+        this->updateTimer.start();
+    });
 }
 
 ChannelView::~ChannelView()
@@ -68,17 +79,35 @@ ChannelView::~ChannelView()
                         this, &ChannelView::wordTypeMaskChanged);
 }
 
-bool ChannelView::layoutMessages()
+void ChannelView::queueUpdate()
 {
+    if (this->updateTimer.isActive()) {
+        this->updateQueued = true;
+    }
+
+    update();
+
+    this->updateTimer.start();
+}
+
+void ChannelView::layoutMessages()
+{
+    this->actuallyLayoutMessages();
+}
+
+void ChannelView::actuallyLayoutMessages()
+{
+    BENCH(timer)
     auto messages = this->getMessagesSnapshot();
 
     if (messages.getLength() == 0) {
         this->scrollBar.setVisible(false);
-        return false;
+
+        return;
     }
 
+    bool redrawRequired = false;
     bool showScrollbar = false;
-    bool redraw = false;
 
     // Bool indicating whether or not we were showing all messages
     // True if one of the following statements are true:
@@ -97,7 +126,7 @@ bool ChannelView::layoutMessages()
         for (size_t i = start; i < messages.getLength(); ++i) {
             auto message = messages[i];
 
-            redraw |= message->layout(layoutWidth, true);
+            redrawRequired |= message->layout(layoutWidth);
 
             y += message->getHeight();
 
@@ -113,7 +142,7 @@ bool ChannelView::layoutMessages()
     for (std::size_t i = messages.getLength() - 1; i > 0; i--) {
         auto *message = messages[i].get();
 
-        message->layout(layoutWidth, true);
+        message->layout(layoutWidth);
 
         h -= message->getHeight();
 
@@ -144,7 +173,11 @@ bool ChannelView::layoutMessages()
         this->scrollBar.scrollToBottom();
     }
 
-    return redraw;
+    MARK(timer);
+
+    if (redrawRequired) {
+        this->queueUpdate();
+    }
 }
 
 void ChannelView::clearMessages()
@@ -154,13 +187,15 @@ void ChannelView::clearMessages()
 
     // Layout chat widget messages, and force an update regardless if there are no messages
     this->layoutMessages();
-    this->update();
+    this->queueUpdate();
 }
 
 void ChannelView::updateGifEmotes()
 {
-    this->onlyUpdateEmotes = true;
-    this->update();
+    if (!this->gifEmotes.empty()) {
+        this->onlyUpdateEmotes = true;
+        this->queueUpdate();
+    }
 }
 
 ScrollBar &ChannelView::getScrollBar()
@@ -278,7 +313,6 @@ void ChannelView::clearSelection()
 {
     this->selection = Selection();
     layoutMessages();
-    update();
 }
 
 messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
@@ -318,8 +352,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
             this->selection.start.messageIndex--;
             this->selection.end.messageIndex--;
 
-            layoutMessages();
-            update();
+            this->layoutMessages();
         });
 
     auto snapshot = channel->getMessageSnapshot();
@@ -373,9 +406,10 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
+    //    BENCH(timer);
     QPainter painter(this);
 
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+//    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
 // only update gif emotes
 #ifndef Q_OS_MAC
@@ -402,10 +436,11 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw gif emotes
     for (GifEmoteData &item : this->gifEmotes) {
-        painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+        //        painter.fillRect(item.rect, this->colorScheme.ChatBackground);
 
         painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
+    //    MARK(timer);
 }
 
 void ChannelView::drawMessages(QPainter &painter)
@@ -423,14 +458,13 @@ void ChannelView::drawMessages(QPainter &painter)
     for (size_t i = start; i < messages.getLength(); ++i) {
         messages::MessageRef *messageRef = messages[i].get();
 
-        std::shared_ptr<QPixmap> bufferPtr = messageRef->buffer;
-        QPixmap *buffer = bufferPtr.get();
+        std::shared_ptr<QPixmap> buffer = messageRef->buffer;
 
-        bool updateBuffer = messageRef->updateBuffer;
+        //        bool updateBuffer = messageRef->updateBuffer;
+        bool updateBuffer = false;
 
-        if (buffer == nullptr) {
-            buffer = new QPixmap(width(), messageRef->getHeight());
-            bufferPtr = std::shared_ptr<QPixmap>(buffer);
+        if (!buffer) {
+            buffer = std::shared_ptr<QPixmap>(new QPixmap(width(), messageRef->getHeight()));
             updateBuffer = true;
         }
 
@@ -438,7 +472,8 @@ void ChannelView::drawMessages(QPainter &painter)
 
         // update messages that have been changed
         if (updateBuffer) {
-            this->updateMessageBuffer(messageRef, buffer, i);
+            this->updateMessageBuffer(messageRef, buffer.get(), i);
+            qDebug() << "updating buffer xD";
         }
 
         // get gif emotes
@@ -459,11 +494,11 @@ void ChannelView::drawMessages(QPainter &painter)
             }
         }
 
-        messageRef->buffer = bufferPtr;
+        messageRef->buffer = buffer;
 
-        //        if (buffer != nullptr) {
-        painter.drawPixmap(0, y, *buffer);
-        //        }
+        if (buffer) {
+            painter.drawPixmap(0, y, *buffer.get());
+        }
 
         y += messageRef->getHeight();
 
@@ -502,7 +537,7 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
 
             const QPixmap *image = lli.getPixmap();
 
-            if (image != nullptr) {
+            if (image != nullptr && !lli.getAnimated()) {
                 painter.drawPixmap(QRect(wordPart.getX(), wordPart.getY(), wordPart.getWidth(),
                                          wordPart.getHeight()),
                                    *image);
@@ -582,7 +617,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
             int offset = this->selection.min.charIndex - charIndex;
 
             for (int j = 0; j < offset; j++) {
-                rect.setLeft(rect.left() + part.getCharacterWidth(j));
+                rect.setLeft(rect.left() + part.getCharWidth(j));
             }
 
             if (isSingleWord) {
@@ -591,7 +626,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + part.getCharacterWidth(j));
+                    rect.setRight(rect.right() + part.getCharWidth(j));
                 }
 
                 painter.fillRect(rect, selectionColor);
@@ -648,7 +683,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + part.getCharacterWidth(j));
+                    rect.setRight(rect.right() + part.getCharWidth(j));
                 }
             } else {
                 if (this->selection.max.charIndex == charIndex) {

@@ -56,7 +56,7 @@ public:
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
 
-    void layoutMessages(bool forceUpdate = false);
+    void layoutMessages();
     void updateGifEmotes();
 
 protected:

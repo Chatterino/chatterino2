@@ -164,7 +164,8 @@ HEADERS  += \
     src/messages/messagecolor.hpp \
     src/util/nativeeventhelper.hpp \
     src/debug/log.hpp \
-    src/messages/imageloadermanager.hpp
+    src/messages/imageloadermanager.hpp \
+    src/util/benchmark.hpp
 
 PRECOMPILED_HEADER =
 

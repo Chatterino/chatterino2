@@ -30,84 +30,72 @@ int MessageRef::getHeight() const
     return this->height;
 }
 
-bool MessageRef::layout(int width, bool enableEmoteMargins)
+// return true if redraw is required
+bool MessageRef::layout(int width)
 {
-    auto &settings = SettingsManager::getInstance();
+    bool layoutRequired = false;
 
-    bool sizeChanged = width != this->currentLayoutWidth;
-    bool redraw = width != this->currentLayoutWidth;
-    int spaceWidth = 4;
+    // check if width changed
+    const bool widthChanged = width != this->currentLayoutWidth;
+    layoutRequired |= widthChanged;
+    this->currentLayoutWidth = width;
+    // check if emotes changed
+    const bool imagesChanged = this->emoteGeneration != EmoteManager::instance->getGeneration();
+    layoutRequired |= imagesChanged;
+    this->emoteGeneration = EmoteManager::instance->getGeneration();
+    // check if text changed
+    const bool textChanged = this->fontGeneration != FontManager::getInstance().getGeneration();
+    layoutRequired |= textChanged;
+    this->fontGeneration = FontManager::getInstance().getGeneration();
+    // check if work mask changed
+    const bool wordMaskChanged =
+        this->currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
+    layoutRequired |= wordMaskChanged;
+    this->currentWordTypes = SettingsManager::getInstance().getWordTypeMask();
 
-    int mediumTextLineHeight =
-        FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
+    // update word sizes if needed
+    if (imagesChanged) {
+        this->updateImageSizes();
+    }
+    if (textChanged) {
+        this->updateTextSizes();
+    }
+    if (widthChanged) {
+        this->buffer = nullptr;
+    }
 
-    /* TODO(pajlada): Re-implement
-    bool recalculateImages = this->emoteGeneration != EmoteManager::getInstance().getGeneration();
-    */
-    bool recalculateImages = true;
-
-    bool recalculateText = this->fontGeneration != FontManager::getInstance().getGeneration();
-    bool newWordTypes = this->currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
-
-    qreal emoteScale = settings.emoteScale.get();
-    bool scaleEmotesByLineHeight = settings.scaleEmotesByLineHeight.get();
-
-    // calculate word sizes
-    if (!redraw && !recalculateImages && !recalculateText && !newWordTypes) {
+    // return if no layout is required
+    if (!layoutRequired) {
         return false;
     }
 
-    // this->emoteGeneration = EmoteManager::getInstance().getGeneration();
-    this->fontGeneration = FontManager::getInstance().getGeneration();
+    this->actuallyLayout(width);
 
-    for (auto &word : this->message->getWords()) {
-        if (word.isImage()) {
-            if (!recalculateImages) {
-                continue;
-            }
+    return true;
+}
 
-            auto &image = word.getImage();
+void MessageRef::actuallyLayout(int width)
+{
+    auto &settings = SettingsManager::getInstance();
 
-            qreal w = image.getWidth();
-            qreal h = image.getHeight();
+    const int spaceWidth = 4;
+    const int right = width - MARGIN_RIGHT;
 
-            if (scaleEmotesByLineHeight) {
-                word.setSize(w * mediumTextLineHeight / h * emoteScale,
-                             mediumTextLineHeight * emoteScale);
-            } else {
-                word.setSize(w * image.getScale() * emoteScale, h * image.getScale() * emoteScale);
-            }
-        } else {
-            if (!recalculateText) {
-                continue;
-            }
-
-            QFontMetrics &metrics = word.getFontMetrics();
-            word.setSize(metrics.width(word.getText()), metrics.height());
-        }
-    }
-
-    if (newWordTypes) {
-        this->currentWordTypes = settings.getWordTypeMask();
-    }
+    // clear word parts
+    this->wordParts.clear();
 
     // layout
-    this->currentLayoutWidth = width;
-
     int x = MARGIN_LEFT;
     int y = MARGIN_TOP;
-
-    int right = width - MARGIN_RIGHT;
 
     int lineNumber = 0;
     int lineStart = 0;
     int lineHeight = 0;
     bool first = true;
 
-    this->wordParts.clear();
-
     uint32_t flags = settings.getWordTypeMask();
 
+    // loop throught all the words and add them when a line is full
     for (auto it = this->message->getWords().begin(); it != this->message->getWords().end(); ++it) {
         Word &word = *it;
 
@@ -118,64 +106,60 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
 
         int xOffset = 0, yOffset = 0;
 
-        if (enableEmoteMargins) {
-            if (word.isImage() && word.getImage().isHat()) {
-                xOffset = -word.getWidth() + 2;
-            } else {
-                xOffset = word.getXOffset();
-                yOffset = word.getYOffset();
-            }
-        }
+        ///        if (enableEmoteMargins) {
+        ///            if (word.isImage() && word.getImage().isHat()) {
+        ///                xOffset = -word.getWidth() + 2;
+        ///            } else {
+        xOffset = word.getXOffset();
+        yOffset = word.getYOffset();
+        ///            }
+        ///        }
 
         // word wrapping
         if (word.isText() && word.getWidth() + MARGIN_LEFT > right) {
+            // align and end the current line
             alignWordParts(lineStart, lineHeight, width);
-
             y += lineHeight;
 
-            const QString &text = word.getText();
+            int currentPartStart = 0;
+            int currentLineWidth = 0;
 
-            int start = 0;
-            QFontMetrics &metrics = word.getFontMetrics();
+            // go through the text, break text when it doesn't fit in the line anymore
+            for (int i = 1; i <= word.getText().length(); i++) {
+                currentLineWidth += word.getCharWidth(i - 1);
 
-            int width = 0;
+                if (currentLineWidth + MARGIN_LEFT > right) {
+                    // add the current line
+                    QString mid = word.getText().mid(currentPartStart, i - currentPartStart - 1);
 
-            std::vector<short> &charWidths = word.getCharacterWidthCache();
-            int charOffset = 0;
-
-            for (int i = 2; i <= text.length(); i++) {
-                if ((width = width + charWidths[i - 1]) + MARGIN_LEFT > right) {
-                    QString mid = text.mid(start, i - start - 1);
-
-                    this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y, width,
+                    this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y, currentLineWidth,
                                                        word.getHeight(), lineNumber, mid, mid,
-                                                       false, charOffset));
+                                                       false, currentPartStart));
 
-                    charOffset = i;
+                    y += word.getFontMetrics().height();
 
-                    y += metrics.height();
+                    currentPartStart = i - 1;
 
-                    start = i - 1;
-
-                    width = 0;
+                    currentLineWidth = 0;
                     lineNumber++;
                 }
             }
 
-            QString mid(text.mid(start));
-            width = metrics.width(mid);
+            QString mid(word.getText().mid(currentPartStart));
+            currentLineWidth = word.getFontMetrics().width(mid);
 
-            this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(), width,
-                                               word.getHeight(), lineNumber, mid, mid, charOffset));
-            x = width + MARGIN_LEFT + spaceWidth;
+            this->wordParts.push_back(WordPart(word, MARGIN_LEFT, y - word.getHeight(),
+                                               currentLineWidth, word.getHeight(), lineNumber, mid,
+                                               mid, true, currentPartStart));
 
+            x = currentLineWidth + MARGIN_LEFT + spaceWidth;
             lineHeight = word.getHeight();
-
             lineStart = this->wordParts.size() - 1;
 
             first = false;
-        } else if (first || x + word.getWidth() + xOffset <= right) {
-            // fits in the line
+        }
+        // fits in the current line
+        else if (first || x + word.getWidth() + xOffset <= right) {
             this->wordParts.push_back(
                 WordPart(word, x, y - word.getHeight(), lineNumber, word.getCopyText()));
 
@@ -185,8 +169,10 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
             lineHeight = std::max(word.getHeight(), lineHeight);
 
             first = false;
-        } else {
-            // doesn't fit in the line
+        }
+        // doesn't fit in the line
+        else {
+            // align and end the current line
             alignWordParts(lineStart, lineHeight, width);
 
             y += lineHeight;
@@ -205,22 +191,56 @@ bool MessageRef::layout(int width, bool enableEmoteMargins)
         }
     }
 
+    // align and end the current line
     alignWordParts(lineStart, lineHeight, width);
 
-    if (this->height != y + lineHeight) {
-        sizeChanged = true;
-        this->height = y + lineHeight;
-    }
+    // update height
+    int oldHeight = this->height;
+    this->height = y + lineHeight + MARGIN_BOTTOM;
 
-    this->height += MARGIN_BOTTOM;
-
-    if (sizeChanged) {
-        buffer = nullptr;
+    // invalidate buffer if height changed
+    if (oldHeight != this->height) {
+        this->buffer = nullptr;
     }
 
     updateBuffer = true;
+}
 
-    return true;
+void MessageRef::updateTextSizes()
+{
+    for (auto &word : this->message->getWords()) {
+        if (!word.isText())
+            continue;
+
+        QFontMetrics &metrics = word.getFontMetrics();
+        word.setSize(metrics.width(word.getText()), metrics.height());
+    }
+}
+
+void MessageRef::updateImageSizes()
+{
+    const int mediumTextLineHeight =
+        FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
+    const qreal emoteScale = SettingsManager::getInstance().emoteScale.get();
+    const bool scaleEmotesByLineHeight =
+        SettingsManager::getInstance().scaleEmotesByLineHeight.get();
+
+    for (auto &word : this->message->getWords()) {
+        if (!word.isImage())
+            continue;
+
+        auto &image = word.getImage();
+
+        qreal w = image.getWidth();
+        qreal h = image.getHeight();
+
+        if (scaleEmotesByLineHeight) {
+            word.setSize(w * mediumTextLineHeight / h * emoteScale,
+                         mediumTextLineHeight * emoteScale);
+        } else {
+            word.setSize(w * image.getScale() * emoteScale, h * image.getScale() * emoteScale);
+        }
+    }
 }
 
 const std::vector<WordPart> &MessageRef::getWordParts() const

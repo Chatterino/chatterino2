@@ -22,7 +22,7 @@ public:
     Message *getMessage();
     int getHeight() const;
 
-    bool layout(int width, bool enableEmoteMargins = true);
+    bool layout(int width);
 
     const std::vector<WordPart> &getWordParts() const;
 
@@ -30,7 +30,6 @@ public:
     bool updateBuffer = false;
 
     const Word *tryGetWordPart(QPoint point);
-
     int getSelectionIndex(QPoint position);
 
 private:
@@ -42,13 +41,15 @@ private:
 
     int currentLayoutWidth = -1;
     int fontGeneration = -1;
-    /* TODO(pajlada): Re-implement
     int emoteGeneration = -1;
-    */
+
     Word::Type currentWordTypes = Word::None;
 
     // methods
+    void actuallyLayout(int width);
     void alignWordParts(int lineStart, int lineHeight, int width);
+    void updateTextSizes();
+    void updateImageSizes();
 };
 
 }  // namespace messages
