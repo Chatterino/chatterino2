@@ -43,6 +43,8 @@ void ImageLoaderManager::queue(chatterino::messages::LazyLoadedImage *lli)
 
     QObject::connect(&requester, &ImageLoaderRequester::request, worker,
                      &ImageLoaderWorker::handleRequest);
+    QObject::connect(worker, &ImageLoaderWorker::done, lli,
+                     [lli]() { lli->windowManager.layoutVisibleChatWidgets(); });
 
     emit requester.request(lli, &this->NaM);
 }
@@ -80,9 +82,9 @@ void ImageLoaderWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, Q
     }
 
     lli->emoteManager.incGeneration();
-    lli->windowManager.layoutVisibleChatWidgets();
 
     reply->deleteLater();
+    emit this->done();
     delete this;
 }
 

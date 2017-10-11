@@ -15,6 +15,9 @@ class ImageLoaderWorker : public QObject
 public slots:
     void handleRequest(chatterino::messages::LazyLoadedImage *lli, QNetworkAccessManager *nam);
     void handleLoad(LazyLoadedImage *lli, QNetworkReply *reply);
+
+signals:
+    void done();
 };
 
 class ImageLoaderRequester : public QObject
