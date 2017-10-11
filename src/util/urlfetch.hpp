@@ -107,10 +107,9 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
 
 }  // namespace twitch
 
-static void urlFetchJSON(const QString &url, std::function<void(QJsonObject &)> successCallback,
-                         QNetworkAccessManager *manager = nullptr)
+static void urlFetchJSON(const QString &url, std::function<void(QJsonObject &)> successCallback)
 {
-    chatterino::util::NetworkManager::queue(QUrl(url), [=](QNetworkReply *reply) {
+    NetworkManager::urlFetch(QUrl(url), [=](QNetworkReply *reply) {
         if (reply->error() != QNetworkReply::NetworkError::NoError) {
             return;
         }
@@ -129,62 +128,44 @@ static void urlFetchJSON(const QString &url, std::function<void(QJsonObject &)> 
 }
 
 static void urlFetchTimeout(const QString &url,
-                            std::function<void(QNetworkReply &)> successCallback, int timeoutMs,
-                            QNetworkAccessManager *manager = nullptr)
+                            std::function<void(QNetworkReply &)> successCallback, int timeoutMs)
 {
-    bool customManager = true;
+    QTimer *timer = new QTimer;
+    timer->setSingleShot(true);
 
-    if (manager == nullptr) {
-        manager = new QNetworkAccessManager();
-        customManager = false;
-    }
+    QEventLoop *loop = new QEventLoop;
 
-    QUrl requestUrl(url);
-    QNetworkRequest request(requestUrl);
+    NetworkManager::urlFetch(QUrl(url),
+                             [=](QNetworkReply *reply) {
+                                 if (reply->error() == QNetworkReply::NetworkError::NoError) {
+                                     // qDebug() << "successCallback";
+                                     successCallback(*reply);
+                                 }
 
-    QNetworkReply *reply = manager->get(request);
+                                 reply->deleteLater();
+                             },
+                             loop, [loop]() { loop->quit(); },
+                             [loop, timer](QNetworkReply *reply) {
+                                 // qDebug() << "connect fun";
+                                 QObject::connect(timer, &QTimer::timeout, loop, [=]() {
+                                     // qDebug() << "TIMED OUT";
+                                     QObject::disconnect(reply, &QNetworkReply::finished, loop,
+                                                         &QEventLoop::quit);
+                                     reply->abort();
+                                     reply->deleteLater();
+                                 });
+                             });
 
-    QTimer timer;
-    timer.setSingleShot(true);
+    QObject::connect(timer, SIGNAL(timeout()), loop, SLOT(quit()));
 
-    QEventLoop loop;
-    QObject::connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        /* uncomment to follow redirects
-        QVariant replyStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-        if (replyStatus >= 300 && replyStatus <= 304) {
-            QString newUrl =
-                reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
-            urlFetch(newUrl, successCallback);
-            return;
-        }
-        */
-
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            successCallback(*reply);
-        }
-
-        reply->deleteLater();
-        if (!customManager) {
-            manager->deleteLater();
-        }
-    });
-    timer.start(timeoutMs);
-    loop.exec();
-
-    if (!timer.isActive()) {
-        qDebug() << "TIMED OUT";
-        QObject::disconnect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        reply->abort();
-    } else {
-        // qDebug() << "XDDD HEHEHE";
-    }
+    timer->start(timeoutMs);
+    loop->exec();
+    delete timer;
+    delete loop;
 }
 
 static void urlFetchJSONTimeout(const QString &url,
-                                std::function<void(QJsonObject &)> successCallback, int timeoutMs,
-                                QNetworkAccessManager *manager = nullptr)
+                                std::function<void(QJsonObject &)> successCallback, int timeoutMs)
 {
     urlFetchTimeout(url,
                     [=](QNetworkReply &reply) {
@@ -196,10 +177,10 @@ static void urlFetchJSONTimeout(const QString &url,
                         }
 
                         QJsonObject rootNode = jsonDoc.object();
-
+                        // qDebug() << "rootnode\n" << rootNode;
                         successCallback(rootNode);
                     },
-                    timeoutMs, manager);
+                    timeoutMs);
 }
 
 }  // namespace util

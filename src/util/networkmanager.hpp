@@ -49,7 +49,7 @@ public:
     static void queue(chatterino::messages::LazyLoadedImage *lli);
 
     template <typename Fun>
-    static void queue(const QUrl &url, Fun fun)
+    static void urlFetch(const QUrl &url, Fun fun)
     {
         NetworkRequester requester;
         NetworkWorker *worker = new NetworkWorker;
@@ -65,23 +65,29 @@ public:
         emit requester.requestUrl();
     }
 
-    template <typename Fun, typename Callback>
-    static void queue(const QUrl &url, Fun fun, const QObject *caller, Callback &&callback)
+    // (hemirt) experimental, no tests done
+    template <typename Fun, typename Callback, typename Connectoid>
+    static void urlFetch(const QUrl &url, Fun fun, const QObject *caller, Callback callback,
+                         Connectoid connectFun = [](QNetworkReply*){return;})
     {
         NetworkRequester requester;
         NetworkWorker *worker = new NetworkWorker;
 
         worker->moveToThread(&NetworkManager::workerThread);
 
-        QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [fun, url, caller]() {
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [=]() {
             QNetworkRequest request(url);
             QNetworkReply *reply = NetworkManager::NaM.get(request);
 
-            QObject::connect(reply, &QNetworkReply::finished, caller,
-                             [fun, reply]() { fun(reply); });
+            connectFun(reply);
+
+            QObject::connect(reply, &QNetworkReply::finished, worker, [=]() {
+                emit worker->done();
+                fun(reply);
+            });
         });
 
-        QObject::connect(worker, &NetworkWorker::done, caller, std::forward<Callback>(callback));
+        QObject::connect(worker, &NetworkWorker::done, caller, [=]() { callback(); });
 
         emit requester.requestUrl();
     }
