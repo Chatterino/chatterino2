@@ -28,11 +28,10 @@ void NetworkManager::deinit()
     NetworkManager::workerThread.wait();
 }
 
-void NetworkWorker::handleRequest(chatterino::messages::LazyLoadedImage *lli,
-                                  QNetworkAccessManager *nam)
+void NetworkWorker::handleRequest(chatterino::messages::LazyLoadedImage *lli)
 {
     QNetworkRequest request(QUrl(lli->getUrl()));
-    QNetworkReply *reply = nam->get(request);
+    QNetworkReply *reply = NetworkManager::NaM.get(request);
 
     QObject::connect(reply, &QNetworkReply::finished,
                      [lli, reply, this]() { this->handleLoad(lli, reply); });
@@ -49,7 +48,7 @@ void NetworkManager::queue(chatterino::messages::LazyLoadedImage *lli)
     QObject::connect(worker, &NetworkWorker::done, lli,
                      [lli]() { lli->windowManager.layoutVisibleChatWidgets(); });
 
-    emit requester.request(lli, &NetworkManager::NaM);
+    emit requester.request(lli);
 }
 
 void NetworkWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply)
