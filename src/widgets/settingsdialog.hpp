@@ -30,6 +30,7 @@ public:
     void select(SettingsDialogTab *tab);
 
     static void showDialog();
+
 private:
     SettingsSnapshot snapshot;
 
@@ -45,23 +46,36 @@ private:
         QPushButton cancelButton;
     } ui;
 
-    void addTab(QLayout *layout, QString title, QString imageRes);
+    void addTab(QBoxLayout *layout, QString title, QString imageRes);
 
     void addTabs();
+    QVBoxLayout *createAccountsTab();
+    QVBoxLayout *createAppearanceTab();
+    QVBoxLayout *createMessagesTab();
+    QVBoxLayout *createBehaviourTab();
+    QVBoxLayout *createCommandsTab();
+    QVBoxLayout *createEmotesTab();
+    QVBoxLayout *createIgnoredUsersTab();
+    QVBoxLayout *createIgnoredMessagesTab();
+    QVBoxLayout *createLinksTab();
+    QVBoxLayout *createLogsTab();
+    QVBoxLayout *createHighlightingTab();
+    QVBoxLayout *createWhispersTab();
 
     SettingsDialogTab *selectedTab = nullptr;
 
     QListWidget *globalHighlights;
 
     /// Widget creation helpers
+    QVBoxLayout *createTabLayout();
     QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
     QCheckBox *createCheckbox(const QString &title, pajlada::Settings::Setting<bool> &setting);
     QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<int> &setting,
                                 QStringList items,
                                 std::function<void(QString, pajlada::Settings::Setting<int> &)> cb);
-    QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<std::string> &setting,
-                                QStringList items,
-                                std::function<void(QString, pajlada::Settings::Setting<std::string> &)> cb);
+    QHBoxLayout *createCombobox(
+        const QString &title, pajlada::Settings::Setting<std::string> &setting, QStringList items,
+        std::function<void(QString, pajlada::Settings::Setting<std::string> &)> cb);
     QLineEdit *createLineEdit(pajlada::Settings::Setting<std::string> &setting);
 
     void okButtonClicked();

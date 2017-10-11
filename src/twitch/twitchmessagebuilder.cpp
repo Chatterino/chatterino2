@@ -412,6 +412,9 @@ void TwitchMessageBuilder::parseHighlights()
     bool doHighlight = false;
     bool playSound = false;
     bool doAlert = false;
+
+    bool hasFocus = (QApplication::focusWidget() != nullptr);
+
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
         for (const Highlight &highlight : activeHighlights) {
             if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
@@ -437,7 +440,7 @@ void TwitchMessageBuilder::parseHighlights()
 
         this->setHighlight(doHighlight);
 
-        if (playSound) {
+        if (playSound && (!hasFocus || settings.highlightAlwaysPlaySound)) {
             player->play();
         }
 

@@ -72,69 +72,94 @@ SettingsDialog::SettingsDialog()
 
 void SettingsDialog::addTabs()
 {
+    this->addTab(this->createAccountsTab(), "Accounts", ":/images/Message_16xLG.png");
+
+    this->addTab(this->createAppearanceTab(), "Appearance",
+                 ":/images/AppearanceEditorPart_16x.png");
+
+    this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/AppearanceEditorPart_16x.png");
+
+    this->addTab(this->createCommandsTab(), "Commands", ":/images/CustomActionEditor_16x.png");
+
+    this->addTab(this->createEmotesTab(), "Emotes", ":/images/Emoji_Color_1F60A_19.png");
+
+    this->addTab(this->createIgnoredUsersTab(), "Ignored Users",
+                 ":/images/StatusAnnotations_Blocked_16xLG_color.png");
+
+    this->addTab(this->createIgnoredMessagesTab(), "Ignored Messages", ":/images/Filter_16x.png");
+
+    this->addTab(this->createLinksTab(), "Links", ":/images/VSO_Link_blue_16x.png");
+
+    this->addTab(this->createLogsTab(), "Logs", ":/images/VSO_Link_blue_16x.png");
+
+    this->addTab(this->createHighlightingTab(), "Highlighting", ":/images/format_Bold_16xLG.png");
+
+    this->addTab(this->createWhispersTab(), "Whispers", ":/images/Message_16xLG.png");
+
+    // Add stretch
+    this->ui.tabs.addStretch(1);
+}
+
+QVBoxLayout *SettingsDialog::createAccountsTab()
+{
+    auto layout = new QVBoxLayout();
     SettingsManager &settings = SettingsManager::getInstance();
 
-    QVBoxLayout *vbox;
+    // add remove buttons
+    auto buttonBox = new QDialogButtonBox(this);
 
-    // Accounts
-    vbox = new QVBoxLayout();
+    auto addButton = new QPushButton("Add", this);
+    auto removeButton = new QPushButton("Remove", this);
 
-    {
-        // add remove buttons
-        auto buttonBox = new QDialogButtonBox(this);
+    connect(addButton, &QPushButton::clicked, []() {
+        // TODO: fix memory leak :bbaper:
+        auto loginWidget = new LoginWidget();
+        loginWidget->show();
+    });
 
-        auto addButton = new QPushButton("Add", this);
-        auto removeButton = new QPushButton("Remove", this);
+    connect(removeButton, &QPushButton::clicked, []() {
+        qDebug() << "TODO: Implement";  //
+    });
 
-        connect(addButton, &QPushButton::clicked, []() {
-            // TODO: fix memory leak :bbaper:
-            auto loginWidget = new LoginWidget();
-            loginWidget->show();
-        });
+    buttonBox->addButton(addButton, QDialogButtonBox::YesRole);
+    buttonBox->addButton(removeButton, QDialogButtonBox::NoRole);
 
-        connect(removeButton, &QPushButton::clicked, []() {
-            qDebug() << "TODO: Implement";  //
-        });
+    layout->addWidget(buttonBox);
 
-        buttonBox->addButton(addButton, QDialogButtonBox::YesRole);
-        buttonBox->addButton(removeButton, QDialogButtonBox::NoRole);
+    // listview
+    auto listWidget = new QListWidget(this);
 
-        vbox->addWidget(buttonBox);
-
-        // listview
-        auto listWidget = new QListWidget(this);
-
-        for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
-            listWidget->addItem(user.getUserName());
-        }
-
-        if (listWidget->count() > 0) {
-            const auto &currentUser = AccountManager::getInstance().getTwitchUser();
-            QString currentUsername = currentUser.getUserName();
-            for (int i = 0; i < listWidget->count(); ++i) {
-                QString itemText = listWidget->item(i)->text();
-                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
-                    listWidget->setCurrentRow(i);
-                    break;
-                }
-            }
-        }
-
-        QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
-            if (!listWidget->selectedItems().isEmpty()) {
-                AccountManager::getInstance().setCurrentTwitchUser(
-                    listWidget->currentItem()->text());
-            }
-        });
-
-        vbox->addWidget(listWidget);
+    for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
+        listWidget->addItem(user.getUserName());
     }
 
-    //    vbox->addStretch(1);
-    addTab(vbox, "Accounts", ":/images/Message_16xLG.png");
+    if (listWidget->count() > 0) {
+        const auto &currentUser = AccountManager::getInstance().getTwitchUser();
+        QString currentUsername = currentUser.getUserName();
+        for (int i = 0; i < listWidget->count(); ++i) {
+            QString itemText = listWidget->item(i)->text();
+            if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
+                listWidget->setCurrentRow(i);
+                break;
+            }
+        }
+    }
 
-    // Appearance
-    vbox = new QVBoxLayout();
+    QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
+        if (!listWidget->selectedItems().isEmpty()) {
+            AccountManager::getInstance().setCurrentTwitchUser(listWidget->currentItem()->text());
+        }
+    });
+
+    layout->addWidget(listWidget);
+
+    return layout;
+}
+
+QVBoxLayout *SettingsDialog::createAppearanceTab()
+{
+    SettingsManager &settings = SettingsManager::getInstance();
+    auto layout = this->createTabLayout();
 
     {
         auto group = new QGroupBox("Application");
@@ -257,7 +282,7 @@ void SettingsDialog::addTabs()
 
         group->setLayout(form);
 
-        vbox->addWidget(group);
+        layout->addWidget(group);
     }
 
     {
@@ -287,97 +312,104 @@ void SettingsDialog::addTabs()
 
         group->setLayout(v);
 
-        vbox->addWidget(group);
+        layout->addWidget(group);
     }
+    return layout;
+}
 
-    vbox->addStretch(1);
+QVBoxLayout *SettingsDialog::createBehaviourTab()
+{
+    SettingsManager &settings = SettingsManager::getInstance();
+    auto layout = this->createTabLayout();
 
-    addTab(vbox, "Appearance", ":/images/AppearanceEditorPart_16x.png");
+    auto form = new QFormLayout();
 
-    // Behaviour
-    vbox = new QVBoxLayout();
+    form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
+    //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
+    //        commands)",
+    //                                                 settings.mentionUsersWithAt));
+    form->addRow("Messages:", createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+    form->addRow(
+        "", createCheckbox("Show last read message indicator", settings.showLastMessageIndicator));
 
-    {
-        auto form = new QFormLayout();
+    //        auto v = new QVBoxLayout();
+    //        v->addWidget(new QLabel("Mouse scroll speed"));
 
-        form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
-        //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
-        //        commands)",
-        //                                                 settings.mentionUsersWithAt));
-        form->addRow("Messages:",
-                     createCheckbox("Hide input box if empty", settings.hideEmptyInput));
-        form->addRow("", createCheckbox("Show last read message indicator",
-                                        settings.showLastMessageIndicator));
+    auto scroll = new QSlider(Qt::Horizontal);
+    form->addRow("Mouse scroll speed:", scroll);
 
-        //        auto v = new QVBoxLayout();
-        //        v->addWidget(new QLabel("Mouse scroll speed"));
+    form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
+    form->addRow(this->createCombobox(
+        "Preferred quality:", settings.preferredQuality,
+        {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
+        [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
+            setting = newValue.toStdString();
+        }));
 
-        auto scroll = new QSlider(Qt::Horizontal);
-        form->addRow("Mouse scroll speed:", scroll);
+    //        v->addWidget(scroll);
+    //        v->addStretch(1);
+    //        vbox->addLayout(v);
+    layout->addLayout(form);
 
-        form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
-        form->addRow(this->createCombobox(
-            "Preferred quality:", settings.preferredQuality,
-            {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
-            [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
-                setting = newValue.toStdString();
-            }));
+    return layout;
+}
 
-        //        v->addWidget(scroll);
-        //        v->addStretch(1);
-        //        vbox->addLayout(v);
-        vbox->addLayout(form);
-    }
+QVBoxLayout *SettingsDialog::createCommandsTab()
+{
+    auto layout = this->createTabLayout();
 
-    vbox->addStretch(1);
+    return layout;
+}
 
-    addTab(vbox, "Behaviour", ":/images/AppearanceEditorPart_16x.png");
+QVBoxLayout *SettingsDialog::createEmotesTab()
+{
+    SettingsManager &settings = SettingsManager::getInstance();
+    auto layout = this->createTabLayout();
 
-    // Commands
-    vbox = new QVBoxLayout();
+    layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
+    layout->addWidget(createCheckbox("Enable BetterTTV Emotes", settings.enableBttvEmotes));
+    layout->addWidget(createCheckbox("Enable FrankerFaceZ Emotes", settings.enableFfzEmotes));
+    layout->addWidget(createCheckbox("Enable Gif Emotes", settings.enableGifs));
+    layout->addWidget(createCheckbox("Enable Emojis", settings.enableEmojis));
 
-    vbox->addWidget(new QLabel());
+    layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
 
-    vbox->addStretch(1);
+    return layout;
+}
 
-    addTab(vbox, "Commands", ":/images/CustomActionEditor_16x.png");
+QVBoxLayout *SettingsDialog::createIgnoredUsersTab()
+{
+    auto layout = this->createTabLayout();
 
-    // Emotes
-    vbox = new QVBoxLayout();
+    return layout;
+}
 
-    vbox->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
-    vbox->addWidget(createCheckbox("Enable BetterTTV Emotes", settings.enableBttvEmotes));
-    vbox->addWidget(createCheckbox("Enable FrankerFaceZ Emotes", settings.enableFfzEmotes));
-    vbox->addWidget(createCheckbox("Enable Gif Emotes", settings.enableGifs));
-    vbox->addWidget(createCheckbox("Enable Emojis", settings.enableEmojis));
+QVBoxLayout *SettingsDialog::createIgnoredMessagesTab()
+{
+    auto layout = this->createTabLayout();
 
-    vbox->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
+    return layout;
+}
 
-    vbox->addStretch(1);
-    addTab(vbox, "Emotes", ":/images/Emoji_Color_1F60A_19.png");
+QVBoxLayout *SettingsDialog::createLinksTab()
+{
+    auto layout = this->createTabLayout();
 
-    // Ignored Users
-    vbox = new QVBoxLayout();
-    vbox->addStretch(1);
-    addTab(vbox, "Ignored Users", ":/images/StatusAnnotations_Blocked_16xLG_color.png");
+    return layout;
+}
 
-    // Ignored Messages
-    vbox = new QVBoxLayout();
-    vbox->addStretch(1);
-    addTab(vbox, "Ignored Messages", ":/images/Filter_16x.png");
+QVBoxLayout *SettingsDialog::createLogsTab()
+{
+    auto layout = this->createTabLayout();
 
-    // Links
-    vbox = new QVBoxLayout();
-    vbox->addStretch(1);
-    addTab(vbox, "Links", ":/images/VSO_Link_blue_16x.png");
+    return layout;
+}
 
-    // Logging
-    vbox = new QVBoxLayout();
-    vbox->addStretch(1);
-    addTab(vbox, "Logs", ":/images/VSO_Link_blue_16x.png");
+QVBoxLayout *SettingsDialog::createHighlightingTab()
+{
+    SettingsManager &settings = SettingsManager::getInstance();
+    auto layout = this->createTabLayout();
 
-    // Highlighting
-    vbox = new QVBoxLayout();
     auto highlights = new QListWidget();
     auto highlightUserBlacklist = new QTextEdit();
     globalHighlights = highlights;
@@ -388,13 +420,13 @@ void SettingsDialog::addTabs()
     auto customSound = new QHBoxLayout();
     auto soundForm = new QFormLayout();
     {
-        vbox->addWidget(createCheckbox("Enable Highlighting", settings.enableHighlights));
-        vbox->addWidget(createCheckbox("Highlight messages containing your name",
-                                       settings.enableHighlightsSelf));
-        vbox->addWidget(createCheckbox("Play sound when your name is mentioned",
-                                       settings.enableHighlightSound));
-        vbox->addWidget(createCheckbox("Flash taskbar when your name is mentioned",
-                                       settings.enableHighlightTaskbar));
+        layout->addWidget(createCheckbox("Enable Highlighting", settings.enableHighlights));
+        layout->addWidget(createCheckbox("Highlight messages containing your name",
+                                         settings.enableHighlightsSelf));
+        layout->addWidget(createCheckbox("Play sound when your name is mentioned",
+                                         settings.enableHighlightSound));
+        layout->addWidget(createCheckbox("Flash taskbar when your name is mentioned",
+                                         settings.enableHighlightTaskbar));
         customSound->addWidget(createCheckbox("Custom sound", settings.customHighlightSound));
         auto selectBtn = new QPushButton("Select");
         QObject::connect(selectBtn, &QPushButton::clicked, this, [&settings, this] {
@@ -406,7 +438,6 @@ void SettingsDialog::addTabs()
     }
 
     soundForm->addRow(customSound);
-
 
     {
         auto hbox = new QHBoxLayout();
@@ -483,7 +514,10 @@ void SettingsDialog::addTabs()
                 delete highlights->selectedItems().first();
             }
         });
-        vbox->addLayout(soundForm);
+        layout->addLayout(soundForm);
+        layout->addWidget(
+            createCheckbox("Always play highlight sound (Even if Chatterino is focused)",
+                           settings.highlightAlwaysPlaySound));
         auto layoutVbox = new QVBoxLayout();
         auto btnHbox = new QHBoxLayout();
 
@@ -499,37 +533,37 @@ void SettingsDialog::addTabs()
         layoutVbox->addWidget(btnWidget);
         highlightWidget->setLayout(layoutVbox);
 
-        highlightTab->addTab(highlightWidget,"Highlights");
-        highlightTab->addTab(highlightUserBlacklist,"Disabled Users");
-        vbox->addWidget(highlightTab);
+        highlightTab->addTab(highlightWidget, "Highlights");
+        highlightTab->addTab(highlightUserBlacklist, "Disabled Users");
+        layout->addWidget(highlightTab);
 
-        vbox->addLayout(hbox);
+        layout->addLayout(hbox);
     }
 
-    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this, [=, &settings](){
-        QStringList list = highlightUserBlacklist->toPlainText().split("\n",QString::SkipEmptyParts);
+    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this, [=, &settings]() {
+        QStringList list =
+            highlightUserBlacklist->toPlainText().split("\n", QString::SkipEmptyParts);
         list.removeDuplicates();
         settings.highlightUserBlacklist.set(list.join("\n") + "\n");
     });
 
-    settings.highlightUserBlacklist.valueChanged.connect([=](const QString &str){
-        highlightUserBlacklist->setPlainText(str);
-    });
+    settings.highlightUserBlacklist.valueChanged.connect(
+        [=](const QString &str) { highlightUserBlacklist->setPlainText(str); });
 
-    vbox->addStretch(1);
-    addTab(vbox, "Highlighting", ":/images/format_Bold_16xLG.png");
-
-    // Whispers
-    vbox = new QVBoxLayout();
-    vbox->addStretch(1);
-    addTab(vbox, "Whispers", ":/images/Message_16xLG.png");
-
-    // Add stretch
-    this->ui.tabs.addStretch(1);
+    return layout;
 }
 
-void SettingsDialog::addTab(QLayout *layout, QString title, QString imageRes)
+QVBoxLayout *SettingsDialog::createWhispersTab()
 {
+    auto layout = this->createTabLayout();
+
+    return layout;
+}
+
+void SettingsDialog::addTab(QBoxLayout *layout, QString title, QString imageRes)
+{
+    layout->addStretch(1);
+
     auto widget = new QWidget();
 
     widget->setLayout(layout);
@@ -572,6 +606,13 @@ void SettingsDialog::showDialog()
 }
 
 /// Widget creation helpers
+QVBoxLayout *SettingsDialog::createTabLayout()
+{
+    auto layout = new QVBoxLayout();
+
+    return layout;
+}
+
 QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
 {
     auto checkbox = new QCheckBox(title);
