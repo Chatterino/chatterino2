@@ -45,7 +45,7 @@ void NetworkManager::queue(chatterino::messages::LazyLoadedImage *lli)
     worker->moveToThread(&NetworkManager::workerThread);
 
     QObject::connect(&requester, &NetworkRequester::request, worker, &NetworkWorker::handleRequest);
-    QObject::connect(worker, &NetworkWorker::done, lli,
+    QObject::connect(worker, &NetworkWorker::done, QThread::currentThread(),
                      [lli]() { lli->windowManager.layoutVisibleChatWidgets(); });
 
     emit requester.request(lli);

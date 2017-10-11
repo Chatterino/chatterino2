@@ -55,7 +55,6 @@ public:
         NetworkWorker *worker = new NetworkWorker;
 
         worker->moveToThread(&NetworkManager::workerThread);
-
         QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [fun, url]() {
             QNetworkRequest request(url);
             QNetworkReply *reply = NetworkManager::NaM.get(request);
