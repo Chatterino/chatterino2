@@ -2,7 +2,7 @@
 #include "asyncexec.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
-#include "messages/imageloadermanager.hpp"
+#include "util/networkmanager.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
@@ -52,8 +52,8 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    static ImageLoaderManager imageLoader;
-    imageLoader.queue(this);
+    static NetworkManager netMag;
+    netMag.queue(this);
 
     this->emoteManager.getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();

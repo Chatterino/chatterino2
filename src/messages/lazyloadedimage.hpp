@@ -65,8 +65,8 @@ private:
     void loadImage();
     void gifUpdateTimout();
 
-    friend class ImageLoaderWorker;
-    friend class ImageLoaderManager;
+    friend class NetworkWorker;
+    friend class NetworkManager;
 };
 
 }  // namespace messages

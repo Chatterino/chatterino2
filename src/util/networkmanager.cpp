@@ -1,4 +1,4 @@
-#include "messages/imageloadermanager.hpp"
+#include "util/networkmanager.hpp"
 #include "emotemanager.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "windowmanager.hpp"
@@ -13,19 +13,19 @@
 namespace chatterino {
 namespace messages {
 
-ImageLoaderManager::ImageLoaderManager()
+NetworkManager::NetworkManager()
 {
     this->NaM.moveToThread(&this->workerThread);
     this->workerThread.start();
 }
 
-ImageLoaderManager::~ImageLoaderManager()
+NetworkManager::~NetworkManager()
 {
     this->workerThread.quit();
     this->workerThread.wait();
 }
 
-void ImageLoaderWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManager *nam)
+void NetworkWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManager *nam)
 {
     QNetworkRequest request(QUrl(lli->getUrl()));
     QNetworkReply *reply = nam->get(request);
@@ -34,22 +34,22 @@ void ImageLoaderWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManage
                      [lli, reply, this]() { this->handleLoad(lli, reply); });
 }
 
-void ImageLoaderManager::queue(chatterino::messages::LazyLoadedImage *lli)
+void NetworkManager::queue(chatterino::messages::LazyLoadedImage *lli)
 {
-    ImageLoaderRequester requester;
-    ImageLoaderWorker *worker = new ImageLoaderWorker;
+    NetworkRequester requester;
+    NetworkWorker *worker = new NetworkWorker;
 
     worker->moveToThread(&this->workerThread);
 
-    QObject::connect(&requester, &ImageLoaderRequester::request, worker,
-                     &ImageLoaderWorker::handleRequest);
-    QObject::connect(worker, &ImageLoaderWorker::done, lli,
+    QObject::connect(&requester, &NetworkRequester::request, worker,
+                     &NetworkWorker::handleRequest);
+    QObject::connect(worker, &NetworkWorker::done, lli,
                      [lli]() { lli->windowManager.layoutVisibleChatWidgets(); });
 
     emit requester.request(lli, &this->NaM);
 }
 
-void ImageLoaderWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply)
+void NetworkWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply)
 {
     QByteArray array = reply->readAll();
     QBuffer buffer(&array);

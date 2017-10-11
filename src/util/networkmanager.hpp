@@ -8,7 +8,7 @@ namespace messages {
 
 class LazyLoadedImage;
 
-class ImageLoaderWorker : public QObject
+class NetworkWorker : public QObject
 {
     Q_OBJECT
 
@@ -20,7 +20,7 @@ signals:
     void done();
 };
 
-class ImageLoaderRequester : public QObject
+class NetworkRequester : public QObject
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ signals:
     void request(chatterino::messages::LazyLoadedImage *lli, QNetworkAccessManager *nam);
 };
 
-class ImageLoaderManager : public QObject
+class NetworkManager : public QObject
 {
     Q_OBJECT
 
@@ -36,8 +36,8 @@ class ImageLoaderManager : public QObject
     QNetworkAccessManager NaM;
 
 public:
-    ImageLoaderManager();
-    ~ImageLoaderManager();
+    NetworkManager();
+    ~NetworkManager();
 
     void queue(chatterino::messages::LazyLoadedImage *lli);
 };
