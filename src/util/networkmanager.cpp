@@ -11,21 +11,25 @@
 #include <QNetworkRequest>
 
 namespace chatterino {
-namespace messages {
+namespace util {
 
-NetworkManager::NetworkManager()
+QThread NetworkManager::workerThread;
+QNetworkAccessManager NetworkManager::NaM;
+
+void NetworkManager::init()
 {
-    this->NaM.moveToThread(&this->workerThread);
-    this->workerThread.start();
+    NetworkManager::NaM.moveToThread(&NetworkManager::workerThread);
+    NetworkManager::workerThread.start();
 }
 
-NetworkManager::~NetworkManager()
+void NetworkManager::deinit()
 {
-    this->workerThread.quit();
-    this->workerThread.wait();
+    NetworkManager::workerThread.quit();
+    NetworkManager::workerThread.wait();
 }
 
-void NetworkWorker::handleRequest(LazyLoadedImage *lli, QNetworkAccessManager *nam)
+void NetworkWorker::handleRequest(chatterino::messages::LazyLoadedImage *lli,
+                                  QNetworkAccessManager *nam)
 {
     QNetworkRequest request(QUrl(lli->getUrl()));
     QNetworkReply *reply = nam->get(request);
@@ -39,14 +43,13 @@ void NetworkManager::queue(chatterino::messages::LazyLoadedImage *lli)
     NetworkRequester requester;
     NetworkWorker *worker = new NetworkWorker;
 
-    worker->moveToThread(&this->workerThread);
+    worker->moveToThread(&NetworkManager::workerThread);
 
-    QObject::connect(&requester, &NetworkRequester::request, worker,
-                     &NetworkWorker::handleRequest);
+    QObject::connect(&requester, &NetworkRequester::request, worker, &NetworkWorker::handleRequest);
     QObject::connect(worker, &NetworkWorker::done, lli,
                      [lli]() { lli->windowManager.layoutVisibleChatWidgets(); });
 
-    emit requester.request(lli, &this->NaM);
+    emit requester.request(lli, &NetworkManager::NaM);
 }
 
 void NetworkWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply)
@@ -69,7 +72,7 @@ void NetworkWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetw
                 lli->currentPixmap = pixmap;
             }
 
-            LazyLoadedImage::FrameData data;
+            chatterino::messages::LazyLoadedImage::FrameData data;
             data.duration = std::max(20, reader.nextImageDelay());
             data.image = pixmap;
 
@@ -88,5 +91,5 @@ void NetworkWorker::handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetw
     delete this;
 }
 
-}  // namespace messages
+}  // namespace util
 }  // namespace chatterino

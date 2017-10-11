@@ -4,9 +4,14 @@
 #include <QThread>
 
 namespace chatterino {
+
 namespace messages {
 
 class LazyLoadedImage;
+
+}  // namespace messages
+
+namespace util {
 
 class NetworkWorker : public QObject
 {
@@ -14,7 +19,7 @@ class NetworkWorker : public QObject
 
 public slots:
     void handleRequest(chatterino::messages::LazyLoadedImage *lli, QNetworkAccessManager *nam);
-    void handleLoad(LazyLoadedImage *lli, QNetworkReply *reply);
+    void handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply);
 
 signals:
     void done();
@@ -32,15 +37,15 @@ class NetworkManager : public QObject
 {
     Q_OBJECT
 
-    QThread workerThread;
-    QNetworkAccessManager NaM;
+    static QThread workerThread;
+    static QNetworkAccessManager NaM;
 
 public:
-    NetworkManager();
-    ~NetworkManager();
+    static void init();
+    static void deinit();
 
-    void queue(chatterino::messages::LazyLoadedImage *lli);
+    static void queue(chatterino::messages::LazyLoadedImage *lli);
 };
 
-}  // namespace messages
+}  // namespace util
 }  // namespace chatterino

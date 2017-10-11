@@ -52,8 +52,7 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    static NetworkManager netMag;
-    netMag.queue(this);
+    chatterino::util::NetworkManager::queue(this);
 
     this->emoteManager.getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();
