@@ -79,7 +79,9 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
                         AccountManager::getInstance().getTwitchUser().getUserId() +
                         "/follows/channels/" + this->userID);
 
-        util::twitch::put(requestUrl,[](QJsonObject obj){});
+        util::twitch::put(requestUrl,[](QJsonObject obj){
+            qDebug() << "follows channel: " << obj;
+        });
     });
 
     QObject::connect(this->_ui->ignore, &QPushButton::clicked, this, [=](){
@@ -87,7 +89,9 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
                         AccountManager::getInstance().getTwitchUser().getUserId() +
                         "/blocks/" + this->userID);
 
-        util::twitch::put(requestUrl,[](QJsonObject obj){});
+        util::twitch::put(requestUrl,[](QJsonObject obj){
+            qDebug() << "blocks user: " << obj;
+        });
     });
 
     QObject::connect(this->_ui->disableHighlights, &QPushButton::clicked, this, [=, &settings](){

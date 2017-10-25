@@ -169,8 +169,8 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
     request.setRawHeader(
         "Authorization",
         "OAuth " + AccountManager::getInstance().getTwitchUser().getOAuthToken().toUtf8());
-    QNetworkReply *reply = manager->put(request, "");
-    QObject::connect(reply, &QNetworkReply::finished, [=]() {
+
+    NetworkManager::urlPut(std::move(request), [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NetworkError::NoError) {
             QByteArray data = reply->readAll();
             QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
@@ -181,7 +181,6 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
             }
         }
         reply->deleteLater();
-        manager->deleteLater();
     });
 }
 

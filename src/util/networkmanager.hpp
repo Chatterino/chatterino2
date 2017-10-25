@@ -73,7 +73,6 @@ public:
         urlFetch(QNetworkRequest(url), std::move(fun));
     }
 
-    // (hemirt) experimental, no tests done
     template <typename Callback, typename Connectoid = void (*)(QNetworkReply *)>
     static void urlFetch(QNetworkRequest request, const QObject *caller, Callback callback,
                          Connectoid connectFun = [](QNetworkReply *) { return; })
@@ -102,6 +101,42 @@ public:
                          Connectoid connectFun = [](QNetworkReply *) { return; })
     {
         urlFetch(QNetworkRequest(url), caller, callback, connectFun);
+    }
+
+    template <typename Fun>
+    static void urlPut(QNetworkRequest request, Fun fun, QByteArray *data)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                         [ fun = std::move(fun), request = std::move(request), data ]() {
+                             QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
+
+                             QObject::connect(reply, &QNetworkReply::finished,
+                                              [ fun = std::move(fun), reply ]() { fun(reply); });
+                         });
+
+        emit requester.requestUrl();
+    }
+
+    template <typename Fun>
+    static void urlPut(QNetworkRequest request, Fun fun)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                         [ fun = std::move(fun), request = std::move(request) ]() {
+                             QNetworkReply *reply = NetworkManager::NaM.put(request, "");
+
+                             QObject::connect(reply, &QNetworkReply::finished,
+                                              [ fun = std::move(fun), reply ]() { fun(reply); });
+                         });
+
+        emit requester.requestUrl();
     }
 };
 
