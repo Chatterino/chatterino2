@@ -24,6 +24,7 @@ public slots:
 
 signals:
     void done();
+    void doneUrl(QNetworkReply *);
 };
 
 class NetworkRequester : public QObject
@@ -49,26 +50,33 @@ public:
     static void queue(chatterino::messages::LazyLoadedImage *lli);
 
     template <typename Fun>
-    static void urlFetch(const QUrl &url, Fun fun)
+    static void urlFetch(QNetworkRequest request, Fun fun)
     {
         NetworkRequester requester;
         NetworkWorker *worker = new NetworkWorker;
 
         worker->moveToThread(&NetworkManager::workerThread);
-        QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [fun, url]() {
-            QNetworkRequest request(url);
-            QNetworkReply *reply = NetworkManager::NaM.get(request);
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                         [ fun = std::move(fun), request = std::move(request) ]() {
+                             QNetworkReply *reply = NetworkManager::NaM.get(request);
 
-            QObject::connect(reply, &QNetworkReply::finished, [fun, reply]() { fun(reply); });
-        });
+                             QObject::connect(reply, &QNetworkReply::finished,
+                                              [fun, reply]() { fun(reply); });
+                         });
 
         emit requester.requestUrl();
     }
 
+    template <typename Fun>
+    static void urlFetch(const QUrl &url, Fun fun)
+    {
+        urlFetch(QNetworkRequest(url), std::move(fun));
+    }
+
     // (hemirt) experimental, no tests done
-    template <typename Fun, typename Callback, typename Connectoid>
-    static void urlFetch(const QUrl &url, Fun fun, const QObject *caller, Callback callback,
-                         Connectoid connectFun = [](QNetworkReply*){return;})
+    template <typename Callback, typename Connectoid = void(*)(QNetworkReply*)>
+    static void urlFetch(QNetworkRequest request, const QObject *caller, Callback callback,
+                         Connectoid connectFun = [](QNetworkReply *) { return; })
     {
         NetworkRequester requester;
         NetworkWorker *worker = new NetworkWorker;
@@ -76,20 +84,24 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
 
         QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [=]() {
-            QNetworkRequest request(url);
             QNetworkReply *reply = NetworkManager::NaM.get(request);
 
             connectFun(reply);
 
             QObject::connect(reply, &QNetworkReply::finished, worker, [=]() {
-                emit worker->done();
-                fun(reply);
+                emit worker->doneUrl(reply);
             });
         });
 
-        QObject::connect(worker, &NetworkWorker::done, caller, [=]() { callback(); });
-
+        QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) { callback(reply); });
         emit requester.requestUrl();
+    }
+
+    template <typename Callback, typename Connectoid = void(*)(QNetworkReply*)>
+    static void urlFetch(const QUrl &url, const QObject *caller, Callback callback,
+                         Connectoid connectFun = [](QNetworkReply *) { return; })
+    {
+        urlFetch(QNetworkRequest(url), caller, callback, connectFun);
     }
 };
 
