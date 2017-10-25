@@ -52,7 +52,43 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    chatterino::util::NetworkManager::queue(this);
+    QNetworkRequest request(QUrl(this->getUrl()));
+    chatterino::util::NetworkManager::urlFetch(request, this, [lli = this](QNetworkReply * reply) {
+        QByteArray array = reply->readAll();
+        QBuffer buffer(&array);
+        buffer.open(QIODevice::ReadOnly);
+
+        QImage image;
+        QImageReader reader(&buffer);
+
+        bool first = true;
+
+        for (int index = 0; index < reader.imageCount(); ++index) {
+            if (reader.read(&image)) {
+                auto pixmap = new QPixmap(QPixmap::fromImage(image));
+
+                if (first) {
+                    first = false;
+                    lli->currentPixmap = pixmap;
+                }
+
+                chatterino::messages::LazyLoadedImage::FrameData data;
+                data.duration = std::max(20, reader.nextImageDelay());
+                data.image = pixmap;
+
+                lli->allFrames.push_back(data);
+            }
+        }
+
+        if (lli->allFrames.size() > 1) {
+            lli->animated = true;
+        }
+
+        lli->emoteManager.incGeneration();
+
+        reply->deleteLater();
+        lli->windowManager.layoutVisibleChatWidgets();
+    });
 
     this->emoteManager.getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();

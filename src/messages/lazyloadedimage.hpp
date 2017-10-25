@@ -8,13 +8,6 @@ namespace chatterino {
 class EmoteManager;
 class WindowManager;
 
-namespace util {
-
-class NetworkManager;
-class NetworkWorker;
-
-}  // namespace util
-
 namespace messages {
 
 class LazyLoadedImage : public QObject
@@ -71,9 +64,6 @@ private:
 
     void loadImage();
     void gifUpdateTimout();
-
-    friend class chatterino::util::NetworkWorker;
-    friend class chatterino::util::NetworkManager;
 };
 
 }  // namespace messages

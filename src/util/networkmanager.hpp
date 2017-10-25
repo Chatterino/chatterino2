@@ -18,12 +18,7 @@ class NetworkWorker : public QObject
 {
     Q_OBJECT
 
-public slots:
-    void handleRequest(chatterino::messages::LazyLoadedImage *lli);
-    void handleLoad(chatterino::messages::LazyLoadedImage *lli, QNetworkReply *reply);
-
 signals:
-    void done();
     void doneUrl(QNetworkReply *);
 };
 
@@ -32,7 +27,6 @@ class NetworkRequester : public QObject
     Q_OBJECT
 
 signals:
-    void request(chatterino::messages::LazyLoadedImage *lli);
     void requestUrl();
 };
 
