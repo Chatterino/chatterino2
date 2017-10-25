@@ -61,7 +61,10 @@ public:
                              QNetworkReply *reply = NetworkManager::NaM.get(request);
 
                              QObject::connect(reply, &QNetworkReply::finished,
-                                              [fun, reply]() { fun(reply); });
+                                              [fun, reply, worker]() {
+                                                  fun(reply);
+                                                  delete worker;
+                                              });
                          });
 
         emit requester.requestUrl();
@@ -91,8 +94,10 @@ public:
                              [=]() { emit worker->doneUrl(reply); });
         });
 
-        QObject::connect(worker, &NetworkWorker::doneUrl, caller,
-                         [=](QNetworkReply *reply) { callback(reply); });
+        QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) {
+            callback(reply);
+            delete worker;
+        });
         emit requester.requestUrl();
     }
 
@@ -115,7 +120,10 @@ public:
                              QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
 
                              QObject::connect(reply, &QNetworkReply::finished,
-                                              [ fun = std::move(fun), reply ]() { fun(reply); });
+                                              [ fun = std::move(fun), reply ]() {
+                                                  fun(reply);
+                                                  delete worker;
+                                              });
                          });
 
         emit requester.requestUrl();
@@ -129,11 +137,14 @@ public:
 
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-                         [ fun = std::move(fun), request = std::move(request) ]() {
+                         [ fun = std::move(fun), request = std::move(request), worker ]() {
                              QNetworkReply *reply = NetworkManager::NaM.put(request, "");
 
                              QObject::connect(reply, &QNetworkReply::finished,
-                                              [ fun = std::move(fun), reply ]() { fun(reply); });
+                                              [ fun = std::move(fun), reply, worker ]() {
+                                                  fun(reply);
+                                                  delete worker;
+                                              });
                          });
 
         emit requester.requestUrl();
