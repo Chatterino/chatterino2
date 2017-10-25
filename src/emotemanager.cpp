@@ -48,7 +48,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
-    util::urlFetchJSON(url, [this, channelName, _map](QJsonObject &rootNode) {
+    util::urlFetchJSON(url, QThread::currentThread(), [this, channelName, _map](QJsonObject &rootNode) {
         auto map = _map.lock();
 
         if (_map.expired()) {
@@ -94,7 +94,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
 
     QString url("http://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::urlFetchJSON(url, [this, channelName, _map](QJsonObject &rootNode) {
+    util::urlFetchJSON(url, QThread::currentThread(), [this, channelName, _map](QJsonObject &rootNode) {
         auto map = _map.lock();
 
         if (_map.expired()) {
@@ -377,7 +377,7 @@ void EmoteManager::refreshTwitchEmotes(const std::string &roomID)
     qDebug() << url;
 
     util::urlFetchJSONTimeout(
-        url,
+        url, QThread::currentThread(),
         [=, &emoteData](QJsonObject &root) {
             emoteData.emoteSets.clear();
             emoteData.emoteCodes.clear();
