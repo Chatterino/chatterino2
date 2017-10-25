@@ -7,7 +7,6 @@
 #include "ui_accountpopupform.h"
 
 #include <QClipboard>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -145,7 +144,6 @@ void AccountPopupWidget::getUserId()
 
 void AccountPopupWidget::getUserData()
 {
-    qDebug() << "get user data";
     util::twitch::get("https://api.twitch.tv/kraken/channels/" + userID, this, [=](const QJsonObject &obj){
         _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
         _ui->lblViews->setText(QString::number(obj.value("views").toInt()));

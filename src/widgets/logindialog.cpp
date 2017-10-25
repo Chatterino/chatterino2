@@ -136,10 +136,8 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 
     this->ui.buttonLowerRow.layout.addWidget(&this->ui.buttonLowerRow.fillInUserIDButton);
 
-    qDebug() << "USERID CONNECT: " << QThread::currentThread();
     connect(&this->ui.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked, [=]() {
         util::twitch::getUserID(this->ui.usernameInput.text(), this, [=](const QString &userID) {
-            qDebug() << "USERID: " << QThread::currentThread();
             this->ui.userIDInput.setText(userID);  //
         });
     });
