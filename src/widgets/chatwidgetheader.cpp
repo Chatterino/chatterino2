@@ -212,10 +212,12 @@ void ChatWidgetHeader::checkLive()
     }
 
     auto id = QString::fromStdString(channel->roomID);
+    qDebug() << "checklive:" << QThread::currentThread();
 
-    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, [=](QJsonObject obj) {
+    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, this, [=](QJsonObject obj) {
         if (obj.value("stream").isNull()) {
             channel->isLive = false;
+            qDebug() << "UpdateChannelText" << QThread::currentThread();
             this->updateChannelText();
         } else {
             channel->isLive = true;
@@ -228,6 +230,7 @@ void ChatWidgetHeader::checkLive()
             auto diff = since.secsTo(QDateTime::currentDateTime());
             channel->streamUptime =
                 QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+            qDebug() << "UpdateChannelText" << QThread::currentThread();
             this->updateChannelText();
         }
     });

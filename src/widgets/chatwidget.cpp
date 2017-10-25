@@ -361,7 +361,7 @@ void ChatWidget::doOpenViewerList()
     auto loadingLabel = new QLabel("Loading...");
 
     util::twitch::get(
-        "https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", [=](QJsonObject obj) {
+        "https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", this, [=](QJsonObject obj) {
             QJsonObject chattersObj = obj.value("chatters").toObject();
 
             loadingLabel->hide();
