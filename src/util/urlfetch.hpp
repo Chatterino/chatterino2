@@ -22,7 +22,8 @@
 namespace chatterino {
 namespace util {
 
-static void urlFetchJSON(QNetworkRequest request, const QObject *caller, std::function<void(QJsonObject &)> successCallback)
+static void urlFetchJSON(QNetworkRequest request, const QObject *caller,
+                         std::function<void(QJsonObject &)> successCallback)
 {
     NetworkManager::urlFetch(std::move(request), caller, [=](QNetworkReply *reply) {
         if (reply->error() != QNetworkReply::NetworkError::NoError) {
@@ -42,12 +43,13 @@ static void urlFetchJSON(QNetworkRequest request, const QObject *caller, std::fu
     });
 }
 
-static void urlFetchJSON(const QString &url, const QObject* caller, std::function<void(QJsonObject &)> successCallback)
+static void urlFetchJSON(const QString &url, const QObject *caller,
+                         std::function<void(QJsonObject &)> successCallback)
 {
     urlFetchJSON(QNetworkRequest(QUrl(url)), caller, successCallback);
 }
 
-static void urlFetchTimeout(const QString &url, const QObject* caller,
+static void urlFetchTimeout(const QString &url, const QObject *caller,
                             std::function<void(QNetworkReply &)> successCallback, int timeoutMs)
 {
     QTimer *timer = new QTimer;
@@ -103,11 +105,11 @@ static void urlFetchJSONTimeout(const QString &url, const QObject *caller,
                     timeoutMs);
 }
 
-
 namespace twitch {
 
 template <typename Callback>
-static void get(QString url, std::function<void(QJsonObject &)> successCallback, const QObject *caller, Callback callback)
+static void get(QString url, std::function<void(QJsonObject &)> successCallback,
+                const QObject *caller, Callback callback)
 {
     QUrl requestUrl(url);
     QNetworkRequest request(requestUrl);
@@ -117,8 +119,8 @@ static void get(QString url, std::function<void(QJsonObject &)> successCallback,
     urlFetchJSON(std::move(request), caller, successCallback);
 }
 
-
-static void get(QString url, const QObject *caller, std::function<void(QJsonObject &)> successCallback)
+static void get(QString url, const QObject *caller,
+                std::function<void(QJsonObject &)> successCallback)
 {
     QUrl requestUrl(url);
     QNetworkRequest request(requestUrl);
@@ -128,32 +130,34 @@ static void get(QString url, const QObject *caller, std::function<void(QJsonObje
     urlFetchJSON(std::move(request), caller, successCallback);
 }
 
-static void getUserID(QString username, const QObject *caller, std::function<void(QString)> successCallback)
+static void getUserID(QString username, const QObject *caller,
+                      std::function<void(QString)> successCallback)
 {
-    get("https://api.twitch.tv/kraken/users?login=" + username, caller, [=](const QJsonObject &root) {
-        if (!root.value("users").isArray()) {
-            qDebug() << "API Error while getting user id, users is not an array";
-            return;
-        }
+    get("https://api.twitch.tv/kraken/users?login=" + username, caller,
+        [=](const QJsonObject &root) {
+            if (!root.value("users").isArray()) {
+                qDebug() << "API Error while getting user id, users is not an array";
+                return;
+            }
 
-        auto users = root.value("users").toArray();
-        if (users.size() != 1) {
-            qDebug() << "API Error while getting user id, users array size is not 1";
-            return;
-        }
-        if (!users[0].isObject()) {
-            qDebug() << "API Error while getting user id, first user is not an object";
-            return;
-        }
-        auto firstUser = users[0].toObject();
-        auto id = firstUser.value("_id");
-        if (!id.isString()) {
-            qDebug()
-                << "API Error: while getting user id, first user object `_id` key is not a string";
-            return;
-        }
-        successCallback(id.toString());
-    });
+            auto users = root.value("users").toArray();
+            if (users.size() != 1) {
+                qDebug() << "API Error while getting user id, users array size is not 1";
+                return;
+            }
+            if (!users[0].isObject()) {
+                qDebug() << "API Error while getting user id, first user is not an object";
+                return;
+            }
+            auto firstUser = users[0].toObject();
+            auto id = firstUser.value("_id");
+            if (!id.isString()) {
+                qDebug() << "API Error: while getting user id, first user object `_id` key is not "
+                            "a string";
+                return;
+            }
+            successCallback(id.toString());
+        });
 }
 static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
 {

@@ -74,7 +74,7 @@ public:
     }
 
     // (hemirt) experimental, no tests done
-    template <typename Callback, typename Connectoid = void(*)(QNetworkReply*)>
+    template <typename Callback, typename Connectoid = void (*)(QNetworkReply *)>
     static void urlFetch(QNetworkRequest request, const QObject *caller, Callback callback,
                          Connectoid connectFun = [](QNetworkReply *) { return; })
     {
@@ -88,16 +88,16 @@ public:
 
             connectFun(reply);
 
-            QObject::connect(reply, &QNetworkReply::finished, worker, [=]() {
-                emit worker->doneUrl(reply);
-            });
+            QObject::connect(reply, &QNetworkReply::finished, worker,
+                             [=]() { emit worker->doneUrl(reply); });
         });
 
-        QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) { callback(reply); });
+        QObject::connect(worker, &NetworkWorker::doneUrl, caller,
+                         [=](QNetworkReply *reply) { callback(reply); });
         emit requester.requestUrl();
     }
 
-    template <typename Callback, typename Connectoid = void(*)(QNetworkReply*)>
+    template <typename Callback, typename Connectoid = void (*)(QNetworkReply *)>
     static void urlFetch(const QUrl &url, const QObject *caller, Callback callback,
                          Connectoid connectFun = [](QNetworkReply *) { return; })
     {
