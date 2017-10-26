@@ -30,6 +30,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
     this->hbox.addLayout(&this->editContainer);
     this->hbox.addLayout(&this->vbox);
 
+    this->textInput.setFont(FontManager::getInstance().getFont(FontManager::Type::Medium));
+
     this->editContainer.addWidget(&this->textInput);
     this->editContainer.setMargin(4);
 
