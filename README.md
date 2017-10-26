@@ -39,7 +39,8 @@ Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org]
 4. open `chatterino.pro` with QT Creator and build
 
 #### Arch Linux
-1. `sudo pacman -S qt5 boost rapidjson`
+install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) from the aur or build manually as follows:
+1. `sudo pacman -S qt5-base qt5-multimedia gst-plugins-ugly gst-plugins-good boost rapidjson`
 2. go into project directory
 3. create build folder `mkdir build && cd build`
 4. `qmake .. && make`
