@@ -38,17 +38,6 @@ static QJsonObject parseJSONFromReply(QNetworkReply *reply)
     return jsonDoc.object();
 }
 
-static void urlFetchJSON(const QString &url, const QObject *caller,
-                         std::function<void(QJsonObject &)> successCallback)
-{
-    util::NetworkRequest req(url);
-    req.setCaller(caller);
-    req.get([=](QNetworkReply *reply) {
-        auto node = parseJSONFromReply(reply);
-        successCallback(node);
-    });
-}
-
 static void urlFetchTimeout(const QString &url, const QObject *caller,
                             std::function<void(QNetworkReply *)> successCallback, int timeoutMs)
 {

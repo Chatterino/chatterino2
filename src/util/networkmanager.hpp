@@ -1,18 +1,30 @@
 #pragma once
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QThread>
 #include <QUrl>
 
 namespace chatterino {
-
-namespace messages {
-
-class LazyLoadedImage;
-
-}  // namespace messages
-
 namespace util {
+
+static QJsonObject parseJSONFromReplyxD(QNetworkReply *reply)
+{
+    if (reply->error() != QNetworkReply::NetworkError::NoError) {
+        return QJsonObject();
+    }
+
+    QByteArray data = reply->readAll();
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+
+    if (jsonDoc.isNull()) {
+        return QJsonObject();
+    }
+
+    return jsonDoc.object();
+}
 
 class NetworkRequest
 {
@@ -95,6 +107,15 @@ public:
             });
 
         emit requester.requestUrl();
+    }
+
+    template <typename FinishedCallback>
+    void getJSON(FinishedCallback onFinished)
+    {
+        this->get([onFinished{std::move(onFinished)}](auto reply) {
+            auto object = parseJSONFromReplyxD(reply);
+            onFinished(object);
+        });
     }
 };
 

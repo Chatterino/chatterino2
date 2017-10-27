@@ -38,28 +38,7 @@ Resources::Resources(EmoteManager &em, WindowManager &wm)
     , buttonBan(lli(em, wm, ":/images/button_ban.png", 0.25))
     , buttonTimeout(lli(em, wm, ":/images/button_timeout.png", 0.25))
 {
-    QString badgesUrl("https://badges.twitch.tv/v1/badges/global/display?language=en");
-
-    util::urlFetchJSON(badgesUrl, QThread::currentThread(), [this](QJsonObject &root) {
-        QJsonObject sets = root.value("badge_sets").toObject();
-        qDebug() << "badges fetched";
-        for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
-            QJsonObject versions = it.value().toObject().value("versions").toObject();
-
-            auto &badgeSet = this->badgeSets[it.key().toStdString()];
-            auto &versionsMap = badgeSet.versions;
-
-            for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
-                 ++versionIt) {
-                std::string kkey = versionIt.key().toStdString();
-                QJsonObject versionObj = versionIt.value().toObject();
-                BadgeVersion v(std::move(versionObj), this->emoteManager, this->windowManager);
-                versionsMap.emplace(kkey, v);
-            }
-        }
-
-        this->dynamicBadgesLoaded = true;
-    });
+    this->loadDynamicTwitchBadges();
 
     this->loadChatterinoBadges();
 }
@@ -83,12 +62,13 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
 {
     qDebug() << "Load channel data for" << QString::fromStdString(roomID);
 
-    // Step 1: Get
-
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + QString::fromStdString(roomID) +
                   "/display?language=en";
 
-    util::urlFetchJSON(url, QThread::currentThread(), [this, roomID](QJsonObject &root) {
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+
+    req.getJSON([this, roomID](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
         Resources::Channel &ch = this->channels[roomID];
@@ -112,13 +92,44 @@ void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
     });
 }
 
+void Resources::loadDynamicTwitchBadges()
+{
+    static QString url("https://badges.twitch.tv/v1/badges/global/display?language=en");
+
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.getJSON([this](QJsonObject &root) {
+        QJsonObject sets = root.value("badge_sets").toObject();
+        qDebug() << "badges fetched";
+        for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
+            QJsonObject versions = it.value().toObject().value("versions").toObject();
+
+            auto &badgeSet = this->badgeSets[it.key().toStdString()];
+            auto &versionsMap = badgeSet.versions;
+
+            for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
+                 ++versionIt) {
+                std::string kkey = versionIt.key().toStdString();
+                QJsonObject versionObj = versionIt.value().toObject();
+                BadgeVersion v(std::move(versionObj), this->emoteManager, this->windowManager);
+                versionsMap.emplace(kkey, v);
+            }
+        }
+
+        this->dynamicBadgesLoaded = true;
+    });
+}
+
 void Resources::loadChatterinoBadges()
 {
     this->chatterinoBadges.clear();
 
-    QString url = "https://fourtf.com/chatterino/badges.json";
+    static QString url("https://fourtf.com/chatterino/badges.json");
 
-    util::urlFetchJSON(url, QThread::currentThread(), [this](QJsonObject &root) {
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+
+    req.getJSON([this](QJsonObject &root) {
         QJsonArray badgeVariants = root.value("badges").toArray();
         qDebug() << "chatbadges fetched";
         for (QJsonArray::iterator it = badgeVariants.begin(); it != badgeVariants.end(); ++it) {

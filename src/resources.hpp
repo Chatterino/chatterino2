@@ -88,6 +88,7 @@ public:
     std::map<std::string, std::shared_ptr<ChatterinoBadge>> chatterinoBadges;
 
     void loadChannelData(const std::string &roomID, bool bypassCache = false);
+    void loadDynamicTwitchBadges();
     void loadChatterinoBadges();
 };
 
