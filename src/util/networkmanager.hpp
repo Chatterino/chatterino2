@@ -1,10 +1,13 @@
 #pragma once
 
+#include "debug/log.hpp"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QThread>
+#include <QTimer>
 #include <QUrl>
 
 namespace chatterino {
@@ -32,6 +35,7 @@ class NetworkRequest
         QNetworkRequest request;
         const QObject *caller = nullptr;
         std::function<void(QNetworkReply *)> onReplyCreated;
+        int timeoutMS = -1;
     } data;
 
 public:
@@ -67,9 +71,19 @@ public:
         this->data.request.setRawHeader(headerName, value);
     }
 
+    void setTimeout(int ms)
+    {
+        this->data.timeoutMS = ms;
+    }
+
     template <typename FinishedCallback>
     void get(FinishedCallback onFinished)
     {
+        QTimer *timer = nullptr;
+        if (this->data.timeoutMS > 0) {
+            timer = new QTimer;
+        }
+
         NetworkRequester requester;
         NetworkWorker *worker = new NetworkWorker;
 
@@ -83,10 +97,22 @@ public:
                              });
         }
 
+        if (timer != nullptr) {
+            timer->start(this->data.timeoutMS);
+        }
+
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [ data = std::move(this->data), worker, onFinished{std::move(onFinished)} ]() {
+            [ timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)} ]() {
                 QNetworkReply *reply = NetworkManager::NaM.get(data.request);
+
+                if (timer != nullptr) {
+                    QObject::connect(timer, &QTimer::timeout, worker, [reply, timer]() {
+                        debug::Log("Aborted!");
+                        reply->abort();
+                        timer->deleteLater();
+                    });
+                }
 
                 if (data.onReplyCreated) {
                     data.onReplyCreated(reply);

@@ -38,51 +38,6 @@ static QJsonObject parseJSONFromReply(QNetworkReply *reply)
     return jsonDoc.object();
 }
 
-static void urlFetchTimeout(const QString &url, const QObject *caller,
-                            std::function<void(QNetworkReply *)> successCallback, int timeoutMs)
-{
-    QTimer *timer = new QTimer;
-    timer->setSingleShot(true);
-
-    QEventLoop *loop = new QEventLoop;
-
-    util::NetworkRequest req(url);
-    req.setCaller(loop);
-    req.setOnReplyCreated([loop, timer](QNetworkReply *reply) {
-        QObject::connect(timer, &QTimer::timeout, loop, [=]() {
-            QObject::disconnect(reply, &QNetworkReply::finished, loop, &QEventLoop::quit);
-            reply->abort();
-            reply->deleteLater();
-        });
-    });
-    req.get([=](QNetworkReply *reply) {
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            successCallback(reply);
-        }
-
-        reply->deleteLater();
-        loop->quit();
-    });
-
-    QObject::connect(timer, SIGNAL(timeout()), loop, SLOT(quit()));
-
-    timer->start(timeoutMs);
-    loop->exec();
-    delete timer;
-    delete loop;
-}
-
-static void urlFetchJSONTimeout(const QString &url, const QObject *caller,
-                                std::function<void(QJsonObject &)> successCallback, int timeoutMs)
-{
-    urlFetchTimeout(url, caller,
-                    [=](QNetworkReply *reply) {
-                        auto node = parseJSONFromReply(reply);
-                        successCallback(node);
-                    },
-                    timeoutMs);
-}
-
 namespace twitch {
 
 static void get(QString url, const QObject *caller,

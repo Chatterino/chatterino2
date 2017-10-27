@@ -48,48 +48,51 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
-    util::urlFetchJSONTimeout(
-        url, QThread::currentThread(),
-        [this, channelName, _map](QJsonObject &rootNode) {
-            auto map = _map.lock();
 
-            if (_map.expired()) {
-                return;
-            }
+    debug::Log("Request bttv channel emotes for {}", channelName);
 
-            map->clear();
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.setTimeout(3000);
+    req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
+        debug::Log("Got bttv channel emotes for {}", channelName);
+        auto map = _map.lock();
 
-            auto emotesNode = rootNode.value("emotes").toArray();
+        if (_map.expired()) {
+            return;
+        }
 
-            QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
+        map->clear();
 
-            std::vector<std::string> codes;
-            for (const QJsonValue &emoteNode : emotesNode) {
-                QJsonObject emoteObject = emoteNode.toObject();
+        auto emotesNode = rootNode.value("emotes").toArray();
 
-                QString id = emoteObject.value("id").toString();
-                QString code = emoteObject.value("code").toString();
-                // emoteObject.value("imageType").toString();
+        QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
 
-                QString link = linkTemplate;
-                link.detach();
+        std::vector<std::string> codes;
+        for (const QJsonValue &emoteNode : emotesNode) {
+            QJsonObject emoteObject = emoteNode.toObject();
 
-                link = link.replace("{{id}}", id).replace("{{image}}", "1x");
+            QString id = emoteObject.value("id").toString();
+            QString code = emoteObject.value("code").toString();
+            // emoteObject.value("imageType").toString();
 
-                auto emote =
-                    this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
-                        return EmoteData(new LazyLoadedImage(*this, this->windowManager, link, 1,
-                                                             code, code + "\nChannel BTTV Emote"));
-                    });
+            QString link = linkTemplate;
+            link.detach();
 
-                this->bttvChannelEmotes.insert(code, emote);
-                map->insert(code, emote);
-                codes.push_back(code.toStdString());
-            }
+            link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
-            this->bttvChannelEmoteCodes[channelName.toStdString()] = codes;
-        },
-        1500);
+            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
+                return EmoteData(new LazyLoadedImage(*this, this->windowManager, link, 1, code,
+                                                     code + "\nChannel BTTV Emote"));
+            });
+
+            this->bttvChannelEmotes.insert(code, emote);
+            map->insert(code, emote);
+            codes.push_back(code.toStdString());
+        }
+
+        this->bttvChannelEmoteCodes[channelName.toStdString()] = codes;
+    });
 }
 
 void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
@@ -98,48 +101,48 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
 
     QString url("http://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::urlFetchJSONTimeout(
-        url, QThread::currentThread(),
-        [this, channelName, _map](QJsonObject &rootNode) {
-            auto map = _map.lock();
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.setTimeout(3000);
+    req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
+        auto map = _map.lock();
 
-            if (_map.expired()) {
-                return;
-            }
+        if (_map.expired()) {
+            return;
+        }
 
-            map->clear();
+        map->clear();
 
-            auto setsNode = rootNode.value("sets").toObject();
+        auto setsNode = rootNode.value("sets").toObject();
 
-            std::vector<std::string> codes;
-            for (const QJsonValue &setNode : setsNode) {
-                auto emotesNode = setNode.toObject().value("emoticons").toArray();
+        std::vector<std::string> codes;
+        for (const QJsonValue &setNode : setsNode) {
+            auto emotesNode = setNode.toObject().value("emoticons").toArray();
 
-                for (const QJsonValue &emoteNode : emotesNode) {
-                    QJsonObject emoteObject = emoteNode.toObject();
+            for (const QJsonValue &emoteNode : emotesNode) {
+                QJsonObject emoteObject = emoteNode.toObject();
 
-                    // margins
-                    int id = emoteObject.value("id").toInt();
-                    QString code = emoteObject.value("name").toString();
+                // margins
+                int id = emoteObject.value("id").toInt();
+                QString code = emoteObject.value("name").toString();
 
-                    QJsonObject urls = emoteObject.value("urls").toObject();
-                    QString url1 = "http:" + urls.value("1").toString();
+                QJsonObject urls = emoteObject.value("urls").toObject();
+                QString url1 = "http:" + urls.value("1").toString();
 
-                    auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code,
-                                                                                    &url1] {
+                auto emote =
+                    this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
                         return EmoteData(new LazyLoadedImage(*this, this->windowManager, url1, 1,
                                                              code, code + "\nGlobal FFZ Emote"));
                     });
 
-                    this->ffzChannelEmotes.insert(code, emote);
-                    map->insert(code, emote);
-                    codes.push_back(code.toStdString());
-                }
-
-                this->ffzChannelEmoteCodes[channelName.toStdString()] = codes;
+                this->ffzChannelEmotes.insert(code, emote);
+                map->insert(code, emote);
+                codes.push_back(code.toStdString());
             }
-        },
-        1500);
+
+            this->ffzChannelEmoteCodes[channelName.toStdString()] = codes;
+        }
+    });
 }
 
 ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
@@ -383,28 +386,28 @@ void EmoteManager::refreshTwitchEmotes(const std::string &roomID)
 
     qDebug() << url;
 
-    util::urlFetchJSONTimeout(
-        url, QThread::currentThread(),
-        [=, &emoteData](QJsonObject &root) {
-            emoteData.emoteSets.clear();
-            emoteData.emoteCodes.clear();
-            auto emoticonSets = root.value("emoticon_sets").toObject();
-            for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
-                std::string emoteSetString = it.key().toStdString();
-                QJsonArray emoteSetList = it.value().toArray();
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.setTimeout(3000);
+    req.getJSON([=, &emoteData](QJsonObject &root) {
+        emoteData.emoteSets.clear();
+        emoteData.emoteCodes.clear();
+        auto emoticonSets = root.value("emoticon_sets").toObject();
+        for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
+            std::string emoteSetString = it.key().toStdString();
+            QJsonArray emoteSetList = it.value().toArray();
 
-                for (QJsonValue emoteValue : emoteSetList) {
-                    QJsonObject emoticon = emoteValue.toObject();
-                    std::string id = emoticon["id"].toString().toStdString();
-                    std::string code = emoticon["code"].toString().toStdString();
-                    emoteData.emoteSets[emoteSetString].push_back({id, code});
-                    emoteData.emoteCodes.push_back(code);
-                }
+            for (QJsonValue emoteValue : emoteSetList) {
+                QJsonObject emoticon = emoteValue.toObject();
+                std::string id = emoticon["id"].toString().toStdString();
+                std::string code = emoticon["code"].toString().toStdString();
+                emoteData.emoteSets[emoteSetString].push_back({id, code});
+                emoteData.emoteCodes.push_back(code);
             }
+        }
 
-            emoteData.filled = true;
-        },
-        3000);
+        emoteData.filled = true;
+    });
 }
 
 void EmoteManager::loadBTTVEmotes()
