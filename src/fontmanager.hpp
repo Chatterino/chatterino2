@@ -3,11 +3,15 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <pajlada/settings/setting.hpp>
+#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
 class FontManager
 {
+    FontManager(const FontManager &) = delete;
+    FontManager(FontManager &&) = delete;
+
 public:
     enum Type : uint8_t {
         Small,
@@ -41,6 +45,8 @@ public:
 
     pajlada::Settings::Setting<std::string> currentFontFamily;
     pajlada::Settings::Setting<int> currentFontSize;
+
+    pajlada::Signals::NoArgSignal fontChanged;
 
 private:
     FontManager();

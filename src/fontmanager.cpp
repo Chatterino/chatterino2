@@ -11,9 +11,11 @@ FontManager::FontManager()
 {
     this->currentFontFamily.getValueChangedSignal().connect([this](const std::string &newValue) {
         this->currentFont.setFamily(newValue.c_str());  //
+        this->fontChanged.invoke();
     });
     this->currentFontSize.getValueChangedSignal().connect([this](const int &newValue) {
         this->currentFont.setSize(newValue);  //
+        this->fontChanged.invoke();
     });
 }
 

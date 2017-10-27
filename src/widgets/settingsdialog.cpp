@@ -158,7 +158,7 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
 
 QVBoxLayout *SettingsDialog::createAppearanceTab()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
+    auto &settings = SettingsManager::getInstance();
     auto layout = this->createTabLayout();
 
     {
@@ -176,8 +176,9 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         fontLayout->addWidget(fontFamilyLabel);
         fontLayout->addWidget(fontSizeLabel);
 
+
         {
-            auto fontManager = FontManager::getInstance();
+            auto &fontManager = FontManager::getInstance();
 
             fontManager.currentFontFamily.getValueChangedSignal().connect(
                 [fontFamilyLabel](const std::string &newValue) {
@@ -191,11 +192,11 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         }
 
         fontButton->connect(fontButton, &QPushButton::clicked, []() {
-            auto fontManager = FontManager::getInstance();
+            auto &fontManager = FontManager::getInstance();
             QFontDialog dialog(fontManager.getFont(FontManager::Medium));
 
             dialog.connect(&dialog, &QFontDialog::fontSelected, [](const QFont &font) {
-                auto fontManager = FontManager::getInstance();
+                auto &fontManager = FontManager::getInstance();
                 fontManager.currentFontFamily = font.family().toStdString();
                 fontManager.currentFontSize = font.pointSize();
             });
