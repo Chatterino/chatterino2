@@ -48,8 +48,9 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
-    util::urlFetchJSON(
-        url, QThread::currentThread(), [this, channelName, _map](QJsonObject &rootNode) {
+    util::urlFetchJSONTimeout(
+        url, QThread::currentThread(),
+        [this, channelName, _map](QJsonObject &rootNode) {
             auto map = _map.lock();
 
             if (_map.expired()) {
@@ -87,7 +88,8 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
             }
 
             this->bttvChannelEmoteCodes[channelName.toStdString()] = codes;
-        });
+        },
+        1500);
 }
 
 void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
@@ -96,8 +98,9 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
 
     QString url("http://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::urlFetchJSON(
-        url, QThread::currentThread(), [this, channelName, _map](QJsonObject &rootNode) {
+    util::urlFetchJSONTimeout(
+        url, QThread::currentThread(),
+        [this, channelName, _map](QJsonObject &rootNode) {
             auto map = _map.lock();
 
             if (_map.expired()) {
@@ -135,7 +138,8 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
 
                 this->ffzChannelEmoteCodes[channelName.toStdString()] = codes;
             }
-        });
+        },
+        1500);
 }
 
 ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()

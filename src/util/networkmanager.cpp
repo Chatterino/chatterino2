@@ -1,14 +1,6 @@
 #include "util/networkmanager.hpp"
-#include "emotemanager.hpp"
-#include "messages/lazyloadedimage.hpp"
-#include "windowmanager.hpp"
 
-#include <QApplication>
-#include <QBuffer>
-#include <QImageReader>
 #include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 
 namespace chatterino {
 namespace util {

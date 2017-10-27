@@ -2,6 +2,7 @@
 
 #include "accountmanager.hpp"
 #include "credentials.hpp"
+#include "util/networkmanager.hpp"
 
 #include <QEventLoop>
 #include <QJsonArray>
@@ -15,68 +16,64 @@
 #include <QTimer>
 
 #include <QDebug>
-#include <functional>
 
-#include "networkmanager.hpp"
+#include <functional>
 
 namespace chatterino {
 namespace util {
 
-static void urlFetchJSON(QNetworkRequest request, const QObject *caller,
-                         std::function<void(QJsonObject &)> successCallback)
+static QJsonObject parseJSONFromReply(QNetworkReply *reply)
 {
-    NetworkManager::urlFetch(std::move(request), caller, [=](QNetworkReply *reply) {
-        if (reply->error() != QNetworkReply::NetworkError::NoError) {
-            return;
-        }
-        QByteArray data = reply->readAll();
-        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+    if (reply->error() != QNetworkReply::NetworkError::NoError) {
+        return QJsonObject();
+    }
 
-        if (jsonDoc.isNull()) {
-            return;
-        }
+    QByteArray data = reply->readAll();
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
 
-        QJsonObject rootNode = jsonDoc.object();
+    if (jsonDoc.isNull()) {
+        return QJsonObject();
+    }
 
-        successCallback(rootNode);
-        reply->deleteLater();
-    });
+    return jsonDoc.object();
 }
 
 static void urlFetchJSON(const QString &url, const QObject *caller,
                          std::function<void(QJsonObject &)> successCallback)
 {
-    urlFetchJSON(QNetworkRequest(QUrl(url)), caller, successCallback);
+    util::NetworkRequest req(url);
+    req.setCaller(caller);
+    req.get([=](QNetworkReply *reply) {
+        auto node = parseJSONFromReply(reply);
+        successCallback(node);
+    });
 }
 
 static void urlFetchTimeout(const QString &url, const QObject *caller,
-                            std::function<void(QNetworkReply &)> successCallback, int timeoutMs)
+                            std::function<void(QNetworkReply *)> successCallback, int timeoutMs)
 {
     QTimer *timer = new QTimer;
     timer->setSingleShot(true);
 
     QEventLoop *loop = new QEventLoop;
 
-    NetworkManager::urlFetch(QUrl(url), loop,
-                             [=](QNetworkReply *reply) {
-                                 if (reply->error() == QNetworkReply::NetworkError::NoError) {
-                                     // qDebug() << "successCallback";
-                                     successCallback(*reply);
-                                 }
+    util::NetworkRequest req(url);
+    req.setCaller(loop);
+    req.setOnReplyCreated([loop, timer](QNetworkReply *reply) {
+        QObject::connect(timer, &QTimer::timeout, loop, [=]() {
+            QObject::disconnect(reply, &QNetworkReply::finished, loop, &QEventLoop::quit);
+            reply->abort();
+            reply->deleteLater();
+        });
+    });
+    req.get([=](QNetworkReply *reply) {
+        if (reply->error() == QNetworkReply::NetworkError::NoError) {
+            successCallback(reply);
+        }
 
-                                 reply->deleteLater();
-                                 loop->quit();
-                             },
-                             [loop, timer](QNetworkReply *reply) {
-                                 qDebug() << "connect fun";
-                                 QObject::connect(timer, &QTimer::timeout, loop, [=]() {
-                                     qDebug() << "TIMED OUT";
-                                     QObject::disconnect(reply, &QNetworkReply::finished, loop,
-                                                         &QEventLoop::quit);
-                                     reply->abort();
-                                     reply->deleteLater();
-                                 });
-                             });
+        reply->deleteLater();
+        loop->quit();
+    });
 
     QObject::connect(timer, SIGNAL(timeout()), loop, SLOT(quit()));
 
@@ -90,44 +87,26 @@ static void urlFetchJSONTimeout(const QString &url, const QObject *caller,
                                 std::function<void(QJsonObject &)> successCallback, int timeoutMs)
 {
     urlFetchTimeout(url, caller,
-                    [=](QNetworkReply &reply) {
-                        QByteArray data = reply.readAll();
-                        QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-
-                        if (jsonDoc.isNull()) {
-                            return;
-                        }
-
-                        QJsonObject rootNode = jsonDoc.object();
-                        // qDebug() << "rootnode\n" << rootNode;
-                        successCallback(rootNode);
+                    [=](QNetworkReply *reply) {
+                        auto node = parseJSONFromReply(reply);
+                        successCallback(node);
                     },
                     timeoutMs);
 }
 
 namespace twitch {
 
-template <typename Callback>
-static void get(QString url, std::function<void(QJsonObject &)> successCallback,
-                const QObject *caller, Callback callback)
-{
-    QUrl requestUrl(url);
-    QNetworkRequest request(requestUrl);
-
-    request.setRawHeader("Client-ID", getDefaultClientID());
-    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    urlFetchJSON(std::move(request), caller, successCallback);
-}
-
 static void get(QString url, const QObject *caller,
                 std::function<void(QJsonObject &)> successCallback)
 {
-    QUrl requestUrl(url);
-    QNetworkRequest request(requestUrl);
-
-    request.setRawHeader("Client-ID", getDefaultClientID());
-    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    urlFetchJSON(std::move(request), caller, successCallback);
+    util::NetworkRequest req(url);
+    req.setCaller(caller);
+    req.setRawHeader("Client-ID", getDefaultClientID());
+    req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    req.get([=](QNetworkReply *reply) {
+        auto node = parseJSONFromReply(reply);
+        successCallback(node);
+    });
 }
 
 static void getUserID(QString username, const QObject *caller,

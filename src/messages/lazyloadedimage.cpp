@@ -12,9 +12,9 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
-#include <thread>
 
 #include <functional>
+#include <thread>
 
 namespace chatterino {
 namespace messages {
@@ -52,8 +52,9 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    QNetworkRequest request(QUrl(this->getUrl()));
-    chatterino::util::NetworkManager::urlFetch(request, this, [lli = this](QNetworkReply * reply) {
+    util::NetworkRequest req(this->getUrl());
+    req.setCaller(this);
+    req.get([lli = this](QNetworkReply * reply) {
         QByteArray array = reply->readAll();
         QBuffer buffer(&array);
         buffer.open(QIODevice::ReadOnly);
@@ -86,7 +87,6 @@ void LazyLoadedImage::loadImage()
 
         lli->emoteManager.incGeneration();
 
-        reply->deleteLater();
         lli->windowManager.layoutVisibleChatWidgets();
     });
 
