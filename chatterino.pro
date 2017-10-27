@@ -97,7 +97,7 @@ SOURCES += \
     src/widgets/rippleeffectlabel.cpp \
     src/widgets/rippleeffectbutton.cpp \
     src/messages/messagecolor.cpp \
-    src/messages/imageloadermanager.cpp
+    src/util/networkmanager.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -164,8 +164,8 @@ HEADERS  += \
     src/messages/messagecolor.hpp \
     src/util/nativeeventhelper.hpp \
     src/debug/log.hpp \
-    src/messages/imageloadermanager.hpp \
-    src/util/benchmark.hpp
+    src/util/benchmark.hpp \
+    src/util/networkmanager.hpp
 
 PRECOMPILED_HEADER =
 

@@ -2,7 +2,7 @@
 #include "asyncexec.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
-#include "messages/imageloadermanager.hpp"
+#include "util/networkmanager.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
@@ -12,9 +12,9 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
-#include <thread>
 
 #include <functional>
+#include <thread>
 
 namespace chatterino {
 namespace messages {
@@ -52,8 +52,43 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 
 void LazyLoadedImage::loadImage()
 {
-    static ImageLoaderManager imageLoader;
-    imageLoader.queue(this);
+    util::NetworkRequest req(this->getUrl());
+    req.setCaller(this);
+    req.get([lli = this](QNetworkReply * reply) {
+        QByteArray array = reply->readAll();
+        QBuffer buffer(&array);
+        buffer.open(QIODevice::ReadOnly);
+
+        QImage image;
+        QImageReader reader(&buffer);
+
+        bool first = true;
+
+        for (int index = 0; index < reader.imageCount(); ++index) {
+            if (reader.read(&image)) {
+                auto pixmap = new QPixmap(QPixmap::fromImage(image));
+
+                if (first) {
+                    first = false;
+                    lli->currentPixmap = pixmap;
+                }
+
+                chatterino::messages::LazyLoadedImage::FrameData data;
+                data.duration = std::max(20, reader.nextImageDelay());
+                data.image = pixmap;
+
+                lli->allFrames.push_back(data);
+            }
+        }
+
+        if (lli->allFrames.size() > 1) {
+            lli->animated = true;
+        }
+
+        lli->emoteManager.incGeneration();
+
+        lli->windowManager.layoutVisibleChatWidgets();
+    });
 
     this->emoteManager.getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();

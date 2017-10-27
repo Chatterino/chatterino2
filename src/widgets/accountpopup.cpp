@@ -7,7 +7,6 @@
 #include "ui_accountpopupform.h"
 
 #include <QClipboard>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -80,7 +79,9 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
                         AccountManager::getInstance().getTwitchUser().getUserId() +
                         "/follows/channels/" + this->userID);
 
-        util::twitch::put(requestUrl,[](QJsonObject obj){});
+        util::twitch::put(requestUrl,[](QJsonObject obj){
+            qDebug() << "follows channel: " << obj;
+        });
     });
 
     QObject::connect(this->_ui->ignore, &QPushButton::clicked, this, [=](){
@@ -88,7 +89,9 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
                         AccountManager::getInstance().getTwitchUser().getUserId() +
                         "/blocks/" + this->userID);
 
-        util::twitch::put(requestUrl,[](QJsonObject obj){});
+        util::twitch::put(requestUrl,[](QJsonObject obj){
+            qDebug() << "blocks user: " << obj;
+        });
     });
 
     QObject::connect(this->_ui->disableHighlights, &QPushButton::clicked, this, [=, &settings](){
@@ -118,7 +121,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
         hide();  //
     });
 
-    util::twitch::getUserID(AccountManager::getInstance().getTwitchUser().getNickName(),
+    util::twitch::getUserID(AccountManager::getInstance().getTwitchUser().getNickName(), this,
                             [=](const QString &id){
         AccountManager::getInstance().getTwitchUser().setUserId(id);
     });
@@ -137,7 +140,7 @@ void AccountPopupWidget::setChannel(std::shared_ptr<Channel> channel)
 
 void AccountPopupWidget::getUserId()
 {
-    util::twitch::getUserID(this->_ui->lblUsername->text(),[=](const QString &id){
+    util::twitch::getUserID(this->_ui->lblUsername->text(), this, [=](const QString &id){
         userID = id;
         getUserData();
     });
@@ -145,7 +148,7 @@ void AccountPopupWidget::getUserId()
 
 void AccountPopupWidget::getUserData()
 {
-    util::twitch::get("https://api.twitch.tv/kraken/channels/" + userID,[=](const QJsonObject &obj){
+    util::twitch::get("https://api.twitch.tv/kraken/channels/" + userID, this, [=](const QJsonObject &obj){
         _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
         _ui->lblViews->setText(QString::number(obj.value("views").toInt()));
         _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));

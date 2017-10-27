@@ -154,7 +154,6 @@ void IrcManager::beginConnecting()
             this->writeConnection->sendRaw("JOIN #" + channel->name);
             this->readConnection->sendRaw("JOIN #" + channel->name);
         }
-
         this->writeConnection->open();
         this->readConnection->open();
     } else {

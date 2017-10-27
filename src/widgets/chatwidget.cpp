@@ -360,17 +360,18 @@ void ChatWidget::doOpenViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    util::twitch::get(
-        "https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", [=](QJsonObject obj) {
-            QJsonObject chattersObj = obj.value("chatters").toObject();
+    util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", this,
+                      [=](QJsonObject obj) {
+                          QJsonObject chattersObj = obj.value("chatters").toObject();
 
-            loadingLabel->hide();
-            for (int i = 0; i < jsonLabels.size(); i++) {
-                chattersList->addItem(labelList.at(i));
-                foreach (const QJsonValue &v, chattersObj.value(jsonLabels.at(i)).toArray())
-                    chattersList->addItem(v.toString());
-            }
-        });
+                          loadingLabel->hide();
+                          for (int i = 0; i < jsonLabels.size(); i++) {
+                              chattersList->addItem(labelList.at(i));
+                              foreach (const QJsonValue &v,
+                                       chattersObj.value(jsonLabels.at(i)).toArray())
+                                  chattersList->addItem(v.toString());
+                          }
+                      });
 
     searchBar->setPlaceholderText("Search User...");
     QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {

@@ -213,7 +213,7 @@ void ChatWidgetHeader::checkLive()
 
     auto id = QString::fromStdString(channel->roomID);
 
-    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, [=](QJsonObject obj) {
+    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, this, [=](QJsonObject obj) {
         if (obj.value("stream").isNull()) {
             channel->isLive = false;
             this->updateChannelText();

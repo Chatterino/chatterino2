@@ -7,6 +7,8 @@
 #include <QStandardPaths>
 #include <pajlada/settings/settingmanager.hpp>
 
+#include "util/networkmanager.hpp"
+
 #ifdef USEWINSDK
 #include "windows.h"
 #endif
@@ -88,6 +90,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Initialize NetworkManager
+    chatterino::util::NetworkManager::init();
+
     int ret = 0;
 
     {
@@ -102,6 +107,9 @@ int main(int argc, char *argv[])
 
     // Save settings
     pajlada::Settings::SettingManager::save();
+
+    // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
+    chatterino::util::NetworkManager::deinit();
 
     return ret;
 }
