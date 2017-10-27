@@ -97,7 +97,7 @@ void ChannelView::layoutMessages()
 
 void ChannelView::actuallyLayoutMessages()
 {
-    BENCH(timer)
+    // BENCH(timer)
     auto messages = this->getMessagesSnapshot();
 
     if (messages.getLength() == 0) {
@@ -173,7 +173,7 @@ void ChannelView::actuallyLayoutMessages()
         this->scrollBar.scrollToBottom();
     }
 
-    MARK(timer);
+    // MARK(timer);
 
     if (redrawRequired) {
         this->queueUpdate();
@@ -472,7 +472,7 @@ void ChannelView::drawMessages(QPainter &painter)
         // update messages that have been changed
         if (updateBuffer) {
             this->updateMessageBuffer(messageRef, buffer.get(), i);
-            qDebug() << "updating buffer xD";
+            // qDebug() << "updating buffer xD";
         }
 
         // get gif emotes
