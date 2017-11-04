@@ -58,12 +58,11 @@ Resources::BadgeVersion::BadgeVersion(QJsonObject &&root, EmoteManager &emoteMan
 {
 }
 
-void Resources::loadChannelData(const std::string &roomID, bool bypassCache)
+void Resources::loadChannelData(const QString &roomID, bool bypassCache)
 {
-    qDebug() << "Load channel data for" << QString::fromStdString(roomID);
+    qDebug() << "Load channel data for" << roomID;
 
-    QString url = "https://badges.twitch.tv/v1/badges/channels/" + QString::fromStdString(roomID) +
-                  "/display?language=en";
+    QString url = "https://badges.twitch.tv/v1/badges/channels/" + roomID + "/display?language=en";
 
     util::NetworkRequest req(url);
     req.setCaller(QThread::currentThread());

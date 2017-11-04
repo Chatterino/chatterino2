@@ -1,11 +1,11 @@
 #include "channel.hpp"
+#include "debug/log.hpp"
 #include "emotemanager.hpp"
 #include "ircmanager.hpp"
 #include "logging/loggingmanager.hpp"
 #include "messages/message.hpp"
 #include "windowmanager.hpp"
 
-#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -18,7 +18,8 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-Channel::Channel()
+Channel::Channel(const QString &_name)
+    : name(_name)
 //    , loggingChannel(logging::get(name))
 {
 }

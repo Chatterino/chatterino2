@@ -69,9 +69,26 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->rightLabel.getLabel().setTextFormat(Qt::RichText);
     this->rightLabel.getLabel().setText("ayy");
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &ChatWidgetHeader::checkLive);
-    timer->start(60000);
+    this->initializeChannelSignals();
+
+    this->chatWidget->channelChanged.connect([this]() {
+        this->initializeChannelSignals();  //
+    });
+}
+
+void ChatWidgetHeader::initializeChannelSignals()
+{
+    // Disconnect any previous signal first
+    this->onlineStatusChangedConnection.disconnect();
+
+    auto channel = this->chatWidget->getChannel();
+    twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+
+    if (twitchChannel) {
+        twitchChannel->onlineStatusChanged.connect([this]() {
+            this->updateChannelText();  //
+        });
+    }
 }
 
 void ChatWidgetHeader::resizeEvent(QResizeEvent *event)
@@ -200,44 +217,6 @@ void ChatWidgetHeader::menuManualReconnect()
 
 void ChatWidgetHeader::menuShowChangelog()
 {
-}
-
-// TODO: this needs to be moved out of here
-void ChatWidgetHeader::checkLive()
-{
-    twitch::TwitchChannel *channel =
-        dynamic_cast<twitch::TwitchChannel *>(this->chatWidget->getChannel().get());
-
-    if (channel == nullptr) {
-        return;
-    }
-
-    auto id = QString::fromStdString(channel->roomID);
-
-    if (id.isEmpty()) {
-        channel->isLive = false;
-        this->updateChannelText();
-        return;
-    }
-
-    util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, this, [=](QJsonObject obj) {
-        if (obj.value("stream").isNull()) {
-            channel->isLive = false;
-            this->updateChannelText();
-        } else {
-            channel->isLive = true;
-            auto stream = obj.value("stream").toObject();
-            channel->streamViewerCount = QString::number(stream.value("viewers").toDouble());
-            channel->streamGame = stream.value("game").toString();
-            channel->streamStatus = stream.value("channel").toObject().value("status").toString();
-            QDateTime since =
-                QDateTime::fromString(stream.value("created_at").toString(), Qt::ISODate);
-            auto diff = since.secsTo(QDateTime::currentDateTime());
-            channel->streamUptime =
-                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
-            this->updateChannelText();
-        }
-    });
 }
 
 }  // namespace widgets

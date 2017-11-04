@@ -281,7 +281,7 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
     auto iterator = tags.find("room-id");
 
     if (iterator != tags.end()) {
-        std::string roomID = iterator.value().toString().toStdString();
+        auto roomID = iterator.value().toString();
 
         auto channel = QString(message->toData()).split("#").at(1);
         channelManager.getTwitchChannel(channel)->setRoomID(roomID);

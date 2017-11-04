@@ -1,31 +1,48 @@
 #include "twitchchannel.hpp"
+#include "debug/log.hpp"
 #include "emotemanager.hpp"
+#include "util/urlfetch.hpp"
 
-#include <QDebug>
+#include <QThread>
+#include <QTimer>
 
 namespace chatterino {
 namespace twitch {
 
 TwitchChannel::TwitchChannel(EmoteManager &emoteManager, IrcManager &ircManager,
-                             const QString &channelName, bool isSpecial)
-    : emoteManager(emoteManager)
+                             const QString &channelName, bool _isSpecial)
+    : Channel(channelName)
+    , emoteManager(emoteManager)
     , ircManager(ircManager)
-    //    , name(channelName)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
-    , subLink("https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link")
-    , channelLink("https://twitch.tv/" + name)
-    , popoutPlayerLink("https://player.twitch.tv/?channel=" + name)
+    , subscriptionURL("https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link")
+    , channelURL("https://twitch.tv/" + name)
+    , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , isLive(false)
-    , isSpecial(isSpecial)
+    , isSpecial(_isSpecial)
 {
-    this->name = channelName;
+    debug::Log("[TwitchChannel:{}] Opened", this->name);
 
-    qDebug() << "Open twitch channel:" << this->name;
-
-    if (!isSpecial) {
+    if (!this->isSpecial) {
         this->reloadChannelEmotes();
     }
+
+    this->liveStatusTimer = new QTimer;
+    QObject::connect(this->liveStatusTimer, &QTimer::timeout, [this]() {
+        this->refreshLiveStatus();  //
+    });
+    this->liveStatusTimer->start(60000);
+
+    this->roomIDchanged.connect([this]() {
+        this->refreshLiveStatus();  //
+    });
+}
+
+TwitchChannel::~TwitchChannel()
+{
+    this->liveStatusTimer->stop();
+    this->liveStatusTimer->deleteLater();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -33,35 +50,20 @@ bool TwitchChannel::isEmpty() const
     return this->name.isEmpty();
 }
 
-const QString &TwitchChannel::getSubLink() const
-{
-    return this->subLink;
-}
-
 bool TwitchChannel::canSendMessage() const
 {
     return !this->isEmpty() && !this->isSpecial;
 }
 
-const QString &TwitchChannel::getChannelLink() const
+void TwitchChannel::setRoomID(const QString &_roomID)
 {
-    return this->channelLink;
-}
-
-const QString &TwitchChannel::getPopoutPlayerLink() const
-{
-    return this->popoutPlayerLink;
-}
-
-void TwitchChannel::setRoomID(std::string id)
-{
-    this->roomID = id;
+    this->roomID = _roomID;
     this->roomIDchanged();
 }
 
 void TwitchChannel::reloadChannelEmotes()
 {
-    printf("[TwitchChannel:%s] Reloading channel emotes\n", qPrintable(this->name));
+    debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
     this->emoteManager.reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
     this->emoteManager.reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
@@ -69,12 +71,53 @@ void TwitchChannel::reloadChannelEmotes()
 
 void TwitchChannel::sendMessage(const QString &message)
 {
-    qDebug() << "TwitchChannel send message: " << message;
+    debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
     QString parsedMessage = this->emoteManager.replaceShortCodes(message);
 
     this->ircManager.sendMessage(this->name, parsedMessage);
 }
+
+void TwitchChannel::setLive(bool newLiveStatus)
+{
+    if (this->isLive == newLiveStatus) {
+        return;
+    }
+
+    this->isLive = newLiveStatus;
+    this->onlineStatusChanged();
 }
+
+void TwitchChannel::refreshLiveStatus()
+{
+    if (this->roomID.isEmpty()) {
+        this->setLive(false);
+        return;
+    }
+
+    debug::Log("[TwitchChannel:{}] Refreshing live status", this->name);
+
+    QString url("https://api.twitch.tv/kraken/streams/" + this->roomID);
+
+    util::twitch::get(url, QThread::currentThread(), [this](QJsonObject obj) {
+        if (obj.value("stream").isNull()) {
+            this->setLive(false);
+        } else {
+            auto stream = obj.value("stream").toObject();
+            this->streamViewerCount = QString::number(stream.value("viewers").toDouble());
+            this->streamGame = stream.value("game").toString();
+            this->streamStatus = stream.value("channel").toObject().value("status").toString();
+            QDateTime since =
+                QDateTime::fromString(stream.value("created_at").toString(), Qt::ISODate);
+            auto diff = since.secsTo(QDateTime::currentDateTime());
+            this->streamUptime =
+                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+
+            this->setLive(true);
+        }
+    });
 }
+
+}  // namespace twitch
+}  // namespace chatterino

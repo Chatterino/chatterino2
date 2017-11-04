@@ -53,7 +53,7 @@ public:
     //        const std::pair<long int, messages::LazyLoadedImage *> &b);
 
 private:
-    std::string roomID;
+    QString roomID;
 
     QColor usernameColor;
 

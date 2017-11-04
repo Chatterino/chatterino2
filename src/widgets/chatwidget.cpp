@@ -119,10 +119,7 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
 
     this->channel = _newChannel;
 
-    twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(_newChannel.get());
-    if (twitchChannel != nullptr) {
-        twitchChannel->roomIDchanged.connect([this]() { this->header.checkLive(); });
-    }
+    this->channelChanged();
 }
 
 void ChatWidget::channelNameUpdated(const std::string &newChannelName)
@@ -224,9 +221,6 @@ void ChatWidget::doCloseSplit()
 {
     NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
     page->removeFromLayout(this);
-    QTimer *timer = this->header.findChild<QTimer *>();
-    timer->stop();
-    timer->deleteLater();
 }
 
 void ChatWidget::doChangeChannel()

@@ -34,7 +34,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         return;
     }
 
-    std::shared_ptr<Channel> emoteChannel(new Channel);
+    std::shared_ptr<Channel> emoteChannel(new Channel(""));
 
     auto addEmotes = [&](EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE

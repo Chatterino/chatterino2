@@ -9,9 +9,12 @@ namespace twitch {
 
 class TwitchChannel : public Channel
 {
+    QTimer *liveStatusTimer;
+
 public:
     explicit TwitchChannel(EmoteManager &emoteManager, IrcManager &ircManager,
-                           const QString &channelName, bool isSpecial = false);
+                           const QString &channelName, bool _isSpecial = false);
+    ~TwitchChannel();
 
     void reloadChannelEmotes();
 
@@ -19,14 +22,15 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
-    const QString &getSubLink() const;
-    const QString &getChannelLink() const;
-    const QString &getPopoutPlayerLink() const;
+    const QString subscriptionURL;
+    const QString channelURL;
+    const QString popoutPlayerURL;
 
-    void setRoomID(std::string id);
+    void setRoomID(const QString &_roomID);
     boost::signals2::signal<void()> roomIDchanged;
+    boost::signals2::signal<void()> onlineStatusChanged;
 
-    std::string roomID;
+    QString roomID;
     bool isLive;
     QString streamViewerCount;
     QString streamStatus;
@@ -37,13 +41,14 @@ public:
     const std::shared_ptr<EmoteMap> ffzChannelEmotes;
 
 private:
+    void setLive(bool newLiveStatus);
+    void refreshLiveStatus();
+
     EmoteManager &emoteManager;
     IrcManager &ircManager;
 
-    QString subLink;
-    QString channelLink;
-    QString popoutPlayerLink;
     bool isSpecial;
 };
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino

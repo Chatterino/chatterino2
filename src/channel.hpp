@@ -24,7 +24,7 @@ class IrcManager;
 class Channel
 {
 public:
-    explicit Channel();
+    explicit Channel(const QString &_name);
 
     boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
     boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;

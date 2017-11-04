@@ -263,9 +263,9 @@ void TwitchMessageBuilder::parseRoomID()
     auto iterator = this->tags.find("room-id");
 
     if (iterator != std::end(this->tags)) {
-        this->roomID = iterator.value().toString().toStdString();
+        this->roomID = iterator.value().toString();
 
-        if (this->twitchChannel->roomID.empty()) {
+        if (this->twitchChannel->roomID.isEmpty()) {
             this->twitchChannel->roomID = this->roomID;
         }
     }

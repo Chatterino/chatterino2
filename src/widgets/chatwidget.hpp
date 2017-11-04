@@ -59,6 +59,8 @@ public:
     void layoutMessages();
     void updateGifEmotes();
 
+    boost::signals2::signal<void()> channelChanged;
+
 protected:
     virtual void paintEvent(QPaintEvent *) override;
 

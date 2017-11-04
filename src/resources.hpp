@@ -70,7 +70,7 @@ public:
     };
 
     //       channelId
-    std::map<std::string, Channel> channels;
+    std::map<QString, Channel> channels;
 
     // Chatterino badges
     struct ChatterinoBadge {
@@ -87,7 +87,7 @@ public:
     //       username
     std::map<std::string, std::shared_ptr<ChatterinoBadge>> chatterinoBadges;
 
-    void loadChannelData(const std::string &roomID, bool bypassCache = false);
+    void loadChannelData(const QString &roomID, bool bypassCache = false);
     void loadDynamicTwitchBadges();
     void loadChatterinoBadges();
 };

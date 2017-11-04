@@ -12,6 +12,7 @@
 #include <QPaintEvent>
 #include <QPoint>
 #include <QWidget>
+#include <boost/signals2/connection.hpp>
 
 namespace chatterino {
 
@@ -29,7 +30,6 @@ public:
     explicit ChatWidgetHeader(ChatWidget *_chatWidget);
     // Update channel text from chat widget
     void updateChannelText();
-    void checkLive();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -43,6 +43,8 @@ private:
 
     QPoint dragStart;
     bool dragging = false;
+
+    boost::signals2::connection onlineStatusChangedConnection;
 
     QHBoxLayout hbox;
 
@@ -61,6 +63,8 @@ private:
     void rightButtonClicked();
 
     virtual void refreshTheme() override;
+
+    void initializeChannelSignals();
 
 public slots:
     void menuMoveSplit();
