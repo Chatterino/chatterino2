@@ -619,25 +619,31 @@ void TwitchMessageBuilder::parseTwitchBadges()
                 continue;
             }
 
-            try {
-                const auto &badgeSet = channelResources.badgeSets.at("subscriber");
-
-                std::string versionKey = badge.mid(11).toStdString();
-
-                try {
-                    auto &badgeVersion = badgeSet.versions.at(versionKey);
-
-                    appendWord(
-                        Word(badgeVersion.badgeImage1x, Word::Type::BadgeSubscription, QString(),
-                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
-                } catch (const std::exception &e) {
-                    qDebug() << "Exception caught:" << e.what()
-                             << "when trying to fetch badge version " << versionKey.c_str();
-                }
-            } catch (const std::exception &e) {
-                qDebug() << "No channel badge set with key `subscriber`. Exception: " << e.what();
+            auto badgeSetIt = channelResources.badgeSets.find("subscriber");
+            if (badgeSetIt == channelResources.badgeSets.end()) {
+                // Fall back to default badge
+                appendWord(Word(this->resources.badgeSubscriber, Word::Type::BadgeSubscription,
+                                QString(), QString("Twitch Subscriber")));
+                continue;
             }
 
+            const auto &badgeSet = badgeSetIt->second;
+
+            std::string versionKey = badge.mid(11).toStdString();
+
+            auto badgeVersionIt = badgeSet.versions.find(versionKey);
+
+            if (badgeVersionIt == badgeSet.versions.end()) {
+                // Fall back to default badge
+                appendWord(Word(this->resources.badgeSubscriber, Word::Type::BadgeSubscription,
+                                QString(), QString("Twitch Subscriber")));
+                continue;
+            }
+
+            auto &badgeVersion = badgeVersionIt->second;
+
+            appendWord(Word(badgeVersion.badgeImage1x, Word::Type::BadgeSubscription, QString(),
+                            QString("Twitch " + QString::fromStdString(badgeVersion.title))));
         } else {
             if (!this->resources.dynamicBadgesLoaded) {
                 // Do nothing

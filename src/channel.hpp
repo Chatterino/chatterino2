@@ -19,8 +19,6 @@ namespace messages {
 class Message;
 }
 
-class IrcManager;
-
 class Channel
 {
 public:
