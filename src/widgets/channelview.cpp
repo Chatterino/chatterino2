@@ -1,6 +1,7 @@
 #include "widgets/channelview.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
+#include "debug/log.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 #include "messages/messageref.hpp"
@@ -759,6 +760,20 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
+
+        auto messages = this->getMessagesSnapshot();
+        if (messages.getLength() == 0) {
+            return;
+        }
+
+        // Start selection at the last message at its last index
+        auto lastMessageIndex = messages.getLength() - 1;
+        auto lastMessage = messages[lastMessageIndex];
+        auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
+
+        SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
+        this->setSelection(selectionItem, selectionItem);
+        this->selecting = true;
 
         return;
     }

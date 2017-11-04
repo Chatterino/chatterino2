@@ -30,6 +30,7 @@ public:
     bool updateBuffer = false;
 
     const Word *tryGetWordPart(QPoint point);
+    int getLastCharacterIndex() const;
     int getSelectionIndex(QPoint position);
 
 private:

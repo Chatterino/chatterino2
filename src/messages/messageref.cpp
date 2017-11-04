@@ -275,6 +275,41 @@ const Word *MessageRef::tryGetWordPart(QPoint point)
     return nullptr;
 }
 
+// XXX(pajlada): This is probably not the optimal way to calculate this
+int MessageRef::getLastCharacterIndex() const
+{
+    // find out in which line the cursor is
+    int lineNumber = 0, lineStart = 0, lineEnd = 0;
+
+    for (size_t i = 0; i < this->wordParts.size(); i++) {
+        const WordPart &part = this->wordParts[i];
+
+        if (part.getLineNumber() != lineNumber) {
+            lineStart = i;
+            lineNumber = part.getLineNumber();
+        }
+
+        lineEnd = i + 1;
+    }
+
+    // count up to the cursor
+    int index = 0;
+
+    for (int i = 0; i < lineStart; i++) {
+        const WordPart &part = this->wordParts[i];
+
+        index += part.getWord().isImage() ? 2 : part.getText().length() + 1;
+    }
+
+    for (int i = lineStart; i < lineEnd; i++) {
+        const WordPart &part = this->wordParts[i];
+
+        index += part.getCharacterLength();
+    }
+
+    return index;
+}
+
 int MessageRef::getSelectionIndex(QPoint position)
 {
     if (this->wordParts.size() == 0) {
