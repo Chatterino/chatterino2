@@ -97,8 +97,9 @@ void ChatWidgetHeader::updateChannelText()
                              "<br>"
                              "Live for " +
                              twitchChannel->streamUptime + " with " +
-                             twitchChannel->streamViewerCount + " viewers"
-                                                                "</p>");
+                             twitchChannel->streamViewerCount +
+                             " viewers"
+                             "</p>");
         } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
@@ -212,6 +213,12 @@ void ChatWidgetHeader::checkLive()
     }
 
     auto id = QString::fromStdString(channel->roomID);
+
+    if (id.isEmpty()) {
+        channel->isLive = false;
+        this->updateChannelText();
+        return;
+    }
 
     util::twitch::get("https://api.twitch.tv/kraken/streams/" + id, this, [=](QJsonObject obj) {
         if (obj.value("stream").isNull()) {
