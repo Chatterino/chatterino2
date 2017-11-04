@@ -29,6 +29,138 @@ static QJsonObject parseJSONFromReplyxD(QNetworkReply *reply)
     return jsonDoc.object();
 }
 
+class NetworkWorker : public QObject
+{
+    Q_OBJECT
+
+signals:
+    void doneUrl(QNetworkReply *);
+};
+
+class NetworkRequester : public QObject
+{
+    Q_OBJECT
+
+signals:
+    void requestUrl();
+};
+
+class NetworkManager : public QObject
+{
+    Q_OBJECT
+
+public:
+    static QThread workerThread;
+    static QNetworkAccessManager NaM;
+
+    static void init();
+    static void deinit();
+
+    template <typename FinishedCallback>
+    static void urlFetch(QNetworkRequest request, FinishedCallback onFinished)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(
+            &requester, &NetworkRequester::requestUrl, worker,
+            [ worker, onFinished = std::move(onFinished), request = std::move(request) ]() {
+                QNetworkReply *reply = NetworkManager::NaM.get(request);
+
+                QObject::connect(reply, &QNetworkReply::finished,
+                                 [ worker, reply, onFinished = std::move(onFinished) ]() {
+                                     onFinished(reply);
+                                     delete worker;
+                                 });
+            });
+
+        emit requester.requestUrl();
+    }
+
+    template <typename FinishedCallback>
+    static void urlFetch(const QUrl &url, FinishedCallback onFinished)
+    {
+        urlFetch(QNetworkRequest(url), std::move(onFinished));
+    }
+
+    template <typename Callback, typename ReplyCreatedCallback = void (*)(QNetworkReply *)>
+    static void urlFetch(QNetworkRequest request, const QObject *caller, Callback callback,
+                         ReplyCreatedCallback onReplyCreated = [](QNetworkReply *) { return; })
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [=]() {
+            QNetworkReply *reply = NetworkManager::NaM.get(request);
+
+            onReplyCreated(reply);
+
+            QObject::connect(reply, &QNetworkReply::finished, worker,
+                             [=]() { emit worker->doneUrl(reply); });
+        });
+
+        QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) {
+            callback(reply);
+            delete worker;
+        });
+        emit requester.requestUrl();
+    }
+
+    template <typename Callback, typename ReplyCreatedCallback = void (*)(QNetworkReply *)>
+    static void urlFetch(const QUrl &url, const QObject *caller, Callback callback,
+                         ReplyCreatedCallback onReplyCreated = [](QNetworkReply *) { return; })
+    {
+        urlFetch(QNetworkRequest(url), caller, callback, onReplyCreated);
+    }
+
+    template <typename FinishedCallback>
+    static void urlPut(QNetworkRequest request, FinishedCallback onFinished, QByteArray *data)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(
+            &requester, &NetworkRequester::requestUrl, worker,
+            [ worker, data, onFinished = std::move(onFinished), request = std::move(request) ]() {
+                QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
+
+                QObject::connect(reply, &QNetworkReply::finished,
+                                 [ worker, reply, onFinished = std::move(onFinished) ]() {
+                                     onFinished(reply);
+                                     delete worker;
+                                 });
+            });
+
+        emit requester.requestUrl();
+    }
+
+    template <typename FinishedCallback>
+    static void urlPut(QNetworkRequest request, FinishedCallback onFinished)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(
+            &requester, &NetworkRequester::requestUrl, worker,
+            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
+                QNetworkReply *reply = NetworkManager::NaM.put(request, "");
+
+                QObject::connect(reply, &QNetworkReply::finished,
+                                 [ onFinished = std::move(onFinished), reply, worker ]() {
+                                     onFinished(reply);
+                                     delete worker;
+                                 });
+            });
+
+        emit requester.requestUrl();
+    }
+};
+
 class NetworkRequest
 {
     struct Data {
@@ -118,18 +250,19 @@ public:
                     data.onReplyCreated(reply);
                 }
 
-                QObject::connect(reply, &QNetworkReply::finished, worker,
-                                 [ data = std::move(this->data), worker, reply, onFinished ]() {
-                                     if (data.caller == nullptr) {
-                                         onFinished(reply);
+                QObject::connect(reply, &QNetworkReply::finished, worker, [
+                    data = std::move(data), worker, reply, onFinished = std::move(onFinished)
+                ]() {
+                    if (data.caller == nullptr) {
+                        onFinished(reply);
 
-                                         reply->deleteLater();
-                                     } else {
-                                         emit worker->doneUrl(reply);
-                                     }
+                        reply->deleteLater();
+                    } else {
+                        emit worker->doneUrl(reply);
+                    }
 
-                                     delete worker;
-                                 });
+                    delete worker;
+                });
             });
 
         emit requester.requestUrl();
@@ -142,137 +275,6 @@ public:
             auto object = parseJSONFromReplyxD(reply);
             onFinished(object);
         });
-    }
-};
-
-class NetworkWorker : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void doneUrl(QNetworkReply *);
-};
-
-class NetworkRequester : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void requestUrl();
-};
-
-class NetworkManager : public QObject
-{
-    Q_OBJECT
-
-public:
-    static QThread workerThread;
-    static QNetworkAccessManager NaM;
-
-    static void init();
-    static void deinit();
-
-    template <typename FinishedCallback>
-    static void urlFetch(QNetworkRequest request, FinishedCallback onFinished)
-    {
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-                         [ onFinished = std::move(onFinished), request = std::move(request) ]() {
-                             QNetworkReply *reply = NetworkManager::NaM.get(request);
-
-                             QObject::connect(reply, &QNetworkReply::finished,
-                                              [onFinished, reply, worker]() {
-                                                  onFinished(reply);
-                                                  delete worker;
-                                              });
-                         });
-
-        emit requester.requestUrl();
-    }
-
-    template <typename FinishedCallback>
-    static void urlFetch(const QUrl &url, FinishedCallback onFinished)
-    {
-        urlFetch(QNetworkRequest(url), std::move(onFinished));
-    }
-
-    template <typename Callback, typename ReplyCreatedCallback = void (*)(QNetworkReply *)>
-    static void urlFetch(QNetworkRequest request, const QObject *caller, Callback callback,
-                         ReplyCreatedCallback onReplyCreated = [](QNetworkReply *) { return; })
-    {
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-
-        QObject::connect(&requester, &NetworkRequester::requestUrl, worker, [=]() {
-            QNetworkReply *reply = NetworkManager::NaM.get(request);
-
-            onReplyCreated(reply);
-
-            QObject::connect(reply, &QNetworkReply::finished, worker,
-                             [=]() { emit worker->doneUrl(reply); });
-        });
-
-        QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) {
-            callback(reply);
-            delete worker;
-        });
-        emit requester.requestUrl();
-    }
-
-    template <typename Callback, typename ReplyCreatedCallback = void (*)(QNetworkReply *)>
-    static void urlFetch(const QUrl &url, const QObject *caller, Callback callback,
-                         ReplyCreatedCallback onReplyCreated = [](QNetworkReply *) { return; })
-    {
-        urlFetch(QNetworkRequest(url), caller, callback, onReplyCreated);
-    }
-
-    template <typename FinishedCallback>
-    static void urlPut(QNetworkRequest request, FinishedCallback onFinished, QByteArray *data)
-    {
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [ onFinished = std::move(onFinished), request = std::move(request), data ]() {
-                QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
-
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [ onFinished = std::move(onFinished), reply ]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
-            });
-
-        emit requester.requestUrl();
-    }
-
-    template <typename FinishedCallback>
-    static void urlPut(QNetworkRequest request, FinishedCallback onFinished)
-    {
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
-                QNetworkReply *reply = NetworkManager::NaM.put(request, "");
-
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [ onFinished = std::move(onFinished), reply, worker ]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
-            });
-
-        emit requester.requestUrl();
     }
 };
 
