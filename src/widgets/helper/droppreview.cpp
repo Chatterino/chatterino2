@@ -1,4 +1,4 @@
-#include "widgets/notebookpagedroppreview.hpp"
+#include "widgets/helper/droppreview.hpp"
 #include "colorscheme.hpp"
 
 #include <QDebug>

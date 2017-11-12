@@ -1,6 +1,6 @@
 #include "widgets/scrollbar.hpp"
 #include "colorscheme.hpp"
-#include "widgets/channelview.hpp"
+#include "widgets/helper/channelview.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>

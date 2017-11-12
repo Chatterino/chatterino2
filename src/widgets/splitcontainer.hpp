@@ -1,10 +1,9 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
-#include "widgets/chatwidget.hpp"
-#include "widgets/notebookpage.hpp"
-#include "widgets/notebookpagedroppreview.hpp"
-#include "widgets/notebooktab.hpp"
+#include "widgets/helper/droppreview.hpp"
+#include "widgets/helper/notebooktab.hpp"
+#include "widgets/split.hpp"
 
 #include <QDragEnterEvent>
 #include <QHBoxLayout>
@@ -22,26 +21,26 @@ class CompletionManager;
 
 namespace widgets {
 
-class NotebookPage : public BaseWidget
+class SplitContainer : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
+    SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
 
     ChannelManager &channelManager;
     CompletionManager &completionManager;
 
-    std::pair<int, int> removeFromLayout(ChatWidget *widget);
-    void addToLayout(ChatWidget *widget, std::pair<int, int> position);
+    std::pair<int, int> removeFromLayout(Split *widget);
+    void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1, -1));
 
-    const std::vector<ChatWidget *> &getChatWidgets() const;
+    const std::vector<Split *> &getChatWidgets() const;
     NotebookTab *getTab() const;
 
     void addChat(bool openChannelNameDialog = false);
 
     static bool isDraggingSplit;
-    static ChatWidget *draggingSplit;
+    static Split *draggingSplit;
     static std::pair<int, int> dropPosition;
 
     int currentX = 0;
@@ -50,6 +49,8 @@ public:
 
     void refreshCurrentFocusCoordinates(bool alsoSetLastRequested = false);
     void requestFocus(int x, int y);
+
+    void updateFlexValues();
 
 protected:
     virtual bool eventFilter(QObject *object, QEvent *event) override;
@@ -86,16 +87,16 @@ private:
         QHBoxLayout hbox;
     } ui;
 
-    std::vector<ChatWidget *> chatWidgets;
+    std::vector<Split *> chatWidgets;
     std::vector<DropRegion> dropRegions;
 
     NotebookPageDropPreview dropPreview;
 
     void setPreviewRect(QPoint mousePos);
 
-    std::pair<int, int> getChatPosition(const ChatWidget *chatWidget);
+    std::pair<int, int> getChatPosition(const Split *chatWidget);
 
-    ChatWidget *createChatWidget();
+    Split *createChatWidget();
 
 public:
     void refreshTitle();

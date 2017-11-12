@@ -1,9 +1,9 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
-#include "widgets/notebookbutton.hpp"
-#include "widgets/notebookpage.hpp"
-#include "widgets/notebooktab.hpp"
+#include "widgets/helper/notebookbutton.hpp"
+#include "widgets/helper/notebooktab.hpp"
+#include "widgets/splitcontainer.hpp"
 
 #include <QList>
 #include <QWidget>
@@ -16,7 +16,7 @@ class CompletionManager;
 
 namespace widgets {
 
-class MainWindow;
+class Window;
 
 class Notebook : public BaseWidget
 {
@@ -25,22 +25,22 @@ class Notebook : public BaseWidget
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    explicit Notebook(ChannelManager &_channelManager, MainWindow *parent);
+    explicit Notebook(ChannelManager &_channelManager, Window *parent, bool showButtons);
 
-    NotebookPage *addPage(bool select = false);
+    SplitContainer *addPage(bool select = false);
 
-    void removePage(NotebookPage *page);
-    void select(NotebookPage *page);
+    void removePage(SplitContainer *page);
+    void select(SplitContainer *page);
 
-    NotebookPage *getSelectedPage() const
+    SplitContainer *getSelectedPage() const
     {
         return selectedPage;
     }
 
     void performLayout(bool animate = true);
 
-    NotebookPage *tabAt(QPoint point, int &index);
-    void rearrangePage(NotebookPage *page, int index);
+    SplitContainer *tabAt(QPoint point, int &index);
+    void rearrangePage(SplitContainer *page, int index);
 
     void nextTab();
     void previousTab();
@@ -60,13 +60,15 @@ public:
     CompletionManager &completionManager;
 
 private:
-    QList<NotebookPage *> pages;
+    QList<SplitContainer *> pages;
 
     NotebookButton addButton;
     NotebookButton settingsButton;
     NotebookButton userButton;
 
-    NotebookPage *selectedPage = nullptr;
+    SplitContainer *selectedPage = nullptr;
+
+    bool showButtons;
 
 public:
     void load(const boost::property_tree::ptree &tree);

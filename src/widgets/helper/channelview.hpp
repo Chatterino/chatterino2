@@ -7,7 +7,7 @@
 #include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/scrollbar.hpp"
 
 #include <QPaintEvent>

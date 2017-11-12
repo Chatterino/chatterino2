@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/mainwindow.hpp"
+#include "widgets/window.hpp"
 
 #include <mutex>
 
@@ -16,6 +16,8 @@ public:
     explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
                            CompletionManager &_completionManager);
 
+    static WindowManager *instance;
+
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
     CompletionManager &completionManager;
@@ -25,7 +27,10 @@ public:
     void repaintGifEmotes();
     // void updateAll();
 
-    widgets::MainWindow &getMainWindow();
+    widgets::Window &getMainWindow();
+    widgets::Window &getCurrentWindow();
+
+    widgets::Window &createWindow();
 
     void load();
     void save();
@@ -35,9 +40,10 @@ public:
 
 private:
     std::mutex windowMutex;
+    std::vector<widgets::Window *> windows;
 
     // TODO(pajlada): Store as a value instead of a pointer
-    widgets::MainWindow *mainWindow = nullptr;
+    widgets::Window *mainWindow = nullptr;
 };
 
 }  // namespace chatterino

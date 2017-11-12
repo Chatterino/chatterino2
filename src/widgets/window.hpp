@@ -8,7 +8,6 @@
 //#include <platform/borderless/qwinwidget.h>
 //#endif
 
-#include <QMainWindow>
 #include <boost/property_tree/ptree.hpp>
 #include <pajlada/settings/serialize.hpp>
 #include <pajlada/settings/settingdata.hpp>
@@ -21,14 +20,14 @@ class CompletionManager;
 
 namespace widgets {
 
-class MainWindow : public BaseWidget
+class Window : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                        CompletionManager &_completionManager);
-    ~MainWindow();
+    explicit Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                    CompletionManager &_completionManager, bool isMainWindow);
+    ~Window();
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 

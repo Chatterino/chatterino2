@@ -1,8 +1,8 @@
 #pragma once
 
-#include "signallabel.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/helper/signallabel.hpp"
 
 #include <QAction>
 #include <QHBoxLayout>
@@ -20,14 +20,14 @@ class ColorScheme;
 
 namespace widgets {
 
-class ChatWidget;
+class Split;
 
-class ChatWidgetHeader : public BaseWidget
+class SplitHeader : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit ChatWidgetHeader(ChatWidget *_chatWidget);
+    explicit SplitHeader(Split *_chatWidget);
     // Update channel text from chat widget
     void updateChannelText();
 
@@ -39,7 +39,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
-    ChatWidget *const chatWidget;
+    Split *const chatWidget;
 
     QPoint dragStart;
     bool dragging = false;

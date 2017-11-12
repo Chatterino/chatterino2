@@ -1,4 +1,4 @@
-#include "widgets/resizingtextedit.hpp"
+#include "widgets/helper/resizingtextedit.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
 {

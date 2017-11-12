@@ -9,6 +9,7 @@
 #include <boost/property_tree/json_parser.hpp>
 
 namespace chatterino {
+WindowManager *WindowManager::instance = nullptr;
 
 WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
                              CompletionManager &_completionManager)
@@ -16,6 +17,7 @@ WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colo
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
 {
+    WindowManager::instance = this;
 }
 
 static const std::string &getSettingsPath()
@@ -49,16 +51,33 @@ void WindowManager::repaintGifEmotes()
 //    }
 //}
 
-widgets::MainWindow &WindowManager::getMainWindow()
+widgets::Window &WindowManager::getMainWindow()
 {
     std::lock_guard<std::mutex> lock(this->windowMutex);
 
     if (this->mainWindow == nullptr) {
-        this->mainWindow = new widgets::MainWindow(this->channelManager, this->colorScheme,
-                                                   this->completionManager);
+        this->mainWindow = new widgets::Window(this->channelManager, this->colorScheme,
+                                               this->completionManager, true);
     }
 
     return *this->mainWindow;
+}
+
+widgets::Window &WindowManager::getCurrentWindow()
+{
+}
+
+widgets::Window &WindowManager::createWindow()
+{
+    auto *window = new widgets::Window(this->channelManager, this->colorScheme,
+                                       this->completionManager, false);
+
+    std::lock_guard<std::mutex> lock(this->windowMutex);
+    window->loadDefaults();
+
+    this->windows.push_back(window);
+
+    return *window;
 }
 
 void WindowManager::load()

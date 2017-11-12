@@ -1,7 +1,7 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
-#include "widgets/scrollbarhighlight.hpp"
+#include "widgets/helper/scrollbarhighlight.hpp"
 
 #include <QMutex>
 #include <QPropertyAnimation>

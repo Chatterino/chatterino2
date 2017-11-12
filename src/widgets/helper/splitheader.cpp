@@ -1,9 +1,9 @@
-#include "widgets/chatwidgetheader.hpp"
+#include "widgets/helper/splitheader.hpp"
 #include "colorscheme.hpp"
 #include "twitch/twitchchannel.hpp"
 #include "util/urlfetch.hpp"
-#include "widgets/chatwidget.hpp"
-#include "widgets/notebookpage.hpp"
+#include "widgets/split.hpp"
+#include "widgets/splitcontainer.hpp"
 
 #include <QByteArray>
 #include <QDrag>
@@ -13,7 +13,7 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
+SplitHeader::SplitHeader(Split *_chatWidget)
     : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
     , leftLabel(this)
@@ -35,23 +35,22 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->leftLabel.getLabel().setTextFormat(Qt::RichText);
     this->leftLabel.getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
 
-    connect(&this->leftLabel, &RippleEffectLabel::clicked, this,
-            &ChatWidgetHeader::leftButtonClicked);
+    connect(&this->leftLabel, &RippleEffectLabel::clicked, this, &SplitHeader::leftButtonClicked);
 
-    this->leftMenu.addAction("Add new split", this->chatWidget, &ChatWidget::doAddSplit,
+    this->leftMenu.addAction("Add new split", this->chatWidget, &Split::doAddSplit,
                              QKeySequence(tr("Ctrl+T")));
-    this->leftMenu.addAction("Close split", this->chatWidget, &ChatWidget::doCloseSplit,
+    this->leftMenu.addAction("Close split", this->chatWidget, &Split::doCloseSplit,
                              QKeySequence(tr("Ctrl+W")));
     this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
-    this->leftMenu.addAction("Popup", this->chatWidget, &ChatWidget::doPopup);
-    this->leftMenu.addAction("Open viewer list", this->chatWidget, &ChatWidget::doOpenViewerList);
+    this->leftMenu.addAction("Popup", this->chatWidget, &Split::doPopup);
+    this->leftMenu.addAction("Open viewer list", this->chatWidget, &Split::doOpenViewerList);
     this->leftMenu.addSeparator();
-    this->leftMenu.addAction("Change channel", this->chatWidget, &ChatWidget::doChangeChannel,
+    this->leftMenu.addAction("Change channel", this->chatWidget, &Split::doChangeChannel,
                              QKeySequence(tr("Ctrl+R")));
-    this->leftMenu.addAction("Clear chat", this->chatWidget, &ChatWidget::doClearChat);
-    this->leftMenu.addAction("Open channel", this->chatWidget, &ChatWidget::doOpenChannel);
-    this->leftMenu.addAction("Open popup player", this->chatWidget, &ChatWidget::doOpenPopupPlayer);
-    this->leftMenu.addAction("Open in Streamlink", this->chatWidget, &ChatWidget::doOpenStreamlink);
+    this->leftMenu.addAction("Clear chat", this->chatWidget, &Split::doClearChat);
+    this->leftMenu.addAction("Open channel", this->chatWidget, &Split::doOpenChannel);
+    this->leftMenu.addAction("Open popup player", this->chatWidget, &Split::doOpenPopupPlayer);
+    this->leftMenu.addAction("Open in Streamlink", this->chatWidget, &Split::doOpenStreamlink);
     this->leftMenu.addSeparator();
     this->leftMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
     this->leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
@@ -62,7 +61,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     this->channelNameLabel.setAlignment(Qt::AlignCenter);
 
     connect(&this->channelNameLabel, &SignalLabel::mouseDoubleClick, this,
-            &ChatWidgetHeader::mouseDoubleClickEvent);
+            &SplitHeader::mouseDoubleClickEvent);
 
     // right
     this->rightLabel.setMinimumWidth(this->height());
@@ -76,7 +75,7 @@ ChatWidgetHeader::ChatWidgetHeader(ChatWidget *_chatWidget)
     });
 }
 
-void ChatWidgetHeader::initializeChannelSignals()
+void SplitHeader::initializeChannelSignals()
 {
     // Disconnect any previous signal first
     this->onlineStatusChangedConnection.disconnect();
@@ -91,12 +90,12 @@ void ChatWidgetHeader::initializeChannelSignals()
     }
 }
 
-void ChatWidgetHeader::resizeEvent(QResizeEvent *event)
+void SplitHeader::resizeEvent(QResizeEvent *event)
 {
-    this->setFixedHeight(static_cast<float>(32 * getDpiMultiplier()));
+    this->setFixedHeight(static_cast<float>(28 * getDpiMultiplier()));
 }
 
-void ChatWidgetHeader::updateChannelText()
+void SplitHeader::updateChannelText()
 {
     const std::string channelName = this->chatWidget->channelName;
     if (channelName.empty()) {
@@ -114,9 +113,8 @@ void ChatWidgetHeader::updateChannelText()
                              "<br>"
                              "Live for " +
                              twitchChannel->streamUptime + " with " +
-                             twitchChannel->streamViewerCount +
-                             " viewers"
-                             "</p>");
+                             twitchChannel->streamViewerCount + " viewers"
+                                                                "</p>");
         } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
@@ -124,7 +122,7 @@ void ChatWidgetHeader::updateChannelText()
     }
 }
 
-void ChatWidgetHeader::paintEvent(QPaintEvent *)
+void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -133,23 +131,23 @@ void ChatWidgetHeader::paintEvent(QPaintEvent *)
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
-void ChatWidgetHeader::mousePressEvent(QMouseEvent *event)
+void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
     this->dragging = true;
 
     this->dragStart = event->pos();
 }
 
-void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
+void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
     if (this->dragging) {
         if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
             std::abs(this->dragStart.y() - event->pos().y()) > 12) {
-            auto page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+            auto page = static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
             if (page != nullptr) {
-                NotebookPage::isDraggingSplit = true;
-                NotebookPage::draggingSplit = this->chatWidget;
+                SplitContainer::isDraggingSplit = true;
+                SplitContainer::draggingSplit = this->chatWidget;
 
                 auto originalLocation = page->removeFromLayout(this->chatWidget);
 
@@ -168,20 +166,20 @@ void ChatWidgetHeader::mouseMoveEvent(QMouseEvent *event)
                     page->addToLayout(this->chatWidget, originalLocation);
                 }
 
-                NotebookPage::isDraggingSplit = false;
+                SplitContainer::isDraggingSplit = false;
             }
         }
     }
 }
 
-void ChatWidgetHeader::mouseDoubleClickEvent(QMouseEvent *event)
+void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
         this->chatWidget->doChangeChannel();
     }
 }
 
-void ChatWidgetHeader::leftButtonClicked()
+void SplitHeader::leftButtonClicked()
 {
     QTimer::singleShot(80, [&] {
         this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
@@ -189,11 +187,11 @@ void ChatWidgetHeader::leftButtonClicked()
     });
 }
 
-void ChatWidgetHeader::rightButtonClicked()
+void SplitHeader::rightButtonClicked()
 {
 }
 
-void ChatWidgetHeader::refreshTheme()
+void SplitHeader::refreshTheme()
 {
     QPalette palette;
     palette.setColor(QPalette::Foreground, this->colorScheme.Text);
@@ -203,19 +201,19 @@ void ChatWidgetHeader::refreshTheme()
     this->rightLabel.setPalette(palette);
 }
 
-void ChatWidgetHeader::menuMoveSplit()
+void SplitHeader::menuMoveSplit()
 {
 }
 
-void ChatWidgetHeader::menuReloadChannelEmotes()
+void SplitHeader::menuReloadChannelEmotes()
 {
 }
 
-void ChatWidgetHeader::menuManualReconnect()
+void SplitHeader::menuManualReconnect()
 {
 }
 
-void ChatWidgetHeader::menuShowChangelog()
+void SplitHeader::menuShowChangelog()
 {
 }
 

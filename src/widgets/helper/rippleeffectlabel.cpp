@@ -1,6 +1,6 @@
-#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
 #include "colorscheme.hpp"
-#include "widgets/chatwidgetheader.hpp"
+#include "widgets/helper/splitheader.hpp"
 
 #include <QBrush>
 #include <QPainter>

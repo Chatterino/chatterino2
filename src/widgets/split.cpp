@@ -1,12 +1,14 @@
-#include "widgets/chatwidget.hpp"
+#include "widgets/split.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
-#include "notebookpage.hpp"
 #include "settingsmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/qualitypopup.hpp"
+#include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
+#include "widgets/window.hpp"
+#include "windowmanager.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -34,7 +36,7 @@ namespace widgets {
 namespace {
 
 template <typename T>
-inline void ezShortcut(ChatWidget *w, const char *key, T t)
+inline void ezShortcut(Split *w, const char *key, T t)
 {
     auto s = new QShortcut(QKeySequence(key), w);
     s->setContext(Qt::WidgetWithChildrenShortcut);
@@ -45,17 +47,19 @@ inline void ezShortcut(ChatWidget *w, const char *key, T t)
 
 static int index = 0;
 
-ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
+Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
     : BaseWidget(parent)
+    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
     , parentPage(*parent)
     , channelManager(_channelManager)
     , completionManager(parent->completionManager)
-    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
     , channel(_channelManager.emptyChannel)
     , vbox(this)
     , header(this)
     , view(_channelManager.getWindowManager(), this)
     , input(this, _channelManager.getEmoteManager(), _channelManager.getWindowManager())
+    , flexSizeX(1)
+    , flexSizeY(1)
 {
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
@@ -66,21 +70,27 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
 
     // Initialize chat widget-wide hotkeys
     // CTRL+T: Create new split (Add page)
-    ezShortcut(this, "CTRL+T", &ChatWidget::doAddSplit);
+    ezShortcut(this, "CTRL+T", &Split::doAddSplit);
 
     // CTRL+W: Close Split
-    ezShortcut(this, "CTRL+W", &ChatWidget::doCloseSplit);
+    ezShortcut(this, "CTRL+W", &Split::doCloseSplit);
 
     // CTRL+R: Change Channel
-    ezShortcut(this, "CTRL+R", &ChatWidget::doChangeChannel);
+    ezShortcut(this, "CTRL+R", &Split::doChangeChannel);
+
+    // xd
+    //ezShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
+    //ezShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
+    //ezShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
+    //ezShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
 #ifndef NDEBUG
     // F12: Toggle message spawning
-    ezShortcut(this, "ALT+Q", &ChatWidget::doToggleMessageSpawning);
+    ezShortcut(this, "ALT+Q", &Split::doToggleMessageSpawning);
 #endif
 
     this->channelName.getValueChangedSignal().connect(
-        std::bind(&ChatWidget::channelNameUpdated, this, std::placeholders::_1));
+        std::bind(&Split::channelNameUpdated, this, std::placeholders::_1));
 
     this->channelNameUpdated(this->channelName.getValue());
 
@@ -94,26 +104,26 @@ ChatWidget::ChatWidget(ChannelManager &_channelManager, NotebookPage *parent)
     });
 
     QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &ChatWidget::test);
+    connect(timer, &QTimer::timeout, this, &Split::test);
     timer->start(1000);
 }
 
-ChatWidget::~ChatWidget()
+Split::~Split()
 {
     this->channelNameUpdated("");
 }
 
-std::shared_ptr<Channel> ChatWidget::getChannel() const
+std::shared_ptr<Channel> Split::getChannel() const
 {
     return this->channel;
 }
 
-std::shared_ptr<Channel> &ChatWidget::getChannelRef()
+std::shared_ptr<Channel> &Split::getChannelRef()
 {
     return this->channel;
 }
 
-void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
+void Split::setChannel(std::shared_ptr<Channel> _newChannel)
 {
     this->view.setChannel(_newChannel);
 
@@ -122,7 +132,29 @@ void ChatWidget::setChannel(std::shared_ptr<Channel> _newChannel)
     this->channelChanged();
 }
 
-void ChatWidget::channelNameUpdated(const std::string &newChannelName)
+void Split::setFlexSizeX(double x)
+{
+    this->flexSizeX = x;
+    this->parentPage.updateFlexValues();
+}
+
+double Split::getFlexSizeX()
+{
+    return this->flexSizeX;
+}
+
+void Split::setFlexSizeY(double y)
+{
+    this->flexSizeY = y;
+    this->parentPage.updateFlexValues();
+}
+
+double Split::getFlexSizeY()
+{
+    return this->flexSizeY;
+}
+
+void Split::channelNameUpdated(const std::string &newChannelName)
 {
     // remove current channel
     if (!this->channel->isEmpty()) {
@@ -141,7 +173,7 @@ void ChatWidget::channelNameUpdated(const std::string &newChannelName)
     this->header.updateChannelText();
 }
 
-bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
+bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
 {
     // create new input dialog and execute it
     TextInputDialog dialog(this);
@@ -164,27 +196,27 @@ bool ChatWidget::showChangeChannelPopup(const char *dialogTitle, bool empty)
     return false;
 }
 
-void ChatWidget::layoutMessages()
+void Split::layoutMessages()
 {
     this->view.layoutMessages();
 }
 
-void ChatWidget::updateGifEmotes()
+void Split::updateGifEmotes()
 {
     this->view.updateGifEmotes();
 }
 
-void ChatWidget::giveFocus(Qt::FocusReason reason)
+void Split::giveFocus(Qt::FocusReason reason)
 {
     this->input.textInput.setFocus(reason);
 }
 
-bool ChatWidget::hasFocus() const
+bool Split::hasFocus() const
 {
     return this->input.textInput.hasFocus();
 }
 
-void ChatWidget::paintEvent(QPaintEvent *)
+void Split::paintEvent(QPaintEvent *)
 {
     // color the background of the chat
     QPainter painter(this);
@@ -192,7 +224,7 @@ void ChatWidget::paintEvent(QPaintEvent *)
     painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
 }
 
-void ChatWidget::load(const boost::property_tree::ptree &tree)
+void Split::load(const boost::property_tree::ptree &tree)
 {
     // load tab text
     try {
@@ -201,7 +233,7 @@ void ChatWidget::load(const boost::property_tree::ptree &tree)
     }
 }
 
-boost::property_tree::ptree ChatWidget::save()
+boost::property_tree::ptree Split::save()
 {
     boost::property_tree::ptree tree;
 
@@ -211,19 +243,19 @@ boost::property_tree::ptree ChatWidget::save()
 }
 
 /// Slots
-void ChatWidget::doAddSplit()
+void Split::doAddSplit()
 {
-    NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
+    SplitContainer *page = static_cast<SplitContainer *>(this->parentWidget());
     page->addChat(true);
 }
 
-void ChatWidget::doCloseSplit()
+void Split::doCloseSplit()
 {
-    NotebookPage *page = static_cast<NotebookPage *>(this->parentWidget());
+    SplitContainer *page = static_cast<SplitContainer *>(this->parentWidget());
     page->removeFromLayout(this);
 }
 
-void ChatWidget::doChangeChannel()
+void Split::doChangeChannel()
 {
     this->showChangeChannelPopup("Change channel");
     auto popup = this->findChildren<QDockWidget *>();
@@ -233,33 +265,37 @@ void ChatWidget::doChangeChannel()
     }
 }
 
-void ChatWidget::doPopup()
+void Split::doPopup()
 {
-    // TODO: Copy signals and stuff too
-    auto widget =
-        new ChatWidget(this->channelManager, static_cast<NotebookPage *>(this->parentWidget()));
-    widget->channelName = this->channelName;
-    widget->show();
+    Window &window = WindowManager::instance->createWindow();
+
+    Split *split = new Split(this->channelManager,
+                             static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()));
+    split->channelName = this->channelName.getValue();
+
+    window.getNotebook().getSelectedPage()->addToLayout(split);
+
+    window.show();
 }
 
-void ChatWidget::doClearChat()
+void Split::doClearChat()
 {
     view.clearMessages();
 }
 
-void ChatWidget::doOpenChannel()
+void Split::doOpenChannel()
 {
     qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
              << QString::fromStdString(this->channelName.getValue());
 }
 
-void ChatWidget::doOpenPopupPlayer()
+void Split::doOpenPopupPlayer()
 {
     qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
              << QString::fromStdString(this->channelName.getValue()) << "/popout";
 }
 
-void ChatWidget::doOpenStreamlink()
+void Split::doOpenStreamlink()
 {
     SettingsManager &settings = SettingsManager::getInstance();
     QString preferredQuality =
@@ -326,7 +362,7 @@ void ChatWidget::doOpenStreamlink()
     }
 }
 
-void ChatWidget::doOpenViewerList()
+void Split::doOpenViewerList()
 {
     auto viewerDock = new QDockWidget("Viewer List", this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -412,7 +448,7 @@ void ChatWidget::doOpenViewerList()
     viewerDock->show();
 }
 
-void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
+void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
 {
     widget->setName(user);
     widget->move(QCursor::pos());
@@ -421,7 +457,7 @@ void ChatWidget::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString us
     widget->setFocus();
 }
 
-void ChatWidget::doCopy()
+void Split::doCopy()
 {
     QApplication::clipboard()->setText(this->view.getSelectedText());
 }
@@ -466,7 +502,7 @@ static Iter select_randomly(Iter start, Iter end)
     return select_randomly(start, end, gen);
 }
 
-void ChatWidget::test()
+void Split::test()
 {
     if (this->testEnabled) {
         messages::MessageParseArgs args;
@@ -496,10 +532,29 @@ void ChatWidget::test()
     }
 }
 
-void ChatWidget::doToggleMessageSpawning()
+void Split::doToggleMessageSpawning()
 {
     this->testEnabled = !this->testEnabled;
 }
 
+void Split::doIncFlexX()
+{
+    this->setFlexSizeX(this->getFlexSizeX() * 1.2);
+}
+
+void Split::doDecFlexX()
+{
+    this->setFlexSizeX(this->getFlexSizeX() * (1 / 1.2));
+}
+
+void Split::doIncFlexY()
+{
+    this->setFlexSizeY(this->getFlexSizeY() * 1.2);
+}
+
+void Split::doDecFlexY()
+{
+    this->setFlexSizeY(this->getFlexSizeY() * (1 / 1.2));
+}
 }  // namespace widgets
 }  // namespace chatterino

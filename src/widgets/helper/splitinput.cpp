@@ -1,11 +1,11 @@
-#include "widgets/chatwidgetinput.hpp"
-#include "chatwidget.hpp"
+#include "widgets/helper/splitinput.hpp"
 #include "colorscheme.hpp"
 #include "completionmanager.hpp"
 #include "ircmanager.hpp"
-#include "notebook.hpp"
-#include "notebookpage.hpp"
 #include "settingsmanager.hpp"
+#include "widgets/notebook.hpp"
+#include "widgets/split.hpp"
+#include "widgets/splitcontainer.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -13,8 +13,7 @@
 namespace chatterino {
 namespace widgets {
 
-ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteManager,
-                                 WindowManager &windowManager)
+SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowManager &windowManager)
     : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
     , emoteManager(emoteManager)
@@ -65,7 +64,7 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
         this->emotePopup->show();
     });
 
-    connect(&textInput, &ResizingTextEdit::textChanged, this, &ChatWidgetInput::editTextChanged);
+    connect(&textInput, &ResizingTextEdit::textChanged, this, &SplitInput::editTextChanged);
 
     this->refreshTheme();
     textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength.get());
@@ -96,7 +95,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             prevIndex = prevMsg.size();
         } else if (event->key() == Qt::Key_Up) {
             if (event->modifiers() == Qt::AltModifier) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 int reqX = page->currentX;
                 int reqY = page->lastRequestedY[reqX] - 1;
@@ -112,7 +112,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             }
         } else if (event->key() == Qt::Key_Down) {
             if (event->modifiers() == Qt::AltModifier) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 int reqX = page->currentX;
                 int reqY = page->lastRequestedY[reqX] + 1;
@@ -131,7 +132,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             }
         } else if (event->key() == Qt::Key_Left) {
             if (event->modifiers() == Qt::AltModifier) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 int reqX = page->currentX - 1;
                 int reqY = page->lastRequestedY[reqX];
@@ -142,7 +144,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             }
         } else if (event->key() == Qt::Key_Right) {
             if (event->modifiers() == Qt::AltModifier) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 int reqX = page->currentX + 1;
                 int reqY = page->lastRequestedY[reqX];
@@ -153,7 +156,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             }
         } else if (event->key() == Qt::Key_Tab) {
             if (event->modifiers() == Qt::ControlModifier) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
 
@@ -161,7 +165,8 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
             }
         } else if (event->key() == Qt::Key_Backtab) {
             if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) {
-                NotebookPage *page = static_cast<NotebookPage *>(this->chatWidget->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
                 Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
 
@@ -186,12 +191,12 @@ ChatWidgetInput::ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &emoteMan
     });
 }
 
-ChatWidgetInput::~ChatWidgetInput()
+SplitInput::~SplitInput()
 {
     this->textLengthVisibleChangedConnection.disconnect();
 }
 
-void ChatWidgetInput::clearSelection()
+void SplitInput::clearSelection()
 {
     QTextCursor c = this->textInput.textCursor();
 
@@ -201,7 +206,7 @@ void ChatWidgetInput::clearSelection()
     this->textInput.setTextCursor(c);
 }
 
-void ChatWidgetInput::refreshTheme()
+void SplitInput::refreshTheme()
 {
     QPalette palette;
 
@@ -212,11 +217,11 @@ void ChatWidgetInput::refreshTheme()
     this->textInput.setStyleSheet(this->colorScheme.InputStyleSheet);
 }
 
-void ChatWidgetInput::editTextChanged()
+void SplitInput::editTextChanged()
 {
 }
 
-void ChatWidgetInput::paintEvent(QPaintEvent *)
+void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -225,7 +230,7 @@ void ChatWidgetInput::paintEvent(QPaintEvent *)
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
-void ChatWidgetInput::resizeEvent(QResizeEvent *)
+void SplitInput::resizeEvent(QResizeEvent *)
 {
     if (this->height() == this->maximumHeight()) {
         this->textInput.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -234,7 +239,7 @@ void ChatWidgetInput::resizeEvent(QResizeEvent *)
     }
 }
 
-void ChatWidgetInput::mousePressEvent(QMouseEvent *)
+void SplitInput::mousePressEvent(QMouseEvent *)
 {
     this->chatWidget->giveFocus(Qt::MouseFocusReason);
 }

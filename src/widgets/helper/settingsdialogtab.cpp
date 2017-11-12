@@ -1,4 +1,4 @@
-#include "widgets/settingsdialogtab.hpp"
+#include "widgets/helper/settingsdialogtab.hpp"
 #include "widgets/settingsdialog.hpp"
 
 #include <QPainter>

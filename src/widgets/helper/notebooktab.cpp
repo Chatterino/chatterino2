@@ -1,4 +1,4 @@
-#include "widgets/notebooktab.hpp"
+#include "widgets/helper/notebooktab.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
 #include "widgets/notebook.hpp"
@@ -279,7 +279,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
         QPoint relPoint = this->mapToParent(event->pos());
 
         int index;
-        NotebookPage *clickedPage = notebook->tabAt(relPoint, index);
+        SplitContainer *clickedPage = notebook->tabAt(relPoint, index);
 
         if (clickedPage != nullptr && clickedPage != this->page) {
             this->notebook->rearrangePage(clickedPage, index);

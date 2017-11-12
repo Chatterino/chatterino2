@@ -6,10 +6,10 @@
 #include "messages/word.hpp"
 #include "messages/wordpart.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/channelview.hpp"
-#include "widgets/chatwidgetheader.hpp"
-#include "widgets/chatwidgetinput.hpp"
-#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/helper/channelview.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/helper/splitheader.hpp"
+#include "widgets/helper/splitinput.hpp"
 
 #include <QFont>
 #include <QShortcut>
@@ -26,7 +26,7 @@ class CompletionManager;
 
 namespace widgets {
 
-class NotebookPage;
+class SplitContainer;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
 // ChatWidgetHeader
@@ -38,59 +38,56 @@ class NotebookPage;
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class ChatWidget : public BaseWidget
+class Split : public BaseWidget
 {
-    friend class ChatWidgetInput;
+    friend class SplitInput;
 
     Q_OBJECT
 
 public:
-    ChatWidget(ChannelManager &_channelManager, NotebookPage *parent);
-    ~ChatWidget();
+    Split(ChannelManager &_channelManager, SplitContainer *parent);
+    ~Split();
+
+    ChannelManager &channelManager;
+    CompletionManager &completionManager;
+    pajlada::Settings::Setting<std::string> channelName;
+    boost::signals2::signal<void()> channelChanged;
+    bool testEnabled = false;
 
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();
+    void setFlexSizeX(double x);
+    double getFlexSizeX();
+    void setFlexSizeY(double y);
+    double getFlexSizeY();
 
     bool showChangeChannelPopup(const char *dialogTitle, bool empty = false);
-
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
-
     void layoutMessages();
     void updateGifEmotes();
-
-    boost::signals2::signal<void()> channelChanged;
+    void load(const boost::property_tree::ptree &tree);
+    boost::property_tree::ptree save();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
 
-public:
-    ChannelManager &channelManager;
-    CompletionManager &completionManager;
-
-    pajlada::Settings::Setting<std::string> channelName;
-
 private:
-    void setChannel(std::shared_ptr<Channel> newChannel);
-    void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
-
-    void channelNameUpdated(const std::string &newChannelName);
-
-    NotebookPage &parentPage;
-
+    SplitContainer &parentPage;
     std::shared_ptr<Channel> channel;
 
     QVBoxLayout vbox;
-    ChatWidgetHeader header;
+    SplitHeader header;
     ChannelView view;
-    ChatWidgetInput input;
+    SplitInput input;
+    double flexSizeX;
+    double flexSizeY;
 
     boost::signals2::connection channelIDChangedConnection;
 
-public:
-    void load(const boost::property_tree::ptree &tree);
-    boost::property_tree::ptree save();
-    bool testEnabled = false;
+    void setChannel(std::shared_ptr<Channel> newChannel);
+    void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
+    void channelNameUpdated(const std::string &newChannelName);
 
 public slots:
     // Add new split to the notebook page that this chat widget is in
@@ -127,6 +124,10 @@ public slots:
 
     void doToggleMessageSpawning();
     void test();
+    void doIncFlexX();
+    void doDecFlexX();
+    void doIncFlexY();
+    void doDecFlexY();
 };
 
 }  // namespace widgets

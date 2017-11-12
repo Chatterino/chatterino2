@@ -1,4 +1,4 @@
-#include "widgets/channelview.hpp"
+#include "widgets/helper/channelview.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "debug/log.hpp"
@@ -9,7 +9,7 @@
 #include "ui_accountpopupform.h"
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
-#include "widgets/chatwidget.hpp"
+#include "widgets/split.hpp"
 #include "windowmanager.hpp"
 
 #include <QDebug>
@@ -240,8 +240,9 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
-                                                       part.getCharacterLength();
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -518,9 +519,10 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
-                                         ? this->colorScheme.ChatBackgroundHighlighted
-                                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(),
+                     (messageRef->getMessage()->getCanHighlightTab())
+                         ? this->colorScheme.ChatBackgroundHighlighted
+                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection

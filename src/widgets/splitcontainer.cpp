@@ -1,8 +1,8 @@
-#include "widgets/notebookpage.hpp"
+#include "widgets/splitcontainer.hpp"
 #include "colorscheme.hpp"
-#include "widgets/chatwidget.hpp"
+#include "widgets/helper/notebooktab.hpp"
 #include "widgets/notebook.hpp"
-#include "widgets/notebooktab.hpp"
+#include "widgets/split.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -19,16 +19,17 @@
 namespace chatterino {
 namespace widgets {
 
-bool NotebookPage::isDraggingSplit = false;
-ChatWidget *NotebookPage::draggingSplit = nullptr;
-std::pair<int, int> NotebookPage::dropPosition = std::pair<int, int>(-1, -1);
+bool SplitContainer::isDraggingSplit = false;
+Split *SplitContainer::draggingSplit = nullptr;
+std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
-NotebookPage::NotebookPage(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab)
+SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab)
     : BaseWidget(parent->colorScheme, parent)
     , channelManager(_channelManager)
     , completionManager(parent->completionManager)
     , tab(_tab)
     , dropPreview(this)
+    , chatWidgets()
 {
     this->tab->page = this;
 
@@ -47,7 +48,18 @@ NotebookPage::NotebookPage(ChannelManager &_channelManager, Notebook *parent, No
     this->refreshTitle();
 }
 
-std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
+void SplitContainer::updateFlexValues()
+{
+    for (int i = 0; i < this->ui.hbox.count(); i++) {
+        QVBoxLayout *vbox = (QVBoxLayout *)ui.hbox.itemAt(i)->layout();
+
+        if (vbox->count() != 0) {
+            ui.hbox.setStretch(i, (int)(1000 * ((Split *)vbox->itemAt(0))->getFlexSizeX()));
+        }
+    }
+}
+
+std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
 {
     // remove reference to chat widget from chatWidgets vector
     auto it = std::find(std::begin(this->chatWidgets), std::end(this->chatWidgets), widget);
@@ -83,8 +95,7 @@ std::pair<int, int> NotebookPage::removeFromLayout(ChatWidget *widget)
     return std::pair<int, int>(-1, -1);
 }
 
-void NotebookPage::addToLayout(ChatWidget *widget,
-                               std::pair<int, int> position = std::pair<int, int>(-1, -1))
+void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
 {
     this->chatWidgets.push_back(widget);
 
@@ -120,19 +131,19 @@ void NotebookPage::addToLayout(ChatWidget *widget,
     this->refreshCurrentFocusCoordinates();
 }
 
-const std::vector<ChatWidget *> &NotebookPage::getChatWidgets() const
+const std::vector<Split *> &SplitContainer::getChatWidgets() const
 {
     return this->chatWidgets;
 }
 
-NotebookTab *NotebookPage::getTab() const
+NotebookTab *SplitContainer::getTab() const
 {
     return this->tab;
 }
 
-void NotebookPage::addChat(bool openChannelNameDialog)
+void SplitContainer::addChat(bool openChannelNameDialog)
 {
-    ChatWidget *w = this->createChatWidget();
+    Split *w = this->createChatWidget();
 
     if (openChannelNameDialog) {
         bool ret = w->showChangeChannelPopup("Open channel", true);
@@ -146,7 +157,7 @@ void NotebookPage::addChat(bool openChannelNameDialog)
     this->addToLayout(w, std::pair<int, int>(-1, -1));
 }
 
-void NotebookPage::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
+void SplitContainer::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
 {
     int setX = -1;
     int setY = -1;
@@ -171,7 +182,7 @@ void NotebookPage::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
 
             QWidget *w = innerItem->widget();
             if (w) {
-                ChatWidget *chatWidget = static_cast<ChatWidget *>(w);
+                Split *chatWidget = static_cast<Split *>(w);
                 if (chatWidget->hasFocus()) {
                     setX = x;
                     setY = y;
@@ -199,7 +210,7 @@ void NotebookPage::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
     }
 }
 
-void NotebookPage::requestFocus(int requestedX, int requestedY)
+void SplitContainer::requestFocus(int requestedX, int requestedY)
 {
     // XXX: Perhaps if we request an Y coordinate out of bounds, we shuold set all previously set
     // requestedYs to 0 (if -1 is requested) or that x-coordinates vbox count (if requestedY >=
@@ -238,12 +249,12 @@ void NotebookPage::requestFocus(int requestedX, int requestedY)
 
     QWidget *w = innerItem->widget();
     if (w) {
-        ChatWidget *chatWidget = static_cast<ChatWidget *>(w);
+        Split *chatWidget = static_cast<Split *>(w);
         chatWidget->giveFocus(Qt::OtherFocusReason);
     }
 }
 
-void NotebookPage::enterEvent(QEvent *)
+void SplitContainer::enterEvent(QEvent *)
 {
     if (this->ui.hbox.count() == 0) {
         this->setCursor(QCursor(Qt::PointingHandCursor));
@@ -252,11 +263,11 @@ void NotebookPage::enterEvent(QEvent *)
     }
 }
 
-void NotebookPage::leaveEvent(QEvent *)
+void SplitContainer::leaveEvent(QEvent *)
 {
 }
 
-void NotebookPage::mouseReleaseEvent(QMouseEvent *event)
+void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
 {
     if (this->ui.hbox.count() == 0 && event->button() == Qt::LeftButton) {
         // "Add Chat" was clicked
@@ -266,7 +277,7 @@ void NotebookPage::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void NotebookPage::dragEnterEvent(QDragEnterEvent *event)
+void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!event->mimeData()->hasFormat("chatterino/split"))
         return;
@@ -306,12 +317,12 @@ void NotebookPage::dragEnterEvent(QDragEnterEvent *event)
     event->acceptProposedAction();
 }
 
-void NotebookPage::dragMoveEvent(QDragMoveEvent *event)
+void SplitContainer::dragMoveEvent(QDragMoveEvent *event)
 {
     setPreviewRect(event->pos());
 }
 
-void NotebookPage::setPreviewRect(QPoint mousePos)
+void SplitContainer::setPreviewRect(QPoint mousePos)
 {
     for (DropRegion region : this->dropRegions) {
         if (region.rect.contains(mousePos)) {
@@ -331,25 +342,25 @@ void NotebookPage::setPreviewRect(QPoint mousePos)
     this->dropPreview.hide();
 }
 
-void NotebookPage::dragLeaveEvent(QDragLeaveEvent *event)
+void SplitContainer::dragLeaveEvent(QDragLeaveEvent *event)
 {
     this->dropPreview.hide();
 }
 
-void NotebookPage::dropEvent(QDropEvent *event)
+void SplitContainer::dropEvent(QDropEvent *event)
 {
     if (isDraggingSplit) {
         event->acceptProposedAction();
 
-        NotebookPage::draggingSplit->setParent(this);
+        SplitContainer::draggingSplit->setParent(this);
 
-        addToLayout(NotebookPage::draggingSplit, dropPosition);
+        addToLayout(SplitContainer::draggingSplit, dropPosition);
     }
 
     this->dropPreview.hide();
 }
 
-bool NotebookPage::eventFilter(QObject *object, QEvent *event)
+bool SplitContainer::eventFilter(QObject *object, QEvent *event)
 {
     if (event->type() == QEvent::FocusIn) {
         QFocusEvent *focusEvent = static_cast<QFocusEvent *>(event);
@@ -360,7 +371,7 @@ bool NotebookPage::eventFilter(QObject *object, QEvent *event)
     return false;
 }
 
-void NotebookPage::paintEvent(QPaintEvent *)
+void SplitContainer::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -380,7 +391,7 @@ void NotebookPage::paintEvent(QPaintEvent *)
     painter.fillRect(0, 0, width(), 2, accentColor);
 }
 
-void NotebookPage::showEvent(QShowEvent *event)
+void SplitContainer::showEvent(QShowEvent *event)
 {
     // Whenever this notebook page is shown, give focus to the last focused chat widget
     // If this is the first time this notebook page is shown, it will give focus to the top-left
@@ -388,7 +399,7 @@ void NotebookPage::showEvent(QShowEvent *event)
     this->requestFocus(this->currentX, this->currentY);
 }
 
-static std::pair<int, int> getWidgetPositionInLayout(QLayout *layout, const ChatWidget *chatWidget)
+static std::pair<int, int> getWidgetPositionInLayout(QLayout *layout, const Split *chatWidget)
 {
     for (int i = 0; i < layout->count(); ++i) {
         printf("xD\n");
@@ -397,7 +408,7 @@ static std::pair<int, int> getWidgetPositionInLayout(QLayout *layout, const Chat
     return std::make_pair(-1, -1);
 }
 
-std::pair<int, int> NotebookPage::getChatPosition(const ChatWidget *chatWidget)
+std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
 {
     auto layout = this->ui.hbox.layout();
 
@@ -408,12 +419,12 @@ std::pair<int, int> NotebookPage::getChatPosition(const ChatWidget *chatWidget)
     return getWidgetPositionInLayout(layout, chatWidget);
 }
 
-ChatWidget *NotebookPage::createChatWidget()
+Split *SplitContainer::createChatWidget()
 {
-    return new ChatWidget(this->channelManager, this);
+    return new Split(this->channelManager, this);
 }
 
-void NotebookPage::refreshTitle()
+void SplitContainer::refreshTitle()
 {
     if (!this->tab->useDefaultBehaviour) {
         return;
@@ -444,7 +455,7 @@ void NotebookPage::refreshTitle()
     this->tab->setTitle(newTitle);
 }
 
-void NotebookPage::load(const boost::property_tree::ptree &tree)
+void SplitContainer::load(const boost::property_tree::ptree &tree)
 {
     try {
         int column = 0;
@@ -488,7 +499,7 @@ static void saveFromLayout(QLayout *layout, boost::property_tree::ptree &tree)
             continue;
         }
 
-        ChatWidget *chatWidget = qobject_cast<ChatWidget *>(widget);
+        Split *chatWidget = qobject_cast<Split *>(widget);
 
         if (chatWidget != nullptr) {
             boost::property_tree::ptree chat = chatWidget->save();
@@ -499,7 +510,7 @@ static void saveFromLayout(QLayout *layout, boost::property_tree::ptree &tree)
     }
 }
 
-boost::property_tree::ptree NotebookPage::save()
+boost::property_tree::ptree SplitContainer::save()
 {
     boost::property_tree::ptree tree;
 

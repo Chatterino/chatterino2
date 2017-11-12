@@ -2,7 +2,7 @@
 
 #include "settingsmanager.hpp"
 #include "settingssnapshot.hpp"
-#include "widgets/settingsdialogtab.hpp"
+#include "widgets/helper/settingsdialogtab.hpp"
 
 #include <QButtonGroup>
 #include <QCheckBox>

@@ -1,10 +1,10 @@
 #include "widgets/notebook.hpp"
 #include "colorscheme.hpp"
-#include "widgets/mainwindow.hpp"
-#include "widgets/notebookbutton.hpp"
-#include "widgets/notebookpage.hpp"
-#include "widgets/notebooktab.hpp"
+#include "widgets/helper/notebookbutton.hpp"
+#include "widgets/helper/notebooktab.hpp"
 #include "widgets/settingsdialog.hpp"
+#include "widgets/splitcontainer.hpp"
+#include "widgets/window.hpp"
 
 #include <QDebug>
 #include <QFile>
@@ -19,13 +19,14 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(ChannelManager &_channelManager, MainWindow *parent)
+Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons)
     : BaseWidget(parent)
     , channelManager(_channelManager)
     , completionManager(parent->completionManager)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)
+    , showButtons(_showButtons)
 {
     this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
     this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
@@ -42,10 +43,10 @@ Notebook::Notebook(ChannelManager &_channelManager, MainWindow *parent)
         [this](const bool &) { this->performLayout(); });
 }
 
-NotebookPage *Notebook::addPage(bool select)
+SplitContainer *Notebook::addPage(bool select)
 {
     auto tab = new NotebookTab(this);
-    auto page = new NotebookPage(this->channelManager, this, tab);
+    auto page = new SplitContainer(this->channelManager, this, tab);
 
     tab->show();
 
@@ -60,7 +61,7 @@ NotebookPage *Notebook::addPage(bool select)
     return page;
 }
 
-void Notebook::removePage(NotebookPage *page)
+void Notebook::removePage(SplitContainer *page)
 {
     int index = this->pages.indexOf(page);
 
@@ -84,7 +85,7 @@ void Notebook::removePage(NotebookPage *page)
     this->performLayout();
 }
 
-void Notebook::select(NotebookPage *page)
+void Notebook::select(SplitContainer *page)
 {
     if (page == this->selectedPage) {
         return;
@@ -106,7 +107,7 @@ void Notebook::select(NotebookPage *page)
     this->performLayout();
 }
 
-NotebookPage *Notebook::tabAt(QPoint point, int &index)
+SplitContainer *Notebook::tabAt(QPoint point, int &index)
 {
     int i = 0;
 
@@ -123,7 +124,7 @@ NotebookPage *Notebook::tabAt(QPoint point, int &index)
     return nullptr;
 }
 
-void Notebook::rearrangePage(NotebookPage *page, int index)
+void Notebook::rearrangePage(SplitContainer *page, int index)
 {
     this->pages.move(this->pages.indexOf(page), index);
 
@@ -161,13 +162,13 @@ void Notebook::performLayout(bool animated)
     int x = 0, y = 0;
     float scale = this->getDpiMultiplier();
 
-    if (SettingsManager::getInstance().hidePreferencesButton.get()) {
+    if (!showButtons || SettingsManager::getInstance().hidePreferencesButton.get()) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (SettingsManager::getInstance().hideUserButton.get()) {
+    if (!showButtons || SettingsManager::getInstance().hideUserButton.get()) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);

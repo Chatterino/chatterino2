@@ -1,6 +1,6 @@
-#include "widgets/notebookbutton.hpp"
+#include "widgets/helper/notebookbutton.hpp"
 #include "colorscheme.hpp"
-#include "widgets/rippleeffectbutton.hpp"
+#include "widgets/helper/rippleeffectbutton.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

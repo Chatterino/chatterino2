@@ -1,4 +1,4 @@
-#include "widgets/scrollbarhighlight.hpp"
+#include "widgets/helper/scrollbarhighlight.hpp"
 #include "colorscheme.hpp"
 #include "widgets/scrollbar.hpp"
 

@@ -15,7 +15,7 @@ class ColorScheme;
 namespace widgets {
 
 class Notebook;
-class NotebookPage;
+class SplitContainer;
 
 class NotebookTab : public BaseWidget
 {
@@ -29,7 +29,7 @@ public:
 
     void calcSize();
 
-    NotebookPage *page;
+    SplitContainer *page;
 
     const QString &getTitle() const;
     void setTitle(const QString &newTitle);

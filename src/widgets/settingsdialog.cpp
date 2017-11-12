@@ -2,8 +2,8 @@
 #include "accountmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
+#include "widgets/helper/settingsdialogtab.hpp"
 #include "widgets/logindialog.hpp"
-#include "widgets/settingsdialogtab.hpp"
 #include "windowmanager.hpp"
 
 #include <QComboBox>
@@ -175,7 +175,6 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         fontLayout->addWidget(fontButton);
         fontLayout->addWidget(fontFamilyLabel);
         fontLayout->addWidget(fontSizeLabel);
-
 
         {
             auto &fontManager = FontManager::getInstance();

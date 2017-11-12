@@ -55,19 +55,13 @@ SOURCES += \
     src/messages/word.cpp \
     src/messages/wordpart.cpp \
     src/resources.cpp \
-    src/widgets/chatwidget.cpp \
-    src/widgets/chatwidgetheader.cpp \
-    src/widgets/chatwidgetinput.cpp \
-    src/widgets/mainwindow.cpp \
     src/widgets/notebook.cpp \
-    src/widgets/notebookbutton.cpp \
-    src/widgets/notebookpage.cpp \
-    src/widgets/notebookpagedroppreview.cpp \
-    src/widgets/notebooktab.cpp \
+    src/widgets/helper/notebookbutton.cpp \
+    src/widgets/helper/notebooktab.cpp \
     src/widgets/scrollbar.cpp \
-    src/widgets/scrollbarhighlight.cpp \
+    src/widgets/helper/scrollbarhighlight.cpp \
     src/widgets/settingsdialog.cpp \
-    src/widgets/settingsdialogtab.cpp \
+    src/widgets/helper/settingsdialogtab.cpp \
     src/widgets/textinputdialog.cpp \
     src/messages/messageref.cpp \
     src/logging/loggingmanager.cpp \
@@ -87,17 +81,25 @@ SOURCES += \
     src/ircaccount.cpp \
     src/widgets/accountpopup.cpp \
     src/widgets/basewidget.cpp \
-    src/widgets/resizingtextedit.cpp \
+    src/widgets/helper/resizingtextedit.cpp \
     src/completionmanager.cpp \
     src/widgets/logindialog.cpp \
     src/widgets/qualitypopup.cpp \
     src/widgets/emotepopup.cpp \
-    src/widgets/channelview.cpp \
+    src/widgets/helper/channelview.cpp \
     src/twitch/twitchchannel.cpp \
-    src/widgets/rippleeffectlabel.cpp \
-    src/widgets/rippleeffectbutton.cpp \
+    src/widgets/helper/rippleeffectlabel.cpp \
+    src/widgets/helper/rippleeffectbutton.cpp \
     src/messages/messagecolor.cpp \
-    src/util/networkmanager.cpp
+    src/util/networkmanager.cpp \
+    src/commandmanager.cpp \
+    src/widgets/split.cpp \
+    src/widgets/helper/splitinput.cpp \
+    src/widgets/helper/splitheader.cpp \
+    src/widgets/splitcontainer.cpp \
+    src/widgets/helper/droppreview.cpp \
+    src/widgets/window.cpp \
+    src/widgets/helper/splitcolumn.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -114,22 +116,16 @@ HEADERS  += \
     src/resources.hpp \
     src/setting.hpp \
     src/twitch/emotevalue.hpp \
-    src/widgets/chatwidget.hpp \
-    src/widgets/chatwidgetheader.hpp \
-    src/widgets/chatwidgetinput.hpp \
-    src/widgets/mainwindow.hpp \
     src/widgets/notebook.hpp \
-    src/widgets/notebookbutton.hpp \
-    src/widgets/notebookpage.hpp \
-    src/widgets/notebookpagedroppreview.hpp \
-    src/widgets/notebooktab.hpp \
+    src/widgets/helper/notebookbutton.hpp \
+    src/widgets/helper/notebooktab.hpp \
     src/widgets/scrollbar.hpp \
-    src/widgets/scrollbarhighlight.hpp \
+    src/widgets/helper/scrollbarhighlight.hpp \
     src/widgets/settingsdialog.hpp \
-    src/widgets/settingsdialogtab.hpp \
-    src/widgets/signallabel.hpp \
+    src/widgets/helper/settingsdialogtab.hpp \
+    src/widgets/helper/signallabel.hpp \
     src/widgets/textinputdialog.hpp \
-    src/widgets/resizingtextedit.hpp \
+    src/widgets/helper/resizingtextedit.hpp \
     src/settingssnapshot.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
@@ -155,17 +151,26 @@ HEADERS  += \
     src/util/distancebetweenpoints.hpp \
     src/widgets/basewidget.hpp \
     src/completionmanager.hpp \
-    src/widgets/channelview.hpp \
+    src/widgets/helper/channelview.hpp \
     src/twitch/twitchchannel.hpp \
-    src/widgets/rippleeffectbutton.hpp \
-    src/widgets/rippleeffectlabel.hpp \
+    src/widgets/helper/rippleeffectbutton.hpp \
+    src/widgets/helper/rippleeffectlabel.hpp \
     src/widgets/qualitypopup.hpp \
     src/widgets/emotepopup.hpp \
     src/messages/messagecolor.hpp \
     src/util/nativeeventhelper.hpp \
     src/debug/log.hpp \
     src/util/benchmark.hpp \
-    src/util/networkmanager.hpp
+    src/util/networkmanager.hpp \
+    src/commandmanager.hpp \
+    src/widgets/split.hpp \
+    src/widgets/helper/splitheader.hpp \
+    src/widgets/helper/splitinput.hpp \
+    src/widgets/window.hpp \
+    src/widgets/splitcontainer.hpp \
+    src/widgets/helper/droppreview.hpp \
+    src/widgets/helper/splitcolumn.hpp
+
 
 PRECOMPILED_HEADER =
 

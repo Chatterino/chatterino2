@@ -3,7 +3,7 @@
 #include "channel.hpp"
 #include "emotemanager.hpp"
 #include "widgets/basewidget.hpp"
-#include "widgets/channelview.hpp"
+#include "widgets/helper/channelview.hpp"
 
 namespace chatterino {
 namespace widgets {

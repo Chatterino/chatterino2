@@ -1,8 +1,8 @@
-#include "widgets/mainwindow.hpp"
+#include "widgets/window.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
-#include "widgets/chatwidget.hpp"
+#include "widgets/split.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
 
@@ -16,13 +16,13 @@
 namespace chatterino {
 namespace widgets {
 
-MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                       CompletionManager &_completionManager)
+Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
+                       CompletionManager &_completionManager, bool _isMainWindow)
     : BaseWidget(_colorScheme, nullptr)
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
     , completionManager(_completionManager)
-    , notebook(this->channelManager, this)
+    , notebook(this->channelManager, this, _isMainWindow)
     , dpi(this->getDpiMultiplier())
 // , windowGeometry("/windows/0/geometry")
 {
@@ -66,11 +66,11 @@ MainWindow::MainWindow(ChannelManager &_channelManager, ColorScheme &_colorSchem
     }
 }
 
-MainWindow::~MainWindow()
+Window::~Window()
 {
 }
 
-void MainWindow::repaintVisibleChatWidgets(Channel *channel)
+void Window::repaintVisibleChatWidgets(Channel *channel)
 {
     auto *page = this->notebook.getSelectedPage();
 
@@ -78,10 +78,10 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
         return;
     }
 
-    const std::vector<ChatWidget *> &widgets = page->getChatWidgets();
+    const std::vector<Split *> &widgets = page->getChatWidgets();
 
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        ChatWidget *widget = *it;
+        Split *widget = *it;
 
         if (channel == nullptr || channel == widget->getChannel().get()) {
             widget->layoutMessages();
@@ -89,14 +89,14 @@ void MainWindow::repaintVisibleChatWidgets(Channel *channel)
     }
 }
 
-void MainWindow::load(const boost::property_tree::ptree &tree)
+void Window::load(const boost::property_tree::ptree &tree)
 {
     this->notebook.load(tree);
 
     loaded = true;
 }
 
-boost::property_tree::ptree MainWindow::save()
+boost::property_tree::ptree Window::save()
 {
     boost::property_tree::ptree child;
 
@@ -107,30 +107,30 @@ boost::property_tree::ptree MainWindow::save()
     return child;
 }
 
-void MainWindow::loadDefaults()
+void Window::loadDefaults()
 {
     this->notebook.loadDefaults();
 
     loaded = true;
 }
 
-bool MainWindow::isLoaded() const
+bool Window::isLoaded() const
 {
     return loaded;
 }
 
-Notebook &MainWindow::getNotebook()
+Notebook &Window::getNotebook()
 {
     return this->notebook;
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
+void Window::closeEvent(QCloseEvent *)
 {
     // Save closing window position
     // this->windowGeometry = this->geometry();
 }
 
-void MainWindow::refreshTheme()
+void Window::refreshTheme()
 {
     QPalette palette;
     palette.setColor(QPalette::Background, this->colorScheme.TabBackground);

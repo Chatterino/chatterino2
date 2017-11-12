@@ -4,7 +4,7 @@
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/emotepopup.hpp"
-#include "widgets/rippleeffectlabel.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -19,15 +19,15 @@
 namespace chatterino {
 namespace widgets {
 
-class ChatWidget;
+class Split;
 
-class ChatWidgetInput : public BaseWidget
+class SplitInput : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    ChatWidgetInput(ChatWidget *_chatWidget, EmoteManager &, WindowManager &);
-    ~ChatWidgetInput();
+    SplitInput(Split *_chatWidget, EmoteManager &, WindowManager &);
+    ~SplitInput();
 
     void clearSelection();
 
@@ -38,7 +38,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    ChatWidget *const chatWidget;
+    Split *const chatWidget;
     EmotePopup *emotePopup = nullptr;
     EmoteManager &emoteManager;
     WindowManager &windowManager;
@@ -57,7 +57,7 @@ private:
 private slots:
     void editTextChanged();
 
-    friend class ChatWidget;
+    friend class Split;
 };
 
 }  // namespace widgets
