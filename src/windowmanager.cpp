@@ -20,6 +20,12 @@ WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colo
     WindowManager::instance = this;
 }
 
+void WindowManager::initMainWindow()
+{
+    this->selectedWindow = this->mainWindow =
+        new widgets::Window(this->channelManager, this->colorScheme, this->completionManager, true);
+}
+
 static const std::string &getSettingsPath()
 {
     static std::string path = (Path::getAppdataPath() + "uilayout.json").toStdString();
@@ -53,18 +59,12 @@ void WindowManager::repaintGifEmotes()
 
 widgets::Window &WindowManager::getMainWindow()
 {
-    std::lock_guard<std::mutex> lock(this->windowMutex);
-
-    if (this->mainWindow == nullptr) {
-        this->mainWindow = new widgets::Window(this->channelManager, this->colorScheme,
-                                               this->completionManager, true);
-    }
-
     return *this->mainWindow;
 }
 
-widgets::Window &WindowManager::getCurrentWindow()
+widgets::Window &WindowManager::getSelectedWindow()
 {
+    return *this->selectedWindow;
 }
 
 widgets::Window &WindowManager::createWindow()
@@ -72,12 +72,26 @@ widgets::Window &WindowManager::createWindow()
     auto *window = new widgets::Window(this->channelManager, this->colorScheme,
                                        this->completionManager, false);
 
-    std::lock_guard<std::mutex> lock(this->windowMutex);
     window->loadDefaults();
 
     this->windows.push_back(window);
 
     return *window;
+}
+
+int WindowManager::windowCount()
+{
+    return this->windows.size();
+}
+
+widgets::Window *WindowManager::windowAt(int index)
+{
+    if (index < 0 || index >= this->windows.size()) {
+        return nullptr;
+    }
+    qDebug() << "getting window at bad index" << index;
+
+    return this->windows.at(index);
 }
 
 void WindowManager::load()

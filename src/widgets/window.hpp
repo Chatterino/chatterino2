@@ -9,6 +9,7 @@
 //#endif
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/signals2.hpp>
 #include <pajlada/settings/serialize.hpp>
 #include <pajlada/settings/settingdata.hpp>
 
@@ -27,7 +28,6 @@ class Window : public BaseWidget
 public:
     explicit Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
                     CompletionManager &_completionManager, bool isMainWindow);
-    ~Window();
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
@@ -38,6 +38,8 @@ public:
     bool isLoaded() const;
 
     Notebook &getNotebook();
+
+    boost::signals2::signal<void()> closed;
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;

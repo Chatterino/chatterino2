@@ -66,10 +66,6 @@ Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
     }
 }
 
-Window::~Window()
-{
-}
-
 void Window::repaintVisibleChatWidgets(Channel *channel)
 {
     auto *page = this->notebook.getSelectedPage();
@@ -128,6 +124,8 @@ void Window::closeEvent(QCloseEvent *)
 {
     // Save closing window position
     // this->windowGeometry = this->geometry();
+
+    this->closed();
 }
 
 void Window::refreshTheme()

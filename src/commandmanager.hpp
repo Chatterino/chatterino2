@@ -9,7 +9,7 @@ public:
     CommandManager() = delete;
 
     void execCommand(QString command);
-    void selectSplitRelative(int dx, int dy);
+    // void selectSplitRelative(int dx, int dy);
     void moveSplitRelative(int dx, int dy);
 };
 }

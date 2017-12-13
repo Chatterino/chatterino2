@@ -39,6 +39,7 @@ public:
 
     void performLayout(bool animate = true);
 
+    int tabCount();
     SplitContainer *tabAt(QPoint point, int &index);
     void rearrangePage(SplitContainer *page, int index);
 

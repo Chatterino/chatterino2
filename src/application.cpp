@@ -22,6 +22,8 @@ Application::Application()
     logging::init();
     SettingsManager::getInstance().load();
 
+    this->windowManager.initMainWindow();
+
     // Initialize everything we need
     this->emoteManager.loadGlobalEmotes();
 

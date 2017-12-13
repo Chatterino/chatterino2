@@ -4,37 +4,39 @@
 namespace chatterino {
 void CommandManager::execCommand(QString command)
 {
-    if (command == "selectr") {
-        selectSplitRelative(1, 0);
-    }
-    if (command == "selectl") {
-        selectSplitRelative(-1, 0);
-    }
-    if (command == "selectu") {
-        selectSplitRelative(0, -1);
-    }
-    if (command == "selectd") {
-        selectSplitRelative(0, 1);
-    }
+//    if (command == "selectr") {
+//        selectSplitRelative(false, 1);
+//    }
+//    if (command == "selectl") {
+//        selectSplitRelative(false, -1);
+//    }
+//    if (command == "selectu") {
+//        selectSplitRelative(true, -1);
+//    }
+//    if (command == "selectd") {
+//        selectSplitRelative(true, 1);
+//    }
 
     if (command == "mover") {
-        moveSplitRelative(1, 0);
+        moveSplitRelative(false, 1);
     }
     if (command == "movel") {
-        moveSplitRelative(-1, 0);
+        moveSplitRelative(false, -1);
     }
     if (command == "moveu") {
-        moveSplitRelative(0, -1);
+        moveSplitRelative(true, -1);
     }
     if (command == "moved") {
-        moveSplitRelative(0, 1);
+        moveSplitRelative(true, 1);
     }
 }
 
-void CommandManager::selectSplitRelative(int dx, int dy)
-{
-    WindowManager::instance->getCurrentWindow().getNotebook().getSelectedPage();
-}
+//void CommandManager::selectSplitRelative(bool vertical, int offset)
+//{
+//    SplitContainer *container = WindowManager::instance->
+//
+//                                if (vertical)
+//}
 
 void CommandManager::moveSplitRelative(int dx, int dy)
 {

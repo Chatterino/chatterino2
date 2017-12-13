@@ -2,8 +2,6 @@
 
 #include "widgets/window.hpp"
 
-#include <mutex>
-
 namespace chatterino {
 
 class ChannelManager;
@@ -25,12 +23,15 @@ public:
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
+    void initMainWindow();
     // void updateAll();
 
     widgets::Window &getMainWindow();
-    widgets::Window &getCurrentWindow();
-
+    widgets::Window &getSelectedWindow();
     widgets::Window &createWindow();
+
+    int windowCount();
+    widgets::Window *windowAt(int index);
 
     void load();
     void save();
@@ -39,11 +40,10 @@ public:
     boost::signals2::signal<void()> layout;
 
 private:
-    std::mutex windowMutex;
     std::vector<widgets::Window *> windows;
 
-    // TODO(pajlada): Store as a value instead of a pointer
     widgets::Window *mainWindow = nullptr;
+    widgets::Window *selectedWindow = nullptr;
 };
 
 }  // namespace chatterino

@@ -107,6 +107,11 @@ void Notebook::select(SplitContainer *page)
     this->performLayout();
 }
 
+int Notebook::tabCount()
+{
+    return this->pages.size();
+}
+
 SplitContainer *Notebook::tabAt(QPoint point, int &index)
 {
     int i = 0;
