@@ -5,6 +5,7 @@
 #include "messages/message.hpp"
 #include "twitch/twitchuser.hpp"
 
+#include <ircconnection.h>
 #include <IrcMessage>
 #include <QMap>
 #include <QMutex>
@@ -44,7 +45,7 @@ public:
     void joinChannel(const QString &channelName);
     void partChannel(const QString &channelName);
 
-    void setUser(std::shared_ptr<twitch::TwitchUser> account);
+    void setUser(std::shared_ptr<twitch::TwitchUser> newAccount);
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
@@ -57,19 +58,18 @@ private:
     // variables
     std::shared_ptr<twitch::TwitchUser> account = nullptr;
 
-    std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
-    std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
+    std::unique_ptr<Communi::IrcConnection> writeConnection = nullptr;
+    std::unique_ptr<Communi::IrcConnection> readConnection = nullptr;
 
     std::mutex connectionMutex;
-    uint32_t connectionGeneration = 0;
 
     QMap<QString, bool> twitchBlockedUsers;
     QMutex twitchBlockedUsersMutex;
 
     QNetworkAccessManager networkAccessManager;
 
-    // methods
-    Communi::IrcConnection *createConnection(bool doRead);
+    void initializeConnection(const std::unique_ptr<Communi::IrcConnection> &connection,
+                              bool isReadConnection);
 
     void refreshIgnoredUsers(const QString &username, const QString &oauthClient,
                              const QString &oauthToken);

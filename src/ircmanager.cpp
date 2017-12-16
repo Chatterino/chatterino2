@@ -13,7 +13,6 @@
 #include "windowmanager.hpp"
 
 #include <irccommand.h>
-#include <ircconnection.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -41,16 +40,32 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
 
         postToThread([this] { this->connect(); });
     });
+
+    // Initialize the connections
+    this->writeConnection.reset(new Communi::IrcConnection);
+    this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
+
+    this->readConnection.reset(new Communi::IrcConnection);
+    this->readConnection->moveToThread(QCoreApplication::instance()->thread());
+
+    // Listen to read connection message signals
+    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::messageReceived, this,
+                     &IrcManager::messageReceived);
+    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::privateMessageReceived,
+                     this, &IrcManager::privateMessageReceived);
 }
 
-void IrcManager::setUser(std::shared_ptr<twitch::TwitchUser> account)
+void IrcManager::setUser(std::shared_ptr<twitch::TwitchUser> newAccount)
 {
-    this->account = account;
+    this->account = newAccount;
 }
 
 void IrcManager::connect()
 {
-    disconnect();
+    this->disconnect();
+
+    this->initializeConnection(this->writeConnection, false);
+    this->initializeConnection(this->readConnection, true);
 
     // XXX(pajlada): Disabled the async_exec for now, because if we happen to run the
     // `beginConnecting` function in a different thread than last time, we won't be able to connect
@@ -59,17 +74,10 @@ void IrcManager::connect()
     this->beginConnecting();
 }
 
-Communi::IrcConnection *IrcManager::createConnection(bool doRead)
+void IrcManager::initializeConnection(const std::unique_ptr<Communi::IrcConnection> &connection,
+                                      bool isReadConnection)
 {
     assert(this->account);
-    Communi::IrcConnection *connection = new Communi::IrcConnection;
-
-    if (doRead) {
-        QObject::connect(connection, &Communi::IrcConnection::messageReceived, this,
-                         &IrcManager::messageReceived);
-        QObject::connect(connection, &Communi::IrcConnection::privateMessageReceived, this,
-                         &IrcManager::privateMessageReceived);
-    }
 
     QString username = this->account->getUserName();
     QString oauthClient = this->account->getOAuthClient();
@@ -88,7 +96,7 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
         this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
-    if (doRead) {
+    if (isReadConnection) {
         connection->sendCommand(
             Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
         connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
@@ -97,8 +105,6 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
 
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6667);
-
-    return connection;
 }
 
 void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oauthClient,
@@ -139,43 +145,23 @@ void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oau
 
 void IrcManager::beginConnecting()
 {
-    uint32_t generation = ++this->connectionGeneration;
-
-    Communi::IrcConnection *_writeConnection = this->createConnection(false);
-    Communi::IrcConnection *_readConnection = this->createConnection(true);
-
     std::lock_guard<std::mutex> locker(this->connectionMutex);
 
-    if (generation == this->connectionGeneration) {
-        this->writeConnection = std::shared_ptr<Communi::IrcConnection>(_writeConnection);
-        this->readConnection = std::shared_ptr<Communi::IrcConnection>(_readConnection);
-
-        this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
-        this->readConnection->moveToThread(QCoreApplication::instance()->thread());
-
-        for (auto &channel : this->channelManager.getItems()) {
-            this->writeConnection->sendRaw("JOIN #" + channel->name);
-            this->readConnection->sendRaw("JOIN #" + channel->name);
-        }
-        this->writeConnection->open();
-        this->readConnection->open();
-    } else {
-        delete _writeConnection;
-        delete _readConnection;
+    for (auto &channel : this->channelManager.getItems()) {
+        this->writeConnection->sendRaw("JOIN #" + channel->name);
+        this->readConnection->sendRaw("JOIN #" + channel->name);
     }
+
+    this->writeConnection->open();
+    this->readConnection->open();
 }
 
 void IrcManager::disconnect()
 {
-    this->connectionMutex.lock();
+    std::lock_guard<std::mutex> locker(this->connectionMutex);
 
-    auto _readConnection = this->readConnection;
-    auto _writeConnection = this->writeConnection;
-
-    this->readConnection.reset();
-    this->writeConnection.reset();
-
-    this->connectionMutex.unlock();
+    this->readConnection->close();
+    this->writeConnection->close();
 }
 
 void IrcManager::sendMessage(const QString &channelName, const QString &message)
@@ -272,17 +258,17 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
 
 void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    // do nothing
+    // TODO: Implement
 }
 
 void IrcManager::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    // do nothing
+    // TODO: Implement
 }
 
 void IrcManager::handleWhisperMessage(Communi::IrcMessage *message)
 {
-    // do nothing
+    // TODO: Implement
 }
 
 void IrcManager::handleUserNoticeMessage(Communi::IrcMessage *message)
@@ -300,6 +286,7 @@ void IrcManager::handleModeMessage(Communi::IrcMessage *message)
     }
 }
 
+// XXX: This does not fit in IrcManager
 bool IrcManager::isTwitchBlockedUser(QString const &username)
 {
     QMutexLocker locker(&this->twitchBlockedUsersMutex);
@@ -309,6 +296,7 @@ bool IrcManager::isTwitchBlockedUser(QString const &username)
     return iterator != this->twitchBlockedUsers.end();
 }
 
+// XXX: This does not fit in IrcManager
 bool IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
 {
     assert(this->account);
@@ -332,9 +320,11 @@ bool IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessag
     reply->deleteLater();
 
     errorMessage = "Error while ignoring user \"" + username + "\": " + reply->errorString();
+
     return false;
 }
 
+// XXX: This does not fit in IrcManager
 void IrcManager::addIgnoredUser(QString const &username)
 {
     QString errorMessage;
@@ -343,9 +333,11 @@ void IrcManager::addIgnoredUser(QString const &username)
     }
 }
 
+// XXX: This does not fit in IrcManager
 bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
 {
     assert(this->account);
+
     QUrl url("https://api.twitch.tv/kraken/users/" + this->account->getUserName() + "/blocks/" +
              username + "?oauth_token=" + this->account->getOAuthToken() +
              "&client_id=" + this->account->getOAuthClient());
@@ -365,9 +357,11 @@ bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMes
     reply->deleteLater();
 
     errorMessage = "Error while unignoring user \"" + username + "\": " + reply->errorString();
+
     return false;
 }
 
+// XXX: This does not fit in IrcManager
 void IrcManager::removeIgnoredUser(QString const &username)
 {
     QString errorMessage;
