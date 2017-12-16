@@ -802,7 +802,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
 
-    qDebug() << "Distance: " << distance;
+    // qDebug() << "Distance: " << distance;
 
     if (fabsf(distance) > 15.f) {
         // It wasn't a proper click, so we don't care about that here
