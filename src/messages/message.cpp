@@ -107,6 +107,36 @@ Message *Message::createSystemMessage(const QString &text)
     return message;
 }
 
+Message *Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
+                                       const QString &reason)
+{
+    Message *message = new Message;
+
+    AddCurrentTimestamp(message);
+
+    QString text;
+
+    text.append(username);
+    text.append(" has been timed out");
+
+    // TODO: Implement who timed the user out
+
+    text.append(" for ");
+    text.append(durationInSeconds);
+    bool ok = true;
+    int timeoutDuration = durationInSeconds.toInt(&ok);
+    text.append(" second");
+    if (ok && timeoutDuration > 1) {
+        text.append("s");
+    }
+
+    if (reason.length() > 0) {
+        text.append(": \"");
+        text.append(reason);
+        text.append("\"");
+    }
+    text.append(".");
+
     Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
 
     message->getWords().push_back(word);

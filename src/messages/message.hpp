@@ -35,6 +35,9 @@ public:
 
     static Message *createSystemMessage(const QString &text);
 
+    static Message *createTimeoutMessage(const QString &username, const QString &durationInSeconds,
+                                         const QString &reason);
+
 private:
     static LazyLoadedImage *badgeStaff;
     static LazyLoadedImage *badgeAdmin;

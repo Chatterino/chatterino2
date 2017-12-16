@@ -263,7 +263,49 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
 
 void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    // TODO: Implement
+    assert(message->parameters().length() >= 1);
+
+    auto rawChannelName = message->parameter(0);
+
+    assert(rawChannelName.length() >= 2);
+
+    auto trimmedChannelName = rawChannelName.mid(1);
+
+    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+
+    if (!c) {
+        debug::Log("[IrcManager:handleClearChatMessage] Channel {} not found in channel manager",
+                   trimmedChannelName);
+        return;
+    }
+
+    if (message->parameters().length() == 1) {
+        std::shared_ptr<Message> msg(
+            Message::createSystemMessage("Chat has been cleared by a moderator."));
+
+        c->addMessage(msg);
+
+        return;
+    }
+
+    assert(message->parameters().length() >= 2);
+
+    QString username = message->parameter(1);
+    QString durationInSeconds, reason;
+    QVariant v = message->tag("ban-duration");
+    if (v.isValid()) {
+        durationInSeconds = v.toString();
+    }
+
+    v = message->tag("ban-reason");
+    if (v.isValid()) {
+        reason = v.toString();
+    }
+
+    std::shared_ptr<Message> msg(
+        Message::createTimeoutMessage(username, durationInSeconds, reason));
+
+    c->addMessage(msg);
 }
 
 void IrcManager::handleUserStateMessage(Communi::IrcMessage *message)
