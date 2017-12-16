@@ -33,6 +33,8 @@ public:
     const QString text;
     bool centered = false;
 
+    static Message *createSystemMessage(const QString &text);
+
 private:
     static LazyLoadedImage *badgeStaff;
     static LazyLoadedImage *badgeAdmin;

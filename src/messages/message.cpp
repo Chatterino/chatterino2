@@ -70,5 +70,33 @@ const QString &Message::getId() const
     return this->id;
 }
 
+/// Static
+Message *Message::createSystemMessage(const QString &text)
+{
+    Message *message = new Message;
+
+    std::time_t t;
+    time(&t);
+    char timeStampBuffer[69];
+
+    // Add word for timestamp with no seconds
+    strftime(timeStampBuffer, 69, "%H:%M", localtime(&t));
+    QString timestampNoSeconds(timeStampBuffer);
+    message->getWords().push_back(Word(timestampNoSeconds, Word::TimestampNoSeconds,
+                                       MessageColor(MessageColor::System), QString(), QString()));
+
+    // Add word for timestamp with seconds
+    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&t));
+    QString timestampWithSeconds(timeStampBuffer);
+    message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
+                                       MessageColor(MessageColor::System), QString(), QString()));
+
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+
+    message->getWords().push_back(word);
+
+    return message;
+}
+
 }  // namespace messages
 }  // namespace chatterino

@@ -53,6 +53,11 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
                      &IrcManager::messageReceived);
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::privateMessageReceived,
                      this, &IrcManager::privateMessageReceived);
+
+    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::connected, this,
+                     &IrcManager::onConnected);
+    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected, this,
+                     &IrcManager::onDisconnected);
 }
 
 void IrcManager::setUser(std::shared_ptr<twitch::TwitchUser> newAccount)
@@ -368,6 +373,26 @@ void IrcManager::removeIgnoredUser(QString const &username)
     if (!tryRemoveIgnoredUser(username, errorMessage)) {
         // TODO: Implement IrcManager::removeIgnoredUser
     }
+}
+
+void IrcManager::onConnected()
+{
+    std::shared_ptr<Message> msg(Message::createSystemMessage("connected to chat"));
+
+    this->channelManager.doOnAll([msg](std::shared_ptr<twitch::TwitchChannel> channel) {
+        assert(channel);
+        channel->addMessage(msg);
+    });
+}
+
+void IrcManager::onDisconnected()
+{
+    std::shared_ptr<Message> msg(Message::createSystemMessage("disconnected from chat"));
+
+    this->channelManager.doOnAll([msg](std::shared_ptr<twitch::TwitchChannel> channel) {
+        assert(channel);
+        channel->addMessage(msg);
+    });
 }
 
 }  // namespace chatterino
