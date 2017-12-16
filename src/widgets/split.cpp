@@ -79,15 +79,10 @@ Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
     ezShortcut(this, "CTRL+R", &Split::doChangeChannel);
 
     // xd
-    //ezShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
-    //ezShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
-    //ezShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
-    //ezShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
-
-#ifndef NDEBUG
-    // F12: Toggle message spawning
-    ezShortcut(this, "ALT+Q", &Split::doToggleMessageSpawning);
-#endif
+    // ezShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
+    // ezShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
+    // ezShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
+    // ezShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
     this->channelName.getValueChangedSignal().connect(
         std::bind(&Split::channelNameUpdated, this, std::placeholders::_1));
@@ -102,10 +97,6 @@ Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
             this->input.clearSelection();
         }
     });
-
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &Split::test);
-    timer->start(1000);
 }
 
 Split::~Split()
@@ -462,30 +453,6 @@ void Split::doCopy()
     QApplication::clipboard()->setText(this->view.getSelectedText());
 }
 
-static std::vector<std::string> usernameVariants = {
-    "pajlada",                 //
-    "trump",                   //
-    "Chancu",                  //
-    "pajaWoman",               //
-    "fourtf",                  //
-    "weneedmoreautisticbots",  //
-    "fourtfbot",               //
-    "pajbot",                  //
-    "snusbot",                 //
-};
-
-static std::vector<std::string> messageVariants = {
-    "hehe",                                         //
-    "lol pajlada",                                  //
-    "hehe BANNEDWORD",                              //
-    "someone ordered pizza",                        //
-    "for ice poseidon",                             //
-    "and delivery guy said it is for enza denino",  //
-    "!gn",                                          //
-    "for my laptop",                                //
-    "should I buy a Herschel backpack?",            //
-};
-
 template <typename Iter, typename RandomGenerator>
 static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
 {
@@ -500,41 +467,6 @@ static Iter select_randomly(Iter start, Iter end)
     static std::random_device rd;
     static std::mt19937 gen(rd());
     return select_randomly(start, end, gen);
-}
-
-void Split::test()
-{
-    if (this->testEnabled) {
-        messages::MessageParseArgs args;
-
-        auto message =
-            new Communi::IrcPrivateMessage(this->channelManager.ircManager.readConnection.get());
-
-        std::string text = *(select_randomly(messageVariants.begin(), messageVariants.end()));
-        std::string username = *(select_randomly(usernameVariants.begin(), usernameVariants.end()));
-        std::string usernameString = username + "!" + username + "@" + username;
-
-        QStringList params{"#pajlada", text.c_str()};
-
-        qDebug() << params;
-
-        message->setParameters(params);
-
-        message->setPrefix(usernameString.c_str());
-
-        auto twitchChannel = std::dynamic_pointer_cast<twitch::TwitchChannel>(this->channel);
-
-        twitch::TwitchMessageBuilder builder(
-            twitchChannel.get(), this->channelManager.ircManager.resources,
-            this->channelManager.emoteManager, this->channelManager.windowManager, message, args);
-
-        twitchChannel->addMessage(builder.parse());
-    }
-}
-
-void Split::doToggleMessageSpawning()
-{
-    this->testEnabled = !this->testEnabled;
 }
 
 void Split::doIncFlexX()
