@@ -6,6 +6,7 @@
 
 namespace chatterino {
 namespace messages {
+
 class MessageColor
 {
 public:
@@ -21,5 +22,6 @@ private:
     Type type;
     QColor color;
 };
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino
