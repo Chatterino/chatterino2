@@ -136,4 +136,14 @@ WindowManager &ChannelManager::getWindowManager()
     return this->windowManager;
 }
 
+void ChannelManager::doOnAll(std::function<void(std::shared_ptr<TwitchChannel>)> func)
+{
+    for (const auto &channel : this->twitchChannels) {
+        func(std::get<0>(channel));
+    }
+
+    func(this->whispersChannel);
+    func(this->mentionsChannel);
+}
+
 }  // namespace chatterino

@@ -5,6 +5,7 @@
 #include "messages/message.hpp"
 #include "twitch/twitchuser.hpp"
 
+#include <ircconnection.h>
 #include <IrcMessage>
 #include <QMap>
 #include <QMutex>
@@ -44,8 +45,7 @@ public:
     void joinChannel(const QString &channelName);
     void partChannel(const QString &channelName);
 
-    const twitch::TwitchUser &getUser() const;
-    void setUser(const twitch::TwitchUser &account);
+    void setUser(std::shared_ptr<twitch::TwitchUser> newAccount);
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
@@ -56,26 +56,20 @@ public:
 
 private:
     // variables
-    twitch::TwitchUser account;
+    std::shared_ptr<twitch::TwitchUser> account = nullptr;
 
-    pajlada::Settings::Setting<std::string> currentUser;
+    std::unique_ptr<Communi::IrcConnection> writeConnection = nullptr;
+    std::unique_ptr<Communi::IrcConnection> readConnection = nullptr;
 
-    std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
-
-public:
-    std::shared_ptr<Communi::IrcConnection> readConnection = nullptr;
-
-private:
     std::mutex connectionMutex;
-    uint32_t connectionGeneration = 0;
 
     QMap<QString, bool> twitchBlockedUsers;
     QMutex twitchBlockedUsersMutex;
 
     QNetworkAccessManager networkAccessManager;
 
-    // methods
-    Communi::IrcConnection *createConnection(bool doRead);
+    void initializeConnection(const std::unique_ptr<Communi::IrcConnection> &connection,
+                              bool isReadConnection);
 
     void refreshIgnoredUsers(const QString &username, const QString &oauthClient,
                              const QString &oauthToken);
@@ -85,12 +79,19 @@ private:
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
     void messageReceived(Communi::IrcMessage *message);
 
+    void writeConnectionMessageReceived(Communi::IrcMessage *message);
+
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message);
     void handleModeMessage(Communi::IrcMessage *message);
+    void handleNoticeMessage(Communi::IrcNoticeMessage *message);
+    void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
+
+    void onConnected();
+    void onDisconnected();
 };
 
 }  // namespace chatterino

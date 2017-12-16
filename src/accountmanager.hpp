@@ -9,6 +9,34 @@
 
 namespace chatterino {
 
+class AccountManager;
+
+class TwitchAccountManager
+{
+public:
+    // Returns the current twitchUsers, or the anonymous user if we're not currently logged in
+    std::shared_ptr<twitch::TwitchUser> getCurrent();
+
+    std::vector<QString> getUsernames() const;
+
+    std::shared_ptr<twitch::TwitchUser> findUserByUsername(const QString &username) const;
+    bool userExists(const QString &username) const;
+
+    pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
+    pajlada::Signals::NoArgSignal userChanged;
+
+private:
+    bool addUser(std::shared_ptr<twitch::TwitchUser> user);
+
+    std::shared_ptr<twitch::TwitchUser> currentUser;
+
+    std::shared_ptr<twitch::TwitchUser> anonymousUser;
+    std::vector<std::shared_ptr<twitch::TwitchUser>> users;
+    mutable std::mutex mutex;
+
+    friend class AccountManager;
+};
+
 class AccountManager
 {
 public:
@@ -20,30 +48,10 @@ public:
 
     void load();
 
-    twitch::TwitchUser &getTwitchAnon();
-
-    // Returns first user from twitchUsers, or twitchAnonymousUser if twitchUsers is empty
-    twitch::TwitchUser &getTwitchUser();
-
-    // Return a copy of the current available twitch users
-    std::vector<twitch::TwitchUser> getTwitchUsers();
-
-    // Remove twitch user with the given username
-    bool removeTwitchUser(const QString &userName);
-
-    void setCurrentTwitchUser(const QString &username);
-
-    // Add twitch user to the list of available twitch users
-    void addTwitchUser(const twitch::TwitchUser &user);
+    TwitchAccountManager Twitch;
 
 private:
     AccountManager();
-
-    pajlada::Settings::Setting<std::string> currentUser;
-
-    twitch::TwitchUser twitchAnonymousUser;
-    std::vector<twitch::TwitchUser> twitchUsers;
-    std::mutex twitchUsersMutex;
 };
 
 }  // namespace chatterino

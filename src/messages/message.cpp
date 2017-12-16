@@ -7,6 +7,7 @@
 #include "ircmanager.hpp"
 #include "messages/link.hpp"
 #include "resources.hpp"
+#include "util/irchelpers.hpp"
 
 #include <ctime>
 #include <list>
@@ -68,6 +69,84 @@ bool Message::isDisabled() const
 const QString &Message::getId() const
 {
     return this->id;
+}
+
+namespace {
+
+void AddCurrentTimestamp(Message *message)
+{
+    std::time_t t;
+    time(&t);
+    char timeStampBuffer[69];
+
+    // Add word for timestamp with no seconds
+    strftime(timeStampBuffer, 69, "%H:%M", localtime(&t));
+    QString timestampNoSeconds(timeStampBuffer);
+    message->getWords().push_back(Word(timestampNoSeconds, Word::TimestampNoSeconds,
+                                       MessageColor(MessageColor::System), QString(), QString()));
+
+    // Add word for timestamp with seconds
+    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&t));
+    QString timestampWithSeconds(timeStampBuffer);
+    message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
+                                       MessageColor(MessageColor::System), QString(), QString()));
+}
+
+}  // namespace
+
+/// Static
+Message *Message::createSystemMessage(const QString &text)
+{
+    Message *message = new Message;
+
+    AddCurrentTimestamp(message);
+
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+
+    message->getWords().push_back(word);
+
+    return message;
+}
+
+Message *Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
+                                       const QString &reason)
+{
+    Message *message = new Message;
+
+    AddCurrentTimestamp(message);
+
+    QString text;
+
+    text.append(username);
+    if (!durationInSeconds.isEmpty()) {
+        text.append(" has been timed out");
+
+        // TODO: Implement who timed the user out
+
+        text.append(" for ");
+        text.append(durationInSeconds);
+        bool ok = true;
+        int timeoutDuration = durationInSeconds.toInt(&ok);
+        text.append(" second");
+        if (ok && timeoutDuration > 1) {
+            text.append("s");
+        }
+    } else {
+        text.append(" has been permanently banned");
+    }
+
+    if (reason.length() > 0) {
+        text.append(": \"");
+        text.append(ParseTagString(reason));
+        text.append("\"");
+    }
+    text.append(".");
+
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+
+    message->getWords().push_back(word);
+
+    return message;
 }
 
 }  // namespace messages

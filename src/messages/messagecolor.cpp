@@ -2,6 +2,7 @@
 
 namespace chatterino {
 namespace messages {
+
 MessageColor::MessageColor(const QColor &_color)
     : type(Type::Custom)
     , color(_color)
@@ -34,5 +35,6 @@ const QColor &MessageColor::getColor(ColorScheme &colorScheme) const
     static QColor _default;
     return _default;
 }
-}
-}
+
+}  // namespace messages
+}  // namespace chatterino

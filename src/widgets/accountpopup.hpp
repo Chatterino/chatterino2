@@ -1,4 +1,5 @@
 #pragma once
+
 #include "concurrentmap.hpp"
 #include "twitch/twitchchannel.hpp"
 
@@ -35,9 +36,9 @@ private:
     void getUserData();
     void loadAvatar(const QUrl &avatarUrl);
 
-    void updateButtons(QWidget* layout, bool state);
-    void timeout(QPushButton* button, int time);
-    void sendCommand(QPushButton* button, QString command);
+    void updateButtons(QWidget *layout, bool state);
+    void timeout(QPushButton *button, int time);
+    void sendCommand(QPushButton *button, QString command);
 
     enum class permissions { User, Mod, Owner };
     permissions permission;

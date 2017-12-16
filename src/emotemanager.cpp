@@ -505,7 +505,6 @@ void EmoteManager::loadFFZEmotes()
 EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
 {
     return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &id] {
-        qDebug() << "added twitch emote: " << id;
         qreal scale;
         QString url = getTwitchEmoteLink(id, scale);
         return new LazyLoadedImage(*this, this->windowManager, url, scale, emoteName,

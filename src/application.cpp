@@ -18,7 +18,6 @@ Application::Application()
     , channelManager(this->windowManager, this->emoteManager, this->ircManager)
     , ircManager(this->channelManager, this->resources, this->emoteManager, this->windowManager)
 {
-    // TODO(pajlada): Get rid of all singletons
     logging::init();
     SettingsManager::getInstance().load();
 
@@ -28,8 +27,6 @@ Application::Application()
     this->emoteManager.loadGlobalEmotes();
 
     AccountManager::getInstance().load();
-
-    this->ircManager.setUser(AccountManager::getInstance().getTwitchUser());
 
     // XXX
     SettingsManager::getInstance().updateWordTypeMask();

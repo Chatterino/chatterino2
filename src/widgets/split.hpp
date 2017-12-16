@@ -52,7 +52,6 @@ public:
     CompletionManager &completionManager;
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
-    bool testEnabled = false;
 
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();
@@ -122,8 +121,6 @@ public slots:
     // Open viewer list of the channel
     void doOpenViewerList();
 
-    void doToggleMessageSpawning();
-    void test();
     void doIncFlexX();
     void doDecFlexX();
     void doIncFlexY();

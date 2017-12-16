@@ -32,6 +32,8 @@ public:
     EmoteManager &getEmoteManager();
     WindowManager &getWindowManager();
 
+    void doOnAll(std::function<void(std::shared_ptr<twitch::TwitchChannel>)> func);
+
     // Special channels
     const std::shared_ptr<twitch::TwitchChannel> whispersChannel;
     const std::shared_ptr<twitch::TwitchChannel> mentionsChannel;
