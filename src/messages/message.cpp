@@ -70,11 +70,10 @@ const QString &Message::getId() const
     return this->id;
 }
 
-/// Static
-Message *Message::createSystemMessage(const QString &text)
-{
-    Message *message = new Message;
+namespace {
 
+void AddCurrentTimestamp(Message *message)
+{
     std::time_t t;
     time(&t);
     char timeStampBuffer[69];
@@ -90,6 +89,23 @@ Message *Message::createSystemMessage(const QString &text)
     QString timestampWithSeconds(timeStampBuffer);
     message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
                                        MessageColor(MessageColor::System), QString(), QString()));
+}
+
+}  // namespace
+
+/// Static
+Message *Message::createSystemMessage(const QString &text)
+{
+    Message *message = new Message;
+
+    AddCurrentTimestamp(message);
+
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+
+    message->getWords().push_back(word);
+
+    return message;
+}
 
     Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
 
