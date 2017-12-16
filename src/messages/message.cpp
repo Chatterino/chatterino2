@@ -117,17 +117,21 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
     QString text;
 
     text.append(username);
-    text.append(" has been timed out");
+    if (!durationInSeconds.isEmpty()) {
+        text.append(" has been timed out");
 
-    // TODO: Implement who timed the user out
+        // TODO: Implement who timed the user out
 
-    text.append(" for ");
-    text.append(durationInSeconds);
-    bool ok = true;
-    int timeoutDuration = durationInSeconds.toInt(&ok);
-    text.append(" second");
-    if (ok && timeoutDuration > 1) {
-        text.append("s");
+        text.append(" for ");
+        text.append(durationInSeconds);
+        bool ok = true;
+        int timeoutDuration = durationInSeconds.toInt(&ok);
+        text.append(" second");
+        if (ok && timeoutDuration > 1) {
+            text.append("s");
+        }
+    } else {
+        text.append(" has been permanently banned");
     }
 
     if (reason.length() > 0) {
