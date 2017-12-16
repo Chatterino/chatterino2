@@ -79,6 +79,8 @@ private:
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
     void messageReceived(Communi::IrcMessage *message);
 
+    void writeConnectionMessageReceived(Communi::IrcMessage *message);
+
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
@@ -86,6 +88,7 @@ private:
     void handleUserNoticeMessage(Communi::IrcMessage *message);
     void handleModeMessage(Communi::IrcMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
+    void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
 
     void onConnected();
     void onDisconnected();

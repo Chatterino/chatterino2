@@ -45,6 +45,9 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
     this->writeConnection.reset(new Communi::IrcConnection);
     this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
 
+    QObject::connect(this->writeConnection.get(), &Communi::IrcConnection::messageReceived, this,
+                     &IrcManager::writeConnectionMessageReceived);
+
     this->readConnection.reset(new Communi::IrcConnection);
     this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
@@ -106,6 +109,12 @@ void IrcManager::initializeConnection(const std::unique_ptr<Communi::IrcConnecti
             Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
         connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
         connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    } else {
+        connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+
+        connection->sendCommand(
+            Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+        connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
     }
 
     connection->setHost("irc.chat.twitch.tv");
@@ -244,6 +253,16 @@ void IrcManager::messageReceived(Communi::IrcMessage *message)
         this->handleModeMessage(message);
     } else if (command == "NOTICE") {
         this->handleNoticeMessage(static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+}
+
+void IrcManager::writeConnectionMessageReceived(Communi::IrcMessage *message)
+{
+    switch (message->type()) {
+        case Communi::IrcMessage::Type::Notice: {
+            this->handleWriteConnectionNoticeMessage(
+                static_cast<Communi::IrcNoticeMessage *>(message));
+        } break;
     }
 }
 
@@ -432,6 +451,40 @@ void IrcManager::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     if (!c) {
         debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
                    trimmedChannelName);
+        return;
+    }
+
+    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
+
+    c->addMessage(msg);
+}
+
+void IrcManager::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
+{
+    auto rawChannelName = message->target();
+
+    assert(rawChannelName.length() >= 2);
+
+    auto trimmedChannelName = rawChannelName.mid(1);
+
+    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+
+    if (!c) {
+        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
+                   trimmedChannelName);
+        return;
+    }
+
+    QVariant v = message->tag("msg-id");
+    if (!v.isValid()) {
+        return;
+    }
+    QString msg_id = v.toString();
+
+    static QList<QString> idsToSkip = {"timeout_success", "ban_success"};
+
+    if (idsToSkip.contains(msg_id)) {
+        // Already handled in the read-connection
         return;
     }
 
