@@ -87,11 +87,18 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
     auto manager = new QNetworkAccessManager();
     QNetworkRequest request(url);
 
+    auto &accountManager = AccountManager::getInstance();
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    QByteArray oauthToken;
+    if (currentTwitchUser) {
+        oauthToken = currentTwitchUser->getOAuthToken().toUtf8();
+    } else {
+        // XXX(pajlada): Bail out?
+    }
+
     request.setRawHeader("Client-ID", getDefaultClientID());
     request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    request.setRawHeader(
-        "Authorization",
-        "OAuth " + AccountManager::getInstance().getTwitchUser().getOAuthToken().toUtf8());
+    request.setRawHeader("Authorization", "OAuth " + oauthToken);
 
     NetworkManager::urlPut(std::move(request), [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NetworkError::NoError) {

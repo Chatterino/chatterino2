@@ -44,8 +44,7 @@ public:
     void joinChannel(const QString &channelName);
     void partChannel(const QString &channelName);
 
-    const twitch::TwitchUser &getUser() const;
-    void setUser(const twitch::TwitchUser &account);
+    void setUser(std::shared_ptr<twitch::TwitchUser> account);
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
@@ -56,9 +55,7 @@ public:
 
 private:
     // variables
-    twitch::TwitchUser account;
-
-    pajlada::Settings::Setting<std::string> currentUser;
+    std::shared_ptr<twitch::TwitchUser> account = nullptr;
 
     std::shared_ptr<Communi::IrcConnection> writeConnection = nullptr;
 

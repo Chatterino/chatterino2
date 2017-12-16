@@ -60,6 +60,15 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     sendCommand(this->_ui->mod, "/mod ");
     sendCommand(this->_ui->unMod, "/unmod ");
 
+    auto &accountManager = AccountManager::getInstance();
+    QString userId;
+    QString userNickname;
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    if (currentTwitchUser) {
+        userId = currentTwitchUser->getUserId();
+        userNickname = currentTwitchUser->getNickName();
+    }
+
     QObject::connect(this->_ui->profile, &QPushButton::clicked, this, [=](){
         QDesktopServices::openUrl(QUrl("https://twitch.tv/" +
                                        this->_ui->lblUsername->text()));
@@ -76,7 +85,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 
     QObject::connect(this->_ui->follow, &QPushButton::clicked, this, [=](){
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
-                        AccountManager::getInstance().getTwitchUser().getUserId() +
+                        userId +
                         "/follows/channels/" + this->userID);
 
         util::twitch::put(requestUrl,[](QJsonObject obj){
@@ -86,7 +95,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 
     QObject::connect(this->_ui->ignore, &QPushButton::clicked, this, [=](){
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
-                        AccountManager::getInstance().getTwitchUser().getUserId() +
+                        userId +
                         "/blocks/" + this->userID);
 
         util::twitch::put(requestUrl,[](QJsonObject obj){
@@ -121,9 +130,9 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
         hide();  //
     });
 
-    util::twitch::getUserID(AccountManager::getInstance().getTwitchUser().getNickName(), this,
+    util::twitch::getUserID(userNickname, this,
                             [=](const QString &id){
-        AccountManager::getInstance().getTwitchUser().setUserId(id);
+        currentTwitchUser->setUserId(id);
     });
 }
 
@@ -185,12 +194,20 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 
 void AccountPopupWidget::updatePermissions()
 {
-    if(this->_channel.get()->name == AccountManager::getInstance().getTwitchUser().getNickName())
+    AccountManager &accountManager = AccountManager::getInstance();
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    if (!currentTwitchUser) {
+        // No twitch user set (should never happen)
+        return;
+    }
+
+    if(this->_channel.get()->name == currentTwitchUser->getNickName())
     {
         permission = permissions::Owner;
     }
-    else if(this->_channel->modList.contains(AccountManager::getInstance().getTwitchUser().getNickName()))
+    else if(this->_channel->modList.contains(currentTwitchUser->getNickName()))
     {
+        // XXX(pajlada): This might always trigger if user is anonymous (if nickName is empty?)
         permission = permissions::Mod;
     }
 }
@@ -229,8 +246,15 @@ void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
 
 void AccountPopupWidget::showEvent(QShowEvent *event)
 {
-    if(this->_ui->lblUsername->text() != AccountManager::getInstance().getTwitchUser().getNickName())
-    {    
+    AccountManager &accountManager = AccountManager::getInstance();
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    if (!currentTwitchUser) {
+        // No twitch user set (should never happen)
+        return;
+    }
+
+    if(this->_ui->lblUsername->text() != currentTwitchUser->getNickName())
+    {
         updateButtons(this->_ui->userLayout, true);
         if(permission != permissions::User)
         {

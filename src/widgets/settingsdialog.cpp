@@ -129,13 +129,13 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     // listview
     auto listWidget = new QListWidget(this);
 
-    for (auto &user : AccountManager::getInstance().getTwitchUsers()) {
-        listWidget->addItem(user.getUserName());
+    for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
+        listWidget->addItem(userName);
     }
 
+    // Select the currently logged in user
     if (listWidget->count() > 0) {
-        const auto &currentUser = AccountManager::getInstance().getTwitchUser();
-        QString currentUsername = currentUser.getUserName();
+        const QString &currentUsername = AccountManager::getInstance().Twitch.getCurrent()->getUserName();
         for (int i = 0; i < listWidget->count(); ++i) {
             QString itemText = listWidget->item(i)->text();
             if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
@@ -147,7 +147,8 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
 
     QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
         if (!listWidget->selectedItems().isEmpty()) {
-            AccountManager::getInstance().setCurrentTwitchUser(listWidget->currentItem()->text());
+            QString newUsername = listWidget->currentItem()->text();
+            AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();
         }
     });
 

@@ -3,6 +3,7 @@
 #include "asyncexec.hpp"
 #include "channel.hpp"
 #include "channelmanager.hpp"
+#include "debug/log.hpp"
 #include "emotemanager.hpp"
 #include "messages/messageparseargs.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
@@ -31,21 +32,18 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
     , resources(_resources)
     , emoteManager(_emoteManager)
     , windowManager(_windowManager)
-    , account(AccountManager::getInstance().getTwitchAnon())
-    , currentUser("/accounts/current")
 {
-    this->currentUser.getValueChangedSignal().connect([](const auto &newUsername) {
-        // TODO: Implement
-        qDebug() << "Current user changed, fetch new credentials and reconnect";
+    AccountManager::getInstance().Twitch.userChanged.connect([this]() {
+        this->setUser(AccountManager::getInstance().Twitch.getCurrent());
+
+        debug::Log("[IrcManager] Reconnecting to Twitch IRC as new user {}",
+                   this->account->getUserName());
+
+        postToThread([this] { this->connect(); });
     });
 }
 
-const twitch::TwitchUser &IrcManager::getUser() const
-{
-    return this->account;
-}
-
-void IrcManager::setUser(const twitch::TwitchUser &account)
+void IrcManager::setUser(std::shared_ptr<twitch::TwitchUser> account)
 {
     this->account = account;
 }
@@ -54,11 +52,16 @@ void IrcManager::connect()
 {
     disconnect();
 
-    async_exec([this] { beginConnecting(); });
+    // XXX(pajlada): Disabled the async_exec for now, because if we happen to run the
+    // `beginConnecting` function in a different thread than last time, we won't be able to connect
+    // because we can't clean up the previous connection properly
+    // async_exec([this] { beginConnecting(); });
+    this->beginConnecting();
 }
 
 Communi::IrcConnection *IrcManager::createConnection(bool doRead)
 {
+    assert(this->account);
     Communi::IrcConnection *connection = new Communi::IrcConnection;
 
     if (doRead) {
@@ -68,9 +71,9 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
                          &IrcManager::privateMessageReceived);
     }
 
-    QString username = this->account.getUserName();
-    QString oauthClient = this->account.getOAuthClient();
-    QString oauthToken = this->account.getOAuthToken();
+    QString username = this->account->getUserName();
+    QString oauthClient = this->account->getOAuthClient();
+    QString oauthToken = this->account->getOAuthToken();
     if (!oauthToken.startsWith("oauth:")) {
         oauthToken.prepend("oauth:");
     }
@@ -79,7 +82,7 @@ Communi::IrcConnection *IrcManager::createConnection(bool doRead)
     connection->setNickName(username);
     connection->setRealName(username);
 
-    if (!this->account.isAnon()) {
+    if (!this->account->isAnon()) {
         connection->setPassword(oauthToken);
 
         this->refreshIgnoredUsers(username, oauthClient, oauthToken);
@@ -310,9 +313,11 @@ bool IrcManager::isTwitchBlockedUser(QString const &username)
 
 bool IrcManager::tryAddIgnoredUser(QString const &username, QString &errorMessage)
 {
-    QUrl url("https://api.twitch.tv/kraken/users/" + this->account.getUserName() + "/blocks/" +
-             username + "?oauth_token=" + this->account.getOAuthToken() +
-             "&client_id=" + this->account.getOAuthClient());
+    assert(this->account);
+
+    QUrl url("https://api.twitch.tv/kraken/users/" + this->account->getUserName() + "/blocks/" +
+             username + "?oauth_token=" + this->account->getOAuthToken() +
+             "&client_id=" + this->account->getOAuthClient());
 
     QNetworkRequest request(url);
     auto reply = this->networkAccessManager.put(request, QByteArray());
@@ -342,9 +347,10 @@ void IrcManager::addIgnoredUser(QString const &username)
 
 bool IrcManager::tryRemoveIgnoredUser(QString const &username, QString &errorMessage)
 {
-    QUrl url("https://api.twitch.tv/kraken/users/" + this->account.getUserName() + "/blocks/" +
-             username + "?oauth_token=" + this->account.getOAuthToken() +
-             "&client_id=" + this->account.getOAuthClient());
+    assert(this->account);
+    QUrl url("https://api.twitch.tv/kraken/users/" + this->account->getUserName() + "/blocks/" +
+             username + "?oauth_token=" + this->account->getOAuthToken() +
+             "&client_id=" + this->account->getOAuthClient());
 
     QNetworkRequest request(url);
     auto reply = this->networkAccessManager.deleteResource(request);

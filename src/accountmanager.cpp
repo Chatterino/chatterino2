@@ -1,7 +1,6 @@
 ﻿#include "accountmanager.hpp"
 #include "common.hpp"
-
-#include <pajlada/settings/setting.hpp>
+#include "debug/log.hpp"
 
 namespace chatterino {
 
@@ -19,17 +18,83 @@ inline QString getEnvString(const char *target)
 
 }  // namespace
 
-AccountManager::AccountManager()
-    : currentUser("/accounts/current", "")
-    , twitchAnonymousUser("justinfan64537", "", "")
+std::shared_ptr<twitch::TwitchUser> TwitchAccountManager::getCurrent()
 {
+    if (!this->currentUser) {
+        return this->anonymousUser;
+    }
+
+    return this->currentUser;
+}
+
+std::vector<QString> TwitchAccountManager::getUsernames() const
+{
+    std::vector<QString> userNames;
+
+    std::lock_guard<std::mutex> lock(this->mutex);
+
+    for (const auto &user : this->users) {
+        userNames.push_back(user->getUserName());
+    }
+
+    return userNames;
+}
+
+std::shared_ptr<twitch::TwitchUser> TwitchAccountManager::findUserByUsername(
+    const QString &username) const
+{
+    std::lock_guard<std::mutex> lock(this->mutex);
+
+    for (const auto &user : this->users) {
+        if (username.compare(user->getUserName(), Qt::CaseInsensitive) == 0) {
+            return user;
+        }
+    }
+
+    return nullptr;
+}
+
+bool TwitchAccountManager::userExists(const QString &username) const
+{
+    return this->findUserByUsername(username) != nullptr;
+}
+
+bool TwitchAccountManager::addUser(std::shared_ptr<twitch::TwitchUser> user)
+{
+    if (this->userExists(user->getNickName())) {
+        // User already exists in user list
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(this->mutex);
+
+    this->users.push_back(user);
+
+    return true;
+}
+
+AccountManager::AccountManager()
+{
+    this->Twitch.anonymousUser.reset(new twitch::TwitchUser("justinfan64537", "", ""));
+
+    this->Twitch.currentUsername.getValueChangedSignal().connect([this](const auto &newValue) {
+        QString newUsername(QString::fromStdString(newValue));
+        auto user = this->Twitch.findUserByUsername(newUsername);
+        if (user) {
+            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
+                       newUsername);
+            // XXX: Should we set the user regardless if the username is found or not?
+            // I can see the logic in setting it to nullptr if the `currentUsername` value has been
+            // set to "" or an invalid username
+            this->Twitch.currentUser = user;
+            this->Twitch.userChanged.invoke();
+        }
+    });
 }
 
 void AccountManager::load()
 {
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/accounts");
-
-    bool first = true;
 
     for (const auto &uid : keys) {
         if (uid == "current") {
@@ -49,74 +114,20 @@ void AccountManager::load()
             continue;
         }
 
-        if (first) {
-            this->setCurrentTwitchUser(qS(username));
-            first = false;
-        }
+        auto user =
+            std::make_shared<twitch::TwitchUser>(qS(username), qS(oauthToken), qS(clientID));
 
-        twitch::TwitchUser user(qS(username), qS(oauthToken), qS(clientID));
-
-        this->addTwitchUser(user);
+        this->Twitch.addUser(user);
 
         printf("Adding user %s(%s)\n", username.c_str(), userID.c_str());
     }
-}
 
-twitch::TwitchUser &AccountManager::getTwitchAnon()
-{
-    return this->twitchAnonymousUser;
-}
-
-twitch::TwitchUser &AccountManager::getTwitchUser()
-{
-    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
-
-    if (this->twitchUsers.size() == 0) {
-        return this->getTwitchAnon();
+    auto currentUser = this->Twitch.findUserByUsername(
+        QString::fromStdString(this->Twitch.currentUsername.getValue()));
+    if (currentUser) {
+        this->Twitch.currentUser = currentUser;
+        this->Twitch.userChanged.invoke();
     }
-
-    QString currentUsername = QString::fromStdString(this->currentUser);
-
-    for (auto &user : this->twitchUsers) {
-        if (user.getUserName() == currentUsername) {
-            return user;
-        }
-    }
-
-    return this->twitchUsers.front();
-}
-
-void AccountManager::setCurrentTwitchUser(const QString &username)
-{
-    this->currentUser.setValue(username.toStdString());
-}
-
-std::vector<twitch::TwitchUser> AccountManager::getTwitchUsers()
-{
-    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
-
-    return std::vector<twitch::TwitchUser>(this->twitchUsers);
-}
-
-bool AccountManager::removeTwitchUser(const QString &userName)
-{
-    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
-
-    for (auto it = this->twitchUsers.begin(); it != this->twitchUsers.end(); it++) {
-        if ((*it).getUserName() == userName) {
-            this->twitchUsers.erase(it);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void AccountManager::addTwitchUser(const twitch::TwitchUser &user)
-{
-    std::lock_guard<std::mutex> lock(this->twitchUsersMutex);
-
-    this->twitchUsers.push_back(user);
 }
 
 }  // namespace chatterino
