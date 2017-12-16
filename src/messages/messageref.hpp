@@ -22,7 +22,7 @@ public:
     Message *getMessage();
     int getHeight() const;
 
-    bool layout(int width);
+    bool layout(int width, float dpiMultiplyer);
 
     const std::vector<WordPart> &getWordParts() const;
 
@@ -43,6 +43,7 @@ private:
     int currentLayoutWidth = -1;
     int fontGeneration = -1;
     int emoteGeneration = -1;
+    float dpiMultiplyer = -1;
 
     Word::Type currentWordTypes = Word::None;
 

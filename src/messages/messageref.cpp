@@ -31,27 +31,37 @@ int MessageRef::getHeight() const
 }
 
 // return true if redraw is required
-bool MessageRef::layout(int width)
+bool MessageRef::layout(int width, float dpiMultiplyer)
 {
     bool layoutRequired = false;
 
     // check if width changed
-    const bool widthChanged = width != this->currentLayoutWidth;
+    bool widthChanged = width != this->currentLayoutWidth;
     layoutRequired |= widthChanged;
     this->currentLayoutWidth = width;
+
     // check if emotes changed
-    const bool imagesChanged = this->emoteGeneration != EmoteManager::instance->getGeneration();
+    bool imagesChanged = this->emoteGeneration != EmoteManager::instance->getGeneration();
     layoutRequired |= imagesChanged;
     this->emoteGeneration = EmoteManager::instance->getGeneration();
+
     // check if text changed
-    const bool textChanged = this->fontGeneration != FontManager::getInstance().getGeneration();
+    bool textChanged = this->fontGeneration != FontManager::getInstance().getGeneration();
     layoutRequired |= textChanged;
     this->fontGeneration = FontManager::getInstance().getGeneration();
+
     // check if work mask changed
-    const bool wordMaskChanged =
+    bool wordMaskChanged =
         this->currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
     layoutRequired |= wordMaskChanged;
     this->currentWordTypes = SettingsManager::getInstance().getWordTypeMask();
+
+    // check if dpi changed
+    bool dpiChanged = this->dpiMultiplyer != dpiMultiplyer;
+    layoutRequired |= dpiChanged;
+    this->dpiMultiplyer = dpiMultiplyer;
+    imagesChanged |= dpiChanged;
+    textChanged |= dpiChanged;
 
     // update word sizes if needed
     if (imagesChanged) {
@@ -213,7 +223,8 @@ void MessageRef::updateTextSizes()
             continue;
 
         QFontMetrics &metrics = word.getFontMetrics();
-        word.setSize(metrics.width(word.getText()), metrics.height());
+        word.setSize((int)(metrics.width(word.getText()) * this->dpiMultiplyer),
+                     (int)(metrics.height() * this->dpiMultiplyer));
     }
 }
 
@@ -221,7 +232,7 @@ void MessageRef::updateImageSizes()
 {
     const int mediumTextLineHeight =
         FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
-    const qreal emoteScale = SettingsManager::getInstance().emoteScale.get();
+    const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * this->dpiMultiplyer;
     const bool scaleEmotesByLineHeight =
         SettingsManager::getInstance().scaleEmotesByLineHeight.get();
 

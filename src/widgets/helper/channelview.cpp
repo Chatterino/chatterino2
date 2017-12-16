@@ -127,7 +127,7 @@ void ChannelView::actuallyLayoutMessages()
         for (size_t i = start; i < messages.getLength(); ++i) {
             auto message = messages[i];
 
-            redrawRequired |= message->layout(layoutWidth);
+            redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier());
 
             y += message->getHeight();
 
@@ -143,7 +143,7 @@ void ChannelView::actuallyLayoutMessages()
     for (std::size_t i = messages.getLength() - 1; i > 0; i--) {
         auto *message = messages[i].get();
 
-        message->layout(layoutWidth);
+        message->layout(layoutWidth, this->getDpiMultiplier());
 
         h -= message->getHeight();
 
