@@ -169,7 +169,8 @@ HEADERS  += \
     src/widgets/window.hpp \
     src/widgets/splitcontainer.hpp \
     src/widgets/helper/droppreview.hpp \
-    src/widgets/helper/splitcolumn.hpp
+    src/widgets/helper/splitcolumn.hpp \
+    src/util/irchelpers.hpp
 
 
 PRECOMPILED_HEADER =

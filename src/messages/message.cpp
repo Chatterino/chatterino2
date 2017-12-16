@@ -7,6 +7,7 @@
 #include "ircmanager.hpp"
 #include "messages/link.hpp"
 #include "resources.hpp"
+#include "util/irchelpers.hpp"
 
 #include <ctime>
 #include <list>
@@ -136,7 +137,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
 
     if (reason.length() > 0) {
         text.append(": \"");
-        text.append(reason);
+        text.append(ParseTagString(reason));
         text.append("\"");
     }
     text.append(".");
