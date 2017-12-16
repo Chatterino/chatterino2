@@ -292,14 +292,12 @@ void IrcManager::handleUserNoticeMessage(Communi::IrcMessage *message)
 
 void IrcManager::handleModeMessage(Communi::IrcMessage *message)
 {
-   auto channel = channelManager.getTwitchChannel(message->parameter(0).remove(0,1));
-   if(message->parameter(1) == "+o")
-   {
-       channel->modList.append(message->parameter(2));
-   } else if(message->parameter(1) == "-o")
-   {
-       channel->modList.append(message->parameter(2));
-   }
+    auto channel = channelManager.getTwitchChannel(message->parameter(0).remove(0, 1));
+    if (message->parameter(1) == "+o") {
+        channel->modList.append(message->parameter(2));
+    } else if (message->parameter(1) == "-o") {
+        channel->modList.append(message->parameter(2));
+    }
 }
 
 bool IrcManager::isTwitchBlockedUser(QString const &username)

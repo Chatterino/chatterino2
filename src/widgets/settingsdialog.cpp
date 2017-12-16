@@ -135,7 +135,8 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
 
     // Select the currently logged in user
     if (listWidget->count() > 0) {
-        const QString &currentUsername = AccountManager::getInstance().Twitch.getCurrent()->getUserName();
+        const QString &currentUsername =
+            AccountManager::getInstance().Twitch.getCurrent()->getUserName();
         for (int i = 0; i < listWidget->count(); ++i) {
             QString itemText = listWidget->item(i)->text();
             if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
