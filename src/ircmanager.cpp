@@ -6,6 +6,7 @@
 #include "debug/log.hpp"
 #include "emotemanager.hpp"
 #include "messages/messageparseargs.hpp"
+#include "settingsmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchparsemessage.hpp"
 #include "twitch/twitchuser.hpp"
@@ -31,6 +32,9 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
     , resources(_resources)
     , windowManager(_windowManager)
 {
+    this->messageSuffix.append(' ');
+    this->messageSuffix.append(QChar(0x206D));
+
     AccountManager::getInstance().Twitch.userChanged.connect([this]() {
         this->setUser(AccountManager::getInstance().Twitch.getCurrent());
 
@@ -177,11 +181,15 @@ void IrcManager::disconnect()
     this->writeConnection->close();
 }
 
-void IrcManager::sendMessage(const QString &channelName, const QString &message)
+void IrcManager::sendMessage(const QString &channelName, QString message)
 {
     this->connectionMutex.lock();
+    static int i = 0;
 
     if (this->writeConnection) {
+        if (SettingsManager::getInstance().allowDuplicateMessages && (++i % 2) == 0) {
+            message.append(this->messageSuffix);
+        }
         this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
     }
 

@@ -38,7 +38,7 @@ public:
     bool tryRemoveIgnoredUser(QString const &username, QString &errorMessage);
     void removeIgnoredUser(QString const &username);
 
-    void sendMessage(const QString &channelName, const QString &message);
+    void sendMessage(const QString &channelName, QString message);
 
     void joinChannel(const QString &channelName);
     void partChannel(const QString &channelName);
@@ -89,6 +89,9 @@ private:
 
     void onConnected();
     void onDisconnected();
+
+private:
+    QByteArray messageSuffix;
 };
 
 }  // namespace chatterino
