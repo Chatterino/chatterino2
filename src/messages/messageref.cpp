@@ -68,9 +68,11 @@ bool MessageRef::layout(int width, float dpiMultiplyer)
     // update word sizes if needed
     if (imagesChanged) {
         this->updateImageSizes();
+        this->buffer = nullptr;
     }
     if (textChanged) {
         this->updateTextSizes();
+        this->buffer = nullptr;
     }
     if (widthChanged || wordMaskChanged) {
         this->buffer = nullptr;

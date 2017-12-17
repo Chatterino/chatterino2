@@ -163,6 +163,8 @@ private:
     boost::signals2::connection repaintGifsConnection;
     boost::signals2::connection layoutConnection;
 
+    pajlada::Signals::NoArgSignal::Connection fontChangedConnection;
+
 private slots:
     void wordTypeMaskChanged()
     {
