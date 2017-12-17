@@ -5,6 +5,8 @@ using namespace chatterino::twitch;
 
 namespace chatterino {
 
+ChannelManager *ChannelManager::instance = nullptr;
+
 ChannelManager::ChannelManager(WindowManager &_windowManager, IrcManager &_ircManager)
     : windowManager(_windowManager)
     , ircManager(_ircManager)
@@ -12,6 +14,7 @@ ChannelManager::ChannelManager(WindowManager &_windowManager, IrcManager &_ircMa
     , mentionsChannel(new TwitchChannel(_ircManager, "/mentions", true))
     , emptyChannel(new TwitchChannel(_ircManager, "", true))
 {
+    ChannelManager::instance = this;
 }
 
 const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()

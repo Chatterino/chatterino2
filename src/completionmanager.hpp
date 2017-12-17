@@ -11,7 +11,7 @@ namespace chatterino {
 class CompletionModel : public QAbstractListModel
 {
 public:
-    CompletionModel(const std::string &_channelName);
+    CompletionModel(const QString &_channelName);
 
     virtual int columnCount(const QModelIndex & /*parent*/) const override
     {
@@ -33,10 +33,11 @@ public:
 
 private:
     void addString(const std::string &str);
+    void addString(const QString &str);
 
     QVector<QString> emotes;
 
-    std::string channelName;
+    QString channelName;
 };
 
 class CompletionManager

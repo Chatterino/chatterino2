@@ -22,7 +22,7 @@ WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colo
 void WindowManager::initMainWindow()
 {
     this->selectedWindow = this->mainWindow =
-        new widgets::Window(this->channelManager, this->colorScheme, true);
+        new widgets::Window("main", this->channelManager, this->colorScheme, true);
 }
 
 static const std::string &getSettingsPath()
@@ -68,7 +68,7 @@ widgets::Window &WindowManager::getSelectedWindow()
 
 widgets::Window &WindowManager::createWindow()
 {
-    auto *window = new widgets::Window(this->channelManager, this->colorScheme, false);
+    auto *window = new widgets::Window("external", this->channelManager, this->colorScheme, false);
 
     window->loadDefaults();
 

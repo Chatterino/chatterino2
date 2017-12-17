@@ -1,11 +1,12 @@
 #include "completionmanager.hpp"
+#include "channelmanager.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "emotemanager.hpp"
 
 namespace chatterino {
 
-CompletionModel::CompletionModel(const std::string &_channelName)
+CompletionModel::CompletionModel(const QString &_channelName)
     : channelName(_channelName)
 {
 }
@@ -39,14 +40,14 @@ void CompletionModel::refresh()
 
     // Channel-specific: BTTV Channel Emotes
     std::vector<std::string> &bttvChannelEmoteCodes =
-        emoteManager.bttvChannelEmoteCodes[this->channelName];
+        emoteManager.bttvChannelEmoteCodes[this->channelName.toStdString()];
     for (const auto &m : bttvChannelEmoteCodes) {
         this->addString(m);
     }
 
     // Channel-specific: FFZ Channel Emotes
     std::vector<std::string> &ffzChannelEmoteCodes =
-        emoteManager.ffzChannelEmoteCodes[this->channelName];
+        emoteManager.ffzChannelEmoteCodes[this->channelName.toStdString()];
     for (const auto &m : ffzChannelEmoteCodes) {
         this->addString(m);
     }
@@ -57,13 +58,29 @@ void CompletionModel::refresh()
         this->addString(":" + m + ":");
     }
 
-    // TODO: Add Channel-specific: Usernames
+    // Channel-specific: Usernames
+    auto *channelManager = ChannelManager::instance;
+    auto c = channelManager->getTwitchChannel(this->channelName);
+    if (!c) {
+        return;
+    }
+    auto usernames = c->getUsernamesForCompletions();
+    for (const auto &username : usernames) {
+        this->addString(username);
+        this->addString('@' + username);
+    }
 }
 
 void CompletionModel::addString(const std::string &str)
 {
     // Always add a space at the end of completions
     this->emotes.push_back(qS(str) + " ");
+}
+
+void CompletionModel::addString(const QString &str)
+{
+    // Always add a space at the end of completions
+    this->emotes.push_back(str + " ");
 }
 
 CompletionModel *CompletionManager::createModel(const std::string &channelName)
@@ -73,7 +90,7 @@ CompletionModel *CompletionManager::createModel(const std::string &channelName)
         return it->second;
     }
 
-    CompletionModel *ret = new CompletionModel(channelName);
+    CompletionModel *ret = new CompletionModel(qS(channelName));
     this->models[channelName] = ret;
 
     return ret;

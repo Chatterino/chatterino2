@@ -36,11 +36,6 @@ int Message::getTimeoutCount() const
     return this->timeoutCount;
 }
 
-const QString &Message::getUserName() const
-{
-    return this->userName;
-}
-
 const QString &Message::getDisplayName() const
 {
     return this->displayName;

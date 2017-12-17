@@ -38,6 +38,13 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 {
     std::shared_ptr<Message> deleted;
 
+    const QString &username = message->username;
+
+    if (!username.isEmpty()) {
+        // TODO: Add recent chatters display name. This should maybe be a setting
+        this->addRecentChatter(username);
+    }
+
     //    if (_loggingChannel.get() != nullptr) {
     //        _loggingChannel->append(message);
     //    }
@@ -47,6 +54,24 @@ void Channel::addMessage(std::shared_ptr<Message> message)
     }
 
     this->messageAppended(message);
+}
+
+void Channel::addRecentChatter(const QString &username)
+{
+    std::lock_guard<std::mutex> lock(this->recentChattersMutex);
+
+    this->recentChatters.insert(username);
+}
+
+std::set<QString> Channel::getUsernamesForCompletions()
+{
+    std::set<QString> usernames;
+
+    this->recentChattersMutex.lock();
+    usernames.insert(this->recentChatters.begin(), this->recentChatters.end());
+    this->recentChattersMutex.unlock();
+
+    return usernames;
 }
 
 bool Channel::canSendMessage() const

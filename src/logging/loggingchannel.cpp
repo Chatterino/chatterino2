@@ -37,7 +37,7 @@ void Channel::append(std::shared_ptr<messages::Message> message)
     str.append('[');
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
-    str.append(message->getUserName());
+    str.append(message->username);
     str.append(": ");
     str.append(message->getContent());
     str.append('\n');
