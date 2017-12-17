@@ -297,7 +297,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         v->addWidget(createCheckbox("Show seconds in timestamp", settings.showTimestampSeconds));
         v->addWidget(createCheckbox("Show badges", settings.showBadges));
         v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)",
-                                    settings.allowDouplicateMessages));
+                                    settings.allowDuplicateMessages));
         v->addWidget(createCheckbox("Seperate messages", settings.seperateMessages));
         v->addWidget(createCheckbox("Show message length", settings.showMessageLength));
         v->addLayout(this->createCombobox(

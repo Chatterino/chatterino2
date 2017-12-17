@@ -39,7 +39,7 @@ public:
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
 
     /// Behaviour
-    BoolSetting allowDouplicateMessages = {"/behaviour/allowDuplicateMessages", true};
+    BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
 
     /// Commands
