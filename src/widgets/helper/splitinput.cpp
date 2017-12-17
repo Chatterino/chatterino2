@@ -67,7 +67,7 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
     connect(&textInput, &ResizingTextEdit::textChanged, this, &SplitInput::editTextChanged);
 
     this->refreshTheme();
-    textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength.get());
+    textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength);
 
     auto completer = new QCompleter(
         this->chatWidget->completionManager.createModel(this->chatWidget->channelName));
@@ -181,7 +181,7 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
     });
 
     this->textLengthVisibleChangedConnection =
-        SettingsManager::getInstance().showMessageLength.valueChanged.connect(
+        SettingsManager::getInstance().showMessageLength.getValueChangedSignal().connect(
             [this](const bool &value) { this->textLengthLabel.setHidden(!value); });
 
     QObject::connect(&this->textInput, &QTextEdit::copyAvailable, [this](bool available) {
@@ -193,7 +193,8 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
 
 SplitInput::~SplitInput()
 {
-    this->textLengthVisibleChangedConnection.disconnect();
+    SettingsManager::getInstance().showMessageLength.getValueChangedSignal().disconnect(
+        this->textLengthVisibleChangedConnection);
 }
 
 void SplitInput::clearSelection()

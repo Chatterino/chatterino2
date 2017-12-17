@@ -371,7 +371,7 @@ QVBoxLayout *SettingsDialog::createEmotesTab()
     layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
     layout->addWidget(createCheckbox("Enable BetterTTV Emotes", settings.enableBttvEmotes));
     layout->addWidget(createCheckbox("Enable FrankerFaceZ Emotes", settings.enableFfzEmotes));
-    layout->addWidget(createCheckbox("Enable Gif Emotes", settings.enableGifs));
+    layout->addWidget(createCheckbox("Enable Gif Emotes", settings.enableGifAnimations));
     layout->addWidget(createCheckbox("Enable Emojis", settings.enableEmojis));
 
     layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));

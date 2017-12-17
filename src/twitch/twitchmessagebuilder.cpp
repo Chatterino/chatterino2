@@ -63,7 +63,7 @@ SharedMessage TwitchMessageBuilder::parse()
     this->appendUsername();
 
     // highlights
-    if (settings.enableHighlights.get()) {
+    if (settings.enableHighlights) {
         this->parseHighlights();
     }
 
@@ -372,7 +372,7 @@ void TwitchMessageBuilder::parseHighlights()
         return;
     }
 
-    if (settings.customHighlightSound.get()) {
+    if (settings.customHighlightSound) {
         player->setMedia(QUrl(settings.pathHighlightSound.get()));
     } else {
         player->setMedia(QUrl("qrc:/sounds/ping2.wav"));
@@ -397,9 +397,9 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     std::vector<Highlight> activeHighlights;
 
-    if (settings.enableHighlightsSelf.get() && currentUsername.size() > 0) {
-        activeHighlights.emplace_back(currentUsername, settings.enableHighlightSound.get(),
-                                      settings.enableHighlightTaskbar.get());
+    if (settings.enableHighlightsSelf && currentUsername.size() > 0) {
+        activeHighlights.emplace_back(currentUsername, settings.enableHighlightSound,
+                                      settings.enableHighlightTaskbar);
     }
 
     const auto &highlightProperties = settings.highlightProperties.get();

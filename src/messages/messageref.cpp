@@ -233,8 +233,7 @@ void MessageRef::updateImageSizes()
     const int mediumTextLineHeight =
         FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
     const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * this->dpiMultiplyer;
-    const bool scaleEmotesByLineHeight =
-        SettingsManager::getInstance().scaleEmotesByLineHeight.get();
+    const bool scaleEmotesByLineHeight = SettingsManager::getInstance().scaleEmotesByLineHeight;
 
     for (auto &word : this->message->getWords()) {
         if (!word.isImage())

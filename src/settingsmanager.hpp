@@ -13,6 +13,8 @@ class SettingsManager : public QObject
 {
     Q_OBJECT
 
+    using BoolSetting = pajlada::Settings::Setting<bool>;
+
 public:
     void load();
     void save();
@@ -22,47 +24,58 @@ public:
     QSettings &getQSettings();
     SettingsSnapshot createSnapshot();
 
-    // new pajlada settings BBaper
-    pajlada::Settings::Setting<bool> showTimestamps;
-    pajlada::Settings::Setting<bool> showTimestampSeconds;
-    pajlada::Settings::Setting<bool> showBadges;
+    /// Appearance
+    BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
+    BoolSetting showTimestampSeconds = {"/appearance/messages/showTimestampSeconds", true};
+    BoolSetting showBadges = {"/appearance/messages/showBadges", true};
+    BoolSetting showLastMessageIndicator = {"/appearance/messages/showLastMessageIndicator", false};
+    BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
+    BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
+    BoolSetting seperateMessages = {"/appearance/messages/separateMessages", false};
+    BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
+    BoolSetting hideTabX = {"/appearance/hideTabX", false};
+    BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
+    BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
+    // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
+
+    /// Behaviour
+    BoolSetting allowDouplicateMessages = {"/behaviour/allowDuplicateMessages", true};
+    BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
+
+    /// Commands
+    BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
+
+    /// Emotes
+    BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight", false};
+    BoolSetting enableTwitchEmotes = {"/emotes/enableTwitchEmotes", true};
+    BoolSetting enableBttvEmotes = {"/emotes/enableBTTVEmotes", true};
+    BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
+    BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
+    BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
+
+    /// Links
+    BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
+
+    /// Highlighting
+    BoolSetting enableHighlights = {"/highlighting/enabled", true};
+    BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword", true};
+    BoolSetting enableHighlightSound = {"/highlighting/enableSound", true};
+    BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing", true};
+    BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
     pajlada::Settings::Setting<std::string> streamlinkPath;
     pajlada::Settings::Setting<std::string> preferredQuality;
 
-    // Settings
     Setting<float> emoteScale;
     Setting<float> mouseScrollMultiplier;
-    Setting<bool> scaleEmotesByLineHeight;
-    Setting<bool> showLastMessageIndicator;
-    Setting<bool> allowDouplicateMessages;
-    Setting<bool> linksDoubleClickOnly;
-    Setting<bool> hideEmptyInput;
-    Setting<bool> showMessageLength;
-    Setting<bool> seperateMessages;
-    Setting<bool> mentionUsersWithAt;
-    Setting<bool> allowCommandsAtEnd;
-    Setting<bool> enableHighlights;
-    Setting<bool> enableHighlightsSelf;
-    Setting<bool> enableHighlightSound;
-    Setting<bool> enableHighlightTaskbar;
-    Setting<bool> customHighlightSound;
+
     Setting<QString> pathHighlightSound;
     Setting<QMap<QString, QPair<bool, bool>>> highlightProperties;
     Setting<QString> highlightUserBlacklist;
-    pajlada::Settings::Setting<bool> highlightAlwaysPlaySound;
-    Setting<bool> enableTwitchEmotes;
-    Setting<bool> enableBttvEmotes;
-    Setting<bool> enableFfzEmotes;
-    Setting<bool> enableEmojis;
-    Setting<bool> enableGifAnimations;
-    Setting<bool> enableGifs;
-    Setting<bool> inlineWhispers;
-    Setting<bool> windowTopMost;
-    Setting<bool> hideTabX;
-    Setting<bool> hidePreferencesButton;
-    Setting<bool> hideUserButton;
-    Setting<bool> useCustomWindowFrame;
+
+    BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
+
+    BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
     static SettingsManager &getInstance()
     {
