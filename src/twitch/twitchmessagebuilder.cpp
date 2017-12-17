@@ -288,7 +288,7 @@ void TwitchMessageBuilder::parseUsername()
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
 
-    this->message->username = this->userName;
+    this->message->loginName = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -302,8 +302,13 @@ void TwitchMessageBuilder::appendUsername()
 
         if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
             username = displayName;
+
+            this->message->displayName = displayName;
         } else {
             localizedName = displayName;
+
+            this->message->displayName = username;
+            this->message->localizedName = displayName;
         }
     }
 

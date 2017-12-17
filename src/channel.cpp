@@ -38,11 +38,11 @@ void Channel::addMessage(std::shared_ptr<Message> message)
 {
     std::shared_ptr<Message> deleted;
 
-    const QString &username = message->username;
+    const QString &username = message->loginName;
 
     if (!username.isEmpty()) {
         // TODO: Add recent chatters display name. This should maybe be a setting
-        this->addRecentChatter(username);
+        this->addRecentChatter(message);
     }
 
     //    if (_loggingChannel.get() != nullptr) {
@@ -56,22 +56,27 @@ void Channel::addMessage(std::shared_ptr<Message> message)
     this->messageAppended(message);
 }
 
-void Channel::addRecentChatter(const QString &username)
+void Channel::addRecentChatter(const std::shared_ptr<messages::Message> &message)
 {
+    assert(!message->loginName.isEmpty());
+
     std::lock_guard<std::mutex> lock(this->recentChattersMutex);
 
-    this->recentChatters.insert(username);
+    this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
 }
 
-std::set<QString> Channel::getUsernamesForCompletions()
+std::vector<Channel::NameOptions> Channel::getUsernamesForCompletions()
 {
-    std::set<QString> usernames;
+    std::vector<NameOptions> names;
 
     this->recentChattersMutex.lock();
-    usernames.insert(this->recentChatters.begin(), this->recentChatters.end());
+    for (const auto &p : this->recentChatters) {
+        names.push_back(p.second);
+    }
+    // usernames.insert(this->recentChatters.begin(), this->recentChatters.end());
     this->recentChattersMutex.unlock();
 
-    return usernames;
+    return names;
 }
 
 bool Channel::canSendMessage() const

@@ -32,15 +32,21 @@ public:
     messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
     void addMessage(messages::SharedMessage message);
-    void addRecentChatter(const QString &username);
+    void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
-    std::set<QString> getUsernamesForCompletions();
+    struct NameOptions {
+        QString displayName;
+        QString localizedName;
+    };
+
+    std::vector<NameOptions> getUsernamesForCompletions();
 
     QString name;
     QStringList modList;
 
+    // Key = login name
+    std::map<QString, NameOptions> recentChatters;
     std::mutex recentChattersMutex;
-    std::set<QString> recentChatters;
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);

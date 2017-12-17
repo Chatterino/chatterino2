@@ -13,18 +13,18 @@ class CompletionModel : public QAbstractListModel
 public:
     CompletionModel(const QString &_channelName);
 
-    virtual int columnCount(const QModelIndex & /*parent*/) const override
+    virtual int columnCount(const QModelIndex &) const override
     {
         return 1;
     }
 
-    virtual QVariant data(const QModelIndex &index, int role) const override
+    virtual QVariant data(const QModelIndex &index, int) const override
     {
         // TODO: Implement more safely
         return QVariant(this->emotes.at(index.row()));
     }
 
-    virtual int rowCount(const QModelIndex &parent) const override
+    virtual int rowCount(const QModelIndex &) const override
     {
         return this->emotes.size();
     }

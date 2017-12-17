@@ -89,9 +89,9 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
         auto *completionModel =
             static_cast<chatterino::CompletionModel *>(this->completer->model());
-        completionModel->refresh();
 
         if (!this->nextCompletion) {
+            completionModel->refresh();
             // first selection
             this->completer->setCompletionPrefix(currentCompletionPrefix);
             this->nextCompletion = true;

@@ -65,9 +65,15 @@ void CompletionModel::refresh()
         return;
     }
     auto usernames = c->getUsernamesForCompletions();
-    for (const auto &username : usernames) {
-        this->addString(username);
-        this->addString('@' + username);
+    for (const auto &name : usernames) {
+        assert(!name.displayName.isEmpty());
+        this->addString(name.displayName);
+        this->addString('@' + name.displayName);
+
+        if (!name.localizedName.isEmpty()) {
+            this->addString(name.localizedName);
+            this->addString('@' + name.localizedName);
+        }
     }
 }
 
