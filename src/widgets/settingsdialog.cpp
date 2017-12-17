@@ -173,26 +173,28 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         auto combo = new QComboBox();
 
         auto fontLayout = new QHBoxLayout();
-        auto fontFamilyLabel = new QLabel("Current font family");
-        auto fontSizeLabel = new QLabel("Current font size");
+        auto fontFamilyLabel = new QLabel("font family, size");
         auto fontButton = new QPushButton("Select");
 
         fontLayout->addWidget(fontButton);
         fontLayout->addWidget(fontFamilyLabel);
-        fontLayout->addWidget(fontSizeLabel);
 
         {
             auto &fontManager = FontManager::getInstance();
 
             fontManager.currentFontFamily.connect(
-                [fontFamilyLabel](const std::string &newValue, auto) {
-                    fontFamilyLabel->setText(QString::fromStdString(newValue));  //
+                [fontFamilyLabel, &fontManager](auto, auto) {
+                    fontFamilyLabel->setText(
+                        QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
+                        QString::number(fontManager.currentFontSize) + "pt");
                 },
                 this->managedConnections);
 
             fontManager.currentFontSize.connect(
-                [fontSizeLabel](const int &newValue, auto) {
-                    fontSizeLabel->setText(QString(QString::number(newValue)));  //
+                [fontFamilyLabel, &fontManager](auto, auto) {
+                    fontFamilyLabel->setText(
+                        QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
+                        QString::number(fontManager.currentFontSize) + "pt");
                 },
                 this->managedConnections);
         }
