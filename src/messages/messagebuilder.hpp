@@ -26,8 +26,10 @@ public:
 
     QString originalMessage;
 
-private:
+protected:
     std::shared_ptr<messages::Message> message;
+
+private:
     std::vector<Word> _words;
     bool highlight = false;
     std::chrono::time_point<std::chrono::system_clock> _parseTime;

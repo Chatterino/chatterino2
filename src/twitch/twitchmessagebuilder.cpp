@@ -287,6 +287,8 @@ void TwitchMessageBuilder::parseUsername()
     if (this->userName.isEmpty()) {
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
+
+    this->message->username = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()

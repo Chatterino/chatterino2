@@ -22,13 +22,14 @@ public:
     void setHighlight(bool value);
     const QString &getTimeoutUser() const;
     int getTimeoutCount() const;
-    const QString &getUserName() const;
     const QString &getDisplayName() const;
     const QString &getContent() const;
     const std::chrono::time_point<std::chrono::system_clock> &getParseTime() const;
     std::vector<Word> &getWords();
     bool isDisabled() const;
     const QString &getId() const;
+
+    QString username;
 
     const QString text;
     bool centered = false;
@@ -57,7 +58,6 @@ private:
     bool disabled = false;
     std::chrono::time_point<std::chrono::system_clock> parseTime;
 
-    QString userName = "";
     QString displayName = "";
     QString content;
     QString id = "";
