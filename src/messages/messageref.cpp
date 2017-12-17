@@ -70,7 +70,7 @@ bool MessageRef::layout(int width, float dpiMultiplyer)
     if (textChanged) {
         this->updateTextSizes();
     }
-    if (widthChanged) {
+    if (widthChanged || wordMaskChanged) {
         this->buffer = nullptr;
     }
 
