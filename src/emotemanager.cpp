@@ -528,11 +528,17 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         _gifUpdateTimer.setInterval(30);
         _gifUpdateTimer.start();
 
-        QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
-            if (SettingsManager::getInstance().enableGifAnimations.getValue()) {
-                _gifUpdateTimerSignal();
-                WindowManager::instance->repaintGifEmotes();
+        SettingsManager::getInstance().enableGifAnimations.connect([this](bool enabled, auto) {
+            if (enabled) {
+                _gifUpdateTimer.start();
+            } else {
+                _gifUpdateTimer.stop();
             }
+        });
+
+        QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
+            _gifUpdateTimerSignal();
+            WindowManager::instance->repaintGifEmotes();
         });
     }
 
