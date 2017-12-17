@@ -12,7 +12,6 @@
 namespace chatterino {
 
 class ChannelManager;
-class CompletionManager;
 
 namespace widgets {
 
@@ -58,7 +57,6 @@ public slots:
 
 public:
     ChannelManager &channelManager;
-    CompletionManager &completionManager;
 
 private:
     QList<SplitContainer *> pages;

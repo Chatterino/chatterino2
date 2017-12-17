@@ -35,15 +35,17 @@ public:
 
 class CompletionManager
 {
-    CompletionManager(EmoteManager &_emoteManager);
-
-    EmoteManager &emoteManager;
+    CompletionManager() = default;
 
 public:
+    static CompletionManager &getInstance()
+    {
+        static CompletionManager instance;
+        return instance;
+    }
+
     CompletionModel *createModel(const std::string &channelName);
     void updateModel(CompletionModel *model, const std::string &channelName = std::string());
-
-    friend class Application;
 };
 
 }  // namespace chatterino

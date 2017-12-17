@@ -19,12 +19,9 @@
 namespace chatterino {
 namespace messages {
 
-LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
-                                 const QString &url, qreal scale, const QString &name,
+LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : emoteManager(_emoteManager)
-    , windowManager(_windowManager)
-    , currentPixmap(nullptr)
+    : currentPixmap(nullptr)
     , url(url)
     , name(name)
     , tooltip(tooltip)
@@ -35,12 +32,9 @@ LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_wi
 {
 }
 
-LazyLoadedImage::LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
-                                 QPixmap *image, qreal scale, const QString &name,
+LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &name,
                                  const QString &tooltip, const QMargins &margin, bool isHat)
-    : emoteManager(_emoteManager)
-    , windowManager(_windowManager)
-    , currentPixmap(image)
+    : currentPixmap(image)
     , name(name)
     , tooltip(tooltip)
     , margin(margin)
@@ -85,12 +79,12 @@ void LazyLoadedImage::loadImage()
             lli->animated = true;
         }
 
-        lli->emoteManager.incGeneration();
+        EmoteManager::getInstance().incGeneration();
 
-        lli->windowManager.layoutVisibleChatWidgets();
+        WindowManager::instance->layoutVisibleChatWidgets();
     });
 
-    this->emoteManager.getGifUpdateSignal().connect([=]() {
+    EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();
     });  // For some reason when Boost signal is in thread scope and thread deletes the signal
          // doesn't work, so this is the fix.

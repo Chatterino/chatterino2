@@ -26,8 +26,7 @@ class Window : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                    CompletionManager &_completionManager, bool isMainWindow);
+    explicit Window(ChannelManager &_channelManager, ColorScheme &_colorScheme, bool isMainWindow);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
@@ -51,7 +50,6 @@ private:
 
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
-    CompletionManager &completionManager;
 
     Notebook notebook;
     bool loaded = false;

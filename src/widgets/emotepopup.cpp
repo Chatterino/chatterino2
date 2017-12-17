@@ -11,10 +11,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager,
-                       WindowManager &windowManager)
+EmotePopup::EmotePopup(ColorScheme &colorScheme)
     : BaseWidget(colorScheme, 0)
-    , emoteManager(emoteManager)
 {
     this->initAsWindow();
 
@@ -22,8 +20,8 @@ EmotePopup::EmotePopup(ColorScheme &colorScheme, EmoteManager &emoteManager,
     this->setLayout(layout);
     layout->setMargin(0);
 
-    view = new ChannelView(windowManager, this);
-    layout->addWidget(view);
+    this->view = new ChannelView(this);
+    layout->addWidget(this->view);
 }
 
 void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
@@ -58,18 +56,20 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         emoteChannel->addMessage(builder2.getMessage());
     };
 
-    addEmotes(this->emoteManager.bttvGlobalEmotes, "BetterTTV Global Emotes",
-              "BetterTTV Global Emote");
+    EmoteManager &emoteManager = EmoteManager::getInstance();
+
+    addEmotes(emoteManager.bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");
-    addEmotes(this->emoteManager.ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
+    addEmotes(emoteManager.ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
               "FrankerFaceZ Global Emote");
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
 
-    //    addEmotes(this->emoteManager.getEmojis(), "Emojis", "Emoji");
+    //    addEmotes(emoteManager.getEmojis(), "Emojis", "Emoji");
 
     this->view->setChannel(emoteChannel);
 }
+
 }  // namespace widgets
 }  // namespace chatterino

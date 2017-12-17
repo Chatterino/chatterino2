@@ -5,14 +5,12 @@ using namespace chatterino::twitch;
 
 namespace chatterino {
 
-ChannelManager::ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
-                               IrcManager &_ircManager)
+ChannelManager::ChannelManager(WindowManager &_windowManager, IrcManager &_ircManager)
     : windowManager(_windowManager)
-    , emoteManager(_emoteManager)
     , ircManager(_ircManager)
-    , whispersChannel(new TwitchChannel(_emoteManager, _ircManager, "/whispers", true))
-    , mentionsChannel(new TwitchChannel(_emoteManager, _ircManager, "/mentions", true))
-    , emptyChannel(new TwitchChannel(_emoteManager, _ircManager, "", true))
+    , whispersChannel(new TwitchChannel(_ircManager, "/whispers", true))
+    , mentionsChannel(new TwitchChannel(_ircManager, "/mentions", true))
+    , emptyChannel(new TwitchChannel(_ircManager, "", true))
 {
 }
 
@@ -46,8 +44,7 @@ std::shared_ptr<TwitchChannel> ChannelManager::addTwitchChannel(const QString &r
     auto it = this->twitchChannels.find(channelName);
 
     if (it == this->twitchChannels.end()) {
-        auto channel =
-            std::make_shared<TwitchChannel>(this->emoteManager, this->ircManager, channelName);
+        auto channel = std::make_shared<TwitchChannel>(this->ircManager, channelName);
 
         this->twitchChannels.insert(channelName, std::make_tuple(channel, 1));
 
@@ -124,16 +121,6 @@ const std::string &ChannelManager::getUserID(const std::string &username)
 
     static std::string temporary = "xd";
     return temporary;
-}
-
-EmoteManager &ChannelManager::getEmoteManager()
-{
-    return this->emoteManager;
-}
-
-WindowManager &ChannelManager::getWindowManager()
-{
-    return this->windowManager;
 }
 
 void ChannelManager::doOnAll(std::function<void(std::shared_ptr<TwitchChannel>)> func)

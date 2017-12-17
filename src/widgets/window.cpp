@@ -2,9 +2,9 @@
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
-#include "widgets/split.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
+#include "widgets/split.hpp"
 
 #include <QDebug>
 #include <QLibrary>
@@ -16,12 +16,10 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                       CompletionManager &_completionManager, bool _isMainWindow)
+Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme, bool _isMainWindow)
     : BaseWidget(_colorScheme, nullptr)
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
-    , completionManager(_completionManager)
     , notebook(this->channelManager, this, _isMainWindow)
     , dpi(this->getDpiMultiplier())
 // , windowGeometry("/windows/0/geometry")

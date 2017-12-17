@@ -4,10 +4,6 @@
 #include <QString>
 
 namespace chatterino {
-
-class EmoteManager;
-class WindowManager;
-
 namespace messages {
 
 class LazyLoadedImage : public QObject
@@ -15,13 +11,11 @@ class LazyLoadedImage : public QObject
 public:
     LazyLoadedImage() = delete;
 
-    explicit LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
-                             const QString &_url, qreal _scale = 1, const QString &_name = "",
+    explicit LazyLoadedImage(const QString &_url, qreal _scale = 1, const QString &_name = "",
                              const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                              bool isHat = false);
 
-    explicit LazyLoadedImage(EmoteManager &_emoteManager, WindowManager &_windowManager,
-                             QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
+    explicit LazyLoadedImage(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
                              const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                              bool isHat = false);
 
@@ -39,9 +33,6 @@ public:
     int getScaledHeight() const;
 
 private:
-    EmoteManager &emoteManager;
-    WindowManager &windowManager;
-
     struct FrameData {
         QPixmap *image;
         int duration;

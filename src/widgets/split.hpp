@@ -22,7 +22,6 @@ namespace chatterino {
 
 class ChannelManager;
 class ColorScheme;
-class CompletionManager;
 
 namespace widgets {
 
@@ -49,7 +48,6 @@ public:
     ~Split();
 
     ChannelManager &channelManager;
-    CompletionManager &completionManager;
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
 

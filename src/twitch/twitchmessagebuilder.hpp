@@ -1,6 +1,5 @@
 #pragma once
 
-#include "emotemanager.hpp"
 #include "messages/messagebuilder.hpp"
 #include "messages/messageparseargs.hpp"
 #include "resources.hpp"
@@ -29,7 +28,7 @@ public:
     TwitchMessageBuilder() = delete;
 
     explicit TwitchMessageBuilder(TwitchChannel *_channel, Resources &_resources,
-                                  EmoteManager &_emoteManager, WindowManager &_windowManager,
+                                  WindowManager &_windowManager,
                                   const Communi::IrcPrivateMessage *_ircMessage,
                                   const messages::MessageParseArgs &_args);
 
@@ -38,7 +37,6 @@ public:
     Resources &resources;
     WindowManager &windowManager;
     ColorScheme &colorScheme;
-    EmoteManager &emoteManager;
     const Communi::IrcPrivateMessage *ircMessage;
     messages::MessageParseArgs args;
     const QVariantMap tags;
@@ -66,8 +64,7 @@ private:
 
     void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, EmoteData>> &vec,
-                           EmoteManager &emoteManager);
+                           std::vector<std::pair<long, EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
     bool appendEmote(EmoteData &emoteData);
 

@@ -22,7 +22,6 @@ namespace widgets {
 Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons)
     : BaseWidget(parent)
     , channelManager(_channelManager)
-    , completionManager(parent->completionManager)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)

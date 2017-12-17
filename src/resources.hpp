@@ -8,16 +8,10 @@
 
 namespace chatterino {
 
-class EmoteManager;
-class WindowManager;
-
 class Resources
 {
-    EmoteManager &emoteManager;
-    WindowManager &windowManager;
-
 public:
-    explicit Resources(EmoteManager &emoteManager, WindowManager &windowManager);
+    explicit Resources();
 
     messages::LazyLoadedImage *badgeStaff;
     messages::LazyLoadedImage *badgeAdmin;
@@ -41,8 +35,7 @@ public:
     struct BadgeVersion {
         BadgeVersion() = delete;
 
-        explicit BadgeVersion(QJsonObject &&root, EmoteManager &emoteManager,
-                              WindowManager &windowManager);
+        explicit BadgeVersion(QJsonObject &&root);
 
         messages::LazyLoadedImage *badgeImage1x;
         messages::LazyLoadedImage *badgeImage2x;

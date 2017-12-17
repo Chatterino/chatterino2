@@ -12,8 +12,8 @@ class TwitchChannel : public Channel
     QTimer *liveStatusTimer;
 
 public:
-    explicit TwitchChannel(EmoteManager &emoteManager, IrcManager &ircManager,
-                           const QString &channelName, bool _isSpecial = false);
+    explicit TwitchChannel(IrcManager &ircManager, const QString &channelName,
+                           bool _isSpecial = false);
     ~TwitchChannel();
 
     void reloadChannelEmotes();
@@ -44,7 +44,6 @@ private:
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
 
-    EmoteManager &emoteManager;
     IrcManager &ircManager;
 
     bool isSpecial;

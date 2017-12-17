@@ -11,11 +11,9 @@
 namespace chatterino {
 WindowManager *WindowManager::instance = nullptr;
 
-WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                             CompletionManager &_completionManager)
+WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme)
     : channelManager(_channelManager)
     , colorScheme(_colorScheme)
-    , completionManager(_completionManager)
 {
     WindowManager::instance = this;
 }
@@ -23,7 +21,7 @@ WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colo
 void WindowManager::initMainWindow()
 {
     this->selectedWindow = this->mainWindow =
-        new widgets::Window(this->channelManager, this->colorScheme, this->completionManager, true);
+        new widgets::Window(this->channelManager, this->colorScheme, true);
 }
 
 static const std::string &getSettingsPath()
@@ -69,8 +67,7 @@ widgets::Window &WindowManager::getSelectedWindow()
 
 widgets::Window &WindowManager::createWindow()
 {
-    auto *window = new widgets::Window(this->channelManager, this->colorScheme,
-                                       this->completionManager, false);
+    auto *window = new widgets::Window(this->channelManager, this->colorScheme, false);
 
     window->loadDefaults();
 

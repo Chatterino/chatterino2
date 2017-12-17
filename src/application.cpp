@@ -10,13 +10,10 @@ namespace chatterino {
 // It will create the instances of the major classes, and connect their signals to each other
 
 Application::Application()
-    : completionManager(this->emoteManager)
-    , windowManager(this->channelManager, this->colorScheme, this->completionManager)
+    : windowManager(this->channelManager, this->colorScheme)
     , colorScheme(this->windowManager)
-    , emoteManager(this->windowManager)
-    , resources(this->emoteManager, this->windowManager)
-    , channelManager(this->windowManager, this->emoteManager, this->ircManager)
-    , ircManager(this->channelManager, this->resources, this->emoteManager, this->windowManager)
+    , channelManager(this->windowManager, this->ircManager)
+    , ircManager(this->channelManager, this->resources, this->windowManager)
 {
     logging::init();
     SettingsManager::getInstance().load();
@@ -24,7 +21,7 @@ Application::Application()
     this->windowManager.initMainWindow();
 
     // Initialize everything we need
-    this->emoteManager.loadGlobalEmotes();
+    EmoteManager::getInstance().loadGlobalEmotes();
 
     AccountManager::getInstance().load();
 
