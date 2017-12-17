@@ -96,6 +96,26 @@ Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
             this->input.clearSelection();
         }
     });
+
+    this->input.textChanged.connect([this](const QString &newText) {
+        if (!SettingsManager::getInstance().hideEmptyInput) {
+            return;
+        }
+
+        if (newText.length() == 0) {
+            this->input.hide();
+        } else if (this->input.isHidden()) {
+            this->input.show();
+        }
+    });
+
+    SettingsManager::getInstance().hideEmptyInput.connect([this](const bool &hideEmptyInput, auto) {
+        if (hideEmptyInput && this->input.getInputText().length() == 0) {
+            this->input.hide();
+        } else {
+            this->input.show();
+        }
+    });
 }
 
 Split::~Split()

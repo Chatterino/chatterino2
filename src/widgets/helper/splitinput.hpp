@@ -26,6 +26,9 @@ public:
     SplitInput(Split *_chatWidget);
 
     void clearSelection();
+    QString getInputText() const;
+
+    pajlada::Signals::Signal<const QString &> textChanged;
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;

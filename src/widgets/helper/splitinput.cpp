@@ -198,6 +198,11 @@ void SplitInput::clearSelection()
     this->textInput.setTextCursor(c);
 }
 
+QString SplitInput::getInputText() const
+{
+    return this->textInput.toPlainText();
+}
+
 void SplitInput::refreshTheme()
 {
     QPalette palette;
@@ -212,6 +217,8 @@ void SplitInput::refreshTheme()
 void SplitInput::editTextChanged()
 {
     QString text = this->textInput.toPlainText();
+
+    this->textChanged.invoke(text);
 
     text = text.trimmed();
     static QRegularExpression spaceRegex("\\s\\s+");
