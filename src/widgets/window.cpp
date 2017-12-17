@@ -6,23 +6,22 @@
 #include "widgets/settingsdialog.hpp"
 #include "widgets/split.hpp"
 
-#include <QDebug>
-#include <QLibrary>
 #include <QPalette>
 #include <QShortcut>
 #include <QVBoxLayout>
-#include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace widgets {
 
-Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme, bool _isMainWindow)
+Window::Window(const QString &_windowName, ChannelManager &_channelManager,
+               ColorScheme &_colorScheme, bool _isMainWindow)
     : BaseWidget(_colorScheme, nullptr)
+    , windowName(_windowName)
+    , windowGeometry(this->windowName.toStdString())
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
     , notebook(this->channelManager, this, _isMainWindow)
     , dpi(this->getDpiMultiplier())
-// , windowGeometry("/windows/0/geometry")
 {
     this->initAsWindow();
 
@@ -45,14 +44,7 @@ Window::Window(ChannelManager &_channelManager, ColorScheme &_colorScheme, bool 
 
     this->refreshTheme();
 
-    if (/*this->windowGeometry->isFilled()*/ false) {
-        // Load geometry from settings file
-        // this->setGeometry(this->windowGeometry.getValueRef());
-    } else {
-        // Set default geometry
-        // Default position is in the middle of the current monitor or the primary monitor
-        this->resize(1280, 800);
-    }
+    this->loadGeometry();
 
     // Initialize program-wide hotkeys
     {
@@ -120,8 +112,12 @@ Notebook &Window::getNotebook()
 
 void Window::closeEvent(QCloseEvent *)
 {
-    // Save closing window position
-    // this->windowGeometry = this->geometry();
+    const QRect &geom = this->geometry();
+
+    this->windowGeometry.x = geom.x();
+    this->windowGeometry.y = geom.y();
+    this->windowGeometry.width = geom.width();
+    this->windowGeometry.height = geom.height();
 
     this->closed();
 }
@@ -131,6 +127,20 @@ void Window::refreshTheme()
     QPalette palette;
     palette.setColor(QPalette::Background, this->colorScheme.TabBackground);
     this->setPalette(palette);
+}
+
+void Window::loadGeometry()
+{
+    if (!this->windowGeometry.x.isDefaultValue() && !this->windowGeometry.y.isDefaultValue()) {
+        this->move(this->windowGeometry.x, this->windowGeometry.y);
+    }
+
+    if (!this->windowGeometry.width.isDefaultValue() &&
+        !this->windowGeometry.height.isDefaultValue()) {
+        this->resize(this->windowGeometry.width, this->windowGeometry.height);
+    } else {
+        this->resize(1280, 800);
+    }
 }
 
 }  // namespace widgets
