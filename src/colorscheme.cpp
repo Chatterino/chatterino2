@@ -34,13 +34,8 @@ ColorScheme::ColorScheme(WindowManager &windowManager)
 {
     this->update();
 
-    this->themeName.getValueChangedSignal().connect([=](const auto &) {
-        this->update();  //
-    });
-
-    this->themeHue.getValueChangedSignal().connect([=](const auto &) {
-        this->update();  //
-    });
+    this->themeName.connectSimple([this](auto) { this->update(); });
+    this->themeHue.connectSimple([this](auto) { this->update(); });
 
     this->updated.connect([&windowManager] {
         windowManager.repaintVisibleChatWidgets();  //
@@ -140,10 +135,10 @@ void ColorScheme::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() +
-                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                  color.saturationF() * 0.2);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                         color.saturationF() * 0.2);
         }
     }
 }

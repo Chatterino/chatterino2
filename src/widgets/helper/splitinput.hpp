@@ -13,8 +13,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <boost/signals2.hpp>
-
 namespace chatterino {
 namespace widgets {
 
@@ -26,7 +24,6 @@ class SplitInput : public BaseWidget
 
 public:
     SplitInput(Split *_chatWidget);
-    ~SplitInput();
 
     void clearSelection();
 
@@ -40,7 +37,7 @@ private:
     Split *const chatWidget;
     EmotePopup *emotePopup = nullptr;
 
-    pajlada::Signals::Signal<const bool &>::Connection textLengthVisibleChangedConnection;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
     QHBoxLayout hbox;
     QVBoxLayout vbox;
     QHBoxLayout editContainer;

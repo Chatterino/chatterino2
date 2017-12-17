@@ -22,8 +22,8 @@ NotebookTab::NotebookTab(Notebook *_notebook)
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    this->hideXConnection = SettingsManager::getInstance().hideTabX.getValueChangedSignal().connect(
-        boost::bind(&NotebookTab::hideTabXChanged, this, _1));
+    SettingsManager::getInstance().hideTabX.connect(
+        boost::bind(&NotebookTab::hideTabXChanged, this, _1), this->managedConnections);
 
     this->setMouseTracking(true);
 
@@ -58,12 +58,6 @@ NotebookTab::NotebookTab(Notebook *_notebook)
     this->menu.addAction("Enable highlights on new message", []() {
         qDebug() << "TODO: Implement";  //
     });
-}
-
-NotebookTab::~NotebookTab()
-{
-    SettingsManager::getInstance().hideTabX.getValueChangedSignal().disconnect(
-        this->hideXConnection);
 }
 
 void NotebookTab::calcSize()

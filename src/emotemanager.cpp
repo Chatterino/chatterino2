@@ -27,7 +27,7 @@ EmoteManager::EmoteManager()
     pajlada::Settings::Setting<std::string> roomID(
         "/accounts/current/roomID", "", pajlada::Settings::SettingOption::DoNotWriteToJSON);
 
-    roomID.getValueChangedSignal().connect([this](const std::string &roomID) {
+    roomID.getValueChangedSignal().connect([this](const std::string &roomID, auto) {
         this->refreshTwitchEmotes(roomID);  //
     });
 }

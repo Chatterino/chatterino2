@@ -20,31 +20,31 @@ SettingsManager::SettingsManager()
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
 {
-    this->showTimestamps.getValueChangedSignal().connect([this](const auto &) {
+    this->showTimestamps.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->showTimestampSeconds.getValueChangedSignal().connect([this](const auto &) {
+    this->showTimestampSeconds.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->showBadges.getValueChangedSignal().connect([this](const auto &) {
+    this->showBadges.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->enableBttvEmotes.getValueChangedSignal().connect([this](const auto &) {
+    this->enableBttvEmotes.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->enableEmojis.getValueChangedSignal().connect([this](const auto &) {
+    this->enableEmojis.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->enableFfzEmotes.getValueChangedSignal().connect([this](const auto &) {
+    this->enableFfzEmotes.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 
-    this->enableTwitchEmotes.getValueChangedSignal().connect([this](const auto &) {
+    this->enableTwitchEmotes.connectSimple([this](auto) {
         this->updateWordTypeMask();  //
     });
 }
