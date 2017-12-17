@@ -77,7 +77,7 @@ AccountManager::AccountManager()
 {
     this->Twitch.anonymousUser.reset(new twitch::TwitchUser("justinfan64537", "", ""));
 
-    this->Twitch.currentUsername.getValueChangedSignal().connect([this](const auto &newValue) {
+    this->Twitch.currentUsername.connect([this](const auto &newValue, auto) {
         QString newUsername(QString::fromStdString(newValue));
         auto user = this->Twitch.findUserByUsername(newUsername);
         if (user) {

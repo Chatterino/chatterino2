@@ -36,10 +36,10 @@ Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showBu
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
 
-    SettingsManager::getInstance().hidePreferencesButton.getValueChangedSignal().connect(
-        [this](const bool &) { this->performLayout(); });
-    SettingsManager::getInstance().hideUserButton.getValueChangedSignal().connect(
-        [this](const bool &) { this->performLayout(); });
+    auto &settingsManager = SettingsManager::getInstance();
+
+    settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
+    settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
 }
 
 SplitContainer *Notebook::addPage(bool select)

@@ -181,15 +181,17 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         {
             auto &fontManager = FontManager::getInstance();
 
-            fontManager.currentFontFamily.getValueChangedSignal().connect(
-                [fontFamilyLabel](const std::string &newValue) {
+            fontManager.currentFontFamily.connect(
+                [fontFamilyLabel](const std::string &newValue, auto) {
                     fontFamilyLabel->setText(QString::fromStdString(newValue));  //
-                });
+                },
+                this->managedConnections);
 
-            fontManager.currentFontSize.getValueChangedSignal().connect(
-                [fontSizeLabel](const int &newValue) {
+            fontManager.currentFontSize.connect(
+                [fontSizeLabel](const int &newValue, auto) {
                     fontSizeLabel->setText(QString(QString::number(newValue)));  //
-                });
+                },
+                this->managedConnections);
         }
 
         fontButton->connect(fontButton, &QPushButton::clicked, []() {

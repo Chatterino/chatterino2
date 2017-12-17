@@ -163,7 +163,7 @@ private:
     boost::signals2::connection repaintGifsConnection;
     boost::signals2::connection layoutConnection;
 
-    pajlada::Signals::NoArgSignal::Connection fontChangedConnection;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
 private slots:
     void wordTypeMaskChanged()

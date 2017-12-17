@@ -61,9 +61,9 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->goToBottom->getLabel().setText("Jump to bottom");
     this->goToBottom->setVisible(false);
 
-    this->fontChangedConnection = FontManager::getInstance().fontChanged.connect([this] {
+    this->managedConnections.emplace_back(FontManager::getInstance().fontChanged.connect([this] {
         this->layoutMessages();  //
-    });
+    }));
 
     connect(goToBottom, &RippleEffectLabel::clicked, this,
             [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
@@ -83,7 +83,6 @@ ChannelView::~ChannelView()
 {
     QObject::disconnect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged,
                         this, &ChannelView::wordTypeMaskChanged);
-    FontManager::getInstance().fontChanged.disconnect(this->fontChangedConnection);
 }
 
 void ChannelView::queueUpdate()
@@ -246,9 +245,8 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord =
-                isSingleMessage &&
-                this->selection.max.charIndex - charIndex < part.getCharacterLength();
+            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
+                                                       part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -525,10 +523,9 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(),
-                     (messageRef->getMessage()->getCanHighlightTab())
-                         ? this->colorScheme.ChatBackgroundHighlighted
-                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+                                         ? this->colorScheme.ChatBackgroundHighlighted
+                                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection

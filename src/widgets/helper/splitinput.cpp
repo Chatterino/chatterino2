@@ -30,9 +30,9 @@ SplitInput::SplitInput(Split *_chatWidget)
     auto &fontManager = FontManager::getInstance();
 
     this->textInput.setFont(fontManager.getFont(FontManager::Type::Medium));
-    fontManager.fontChanged.connect([this, &fontManager]() {
+    this->managedConnections.emplace_back(fontManager.fontChanged.connect([this, &fontManager]() {
         this->textInput.setFont(fontManager.getFont(FontManager::Type::Medium));
-    });
+    }));
 
     this->editContainer.addWidget(&this->textInput);
     this->editContainer.setMargin(4);
@@ -177,21 +177,15 @@ SplitInput::SplitInput(Split *_chatWidget)
         }
     });
 
-    this->textLengthVisibleChangedConnection =
-        SettingsManager::getInstance().showMessageLength.getValueChangedSignal().connect(
-            [this](const bool &value) { this->textLengthLabel.setHidden(!value); });
+    SettingsManager::getInstance().showMessageLength.connect(
+        [this](const bool &value, auto) { this->textLengthLabel.setHidden(!value); },
+        this->managedConnections);
 
     QObject::connect(&this->textInput, &QTextEdit::copyAvailable, [this](bool available) {
         if (available) {
             this->chatWidget->view.clearSelection();
         }
     });
-}
-
-SplitInput::~SplitInput()
-{
-    SettingsManager::getInstance().showMessageLength.getValueChangedSignal().disconnect(
-        this->textLengthVisibleChangedConnection);
 }
 
 void SplitInput::clearSelection()

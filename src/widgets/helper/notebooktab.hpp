@@ -5,9 +5,7 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/signals2.hpp>
-#include <boost/signals2/connection.hpp>
-#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/connection.hpp>
 
 namespace chatterino {
 
@@ -26,7 +24,6 @@ public:
     enum HighlightStyle { HighlightNone, HighlightHighlighted, HighlightNewMessage };
 
     explicit NotebookTab(Notebook *_notebook);
-    ~NotebookTab();
 
     void calcSize();
 
@@ -58,7 +55,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    pajlada::Signals::Signal<const bool &>::Connection hideXConnection;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
     QPropertyAnimation positionChangedAnimation;
     bool positionChangedAnimationRunning = false;

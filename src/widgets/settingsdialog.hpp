@@ -80,6 +80,8 @@ private:
 
     void okButtonClicked();
     void cancelButtonClicked();
+
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 };
 
 }  // namespace widgets
