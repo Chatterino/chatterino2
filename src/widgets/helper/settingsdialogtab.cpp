@@ -14,9 +14,6 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, QString _labelText
     this->ui.labelText = _labelText;
     this->ui.image.load(imageFileName);
 
-    // XXX: DPI (not sure if this is auto-adjusted with custom DPI)
-    this->setFixedHeight(32);
-
     this->setCursor(QCursor(Qt::PointingHandCursor));
 
     this->setStyleSheet("color: #FFF");
@@ -27,6 +24,8 @@ void SettingsDialogTab::setSelected(bool _selected)
     if (this->selected == _selected) {
         return;
     }
+
+    //    height: <checkbox-size>px;
 
     this->selected = _selected;
     emit selectedChanged(selected);

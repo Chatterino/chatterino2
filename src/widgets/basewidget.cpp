@@ -37,6 +37,7 @@ BaseWidget::BaseWidget(QWidget *parent)
 
 float BaseWidget::getDpiMultiplier()
 {
+    //    return 1.f;
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
 
     if (baseWidget == nullptr) {
@@ -90,8 +91,7 @@ bool BaseWidget::nativeEvent(const QByteArray &eventType, void *message, long *r
         this->dpiMultiplier = dpi / 96.f;
         float scale = this->dpiMultiplier / oldDpiMultiplier;
 
-        qDebug() << scale;
-        qDebug() << dpi;
+        this->dpiMultiplyerChanged(oldDpiMultiplier, this->dpiMultiplier);
 
         this->resize(static_cast<int>(this->width() * scale),
                      static_cast<int>(this->height() * scale));

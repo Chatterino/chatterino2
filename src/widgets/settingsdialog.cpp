@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileDialog>
+#include <QFont>
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -31,11 +32,6 @@ SettingsDialog::SettingsDialog()
 {
     this->initAsWindow();
 
-    QFile file(":/qss/settings.qss");
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    this->setStyleSheet(styleSheet);
-
     QPalette palette;
     palette.setColor(QPalette::Background, QColor("#444"));
     this->setPalette(palette);
@@ -48,11 +44,10 @@ SettingsDialog::SettingsDialog()
 
     this->ui.vbox.addWidget(&this->ui.buttonBox);
 
-    auto tabWidget = new QWidget();
+    auto tabWidget = &ui.tabWidget;
     tabWidget->setObjectName("tabWidget");
 
     tabWidget->setLayout(&this->ui.tabs);
-    tabWidget->setFixedWidth(200);
 
     this->ui.hbox.addWidget(tabWidget);
     this->ui.hbox.addLayout(&this->ui.pageStack);
@@ -71,6 +66,8 @@ SettingsDialog::SettingsDialog()
     this->resize(600, 500);
 
     this->addTabs();
+
+    this->dpiMultiplyerChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
 }
 
 void SettingsDialog::addTabs()
@@ -578,6 +575,7 @@ void SettingsDialog::addTab(QBoxLayout *layout, QString title, QString imageRes)
     tab->setWidget(widget);
 
     this->ui.tabs.addWidget(tab, 0, Qt::AlignTop);
+    tabs.push_back(tab);
 
     this->ui.pageStack.addWidget(widget);
 
@@ -608,6 +606,44 @@ void SettingsDialog::showDialog()
     instance->activateWindow();
     instance->raise();
     instance->setFocus();
+}
+
+void SettingsDialog::dpiMultiplyerChanged(float oldDpi, float newDpi)
+{
+    QFile file(":/qss/settings.qss");
+    file.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(file.readAll());
+    styleSheet.replace("<font-size>", QString::number((int)(14 * newDpi)));
+    styleSheet.replace("<checkbox-size>", QString::number((int)(14 * newDpi)));
+
+    for (SettingsDialogTab *tab : this->tabs) {
+        tab->setFixedHeight((int)(30 * newDpi));
+    }
+
+    this->setStyleSheet(styleSheet);
+
+    this->ui.tabWidget.setFixedWidth((int)(200 * newDpi));
+}
+
+void SettingsDialog::setChildrensFont(QLayout *object, QFont &font, int indent)
+{
+    //    for (QWidget *widget : this->widgets) {
+    //        widget->setFont(font);
+    //    }
+    //    for (int i = 0; i < object->count(); i++) {
+    //        if (object->itemAt(i)->layout()) {
+    //            setChildrensFont(object->layout()->itemAt(i)->layout(), font, indent + 2);
+    //        }
+
+    //        if (object->itemAt(i)->widget()) {
+    //            object->itemAt(i)->widget()->setFont(font);
+
+    //            if (object->itemAt(i)->widget()->layout() &&
+    //                !object->itemAt(i)->widget()->layout()->isEmpty()) {
+    //                setChildrensFont(object->itemAt(i)->widget()->layout(), font, indent + 2);
+    //            }
+    //        }
+    //    }
 }
 
 /// Widget creation helpers

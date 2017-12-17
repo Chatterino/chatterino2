@@ -69,6 +69,8 @@ inline bool initSettings(bool portable)
 
 int main(int argc, char *argv[])
 {
+    //    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
 #ifdef USEWINSDK

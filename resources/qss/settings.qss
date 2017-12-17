@@ -3,7 +3,7 @@
 }
 
 * {
-    font-size: 14px;
+    font-size: <font-size>px;
 }
 
 SettingsDialogTab:hover {
@@ -16,4 +16,9 @@ QLabel, QCheckBox, QGroupBox, SettingsDialogTab {
 
 QGroupBox {
     background-color: #444;
+}
+
+QCheckBox::indicator {
+    width: <checkbox-size>px;
+    height: <checkbox-size>px;
 }

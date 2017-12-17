@@ -33,8 +33,12 @@ public:
 
     static void showDialog();
 
+protected:
+    virtual void dpiMultiplyerChanged(float oldDpi, float newDpi) override;
+
 private:
     SettingsSnapshot snapshot;
+    std::vector<SettingsDialogTab *> tabs;
 
     pajlada::Settings::Setting<int> usernameDisplayMode;
 
@@ -42,6 +46,7 @@ private:
         QVBoxLayout tabs;
         QVBoxLayout vbox;
         QHBoxLayout hbox;
+        QWidget tabWidget;
         QStackedLayout pageStack;
         QDialogButtonBox buttonBox;
         QPushButton okButton;
@@ -49,8 +54,8 @@ private:
     } ui;
 
     void addTab(QBoxLayout *layout, QString title, QString imageRes);
-
     void addTabs();
+
     QVBoxLayout *createAccountsTab();
     QVBoxLayout *createAppearanceTab();
     QVBoxLayout *createMessagesTab();
@@ -84,6 +89,8 @@ private:
     void cancelButtonClicked();
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+
+    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
 };
 
 }  // namespace widgets

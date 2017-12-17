@@ -34,6 +34,10 @@ protected:
 #ifdef USEWINSDK
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
+
+    virtual void dpiMultiplyerChanged(float oldDpi, float newDpi)
+    {
+    }
     void initAsWindow();
 
 private:
