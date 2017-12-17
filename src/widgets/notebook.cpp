@@ -37,9 +37,9 @@ Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showBu
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
 
-    SettingsManager::getInstance().hidePreferencesButton.valueChanged.connect(
+    SettingsManager::getInstance().hidePreferencesButton.getValueChangedSignal().connect(
         [this](const bool &) { this->performLayout(); });
-    SettingsManager::getInstance().hideUserButton.valueChanged.connect(
+    SettingsManager::getInstance().hideUserButton.getValueChangedSignal().connect(
         [this](const bool &) { this->performLayout(); });
 }
 
@@ -167,13 +167,13 @@ void Notebook::performLayout(bool animated)
     int x = 0, y = 0;
     float scale = this->getDpiMultiplier();
 
-    if (!showButtons || SettingsManager::getInstance().hidePreferencesButton.get()) {
+    if (!showButtons || SettingsManager::getInstance().hidePreferencesButton) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (!showButtons || SettingsManager::getInstance().hideUserButton.get()) {
+    if (!showButtons || SettingsManager::getInstance().hideUserButton) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);

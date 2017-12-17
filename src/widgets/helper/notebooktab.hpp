@@ -7,6 +7,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/signals2.hpp>
 #include <boost/signals2/connection.hpp>
+#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
@@ -57,7 +58,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    boost::signals2::connection hideXConnection;
+    pajlada::Signals::Signal<const bool &>::Connection hideXConnection;
 
     QPropertyAnimation positionChangedAnimation;
     bool positionChangedAnimationRunning = false;

@@ -43,7 +43,7 @@ private:
     EmoteManager &emoteManager;
     WindowManager &windowManager;
 
-    boost::signals2::connection textLengthVisibleChangedConnection;
+    pajlada::Signals::Signal<const bool &>::Connection textLengthVisibleChangedConnection;
     QHBoxLayout hbox;
     QVBoxLayout vbox;
     QHBoxLayout editContainer;

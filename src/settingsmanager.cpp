@@ -11,58 +11,42 @@ namespace chatterino {
 
 SettingsManager::SettingsManager()
     : settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
-    , showTimestamps("/appearance/messages/showTimestamps", true)
-    , showTimestampSeconds("/appearance/messages/showTimestampSeconds", true)
-    , showBadges("/appearance/messages/showBadges", true)
     , streamlinkPath("/behaviour/streamlink/path", "")
     , preferredQuality("/behaviour/streamlink/quality", "Choose")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
     , mouseScrollMultiplier(this->settingsItems, "mouseScrollMultiplier", 1.0)
-    , scaleEmotesByLineHeight(this->settingsItems, "scaleEmotesByLineHeight", false)
-    , showLastMessageIndicator(this->settingsItems, "showLastMessageIndicator", false)
-    , allowDouplicateMessages(this->settingsItems, "allowDouplicateMessages", true)
-    , linksDoubleClickOnly(this->settingsItems, "linksDoubleClickOnly", false)
-    , hideEmptyInput(this->settingsItems, "hideEmptyInput", false)
-    , showMessageLength(this->settingsItems, "showMessageLength", false)
-    , seperateMessages(this->settingsItems, "seperateMessages", false)
-    , mentionUsersWithAt(this->settingsItems, "mentionUsersWithAt", false)
-    , allowCommandsAtEnd(this->settingsItems, "allowCommandsAtEnd", false)
-    , enableHighlights(this->settingsItems, "enableHighlights", true)
-    , enableHighlightsSelf(this->settingsItems, "enableHighlightsSelf", true)
-    , enableHighlightSound(this->settingsItems, "enableHighlightSound", true)
-    , enableHighlightTaskbar(this->settingsItems, "enableHighlightTaskbar", true)
-    , customHighlightSound(this->settingsItems, "customHighlightSound", false)
     , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
-    , highlightAlwaysPlaySound("/highlighting/alwaysPlaySound", false)
-    , enableTwitchEmotes(this->settingsItems, "enableTwitchEmotes", true)
-    , enableBttvEmotes(this->settingsItems, "enableBttvEmotes", true)
-    , enableFfzEmotes(this->settingsItems, "enableFfzEmotes", true)
-    , enableEmojis(this->settingsItems, "enableEmojis", true)
-    , enableGifAnimations(this->settingsItems, "enableGifAnimations", true)
-    , enableGifs(this->settingsItems, "enableGifs", true)
-    , inlineWhispers(this->settingsItems, "inlineWhispers", true)
-    , windowTopMost(this->settingsItems, "windowTopMost", false)
-    , hideTabX(this->settingsItems, "hideTabX", false)
-    , hidePreferencesButton(this->settingsItems, "hidePreferencesButton", false)
-    , hideUserButton(this->settingsItems, "hideUserButton", false)
-    , useCustomWindowFrame(this->settingsItems, "useCustomWindowFrame", true)
 {
-    this->showTimestamps.getValueChangedSignal().connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
-    this->showTimestampSeconds.getValueChangedSignal().connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
-    this->showBadges.getValueChangedSignal().connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
-    this->enableBttvEmotes.valueChanged.connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
-    this->enableEmojis.valueChanged.connect([this](const auto &) { this->updateWordTypeMask(); });
-    this->enableFfzEmotes.valueChanged.connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
-    this->enableTwitchEmotes.valueChanged.connect(
-        [this](const auto &) { this->updateWordTypeMask(); });
+    this->showTimestamps.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->showTimestampSeconds.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->showBadges.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->enableBttvEmotes.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->enableEmojis.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->enableFfzEmotes.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
+
+    this->enableTwitchEmotes.getValueChangedSignal().connect([this](const auto &) {
+        this->updateWordTypeMask();  //
+    });
 }
 
 void SettingsManager::save()
@@ -136,15 +120,15 @@ void SettingsManager::updateWordTypeMask()
         }
     }
 
-    newMaskUint |= enableTwitchEmotes.get() ? Word::TwitchEmoteImage : Word::TwitchEmoteText;
-    newMaskUint |= enableFfzEmotes.get() ? Word::FfzEmoteImage : Word::FfzEmoteText;
-    newMaskUint |= enableBttvEmotes.get() ? Word::BttvEmoteImage : Word::BttvEmoteText;
+    newMaskUint |= enableTwitchEmotes ? Word::TwitchEmoteImage : Word::TwitchEmoteText;
+    newMaskUint |= enableFfzEmotes ? Word::FfzEmoteImage : Word::FfzEmoteText;
+    newMaskUint |= enableBttvEmotes ? Word::BttvEmoteImage : Word::BttvEmoteText;
     newMaskUint |=
-        (enableBttvEmotes.get() && enableGifs.get()) ? Word::BttvEmoteImage : Word::BttvEmoteText;
-    newMaskUint |= enableEmojis.get() ? Word::EmojiImage : Word::EmojiText;
+        (enableBttvEmotes && enableGifAnimations) ? Word::BttvEmoteImage : Word::BttvEmoteText;
+    newMaskUint |= enableEmojis ? Word::EmojiImage : Word::EmojiText;
 
     newMaskUint |= Word::BitsAmount;
-    newMaskUint |= enableGifs.get() ? Word::BitsAnimated : Word::BitsStatic;
+    newMaskUint |= enableGifAnimations ? Word::BitsAnimated : Word::BitsStatic;
 
     if (this->showBadges) {
         newMaskUint |= Word::Badges;
