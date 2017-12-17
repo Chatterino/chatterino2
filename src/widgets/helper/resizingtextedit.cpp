@@ -1,4 +1,5 @@
 #include "widgets/helper/resizingtextedit.hpp"
+#include "completionmanager.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
 {
@@ -85,6 +86,10 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         if (!currentCompletionPrefix.size()) {
             return;
         }
+
+        auto *completionModel =
+            static_cast<chatterino::CompletionModel *>(this->completer->model());
+        completionModel->refresh();
 
         if (!this->nextCompletion) {
             // first selection

@@ -3,15 +3,16 @@
 #include <QAbstractListModel>
 #include <QVector>
 
+#include <map>
 #include <string>
 
 namespace chatterino {
 
-class EmoteManager;
-
 class CompletionModel : public QAbstractListModel
 {
 public:
+    CompletionModel(const std::string &_channelName);
+
     virtual int columnCount(const QModelIndex & /*parent*/) const override
     {
         return 1;
@@ -28,14 +29,21 @@ public:
         return this->emotes.size();
     }
 
+    void refresh();
+
+private:
     void addString(const std::string &str);
 
     QVector<QString> emotes;
+
+    std::string channelName;
 };
 
 class CompletionManager
 {
     CompletionManager() = default;
+
+    std::map<std::string, CompletionModel *> models;
 
 public:
     static CompletionManager &getInstance()
@@ -45,7 +53,6 @@ public:
     }
 
     CompletionModel *createModel(const std::string &channelName);
-    void updateModel(CompletionModel *model, const std::string &channelName = std::string());
 };
 
 }  // namespace chatterino
