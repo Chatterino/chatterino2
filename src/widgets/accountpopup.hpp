@@ -1,5 +1,6 @@
 #pragma once
 
+#include "basewidget.hpp"
 #include "concurrentmap.hpp"
 #include "twitch/twitchchannel.hpp"
 
@@ -18,7 +19,7 @@ class Channel;
 
 namespace widgets {
 
-class AccountPopupWidget : public QWidget
+class AccountPopupWidget : public BaseWidget
 {
     Q_OBJECT
 public:

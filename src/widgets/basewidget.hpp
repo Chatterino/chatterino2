@@ -21,6 +21,8 @@ public:
 
     explicit BaseWidget(BaseWidget *parent);
 
+    explicit BaseWidget(QWidget *parent = nullptr);
+
     ColorScheme &colorScheme;
 
     float getDpiMultiplier();

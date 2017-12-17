@@ -19,6 +19,8 @@ public:
         return this->lightTheme;
     }
 
+    static ColorScheme *instance;
+
     QString InputStyleSheet;
 
     QColor SystemMessageColor;

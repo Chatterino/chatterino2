@@ -1,22 +1,25 @@
 #ifndef QUALITYPOPUP_H
 #define QUALITYPOPUP_H
 
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QHBoxLayout>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include "basewidget.hpp"
 
 namespace chatterino {
 
 namespace widgets {
 
-class QualityPopup : public QWidget
+class QualityPopup : public BaseWidget
 {
 public:
     QualityPopup(const QString &channel, const QString &path, QStringList options);
     static void showDialog(const QString &channel, const QString &path, QStringList options);
+
 private:
     struct {
         QVBoxLayout vbox;
@@ -25,7 +28,7 @@ private:
         QPushButton okButton;
         QPushButton cancelButton;
     } ui;
-    
+
     QString channel;
     QString path;
 
@@ -33,7 +36,7 @@ private:
     void cancelButtonClicked();
 };
 
-} // namespace widgets
-} // namespace chatterino
+}  // namespace widgets
+}  // namespace chatterino
 
-#endif // QUALITYPOPUP_H
+#endif  // QUALITYPOPUP_H

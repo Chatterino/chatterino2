@@ -1,5 +1,6 @@
 #include "widgets/basewidget.hpp"
 #include "colorscheme.hpp"
+#include "settingsmanager.hpp"
 
 //#include <QApplication>
 #include <QDebug>
@@ -26,6 +27,12 @@ BaseWidget::BaseWidget(BaseWidget *parent)
 //    , windowManager(parent->windowManager)
 {
     this->init();
+}
+
+BaseWidget::BaseWidget(QWidget *parent)
+    : QWidget(parent)
+    , colorScheme(*ColorScheme::instance)
+{
 }
 
 float BaseWidget::getDpiMultiplier()
@@ -60,6 +67,10 @@ void BaseWidget::initAsWindow()
         this->dpiMultiplier = dpi.value() / 96.f;
     }
 #endif
+
+    if (SettingsManager::getInstance().windowTopMost.getValue()) {
+        this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
+    }
 }
 
 void BaseWidget::refreshTheme()

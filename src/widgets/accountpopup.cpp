@@ -19,15 +19,16 @@ namespace chatterino {
 namespace widgets {
 
 AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
-    : QWidget(nullptr)
+    : BaseWidget()
     , _ui(new Ui::AccountPopup)
     , _channel(channel)
 {
     _ui->setupUi(this);
 
-    resize(0, 0);
-
     setWindowFlags(Qt::FramelessWindowHint);
+    this->initAsWindow();
+
+    resize(0, 0);
 
     SettingsManager &settings = SettingsManager::getInstance();
 

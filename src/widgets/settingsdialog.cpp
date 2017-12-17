@@ -23,11 +23,14 @@ namespace chatterino {
 namespace widgets {
 
 SettingsDialog::SettingsDialog()
-    : snapshot(SettingsManager::getInstance().createSnapshot())
+    : BaseWidget()
+    , snapshot(SettingsManager::getInstance().createSnapshot())
     , usernameDisplayMode(
           "/appearance/messages/usernameDisplayMode",
           twitch::TwitchMessageBuilder::UsernameDisplayMode::UsernameAndLocalizedName)
 {
+    this->initAsWindow();
+
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
@@ -328,7 +331,8 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
 
     auto form = new QFormLayout();
 
-    form->addRow("Window:", createCheckbox("Window always on top", settings.windowTopMost));
+    form->addRow("Window:",
+                 createCheckbox("Window always on top (requires restart)", settings.windowTopMost));
     //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
     //        commands)",
     //                                                 settings.mentionUsersWithAt));

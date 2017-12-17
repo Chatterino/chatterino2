@@ -6,15 +6,19 @@ namespace chatterino {
 namespace widgets {
 
 QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringList options)
-    : channel(channel)
+    : BaseWidget()
+    , channel(channel)
     , path(path)
 {
+    this->initAsWindow();
+
     this->ui.okButton.setText("OK");
     this->ui.cancelButton.setText("Cancel");
 
-    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this, &QualityPopup::okButtonClicked);
+    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this,
+                     &QualityPopup::okButtonClicked);
     QObject::connect(&this->ui.cancelButton, &QPushButton::clicked, this,
-                 &QualityPopup::cancelButtonClicked);
+                     &QualityPopup::cancelButtonClicked);
 
     this->ui.buttonBox.addButton(&this->ui.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
     this->ui.buttonBox.addButton(&this->ui.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
@@ -29,7 +33,8 @@ QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringL
     this->setLayout(&this->ui.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channel, const QString &path, QStringList options) {
+void QualityPopup::showDialog(const QString &channel, const QString &path, QStringList options)
+{
     static QualityPopup *instance = new QualityPopup(channel, path, options);
 
     instance->show();
@@ -38,9 +43,10 @@ void QualityPopup::showDialog(const QString &channel, const QString &path, QStri
     instance->setFocus();
 }
 
-void QualityPopup::okButtonClicked() {
+void QualityPopup::okButtonClicked()
+{
     QProcess::startDetached(this->path,
-                        {"twitch.tv/" + this->channel, this->ui.selector.currentText()});
+                            {"twitch.tv/" + this->channel, this->ui.selector.currentText()});
     this->close();
 }
 
@@ -49,5 +55,5 @@ void QualityPopup::cancelButtonClicked()
     this->close();
 }
 
-} // namespace widgets
-} // namespace chatterino
+}  // namespace widgets
+}  // namespace chatterino

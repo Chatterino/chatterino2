@@ -28,10 +28,14 @@ double getMultiplierByTheme(const std::string &themeName)
 
 }  // namespace detail
 
+ColorScheme *ColorScheme::instance = nullptr;
+
 ColorScheme::ColorScheme(WindowManager &windowManager)
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
 {
+    ColorScheme::instance = this;
+
     this->update();
 
     this->themeName.connectSimple([this](auto) { this->update(); });
@@ -135,10 +139,10 @@ void ColorScheme::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(
-                color.hueF(), color.saturationF(),
-                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                         color.saturationF() * 0.2);
+            color.setHslF(color.hueF(), color.saturationF(),
+                          color.lightnessF() +
+                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                  color.saturationF() * 0.2);
         }
     }
 }

@@ -18,11 +18,13 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 
+#include "basewidget.hpp"
+
 namespace chatterino {
 
 namespace widgets {
 
-class SettingsDialog : public QWidget
+class SettingsDialog : public BaseWidget
 {
 public:
     SettingsDialog();
