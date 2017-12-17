@@ -1,5 +1,6 @@
 #include "emotemanager.hpp"
 #include "common.hpp"
+#include "settingsmanager.hpp"
 #include "util/urlfetch.hpp"
 #include "windowmanager.hpp"
 
@@ -528,8 +529,10 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         _gifUpdateTimer.start();
 
         QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
-            _gifUpdateTimerSignal();
-            WindowManager::instance->repaintGifEmotes();
+            if (SettingsManager::getInstance().enableGifAnimations.getValue()) {
+                _gifUpdateTimerSignal();
+                WindowManager::instance->repaintGifEmotes();
+            }
         });
     }
 

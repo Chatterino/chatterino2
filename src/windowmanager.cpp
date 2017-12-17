@@ -2,6 +2,7 @@
 #include "appdatapath.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
+#include "settingsmanager.hpp"
 
 #include <QDebug>
 #include <QStandardPaths>
