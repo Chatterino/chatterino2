@@ -182,21 +182,16 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         {
             auto &fontManager = FontManager::getInstance();
 
-            fontManager.currentFontFamily.connect(
-                [fontFamilyLabel, &fontManager](auto, auto) {
-                    fontFamilyLabel->setText(
-                        QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
-                        QString::number(fontManager.currentFontSize) + "pt");
-                },
-                this->managedConnections);
+            auto UpdateFontFamilyLabel = [fontFamilyLabel, &fontManager](auto) {
+                fontFamilyLabel->setText(
+                    QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
+                    QString::number(fontManager.currentFontSize) + "pt");
+            };
 
-            fontManager.currentFontSize.connect(
-                [fontFamilyLabel, &fontManager](auto, auto) {
-                    fontFamilyLabel->setText(
-                        QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
-                        QString::number(fontManager.currentFontSize) + "pt");
-                },
-                this->managedConnections);
+            fontManager.currentFontFamily.connectSimple(UpdateFontFamilyLabel,
+                                                        this->managedConnections);
+            fontManager.currentFontSize.connectSimple(UpdateFontFamilyLabel,
+                                                      this->managedConnections);
         }
 
         fontButton->connect(fontButton, &QPushButton::clicked, []() {
