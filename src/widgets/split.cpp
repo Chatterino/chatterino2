@@ -294,61 +294,78 @@ void Split::doOpenStreamlink()
     QString path = QString::fromStdString(settings.streamlinkPath.getValue());
     QString channel = QString::fromStdString(this->channelName.getValue());
     QFileInfo fileinfo = QFileInfo(path);
-    if (fileinfo.exists() && fileinfo.isExecutable()) {
-        if (preferredQuality != "choose") {
-            QStringList args = {"twitch.tv/" + channel};
-            QString quality = "";
-            QString exclude = "";
-            if (preferredQuality == "high") {
-                exclude = ">720p30";
-                quality = "high,best";
-            } else if (preferredQuality == "medium") {
-                exclude = ">540p30";
-                quality = "medium,best";
-            } else if (preferredQuality == "low") {
-                exclude = ">360p30";
-                quality = "low,best";
-            } else if (preferredQuality == "audio only") {
-                quality = "audio,audio_only";
-            } else {
-                quality = "best";
-            }
-            if (quality != "")
-                args << quality;
-            if (exclude != "")
-                args << "--stream-sorting-excludes" << exclude;
-            QProcess::startDetached(path, args);
+
+    if (path.isEmpty()) {
+        debug::Log("[Split:doOpenStreamlink] No streamlink path selected in Settings");
+        return;
+    }
+
+    if (!fileinfo.exists()) {
+        debug::Log("[Split:doOpenStreamlink] Streamlink path ({}) is invalid, file does not exist",
+                   path);
+        return;
+    }
+
+    if (fileinfo.isDir() || !fileinfo.isExecutable()) {
+        debug::Log("[Split:doOpenStreamlink] Streamlink path ({}) is invalid, it needs to point to "
+                   "the streamlink executable",
+                   path);
+        return;
+    }
+
+    if (preferredQuality != "choose") {
+        QStringList args = {"twitch.tv/" + channel};
+        QString quality = "";
+        QString exclude = "";
+        if (preferredQuality == "high") {
+            exclude = ">720p30";
+            quality = "high,best";
+        } else if (preferredQuality == "medium") {
+            exclude = ">540p30";
+            quality = "medium,best";
+        } else if (preferredQuality == "low") {
+            exclude = ">360p30";
+            quality = "low,best";
+        } else if (preferredQuality == "audio only") {
+            quality = "audio,audio_only";
         } else {
-            QProcess *p = new QProcess();
-            // my god that signal though
-            QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-                             [path, channel, p](int exitCode) {
-                                 if (exitCode > 0) {
-                                     return;
-                                 }
-                                 QString lastLine = QString(p->readAllStandardOutput());
-                                 lastLine = lastLine.trimmed().split('\n').last();
-                                 if (lastLine.startsWith("Available streams: ")) {
-                                     QStringList options;
-                                     QStringList split =
-                                         lastLine.right(lastLine.length() - 19).split(", ");
-
-                                     for (int i = split.length() - 1; i >= 0; i--) {
-                                         QString option = split.at(i);
-                                         if (option.endsWith(" (worst)")) {
-                                             options << option.left(option.length() - 8);
-                                         } else if (option.endsWith(" (best)")) {
-                                             options << option.left(option.length() - 7);
-                                         } else {
-                                             options << option;
-                                         }
-                                     }
-
-                                     QualityPopup::showDialog(channel, path, options);
-                                 }
-                             });
-            p->start(path, {"twitch.tv/" + channel});
+            quality = "best";
         }
+        if (quality != "")
+            args << quality;
+        if (exclude != "")
+            args << "--stream-sorting-excludes" << exclude;
+        QProcess::startDetached(path, args);
+    } else {
+        QProcess *p = new QProcess();
+        // my god that signal though
+        QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
+                         [path, channel, p](int exitCode) {
+                             if (exitCode > 0) {
+                                 return;
+                             }
+                             QString lastLine = QString(p->readAllStandardOutput());
+                             lastLine = lastLine.trimmed().split('\n').last();
+                             if (lastLine.startsWith("Available streams: ")) {
+                                 QStringList options;
+                                 QStringList split =
+                                     lastLine.right(lastLine.length() - 19).split(", ");
+
+                                 for (int i = split.length() - 1; i >= 0; i--) {
+                                     QString option = split.at(i);
+                                     if (option.endsWith(" (worst)")) {
+                                         options << option.left(option.length() - 8);
+                                     } else if (option.endsWith(" (best)")) {
+                                         options << option.left(option.length() - 7);
+                                     } else {
+                                         options << option;
+                                     }
+                                 }
+
+                                 QualityPopup::showDialog(channel, path, options);
+                             }
+                         });
+        p->start(path, {"twitch.tv/" + channel});
     }
 }
 
