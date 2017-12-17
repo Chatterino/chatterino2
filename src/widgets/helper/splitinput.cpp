@@ -45,7 +45,7 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
     this->vbox.addStretch(1);
     this->vbox.addWidget(&this->emotesLabel);
 
-    this->textLengthLabel.setText("100");
+    this->textLengthLabel.setText("");
     this->textLengthLabel.setAlignment(Qt::AlignRight);
 
     this->emotesLabel.getLabel().setTextFormat(Qt::RichText);
@@ -220,6 +220,21 @@ void SplitInput::refreshTheme()
 
 void SplitInput::editTextChanged()
 {
+    QString text = this->textInput.toPlainText();
+
+    text = text.trimmed();
+    static QRegularExpression spaceRegex("\\s\\s+");
+    text = text.replace(spaceRegex, " ");
+
+    QString labelText;
+
+    if (text.length() == 0) {
+        labelText = "";
+    } else {
+        labelText = QString::number(text.length());
+    }
+
+    this->textLengthLabel.setText(labelText);
 }
 
 void SplitInput::paintEvent(QPaintEvent *)
