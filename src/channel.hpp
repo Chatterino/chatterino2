@@ -13,6 +13,7 @@
 #include <boost/signals2.hpp>
 
 #include <memory>
+#include <set>
 
 namespace chatterino {
 namespace messages {
@@ -30,16 +31,21 @@ public:
     virtual bool isEmpty() const;
     messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
-    // methods
     void addMessage(messages::SharedMessage message);
+    void addRecentChatter(const QString &username);
+
+    std::set<QString> getUsernamesForCompletions();
+
     QString name;
     QStringList modList;
+
+    std::mutex recentChattersMutex;
+    std::set<QString> recentChatters;
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
 
 private:
-    // variables
     messages::LimitedQueue<messages::SharedMessage> messages;
 
     // std::shared_ptr<logging::Channel> loggingChannel;

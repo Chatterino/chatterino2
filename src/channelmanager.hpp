@@ -16,6 +16,8 @@ class ChannelManager
 public:
     explicit ChannelManager(WindowManager &_windowManager, IrcManager &_ircManager);
 
+    static ChannelManager *instance;
+
     WindowManager &windowManager;
     IrcManager &ircManager;
 
