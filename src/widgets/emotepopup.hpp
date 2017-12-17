@@ -19,5 +19,6 @@ private:
     ChannelView *view;
     EmoteManager &emoteManager;
 };
-}
-}
+
+}  // namespace widgets
+}  // namespace chatterino

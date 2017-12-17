@@ -71,5 +71,6 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
     this->view->setChannel(emoteChannel);
 }
+
 }  // namespace widgets
 }  // namespace chatterino
