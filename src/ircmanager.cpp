@@ -26,10 +26,9 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
-                       EmoteManager &_emoteManager, WindowManager &_windowManager)
+                       WindowManager &_windowManager)
     : channelManager(_channelManager)
     , resources(_resources)
-    , emoteManager(_emoteManager)
     , windowManager(_windowManager)
 {
     AccountManager::getInstance().Twitch.userChanged.connect([this]() {
@@ -224,8 +223,8 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
     messages::MessageParseArgs args;
 
-    twitch::TwitchMessageBuilder builder(c.get(), this->resources, this->emoteManager,
-                                         this->windowManager, message, args);
+    twitch::TwitchMessageBuilder builder(c.get(), this->resources, this->windowManager, message,
+                                         args);
 
     c->addMessage(builder.parse());
 }

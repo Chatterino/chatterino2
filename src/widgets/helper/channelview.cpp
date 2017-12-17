@@ -28,9 +28,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
+ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
-    , windowManager(windowManager)
     , scrollBar(this)
     , userPopupWidget(std::shared_ptr<twitch::TwitchChannel>())
 {
@@ -50,6 +49,8 @@ ChannelView::ChannelView(WindowManager &windowManager, BaseWidget *parent)
 
         this->queueUpdate();
     });
+
+    WindowManager &windowManager = *WindowManager::instance;
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
@@ -240,9 +241,8 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord =
-                isSingleMessage &&
-                this->selection.max.charIndex - charIndex < part.getCharacterLength();
+            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
+                                                       part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -519,10 +519,9 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(),
-                     (messageRef->getMessage()->getCanHighlightTab())
-                         ? this->colorScheme.ChatBackgroundHighlighted
-                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+                                         ? this->colorScheme.ChatBackgroundHighlighted
+                                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection

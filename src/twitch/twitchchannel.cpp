@@ -9,10 +9,8 @@
 namespace chatterino {
 namespace twitch {
 
-TwitchChannel::TwitchChannel(EmoteManager &emoteManager, IrcManager &ircManager,
-                             const QString &channelName, bool _isSpecial)
+TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName, bool _isSpecial)
     : Channel(channelName)
-    , emoteManager(emoteManager)
     , ircManager(ircManager)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
@@ -63,18 +61,22 @@ void TwitchChannel::setRoomID(const QString &_roomID)
 
 void TwitchChannel::reloadChannelEmotes()
 {
+    auto &emoteManager = EmoteManager::getInstance();
+
     debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
-    this->emoteManager.reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
-    this->emoteManager.reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
+    emoteManager.reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
+    emoteManager.reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
 }
 
 void TwitchChannel::sendMessage(const QString &message)
 {
+    auto &emoteManager = EmoteManager::getInstance();
+
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
-    QString parsedMessage = this->emoteManager.replaceShortCodes(message);
+    QString parsedMessage = emoteManager.replaceShortCodes(message);
 
     this->ircManager.sendMessage(this->name, parsedMessage);
 }

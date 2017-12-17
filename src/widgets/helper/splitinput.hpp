@@ -1,6 +1,5 @@
 #pragma once
 
-#include "emotemanager.hpp"
 #include "resizingtextedit.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/emotepopup.hpp"
@@ -26,7 +25,7 @@ class SplitInput : public BaseWidget
     Q_OBJECT
 
 public:
-    SplitInput(Split *_chatWidget, EmoteManager &, WindowManager &);
+    SplitInput(Split *_chatWidget);
     ~SplitInput();
 
     void clearSelection();
@@ -40,8 +39,6 @@ protected:
 private:
     Split *const chatWidget;
     EmotePopup *emotePopup = nullptr;
-    EmoteManager &emoteManager;
-    WindowManager &windowManager;
 
     pajlada::Signals::Signal<const bool &>::Connection textLengthVisibleChangedConnection;
     QHBoxLayout hbox;

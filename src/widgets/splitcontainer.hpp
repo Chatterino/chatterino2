@@ -17,7 +17,6 @@
 namespace chatterino {
 
 class ChannelManager;
-class CompletionManager;
 
 namespace widgets {
 
@@ -29,7 +28,6 @@ public:
     SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
 
     ChannelManager &channelManager;
-    CompletionManager &completionManager;
 
     std::pair<int, int> removeFromLayout(Split *widget);
     void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1, -1));

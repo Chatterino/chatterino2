@@ -85,7 +85,7 @@ class ChannelView : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(WindowManager &windowManager, BaseWidget *parent = 0);
+    explicit ChannelView(BaseWidget *parent = 0);
     ~ChannelView();
 
     void updateGifEmotes();
@@ -123,7 +123,6 @@ private:
         QRect rect;
     };
 
-    WindowManager &windowManager;
     QTimer updateTimer;
     bool updateQueued = false;
 

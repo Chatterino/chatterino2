@@ -9,17 +9,14 @@
 namespace chatterino {
 
 class WindowManager;
-class EmoteManager;
 class IrcManager;
 
 class ChannelManager
 {
 public:
-    explicit ChannelManager(WindowManager &_windowManager, EmoteManager &_emoteManager,
-                            IrcManager &_ircManager);
+    explicit ChannelManager(WindowManager &_windowManager, IrcManager &_ircManager);
 
     WindowManager &windowManager;
-    EmoteManager &emoteManager;
     IrcManager &ircManager;
 
     const std::vector<std::shared_ptr<Channel>> getItems();
@@ -29,8 +26,6 @@ public:
     void removeTwitchChannel(const QString &channel);
 
     const std::string &getUserID(const std::string &username);
-    EmoteManager &getEmoteManager();
-    WindowManager &getWindowManager();
 
     void doOnAll(std::function<void(std::shared_ptr<twitch::TwitchChannel>)> func);
 

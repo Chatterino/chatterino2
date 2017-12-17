@@ -33,6 +33,8 @@ int MessageRef::getHeight() const
 // return true if redraw is required
 bool MessageRef::layout(int width, float dpiMultiplyer)
 {
+    auto &emoteManager = EmoteManager::getInstance();
+
     bool layoutRequired = false;
 
     // check if width changed
@@ -41,9 +43,9 @@ bool MessageRef::layout(int width, float dpiMultiplyer)
     this->currentLayoutWidth = width;
 
     // check if emotes changed
-    bool imagesChanged = this->emoteGeneration != EmoteManager::instance->getGeneration();
+    bool imagesChanged = this->emoteGeneration != emoteManager.getGeneration();
     layoutRequired |= imagesChanged;
-    this->emoteGeneration = EmoteManager::instance->getGeneration();
+    this->emoteGeneration = emoteManager.getGeneration();
 
     // check if text changed
     bool textChanged = this->fontGeneration != FontManager::getInstance().getGeneration();

@@ -13,11 +13,9 @@
 namespace chatterino {
 namespace widgets {
 
-SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowManager &windowManager)
+SplitInput::SplitInput(Split *_chatWidget)
     : BaseWidget(_chatWidget)
     , chatWidget(_chatWidget)
-    , emoteManager(emoteManager)
-    , windowManager(windowManager)
     , emotesLabel(this)
 {
     this->setMaximumHeight(150);
@@ -55,8 +53,7 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
         if (this->emotePopup == nullptr) {
-            this->emotePopup =
-                new EmotePopup(this->colorScheme, this->emoteManager, this->windowManager);
+            this->emotePopup = new EmotePopup(this->colorScheme);
         }
 
         this->emotePopup->resize(300, 500);
@@ -69,8 +66,8 @@ SplitInput::SplitInput(Split *_chatWidget, EmoteManager &emoteManager, WindowMan
     this->refreshTheme();
     textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength);
 
-    auto completer = new QCompleter(
-        this->chatWidget->completionManager.createModel(this->chatWidget->channelName));
+    auto completer =
+        new QCompleter(CompletionManager::getInstance().createModel(this->chatWidget->channelName));
 
     this->textInput.setCompleter(completer);
 

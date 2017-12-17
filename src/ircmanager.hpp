@@ -20,7 +20,6 @@ namespace chatterino {
 
 class ChannelManager;
 class Resources;
-class EmoteManager;
 class WindowManager;
 
 class IrcManager : public QObject
@@ -28,8 +27,7 @@ class IrcManager : public QObject
     Q_OBJECT
 
 public:
-    IrcManager(ChannelManager &channelManager, Resources &resources, EmoteManager &emoteManager,
-               WindowManager &windowManager);
+    IrcManager(ChannelManager &channelManager, Resources &resources, WindowManager &windowManager);
 
     void connect();
     void disconnect();
@@ -51,7 +49,6 @@ public:
 
     ChannelManager &channelManager;
     Resources &resources;
-    EmoteManager &emoteManager;
     WindowManager &windowManager;
 
 private:

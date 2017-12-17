@@ -11,14 +11,12 @@ class CompletionManager;
 class WindowManager
 {
 public:
-    explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme,
-                           CompletionManager &_completionManager);
+    explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme);
 
     static WindowManager *instance;
 
     ChannelManager &channelManager;
     ColorScheme &colorScheme;
-    CompletionManager &completionManager;
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);

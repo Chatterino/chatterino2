@@ -17,7 +17,6 @@ namespace chatterino {
 namespace twitch {
 
 TwitchMessageBuilder::TwitchMessageBuilder(TwitchChannel *_channel, Resources &_resources,
-                                           EmoteManager &_emoteManager,
                                            WindowManager &_windowManager,
                                            const Communi::IrcPrivateMessage *_ircMessage,
                                            const messages::MessageParseArgs &_args)
@@ -26,7 +25,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(TwitchChannel *_channel, Resources &_
     , resources(_resources)
     , windowManager(_windowManager)
     , colorScheme(this->windowManager.colorScheme)
-    , emoteManager(_emoteManager)
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
@@ -37,6 +35,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(TwitchChannel *_channel, Resources &_
 SharedMessage TwitchMessageBuilder::parse()
 {
     SettingsManager &settings = SettingsManager::getInstance();
+    EmoteManager &emoteManager = EmoteManager::getInstance();
 
     this->originalMessage = this->ircMessage->content();
 
@@ -83,7 +82,7 @@ SharedMessage TwitchMessageBuilder::parse()
         QStringList emoteString = iterator.value().toString().split('/');
 
         for (QString emote : emoteString) {
-            this->appendTwitchEmote(ircMessage, emote, twitchEmotes, emoteManager);
+            this->appendTwitchEmote(ircMessage, emote, twitchEmotes);
         }
 
         struct {
@@ -172,14 +171,10 @@ SharedMessage TwitchMessageBuilder::parse()
 
                     LazyLoadedImage *imageAnimated = emoteManager.miscImageCache.getOrAdd(
                         bitsLinkAnimated, [this, &bitsLinkAnimated] {
-                            return new LazyLoadedImage(this->emoteManager, this->windowManager,
-                                                       bitsLinkAnimated);
+                            return new LazyLoadedImage(bitsLinkAnimated);
                         });
-                    LazyLoadedImage *image =
-                        emoteManager.miscImageCache.getOrAdd(bitsLink, [this, &bitsLink] {
-                            return new LazyLoadedImage(this->emoteManager, this->windowManager,
-                                                       bitsLink);
-                        });
+                    LazyLoadedImage *image = emoteManager.miscImageCache.getOrAdd(
+                        bitsLink, [this, &bitsLink] { return new LazyLoadedImage(bitsLink); });
 
                     this->appendWord(Word(imageAnimated, Word::BitsAnimated, QString("cheer"),
                                           QString("Twitch Cheer"),
@@ -464,9 +459,9 @@ void TwitchMessageBuilder::appendModerationButtons()
 
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage,
                                              const QString &emote,
-                                             std::vector<std::pair<long int, EmoteData>> &vec,
-                                             EmoteManager &emoteManager)
+                                             std::vector<std::pair<long int, EmoteData>> &vec)
 {
+    EmoteManager &emoteManager = EmoteManager::getInstance();
     if (!emote.contains(':')) {
         return;
     }
@@ -504,6 +499,7 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *i
 
 bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 {
+    EmoteManager &emoteManager = EmoteManager::getInstance();
     EmoteData emoteData;
 
     if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {

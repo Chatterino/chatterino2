@@ -20,10 +20,8 @@ public:
 
     int run(QApplication &qtApp);
 
-    CompletionManager completionManager;
     WindowManager windowManager;
     ColorScheme colorScheme;
-    EmoteManager emoteManager;
     Resources resources;
     ChannelManager channelManager;
     IrcManager ircManager;
