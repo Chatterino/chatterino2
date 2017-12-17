@@ -522,27 +522,27 @@ EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
 
 boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
 {
-    if (!_gifUpdateTimerInitiated) {
-        _gifUpdateTimerInitiated = true;
+    if (!this->gifUpdateTimerInitiated) {
+        this->gifUpdateTimerInitiated = true;
 
-        _gifUpdateTimer.setInterval(30);
-        _gifUpdateTimer.start();
+        this->gifUpdateTimer.setInterval(30);
+        this->gifUpdateTimer.start();
 
         SettingsManager::getInstance().enableGifAnimations.connect([this](bool enabled, auto) {
             if (enabled) {
-                _gifUpdateTimer.start();
+                this->gifUpdateTimer.start();
             } else {
-                _gifUpdateTimer.stop();
+                this->gifUpdateTimer.stop();
             }
         });
 
-        QObject::connect(&_gifUpdateTimer, &QTimer::timeout, [this] {
-            _gifUpdateTimerSignal();
+        QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
+            this->gifUpdateTimerSignal();
             WindowManager::instance->repaintGifEmotes();
         });
     }
 
-    return _gifUpdateTimerSignal;
+    return this->gifUpdateTimerSignal;
 }
 
 }  // namespace chatterino

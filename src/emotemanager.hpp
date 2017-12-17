@@ -157,11 +157,9 @@ private:
     /// Chatterino emotes
     EmoteMap _chatterinoEmotes;
 
-    boost::signals2::signal<void()> _gifUpdateTimerSignal;
-    QTimer _gifUpdateTimer;
-    bool _gifUpdateTimerInitiated = false;
-
-    int _generation = 0;
+    boost::signals2::signal<void()> gifUpdateTimerSignal;
+    QTimer gifUpdateTimer;
+    bool gifUpdateTimerInitiated = false;
 
     // methods
     static QString getTwitchEmoteLink(long id, qreal &scale);
