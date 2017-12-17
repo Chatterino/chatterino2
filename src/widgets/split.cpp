@@ -360,12 +360,9 @@ void Split::doOpenStreamlink()
         QProcess *p = new QProcess();
         // my god that signal though
         QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-                         [path, channel, p](int exitCode) {
-                             if (exitCode > 0) {
-                                 return;
-                             }
+                         [path, channel, p](int) {
                              QString lastLine = QString(p->readAllStandardOutput());
-                             lastLine = lastLine.trimmed().split('\n').last();
+                             lastLine = lastLine.trimmed().split('\n').last().trimmed();
                              if (lastLine.startsWith("Available streams: ")) {
                                  QStringList options;
                                  QStringList split =
@@ -385,7 +382,7 @@ void Split::doOpenStreamlink()
                                  QualityPopup::showDialog(channel, path, options);
                              }
                          });
-        p->start(path, {"twitch.tv/" + channel});
+        p->start(path, {"twitch.tv/" + channel, "--default-stream=KKona"});
     }
 }
 
