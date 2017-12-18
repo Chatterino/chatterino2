@@ -83,12 +83,14 @@ AccountManager::AccountManager()
         if (user) {
             debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
                        newUsername);
-            // XXX: Should we set the user regardless if the username is found or not?
-            // I can see the logic in setting it to nullptr if the `currentUsername` value has been
-            // set to "" or an invalid username
             this->Twitch.currentUser = user;
-            this->Twitch.userChanged.invoke();
+        } else {
+            debug::Log(
+                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
+            this->Twitch.currentUser = this->Twitch.anonymousUser;
         }
+
+        this->Twitch.userChanged.invoke();
     });
 }
 
@@ -124,10 +126,14 @@ void AccountManager::load()
 
     auto currentUser = this->Twitch.findUserByUsername(
         QString::fromStdString(this->Twitch.currentUsername.getValue()));
+
     if (currentUser) {
         this->Twitch.currentUser = currentUser;
-        this->Twitch.userChanged.invoke();
+    } else {
+        this->Twitch.currentUser = this->Twitch.anonymousUser;
     }
+
+    this->Twitch.userChanged.invoke();
 }
 
 }  // namespace chatterino

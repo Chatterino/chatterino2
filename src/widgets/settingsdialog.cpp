@@ -129,19 +129,29 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     // listview
     auto listWidget = new QListWidget(this);
 
+    static QString anonUsername(" - anonymous - ");
+
+    listWidget->addItem(anonUsername);
+
     for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
         listWidget->addItem(userName);
     }
 
     // Select the currently logged in user
     if (listWidget->count() > 0) {
-        const QString &currentUsername =
-            AccountManager::getInstance().Twitch.getCurrent()->getUserName();
-        for (int i = 0; i < listWidget->count(); ++i) {
-            QString itemText = listWidget->item(i)->text();
-            if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
-                listWidget->setCurrentRow(i);
-                break;
+        auto currentUser = AccountManager::getInstance().Twitch.getCurrent();
+
+        if (currentUser->isAnon()) {
+            listWidget->setCurrentRow(0);
+        } else {
+            const QString &currentUsername = currentUser->getUserName();
+            for (int i = 0; i < listWidget->count(); ++i) {
+                QString itemText = listWidget->item(i)->text();
+
+                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
+                    listWidget->setCurrentRow(i);
+                    break;
+                }
             }
         }
     }
@@ -149,7 +159,11 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
         if (!listWidget->selectedItems().isEmpty()) {
             QString newUsername = listWidget->currentItem()->text();
-            AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();
+            if (newUsername.compare(anonUsername, Qt::CaseInsensitive) == 0) {
+                AccountManager::getInstance().Twitch.currentUsername = "";
+            } else {
+                AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();
+            }
         }
     });
 
