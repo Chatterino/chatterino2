@@ -83,7 +83,7 @@ void ScrollBar::scrollToBottom()
 
 bool ScrollBar::isAtBottom() const
 {
-    return ((this->getMaximum() - this->getLargeChange()) - this->getCurrentValue()) <= 1;
+    return this->atBottom;
 }
 
 void ScrollBar::setMaximum(qreal value)
@@ -119,23 +119,30 @@ void ScrollBar::setDesiredValue(qreal value, bool animated)
     animated &= this->smoothScrollingSetting.getValue();
     value = std::max(_minimum, std::min(_maximum - _largeChange, value));
 
-    if (_desiredValue != value) {
+    if (_desiredValue + _smoothScrollingOffset != value) {
         if (animated) {
             _currentValueAnimation.stop();
-            _currentValueAnimation.setStartValue(_currentValue + this->_smoothScrollingOffset);
+            _currentValueAnimation.setStartValue(_currentValue + _smoothScrollingOffset);
 
+            //            if (((this->getMaximum() - this->getLargeChange()) - value) <= 0.01) {
+            //                value += 1;
+            //            }
             _currentValueAnimation.setEndValue(value);
+            _smoothScrollingOffset = 0;
             _currentValueAnimation.start();
         } else {
             if (_currentValueAnimation.state() != QPropertyAnimation::Running) {
-                // currentValueAnimation.stop();
-
+                _smoothScrollingOffset = 0;
+                _desiredValue = value;
+                _currentValueAnimation.stop();
                 setCurrentValue(value);
             }
         }
     }
 
-    this->_smoothScrollingOffset = 0;
+    this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.01;
+
+    _smoothScrollingOffset = 0;
     _desiredValue = value;
 }
 
@@ -161,7 +168,7 @@ qreal ScrollBar::getSmallChange() const
 
 qreal ScrollBar::getDesiredValue() const
 {
-    return _desiredValue;
+    return _desiredValue + _smoothScrollingOffset;
 }
 
 qreal ScrollBar::getCurrentValue() const

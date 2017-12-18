@@ -341,11 +341,11 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
             auto messageRef = new MessageRef(message);
 
             if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
-                //                qreal value = std::max(0.0, this->getScrollBar().getDesiredValue()
-                //                - 1);
-
-                //                this->getScrollBar().setDesiredValue(value, false);
-                this->getScrollBar().offset(-1);
+                if (this->scrollBar.isAtBottom()) {
+                    this->scrollBar.scrollToBottom();
+                } else {
+                    this->scrollBar.offset(-1);
+                }
             }
 
             layoutMessages();
@@ -417,7 +417,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     //    BENCH(timer);
     QPainter painter(this);
 
-//    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
 // only update gif emotes
 #ifndef Q_OS_MAC

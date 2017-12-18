@@ -67,6 +67,8 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
     void leaveEvent(QEvent *);
 
+    bool atBottom = false;
+
     int _mouseOverIndex = -1;
     int _mouseDownIndex = -1;
     QPoint _lastMousePosition;
