@@ -1,4 +1,5 @@
 #include "widgets/window.hpp"
+#include "accountmanager.hpp"
 #include "channelmanager.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
@@ -24,6 +25,15 @@ Window::Window(const QString &_windowName, ChannelManager &_channelManager,
     , dpi(this->getDpiMultiplier())
 {
     this->initAsWindow();
+
+    AccountManager::getInstance().Twitch.currentUsername.connect(
+        [this](const std::string &newUsername, auto) {
+            if (newUsername.empty()) {
+                this->refreshWindowTitle("Not logged in");
+            } else {
+                this->refreshWindowTitle(QString::fromStdString(newUsername));
+            }
+        });
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -108,6 +118,11 @@ bool Window::isLoaded() const
 Notebook &Window::getNotebook()
 {
     return this->notebook;
+}
+
+void Window::refreshWindowTitle(const QString &username)
+{
+    this->setWindowTitle(username + " - Chatterino for Twitch");
 }
 
 void Window::closeEvent(QCloseEvent *)

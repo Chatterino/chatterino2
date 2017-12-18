@@ -58,6 +58,8 @@ public:
 
     Notebook &getNotebook();
 
+    void refreshWindowTitle(const QString &username);
+
     boost::signals2::signal<void()> closed;
 
 protected:
