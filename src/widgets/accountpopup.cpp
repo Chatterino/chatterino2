@@ -25,6 +25,8 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 {
     _ui->setupUi(this);
 
+    this->layout()->setSizeConstraint(QLayout::SetFixedSize);
+
     setWindowFlags(Qt::FramelessWindowHint);
     this->initAsWindow();
 
@@ -120,6 +122,8 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 
     util::twitch::getUserID(userNickname, this,
                             [=](const QString &id) { currentTwitchUser->setUserId(id); });
+
+    this->dpiMultiplyerChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
 }
 
 void AccountPopupWidget::setName(const QString &name)
@@ -194,6 +198,14 @@ void AccountPopupWidget::updatePermissions()
         // XXX(pajlada): This might always trigger if user is anonymous (if nickName is empty?)
         permission = permissions::Mod;
     }
+}
+
+void AccountPopupWidget::dpiMultiplyerChanged(float oldDpi, float newDpi)
+{
+    this->setStyleSheet(QString("* { font-size: <font-size>px; }")
+                            .replace("<font-size>", QString::number((int)(12 * newDpi))));
+
+    this->_ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
 }
 
 void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
