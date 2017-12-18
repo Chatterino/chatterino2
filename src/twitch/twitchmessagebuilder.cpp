@@ -364,6 +364,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::parseHighlights()
 {
     static auto player = new QMediaPlayer;
+    static QUrl currentPlayerUrl;
     SettingsManager &settings = SettingsManager::getInstance();
     static pajlada::Settings::Setting<std::string> currentUser("/accounts/current");
 
@@ -374,10 +375,18 @@ void TwitchMessageBuilder::parseHighlights()
         return;
     }
 
+    // update the media player url if necessary
+    QUrl highlightSoundUrl;
     if (settings.customHighlightSound) {
-        player->setMedia(QUrl(settings.pathHighlightSound.get()));
+        highlightSoundUrl = QUrl(settings.pathHighlightSound.get());
     } else {
-        player->setMedia(QUrl("qrc:/sounds/ping2.wav"));
+        highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
+    }
+
+    if (currentPlayerUrl != highlightSoundUrl) {
+        player->setMedia(highlightSoundUrl);
+
+        currentPlayerUrl = highlightSoundUrl;
     }
 
     struct Highlight {
