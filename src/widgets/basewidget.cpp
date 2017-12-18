@@ -2,10 +2,9 @@
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
 
-//#include <QApplication>
 #include <QDebug>
-//#include <QDesktopWidget>
-//#include <QScreen>
+#include <QLayout>
+#include <QtGlobal>
 #include <boost/signals2.hpp>
 #include "util/nativeeventhelper.hpp"
 
@@ -91,7 +90,7 @@ bool BaseWidget::nativeEvent(const QByteArray &eventType, void *message, long *r
         this->dpiMultiplier = dpi / 96.f;
         float scale = this->dpiMultiplier / oldDpiMultiplier;
 
-        this->dpiMultiplyerChanged(oldDpiMultiplier, this->dpiMultiplier);
+        this->dpiMultiplierChanged(oldDpiMultiplier, this->dpiMultiplier);
 
         this->resize(static_cast<int>(this->width() * scale),
                      static_cast<int>(this->height() * scale));

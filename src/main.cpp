@@ -31,8 +31,8 @@ public:
                 EnableNonClientDpiScaling enableNonClientDpiScaling =
                     (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
 
-                if (enableNonClientDpiScaling)
-                    enableNonClientDpiScaling(msg->hwnd);
+                //                if (enableNonClientDpiScaling)
+                //                    enableNonClientDpiScaling(msg->hwnd);
             }
         }
         return false;

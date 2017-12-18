@@ -31,7 +31,7 @@ public:
     void updatePermissions();
 
 protected:
-    virtual void dpiMultiplyerChanged(float oldDpi, float newDpi) override;
+    virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
 
 private:
     Ui::AccountPopup *_ui;

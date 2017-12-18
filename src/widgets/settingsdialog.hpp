@@ -34,7 +34,7 @@ public:
     static void showDialog();
 
 protected:
-    virtual void dpiMultiplyerChanged(float oldDpi, float newDpi) override;
+    virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
 
 private:
     SettingsSnapshot snapshot;

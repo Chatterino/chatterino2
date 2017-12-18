@@ -123,7 +123,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
     util::twitch::getUserID(userNickname, this,
                             [=](const QString &id) { currentTwitchUser->setUserId(id); });
 
-    this->dpiMultiplyerChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
 }
 
 void AccountPopupWidget::setName(const QString &name)
@@ -200,7 +200,7 @@ void AccountPopupWidget::updatePermissions()
     }
 }
 
-void AccountPopupWidget::dpiMultiplyerChanged(float oldDpi, float newDpi)
+void AccountPopupWidget::dpiMultiplierChanged(float oldDpi, float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));

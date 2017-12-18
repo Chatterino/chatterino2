@@ -35,7 +35,7 @@ protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
 
-    virtual void dpiMultiplyerChanged(float oldDpi, float newDpi)
+    virtual void dpiMultiplierChanged(float oldDpi, float newDpi)
     {
     }
     void initAsWindow();

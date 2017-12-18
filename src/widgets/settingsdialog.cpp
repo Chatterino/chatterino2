@@ -67,7 +67,7 @@ SettingsDialog::SettingsDialog()
 
     this->addTabs();
 
-    this->dpiMultiplyerChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
 }
 
 void SettingsDialog::addTabs()
@@ -608,7 +608,7 @@ void SettingsDialog::showDialog()
     instance->setFocus();
 }
 
-void SettingsDialog::dpiMultiplyerChanged(float oldDpi, float newDpi)
+void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
