@@ -15,6 +15,7 @@ ScrollBar::ScrollBar(ChannelView *parent)
     : BaseWidget(parent)
     , _currentValueAnimation(this, "_currentValue")
     , _highlights(nullptr)
+    , smoothScrollingSetting(SettingsManager::getInstance().enableSmoothScrolling)
 {
     resize(16, 100);
     _currentValueAnimation.setDuration(250);
@@ -115,12 +116,13 @@ void ScrollBar::setSmallChange(qreal value)
 
 void ScrollBar::setDesiredValue(qreal value, bool animated)
 {
+    animated &= this->smoothScrollingSetting.getValue();
     value = std::max(_minimum, std::min(_maximum - _largeChange, value));
 
     if (_desiredValue != value) {
         if (animated) {
             _currentValueAnimation.stop();
-            _currentValueAnimation.setStartValue(_currentValue);
+            _currentValueAnimation.setStartValue(_currentValue + this->_smoothScrollingOffset);
 
             _currentValueAnimation.setEndValue(value);
             _currentValueAnimation.start();
@@ -133,6 +135,7 @@ void ScrollBar::setDesiredValue(qreal value, bool animated)
         }
     }
 
+    this->_smoothScrollingOffset = 0;
     _desiredValue = value;
 }
 
@@ -166,6 +169,15 @@ qreal ScrollBar::getCurrentValue() const
     return _currentValue;
 }
 
+void ScrollBar::offset(qreal value)
+{
+    if (_currentValueAnimation.state() == QPropertyAnimation::Running) {
+        this->_smoothScrollingOffset += value;
+    } else {
+        this->setDesiredValue(this->getDesiredValue() + value);
+    }
+}
+
 boost::signals2::signal<void()> &ScrollBar::getCurrentValueChanged()
 {
     return _currentValueChanged;
@@ -173,7 +185,8 @@ boost::signals2::signal<void()> &ScrollBar::getCurrentValueChanged()
 
 void ScrollBar::setCurrentValue(qreal value)
 {
-    value = std::max(_minimum, std::min(_maximum - _largeChange, value));
+    value =
+        std::max(_minimum, std::min(_maximum - _largeChange, value + this->_smoothScrollingOffset));
 
     if (_currentValue != value) {
         _currentValue = value;

@@ -36,6 +36,7 @@ public:
     BoolSetting hideTabX = {"/appearance/hideTabX", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
+    BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
 
     /// Behaviour

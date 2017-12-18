@@ -7,6 +7,7 @@
 #include <QPropertyAnimation>
 #include <QWidget>
 #include <boost/signals2.hpp>
+#include <settingsmanager.hpp>
 
 namespace chatterino {
 
@@ -44,6 +45,8 @@ public:
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
+    // offset the desired value without breaking smooth scolling
+    void offset(qreal value);
     boost::signals2::signal<void()> &getCurrentValueChanged();
     void setCurrentValue(qreal value);
 
@@ -79,8 +82,11 @@ private:
     qreal _smallChange = 5;
     qreal _desiredValue = 0;
     qreal _currentValue = 0;
+    qreal _smoothScrollingOffset = 0;
 
     boost::signals2::signal<void()> _currentValueChanged;
+
+    pajlada::Settings::Setting<bool> &smoothScrollingSetting;
 
     void updateScroll();
 };
