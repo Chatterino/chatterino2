@@ -56,7 +56,8 @@ SplitInput::SplitInput(Split *_chatWidget)
             this->emotePopup = new EmotePopup(this->colorScheme);
         }
 
-        this->emotePopup->resize(300, 500);
+        this->emotePopup->resize((int)(300 * this->emotePopup->getDpiMultiplier()),
+                                 (int)(500 * this->emotePopup->getDpiMultiplier()));
         this->emotePopup->loadChannel(this->chatWidget->getChannel());
         this->emotePopup->show();
     });
