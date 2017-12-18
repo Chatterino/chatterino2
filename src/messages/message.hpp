@@ -27,6 +27,8 @@ public:
     std::vector<Word> &getWords();
     bool isDisabled() const;
     const QString &getId() const;
+    bool getCollapsedDefault() const;
+    void setCollapsedDefault(bool value);
 
     QString loginName;
     QString displayName;
@@ -57,6 +59,9 @@ private:
     QString timeoutUser = "";
     int timeoutCount = 0;
     bool disabled = false;
+
+    bool collapsedDefault = false;
+
     std::chrono::time_point<std::chrono::system_clock> parseTime;
 
     QString content;

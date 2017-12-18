@@ -61,6 +61,16 @@ const QString &Message::getId() const
     return this->id;
 }
 
+bool Message::getCollapsedDefault() const
+{
+    return this->collapsedDefault;
+}
+
+void Message::setCollapsedDefault(bool value)
+{
+    this->collapsedDefault = value;
+}
+
 namespace {
 
 void AddCurrentTimestamp(Message *message)

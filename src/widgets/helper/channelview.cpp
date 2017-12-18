@@ -729,11 +729,19 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
+    // no message under cursor
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
         return;
     }
 
+    // message under cursor is collapsed
+    if (message->isCollapsed()) {
+        this->setCursor(Qt::PointingHandCursor);
+        return;
+    }
+
+    // is selecting
     if (this->selecting) {
         int index = message->getSelectionIndex(relativePos);
 
@@ -742,16 +750,18 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->repaint();
     }
 
+    // check if word underneath cursor
     const messages::Word *hoverWord;
     if ((hoverWord = message->tryGetWordPart(relativePos)) == nullptr) {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
         return;
     }
 
+    // check if word has a link
     if (hoverWord->getLink().isValid()) {
-        setCursor(Qt::PointingHandCursor);
+        this->setCursor(Qt::PointingHandCursor);
     } else {
-        setCursor(Qt::ArrowCursor);
+        this->setCursor(Qt::ArrowCursor);
     }
 }
 
@@ -784,6 +794,11 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         this->setSelection(selectionItem, selectionItem);
         this->selecting = true;
 
+        return;
+    }
+
+    // check if message is collapsed
+    if (message->isCollapsed()) {
         return;
     }
 
@@ -828,6 +843,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         // No message at clicked position
         this->userPopupWidget.hide();
+        return;
+    }
+
+    // message under cursor is collapsed
+    if (message->isCollapsed()) {
+        message->setCollapsed(false);
+        this->layoutMessages();
         return;
     }
 

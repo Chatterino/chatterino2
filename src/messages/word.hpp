@@ -80,6 +80,9 @@ public:
 
         AlwaysShow = (1 << 25),
 
+        // used in the ChannelView class to make the collapse buttons visible if needed
+        Collapsed = (1 << 26),
+
         Default = TimestampNoSeconds | Badges | Username | BitsStatic | FfzEmoteImage |
                   BttvEmoteImage | BttvGifEmoteImage | TwitchEmoteImage | BitsAmount | Text |
                   ButtonBan | ButtonTimeout | AlwaysShow

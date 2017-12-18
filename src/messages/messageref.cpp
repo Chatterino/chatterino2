@@ -4,10 +4,10 @@
 
 #include <QDebug>
 
-#define MARGIN_LEFT 8
-#define MARGIN_RIGHT 8
-#define MARGIN_TOP 4
-#define MARGIN_BOTTOM 4
+#define MARGIN_LEFT (int)(8 * this->dpiMultiplier)
+#define MARGIN_RIGHT (int)(8 * this->dpiMultiplier)
+#define MARGIN_TOP (int)(4 * this->dpiMultiplier)
+#define MARGIN_BOTTOM (int)(4 * this->dpiMultiplier)
 
 using namespace chatterino::messages;
 
@@ -17,6 +17,7 @@ namespace messages {
 MessageRef::MessageRef(SharedMessage _message)
     : message(_message)
     , wordParts()
+    , collapsed(_message->getCollapsedDefault())
 {
 }
 
@@ -59,9 +60,9 @@ bool MessageRef::layout(int width, float dpiMultiplyer)
     this->currentWordTypes = SettingsManager::getInstance().getWordTypeMask();
 
     // check if dpi changed
-    bool dpiChanged = this->dpiMultiplyer != dpiMultiplyer;
+    bool dpiChanged = this->dpiMultiplier != dpiMultiplyer;
     layoutRequired |= dpiChanged;
-    this->dpiMultiplyer = dpiMultiplyer;
+    this->dpiMultiplier = dpiMultiplyer;
     imagesChanged |= dpiChanged;
     textChanged |= dpiChanged;
 
@@ -105,9 +106,13 @@ void MessageRef::actuallyLayout(int width)
     int lineNumber = 0;
     int lineStart = 0;
     int lineHeight = 0;
+    int firstLineHeight = -1;
     bool first = true;
 
     uint32_t flags = settings.getWordTypeMask();
+    if (this->collapsed) {
+        flags |= Word::Collapsed;
+    }
 
     // loop throught all the words and add them when a line is full
     for (auto it = this->message->getWords().begin(); it != this->message->getWords().end(); ++it) {
@@ -132,7 +137,7 @@ void MessageRef::actuallyLayout(int width)
         // word wrapping
         if (word.isText() && word.getWidth() + MARGIN_LEFT > right) {
             // align and end the current line
-            alignWordParts(lineStart, lineHeight, width);
+            alignWordParts(lineStart, lineHeight, width, firstLineHeight);
             y += lineHeight;
 
             int currentPartStart = 0;
@@ -187,7 +192,7 @@ void MessageRef::actuallyLayout(int width)
         // doesn't fit in the line
         else {
             // align and end the current line
-            alignWordParts(lineStart, lineHeight, width);
+            alignWordParts(lineStart, lineHeight, width, firstLineHeight);
 
             y += lineHeight;
 
@@ -206,11 +211,19 @@ void MessageRef::actuallyLayout(int width)
     }
 
     // align and end the current line
-    alignWordParts(lineStart, lineHeight, width);
+    alignWordParts(lineStart, lineHeight, width, firstLineHeight);
+
+    this->collapsedHeight = firstLineHeight == -1 ? (int)(24 * dpiMultiplier)
+                                                  : firstLineHeight + MARGIN_TOP + MARGIN_BOTTOM;
 
     // update height
     int oldHeight = this->height;
-    this->height = y + lineHeight + MARGIN_BOTTOM;
+
+    if (this->isCollapsed()) {
+        this->height = this->collapsedHeight;
+    } else {
+        this->height = y + lineHeight + MARGIN_BOTTOM;
+    }
 
     // invalidate buffer if height changed
     if (oldHeight != this->height) {
@@ -227,8 +240,8 @@ void MessageRef::updateTextSizes()
             continue;
 
         QFontMetrics &metrics = word.getFontMetrics();
-        word.setSize((int)(metrics.width(word.getText()) * this->dpiMultiplyer),
-                     (int)(metrics.height() * this->dpiMultiplyer));
+        word.setSize((int)(metrics.width(word.getText()) * this->dpiMultiplier),
+                     (int)(metrics.height() * this->dpiMultiplier));
     }
 }
 
@@ -236,7 +249,7 @@ void MessageRef::updateImageSizes()
 {
     const int mediumTextLineHeight =
         FontManager::getInstance().getFontMetrics(FontManager::Medium).height();
-    const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * this->dpiMultiplyer;
+    const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * this->dpiMultiplier;
     const bool scaleEmotesByLineHeight = SettingsManager::getInstance().scaleEmotesByLineHeight;
 
     for (auto &word : this->message->getWords()) {
@@ -262,8 +275,12 @@ const std::vector<WordPart> &MessageRef::getWordParts() const
     return this->wordParts;
 }
 
-void MessageRef::alignWordParts(int lineStart, int lineHeight, int width)
+void MessageRef::alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight)
 {
+    if (firstLineHeight == -1) {
+        firstLineHeight = lineHeight;
+    }
+
     int xOffset = 0;
 
     if (this->message->centered && this->wordParts.size() > 0) {
@@ -399,5 +416,22 @@ int MessageRef::getSelectionIndex(QPoint position)
     return index;
 }
 
+bool MessageRef::isCollapsed() const
+{
+    return this->collapsed;
+}
+
+void MessageRef::setCollapsed(bool value)
+{
+    if (this->collapsed != value) {
+        this->currentLayoutWidth = 0;
+        this->collapsed = value;
+    }
+}
+
+int MessageRef::getCollapsedHeight() const
+{
+    return this->collapsedHeight;
+}
 }  // namespace messages
 }  // namespace chatterino

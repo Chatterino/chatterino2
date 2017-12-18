@@ -41,6 +41,10 @@ SharedMessage TwitchMessageBuilder::parse()
 
     this->parseUsername();
 
+    //    this->message->setCollapsedDefault(true);
+    //    this->appendWord(Word(this->resources.badgeCollapsed, Word::Collapsed, QString(),
+    //    QString()));
+
     // The timestamp is always appended to the builder
     // Whether or not will be rendered is decided/checked later
     this->appendTimestamp();

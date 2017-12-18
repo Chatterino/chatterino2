@@ -22,6 +22,7 @@ public:
     messages::LazyLoadedImage *badgePremium;
     messages::LazyLoadedImage *badgeVerified;
     messages::LazyLoadedImage *badgeSubscriber;
+    messages::LazyLoadedImage *badgeCollapsed;
 
     messages::LazyLoadedImage *cheerBadge100000;
     messages::LazyLoadedImage *cheerBadge10000;
