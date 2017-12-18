@@ -281,6 +281,10 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
             });
         }
 
+        auto enableSmoothScrolling =
+            createCheckbox("Enable smooth scrolling", settings.enableSmoothScrolling);
+        form->addRow("Scrolling:", enableSmoothScrolling);
+
         group->setLayout(form);
 
         layout->addWidget(group);

@@ -155,7 +155,7 @@ void ChannelView::actuallyLayoutMessages()
         if (h < 0) {
             this->scrollBar.setLargeChange((messages.getLength() - i) +
                                            (qreal)h / message->getHeight());
-            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
+            //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
 
             showScrollbar = true;
             break;
@@ -245,8 +245,9 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
-                                                       part.getCharacterLength();
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -340,9 +341,11 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
             auto messageRef = new MessageRef(message);
 
             if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
-                qreal value = std::max(0.0, this->getScrollBar().getDesiredValue() - 1);
+                //                qreal value = std::max(0.0, this->getScrollBar().getDesiredValue()
+                //                - 1);
 
-                this->getScrollBar().setDesiredValue(value, false);
+                //                this->getScrollBar().setDesiredValue(value, false);
+                this->getScrollBar().offset(-1);
             }
 
             layoutMessages();
@@ -523,9 +526,10 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
-                                         ? this->colorScheme.ChatBackgroundHighlighted
-                                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(),
+                     (messageRef->getMessage()->getCanHighlightTab())
+                         ? this->colorScheme.ChatBackgroundHighlighted
+                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection
