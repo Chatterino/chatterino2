@@ -2,7 +2,7 @@
 Chatterino 2
 ============
 
-Chatterino 2 is the second installment of the Twitch chat client series "Chatterino". For now you can check out Chatterino 1 at [chatterino.com](chatterino.com).
+Chatterino 2 is the second installment of the Twitch chat client series "Chatterino". For now you can check out Chatterino 1 at [https://chatterino.com](https://chatterino.com).
 
 ## Code style
 The code is normally formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
