@@ -101,7 +101,7 @@ Message *Message::createSystemMessage(const QString &text)
 
     AddCurrentTimestamp(message);
 
-    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, QString());
 
     message->getWords().push_back(word);
 
@@ -142,7 +142,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
     }
     text.append(".");
 
-    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, text);
+    Word word(text, Word::Type::Default, MessageColor(MessageColor::Type::System), text, QString());
 
     message->getWords().push_back(word);
 

@@ -78,7 +78,8 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
             link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
             auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
-                return EmoteData(new LazyLoadedImage(link, 1, code, code + "\nChannel BTTV Emote"));
+                return EmoteData(
+                    new LazyLoadedImage(link, 1, code, code + "<br/>Channel BTTV Emote"));
             });
 
             this->bttvChannelEmotes.insert(code, emote);
@@ -127,7 +128,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
                 auto emote =
                     this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
                         return EmoteData(
-                            new LazyLoadedImage(url1, 1, code, code + "\nGlobal FFZ Emote"));
+                            new LazyLoadedImage(url1, 1, code, code + "<br/>Global FFZ Emote"));
                     });
 
                 this->ffzChannelEmotes.insert(code, emote);
@@ -222,7 +223,7 @@ void EmoteManager::loadEmojis()
                       code + ".png";
 
         this->emojis.insert(code, EmoteData(new LazyLoadedImage(url, 0.35, ":" + shortCode + ":",
-                                                                ":" + shortCode + ":")));
+                                                                ":" + shortCode + ":<br/>Emoji")));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
         // emojiData.code.length()
@@ -430,7 +431,7 @@ void EmoteManager::loadBTTVEmotes()
                 QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
                 this->bttvGlobalEmotes.insert(
-                    code, new LazyLoadedImage(url, 1, code, code + "\nGlobal BTTV Emote"));
+                    code, new LazyLoadedImage(url, 1, code, code + "<br/>Global BTTV Emote"));
                 codes.push_back(code.toStdString());
             }
 
@@ -475,7 +476,7 @@ void EmoteManager::loadFFZEmotes()
                     QString url1 = "http:" + urls.value("1").toString();
 
                     this->ffzGlobalEmotes.insert(
-                        code, new LazyLoadedImage(url1, 1, code, code + "\nGlobal FFZ Emote"));
+                        code, new LazyLoadedImage(url1, 1, code, code + "<br/>Global FFZ Emote"));
                     codes.push_back(code.toStdString());
                 }
 
@@ -495,7 +496,7 @@ EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
     return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &id] {
         qreal scale;
         QString url = getTwitchEmoteLink(id, scale);
-        return new LazyLoadedImage(url, scale, emoteName, emoteName + "\nTwitch Emote");
+        return new LazyLoadedImage(url, scale, emoteName, emoteName + "<br/>Twitch Emote");
     });
 }
 

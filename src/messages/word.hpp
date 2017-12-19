@@ -93,9 +93,9 @@ public:
     }
 
     explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
-                  const QString &getTooltip, const Link &getLink = Link());
+                  const QString &tooltip, const Link &getLink = Link());
     explicit Word(const QString &_text, Type getType, const MessageColor &getColor,
-                  const QString &copytext, const QString &getTooltip, const Link &getLink = Link());
+                  const QString &copytext, const QString &tooltip, const Link &getLink = Link());
 
     LazyLoadedImage &getImage() const;
     const QString &getText() const;

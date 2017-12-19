@@ -225,12 +225,10 @@ SharedMessage TwitchMessageBuilder::parse()
 
                 this->appendWord(Word(string, Word::Text, textColor, string, QString(), link));
             } else {  // is emoji
-                static QString emojiTooltip("Emoji");
-
                 this->appendWord(Word(emoteData.image, Word::EmojiImage, emoteData.image->getName(),
-                                      emojiTooltip));
+                                      emoteData.image->getTooltip()));
                 Word(emoteData.image->getName(), Word::EmojiText, textColor,
-                     emoteData.image->getName(), emojiTooltip);
+                     emoteData.image->getName(), emoteData.image->getTooltip());
             }
         }
 
