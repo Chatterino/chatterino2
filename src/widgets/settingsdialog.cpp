@@ -1,5 +1,6 @@
 #include "widgets/settingsdialog.hpp"
 #include "accountmanager.hpp"
+#include "debug/log.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
@@ -315,11 +316,18 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
     form->addRow(
         "", createCheckbox("Show last read message indicator", settings.showLastMessageIndicator));
 
-    //        auto v = new QVBoxLayout();
-    //        v->addWidget(new QLabel("Mouse scroll speed"));
-
     auto scroll = new QSlider(Qt::Horizontal);
     form->addRow("Mouse scroll speed:", scroll);
+
+    float currentValue = SettingsManager::getInstance().mouseScrollMultiplier;
+    int scrollValue = ((currentValue - 0.1f) / 2.f) * 99.f;
+    scroll->setValue(scrollValue);
+
+    connect(scroll, &QSlider::valueChanged, [](int newValue) {
+        float mul = static_cast<float>(newValue) / 99.f;
+        float newScrollValue = (mul * 2.1f) + 0.1f;
+        SettingsManager::getInstance().mouseScrollMultiplier = newScrollValue;
+    });
 
     form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
     form->addRow(this->createCombobox(
@@ -329,9 +337,6 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
             setting = newValue.toStdString();
         }));
 
-    //        v->addWidget(scroll);
-    //        v->addStretch(1);
-    //        vbox->addLayout(v);
     layout->addLayout(form);
 
     return layout;

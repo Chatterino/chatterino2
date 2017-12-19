@@ -245,9 +245,8 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord =
-                isSingleMessage &&
-                this->selection.max.charIndex - charIndex < part.getCharacterLength();
+            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
+                                                       part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -526,10 +525,9 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(),
-                     (messageRef->getMessage()->getCanHighlightTab())
-                         ? this->colorScheme.ChatBackgroundHighlighted
-                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+                                         ? this->colorScheme.ChatBackgroundHighlighted
+                                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection
@@ -716,7 +714,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
     if (this->scrollBar.isVisible()) {
-        auto mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier.get();
+        float mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier;
 
         this->scrollBar.setDesiredValue(
             this->scrollBar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);

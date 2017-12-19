@@ -15,6 +15,7 @@ class SettingsManager : public QObject
     Q_OBJECT
 
     using BoolSetting = pajlada::Settings::Setting<bool>;
+    using FloatSetting = pajlada::Settings::Setting<float>;
 
 public:
     void load();
@@ -43,6 +44,7 @@ public:
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
+    FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
@@ -69,7 +71,6 @@ public:
     pajlada::Settings::Setting<std::string> preferredQuality;
 
     Setting<float> emoteScale;
-    Setting<float> mouseScrollMultiplier;
 
     Setting<QString> pathHighlightSound;
     Setting<QMap<QString, QPair<bool, bool>>> highlightProperties;

@@ -14,7 +14,6 @@ SettingsManager::SettingsManager()
     , streamlinkPath("/behaviour/streamlink/path", "")
     , preferredQuality("/behaviour/streamlink/quality", "Choose")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
-    , mouseScrollMultiplier(this->settingsItems, "mouseScrollMultiplier", 1.0)
     , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
