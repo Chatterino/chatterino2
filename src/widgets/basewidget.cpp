@@ -22,7 +22,7 @@ BaseWidget::BaseWidget(ColorScheme &_colorScheme, QWidget *parent)
 
 BaseWidget::BaseWidget(BaseWidget *parent)
     : QWidget(parent)
-    , colorScheme(parent->colorScheme)
+    , colorScheme(*ColorScheme::instance)
 //    , windowManager(parent->windowManager)
 {
     this->init();

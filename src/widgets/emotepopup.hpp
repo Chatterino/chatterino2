@@ -13,9 +13,11 @@ public:
     explicit EmotePopup(ColorScheme &);
 
     void loadChannel(std::shared_ptr<Channel> channel);
+    void loadEmojis();
 
 private:
-    ChannelView *view;
+    ChannelView *viewEmotes;
+    ChannelView *viewEmojis;
 };
 
 }  // namespace widgets

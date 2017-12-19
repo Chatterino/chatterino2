@@ -1,6 +1,7 @@
 #include "emotepopup.hpp"
 
 #include <QHBoxLayout>
+#include <QTabWidget>
 
 #include "messages/messagebuilder.hpp"
 #include "twitch/twitchchannel.hpp"
@@ -16,12 +17,18 @@ EmotePopup::EmotePopup(ColorScheme &colorScheme)
 {
     this->initAsWindow();
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    this->setLayout(layout);
-    layout->setMargin(0);
+    this->viewEmotes = new ChannelView();
+    this->viewEmojis = new ChannelView();
 
-    this->view = new ChannelView(this);
-    layout->addWidget(this->view);
+    this->setLayout(new QVBoxLayout(this));
+
+    QTabWidget *tabs = new QTabWidget(this);
+    this->layout()->addWidget(tabs);
+    this->layout()->setMargin(0);
+    tabs->addTab(this->viewEmotes, "Emotes");
+    tabs->addTab(this->viewEmojis, "Emojis");
+
+    this->loadEmojis();
 }
 
 void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
@@ -66,9 +73,34 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
 
-    //    addEmotes(emoteManager.getEmojis(), "Emojis", "Emoji");
+    this->viewEmotes->setChannel(emoteChannel);
+}
 
-    this->view->setChannel(emoteChannel);
+void EmotePopup::loadEmojis()
+{
+    EmoteMap &emojis = EmoteManager::getInstance().getEmojis();
+
+    std::shared_ptr<Channel> emojiChannel(new Channel(""));
+
+    // title
+    messages::MessageBuilder builder1;
+
+    builder1.appendWord(
+        Word("emojis", Word::Type::Text, MessageColor(MessageColor::Text), QString(), QString()));
+
+    builder1.getMessage()->centered = true;
+    emojiChannel->addMessage(builder1.getMessage());
+
+    // emojis
+    messages::MessageBuilder builder;
+    builder.getMessage()->centered = true;
+    emojis.each([this, &builder](const QString &key, const EmoteData &value) {
+        builder.appendWord(Word(value.image, Word::Type::AlwaysShow, key, "emoji",
+                                Link(Link::Type::InsertText, key)));
+    });
+    emojiChannel->addMessage(builder.getMessage());
+
+    this->viewEmojis->setChannel(emojiChannel);
 }
 
 }  // namespace widgets
