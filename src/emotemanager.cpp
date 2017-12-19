@@ -160,11 +160,6 @@ EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
     return _bttvChannelEmoteFromCaches;
 }
 
-EmoteMap &EmoteManager::getEmojis()
-{
-    return this->emojis;
-}
-
 ConcurrentMap<int, EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;
@@ -226,7 +221,8 @@ void EmoteManager::loadEmojis()
                       "emojione/2.2.6/assets/png/" +
                       code + ".png";
 
-        this->emojis.insert(code, EmoteData(new LazyLoadedImage(url, 0.35)));
+        this->emojis.insert(code, EmoteData(new LazyLoadedImage(url, 0.35, ":" + shortCode + ":",
+                                                                ":" + shortCode + ":")));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
         // emojiData.code.length()
@@ -303,8 +299,8 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
                       matchedEmoji.code + ".png";
 
         // Create or fetch cached emoji image
-        auto emojiImage = this->emojiCache.getOrAdd(url, [this, &url] {
-            return EmoteData(new LazyLoadedImage(url, 0.35));  //
+        auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [this, &url] {
+            return EmoteData(new LazyLoadedImage(url, 0.35, "?????????", "???????????????"));  //
         });
 
         // Push the emoji as a word to parsedWords
