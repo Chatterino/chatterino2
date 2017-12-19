@@ -6,6 +6,7 @@
 
 #include <QSettings>
 #include <pajlada/settings/setting.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 
 namespace chatterino {
 
@@ -94,6 +95,8 @@ private:
     QSettings settings;
     std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
     messages::Word::Type wordTypeMask = messages::Word::Default;
+
+    pajlada::Settings::SettingListener wordMaskListener;
 };
 
 }  // namespace chatterino

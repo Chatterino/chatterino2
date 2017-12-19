@@ -20,33 +20,16 @@ SettingsManager::SettingsManager()
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
 {
-    this->showTimestamps.connectSimple([this](auto) {
+    this->wordMaskListener.addSetting(this->showTimestamps);
+    this->wordMaskListener.addSetting(this->showTimestampSeconds);
+    this->wordMaskListener.addSetting(this->showBadges);
+    this->wordMaskListener.addSetting(this->enableBttvEmotes);
+    this->wordMaskListener.addSetting(this->enableEmojis);
+    this->wordMaskListener.addSetting(this->enableFfzEmotes);
+    this->wordMaskListener.addSetting(this->enableTwitchEmotes);
+    this->wordMaskListener.cb = [this](auto) {
         this->updateWordTypeMask();  //
-    });
-
-    this->showTimestampSeconds.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
-
-    this->showBadges.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
-
-    this->enableBttvEmotes.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
-
-    this->enableEmojis.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
-
-    this->enableFfzEmotes.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
-
-    this->enableTwitchEmotes.connectSimple([this](auto) {
-        this->updateWordTypeMask();  //
-    });
+    };
 }
 
 void SettingsManager::save()
