@@ -576,7 +576,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
         return;
     }
 
-    QColor selectionColor(255, 255, 255, 63);
+    QColor selectionColor = this->colorScheme.Selection;
 
     int charIndex = 0;
     size_t i = 0;

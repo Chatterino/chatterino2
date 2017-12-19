@@ -117,6 +117,9 @@ void ColorScheme::setColors(double hue, double multiplier)
                       "border:" + TabSelectedBackground.name() + ";" + "color:" + Text.name() +
                       ";" + "selection-background-color:" + TabSelectedBackground.name();
 
+    // Selection
+    Selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
+
     this->updated();
 }
 

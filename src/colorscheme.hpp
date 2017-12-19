@@ -75,6 +75,8 @@ public:
 
     QBrush TabNewMessageBackground;
 
+    QColor Selection;
+
     const int HighlightColorCount = 3;
     QColor HighlightColors[3];
 
