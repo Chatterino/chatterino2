@@ -1,5 +1,6 @@
 #include "widgets/settingsdialog.hpp"
 #include "accountmanager.hpp"
+#include "const.hpp"
 #include "debug/log.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
@@ -130,7 +131,7 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     connect(removeButton, &QPushButton::clicked, [this]() {
         qDebug() << "TODO: Implement";  //
         auto selectedUser = this->ui.accountSwitchWidget->currentItem()->text();
-        if (selectedUser == " - anonymous - ") {
+        if (selectedUser == ANONYMOUS_USERNAME_LABEL) {
             // Do nothing
             return;
         }

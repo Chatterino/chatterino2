@@ -1,4 +1,5 @@
 #include "twitchuser.hpp"
+#include "const.hpp"
 #include "util/urlfetch.hpp"
 
 namespace chatterino {
@@ -9,7 +10,7 @@ TwitchUser::TwitchUser(const QString &username, const QString &oauthToken,
     : IrcUser2(username, username, username, "oauth:" + oauthToken)
     , _oauthClient(oauthClient)
     , _oauthToken(oauthToken)
-    , _isAnon(username.startsWith("justinfan"))
+    , _isAnon(username == ANONYMOUS_USERNAME)
 {
 }
 

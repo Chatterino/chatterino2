@@ -14,6 +14,8 @@ class AccountManager;
 class TwitchAccountManager
 {
 public:
+    TwitchAccountManager();
+
     struct UserData {
         QString username;
         QString userID;

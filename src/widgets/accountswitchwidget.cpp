@@ -1,5 +1,6 @@
 #include "accountswitchwidget.hpp"
 #include "accountmanager.hpp"
+#include "const.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -7,9 +8,7 @@ namespace widgets {
 AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     : QListWidget(parent)
 {
-    static QString anonUsername(" - anonymous - ");
-
-    this->addItem(anonUsername);
+    this->addItem(ANONYMOUS_USERNAME_LABEL);
 
     for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
         this->addItem(userName);
@@ -20,7 +19,7 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
         this->clear();
 
-        this->addItem(anonUsername);
+        this->addItem(ANONYMOUS_USERNAME_LABEL);
 
         for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
             this->addItem(userName);
@@ -36,7 +35,7 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     QObject::connect(this, &QListWidget::clicked, [this] {
         if (!this->selectedItems().isEmpty()) {
             QString newUsername = this->currentItem()->text();
-            if (newUsername.compare(anonUsername, Qt::CaseInsensitive) == 0) {
+            if (newUsername.compare(ANONYMOUS_USERNAME_LABEL, Qt::CaseInsensitive) == 0) {
                 AccountManager::getInstance().Twitch.currentUsername = "";
             } else {
                 AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();

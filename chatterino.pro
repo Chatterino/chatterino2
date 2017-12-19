@@ -175,7 +175,8 @@ HEADERS  += \
     src/util/irchelpers.hpp \
     src/util/helpers.hpp \
     src/widgets/accountswitchwidget.hpp \
-    src/widgets/accountswitchpopupwidget.hpp
+    src/widgets/accountswitchpopupwidget.hpp \
+    src/const.hpp
 
 
 PRECOMPILED_HEADER =

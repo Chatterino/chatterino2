@@ -1,5 +1,6 @@
 ﻿#include "accountmanager.hpp"
 #include "common.hpp"
+#include "const.hpp"
 #include "debug/log.hpp"
 
 namespace chatterino {
@@ -17,6 +18,27 @@ inline QString getEnvString(const char *target)
 }
 
 }  // namespace
+
+TwitchAccountManager::TwitchAccountManager()
+{
+    this->anonymousUser.reset(new twitch::TwitchUser(twitch::ANONYMOUS_USERNAME, "", ""));
+
+    this->currentUsername.connect([this](const auto &newValue, auto) {
+        QString newUsername(QString::fromStdString(newValue));
+        auto user = this->findUserByUsername(newUsername);
+        if (user) {
+            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
+                       newUsername);
+            this->currentUser = user;
+        } else {
+            debug::Log(
+                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
+            this->currentUser = this->anonymousUser;
+        }
+
+        this->userChanged.invoke();
+    });
+}
 
 std::shared_ptr<twitch::TwitchUser> TwitchAccountManager::getCurrent()
 {
@@ -180,23 +202,6 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
 AccountManager::AccountManager()
 {
-    this->Twitch.anonymousUser.reset(new twitch::TwitchUser("justinfan64537", "", ""));
-
-    this->Twitch.currentUsername.connect([this](const auto &newValue, auto) {
-        QString newUsername(QString::fromStdString(newValue));
-        auto user = this->Twitch.findUserByUsername(newUsername);
-        if (user) {
-            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
-                       newUsername);
-            this->Twitch.currentUser = user;
-        } else {
-            debug::Log(
-                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
-            this->Twitch.currentUser = this->Twitch.anonymousUser;
-        }
-
-        this->Twitch.userChanged.invoke();
-    });
 }
 
 void AccountManager::load()
