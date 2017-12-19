@@ -2,6 +2,7 @@
 
 #include "settingsmanager.hpp"
 #include "settingssnapshot.hpp"
+#include "widgets/accountswitchwidget.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 
 #include <QButtonGroup>
@@ -31,12 +32,19 @@ public:
 
     void select(SettingsDialogTab *tab);
 
-    static void showDialog();
+    enum class PreferredTab {
+        NoPreference,
+        Accounts,
+    };
+
+    static void showDialog(PreferredTab preferredTab = PreferredTab::NoPreference);
 
 protected:
     virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
 
 private:
+    void refresh();
+
     SettingsSnapshot snapshot;
     std::vector<SettingsDialogTab *> tabs;
 
@@ -51,6 +59,8 @@ private:
         QDialogButtonBox buttonBox;
         QPushButton okButton;
         QPushButton cancelButton;
+
+        AccountSwitchWidget *accountSwitchWidget = nullptr;
     } ui;
 
     void addTab(QBoxLayout *layout, QString title, QString imageRes);

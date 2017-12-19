@@ -99,7 +99,9 @@ SOURCES += \
     src/widgets/splitcontainer.cpp \
     src/widgets/helper/droppreview.cpp \
     src/widgets/window.cpp \
-    src/widgets/helper/splitcolumn.cpp
+    src/widgets/helper/splitcolumn.cpp \
+    src/widgets/accountswitchwidget.cpp \
+    src/widgets/accountswitchpopupwidget.cpp
 
 HEADERS  += \
     src/asyncexec.hpp \
@@ -171,7 +173,9 @@ HEADERS  += \
     src/widgets/helper/droppreview.hpp \
     src/widgets/helper/splitcolumn.hpp \
     src/util/irchelpers.hpp \
-    src/util/helpers.hpp
+    src/util/helpers.hpp \
+    src/widgets/accountswitchwidget.hpp \
+    src/widgets/accountswitchpopupwidget.hpp
 
 
 PRECOMPILED_HEADER =

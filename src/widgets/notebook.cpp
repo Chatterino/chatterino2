@@ -1,5 +1,7 @@
 #include "widgets/notebook.hpp"
 #include "colorscheme.hpp"
+#include "debug/log.hpp"
+#include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -227,6 +229,26 @@ void Notebook::settingsButtonClicked()
 
 void Notebook::usersButtonClicked()
 {
+    static QWidget *lastFocusedWidget = nullptr;
+    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget(this);
+
+    if (w->hasFocus()) {
+        w->hide();
+        if (lastFocusedWidget) {
+            lastFocusedWidget->setFocus();
+        }
+        return;
+    }
+
+    lastFocusedWidget = this->focusWidget();
+
+    w->refresh();
+
+    QPoint buttonPos = this->userButton.rect().bottomRight();
+    w->move(buttonPos.x(), buttonPos.y());
+
+    w->show();
+    w->setFocus();
 }
 
 void Notebook::addPageButtonClicked()

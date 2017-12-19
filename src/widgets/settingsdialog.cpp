@@ -126,48 +126,9 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
 
     layout->addWidget(buttonBox);
 
-    // listview
-    auto listWidget = new QListWidget(this);
+    this->ui.accountSwitchWidget = new AccountSwitchWidget(this);
 
-    static QString anonUsername(" - anonymous - ");
-
-    listWidget->addItem(anonUsername);
-
-    for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
-        listWidget->addItem(userName);
-    }
-
-    // Select the currently logged in user
-    if (listWidget->count() > 0) {
-        auto currentUser = AccountManager::getInstance().Twitch.getCurrent();
-
-        if (currentUser->isAnon()) {
-            listWidget->setCurrentRow(0);
-        } else {
-            const QString &currentUsername = currentUser->getUserName();
-            for (int i = 0; i < listWidget->count(); ++i) {
-                QString itemText = listWidget->item(i)->text();
-
-                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
-                    listWidget->setCurrentRow(i);
-                    break;
-                }
-            }
-        }
-    }
-
-    QObject::connect(listWidget, &QListWidget::clicked, this, [&, listWidget] {
-        if (!listWidget->selectedItems().isEmpty()) {
-            QString newUsername = listWidget->currentItem()->text();
-            if (newUsername.compare(anonUsername, Qt::CaseInsensitive) == 0) {
-                AccountManager::getInstance().Twitch.currentUsername = "";
-            } else {
-                AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();
-            }
-        }
-    });
-
-    layout->addWidget(listWidget);
+    layout->addWidget(this->ui.accountSwitchWidget);
 
     return layout;
 }
@@ -618,14 +579,26 @@ void SettingsDialog::select(SettingsDialogTab *tab)
     this->selectedTab = tab;
 }
 
-void SettingsDialog::showDialog()
+void SettingsDialog::showDialog(PreferredTab preferredTab)
 {
     static SettingsDialog *instance = new SettingsDialog();
+    instance->refresh();
+
+    switch (preferredTab) {
+        case SettingsDialog::PreferredTab::Accounts: {
+            instance->select(instance->tabs.at(0));
+        } break;
+    }
 
     instance->show();
     instance->activateWindow();
     instance->raise();
     instance->setFocus();
+}
+
+void SettingsDialog::refresh()
+{
+    this->ui.accountSwitchWidget->refresh();
 }
 
 void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)

@@ -113,8 +113,9 @@ void SplitHeader::updateChannelText()
                              "<br>"
                              "Live for " +
                              twitchChannel->streamUptime + " with " +
-                             twitchChannel->streamViewerCount + " viewers"
-                                                                "</p>");
+                             twitchChannel->streamViewerCount +
+                             " viewers"
+                             "</p>");
         } else {
             this->channelNameLabel.setText(QString::fromStdString(channelName));
             this->setToolTip("");
