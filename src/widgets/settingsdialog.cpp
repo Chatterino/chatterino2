@@ -113,11 +113,13 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     auto buttonBox = new QDialogButtonBox(this);
 
     auto addButton = new QPushButton("Add", this);
+    addButton->setToolTip("Log in with a new account");
+
     auto removeButton = new QPushButton("Remove", this);
+    removeButton->setToolTip("Remove selected account");
 
     connect(addButton, &QPushButton::clicked, []() {
-        // TODO: fix memory leak :bbaper:
-        auto loginWidget = new LoginWidget();
+        static auto loginWidget = new LoginWidget();
         loginWidget->show();
     });
 
@@ -129,12 +131,12 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
     this->ui.accountSwitchWidget = new AccountSwitchWidget(this);
 
     connect(removeButton, &QPushButton::clicked, [this]() {
-        qDebug() << "TODO: Implement";  //
         auto selectedUser = this->ui.accountSwitchWidget->currentItem()->text();
         if (selectedUser == ANONYMOUS_USERNAME_LABEL) {
             // Do nothing
             return;
         }
+
         AccountManager::getInstance().Twitch.removeUser(selectedUser);
     });
 

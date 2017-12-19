@@ -12,6 +12,51 @@
 namespace chatterino {
 namespace widgets {
 
+namespace {
+
+void LogInWithCredentials(const std::string &userID, const std::string &username,
+                          const std::string &clientID, const std::string &oauthToken)
+{
+    QStringList errors;
+
+    if (userID.empty()) {
+        errors.append("Missing user ID");
+    }
+    if (username.empty()) {
+        errors.append("Missing username");
+    }
+    if (clientID.empty()) {
+        errors.append("Missing Client ID");
+    }
+    if (oauthToken.empty()) {
+        errors.append("Missing OAuth Token");
+    }
+
+    if (errors.length() > 0) {
+        QMessageBox messageBox;
+        messageBox.setIcon(QMessageBox::Critical);
+        messageBox.setText(errors.join("<br />"));
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        messageBox.exec();
+        return;
+    }
+
+    QMessageBox messageBox;
+    messageBox.setIcon(QMessageBox::Information);
+    messageBox.setText("Successfully logged in with user <b>" + qS(username) + "</b>!");
+    pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username", username);
+    pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/userID", userID);
+    pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/clientID", clientID);
+    pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/oauthToken",
+                                                 oauthToken);
+
+    AccountManager::getInstance().Twitch.reloadUsers();
+
+    messageBox.exec();
+}
+
+}  // namespace
+
 BasicLoginWidget::BasicLoginWidget()
 {
     this->setLayout(&this->ui.layout);
@@ -57,31 +102,7 @@ BasicLoginWidget::BasicLoginWidget()
             }
         }
 
-        if (oauthToken.empty() || clientID.empty() || username.empty() || userID.empty()) {
-            QMessageBox messageBox;
-            messageBox.setText("Bad values");
-            messageBox.setInformativeText("Missing values from the clipboard.<br />Ensure you "
-                                          "copied all text and try again.");
-            messageBox.setStandardButtons(QMessageBox::Ok);
-            messageBox.exec();
-        } else {
-            QMessageBox messageBox;
-            messageBox.setText("Success!");
-            messageBox.setInformativeText("Successfully added user " + qS(username) + "!");
-            qDebug() << "Success! mr";
-            pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username",
-                                                         username);
-            pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/userID",
-                                                         userID);
-            pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/clientID",
-                                                         clientID);
-            pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/oauthToken",
-                                                         oauthToken);
-
-            AccountManager::getInstance().Twitch.reloadUsers();
-
-            messageBox.exec();
-        }
+        LogInWithCredentials(userID, username, clientID, oauthToken);
     });
 }
 
@@ -135,14 +156,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
         std::string clientID = this->ui.clientIDInput.text().toStdString();
         std::string oauthToken = this->ui.oauthTokenInput.text().toStdString();
 
-        qDebug() << "Success! mr";
-        pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username",
-                                                     username);
-        pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/userID", userID);
-        pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/clientID",
-                                                     clientID);
-        pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/oauthToken",
-                                                     oauthToken);
+        LogInWithCredentials(userID, username, clientID, oauthToken);
     });
 
     /// Lower button row
