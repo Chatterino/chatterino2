@@ -51,10 +51,14 @@ float BaseWidget::getDpiMultiplier()
 
 void BaseWidget::init()
 {
-    this->colorScheme.updated.connect([this]() {
+    auto connection = this->colorScheme.updated.connect([this]() {
         this->refreshTheme();
 
         this->update();
+    });
+
+    QObject::connect(this, &QObject::destroyed, [connection] {
+        connection.disconnect();  //
     });
 }
 

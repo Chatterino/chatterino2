@@ -290,6 +290,8 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
             combo->setCurrentText(currentComboText);
 
             QObject::connect(combo, &QComboBox::currentTextChanged, this, [](const QString &value) {
+                // dirty hack
+                EmoteManager::getInstance().incGeneration();
                 pajlada::Settings::Setting<std::string>::set("/appearance/theme/name",
                                                              value.toStdString());
             });
