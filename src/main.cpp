@@ -10,35 +10,10 @@
 #include "util/networkmanager.hpp"
 
 #ifdef USEWINSDK
-#include "windows.h"
+#include "util/nativeeventhelper.hpp"
 #endif
 
 namespace {
-
-#ifdef USEWINSDK
-class DpiNativeEventFilter : public QAbstractNativeEventFilter
-{
-public:
-    bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override
-    {
-        MSG *msg = reinterpret_cast<MSG *>(message);
-
-        if (msg->message == WM_NCCREATE) {
-            QLibrary user32("user32.dll", NULL);
-            {
-                typedef BOOL(WINAPI * EnableNonClientDpiScaling)(HWND);
-
-                EnableNonClientDpiScaling enableNonClientDpiScaling =
-                    (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
-
-                //                if (enableNonClientDpiScaling)
-                //                    enableNonClientDpiScaling(msg->hwnd);
-            }
-        }
-        return false;
-    }
-};
-#endif
 
 inline bool initSettings(bool portable)
 {
@@ -73,8 +48,9 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
+// Install native event handler for hidpi on windows
 #ifdef USEWINSDK
-    a.installNativeEventFilter(new DpiNativeEventFilter);
+    a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
 #endif
 
     // Options
