@@ -23,10 +23,10 @@ class AccountPopupWidget : public BaseWidget
 {
     Q_OBJECT
 public:
-    AccountPopupWidget(std::shared_ptr<Channel> channel);
+    AccountPopupWidget(std::shared_ptr<Channel> _channel);
 
     void setName(const QString &name);
-    void setChannel(std::shared_ptr<Channel> channel);
+    void setChannel(std::shared_ptr<Channel> _channel);
 
     void updatePermissions();
 
@@ -34,7 +34,7 @@ protected:
     virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
 
 private:
-    Ui::AccountPopup *_ui;
+    Ui::AccountPopup *ui;
 
     void getUserId();
     void getUserData();
@@ -47,7 +47,7 @@ private:
     enum class permissions { User, Mod, Owner };
     permissions permission;
 
-    std::shared_ptr<Channel> _channel;
+    std::shared_ptr<Channel> channel;
 
     QString userID;
     QPixmap avatar;

@@ -18,46 +18,46 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
+AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> _channel)
     : BaseWidget()
-    , _ui(new Ui::AccountPopup)
-    , _channel(channel)
+    , ui(new Ui::AccountPopup)
+    , channel(_channel)
 {
-    _ui->setupUi(this);
+    this->ui->setupUi(this);
 
     this->layout()->setSizeConstraint(QLayout::SetFixedSize);
 
-    setWindowFlags(Qt::FramelessWindowHint);
+    this->setWindowFlags(Qt::FramelessWindowHint);
     this->initAsWindow();
 
-    resize(0, 0);
+    this->resize(0, 0);
 
     SettingsManager &settings = SettingsManager::getInstance();
 
-    permission = permissions::User;
-    for (auto button : this->_ui->profileLayout->findChildren<QPushButton *>()) {
+    this->permission = permissions::User;
+    for (auto button : this->ui->profileLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
     }
-    for (auto button : this->_ui->userLayout->findChildren<QPushButton *>()) {
+    for (auto button : this->ui->userLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
     }
-    for (auto button : this->_ui->modLayout->findChildren<QPushButton *>()) {
+    for (auto button : this->ui->modLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
     }
-    for (auto button : this->_ui->ownerLayout->findChildren<QPushButton *>()) {
+    for (auto button : this->ui->ownerLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
     }
 
-    timeout(this->_ui->purge, 1);
-    timeout(this->_ui->min1, 60);
-    timeout(this->_ui->min10, 600);
-    timeout(this->_ui->hour1, 3600);
-    timeout(this->_ui->hour24, 86400);
+    this->timeout(this->ui->purge, 1);
+    this->timeout(this->ui->min1, 60);
+    this->timeout(this->ui->min10, 600);
+    this->timeout(this->ui->hour1, 3600);
+    this->timeout(this->ui->hour24, 86400);
 
-    sendCommand(this->_ui->ban, "/ban ");
-    sendCommand(this->_ui->unBan, "/unban ");
-    sendCommand(this->_ui->mod, "/mod ");
-    sendCommand(this->_ui->unMod, "/unmod ");
+    this->sendCommand(this->ui->ban, "/ban ");
+    this->sendCommand(this->ui->unBan, "/unban ");
+    this->sendCommand(this->ui->mod, "/mod ");
+    this->sendCommand(this->ui->unMod, "/unmod ");
 
     auto &accountManager = AccountManager::getInstance();
     QString userId;
@@ -68,19 +68,19 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
         userNickname = currentTwitchUser->getNickName();
     }
 
-    QObject::connect(this->_ui->profile, &QPushButton::clicked, this, [=]() {
-        QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->_ui->lblUsername->text()));
+    QObject::connect(this->ui->profile, &QPushButton::clicked, this, [=]() {
+        QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->ui->lblUsername->text()));
     });
 
-    QObject::connect(this->_ui->sendMessage, &QPushButton::clicked, this, [=]() {
+    QObject::connect(this->ui->sendMessage, &QPushButton::clicked, this, [=]() {
         QDesktopServices::openUrl(
-            QUrl("https://www.twitch.tv/message/compose?to=" + this->_ui->lblUsername->text()));
+            QUrl("https://www.twitch.tv/message/compose?to=" + this->ui->lblUsername->text()));
     });
 
-    QObject::connect(this->_ui->copy, &QPushButton::clicked, this,
-                     [=]() { QApplication::clipboard()->setText(this->_ui->lblUsername->text()); });
+    QObject::connect(this->ui->copy, &QPushButton::clicked, this,
+                     [=]() { QApplication::clipboard()->setText(this->ui->lblUsername->text()); });
 
-    QObject::connect(this->_ui->follow, &QPushButton::clicked, this, [=]() {
+    QObject::connect(this->ui->follow, &QPushButton::clicked, this, [=]() {
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" + userId + "/follows/channels/" +
                         this->userID);
 
@@ -88,36 +88,36 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
                           [](QJsonObject obj) { qDebug() << "follows channel: " << obj; });
     });
 
-    QObject::connect(this->_ui->ignore, &QPushButton::clicked, this, [=]() {
+    QObject::connect(this->ui->ignore, &QPushButton::clicked, this, [=]() {
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" + userId + "/blocks/" + this->userID);
 
         util::twitch::put(requestUrl, [](QJsonObject obj) { qDebug() << "blocks user: " << obj; });
     });
 
-    QObject::connect(this->_ui->disableHighlights, &QPushButton::clicked, this, [=, &settings]() {
+    QObject::connect(this->ui->disableHighlights, &QPushButton::clicked, this, [=, &settings]() {
         QString str = settings.highlightUserBlacklist.getnonConst();
-        str.append(this->_ui->lblUsername->text() + "\n");
+        str.append(this->ui->lblUsername->text() + "\n");
         settings.highlightUserBlacklist.set(str);
-        this->_ui->disableHighlights->hide();
-        this->_ui->enableHighlights->show();
+        this->ui->disableHighlights->hide();
+        this->ui->enableHighlights->show();
     });
 
-    QObject::connect(this->_ui->enableHighlights, &QPushButton::clicked, this, [=, &settings]() {
+    QObject::connect(this->ui->enableHighlights, &QPushButton::clicked, this, [=, &settings]() {
         QString str = settings.highlightUserBlacklist.getnonConst();
         QStringList list = str.split("\n");
-        list.removeAll(this->_ui->lblUsername->text());
+        list.removeAll(this->ui->lblUsername->text());
         settings.highlightUserBlacklist.set(list.join("\n"));
-        this->_ui->enableHighlights->hide();
-        this->_ui->disableHighlights->show();
+        this->ui->enableHighlights->hide();
+        this->ui->disableHighlights->show();
     });
 
-    updateButtons(this->_ui->userLayout, false);
-    updateButtons(this->_ui->modLayout, false);
-    updateButtons(this->_ui->ownerLayout, false);
+    this->updateButtons(this->ui->userLayout, false);
+    this->updateButtons(this->ui->modLayout, false);
+    this->updateButtons(this->ui->ownerLayout, false);
 
     // Close button
-    connect(_ui->btnClose, &QPushButton::clicked, [=]() {
-        hide();  //
+    QObject::connect(this->ui->btnClose, &QPushButton::clicked, [this] {
+        this->hide();  //
     });
 
     util::twitch::getUserID(userNickname, this,
@@ -128,38 +128,38 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> channel)
 
 void AccountPopupWidget::setName(const QString &name)
 {
-    _ui->lblUsername->setText(name);
-    getUserId();
+    this->ui->lblUsername->setText(name);
+    this->getUserId();
 }
 
-void AccountPopupWidget::setChannel(std::shared_ptr<Channel> channel)
+void AccountPopupWidget::setChannel(std::shared_ptr<Channel> _channel)
 {
-    this->_channel = channel;
+    this->channel = _channel;
 }
 
 void AccountPopupWidget::getUserId()
 {
-    util::twitch::getUserID(this->_ui->lblUsername->text(), this, [=](const QString &id) {
+    util::twitch::getUserID(this->ui->lblUsername->text(), this, [=](const QString &id) {
         userID = id;
-        getUserData();
+        this->getUserData();
     });
 }
 
 void AccountPopupWidget::getUserData()
 {
     util::twitch::get(
-        "https://api.twitch.tv/kraken/channels/" + userID, this, [=](const QJsonObject &obj) {
-            _ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
-            _ui->lblViews->setText(QString::number(obj.value("views").toInt()));
-            _ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
+        "https://api.twitch.tv/kraken/channels/" + this->userID, this, [=](const QJsonObject &obj) {
+            this->ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
+            this->ui->lblViews->setText(QString::number(obj.value("views").toInt()));
+            this->ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
 
-            loadAvatar(QUrl(obj.value("logo").toString()));
+            this->loadAvatar(QUrl(obj.value("logo").toString()));
         });
 }
 
 void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 {
-    if (!avatarMap.tryGet(userID, this->avatar)) {
+    if (!this->avatarMap.tryGet(this->userID, this->avatar)) {
         if (!avatarUrl.isEmpty()) {
             QNetworkRequest req(avatarUrl);
             static auto manager = new QNetworkAccessManager();
@@ -169,17 +169,17 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
                 if (reply->error() == QNetworkReply::NoError) {
                     const auto data = reply->readAll();
                     this->avatar.loadFromData(data);
-                    this->avatarMap.insert(userID, avatar);
-                    _ui->lblAvatar->setPixmap(avatar);
+                    this->avatarMap.insert(this->userID, this->avatar);
+                    this->ui->lblAvatar->setPixmap(this->avatar);
                 } else {
-                    _ui->lblAvatar->setText("ERROR");
+                    this->ui->lblAvatar->setText("ERROR");
                 }
             });
         } else {
-            _ui->lblAvatar->setText("No Avatar");
+            this->ui->lblAvatar->setText("No Avatar");
         }
     } else {
-        _ui->lblAvatar->setPixmap(this->avatar);
+        this->ui->lblAvatar->setPixmap(this->avatar);
     }
 }
 
@@ -192,11 +192,11 @@ void AccountPopupWidget::updatePermissions()
         return;
     }
 
-    if (this->_channel.get()->name == currentTwitchUser->getNickName()) {
-        permission = permissions::Owner;
-    } else if (this->_channel->modList.contains(currentTwitchUser->getNickName())) {
+    if (this->channel.get()->name == currentTwitchUser->getNickName()) {
+        this->permission = permissions::Owner;
+    } else if (this->channel->modList.contains(currentTwitchUser->getNickName())) {
         // XXX(pajlada): This might always trigger if user is anonymous (if nickName is empty?)
-        permission = permissions::Mod;
+        this->permission = permissions::Mod;
     }
 }
 
@@ -205,7 +205,7 @@ void AccountPopupWidget::dpiMultiplierChanged(float oldDpi, float newDpi)
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));
 
-    this->_ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
+    this->ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
 }
 
 void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
@@ -218,26 +218,26 @@ void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
 void AccountPopupWidget::timeout(QPushButton *button, int time)
 {
     QObject::connect(button, &QPushButton::clicked, this, [=]() {
-        this->_channel->sendMessage("/timeout " + this->_ui->lblUsername->text() + " " +
-                                    QString::number(time));
+        this->channel->sendMessage("/timeout " + this->ui->lblUsername->text() + " " +
+                                   QString::number(time));
     });
 }
 
 void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
 {
     QObject::connect(button, &QPushButton::clicked, this, [=]() {
-        this->_channel->sendMessage(command + this->_ui->lblUsername->text());
+        this->channel->sendMessage(command + this->ui->lblUsername->text());
     });
 }
 
 void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
 {
     this->hide();
-    _ui->lblFollowers->setText("Loading...");
-    _ui->lblViews->setText("Loading...");
-    _ui->lblAccountAge->setText("Loading...");
-    _ui->lblUsername->setText("Loading...");
-    _ui->lblAvatar->setText("Loading...");
+    this->ui->lblFollowers->setText("Loading...");
+    this->ui->lblViews->setText("Loading...");
+    this->ui->lblAccountAge->setText("Loading...");
+    this->ui->lblUsername->setText("Loading...");
+    this->ui->lblAvatar->setText("Loading...");
 }
 
 void AccountPopupWidget::showEvent(QShowEvent *event)
@@ -249,31 +249,31 @@ void AccountPopupWidget::showEvent(QShowEvent *event)
         return;
     }
 
-    if (this->_ui->lblUsername->text() != currentTwitchUser->getNickName()) {
-        updateButtons(this->_ui->userLayout, true);
-        if (permission != permissions::User) {
-            if (!this->_channel->modList.contains(this->_ui->lblUsername->text())) {
-                updateButtons(this->_ui->modLayout, true);
+    if (this->ui->lblUsername->text() != currentTwitchUser->getNickName()) {
+        this->updateButtons(this->ui->userLayout, true);
+        if (this->permission != permissions::User) {
+            if (!this->channel->modList.contains(this->ui->lblUsername->text())) {
+                this->updateButtons(this->ui->modLayout, true);
             }
-            if (permission == permissions::Owner) {
-                updateButtons(this->_ui->ownerLayout, true);
-                updateButtons(this->_ui->modLayout, true);
+            if (this->permission == permissions::Owner) {
+                this->updateButtons(this->ui->ownerLayout, true);
+                this->updateButtons(this->ui->modLayout, true);
             }
         }
     } else {
-        updateButtons(this->_ui->modLayout, false);
-        updateButtons(this->_ui->userLayout, false);
-        updateButtons(this->_ui->ownerLayout, false);
+        this->updateButtons(this->ui->modLayout, false);
+        this->updateButtons(this->ui->userLayout, false);
+        this->updateButtons(this->ui->ownerLayout, false);
     }
 
     QString blacklisted = SettingsManager::getInstance().highlightUserBlacklist.getnonConst();
     QStringList list = blacklisted.split("\n", QString::SkipEmptyParts);
-    if (list.contains(this->_ui->lblUsername->text(), Qt::CaseInsensitive)) {
-        this->_ui->disableHighlights->hide();
-        this->_ui->enableHighlights->show();
+    if (list.contains(this->ui->lblUsername->text(), Qt::CaseInsensitive)) {
+        this->ui->disableHighlights->hide();
+        this->ui->enableHighlights->show();
     } else {
-        this->_ui->disableHighlights->show();
-        this->_ui->enableHighlights->hide();
+        this->ui->disableHighlights->show();
+        this->ui->enableHighlights->hide();
     }
 }
 
