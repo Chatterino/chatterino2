@@ -161,6 +161,11 @@ EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
     return _bttvChannelEmoteFromCaches;
 }
 
+EmoteMap &EmoteManager::getEmojis()
+{
+    return this->emojis;
+}
+
 ConcurrentMap<int, EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;

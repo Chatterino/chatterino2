@@ -54,6 +54,7 @@ public:
     EmoteMap &getFFZEmotes();
     EmoteMap &getChatterinoEmotes();
     EmoteMap &getBTTVChannelEmoteFromCaches();
+    EmoteMap &getEmojis();
     ConcurrentMap<int, EmoteData> &getFFZChannelEmoteFromCaches();
     ConcurrentMap<long, EmoteData> &getTwitchEmoteFromCache();
 
