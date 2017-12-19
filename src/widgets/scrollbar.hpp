@@ -28,7 +28,7 @@ public:
     void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);
     void addHighlight(ScrollBarHighlight *highlight);
 
-    Q_PROPERTY(qreal _desiredValue READ getDesiredValue WRITE setDesiredValue)
+    Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
 
     void scrollToBottom();
 
@@ -53,13 +53,13 @@ public:
     void printCurrentState(const QString &prefix = QString()) const;
 
 private:
-    Q_PROPERTY(qreal _currentValue READ getCurrentValue WRITE setCurrentValue)
+    Q_PROPERTY(qreal currentValue READ getCurrentValue WRITE setCurrentValue)
 
-    QMutex _mutex;
+    QMutex mutex;
 
-    QPropertyAnimation _currentValueAnimation;
+    QPropertyAnimation currentValueAnimation;
 
-    ScrollBarHighlight *_highlights;
+    ScrollBarHighlight *highlights;
 
     void paintEvent(QPaintEvent *);
     void mouseMoveEvent(QMouseEvent *event);
@@ -69,24 +69,24 @@ private:
 
     bool atBottom = false;
 
-    int _mouseOverIndex = -1;
-    int _mouseDownIndex = -1;
-    QPoint _lastMousePosition;
+    int mouseOverIndex = -1;
+    int mouseDownIndex = -1;
+    QPoint lastMousePosition;
 
-    int _buttonHeight = 16;
-    int _trackHeight = 100;
+    int buttonHeight = 16;
+    int trackHeight = 100;
 
-    QRect _thumbRect;
+    QRect thumbRect;
 
-    qreal _maximum = 0;
-    qreal _minimum = 0;
-    qreal _largeChange = 0;
-    qreal _smallChange = 5;
-    qreal _desiredValue = 0;
-    qreal _currentValue = 0;
-    qreal _smoothScrollingOffset = 0;
+    qreal maximum = 0;
+    qreal minimum = 0;
+    qreal largeChange = 0;
+    qreal smallChange = 5;
+    qreal desiredValue = 0;
+    qreal currentValue = 0;
+    qreal smoothScrollingOffset = 0;
 
-    boost::signals2::signal<void()> _currentValueChanged;
+    boost::signals2::signal<void()> currentValueChanged;
 
     pajlada::Settings::Setting<bool> &smoothScrollingSetting;
 
