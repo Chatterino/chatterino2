@@ -80,22 +80,24 @@ void SettingsDialog::addTabs()
 
     this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/AppearanceEditorPart_16x.png");
 
-    this->addTab(this->createCommandsTab(), "Commands", ":/images/CustomActionEditor_16x.png");
+    //    this->addTab(this->createCommandsTab(), "Commands",
+    //    ":/images/CustomActionEditor_16x.png");
 
     this->addTab(this->createEmotesTab(), "Emotes", ":/images/Emoji_Color_1F60A_19.png");
 
-    this->addTab(this->createIgnoredUsersTab(), "Ignored Users",
-                 ":/images/StatusAnnotations_Blocked_16xLG_color.png");
+    //    this->addTab(this->createIgnoredUsersTab(), "Ignored Users",
+    //                 ":/images/StatusAnnotations_Blocked_16xLG_color.png");
 
-    this->addTab(this->createIgnoredMessagesTab(), "Ignored Messages", ":/images/Filter_16x.png");
+    //    this->addTab(this->createIgnoredMessagesTab(), "Ignored Messages",
+    //    ":/images/Filter_16x.png");
 
-    this->addTab(this->createLinksTab(), "Links", ":/images/VSO_Link_blue_16x.png");
+    //    this->addTab(this->createLinksTab(), "Links", ":/images/VSO_Link_blue_16x.png");
 
-    this->addTab(this->createLogsTab(), "Logs", ":/images/VSO_Link_blue_16x.png");
+    //    this->addTab(this->createLogsTab(), "Logs", ":/images/VSO_Link_blue_16x.png");
 
     this->addTab(this->createHighlightingTab(), "Highlighting", ":/images/format_Bold_16xLG.png");
 
-    this->addTab(this->createWhispersTab(), "Whispers", ":/images/Message_16xLG.png");
+    //    this->addTab(this->createWhispersTab(), "Whispers", ":/images/Message_16xLG.png");
 
     // Add stretch
     this->ui.tabs.addStretch(1);
