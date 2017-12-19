@@ -120,16 +120,22 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
         loginWidget->show();
     });
 
-    connect(removeButton, &QPushButton::clicked, []() {
-        qDebug() << "TODO: Implement";  //
-    });
-
     buttonBox->addButton(addButton, QDialogButtonBox::YesRole);
     buttonBox->addButton(removeButton, QDialogButtonBox::NoRole);
 
     layout->addWidget(buttonBox);
 
     this->ui.accountSwitchWidget = new AccountSwitchWidget(this);
+
+    connect(removeButton, &QPushButton::clicked, [this]() {
+        qDebug() << "TODO: Implement";  //
+        auto selectedUser = this->ui.accountSwitchWidget->currentItem()->text();
+        if (selectedUser == " - anonymous - ") {
+            // Do nothing
+            return;
+        }
+        AccountManager::getInstance().Twitch.removeUser(selectedUser);
+    });
 
     layout->addWidget(this->ui.accountSwitchWidget);
 

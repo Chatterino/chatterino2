@@ -1,9 +1,11 @@
 #include "widgets/logindialog.hpp"
+#include "common.hpp"
 #include "util/urlfetch.hpp"
 
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include <QUrl>
 #include <pajlada/settings/setting.hpp>
 
@@ -56,8 +58,16 @@ BasicLoginWidget::BasicLoginWidget()
         }
 
         if (oauthToken.empty() || clientID.empty() || username.empty() || userID.empty()) {
-            qDebug() << "Missing variables!!!!!!!!!";
+            QMessageBox messageBox;
+            messageBox.setText("Bad values");
+            messageBox.setInformativeText("Missing values from the clipboard.<br />Ensure you "
+                                          "copied all text and try again.");
+            messageBox.setStandardButtons(QMessageBox::Ok);
+            messageBox.exec();
         } else {
+            QMessageBox messageBox;
+            messageBox.setText("Success!");
+            messageBox.setInformativeText("Successfully added user " + qS(username) + "!");
             qDebug() << "Success! mr";
             pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username",
                                                          username);
@@ -67,6 +77,10 @@ BasicLoginWidget::BasicLoginWidget()
                                                          clientID);
             pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/oauthToken",
                                                          oauthToken);
+
+            AccountManager::getInstance().Twitch.reloadUsers();
+
+            messageBox.exec();
         }
     });
 }

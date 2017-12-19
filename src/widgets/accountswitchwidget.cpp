@@ -15,6 +15,22 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
         this->addItem(userName);
     }
 
+    AccountManager::getInstance().Twitch.userListUpdated.connect([this]() {
+        this->blockSignals(true);
+
+        this->clear();
+
+        this->addItem(anonUsername);
+
+        for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
+            this->addItem(userName);
+        }
+
+        this->refreshSelection();
+
+        this->blockSignals(false);
+    });
+
     this->refreshSelection();
 
     QObject::connect(this, &QListWidget::clicked, [this] {

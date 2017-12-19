@@ -14,6 +14,13 @@ class AccountManager;
 class TwitchAccountManager
 {
 public:
+    struct UserData {
+        QString username;
+        QString userID;
+        QString clientID;
+        QString oauthToken;
+    };
+
     // Returns the current twitchUsers, or the anonymous user if we're not currently logged in
     std::shared_ptr<twitch::TwitchUser> getCurrent();
 
@@ -22,11 +29,21 @@ public:
     std::shared_ptr<twitch::TwitchUser> findUserByUsername(const QString &username) const;
     bool userExists(const QString &username) const;
 
+    void reloadUsers();
+
+    bool removeUser(const QString &username);
+
     pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
     pajlada::Signals::NoArgSignal userChanged;
+    pajlada::Signals::NoArgSignal userListUpdated;
 
 private:
-    bool addUser(std::shared_ptr<twitch::TwitchUser> user);
+    enum class AddUserResponse {
+        UserAlreadyExists,
+        UserValuesUpdated,
+        UserAdded,
+    };
+    AddUserResponse addUser(const UserData &data);
 
     std::shared_ptr<twitch::TwitchUser> currentUser;
 
