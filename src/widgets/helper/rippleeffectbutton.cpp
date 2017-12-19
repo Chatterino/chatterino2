@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QPainter>
 
+#include "colorscheme.hpp"
+
 namespace chatterino {
 namespace widgets {
 
@@ -16,7 +18,7 @@ RippleEffectButton::RippleEffectButton(BaseWidget *parent)
     this->effectTimer.start();
 }
 
-void RippleEffectButton::setMouseEffectColor(QColor color)
+void RippleEffectButton::setMouseEffectColor(boost::optional<QColor> color)
 {
     this->mouseEffectColor = color;
 }
@@ -30,7 +32,13 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
 void RippleEffectButton::fancyPaint(QPainter &painter)
 {
-    QColor &c = this->mouseEffectColor;
+    QColor c;
+
+    if (this->mouseEffectColor) {
+        c = this->mouseEffectColor.get();
+    } else {
+        c = this->colorScheme.isLightTheme() ? QColor(0, 0, 0) : QColor(255, 255, 255);
+    }
 
     if (this->hoverMultiplier > 0) {
         QRadialGradient gradient(mousePos.x(), mousePos.y(), 50, mousePos.x(), mousePos.y());

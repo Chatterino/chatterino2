@@ -132,7 +132,16 @@ QColor ColorScheme::blendColors(const QColor &color1, const QColor &color2, qrea
 void ColorScheme::normalizeColor(QColor &color)
 {
     if (this->lightTheme) {
-        // TODO: write some codes
+        if (color.lightnessF() > 0.5f) {
+            color.setHslF(color.hueF(), color.saturationF(), 0.5f);
+        }
+
+        if (color.lightnessF() > 0.4f && color.hueF() > 0.1 && color.hueF() < 0.33333) {
+            color.setHslF(color.hueF(), color.saturationF(),
+                          color.lightnessF() -
+                              sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
+                                  color.saturationF() * 0.2);
+        }
     } else {
         if (color.lightnessF() < 0.5f) {
             color.setHslF(color.hueF(), color.saturationF(), 0.5f);
@@ -142,7 +151,7 @@ void ColorScheme::normalizeColor(QColor &color)
             color.setHslF(color.hueF(), color.saturationF(),
                           color.lightnessF() +
                               sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                  color.saturationF() * 0.2);
+                                  color.saturationF() * 0.4);
         }
     }
 }

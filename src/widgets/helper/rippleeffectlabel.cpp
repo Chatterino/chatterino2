@@ -21,7 +21,7 @@ RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     this->hbox.addWidget(&this->label);
     this->hbox.addSpacing(spacing);
 
-    this->setMouseEffectColor(QColor(255, 255, 255, 63));
+    //    this->setMouseEffectColor(QColor(255, 255, 255, 63));
 }
 
 }  // namespace widgets

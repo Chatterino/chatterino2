@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/optional.hpp>
+
 #include "widgets/basewidget.hpp"
 
 #include <QMouseEvent>
@@ -28,7 +30,7 @@ class RippleEffectButton : public BaseWidget
 public:
     RippleEffectButton(BaseWidget *parent);
 
-    void setMouseEffectColor(QColor color);
+    void setMouseEffectColor(boost::optional<QColor> color);
 
 signals:
     void clicked();
@@ -52,7 +54,7 @@ private:
     double hoverMultiplier = 0.0;
     QTimer effectTimer;
     std::vector<ClickEffect> clickEffects;
-    QColor mouseEffectColor = {255, 255, 255};
+    boost::optional<QColor> mouseEffectColor = boost::none;
 
     void onMouseEffectTimeout();
 };
