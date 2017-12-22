@@ -105,9 +105,9 @@ void ChannelView::layoutMessages()
 void ChannelView::actuallyLayoutMessages()
 {
     // BENCH(timer)
-    auto messages = this->getMessagesSnapshot();
+    auto messagesSnapshot = this->getMessagesSnapshot();
 
-    if (messages.getLength() == 0) {
+    if (messagesSnapshot.getLength() == 0) {
         this->scrollBar.setVisible(false);
 
         return;
@@ -127,11 +127,12 @@ void ChannelView::actuallyLayoutMessages()
         (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
 
     // layout the visible messages in the view
-    if (messages.getLength() > start) {
-        int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
+    if (messagesSnapshot.getLength() > start) {
+        int y =
+            -(messagesSnapshot[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-        for (size_t i = start; i < messages.getLength(); ++i) {
-            auto message = messages[i];
+        for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
+            auto message = messagesSnapshot[i];
 
             redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier());
 
@@ -146,15 +147,15 @@ void ChannelView::actuallyLayoutMessages()
     // layout the messages at the bottom to determine the scrollbar thumb size
     int h = height() - 8;
 
-    for (std::size_t i = messages.getLength() - 1; i > 0; i--) {
-        auto *message = messages[i].get();
+    for (std::size_t i = messagesSnapshot.getLength() - 1; i > 0; i--) {
+        auto *message = messagesSnapshot[i].get();
 
         message->layout(layoutWidth, this->getDpiMultiplier());
 
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollBar.setLargeChange((messages.getLength() - i) +
+            this->scrollBar.setLargeChange((messagesSnapshot.getLength() - i) +
                                            (qreal)h / message->getHeight());
             //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
 
@@ -169,7 +170,7 @@ void ChannelView::actuallyLayoutMessages()
         this->scrollBar.setDesiredValue(0);
     }
 
-    this->scrollBar.setMaximum(messages.getLength());
+    this->scrollBar.setMaximum(messagesSnapshot.getLength());
 
     if (this->showingLatestMessages && showScrollbar) {
         // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
@@ -212,7 +213,7 @@ ScrollBar &ChannelView::getScrollBar()
 
 QString ChannelView::getSelectedText()
 {
-    LimitedQueueSnapshot<SharedMessageRef> messages = this->getMessagesSnapshot();
+    auto messagesSnapshot = this->getMessagesSnapshot();
 
     QString text;
     bool isSingleMessage = this->selection.isSingleMessage();
@@ -236,7 +237,7 @@ QString ChannelView::getSelectedText()
     };
 
     // first line
-    for (const messages::WordPart &part : messages[i]->getWordParts()) {
+    for (const messages::WordPart &part : messagesSnapshot[i]->getWordParts()) {
         int charLength = part.getCharacterLength();
 
         if (charIndex + charLength < this->selection.min.charIndex) {
@@ -273,7 +274,7 @@ QString ChannelView::getSelectedText()
 
     // middle lines
     for (i++; i < this->selection.max.messageIndex; i++) {
-        for (const messages::WordPart &part : messages[i]->getWordParts()) {
+        for (const messages::WordPart &part : messagesSnapshot[i]->getWordParts()) {
             if (!part.getCopyText().isEmpty()) {
                 text += part.getCopyText();
 
@@ -289,7 +290,7 @@ QString ChannelView::getSelectedText()
     charIndex = 0;
 
     for (const messages::WordPart &part :
-         messages[this->selection.max.messageIndex]->getWordParts()) {
+         messagesSnapshot[this->selection.max.messageIndex]->getWordParts()) {
         int charLength = part.getCharacterLength();
 
         if (charIndex + charLength >= this->selection.max.charIndex) {
@@ -326,7 +327,7 @@ messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapsho
     return this->messages.getSnapshot();
 }
 
-void ChannelView::setChannel(std::shared_ptr<Channel> channel)
+void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
 {
     if (this->channel) {
         this->detachChannel();
@@ -335,7 +336,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
 
     // on new message
     this->messageAppendedConnection =
-        channel->messageAppended.connect([this](SharedMessage &message) {
+        newChannel->messageAppended.connect([this](SharedMessage &message) {
             SharedMessageRef deleted;
 
             auto messageRef = new MessageRef(message);
@@ -354,7 +355,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
 
     // on message removed
     this->messageRemovedConnection =
-        channel->messageRemovedFromStart.connect([this](SharedMessage &) {
+        newChannel->messageRemovedFromStart.connect([this](SharedMessage &) {
             this->selection.min.messageIndex--;
             this->selection.max.messageIndex--;
             this->selection.start.messageIndex--;
@@ -363,7 +364,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
             this->layoutMessages();
         });
 
-    auto snapshot = channel->getMessageSnapshot();
+    auto snapshot = newChannel->getMessageSnapshot();
 
     for (size_t i = 0; i < snapshot.getLength(); i++) {
         SharedMessageRef deleted;
@@ -373,9 +374,9 @@ void ChannelView::setChannel(std::shared_ptr<Channel> channel)
         this->messages.appendItem(SharedMessageRef(messageRef), deleted);
     }
 
-    this->channel = channel;
+    this->channel = newChannel;
 
-    this->userPopupWidget.setChannel(channel);
+    this->userPopupWidget.setChannel(newChannel);
 }
 
 void ChannelView::detachChannel()
@@ -453,18 +454,19 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
 void ChannelView::drawMessages(QPainter &painter)
 {
-    auto messages = this->getMessagesSnapshot();
+    auto messagesSnapshot = this->getMessagesSnapshot();
 
     size_t start = this->scrollBar.getCurrentValue();
 
-    if (start >= messages.getLength()) {
+    if (start >= messagesSnapshot.getLength()) {
         return;
     }
 
-    int y = -(messages[start].get()->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
+    int y = -(messagesSnapshot[start].get()->getHeight() *
+              (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (size_t i = start; i < messages.getLength(); ++i) {
-        messages::MessageRef *messageRef = messages[i].get();
+    for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
+        messages::MessageRef *messageRef = messagesSnapshot[i].get();
 
         std::shared_ptr<QPixmap> buffer = messageRef->buffer;
 
@@ -806,14 +808,14 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
 
-        auto messages = this->getMessagesSnapshot();
-        if (messages.getLength() == 0) {
+        auto messagesSnapshot = this->getMessagesSnapshot();
+        if (messagesSnapshot.getLength() == 0) {
             return;
         }
 
         // Start selection at the last message at its last index
-        auto lastMessageIndex = messages.getLength() - 1;
-        auto lastMessage = messages[lastMessageIndex];
+        auto lastMessageIndex = messagesSnapshot.getLength() - 1;
+        auto lastMessage = messagesSnapshot[lastMessageIndex];
         auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
 
         SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
@@ -909,18 +911,18 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &_message,
                                   QPoint &relativePos, int &index)
 {
-    auto messages = this->getMessagesSnapshot();
+    auto messagesSnapshot = this->getMessagesSnapshot();
 
     size_t start = this->scrollBar.getCurrentValue();
 
-    if (start >= messages.getLength()) {
+    if (start >= messagesSnapshot.getLength()) {
         return false;
     }
 
-    int y = -(messages[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
+    int y = -(messagesSnapshot[start]->getHeight() * (fmod(this->scrollBar.getCurrentValue(), 1)));
 
-    for (size_t i = start; i < messages.getLength(); ++i) {
-        auto message = messages[i];
+    for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
+        auto message = messagesSnapshot[i];
 
         if (p.y() < y + message->getHeight()) {
             relativePos = QPoint(p.x(), p.y() - y);

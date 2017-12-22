@@ -62,11 +62,11 @@ public:
         return QVariant::fromValue(this->value);
     }
 
-    virtual void setVariant(QVariant value) final
+    virtual void setVariant(QVariant newValue) final
     {
-        if (value.isValid()) {
-            assert(value.canConvert<T>());
-            set(value.value<T>());
+        if (newValue.isValid()) {
+            assert(newValue.canConvert<T>());
+            set(newValue.value<T>());
         }
     }
 
