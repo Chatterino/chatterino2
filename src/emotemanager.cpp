@@ -24,11 +24,12 @@ namespace chatterino {
 EmoteManager::EmoteManager()
     : findShortCodesRegex(":([-+\\w]+):")
 {
-    pajlada::Settings::Setting<std::string> roomID(
-        "/accounts/current/roomID", "", pajlada::Settings::SettingOption::DoNotWriteToJSON);
+    auto &accountManager = AccountManager::getInstance();
 
-    roomID.getValueChangedSignal().connect([this](const std::string &roomID, auto) {
-        this->refreshTwitchEmotes(roomID);  //
+    accountManager.Twitch.userChanged.connect([this] {
+        auto currentUser = AccountManager::getInstance().Twitch.getCurrent();
+        assert(currentUser);
+        this->refreshTwitchEmotes(currentUser);
     });
 }
 
@@ -354,56 +355,51 @@ QString EmoteManager::replaceShortCodes(const QString &text)
     return ret;
 }
 
-void EmoteManager::refreshTwitchEmotes(const std::string &roomID)
+void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser> &user)
 {
-    std::string oauthClient =
-        pajlada::Settings::Setting<std::string>::get("/accounts/" + roomID + "/oauthClient");
-    std::string oauthToken =
-        pajlada::Settings::Setting<std::string>::get("/accounts/" + roomID + "/oauthToken");
+    debug::Log("Loading Twitch emotes for user {}", user->getNickName());
 
-    TwitchAccountEmoteData &emoteData = this->twitchAccountEmotes[roomID];
+    const auto &roomID = user->getUserId();
+    const auto &clientID = user->getOAuthClient();
+    const auto &oauthToken = user->getOAuthToken();
+
+    if (clientID.isEmpty() || oauthToken.isEmpty()) {
+        debug::Log("Missing Client ID or OAuth token");
+        return;
+    }
+
+    TwitchAccountEmoteData &emoteData = this->twitchAccountEmotes[roomID.toStdString()];
 
     if (emoteData.filled) {
-        qDebug() << "Already loaded for room id " << qS(roomID);
+        qDebug() << "Already loaded for room id " << roomID;
         return;
     }
 
-    qDebug() << "Loading emotes for room id " << qS(roomID);
+    QString url("https://api.twitch.tv/kraken/users/" + roomID + "/emotes");
 
-    if (oauthClient.empty() || oauthToken.empty()) {
-        qDebug() << "Missing oauth client/token";
-        return;
-    }
+    util::twitch::getAuthorized(
+        url, clientID, oauthToken, QThread::currentThread(),
+        [=, &emoteData](QJsonObject &root) {
+            emoteData.emoteSets.clear();
+            emoteData.emoteCodes.clear();
+            auto emoticonSets = root.value("emoticon_sets").toObject();
+            for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
+                std::string emoteSetString = it.key().toStdString();
+                QJsonArray emoteSetList = it.value().toArray();
 
-    // api:v5
-    QString url("https://api.twitch.tv/kraken/users/" + qS(roomID) +
-                "/emotes?api_version=5&oauth_token=" + qS(oauthToken) +
-                "&client_id=" + qS(oauthClient));
-
-    qDebug() << url;
-
-    util::NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.setTimeout(3000);
-    req.getJSON([=, &emoteData](QJsonObject &root) {
-        emoteData.emoteSets.clear();
-        emoteData.emoteCodes.clear();
-        auto emoticonSets = root.value("emoticon_sets").toObject();
-        for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
-            std::string emoteSetString = it.key().toStdString();
-            QJsonArray emoteSetList = it.value().toArray();
-
-            for (QJsonValue emoteValue : emoteSetList) {
-                QJsonObject emoticon = emoteValue.toObject();
-                std::string id = emoticon["id"].toString().toStdString();
-                std::string code = emoticon["code"].toString().toStdString();
-                emoteData.emoteSets[emoteSetString].push_back({id, code});
-                emoteData.emoteCodes.push_back(code);
+                for (QJsonValue emoteValue : emoteSetList) {
+                    QJsonObject emoticon = emoteValue.toObject();
+                    std::string id = emoticon["id"].toString().toStdString();
+                    std::string code = emoticon["code"].toString().toStdString();
+                    emoteData.emoteSets[emoteSetString].push_back({id, code});
+                    emoteData.emoteCodes.push_back(code);
+                }
             }
+
+            emoteData.filled = true;
         }
 
-        emoteData.filled = true;
-    });
+    );
 }
 
 void EmoteManager::loadBTTVEmotes()
