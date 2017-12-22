@@ -50,6 +50,20 @@ static void get(QString url, const QObject *caller,
     });
 }
 
+static void getAuthorized(QString url, const QString &clientID, const QString &oauthToken,
+                          const QObject *caller, std::function<void(QJsonObject &)> successCallback)
+{
+    util::NetworkRequest req(url);
+    req.setCaller(caller);
+    req.setRawHeader("Client-ID", clientID.toUtf8());
+    req.setRawHeader("Authorization", "OAuth " + oauthToken.toUtf8());
+    req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    req.get([=](QNetworkReply *reply) {
+        auto node = parseJSONFromReply(reply);
+        successCallback(node);
+    });
+}
+
 static void getUserID(QString username, const QObject *caller,
                       std::function<void(QString)> successCallback)
 {
