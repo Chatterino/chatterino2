@@ -129,7 +129,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
                 auto emote =
                     this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
                         return EmoteData(
-                            new LazyLoadedImage(url1, 1, code, code + "<br/>Global FFZ Emote"));
+                            new LazyLoadedImage(url1, 1, code, code + "<br/>Channel FFZ Emote"));
                     });
 
                 this->ffzChannelEmotes.insert(code, emote);
