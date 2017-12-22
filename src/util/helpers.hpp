@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fmt/format.h>
+#include <QUuid>
 
 namespace chatterino {
 
@@ -10,6 +11,12 @@ auto fS(Args &&... args) -> decltype(fmt::format(std::forward<Args>(args)...))
     return fmt::format(std::forward<Args>(args)...);
 }
 
+static QString CreateUUID()
+{
+    auto uuid = QUuid::createUuid();
+    return uuid.toString();
+}
+
 }  // namespace chatterino
 
 namespace fmt {
@@ -17,7 +24,7 @@ namespace fmt {
 // format_arg for QString
 inline void format_arg(BasicFormatter<char> &f, const char *&, const QString &v)
 {
-    f.writer().write("\"{}\"", v.toStdString());
+    f.writer().write("{}", v.toStdString());
 }
 
 }  // namespace fmt
