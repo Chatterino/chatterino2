@@ -191,7 +191,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
                                                         userData.clientID);
 
     // Set users User ID without the uid prefix
-    newUser->setUserId(userData.userID.mid(3));
+    newUser->setUserId(userData.userID);
 
     std::lock_guard<std::mutex> lock(this->mutex);
 
