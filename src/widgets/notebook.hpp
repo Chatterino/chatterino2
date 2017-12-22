@@ -7,7 +7,6 @@
 
 #include <QList>
 #include <QWidget>
-#include <boost/property_tree/ptree.hpp>
 
 namespace chatterino {
 
@@ -21,12 +20,16 @@ class Notebook : public BaseWidget
 {
     Q_OBJECT
 
+    std::string settingRoot;
+
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    explicit Notebook(ChannelManager &_channelManager, Window *parent, bool showButtons);
+    explicit Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons,
+                      const std::string &settingPrefix);
 
-    SplitContainer *addPage(bool select = false);
+    SplitContainer *addNewPage();
+    SplitContainer *addPage(const std::string &uuid, bool select = false);
 
     void removePage(SplitContainer *page);
     void select(SplitContainer *page);
@@ -69,10 +72,10 @@ private:
 
     bool showButtons;
 
+    void loadContainers();
+
 public:
-    void load(const boost::property_tree::ptree &tree);
-    void save(boost::property_tree::ptree &tree);
-    void loadDefaults();
+    void save();
 };
 
 }  // namespace widgets

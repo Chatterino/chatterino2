@@ -1,6 +1,9 @@
 #include "widgets/helper/notebooktab.hpp"
 #include "colorscheme.hpp"
+#include "common.hpp"
+#include "debug/log.hpp"
 #include "settingsmanager.hpp"
+#include "util/helpers.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/textinputdialog.hpp"
 
@@ -11,10 +14,13 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookTab::NotebookTab(Notebook *_notebook)
+NotebookTab::NotebookTab(Notebook *_notebook, const std::string &settingPrefix)
     : BaseWidget(_notebook)
+    , settingRoot(fS("{}/tab", settingPrefix))
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
+    , title(fS("{}/title", this->settingRoot), "")
+    , useDefaultBehaviour(fS("{}/useDefaultBehaviour", this->settingRoot), true)
     , menu(this)
 {
     this->calcSize();
@@ -49,26 +55,29 @@ NotebookTab::NotebookTab(Notebook *_notebook)
         }
     });
 
-    this->menu.addAction("Close", [=]() {
-        this->notebook->removePage(this->page);
+    QAction *enableHighlightsOnNewMessageAction =
+        new QAction("Enable highlights on new message", &this->menu);
+    enableHighlightsOnNewMessageAction->setCheckable(true);
 
-        qDebug() << "lmoa";
-    });
+    this->menu.addAction("Close", [=]() { this->notebook->removePage(this->page); });
 
-    this->menu.addAction("Enable highlights on new message", []() {
-        qDebug() << "TODO: Implement";  //
+    this->menu.addAction(enableHighlightsOnNewMessageAction);
+
+    connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool newValue) {
+        debug::Log("New value is {}", newValue);  //
     });
 }
 
 void NotebookTab::calcSize()
 {
     float scale = getDpiMultiplier();
+    QString qTitle(qS(this->title));
 
     if (SettingsManager::getInstance().hideTabX) {
-        this->resize(static_cast<int>((fontMetrics().width(title) + 16) * scale),
+        this->resize(static_cast<int>((fontMetrics().width(qTitle) + 16) * scale),
                      static_cast<int>(24 * scale));
     } else {
-        this->resize(static_cast<int>((fontMetrics().width(title) + 8 + 24) * scale),
+        this->resize(static_cast<int>((fontMetrics().width(qTitle) + 8 + 24) * scale),
                      static_cast<int>(24 * scale));
     }
 
@@ -77,14 +86,14 @@ void NotebookTab::calcSize()
     }
 }
 
-const QString &NotebookTab::getTitle() const
+QString NotebookTab::getTitle() const
 {
-    return title;
+    return qS(this->title);
 }
 
 void NotebookTab::setTitle(const QString &newTitle)
 {
-    this->title = newTitle;
+    this->title = newTitle.toStdString();
 
     this->calcSize();
 }
@@ -182,7 +191,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     int rectW = (SettingsManager::getInstance().hideTabX ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, this->height());
 
-    painter.drawText(rect, title, QTextOption(Qt::AlignCenter));
+    painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
 
     if (!SettingsManager::getInstance().hideTabX && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
@@ -280,34 +289,6 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
             this->notebook->rearrangePage(clickedPage, index);
         }
     }
-}
-
-void NotebookTab::load(const boost::property_tree::ptree &tree)
-{
-    // Load tab title
-    try {
-        QString newTitle = QString::fromStdString(tree.get<std::string>("title"));
-        if (newTitle.isEmpty()) {
-            this->useDefaultBehaviour = true;
-        } else {
-            this->setTitle(newTitle);
-            this->useDefaultBehaviour = false;
-        }
-    } catch (boost::property_tree::ptree_error) {
-    }
-}
-
-boost::property_tree::ptree NotebookTab::save()
-{
-    boost::property_tree::ptree tree;
-
-    if (this->useDefaultBehaviour) {
-        tree.put("title", "");
-    } else {
-        tree.put("title", this->getTitle().toStdString());
-    }
-
-    return tree;
 }
 
 }  // namespace widgets

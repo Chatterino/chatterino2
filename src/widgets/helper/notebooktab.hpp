@@ -4,7 +4,7 @@
 
 #include <QMenu>
 #include <QPropertyAnimation>
-#include <boost/property_tree/ptree.hpp>
+#include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
 
 namespace chatterino {
@@ -20,16 +20,18 @@ class NotebookTab : public BaseWidget
 {
     Q_OBJECT
 
+    std::string settingRoot;
+
 public:
     enum HighlightStyle { HighlightNone, HighlightHighlighted, HighlightNewMessage };
 
-    explicit NotebookTab(Notebook *_notebook);
+    explicit NotebookTab(Notebook *_notebook, const std::string &settingPrefix);
 
     void calcSize();
 
     SplitContainer *page;
 
-    const QString &getTitle() const;
+    QString getTitle() const;
     void setTitle(const QString &newTitle);
     bool isSelected() const;
     void setSelected(bool value);
@@ -63,10 +65,10 @@ private:
 
     Notebook *notebook;
 
-    QString title;
+    pajlada::Settings::Setting<std::string> title;
 
 public:
-    bool useDefaultBehaviour = true;
+    pajlada::Settings::Setting<bool> useDefaultBehaviour;
 
 private:
     bool selected = false;
@@ -85,10 +87,6 @@ private:
         return QRect(this->width() - static_cast<int>(20 * scale), static_cast<int>(4 * scale),
                      static_cast<int>(16 * scale), static_cast<int>(16 * scale));
     }
-
-public:
-    void load(const boost::property_tree::ptree &tree);
-    boost::property_tree::ptree save();
 };
 
 }  // namespace widgets

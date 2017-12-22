@@ -15,7 +15,6 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/signals2/connection.hpp>
 
 namespace chatterino {
@@ -43,14 +42,18 @@ class Split : public BaseWidget
 
     Q_OBJECT
 
+    const std::string uuid;
+    const std::string settingRoot;
+
 public:
-    Split(ChannelManager &_channelManager, SplitContainer *parent);
+    Split(ChannelManager &_channelManager, SplitContainer *parent, const std::string &_uuid);
     ~Split();
 
     ChannelManager &channelManager;
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
 
+    const std::string &getUUID() const;
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();
     void setFlexSizeX(double x);
@@ -63,8 +66,6 @@ public:
     bool hasFocus() const;
     void layoutMessages();
     void updateGifEmotes();
-    void load(const boost::property_tree::ptree &tree);
-    boost::property_tree::ptree save();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;

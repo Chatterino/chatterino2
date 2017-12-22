@@ -25,6 +25,9 @@ public:
     Resources resources;
     ChannelManager channelManager;
     IrcManager ircManager;
+
+private:
+    void save();
 };
 
 }  // namespace chatterino

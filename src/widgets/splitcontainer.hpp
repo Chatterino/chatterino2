@@ -11,8 +11,6 @@
 #include <QVBoxLayout>
 #include <QVector>
 #include <QWidget>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/signals2.hpp>
 
 namespace chatterino {
 
@@ -24,8 +22,12 @@ class SplitContainer : public BaseWidget
 {
     Q_OBJECT
 
+    const std::string settingPrefix;
+    std::string settingRoot;
+
 public:
-    SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab);
+    SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
+                   const std::string &_settingPrefix);
 
     ChannelManager &channelManager;
 
@@ -35,7 +37,7 @@ public:
     const std::vector<Split *> &getChatWidgets() const;
     NotebookTab *getTab() const;
 
-    void addChat(bool openChannelNameDialog = false);
+    void addChat(bool openChannelNameDialog = false, std::string chatUUID = std::string());
 
     static bool isDraggingSplit;
     static Split *draggingSplit;
@@ -88,19 +90,22 @@ private:
     std::vector<Split *> chatWidgets;
     std::vector<DropRegion> dropRegions;
 
+    pajlada::Settings::Setting<std::vector<std::vector<std::string>>> chats;
+
     NotebookPageDropPreview dropPreview;
 
     void setPreviewRect(QPoint mousePos);
 
     std::pair<int, int> getChatPosition(const Split *chatWidget);
 
-    Split *createChatWidget();
+    Split *createChatWidget(const std::string &uuid);
 
 public:
     void refreshTitle();
 
-    void load(const boost::property_tree::ptree &tree);
-    boost::property_tree::ptree save();
+    void loadSplits();
+
+    void save();
 };
 
 }  // namespace widgets

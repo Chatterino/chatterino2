@@ -31,7 +31,6 @@ public:
     int windowCount();
     widgets::Window *windowAt(int index);
 
-    void load();
     void save();
 
     boost::signals2::signal<void()> repaintGifs;
