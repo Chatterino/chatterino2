@@ -45,8 +45,6 @@ inline void ezShortcut(Split *w, const char *key, T t)
 
 }  // namespace
 
-static int index = 0;
-
 Split::Split(ChannelManager &_channelManager, SplitContainer *parent, const std::string &_uuid)
     : BaseWidget(parent)
     , uuid(_uuid)

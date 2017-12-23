@@ -19,10 +19,10 @@ Window::Window(const QString &windowName, ChannelManager &_channelManager,
     : BaseWidget(_colorScheme, nullptr)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
+    , dpi(this->getDpiMultiplier())
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
     , notebook(this->channelManager, this, _isMainWindow, this->settingRoot)
-    , dpi(this->getDpiMultiplier())
 {
     this->initAsWindow();
 

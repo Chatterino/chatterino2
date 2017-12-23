@@ -22,6 +22,9 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
+    const std::shared_ptr<EmoteMap> bttvChannelEmotes;
+    const std::shared_ptr<EmoteMap> ffzChannelEmotes;
+
     const QString subscriptionURL;
     const QString channelURL;
     const QString popoutPlayerURL;
@@ -36,9 +39,6 @@ public:
     QString streamStatus;
     QString streamGame;
     QString streamUptime;
-
-    const std::shared_ptr<EmoteMap> bttvChannelEmotes;
-    const std::shared_ptr<EmoteMap> ffzChannelEmotes;
 
 private:
     void setLive(bool newLiveStatus);

@@ -23,11 +23,11 @@ Word::Word(const QString &text, Flags type, const MessageColor &color, FontManag
     : image(nullptr)
     , text(text)
     , color(color)
-    , font(font)
     , _isImage(false)
     , type(type)
     , copyText(copytext)
     , tooltip(tooltip)
+    , font(font)
     , link(link)
 {
 }

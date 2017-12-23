@@ -10,14 +10,14 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 SettingsManager::SettingsManager()
-    : settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
-    , streamlinkPath("/behaviour/streamlink/path", "")
+    : streamlinkPath("/behaviour/streamlink/path", "")
     , preferredQuality("/behaviour/streamlink/quality", "Choose")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
     , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
+    , settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
 {
     this->wordMaskListener.addSetting(this->showTimestamps);
     this->wordMaskListener.addSetting(this->showTimestampSeconds);

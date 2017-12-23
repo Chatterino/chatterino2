@@ -25,7 +25,7 @@ static bool tryHandleDpiChangedMessage(void *message, int &dpi)
 static boost::optional<UINT> getWindowDpi(quintptr ptr)
 {
     typedef UINT(WINAPI * GetDpiForWindow)(HWND);
-    QLibrary user32("user32.dll", NULL);
+    QLibrary user32("user32.dll", 0);
 
     GetDpiForWindow getDpiForWindow = (GetDpiForWindow)user32.resolve("GetDpiForWindow");
 
@@ -44,20 +44,20 @@ class DpiNativeEventFilter : public QAbstractNativeEventFilter
 public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override
     {
-        MSG *msg = reinterpret_cast<MSG *>(message);
+//        MSG *msg = reinterpret_cast<MSG *>(message);
 
-        if (msg->message == WM_NCCREATE) {
-            QLibrary user32("user32.dll", NULL);
-            {
-                typedef BOOL(WINAPI * EnableNonClientDpiScaling)(HWND);
+//        if (msg->message == WM_NCCREATE) {
+//            QLibrary user32("user32.dll", 0);
+//            {
+//                typedef BOOL(WINAPI * EnableNonClientDpiScaling)(HWND);
 
-                EnableNonClientDpiScaling enableNonClientDpiScaling =
-                    (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
+//                EnableNonClientDpiScaling enableNonClientDpiScaling =
+//                    (EnableNonClientDpiScaling)user32.resolve("EnableNonClientDpiScaling");
 
                 //                if (enableNonClientDpiScaling)
                 //                    enableNonClientDpiScaling(msg->hwnd);
-            }
-        }
+//            }
+//        }
         return false;
     }
 };

@@ -1,8 +1,8 @@
 #pragma once
 #include "widgets/basewidget.hpp"
 
-#include <QWidget>
 #include <QLabel>
+#include <QWidget>
 
 namespace chatterino {
 namespace widgets {
@@ -16,11 +16,10 @@ public:
     void setText(QString text);
     void moveTo(QPoint point);
 
-    static TooltipWidget* getInstance()
+    static TooltipWidget *getInstance()
     {
         static TooltipWidget *tooltipWidget = nullptr;
-        if(tooltipWidget == nullptr)
-        {
+        if (tooltipWidget == nullptr) {
             tooltipWidget = new TooltipWidget();
         }
         return tooltipWidget;

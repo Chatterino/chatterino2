@@ -12,27 +12,29 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWidget(parent)
     , displayText(new QLabel())
 {
-    QColor black(0,0,0);
-    QColor white(255,255,255);
+    QColor black(0, 0, 0);
+    QColor white(255, 255, 255);
 
     QPalette palette;
-    palette.setColor(QPalette::WindowText,white);
-    palette.setColor(QPalette::Background,black);
+    palette.setColor(QPalette::WindowText, white);
+    palette.setColor(QPalette::Background, black);
     this->setPalette(palette);
     this->setWindowOpacity(0.8);
-    this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall));
+    this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall,
+                                                     this->getDpiMultiplier()));
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 
     displayText->setAlignment(Qt::AlignHCenter);
     auto layout = new QVBoxLayout();
-    layout->setContentsMargins(10,5,10,5);
+    layout->setContentsMargins(10, 5, 10, 5);
     layout->addWidget(displayText);
     this->setLayout(layout);
 
     FontManager::getInstance().fontChanged.connect([this] {
-        this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall));
+        this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall,
+                                                         this->getDpiMultiplier()));
     });
 }
 

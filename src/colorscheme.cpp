@@ -56,7 +56,6 @@ void ColorScheme::update()
 void ColorScheme::setColors(double hue, double multiplier)
 {
     lightTheme = multiplier > 0;
-    bool hasDarkBorder = false;
 
     SystemMessageColor = QColor(140, 127, 127);
 

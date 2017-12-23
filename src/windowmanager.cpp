@@ -81,7 +81,7 @@ int WindowManager::windowCount()
 
 widgets::Window *WindowManager::windowAt(int index)
 {
-    if (index < 0 || index >= this->windows.size()) {
+    if (index < 0 || (size_t)index >= this->windows.size()) {
         return nullptr;
     }
     qDebug() << "getting window at bad index" << index;

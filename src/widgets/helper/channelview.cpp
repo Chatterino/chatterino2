@@ -79,15 +79,11 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->updateTimer.start();
     });
 
-    auto _split = this->parent();
-    auto _splitContainer = _split->parent();
-    auto _notebook = _splitContainer->parent();
-    auto _window = qobject_cast<Window*>(_notebook->parent());
+    Window *_window = dynamic_cast<Window *>(this->window());
 
-    assert(_window);
-
-    _window->lostFocus.connect(
-        [this] { TooltipWidget::getInstance()->hide(); });
+    if (_window) {
+        _window->lostFocus.connect([this] { TooltipWidget::getInstance()->hide(); });
+    }
 }
 
 ChannelView::~ChannelView()
@@ -283,7 +279,7 @@ QString ChannelView::getSelectedText()
     text += "\n";
 
     // middle lines
-    for (i++; i < this->selection.max.messageIndex; i++) {
+    for (i++; (int)i < this->selection.max.messageIndex; i++) {
         for (const messages::WordPart &part : messagesSnapshot[i]->getWordParts()) {
             if (!part.getCopyText().isEmpty()) {
                 text += part.getCopyText();
