@@ -361,7 +361,7 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     this->appendWord(Word(usernameString, Word::Username, MessageColor(this->usernameColor),
-                          FontManager::Medium, usernameString, QString(),
+                          FontManager::MediumBold, usernameString, QString(),
                           Link(Link::UserInfo, this->userName)));
 }
 

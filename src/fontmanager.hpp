@@ -70,7 +70,7 @@ private:
             : small(QFont(fontFamilyName, mediumSize - 4))
             , mediumSmall(QFont(fontFamilyName, mediumSize -2))
             , medium(QFont(fontFamilyName, mediumSize))
-            , mediumBold(QFont(fontFamilyName, mediumSize, 50))
+            , mediumBold(QFont(fontFamilyName, mediumSize, QFont::DemiBold))
             , mediumItalic(QFont(fontFamilyName, mediumSize, -1, true))
             , large(QFont(fontFamilyName, mediumSize))
             , veryLarge(QFont(fontFamilyName, mediumSize))
