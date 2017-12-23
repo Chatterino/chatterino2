@@ -164,7 +164,6 @@ private:
     boost::signals2::connection layoutConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-
 private slots:
     void wordTypeMaskChanged()
     {

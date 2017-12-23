@@ -4,6 +4,7 @@
 #include "util/urlfetch.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
+#include "widgets/tooltipwidget.hpp"
 
 #include <QByteArray>
 #include <QDrag>
@@ -21,6 +22,11 @@ SplitHeader::SplitHeader(Split *_chatWidget)
     , rightLabel(this)
     , rightMenu(this)
 {
+    this->setMouseTracking(true);
+    this->leftLabel.setMouseTracking(true);
+    this->channelNameLabel.setMouseTracking(true);
+    this->rightLabel.setMouseTracking(true);
+
     this->refreshTheme();
 
     this->updateChannelText();
@@ -106,19 +112,21 @@ void SplitHeader::updateChannelText()
         twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
 
         if (twitchChannel != nullptr && twitchChannel->isLive) {
+            this->isLive = true;
+            this->tooltip = "<style>.center    { text-align: center; }</style>"
+                            "<p class = \"center\">" +
+                            twitchChannel->streamStatus + "<br><br>" + twitchChannel->streamGame +
+                            "<br>"
+                            "Live for " +
+                            twitchChannel->streamUptime + " with " +
+                            twitchChannel->streamViewerCount +
+                            " viewers"
+                            "</p>";
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
-            this->setToolTip("<style>.center    { text-align: center; }</style>"
-                             "<p class = \"center\">" +
-                             twitchChannel->streamStatus + "<br><br>" + twitchChannel->streamGame +
-                             "<br>"
-                             "Live for " +
-                             twitchChannel->streamUptime + " with " +
-                             twitchChannel->streamViewerCount +
-                             " viewers"
-                             "</p>");
         } else {
+            this->isLive = false;
             this->channelNameLabel.setText(QString::fromStdString(channelName));
-            this->setToolTip("");
+            this->tooltip = "";
         }
     }
 }
@@ -141,6 +149,13 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
+    if (!this->dragging && this->isLive) {
+        auto tooltipWidget = TooltipWidget::getInstance();
+        tooltipWidget->moveTo(event->globalPos());
+        tooltipWidget->setText(tooltip);
+        tooltipWidget->show();
+    }
+
     if (this->dragging) {
         if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
             std::abs(this->dragStart.y() - event->pos().y()) > 12) {
@@ -168,9 +183,16 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
                 }
 
                 SplitContainer::isDraggingSplit = false;
+                this->dragging = false;
             }
         }
     }
+}
+
+void SplitHeader::leaveEvent(QEvent *event)
+{
+    TooltipWidget::getInstance()->hide();
+    BaseWidget::leaveEvent(event);
 }
 
 void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)

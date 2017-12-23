@@ -109,7 +109,8 @@ SOURCES += \
     src/widgets/window.cpp \
     src/widgets/helper/splitcolumn.cpp \
     src/widgets/accountswitchwidget.cpp \
-    src/widgets/accountswitchpopupwidget.cpp
+    src/widgets/accountswitchpopupwidget.cpp \
+    src/widgets/tooltipwidget.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -186,6 +187,7 @@ HEADERS  += \
     src/widgets/accountswitchwidget.hpp \
     src/widgets/accountswitchpopupwidget.hpp \
     src/const.hpp \
+    src/widgets/tooltipwidget.hpp \
     src/precompiled_headers.hpp \
     src/messages/wordflags.hpp
 
