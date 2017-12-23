@@ -15,6 +15,7 @@ class FontManager
 public:
     enum Type : uint8_t {
         Small,
+        MediumSmall,
         Medium,
         MediumBold,
         MediumItalic,
@@ -67,6 +68,7 @@ private:
 
         explicit Font(const char *fontFamilyName, int mediumSize)
             : small(QFont(fontFamilyName, mediumSize - 4))
+            , mediumSmall(QFont(fontFamilyName, mediumSize -2))
             , medium(QFont(fontFamilyName, mediumSize))
             , mediumBold(QFont(fontFamilyName, mediumSize, 50))
             , mediumItalic(QFont(fontFamilyName, mediumSize, -1, true))
@@ -78,6 +80,7 @@ private:
         void setFamily(const char *newFamily)
         {
             this->small.font.setFamily(newFamily);
+            this->mediumSmall.font.setFamily(newFamily);
             this->medium.font.setFamily(newFamily);
             this->mediumBold.font.setFamily(newFamily);
             this->mediumItalic.font.setFamily(newFamily);
@@ -90,6 +93,7 @@ private:
         void setSize(int newMediumSize)
         {
             this->small.font.setPointSize(newMediumSize - 4);
+            this->mediumSmall.font.setPointSize(newMediumSize - 2);
             this->medium.font.setPointSize(newMediumSize);
             this->mediumBold.font.setPointSize(newMediumSize);
             this->mediumItalic.font.setPointSize(newMediumSize);
@@ -102,6 +106,7 @@ private:
         void updateMetrics()
         {
             this->small.metrics = QFontMetrics(this->small.font);
+            this->mediumSmall.metrics = QFontMetrics(this->mediumSmall.font);
             this->medium.metrics = QFontMetrics(this->medium.font);
             this->mediumBold.metrics = QFontMetrics(this->mediumBold.font);
             this->mediumItalic.metrics = QFontMetrics(this->mediumItalic.font);
@@ -115,6 +120,7 @@ private:
         QFontMetrics &getFontMetrics(Type type);
 
         FontData small;
+        FontData mediumSmall;
         FontData medium;
         FontData mediumBold;
         FontData mediumItalic;

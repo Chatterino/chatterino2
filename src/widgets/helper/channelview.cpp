@@ -10,13 +10,13 @@
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/split.hpp"
+#include "widgets/tooltipwidget.hpp"
 #include "windowmanager.hpp"
 
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
 #include <QPainter>
-#include <QToolTip>
 
 #include <math.h>
 #include <algorithm>
@@ -78,6 +78,9 @@ ChannelView::ChannelView(BaseWidget *parent)
 
         this->updateTimer.start();
     });
+
+    windowManager.getMainWindow().lostFocus.connect(
+        [this] { TooltipWidget::getInstance()->hide(); });
 }
 
 ChannelView::~ChannelView()
@@ -724,6 +727,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
+    auto tooltipWidget = TooltipWidget::getInstance();
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
     int messageIndex;
@@ -731,12 +735,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // no message under cursor
     if (!tryGetMessageAt(event->pos(), message, relativePos, messageIndex)) {
         this->setCursor(Qt::ArrowCursor);
+        tooltipWidget->hide();
         return;
     }
 
     // message under cursor is collapsed
     if (message->isCollapsed()) {
         this->setCursor(Qt::PointingHandCursor);
+        tooltipWidget->hide();
         return;
     }
 
@@ -749,38 +755,19 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->repaint();
     }
 
-    static QTimer *tooltipTimer = new QTimer();
-
     // check if word underneath cursor
     const messages::Word *hoverWord;
     if ((hoverWord = message->tryGetWordPart(relativePos)) == nullptr) {
         this->setCursor(Qt::ArrowCursor);
-        tooltipTimer->stop();
-        QToolTip::hideText();
+        tooltipWidget->hide();
         return;
     }
-
     const auto &tooltip = hoverWord->getTooltip();
 
-    static QString targetTooltip;
-    static QPoint tooltipPos;
-    connect(tooltipTimer, &QTimer::timeout, []() {
-        assert(!targetTooltip.isEmpty());
-        QToolTip::showText(tooltipPos, targetTooltip);  //
-    });
-
-    tooltipTimer->setSingleShot(true);
-    tooltipTimer->setInterval(500);
-
-    if (!tooltip.isEmpty()) {
-        tooltipPos = event->globalPos();
-        targetTooltip = "<style>.center { text-align: center; }</style>"
-                        "<p class = \"center\">" +
-                        tooltip + "</p>";
-        tooltipTimer->start();
-    } else {
-        tooltipTimer->stop();
-        QToolTip::hideText();
+    if (hoverWord->isImage()) {
+        tooltipWidget->moveTo(event->globalPos());
+        tooltipWidget->setText(tooltip);
+        tooltipWidget->show();
     }
 
     // check if word has a link

@@ -36,6 +36,8 @@ FontManager::FontData &FontManager::Font::getFontData(Type type)
     switch (type) {
         case Small:
             return this->small;
+        case MediumSmall:
+            return this->mediumSmall;
         case Medium:
             return this->medium;
         case MediumBold:

@@ -137,6 +137,15 @@ void Window::closeEvent(QCloseEvent *)
     this->closed();
 }
 
+void Window::changeEvent(QEvent *event)
+{
+    if(!this->isActiveWindow())
+    {
+        this->lostFocus.invoke();
+    }
+    BaseWidget::changeEvent(event);
+}
+
 void Window::refreshTheme()
 {
     QPalette palette;
