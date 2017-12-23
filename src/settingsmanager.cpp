@@ -75,7 +75,7 @@ void SettingsManager::load()
     }
 }
 
-Word::Type SettingsManager::getWordTypeMask()
+Word::Flags SettingsManager::getWordTypeMask()
 {
     return this->wordTypeMask;
 }
@@ -120,7 +120,7 @@ void SettingsManager::updateWordTypeMask()
 
     newMaskUint |= Word::AlwaysShow;
 
-    Word::Type newMask = static_cast<Word::Type>(newMaskUint);
+    Word::Flags newMask = static_cast<Word::Flags>(newMaskUint);
 
     if (newMask != this->wordTypeMask) {
         this->wordTypeMask = newMask;

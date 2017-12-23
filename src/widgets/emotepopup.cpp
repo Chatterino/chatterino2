@@ -45,8 +45,8 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         // TITLE
         messages::MessageBuilder builder1;
 
-        builder1.appendWord(
-            Word(title, Word::Type::Text, MessageColor(MessageColor::Text), QString(), QString()));
+        builder1.appendWord(Word(title, Word::Flags::Text, MessageColor(MessageColor::Text),
+                                 FontManager::Medium, QString(), QString()));
 
         builder1.getMessage()->centered = true;
         emoteChannel->addMessage(builder1.getMessage());
@@ -56,7 +56,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         builder2.getMessage()->centered = true;
 
         map.each([&](const QString &key, const EmoteData &value) {
-            builder2.appendWord(Word(value.image, Word::Type::AlwaysShow, key, emoteDesc,
+            builder2.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, emoteDesc,
                                      Link(Link::Type::InsertText, key)));
         });
 
@@ -85,8 +85,8 @@ void EmotePopup::loadEmojis()
     // title
     messages::MessageBuilder builder1;
 
-    builder1.appendWord(
-        Word("emojis", Word::Type::Text, MessageColor(MessageColor::Text), QString(), QString()));
+    builder1.appendWord(Word("emojis", Word::Flags::Text, MessageColor(MessageColor::Text),
+                             FontManager::Medium, QString(), QString()));
 
     builder1.getMessage()->centered = true;
     emojiChannel->addMessage(builder1.getMessage());
@@ -95,7 +95,7 @@ void EmotePopup::loadEmojis()
     messages::MessageBuilder builder;
     builder.getMessage()->centered = true;
     emojis.each([this, &builder](const QString &key, const EmoteData &value) {
-        builder.appendWord(Word(value.image, Word::Type::AlwaysShow, key, "emoji",
+        builder.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, "emoji",
                                 Link(Link::Type::InsertText, key)));
     });
     emojiChannel->addMessage(builder.getMessage());

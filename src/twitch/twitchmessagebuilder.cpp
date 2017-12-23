@@ -120,7 +120,7 @@ SharedMessage TwitchMessageBuilder::parse()
                      currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
             this->appendWord(
                 Word(currentTwitchEmote->second.image->getName(), Word::TwitchEmoteText, textColor,
-                     currentTwitchEmote->second.image->getName(),
+                     FontManager::Medium, currentTwitchEmote->second.image->getName(),
                      currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
 
             i += split.length() + 1;
@@ -193,7 +193,7 @@ SharedMessage TwitchMessageBuilder::parse()
 
                     this->appendWord(Word(
                         QString("x" + string.mid(5)), Word::BitsAmount, MessageColor(bitsColor),
-                        QString(string.mid(5)), QString("Twitch Cheer"),
+                        FontManager::Medium, QString(string.mid(5)), QString("Twitch Cheer"),
                         Link(Link::Url,
                              QString("https://blog.twitch.tv/"
                                      "introducing-cheering-celebrate-together-da62af41fac6"))));
@@ -223,11 +223,12 @@ SharedMessage TwitchMessageBuilder::parse()
                     textColor = MessageColor(MessageColor::Link);
                 }
 
-                this->appendWord(Word(string, Word::Text, textColor, string, QString(), link));
+                this->appendWord(Word(string, Word::Text, textColor, FontManager::Medium, string,
+                                      QString(), link));
             } else {  // is emoji
                 this->appendWord(Word(emoteData.image, Word::EmojiImage, emoteData.image->getName(),
                                       emoteData.image->getTooltip()));
-                Word(emoteData.image->getName(), Word::EmojiText, textColor,
+                Word(emoteData.image->getName(), Word::EmojiText, textColor, FontManager::Medium,
                      emoteData.image->getName(), emoteData.image->getTooltip());
             }
         }
@@ -272,7 +273,7 @@ void TwitchMessageBuilder::parseChannelName()
 {
     QString channelName("#" + this->channel->name);
     this->appendWord(Word(channelName, Word::Misc, MessageColor(MessageColor::System),
-                          QString(channelName), QString(),
+                          FontManager::Medium, QString(channelName), QString(),
                           Link(Link::Url, this->channel->name + "\n" + this->messageID)));
 }
 
@@ -360,7 +361,8 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     this->appendWord(Word(usernameString, Word::Username, MessageColor(this->usernameColor),
-                          usernameString, QString(), Link(Link::UserInfo, this->userName)));
+                          FontManager::Medium, usernameString, QString(),
+                          Link(Link::UserInfo, this->userName)));
 }
 
 void TwitchMessageBuilder::parseHighlights()
@@ -636,7 +638,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
             auto badgeSetIt = channelResources.badgeSets.find("subscriber");
             if (badgeSetIt == channelResources.badgeSets.end()) {
                 // Fall back to default badge
-                appendWord(Word(this->resources.badgeSubscriber, Word::Type::BadgeSubscription,
+                appendWord(Word(this->resources.badgeSubscriber, Word::Flags::BadgeSubscription,
                                 QString(), QString("Twitch Subscriber")));
                 continue;
             }
@@ -649,14 +651,14 @@ void TwitchMessageBuilder::parseTwitchBadges()
 
             if (badgeVersionIt == badgeSet.versions.end()) {
                 // Fall back to default badge
-                appendWord(Word(this->resources.badgeSubscriber, Word::Type::BadgeSubscription,
+                appendWord(Word(this->resources.badgeSubscriber, Word::Flags::BadgeSubscription,
                                 QString(), QString("Twitch Subscriber")));
                 continue;
             }
 
             auto &badgeVersion = badgeVersionIt->second;
 
-            appendWord(Word(badgeVersion.badgeImage1x, Word::Type::BadgeSubscription, QString(),
+            appendWord(Word(badgeVersion.badgeImage1x, Word::Flags::BadgeSubscription, QString(),
                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
         } else {
             if (!this->resources.dynamicBadgesLoaded) {
@@ -671,7 +673,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
                 continue;
             }
 
-            Word::Type badgeType = Word::Type::BadgeVanity;
+            Word::Flags badgeType = Word::Flags::BadgeVanity;
 
             std::string badgeSetKey = parts[0].toStdString();
             std::string versionKey = parts[1].toStdString();

@@ -554,12 +554,14 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
         }
         // text
         else {
-            QColor color = wordPart.getWord().getColor().getColor(this->colorScheme);
+            QColor color = wordPart.getWord().getTextColor().getColor(this->colorScheme);
 
             this->colorScheme.normalizeColor(color);
 
             painter.setPen(color);
-            painter.setFont(wordPart.getWord().getFont());
+            painter.setFont(wordPart.getWord().getFont(this->getDpiMultiplier()));
+
+            qDebug() << wordPart.getWord().getFont(this->getDpiMultiplier()).pointSize();
 
             painter.drawText(QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
                              wordPart.getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
@@ -626,7 +628,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
             int offset = this->selection.min.charIndex - charIndex;
 
             for (int j = 0; j < offset; j++) {
-                rect.setLeft(rect.left() + part.getCharWidth(j));
+                rect.setLeft(rect.left() + part.getCharWidth(j, this->getDpiMultiplier()));
             }
 
             if (isSingleWord) {
@@ -635,7 +637,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + part.getCharWidth(j));
+                    rect.setRight(rect.right() + part.getCharWidth(j, this->getDpiMultiplier()));
                 }
 
                 painter.fillRect(rect, selectionColor);
@@ -692,7 +694,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
                 rect.setRight(part.getX());
 
                 for (int j = 0; j < offset + length; j++) {
-                    rect.setRight(rect.right() + part.getCharWidth(j));
+                    rect.setRight(rect.right() + part.getCharWidth(j, this->getDpiMultiplier()));
                 }
             } else {
                 if (this->selection.max.charIndex == charIndex) {

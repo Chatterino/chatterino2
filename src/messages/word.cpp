@@ -1,11 +1,12 @@
 #include "messages/word.hpp"
+#include "settingsmanager.hpp"
 #include "util/benchmark.hpp"
 
 namespace chatterino {
 namespace messages {
 
 // Image word
-Word::Word(LazyLoadedImage *image, Type type, const QString &copytext, const QString &tooltip,
+Word::Word(LazyLoadedImage *image, Flags type, const QString &copytext, const QString &tooltip,
            const Link &link)
     : image(image)
     , _isImage(true)
@@ -14,15 +15,15 @@ Word::Word(LazyLoadedImage *image, Type type, const QString &copytext, const QSt
     , tooltip(tooltip)
     , link(link)
 {
-    image->getWidth();  // professional segfault test
 }
 
 // Text word
-Word::Word(const QString &text, Type type, const MessageColor &color, const QString &copytext,
-           const QString &tooltip, const Link &link)
+Word::Word(const QString &text, Flags type, const MessageColor &color, FontManager::Type font,
+           const QString &copytext, const QString &tooltip, const Link &link)
     : image(nullptr)
     , text(text)
     , color(color)
+    , font(font)
     , _isImage(false)
     , type(type)
     , copyText(copytext)
@@ -41,20 +42,54 @@ const QString &Word::getText() const
     return this->text;
 }
 
-int Word::getWidth() const
+int Word::getWidth(float scale) const
 {
-    return this->width;
+    return this->getSize(scale).width();
 }
 
-int Word::getHeight() const
+int Word::getHeight(float scale) const
 {
-    return this->height;
+    return this->getSize(scale).height();
 }
 
-void Word::setSize(int width, int height)
+QSize Word::getSize(float scale) const
 {
-    this->width = width;
-    this->height = height;
+    auto &data = this->getDataByScale(scale);
+
+    if (data.size.isEmpty()) {
+        // no size found
+        if (this->isText()) {
+            QFontMetrics &metrics = this->getFontMetrics(scale);
+            data.size.setWidth((int)(metrics.width(this->getText())));
+            data.size.setHeight((int)(metrics.height()));
+        } else {
+            const int mediumTextLineHeight =
+                FontManager::getInstance().getFontMetrics(this->font, scale).height();
+            const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * scale;
+            const bool scaleEmotesByLineHeight =
+                SettingsManager::getInstance().scaleEmotesByLineHeight;
+
+            auto &image = this->getImage();
+
+            qreal w = image.getWidth();
+            qreal h = image.getHeight();
+
+            if (scaleEmotesByLineHeight) {
+                data.size.setWidth(w * mediumTextLineHeight / h * emoteScale);
+                data.size.setHeight(mediumTextLineHeight * emoteScale);
+            } else {
+                data.size.setWidth(w * image.getScale() * emoteScale);
+                data.size.setHeight(h * image.getScale() * emoteScale);
+            }
+        }
+    }
+
+    return data.size;
+}
+
+void Word::updateSize()
+{
+    this->dataByScale.clear();
 }
 
 bool Word::isImage() const
@@ -77,17 +112,17 @@ bool Word::hasTrailingSpace() const
     return this->_hasTrailingSpace;
 }
 
-QFont &Word::getFont() const
+QFont &Word::getFont(float scale) const
 {
-    return FontManager::getInstance().getFont(this->font);
+    return FontManager::getInstance().getFont(this->font, scale);
 }
 
-QFontMetrics &Word::getFontMetrics() const
+QFontMetrics &Word::getFontMetrics(float scale) const
 {
-    return FontManager::getInstance().getFontMetrics(this->font);
+    return FontManager::getInstance().getFontMetrics(this->font, scale);
 }
 
-Word::Type Word::getType() const
+Word::Flags Word::getFlags() const
 {
     return this->type;
 }
@@ -97,7 +132,7 @@ const QString &Word::getTooltip() const
     return this->tooltip;
 }
 
-const MessageColor &Word::getColor() const
+const MessageColor &Word::getTextColor() const
 {
     return this->color;
 }
@@ -128,24 +163,42 @@ int Word::getCharacterLength() const
     return this->isImage() ? 2 : this->getText().length() + 1;
 }
 
-short Word::getCharWidth(int index) const
+short Word::getCharWidth(int index, float scale) const
 {
-    return this->getCharacterWidthCache().at(index);
+    return this->getCharacterWidthCache(scale).at(index);
 }
 
-std::vector<short> &Word::getCharacterWidthCache() const
+std::vector<short> &Word::getCharacterWidthCache(float scale) const
 {
+    auto &data = this->getDataByScale(scale);
+
     // lock not required because there is only one gui thread
     // std::lock_guard<std::mutex> lock(this->charWidthCacheMutex);
 
-    if (this->charWidthCache.size() == 0 && this->isText()) {
+    if (data.charWidthCache.size() == 0 && this->isText()) {
         for (int i = 0; i < this->getText().length(); i++) {
-            this->charWidthCache.push_back(this->getFontMetrics().charWidth(this->getText(), i));
+            data.charWidthCache.push_back(
+                this->getFontMetrics(scale).charWidth(this->getText(), i));
         }
     }
 
     // TODO: on font change
-    return this->charWidthCache;
+    return data.charWidthCache;
+}
+
+Word::ScaleDependantData &Word::getDataByScale(float scale) const
+{
+    // try to find and return data for scale
+    for (auto it = this->dataByScale.begin(); it != this->dataByScale.end(); it++) {
+        if (it->scale == scale) {
+            return *it;
+        }
+    }
+
+    // create new data element and return that
+    this->dataByScale.emplace_back(scale);
+
+    return this->dataByScale.back();
 }
 
 }  // namespace messages

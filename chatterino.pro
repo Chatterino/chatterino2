@@ -8,6 +8,7 @@ QT      += core gui network multimedia
 CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
+PRECOMPILED_HEADER = precompiled_header.hpp
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -111,6 +112,7 @@ SOURCES += \
     src/widgets/accountswitchpopupwidget.cpp
 
 HEADERS  += \
+    src/precompiled_headers.hpp \
     src/asyncexec.hpp \
     src/channel.hpp \
     src/colorscheme.hpp \
@@ -183,7 +185,9 @@ HEADERS  += \
     src/util/helpers.hpp \
     src/widgets/accountswitchwidget.hpp \
     src/widgets/accountswitchpopupwidget.hpp \
-    src/const.hpp
+    src/const.hpp \
+    src/precompiled_headers.hpp \
+    src/messages/wordflags.hpp
 
 
 PRECOMPILED_HEADER =

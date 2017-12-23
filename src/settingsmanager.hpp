@@ -21,7 +21,7 @@ public:
     void load();
     void save();
 
-    messages::Word::Type getWordTypeMask();
+    messages::Word::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
     QSettings &getQSettings();
     SettingsSnapshot createSnapshot();
@@ -95,7 +95,7 @@ private:
 
     QSettings settings;
     std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
-    messages::Word::Type wordTypeMask = messages::Word::Default;
+    messages::Word::Flags wordTypeMask = messages::Word::Default;
 
     pajlada::Settings::SettingListener wordMaskListener;
 };
