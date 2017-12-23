@@ -149,7 +149,7 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
-    if (this->isLive) {
+    if (!this->dragging && this->isLive) {
         auto tooltipWidget = TooltipWidget::getInstance();
         tooltipWidget->moveTo(event->globalPos());
         tooltipWidget->setText(tooltip);
@@ -183,6 +183,7 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
                 }
 
                 SplitContainer::isDraggingSplit = false;
+                this->dragging = false;
             }
         }
     }
