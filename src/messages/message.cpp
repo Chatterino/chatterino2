@@ -103,10 +103,13 @@ Message *Message::createSystemMessage(const QString &text)
 
     AddCurrentTimestamp(message);
 
-    Word word(text, Word::Flags::Default, MessageColor(MessageColor::Type::System),
-              FontManager::Medium, text, QString());
+    QStringList words = text.split(' ');
 
-    message->getWords().push_back(word);
+    for (QString word : words) {
+        message->getWords().push_back(Word(word, Word::Flags::Default,
+                                           MessageColor(MessageColor::Type::System),
+                                           FontManager::Medium, word, QString()));
+    }
 
     return message;
 }
