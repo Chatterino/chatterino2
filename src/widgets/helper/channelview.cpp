@@ -79,7 +79,14 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->updateTimer.start();
     });
 
-    windowManager.getMainWindow().lostFocus.connect(
+    auto _split = this->parent();
+    auto _splitContainer = _split->parent();
+    auto _notebook = _splitContainer->parent();
+    auto _window = qobject_cast<Window*>(_notebook->parent());
+
+    assert(_window);
+
+    _window->lostFocus.connect(
         [this] { TooltipWidget::getInstance()->hide(); });
 }
 
