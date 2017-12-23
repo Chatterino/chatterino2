@@ -11,8 +11,8 @@ class Word;
 class WordPart
 {
 public:
-    WordPart(Word &getWord, int getX, int getY, int _lineNumber, const QString &getCopyText,
-             bool allowTrailingSpace = true);
+    WordPart(Word &getWord, int getX, int getY, float scale, int _lineNumber,
+             const QString &getCopyText, bool allowTrailingSpace = true);
 
     WordPart(Word &getWord, int getX, int getY, int getWidth, int getHeight, int _lineNumber,
              const QString &getCopyText, const QString &customText, bool allowTrailingSpace = true,
@@ -33,7 +33,7 @@ public:
     const QString &getText() const;
     int getLineNumber() const;
     int getCharacterLength() const;
-    short getCharWidth(int index) const;
+    short getCharWidth(int index, float scale) const;
 
 private:
     Word &word;

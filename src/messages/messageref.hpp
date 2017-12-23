@@ -22,7 +22,7 @@ public:
     Message *getMessage();
     int getHeight() const;
 
-    bool layout(int width, float dpiMultiplier);
+    bool layout(int width, float scale);
 
     const std::vector<WordPart> &getWordParts() const;
 
@@ -36,6 +36,7 @@ public:
     bool isCollapsed() const;
     void setCollapsed(bool value);
     int getCollapsedHeight() const;
+    int getCollapsedLineCount() const;
 
 private:
     // variables
@@ -47,14 +48,15 @@ private:
     int currentLayoutWidth = -1;
     int fontGeneration = -1;
     int emoteGeneration = -1;
-    float dpiMultiplier = -1;
+    float scale = -1;
 
-    Word::Type currentWordTypes = Word::None;
+    Word::Flags currentWordTypes = Word::None;
 
     bool collapsed;
     int collapsedHeight = 32;
 
     // methods
+    void rebuild();
     void actuallyLayout(int width);
     void alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight);
     void updateTextSizes();

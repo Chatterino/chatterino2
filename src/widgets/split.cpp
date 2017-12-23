@@ -47,9 +47,11 @@ inline void ezShortcut(Split *w, const char *key, T t)
 
 static int index = 0;
 
-Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
+Split::Split(ChannelManager &_channelManager, SplitContainer *parent, const std::string &_uuid)
     : BaseWidget(parent)
-    , channelName("/chatWidgets/" + std::to_string(index++) + "/channelName")
+    , uuid(_uuid)
+    , settingRoot(fS("/splits/{}", this->uuid))
+    , channelName(fS("{}/channelName", this->settingRoot))
     , parentPage(*parent)
     , channelManager(_channelManager)
     , channel(_channelManager.emptyChannel)
@@ -121,6 +123,11 @@ Split::Split(ChannelManager &_channelManager, SplitContainer *parent)
 Split::~Split()
 {
     this->channelNameUpdated("");
+}
+
+const std::string &Split::getUUID() const
+{
+    return this->uuid;
 }
 
 std::shared_ptr<Channel> Split::getChannel() const
@@ -234,24 +241,6 @@ void Split::paintEvent(QPaintEvent *)
     painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
 }
 
-void Split::load(const boost::property_tree::ptree &tree)
-{
-    // load tab text
-    try {
-        this->channelName = tree.get<std::string>("channelName");
-    } catch (boost::property_tree::ptree_error) {
-    }
-}
-
-boost::property_tree::ptree Split::save()
-{
-    boost::property_tree::ptree tree;
-
-    tree.put("channelName", this->channelName.getValue());
-
-    return tree;
-}
-
 /// Slots
 void Split::doAddSplit()
 {
@@ -280,8 +269,8 @@ void Split::doPopup()
     Window &window = WindowManager::instance->createWindow();
 
     Split *split = new Split(this->channelManager,
-                             static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()));
-    split->channelName = this->channelName.getValue();
+                             static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()),
+                             this->uuid);
 
     window.getNotebook().getSelectedPage()->addToLayout(split);
 

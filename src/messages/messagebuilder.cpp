@@ -42,13 +42,15 @@ void MessageBuilder::appendTimestamp(time_t time)
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&time));
     QString timestampNoSeconds(timeStampBuffer);
     this->appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                          MessageColor(MessageColor::System), QString(), QString()));
+                          MessageColor(MessageColor::System), FontManager::Medium, QString(),
+                          QString()));
 
     // Add word for timestamp with seconds
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
     QString timestampWithSeconds(timeStampBuffer);
     this->appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                          MessageColor(MessageColor::System), QString(), QString()));
+                          MessageColor(MessageColor::System), FontManager::Medium, QString(),
+                          QString()));
 }
 
 QString MessageBuilder::matchLink(const QString &string)

@@ -27,13 +27,11 @@ Application::Application()
 
     // XXX
     SettingsManager::getInstance().updateWordTypeMask();
-
-    this->windowManager.load();
 }
 
 Application::~Application()
 {
-    this->windowManager.save();
+    this->save();
 
     chatterino::SettingsManager::getInstance().save();
 }
@@ -47,6 +45,11 @@ int Application::run(QApplication &qtApp)
     this->windowManager.getMainWindow().show();
 
     return qtApp.exec();
+}
+
+void Application::save()
+{
+    this->windowManager.save();
 }
 
 }  // namespace chatterino

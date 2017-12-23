@@ -92,6 +92,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
         if (!this->nextCompletion) {
             completionModel->refresh();
+            this->completer->setModel(completionModel);
             // first selection
             this->completer->setCompletionPrefix(currentCompletionPrefix);
             this->nextCompletion = true;
@@ -133,9 +134,6 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer->setWidget(this);
     this->completer->setCompletionMode(QCompleter::InlineCompletion);
     this->completer->setCaseSensitivity(Qt::CaseInsensitive);
-    /*QObject::connect(this->completer, SIGNAL(highlighted(QString)), this,
-                     SLOT(insertCompletion(QString)));
-*/
     QObject::connect(completer,
                      static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::highlighted),
                      this, &ResizingTextEdit::insertCompletion);

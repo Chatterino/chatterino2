@@ -4,6 +4,7 @@
 #include "messages/lazyloadedimage.hpp"
 #include "messages/link.hpp"
 #include "messages/messagecolor.hpp"
+//#include "wordflags.hpp"
 
 #include <stdint.h>
 #include <QRect>
@@ -15,7 +16,7 @@ namespace messages {
 class Word
 {
 public:
-    enum Type : uint32_t {
+    enum Flags : uint32_t {
         None = 0,
         Misc = (1 << 0),
         Text = (1 << 1),
@@ -92,33 +93,36 @@ public:
     {
     }
 
-    explicit Word(LazyLoadedImage *_image, Type getType, const QString &copytext,
+    explicit Word(LazyLoadedImage *_image, Flags getFlags, const QString &copytext,
                   const QString &tooltip, const Link &getLink = Link());
-    explicit Word(const QString &_text, Type getType, const MessageColor &getColor,
-                  const QString &copytext, const QString &tooltip, const Link &getLink = Link());
-
-    LazyLoadedImage &getImage() const;
-    const QString &getText() const;
-    int getWidth() const;
-    int getHeight() const;
-    void setSize(int _width, int _height);
+    explicit Word(const QString &_text, Flags getFlags, const MessageColor &textColor,
+                  FontManager::Type font, const QString &copytext, const QString &tooltip,
+                  const Link &getLink = Link());
 
     bool isImage() const;
     bool isText() const;
+
+    LazyLoadedImage &getImage() const;
+    const QString &getText() const;
     const QString &getCopyText() const;
     bool hasTrailingSpace() const;
-    QFont &getFont() const;
-    QFontMetrics &getFontMetrics() const;
-    Type getType() const;
+    Flags getFlags() const;
     const QString &getTooltip() const;
-    const MessageColor &getColor() const;
+    const MessageColor &getTextColor() const;
     const Link &getLink() const;
     int getXOffset() const;
     int getYOffset() const;
     void setOffset(int _xOffset, int _yOffset);
     int getCharacterLength() const;
 
-    short getCharWidth(int index) const;
+    void updateSize();
+
+    QFont &getFont(float scale) const;
+    QFontMetrics &getFontMetrics(float scale) const;
+    int getWidth(float scale) const;
+    int getHeight(float scale) const;
+    QSize getSize(float scale) const;
+    short getCharWidth(int index, float scale) const;
 
 private:
     LazyLoadedImage *image;
@@ -126,12 +130,10 @@ private:
     MessageColor color;
     bool _isImage;
 
-    Type type;
+    Flags type;
     QString copyText;
     QString tooltip;
 
-    int width = 16;
-    int height = 16;
     int xOffset = 0;
     int yOffset = 0;
 
@@ -139,8 +141,22 @@ private:
     FontManager::Type font = FontManager::Medium;
     Link link;
 
-    std::vector<short> &getCharacterWidthCache() const;
-    mutable std::vector<short> charWidthCache;
+    struct ScaleDependantData {
+        float scale;
+        QSize size;
+        mutable std::vector<short> charWidthCache;
+
+        ScaleDependantData(float _scale)
+            : scale(_scale)
+            , size()
+        {
+        }
+    };
+
+    mutable std::list<ScaleDependantData> dataByScale;
+
+    inline ScaleDependantData &getDataByScale(float scale) const;
+    std::vector<short> &getCharacterWidthCache(float scale) const;
 };
 
 }  // namespace messages

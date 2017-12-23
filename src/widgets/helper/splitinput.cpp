@@ -29,9 +29,11 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     auto &fontManager = FontManager::getInstance();
 
-    this->textInput.setFont(fontManager.getFont(FontManager::Type::Medium));
+    this->textInput.setFont(
+        fontManager.getFont(FontManager::Type::Medium, this->getDpiMultiplier()));
     this->managedConnections.emplace_back(fontManager.fontChanged.connect([this, &fontManager]() {
-        this->textInput.setFont(fontManager.getFont(FontManager::Type::Medium));
+        this->textInput.setFont(
+            fontManager.getFont(FontManager::Type::Medium, this->getDpiMultiplier()));
     }));
 
     this->editContainer.addWidget(&this->textInput);

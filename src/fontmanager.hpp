@@ -31,8 +31,8 @@ public:
         return instance;
     }
 
-    QFont &getFont(Type type);
-    QFontMetrics &getFontMetrics(Type type);
+    QFont &getFont(Type type, float dpi);
+    QFontMetrics &getFontMetrics(Type type, float dpi);
 
     int getGeneration() const
     {
@@ -128,10 +128,12 @@ private:
         FontData veryLarge;
     };
 
+    Font &getCurrentFont(float dpi);
+
     // Future plans:
     // Could have multiple fonts in here, such as "Menu font", "Application font", "Chat font"
 
-    Font currentFont;
+    std::list<std::pair<float, Font>> currentFontByDpi;
 
     int generation = 0;
 };

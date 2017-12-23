@@ -1,5 +1,6 @@
 #include "widgets/splitcontainer.hpp"
 #include "colorscheme.hpp"
+#include "util/helpers.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/split.hpp"
@@ -23,8 +24,12 @@ bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
 std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
-SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab)
+SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
+                               const std::string &_settingPrefix)
     : BaseWidget(parent->colorScheme, parent)
+    , settingPrefix(_settingPrefix)
+    , settingRoot(fS("{}", this->settingPrefix))
+    , chats(fS("{}/chats", this->settingRoot))
     , channelManager(_channelManager)
     , tab(_tab)
     , dropPreview(this)
@@ -43,6 +48,8 @@ SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent
 
     this->ui.hbox.setSpacing(1);
     this->ui.hbox.setMargin(0);
+
+    this->loadSplits();
 
     this->refreshTitle();
 }
@@ -108,6 +115,7 @@ void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
         vbox->addWidget(widget);
 
         this->ui.hbox.addLayout(vbox, 1);
+
         this->refreshCurrentFocusCoordinates();
         return;
     }
@@ -140,9 +148,12 @@ NotebookTab *SplitContainer::getTab() const
     return this->tab;
 }
 
-void SplitContainer::addChat(bool openChannelNameDialog)
+void SplitContainer::addChat(bool openChannelNameDialog, std::string chatUUID)
 {
-    Split *w = this->createChatWidget();
+    if (chatUUID.empty()) {
+        chatUUID = CreateUUID().toStdString();
+    }
+    Split *w = this->createChatWidget(chatUUID);
 
     if (openChannelNameDialog) {
         bool ret = w->showChangeChannelPopup("Open channel", true);
@@ -418,9 +429,9 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
     return getWidgetPositionInLayout(layout, chatWidget);
 }
 
-Split *SplitContainer::createChatWidget()
+Split *SplitContainer::createChatWidget(const std::string &uuid)
 {
-    return new Split(this->channelManager, this);
+    return new Split(this->channelManager, this, uuid);
 }
 
 void SplitContainer::refreshTitle()
@@ -454,81 +465,82 @@ void SplitContainer::refreshTitle()
     this->tab->setTitle(newTitle);
 }
 
-void SplitContainer::load(const boost::property_tree::ptree &tree)
+void SplitContainer::loadSplits()
 {
-    try {
-        int column = 0;
-        for (const auto &v : tree.get_child("columns.")) {
-            int row = 0;
-            for (const auto &innerV : v.second.get_child("")) {
-                auto widget = this->createChatWidget();
-                widget->load(innerV.second);
-                addToLayout(widget, std::pair<int, int>(column, row));
-                ++row;
-            }
-            ++column;
+    const auto hboxes = this->chats.getValue();
+    int column = 0;
+    for (const std::vector<std::string> &hbox : hboxes) {
+        int row = 0;
+        for (const std::string &chatUUID : hbox) {
+            Split *split = this->createChatWidget(chatUUID);
+
+            this->addToLayout(split, std::pair<int, int>(column, row));
+
+            ++row;
         }
-    } catch (boost::property_tree::ptree_error &) {
-        // can't read tabs
+        ++column;
     }
 }
 
-static void saveFromLayout(QLayout *layout, boost::property_tree::ptree &tree)
+template <typename Container>
+static void saveFromLayout(QLayout *layout, Container &container)
 {
     for (int i = 0; i < layout->count(); ++i) {
         auto item = layout->itemAt(i);
 
         auto innerLayout = item->layout();
         if (innerLayout != nullptr) {
-            boost::property_tree::ptree innerLayoutTree;
+            std::vector<std::string> vbox;
 
-            saveFromLayout(innerLayout, innerLayoutTree);
-
-            if (innerLayoutTree.size() > 0) {
-                tree.push_back(std::make_pair("", innerLayoutTree));
+            for (int j = 0; j < innerLayout->count(); ++j) {
+                auto innerItem = innerLayout->itemAt(j);
+                auto innerWidget = innerItem->widget();
+                if (innerWidget == nullptr) {
+                    assert(false);
+                    continue;
+                }
+                Split *innerSplit = qobject_cast<Split *>(innerWidget);
+                vbox.push_back(innerSplit->getUUID());
             }
 
-            continue;
-        }
+            container.push_back(vbox);
 
-        auto widget = item->widget();
-
-        if (widget == nullptr) {
-            // This layoutitem does not manage a widget for some reason
-            continue;
-        }
-
-        Split *chatWidget = qobject_cast<Split *>(widget);
-
-        if (chatWidget != nullptr) {
-            boost::property_tree::ptree chat = chatWidget->save();
-
-            tree.push_back(std::make_pair("", chat));
             continue;
         }
     }
 }
 
-boost::property_tree::ptree SplitContainer::save()
+void SplitContainer::save()
 {
-    boost::property_tree::ptree tree;
-
     auto layout = this->ui.hbox.layout();
 
-    saveFromLayout(layout, tree);
+    std::vector<std::vector<std::string>> _chats;
 
-    /*
-    for (const auto &chat : this->chatWidgets) {
-        boost::property_tree::ptree child = chat->save();
+    for (int i = 0; i < layout->count(); ++i) {
+        auto item = layout->itemAt(i);
 
-        // Set child position
-        child.put("position", "5,3");
+        auto innerLayout = item->layout();
+        if (innerLayout != nullptr) {
+            std::vector<std::string> vbox;
 
-        tree.push_back(std::make_pair("", child));
+            for (int j = 0; j < innerLayout->count(); ++j) {
+                auto innerItem = innerLayout->itemAt(j);
+                auto innerWidget = innerItem->widget();
+                if (innerWidget == nullptr) {
+                    assert(false);
+                    continue;
+                }
+                Split *innerSplit = qobject_cast<Split *>(innerWidget);
+                vbox.push_back(innerSplit->getUUID());
+            }
+
+            _chats.push_back(vbox);
+
+            continue;
+        }
     }
-    */
 
-    return tree;
+    this->chats = _chats;
 }
 
 }  // namespace widgets

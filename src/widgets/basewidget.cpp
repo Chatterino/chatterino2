@@ -11,11 +11,9 @@
 namespace chatterino {
 namespace widgets {
 
-// BaseWidget::BaseWidget(ColorScheme &_colorScheme, WindowManager &_windowManager, QWidget *parent)
 BaseWidget::BaseWidget(ColorScheme &_colorScheme, QWidget *parent)
     : QWidget(parent)
     , colorScheme(_colorScheme)
-//    , windowManager(_windowManager)
 {
     this->init();
 }
@@ -23,7 +21,6 @@ BaseWidget::BaseWidget(ColorScheme &_colorScheme, QWidget *parent)
 BaseWidget::BaseWidget(BaseWidget *parent)
     : QWidget(parent)
     , colorScheme(*ColorScheme::instance)
-//    , windowManager(parent->windowManager)
 {
     this->init();
 }

@@ -15,14 +15,17 @@
 #include <QList>
 #include <QShortcut>
 #include <QStandardPaths>
+#include <QUuid>
 #include <QWidget>
 #include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons)
+Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons,
+                   const std::string &settingPrefix)
     : BaseWidget(parent)
+    , settingRoot(fS("{}/notebook", settingPrefix))
     , channelManager(_channelManager)
     , addButton(this)
     , settingsButton(this)
@@ -42,12 +45,21 @@ Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showBu
 
     settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
     settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
+
+    this->loadContainers();
 }
 
-SplitContainer *Notebook::addPage(bool select)
+SplitContainer *Notebook::addNewPage()
 {
-    auto tab = new NotebookTab(this);
-    auto page = new SplitContainer(this->channelManager, this, tab);
+    return this->addPage(CreateUUID().toStdString(), true);
+}
+
+SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
+{
+    std::string key = fS("{}/containers/{}", this->settingRoot, uuid);
+
+    auto tab = new NotebookTab(this, key);
+    auto page = new SplitContainer(this->channelManager, this, tab, key);
 
     tab->show();
 
@@ -80,7 +92,7 @@ void Notebook::removePage(SplitContainer *page)
     this->pages.removeOne(page);
 
     if (this->pages.size() == 0) {
-        addPage();
+        this->addNewPage();
     }
 
     this->performLayout();
@@ -253,54 +265,25 @@ void Notebook::usersButtonClicked()
 
 void Notebook::addPageButtonClicked()
 {
-    QTimer::singleShot(80, [this] { this->addPage(true); });
+    QTimer::singleShot(80, [this] { this->addNewPage(); });
 }
 
-void Notebook::load(const boost::property_tree::ptree &tree)
+void Notebook::loadContainers()
 {
-    // Read a list of tabs
-    try {
-        BOOST_FOREACH (const boost::property_tree::ptree::value_type &v, tree.get_child("tabs.")) {
-            bool select = v.second.get<bool>("selected", false);
+    std::string containersKey = fS("{}/containers", this->settingRoot);
 
-            auto page = addPage(select);
-            auto tab = page->getTab();
-            tab->load(v.second);
-            page->load(v.second);
-        }
-    } catch (boost::property_tree::ptree_error &) {
-        // can't read tabs
-    }
+    auto keys = pajlada::Settings::SettingManager::getObjectKeys(containersKey);
 
-    if (this->pages.size() == 0) {
-        // No pages saved, show default stuff
-        loadDefaults();
+    for (const std::string &key : keys) {
+        this->addPage(key);
     }
 }
 
-void Notebook::save(boost::property_tree::ptree &tree)
+void Notebook::save()
 {
-    boost::property_tree::ptree tabs;
-
-    // Iterate through all tabs and add them to our tabs property thing
     for (const auto &page : this->pages) {
-        boost::property_tree::ptree pTab = page->getTab()->save();
-
-        boost::property_tree::ptree pChats = page->save();
-
-        if (pChats.size() > 0) {
-            pTab.add_child("columns", pChats);
-        }
-
-        tabs.push_back(std::make_pair("", pTab));
+        page->save();
     }
-
-    tree.add_child("tabs", tabs);
-}
-
-void Notebook::loadDefaults()
-{
-    addPage();
 }
 
 }  // namespace widgets

@@ -7,6 +7,7 @@
 #include "messages/lazyloadedimage.hpp"
 #include "signalvector.hpp"
 #include "twitch/emotevalue.hpp"
+#include "twitch/twitchuser.hpp"
 
 #include <QMap>
 #include <QMutex>
@@ -100,7 +101,7 @@ public:
     std::vector<std::string> emojiShortCodes;
 
     /// Twitch emotes
-    void refreshTwitchEmotes(const std::string &roomID);
+    void refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser> &user);
 
     struct TwitchAccountEmoteData {
         struct TwitchEmote {

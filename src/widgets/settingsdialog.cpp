@@ -180,7 +180,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
 
         fontButton->connect(fontButton, &QPushButton::clicked, []() {
             auto &fontManager = FontManager::getInstance();
-            QFontDialog dialog(fontManager.getFont(FontManager::Medium));
+            QFontDialog dialog(fontManager.getFont(FontManager::Medium, 1.));
 
             dialog.connect(&dialog, &QFontDialog::fontSelected, [](const QFont &font) {
                 auto &fontManager = FontManager::getInstance();

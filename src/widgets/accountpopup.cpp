@@ -200,7 +200,7 @@ void AccountPopupWidget::updatePermissions()
     }
 }
 
-void AccountPopupWidget::dpiMultiplierChanged(float oldDpi, float newDpi)
+void AccountPopupWidget::dpiMultiplierChanged(float /*oldDpi*/, float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));
@@ -230,7 +230,7 @@ void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
     });
 }
 
-void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
+void AccountPopupWidget::focusOutEvent(QFocusEvent *)
 {
     this->hide();
     this->ui->lblFollowers->setText("Loading...");
@@ -240,7 +240,7 @@ void AccountPopupWidget::focusOutEvent(QFocusEvent *event)
     this->ui->lblAvatar->setText("Loading...");
 }
 
-void AccountPopupWidget::showEvent(QShowEvent *event)
+void AccountPopupWidget::showEvent(QShowEvent *)
 {
     AccountManager &accountManager = AccountManager::getInstance();
     auto currentTwitchUser = accountManager.Twitch.getCurrent();

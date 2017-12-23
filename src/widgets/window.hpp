@@ -9,7 +9,6 @@
 //#include <platform/borderless/qwinwidget.h>
 //#endif
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -23,11 +22,11 @@ class CompletionManager;
 namespace widgets {
 
 struct WindowGeometry {
-    WindowGeometry(const std::string &key)
-        : x(fS("/windows/{}/geometry/x", key))
-        , y(fS("/windows/{}/geometry/y", key))
-        , width(fS("/windows/{}/geometry/width", key))
-        , height(fS("/windows/{}/geometry/height", key))
+    WindowGeometry(const std::string &settingPrefix)
+        : x(fS("{}/geometry/x", settingPrefix))
+        , y(fS("{}/geometry/y", settingPrefix))
+        , width(fS("{}/geometry/width", settingPrefix))
+        , height(fS("{}/geometry/height", settingPrefix))
     {
     }
 
@@ -41,21 +40,15 @@ class Window : public BaseWidget
 {
     Q_OBJECT
 
-    QString windowName;
+    std::string settingRoot;
 
     WindowGeometry windowGeometry;
 
 public:
-    explicit Window(const QString &_windowName, ChannelManager &_channelManager,
+    explicit Window(const QString &windowName, ChannelManager &_channelManager,
                     ColorScheme &_colorScheme, bool isMainWindow);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
-
-    void load(const boost::property_tree::ptree &tree);
-    boost::property_tree::ptree save();
-    void loadDefaults();
-
-    bool isLoaded() const;
 
     Notebook &getNotebook();
 
@@ -81,10 +74,12 @@ private:
     ColorScheme &colorScheme;
 
     Notebook notebook;
-    bool loaded = false;
     TitleBar titleBar;
 
     friend class Notebook;
+
+public:
+    void save();
 };
 
 }  // namespace widgets

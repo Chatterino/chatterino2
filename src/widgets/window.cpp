@@ -14,14 +14,14 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(const QString &_windowName, ChannelManager &_channelManager,
+Window::Window(const QString &windowName, ChannelManager &_channelManager,
                ColorScheme &_colorScheme, bool _isMainWindow)
     : BaseWidget(_colorScheme, nullptr)
-    , windowName(_windowName)
-    , windowGeometry(this->windowName.toStdString())
+    , settingRoot(fS("/windows/{}", windowName))
+    , windowGeometry(this->settingRoot)
     , channelManager(_channelManager)
     , colorScheme(_colorScheme)
-    , notebook(this->channelManager, this, _isMainWindow)
+    , notebook(this->channelManager, this, _isMainWindow, this->settingRoot)
     , dpi(this->getDpiMultiplier())
 {
     this->initAsWindow();
@@ -85,36 +85,6 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
     }
 }
 
-void Window::load(const boost::property_tree::ptree &tree)
-{
-    this->notebook.load(tree);
-
-    loaded = true;
-}
-
-boost::property_tree::ptree Window::save()
-{
-    boost::property_tree::ptree child;
-
-    child.put("type", "main");
-
-    this->notebook.save(child);
-
-    return child;
-}
-
-void Window::loadDefaults()
-{
-    this->notebook.loadDefaults();
-
-    loaded = true;
-}
-
-bool Window::isLoaded() const
-{
-    return loaded;
-}
-
 Notebook &Window::getNotebook()
 {
     return this->notebook;
@@ -171,6 +141,11 @@ void Window::loadGeometry()
     } else {
         this->resize(1280, 800);
     }
+}
+
+void Window::save()
+{
+    this->notebook.save();
 }
 
 }  // namespace widgets

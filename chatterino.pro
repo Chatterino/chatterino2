@@ -8,6 +8,7 @@ QT      += core gui network multimedia
 CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
+PRECOMPILED_HEADER = precompiled_header.hpp
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,13 +22,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 # Define warning flags for Chatterino
 win32-msvc* {
-    QMAKE_CXXFLAGS_WARN_ON = -W4
+    QMAKE_CXXFLAGS_WARN_ON = /W4
     # 4714 - function marked as __forceinline not inlined
     # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
     #        These functions may have a different preferred name, may be insecure or have
     #        a more secure variant, or may be obsolete.
+    # 4505 - unreferenced local version has been removed
+    # 4127 - conditional expression is constant
+    # 4503 - decorated name length exceeded, name was truncated
     QMAKE_CXXFLAGS_WARN_ON += /wd4714
     QMAKE_CXXFLAGS_WARN_ON += /wd4996
+    QMAKE_CXXFLAGS_WARN_ON += /wd4505
+    QMAKE_CXXFLAGS_WARN_ON += /wd4127
+    QMAKE_CXXFLAGS_WARN_ON += /wd4503
+
 } else {
     QMAKE_CXXFLAGS_WARN_ON = -Wall
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
@@ -105,6 +113,7 @@ SOURCES += \
     src/widgets/tooltipwidget.cpp
 
 HEADERS  += \
+    src/precompiled_headers.hpp \
     src/asyncexec.hpp \
     src/channel.hpp \
     src/colorscheme.hpp \
@@ -178,7 +187,9 @@ HEADERS  += \
     src/widgets/accountswitchwidget.hpp \
     src/widgets/accountswitchpopupwidget.hpp \
     src/const.hpp \
-    src/widgets/tooltipwidget.hpp
+    src/widgets/tooltipwidget.hpp \
+    src/precompiled_headers.hpp \
+    src/messages/wordflags.hpp
 
 
 PRECOMPILED_HEADER =

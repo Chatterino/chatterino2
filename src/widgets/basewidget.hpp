@@ -2,8 +2,6 @@
 
 #include <QWidget>
 
-//#include "windowmanager.hpp"
-
 namespace chatterino {
 
 class ColorScheme;
@@ -15,8 +13,6 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    //    explicit BaseWidget(ColorScheme &_colorScheme, WindowManager &windowManager, QWidget
-    //    *parent);
     explicit BaseWidget(ColorScheme &_colorScheme, QWidget *parent);
 
     explicit BaseWidget(BaseWidget *parent);
@@ -27,15 +23,13 @@ public:
 
     float getDpiMultiplier();
 
-    // protected:
-    //    WindowManager &windowManager;
-
 protected:
 #ifdef USEWINSDK
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
 
-    virtual void dpiMultiplierChanged(float oldDpi, float newDpi)
+    // XXX: Should this be pure virtual?
+    virtual void dpiMultiplierChanged(float /*oldDpi*/, float /*newDpi*/)
     {
     }
     void initAsWindow();

@@ -4,15 +4,15 @@
 namespace chatterino {
 namespace messages {
 
-WordPart::WordPart(Word &_word, int _x, int _y, int _lineNumber, const QString &_copyText,
-                   bool _allowTrailingSpace)
+WordPart::WordPart(Word &_word, int _x, int _y, float scale, int _lineNumber,
+                   const QString &_copyText, bool _allowTrailingSpace)
     : word(_word)
     , copyText(_copyText)
     , text(_word.isText() ? _word.getText() : QString())
     , x(_x)
     , y(_y)
-    , width(_word.getWidth())
-    , height(_word.getHeight())
+    , width(_word.getWidth(scale))
+    , height(_word.getHeight(scale))
     , lineNumber(_lineNumber)
     , _trailingSpace(!_word.getCopyText().isEmpty() &&
                      _word.hasTrailingSpace() & _allowTrailingSpace)
@@ -115,9 +115,9 @@ int WordPart::getCharacterLength() const
     return this->getWord().isImage() ? 2 : this->getText().length() + 1;
 }
 
-short WordPart::getCharWidth(int index) const
+short WordPart::getCharWidth(int index, float scale) const
 {
-    return this->getWord().getCharWidth(index + this->wordCharOffset);
+    return this->getWord().getCharWidth(index + this->wordCharOffset, scale);
 }
 }  // namespace messages
 }  // namespace chatterino
