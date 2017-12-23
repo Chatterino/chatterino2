@@ -146,6 +146,12 @@ void Window::changeEvent(QEvent *event)
     BaseWidget::changeEvent(event);
 }
 
+void Window::leaveEvent(QEvent *event)
+{
+    this->lostFocus.invoke();
+    BaseWidget::leaveEvent(event);
+}
+
 void Window::refreshTheme()
 {
     QPalette palette;
