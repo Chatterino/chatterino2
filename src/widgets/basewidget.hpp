@@ -28,7 +28,8 @@ protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
 
-    virtual void focusOutEvent(QFocusEvent *) override;
+    virtual void changeEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
 
     // XXX: Should this be pure virtual?
     // fourtf: hell no

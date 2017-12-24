@@ -104,7 +104,14 @@ bool BaseWidget::nativeEvent(const QByteArray &eventType, void *message, long *r
 }
 #endif
 
-void BaseWidget::focusOutEvent(QFocusEvent *)
+void BaseWidget::changeEvent(QEvent *)
+{
+    if (this->isWindow) {
+        TooltipWidget::getInstance()->hide();
+    }
+}
+
+void BaseWidget::leaveEvent(QEvent *)
 {
     if (this->isWindow) {
         TooltipWidget::getInstance()->hide();
