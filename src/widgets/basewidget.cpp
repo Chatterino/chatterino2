@@ -1,6 +1,7 @@
 #include "widgets/basewidget.hpp"
 #include "colorscheme.hpp"
 #include "settingsmanager.hpp"
+#include "widgets/tooltipwidget.hpp"
 
 #include <QDebug>
 #include <QLayout>
@@ -61,6 +62,8 @@ void BaseWidget::init()
 
 void BaseWidget::initAsWindow()
 {
+    this->isWindow = true;
+
 #ifdef USEWINSDK
     auto dpi = util::getWindowDpi(this->winId());
 
@@ -101,5 +104,11 @@ bool BaseWidget::nativeEvent(const QByteArray &eventType, void *message, long *r
 }
 #endif
 
+void BaseWidget::focusOutEvent(QFocusEvent *)
+{
+    if (this->isWindow) {
+        TooltipWidget::getInstance()->hide();
+    }
+}
 }  // namespace widgets
 }  // namespace chatterino

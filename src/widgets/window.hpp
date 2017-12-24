@@ -56,13 +56,14 @@ public:
 
     boost::signals2::signal<void()> closed;
 
-    pajlada::Signals::NoArgSignal lostFocus;
+    //    pajlada::Signals::NoArgSignal lostFocus;
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
-    virtual void changeEvent(QEvent *event) override;
-    virtual void leaveEvent(QEvent *event) override;
+    //    virtual void changeEvent(QEvent *event) override;
+    //    virtual void leaveEvent(QEvent *event) override;
+
 private:
     float dpi;
 

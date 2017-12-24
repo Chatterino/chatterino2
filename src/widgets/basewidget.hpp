@@ -28,13 +28,17 @@ protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 #endif
 
+    virtual void focusOutEvent(QFocusEvent *) override;
+
     // XXX: Should this be pure virtual?
+    // fourtf: hell no
     virtual void dpiMultiplierChanged(float /*oldDpi*/, float /*newDpi*/)
     {
     }
     void initAsWindow();
 
 private:
+    bool isWindow = false;
     float dpiMultiplier = 1.f;
 
     void init();

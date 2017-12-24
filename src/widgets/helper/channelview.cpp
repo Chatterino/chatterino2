@@ -82,7 +82,6 @@ ChannelView::ChannelView(BaseWidget *parent)
     Window *_window = dynamic_cast<Window *>(this->window());
 
     if (_window) {
-        _window->lostFocus.connect([this] { TooltipWidget::getInstance()->hide(); });
     }
 }
 
