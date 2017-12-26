@@ -473,6 +473,8 @@ void ChannelView::drawMessages(QPainter &painter)
     int y = -(messagesSnapshot[start].get()->getHeight() *
               (fmod(this->scrollBar.getCurrentValue(), 1)));
 
+    messages::MessageRef *end = nullptr;
+
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
         messages::MessageRef *messageRef = messagesSnapshot[i].get();
 
@@ -520,7 +522,40 @@ void ChannelView::drawMessages(QPainter &painter)
 
         y += messageRef->getHeight();
 
+        end = messageRef;
         if (y > height()) {
+            break;
+        }
+    }
+
+    if (end == nullptr) {
+        return;
+    }
+
+    // remove messages that are on screen
+    // the messages that are left at the end get their buffers reset
+    for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
+        messages::MessageRef *messageRef = messagesSnapshot[i].get();
+        auto it = this->messagesOnScreen.find(messageRef);
+        if (it != this->messagesOnScreen.end()) {
+            this->messagesOnScreen.erase(it);
+        }
+    }
+
+    // delete the message buffers that aren't on screen
+    for (MessageRef *item : this->messagesOnScreen) {
+        item->buffer.reset();
+    }
+
+    this->messagesOnScreen.clear();
+
+    // add all messages on screen to the map
+    for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
+        messages::MessageRef *messageRef = messagesSnapshot[i].get();
+
+        this->messagesOnScreen.insert(messageRef);
+
+        if (messageRef == end) {
             break;
         }
     }

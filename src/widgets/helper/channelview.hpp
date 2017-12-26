@@ -17,6 +17,7 @@
 #include <QWidget>
 #include <boost/signals2.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <unordered_set>
 
 namespace chatterino {
 namespace widgets {
@@ -165,6 +166,9 @@ private:
     boost::signals2::connection layoutConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+
+    std::unordered_set<messages::MessageRef *> messagesOnScreen;
+
 private slots:
     void wordTypeMaskChanged()
     {
