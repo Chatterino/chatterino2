@@ -53,6 +53,11 @@ public:
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
 
+    ChannelView &getChannelView()
+    {
+        return this->view;
+    }
+
     const std::string &getUUID() const;
     std::shared_ptr<Channel> getChannel() const;
     std::shared_ptr<Channel> &getChannelRef();

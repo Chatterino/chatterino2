@@ -277,7 +277,7 @@ void Split::doPopup()
 
 void Split::doClearChat()
 {
-    view.clearMessages();
+    this->view.clearMessages();
 }
 
 void Split::doOpenChannel()

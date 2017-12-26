@@ -16,7 +16,7 @@
 namespace chatterino {
 namespace messages {
 
-bool Message::getCanHighlightTab() const
+bool Message::containsHighlightedPhrase() const
 {
     return this->highlightTab;
 }

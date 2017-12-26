@@ -107,11 +107,17 @@ void NotebookTab::setSelected(bool value)
 {
     this->selected = value;
 
+    this->highlightState = HighlightState::None;
+
     this->update();
 }
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
+    if (this->isSelected()) {
+        return;
+    }
+
     this->highlightState = newHighlightStyle;
 
     this->update();

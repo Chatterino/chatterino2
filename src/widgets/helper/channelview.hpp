@@ -15,8 +15,8 @@
 #include <QTimer>
 #include <QWheelEvent>
 #include <QWidget>
-
 #include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -103,6 +103,7 @@ public:
 
     boost::signals2::signal<void(QMouseEvent *)> mouseDown;
     boost::signals2::signal<void()> selectionChanged;
+    pajlada::Signals::NoArgSignal highlightedMessageReceived;
 
 protected:
     virtual void resizeEvent(QResizeEvent *) override;

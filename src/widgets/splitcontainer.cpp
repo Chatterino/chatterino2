@@ -1,5 +1,6 @@
 #include "widgets/splitcontainer.hpp"
 #include "colorscheme.hpp"
+#include "common.hpp"
 #include "util/helpers.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/notebook.hpp"
@@ -431,7 +432,13 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
 
 Split *SplitContainer::createChatWidget(const std::string &uuid)
 {
-    return new Split(this->channelManager, this, uuid);
+    auto split = new Split(this->channelManager, this, uuid);
+
+    split->getChannelView().highlightedMessageReceived.connect([this] {
+        this->tab->setHighlightState(HighlightState::Highlighted);  //
+    });
+
+    return split;
 }
 
 void SplitContainer::refreshTitle()

@@ -354,6 +354,10 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 }
             }
 
+            if (message->containsHighlightedPhrase()) {
+                this->highlightedMessageReceived.invoke();
+            }
+
             layoutMessages();
             update();
         });
@@ -533,7 +537,7 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(), (messageRef->getMessage()->getCanHighlightTab())
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->containsHighlightedPhrase())
                                          ? this->colorScheme.ChatBackgroundHighlighted
                                          : this->colorScheme.ChatBackground);
     //}

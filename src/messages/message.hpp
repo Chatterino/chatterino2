@@ -18,7 +18,7 @@ typedef std::shared_ptr<Message> SharedMessage;
 class Message
 {
 public:
-    bool getCanHighlightTab() const;
+    bool containsHighlightedPhrase() const;
     void setHighlight(bool value);
     const QString &getTimeoutUser() const;
     int getTimeoutCount() const;
