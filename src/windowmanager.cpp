@@ -68,6 +68,7 @@ widgets::Window &WindowManager::getSelectedWindow()
 widgets::Window &WindowManager::createWindow()
 {
     auto *window = new widgets::Window("external", this->channelManager, this->colorScheme, false);
+    window->getNotebook().addNewPage();
 
     this->windows.push_back(window);
 

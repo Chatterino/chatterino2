@@ -74,7 +74,7 @@ void ColorScheme::setColors(double hue, double multiplier)
         TabBackground = QColor(255, 255, 255);
 
         TabHoverText = QColor(0, 0, 0);
-        TabHoverBackground = getColor(hue, 0, 0.05);
+        TabHoverBackground = QColor::fromHslF(hue, 0, 0.95);
     } else {
         // Ubuntu style
         // TODO: add setting for this
@@ -86,15 +86,15 @@ void ColorScheme::setColors(double hue, double multiplier)
     }
 
     TabSelectedText = QColor(255, 255, 255);
-    TabSelectedBackground = getColor(hue, 0.5, 0.5);
+    TabSelectedBackground = QColor::fromHslF(hue, 0.5, 0.5);
 
     TabSelectedUnfocusedText = QColor(255, 255, 255);
-    TabSelectedUnfocusedBackground = getColor(hue, 0, 0.5);
+    TabSelectedUnfocusedBackground = QColor::fromHslF(hue, 0, 0.5);
 
     TabHighlightedText = QColor(0, 0, 0);
-    TabHighlightedBackground = getColor(hue, 0.5, 0.2);
+    TabHighlightedBackground = QColor::fromHslF(hue, 0.5, 0.8);
 
-    TabNewMessageBackground = QBrush(getColor(hue, 0.5, 0.2), Qt::DiagCrossPattern);
+    TabNewMessageBackground = QBrush(QColor::fromHslF(hue, 0.5, 0.8), Qt::DiagCrossPattern);
 
     // Chat
     ChatBackground = getColor(0, 0.1, 1);
@@ -139,10 +139,10 @@ void ColorScheme::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() > 0.4f && color.hueF() > 0.1 && color.hueF() < 0.33333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() -
-                              sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
-                                  color.saturationF() * 0.2);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
+                                         color.saturationF() * 0.2);
         }
     } else {
         if (color.lightnessF() < 0.5f) {
@@ -150,10 +150,10 @@ void ColorScheme::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() +
-                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                  color.saturationF() * 0.4);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                         color.saturationF() * 0.4);
         }
     }
 }
