@@ -399,96 +399,77 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser>
             emoteData.filled = true;
         }
 
-    );
+        );
 }
 
 void EmoteManager::loadBTTVEmotes()
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QString url("https://api.betterttv.net/2/emotes");
 
-    QUrl url("https://api.betterttv.net/2/emotes");
-    QNetworkRequest request(url);
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.setTimeout(30000);
+    req.getJSON([this](QJsonObject &root) {
+        debug::Log("Got global bttv emotes");
+        auto emotes = root.value("emotes").toArray();
 
-    QNetworkReply *reply = manager->get(request);
+        QString linkTemplate = "https:" + root.value("urlTemplate").toString();
 
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            QByteArray data = reply->readAll();
-            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-            QJsonObject root = jsonDoc.object();
+        std::vector<std::string> codes;
+        for (const QJsonValue &emote : emotes) {
+            QString id = emote.toObject().value("id").toString();
+            QString code = emote.toObject().value("code").toString();
+            // emote.value("imageType").toString();
 
-            auto emotes = root.value("emotes").toArray();
+            QString tmp = linkTemplate;
+            tmp.detach();
+            QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
 
-            QString linkTemplate = "https:" + root.value("urlTemplate").toString();
-
-            std::vector<std::string> codes;
-            for (const QJsonValue &emote : emotes) {
-                QString id = emote.toObject().value("id").toString();
-                QString code = emote.toObject().value("code").toString();
-                // emote.value("imageType").toString();
-
-                QString tmp = linkTemplate;
-                tmp.detach();
-                QString url = tmp.replace("{{id}}", id).replace("{{image}}", "1x");
-
-                this->bttvGlobalEmotes.insert(
-                    code, new LazyLoadedImage(url, 1, code, code + "<br/>Global BTTV Emote"));
-                codes.push_back(code.toStdString());
-            }
-
-            this->bttvGlobalEmoteCodes = codes;
+            this->bttvGlobalEmotes.insert(
+                code, new LazyLoadedImage(url, 1, code, code + "<br/>Global BTTV Emote"));
+            codes.push_back(code.toStdString());
         }
 
-        reply->deleteLater();
-        manager->deleteLater();
+        this->bttvGlobalEmoteCodes = codes;
     });
 }
 
 void EmoteManager::loadFFZEmotes()
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
+    QString url("https://api.frankerfacez.com/v1/set/global");
 
-    QUrl url("https://api.frankerfacez.com/v1/set/global");
-    QNetworkRequest request(url);
+    util::NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+    req.setTimeout(30000);
+    req.getJSON([this](QJsonObject &root) {
+        debug::Log("Got global ffz emotes");
 
-    QNetworkReply *reply = manager->get(request);
+        auto sets = root.value("sets").toObject();
 
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            QByteArray data = reply->readAll();
-            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-            QJsonObject root = jsonDoc.object();
+        std::vector<std::string> codes;
+        for (const QJsonValue &set : sets) {
+            auto emoticons = set.toObject().value("emoticons").toArray();
 
-            auto sets = root.value("sets").toObject();
+            for (const QJsonValue &emote : emoticons) {
+                QJsonObject object = emote.toObject();
 
-            std::vector<std::string> codes;
-            for (const QJsonValue &set : sets) {
-                auto emoticons = set.toObject().value("emoticons").toArray();
+                // margins
 
-                for (const QJsonValue &emote : emoticons) {
-                    QJsonObject object = emote.toObject();
+                // int id = object.value("id").toInt();
+                QString code = object.value("name").toString();
 
-                    // margins
+                QJsonObject urls = object.value("urls").toObject();
+                QString url1 = "http:" + urls.value("1").toString();
 
-                    // int id = object.value("id").toInt();
-                    QString code = object.value("name").toString();
-
-                    QJsonObject urls = object.value("urls").toObject();
-                    QString url1 = "http:" + urls.value("1").toString();
-
-                    this->ffzGlobalEmotes.insert(
-                        code, new LazyLoadedImage(url1, 1, code, code + "<br/>Global FFZ Emote"));
-                    codes.push_back(code.toStdString());
-                }
-
-                this->ffzGlobalEmoteCodes = codes;
+                this->ffzGlobalEmotes.insert(
+                    code, new LazyLoadedImage(url1, 1, code, code + "<br/>Global FFZ Emote"));
+                codes.push_back(code.toStdString());
             }
-        }
 
-        reply->deleteLater();
-        manager->deleteLater();
+            this->ffzGlobalEmoteCodes = codes;
+        }
     });
-}
+}  // namespace chatterino
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
