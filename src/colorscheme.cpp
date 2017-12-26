@@ -57,6 +57,8 @@ void ColorScheme::setColors(double hue, double multiplier)
 {
     lightTheme = multiplier > 0;
 
+    qreal sat = 0.05;
+
     SystemMessageColor = QColor(140, 127, 127);
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
@@ -97,19 +99,21 @@ void ColorScheme::setColors(double hue, double multiplier)
     TabNewMessageBackground = QBrush(QColor::fromHslF(hue, 0.5, 0.8), Qt::DiagCrossPattern);
 
     // Chat
-    ChatBackground = getColor(0, 0.1, 1);
+    bool flat = lightTheme;
+
+    ChatBackground = getColor(0, sat, 1);
     ChatBackgroundHighlighted = blendColors(TabSelectedBackground, ChatBackground, 0.8);
-    ChatHeaderBackground = getColor(0, 0.1, 0.9);
-    ChatHeaderBorder = getColor(0, 0.1, 0.85);
-    ChatInputBackground = getColor(0, 0.1, 0.95);
-    ChatInputBorder = getColor(0, 0.1, 0.9);
+    ChatHeaderBackground = getColor(0, sat, flat ? 1 : 0.9);
+    ChatHeaderBorder = getColor(0, sat, flat ? 1 : 0.85);
+    ChatInputBackground = getColor(0, sat, flat ? 0.95 : 0.95);
+    ChatInputBorder = getColor(0, sat, flat ? 1 : 1);
     ChatSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
 
     // Scrollbar
-    ScrollbarBG = ChatBackground;
-    ScrollbarThumb = getColor(0, 0.1, 0.85);
-    ScrollbarThumbSelected = getColor(0, 0.1, 0.7);
-    ScrollbarArrow = getColor(0, 0.1, 0.9);
+    ScrollbarBG = getColor(0, sat, 0.90);
+    ScrollbarThumb = getColor(0, sat, 0.80);
+    ScrollbarThumbSelected = getColor(0, sat, 0.7);
+    ScrollbarArrow = getColor(0, sat, 0.9);
 
     // stylesheet
     InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +

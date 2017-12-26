@@ -22,7 +22,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     this->setLayout(&this->hbox);
 
-    this->hbox.setMargin(0);
+    this->hbox.setMargin(4);
 
     this->hbox.addLayout(&this->editContainer);
     this->hbox.addLayout(&this->vbox);
@@ -37,7 +37,7 @@ SplitInput::SplitInput(Split *_chatWidget)
     }));
 
     this->editContainer.addWidget(&this->textInput);
-    this->editContainer.setMargin(4);
+    this->editContainer.setMargin(2);
 
     this->emotesLabel.setMinimumHeight(24);
 
@@ -215,6 +215,8 @@ void SplitInput::refreshTheme()
     this->textLengthLabel.setPalette(palette);
 
     this->textInput.setStyleSheet(this->colorScheme.InputStyleSheet);
+
+    this->hbox.setMargin((this->colorScheme.isLightTheme() ? 4 : 2) * this->getDpiMultiplier());
 }
 
 void SplitInput::editTextChanged()
@@ -243,7 +245,12 @@ void SplitInput::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.fillRect(this->rect(), this->colorScheme.ChatInputBackground);
-    painter.setPen(this->colorScheme.ChatInputBorder);
+
+    QPen pen(this->colorScheme.ChatInputBorder);
+    if (this->colorScheme.isLightTheme()) {
+        pen.setWidth((int)(6 * this->getDpiMultiplier()));
+    }
+    painter.setPen(pen);
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
@@ -254,6 +261,8 @@ void SplitInput::resizeEvent(QResizeEvent *)
     } else {
         this->textInput.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
+
+    this->refreshTheme();
 }
 
 void SplitInput::mousePressEvent(QMouseEvent *)

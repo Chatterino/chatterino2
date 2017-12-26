@@ -52,6 +52,14 @@ public:
 
     void printCurrentState(const QString &prefix = QString()) const;
 
+protected:
+    void paintEvent(QPaintEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void leaveEvent(QEvent *) override;
+
 private:
     Q_PROPERTY(qreal currentValue READ getCurrentValue WRITE setCurrentValue)
 
@@ -61,19 +69,14 @@ private:
 
     ScrollBarHighlight *highlights;
 
-    void paintEvent(QPaintEvent *);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void leaveEvent(QEvent *);
-
     bool atBottom = false;
 
     int mouseOverIndex = -1;
     int mouseDownIndex = -1;
     QPoint lastMousePosition;
 
-    int buttonHeight = 16;
+    //    int buttonHeight = 16;
+    int buttonHeight = 0;
     int trackHeight = 100;
 
     QRect thumbRect;

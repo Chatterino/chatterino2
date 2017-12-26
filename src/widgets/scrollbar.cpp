@@ -244,6 +244,11 @@ void ScrollBar::paintEvent(QPaintEvent *)
     this->mutex.unlock();
 }
 
+void ScrollBar::resizeEvent(QResizeEvent *)
+{
+    this->resize((int)(16 * this->getDpiMultiplier()), this->height());
+}
+
 void ScrollBar::mouseMoveEvent(QMouseEvent *event)
 {
     if (this->mouseDownIndex == -1) {
