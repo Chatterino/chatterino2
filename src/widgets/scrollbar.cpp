@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QTimer>
 
 #define MIN_THUMB_HEIGHT 10
 
@@ -17,11 +18,22 @@ ScrollBar::ScrollBar(ChannelView *parent)
     , highlights(nullptr)
     , smoothScrollingSetting(SettingsManager::getInstance().enableSmoothScrolling)
 {
-    resize(16, 100);
+    resize((int)(16 * this->getDpiMultiplier()), 100);
     this->currentValueAnimation.setDuration(250);
     this->currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
     setMouseTracking(true);
+
+    // don't do this at home kids
+    QTimer *timer = new QTimer(this);
+    timer->setSingleShot(true);
+
+    connect(timer, &QTimer::timeout, [=]() {
+        resize((int)(16 * this->getDpiMultiplier()), 100);
+        timer->deleteLater();
+    });
+
+    timer->start(10);
 }
 
 ScrollBar::~ScrollBar()
@@ -217,12 +229,18 @@ void ScrollBar::printCurrentState(const QString &prefix) const
 
 void ScrollBar::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
-    painter.fillRect(rect(), this->colorScheme.ScrollbarBG);
+    bool mouseOver = this->mouseOverIndex != -1;
+    int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getDpiMultiplier());
 
-    painter.fillRect(QRect(0, 0, width(), this->buttonHeight), this->colorScheme.ScrollbarArrow);
-    painter.fillRect(QRect(0, height() - this->buttonHeight, width(), this->buttonHeight),
+    QPainter painter(this);
+    //    painter.fillRect(rect(), this->colorScheme.ScrollbarBG);
+
+    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
                      this->colorScheme.ScrollbarArrow);
+    painter.fillRect(QRect(xOffset, height() - this->buttonHeight, width(), this->buttonHeight),
+                     this->colorScheme.ScrollbarArrow);
+
+    this->thumbRect.setX(xOffset);
 
     // mouse over thumb
     if (this->mouseDownIndex == 2) {
