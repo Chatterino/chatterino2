@@ -110,14 +110,9 @@ void NotebookTab::setSelected(bool value)
     this->update();
 }
 
-NotebookTab::HighlightStyle NotebookTab::getHighlightStyle() const
+void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    return this->highlightStyle;
-}
-
-void NotebookTab::setHighlightStyle(HighlightStyle newHighlightStyle)
-{
-    this->highlightStyle = newHighlightStyle;
+    this->highlightState = newHighlightStyle;
 
     this->update();
 }
@@ -174,10 +169,10 @@ void NotebookTab::paintEvent(QPaintEvent *)
     } else if (this->mouseOver) {
         painter.fillRect(rect(), this->colorScheme.TabHoverBackground);
         fg = this->colorScheme.TabHoverText;
-    } else if (this->highlightStyle == HighlightHighlighted) {
+    } else if (this->highlightState == HighlightState::Highlighted) {
         painter.fillRect(rect(), this->colorScheme.TabHighlightedBackground);
         fg = this->colorScheme.TabHighlightedText;
-    } else if (this->highlightStyle == HighlightNewMessage) {
+    } else if (this->highlightState == HighlightState::NewMessage) {
         painter.fillRect(rect(), this->colorScheme.TabNewMessageBackground);
         fg = this->colorScheme.TabHighlightedText;
     } else {

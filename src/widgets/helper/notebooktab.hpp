@@ -23,7 +23,11 @@ class NotebookTab : public BaseWidget
     std::string settingRoot;
 
 public:
-    enum HighlightStyle { HighlightNone, HighlightHighlighted, HighlightNewMessage };
+    enum class HighlightState {
+        None,
+        Highlighted,
+        NewMessage,
+    };
 
     explicit NotebookTab(Notebook *_notebook, const std::string &settingPrefix);
 
@@ -36,8 +40,7 @@ public:
     bool isSelected() const;
     void setSelected(bool value);
 
-    HighlightStyle getHighlightStyle() const;
-    void setHighlightStyle(HighlightStyle style);
+    void setHighlightState(HighlightState style);
 
     void moveAnimated(QPoint pos, bool animated = true);
 
@@ -77,7 +80,7 @@ private:
     bool mouseOverX = false;
     bool mouseDownX = false;
 
-    HighlightStyle highlightStyle = HighlightStyle::HighlightNone;
+    HighlightState highlightState = HighlightState::None;
 
     QMenu menu;
 
