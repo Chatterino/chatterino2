@@ -426,8 +426,6 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     //    BENCH(timer);
     QPainter painter(this);
 
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
-
 // only update gif emotes
 #ifndef Q_OS_MAC
 //    if (this->onlyUpdateEmotes) {
@@ -450,6 +448,8 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw messages
     this->drawMessages(painter);
+
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw gif emotes
     for (GifEmoteData &item : this->gifEmotes) {
@@ -530,6 +530,8 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
                                       int messageIndex)
 {
     QPainter painter(buffer);
+
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
     // if (this->selectionMin.messageIndex <= messageIndex &&
