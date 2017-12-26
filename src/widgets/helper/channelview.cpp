@@ -569,8 +569,6 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
             painter.setPen(color);
             painter.setFont(wordPart.getWord().getFont(this->getDpiMultiplier()));
 
-            qDebug() << wordPart.getWord().getFont(this->getDpiMultiplier()).pointSize();
-
             painter.drawText(QRectF(wordPart.getX(), wordPart.getY(), 10000, 10000),
                              wordPart.getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
         }
