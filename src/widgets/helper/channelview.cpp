@@ -45,7 +45,6 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->layoutMessages();
-
         this->goToBottom->setVisible(this->scrollBar.isVisible() && !this->scrollBar.isAtBottom());
 
         this->queueUpdate();
@@ -93,13 +92,13 @@ ChannelView::~ChannelView()
 
 void ChannelView::queueUpdate()
 {
-    if (this->updateTimer.isActive()) {
-        this->updateQueued = true;
-    }
+    //    if (this->updateTimer.isActive()) {
+    //        this->updateQueued = true;
+    //    }
 
     update();
 
-    this->updateTimer.start();
+    //    this->updateTimer.start();
 }
 
 void ChannelView::layoutMessages()
