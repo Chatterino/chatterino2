@@ -90,6 +90,9 @@ private:
     void onConnected();
     void onDisconnected();
 
+    void fetchRecentMessages(QString &roomID, QString &channel);
+    QVector<QString> dontParse;
+
 private:
     QByteArray messageSuffix;
 };

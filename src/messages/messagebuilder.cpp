@@ -3,6 +3,8 @@
 #include "emotemanager.hpp"
 #include "resources.hpp"
 
+#include <QDateTime>
+
 namespace chatterino {
 namespace messages {
 
@@ -24,8 +26,7 @@ void MessageBuilder::appendWord(const Word &&word)
 
 void MessageBuilder::appendTimestamp()
 {
-    std::time_t t;
-    time(&t);
+    QDateTime t = QDateTime::currentDateTime();
     this->appendTimestamp(t);
 }
 
@@ -34,20 +35,16 @@ void MessageBuilder::setHighlight(bool value)
     this->message->setHighlight(value);
 }
 
-void MessageBuilder::appendTimestamp(time_t time)
+void MessageBuilder::appendTimestamp(QDateTime &time)
 {
-    char timeStampBuffer[69];
-
     // Add word for timestamp with no seconds
-    strftime(timeStampBuffer, 69, "%H:%M", localtime(&time));
-    QString timestampNoSeconds(timeStampBuffer);
+    QString timestampNoSeconds(time.toString("hh:mm"));
     this->appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
                           MessageColor(MessageColor::System), FontManager::Medium, QString(),
                           QString()));
 
     // Add word for timestamp with seconds
-    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&time));
-    QString timestampWithSeconds(timeStampBuffer);
+    QString timestampWithSeconds(time.toString("hh:mm:ss"));
     this->appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
                           MessageColor(MessageColor::System), FontManager::Medium, QString(),
                           QString()));

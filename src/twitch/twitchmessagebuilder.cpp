@@ -47,7 +47,17 @@ SharedMessage TwitchMessageBuilder::parse()
 
     // The timestamp is always appended to the builder
     // Whether or not will be rendered is decided/checked later
-    this->appendTimestamp();
+
+    // Appends the correct timestamp if the message is a past message
+    bool isPastMsg = this->tags.contains("historical");
+    if(isPastMsg) {
+        // This may be architecture dependent(datatype)
+        qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
+        QDateTime time = QDateTime::fromMSecsSinceEpoch(ts);
+        this->appendTimestamp(time);
+    } else {
+        this->appendTimestamp();
+    }
 
     this->parseMessageID();
 
@@ -66,7 +76,7 @@ SharedMessage TwitchMessageBuilder::parse()
     this->appendUsername();
 
     // highlights
-    if (settings.enableHighlights) {
+    if (settings.enableHighlights && !isPastMsg) {
         this->parseHighlights();
     }
 

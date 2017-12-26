@@ -18,7 +18,7 @@ public:
 
     void appendWord(const Word &&word);
     void appendTimestamp();
-    void appendTimestamp(std::time_t time);
+    void appendTimestamp(QDateTime &time);
     void setHighlight(bool value);
 
     QString matchLink(const QString &string);
