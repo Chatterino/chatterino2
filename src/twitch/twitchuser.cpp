@@ -34,14 +34,26 @@ void TwitchUser::setUserId(const QString &id)
     this->_userId = id;
 }
 
-void TwitchUser::setOAuthClient(const QString &newClientID)
+bool TwitchUser::setOAuthClient(const QString &newClientID)
 {
+    if (this->_oauthClient.compare(newClientID) == 0) {
+        return false;
+    }
+
     this->_oauthClient = newClientID;
+
+    return true;
 }
 
-void TwitchUser::setOAuthToken(const QString &newOAuthToken)
+bool TwitchUser::setOAuthToken(const QString &newOAuthToken)
 {
+    if (this->_oauthToken.compare(newOAuthToken) == 0) {
+        return false;
+    }
+
     this->_oauthToken = newOAuthToken;
+
+    return true;
 }
 
 bool TwitchUser::isAnon() const

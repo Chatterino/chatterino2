@@ -170,13 +170,12 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
     auto previousUser = this->findUserByUsername(userData.username);
     if (previousUser) {
         bool userUpdated = false;
-        if (previousUser->getOAuthClient().compare(userData.clientID) != 0) {
-            previousUser->setOAuthClient(userData.clientID);
+
+        if (previousUser->setOAuthClient(userData.clientID)) {
             userUpdated = true;
         }
 
-        if (previousUser->getOAuthToken().compare(userData.oauthToken) != 0) {
-            previousUser->setOAuthToken(userData.oauthToken);
+        if (previousUser->setOAuthToken(userData.oauthToken)) {
             userUpdated = true;
         }
 

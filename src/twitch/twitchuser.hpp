@@ -17,8 +17,13 @@ public:
     const QString &getUserId() const;
     void setUserId(const QString &id);
 
-    void setOAuthClient(const QString &newClientID);
-    void setOAuthToken(const QString &newClientID);
+    // Attempts to update the users OAuth Client ID
+    // Returns true if the value has changed, otherwise false
+    bool setOAuthClient(const QString &newClientID);
+
+    // Attempts to update the users OAuth Token
+    // Returns true if the value has changed, otherwise false
+    bool setOAuthToken(const QString &newOAuthToken);
 
     bool isAnon() const;
 
@@ -26,7 +31,7 @@ private:
     QString _oauthClient;
     QString _oauthToken;
     QString _userId;
-    bool _isAnon;
+    const bool _isAnon;
 };
 
 }  // namespace twitch
