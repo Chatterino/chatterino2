@@ -110,7 +110,7 @@ void ColorScheme::setColors(double hue, double multiplier)
     ChatSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
 
     // Scrollbar
-    ScrollbarBG = getColor(0, sat, 0.90);
+    ScrollbarBG = getColor(0, sat, 0.94);
     ScrollbarThumb = getColor(0, sat, 0.80);
     ScrollbarThumbSelected = getColor(0, sat, 0.7);
     ScrollbarArrow = getColor(0, sat, 0.9);
