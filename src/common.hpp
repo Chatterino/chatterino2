@@ -6,6 +6,12 @@
 
 namespace chatterino {
 
+enum class HighlightState {
+    None,
+    Highlighted,
+    NewMessage,
+};
+
 inline QString qS(const std::string &string)
 {
     return QString::fromStdString(string);

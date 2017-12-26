@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.hpp"
 #include "widgets/basewidget.hpp"
 
 #include <QMenu>
@@ -23,12 +24,6 @@ class NotebookTab : public BaseWidget
     std::string settingRoot;
 
 public:
-    enum class HighlightState {
-        None,
-        Highlighted,
-        NewMessage,
-    };
-
     explicit NotebookTab(Notebook *_notebook, const std::string &settingPrefix);
 
     void calcSize();
