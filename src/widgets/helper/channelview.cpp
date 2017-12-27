@@ -127,8 +127,10 @@ void ChannelView::actuallyLayoutMessages()
     this->showingLatestMessages = this->scrollBar.isAtBottom() || !this->scrollBar.isVisible();
 
     size_t start = this->scrollBar.getCurrentValue();
+    //    int layoutWidth =
+    //        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
     int layoutWidth =
-        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
+        this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier();
 
     // layout the visible messages in the view
     if (messagesSnapshot.getLength() > start) {
@@ -251,8 +253,9 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
-                                                       part.getCharacterLength();
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -573,9 +576,10 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(), (messageRef->getMessage()->containsHighlightedPhrase())
-                                         ? this->colorScheme.ChatBackgroundHighlighted
-                                         : this->colorScheme.ChatBackground);
+    painter.fillRect(buffer->rect(),
+                     (messageRef->getMessage()->containsHighlightedPhrase())
+                         ? this->colorScheme.ChatBackgroundHighlighted
+                         : this->colorScheme.ChatBackground);
     //}
 
     // draw selection

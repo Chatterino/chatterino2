@@ -7,28 +7,28 @@ namespace chatterino {
 
 class CommandManager
 {
-public:
-    CommandManager() = delete;
+    // public:
+    //    CommandManager() = delete;
 
-    QString execCommand(QString text);
+    //    QString execCommand(QString text);
     // void addCommand ?
     // void loadCommands(QString) taking all commands as a \n seperated list ?
 
-    static CommandManager *getInstance()
-    {
-        static CommandManager manager;
+    //    static CommandManager *getInstance()
+    //    {
+    //        static CommandManager manager;
 
-        return manager;
-    }
+    //        return manager;
+    //    }
 
-private:
-    struct Command {
-        QString name;
-        QString text;
+    // private:
+    //    struct Command {
+    //        QString name;
+    //        QString text;
 
-        Command(QString text);
-    };
+    //        Command(QString text);
+    //    };
 
-    std::vector<Command> commands;
+    //    std::vector<Command> commands;
 };
 }
