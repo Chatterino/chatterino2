@@ -20,6 +20,9 @@ EmotePopup::EmotePopup(ColorScheme &colorScheme)
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
 
+    this->viewEmotes->setEnableScrollingToBottom(false);
+    this->viewEmojis->setEnableScrollingToBottom(false);
+
     this->setLayout(new QVBoxLayout(this));
 
     QTabWidget *tabs = new QTabWidget(this);

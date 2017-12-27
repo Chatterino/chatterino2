@@ -95,6 +95,8 @@ public:
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
+    void setEnableScrollingToBottom(bool);
+    bool getEnableScrollingToBottom() const;
 
     void setChannel(std::shared_ptr<Channel> channel);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
@@ -147,6 +149,7 @@ private:
     // This variable can be used to decide whether or not we should render the "Show latest
     // messages" button
     bool showingLatestMessages = true;
+    bool enableScrollingToBottom = true;
 
     AccountPopupWidget userPopupWidget;
     bool onlyUpdateEmotes = false;

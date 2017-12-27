@@ -45,7 +45,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->layoutMessages();
-        this->goToBottom->setVisible(this->scrollBar.isVisible() && !this->scrollBar.isAtBottom());
+        this->goToBottom->setVisible(this->enableScrollingToBottom && this->scrollBar.isVisible() &&
+                                     !this->scrollBar.isAtBottom());
 
         this->queueUpdate();
     });
@@ -178,7 +179,7 @@ void ChannelView::actuallyLayoutMessages()
 
     this->scrollBar.setMaximum(messagesSnapshot.getLength());
 
-    if (this->showingLatestMessages && showScrollbar) {
+    if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
         // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
         // to bottom
         // TODO: Do we want to check if the user is currently moving the scrollbar?
@@ -327,6 +328,16 @@ void ChannelView::clearSelection()
 {
     this->selection = Selection();
     layoutMessages();
+}
+
+void ChannelView::setEnableScrollingToBottom(bool value)
+{
+    this->enableScrollingToBottom = value;
+}
+
+bool ChannelView::getEnableScrollingToBottom() const
+{
+    return this->enableScrollingToBottom;
 }
 
 messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
