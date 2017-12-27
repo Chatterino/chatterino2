@@ -1,15 +1,34 @@
 #pragma once
 
 #include <QString>
+#include <vector>
 
 namespace chatterino {
+
 class CommandManager
 {
-public:
-    CommandManager() = delete;
+    // public:
+    //    CommandManager() = delete;
 
-    void execCommand(QString command);
-    // void selectSplitRelative(int dx, int dy);
-    void moveSplitRelative(int dx, int dy);
+    //    QString execCommand(QString text);
+    // void addCommand ?
+    // void loadCommands(QString) taking all commands as a \n seperated list ?
+
+    //    static CommandManager *getInstance()
+    //    {
+    //        static CommandManager manager;
+
+    //        return manager;
+    //    }
+
+    // private:
+    //    struct Command {
+    //        QString name;
+    //        QString text;
+
+    //        Command(QString text);
+    //    };
+
+    //    std::vector<Command> commands;
 };
 }

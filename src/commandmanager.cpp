@@ -1,44 +1,77 @@
 #include "commandmanager.hpp"
-#include "windowmanager.hpp"
+
+#include <QRegularExpression>
 
 namespace chatterino {
-void CommandManager::execCommand(QString command)
-{
-//    if (command == "selectr") {
-//        selectSplitRelative(false, 1);
-//    }
-//    if (command == "selectl") {
-//        selectSplitRelative(false, -1);
-//    }
-//    if (command == "selectu") {
-//        selectSplitRelative(true, -1);
-//    }
-//    if (command == "selectd") {
-//        selectSplitRelative(true, 1);
-//    }
-
-    if (command == "mover") {
-        moveSplitRelative(false, 1);
-    }
-    if (command == "movel") {
-        moveSplitRelative(false, -1);
-    }
-    if (command == "moveu") {
-        moveSplitRelative(true, -1);
-    }
-    if (command == "moved") {
-        moveSplitRelative(true, 1);
-    }
-}
-
-//void CommandManager::selectSplitRelative(bool vertical, int offset)
+// QString CommandManager::execCommand(QString text)
 //{
-//    SplitContainer *container = WindowManager::instance->
-//
-//                                if (vertical)
+//    QStringList words = text.split(' ', QString::SkipEmptyParts);
+
+//    if (words.length() == 0) {
+//        return text;
+//    }
+
+//    QString commandName = words[0];
+//    if (commandName[0] == "/") {
+//        commandName = commandName.mid(1);
+//    }
+
+//    Command *command = nullptr;
+//    for (Command &command : this->commands) {
+//        if (command.name == commandName) {
+//            command = &command;
+//            break;
+//        }
+//    }
+
+//    if (command == nullptr) {
+//        return text;
+//    }
+
+//    QString result;
+
+//    static QRegularExpression parseCommand("[^{]({{)*{(\d+\+?)}");
+//    for (QRegularExpressionMatch &match : parseCommand.globalMatch(command->text)) {
+//        result += text.mid(match.capturedStart(), match.capturedLength());
+
+//        QString wordIndexMatch = match.captured(2);
+
+//        bool ok;
+//        int wordIndex = wordIndexMatch.replace("=", "").toInt(ok);
+//        if (!ok) {
+//            result += match.captured();
+//            continue;
+//        }
+//        if (words.length() <= wordIndex) {
+//            // alternatively return text because the operation failed
+//            result += "";
+//            return;
+//        }
+
+//        if (wordIndexMatch[wordIndexMatch.length() - 1] == '+') {
+//            for (int i = wordIndex; i < words.length(); i++) {
+//                result += words[i];
+//            }
+//        } else {
+//            result += words[wordIndex];
+//        }
+//    }
+
+//    result += text.mid(match.capturedStart(), match.capturedLength());
+
+//    return result;
 //}
 
-void CommandManager::moveSplitRelative(int dx, int dy)
-{
-}
+// CommandManager::Command::Command(QString _text)
+//{
+//    int index = _text.indexOf(' ');
+
+//    if (index == -1) {
+//        this->name == _text;
+//        return;
+//    }
+
+//    this->name = _text.mid(0, index);
+//    this->text = _text.mid(index + 1);
+//}
 }
