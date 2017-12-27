@@ -204,6 +204,7 @@ void IrcManager::joinChannel(const QString &channelName)
         this->readConnection->sendRaw("JOIN #" + channelName);
         this->writeConnection->sendRaw("JOIN #" + channelName);
     }
+    this->dontParse.append(channelName);
 
     this->connectionMutex.unlock();
 }
@@ -223,9 +224,10 @@ void IrcManager::partChannel(const QString &channelName)
 void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     this->onPrivateMessage.invoke(message);
-    auto c = this->channelManager.getTwitchChannel(message->target().mid(1));
+    QString channel = message->target().mid(1);
+    auto c = this->channelManager.getTwitchChannel(channel);
 
-    if (!c) {
+    if (!c || this->dontParse.contains(channel)) {
         return;
     }
 
@@ -286,6 +288,7 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
         channelManager.getTwitchChannel(channel)->setRoomID(roomID);
 
         this->resources.loadChannelData(roomID);
+        this->fetchRecentMessages(roomID, channel);
     }
 }
 
@@ -518,6 +521,25 @@ void IrcManager::onDisconnected()
         assert(channel);
         channel->addMessage(msg);
     });
+}
+
+void IrcManager::fetchRecentMessages(QString &roomID, QString &channel)
+{
+    static QString genericURL =
+        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
+
+    util::twitch::get(genericURL.arg(roomID), this, [=](QJsonObject obj) {
+        this->dontParse.removeAll(channel);
+        auto msgArray = obj.value("messages").toArray();
+        if (msgArray.size())
+            for (int i = 0; i < msgArray.size(); i++) {
+                QByteArray content = msgArray[i].toString().toUtf8();
+                auto msg = Communi::IrcMessage::fromData(content, this->readConnection.get());
+                auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
+                privateMessageReceived(privMsg);
+            }
+    });
+
 }
 
 }  // namespace chatterino
