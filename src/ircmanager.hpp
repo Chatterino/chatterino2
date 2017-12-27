@@ -46,11 +46,13 @@ public:
     void setUser(std::shared_ptr<twitch::TwitchUser> newAccount);
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
+    void privateMessageReceived(Communi::IrcPrivateMessage *message);
 
     ChannelManager &channelManager;
     Resources &resources;
     WindowManager &windowManager;
 
+    Communi::IrcConnection* getReadConnection();
 private:
     // variables
     std::shared_ptr<twitch::TwitchUser> account = nullptr;
@@ -73,7 +75,6 @@ private:
 
     void beginConnecting();
 
-    void privateMessageReceived(Communi::IrcPrivateMessage *message);
     void messageReceived(Communi::IrcMessage *message);
 
     void writeConnectionMessageReceived(Communi::IrcMessage *message);
@@ -89,9 +90,6 @@ private:
 
     void onConnected();
     void onDisconnected();
-
-    void fetchRecentMessages(QString &roomID, QString &channel);
-    QVector<QString> dontParse;
 
 private:
     QByteArray messageSuffix;

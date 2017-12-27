@@ -33,6 +33,8 @@ public:
     boost::signals2::signal<void()> roomIDchanged;
     boost::signals2::signal<void()> onlineStatusChanged;
 
+    pajlada::Signals::NoArgBoltSignal fetchMessages;
+
     QString roomID;
     bool isLive;
     QString streamViewerCount;
@@ -43,6 +45,8 @@ public:
 private:
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
+
+    void fetchRecentMessages();
 
     IrcManager &ircManager;
 

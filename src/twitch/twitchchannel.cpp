@@ -22,6 +22,8 @@ TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName,
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
+    this->dontAddMessages = true;
+
     if (!this->isSpecial) {
         this->reloadChannelEmotes();
     }
@@ -34,6 +36,10 @@ TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName,
 
     this->roomIDchanged.connect([this]() {
         this->refreshLiveStatus();  //
+    });
+
+    this->fetchMessages.connect([this] {
+        this->fetchRecentMessages();
     });
 }
 
@@ -57,6 +63,7 @@ void TwitchChannel::setRoomID(const QString &_roomID)
 {
     this->roomID = _roomID;
     this->roomIDchanged();
+    this->fetchMessages.invoke();
 }
 
 void TwitchChannel::reloadChannelEmotes()
@@ -118,6 +125,25 @@ void TwitchChannel::refreshLiveStatus()
 
             this->setLive(true);
         }
+    });
+}
+
+void TwitchChannel::fetchRecentMessages()
+{
+    static QString genericURL =
+        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
+    static auto readConnection = this->ircManager.getReadConnection();
+
+    util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [=](QJsonObject obj) {
+        this->dontAddMessages = false;
+        auto msgArray = obj.value("messages").toArray();
+        if (msgArray.size())
+            for (int i = 0; i < msgArray.size(); i++) {
+                QByteArray content = msgArray[i].toString().toUtf8();
+                auto msg = Communi::IrcMessage::fromData(content, readConnection);
+                auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
+                this->ircManager.privateMessageReceived(privMsg);
+            }
     });
 }
 

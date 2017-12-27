@@ -36,6 +36,9 @@ messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnaps
 
 void Channel::addMessage(std::shared_ptr<Message> message)
 {
+    if (dontAddMessages) {
+        return;
+    }
     std::shared_ptr<Message> deleted;
 
     const QString &username = message->loginName;
