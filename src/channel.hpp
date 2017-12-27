@@ -51,7 +51,7 @@ public:
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
 
-    bool dontAddMessages;
+    bool dontAddMessages = false;
 
 private:
     messages::LimitedQueue<messages::SharedMessage> messages;
