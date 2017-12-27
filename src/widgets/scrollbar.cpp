@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
+#include <cmath>
 
 #define MIN_THUMB_HEIGHT 10
 
@@ -208,13 +209,13 @@ void ScrollBar::setCurrentValue(qreal value)
     value = std::max(this->minimum, std::min(this->maximum - this->largeChange,
                                              value + this->smoothScrollingOffset));
 
-    if (this->currentValue != value) {
+    if (std::abs(this->currentValue - value) > 0.000001) {
         this->currentValue = value;
 
-        updateScroll();
+        this->updateScroll();
         this->currentValueChanged();
 
-        update();
+        this->update();
     }
 }
 
