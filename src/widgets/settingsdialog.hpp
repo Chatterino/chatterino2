@@ -1,7 +1,6 @@
 #pragma once
 
 #include "settingsmanager.hpp"
-#include "settingssnapshot.hpp"
 #include "widgets/accountswitchwidget.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 
@@ -27,11 +26,13 @@ namespace widgets {
 
 class SettingsDialog : public BaseWidget
 {
-public:
     SettingsDialog();
 
     void select(SettingsDialogTab *tab);
 
+    friend class SettingsDialogTab;
+
+public:
     enum class PreferredTab {
         NoPreference,
         Accounts,
@@ -45,7 +46,6 @@ protected:
 private:
     void refresh();
 
-    SettingsSnapshot snapshot;
     std::vector<SettingsDialogTab *> tabs;
 
     pajlada::Settings::Setting<int> usernameDisplayMode;

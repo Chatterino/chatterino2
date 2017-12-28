@@ -1,13 +1,20 @@
 #include "settingsmanager.hpp"
 #include "appdatapath.hpp"
+#include "debug/log.hpp"
 
-#include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
 
 using namespace chatterino::messages;
 
 namespace chatterino {
+
+std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
+
+void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
+{
+    _settings.push_back(setting);
+}
 
 SettingsManager::SettingsManager()
     : streamlinkPath("/behaviour/streamlink/path", "")
@@ -17,6 +24,7 @@ SettingsManager::SettingsManager()
     , highlightProperties(this->settingsItems, "highlightProperties",
                           QMap<QString, QPair<bool, bool>>())
     , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
+    , snapshot(nullptr)
     , settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
 {
     this->wordMaskListener.addSetting(this->showTimestamps);
@@ -62,7 +70,6 @@ void SettingsManager::load()
         } else {
             this->settings.beginGroup("Highlights");
             QStringList list = this->settings.childGroups();
-            qDebug() << list.join(",");
             for (auto string : list) {
                 this->settings.beginGroup(string);
                 highlightProperties.insertMap(string,
@@ -129,19 +136,51 @@ void SettingsManager::updateWordTypeMask()
     }
 }
 
-SettingsSnapshot SettingsManager::createSnapshot()
+void SettingsManager::saveSnapshot()
 {
-    SettingsSnapshot snapshot;
+    rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
+    rapidjson::Document::AllocatorType &a = d->GetAllocator();
 
-    for (auto &item : this->settingsItems) {
-        if (item.get().getName() != "highlightProperties") {
-            snapshot.addItem(item, item.get().getVariant());
-        } else {
-            snapshot.mapItems = highlightProperties.get();
+    for (const auto &weakSetting : _settings) {
+        auto setting = weakSetting.lock();
+        if (!setting) {
+            continue;
         }
+
+        rapidjson::Value key(setting->getPath().c_str(), a);
+        rapidjson::Value val = setting->marshalInto(*d);
+        d->AddMember(key.Move(), val.Move(), a);
     }
 
-    return snapshot;
+    this->snapshot.reset(d);
+
+    debug::Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
+}
+
+void SettingsManager::recallSnapshot()
+{
+    if (!this->snapshot) {
+        return;
+    }
+
+    const auto &snapshotObject = this->snapshot->GetObject();
+
+    for (const auto &weakSetting : _settings) {
+        auto setting = weakSetting.lock();
+        if (!setting) {
+            debug::Log("Error stage 1 of loading");
+            continue;
+        }
+
+        const char *path = setting->getPath().c_str();
+
+        if (!snapshotObject.HasMember(path)) {
+            debug::Log("Error stage 2 of loading");
+            continue;
+        }
+
+        setting->unmarshalValue(snapshotObject[path]);
+    }
 }
 
 }  // namespace chatterino

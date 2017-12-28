@@ -2,7 +2,6 @@
 
 #include "messages/word.hpp"
 #include "setting.hpp"
-#include "settingssnapshot.hpp"
 
 #include <QSettings>
 #include <pajlada/settings/setting.hpp>
@@ -10,12 +9,76 @@
 
 namespace chatterino {
 
+static void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
+
+template <typename Type>
+class ChatterinoSetting : public pajlada::Settings::Setting<Type>
+{
+public:
+    ChatterinoSetting(const std::string &_path, const Type &_defaultValue)
+        : pajlada::Settings::Setting<Type>(_path, _defaultValue)
+    {
+        _registerSetting(this->data);
+    }
+
+    void saveRecall();
+
+    ChatterinoSetting &operator=(const Type &newValue)
+    {
+        assert(this->data != nullptr);
+
+        this->setValue(newValue);
+
+        return *this;
+    }
+
+    template <typename T2>
+    ChatterinoSetting &operator=(const T2 &newValue)
+    {
+        assert(this->data != nullptr);
+
+        this->setValue(newValue);
+
+        return *this;
+    }
+
+    ChatterinoSetting &operator=(Type &&newValue) noexcept
+    {
+        assert(this->data != nullptr);
+
+        this->setValue(std::move(newValue));
+
+        return *this;
+    }
+
+    bool operator==(const Type &rhs) const
+    {
+        assert(this->data != nullptr);
+
+        return this->getValue() == rhs;
+    }
+
+    bool operator!=(const Type &rhs) const
+    {
+        assert(this->data != nullptr);
+
+        return this->getValue() != rhs;
+    }
+
+    operator const Type() const
+    {
+        assert(this->data != nullptr);
+
+        return this->getValue();
+    }
+};
+
 class SettingsManager : public QObject
 {
     Q_OBJECT
 
-    using BoolSetting = pajlada::Settings::Setting<bool>;
-    using FloatSetting = pajlada::Settings::Setting<float>;
+    using BoolSetting = ChatterinoSetting<bool>;
+    using FloatSetting = ChatterinoSetting<float>;
 
 public:
     void load();
@@ -24,7 +87,6 @@ public:
     messages::Word::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
     QSettings &getQSettings();
-    SettingsSnapshot createSnapshot();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -87,10 +149,15 @@ public:
     }
     void updateWordTypeMask();
 
+    void saveSnapshot();
+    void recallSnapshot();
+
 signals:
     void wordTypeMaskChanged();
 
 private:
+    std::unique_ptr<rapidjson::Document> snapshot;
+
     SettingsManager();
 
     QSettings settings;

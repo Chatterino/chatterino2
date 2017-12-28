@@ -27,7 +27,6 @@ namespace widgets {
 
 SettingsDialog::SettingsDialog()
     : BaseWidget()
-    , snapshot(SettingsManager::getInstance().createSnapshot())
     , usernameDisplayMode(
           "/appearance/messages/usernameDisplayMode",
           twitch::TwitchMessageBuilder::UsernameDisplayMode::UsernameAndLocalizedName)
@@ -615,6 +614,8 @@ void SettingsDialog::showDialog(PreferredTab preferredTab)
 void SettingsDialog::refresh()
 {
     this->ui.accountSwitchWidget->refresh();
+
+    SettingsManager::getInstance().saveSnapshot();
 }
 
 void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)
@@ -683,7 +684,9 @@ QCheckBox *SettingsDialog::createCheckbox(const QString &title,
     auto checkbox = new QCheckBox(title);
 
     // Set checkbox initial state
-    checkbox->setChecked(setting.getValue());
+    setting.connect([checkbox](const bool &value, auto) {
+        checkbox->setChecked(value);  //
+    });
 
     QObject::connect(checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
         qDebug() << "update checkbox value";
@@ -751,13 +754,11 @@ void SettingsDialog::okButtonClicked()
 
 void SettingsDialog::cancelButtonClicked()
 {
-    // TODO: Re-implement the snapshot feature properly
-    auto &instance = SettingsManager::getInstance();
+    auto &settings = SettingsManager::getInstance();
 
-    this->snapshot.apply();
-    instance.highlightProperties.set(this->snapshot.mapItems);
+    settings.recallSnapshot();
 
-    QStringList list = instance.highlightProperties.get().keys();
+    QStringList list = settings.highlightProperties.get().keys();
     list.removeDuplicates();
     while (globalHighlights->count() > 0) {
         delete globalHighlights->takeItem(0);
