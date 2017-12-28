@@ -449,7 +449,16 @@ void IrcManager::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     auto rawChannelName = message->target();
 
-    assert(rawChannelName.length() >= 2);
+    bool broadcast = rawChannelName.length() < 2;
+    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
+
+    if (broadcast) {
+        this->channelManager.doOnAll([msg](const auto &c) {
+            c->addMessage(msg);  //
+        });
+
+        return;
+    }
 
     auto trimmedChannelName = rawChannelName.mid(1);
 
@@ -460,28 +469,12 @@ void IrcManager::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                    trimmedChannelName);
         return;
     }
-
-    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
 
     c->addMessage(msg);
 }
 
 void IrcManager::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
 {
-    auto rawChannelName = message->target();
-
-    assert(rawChannelName.length() >= 2);
-
-    auto trimmedChannelName = rawChannelName.mid(1);
-
-    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
-
-    if (!c) {
-        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
-                   trimmedChannelName);
-        return;
-    }
-
     QVariant v = message->tag("msg-id");
     if (!v.isValid()) {
         return;
@@ -495,9 +488,7 @@ void IrcManager::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *m
         return;
     }
 
-    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
-
-    c->addMessage(msg);
+    this->handleNoticeMessage(message);
 }
 
 void IrcManager::onConnected()
