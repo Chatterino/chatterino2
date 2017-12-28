@@ -50,7 +50,7 @@ SharedMessage TwitchMessageBuilder::parse()
 
     // Appends the correct timestamp if the message is a past message
     bool isPastMsg = this->tags.contains("historical");
-    if(isPastMsg) {
+    if (isPastMsg) {
         // This may be architecture dependent(datatype)
         qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
         QDateTime time = QDateTime::fromMSecsSinceEpoch(ts);
@@ -367,7 +367,7 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     if (!ircMessage->isAction()) {
-        usernameString += ": ";
+        usernameString += ":";
     }
 
     this->appendWord(Word(usernameString, Word::Username, MessageColor(this->usernameColor),
