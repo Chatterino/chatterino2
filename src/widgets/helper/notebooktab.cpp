@@ -14,9 +14,10 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookTab::NotebookTab(Notebook *_notebook, const std::string &settingPrefix)
+NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
     : BaseWidget(_notebook)
-    , settingRoot(fS("{}/tab", settingPrefix))
+    , uuid(_uuid)
+    , settingRoot(fS("/containers/{}/tab", this->uuid))
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
     , title(fS("{}/title", this->settingRoot), "")

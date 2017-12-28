@@ -21,10 +21,11 @@ class NotebookTab : public BaseWidget
 {
     Q_OBJECT
 
-    std::string settingRoot;
+    const std::string uuid;
+    const std::string settingRoot;
 
 public:
-    explicit NotebookTab(Notebook *_notebook, const std::string &settingPrefix);
+    explicit NotebookTab(Notebook *_notebook, const std::string &_uuid);
 
     void calcSize();
 

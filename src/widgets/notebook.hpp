@@ -72,7 +72,9 @@ private:
 
     bool showButtons;
 
-    void loadContainers();
+    pajlada::Settings::Setting<std::vector<std::string>> tabs;
+
+    void loadTabs();
 
 public:
     void save();

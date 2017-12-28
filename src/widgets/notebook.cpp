@@ -31,6 +31,7 @@ Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showBu
     , settingsButton(this)
     , userButton(this)
     , showButtons(_showButtons)
+    , tabs(fS("{}/tabs", this->settingRoot))
 {
     this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
     this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
@@ -46,7 +47,7 @@ Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showBu
     settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
     settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
 
-    this->loadContainers();
+    this->loadTabs();
 }
 
 SplitContainer *Notebook::addNewPage()
@@ -56,10 +57,8 @@ SplitContainer *Notebook::addNewPage()
 
 SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
 {
-    std::string key = fS("{}/containers/{}", this->settingRoot, uuid);
-
-    auto tab = new NotebookTab(this, key);
-    auto page = new SplitContainer(this->channelManager, this, tab, key);
+    auto tab = new NotebookTab(this, uuid);
+    auto page = new SplitContainer(this->channelManager, this, tab, uuid);
 
     tab->show();
 
@@ -268,22 +267,30 @@ void Notebook::addPageButtonClicked()
     QTimer::singleShot(80, [this] { this->addNewPage(); });
 }
 
-void Notebook::loadContainers()
+void Notebook::loadTabs()
 {
-    std::string containersKey = fS("{}/containers", this->settingRoot);
+    const std::vector<std::string> tabArray = this->tabs.getValue();
 
-    auto keys = pajlada::Settings::SettingManager::getObjectKeys(containersKey);
+    if (tabArray.size() == 0) {
+        this->addNewPage();
+        return;
+    }
 
-    for (const std::string &key : keys) {
-        this->addPage(key);
+    for (const std::string &tabUUID : tabArray) {
+        this->addPage(tabUUID);
     }
 }
 
 void Notebook::save()
 {
+    std::vector<std::string> tabArray;
+
     for (const auto &page : this->pages) {
+        tabArray.push_back(page->getUUID());
         page->save();
     }
+
+    this->tabs = tabArray;
 }
 
 }  // namespace widgets

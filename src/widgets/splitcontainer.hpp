@@ -22,12 +22,17 @@ class SplitContainer : public BaseWidget
 {
     Q_OBJECT
 
-    const std::string settingPrefix;
-    std::string settingRoot;
+    const std::string uuid;
+    const std::string settingRoot;
 
 public:
     SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
-                   const std::string &_settingPrefix);
+                   const std::string &_uuid);
+
+    const std::string &getUUID() const
+    {
+        return this->uuid;
+    }
 
     ChannelManager &channelManager;
 

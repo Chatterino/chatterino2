@@ -26,10 +26,10 @@ Split *SplitContainer::draggingSplit = nullptr;
 std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
 SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
-                               const std::string &_settingPrefix)
+                               const std::string &_uuid)
     : BaseWidget(parent->colorScheme, parent)
-    , settingPrefix(_settingPrefix)
-    , settingRoot(fS("{}", this->settingPrefix))
+    , uuid(_uuid)
+    , settingRoot(fS("/containers/{}", this->uuid))
     , chats(fS("{}/chats", this->settingRoot))
     , channelManager(_channelManager)
     , tab(_tab)
