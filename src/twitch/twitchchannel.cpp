@@ -39,7 +39,7 @@ TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName,
     });
 
     this->fetchMessages.connect([this] {
-        this->fetchRecentMessages();
+        this->fetchRecentMessages();  //
     });
 }
 
@@ -109,22 +109,49 @@ void TwitchChannel::refreshLiveStatus()
 
     QString url("https://api.twitch.tv/kraken/streams/" + this->roomID);
 
-    util::twitch::get(url, QThread::currentThread(), [this](QJsonObject obj) {
-        if (obj.value("stream").isNull()) {
-            this->setLive(false);
-        } else {
-            auto stream = obj.value("stream").toObject();
-            this->streamViewerCount = QString::number(stream.value("viewers").toDouble());
-            this->streamGame = stream.value("game").toString();
-            this->streamStatus = stream.value("channel").toObject().value("status").toString();
-            QDateTime since =
-                QDateTime::fromString(stream.value("created_at").toString(), Qt::ISODate);
-            auto diff = since.secsTo(QDateTime::currentDateTime());
-            this->streamUptime =
-                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
-
-            this->setLive(true);
+    util::twitch::get2(url, QThread::currentThread(), [this](rapidjson::Document &d) {
+        if (!d.IsObject()) {
+            debug::Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+            return;
         }
+
+        if (!d.HasMember("stream")) {
+            debug::Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+            return;
+        }
+
+        const auto &stream = d["stream"];
+
+        if (!stream.IsObject()) {
+            // Stream is offline (stream is most likely null)
+            this->setLive(false);
+            return;
+        }
+
+        if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
+            !stream.HasMember("channel") || !stream.HasMember("created_at")) {
+            debug::Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
+            this->setLive(false);
+            return;
+        }
+
+        const rapidjson::Value &streamChannel = stream["channel"];
+
+        if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
+            debug::Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
+            return;
+        }
+
+        // Stream is live
+        this->streamViewerCount = QString::number(stream["viewers"].GetInt());
+        this->streamGame = stream["game"].GetString();
+        this->streamStatus = streamChannel["status"].GetString();
+        QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
+        auto diff = since.secsTo(QDateTime::currentDateTime());
+        this->streamUptime =
+            QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+
+        this->setLive(true);
     });
 }
 

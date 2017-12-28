@@ -5,6 +5,9 @@
 #include "debug/log.hpp"
 #include "util/networkmanager.hpp"
 
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
+#include <rapidjson/error/error.h>
 #include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -35,6 +38,26 @@ static QJsonObject parseJSONFromReply(QNetworkReply *reply)
     return jsonDoc.object();
 }
 
+static rapidjson::Document parseJSONFromReply2(QNetworkReply *reply)
+{
+    rapidjson::Document ret(rapidjson::kNullType);
+
+    if (reply->error() != QNetworkReply::NetworkError::NoError) {
+        return ret;
+    }
+
+    QByteArray data = reply->readAll();
+    rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
+
+    if (result.Code() != rapidjson::kParseErrorNone) {
+        debug::Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
+                   result.Offset());
+        return ret;
+    }
+
+    return ret;
+}
+
 namespace twitch {
 
 static void get(QString url, const QObject *caller,
@@ -47,6 +70,19 @@ static void get(QString url, const QObject *caller,
     req.get([=](QNetworkReply *reply) {
         auto node = parseJSONFromReply(reply);
         successCallback(node);
+    });
+}
+
+static void get2(QString url, const QObject *caller,
+                 std::function<void(rapidjson::Document &)> successCallback)
+{
+    util::NetworkRequest req(url);
+    req.setCaller(caller);
+    req.setRawHeader("Client-ID", getDefaultClientID());
+    req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    req.get([=](QNetworkReply *reply) {
+        auto document = parseJSONFromReply2(reply);
+        successCallback(document);
     });
 }
 
