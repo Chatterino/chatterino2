@@ -89,6 +89,10 @@ ChannelView::~ChannelView()
 {
     QObject::disconnect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged,
                         this, &ChannelView::wordTypeMaskChanged);
+    this->messageAppendedConnection.disconnect();
+    this->messageRemovedConnection.disconnect();
+    this->repaintGifsConnection.disconnect();
+    this->layoutConnection.disconnect();
 }
 
 void ChannelView::queueUpdate()
