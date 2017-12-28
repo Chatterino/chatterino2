@@ -8,6 +8,7 @@
 #define MARGIN_RIGHT (int)(8 * this->scale)
 #define MARGIN_TOP (int)(4 * this->scale)
 #define MARGIN_BOTTOM (int)(4 * this->scale)
+#define COMPACT_EMOTES_OFFSET 6
 
 using namespace chatterino::messages;
 
@@ -96,6 +97,8 @@ void MessageRef::actuallyLayout(int width)
     const int spaceWidth = 4;
     const int right = width - MARGIN_RIGHT;
 
+    bool overlapEmotes = true;
+
     // clear word parts
     this->wordParts.clear();
 
@@ -137,7 +140,7 @@ void MessageRef::actuallyLayout(int width)
         // word wrapping
         if (word.isText() && word.getWidth(this->scale) + MARGIN_LEFT > right) {
             // align and end the current line
-            alignWordParts(lineStart, lineHeight, width, firstLineHeight);
+            this->_alignWordParts(lineStart, lineHeight, width, firstLineHeight);
             y += lineHeight;
 
             int currentPartStart = 0;
@@ -172,10 +175,8 @@ void MessageRef::actuallyLayout(int width)
                                                lineNumber, mid, mid, true, currentPartStart));
 
             x = currentLineWidth + MARGIN_LEFT + spaceWidth;
-            lineHeight = word.getHeight(this->scale);
+            lineHeight = this->_updateLineHeight(0, word, overlapEmotes);
             lineStart = this->wordParts.size() - 1;
-
-            first = false;
         }
         // fits in the current line
         else if (first || x + word.getWidth(this->scale) + xOffset <= right) {
@@ -185,14 +186,12 @@ void MessageRef::actuallyLayout(int width)
             x += word.getWidth(this->scale) + xOffset;
             x += spaceWidth;
 
-            lineHeight = std::max(word.getHeight(this->scale), lineHeight);
-
-            first = false;
+            lineHeight = this->_updateLineHeight(lineHeight, word, overlapEmotes);
         }
         // doesn't fit in the line
         else {
             // align and end the current line
-            alignWordParts(lineStart, lineHeight, width, firstLineHeight);
+            this->_alignWordParts(lineStart, lineHeight, width, firstLineHeight);
 
             y += lineHeight;
 
@@ -203,15 +202,17 @@ void MessageRef::actuallyLayout(int width)
 
             lineStart = this->wordParts.size() - 1;
 
-            lineHeight = word.getHeight(this->scale);
+            lineHeight = this->_updateLineHeight(0, word, overlapEmotes);
 
             x = word.getWidth(this->scale) + MARGIN_LEFT;
             x += spaceWidth;
         }
+
+        first = false;
     }
 
     // align and end the current line
-    alignWordParts(lineStart, lineHeight, width, firstLineHeight);
+    this->_alignWordParts(lineStart, lineHeight, width, firstLineHeight);
 
     this->collapsedHeight = firstLineHeight == -1 ? (int)(24 * this->scale)
                                                   : firstLineHeight + MARGIN_TOP + MARGIN_BOTTOM;
@@ -259,8 +260,10 @@ const std::vector<WordPart> &MessageRef::getWordParts() const
     return this->wordParts;
 }
 
-void MessageRef::alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight)
+void MessageRef::_alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight)
 {
+    bool compactEmotes = true;
+
     if (firstLineHeight == -1) {
         firstLineHeight = lineHeight;
     }
@@ -272,10 +275,26 @@ void MessageRef::alignWordParts(int lineStart, int lineHeight, int width, int &f
     }
 
     for (size_t i = lineStart; i < this->wordParts.size(); i++) {
-        WordPart &wordPart2 = this->wordParts.at(i);
+        WordPart &wordPart = this->wordParts.at(i);
 
-        wordPart2.setPosition(wordPart2.getX() + xOffset, wordPart2.getY() + lineHeight);
+        int yExtra = compactEmotes && wordPart.getWord().isImage()
+                         ? (COMPACT_EMOTES_OFFSET / 2) * this->scale
+                         : 0;
+
+        wordPart.setPosition(wordPart.getX() + xOffset, wordPart.getY() + lineHeight + yExtra);
     }
+}
+
+int MessageRef::_updateLineHeight(int currentLineHeight, Word &word, bool compactEmotes)
+{
+    int newLineHeight = word.getHeight(this->scale);
+
+    // fourtf: doesn't care about the height of a normal line
+    if (compactEmotes && word.isImage()) {
+        newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale;
+    }
+
+    return std::max(currentLineHeight, newLineHeight);
 }
 
 const Word *MessageRef::tryGetWordPart(QPoint point)

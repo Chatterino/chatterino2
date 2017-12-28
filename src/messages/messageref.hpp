@@ -58,7 +58,8 @@ private:
     // methods
     void rebuild();
     void actuallyLayout(int width);
-    void alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight);
+    void _alignWordParts(int lineStart, int lineHeight, int width, int &firstLineHeight);
+    int _updateLineHeight(int currentLineHeight, Word &word, bool overlapEmotes);
     void updateTextSizes();
     void updateImageSizes();
 };
