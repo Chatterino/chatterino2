@@ -78,11 +78,6 @@ ChannelView::ChannelView(BaseWidget *parent)
 
         this->updateTimer.start();
     });
-
-    Window *_window = dynamic_cast<Window *>(this->window());
-
-    if (_window) {
-    }
 }
 
 ChannelView::~ChannelView()
