@@ -14,7 +14,7 @@ TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName,
     , ircManager(ircManager)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
-    , subscriptionURL("https://www.twitch.tv/" + name + "/subscribe?ref=in_chat_subscriber_link")
+    , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , isLive(false)
