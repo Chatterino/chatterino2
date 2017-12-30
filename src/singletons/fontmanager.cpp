@@ -1,4 +1,4 @@
-#include "fontmanager.hpp"
+#include "singletons/fontmanager.hpp"
 
 #include <QDebug>
 
@@ -21,6 +21,13 @@ FontManager::FontManager()
         this->currentFontByDpi.clear();
         this->fontChanged.invoke();
     });
+}
+
+FontManager &FontManager::getInstance()
+{
+    static FontManager instance;
+
+    return instance;
 }
 
 QFont &FontManager::getFont(Type type, float dpi)

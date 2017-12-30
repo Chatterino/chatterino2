@@ -1,12 +1,12 @@
 #include "widgets/settingsdialog.hpp"
-#include "accountmanager.hpp"
+#include "singletons/accountmanager.hpp"
 #include "const.hpp"
 #include "debug/log.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 #include "widgets/logindialog.hpp"
-#include "windowmanager.hpp"
+#include "singletons/windowmanager.hpp"
 
 #include <QComboBox>
 #include <QDebug>

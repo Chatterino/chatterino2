@@ -1,6 +1,6 @@
 #pragma once
 
-#include "accountmanager.hpp"
+#include "singletons/accountmanager.hpp"
 #include "credentials.hpp"
 #include "debug/log.hpp"
 #include "util/networkmanager.hpp"

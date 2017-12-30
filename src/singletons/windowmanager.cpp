@@ -1,27 +1,27 @@
 #include "windowmanager.hpp"
 #include "appdatapath.hpp"
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
 
 #include <QDebug>
 #include <QStandardPaths>
 #include <boost/foreach.hpp>
 
 namespace chatterino {
-WindowManager *WindowManager::instance = nullptr;
-
-WindowManager::WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme)
-    : channelManager(_channelManager)
-    , colorScheme(_colorScheme)
+WindowManager &WindowManager::getInstance()
 {
-    WindowManager::instance = this;
+    static WindowManager instance(ThemeManager::getInstance());
+    return instance;
+}
+
+WindowManager::WindowManager(ThemeManager &_themeManager)
+    : themeManager(_themeManager)
+{
+    _themeManager.repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
 }
 
 void WindowManager::initMainWindow()
 {
-    this->selectedWindow = this->mainWindow =
-        new widgets::Window("main", this->channelManager, this->colorScheme, true);
+    this->selectedWindow = this->mainWindow = new widgets::Window("main", this->themeManager, true);
 }
 
 static const std::string &getSettingsPath()
@@ -67,7 +67,7 @@ widgets::Window &WindowManager::getSelectedWindow()
 
 widgets::Window &WindowManager::createWindow()
 {
-    auto *window = new widgets::Window("external", this->channelManager, this->colorScheme, false);
+    auto *window = new widgets::Window("external", this->themeManager, false);
     window->getNotebook().addNewPage();
 
     this->windows.push_back(window);

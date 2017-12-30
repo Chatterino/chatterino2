@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QPainter>
 
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -37,7 +37,7 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
     if (this->mouseEffectColor) {
         c = this->mouseEffectColor.get();
     } else {
-        c = this->colorScheme.isLightTheme() ? QColor(0, 0, 0) : QColor(255, 255, 255);
+        c = this->themeManager.isLightTheme() ? QColor(0, 0, 0) : QColor(255, 255, 255);
     }
 
     if (this->hoverMultiplier > 0) {

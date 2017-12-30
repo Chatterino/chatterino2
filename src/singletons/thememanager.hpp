@@ -9,17 +9,17 @@ namespace chatterino {
 
 class WindowManager;
 
-class ColorScheme
+class ThemeManager
 {
+    ThemeManager();
+
 public:
-    explicit ColorScheme(WindowManager &windowManager);
+    static ThemeManager &getInstance();
 
     inline bool isLightTheme() const
     {
         return this->lightTheme;
     }
-
-    static ColorScheme *instance;
 
     QString InputStyleSheet;
 
@@ -90,7 +90,7 @@ private:
     pajlada::Settings::Setting<std::string> themeName;
     pajlada::Settings::Setting<double> themeHue;
 
-    void setColors(double hue, double multiplier);
+    void actuallyUpdate(double hue, double multiplier);
     QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
 
     double middleLookupTable[360] = {};
@@ -100,6 +100,10 @@ private:
                                double toValue);
 
     bool lightTheme = false;
+
+    pajlada::Signals::NoArgSignal repaintVisibleChatWidgets;
+
+    friend class WindowManager;
 };
 
 }  // namespace chatterino

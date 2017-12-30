@@ -1,7 +1,6 @@
 #pragma once
 
 #include "concurrentmap.hpp"
-#include "emotemanager.hpp"
 #include "logging/loggingchannel.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/limitedqueue.hpp"

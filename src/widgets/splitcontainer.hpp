@@ -26,15 +26,12 @@ class SplitContainer : public BaseWidget
     const std::string settingRoot;
 
 public:
-    SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
-                   const std::string &_uuid);
+    SplitContainer(Notebook *parent, NotebookTab *_tab, const std::string &_uuid);
 
     const std::string &getUUID() const
     {
         return this->uuid;
     }
-
-    ChannelManager &channelManager;
 
     std::pair<int, int> removeFromLayout(Split *widget);
     void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1, -1));

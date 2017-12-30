@@ -1,8 +1,8 @@
 #include "widgets/window.hpp"
-#include "accountmanager.hpp"
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/accountmanager.hpp"
+#include "singletons/channelmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
 #include "widgets/split.hpp"
@@ -14,15 +14,13 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(const QString &windowName, ChannelManager &_channelManager,
-               ColorScheme &_colorScheme, bool _isMainWindow)
-    : BaseWidget(_colorScheme, nullptr)
+Window::Window(const QString &windowName, ThemeManager &_themeManager, bool _isMainWindow)
+    : BaseWidget(_themeManager, nullptr)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
     , dpi(this->getDpiMultiplier())
-    , channelManager(_channelManager)
-    , colorScheme(_colorScheme)
-    , notebook(this->channelManager, this, _isMainWindow, this->settingRoot)
+    , themeManager(_themeManager)
+    , notebook(this, _isMainWindow, this->settingRoot)
 {
     this->initAsWindow();
 
@@ -110,7 +108,7 @@ void Window::closeEvent(QCloseEvent *)
 void Window::refreshTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Background, this->colorScheme.TabBackground);
+    palette.setColor(QPalette::Background, this->themeManager.TabBackground);
     this->setPalette(palette);
 }
 

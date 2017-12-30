@@ -7,7 +7,11 @@ namespace chatterino {
 
 class CommandManager
 {
-    // public:
+    CommandManager() = default;
+
+public:
+    static CommandManager &getInstance();
+
     //    CommandManager() = delete;
 
     //    QString execCommand(QString text);

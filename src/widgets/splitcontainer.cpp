@@ -1,6 +1,6 @@
 #include "widgets/splitcontainer.hpp"
-#include "colorscheme.hpp"
 #include "common.hpp"
+#include "singletons/thememanager.hpp"
 #include "util/helpers.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/notebook.hpp"
@@ -25,13 +25,11 @@ bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
 std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
-SplitContainer::SplitContainer(ChannelManager &_channelManager, Notebook *parent, NotebookTab *_tab,
-                               const std::string &_uuid)
-    : BaseWidget(parent->colorScheme, parent)
+SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::string &_uuid)
+    : BaseWidget(parent->themeManager, parent)
     , uuid(_uuid)
     , settingRoot(fS("/containers/{}", this->uuid))
     , chats(fS("{}/chats", this->settingRoot))
-    , channelManager(_channelManager)
     , tab(_tab)
     , dropPreview(this)
     , chatWidgets()
@@ -387,17 +385,17 @@ void SplitContainer::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (this->ui.hbox.count() == 0) {
-        painter.fillRect(rect(), this->colorScheme.ChatBackground);
+        painter.fillRect(rect(), this->themeManager.ChatBackground);
 
-        painter.setPen(this->colorScheme.Text);
+        painter.setPen(this->themeManager.Text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), this->colorScheme.ChatSeperator);
+        painter.fillRect(rect(), this->themeManager.ChatSeperator);
     }
 
     QColor accentColor = (QApplication::activeWindow() == this->window()
-                              ? this->colorScheme.TabSelectedBackground
-                              : this->colorScheme.TabSelectedUnfocusedBackground);
+                              ? this->themeManager.TabSelectedBackground
+                              : this->themeManager.TabSelectedUnfocusedBackground);
 
     painter.fillRect(0, 0, width(), 2, accentColor);
 }
@@ -432,7 +430,7 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
 
 Split *SplitContainer::createChatWidget(const std::string &uuid)
 {
-    auto split = new Split(this->channelManager, this, uuid);
+    auto split = new Split(this, uuid);
 
     split->getChannelView().highlightedMessageReceived.connect([this] {
         this->tab->setHighlightState(HighlightState::Highlighted);  //

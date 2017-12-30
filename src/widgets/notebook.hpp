@@ -25,8 +25,7 @@ class Notebook : public BaseWidget
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    explicit Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons,
-                      const std::string &settingPrefix);
+    explicit Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix);
 
     SplitContainer *addNewPage();
     SplitContainer *addPage(const std::string &uuid, bool select = false);
@@ -57,9 +56,6 @@ public slots:
     void settingsButtonClicked();
     void usersButtonClicked();
     void addPageButtonClicked();
-
-public:
-    ChannelManager &channelManager;
 
 private:
     QList<SplitContainer *> pages;

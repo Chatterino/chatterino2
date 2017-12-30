@@ -1,5 +1,5 @@
 #include "widgets/helper/splitheader.hpp"
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 #include "twitch/twitchchannel.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/split.hpp"
@@ -135,8 +135,8 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->colorScheme.ChatHeaderBackground);
-    painter.setPen(this->colorScheme.ChatHeaderBorder);
+    painter.fillRect(rect(), this->themeManager.ChatHeaderBackground);
+    painter.setPen(this->themeManager.ChatHeaderBorder);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
@@ -217,7 +217,7 @@ void SplitHeader::rightButtonClicked()
 void SplitHeader::refreshTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
+    palette.setColor(QPalette::Foreground, this->themeManager.Text);
 
     this->leftLabel.setPalette(palette);
     this->channelNameLabel.setPalette(palette);

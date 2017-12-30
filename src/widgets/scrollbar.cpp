@@ -1,5 +1,5 @@
 #include "widgets/scrollbar.hpp"
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/helper/channelview.hpp"
 
 #include <QDebug>
@@ -234,22 +234,22 @@ void ScrollBar::paintEvent(QPaintEvent *)
     int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getDpiMultiplier());
 
     QPainter painter(this);
-    //    painter.fillRect(rect(), this->colorScheme.ScrollbarBG);
+    //    painter.fillRect(rect(), this->themeManager.ScrollbarBG);
 
     painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
-                     this->colorScheme.ScrollbarArrow);
+                     this->themeManager.ScrollbarArrow);
     painter.fillRect(QRect(xOffset, height() - this->buttonHeight, width(), this->buttonHeight),
-                     this->colorScheme.ScrollbarArrow);
+                     this->themeManager.ScrollbarArrow);
 
     this->thumbRect.setX(xOffset);
 
     // mouse over thumb
     if (this->mouseDownIndex == 2) {
-        painter.fillRect(this->thumbRect, this->colorScheme.ScrollbarThumbSelected);
+        painter.fillRect(this->thumbRect, this->themeManager.ScrollbarThumbSelected);
     }
     // mouse not over thumb
     else {
-        painter.fillRect(this->thumbRect, this->colorScheme.ScrollbarThumb);
+        painter.fillRect(this->thumbRect, this->themeManager.ScrollbarThumb);
     }
 
     //    ScrollBarHighlight *highlight = highlights;

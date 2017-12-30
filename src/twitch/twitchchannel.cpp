@@ -1,6 +1,6 @@
 #include "twitchchannel.hpp"
 #include "debug/log.hpp"
-#include "emotemanager.hpp"
+#include "singletons/emotemanager.hpp"
 #include "util/urlfetch.hpp"
 
 #include <QThread>
@@ -9,24 +9,20 @@
 namespace chatterino {
 namespace twitch {
 
-TwitchChannel::TwitchChannel(IrcManager &ircManager, const QString &channelName, bool _isSpecial)
+TwitchChannel::TwitchChannel(const QString &channelName)
     : Channel(channelName)
-    , ircManager(ircManager)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , isLive(false)
-    , isSpecial(_isSpecial)
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
     this->dontAddMessages = true;
 
-    if (!this->isSpecial) {
-        this->reloadChannelEmotes();
-    }
+    this->reloadChannelEmotes();
 
     this->liveStatusTimer = new QTimer;
     QObject::connect(this->liveStatusTimer, &QTimer::timeout, [this]() {
@@ -56,7 +52,7 @@ bool TwitchChannel::isEmpty() const
 
 bool TwitchChannel::canSendMessage() const
 {
-    return !this->isEmpty() && !this->isSpecial;
+    return !this->isEmpty();
 }
 
 void TwitchChannel::setRoomID(const QString &_roomID)
@@ -85,7 +81,7 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = emoteManager.replaceShortCodes(message);
 
-    this->ircManager.sendMessage(this->name, parsedMessage);
+    IrcManager::getInstance().sendMessage(this->name, parsedMessage);
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
@@ -159,7 +155,7 @@ void TwitchChannel::fetchRecentMessages()
 {
     static QString genericURL =
         "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
-    static auto readConnection = this->ircManager.getReadConnection();
+    static auto readConnection = IrcManager::getInstance().getReadConnection();
 
     util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [=](QJsonObject obj) {
         this->dontAddMessages = false;
@@ -169,7 +165,7 @@ void TwitchChannel::fetchRecentMessages()
                 QByteArray content = msgArray[i].toString().toUtf8();
                 auto msg = Communi::IrcMessage::fromData(content, readConnection);
                 auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
-                this->ircManager.privateMessageReceived(privMsg);
+                IrcManager::getInstance().privateMessageReceived(privMsg);
             }
     });
 }

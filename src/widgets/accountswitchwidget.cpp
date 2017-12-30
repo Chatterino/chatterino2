@@ -1,5 +1,5 @@
 #include "accountswitchwidget.hpp"
-#include "accountmanager.hpp"
+#include "singletons/accountmanager.hpp"
 #include "const.hpp"
 
 namespace chatterino {

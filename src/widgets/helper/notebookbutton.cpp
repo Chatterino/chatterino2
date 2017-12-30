@@ -1,5 +1,5 @@
 #include "widgets/helper/notebookbutton.hpp"
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/helper/rippleeffectbutton.hpp"
 
 #include <QMouseEvent>
@@ -23,16 +23,16 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    background = this->colorScheme.TabBackground;
+    background = this->themeManager.TabBackground;
 
     if (mouseDown) {
-        // background = this->colorScheme.TabSelectedBackground;
-        foreground = this->colorScheme.TabHoverText;
+        // background = this->themeManager.TabSelectedBackground;
+        foreground = this->themeManager.TabHoverText;
     } else if (mouseOver) {
-        // background = this->colorScheme.TabHoverText;
-        foreground = this->colorScheme.TabHoverText;
+        // background = this->themeManager.TabHoverText;
+        foreground = this->themeManager.TabHoverText;
     } else {
-        // background = this->colorScheme.TabPanelBackground;
+        // background = this->themeManager.TabPanelBackground;
         foreground = QColor(70, 80, 80);
     }
 

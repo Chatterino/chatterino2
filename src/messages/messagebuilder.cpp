@@ -1,6 +1,6 @@
 #include "messagebuilder.hpp"
-#include "colorscheme.hpp"
-#include "emotemanager.hpp"
+#include "singletons/thememanager.hpp"
+#include "singletons/emotemanager.hpp"
 #include "resources.hpp"
 
 #include <QDateTime>

@@ -1,8 +1,14 @@
-#include "commandmanager.hpp"
+#include "singletons/commandmanager.hpp"
 
 #include <QRegularExpression>
 
 namespace chatterino {
+CommandManager &CommandManager::getInstance()
+{
+    static CommandManager instance;
+    return instance;
+}
+
 // QString CommandManager::execCommand(QString text)
 //{
 //    QStringList words = text.split(' ', QString::SkipEmptyParts);

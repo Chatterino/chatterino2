@@ -18,6 +18,9 @@
 
 namespace chatterino {
 
+class SettingsManager;
+class WindowManager;
+
 struct EmoteData {
     EmoteData()
     {
@@ -35,14 +38,10 @@ typedef ConcurrentMap<QString, EmoteData> EmoteMap;
 
 class EmoteManager
 {
-    EmoteManager();
+    explicit EmoteManager(SettingsManager &manager, WindowManager &windowManager);
 
 public:
-    static EmoteManager &getInstance()
-    {
-        static EmoteManager instance;
-        return instance;
-    }
+    static EmoteManager &getInstance();
 
     void loadGlobalEmotes();
 
@@ -79,6 +78,9 @@ public:
     ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
 
 private:
+    SettingsManager &settingsManager;
+    WindowManager &windowManager;
+
     /// Emojis
     QRegularExpression findShortCodesRegex;
 

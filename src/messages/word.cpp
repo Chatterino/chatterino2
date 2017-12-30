@@ -1,5 +1,5 @@
 #include "messages/word.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "util/benchmark.hpp"
 
 namespace chatterino {

@@ -1,6 +1,6 @@
 #include "widgets/notebook.hpp"
-#include "colorscheme.hpp"
 #include "debug/log.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
@@ -22,11 +22,9 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(ChannelManager &_channelManager, Window *parent, bool _showButtons,
-                   const std::string &settingPrefix)
+Notebook::Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix)
     : BaseWidget(parent)
     , settingRoot(fS("{}/notebook", settingPrefix))
-    , channelManager(_channelManager)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)
@@ -58,7 +56,7 @@ SplitContainer *Notebook::addNewPage()
 SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
 {
     auto tab = new NotebookTab(this, uuid);
-    auto page = new SplitContainer(this->channelManager, this, tab, uuid);
+    auto page = new SplitContainer(this, tab, uuid);
 
     tab->show();
 

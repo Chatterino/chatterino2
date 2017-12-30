@@ -1,12 +1,7 @@
 #pragma once
 
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
-#include "completionmanager.hpp"
-#include "emotemanager.hpp"
-#include "ircmanager.hpp"
+#include "singletons/ircmanager.hpp"
 #include "resources.hpp"
-#include "windowmanager.hpp"
 
 #include <QApplication>
 
@@ -19,12 +14,6 @@ public:
     ~Application();
 
     int run(QApplication &qtApp);
-
-    WindowManager windowManager;
-    ColorScheme colorScheme;
-    Resources resources;
-    ChannelManager channelManager;
-    IrcManager ircManager;
 
 private:
     void save();

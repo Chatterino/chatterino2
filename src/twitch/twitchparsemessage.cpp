@@ -1,8 +1,8 @@
 //#include "twitchparsemessage.hpp"
 //#include "colorscheme.hpp"
 //#include "emojis.hpp"
-//#include "emotemanager.hpp"
-//#include "ircmanager.hpp"
+//#include "singletons/emotemanager.hpp"
+//#include "singletons/ircmanager.hpp"
 //#include "resources.hpp"
 //#include "twitch/twitchmessagebuilder.hpp"
 //

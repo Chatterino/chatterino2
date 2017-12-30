@@ -4,19 +4,14 @@
 
 namespace chatterino {
 
-class ChannelManager;
-class ColorScheme;
-class CompletionManager;
+class ThemeManager;
 
 class WindowManager
 {
+    explicit WindowManager(ThemeManager &_themeManager);
+
 public:
-    explicit WindowManager(ChannelManager &_channelManager, ColorScheme &_colorScheme);
-
-    static WindowManager *instance;
-
-    ChannelManager &channelManager;
-    ColorScheme &colorScheme;
+    static WindowManager &getInstance();
 
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
@@ -37,6 +32,8 @@ public:
     boost::signals2::signal<void()> layout;
 
 private:
+    ThemeManager &themeManager;
+
     std::vector<widgets::Window *> windows;
 
     widgets::Window *mainWindow = nullptr;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fontmanager.hpp"
+#include "singletons/fontmanager.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/link.hpp"
 #include "messages/messagecolor.hpp"

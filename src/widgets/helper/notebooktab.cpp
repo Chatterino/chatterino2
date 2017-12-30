@@ -1,8 +1,8 @@
 #include "widgets/helper/notebooktab.hpp"
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "util/helpers.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/textinputdialog.hpp"
@@ -167,24 +167,24 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     if (this->selected) {
         if (this->window() == QApplication::activeWindow()) {
-            painter.fillRect(rect(), this->colorScheme.TabSelectedBackground);
-            fg = this->colorScheme.TabSelectedText;
+            painter.fillRect(rect(), this->themeManager.TabSelectedBackground);
+            fg = this->themeManager.TabSelectedText;
         } else {
-            painter.fillRect(rect(), this->colorScheme.TabSelectedUnfocusedBackground);
-            fg = this->colorScheme.TabSelectedUnfocusedText;
+            painter.fillRect(rect(), this->themeManager.TabSelectedUnfocusedBackground);
+            fg = this->themeManager.TabSelectedUnfocusedText;
         }
     } else if (this->mouseOver) {
-        painter.fillRect(rect(), this->colorScheme.TabHoverBackground);
-        fg = this->colorScheme.TabHoverText;
+        painter.fillRect(rect(), this->themeManager.TabHoverBackground);
+        fg = this->themeManager.TabHoverText;
     } else if (this->highlightState == HighlightState::Highlighted) {
-        painter.fillRect(rect(), this->colorScheme.TabHighlightedBackground);
-        fg = this->colorScheme.TabHighlightedText;
+        painter.fillRect(rect(), this->themeManager.TabHighlightedBackground);
+        fg = this->themeManager.TabHighlightedText;
     } else if (this->highlightState == HighlightState::NewMessage) {
-        painter.fillRect(rect(), this->colorScheme.TabNewMessageBackground);
-        fg = this->colorScheme.TabHighlightedText;
+        painter.fillRect(rect(), this->themeManager.TabNewMessageBackground);
+        fg = this->themeManager.TabHighlightedText;
     } else {
-        painter.fillRect(rect(), this->colorScheme.TabBackground);
-        fg = this->colorScheme.TabText;
+        painter.fillRect(rect(), this->themeManager.TabBackground);
+        fg = this->themeManager.TabText;
     }
 
     painter.setPen(fg);

@@ -1,5 +1,5 @@
 #include "widgets/helper/droppreview.hpp"
-#include "colorscheme.hpp"
+#include "singletons/thememanager.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -20,7 +20,7 @@ void NotebookPageDropPreview::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.fillRect(8, 8, this->width() - 17, this->height() - 17,
-                     this->colorScheme.DropPreviewBackground);
+                     this->themeManager.DropPreviewBackground);
 }
 
 void NotebookPageDropPreview::hideEvent(QHideEvent *)

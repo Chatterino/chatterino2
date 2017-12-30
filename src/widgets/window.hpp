@@ -16,7 +16,7 @@
 namespace chatterino {
 
 class ChannelManager;
-class ColorScheme;
+class ThemeManager;
 class CompletionManager;
 
 namespace widgets {
@@ -45,8 +45,7 @@ class Window : public BaseWidget
     WindowGeometry windowGeometry;
 
 public:
-    explicit Window(const QString &windowName, ChannelManager &_channelManager,
-                    ColorScheme &_colorScheme, bool isMainWindow);
+    explicit Window(const QString &windowName, ThemeManager &_themeManager, bool isMainWindow);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
@@ -60,14 +59,13 @@ protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
+    ThemeManager &themeManager;
+
     float dpi;
 
     virtual void refreshTheme() override;
 
     void loadGeometry();
-
-    ChannelManager &channelManager;
-    ColorScheme &colorScheme;
 
     Notebook notebook;
     TitleBar titleBar;

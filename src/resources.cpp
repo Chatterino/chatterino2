@@ -1,7 +1,7 @@
 #include "resources.hpp"
-#include "emotemanager.hpp"
+//#include "singletons/emotemanager.hpp"
+//#include "singletons/windowmanager.hpp"
 #include "util/urlfetch.hpp"
-#include "windowmanager.hpp"
 
 #include <QPixmap>
 
@@ -39,6 +39,12 @@ Resources::Resources()
     this->loadDynamicTwitchBadges();
 
     this->loadChatterinoBadges();
+}
+
+Resources &Resources::getInstance()
+{
+    static Resources instance;
+    return instance;
 }
 
 Resources::BadgeVersion::BadgeVersion(QJsonObject &&root)

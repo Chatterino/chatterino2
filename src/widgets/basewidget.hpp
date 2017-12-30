@@ -4,7 +4,7 @@
 
 namespace chatterino {
 
-class ColorScheme;
+class ThemeManager;
 
 namespace widgets {
 
@@ -13,13 +13,13 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(ColorScheme &_colorScheme, QWidget *parent);
+    explicit BaseWidget(ThemeManager &_themeManager, QWidget *parent);
 
     explicit BaseWidget(BaseWidget *parent);
 
     explicit BaseWidget(QWidget *parent = nullptr);
 
-    ColorScheme &colorScheme;
+    ThemeManager &themeManager;
 
     float getDpiMultiplier();
 

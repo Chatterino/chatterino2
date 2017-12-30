@@ -2,8 +2,9 @@
 
 #include "messages/messagebuilder.hpp"
 #include "messages/messageparseargs.hpp"
-#include "resources.hpp"
-#include "twitch/twitchchannel.hpp"
+#include "singletons/emotemanager.hpp"
+
+#include <IrcMessage>
 
 #include <QString>
 #include <QVariant>
@@ -12,9 +13,10 @@ namespace chatterino {
 
 class WindowManager;
 class Channel;
-class ColorScheme;
+class ThemeManager;
 
 namespace twitch {
+class TwitchChannel;
 
 class TwitchMessageBuilder : public messages::MessageBuilder
 {
@@ -27,16 +29,11 @@ public:
 
     TwitchMessageBuilder() = delete;
 
-    explicit TwitchMessageBuilder(TwitchChannel *_channel, Resources &_resources,
-                                  WindowManager &_windowManager,
-                                  const Communi::IrcPrivateMessage *_ircMessage,
+    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
                                   const messages::MessageParseArgs &_args);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
-    Resources &resources;
-    WindowManager &windowManager;
-    ColorScheme &colorScheme;
     const Communi::IrcPrivateMessage *ircMessage;
     messages::MessageParseArgs args;
     const QVariantMap tags;

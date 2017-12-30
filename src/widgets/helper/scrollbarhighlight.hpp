@@ -4,7 +4,7 @@
 
 namespace chatterino {
 
-class ColorScheme;
+class ThemeManager;
 
 namespace widgets {
 
@@ -18,7 +18,7 @@ public:
     ScrollBarHighlight(double _position, int _colorIndex, ScrollBar *parent, Style _style = Default,
                        QString _tag = "");
 
-    ColorScheme &colorScheme;
+    ThemeManager &themeManager;
 
     double getPosition()
     {

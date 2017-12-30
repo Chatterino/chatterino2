@@ -16,7 +16,7 @@
 
 namespace chatterino {
 
-class ColorScheme;
+class ThemeManager;
 
 namespace widgets {
 

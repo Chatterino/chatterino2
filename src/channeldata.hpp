@@ -17,4 +17,4 @@ private:
     // std::map<std::string, BadgeData> subscriptionBadges;
 };
 
-};  // namespace chatterino
+}  // namespace chatterino

@@ -1,20 +1,21 @@
-#include "channelmanager.hpp"
-#include "ircmanager.hpp"
+#include "singletons/channelmanager.hpp"
+#include "singletons/ircmanager.hpp"
 
 using namespace chatterino::twitch;
 
 namespace chatterino {
 
-ChannelManager *ChannelManager::instance = nullptr;
-
-ChannelManager::ChannelManager(WindowManager &_windowManager, IrcManager &_ircManager)
-    : windowManager(_windowManager)
-    , ircManager(_ircManager)
-    , whispersChannel(new TwitchChannel(_ircManager, "/whispers", true))
-    , mentionsChannel(new TwitchChannel(_ircManager, "/mentions", true))
-    , emptyChannel(new TwitchChannel(_ircManager, "", true))
+ChannelManager &ChannelManager::getInstance()
 {
-    ChannelManager::instance = this;
+    static ChannelManager instance;
+    return instance;
+}
+
+ChannelManager::ChannelManager()
+    : whispersChannel(new Channel("/whispers"))
+    , mentionsChannel(new Channel("/mentions"))
+    , emptyChannel(new Channel(""))
+{
 }
 
 const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()
@@ -30,7 +31,7 @@ const std::vector<std::shared_ptr<Channel>> ChannelManager::getItems()
     return items;
 }
 
-std::shared_ptr<TwitchChannel> ChannelManager::addTwitchChannel(const QString &rawChannelName)
+std::shared_ptr<Channel> ChannelManager::addTwitchChannel(const QString &rawChannelName)
 {
     QString channelName = rawChannelName.toLower();
 
@@ -47,11 +48,11 @@ std::shared_ptr<TwitchChannel> ChannelManager::addTwitchChannel(const QString &r
     auto it = this->twitchChannels.find(channelName);
 
     if (it == this->twitchChannels.end()) {
-        auto channel = std::make_shared<TwitchChannel>(this->ircManager, channelName);
+        auto channel = std::make_shared<TwitchChannel>(channelName);
 
         this->twitchChannels.insert(channelName, std::make_tuple(channel, 1));
 
-        this->ircManager.joinChannel(channelName);
+        this->ircJoin.invoke(channelName);
 
         return channel;
     }
@@ -61,7 +62,7 @@ std::shared_ptr<TwitchChannel> ChannelManager::addTwitchChannel(const QString &r
     return std::get<0>(it.value());
 }
 
-std::shared_ptr<TwitchChannel> ChannelManager::getTwitchChannel(const QString &channel)
+std::shared_ptr<Channel> ChannelManager::getTwitchChannel(const QString &channel)
 {
     QMutexLocker locker(&this->channelsMutex);
 
@@ -107,7 +108,7 @@ void ChannelManager::removeTwitchChannel(const QString &channel)
     std::get<1>(a.value())--;
 
     if (std::get<1>(a.value()) == 0) {
-        this->ircManager.partChannel(c);
+        this->ircPart.invoke(c);
         this->twitchChannels.remove(c);
     }
 }
@@ -126,7 +127,7 @@ const std::string &ChannelManager::getUserID(const std::string &username)
     return temporary;
 }
 
-void ChannelManager::doOnAll(std::function<void(std::shared_ptr<TwitchChannel>)> func)
+void ChannelManager::doOnAll(std::function<void(std::shared_ptr<Channel>)> func)
 {
     for (const auto &channel : this->twitchChannels) {
         func(std::get<0>(channel));

@@ -1,6 +1,6 @@
 #include "messages/messageref.hpp"
-#include "emotemanager.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/settingsmanager.hpp"
 
 #include <QDebug>
 

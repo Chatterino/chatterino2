@@ -1,10 +1,10 @@
 #include "messages/lazyloadedimage.hpp"
 #include "asyncexec.hpp"
-#include "emotemanager.hpp"
-#include "ircmanager.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/ircmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "util/networkmanager.hpp"
 #include "util/urlfetch.hpp"
-#include "windowmanager.hpp"
 
 #include <QBuffer>
 #include <QImageReader>
@@ -81,7 +81,7 @@ void LazyLoadedImage::loadImage()
 
         EmoteManager::getInstance().incGeneration();
 
-        WindowManager::instance->layoutVisibleChatWidgets();
+        WindowManager::getInstance().layoutVisibleChatWidgets();
     });
 
     EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {

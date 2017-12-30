@@ -55,8 +55,7 @@ SOURCES += \
     src/application.cpp \
     src/channel.cpp \
     src/channeldata.cpp \
-    src/colorscheme.cpp \
-    src/ircmanager.cpp \
+    src/singletons/ircmanager.cpp \
     src/messages/lazyloadedimage.cpp \
     src/messages/link.cpp \
     src/messages/message.cpp \
@@ -74,23 +73,23 @@ SOURCES += \
     src/messages/messageref.cpp \
     src/logging/loggingmanager.cpp \
     src/logging/loggingchannel.cpp \
-    src/windowmanager.cpp \
-    src/channelmanager.cpp \
-    src/fontmanager.cpp \
-    src/settingsmanager.cpp \
-    src/emotemanager.cpp \
+    src/singletons/windowmanager.cpp \
+    src/singletons/channelmanager.cpp \
+    src/singletons/fontmanager.cpp \
+    src/singletons/settingsmanager.cpp \
+    src/singletons/emotemanager.cpp \
     src/messages/messagebuilder.cpp \
     src/twitch/twitchmessagebuilder.cpp \
     src/twitch/twitchparsemessage.cpp \
     src/widgets/titlebar.cpp \
     src/appdatapath.cpp \
-    src/accountmanager.cpp \
+    src/singletons/accountmanager.cpp \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \
     src/widgets/accountpopup.cpp \
     src/widgets/basewidget.cpp \
     src/widgets/helper/resizingtextedit.cpp \
-    src/completionmanager.cpp \
+    src/singletons/completionmanager.cpp \
     src/widgets/logindialog.cpp \
     src/widgets/qualitypopup.cpp \
     src/widgets/emotepopup.cpp \
@@ -100,7 +99,7 @@ SOURCES += \
     src/widgets/helper/rippleeffectbutton.cpp \
     src/messages/messagecolor.cpp \
     src/util/networkmanager.cpp \
-    src/commandmanager.cpp \
+    src/singletons/commandmanager.cpp \
     src/widgets/split.cpp \
     src/widgets/helper/splitinput.cpp \
     src/widgets/helper/splitheader.cpp \
@@ -110,16 +109,18 @@ SOURCES += \
     src/widgets/helper/splitcolumn.cpp \
     src/widgets/accountswitchwidget.cpp \
     src/widgets/accountswitchpopupwidget.cpp \
-    src/widgets/tooltipwidget.cpp
+    src/widgets/tooltipwidget.cpp \
+    src/singletons/thememanager.cpp \
+    src/twitch/twitchaccountmanager.cpp \
+    src/singletons/helper/completionmodel.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
     src/asyncexec.hpp \
     src/channel.hpp \
-    src/colorscheme.hpp \
     src/concurrentmap.hpp \
     src/emojis.hpp \
-    src/ircmanager.hpp \
+    src/singletons/ircmanager.hpp \
     src/messages/lazyloadedimage.hpp \
     src/messages/link.hpp \
     src/messages/message.hpp \
@@ -144,11 +145,11 @@ HEADERS  += \
     src/messages/messageref.hpp \
     src/logging/loggingmanager.hpp \
     src/logging/loggingchannel.hpp \
-    src/channelmanager.hpp \
-    src/windowmanager.hpp \
-    src/settingsmanager.hpp \
-    src/fontmanager.hpp \
-    src/emotemanager.hpp \
+    src/singletons/channelmanager.hpp \
+    src/singletons/windowmanager.hpp \
+    src/singletons/settingsmanager.hpp \
+    src/singletons/fontmanager.hpp \
+    src/singletons/emotemanager.hpp \
     src/util/urlfetch.hpp \
     src/messages/messageparseargs.hpp \
     src/messages/messagebuilder.hpp \
@@ -156,13 +157,13 @@ HEADERS  += \
     src/twitch/twitchparsemessage.hpp \
     src/widgets/titlebar.hpp \
     src/appdatapath.hpp \
-    src/accountmanager.hpp \
+    src/singletons/accountmanager.hpp \
     src/twitch/twitchuser.hpp \
     src/ircaccount.hpp \
     src/widgets/accountpopup.hpp \
     src/util/distancebetweenpoints.hpp \
     src/widgets/basewidget.hpp \
-    src/completionmanager.hpp \
+    src/singletons/completionmanager.hpp \
     src/widgets/helper/channelview.hpp \
     src/twitch/twitchchannel.hpp \
     src/widgets/helper/rippleeffectbutton.hpp \
@@ -174,7 +175,7 @@ HEADERS  += \
     src/debug/log.hpp \
     src/util/benchmark.hpp \
     src/util/networkmanager.hpp \
-    src/commandmanager.hpp \
+    src/singletons/commandmanager.hpp \
     src/widgets/split.hpp \
     src/widgets/helper/splitheader.hpp \
     src/widgets/helper/splitinput.hpp \
@@ -189,7 +190,11 @@ HEADERS  += \
     src/const.hpp \
     src/widgets/tooltipwidget.hpp \
     src/precompiled_headers.hpp \
-    src/messages/wordflags.hpp
+    src/messages/wordflags.hpp \
+    src/singletons/thememanager.hpp \
+    src/twitch/twitchaccountmanager.hpp \
+    src/singletons/helper/completionmodel.hpp \
+    src/singletons/helper/chatterinosetting.hpp
 
 
 PRECOMPILED_HEADER =
@@ -210,20 +215,22 @@ win32 {
 }
 
 # Optional dependency on windows sdk 7.1
-win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
-    LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
-        -ldwmapi \
-        -lgdi32
+!contains(QMAKE_TARGET.arch, x86_64) {
+    win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
+        LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
+            -ldwmapi \
+            -lgdi32
 
-#    SOURCES += platform/borderless/qwinwidget.cpp \
-#        platform/borderless/winnativewindow.cpp \
-#        platform/borderless/widget.cpp
+#        SOURCES += platform/borderless/qwinwidget.cpp \
+#            platform/borderless/winnativewindow.cpp \
+#            platform/borderless/widget.cpp
 
-#    HEADERS += platform/borderless/qwinwidget.h \
-#        platform/borderless/winnativewindow.h \
-#        platform/borderless/widget.h
+#        HEADERS += platform/borderless/qwinwidget.h \
+#            platform/borderless/winnativewindow.h \
+#            platform/borderless/widget.h
 
-    DEFINES += "USEWINSDK"
+        DEFINES += "USEWINSDK"
+    }
 }
 
 macx {

@@ -19,9 +19,6 @@
 
 namespace chatterino {
 
-class ChannelManager;
-class ColorScheme;
-
 namespace widgets {
 
 class SplitContainer;
@@ -46,10 +43,9 @@ class Split : public BaseWidget
     const std::string settingRoot;
 
 public:
-    Split(ChannelManager &_channelManager, SplitContainer *parent, const std::string &_uuid);
+    Split(SplitContainer *parent, const std::string &_uuid);
     ~Split();
 
-    ChannelManager &channelManager;
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
 

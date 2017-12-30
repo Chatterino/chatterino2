@@ -1,17 +1,18 @@
-#include "ircmanager.hpp"
-#include "accountmanager.hpp"
+#include "singletons/ircmanager.hpp"
 #include "asyncexec.hpp"
 #include "channel.hpp"
-#include "channelmanager.hpp"
 #include "debug/log.hpp"
-#include "emotemanager.hpp"
 #include "messages/messageparseargs.hpp"
-#include "settingsmanager.hpp"
+#include "resources.hpp"
+#include "singletons/accountmanager.hpp"
+#include "singletons/channelmanager.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchparsemessage.hpp"
 #include "twitch/twitchuser.hpp"
 #include "util/urlfetch.hpp"
-#include "windowmanager.hpp"
 
 #include <irccommand.h>
 #include <QJsonArray>
@@ -27,16 +28,17 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
-                       WindowManager &_windowManager)
+                       AccountManager &_accountManager)
     : channelManager(_channelManager)
     , resources(_resources)
-    , windowManager(_windowManager)
+    , accountManager(_accountManager)
 {
     this->messageSuffix.append(' ');
     this->messageSuffix.append(QChar(0x206D));
 
-    AccountManager::getInstance().Twitch.userChanged.connect([this]() {
-        this->setUser(AccountManager::getInstance().Twitch.getCurrent());
+    this->account = accountManager.Twitch.getCurrent();
+    accountManager.Twitch.userChanged.connect([this]() {
+        this->setUser(accountManager.Twitch.getCurrent());
 
         debug::Log("[IrcManager] Reconnecting to Twitch IRC as new user {}",
                    this->account->getUserName());
@@ -64,6 +66,13 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
                      &IrcManager::onConnected);
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected, this,
                      &IrcManager::onDisconnected);
+}
+
+IrcManager &IrcManager::getInstance()
+{
+    static IrcManager instance(ChannelManager::getInstance(), Resources::getInstance(),
+                               AccountManager::getInstance());
+    return instance;
 }
 
 void IrcManager::setUser(std::shared_ptr<twitch::TwitchUser> newAccount)
@@ -231,8 +240,7 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
     messages::MessageParseArgs args;
 
-    twitch::TwitchMessageBuilder builder(c.get(), this->resources, this->windowManager, message,
-                                         args);
+    twitch::TwitchMessageBuilder builder(c.get(), message, args);
 
     c->addMessage(builder.parse());
 }
@@ -282,8 +290,11 @@ void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
     if (iterator != tags.end()) {
         auto roomID = iterator.value().toString();
 
-        auto channel = QString(message->toData()).split("#").at(1);
-        channelManager.getTwitchChannel(channel)->setRoomID(roomID);
+        auto channel = channelManager.getTwitchChannel(QString(message->toData()).split("#").at(1));
+        auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+        if (twitchChannel != nullptr) {
+            twitchChannel->setRoomID(roomID);
+        }
 
         this->resources.loadChannelData(roomID);
     }
@@ -495,7 +506,7 @@ void IrcManager::onConnected()
 {
     std::shared_ptr<Message> msg(Message::createSystemMessage("connected to chat"));
 
-    this->channelManager.doOnAll([msg](std::shared_ptr<twitch::TwitchChannel> channel) {
+    this->channelManager.doOnAll([msg](std::shared_ptr<Channel> channel) {
         assert(channel);
         channel->addMessage(msg);
     });
@@ -505,7 +516,7 @@ void IrcManager::onDisconnected()
 {
     std::shared_ptr<Message> msg(Message::createSystemMessage("disconnected from chat"));
 
-    this->channelManager.doOnAll([msg](std::shared_ptr<twitch::TwitchChannel> channel) {
+    this->channelManager.doOnAll([msg](std::shared_ptr<Channel> channel) {
         assert(channel);
         channel->addMessage(msg);
     });

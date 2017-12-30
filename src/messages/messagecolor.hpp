@@ -2,7 +2,7 @@
 
 #include <QColor>
 
-#include <colorscheme.hpp>
+#include "singletons/thememanager.hpp"
 
 namespace chatterino {
 namespace messages {
@@ -16,7 +16,7 @@ public:
     explicit MessageColor(Type type = Text);
 
     Type getType() const;
-    const QColor &getColor(ColorScheme &colorScheme) const;
+    const QColor &getColor(ThemeManager &themeManager) const;
 
 private:
     Type type;

@@ -1,6 +1,6 @@
 #include "widgets/basewidget.hpp"
-#include "colorscheme.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/tooltipwidget.hpp"
 
 #include <QDebug>
@@ -12,23 +12,23 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWidget::BaseWidget(ColorScheme &_colorScheme, QWidget *parent)
+BaseWidget::BaseWidget(ThemeManager &_themeManager, QWidget *parent)
     : QWidget(parent)
-    , colorScheme(_colorScheme)
+    , themeManager(_themeManager)
 {
     this->init();
 }
 
 BaseWidget::BaseWidget(BaseWidget *parent)
     : QWidget(parent)
-    , colorScheme(*ColorScheme::instance)
+    , themeManager(ThemeManager::getInstance())
 {
     this->init();
 }
 
 BaseWidget::BaseWidget(QWidget *parent)
     : QWidget(parent)
-    , colorScheme(*ColorScheme::instance)
+    , themeManager(ThemeManager::getInstance())
 {
 }
 
@@ -49,7 +49,7 @@ float BaseWidget::getDpiMultiplier()
 
 void BaseWidget::init()
 {
-    auto connection = this->colorScheme.updated.connect([this]() {
+    auto connection = this->themeManager.updated.connect([this]() {
         this->refreshTheme();
 
         this->update();

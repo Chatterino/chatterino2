@@ -11,6 +11,7 @@ class FontManager
 {
     FontManager(const FontManager &) = delete;
     FontManager(FontManager &&) = delete;
+    FontManager();
 
 public:
     enum Type : uint8_t {
@@ -24,12 +25,7 @@ public:
     };
 
     // FontManager is initialized only once, on first use
-    static FontManager &getInstance()
-    {
-        static FontManager instance;
-
-        return instance;
-    }
+    static FontManager &getInstance();
 
     QFont &getFont(Type type, float dpi);
     QFontMetrics &getFontMetrics(Type type, float dpi);
@@ -50,8 +46,6 @@ public:
     pajlada::Signals::NoArgSignal fontChanged;
 
 private:
-    FontManager();
-
     struct FontData {
         FontData(QFont &&_font)
             : font(_font)
@@ -68,7 +62,7 @@ private:
 
         explicit Font(const char *fontFamilyName, int mediumSize)
             : small(QFont(fontFamilyName, mediumSize - 4))
-            , mediumSmall(QFont(fontFamilyName, mediumSize -2))
+            , mediumSmall(QFont(fontFamilyName, mediumSize - 2))
             , medium(QFont(fontFamilyName, mediumSize))
             , mediumBold(QFont(fontFamilyName, mediumSize, QFont::DemiBold))
             , mediumItalic(QFont(fontFamilyName, mediumSize, -1, true))

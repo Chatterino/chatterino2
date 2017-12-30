@@ -1,8 +1,10 @@
 #include "application.hpp"
-#include "accountmanager.hpp"
-#include "colorscheme.hpp"
 #include "logging/loggingmanager.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/accountmanager.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
+#include "singletons/windowmanager.hpp"
 
 namespace chatterino {
 
@@ -10,15 +12,11 @@ namespace chatterino {
 // It will create the instances of the major classes, and connect their signals to each other
 
 Application::Application()
-    : windowManager(this->channelManager, this->colorScheme)
-    , colorScheme(this->windowManager)
-    , channelManager(this->windowManager, this->ircManager)
-    , ircManager(this->channelManager, this->resources, this->windowManager)
 {
     logging::init();
     SettingsManager::getInstance().load();
 
-    this->windowManager.initMainWindow();
+    WindowManager::getInstance().initMainWindow();
 
     // Initialize everything we need
     EmoteManager::getInstance().loadGlobalEmotes();
@@ -39,17 +37,17 @@ Application::~Application()
 int Application::run(QApplication &qtApp)
 {
     // Start connecting to the IRC Servers (Twitch only for now)
-    this->ircManager.connect();
+    IrcManager::getInstance().connect();
 
     // Show main window
-    this->windowManager.getMainWindow().show();
+    WindowManager::getInstance().getMainWindow().show();
 
     return qtApp.exec();
 }
 
 void Application::save()
 {
-    this->windowManager.save();
+    WindowManager::getInstance().save();
 }
 
 }  // namespace chatterino

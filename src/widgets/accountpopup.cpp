@@ -1,8 +1,8 @@
 #include "widgets/accountpopup.hpp"
-#include "accountmanager.hpp"
+#include "singletons/accountmanager.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "ui_accountpopupform.h"
 #include "util/urlfetch.hpp"
 

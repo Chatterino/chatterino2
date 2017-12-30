@@ -12,8 +12,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-EmotePopup::EmotePopup(ColorScheme &colorScheme)
-    : BaseWidget(colorScheme, 0)
+EmotePopup::EmotePopup(ThemeManager &themeManager)
+    : BaseWidget(themeManager, 0)
 {
     this->initAsWindow();
 

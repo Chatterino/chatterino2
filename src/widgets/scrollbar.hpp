@@ -1,5 +1,6 @@
 #pragma once
 
+#include "singletons/settingsmanager.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
@@ -7,11 +8,10 @@
 #include <QPropertyAnimation>
 #include <QWidget>
 #include <boost/signals2.hpp>
-#include <settingsmanager.hpp>
 
 namespace chatterino {
 
-class ColorScheme;
+class ThemeManager;
 
 namespace widgets {
 

@@ -10,8 +10,10 @@ namespace chatterino {
 
 class Resources
 {
-public:
     explicit Resources();
+
+public:
+    static Resources &getInstance();
 
     messages::LazyLoadedImage *badgeStaff;
     messages::LazyLoadedImage *badgeAdmin;

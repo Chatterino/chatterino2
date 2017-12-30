@@ -1,17 +1,17 @@
-#include "widgets/helper/channelview.hpp"
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
+#include "channelview.hpp"
 #include "debug/log.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 #include "messages/messageref.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/channelmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "ui_accountpopupform.h"
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/split.hpp"
 #include "widgets/tooltipwidget.hpp"
-#include "windowmanager.hpp"
 
 #include <QDebug>
 #include <QDesktopServices>
@@ -51,7 +51,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->queueUpdate();
     });
 
-    WindowManager &windowManager = *WindowManager::instance;
+    WindowManager &windowManager = WindowManager::getInstance();
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
@@ -445,7 +445,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 //        this->onlyUpdateEmotes = false;
 
 //        for (const GifEmoteData &item : this->gifEmotes) {
-//            painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+//            painter.fillRect(item.rect, this->themeManager.ChatBackground);
 
 //            painter.drawPixmap(item.rect, *item.image->getPixmap());
 //        }
@@ -457,7 +457,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // update all messages
     this->gifEmotes.clear();
 
-    painter.fillRect(rect(), this->colorScheme.ChatBackground);
+    painter.fillRect(rect(), this->themeManager.ChatBackground);
 
     // draw messages
     this->drawMessages(painter);
@@ -466,7 +466,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw gif emotes
     for (GifEmoteData &item : this->gifEmotes) {
-        //        painter.fillRect(item.rect, this->colorScheme.ChatBackground);
+        //        painter.fillRect(item.rect, this->themeManager.ChatBackground);
 
         painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
@@ -588,8 +588,8 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //} else {
     painter.fillRect(buffer->rect(),
                      (messageRef->getMessage()->containsHighlightedPhrase())
-                         ? this->colorScheme.ChatBackgroundHighlighted
-                         : this->colorScheme.ChatBackground);
+                         ? this->themeManager.ChatBackgroundHighlighted
+                         : this->themeManager.ChatBackground);
     //}
 
     // draw selection
@@ -613,9 +613,9 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
         }
         // text
         else {
-            QColor color = wordPart.getWord().getTextColor().getColor(this->colorScheme);
+            QColor color = wordPart.getWord().getTextColor().getColor(this->themeManager);
 
-            this->colorScheme.normalizeColor(color);
+            this->themeManager.normalizeColor(color);
 
             painter.setPen(color);
             painter.setFont(wordPart.getWord().getFont(this->getDpiMultiplier()));
@@ -636,7 +636,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
         return;
     }
 
-    QColor selectionColor = this->colorScheme.Selection;
+    QColor selectionColor = this->themeManager.Selection;
 
     int charIndex = 0;
     size_t i = 0;

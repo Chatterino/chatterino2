@@ -20,14 +20,17 @@ namespace chatterino {
 
 class ChannelManager;
 class Resources;
-class WindowManager;
+class AccountManager;
 
 class IrcManager : public QObject
 {
-    Q_OBJECT
+    //    Q_OBJECT
+
+    IrcManager(ChannelManager &channelManager, Resources &resources,
+               AccountManager &accountManager);
 
 public:
-    IrcManager(ChannelManager &channelManager, Resources &resources, WindowManager &windowManager);
+    static IrcManager &getInstance();
 
     void connect();
     void disconnect();
@@ -48,12 +51,13 @@ public:
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
 
+    Communi::IrcConnection *getReadConnection();
+
+private:
     ChannelManager &channelManager;
     Resources &resources;
-    WindowManager &windowManager;
+    AccountManager &accountManager;
 
-    Communi::IrcConnection* getReadConnection();
-private:
     // variables
     std::shared_ptr<twitch::TwitchUser> account = nullptr;
 

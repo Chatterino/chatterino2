@@ -1,4 +1,4 @@
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "appdatapath.hpp"
 #include "debug/log.hpp"
 

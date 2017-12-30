@@ -19,17 +19,17 @@ MessageColor::Type MessageColor::getType() const
     return this->type;
 }
 
-const QColor &MessageColor::getColor(ColorScheme &colorScheme) const
+const QColor &MessageColor::getColor(ThemeManager &themeManager) const
 {
     switch (this->type) {
         case Type::Custom:
             return this->color;
         case Type::Text:
-            return colorScheme.Text;
+            return themeManager.Text;
         case Type::System:
-            return colorScheme.SystemMessageColor;
+            return themeManager.SystemMessageColor;
         case Type::Link:
-            return colorScheme.TextLink;
+            return themeManager.TextLink;
     }
 
     static QColor _default;

@@ -2,7 +2,8 @@
 
 #include "channel.hpp"
 #include "concurrentmap.hpp"
-#include "ircmanager.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/ircmanager.hpp"
 
 namespace chatterino {
 namespace twitch {
@@ -12,8 +13,7 @@ class TwitchChannel : public Channel
     QTimer *liveStatusTimer;
 
 public:
-    explicit TwitchChannel(IrcManager &ircManager, const QString &channelName,
-                           bool _isSpecial = false);
+    explicit TwitchChannel(const QString &channelName);
     ~TwitchChannel();
 
     void reloadChannelEmotes();
@@ -22,8 +22,8 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
-    const std::shared_ptr<EmoteMap> bttvChannelEmotes;
-    const std::shared_ptr<EmoteMap> ffzChannelEmotes;
+    const std::shared_ptr<chatterino::EmoteMap> bttvChannelEmotes;
+    const std::shared_ptr<chatterino::EmoteMap> ffzChannelEmotes;
 
     const QString subscriptionURL;
     const QString channelURL;
@@ -47,10 +47,6 @@ private:
     void refreshLiveStatus();
 
     void fetchRecentMessages();
-
-    IrcManager &ircManager;
-
-    bool isSpecial;
 };
 
 }  // namespace twitch

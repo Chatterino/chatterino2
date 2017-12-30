@@ -1,6 +1,6 @@
 #pragma once
 
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "widgets/accountswitchwidget.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 

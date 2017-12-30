@@ -1,14 +1,14 @@
 #include "widgets/split.hpp"
-#include "channelmanager.hpp"
-#include "colorscheme.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/channelmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/qualitypopup.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
 #include "widgets/window.hpp"
-#include "windowmanager.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -45,14 +45,13 @@ inline void ezShortcut(Split *w, const char *key, T t)
 
 }  // namespace
 
-Split::Split(ChannelManager &_channelManager, SplitContainer *parent, const std::string &_uuid)
+Split::Split(SplitContainer *parent, const std::string &_uuid)
     : BaseWidget(parent)
     , uuid(_uuid)
     , settingRoot(fS("/splits/{}", this->uuid))
     , channelName(fS("{}/channelName", this->settingRoot))
     , parentPage(*parent)
-    , channelManager(_channelManager)
-    , channel(_channelManager.emptyChannel)
+    , channel(ChannelManager::getInstance().emptyChannel)
     , vbox(this)
     , header(this)
     , view(this)
@@ -171,17 +170,18 @@ double Split::getFlexSizeY()
 
 void Split::channelNameUpdated(const std::string &newChannelName)
 {
+    auto &cman = ChannelManager::getInstance();
+
     // remove current channel
     if (!this->channel->isEmpty()) {
-        this->channelManager.removeTwitchChannel(this->channel->name);
+        cman.removeTwitchChannel(this->channel->name);
     }
 
     // update messages
     if (newChannelName.empty()) {
-        this->setChannel(this->channelManager.emptyChannel);
+        this->setChannel(cman.emptyChannel);
     } else {
-        this->setChannel(
-            this->channelManager.addTwitchChannel(QString::fromStdString(newChannelName)));
+        this->setChannel(cman.addTwitchChannel(QString::fromStdString(newChannelName)));
     }
 
     // update header
@@ -236,7 +236,7 @@ void Split::paintEvent(QPaintEvent *)
     // color the background of the chat
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->colorScheme.ChatBackground);
+    painter.fillRect(this->rect(), this->themeManager.ChatBackground);
 }
 
 /// Slots
@@ -264,10 +264,9 @@ void Split::doChangeChannel()
 
 void Split::doPopup()
 {
-    Window &window = WindowManager::instance->createWindow();
+    Window &window = WindowManager::getInstance().createWindow();
 
-    Split *split = new Split(this->channelManager,
-                             static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()),
+    Split *split = new Split(static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()),
                              this->uuid);
 
     window.getNotebook().getSelectedPage()->addToLayout(split);
@@ -396,7 +395,7 @@ void Split::doOpenViewerList()
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels) {
         auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->colorScheme.ChatHeaderBackground);
+        label->setBackgroundColor(this->themeManager.ChatHeaderBackground);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -453,7 +452,7 @@ void Split::doOpenViewerList()
     dockVbox->addWidget(resultList);
     resultList->hide();
 
-    multiWidget->setStyleSheet(this->colorScheme.InputStyleSheet);
+    multiWidget->setStyleSheet(this->themeManager.InputStyleSheet);
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();

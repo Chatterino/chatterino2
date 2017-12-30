@@ -1,10 +1,11 @@
 #include "emotemanager.hpp"
 #include "common.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "util/urlfetch.hpp"
-#include "windowmanager.hpp"
 
 #include <QDebug>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -21,8 +22,10 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-EmoteManager::EmoteManager()
-    : findShortCodesRegex(":([-+\\w]+):")
+EmoteManager::EmoteManager(SettingsManager &_settingsManager, WindowManager &_windowManager)
+    : settingsManager(_settingsManager)
+    , windowManager(_windowManager)
+    , findShortCodesRegex(":([-+\\w]+):")
 {
     auto &accountManager = AccountManager::getInstance();
 
@@ -31,6 +34,12 @@ EmoteManager::EmoteManager()
         assert(currentUser);
         this->refreshTwitchEmotes(currentUser);
     });
+}
+
+EmoteManager &EmoteManager::getInstance()
+{
+    static EmoteManager instance(SettingsManager::getInstance(), WindowManager::getInstance());
+    return instance;
 }
 
 void EmoteManager::loadGlobalEmotes()
@@ -507,7 +516,7 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         this->gifUpdateTimer.setInterval(30);
         this->gifUpdateTimer.start();
 
-        SettingsManager::getInstance().enableGifAnimations.connect([this](bool enabled, auto) {
+        this->settingsManager.enableGifAnimations.connect([this](bool enabled, auto) {
             if (enabled) {
                 this->gifUpdateTimer.start();
             } else {
@@ -517,7 +526,8 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
 
         QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
             this->gifUpdateTimerSignal();
-            WindowManager::instance->repaintGifEmotes();
+            // fourtf:
+            this->windowManager.repaintGifEmotes();
         });
     }
 

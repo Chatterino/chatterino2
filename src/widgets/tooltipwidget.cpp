@@ -1,6 +1,6 @@
 #include "tooltipwidget.hpp"
-#include "colorscheme.hpp"
-#include "fontmanager.hpp"
+#include "singletons/thememanager.hpp"
+#include "singletons/fontmanager.hpp"
 
 #include <QStyle>
 #include <QVBoxLayout>

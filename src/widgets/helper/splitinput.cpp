@@ -1,8 +1,8 @@
 #include "widgets/helper/splitinput.hpp"
-#include "colorscheme.hpp"
-#include "completionmanager.hpp"
-#include "ircmanager.hpp"
-#include "settingsmanager.hpp"
+#include "singletons/completionmanager.hpp"
+#include "singletons/ircmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
@@ -55,7 +55,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
         if (this->emotePopup == nullptr) {
-            this->emotePopup = new EmotePopup(this->colorScheme);
+            this->emotePopup = new EmotePopup(this->themeManager);
         }
 
         this->emotePopup->resize((int)(300 * this->emotePopup->getDpiMultiplier()),
@@ -210,13 +210,13 @@ void SplitInput::refreshTheme()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, this->colorScheme.Text);
+    palette.setColor(QPalette::Foreground, this->themeManager.Text);
 
     this->textLengthLabel.setPalette(palette);
 
-    this->textInput.setStyleSheet(this->colorScheme.InputStyleSheet);
+    this->textInput.setStyleSheet(this->themeManager.InputStyleSheet);
 
-    this->hbox.setMargin((this->colorScheme.isLightTheme() ? 4 : 2) * this->getDpiMultiplier());
+    this->hbox.setMargin((this->themeManager.isLightTheme() ? 4 : 2) * this->getDpiMultiplier());
 }
 
 void SplitInput::editTextChanged()
@@ -244,10 +244,10 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->colorScheme.ChatInputBackground);
+    painter.fillRect(this->rect(), this->themeManager.ChatInputBackground);
 
-    QPen pen(this->colorScheme.ChatInputBorder);
-    if (this->colorScheme.isLightTheme()) {
+    QPen pen(this->themeManager.ChatInputBorder);
+    if (this->themeManager.isLightTheme()) {
         pen.setWidth((int)(6 * this->getDpiMultiplier()));
     }
     painter.setPen(pen);
