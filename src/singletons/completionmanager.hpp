@@ -8,6 +8,7 @@
 #include "helper/completionmodel.hpp"
 
 namespace chatterino {
+namespace singletons {
 class CompletionManager
 {
     CompletionManager() = default;
@@ -22,3 +23,4 @@ private:
 };
 
 }  // namespace chatterino
+}

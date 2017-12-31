@@ -29,7 +29,7 @@ NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    SettingsManager::getInstance().hideTabX.connect(
+    singletons::SettingManager::getInstance().hideTabX.connect(
         boost::bind(&NotebookTab::hideTabXChanged, this, _1), this->managedConnections);
 
     this->setMouseTracking(true);
@@ -74,7 +74,7 @@ void NotebookTab::calcSize()
     float scale = getDpiMultiplier();
     QString qTitle(qS(this->title));
 
-    if (SettingsManager::getInstance().hideTabX) {
+    if (singletons::SettingManager::getInstance().hideTabX) {
         this->resize(static_cast<int>((fontMetrics().width(qTitle) + 16) * scale),
                      static_cast<int>(24 * scale));
     } else {
@@ -190,12 +190,12 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(fg);
 
     float scale = this->getDpiMultiplier();
-    int rectW = (SettingsManager::getInstance().hideTabX ? 0 : static_cast<int>(16) * scale);
+    int rectW = (singletons::SettingManager::getInstance().hideTabX ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, this->height());
 
     painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
 
-    if (!SettingsManager::getInstance().hideTabX && (mouseOver || selected)) {
+    if (!singletons::SettingManager::getInstance().hideTabX && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (mouseOverX) {
             painter.fillRect(xRect, QColor(0, 0, 0, 64));
@@ -237,7 +237,7 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
             this->notebook->removePage(this->page);
         }
     } else {
-        if (!SettingsManager::getInstance().hideTabX && this->mouseDownX &&
+        if (!singletons::SettingManager::getInstance().hideTabX && this->mouseDownX &&
             this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
@@ -270,7 +270,7 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *)
 
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!SettingsManager::getInstance().hideTabX) {
+    if (!singletons::SettingManager::getInstance().hideTabX) {
         bool overX = this->getXRect().contains(event->pos());
 
         if (overX != this->mouseOverX) {

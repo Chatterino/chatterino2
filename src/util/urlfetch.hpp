@@ -133,7 +133,7 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
 {
     QNetworkRequest request(url);
 
-    auto &accountManager = AccountManager::getInstance();
+    auto &accountManager = singletons::AccountManager::getInstance();
     auto currentTwitchUser = accountManager.Twitch.getCurrent();
     QByteArray oauthToken;
     if (currentTwitchUser) {

@@ -4,6 +4,7 @@
 #include <vector>
 
 namespace chatterino {
+namespace singletons {
 
 class CommandManager
 {
@@ -35,4 +36,5 @@ public:
 
     //    std::vector<Command> commands;
 };
+}
 }

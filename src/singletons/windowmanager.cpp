@@ -1,5 +1,6 @@
 #include "windowmanager.hpp"
 #include "appdatapath.hpp"
+#include "singletons/fontmanager.hpp"
 #include "singletons/thememanager.hpp"
 
 #include <QDebug>
@@ -7,6 +8,7 @@
 #include <boost/foreach.hpp>
 
 namespace chatterino {
+namespace singletons {
 WindowManager &WindowManager::getInstance()
 {
     static WindowManager instance(ThemeManager::getInstance());
@@ -102,3 +104,4 @@ void WindowManager::save()
 }
 
 }  // namespace chatterino
+}

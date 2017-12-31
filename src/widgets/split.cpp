@@ -51,7 +51,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     , settingRoot(fS("/splits/{}", this->uuid))
     , channelName(fS("{}/channelName", this->settingRoot))
     , parentPage(*parent)
-    , channel(ChannelManager::getInstance().emptyChannel)
+    , channel(singletons::ChannelManager::getInstance().emptyChannel)
     , vbox(this)
     , header(this)
     , view(this)
@@ -97,7 +97,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     });
 
     this->input.textChanged.connect([this](const QString &newText) {
-        if (!SettingsManager::getInstance().hideEmptyInput) {
+        if (!singletons::SettingManager::getInstance().hideEmptyInput) {
             return;
         }
 
@@ -108,7 +108,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
         }
     });
 
-    SettingsManager::getInstance().hideEmptyInput.connect([this](const bool &hideEmptyInput, auto) {
+    singletons::SettingManager::getInstance().hideEmptyInput.connect([this](const bool &hideEmptyInput, auto) {
         if (hideEmptyInput && this->input.getInputText().length() == 0) {
             this->input.hide();
         } else {
@@ -170,7 +170,7 @@ double Split::getFlexSizeY()
 
 void Split::channelNameUpdated(const std::string &newChannelName)
 {
-    auto &cman = ChannelManager::getInstance();
+    auto &cman = singletons::ChannelManager::getInstance();
 
     // remove current channel
     if (!this->channel->isEmpty()) {
@@ -264,7 +264,7 @@ void Split::doChangeChannel()
 
 void Split::doPopup()
 {
-    Window &window = WindowManager::getInstance().createWindow();
+    Window &window = singletons::WindowManager::getInstance().createWindow();
 
     Split *split = new Split(static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()),
                              this->uuid);
@@ -293,7 +293,7 @@ void Split::doOpenPopupPlayer()
 
 void Split::doOpenStreamlink()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     QString preferredQuality =
         QString::fromStdString(settings.preferredQuality.getValue()).toLower();
     // TODO(Confuseh): Default streamlink paths

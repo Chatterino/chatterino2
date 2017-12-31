@@ -17,7 +17,7 @@ ScrollBar::ScrollBar(ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation(this, "currentValue")
     , highlights(nullptr)
-    , smoothScrollingSetting(SettingsManager::getInstance().enableSmoothScrolling)
+    , smoothScrollingSetting(singletons::SettingManager::getInstance().enableSmoothScrolling)
 {
     resize((int)(16 * this->getDpiMultiplier()), 100);
     this->currentValueAnimation.setDuration(250);

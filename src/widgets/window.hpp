@@ -14,10 +14,9 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-
-class ChannelManager;
+namespace singletons {
 class ThemeManager;
-class CompletionManager;
+}
 
 namespace widgets {
 
@@ -45,7 +44,7 @@ class Window : public BaseWidget
     WindowGeometry windowGeometry;
 
 public:
-    explicit Window(const QString &windowName, ThemeManager &_themeManager, bool isMainWindow);
+    explicit Window(const QString &windowName, singletons::ThemeManager &_themeManager, bool isMainWindow);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
@@ -59,7 +58,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event) override;
 
 private:
-    ThemeManager &themeManager;
+    singletons::ThemeManager &themeManager;
 
     float dpi;
 

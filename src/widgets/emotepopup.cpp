@@ -12,7 +12,7 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-EmotePopup::EmotePopup(ThemeManager &themeManager)
+EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     : BaseWidget(themeManager, 0)
 {
     this->initAsWindow();
@@ -44,12 +44,12 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
     std::shared_ptr<Channel> emoteChannel(new Channel(""));
 
-    auto addEmotes = [&](EmoteMap &map, const QString &title, const QString &emoteDesc) {
+    auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
         messages::MessageBuilder builder1;
 
         builder1.appendWord(Word(title, Word::Flags::Text, MessageColor(MessageColor::Text),
-                                 FontManager::Medium, QString(), QString()));
+                                 singletons::FontManager::Medium, QString(), QString()));
 
         builder1.getMessage()->centered = true;
         emoteChannel->addMessage(builder1.getMessage());
@@ -58,7 +58,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         messages::MessageBuilder builder2;
         builder2.getMessage()->centered = true;
 
-        map.each([&](const QString &key, const EmoteData &value) {
+        map.each([&](const QString &key, const util::EmoteData &value) {
             builder2.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, emoteDesc,
                                      Link(Link::Type::InsertText, key)));
         });
@@ -66,7 +66,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         emoteChannel->addMessage(builder2.getMessage());
     };
 
-    EmoteManager &emoteManager = EmoteManager::getInstance();
+    singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
 
     addEmotes(emoteManager.bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
@@ -81,7 +81,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
 void EmotePopup::loadEmojis()
 {
-    EmoteMap &emojis = EmoteManager::getInstance().getEmojis();
+    util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
     std::shared_ptr<Channel> emojiChannel(new Channel(""));
 
@@ -89,7 +89,7 @@ void EmotePopup::loadEmojis()
     messages::MessageBuilder builder1;
 
     builder1.appendWord(Word("emojis", Word::Flags::Text, MessageColor(MessageColor::Text),
-                             FontManager::Medium, QString(), QString()));
+                             singletons::FontManager::Medium, QString(), QString()));
 
     builder1.getMessage()->centered = true;
     emojiChannel->addMessage(builder1.getMessage());
@@ -97,7 +97,7 @@ void EmotePopup::loadEmojis()
     // emojis
     messages::MessageBuilder builder;
     builder.getMessage()->centered = true;
-    emojis.each([this, &builder](const QString &key, const EmoteData &value) {
+    emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
         builder.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, "emoji",
                                 Link(Link::Type::InsertText, key)));
     });

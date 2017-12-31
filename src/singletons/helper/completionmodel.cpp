@@ -7,6 +7,7 @@
 #include "singletons/emotemanager.hpp"
 
 namespace chatterino {
+namespace singletons {
 CompletionModel::CompletionModel(const QString &_channelName)
     : channelName(_channelName)
 {
@@ -16,7 +17,7 @@ void CompletionModel::refresh()
 {
     // debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
 
-    auto &emoteManager = EmoteManager::getInstance();
+    auto &emoteManager = singletons::EmoteManager::getInstance();
     this->emotes.clear();
 
     // User-specific: Twitch Emotes
@@ -60,7 +61,7 @@ void CompletionModel::refresh()
     }
 
     // Channel-specific: Usernames
-    auto c = ChannelManager::getInstance().getTwitchChannel(this->channelName);
+    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
     auto usernames = c->getUsernamesForCompletions();
     for (const auto &name : usernames) {
         assert(!name.displayName.isEmpty());
@@ -84,5 +85,6 @@ void CompletionModel::addString(const QString &str)
 {
     // Always add a space at the end of completions
     this->emotes.push_back(str + " ");
+}
 }
 }

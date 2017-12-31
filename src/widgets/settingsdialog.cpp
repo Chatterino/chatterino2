@@ -106,7 +106,7 @@ void SettingsDialog::addTabs()
 QVBoxLayout *SettingsDialog::createAccountsTab()
 {
     auto layout = new QVBoxLayout();
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     // add remove buttons
     auto buttonBox = new QDialogButtonBox(this);
@@ -136,7 +136,7 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
             return;
         }
 
-        AccountManager::getInstance().Twitch.removeUser(selectedUser);
+        singletons::AccountManager::getInstance().Twitch.removeUser(selectedUser);
     });
 
     layout->addWidget(this->ui.accountSwitchWidget);
@@ -146,7 +146,7 @@ QVBoxLayout *SettingsDialog::createAccountsTab()
 
 QVBoxLayout *SettingsDialog::createAppearanceTab()
 {
-    auto &settings = SettingsManager::getInstance();
+    auto &settings = singletons::SettingManager::getInstance();
     auto layout = this->createTabLayout();
 
     {
@@ -163,7 +163,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         fontLayout->addWidget(fontFamilyLabel);
 
         {
-            auto &fontManager = FontManager::getInstance();
+            auto &fontManager = singletons::FontManager::getInstance();
 
             auto UpdateFontFamilyLabel = [fontFamilyLabel, &fontManager](auto) {
                 fontFamilyLabel->setText(
@@ -178,11 +178,11 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         }
 
         fontButton->connect(fontButton, &QPushButton::clicked, []() {
-            auto &fontManager = FontManager::getInstance();
-            QFontDialog dialog(fontManager.getFont(FontManager::Medium, 1.));
+            auto &fontManager = singletons::FontManager::getInstance();
+            QFontDialog dialog(fontManager.getFont(singletons::FontManager::Medium, 1.));
 
             dialog.connect(&dialog, &QFontDialog::fontSelected, [](const QFont &font) {
-                auto &fontManager = FontManager::getInstance();
+                auto &fontManager = singletons::FontManager::getInstance();
                 fontManager.currentFontFamily = font.family().toStdString();
                 fontManager.currentFontSize = font.pointSize();
             });
@@ -263,7 +263,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
 
             QObject::connect(combo, &QComboBox::currentTextChanged, this, [](const QString &value) {
                 // dirty hack
-                EmoteManager::getInstance().incGeneration();
+                singletons::EmoteManager::getInstance().incGeneration();
                 pajlada::Settings::Setting<std::string>::set("/appearance/theme/name",
                                                              value.toStdString());
             });
@@ -312,7 +312,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
 
 QVBoxLayout *SettingsDialog::createBehaviourTab()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     auto layout = this->createTabLayout();
 
     auto form = new QFormLayout();
@@ -329,14 +329,14 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
     auto scroll = new QSlider(Qt::Horizontal);
     form->addRow("Mouse scroll speed:", scroll);
 
-    float currentValue = SettingsManager::getInstance().mouseScrollMultiplier;
+    float currentValue = singletons::SettingManager::getInstance().mouseScrollMultiplier;
     int scrollValue = ((currentValue - 0.1f) / 2.f) * 99.f;
     scroll->setValue(scrollValue);
 
     connect(scroll, &QSlider::valueChanged, [](int newValue) {
         float mul = static_cast<float>(newValue) / 99.f;
         float newScrollValue = (mul * 2.1f) + 0.1f;
-        SettingsManager::getInstance().mouseScrollMultiplier = newScrollValue;
+        singletons::SettingManager::getInstance().mouseScrollMultiplier = newScrollValue;
     });
 
     form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
@@ -361,7 +361,7 @@ QVBoxLayout *SettingsDialog::createCommandsTab()
 
 QVBoxLayout *SettingsDialog::createEmotesTab()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     auto layout = this->createTabLayout();
 
     layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
@@ -405,7 +405,7 @@ QVBoxLayout *SettingsDialog::createLogsTab()
 
 QVBoxLayout *SettingsDialog::createHighlightingTab()
 {
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     auto layout = this->createTabLayout();
 
     auto highlights = new QListWidget();
@@ -615,7 +615,7 @@ void SettingsDialog::refresh()
 {
     this->ui.accountSwitchWidget->refresh();
 
-    SettingsManager::getInstance().saveSnapshot();
+    singletons::SettingManager::getInstance().saveSnapshot();
 }
 
 void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)
@@ -754,7 +754,7 @@ void SettingsDialog::okButtonClicked()
 
 void SettingsDialog::cancelButtonClicked()
 {
-    auto &settings = SettingsManager::getInstance();
+    auto &settings = singletons::SettingManager::getInstance();
 
     settings.recallSnapshot();
 

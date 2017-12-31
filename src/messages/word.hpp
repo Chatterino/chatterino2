@@ -96,7 +96,7 @@ public:
     explicit Word(LazyLoadedImage *_image, Flags getFlags, const QString &copytext,
                   const QString &tooltip, const Link &getLink = Link());
     explicit Word(const QString &_text, Flags getFlags, const MessageColor &textColor,
-                  FontManager::Type font, const QString &copytext, const QString &tooltip,
+                  singletons::FontManager::Type font, const QString &copytext, const QString &tooltip,
                   const Link &getLink = Link());
 
     bool isImage() const;
@@ -138,7 +138,7 @@ private:
     int yOffset = 0;
 
     bool _hasTrailingSpace = true;
-    FontManager::Type font = FontManager::Medium;
+    singletons::FontManager::Type font = singletons::FontManager::Medium;
     Link link;
 
     struct ScaleDependantData {

@@ -7,6 +7,7 @@
 #include <math.h>
 
 namespace chatterino {
+namespace singletons {
 
 namespace detail {
 
@@ -160,3 +161,4 @@ void ThemeManager::normalizeColor(QColor &color)
 }
 
 }  // namespace chatterino
+}

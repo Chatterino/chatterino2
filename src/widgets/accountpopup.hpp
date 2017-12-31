@@ -1,7 +1,7 @@
 #pragma once
 
 #include "basewidget.hpp"
-#include "concurrentmap.hpp"
+#include "util/concurrentmap.hpp"
 #include "twitch/twitchchannel.hpp"
 
 #include <QPushButton>
@@ -52,7 +52,7 @@ private:
     QString userID;
     QPixmap avatar;
 
-    ConcurrentMap<QString, QPixmap> avatarMap;
+    util::ConcurrentMap<QString, QPixmap> avatarMap;
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override;

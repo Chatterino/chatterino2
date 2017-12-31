@@ -6,6 +6,7 @@
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
+namespace singletons {
 
 class WindowManager;
 
@@ -107,3 +108,4 @@ private:
 };
 
 }  // namespace chatterino
+}

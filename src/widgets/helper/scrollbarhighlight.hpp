@@ -3,8 +3,9 @@
 #include "QString"
 
 namespace chatterino {
-
+namespace singletons {
 class ThemeManager;
+}
 
 namespace widgets {
 
@@ -18,7 +19,7 @@ public:
     ScrollBarHighlight(double _position, int _colorIndex, ScrollBar *parent, Style _style = Default,
                        QString _tag = "");
 
-    ThemeManager &themeManager;
+    singletons::ThemeManager &themeManager;
 
     double getPosition()
     {

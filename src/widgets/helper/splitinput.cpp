@@ -27,13 +27,13 @@ SplitInput::SplitInput(Split *_chatWidget)
     this->hbox.addLayout(&this->editContainer);
     this->hbox.addLayout(&this->vbox);
 
-    auto &fontManager = FontManager::getInstance();
+    auto &fontManager = singletons::FontManager::getInstance();
 
     this->textInput.setFont(
-        fontManager.getFont(FontManager::Type::Medium, this->getDpiMultiplier()));
+        fontManager.getFont(singletons::FontManager::Type::Medium, this->getDpiMultiplier()));
     this->managedConnections.emplace_back(fontManager.fontChanged.connect([this, &fontManager]() {
         this->textInput.setFont(
-            fontManager.getFont(FontManager::Type::Medium, this->getDpiMultiplier()));
+            fontManager.getFont(singletons::FontManager::Type::Medium, this->getDpiMultiplier()));
     }));
 
     this->editContainer.addWidget(&this->textInput);
@@ -67,10 +67,10 @@ SplitInput::SplitInput(Split *_chatWidget)
     connect(&textInput, &ResizingTextEdit::textChanged, this, &SplitInput::editTextChanged);
 
     this->refreshTheme();
-    textLengthLabel.setHidden(!SettingsManager::getInstance().showMessageLength);
+    textLengthLabel.setHidden(!singletons::SettingManager::getInstance().showMessageLength);
 
-    auto completer =
-        new QCompleter(CompletionManager::getInstance().createModel(this->chatWidget->channelName));
+    auto completer = new QCompleter(
+        singletons::CompletionManager::getInstance().createModel(this->chatWidget->channelName));
 
     this->textInput.setCompleter(completer);
 
@@ -180,7 +180,7 @@ SplitInput::SplitInput(Split *_chatWidget)
         }
     });
 
-    SettingsManager::getInstance().showMessageLength.connect(
+    singletons::SettingManager::getInstance().showMessageLength.connect(
         [this](const bool &value, auto) { this->textLengthLabel.setHidden(!value); },
         this->managedConnections);
 

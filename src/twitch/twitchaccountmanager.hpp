@@ -13,7 +13,9 @@
 //
 
 namespace chatterino {
+namespace singletons {
 class AccountManager;
+}
 
 namespace twitch {
 
@@ -59,7 +61,7 @@ private:
     std::vector<std::shared_ptr<twitch::TwitchUser>> users;
     mutable std::mutex mutex;
 
-    friend class chatterino::AccountManager;
+    friend class chatterino::singletons::AccountManager;
 };
 }
 }

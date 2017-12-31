@@ -14,7 +14,7 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(const QString &windowName, ThemeManager &_themeManager, bool _isMainWindow)
+Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager, bool _isMainWindow)
     : BaseWidget(_themeManager, nullptr)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
@@ -24,7 +24,7 @@ Window::Window(const QString &windowName, ThemeManager &_themeManager, bool _isM
 {
     this->initAsWindow();
 
-    AccountManager::getInstance().Twitch.currentUsername.connect(
+    singletons::AccountManager::getInstance().Twitch.currentUsername.connect(
         [this](const std::string &newUsername, auto) {
             if (newUsername.empty()) {
                 this->refreshWindowTitle("Not logged in");

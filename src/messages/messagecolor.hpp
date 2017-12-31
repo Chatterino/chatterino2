@@ -16,7 +16,7 @@ public:
     explicit MessageColor(Type type = Text);
 
     Type getType() const;
-    const QColor &getColor(ThemeManager &themeManager) const;
+    const QColor &getColor(singletons::ThemeManager &themeManager) const;
 
 private:
     Type type;

@@ -3,6 +3,7 @@
 #include <QRegularExpression>
 
 namespace chatterino {
+namespace singletons {
 CommandManager &CommandManager::getInstance()
 {
     static CommandManager instance;
@@ -80,4 +81,5 @@ CommandManager &CommandManager::getInstance()
 //    this->name = _text.mid(0, index);
 //    this->text = _text.mid(index + 1);
 //}
+}
 }

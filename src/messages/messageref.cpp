@@ -35,7 +35,7 @@ int MessageRef::getHeight() const
 // return true if redraw is required
 bool MessageRef::layout(int width, float scale)
 {
-    auto &emoteManager = EmoteManager::getInstance();
+    auto &emoteManager = singletons::EmoteManager::getInstance();
 
     bool rebuildRequired = false, layoutRequired = false;
 
@@ -50,15 +50,15 @@ bool MessageRef::layout(int width, float scale)
     this->emoteGeneration = emoteManager.getGeneration();
 
     // check if text changed
-    bool textChanged = this->fontGeneration != FontManager::getInstance().getGeneration();
+    bool textChanged = this->fontGeneration != singletons::FontManager::getInstance().getGeneration();
     layoutRequired |= textChanged;
-    this->fontGeneration = FontManager::getInstance().getGeneration();
+    this->fontGeneration = singletons::FontManager::getInstance().getGeneration();
 
     // check if work mask changed
     bool wordMaskChanged =
-        this->currentWordTypes != SettingsManager::getInstance().getWordTypeMask();
+        this->currentWordTypes != singletons::SettingManager::getInstance().getWordTypeMask();
     layoutRequired |= wordMaskChanged;
-    this->currentWordTypes = SettingsManager::getInstance().getWordTypeMask();
+    this->currentWordTypes = singletons::SettingManager::getInstance().getWordTypeMask();
 
     // check if dpi changed
     bool scaleChanged = this->scale != scale;
@@ -92,7 +92,7 @@ bool MessageRef::layout(int width, float scale)
 
 void MessageRef::actuallyLayout(int width)
 {
-    auto &settings = SettingsManager::getInstance();
+    auto &settings = singletons::SettingManager::getInstance();
 
     const int spaceWidth = 4;
     const int right = width - MARGIN_RIGHT;

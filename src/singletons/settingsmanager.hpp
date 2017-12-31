@@ -9,10 +9,11 @@
 #include <pajlada/settings/settinglistener.hpp>
 
 namespace chatterino {
+namespace singletons {
 
 static void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
-class SettingsManager : public QObject
+class SettingManager : public QObject
 {
     Q_OBJECT
 
@@ -81,9 +82,9 @@ public:
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
-    static SettingsManager &getInstance()
+    static SettingManager &getInstance()
     {
-        static SettingsManager instance;
+        static SettingManager instance;
         return instance;
     }
     void updateWordTypeMask();
@@ -97,7 +98,7 @@ signals:
 private:
     std::unique_ptr<rapidjson::Document> snapshot;
 
-    SettingsManager();
+    SettingManager();
 
     QSettings settings;
     std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
@@ -107,3 +108,4 @@ private:
 };
 
 }  // namespace chatterino
+}

@@ -26,6 +26,7 @@
 using namespace chatterino::messages;
 
 namespace chatterino {
+namespace singletons {
 
 IrcManager::IrcManager(ChannelManager &_channelManager, ResourceManager &_resources,
                        AccountManager &_accountManager)
@@ -70,7 +71,8 @@ IrcManager::IrcManager(ChannelManager &_channelManager, ResourceManager &_resour
 
 IrcManager &IrcManager::getInstance()
 {
-    static IrcManager instance(ChannelManager::getInstance(), ResourceManager::getInstance(),
+    static IrcManager instance(ChannelManager::getInstance(),
+                               singletons::ResourceManager::getInstance(),
                                AccountManager::getInstance());
     return instance;
 }
@@ -196,7 +198,7 @@ void IrcManager::sendMessage(const QString &channelName, QString message)
     static int i = 0;
 
     if (this->writeConnection) {
-        if (SettingsManager::getInstance().allowDuplicateMessages && (++i % 2) == 0) {
+        if (singletons::SettingManager::getInstance().allowDuplicateMessages && (++i % 2) == 0) {
             message.append(this->messageSuffix);
         }
         this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
@@ -528,3 +530,4 @@ Communi::IrcConnection *IrcManager::getReadConnection()
 }
 
 }  // namespace chatterino
+}

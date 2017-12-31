@@ -12,7 +12,7 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWidget::BaseWidget(ThemeManager &_themeManager, QWidget *parent)
+BaseWidget::BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent)
     : QWidget(parent)
     , themeManager(_themeManager)
 {
@@ -21,14 +21,14 @@ BaseWidget::BaseWidget(ThemeManager &_themeManager, QWidget *parent)
 
 BaseWidget::BaseWidget(BaseWidget *parent)
     : QWidget(parent)
-    , themeManager(ThemeManager::getInstance())
+    , themeManager(singletons::ThemeManager::getInstance())
 {
     this->init();
 }
 
 BaseWidget::BaseWidget(QWidget *parent)
     : QWidget(parent)
-    , themeManager(ThemeManager::getInstance())
+    , themeManager(singletons::ThemeManager::getInstance())
 {
 }
 
@@ -72,7 +72,7 @@ void BaseWidget::initAsWindow()
     }
 #endif
 
-    if (SettingsManager::getInstance().windowTopMost.getValue()) {
+    if (singletons::SettingManager::getInstance().windowTopMost.getValue()) {
         this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     }
 }

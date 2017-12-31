@@ -40,7 +40,7 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
 
-    auto &settingsManager = SettingsManager::getInstance();
+    auto &settingsManager = singletons::SettingManager::getInstance();
 
     settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
     settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
@@ -177,13 +177,13 @@ void Notebook::performLayout(bool animated)
     int x = 0, y = 0;
     float scale = this->getDpiMultiplier();
 
-    if (!showButtons || SettingsManager::getInstance().hidePreferencesButton) {
+    if (!showButtons || singletons::SettingManager::getInstance().hidePreferencesButton) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (!showButtons || SettingsManager::getInstance().hideUserButton) {
+    if (!showButtons || singletons::SettingManager::getInstance().hideUserButton) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);

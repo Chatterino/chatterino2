@@ -3,6 +3,7 @@
 #include "widgets/window.hpp"
 
 namespace chatterino {
+namespace singletons {
 
 class ThemeManager;
 
@@ -41,3 +42,4 @@ private:
 };
 
 }  // namespace chatterino
+}

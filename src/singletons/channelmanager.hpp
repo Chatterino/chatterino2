@@ -7,8 +7,7 @@
 #include <map>
 
 namespace chatterino {
-
-class WindowManager;
+namespace singletons {
 class IrcManager;
 
 class ChannelManager
@@ -43,7 +42,8 @@ private:
     pajlada::Signals::Signal<const QString &> ircJoin;
     pajlada::Signals::Signal<const QString &> ircPart;
 
-    friend class IrcManager;
+    friend class singletons::IrcManager;
 };
 
 }  // namespace chatterino
+}

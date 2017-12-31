@@ -8,6 +8,7 @@
 using namespace chatterino::messages;
 
 namespace chatterino {
+namespace singletons {
 
 std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
 
@@ -16,7 +17,7 @@ void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
     _settings.push_back(setting);
 }
 
-SettingsManager::SettingsManager()
+SettingManager::SettingManager()
     : streamlinkPath("/behaviour/streamlink/path", "")
     , preferredQuality("/behaviour/streamlink/quality", "Choose")
     , emoteScale(this->settingsItems, "emoteScale", 1.0)
@@ -39,7 +40,7 @@ SettingsManager::SettingsManager()
     };
 }
 
-void SettingsManager::save()
+void SettingManager::save()
 {
     for (auto &item : this->settingsItems) {
         if (item.get().getName() != "highlightProperties") {
@@ -62,7 +63,7 @@ void SettingsManager::save()
     }
 }
 
-void SettingsManager::load()
+void SettingManager::load()
 {
     for (auto &item : this->settingsItems) {
         if (item.get().getName() != "highlightProperties") {
@@ -82,22 +83,22 @@ void SettingsManager::load()
     }
 }
 
-Word::Flags SettingsManager::getWordTypeMask()
+Word::Flags SettingManager::getWordTypeMask()
 {
     return this->wordTypeMask;
 }
 
-bool SettingsManager::isIgnoredEmote(const QString &)
+bool SettingManager::isIgnoredEmote(const QString &)
 {
     return false;
 }
 
-QSettings &SettingsManager::getQSettings()
+QSettings &SettingManager::getQSettings()
 {
     return this->settings;
 }
 
-void SettingsManager::updateWordTypeMask()
+void SettingManager::updateWordTypeMask()
 {
     uint32_t newMaskUint = Word::Text;
 
@@ -136,7 +137,7 @@ void SettingsManager::updateWordTypeMask()
     }
 }
 
-void SettingsManager::saveSnapshot()
+void SettingManager::saveSnapshot()
 {
     rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
     rapidjson::Document::AllocatorType &a = d->GetAllocator();
@@ -157,7 +158,7 @@ void SettingsManager::saveSnapshot()
     debug::Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
-void SettingsManager::recallSnapshot()
+void SettingManager::recallSnapshot()
 {
     if (!this->snapshot) {
         return;
@@ -184,3 +185,4 @@ void SettingsManager::recallSnapshot()
 }
 
 }  // namespace chatterino
+}

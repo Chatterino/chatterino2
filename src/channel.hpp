@@ -1,9 +1,9 @@
 #pragma once
 
-#include "concurrentmap.hpp"
 #include "logging/loggingchannel.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/limitedqueue.hpp"
+#include "util/concurrentmap.hpp"
 
 #include <QMap>
 #include <QMutex>

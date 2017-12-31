@@ -118,7 +118,7 @@ HEADERS  += \
     src/precompiled_headers.hpp \
     src/asyncexec.hpp \
     src/channel.hpp \
-    src/concurrentmap.hpp \
+    src/util/concurrentmap.hpp \
     src/emojis.hpp \
     src/singletons/ircmanager.hpp \
     src/messages/lazyloadedimage.hpp \
@@ -194,7 +194,8 @@ HEADERS  += \
     src/twitch/twitchaccountmanager.hpp \
     src/singletons/helper/completionmodel.hpp \
     src/singletons/helper/chatterinosetting.hpp \
-    src/singletons/resourcemanager.hpp
+    src/singletons/resourcemanager.hpp \
+    src/util/emotemap.hpp
 
 
 PRECOMPILED_HEADER =

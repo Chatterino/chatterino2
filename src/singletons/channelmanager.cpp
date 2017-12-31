@@ -4,6 +4,7 @@
 using namespace chatterino::twitch;
 
 namespace chatterino {
+namespace singletons {
 
 ChannelManager &ChannelManager::getInstance()
 {
@@ -138,3 +139,4 @@ void ChannelManager::doOnAll(std::function<void(std::shared_ptr<Channel>)> func)
 }
 
 }  // namespace chatterino
+}

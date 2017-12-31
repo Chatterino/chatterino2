@@ -9,9 +9,6 @@
 #include <QWidget>
 
 namespace chatterino {
-
-class ChannelManager;
-
 namespace widgets {
 
 class Window;

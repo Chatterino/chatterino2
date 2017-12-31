@@ -3,6 +3,7 @@
 #include "twitch/twitchaccountmanager.hpp"
 
 namespace chatterino {
+namespace singletons {
 
 class AccountManager
 {
@@ -17,3 +18,4 @@ public:
 };
 
 }  // namespace chatterino
+}

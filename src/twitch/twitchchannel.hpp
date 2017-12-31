@@ -1,9 +1,9 @@
 #pragma once
 
 #include "channel.hpp"
-#include "concurrentmap.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
+#include "util/concurrentmap.hpp"
 
 namespace chatterino {
 namespace twitch {
@@ -22,8 +22,8 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
-    const std::shared_ptr<chatterino::EmoteMap> bttvChannelEmotes;
-    const std::shared_ptr<chatterino::EmoteMap> ffzChannelEmotes;
+    const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
+    const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
 
     const QString subscriptionURL;
     const QString channelURL;

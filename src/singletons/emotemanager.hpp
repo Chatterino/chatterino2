@@ -2,12 +2,13 @@
 
 #define GIF_FRAME_LENGTH 33
 
-#include "concurrentmap.hpp"
 #include "emojis.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "signalvector.hpp"
 #include "twitch/emotevalue.hpp"
 #include "twitch/twitchuser.hpp"
+#include "util/concurrentmap.hpp"
+#include "util/emotemap.hpp"
 
 #include <QMap>
 #include <QMutex>
@@ -17,28 +18,15 @@
 #include <boost/signals2.hpp>
 
 namespace chatterino {
+namespace singletons {
 
-class SettingsManager;
+class SettingManager;
 class WindowManager;
-
-struct EmoteData {
-    EmoteData()
-    {
-    }
-
-    EmoteData(messages::LazyLoadedImage *_image)
-        : image(_image)
-    {
-    }
-
-    messages::LazyLoadedImage *image = nullptr;
-};
-
-typedef ConcurrentMap<QString, EmoteData> EmoteMap;
 
 class EmoteManager
 {
-    explicit EmoteManager(SettingsManager &manager, WindowManager &windowManager);
+    explicit EmoteManager(singletons::SettingManager &manager,
+                          singletons::WindowManager &windowManager);
 
 public:
     static EmoteManager &getInstance();
@@ -46,21 +34,21 @@ public:
     void loadGlobalEmotes();
 
     void reloadBTTVChannelEmotes(const QString &channelName,
-                                 std::weak_ptr<EmoteMap> channelEmoteMap);
+                                 std::weak_ptr<util::EmoteMap> channelEmoteMap);
     void reloadFFZChannelEmotes(const QString &channelName,
-                                std::weak_ptr<EmoteMap> channelEmoteMap);
+                                std::weak_ptr<util::EmoteMap> channelEmoteMap);
 
-    ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
-    EmoteMap &getFFZEmotes();
-    EmoteMap &getChatterinoEmotes();
-    EmoteMap &getBTTVChannelEmoteFromCaches();
-    EmoteMap &getEmojis();
-    ConcurrentMap<int, EmoteData> &getFFZChannelEmoteFromCaches();
-    ConcurrentMap<long, EmoteData> &getTwitchEmoteFromCache();
+    util::ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
+    util::EmoteMap &getFFZEmotes();
+    util::EmoteMap &getChatterinoEmotes();
+    util::EmoteMap &getBTTVChannelEmoteFromCaches();
+    util::EmoteMap &getEmojis();
+    util::ConcurrentMap<int, util::EmoteData> &getFFZChannelEmoteFromCaches();
+    util::ConcurrentMap<long, util::EmoteData> &getTwitchEmoteFromCache();
 
-    EmoteData getCheerImage(long long int amount, bool animated);
+    util::EmoteData getCheerImage(long long int amount, bool animated);
 
-    EmoteData getTwitchEmoteById(long int id, const QString &emoteName);
+    util::EmoteData getTwitchEmoteById(long int id, const QString &emoteName);
 
     int getGeneration()
     {
@@ -75,10 +63,10 @@ public:
     boost::signals2::signal<void()> &getGifUpdateSignal();
 
     // Bit badge/emotes?
-    ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
+    util::ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
 
 private:
-    SettingsManager &settingsManager;
+    SettingManager &settingsManager;
     WindowManager &windowManager;
 
     /// Emojis
@@ -91,12 +79,13 @@ private:
     QMap<QChar, QVector<EmojiData>> emojiFirstByte;
 
     //            url      Emoji-one image
-    EmoteMap emojis;
+    util::EmoteMap emojis;
 
     void loadEmojis();
 
 public:
-    void parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
+    void parseEmojis(std::vector<std::tuple<util::EmoteData, QString>> &parsedWords,
+                     const QString &text);
 
     QString replaceShortCodes(const QString &text);
 
@@ -123,41 +112,41 @@ public:
 
 private:
     //            emote code
-    ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
+    util::ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
 
     //        emote id
-    ConcurrentMap<long, EmoteData> _twitchEmoteFromCache;
+    util::ConcurrentMap<long, util::EmoteData> _twitchEmoteFromCache;
 
     /// BTTV emotes
-    EmoteMap bttvChannelEmotes;
+    util::EmoteMap bttvChannelEmotes;
 
 public:
-    ConcurrentMap<QString, EmoteMap> bttvChannels;
-    EmoteMap bttvGlobalEmotes;
+    util::ConcurrentMap<QString, util::EmoteMap> bttvChannels;
+    util::EmoteMap bttvGlobalEmotes;
     SignalVector<std::string> bttvGlobalEmoteCodes;
     //       roomID
     std::map<std::string, SignalVector<std::string>> bttvChannelEmoteCodes;
-    EmoteMap _bttvChannelEmoteFromCaches;
+    util::EmoteMap _bttvChannelEmoteFromCaches;
 
 private:
     void loadBTTVEmotes();
 
     /// FFZ emotes
-    EmoteMap ffzChannelEmotes;
+    util::EmoteMap ffzChannelEmotes;
 
 public:
-    ConcurrentMap<QString, EmoteMap> ffzChannels;
-    EmoteMap ffzGlobalEmotes;
+    util::ConcurrentMap<QString, util::EmoteMap> ffzChannels;
+    util::EmoteMap ffzGlobalEmotes;
     SignalVector<std::string> ffzGlobalEmoteCodes;
     std::map<std::string, SignalVector<std::string>> ffzChannelEmoteCodes;
 
 private:
-    ConcurrentMap<int, EmoteData> _ffzChannelEmoteFromCaches;
+    util::ConcurrentMap<int, util::EmoteData> _ffzChannelEmoteFromCaches;
 
     void loadFFZEmotes();
 
     /// Chatterino emotes
-    EmoteMap _chatterinoEmotes;
+    util::EmoteMap _chatterinoEmotes;
 
     boost::signals2::signal<void()> gifUpdateTimerSignal;
     QTimer gifUpdateTimer;
@@ -170,3 +159,4 @@ private:
 };
 
 }  // namespace chatterino
+}

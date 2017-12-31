@@ -11,8 +11,8 @@ namespace twitch {
 
 TwitchChannel::TwitchChannel(const QString &channelName)
     : Channel(channelName)
-    , bttvChannelEmotes(new EmoteMap)
-    , ffzChannelEmotes(new EmoteMap)
+    , bttvChannelEmotes(new util::EmoteMap)
+    , ffzChannelEmotes(new util::EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
@@ -64,7 +64,7 @@ void TwitchChannel::setRoomID(const QString &_roomID)
 
 void TwitchChannel::reloadChannelEmotes()
 {
-    auto &emoteManager = EmoteManager::getInstance();
+    auto &emoteManager = singletons::EmoteManager::getInstance();
 
     debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
@@ -74,14 +74,14 @@ void TwitchChannel::reloadChannelEmotes()
 
 void TwitchChannel::sendMessage(const QString &message)
 {
-    auto &emoteManager = EmoteManager::getInstance();
+    auto &emoteManager = singletons::EmoteManager::getInstance();
 
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
     QString parsedMessage = emoteManager.replaceShortCodes(message);
 
-    IrcManager::getInstance().sendMessage(this->name, parsedMessage);
+    singletons::IrcManager::getInstance().sendMessage(this->name, parsedMessage);
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
@@ -155,7 +155,7 @@ void TwitchChannel::fetchRecentMessages()
 {
     static QString genericURL =
         "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
-    static auto readConnection = IrcManager::getInstance().getReadConnection();
+    static auto readConnection = singletons::IrcManager::getInstance().getReadConnection();
 
     util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [=](QJsonObject obj) {
         this->dontAddMessages = false;
@@ -165,7 +165,7 @@ void TwitchChannel::fetchRecentMessages()
                 QByteArray content = msgArray[i].toString().toUtf8();
                 auto msg = Communi::IrcMessage::fromData(content, readConnection);
                 auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
-                IrcManager::getInstance().privateMessageReceived(privMsg);
+                singletons::IrcManager::getInstance().privateMessageReceived(privMsg);
             }
     });
 }

@@ -20,7 +20,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     palette.setColor(QPalette::Background, black);
     this->setPalette(palette);
     this->setWindowOpacity(0.8);
-    this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall,
+    this->setFont(singletons::FontManager::getInstance().getFont(singletons::FontManager::Type::MediumSmall,
                                                      this->getDpiMultiplier()));
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
@@ -32,8 +32,8 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     layout->addWidget(displayText);
     this->setLayout(layout);
 
-    FontManager::getInstance().fontChanged.connect([this] {
-        this->setFont(FontManager::getInstance().getFont(FontManager::Type::MediumSmall,
+    singletons::FontManager::getInstance().fontChanged.connect([this] {
+        this->setFont(singletons::FontManager::getInstance().getFont(singletons::FontManager::Type::MediumSmall,
                                                          this->getDpiMultiplier()));
     });
 }

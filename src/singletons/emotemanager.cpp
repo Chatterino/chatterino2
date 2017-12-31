@@ -21,8 +21,9 @@
 using namespace chatterino::messages;
 
 namespace chatterino {
+namespace singletons {
 
-EmoteManager::EmoteManager(SettingsManager &_settingsManager, WindowManager &_windowManager)
+EmoteManager::EmoteManager(SettingManager &_settingsManager, WindowManager &_windowManager)
     : settingsManager(_settingsManager)
     , windowManager(_windowManager)
     , findShortCodesRegex(":([-+\\w]+):")
@@ -38,7 +39,7 @@ EmoteManager::EmoteManager(SettingsManager &_settingsManager, WindowManager &_wi
 
 EmoteManager &EmoteManager::getInstance()
 {
-    static EmoteManager instance(SettingsManager::getInstance(), WindowManager::getInstance());
+    static EmoteManager instance(SettingManager::getInstance(), WindowManager::getInstance());
     return instance;
 }
 
@@ -49,7 +50,8 @@ void EmoteManager::loadGlobalEmotes()
     this->loadFFZEmotes();
 }
 
-void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
+void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
+                                           std::weak_ptr<util::EmoteMap> _map)
 {
     printf("[EmoteManager] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
@@ -88,7 +90,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
             link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
             auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
-                return EmoteData(
+                return util::EmoteData(
                     new LazyLoadedImage(link, 1, code, code + "<br/>Channel BTTV Emote"));
             });
 
@@ -101,7 +103,8 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName, std::weak
     });
 }
 
-void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
+void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
+                                          std::weak_ptr<util::EmoteMap> _map)
 {
     printf("[EmoteManager] Reload FFZ Channel Emotes for channel %s\n", qPrintable(channelName));
 
@@ -137,7 +140,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
 
                 auto emote =
                     this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &url1] {
-                        return EmoteData(
+                        return util::EmoteData(
                             new LazyLoadedImage(url1, 1, code, code + "<br/>Channel FFZ Emote"));
                     });
 
@@ -151,37 +154,37 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName, std::weak_
     });
 }
 
-ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
+util::ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
 {
     return _twitchEmotes;
 }
 
-EmoteMap &EmoteManager::getFFZEmotes()
+util::EmoteMap &EmoteManager::getFFZEmotes()
 {
     return ffzGlobalEmotes;
 }
 
-EmoteMap &EmoteManager::getChatterinoEmotes()
+util::EmoteMap &EmoteManager::getChatterinoEmotes()
 {
     return _chatterinoEmotes;
 }
 
-EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
+util::EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
 {
     return _bttvChannelEmoteFromCaches;
 }
 
-EmoteMap &EmoteManager::getEmojis()
+util::EmoteMap &EmoteManager::getEmojis()
 {
     return this->emojis;
 }
 
-ConcurrentMap<int, EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
+util::ConcurrentMap<int, util::EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;
 }
 
-ConcurrentMap<long, EmoteData> &EmoteManager::getTwitchEmoteFromCache()
+util::ConcurrentMap<long, util::EmoteData> &EmoteManager::getTwitchEmoteFromCache()
 {
     return _twitchEmoteFromCache;
 }
@@ -237,7 +240,8 @@ void EmoteManager::loadEmojis()
                       "emojione/2.2.6/assets/png/" +
                       code + ".png";
 
-        this->emojis.insert(code, EmoteData(new LazyLoadedImage(url, 0.35, ":" + shortCode + ":",
+        this->emojis.insert(code,
+                            util::EmoteData(new LazyLoadedImage(url, 0.35, ":" + shortCode + ":",
                                                                 ":" + shortCode + ":<br/>Emoji")));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
@@ -245,7 +249,7 @@ void EmoteManager::loadEmojis()
     }
 }
 
-void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &parsedWords,
+void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>> &parsedWords,
                                const QString &text)
 {
     int lastParsedEmojiEndIndex = 0;
@@ -316,11 +320,12 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<EmoteData, QString>> &pars
 
         // Create or fetch cached emoji image
         auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [this, &url] {
-            return EmoteData(new LazyLoadedImage(url, 0.35, "?????????", "???????????????"));  //
+            return util::EmoteData(
+                new LazyLoadedImage(url, 0.35, "?????????", "???????????????"));  //
         });
 
         // Push the emoji as a word to parsedWords
-        parsedWords.push_back(std::tuple<EmoteData, QString>(emojiImage, QString()));
+        parsedWords.push_back(std::tuple<util::EmoteData, QString>(emojiImage, QString()));
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 
@@ -482,7 +487,7 @@ void EmoteManager::loadFFZEmotes()
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
-EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
+util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
 {
     return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &id] {
         qreal scale;
@@ -502,10 +507,10 @@ QString EmoteManager::getTwitchEmoteLink(long id, qreal &scale)
     return value.replace("{id}", QString::number(id)).replace("{scale}", "2");
 }
 
-EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
+util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
 {
     // TODO: fix this xD
-    return EmoteData();
+    return util::EmoteData();
 }
 
 boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
@@ -535,3 +540,4 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
 }
 
 }  // namespace chatterino
+}

@@ -1,7 +1,7 @@
 #include "widgets/accountpopup.hpp"
-#include "singletons/accountmanager.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
+#include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "ui_accountpopupform.h"
 #include "util/urlfetch.hpp"
@@ -32,7 +32,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> _channel)
 
     this->resize(0, 0);
 
-    SettingsManager &settings = SettingsManager::getInstance();
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     this->permission = permissions::User;
     for (auto button : this->ui->profileLayout->findChildren<QPushButton *>()) {
@@ -59,7 +59,7 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> _channel)
     this->sendCommand(this->ui->mod, "/mod ");
     this->sendCommand(this->ui->unMod, "/unmod ");
 
-    auto &accountManager = AccountManager::getInstance();
+    auto &accountManager = singletons::AccountManager::getInstance();
     QString userId;
     QString userNickname;
     auto currentTwitchUser = accountManager.Twitch.getCurrent();
@@ -185,7 +185,8 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 
 void AccountPopupWidget::updatePermissions()
 {
-    AccountManager &accountManager = AccountManager::getInstance();
+    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
+
     auto currentTwitchUser = accountManager.Twitch.getCurrent();
     if (!currentTwitchUser) {
         // No twitch user set (should never happen)
@@ -242,7 +243,7 @@ void AccountPopupWidget::focusOutEvent(QFocusEvent *)
 
 void AccountPopupWidget::showEvent(QShowEvent *)
 {
-    AccountManager &accountManager = AccountManager::getInstance();
+    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
     auto currentTwitchUser = accountManager.Twitch.getCurrent();
     if (!currentTwitchUser) {
         // No twitch user set (should never happen)
@@ -266,7 +267,8 @@ void AccountPopupWidget::showEvent(QShowEvent *)
         this->updateButtons(this->ui->ownerLayout, false);
     }
 
-    QString blacklisted = SettingsManager::getInstance().highlightUserBlacklist.getnonConst();
+    QString blacklisted =
+        singletons::SettingManager::getInstance().highlightUserBlacklist.getnonConst();
     QStringList list = blacklisted.split("\n", QString::SkipEmptyParts);
     if (list.contains(this->ui->lblUsername->text(), Qt::CaseInsensitive)) {
         this->ui->disableHighlights->hide();

@@ -5,6 +5,7 @@
 #include "singletons/emotemanager.hpp"
 
 namespace chatterino {
+namespace singletons {
 
 CompletionManager &CompletionManager::getInstance()
 {
@@ -26,3 +27,4 @@ CompletionModel *CompletionManager::createModel(const std::string &channelName)
 }
 
 }  // namespace chatterino
+}

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "concurrentmap.hpp"
 #include "messages/lazyloadedimage.hpp"
+#include "util/concurrentmap.hpp"
 
 #include <QObject>
 #include <QString>

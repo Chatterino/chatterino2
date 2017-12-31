@@ -88,7 +88,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         auto *completionModel =
-            static_cast<chatterino::CompletionModel *>(this->completer->model());
+            static_cast<chatterino::singletons::CompletionModel *>(this->completer->model());
 
         if (!this->nextCompletion) {
             completionModel->refresh();

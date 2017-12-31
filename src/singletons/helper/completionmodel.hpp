@@ -7,6 +7,7 @@
 #include <string>
 
 namespace chatterino {
+namespace singletons {
 class CompletionModel : public QAbstractListModel
 {
 public:
@@ -38,4 +39,5 @@ private:
 
     QString channelName;
 };
+}
 }

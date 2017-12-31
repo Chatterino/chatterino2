@@ -1,6 +1,7 @@
 ﻿#include "singletons/accountmanager.hpp"
 
 namespace chatterino {
+namespace singletons {
 
 namespace {
 
@@ -43,3 +44,4 @@ void AccountManager::load()
 }
 
 }  // namespace chatterino
+}

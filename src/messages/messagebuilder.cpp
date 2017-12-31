@@ -40,13 +40,13 @@ void MessageBuilder::appendTimestamp(QDateTime &time)
     // Add word for timestamp with no seconds
     QString timestampNoSeconds(time.toString("hh:mm"));
     this->appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                          MessageColor(MessageColor::System), FontManager::Medium, QString(),
+                          MessageColor(MessageColor::System), singletons::FontManager::Medium, QString(),
                           QString()));
 
     // Add word for timestamp with seconds
     QString timestampWithSeconds(time.toString("hh:mm:ss"));
     this->appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                          MessageColor(MessageColor::System), FontManager::Medium, QString(),
+                          MessageColor(MessageColor::System), singletons::FontManager::Medium, QString(),
                           QString()));
 }
 

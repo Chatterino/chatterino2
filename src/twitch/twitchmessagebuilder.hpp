@@ -10,10 +10,7 @@
 #include <QVariant>
 
 namespace chatterino {
-
-class WindowManager;
 class Channel;
-class ThemeManager;
 
 namespace twitch {
 class TwitchChannel;
@@ -61,9 +58,9 @@ private:
 
     void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, EmoteData>> &vec);
+                           std::vector<std::pair<long, util::EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
-    bool appendEmote(EmoteData &emoteData);
+    bool appendEmote(util::EmoteData &emoteData);
 
     void parseTwitchBadges();
     void parseChatterinoBadges();

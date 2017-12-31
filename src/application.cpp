@@ -6,6 +6,8 @@
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
 
+using namespace chatterino::singletons;
+
 namespace chatterino {
 
 // this class is responsible for handling the workflow of Chatterino
@@ -13,41 +15,43 @@ namespace chatterino {
 
 Application::Application()
 {
-    logging::init();
-    SettingsManager::getInstance().load();
+    singletons::WindowManager::getInstance();
 
-    WindowManager::getInstance().initMainWindow();
+    logging::init();
+    singletons::SettingManager::getInstance().load();
+
+    singletons::WindowManager::getInstance().initMainWindow();
 
     // Initialize everything we need
-    EmoteManager::getInstance().loadGlobalEmotes();
+    singletons::EmoteManager::getInstance().loadGlobalEmotes();
 
-    AccountManager::getInstance().load();
+    singletons::AccountManager::getInstance().load();
 
     // XXX
-    SettingsManager::getInstance().updateWordTypeMask();
+    singletons::SettingManager::getInstance().updateWordTypeMask();
 }
 
 Application::~Application()
 {
     this->save();
 
-    chatterino::SettingsManager::getInstance().save();
+    chatterino::singletons::SettingManager::getInstance().save();
 }
 
 int Application::run(QApplication &qtApp)
 {
     // Start connecting to the IRC Servers (Twitch only for now)
-    IrcManager::getInstance().connect();
+    singletons::IrcManager::getInstance().connect();
 
     // Show main window
-    WindowManager::getInstance().getMainWindow().show();
+    singletons::WindowManager::getInstance().getMainWindow().show();
 
     return qtApp.exec();
 }
 
 void Application::save()
 {
-    WindowManager::getInstance().save();
+    singletons::WindowManager::getInstance().save();
 }
 
 }  // namespace chatterino

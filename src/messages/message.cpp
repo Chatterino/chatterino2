@@ -83,14 +83,14 @@ void AddCurrentTimestamp(Message *message)
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&t));
     QString timestampNoSeconds(timeStampBuffer);
     message->getWords().push_back(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                                       MessageColor(MessageColor::System), FontManager::Medium,
+                                       MessageColor(MessageColor::System), singletons::FontManager::Medium,
                                        QString(), QString()));
 
     // Add word for timestamp with seconds
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&t));
     QString timestampWithSeconds(timeStampBuffer);
     message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                                       MessageColor(MessageColor::System), FontManager::Medium,
+                                       MessageColor(MessageColor::System), singletons::FontManager::Medium,
                                        QString(), QString()));
 }
 
@@ -108,7 +108,7 @@ Message *Message::createSystemMessage(const QString &text)
     for (QString word : words) {
         message->getWords().push_back(Word(word, Word::Flags::Default,
                                            MessageColor(MessageColor::Type::System),
-                                           FontManager::Medium, word, QString()));
+                                           singletons::FontManager::Medium, word, QString()));
     }
 
     return message;
@@ -149,7 +149,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
     text.append(".");
 
     Word word(text, Word::Flags::Default, MessageColor(MessageColor::Type::System),
-              FontManager::Medium, text, QString());
+              singletons::FontManager::Medium, text, QString());
 
     message->getWords().push_back(word);
 

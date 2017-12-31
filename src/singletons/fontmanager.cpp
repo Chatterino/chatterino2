@@ -3,6 +3,7 @@
 #include <QDebug>
 
 namespace chatterino {
+namespace singletons {
 
 FontManager::FontManager()
     : currentFontFamily("/appearance/currentFontFamily", "Arial")
@@ -89,3 +90,4 @@ FontManager::Font &FontManager::getCurrentFont(float dpi)
     return this->currentFontByDpi.back().second;
 }
 }  // namespace chatterino
+}

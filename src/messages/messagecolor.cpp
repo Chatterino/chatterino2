@@ -19,7 +19,7 @@ MessageColor::Type MessageColor::getType() const
     return this->type;
 }
 
-const QColor &MessageColor::getColor(ThemeManager &themeManager) const
+const QColor &MessageColor::getColor(singletons::ThemeManager &themeManager) const
 {
     switch (this->type) {
         case Type::Custom:

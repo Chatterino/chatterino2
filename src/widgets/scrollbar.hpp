@@ -11,8 +11,6 @@
 
 namespace chatterino {
 
-class ThemeManager;
-
 namespace widgets {
 
 class ChannelView;

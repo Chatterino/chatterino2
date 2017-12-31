@@ -6,6 +6,7 @@
 #include <QPixmap>
 
 namespace chatterino {
+namespace singletons {
 
 namespace {
 
@@ -153,3 +154,4 @@ void ResourceManager::loadChatterinoBadges()
 }
 
 }  // namespace chatterino
+}

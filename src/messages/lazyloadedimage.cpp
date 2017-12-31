@@ -79,12 +79,12 @@ void LazyLoadedImage::loadImage()
             lli->animated = true;
         }
 
-        EmoteManager::getInstance().incGeneration();
+        singletons::EmoteManager::getInstance().incGeneration();
 
-        WindowManager::getInstance().layoutVisibleChatWidgets();
+        singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
     });
 
-    EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
+    singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
         this->gifUpdateTimout();
     });  // For some reason when Boost signal is in thread scope and thread deletes the signal
          // doesn't work, so this is the fix.

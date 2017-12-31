@@ -7,6 +7,7 @@
 #include <mutex>
 
 namespace chatterino {
+namespace singletons {
 
 class ResourceManager
 {
@@ -90,3 +91,4 @@ public:
 };
 
 }  // namespace chatterino
+}

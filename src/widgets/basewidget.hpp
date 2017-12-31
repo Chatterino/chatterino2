@@ -3,8 +3,9 @@
 #include <QWidget>
 
 namespace chatterino {
-
+namespace singletons {
 class ThemeManager;
+}
 
 namespace widgets {
 
@@ -13,13 +14,13 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(ThemeManager &_themeManager, QWidget *parent);
+    explicit BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent);
 
     explicit BaseWidget(BaseWidget *parent);
 
     explicit BaseWidget(QWidget *parent = nullptr);
 
-    ThemeManager &themeManager;
+    singletons::ThemeManager &themeManager;
 
     float getDpiMultiplier();
 

@@ -39,7 +39,8 @@ ChannelView::ChannelView(BaseWidget *parent)
 #endif
     this->setMouseTracking(true);
 
-    QObject::connect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged, this,
+    QObject::connect(&singletons::SettingManager::getInstance(),
+                     &singletons::SettingManager::wordTypeMaskChanged, this,
                      &ChannelView::wordTypeMaskChanged);
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
@@ -51,7 +52,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->queueUpdate();
     });
 
-    WindowManager &windowManager = WindowManager::getInstance();
+    singletons::WindowManager &windowManager = singletons::WindowManager::getInstance();
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
@@ -62,9 +63,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->goToBottom->getLabel().setText("Jump to bottom");
     this->goToBottom->setVisible(false);
 
-    this->managedConnections.emplace_back(FontManager::getInstance().fontChanged.connect([this] {
-        this->layoutMessages();  //
-    }));
+    this->managedConnections.emplace_back(
+        singletons::FontManager::getInstance().fontChanged.connect([this] {
+            this->layoutMessages();  //
+        }));
 
     connect(goToBottom, &RippleEffectLabel::clicked, this,
             [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
@@ -82,8 +84,9 @@ ChannelView::ChannelView(BaseWidget *parent)
 
 ChannelView::~ChannelView()
 {
-    QObject::disconnect(&SettingsManager::getInstance(), &SettingsManager::wordTypeMaskChanged,
-                        this, &ChannelView::wordTypeMaskChanged);
+    QObject::disconnect(&singletons::SettingManager::getInstance(),
+                        &singletons::SettingManager::wordTypeMaskChanged, this,
+                        &ChannelView::wordTypeMaskChanged);
     this->messageAppendedConnection.disconnect();
     this->messageRemovedConnection.disconnect();
     this->repaintGifsConnection.disconnect();
@@ -776,7 +779,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
     if (this->scrollBar.isVisible()) {
-        float mouseMultiplier = SettingsManager::getInstance().mouseScrollMultiplier;
+        float mouseMultiplier = singletons::SettingManager::getInstance().mouseScrollMultiplier;
 
         this->scrollBar.setDesiredValue(
             this->scrollBar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);

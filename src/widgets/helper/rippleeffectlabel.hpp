@@ -10,9 +10,6 @@
 #include <QWidget>
 
 namespace chatterino {
-
-class ThemeManager;
-
 namespace widgets {
 
 class RippleEffectLabel : public RippleEffectButton

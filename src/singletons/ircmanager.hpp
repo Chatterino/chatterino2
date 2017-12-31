@@ -17,10 +17,12 @@
 #include <mutex>
 
 namespace chatterino {
+namespace singletons {
 
 class ChannelManager;
 class ResourceManager;
 class AccountManager;
+class WindowManager;
 
 class IrcManager : public QObject
 {
@@ -100,3 +102,4 @@ private:
 };
 
 }  // namespace chatterino
+}

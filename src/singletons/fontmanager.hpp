@@ -6,6 +6,7 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
+namespace singletons {
 
 class FontManager
 {
@@ -133,3 +134,4 @@ private:
 };
 
 }  // namespace chatterino
+}

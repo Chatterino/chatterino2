@@ -10,7 +10,7 @@ namespace widgets {
 class EmotePopup : public BaseWidget
 {
 public:
-    explicit EmotePopup(ThemeManager &);
+    explicit EmotePopup(singletons::ThemeManager &);
 
     void loadChannel(std::shared_ptr<Channel> channel);
     void loadEmojis();

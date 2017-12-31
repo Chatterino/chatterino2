@@ -1,6 +1,6 @@
 #include "accountswitchwidget.hpp"
-#include "singletons/accountmanager.hpp"
 #include "const.hpp"
+#include "singletons/accountmanager.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -8,20 +8,22 @@ namespace widgets {
 AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     : QListWidget(parent)
 {
+    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
+
     this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-    for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
+    for (const auto &userName : accountManager.Twitch.getUsernames()) {
         this->addItem(userName);
     }
 
-    AccountManager::getInstance().Twitch.userListUpdated.connect([this]() {
+    accountManager.Twitch.userListUpdated.connect([this, &accountManager]() {
         this->blockSignals(true);
 
         this->clear();
 
         this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-        for (const auto &userName : AccountManager::getInstance().Twitch.getUsernames()) {
+        for (const auto &userName : accountManager.Twitch.getUsernames()) {
             this->addItem(userName);
         }
 
@@ -32,13 +34,13 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
     this->refreshSelection();
 
-    QObject::connect(this, &QListWidget::clicked, [this] {
+    QObject::connect(this, &QListWidget::clicked, [this, &accountManager] {
         if (!this->selectedItems().isEmpty()) {
             QString newUsername = this->currentItem()->text();
             if (newUsername.compare(ANONYMOUS_USERNAME_LABEL, Qt::CaseInsensitive) == 0) {
-                AccountManager::getInstance().Twitch.currentUsername = "";
+                accountManager.Twitch.currentUsername = "";
             } else {
-                AccountManager::getInstance().Twitch.currentUsername = newUsername.toStdString();
+                accountManager.Twitch.currentUsername = newUsername.toStdString();
             }
         }
     });
@@ -55,7 +57,7 @@ void AccountSwitchWidget::refreshSelection()
 
     // Select the currently logged in user
     if (this->count() > 0) {
-        auto currentUser = AccountManager::getInstance().Twitch.getCurrent();
+        auto currentUser = singletons::AccountManager::getInstance().Twitch.getCurrent();
 
         if (currentUser->isAnon()) {
             this->setCurrentRow(0);

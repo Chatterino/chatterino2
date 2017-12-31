@@ -18,8 +18,9 @@ Word::Word(LazyLoadedImage *image, Flags type, const QString &copytext, const QS
 }
 
 // Text word
-Word::Word(const QString &text, Flags type, const MessageColor &color, FontManager::Type font,
-           const QString &copytext, const QString &tooltip, const Link &link)
+Word::Word(const QString &text, Flags type, const MessageColor &color,
+           singletons::FontManager::Type font, const QString &copytext, const QString &tooltip,
+           const Link &link)
     : image(nullptr)
     , text(text)
     , color(color)
@@ -64,10 +65,11 @@ QSize Word::getSize(float scale) const
             data.size.setHeight((int)(metrics.height()));
         } else {
             const int mediumTextLineHeight =
-                FontManager::getInstance().getFontMetrics(this->font, scale).height();
-            const qreal emoteScale = SettingsManager::getInstance().emoteScale.get() * scale;
+                singletons::FontManager::getInstance().getFontMetrics(this->font, scale).height();
+            const qreal emoteScale =
+                singletons::SettingManager::getInstance().emoteScale.get() * scale;
             const bool scaleEmotesByLineHeight =
-                SettingsManager::getInstance().scaleEmotesByLineHeight;
+                singletons::SettingManager::getInstance().scaleEmotesByLineHeight;
 
             auto &image = this->getImage();
 
@@ -114,12 +116,12 @@ bool Word::hasTrailingSpace() const
 
 QFont &Word::getFont(float scale) const
 {
-    return FontManager::getInstance().getFont(this->font, scale);
+    return singletons::FontManager::getInstance().getFont(this->font, scale);
 }
 
 QFontMetrics &Word::getFontMetrics(float scale) const
 {
-    return FontManager::getInstance().getFontMetrics(this->font, scale);
+    return singletons::FontManager::getInstance().getFontMetrics(this->font, scale);
 }
 
 Word::Flags Word::getFlags() const
