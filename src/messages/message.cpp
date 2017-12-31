@@ -6,7 +6,7 @@
 #include "singletons/fontmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "messages/link.hpp"
-#include "resources.hpp"
+#include "singletons/resourcemanager.hpp"
 #include "util/irchelpers.hpp"
 
 #include <ctime>

@@ -19,14 +19,14 @@
 namespace chatterino {
 
 class ChannelManager;
-class Resources;
+class ResourceManager;
 class AccountManager;
 
 class IrcManager : public QObject
 {
     //    Q_OBJECT
 
-    IrcManager(ChannelManager &channelManager, Resources &resources,
+    IrcManager(ChannelManager &channelManager, ResourceManager &resources,
                AccountManager &accountManager);
 
 public:
@@ -55,7 +55,7 @@ public:
 
 private:
     ChannelManager &channelManager;
-    Resources &resources;
+    ResourceManager &resources;
     AccountManager &accountManager;
 
     // variables

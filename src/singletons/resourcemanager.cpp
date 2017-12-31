@@ -1,4 +1,4 @@
-#include "resources.hpp"
+#include "resourcemanager.hpp"
 //#include "singletons/emotemanager.hpp"
 //#include "singletons/windowmanager.hpp"
 #include "util/urlfetch.hpp"
@@ -16,7 +16,7 @@ inline messages::LazyLoadedImage *lli(const char *pixmapPath, qreal scale = 1)
 
 }  // namespace
 
-Resources::Resources()
+ResourceManager::ResourceManager()
     : badgeStaff(lli(":/images/staff_bg.png"))
     , badgeAdmin(lli(":/images/admin_bg.png"))
     , badgeGlobalModerator(lli(":/images/globalmod_bg.png"))
@@ -41,13 +41,13 @@ Resources::Resources()
     this->loadChatterinoBadges();
 }
 
-Resources &Resources::getInstance()
+ResourceManager &ResourceManager::getInstance()
 {
-    static Resources instance;
+    static ResourceManager instance;
     return instance;
 }
 
-Resources::BadgeVersion::BadgeVersion(QJsonObject &&root)
+ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
     : badgeImage1x(new messages::LazyLoadedImage(root.value("image_url_1x").toString()))
     , badgeImage2x(new messages::LazyLoadedImage(root.value("image_url_2x").toString()))
     , badgeImage4x(new messages::LazyLoadedImage(root.value("image_url_4x").toString()))
@@ -58,7 +58,7 @@ Resources::BadgeVersion::BadgeVersion(QJsonObject &&root)
 {
 }
 
-void Resources::loadChannelData(const QString &roomID, bool bypassCache)
+void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 {
     qDebug() << "Load channel data for" << roomID;
 
@@ -70,7 +70,7 @@ void Resources::loadChannelData(const QString &roomID, bool bypassCache)
     req.getJSON([this, roomID](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
-        Resources::Channel &ch = this->channels[roomID];
+        ResourceManager::Channel &ch = this->channels[roomID];
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
             QJsonObject versions = it.value().toObject().value("versions").toObject();
@@ -91,7 +91,7 @@ void Resources::loadChannelData(const QString &roomID, bool bypassCache)
     });
 }
 
-void Resources::loadDynamicTwitchBadges()
+void ResourceManager::loadDynamicTwitchBadges()
 {
     static QString url("https://badges.twitch.tv/v1/badges/global/display?language=en");
 
@@ -119,7 +119,7 @@ void Resources::loadDynamicTwitchBadges()
     });
 }
 
-void Resources::loadChatterinoBadges()
+void ResourceManager::loadChatterinoBadges()
 {
     this->chatterinoBadges.clear();
 

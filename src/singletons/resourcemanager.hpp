@@ -8,12 +8,12 @@
 
 namespace chatterino {
 
-class Resources
+class ResourceManager
 {
-    explicit Resources();
+    ResourceManager();
 
 public:
-    static Resources &getInstance();
+    static ResourceManager &getInstance();
 
     messages::LazyLoadedImage *badgeStaff;
     messages::LazyLoadedImage *badgeAdmin;

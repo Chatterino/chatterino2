@@ -3,10 +3,10 @@
 #include "channel.hpp"
 #include "debug/log.hpp"
 #include "messages/messageparseargs.hpp"
-#include "resources.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
@@ -27,7 +27,7 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
+IrcManager::IrcManager(ChannelManager &_channelManager, ResourceManager &_resources,
                        AccountManager &_accountManager)
     : channelManager(_channelManager)
     , resources(_resources)
@@ -70,7 +70,7 @@ IrcManager::IrcManager(ChannelManager &_channelManager, Resources &_resources,
 
 IrcManager &IrcManager::getInstance()
 {
-    static IrcManager instance(ChannelManager::getInstance(), Resources::getInstance(),
+    static IrcManager instance(ChannelManager::getInstance(), ResourceManager::getInstance(),
                                AccountManager::getInstance());
     return instance;
 }

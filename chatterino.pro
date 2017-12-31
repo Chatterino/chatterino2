@@ -61,7 +61,6 @@ SOURCES += \
     src/messages/message.cpp \
     src/messages/word.cpp \
     src/messages/wordpart.cpp \
-    src/resources.cpp \
     src/widgets/notebook.cpp \
     src/widgets/helper/notebookbutton.cpp \
     src/widgets/helper/notebooktab.cpp \
@@ -112,7 +111,8 @@ SOURCES += \
     src/widgets/tooltipwidget.cpp \
     src/singletons/thememanager.cpp \
     src/twitch/twitchaccountmanager.cpp \
-    src/singletons/helper/completionmodel.cpp
+    src/singletons/helper/completionmodel.cpp \
+    src/singletons/resourcemanager.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -126,7 +126,6 @@ HEADERS  += \
     src/messages/message.hpp \
     src/messages/word.hpp \
     src/messages/wordpart.hpp \
-    src/resources.hpp \
     src/setting.hpp \
     src/twitch/emotevalue.hpp \
     src/widgets/notebook.hpp \
@@ -194,7 +193,8 @@ HEADERS  += \
     src/singletons/thememanager.hpp \
     src/twitch/twitchaccountmanager.hpp \
     src/singletons/helper/completionmodel.hpp \
-    src/singletons/helper/chatterinosetting.hpp
+    src/singletons/helper/chatterinosetting.hpp \
+    src/singletons/resourcemanager.hpp
 
 
 PRECOMPILED_HEADER =
