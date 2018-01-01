@@ -1,5 +1,7 @@
 #pragma once
 
+#include "QDebug"
+
 #include "messages/limitedqueuesnapshot.hpp"
 
 #include <memory>
@@ -9,88 +11,193 @@
 namespace chatterino {
 namespace messages {
 
+//
+// Warning:
+// - this class is so overengineered it's not even funny anymore
+//
+// Explanation:
+// - messages can be appended until 'limit' is reached
+// - when the limit is reached for every message added one will be removed at the start
+// - messages can only be added to the start when there is space for them,
+//   trying to add messages to the start when it's full will not add them
+// - you are able to get a "Snapshot" which captures the state of this object
+// - adding items to this class does not change the "items" of the snapshot
+//
+
 template <typename T>
 class LimitedQueue
 {
+protected:
+    typedef std::shared_ptr<std::vector<T>> Chunk;
+    typedef std::shared_ptr<std::vector<Chunk>> ChunkVector;
+
 public:
-    LimitedQueue(int _limit = 1000, int _buffer = 250)
-        : offset(0)
-        , limit(_limit)
-        , buffer(_buffer)
+    LimitedQueue(int _limit = 1000)
+        : limit(_limit)
     {
-        this->vector = std::make_shared<std::vector<T>>();
-        this->vector->reserve(this->limit + this->buffer);
+        this->clear();
     }
 
     void clear()
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
-        this->vector = std::make_shared<std::vector<T>>();
-        this->vector->reserve(this->limit + this->buffer);
-
-        this->offset = 0;
+        this->chunks = std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+        Chunk chunk = std::make_shared<std::vector<T>>();
+        chunk->resize(this->chunkSize);
+        this->chunks->push_back(chunk);
+        this->firstChunkOffset = 0;
+        this->lastChunkEnd = 0;
     }
 
     // return true if an item was deleted
     // deleted will be set if the item was deleted
-    bool appendItem(const T &item, T &deleted)
+    bool pushBack(const T &item, T &deleted)
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
-        if (this->vector->size() >= this->limit) {
-            // vector is full
-            if (this->offset == this->buffer) {
-                deleted = this->vector->at(this->offset);
+        Chunk lastChunk = this->chunks->back();
 
-                // create new vector
-                auto newVector = std::make_shared<std::vector<T>>();
-                newVector->reserve(this->limit + this->buffer);
+        // still space in the last chunk
+        if (lastChunk->size() <= this->lastChunkEnd) {
+            // create new chunk vector
+            ChunkVector newVector =
+                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
 
-                for (unsigned int i = 0; i < this->limit; ++i) {
-                    newVector->push_back(this->vector->at(i + this->offset));
-                }
-                newVector->push_back(item);
-
-                this->offset = 0;
-                this->vector = newVector;
-
-                return true;
-            } else {
-                deleted = this->vector->at(this->offset);
-
-                // append item and increment offset("deleting" first element)
-                this->vector->push_back(item);
-                this->offset++;
-
-                return true;
+            // copy chunks
+            for (Chunk &chunk : *this->chunks) {
+                newVector->push_back(chunk);
             }
-        } else {
-            // append item
-            this->vector->push_back(item);
 
-            return false;
+            // push back new chunk
+            Chunk newChunk = std::make_shared<std::vector<T>>();
+            newChunk->resize(this->chunkSize);
+            newVector->push_back(newChunk);
+
+            // replace current chunk vector
+            this->chunks = newVector;
+            this->lastChunkEnd = 0;
+            lastChunk = this->chunks->back();
         }
+
+        lastChunk->at(this->lastChunkEnd++) = item;
+
+        return this->deleteFirstItem(deleted);
     }
+
+    // returns a vector with all the accepted items
+    std::vector<T> pushFront(const std::vector<T> &items)
+    {
+        std::vector<T> acceptedItems;
+
+        if (this->space() > 0) {
+            std::lock_guard<std::mutex> lock(this->mutex);
+
+            // create new vector to clone chunks into
+            ChunkVector newChunks =
+                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+
+            newChunks->resize(this->chunks->size());
+
+            // copy chunks except for first one
+            for (size_t i = 1; i < this->chunks->size(); i++) {
+                newChunks->at(i) = this->chunks->at(i);
+            }
+
+            // create new chunk for the first one
+            size_t offset = std::min(this->space(), items.size());
+            Chunk newFirstChunk = std::make_shared<std::vector<T>>();
+            newFirstChunk->resize(this->chunks->front()->size() + offset);
+
+            for (size_t i = 0; i < offset; i++) {
+                newFirstChunk->at(i) = items[items.size() - offset + i];
+                acceptedItems.push_back(items[items.size() - offset + i]);
+            }
+
+            for (size_t i = 0; i < this->chunks->at(0)->size(); i++) {
+                newFirstChunk->at(i + offset) = this->chunks->at(0)->at(i);
+            }
+
+            newChunks->at(0) = newFirstChunk;
+
+            this->chunks = newChunks;
+            qDebug() << acceptedItems.size();
+            qDebug() << this->chunks->at(0)->size();
+
+            if (this->chunks->size() == 1) {
+                this->lastChunkEnd += offset;
+            }
+        }
+
+        return acceptedItems;
+    }
+
+    //    void insertAfter(const std::vector<T> &items, const T &index)
 
     messages::LimitedQueueSnapshot<T> getSnapshot()
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
-        if (this->vector->size() < this->limit) {
-            return LimitedQueueSnapshot<T>(this->vector, this->offset, this->vector->size());
-        } else {
-            return LimitedQueueSnapshot<T>(this->vector, this->offset, this->limit);
-        }
+        return LimitedQueueSnapshot<T>(this->chunks, this->limit - this->space(),
+                                       this->firstChunkOffset, this->lastChunkEnd);
     }
 
 private:
-    std::shared_ptr<std::vector<T>> vector;
+    size_t space()
+    {
+        size_t totalSize = 0;
+        for (Chunk &chunk : *this->chunks) {
+            totalSize += chunk->size();
+        }
+
+        totalSize -= this->chunks->back()->size() - this->lastChunkEnd;
+        if (this->chunks->size() != 1) {
+            totalSize -= this->firstChunkOffset;
+        }
+
+        return this->limit - totalSize;
+    }
+
+    bool deleteFirstItem(T &deleted)
+    {
+        // determine if the first chunk should be deleted
+        if (space() > 0) {
+            return false;
+        }
+
+        deleted = this->chunks->front()->at(this->firstChunkOffset);
+
+        this->firstChunkOffset++;
+
+        // need to delete the first chunk
+        if (this->firstChunkOffset == this->chunks->front()->size() - 1) {
+            // copy the chunk vector
+            ChunkVector newVector =
+                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+
+            // delete first chunk
+            bool first = true;
+            for (Chunk &chunk : *this->chunks) {
+                if (!first) {
+                    newVector->push_back(chunk);
+                }
+                first = false;
+            }
+
+            this->chunks = newVector;
+            this->firstChunkOffset = 0;
+        }
+        return true;
+    }
+
+    ChunkVector chunks;
     std::mutex mutex;
 
-    unsigned int offset;
-    unsigned int limit;
-    unsigned int buffer;
+    size_t firstChunkOffset;
+    size_t lastChunkEnd;
+    size_t limit;
+
+    const size_t chunkSize = 100;
 };
 
 }  // namespace messages

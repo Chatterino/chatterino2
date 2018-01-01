@@ -361,7 +361,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
 
             auto messageRef = new MessageRef(message);
 
-            if (this->messages.appendItem(SharedMessageRef(messageRef), deleted)) {
+            if (this->messages.pushBack(SharedMessageRef(messageRef), deleted)) {
                 if (this->scrollBar.isAtBottom()) {
                     this->scrollBar.scrollToBottom();
                 } else {
@@ -374,7 +374,26 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
             }
 
             layoutMessages();
-            update();
+        });
+
+    this->messageAddedAtStartConnection =
+        newChannel->messagesAddedAtStart.connect([this](std::vector<SharedMessage> &messages) {
+            std::vector<SharedMessageRef> messageRefs;
+            messageRefs.resize(messages.size());
+            qDebug() << messages.size();
+            for (int i = 0; i < messages.size(); i++) {
+                messageRefs.at(i) = SharedMessageRef(new MessageRef(messages.at(i)));
+            }
+
+            if (this->messages.pushFront(messageRefs).size() > 0) {
+                if (this->scrollBar.isAtBottom()) {
+                    this->scrollBar.scrollToBottom();
+                } else {
+                    this->scrollBar.offset((qreal)-messages.size());
+                }
+            }
+
+            layoutMessages();
         });
 
     // on message removed
@@ -395,7 +414,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
 
         auto messageRef = new MessageRef(snapshot[i]);
 
-        this->messages.appendItem(SharedMessageRef(messageRef), deleted);
+        this->messages.pushBack(SharedMessageRef(messageRef), deleted);
     }
 
     this->channel = newChannel;
@@ -551,15 +570,14 @@ void ChannelView::drawMessages(QPainter &painter)
     // remove messages that are on screen
     // the messages that are left at the end get their buffers reset
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
-        messages::MessageRef *messageRef = messagesSnapshot[i].get();
-        auto it = this->messagesOnScreen.find(messageRef);
+        auto it = this->messagesOnScreen.find(messagesSnapshot[i]);
         if (it != this->messagesOnScreen.end()) {
             this->messagesOnScreen.erase(it);
         }
     }
 
     // delete the message buffers that aren't on screen
-    for (MessageRef *item : this->messagesOnScreen) {
+    for (std::shared_ptr<messages::MessageRef> item : this->messagesOnScreen) {
         item->buffer.reset();
     }
 
@@ -567,11 +585,11 @@ void ChannelView::drawMessages(QPainter &painter)
 
     // add all messages on screen to the map
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
-        messages::MessageRef *messageRef = messagesSnapshot[i].get();
+        std::shared_ptr<messages::MessageRef> messageRef = messagesSnapshot[i];
 
         this->messagesOnScreen.insert(messageRef);
 
-        if (messageRef == end) {
+        if (messageRef.get() == end) {
             break;
         }
     }

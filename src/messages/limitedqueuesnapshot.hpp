@@ -10,29 +10,46 @@ template <typename T>
 class LimitedQueueSnapshot
 {
 public:
-    LimitedQueueSnapshot(std::shared_ptr<std::vector<T>> _vector, std::size_t _offset,
-                         std::size_t _size)
-        : vector(_vector)
-        , offset(_offset)
-        , length(_size)
+    LimitedQueueSnapshot(std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> _chunks,
+                         size_t _length, size_t _firstChunkOffset, size_t _lastChunkEnd)
+        : chunks(_chunks)
+        , length(_length)
+        , firstChunkOffset(_firstChunkOffset)
+        , lastChunkEnd(_lastChunkEnd)
     {
     }
 
     std::size_t getLength()
     {
-        return length;
+        return this->length;
     }
 
     T const &operator[](std::size_t index) const
     {
-        return vector->at(index + offset);
+        index += this->firstChunkOffset;
+
+        size_t x = 0;
+
+        for (size_t i = 0; i < this->chunks->size(); i++) {
+            auto &chunk = this->chunks->at(i);
+
+            if (x <= index && x + chunk->size() > index) {
+                return chunk->at(index - x);
+            }
+            x += chunk->size();
+        }
+
+        assert(false && "out of range");
+
+        return this->chunks->at(0)->at(0);
     }
 
 private:
-    std::shared_ptr<std::vector<T>> vector;
+    std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> chunks;
 
-    std::size_t offset;
-    std::size_t length;
+    size_t length;
+    size_t firstChunkOffset;
+    size_t lastChunkEnd;
 };
 
 }  // namespace messages

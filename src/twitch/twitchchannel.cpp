@@ -1,6 +1,7 @@
 #include "twitchchannel.hpp"
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
+#include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 
 #include <QThread>
@@ -19,8 +20,6 @@ TwitchChannel::TwitchChannel(const QString &channelName)
     , isLive(false)
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
-
-    this->dontAddMessages = true;
 
     this->reloadChannelEmotes();
 
@@ -158,15 +157,22 @@ void TwitchChannel::fetchRecentMessages()
     static auto readConnection = singletons::IrcManager::getInstance().getReadConnection();
 
     util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [=](QJsonObject obj) {
-        this->dontAddMessages = false;
         auto msgArray = obj.value("messages").toArray();
-        if (msgArray.size())
+        if (msgArray.size() > 0) {
+            std::vector<messages::SharedMessage> messages;
+            messages.resize(msgArray.size());
+
             for (int i = 0; i < msgArray.size(); i++) {
                 QByteArray content = msgArray[i].toString().toUtf8();
                 auto msg = Communi::IrcMessage::fromData(content, readConnection);
                 auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
-                singletons::IrcManager::getInstance().privateMessageReceived(privMsg);
+
+                messages::MessageParseArgs args;
+                twitch::TwitchMessageBuilder builder(this, privMsg, args);
+                messages.at(i) = builder.parse();
             }
+            this->addMessagesAtStart(messages);
+        }
     });
 }
 

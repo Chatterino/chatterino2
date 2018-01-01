@@ -10,7 +10,6 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
-#include "twitch/twitchparsemessage.hpp"
 #include "twitch/twitchuser.hpp"
 #include "util/urlfetch.hpp"
 
@@ -67,6 +66,12 @@ IrcManager::IrcManager(ChannelManager &_channelManager, ResourceManager &_resour
                      &IrcManager::onConnected);
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected, this,
                      &IrcManager::onDisconnected);
+
+    // join and part chats on event
+    ChannelManager::getInstance().ircJoin.connect(
+        [this](const QString &name) { this->joinChannel(name); });
+    ChannelManager::getInstance().ircPart.connect(
+        [this](const QString &name) { this->partChannel(name); });
 }
 
 IrcManager &IrcManager::getInstance()

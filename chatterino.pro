@@ -79,7 +79,6 @@ SOURCES += \
     src/singletons/emotemanager.cpp \
     src/messages/messagebuilder.cpp \
     src/twitch/twitchmessagebuilder.cpp \
-    src/twitch/twitchparsemessage.cpp \
     src/widgets/titlebar.cpp \
     src/appdatapath.cpp \
     src/singletons/accountmanager.cpp \
@@ -153,7 +152,6 @@ HEADERS  += \
     src/messages/messageparseargs.hpp \
     src/messages/messagebuilder.hpp \
     src/twitch/twitchmessagebuilder.hpp \
-    src/twitch/twitchparsemessage.hpp \
     src/widgets/titlebar.hpp \
     src/appdatapath.hpp \
     src/singletons/accountmanager.hpp \
