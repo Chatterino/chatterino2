@@ -26,8 +26,6 @@ class WindowManager;
 
 class IrcManager : public QObject
 {
-    //    Q_OBJECT
-
     IrcManager(ChannelManager &channelManager, ResourceManager &resources,
                AccountManager &accountManager);
 
@@ -37,7 +35,7 @@ public:
     void connect();
     void disconnect();
 
-    bool isTwitchBlockedUser(QString const &username);
+    bool isTwitchUserBlocked(QString const &username);
     bool tryAddIgnoredUser(QString const &username, QString &errorMessage);
     void addIgnoredUser(QString const &username);
     bool tryRemoveIgnoredUser(QString const &username, QString &errorMessage);
