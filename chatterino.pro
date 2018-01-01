@@ -111,7 +111,8 @@ SOURCES += \
     src/singletons/thememanager.cpp \
     src/twitch/twitchaccountmanager.cpp \
     src/singletons/helper/completionmodel.cpp \
-    src/singletons/resourcemanager.cpp
+    src/singletons/resourcemanager.cpp \
+    src/singletons/helper/ircmessagehandler.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -193,7 +194,8 @@ HEADERS  += \
     src/singletons/helper/completionmodel.hpp \
     src/singletons/helper/chatterinosetting.hpp \
     src/singletons/resourcemanager.hpp \
-    src/util/emotemap.hpp
+    src/util/emotemap.hpp \
+    src/singletons/helper/ircmessagehandler.hpp
 
 
 PRECOMPILED_HEADER =

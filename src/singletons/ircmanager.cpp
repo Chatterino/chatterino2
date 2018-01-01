@@ -6,6 +6,7 @@
 #include "singletons/accountmanager.hpp"
 #include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/helper/ircmessagehandler.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -262,19 +263,20 @@ void IrcManager::messageReceived(Communi::IrcMessage *message)
     const QString &command = message->command();
 
     if (command == "ROOMSTATE") {
-        this->handleRoomStateMessage(message);
+        helper::IrcMessageHandler::getInstance().handleRoomStateMessage(message);
     } else if (command == "CLEARCHAT") {
-        this->handleClearChatMessage(message);
+        helper::IrcMessageHandler::getInstance().handleClearChatMessage(message);
     } else if (command == "USERSTATE") {
-        this->handleUserStateMessage(message);
+        helper::IrcMessageHandler::getInstance().handleUserStateMessage(message);
     } else if (command == "WHISPER") {
-        this->handleWhisperMessage(message);
+        helper::IrcMessageHandler::getInstance().handleWhisperMessage(message);
     } else if (command == "USERNOTICE") {
-        this->handleUserNoticeMessage(message);
+        helper::IrcMessageHandler::getInstance().handleUserNoticeMessage(message);
     } else if (command == "MODE") {
-        this->handleModeMessage(message);
+        helper::IrcMessageHandler::getInstance().handleModeMessage(message);
     } else if (command == "NOTICE") {
-        this->handleNoticeMessage(static_cast<Communi::IrcNoticeMessage *>(message));
+        helper::IrcMessageHandler::getInstance().handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
     }
 }
 
@@ -282,113 +284,9 @@ void IrcManager::writeConnectionMessageReceived(Communi::IrcMessage *message)
 {
     switch (message->type()) {
         case Communi::IrcMessage::Type::Notice: {
-            this->handleWriteConnectionNoticeMessage(
+            helper::IrcMessageHandler::getInstance().handleWriteConnectionNoticeMessage(
                 static_cast<Communi::IrcNoticeMessage *>(message));
         } break;
-    }
-}
-
-void IrcManager::handleRoomStateMessage(Communi::IrcMessage *message)
-{
-    const auto &tags = message->tags();
-
-    auto iterator = tags.find("room-id");
-
-    if (iterator != tags.end()) {
-        auto roomID = iterator.value().toString();
-
-        auto channel = channelManager.getTwitchChannel(QString(message->toData()).split("#").at(1));
-        auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
-        if (twitchChannel != nullptr) {
-            twitchChannel->setRoomID(roomID);
-        }
-
-        this->resources.loadChannelData(roomID);
-    }
-}
-
-void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
-{
-    assert(message->parameters().length() >= 1);
-
-    auto rawChannelName = message->parameter(0);
-
-    assert(rawChannelName.length() >= 2);
-
-    auto trimmedChannelName = rawChannelName.mid(1);
-
-    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
-
-    if (!c) {
-        debug::Log("[IrcManager:handleClearChatMessage] Channel {} not found in channel manager",
-                   trimmedChannelName);
-        return;
-    }
-
-    // check if the chat has been cleared by a moderator
-    if (message->parameters().length() == 1) {
-        std::shared_ptr<Message> msg(
-            Message::createSystemMessage("Chat has been cleared by a moderator."));
-
-        c->addMessage(msg);
-
-        return;
-    }
-
-    assert(message->parameters().length() >= 2);
-
-    // get username, duration and message of the timed out user
-    QString username = message->parameter(1);
-    QString durationInSeconds, reason;
-    QVariant v = message->tag("ban-duration");
-    if (v.isValid()) {
-        durationInSeconds = v.toString();
-    }
-
-    v = message->tag("ban-reason");
-    if (v.isValid()) {
-        reason = v.toString();
-    }
-
-    // add the notice that the user has been timed out
-    SharedMessage msg(Message::createTimeoutMessage(username, durationInSeconds, reason));
-
-    c->addMessage(msg);
-
-    // disable the messages from the user
-    LimitedQueueSnapshot<SharedMessage> snapshot = c->getMessageSnapshot();
-    for (int i = 0; i < snapshot.getLength(); i++) {
-        if (snapshot[i]->getTimeoutUser() == username) {
-            snapshot[i]->setDisabled(true);
-        }
-    }
-
-    // refresh all
-    WindowManager::getInstance().layoutVisibleChatWidgets(c.get());
-}
-
-void IrcManager::handleUserStateMessage(Communi::IrcMessage *message)
-{
-    // TODO: Implement
-}
-
-void IrcManager::handleWhisperMessage(Communi::IrcMessage *message)
-{
-    // TODO: Implement
-}
-
-void IrcManager::handleUserNoticeMessage(Communi::IrcMessage *message)
-{
-    // do nothing
-}
-
-void IrcManager::handleModeMessage(Communi::IrcMessage *message)
-{
-    auto channel = channelManager.getTwitchChannel(message->parameter(0).remove(0, 1));
-    if (message->parameter(1) == "+o") {
-        channel->modList.append(message->parameter(2));
-    } else if (message->parameter(1) == "-o") {
-        channel->modList.append(message->parameter(2));
     }
 }
 
@@ -474,52 +372,6 @@ void IrcManager::removeIgnoredUser(QString const &username)
     if (!tryRemoveIgnoredUser(username, errorMessage)) {
         // TODO: Implement IrcManager::removeIgnoredUser
     }
-}
-
-void IrcManager::handleNoticeMessage(Communi::IrcNoticeMessage *message)
-{
-    auto rawChannelName = message->target();
-
-    bool broadcast = rawChannelName.length() < 2;
-    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
-
-    if (broadcast) {
-        this->channelManager.doOnAll([msg](const auto &c) {
-            c->addMessage(msg);  //
-        });
-
-        return;
-    }
-
-    auto trimmedChannelName = rawChannelName.mid(1);
-
-    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
-
-    if (!c) {
-        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
-                   trimmedChannelName);
-        return;
-    }
-
-    c->addMessage(msg);
-}
-
-void IrcManager::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
-{
-    QVariant v = message->tag("msg-id");
-    if (!v.isValid()) {
-        return;
-    }
-    QString msg_id = v.toString();
-
-    static QList<QString> idsToSkip = {"timeout_success", "ban_success"};
-
-    if (idsToSkip.contains(msg_id)) {
-        // Already handled in the read-connection
-        return;
-    }
-
-    this->handleNoticeMessage(message);
 }
 
 void IrcManager::onConnected()
