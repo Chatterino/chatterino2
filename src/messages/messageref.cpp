@@ -50,7 +50,8 @@ bool MessageRef::layout(int width, float scale)
     this->emoteGeneration = emoteManager.getGeneration();
 
     // check if text changed
-    bool textChanged = this->fontGeneration != singletons::FontManager::getInstance().getGeneration();
+    bool textChanged =
+        this->fontGeneration != singletons::FontManager::getInstance().getGeneration();
     layoutRequired |= textChanged;
     this->fontGeneration = singletons::FontManager::getInstance().getGeneration();
 
@@ -435,6 +436,11 @@ void MessageRef::setCollapsed(bool value)
 int MessageRef::getCollapsedHeight() const
 {
     return this->collapsedHeight;
+}
+
+bool MessageRef::isDisabled() const
+{
+    return this->message->isDisabled();
 }
 }  // namespace messages
 }  // namespace chatterino

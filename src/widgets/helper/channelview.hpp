@@ -133,7 +133,7 @@ private:
     void detachChannel();
     void actuallyLayoutMessages();
 
-    void drawMessages(QPainter &painter);
+    void drawMessages(QPainter &painter, bool overlays);
     void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
     void drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef, int messageIndex,
                               int bufferHeight);

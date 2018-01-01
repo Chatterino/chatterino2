@@ -100,6 +100,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     bool flat = lightTheme;
 
     ChatBackground = getColor(0, sat, 1);
+    DisabledMessageOverlay = getColor(0, sat, 1, 0.6);
     ChatBackgroundHighlighted = blendColors(TabSelectedBackground, ChatBackground, 0.8);
     ChatHeaderBackground = getColor(0, sat, flat ? 1 : 0.9);
     ChatHeaderBorder = getColor(0, sat, flat ? 1 : 0.85);

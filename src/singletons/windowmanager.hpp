@@ -30,7 +30,7 @@ public:
     void save();
 
     boost::signals2::signal<void()> repaintGifs;
-    boost::signals2::signal<void()> layout;
+    boost::signals2::signal<void(Channel *)> layout;
 
 private:
     ThemeManager &themeManager;

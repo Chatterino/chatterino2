@@ -325,6 +325,7 @@ void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
+    // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
         std::shared_ptr<Message> msg(
             Message::createSystemMessage("Chat has been cleared by a moderator."));
@@ -336,6 +337,7 @@ void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
 
     assert(message->parameters().length() >= 2);
 
+    // get username, duration and message of the timed out user
     QString username = message->parameter(1);
     QString durationInSeconds, reason;
     QVariant v = message->tag("ban-duration");
@@ -348,10 +350,21 @@ void IrcManager::handleClearChatMessage(Communi::IrcMessage *message)
         reason = v.toString();
     }
 
-    std::shared_ptr<Message> msg(
-        Message::createTimeoutMessage(username, durationInSeconds, reason));
+    // add the notice that the user has been timed out
+    SharedMessage msg(Message::createTimeoutMessage(username, durationInSeconds, reason));
 
     c->addMessage(msg);
+
+    // disable the messages from the user
+    LimitedQueueSnapshot<SharedMessage> snapshot = c->getMessageSnapshot();
+    for (int i = 0; i < snapshot.getLength(); i++) {
+        if (snapshot[i]->getTimeoutUser() == username) {
+            snapshot[i]->setDisabled(true);
+        }
+    }
+
+    // refresh all
+    WindowManager::getInstance().layoutVisibleChatWidgets(c.get());
 }
 
 void IrcManager::handleUserStateMessage(Communi::IrcMessage *message)

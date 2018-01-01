@@ -36,6 +36,7 @@ public:
     QColor ChatBackgroundHighlighted;
     QColor ChatBackgroundResub;
     QColor ChatBackgroundWhisper;
+    QColor DisabledMessageOverlay;
 
     QColor ChatHeaderBorder;
     QColor ChatHeaderBackground;

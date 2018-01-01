@@ -1,12 +1,12 @@
 #include "messages/message.hpp"
 #include "channel.hpp"
-#include "singletons/thememanager.hpp"
 #include "emojis.hpp"
+#include "messages/link.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/ircmanager.hpp"
-#include "messages/link.hpp"
 #include "singletons/resourcemanager.hpp"
+#include "singletons/thememanager.hpp"
 #include "util/irchelpers.hpp"
 
 #include <ctime>
@@ -56,6 +56,11 @@ bool Message::isDisabled() const
     return this->disabled;
 }
 
+void Message::setDisabled(bool value)
+{
+    this->disabled = value;
+}
+
 const QString &Message::getId() const
 {
     return this->id;
@@ -83,15 +88,15 @@ void AddCurrentTimestamp(Message *message)
     strftime(timeStampBuffer, 69, "%H:%M", localtime(&t));
     QString timestampNoSeconds(timeStampBuffer);
     message->getWords().push_back(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                                       MessageColor(MessageColor::System), singletons::FontManager::Medium,
-                                       QString(), QString()));
+                                       MessageColor(MessageColor::System),
+                                       singletons::FontManager::Medium, QString(), QString()));
 
     // Add word for timestamp with seconds
     strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&t));
     QString timestampWithSeconds(timeStampBuffer);
     message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                                       MessageColor(MessageColor::System), singletons::FontManager::Medium,
-                                       QString(), QString()));
+                                       MessageColor(MessageColor::System),
+                                       singletons::FontManager::Medium, QString(), QString()));
 }
 
 }  // namespace
@@ -117,10 +122,6 @@ Message *Message::createSystemMessage(const QString &text)
 Message *Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
                                        const QString &reason)
 {
-    Message *message = new Message;
-
-    AddCurrentTimestamp(message);
-
     QString text;
 
     text.append(username);
@@ -148,12 +149,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
     }
     text.append(".");
 
-    Word word(text, Word::Flags::Default, MessageColor(MessageColor::Type::System),
-              singletons::FontManager::Medium, text, QString());
-
-    message->getWords().push_back(word);
-
-    return message;
+    return Message::createSystemMessage(text);
 }
 
 }  // namespace messages

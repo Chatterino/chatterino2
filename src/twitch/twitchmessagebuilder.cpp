@@ -305,6 +305,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     this->message->loginName = this->userName;
+    this->message->timeoutUser = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()

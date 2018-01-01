@@ -56,7 +56,11 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->repaintGifsConnection =
         windowManager.repaintGifs.connect([&] { this->updateGifEmotes(); });
-    this->layoutConnection = windowManager.layout.connect([&] { this->layoutMessages(); });
+    this->layoutConnection = windowManager.layout.connect([&](Channel *channel) {
+        if (channel == nullptr || this->channel.get() == channel) {
+            this->layoutMessages();
+        }
+    });
 
     this->goToBottom = new RippleEffectLabel(this, 0);
     this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.5); color: #FFF;");
@@ -482,20 +486,24 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     painter.fillRect(rect(), this->themeManager.ChatBackground);
 
     // draw messages
-    this->drawMessages(painter);
+    this->drawMessages(painter, false);
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw gif emotes
     for (GifEmoteData &item : this->gifEmotes) {
-        //        painter.fillRect(item.rect, this->themeManager.ChatBackground);
-
         painter.drawPixmap(item.rect, *item.image->getPixmap());
     }
+
+    // draw the overlays of the messages (such as disabled message blur-out)
+    this->drawMessages(painter, true);
+
     //    MARK(timer);
 }
 
-void ChannelView::drawMessages(QPainter &painter)
+// if overlays is false then it draws the message, if true then it draws things such as the grey
+// overlay when a message is disabled
+void ChannelView::drawMessages(QPainter &painter, bool overlays)
 {
     auto messagesSnapshot = this->getMessagesSnapshot();
 
@@ -513,46 +521,53 @@ void ChannelView::drawMessages(QPainter &painter)
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
         messages::MessageRef *messageRef = messagesSnapshot[i].get();
 
-        std::shared_ptr<QPixmap> buffer = messageRef->buffer;
+        if (overlays) {
+            if (messageRef->isDisabled()) {
+                painter.fillRect(0, y, this->width(), messageRef->getHeight(),
+                                 this->themeManager.DisabledMessageOverlay);
+            }
+        } else {
+            std::shared_ptr<QPixmap> buffer = messageRef->buffer;
 
-        //        bool updateBuffer = messageRef->updateBuffer;
-        bool updateBuffer = false;
+            //        bool updateBuffer = messageRef->updateBuffer;
+            bool updateBuffer = false;
 
-        if (!buffer) {
-            buffer = std::shared_ptr<QPixmap>(new QPixmap(width(), messageRef->getHeight()));
-            updateBuffer = true;
-        }
+            if (!buffer) {
+                buffer = std::shared_ptr<QPixmap>(new QPixmap(width(), messageRef->getHeight()));
+                updateBuffer = true;
+            }
 
-        updateBuffer |= this->selecting;
+            updateBuffer |= this->selecting;
 
-        // update messages that have been changed
-        if (updateBuffer) {
-            this->updateMessageBuffer(messageRef, buffer.get(), i);
-            // qDebug() << "updating buffer xD";
-        }
+            // update messages that have been changed
+            if (updateBuffer) {
+                this->updateMessageBuffer(messageRef, buffer.get(), i);
+                // qDebug() << "updating buffer xD";
+            }
 
-        // get gif emotes
-        for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
-            if (wordPart.getWord().isImage()) {
-                messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
+            // get gif emotes
+            for (messages::WordPart const &wordPart : messageRef->getWordParts()) {
+                if (wordPart.getWord().isImage()) {
+                    messages::LazyLoadedImage &lli = wordPart.getWord().getImage();
 
-                if (lli.getAnimated()) {
-                    GifEmoteData gifEmoteData;
-                    gifEmoteData.image = &lli;
-                    QRect rect(wordPart.getX(), wordPart.getY() + y, wordPart.getWidth(),
-                               wordPart.getHeight());
+                    if (lli.getAnimated()) {
+                        GifEmoteData gifEmoteData;
+                        gifEmoteData.image = &lli;
+                        QRect rect(wordPart.getX(), wordPart.getY() + y, wordPart.getWidth(),
+                                   wordPart.getHeight());
 
-                    gifEmoteData.rect = rect;
+                        gifEmoteData.rect = rect;
 
-                    this->gifEmotes.push_back(gifEmoteData);
+                        this->gifEmotes.push_back(gifEmoteData);
+                    }
                 }
             }
-        }
 
-        messageRef->buffer = buffer;
+            messageRef->buffer = buffer;
 
-        if (buffer) {
-            painter.drawPixmap(0, y, *buffer.get());
+            if (buffer) {
+                painter.drawPixmap(0, y, *buffer.get());
+            }
         }
 
         y += messageRef->getHeight();
