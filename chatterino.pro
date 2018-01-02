@@ -256,3 +256,6 @@ include(dependencies/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
 
+
+#MAC ICON
+macx:ICON = resources/images/chatterino2.icns

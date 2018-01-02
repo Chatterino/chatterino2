@@ -43,6 +43,7 @@
         <file>images/behave.svg</file>
         <file>images/theme.svg</file>
         <file>images/accounts.svg</file>
+        <file>images/chatterino2.icns</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>
