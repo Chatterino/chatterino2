@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT      += core gui network multimedia
+QT      += core gui network multimedia svg
 CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14
@@ -256,3 +256,6 @@ include(dependencies/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
 
+
+#MAC ICON
+macx:ICON = resources/images/chatterino2.icns

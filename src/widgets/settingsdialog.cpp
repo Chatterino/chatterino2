@@ -21,6 +21,7 @@
 #include <QPalette>
 #include <QResource>
 #include <QTextEdit>
+#include <QtSvg>
 
 namespace chatterino {
 namespace widgets {
@@ -80,17 +81,16 @@ SettingsDialog *SettingsDialog::getHandle()
 
 void SettingsDialog::addTabs()
 {
-    this->addTab(this->createAccountsTab(), "Accounts", ":/images/Message_16xLG.png");
+    this->addTab(this->createAccountsTab(), "Accounts", ":/images/accounts.svg");
 
-    this->addTab(this->createAppearanceTab(), "Appearance",
-                 ":/images/AppearanceEditorPart_16x.png");
+    this->addTab(this->createAppearanceTab(), "Appearance", ":/images/theme.svg");
 
-    this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/AppearanceEditorPart_16x.png");
+    this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/behave.svg");
 
     //    this->addTab(this->createCommandsTab(), "Commands",
     //    ":/images/CustomActionEditor_16x.png");
 
-    this->addTab(this->createEmotesTab(), "Emotes", ":/images/Emoji_Color_1F60A_19.png");
+    this->addTab(this->createEmotesTab(), "Emotes", ":/images/emote.svg");
 
     //    this->addTab(this->createIgnoredUsersTab(), "Ignored Users",
     //                 ":/images/StatusAnnotations_Blocked_16xLG_color.png");
@@ -102,7 +102,7 @@ void SettingsDialog::addTabs()
 
     //    this->addTab(this->createLogsTab(), "Logs", ":/images/VSO_Link_blue_16x.png");
 
-    this->addTab(this->createHighlightingTab(), "Highlighting", ":/images/format_Bold_16xLG.png");
+    this->addTab(this->createHighlightingTab(), "Highlighting", ":/images/notifications.svg");
 
     //    this->addTab(this->createWhispersTab(), "Whispers", ":/images/Message_16xLG.png");
 

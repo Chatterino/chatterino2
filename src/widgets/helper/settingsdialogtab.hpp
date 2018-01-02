@@ -2,6 +2,7 @@
 
 #include <QPaintEvent>
 #include <QWidget>
+#include <QIcon>
 
 namespace chatterino {
 namespace widgets {
@@ -29,7 +30,7 @@ private:
     struct {
         QWidget *widget;
         QString labelText;
-        QImage image;
+        QIcon icon;
     } ui;
 
     // Parent settings dialog
