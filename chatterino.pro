@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT      += core gui network multimedia
+QT      += core gui network multimedia svg
 CONFIG  += communi
 COMMUNI += core model util
 CONFIG  += c++14

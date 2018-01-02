@@ -12,7 +12,7 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, QString _labelText
     : dialog(_dialog)
 {
     this->ui.labelText = _labelText;
-    this->ui.image.load(imageFileName);
+    this->ui.icon.addFile(imageFileName);
 
     this->setCursor(QCursor(Qt::PointingHandCursor));
 
@@ -50,11 +50,13 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (this->height() - this->ui.image.width()) / 2;
+    int a = (this->height() - 20) / 2;
+    QPixmap pixmap = this->ui.icon.pixmap(QSize(20,20));
 
-    painter.drawImage(a, a, this->ui.image);
 
-    a = a + a + this->ui.image.width();
+    painter.drawPixmap(0, a, pixmap);
+
+    a = a + a + 20;
 
     painter.drawText(QRect(a, 0, width() - a, height()), this->ui.labelText,
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));

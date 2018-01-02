@@ -34,6 +34,15 @@
         <file>sounds/ping2.wav</file>
         <file>images/subscriber.png</file>
         <file>images/collapse.png</file>
+        <file>images/emote.svg</file>
+        <file>../../../Small/ChatterinoRestyle/notifications.svg</file>
+        <file>../../../Small/ChatterinoRestyle/behave.svg</file>
+        <file>../../../Small/ChatterinoRestyle/theme.svg</file>
+        <file>../../../Small/ChatterinoRestyle/accounts.svg</file>
+        <file>images/notifications.svg</file>
+        <file>images/behave.svg</file>
+        <file>images/theme.svg</file>
+        <file>images/accounts.svg</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>
