@@ -183,9 +183,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // fill the tab background
     painter.fillRect(rect(),
-                     windowFocused
-                         ? (this->mouseOver ? colors.backgrounds.hover : colors.backgrounds.regular)
-                         : colors.backgrounds.unfocused);
+                     this->mouseOver ? colors.backgrounds.hover
+                                     : (windowFocused ? colors.backgrounds.regular
+                                                      : colors.backgrounds.unfocused));
 
     // set the pen color
     painter.setPen(colors.text);

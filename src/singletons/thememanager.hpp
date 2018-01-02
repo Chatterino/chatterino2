@@ -31,28 +31,28 @@ public:
         } backgrounds;
     };
 
-    struct Tabs {
+    struct {
         TabColors regular;
         TabColors selected;
         TabColors highlighted;
         TabColors newMessage;
     } tabs;
 
-    struct Splits {
+    struct {
         QColor messageSeperator;
         QColor background;
         QColor border;
         QColor borderFocused;
         QColor dropPreview;
 
-        struct Header {
+        struct {
             QColor border;
             QColor background;
             QColor text;
             // int margin;
         } header;
 
-        struct Input {
+        struct {
             QColor border;
             QColor background;
             QColor selection;
@@ -62,15 +62,15 @@ public:
         } input;
     } splits;
 
-    struct Messages {
-        struct TextColors {
+    struct {
+        struct {
             QColor regular;
             QColor caret;
             QColor link;
             QColor system;
         } textColors;
 
-        struct Backgrounds {
+        struct {
             QColor regular;
             QColor highlighted;
             // QColor resub;
@@ -83,7 +83,7 @@ public:
         QColor selection;
     } messages;
 
-    struct Scrollbars {
+    struct {
         QColor background;
         QColor thumb;
         QColor thumbSelected;
@@ -91,7 +91,7 @@ public:
         // QColor highlights[3];
     } scrollbars;
 
-    struct Tooltip {
+    struct {
         QColor text;
         QColor background;
     } tooltip;
