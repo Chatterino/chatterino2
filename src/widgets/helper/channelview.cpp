@@ -483,7 +483,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // update all messages
     this->gifEmotes.clear();
 
-    painter.fillRect(rect(), this->themeManager.ChatBackground);
+    painter.fillRect(rect(), this->themeManager.splits.background);
 
     // draw messages
     this->drawMessages(painter, false);
@@ -524,7 +524,7 @@ void ChannelView::drawMessages(QPainter &painter, bool overlays)
         if (overlays) {
             if (messageRef->isDisabled()) {
                 painter.fillRect(0, y, this->width(), messageRef->getHeight(),
-                                 this->themeManager.DisabledMessageOverlay);
+                                 this->themeManager.messages.disabled);
             }
         } else {
             std::shared_ptr<QPixmap> buffer = messageRef->buffer;
@@ -624,8 +624,8 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //} else {
     painter.fillRect(buffer->rect(),
                      (messageRef->getMessage()->containsHighlightedPhrase())
-                         ? this->themeManager.ChatBackgroundHighlighted
-                         : this->themeManager.ChatBackground);
+                         ? this->themeManager.messages.backgrounds.highlighted
+                         : this->themeManager.messages.backgrounds.regular);
     //}
 
     // draw selection
@@ -672,7 +672,7 @@ void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageRef *
         return;
     }
 
-    QColor selectionColor = this->themeManager.Selection;
+    QColor selectionColor = this->themeManager.messages.selection;
 
     int charIndex = 0;
     size_t i = 0;

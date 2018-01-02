@@ -25,7 +25,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , usernameColor(singletons::ThemeManager::getInstance().SystemMessageColor)
+    , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
 {
 }
 

@@ -210,11 +210,11 @@ void SplitInput::refreshTheme()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, this->themeManager.Text);
+    palette.setColor(QPalette::Foreground, this->themeManager.splits.input.text);
 
     this->textLengthLabel.setPalette(palette);
 
-    this->textInput.setStyleSheet(this->themeManager.InputStyleSheet);
+    this->textInput.setStyleSheet(this->themeManager.splits.input.styleSheet);
 
     this->hbox.setMargin((this->themeManager.isLightTheme() ? 4 : 2) * this->getDpiMultiplier());
 }
@@ -244,9 +244,9 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager.ChatInputBackground);
+    painter.fillRect(this->rect(), this->themeManager.splits.input.background);
 
-    QPen pen(this->themeManager.ChatInputBorder);
+    QPen pen(this->themeManager.splits.input.border);
     if (this->themeManager.isLightTheme()) {
         pen.setWidth((int)(6 * this->getDpiMultiplier()));
     }

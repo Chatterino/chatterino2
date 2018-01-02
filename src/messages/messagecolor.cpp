@@ -25,11 +25,11 @@ const QColor &MessageColor::getColor(singletons::ThemeManager &themeManager) con
         case Type::Custom:
             return this->color;
         case Type::Text:
-            return themeManager.Text;
+            return themeManager.messages.textColors.regular;
         case Type::System:
-            return themeManager.SystemMessageColor;
+            return themeManager.messages.textColors.system;
         case Type::Link:
-            return themeManager.TextLink;
+            return themeManager.messages.textColors.link;
     }
 
     static QColor _default;

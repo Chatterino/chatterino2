@@ -291,7 +291,7 @@ void IrcManager::writeConnectionMessageReceived(Communi::IrcMessage *message)
 }
 
 // XXX: This does not fit in IrcManager
-bool IrcManager::isTwitchBlockedUser(QString const &username)
+bool IrcManager::isTwitchUserBlocked(QString const &username)
 {
     QMutexLocker locker(&this->twitchBlockedUsersMutex);
 

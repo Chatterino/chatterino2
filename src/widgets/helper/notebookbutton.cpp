@@ -23,16 +23,11 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    background = this->themeManager.TabBackground;
-
-    if (mouseDown) {
-        // background = this->themeManager.TabSelectedBackground;
-        foreground = this->themeManager.TabHoverText;
-    } else if (mouseOver) {
-        // background = this->themeManager.TabHoverText;
-        foreground = this->themeManager.TabHoverText;
+    if (mouseDown || mouseOver) {
+        background = this->themeManager.tabs.regular.backgrounds.regular.color();
+        foreground = this->themeManager.tabs.regular.text;
     } else {
-        // background = this->themeManager.TabPanelBackground;
+        background = this->themeManager.tabs.regular.backgrounds.regular.color();
         foreground = QColor(70, 80, 80);
     }
 

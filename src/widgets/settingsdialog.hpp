@@ -33,6 +33,8 @@ class SettingsDialog : public BaseWidget
     friend class SettingsDialogTab;
 
 public:
+    static SettingsDialog *getHandle();  // may be NULL
+
     enum class PreferredTab {
         NoPreference,
         Accounts,
@@ -45,6 +47,7 @@ protected:
 
 private:
     void refresh();
+    static SettingsDialog *handle;
 
     std::vector<SettingsDialogTab *> tabs;
 

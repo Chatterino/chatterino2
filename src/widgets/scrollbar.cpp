@@ -236,20 +236,21 @@ void ScrollBar::paintEvent(QPaintEvent *)
     QPainter painter(this);
     //    painter.fillRect(rect(), this->themeManager.ScrollbarBG);
 
-    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
-                     this->themeManager.ScrollbarArrow);
-    painter.fillRect(QRect(xOffset, height() - this->buttonHeight, width(), this->buttonHeight),
-                     this->themeManager.ScrollbarArrow);
+    //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
+    //                     this->themeManager.ScrollbarArrow);
+    //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight, width(),
+    //    this->buttonHeight),
+    //                     this->themeManager.ScrollbarArrow);
 
     this->thumbRect.setX(xOffset);
 
     // mouse over thumb
     if (this->mouseDownIndex == 2) {
-        painter.fillRect(this->thumbRect, this->themeManager.ScrollbarThumbSelected);
+        painter.fillRect(this->thumbRect, this->themeManager.scrollbars.thumbSelected);
     }
     // mouse not over thumb
     else {
-        painter.fillRect(this->thumbRect, this->themeManager.ScrollbarThumb);
+        painter.fillRect(this->thumbRect, this->themeManager.scrollbars.thumb);
     }
 
     //    ScrollBarHighlight *highlight = highlights;

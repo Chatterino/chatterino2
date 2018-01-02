@@ -1,12 +1,12 @@
 #include "widgets/settingsdialog.hpp"
-#include "singletons/accountmanager.hpp"
 #include "const.hpp"
 #include "debug/log.hpp"
+#include "singletons/accountmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 #include "widgets/logindialog.hpp"
-#include "singletons/windowmanager.hpp"
 
 #include <QComboBox>
 #include <QDebug>
@@ -24,6 +24,8 @@
 
 namespace chatterino {
 namespace widgets {
+
+SettingsDialog *SettingsDialog::handle = nullptr;
 
 SettingsDialog::SettingsDialog()
     : BaseWidget()
@@ -69,6 +71,11 @@ SettingsDialog::SettingsDialog()
     this->addTabs();
 
     this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+}
+
+SettingsDialog *SettingsDialog::getHandle()
+{
+    return SettingsDialog::handle;
 }
 
 void SettingsDialog::addTabs()

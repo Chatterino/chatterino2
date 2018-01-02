@@ -14,7 +14,8 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager, bool _isMainWindow)
+Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager,
+               bool _isMainWindow)
     : BaseWidget(_themeManager, nullptr)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
@@ -108,7 +109,8 @@ void Window::closeEvent(QCloseEvent *)
 void Window::refreshTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Background, this->themeManager.TabBackground);
+    palette.setColor(QPalette::Background,
+                     this->themeManager.tabs.regular.backgrounds.regular.color());
     this->setPalette(palette);
 }
 

@@ -108,13 +108,14 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
         }
     });
 
-    singletons::SettingManager::getInstance().hideEmptyInput.connect([this](const bool &hideEmptyInput, auto) {
-        if (hideEmptyInput && this->input.getInputText().length() == 0) {
-            this->input.hide();
-        } else {
-            this->input.show();
-        }
-    });
+    singletons::SettingManager::getInstance().hideEmptyInput.connect(
+        [this](const bool &hideEmptyInput, auto) {
+            if (hideEmptyInput && this->input.getInputText().length() == 0) {
+                this->input.hide();
+            } else {
+                this->input.show();
+            }
+        });
 }
 
 Split::~Split()
@@ -236,7 +237,7 @@ void Split::paintEvent(QPaintEvent *)
     // color the background of the chat
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager.ChatBackground);
+    painter.fillRect(this->rect(), this->themeManager.splits.background);
 }
 
 /// Slots
@@ -395,7 +396,7 @@ void Split::doOpenViewerList()
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels) {
         auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->themeManager.ChatHeaderBackground);
+        label->setBackgroundColor(this->themeManager.splits.header.background);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -452,7 +453,7 @@ void Split::doOpenViewerList()
     dockVbox->addWidget(resultList);
     resultList->hide();
 
-    multiWidget->setStyleSheet(this->themeManager.InputStyleSheet);
+    multiWidget->setStyleSheet(this->themeManager.splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();

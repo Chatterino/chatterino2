@@ -57,70 +57,85 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     qreal sat = 0.05;
 
-    SystemMessageColor = QColor(140, 127, 127);
-
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
     };
 
-    DropPreviewBackground = getColor(hue, 0.5, 0.5, 0.6);
+    // Ubuntu style
+    // TODO: add setting for this
+    //        TabText = QColor(210, 210, 210);
+    //        TabBackground = QColor(61, 60, 56);
+    //        TabHoverText = QColor(210, 210, 210);
+    //        TabHoverBackground = QColor(73, 72, 68);
 
-    Text = TextCaret = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
-    TextLink = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    // message (referenced later)
+    this->messages.textColors.caret =  //
+        this->messages.textColors.regular = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
 
-    // tab
-    if (true) {
-        TabText = QColor(0, 0, 0);
-        TabBackground = QColor(255, 255, 255);
+    // tabs
+    // text, {regular, hover, unfocused}
+    this->tabs.regular = {QColor(0, 0, 0),
+                          {QColor(255, 255, 255), QColor(200, 200, 200), QColor(255, 255, 255)}};
 
-        TabHoverText = QColor(0, 0, 0);
-        TabHoverBackground = QColor::fromHslF(hue, 0, 0.95);
-    } else {
-        // Ubuntu style
-        // TODO: add setting for this
-        TabText = QColor(210, 210, 210);
-        TabBackground = QColor(61, 60, 56);
+    this->tabs.selected = {QColor(255, 255, 255),
+                           {QColor::fromHslF(hue, 0.5, 0.5), QColor::fromHslF(hue, 0.5, 0.5),
+                            QColor::fromHslF(hue, 0, 0.5)}};
 
-        TabHoverText = QColor(210, 210, 210);
-        TabHoverBackground = QColor(73, 72, 68);
-    }
+    this->tabs.newMessage = {QColor(0, 0, 0),
+                             {QBrush(QColor::fromHslF(hue, 0.5, 0.8), Qt::DiagCrossPattern),
+                              QBrush(QColor::fromHslF(hue, 0.5, 0.7), Qt::DiagCrossPattern),
+                              QBrush(QColor::fromHslF(hue, 0, 0.8), Qt::DiagCrossPattern)}};
 
-    TabSelectedText = QColor(255, 255, 255);
-    TabSelectedBackground = QColor::fromHslF(hue, 0.5, 0.5);
+    this->tabs.highlighted = {QColor(0, 0, 0),
+                              {QColor::fromHslF(hue, 0.5, 0.8), QColor::fromHslF(hue, 0.5, 0.7),
+                               QColor::fromHslF(hue, 0, 0.8)}};
 
-    TabSelectedUnfocusedText = QColor(255, 255, 255);
-    TabSelectedUnfocusedBackground = QColor::fromHslF(hue, 0, 0.5);
-
-    TabHighlightedText = QColor(0, 0, 0);
-    TabHighlightedBackground = QColor::fromHslF(hue, 0.5, 0.8);
-
-    TabNewMessageBackground = QBrush(QColor::fromHslF(hue, 0.5, 0.8), Qt::DiagCrossPattern);
-
-    // Chat
+    // Split
     bool flat = lightTheme;
 
-    ChatBackground = getColor(0, sat, 1);
-    DisabledMessageOverlay = getColor(0, sat, 1, 0.6);
-    ChatBackgroundHighlighted = blendColors(TabSelectedBackground, ChatBackground, 0.8);
-    ChatHeaderBackground = getColor(0, sat, flat ? 1 : 0.9);
-    ChatHeaderBorder = getColor(0, sat, flat ? 1 : 0.85);
-    ChatInputBackground = getColor(0, sat, flat ? 0.95 : 0.95);
-    ChatInputBorder = getColor(0, sat, flat ? 1 : 1);
-    ChatSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
+    this->splits.messageSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
+    this->splits.background = getColor(0, sat, 1);
+    this->splits.dropPreview = getColor(hue, 0.5, 0.5, 0.6);
+    // this->splits.border
+    // this->splits.borderFocused
+
+    this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
+    this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
+    this->splits.header.text = this->messages.textColors.regular;
+
+    this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
+    this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
+    this->splits.input.text = this->messages.textColors.regular;
+    this->splits.input.styleSheet =
+        "background:" + this->splits.input.background.name() + ";" +
+        "border:" + this->tabs.selected.backgrounds.regular.color().name() + ";" +
+        "color:" + this->messages.textColors.regular.name() + ";" +
+        "selection-background-color:" + this->tabs.selected.backgrounds.regular.color().name();
+
+    // Message
+    this->messages.textColors.link = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    this->messages.textColors.system = QColor(140, 127, 127);
+
+    this->messages.backgrounds.regular = splits.background;
+    this->messages.backgrounds.highlighted = blendColors(
+        this->tabs.selected.backgrounds.regular.color(), this->messages.backgrounds.regular, 0.8);
+    // this->messages.backgrounds.resub
+    // this->messages.backgrounds.whisper
+    this->messages.disabled = getColor(0, sat, 1, 0.6);
+    // this->messages.seperator =
+    // this->messages.seperatorInner =
 
     // Scrollbar
-    ScrollbarBG = getColor(0, sat, 0.94);
-    ScrollbarThumb = getColor(0, sat, 0.80);
-    ScrollbarThumbSelected = getColor(0, sat, 0.7);
-    ScrollbarArrow = getColor(0, sat, 0.9);
+    this->scrollbars.background = getColor(0, sat, 0.94);
+    this->scrollbars.thumb = getColor(0, sat, 0.80);
+    this->scrollbars.thumbSelected = getColor(0, sat, 0.7);
 
-    // stylesheet
-    InputStyleSheet = "background:" + ChatInputBackground.name() + ";" +
-                      "border:" + TabSelectedBackground.name() + ";" + "color:" + Text.name() +
-                      ";" + "selection-background-color:" + TabSelectedBackground.name();
+    // tooltip
+    this->tooltip.background = QColor(0, 0, 0);
+    this->tooltip.text = QColor(255, 255, 255);
 
     // Selection
-    Selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
+    this->messages.selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     this->updated();
 }
