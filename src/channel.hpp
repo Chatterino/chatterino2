@@ -26,11 +26,13 @@ public:
 
     boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
     boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
+    boost::signals2::signal<void(std::vector<messages::SharedMessage> &)> messagesAddedAtStart;
 
     virtual bool isEmpty() const;
     messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
 
     void addMessage(messages::SharedMessage message);
+    void addMessagesAtStart(std::vector<messages::SharedMessage> &messages);
     void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
     struct NameOptions {
@@ -49,8 +51,6 @@ public:
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
-
-    bool dontAddMessages = false;
 
 private:
     messages::LimitedQueue<messages::SharedMessage> messages;

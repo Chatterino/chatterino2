@@ -119,9 +119,8 @@ void SplitHeader::updateChannelText()
                             "<br>"
                             "Live for " +
                             twitchChannel->streamUptime + " with " +
-                            twitchChannel->streamViewerCount +
-                            " viewers"
-                            "</p>";
+                            twitchChannel->streamViewerCount + " viewers"
+                                                               "</p>";
             this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
         } else {
             this->isLive = false;
@@ -135,8 +134,8 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->themeManager.ChatHeaderBackground);
-    painter.setPen(this->themeManager.ChatHeaderBorder);
+    painter.fillRect(rect(), this->themeManager.splits.header.background);
+    painter.setPen(this->themeManager.splits.header.border);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
@@ -217,7 +216,7 @@ void SplitHeader::rightButtonClicked()
 void SplitHeader::refreshTheme()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, this->themeManager.Text);
+    palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);
 
     this->leftLabel.setPalette(palette);
     this->channelNameLabel.setPalette(palette);

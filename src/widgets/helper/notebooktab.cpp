@@ -1,10 +1,11 @@
 #include "widgets/helper/notebooktab.hpp"
-#include "singletons/thememanager.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "singletons/thememanager.hpp"
 #include "util/helpers.hpp"
 #include "widgets/notebook.hpp"
+#include "widgets/settingsdialog.hpp"
 #include "widgets/textinputdialog.hpp"
 
 #include <QApplication>
@@ -161,41 +162,44 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
+    singletons::SettingManager &settingManager = singletons::SettingManager::getInstance();
     QPainter painter(this);
 
-    QColor fg = QColor(0, 0, 0);
+    // select the right tab colors
+    singletons::ThemeManager::TabColors colors;
 
     if (this->selected) {
-        if (this->window() == QApplication::activeWindow()) {
-            painter.fillRect(rect(), this->themeManager.TabSelectedBackground);
-            fg = this->themeManager.TabSelectedText;
-        } else {
-            painter.fillRect(rect(), this->themeManager.TabSelectedUnfocusedBackground);
-            fg = this->themeManager.TabSelectedUnfocusedText;
-        }
-    } else if (this->mouseOver) {
-        painter.fillRect(rect(), this->themeManager.TabHoverBackground);
-        fg = this->themeManager.TabHoverText;
+        colors = this->themeManager.tabs.selected;
     } else if (this->highlightState == HighlightState::Highlighted) {
-        painter.fillRect(rect(), this->themeManager.TabHighlightedBackground);
-        fg = this->themeManager.TabHighlightedText;
+        colors = this->themeManager.tabs.highlighted;
     } else if (this->highlightState == HighlightState::NewMessage) {
-        painter.fillRect(rect(), this->themeManager.TabNewMessageBackground);
-        fg = this->themeManager.TabHighlightedText;
+        colors = this->themeManager.tabs.newMessage;
     } else {
-        painter.fillRect(rect(), this->themeManager.TabBackground);
-        fg = this->themeManager.TabText;
+        colors = this->themeManager.tabs.regular;
     }
 
-    painter.setPen(fg);
+    bool windowFocused = this->window() == QApplication::activeWindow();
+    // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
+    // fill the tab background
+    painter.fillRect(rect(),
+                     this->mouseOver ? colors.backgrounds.hover
+                                     : (windowFocused ? colors.backgrounds.regular
+                                                      : colors.backgrounds.unfocused));
+
+    // set the pen color
+    painter.setPen(colors.text);
+
+    // set area for text
     float scale = this->getDpiMultiplier();
-    int rectW = (singletons::SettingManager::getInstance().hideTabX ? 0 : static_cast<int>(16) * scale);
+    int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, this->height());
 
+    // draw text
     painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
 
-    if (!singletons::SettingManager::getInstance().hideTabX && (mouseOver || selected)) {
+    // draw close x
+    if (!settingManager.hideTabX && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (mouseOverX) {
             painter.fillRect(xRect, QColor(0, 0, 0, 64));

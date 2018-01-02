@@ -133,7 +133,7 @@ private:
     void detachChannel();
     void actuallyLayoutMessages();
 
-    void drawMessages(QPainter &painter);
+    void drawMessages(QPainter &painter, bool overlays);
     void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
     void drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef, int messageIndex,
                               int bufferHeight);
@@ -164,13 +164,14 @@ private:
     messages::LimitedQueue<messages::SharedMessageRef> messages;
 
     boost::signals2::connection messageAppendedConnection;
+    boost::signals2::connection messageAddedAtStartConnection;
     boost::signals2::connection messageRemovedConnection;
     boost::signals2::connection repaintGifsConnection;
     boost::signals2::connection layoutConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
-    std::unordered_set<messages::MessageRef *> messagesOnScreen;
+    std::unordered_set<std::shared_ptr<messages::MessageRef>> messagesOnScreen;
 
 private slots:
     void wordTypeMaskChanged()

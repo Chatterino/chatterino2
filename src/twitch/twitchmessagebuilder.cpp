@@ -1,8 +1,8 @@
 #include "twitchmessagebuilder.hpp"
 #include "debug/log.hpp"
-#include "singletons/resourcemanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
+#include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -25,7 +25,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , usernameColor(singletons::ThemeManager::getInstance().SystemMessageColor)
+    , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
 {
 }
 
@@ -200,7 +200,8 @@ SharedMessage TwitchMessageBuilder::parse()
 
                     this->appendWord(Word(
                         QString("x" + string.mid(5)), Word::BitsAmount, MessageColor(bitsColor),
-                        singletons::FontManager::Medium, QString(string.mid(5)), QString("Twitch Cheer"),
+                        singletons::FontManager::Medium, QString(string.mid(5)),
+                        QString("Twitch Cheer"),
                         Link(Link::Url,
                              QString("https://blog.twitch.tv/"
                                      "introducing-cheering-celebrate-together-da62af41fac6"))));
@@ -230,13 +231,14 @@ SharedMessage TwitchMessageBuilder::parse()
                     textColor = MessageColor(MessageColor::Link);
                 }
 
-                this->appendWord(Word(string, Word::Text, textColor, singletons::FontManager::Medium, string,
-                                      QString(), link));
+                this->appendWord(Word(string, Word::Text, textColor,
+                                      singletons::FontManager::Medium, string, QString(), link));
             } else {  // is emoji
                 this->appendWord(Word(emoteData.image, Word::EmojiImage, emoteData.image->getName(),
                                       emoteData.image->getTooltip()));
-                Word(emoteData.image->getName(), Word::EmojiText, textColor, singletons::FontManager::Medium,
-                     emoteData.image->getName(), emoteData.image->getTooltip());
+                Word(emoteData.image->getName(), Word::EmojiText, textColor,
+                     singletons::FontManager::Medium, emoteData.image->getName(),
+                     emoteData.image->getTooltip());
             }
         }
 
@@ -303,6 +305,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     this->message->loginName = this->userName;
+    this->message->timeoutUser = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -471,7 +474,8 @@ void TwitchMessageBuilder::parseHighlights()
         }
 
         if (doAlert) {
-            QApplication::alert(singletons::WindowManager::getInstance().getMainWindow().window(), 2500);
+            QApplication::alert(singletons::WindowManager::getInstance().getMainWindow().window(),
+                                2500);
         }
     }
 }
@@ -482,10 +486,11 @@ void TwitchMessageBuilder::appendModerationButtons()
     static QString buttonBanTooltip("Ban user");
     static QString buttonTimeoutTooltip("Timeout user");
 
-    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonBan, Word::ButtonBan, QString(),
-                          buttonBanTooltip, Link(Link::UserBan, ircMessage->account())));
-    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonTimeout, Word::ButtonTimeout, QString(),
-                          buttonTimeoutTooltip, Link(Link::UserTimeout, ircMessage->account())));
+    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonBan, Word::ButtonBan,
+                          QString(), buttonBanTooltip, Link(Link::UserBan, ircMessage->account())));
+    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonTimeout,
+                          Word::ButtonTimeout, QString(), buttonTimeoutTooltip,
+                          Link(Link::UserTimeout, ircMessage->account())));
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage,
@@ -567,7 +572,8 @@ bool TwitchMessageBuilder::appendEmote(util::EmoteData &emoteData)
 
 void TwitchMessageBuilder::parseTwitchBadges()
 {
-    const auto &channelResources = singletons::ResourceManager::getInstance().channels[this->roomID];
+    const auto &channelResources =
+        singletons::ResourceManager::getInstance().channels[this->roomID];
 
     auto iterator = this->tags.find("badges");
 
@@ -602,42 +608,43 @@ void TwitchMessageBuilder::parseTwitchBadges()
                         Word(badgeVersion.badgeImage1x, Word::BadgeVanity, QString(),
                              QString("Twitch " + QString::fromStdString(badgeVersion.title))));
                 } catch (const std::exception &e) {
-                    debug::Log("Exception caught: {} when trying to fetch badge version {}",
+                    debug::Log("Exception caught: {} when trying to fetch badge version {} ",
                                e.what(), versionKey);
                 }
             } catch (const std::exception &e) {
                 debug::Log("No badge set with key bits. Exception: {}", e.what());
             }
         } else if (badge == "staff/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeStaff, Word::BadgeGlobalAuthority,
-                            QString(), QString("Twitch Staff")));
+            appendWord(Word(singletons::ResourceManager::getInstance().badgeStaff,
+                            Word::BadgeGlobalAuthority, QString(), QString("Twitch Staff")));
         } else if (badge == "admin/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeAdmin, Word::BadgeGlobalAuthority,
-                            QString(), QString("Twitch Admin")));
+            appendWord(Word(singletons::ResourceManager::getInstance().badgeAdmin,
+                            Word::BadgeGlobalAuthority, QString(), QString("Twitch Admin")));
         } else if (badge == "global_mod/1") {
             appendWord(Word(singletons::ResourceManager::getInstance().badgeGlobalModerator,
                             Word::BadgeGlobalAuthority, QString(), QString("Global Moderator")));
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeModerator, Word::BadgeChannelAuthority,
-                            QString(),
+            appendWord(Word(singletons::ResourceManager::getInstance().badgeModerator,
+                            Word::BadgeChannelAuthority, QString(),
                             QString("Channel Moderator")));  // custom badge
         } else if (badge == "turbo/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeTurbo, Word::BadgeVanity, QString(),
-                            QString("Turbo Subscriber")));
+            appendWord(Word(singletons::ResourceManager::getInstance().badgeTurbo,
+                            Word::BadgeVanity, QString(), QString("Turbo Subscriber")));
         } else if (badge == "broadcaster/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeBroadcaster, Word::BadgeChannelAuthority,
-                            QString(), QString("Channel Broadcaster")));
+            appendWord(Word(singletons::ResourceManager::getInstance().badgeBroadcaster,
+                            Word::BadgeChannelAuthority, QString(),
+                            QString("Channel Broadcaster")));
         } else if (badge == "premium/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgePremium, Word::BadgeVanity, QString(),
-                            QString("Twitch Prime")));
+            appendWord(Word(singletons::ResourceManager::getInstance().badgePremium,
+                            Word::BadgeVanity, QString(), QString("Twitch Prime")));
 
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    appendWord(Word(singletons::ResourceManager::getInstance().badgeVerified, Word::BadgeVanity,
-                                    QString(), "Twitch Verified"));
+                    appendWord(Word(singletons::ResourceManager::getInstance().badgeVerified,
+                                    Word::BadgeVanity, QString(), "Twitch Verified"));
                 } break;
                 default: {
                     printf("[TwitchMessageBuilder] Unhandled partner badge index: %d\n", index);
@@ -695,7 +702,8 @@ void TwitchMessageBuilder::parseTwitchBadges()
             std::string versionKey = parts[1].toStdString();
 
             try {
-                auto &badgeSet = singletons::ResourceManager::getInstance().badgeSets.at(badgeSetKey);
+                auto &badgeSet =
+                    singletons::ResourceManager::getInstance().badgeSets.at(badgeSetKey);
 
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);

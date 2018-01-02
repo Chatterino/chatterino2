@@ -22,64 +22,79 @@ public:
         return this->lightTheme;
     }
 
-    QString InputStyleSheet;
+    struct TabColors {
+        QColor text;
+        struct Backgrounds {
+            QBrush regular;
+            QBrush hover;
+            QBrush unfocused;
+        } backgrounds;
+    };
 
-    QColor SystemMessageColor;
+    struct {
+        TabColors regular;
+        TabColors selected;
+        TabColors highlighted;
+        TabColors newMessage;
+    } tabs;
 
-    QColor DropPreviewBackground;
+    struct {
+        QColor messageSeperator;
+        QColor background;
+        QColor border;
+        QColor borderFocused;
+        QColor dropPreview;
 
-    QColor TooltipBackground;
-    QColor TooltipText;
+        struct {
+            QColor border;
+            QColor background;
+            QColor text;
+            // int margin;
+        } header;
 
-    QColor ChatSeperator;
-    QColor ChatBackground;
-    QColor ChatBackgroundHighlighted;
-    QColor ChatBackgroundResub;
-    QColor ChatBackgroundWhisper;
+        struct {
+            QColor border;
+            QColor background;
+            QColor selection;
+            QColor text;
+            QString styleSheet;
+            // int margin;
+        } input;
+    } splits;
 
-    QColor ChatHeaderBorder;
-    QColor ChatHeaderBackground;
+    struct {
+        struct {
+            QColor regular;
+            QColor caret;
+            QColor link;
+            QColor system;
+        } textColors;
 
-    QColor ChatInputBackground;
-    QColor ChatInputBorder;
+        struct {
+            QColor regular;
+            QColor highlighted;
+            // QColor resub;
+            // QColor whisper;
+        } backgrounds;
 
-    QColor ChatMessageSeperatorBorder;
-    QColor ChatMessageSeperatorBorderInner;
-    QColor ChatBorder;
-    QColor ChatBorderFocused;
-    QColor Text;
-    QColor TextCaret;
-    QColor TextLink;
-    QColor TextFocused;
-    QColor Menu;
-    QColor MenuBorder;
+        QColor disabled;
+        //        QColor seperator;
+        //        QColor seperatorInner;
+        QColor selection;
+    } messages;
 
-    QColor ScrollbarBG;
-    QColor ScrollbarThumb;
-    QColor ScrollbarThumbSelected;
-    QColor ScrollbarArrow;
+    struct {
+        QColor background;
+        QColor thumb;
+        QColor thumbSelected;
+        // const int highlightsCount = 3;
+        // QColor highlights[3];
+    } scrollbars;
 
-    QColor TabText;
-    QColor TabBackground;
-
-    QColor TabHoverText;
-    QColor TabHoverBackground;
-
-    QColor TabSelectedText;
-    QColor TabSelectedBackground;
-
-    QColor TabHighlightedText;
-    QColor TabHighlightedBackground;
-
-    QColor TabSelectedUnfocusedText;
-    QColor TabSelectedUnfocusedBackground;
-
-    QBrush TabNewMessageBackground;
-
-    QColor Selection;
-
-    const int HighlightColorCount = 3;
-    QColor HighlightColors[3];
+    struct {
+        QColor text;
+        QColor background;
+    } tooltip;
 
     void normalizeColor(QColor &color);
 

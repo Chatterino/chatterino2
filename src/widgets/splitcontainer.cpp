@@ -385,17 +385,17 @@ void SplitContainer::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (this->ui.hbox.count() == 0) {
-        painter.fillRect(rect(), this->themeManager.ChatBackground);
+        painter.fillRect(rect(), this->themeManager.splits.background);
 
-        painter.setPen(this->themeManager.Text);
+        painter.setPen(this->themeManager.splits.header.text);
         painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), this->themeManager.ChatSeperator);
+        painter.fillRect(rect(), this->themeManager.splits.messageSeperator);
     }
 
-    QColor accentColor = (QApplication::activeWindow() == this->window()
-                              ? this->themeManager.TabSelectedBackground
-                              : this->themeManager.TabSelectedUnfocusedBackground);
+    QBrush accentColor = (QApplication::activeWindow() == this->window()
+                              ? this->themeManager.tabs.selected.backgrounds.regular
+                              : this->themeManager.tabs.selected.backgrounds.unfocused);
 
     painter.fillRect(0, 0, width(), 2, accentColor);
 }

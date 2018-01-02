@@ -38,6 +38,8 @@ public:
     int getCollapsedHeight() const;
     int getCollapsedLineCount() const;
 
+    bool isDisabled() const;
+
 private:
     // variables
     SharedMessage message;

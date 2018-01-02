@@ -1,9 +1,9 @@
 #include "channel.hpp"
 #include "debug/log.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/ircmanager.hpp"
 #include "logging/loggingmanager.hpp"
 #include "messages/message.hpp"
+#include "singletons/emotemanager.hpp"
+#include "singletons/ircmanager.hpp"
 #include "singletons/windowmanager.hpp"
 
 #include <QJsonArray>
@@ -36,9 +36,6 @@ messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnaps
 
 void Channel::addMessage(std::shared_ptr<Message> message)
 {
-    if (dontAddMessages) {
-        return;
-    }
     std::shared_ptr<Message> deleted;
 
     const QString &username = message->loginName;
@@ -52,11 +49,20 @@ void Channel::addMessage(std::shared_ptr<Message> message)
     //        _loggingChannel->append(message);
     //    }
 
-    if (this->messages.appendItem(message, deleted)) {
+    if (this->messages.pushBack(message, deleted)) {
         messageRemovedFromStart(deleted);
     }
 
     this->messageAppended(message);
+}
+
+void Channel::addMessagesAtStart(std::vector<messages::SharedMessage> &messages)
+{
+    std::vector<messages::SharedMessage> addedMessages = this->messages.pushFront(messages);
+
+    if (addedMessages.size() != 0) {
+        this->messagesAddedAtStart(addedMessages);
+    }
 }
 
 void Channel::addRecentChatter(const std::shared_ptr<messages::Message> &message)

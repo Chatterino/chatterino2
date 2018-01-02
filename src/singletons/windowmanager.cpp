@@ -35,7 +35,7 @@ static const std::string &getSettingsPath()
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    this->layout();
+    this->layout(channel);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)

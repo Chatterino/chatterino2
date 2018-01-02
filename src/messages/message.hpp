@@ -26,6 +26,7 @@ public:
     const std::chrono::time_point<std::chrono::system_clock> &getParseTime() const;
     std::vector<Word> &getWords();
     bool isDisabled() const;
+    void setDisabled(bool value);
     const QString &getId() const;
     bool getCollapsedDefault() const;
     void setCollapsedDefault(bool value);
@@ -33,6 +34,7 @@ public:
     QString loginName;
     QString displayName;
     QString localizedName;
+    QString timeoutUser;
 
     const QString text;
     bool centered = false;
@@ -56,7 +58,6 @@ private:
     // what is highlightTab?
     bool highlightTab = false;
 
-    QString timeoutUser = "";
     int timeoutCount = 0;
     bool disabled = false;
 
