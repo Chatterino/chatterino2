@@ -257,5 +257,6 @@ DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
 
 
-#MAC ICON
+#ICONs
 macx:ICON = resources/images/chatterino2.icns
+win32:RC_FILE = resources/windows.rc
