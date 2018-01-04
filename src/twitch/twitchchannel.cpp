@@ -104,7 +104,17 @@ void TwitchChannel::refreshLiveStatus()
 
     QString url("https://api.twitch.tv/kraken/streams/" + this->roomID);
 
-    util::twitch::get2(url, QThread::currentThread(), [this](rapidjson::Document &d) {
+    std::weak_ptr<Channel> weak = this->shared_from_this();
+
+    util::twitch::get2(url, QThread::currentThread(), [weak](rapidjson::Document &d) {
+        std::shared_ptr<Channel> shared = weak.lock();
+
+        if (!shared) {
+            return;
+        }
+
+        TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
+
         if (!d.IsObject()) {
             debug::Log("[TwitchChannel:refreshLiveStatus] root is not an object");
             return;
@@ -119,14 +129,14 @@ void TwitchChannel::refreshLiveStatus()
 
         if (!stream.IsObject()) {
             // Stream is offline (stream is most likely null)
-            this->setLive(false);
+            channel->setLive(false);
             return;
         }
 
         if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
             !stream.HasMember("channel") || !stream.HasMember("created_at")) {
             debug::Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
-            this->setLive(false);
+            channel->setLive(false);
             return;
         }
 
@@ -138,15 +148,15 @@ void TwitchChannel::refreshLiveStatus()
         }
 
         // Stream is live
-        this->streamViewerCount = QString::number(stream["viewers"].GetInt());
-        this->streamGame = stream["game"].GetString();
-        this->streamStatus = streamChannel["status"].GetString();
+        channel->streamViewerCount = QString::number(stream["viewers"].GetInt());
+        channel->streamGame = stream["game"].GetString();
+        channel->streamStatus = streamChannel["status"].GetString();
         QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
-        this->streamUptime =
+        channel->streamUptime =
             QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
 
-        this->setLive(true);
+        channel->setLive(true);
     });
 }
 
@@ -154,9 +164,19 @@ void TwitchChannel::fetchRecentMessages()
 {
     static QString genericURL =
         "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
-    static auto readConnection = singletons::IrcManager::getInstance().getReadConnection();
 
-    util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [=](QJsonObject obj) {
+    std::weak_ptr<Channel> weak = this->shared_from_this();
+
+    util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
+        std::shared_ptr<Channel> shared = weak.lock();
+
+        if (!shared) {
+            return;
+        }
+
+        TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
+        static auto readConnection = singletons::IrcManager::getInstance().getReadConnection();
+
         auto msgArray = obj.value("messages").toArray();
         if (msgArray.size() > 0) {
             std::vector<messages::SharedMessage> messages;
@@ -168,10 +188,10 @@ void TwitchChannel::fetchRecentMessages()
                 auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
 
                 messages::MessageParseArgs args;
-                twitch::TwitchMessageBuilder builder(this, privMsg, args);
+                twitch::TwitchMessageBuilder builder(channel, privMsg, args);
                 messages.at(i) = builder.parse();
             }
-            this->addMessagesAtStart(messages);
+            channel->addMessagesAtStart(messages);
         }
     });
 }
