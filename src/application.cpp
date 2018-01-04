@@ -1,6 +1,7 @@
 #include "application.hpp"
 #include "logging/loggingmanager.hpp"
 #include "singletons/accountmanager.hpp"
+#include "singletons/commandmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"

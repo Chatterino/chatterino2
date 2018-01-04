@@ -1,10 +1,15 @@
 #pragma once
 
+#include <QMap>
 #include <QString>
-#include <vector>
+#include <mutex>
 
 namespace chatterino {
 namespace singletons {
+
+//
+// this class managed the custom /commands
+//
 
 class CommandManager
 {
@@ -13,28 +18,26 @@ class CommandManager
 public:
     static CommandManager &getInstance();
 
-    //    CommandManager() = delete;
+    QString execCommand(QString text);
 
-    //    QString execCommand(QString text);
-    // void addCommand ?
-    // void loadCommands(QString) taking all commands as a \n seperated list ?
+    void loadCommands();
+    void saveCommands();
 
-    //    static CommandManager *getInstance()
-    //    {
-    //        static CommandManager manager;
+    void setCommands(const QStringList &commands);
+    QStringList getCommands();
 
-    //        return manager;
-    //    }
+private:
+    struct Command {
+        QString name;
+        QString text;
 
-    // private:
-    //    struct Command {
-    //        QString name;
-    //        QString text;
+        Command() = default;
+        Command(QString text);
+    };
 
-    //        Command(QString text);
-    //    };
-
-    //    std::vector<Command> commands;
+    QMap<QString, Command> commands;
+    std::mutex mutex;
+    QStringList commandsStringList;
 };
 }
 }

@@ -1,5 +1,7 @@
 #include "singletons/commandmanager.hpp"
 
+#include <QDebug>
+#include <QFile>
 #include <QRegularExpression>
 
 namespace chatterino {
@@ -10,76 +12,146 @@ CommandManager &CommandManager::getInstance()
     return instance;
 }
 
-// QString CommandManager::execCommand(QString text)
-//{
-//    QStringList words = text.split(' ', QString::SkipEmptyParts);
+void CommandManager::loadCommands()
+{
+    //    QFile TextFile("");
+    //    QStringList SL;
 
-//    if (words.length() == 0) {
-//        return text;
-//    }
+    //    while (!TextFile.atEnd())
+    //        SL.append(TextFile.readLine());
+}
 
-//    QString commandName = words[0];
-//    if (commandName[0] == "/") {
-//        commandName = commandName.mid(1);
-//    }
+void CommandManager::saveCommands()
+{
+}
 
-//    Command *command = nullptr;
-//    for (Command &command : this->commands) {
-//        if (command.name == commandName) {
-//            command = &command;
-//            break;
-//        }
-//    }
+void CommandManager::setCommands(const QStringList &_commands)
+{
+    std::lock_guard<std::mutex> lock(this->mutex);
 
-//    if (command == nullptr) {
-//        return text;
-//    }
+    this->commands.clear();
 
-//    QString result;
+    for (const QString &commandRef : _commands) {
+        QString command = commandRef;
 
-//    static QRegularExpression parseCommand("[^{]({{)*{(\d+\+?)}");
-//    for (QRegularExpressionMatch &match : parseCommand.globalMatch(command->text)) {
-//        result += text.mid(match.capturedStart(), match.capturedLength());
+        if (command.size() == 0) {
+            continue;
+        }
 
-//        QString wordIndexMatch = match.captured(2);
+        if (command.at(0) != '/') {
+            command = QString("/") + command;
+        }
 
-//        bool ok;
-//        int wordIndex = wordIndexMatch.replace("=", "").toInt(ok);
-//        if (!ok) {
-//            result += match.captured();
-//            continue;
-//        }
-//        if (words.length() <= wordIndex) {
-//            // alternatively return text because the operation failed
-//            result += "";
-//            return;
-//        }
+        QString commandName = command.mid(0, command.indexOf(' '));
 
-//        if (wordIndexMatch[wordIndexMatch.length() - 1] == '+') {
-//            for (int i = wordIndex; i < words.length(); i++) {
-//                result += words[i];
-//            }
-//        } else {
-//            result += words[wordIndex];
-//        }
-//    }
+        if (this->commands.find(commandName) == this->commands.end()) {
+            this->commands.insert(commandName, Command(command));
+        }
+    }
 
-//    result += text.mid(match.capturedStart(), match.capturedLength());
+    this->commandsStringList = _commands;
+    this->commandsStringList.detach();
+}
 
-//    return result;
-//}
+QStringList CommandManager::getCommands()
+{
+    return this->commandsStringList;
+}
 
-// CommandManager::Command::Command(QString _text)
-//{
-//    int index = _text.indexOf(' ');
+QString CommandManager::execCommand(QString text)
+{
+    Command command;
+    QStringList words = text.split(' ', QString::SkipEmptyParts);
 
-//    if (index == -1) {
-//        this->name == _text;
-//        return;
-//    }
+    {
+        std::lock_guard<std::mutex> lock(this->mutex);
 
-//    this->name = _text.mid(0, index);
-//    this->text = _text.mid(index + 1);
-//}
+        if (words.length() == 0) {
+            return text;
+        }
+
+        QString commandName = words[0];
+
+        auto it = this->commands.find(commandName);
+
+        if (it == this->commands.end()) {
+            return text;
+        }
+
+        command = it.value();
+    }
+
+    QString result;
+
+    static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");
+
+    int lastCaptureEnd = 0;
+
+    auto globalMatch = parseCommand.globalMatch(command.text);
+    int matchOffset = 0;
+
+    while (true) {
+        QRegularExpressionMatch match = parseCommand.match(command.text, matchOffset);
+
+        if (!match.hasMatch()) {
+            break;
+        }
+
+        result += command.text.mid(lastCaptureEnd, match.capturedStart() - lastCaptureEnd + 1);
+
+        lastCaptureEnd = match.capturedEnd();
+        matchOffset = lastCaptureEnd - 1;
+
+        QString wordIndexMatch = match.captured(3);
+
+        bool plus = wordIndexMatch.at(wordIndexMatch.size() - 1) == '+';
+        wordIndexMatch = wordIndexMatch.replace("+", "");
+
+        bool ok;
+        int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
+        if (!ok || wordIndex == 0) {
+            result += "{" + match.captured(3) + "}";
+            continue;
+        }
+
+        if (words.length() <= wordIndex) {
+            continue;
+        }
+
+        if (plus) {
+            bool first = true;
+            for (int i = wordIndex; i < words.length(); i++) {
+                if (!first) {
+                    result += " ";
+                }
+                result += words[i];
+                first = false;
+            }
+        } else {
+            result += words[wordIndex];
+        }
+    }
+
+    result += command.text.mid(lastCaptureEnd);
+
+    if (result.size() > 0 && result.at(0) == '{') {
+        result = result.mid(1);
+    }
+
+    return result.replace("{{", "{");
+}
+
+CommandManager::Command::Command(QString _text)
+{
+    int index = _text.indexOf(' ');
+
+    if (index == -1) {
+        this->name == _text;
+        return;
+    }
+
+    this->name = _text.mid(0, index);
+    this->text = _text.mid(index + 1);
+}
 }
 }

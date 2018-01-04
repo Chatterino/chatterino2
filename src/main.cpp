@@ -29,6 +29,8 @@ inline bool initSettings(bool portable)
         }
     }
 
+    qDebug() << settingsPath;
+
     if (!QDir().mkpath(settingsPath)) {
         printf("Error creating directories for settings: %s\n", qPrintable(settingsPath));
         return false;
