@@ -2,6 +2,7 @@
 #include "const.hpp"
 #include "debug/log.hpp"
 #include "singletons/accountmanager.hpp"
+#include "singletons/commandmanager.hpp"
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
@@ -87,8 +88,7 @@ void SettingsDialog::addTabs()
 
     this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/behave.svg");
 
-    //    this->addTab(this->createCommandsTab(), "Commands",
-    //    ":/images/CustomActionEditor_16x.png");
+    this->addTab(this->createCommandsTab(), "Commands", ":/images/CustomActionEditor_16x.png");
 
     this->addTab(this->createEmotesTab(), "Emotes", ":/images/emote.svg");
 
@@ -361,7 +361,36 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
 
 QVBoxLayout *SettingsDialog::createCommandsTab()
 {
+    singletons::CommandManager &commandManager = singletons::CommandManager::getInstance();
+
+    this->commandsTextChangedDelay.setSingleShot(true);
+
     auto layout = this->createTabLayout();
+
+    layout->addWidget(new QLabel("One command per line. Commands don't save right now"));
+    layout->addWidget(new QLabel("\"/cmd example command\" will print "
+                                 "\"example command\" when you type /cmd in chat."));
+    layout->addWidget(new QLabel("{1} will be replaced with the first word you type after the "
+                                 "command, {2} with the second and so on."));
+    layout->addWidget(new QLabel("{1+} will be replaced with first word and everything after, {2+} "
+                                 "with everything after the second word and so on"));
+    layout->addWidget(new QLabel("Duplicate commands will be ignored."));
+
+    QTextEdit *textEdit = new QTextEdit();
+    textEdit->setPlainText(QString(commandManager.getCommands().join('\n')));
+
+    layout->addWidget(textEdit);
+
+    QObject::connect(textEdit, &QTextEdit::textChanged,
+                     [this] { this->commandsTextChangedDelay.start(200); });
+
+    QObject::connect(&this->commandsTextChangedDelay, &QTimer::timeout,
+                     [textEdit, &commandManager] {
+                         QString text = textEdit->toPlainText();
+                         QStringList lines = text.split(QRegularExpression("(\r?\n|\r\n?)"));
+
+                         commandManager.setCommands(lines);
+                     });
 
     return layout;
 }

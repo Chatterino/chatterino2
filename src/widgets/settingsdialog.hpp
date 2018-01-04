@@ -14,6 +14,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QStackedLayout>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
@@ -52,6 +53,7 @@ private:
     std::vector<SettingsDialogTab *> tabs;
 
     pajlada::Settings::Setting<int> usernameDisplayMode;
+    QTimer commandsTextChangedDelay;
 
     struct {
         QVBoxLayout tabs;

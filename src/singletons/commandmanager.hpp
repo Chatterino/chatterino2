@@ -18,7 +18,7 @@ class CommandManager
 public:
     static CommandManager &getInstance();
 
-    QString execCommand(QString text);
+    QString execCommand(QString text, bool dryRun);
 
     void loadCommands();
     void saveCommands();

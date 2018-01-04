@@ -38,9 +38,9 @@ void CommandManager::setCommands(const QStringList &_commands)
             continue;
         }
 
-        if (command.at(0) != '/') {
-            command = QString("/") + command;
-        }
+        //        if (command.at(0) != '/') {
+        //            command = QString("/") + command;
+        //        }
 
         QString commandName = command.mid(0, command.indexOf(' '));
 
@@ -58,7 +58,7 @@ QStringList CommandManager::getCommands()
     return this->commandsStringList;
 }
 
-QString CommandManager::execCommand(QString text)
+QString CommandManager::execCommand(QString text, bool dryRun)
 {
     Command command;
     QStringList words = text.split(' ', QString::SkipEmptyParts);

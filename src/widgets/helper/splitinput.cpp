@@ -1,4 +1,5 @@
 #include "widgets/helper/splitinput.hpp"
+#include "singletons/commandmanager.hpp"
 #include "singletons/completionmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -82,7 +83,11 @@ SplitInput::SplitInput(Split *_chatWidget)
             }
             QString message = textInput.toPlainText();
 
-            c->sendMessage(message.replace('\n', ' '));
+            QString sendMessage =
+                singletons::CommandManager::getInstance().execCommand(message, false);
+            sendMessage = sendMessage.replace('\n', ' ');
+
+            c->sendMessage(sendMessage);
             prevMsg.append(message);
 
             event->accept();
@@ -228,6 +233,8 @@ void SplitInput::editTextChanged()
     text = text.trimmed();
     static QRegularExpression spaceRegex("\\s\\s+");
     text = text.replace(spaceRegex, " ");
+
+    text = singletons::CommandManager::getInstance().execCommand(text, true);
 
     QString labelText;
 
