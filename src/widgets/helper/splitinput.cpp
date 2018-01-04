@@ -19,8 +19,6 @@ SplitInput::SplitInput(Split *_chatWidget)
     , chatWidget(_chatWidget)
     , emotesLabel(this)
 {
-    this->setMaximumHeight(150);
-
     this->setLayout(&this->hbox);
 
     this->hbox.setMargin(4);
@@ -268,6 +266,8 @@ void SplitInput::resizeEvent(QResizeEvent *)
     } else {
         this->textInput.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
+
+    this->setMaximumHeight((int)(150 * this->getDpiMultiplier()));
 
     this->refreshTheme();
 }
