@@ -18,13 +18,7 @@ void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
 }
 
 SettingManager::SettingManager()
-    : streamlinkPath("/behaviour/streamlink/path", "")
-    , preferredQuality("/behaviour/streamlink/quality", "Choose")
-    , emoteScale(this->settingsItems, "emoteScale", 1.0)
-    , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
-    , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
-    , snapshot(nullptr)
-    , settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
+    : snapshot(nullptr)
 {
     this->wordMaskListener.addSetting(this->showTimestamps);
     this->wordMaskListener.addSetting(this->showTimestampSeconds);
@@ -46,11 +40,6 @@ Word::Flags SettingManager::getWordTypeMask()
 bool SettingManager::isIgnoredEmote(const QString &)
 {
     return false;
-}
-
-QSettings &SettingManager::getQSettings()
-{
-    return this->settings;
 }
 
 void SettingManager::load()

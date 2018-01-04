@@ -1,8 +1,8 @@
 #pragma once
 
 #include "basewidget.hpp"
-#include "util/concurrentmap.hpp"
 #include "twitch/twitchchannel.hpp"
+#include "util/concurrentmap.hpp"
 
 #include <QPushButton>
 #include <QWidget>

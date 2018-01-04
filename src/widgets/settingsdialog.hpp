@@ -88,7 +88,6 @@ private:
 
     /// Widget creation helpers
     QVBoxLayout *createTabLayout();
-    QCheckBox *createCheckbox(const QString &title, Setting<bool> &setting);
     QCheckBox *createCheckbox(const QString &title, pajlada::Settings::Setting<bool> &setting);
     QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<int> &setting,
                                 QStringList items,

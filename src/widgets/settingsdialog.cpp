@@ -422,7 +422,7 @@ QVBoxLayout *SettingsDialog::createHighlightingTab()
     for (const auto &highlightProperty : highlightProperties) {
         highlights->addItem(highlightProperty.key);
     }
-    highlightUserBlacklist->setText(settings.highlightUserBlacklist.getnonConst());
+    highlightUserBlacklist->setText(settings.highlightUserBlacklist);
     auto highlightTab = new QTabWidget();
     auto customSound = new QHBoxLayout();
     auto soundForm = new QFormLayout();
@@ -439,7 +439,7 @@ QVBoxLayout *SettingsDialog::createHighlightingTab()
         QObject::connect(selectBtn, &QPushButton::clicked, this, [&settings, this] {
             auto fileName = QFileDialog::getOpenFileName(this, tr("Open Sound"), "",
                                                          tr("Audio Files (*.mp3 *.wav)"));
-            settings.pathHighlightSound.set(fileName);
+            settings.pathHighlightSound = fileName;
         });
         customSound->addWidget(selectBtn);
     }
@@ -617,11 +617,12 @@ QVBoxLayout *SettingsDialog::createHighlightingTab()
         QStringList list =
             highlightUserBlacklist->toPlainText().split("\n", QString::SkipEmptyParts);
         list.removeDuplicates();
-        settings.highlightUserBlacklist.set(list.join("\n") + "\n");
+        settings.highlightUserBlacklist = list.join("\n") + "\n";
     });
 
-    settings.highlightUserBlacklist.valueChanged.connect(
-        [=](const QString &str) { highlightUserBlacklist->setPlainText(str); });
+    settings.highlightUserBlacklist.connect([=](const QString &str, auto) {
+        highlightUserBlacklist->setPlainText(str);  //
+    });
 
     return layout;
 }
@@ -737,20 +738,6 @@ QVBoxLayout *SettingsDialog::createTabLayout()
     auto layout = new QVBoxLayout();
 
     return layout;
-}
-
-QCheckBox *SettingsDialog::createCheckbox(const QString &title, Setting<bool> &setting)
-{
-    auto checkbox = new QCheckBox(title);
-
-    // Set checkbox initial state
-    checkbox->setChecked(setting.get());
-
-    QObject::connect(checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
-        setting.set(state);  //
-    });
-
-    return checkbox;
 }
 
 QCheckBox *SettingsDialog::createCheckbox(const QString &title,

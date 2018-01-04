@@ -95,18 +95,18 @@ AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> _channel)
     });
 
     QObject::connect(this->ui->disableHighlights, &QPushButton::clicked, this, [=, &settings]() {
-        QString str = settings.highlightUserBlacklist.getnonConst();
+        QString str = settings.highlightUserBlacklist;
         str.append(this->ui->lblUsername->text() + "\n");
-        settings.highlightUserBlacklist.set(str);
+        settings.highlightUserBlacklist = str;
         this->ui->disableHighlights->hide();
         this->ui->enableHighlights->show();
     });
 
     QObject::connect(this->ui->enableHighlights, &QPushButton::clicked, this, [=, &settings]() {
-        QString str = settings.highlightUserBlacklist.getnonConst();
+        QString str = settings.highlightUserBlacklist;
         QStringList list = str.split("\n");
         list.removeAll(this->ui->lblUsername->text());
-        settings.highlightUserBlacklist.set(list.join("\n"));
+        settings.highlightUserBlacklist = list.join("\n");
         this->ui->enableHighlights->hide();
         this->ui->disableHighlights->show();
     });
@@ -267,8 +267,7 @@ void AccountPopupWidget::showEvent(QShowEvent *)
         this->updateButtons(this->ui->ownerLayout, false);
     }
 
-    QString blacklisted =
-        singletons::SettingManager::getInstance().highlightUserBlacklist.getnonConst();
+    QString blacklisted = singletons::SettingManager::getInstance().highlightUserBlacklist;
     QStringList list = blacklisted.split("\n", QString::SkipEmptyParts);
     if (list.contains(this->ui->lblUsername->text(), Qt::CaseInsensitive)) {
         this->ui->disableHighlights->hide();

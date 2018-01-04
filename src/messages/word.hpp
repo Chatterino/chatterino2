@@ -1,9 +1,9 @@
 #pragma once
 
-#include "singletons/fontmanager.hpp"
 #include "messages/lazyloadedimage.hpp"
 #include "messages/link.hpp"
 #include "messages/messagecolor.hpp"
+#include "singletons/fontmanager.hpp"
 //#include "wordflags.hpp"
 
 #include <stdint.h>
@@ -96,8 +96,8 @@ public:
     explicit Word(LazyLoadedImage *_image, Flags getFlags, const QString &copytext,
                   const QString &tooltip, const Link &getLink = Link());
     explicit Word(const QString &_text, Flags getFlags, const MessageColor &textColor,
-                  singletons::FontManager::Type font, const QString &copytext, const QString &tooltip,
-                  const Link &getLink = Link());
+                  singletons::FontManager::Type font, const QString &copytext,
+                  const QString &tooltip, const Link &getLink = Link());
 
     bool isImage() const;
     bool isText() const;

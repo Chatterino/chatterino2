@@ -396,7 +396,7 @@ void TwitchMessageBuilder::parseHighlights()
     // update the media player url if necessary
     QUrl highlightSoundUrl;
     if (settings.customHighlightSound) {
-        highlightSoundUrl = QUrl(settings.pathHighlightSound.get());
+        highlightSoundUrl = QUrl(settings.pathHighlightSound.getValue());
     } else {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
@@ -408,7 +408,7 @@ void TwitchMessageBuilder::parseHighlights()
     }
 
     QStringList blackList =
-        settings.highlightUserBlacklist.get().split("\n", QString::SkipEmptyParts);
+        settings.highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     auto activeHighlights = settings.highlightProperties.getValue();

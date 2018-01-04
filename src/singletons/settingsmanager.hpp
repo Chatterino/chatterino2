@@ -2,10 +2,8 @@
 
 #include "messages/highlightphrase.hpp"
 #include "messages/word.hpp"
-#include "setting.hpp"
 #include "singletons/helper/chatterinosetting.hpp"
 
-#include <QSettings>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 
@@ -20,11 +18,12 @@ class SettingManager : public QObject
 
     using BoolSetting = ChatterinoSetting<bool>;
     using FloatSetting = ChatterinoSetting<float>;
+    using StringSetting = ChatterinoSetting<std::string>;
+    using QStringSetting = ChatterinoSetting<QString>;
 
 public:
     messages::Word::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
-    QSettings &getQSettings();
 
     void load();
 
@@ -47,6 +46,8 @@ public:
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
+    StringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
+    StringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
@@ -58,6 +59,7 @@ public:
     BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
     BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
+    FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -69,15 +71,12 @@ public:
     BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing", true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
-    pajlada::Settings::Setting<std::string> streamlinkPath;
-    pajlada::Settings::Setting<std::string> preferredQuality;
-
-    Setting<float> emoteScale;
     ChatterinoSetting<std::vector<messages::HighlightPhrase>> highlightProperties = {
         "/highlighting/highlights"};
 
-    Setting<QString> pathHighlightSound;
-    Setting<QString> highlightUserBlacklist;
+    QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
+                                         "qrc:/sounds/ping2.wav"};
+    QStringSetting highlightUserBlacklist = {"/highlighting/blacklistedUsers", ""};
 
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
 
@@ -101,8 +100,6 @@ private:
 
     SettingManager();
 
-    QSettings settings;
-    std::vector<std::reference_wrapper<BaseSetting>> settingsItems;
     messages::Word::Flags wordTypeMask = messages::Word::Default;
 
     pajlada::Settings::SettingListener wordMaskListener;
