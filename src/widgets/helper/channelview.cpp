@@ -79,10 +79,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->updateTimer.setSingleShot(true);
     connect(&this->updateTimer, &QTimer::timeout, this, [this] {
         if (this->updateQueued) {
-            this->update();
+            this->updateQueued = false;
+            this->repaint();
+            this->updateTimer.start();
         }
-
-        this->updateTimer.start();
     });
 }
 
@@ -99,13 +99,14 @@ ChannelView::~ChannelView()
 
 void ChannelView::queueUpdate()
 {
-    //    if (this->updateTimer.isActive()) {
-    //        this->updateQueued = true;
-    //    }
+    if (this->updateTimer.isActive()) {
+        this->updateQueued = true;
+        return;
+    }
 
-    update();
+    this->repaint();
 
-    //    this->updateTimer.start();
+    this->updateTimer.start();
 }
 
 void ChannelView::layoutMessages()
