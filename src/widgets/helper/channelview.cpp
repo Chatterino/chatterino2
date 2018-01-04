@@ -63,8 +63,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     });
 
     this->goToBottom = new RippleEffectLabel(this, 0);
-    this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.5); color: #FFF;");
-    this->goToBottom->getLabel().setText("Jump to bottom");
+    this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.66); color: #FFF;");
+    this->goToBottom->getLabel().setText("More messages below");
     this->goToBottom->setVisible(false);
 
     this->managedConnections.emplace_back(
