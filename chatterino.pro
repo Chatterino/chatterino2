@@ -195,7 +195,8 @@ HEADERS  += \
     src/util/emotemap.hpp \
     src/singletons/helper/ircmessagehandler.hpp \
     src/util/serialize-custom.hpp \
-    src/messages/highlightphrase.hpp
+    src/messages/highlightphrase.hpp \
+    src/messages/selection.hpp
 
 
 PRECOMPILED_HEADER =
