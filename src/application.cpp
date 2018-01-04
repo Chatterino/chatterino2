@@ -35,8 +35,6 @@ Application::Application()
 Application::~Application()
 {
     this->save();
-
-    chatterino::singletons::SettingManager::getInstance().save();
 }
 
 int Application::run(QApplication &qtApp)

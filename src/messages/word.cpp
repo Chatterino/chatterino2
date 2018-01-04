@@ -67,7 +67,7 @@ QSize Word::getSize(float scale) const
             const int mediumTextLineHeight =
                 singletons::FontManager::getInstance().getFontMetrics(this->font, scale).height();
             const qreal emoteScale =
-                singletons::SettingManager::getInstance().emoteScale.get() * scale;
+                singletons::SettingManager::getInstance().emoteScale.getValue() * scale;
             const bool scaleEmotesByLineHeight =
                 singletons::SettingManager::getInstance().scaleEmotesByLineHeight;
 

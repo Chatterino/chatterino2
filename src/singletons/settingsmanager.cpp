@@ -18,15 +18,7 @@ void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
 }
 
 SettingManager::SettingManager()
-    : streamlinkPath("/behaviour/streamlink/path", "")
-    , preferredQuality("/behaviour/streamlink/quality", "Choose")
-    , emoteScale(this->settingsItems, "emoteScale", 1.0)
-    , pathHighlightSound(this->settingsItems, "pathHighlightSound", "qrc:/sounds/ping2.wav")
-    , highlightProperties(this->settingsItems, "highlightProperties",
-                          QMap<QString, QPair<bool, bool>>())
-    , highlightUserBlacklist(this->settingsItems, "highlightUserBlacklist", "")
-    , snapshot(nullptr)
-    , settings(Path::getAppdataPath() + "settings.ini", QSettings::IniFormat)
+    : snapshot(nullptr)
 {
     this->wordMaskListener.addSetting(this->showTimestamps);
     this->wordMaskListener.addSetting(this->showTimestampSeconds);
@@ -40,49 +32,6 @@ SettingManager::SettingManager()
     };
 }
 
-void SettingManager::save()
-{
-    for (auto &item : this->settingsItems) {
-        if (item.get().getName() != "highlightProperties") {
-            this->settings.setValue(item.get().getName(), item.get().getVariant());
-        } else {
-            this->settings.beginGroup("Highlights");
-            QStringList list = highlightProperties.get().keys();
-            list.removeAll("");
-            this->settings.remove("");
-            for (auto string : list) {
-                this->settings.beginGroup(string);
-                this->settings.setValue("highlightSound",
-                                        highlightProperties.get().value(string).first);
-                this->settings.setValue("highlightTask",
-                                        highlightProperties.get().value(string).second);
-                this->settings.endGroup();
-            }
-            this->settings.endGroup();
-        }
-    }
-}
-
-void SettingManager::load()
-{
-    for (auto &item : this->settingsItems) {
-        if (item.get().getName() != "highlightProperties") {
-            item.get().setVariant(this->settings.value(item.get().getName()));
-        } else {
-            this->settings.beginGroup("Highlights");
-            QStringList list = this->settings.childGroups();
-            for (auto string : list) {
-                this->settings.beginGroup(string);
-                highlightProperties.insertMap(string,
-                                              this->settings.value("highlightSound").toBool(),
-                                              this->settings.value("highlightTask").toBool());
-                this->settings.endGroup();
-            }
-            this->settings.endGroup();
-        }
-    }
-}
-
 Word::Flags SettingManager::getWordTypeMask()
 {
     return this->wordTypeMask;
@@ -93,9 +42,10 @@ bool SettingManager::isIgnoredEmote(const QString &)
     return false;
 }
 
-QSettings &SettingManager::getQSettings()
+void SettingManager::load()
 {
-    return this->settings;
+    // Just to make sure the singleton is initialized
+    debug::Log(".");
 }
 
 void SettingManager::updateWordTypeMask()
@@ -184,5 +134,5 @@ void SettingManager::recallSnapshot()
     }
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}

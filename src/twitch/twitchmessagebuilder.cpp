@@ -396,7 +396,7 @@ void TwitchMessageBuilder::parseHighlights()
     // update the media player url if necessary
     QUrl highlightSoundUrl;
     if (settings.customHighlightSound) {
-        highlightSoundUrl = QUrl(settings.pathHighlightSound.get());
+        highlightSoundUrl = QUrl(settings.pathHighlightSound.getValue());
     } else {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
@@ -407,35 +407,18 @@ void TwitchMessageBuilder::parseHighlights()
         currentPlayerUrl = highlightSoundUrl;
     }
 
-    struct Highlight {
-        Highlight(const QString &_target, bool _sound, bool _alert)
-            : target(_target)
-            , sound(_sound)
-            , alert(_alert)
-        {
-        }
-
-        QString target;
-        bool sound;
-        bool alert;
-    };
-
     QStringList blackList =
-        settings.highlightUserBlacklist.get().split("\n", QString::SkipEmptyParts);
+        settings.highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
-    std::vector<Highlight> activeHighlights;
+    auto activeHighlights = settings.highlightProperties.getValue();
 
     if (settings.enableHighlightsSelf && currentUsername.size() > 0) {
-        activeHighlights.emplace_back(currentUsername, settings.enableHighlightSound,
-                                      settings.enableHighlightTaskbar);
-    }
-
-    const auto &highlightProperties = settings.highlightProperties.get();
-
-    for (auto it = highlightProperties.begin(); it != highlightProperties.end(); ++it) {
-        auto properties = it.value();
-        activeHighlights.emplace_back(it.key(), properties.first, properties.second);
+        messages::HighlightPhrase selfHighlight;
+        selfHighlight.key = currentUsername;
+        selfHighlight.sound = settings.enableHighlightSound;
+        selfHighlight.alert = settings.enableHighlightTaskbar;
+        activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
     bool doHighlight = false;
@@ -445,10 +428,10 @@ void TwitchMessageBuilder::parseHighlights()
     bool hasFocus = (QApplication::focusWidget() != nullptr);
 
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
-        for (const Highlight &highlight : activeHighlights) {
-            if (this->originalMessage.contains(highlight.target, Qt::CaseInsensitive)) {
+        for (const messages::HighlightPhrase &highlight : activeHighlights) {
+            if (this->originalMessage.contains(highlight.key, Qt::CaseInsensitive)) {
                 debug::Log("Highlight because {} contains {}", this->originalMessage,
-                           highlight.target);
+                           highlight.key);
                 doHighlight = true;
 
                 if (highlight.sound) {

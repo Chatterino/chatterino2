@@ -126,7 +126,6 @@ HEADERS  += \
     src/messages/message.hpp \
     src/messages/word.hpp \
     src/messages/wordpart.hpp \
-    src/setting.hpp \
     src/twitch/emotevalue.hpp \
     src/widgets/notebook.hpp \
     src/widgets/helper/notebookbutton.hpp \
@@ -138,7 +137,6 @@ HEADERS  += \
     src/widgets/helper/signallabel.hpp \
     src/widgets/textinputdialog.hpp \
     src/widgets/helper/resizingtextedit.hpp \
-    src/settingssnapshot.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
     src/messages/messageref.hpp \
@@ -195,7 +193,9 @@ HEADERS  += \
     src/singletons/helper/chatterinosetting.hpp \
     src/singletons/resourcemanager.hpp \
     src/util/emotemap.hpp \
-    src/singletons/helper/ircmessagehandler.hpp
+    src/singletons/helper/ircmessagehandler.hpp \
+    src/util/serialize-custom.hpp \
+    src/messages/highlightphrase.hpp
 
 
 PRECOMPILED_HEADER =

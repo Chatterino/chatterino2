@@ -200,14 +200,19 @@ void IrcManager::disconnect()
 
 void IrcManager::sendMessage(const QString &channelName, QString message)
 {
+    QString trimmedMessage = message.trimmed();
+    if (trimmedMessage.isEmpty()) {
+        return;
+    }
+
     this->connectionMutex.lock();
     static int i = 0;
 
     if (this->writeConnection) {
         if (singletons::SettingManager::getInstance().allowDuplicateMessages && (++i % 2) == 0) {
-            message.append(this->messageSuffix);
+            trimmedMessage.append(this->messageSuffix);
         }
-        this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
+        this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + trimmedMessage);
     }
 
     this->connectionMutex.unlock();
@@ -399,5 +404,5 @@ Communi::IrcConnection *IrcManager::getReadConnection()
     return this->readConnection.get();
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}
