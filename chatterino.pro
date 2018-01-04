@@ -195,7 +195,9 @@ HEADERS  += \
     src/singletons/helper/chatterinosetting.hpp \
     src/singletons/resourcemanager.hpp \
     src/util/emotemap.hpp \
-    src/singletons/helper/ircmessagehandler.hpp
+    src/singletons/helper/ircmessagehandler.hpp \
+    src/util/serialize-custom.hpp \
+    src/messages/highlightphrase.hpp
 
 
 PRECOMPILED_HEADER =

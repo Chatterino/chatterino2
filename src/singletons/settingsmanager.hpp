@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/highlightphrase.hpp"
 #include "messages/word.hpp"
 #include "setting.hpp"
 #include "singletons/helper/chatterinosetting.hpp"
@@ -21,12 +22,11 @@ class SettingManager : public QObject
     using FloatSetting = ChatterinoSetting<float>;
 
 public:
-    void load();
-    void save();
-
     messages::Word::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
     QSettings &getQSettings();
+
+    void load();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -73,9 +73,10 @@ public:
     pajlada::Settings::Setting<std::string> preferredQuality;
 
     Setting<float> emoteScale;
+    ChatterinoSetting<std::vector<messages::HighlightPhrase>> highlightProperties = {
+        "/highlighting/highlights"};
 
     Setting<QString> pathHighlightSound;
-    Setting<QMap<QString, QPair<bool, bool>>> highlightProperties;
     Setting<QString> highlightUserBlacklist;
 
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
@@ -107,5 +108,5 @@ private:
     pajlada::Settings::SettingListener wordMaskListener;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}
