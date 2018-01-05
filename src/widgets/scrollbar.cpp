@@ -20,7 +20,7 @@ ScrollBar::ScrollBar(ChannelView *parent)
     , smoothScrollingSetting(singletons::SettingManager::getInstance().enableSmoothScrolling)
 {
     resize((int)(16 * this->getDpiMultiplier()), 100);
-    this->currentValueAnimation.setDuration(250);
+    this->currentValueAnimation.setDuration(150);
     this->currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
     setMouseTracking(true);
