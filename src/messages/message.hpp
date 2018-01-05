@@ -14,12 +14,12 @@ namespace messages {
 class Message;
 
 typedef std::shared_ptr<Message> SharedMessage;
-typedef uint32_t MessageFlagsType;
+typedef char MessageFlagsType;
 
 class Message
 {
 public:
-    enum MessageFlags : uint32_t {
+    enum MessageFlags : MessageFlagsType {
         None = 0,
         System = (1 << 1),
         Timeout = (1 << 2),
