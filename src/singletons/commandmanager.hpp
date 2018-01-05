@@ -5,6 +5,8 @@
 #include <mutex>
 
 namespace chatterino {
+class Channel;
+
 namespace singletons {
 
 //
@@ -18,7 +20,7 @@ class CommandManager
 public:
     static CommandManager &getInstance();
 
-    QString execCommand(QString text, bool dryRun);
+    QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
 
     void loadCommands();
     void saveCommands();
@@ -38,6 +40,8 @@ private:
     QMap<QString, Command> commands;
     std::mutex mutex;
     QStringList commandsStringList;
+
+    QString execCustomCommand(const QStringList &words, const Command &command);
 };
 }
 }

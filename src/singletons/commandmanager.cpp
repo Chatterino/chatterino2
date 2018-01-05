@@ -4,6 +4,9 @@
 #include <QFile>
 #include <QRegularExpression>
 
+#include "channel.hpp"
+#include "twitch/twitchchannel.hpp"
+
 namespace chatterino {
 namespace singletons {
 CommandManager &CommandManager::getInstance()
@@ -58,10 +61,11 @@ QStringList CommandManager::getCommands()
     return this->commandsStringList;
 }
 
-QString CommandManager::execCommand(QString text, bool dryRun)
+QString CommandManager::execCommand(const QString &text, std::shared_ptr<Channel> channel,
+                                    bool dryRun)
 {
-    Command command;
     QStringList words = text.split(' ', QString::SkipEmptyParts);
+    Command command;
 
     {
         std::lock_guard<std::mutex> lock(this->mutex);
@@ -72,6 +76,44 @@ QString CommandManager::execCommand(QString text, bool dryRun)
 
         QString commandName = words[0];
 
+        // check if default command exists
+        auto *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+
+        if (!dryRun && twitchChannel != nullptr) {
+            if (commandName == "/uptime") {
+                QString messageText =
+                    twitchChannel->isLive ? twitchChannel->streamUptime : "Channel is not live.";
+                messages::SharedMessage message(
+                    messages::Message::createSystemMessage(messageText));
+                channel->addMessage(message);
+
+                return "";
+            } else if (commandName == "/ignore" && words.size() >= 2) {
+                QString messageText;
+
+                if (IrcManager::getInstance().tryAddIgnoredUser(words.at(1), messageText)) {
+                    messageText = "Ignored user \"" + words.at(1) + "\".";
+                }
+
+                messages::SharedMessage message(
+                    messages::Message::createSystemMessage(messageText));
+                channel->addMessage(message);
+                return "";
+            } else if (commandName == "/unignore") {
+                QString messageText;
+
+                if (IrcManager::getInstance().tryRemoveIgnoredUser(words.at(1), messageText)) {
+                    messageText = "Ignored user \"" + words.at(1) + "\".";
+                }
+
+                messages::SharedMessage message(
+                    messages::Message::createSystemMessage(messageText));
+                channel->addMessage(message);
+                return "";
+            }
+        }
+
+        // check if custom command exists
         auto it = this->commands.find(commandName);
 
         if (it == this->commands.end()) {
@@ -81,6 +123,11 @@ QString CommandManager::execCommand(QString text, bool dryRun)
         command = it.value();
     }
 
+    return this->execCustomCommand(words, command);
+}
+
+QString CommandManager::execCustomCommand(const QStringList &words, const Command &command)
+{
     QString result;
 
     static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");

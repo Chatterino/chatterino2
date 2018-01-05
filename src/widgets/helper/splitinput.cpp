@@ -82,7 +82,7 @@ SplitInput::SplitInput(Split *_chatWidget)
             QString message = textInput.toPlainText();
 
             QString sendMessage =
-                singletons::CommandManager::getInstance().execCommand(message, false);
+                singletons::CommandManager::getInstance().execCommand(message, c, false);
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
@@ -232,7 +232,8 @@ void SplitInput::editTextChanged()
     static QRegularExpression spaceRegex("\\s\\s+");
     text = text.replace(spaceRegex, " ");
 
-    text = singletons::CommandManager::getInstance().execCommand(text, true);
+    text = singletons::CommandManager::getInstance().execCommand(
+        text, this->chatWidget->getChannel(), true);
 
     QString labelText;
 
