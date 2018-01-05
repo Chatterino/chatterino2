@@ -116,15 +116,27 @@ void Window::refreshTheme()
 
 void Window::loadGeometry()
 {
+    bool doSetGeometry = false;
+    QRect loadedGeometry;
     if (!this->windowGeometry.x.isDefaultValue() && !this->windowGeometry.y.isDefaultValue()) {
-        this->move(this->windowGeometry.x, this->windowGeometry.y);
+        loadedGeometry.setX(this->windowGeometry.x);
+        loadedGeometry.setY(this->windowGeometry.y);
+        doSetGeometry = true;
     }
 
     if (!this->windowGeometry.width.isDefaultValue() &&
         !this->windowGeometry.height.isDefaultValue()) {
-        this->resize(this->windowGeometry.width, this->windowGeometry.height);
+        loadedGeometry.setWidth(this->windowGeometry.width);
+        loadedGeometry.setHeight(this->windowGeometry.height);
     } else {
-        this->resize(1280, 800);
+        loadedGeometry.setWidth(1280);
+        loadedGeometry.setHeight(720);
+    }
+
+    if (doSetGeometry) {
+        this->setGeometry(loadedGeometry);
+    } else {
+        this->resize(loadedGeometry.width(), loadedGeometry.height());
     }
 }
 
