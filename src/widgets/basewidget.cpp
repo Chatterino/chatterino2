@@ -4,6 +4,7 @@
 #include "widgets/tooltipwidget.hpp"
 
 #include <QDebug>
+#include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
 #include <boost/signals2.hpp>
@@ -62,6 +63,8 @@ void BaseWidget::init()
 
 void BaseWidget::initAsWindow()
 {
+    this->setWindowIcon(QIcon(":/images/icon.png"));
+
     this->isWindow = true;
 
 #ifdef USEWINSDK
