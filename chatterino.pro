@@ -82,7 +82,6 @@ SOURCES += \
     src/messages/messagebuilder.cpp \
     src/twitch/twitchmessagebuilder.cpp \
     src/widgets/titlebar.cpp \
-    src/appdatapath.cpp \
     src/singletons/accountmanager.cpp \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \
@@ -155,7 +154,6 @@ HEADERS  += \
     src/messages/messagebuilder.hpp \
     src/twitch/twitchmessagebuilder.hpp \
     src/widgets/titlebar.hpp \
-    src/appdatapath.hpp \
     src/singletons/accountmanager.hpp \
     src/twitch/twitchuser.hpp \
     src/ircaccount.hpp \

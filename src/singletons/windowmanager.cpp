@@ -1,14 +1,13 @@
 #include "windowmanager.hpp"
-#include "appdatapath.hpp"
+#include "debug/log.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/thememanager.hpp"
 
 #include <QDebug>
-#include <QStandardPaths>
-#include <boost/foreach.hpp>
 
 namespace chatterino {
 namespace singletons {
+
 WindowManager &WindowManager::getInstance()
 {
     static WindowManager instance(ThemeManager::getInstance());
@@ -24,13 +23,6 @@ WindowManager::WindowManager(ThemeManager &_themeManager)
 void WindowManager::initMainWindow()
 {
     this->selectedWindow = this->mainWindow = new widgets::Window("main", this->themeManager, true);
-}
-
-static const std::string &getSettingsPath()
-{
-    static std::string path = (Path::getAppdataPath() + "uilayout.json").toStdString();
-
-    return path;
 }
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
@@ -87,7 +79,7 @@ widgets::Window *WindowManager::windowAt(int index)
     if (index < 0 || (size_t)index >= this->windows.size()) {
         return nullptr;
     }
-    qDebug() << "getting window at bad index" << index;
+    debug::Log("getting window at bad index {}", index);
 
     return this->windows.at(index);
 }
@@ -103,5 +95,5 @@ void WindowManager::save()
     }
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}

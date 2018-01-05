@@ -261,9 +261,8 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord =
-                isSingleMessage &&
-                this->selection.max.charIndex - charIndex < part.getCharacterLength();
+            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
+                                                       part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -394,7 +393,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 if (this->scrollBar.isAtBottom()) {
                     this->scrollBar.scrollToBottom();
                 } else {
-                    this->scrollBar.offset((qreal)-messages.size());
+                    this->scrollBar.offset((qreal)messages.size());
                 }
             }
 
@@ -623,10 +622,9 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(),
-                     (messageRef->getMessage()->containsHighlightedPhrase())
-                         ? this->themeManager.messages.backgrounds.highlighted
-                         : this->themeManager.messages.backgrounds.regular);
+    painter.fillRect(buffer->rect(), (messageRef->getMessage()->containsHighlightedPhrase())
+                                         ? this->themeManager.messages.backgrounds.highlighted
+                                         : this->themeManager.messages.backgrounds.regular);
     //}
 
     // draw selection

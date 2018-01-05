@@ -1,10 +1,6 @@
 #include "singletons/settingsmanager.hpp"
-#include "appdatapath.hpp"
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
-
-#include <QDir>
-#include <QStandardPaths>
 
 using namespace chatterino::messages;
 

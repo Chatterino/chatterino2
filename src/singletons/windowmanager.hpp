@@ -14,10 +14,10 @@ class WindowManager
 public:
     static WindowManager &getInstance();
 
+    void initMainWindow();
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
-    void initMainWindow();
     // void updateAll();
 
     widgets::Window &getMainWindow();
@@ -41,5 +41,5 @@ private:
     widgets::Window *selectedWindow = nullptr;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}
