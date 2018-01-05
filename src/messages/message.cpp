@@ -76,6 +76,16 @@ void Message::setCollapsedDefault(bool value)
     this->collapsedDefault = value;
 }
 
+bool Message::getDisableCompactEmotes() const
+{
+    return this->disableCompactEmotes;
+}
+
+void Message::setDisableCompactEmotes(bool value)
+{
+    this->disableCompactEmotes = value;
+}
+
 namespace {
 
 void AddCurrentTimestamp(Message *message)

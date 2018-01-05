@@ -30,6 +30,8 @@ public:
     const QString &getId() const;
     bool getCollapsedDefault() const;
     void setCollapsedDefault(bool value);
+    bool getDisableCompactEmotes() const;
+    void setDisableCompactEmotes(bool value);
 
     QString loginName;
     QString displayName;
@@ -62,6 +64,7 @@ private:
     bool disabled = false;
 
     bool collapsedDefault = false;
+    bool disableCompactEmotes = false;
 
     std::chrono::time_point<std::chrono::system_clock> parseTime;
 

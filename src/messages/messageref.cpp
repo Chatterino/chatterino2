@@ -98,7 +98,7 @@ void MessageRef::actuallyLayout(int width)
     const int spaceWidth = 4;
     const int right = width - MARGIN_RIGHT;
 
-    bool overlapEmotes = true;
+    bool compactEmotes = !this->getMessage()->getDisableCompactEmotes();
 
     // clear word parts
     this->wordParts.clear();
@@ -176,7 +176,7 @@ void MessageRef::actuallyLayout(int width)
                                                lineNumber, mid, mid, true, currentPartStart));
 
             x = currentLineWidth + MARGIN_LEFT + spaceWidth;
-            lineHeight = this->_updateLineHeight(0, word, overlapEmotes);
+            lineHeight = this->_updateLineHeight(0, word, compactEmotes);
             lineStart = this->wordParts.size() - 1;
         }
         // fits in the current line
@@ -187,7 +187,7 @@ void MessageRef::actuallyLayout(int width)
             x += word.getWidth(this->scale) + xOffset;
             x += spaceWidth;
 
-            lineHeight = this->_updateLineHeight(lineHeight, word, overlapEmotes);
+            lineHeight = this->_updateLineHeight(lineHeight, word, compactEmotes);
         }
         // doesn't fit in the line
         else {
@@ -203,7 +203,7 @@ void MessageRef::actuallyLayout(int width)
 
             lineStart = this->wordParts.size() - 1;
 
-            lineHeight = this->_updateLineHeight(0, word, overlapEmotes);
+            lineHeight = this->_updateLineHeight(0, word, compactEmotes);
 
             x = word.getWidth(this->scale) + MARGIN_LEFT;
             x += spaceWidth;
@@ -278,9 +278,13 @@ void MessageRef::_alignWordParts(int lineStart, int lineHeight, int width, int &
     for (size_t i = lineStart; i < this->wordParts.size(); i++) {
         WordPart &wordPart = this->wordParts.at(i);
 
-        int yExtra = compactEmotes && wordPart.getWord().isImage()
-                         ? (COMPACT_EMOTES_OFFSET / 2) * this->scale
-                         : 0;
+        const bool isCompactEmote = compactEmotes && wordPart.getWord().isImage() &&
+                                    wordPart.getWord().getFlags() & Word::EmoteImages;
+
+        int yExtra = 0;
+        if (isCompactEmote) {
+            yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale;
+        }
 
         wordPart.setPosition(wordPart.getX() + xOffset, wordPart.getY() + lineHeight + yExtra);
     }
@@ -291,7 +295,7 @@ int MessageRef::_updateLineHeight(int currentLineHeight, Word &word, bool compac
     int newLineHeight = word.getHeight(this->scale);
 
     // fourtf: doesn't care about the height of a normal line
-    if (compactEmotes && word.isImage()) {
+    if (compactEmotes && word.isImage() && word.getFlags() & Word::EmoteImages) {
         newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale;
     }
 

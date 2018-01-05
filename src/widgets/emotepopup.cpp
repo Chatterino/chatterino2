@@ -57,6 +57,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         // EMOTES
         messages::MessageBuilder builder2;
         builder2.getMessage()->centered = true;
+        builder2.getMessage()->setDisableCompactEmotes(true);
 
         map.each([&](const QString &key, const util::EmoteData &value) {
             builder2.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, emoteDesc,
@@ -97,6 +98,7 @@ void EmotePopup::loadEmojis()
     // emojis
     messages::MessageBuilder builder;
     builder.getMessage()->centered = true;
+    builder.getMessage()->setDisableCompactEmotes(true);
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
         builder.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, "emoji",
                                 Link(Link::Type::InsertText, key)));
