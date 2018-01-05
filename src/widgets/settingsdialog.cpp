@@ -370,7 +370,7 @@ QVBoxLayout *SettingsDialog::createCommandsTab()
 
     auto layout = this->createTabLayout();
 
-    layout->addWidget(new QLabel("One command per line. Commands don't save right now"));
+    layout->addWidget(new QLabel("One command per line."));
     layout->addWidget(new QLabel("\"/cmd example command\" will print "
                                  "\"example command\" when you type /cmd in chat."));
     layout->addWidget(new QLabel("{1} will be replaced with the first word you type after the "
