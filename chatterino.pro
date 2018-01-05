@@ -30,11 +30,13 @@ win32-msvc* {
     # 4505 - unreferenced local version has been removed
     # 4127 - conditional expression is constant
     # 4503 - decorated name length exceeded, name was truncated
+    # 4100 - unreferences formal parameter
     QMAKE_CXXFLAGS_WARN_ON += /wd4714
     QMAKE_CXXFLAGS_WARN_ON += /wd4996
     QMAKE_CXXFLAGS_WARN_ON += /wd4505
     QMAKE_CXXFLAGS_WARN_ON += /wd4127
     QMAKE_CXXFLAGS_WARN_ON += /wd4503
+    QMAKE_CXXFLAGS_WARN_ON += /wd4100
 
 } else {
     QMAKE_CXXFLAGS_WARN_ON = -Wall
