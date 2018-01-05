@@ -165,7 +165,7 @@ void ChannelView::actuallyLayoutMessages()
     // layout the messages at the bottom to determine the scrollbar thumb size
     int h = height() - 8;
 
-    for (std::size_t i = messagesSnapshot.getLength() - 1; i > 0; i--) {
+    for (int i = (int)messagesSnapshot.getLength() - 1; i >= 0; i--) {
         auto *message = messagesSnapshot[i].get();
 
         message->layout(layoutWidth, this->getDpiMultiplier());
@@ -267,8 +267,9 @@ QString ChannelView::getSelectedText()
 
         if (first) {
             first = false;
-            bool isSingleWord = isSingleMessage && this->selection.max.charIndex - charIndex <
-                                                       part.getCharacterLength();
+            bool isSingleWord =
+                isSingleMessage &&
+                this->selection.max.charIndex - charIndex < part.getCharacterLength();
 
             if (isSingleWord) {
                 // return single word
@@ -630,9 +631,10 @@ void ChannelView::updateMessageBuffer(messages::MessageRef *messageRef, QPixmap 
     //    this->selectionMax.messageIndex >= messageIndex) {
     //    painter.fillRect(buffer->rect(), QColor(24, 55, 25));
     //} else {
-    painter.fillRect(buffer->rect(), (messageRef->getMessage()->containsHighlightedPhrase())
-                                         ? this->themeManager.messages.backgrounds.highlighted
-                                         : this->themeManager.messages.backgrounds.regular);
+    painter.fillRect(buffer->rect(),
+                     (messageRef->getMessage()->containsHighlightedPhrase())
+                         ? this->themeManager.messages.backgrounds.highlighted
+                         : this->themeManager.messages.backgrounds.regular);
     //}
 
     // draw selection
