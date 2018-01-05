@@ -43,5 +43,6 @@ private:
 
     QString execCustomCommand(const QStringList &words, const Command &command);
 };
-}
-}
+
+}  // namespace singletons
+}  // namespace chatterino

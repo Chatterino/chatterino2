@@ -200,5 +200,6 @@ CommandManager::Command::Command(QString _text)
     this->name = _text.mid(0, index);
     this->text = _text.mid(index + 1);
 }
-}
-}
+
+}  // namespace singletons
+}  // namespace chatterino
