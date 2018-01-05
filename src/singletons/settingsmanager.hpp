@@ -50,6 +50,7 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
     StringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
     StringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
+    BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};

@@ -327,35 +327,50 @@ QVBoxLayout *SettingsDialog::createBehaviourTab()
 
     auto form = new QFormLayout();
 
-    form->addRow("Window:",
-                 createCheckbox("Window always on top (requires restart)", settings.windowTopMost));
-    //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
-    //        commands)",
-    //                                                 settings.mentionUsersWithAt));
-    form->addRow("Messages:", createCheckbox("Hide input box if empty", settings.hideEmptyInput));
-    form->addRow(
-        "", createCheckbox("Show last read message indicator", settings.showLastMessageIndicator));
+    // WINDOW
+    {
+        form->addRow("Window:", createCheckbox("Window always on top (requires restart)",
+                                               settings.windowTopMost));
+        //        form->addRow("Messages:", createCheckbox("Mention users with a @ (except in
+        //        commands)",
+        //                                                 settings.mentionUsersWithAt));
+    }
+    // MESSAGES
+    {
+        form->addRow("Messages:",
+                     createCheckbox("Hide input box if empty", settings.hideEmptyInput));
+        form->addRow("", createCheckbox("Show last read message indicator",
+                                        settings.showLastMessageIndicator));
+    }
+    // PAUSE
+    {
+        form->addRow("Pause chat:", createCheckbox("When hovering", settings.pauseChatHover));
+    }
+    // MOUSE SCROLL SPEED
+    {
+        auto scroll = new QSlider(Qt::Horizontal);
+        form->addRow("Mouse scroll speed:", scroll);
 
-    auto scroll = new QSlider(Qt::Horizontal);
-    form->addRow("Mouse scroll speed:", scroll);
+        float currentValue = singletons::SettingManager::getInstance().mouseScrollMultiplier;
+        int scrollValue = ((currentValue - 0.1f) / 2.f) * 99.f;
+        scroll->setValue(scrollValue);
 
-    float currentValue = singletons::SettingManager::getInstance().mouseScrollMultiplier;
-    int scrollValue = ((currentValue - 0.1f) / 2.f) * 99.f;
-    scroll->setValue(scrollValue);
-
-    connect(scroll, &QSlider::valueChanged, [](int newValue) {
-        float mul = static_cast<float>(newValue) / 99.f;
-        float newScrollValue = (mul * 2.1f) + 0.1f;
-        singletons::SettingManager::getInstance().mouseScrollMultiplier = newScrollValue;
-    });
-
-    form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
-    form->addRow(this->createCombobox(
-        "Preferred quality:", settings.preferredQuality,
-        {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
-        [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
-            setting = newValue.toStdString();
-        }));
+        connect(scroll, &QSlider::valueChanged, [](int newValue) {
+            float mul = static_cast<float>(newValue) / 99.f;
+            float newScrollValue = (mul * 2.1f) + 0.1f;
+            singletons::SettingManager::getInstance().mouseScrollMultiplier = newScrollValue;
+        });
+    }
+    // STREAMLINK
+    {
+        form->addRow("Streamlink path:", createLineEdit(settings.streamlinkPath));
+        form->addRow(this->createCombobox(
+            "Preferred quality:", settings.preferredQuality,
+            {"Choose", "Source", "High", "Medium", "Low", "Audio only"},
+            [](const QString &newValue, pajlada::Settings::Setting<std::string> &setting) {
+                setting = newValue.toStdString();
+            }));
+    }
 
     layout->addLayout(form);
 

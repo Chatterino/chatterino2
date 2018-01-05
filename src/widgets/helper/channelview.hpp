@@ -39,6 +39,7 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
+    void pause(int msecTimeout);
 
     void setChannel(std::shared_ptr<Channel> channel);
     messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
@@ -56,6 +57,9 @@ protected:
     virtual void paintEvent(QPaintEvent *) override;
     virtual void wheelEvent(QWheelEvent *event) override;
 
+    virtual void enterEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
+
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
@@ -72,6 +76,10 @@ private:
     QTimer updateTimer;
     bool updateQueued = false;
     bool messageWasAdded = false;
+    bool paused = false;
+    QTimer pauseTimeout;
+
+    messages::LimitedQueueSnapshot<messages::SharedMessageRef> snapshot;
 
     void detachChannel();
     void actuallyLayoutMessages();

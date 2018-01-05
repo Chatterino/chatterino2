@@ -26,6 +26,7 @@
 
 #define LAYOUT_WIDTH \
     (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier())
+#define PAUSE_TIME 1000
 
 using namespace chatterino::messages;
 
@@ -91,6 +92,8 @@ ChannelView::ChannelView(BaseWidget *parent)
             this->updateTimer.start();
         }
     });
+
+    this->pauseTimeout.setSingleShot(true);
 }
 
 ChannelView::~ChannelView()
@@ -357,7 +360,11 @@ bool ChannelView::getEnableScrollingToBottom() const
 
 messages::LimitedQueueSnapshot<SharedMessageRef> ChannelView::getMessagesSnapshot()
 {
-    return this->messages.getSnapshot();
+    if (!this->paused) {
+        this->snapshot = this->messages.getSnapshot();
+    }
+
+    return this->snapshot;
 }
 
 void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
@@ -444,6 +451,13 @@ void ChannelView::detachChannel()
 
     // on message removed
     this->messageRemovedConnection.disconnect();
+}
+
+void ChannelView::pause(int msecTimeout)
+{
+    this->paused = true;
+
+    this->pauseTimeout.start(msecTimeout);
 }
 
 void ChannelView::resizeEvent(QResizeEvent *)
@@ -882,8 +896,22 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     }
 }
 
+void ChannelView::enterEvent(QEvent *)
+{
+    //    this->pause(PAUSE_TIME);
+}
+
+void ChannelView::leaveEvent(QEvent *)
+{
+    this->paused = false;
+}
+
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (singletons::SettingManager::getInstance().pauseChatHover.getValue()) {
+        this->pause(300);
+    }
+
     auto tooltipWidget = TooltipWidget::getInstance();
     std::shared_ptr<messages::MessageRef> message;
     QPoint relativePos;
@@ -896,20 +924,21 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    // is selecting
+    if (this->selecting) {
+        this->pause(500);
+        int index = message->getSelectionIndex(relativePos);
+
+        this->setSelection(this->selection.start, SelectionItem(messageIndex, index));
+
+        this->queueUpdate();
+    }
+
     // message under cursor is collapsed
     if (message->isCollapsed()) {
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
-    }
-
-    // is selecting
-    if (this->selecting) {
-        int index = message->getSelectionIndex(relativePos);
-
-        this->setSelection(this->selection.start, SelectionItem(messageIndex, index));
-
-        this->repaint();
     }
 
     // check if word underneath cursor
@@ -937,6 +966,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
 void ChannelView::mousePressEvent(QMouseEvent *event)
 {
+    if (singletons::SettingManager::getInstance().linksDoubleClickOnly.getValue()) {
+        this->pause(200);
+    }
+
     this->isMouseDown = true;
 
     this->lastPressPosition = event->screenPos();
@@ -987,6 +1020,10 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         // We didn't grab the mouse press, so we shouldn't be handling the mouse
         // release
         return;
+    }
+
+    if (this->selecting) {
+        this->paused = false;
     }
 
     this->isMouseDown = false;

@@ -10,6 +10,11 @@ template <typename T>
 class LimitedQueueSnapshot
 {
 public:
+    LimitedQueueSnapshot()
+        : length(0)
+    {
+    }
+
     LimitedQueueSnapshot(std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> _chunks,
                          size_t _length, size_t _firstChunkOffset, size_t _lastChunkEnd)
         : chunks(_chunks)
