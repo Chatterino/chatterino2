@@ -1,6 +1,7 @@
 #include "singletons/commandmanager.hpp"
+#include "debug/log.hpp"
+#include "singletons/pathmanager.hpp"
 
-#include <QDebug>
 #include <QFile>
 #include <QRegularExpression>
 
@@ -9,6 +10,7 @@
 
 namespace chatterino {
 namespace singletons {
+
 CommandManager &CommandManager::getInstance()
 {
     static CommandManager instance;
@@ -17,15 +19,40 @@ CommandManager &CommandManager::getInstance()
 
 void CommandManager::loadCommands()
 {
-    //    QFile TextFile("");
-    //    QStringList SL;
+    this->filePath = PathManager::getInstance().customFolderPath + "/Commands.txt";
 
-    //    while (!TextFile.atEnd())
-    //        SL.append(TextFile.readLine());
+    QFile textFile(this->filePath);
+    if (!textFile.open(QIODevice::ReadOnly)) {
+        // No commands file created yet
+        return;
+    }
+
+    QList<QByteArray> test = textFile.readAll().split('\n');
+
+    QStringList loadedCommands;
+
+    for (const auto &command : test) {
+        loadedCommands.append(command);
+    }
+
+    this->setCommands(loadedCommands);
+
+    textFile.close();
 }
 
 void CommandManager::saveCommands()
 {
+    QFile textFile(this->filePath);
+    if (!textFile.open(QIODevice::WriteOnly)) {
+        debug::Log("[CommandManager::saveCommands] Unable to open {} for writing", this->filePath);
+        return;
+    }
+
+    QString commandsString = this->commandsStringList.join('\n');
+
+    textFile.write(commandsString.toUtf8());
+
+    textFile.close();
 }
 
 void CommandManager::setCommands(const QStringList &_commands)

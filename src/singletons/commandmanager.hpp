@@ -40,6 +40,7 @@ private:
     QMap<QString, Command> commands;
     std::mutex mutex;
     QStringList commandsStringList;
+    QString filePath;
 
     QString execCustomCommand(const QStringList &words, const Command &command);
 };

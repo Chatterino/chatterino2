@@ -21,6 +21,7 @@ Application::Application()
     logging::init();
 
     singletons::SettingManager::getInstance().init();
+    singletons::CommandManager::getInstance().loadCommands();
 
     singletons::WindowManager::getInstance().initMainWindow();
 
@@ -52,6 +53,8 @@ int Application::run(QApplication &qtApp)
 void Application::save()
 {
     singletons::WindowManager::getInstance().save();
+
+    singletons::CommandManager::getInstance().saveCommands();
 }
 
 }  // namespace chatterino
