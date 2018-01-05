@@ -28,7 +28,7 @@ public:
 
     Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
 
-    void scrollToBottom();
+    void scrollToBottom(bool animate = false);
 
     bool isAtBottom() const;
 

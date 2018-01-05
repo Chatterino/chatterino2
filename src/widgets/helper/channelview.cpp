@@ -72,8 +72,12 @@ ChannelView::ChannelView(BaseWidget *parent)
             this->layoutMessages();  //
         }));
 
-    connect(goToBottom, &RippleEffectLabel::clicked, this,
-            [this] { QTimer::singleShot(180, [this] { this->scrollBar.scrollToBottom(); }); });
+    connect(goToBottom, &RippleEffectLabel::clicked, this, [this] {
+        QTimer::singleShot(180, [this] {
+            this->scrollBar.scrollToBottom(singletons::SettingManager::getInstance()
+                                               .enableSmoothScrollingNewMessages.getValue());
+        });
+    });
 
     this->updateTimer.setInterval(1000 / 60);
     this->updateTimer.setSingleShot(true);
@@ -186,13 +190,15 @@ void ChannelView::actuallyLayoutMessages()
 
     this->scrollBar.setMaximum(messagesSnapshot.getLength());
 
+    // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
+    // to bottom
+    // TODO: Do we want to check if the user is currently moving the scrollbar?
+    // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
+    // seconds or something
     if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
-        // If we were showing the latest messages and the scrollbar now wants to be rendered, scroll
-        // to bottom
-        // TODO: Do we want to check if the user is currently moving the scrollbar?
-        // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
-        // seconds or something
-        this->scrollBar.scrollToBottom();
+        this->scrollBar.scrollToBottom(
+            this->messageWasAdded &&
+            singletons::SettingManager::getInstance().enableSmoothScrollingNewMessages.getValue());
     }
 
     // MARK(timer);
@@ -377,7 +383,8 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 this->highlightedMessageReceived.invoke();
             }
 
-            layoutMessages();
+            this->messageWasAdded = true;
+            this->layoutMessages();
         });
 
     this->messageAddedAtStartConnection =
@@ -397,7 +404,8 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 }
             }
 
-            layoutMessages();
+            this->messageWasAdded = true;
+            this->layoutMessages();
         });
 
     // on message removed

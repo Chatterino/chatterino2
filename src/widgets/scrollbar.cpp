@@ -89,9 +89,9 @@ void ScrollBar::addHighlight(ScrollBarHighlight *highlight)
     this->mutex.unlock();
 }
 
-void ScrollBar::scrollToBottom()
+void ScrollBar::scrollToBottom(bool animate)
 {
-    this->setDesiredValue(this->maximum - this->getLargeChange());
+    this->setDesiredValue(this->maximum - this->getLargeChange(), animate);
 }
 
 bool ScrollBar::isAtBottom() const

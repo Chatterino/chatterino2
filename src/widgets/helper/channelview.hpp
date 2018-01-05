@@ -71,6 +71,7 @@ private:
 
     QTimer updateTimer;
     bool updateQueued = false;
+    bool messageWasAdded = false;
 
     void detachChannel();
     void actuallyLayoutMessages();

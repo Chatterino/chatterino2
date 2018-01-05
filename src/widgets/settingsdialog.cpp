@@ -280,6 +280,10 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
             createCheckbox("Enable smooth scrolling", settings.enableSmoothScrolling);
         form->addRow("Scrolling:", enableSmoothScrolling);
 
+        auto enableSmoothScrollingNewMessages = createCheckbox(
+            "Enable smooth scrolling for new messages", settings.enableSmoothScrolling);
+        form->addRow("", enableSmoothScrollingNewMessages);
+
         group->setLayout(form);
 
         layout->addWidget(group);
