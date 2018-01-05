@@ -132,6 +132,40 @@ public:
         return acceptedItems;
     }
 
+    // replaces a single item, return true if successful
+    int replaceItem(const T &item, const T &replacement)
+    {
+        std::lock_guard<std::mutex> lock(this->mutex);
+
+        int x = 0;
+
+        for (size_t i = 0; i < this->chunks->size(); i++) {
+            Chunk &chunk = this->chunks->at(i);
+
+            size_t start = i == 0 ? this->firstChunkOffset : 0;
+            size_t end = i == chunk->size() - 1 ? this->lastChunkEnd : chunk->size();
+
+            for (size_t j = start; j < end; j++) {
+                if (chunk->at(j) == item) {
+                    Chunk newChunk = std::make_shared<std::vector<T>>();
+                    newChunk->resize(chunk->size());
+
+                    for (size_t k = 0; k < chunk->size(); k++) {
+                        newChunk->at(k) = chunk->at(k);
+                    }
+
+                    newChunk->at(j) = replacement;
+                    this->chunks->at(i) = newChunk;
+
+                    return x;
+                }
+                x++;
+            }
+        }
+
+        return -1;
+    }
+
     //    void insertAfter(const std::vector<T> &items, const T &index)
 
     messages::LimitedQueueSnapshot<T> getSnapshot()

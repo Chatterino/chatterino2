@@ -117,6 +117,7 @@ private:
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageAddedAtStartConnection;
     boost::signals2::connection messageRemovedConnection;
+    boost::signals2::connection messageReplacedConnection;
     boost::signals2::connection repaintGifsConnection;
     boost::signals2::connection layoutConnection;
 

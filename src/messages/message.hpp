@@ -14,10 +14,17 @@ namespace messages {
 class Message;
 
 typedef std::shared_ptr<Message> SharedMessage;
+typedef uint32_t MessageFlagsType;
 
 class Message
 {
 public:
+    enum MessageFlags : uint32_t {
+        None = 0,
+        System = (1 << 1),
+        Timeout = (1 << 2),
+    };
+
     bool containsHighlightedPhrase() const;
     void setHighlight(bool value);
     const QString &getTimeoutUser() const;
@@ -25,6 +32,10 @@ public:
     const QString &getContent() const;
     const std::chrono::time_point<std::chrono::system_clock> &getParseTime() const;
     std::vector<Word> &getWords();
+    MessageFlags getFlags() const;
+    void setFlags(MessageFlags flags);
+    void addFlags(MessageFlags flags);
+    void removeFlags(MessageFlags flags);
     bool isDisabled() const;
     void setDisabled(bool value);
     const QString &getId() const;
@@ -45,7 +56,7 @@ public:
     static Message *createSystemMessage(const QString &text);
 
     static Message *createTimeoutMessage(const QString &username, const QString &durationInSeconds,
-                                         const QString &reason);
+                                         const QString &reason, bool multipleTimes);
 
 private:
     static LazyLoadedImage *badgeStaff;
@@ -57,6 +68,8 @@ private:
     static LazyLoadedImage *badgePremium;
 
     static QRegularExpression *cheerRegex;
+
+    MessageFlags flags = MessageFlags::None;
 
     // what is highlightTab?
     bool highlightTab = false;

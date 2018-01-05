@@ -104,6 +104,8 @@ ChannelView::~ChannelView()
     this->messageRemovedConnection.disconnect();
     this->repaintGifsConnection.disconnect();
     this->layoutConnection.disconnect();
+    this->messageAddedAtStartConnection.disconnect();
+    this->messageReplacedConnection.disconnect();
 }
 
 void ChannelView::queueUpdate()
@@ -426,6 +428,15 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
             this->selection.start.messageIndex--;
             this->selection.end.messageIndex--;
 
+            this->layoutMessages();
+        });
+
+    // on message replaced
+    this->messageReplacedConnection =
+        newChannel->messageReplaced.connect([this](size_t index, SharedMessage replacement) {
+            SharedMessageRef newItem(new MessageRef(replacement));
+
+            this->messages.replaceItem(this->messages.getSnapshot()[index], newItem);
             this->layoutMessages();
         });
 

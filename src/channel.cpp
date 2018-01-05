@@ -56,12 +56,21 @@ void Channel::addMessage(std::shared_ptr<Message> message)
     this->messageAppended(message);
 }
 
-void Channel::addMessagesAtStart(std::vector<messages::SharedMessage> &messages)
+void Channel::addMessagesAtStart(std::vector<messages::SharedMessage> &_messages)
 {
-    std::vector<messages::SharedMessage> addedMessages = this->messages.pushFront(messages);
+    std::vector<messages::SharedMessage> addedMessages = this->messages.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart(addedMessages);
+    }
+}
+
+void Channel::replaceMessage(messages::SharedMessage message, messages::SharedMessage replacement)
+{
+    int index = this->messages.replaceItem(message, replacement);
+
+    if (index >= 0) {
+        this->messageReplaced((size_t)index, replacement);
     }
 }
 

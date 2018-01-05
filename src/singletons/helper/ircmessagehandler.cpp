@@ -71,8 +71,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
-        std::shared_ptr<Message> msg(
-            Message::createSystemMessage("Chat has been cleared by a moderator."));
+        SharedMessage msg(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
         c->addMessage(msg);
 
@@ -95,20 +94,35 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // add the notice that the user has been timed out
-    SharedMessage msg(Message::createTimeoutMessage(username, durationInSeconds, reason));
+    LimitedQueueSnapshot<SharedMessage> snapshot = c->getMessageSnapshot();
+    bool addMessage = true;
 
-    c->addMessage(msg);
+    for (int i = std::max(0, (int)snapshot.getLength() - 20); i < snapshot.getLength(); i++) {
+        if (snapshot[i]->getFlags() & Message::Timeout && snapshot[i]->timeoutUser == username) {
+            SharedMessage replacement(
+                Message::createTimeoutMessage(username, durationInSeconds, reason, true));
+            c->replaceMessage(snapshot[i], replacement);
+            addMessage = false;
+            break;
+        }
+    }
+
+    if (addMessage) {
+        SharedMessage msg(
+            Message::createTimeoutMessage(username, durationInSeconds, reason, false));
+        c->addMessage(msg);
+    }
 
     // disable the messages from the user
-    LimitedQueueSnapshot<SharedMessage> snapshot = c->getMessageSnapshot();
     for (int i = 0; i < snapshot.getLength(); i++) {
-        if (snapshot[i]->getTimeoutUser() == username) {
+        if (!(snapshot[i]->getFlags() & Message::Timeout) &&
+            snapshot[i]->getTimeoutUser() == username) {
             snapshot[i]->setDisabled(true);
         }
     }
 
     // refresh all
-    WindowManager::getInstance().layoutVisibleChatWidgets(c.get());
+    WindowManager::getInstance().repaintVisibleChatWidgets(c.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)

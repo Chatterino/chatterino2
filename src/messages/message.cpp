@@ -55,6 +55,26 @@ std::vector<Word> &Message::getWords()
     return this->words;
 }
 
+Message::MessageFlags Message::getFlags() const
+{
+    return this->flags;
+}
+
+void Message::setFlags(MessageFlags _flags)
+{
+    this->flags = flags;
+}
+
+void Message::addFlags(MessageFlags _flags)
+{
+    this->flags = (MessageFlags)((MessageFlagsType)this->flags | (MessageFlagsType)_flags);
+}
+
+void Message::removeFlags(MessageFlags _flags)
+{
+    this->flags = (MessageFlags)((MessageFlagsType)this->flags & ~((MessageFlagsType)_flags));
+}
+
 bool Message::isDisabled() const
 {
     return this->disabled;
@@ -147,12 +167,13 @@ Message *Message::createSystemMessage(const QString &text)
                                            MessageColor(MessageColor::Type::System),
                                            singletons::FontManager::Medium, word, QString()));
     }
+    message->addFlags(Message::System);
 
     return message;
 }
 
 Message *Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
-                                       const QString &reason)
+                                       const QString &reason, bool multipleTimes)
 {
     QString text;
 
@@ -181,7 +202,14 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
     }
     text.append(".");
 
-    return Message::createSystemMessage(text);
+    if (multipleTimes) {
+        text.append(" (multiple times)");
+    }
+
+    Message *message = Message::createSystemMessage(text);
+    message->addFlags(Message::Timeout);
+    message->timeoutUser = username;
+    return message;
 }
 
 }  // namespace messages

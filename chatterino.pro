@@ -188,7 +188,6 @@ HEADERS  += \
     src/const.hpp \
     src/widgets/tooltipwidget.hpp \
     src/precompiled_headers.hpp \
-    src/messages/wordflags.hpp \
     src/singletons/thememanager.hpp \
     src/twitch/twitchaccountmanager.hpp \
     src/singletons/helper/completionmodel.hpp \
