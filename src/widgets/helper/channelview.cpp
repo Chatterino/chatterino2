@@ -24,6 +24,9 @@
 #include <functional>
 #include <memory>
 
+#define LAYOUT_WIDTH \
+    (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier())
+
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -141,8 +144,7 @@ void ChannelView::actuallyLayoutMessages()
     size_t start = this->scrollBar.getCurrentValue();
     //    int layoutWidth =
     //        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
-    int layoutWidth =
-        this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier();
+    int layoutWidth = LAYOUT_WIDTH;
 
     // layout the visible messages in the view
     if (messagesSnapshot.getLength() > start) {
@@ -447,13 +449,13 @@ void ChannelView::detachChannel()
 void ChannelView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
-    this->scrollBar.move(width() - this->scrollBar.width(), 0);
+    this->scrollBar.move(this->width() - this->scrollBar.width(), 0);
 
     this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
 
     this->scrollBar.raise();
 
-    layoutMessages();
+    this->layoutMessages();
 
     this->update();
 }
@@ -542,7 +544,8 @@ void ChannelView::drawMessages(QPainter &painter, bool overlays)
             bool updateBuffer = false;
 
             if (!buffer) {
-                buffer = std::shared_ptr<QPixmap>(new QPixmap(width(), messageRef->getHeight()));
+                buffer =
+                    std::shared_ptr<QPixmap>(new QPixmap(this->width(), messageRef->getHeight()));
                 updateBuffer = true;
             }
 
@@ -845,7 +848,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == 0) {
                     desired = 0;
                 } else {
-                    snapshot[i - 1]->layout(this->width(), this->getDpiMultiplier());
+                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -867,7 +870,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == snapshot.getLength() - 1) {
                     desired = snapshot.getLength();
                 } else {
-                    snapshot[i + 1]->layout(this->width(), this->getDpiMultiplier());
+                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();

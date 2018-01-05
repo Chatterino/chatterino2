@@ -2,6 +2,7 @@
 
 #include <QMap>
 #include <QString>
+#include <memory>
 #include <mutex>
 
 namespace chatterino {
