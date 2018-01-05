@@ -1,5 +1,5 @@
 #include "application.hpp"
-#include "singletons/settingsmanager.hpp"
+#include "singletons/pathmanager.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 #endif
 
     // Initialize settings
-    bool success = chatterino::singletons::SettingManager::getInstance().init(argc, argv);
+    bool success = chatterino::singletons::PathManager::getInstance().init(argc, argv);
     if (!success) {
-        printf("Error initializing settings\n");
+        printf("Error initializing paths\n");
         return 1;
     }
 

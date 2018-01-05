@@ -114,7 +114,8 @@ SOURCES += \
     src/twitch/twitchaccountmanager.cpp \
     src/singletons/helper/completionmodel.cpp \
     src/singletons/resourcemanager.cpp \
-    src/singletons/helper/ircmessagehandler.cpp
+    src/singletons/helper/ircmessagehandler.cpp \
+    src/singletons/pathmanager.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -198,7 +199,8 @@ HEADERS  += \
     src/singletons/helper/ircmessagehandler.hpp \
     src/util/serialize-custom.hpp \
     src/messages/highlightphrase.hpp \
-    src/messages/selection.hpp
+    src/messages/selection.hpp \
+    src/singletons/pathmanager.hpp
 
 
 PRECOMPILED_HEADER =

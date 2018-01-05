@@ -1,6 +1,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "appdatapath.hpp"
 #include "debug/log.hpp"
+#include "singletons/pathmanager.hpp"
 
 #include <QDir>
 #include <QStandardPaths>
@@ -42,38 +43,11 @@ bool SettingManager::isIgnoredEmote(const QString &)
     return false;
 }
 
-bool SettingManager::init(int argc, char **argv)
+void SettingManager::init()
 {
-    // Options
-    bool portable = false;
-
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "portable") == 0) {
-            portable = true;
-        }
-    }
-
-    QString settingsPath;
-    if (portable) {
-        settingsPath.append(QDir::currentPath());
-    } else {
-        // Get settings path
-        settingsPath.append(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-        if (settingsPath.isEmpty()) {
-            printf("Error finding writable location for settings\n");
-            return false;
-        }
-    }
-
-    if (!QDir().mkpath(settingsPath)) {
-        printf("Error creating directories for settings: %s\n", qPrintable(settingsPath));
-        return false;
-    }
-    settingsPath.append("/settings.json");
+    QString settingsPath = PathManager::getInstance().settingsFolderPath + "/settings.json";
 
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
-
-    return true;
 }
 
 void SettingManager::updateWordTypeMask()

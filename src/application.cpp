@@ -20,6 +20,8 @@ Application::Application()
 
     logging::init();
 
+    singletons::SettingManager::getInstance().init();
+
     singletons::WindowManager::getInstance().initMainWindow();
 
     // Initialize everything we need
