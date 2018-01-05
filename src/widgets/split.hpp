@@ -118,6 +118,9 @@ public slots:
     // Copy text from chat
     void doCopy();
 
+    // Open a search popup
+    void doSearch();
+
     // Open viewer list of the channel
     void doOpenViewerList();
 

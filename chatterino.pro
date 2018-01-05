@@ -114,7 +114,8 @@ SOURCES += \
     src/singletons/helper/completionmodel.cpp \
     src/singletons/resourcemanager.cpp \
     src/singletons/helper/ircmessagehandler.cpp \
-    src/singletons/pathmanager.cpp
+    src/singletons/pathmanager.cpp \
+    src/widgets/helper/searchpopup.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -198,7 +199,8 @@ HEADERS  += \
     src/util/serialize-custom.hpp \
     src/messages/highlightphrase.hpp \
     src/messages/selection.hpp \
-    src/singletons/pathmanager.hpp
+    src/singletons/pathmanager.hpp \
+    src/widgets/helper/searchpopup.hpp
 
 
 PRECOMPILED_HEADER =

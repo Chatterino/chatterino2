@@ -32,6 +32,7 @@ public:
     void setCollapsedDefault(bool value);
     bool getDisableCompactEmotes() const;
     void setDisableCompactEmotes(bool value);
+    void updateContent() const;
 
     QString loginName;
     QString displayName;
@@ -68,7 +69,7 @@ private:
 
     std::chrono::time_point<std::chrono::system_clock> parseTime;
 
-    QString content;
+    mutable QString content;
     QString id = "";
 
     std::vector<Word> words;

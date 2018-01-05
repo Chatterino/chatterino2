@@ -38,6 +38,10 @@ int Message::getTimeoutCount() const
 
 const QString &Message::getContent() const
 {
+    if (this->content.isNull()) {
+        this->updateContent();
+    }
+
     return this->content;
 }
 
@@ -84,6 +88,24 @@ bool Message::getDisableCompactEmotes() const
 void Message::setDisableCompactEmotes(bool value)
 {
     this->disableCompactEmotes = value;
+}
+
+void Message::updateContent() const
+{
+    QString _content("");
+
+    bool first;
+
+    for (const Word &word : this->words) {
+        if (!first) {
+            _content += "";
+        }
+
+        _content += word.getCopyText();
+        first = false;
+    }
+
+    this->content = _content;
 }
 
 namespace {

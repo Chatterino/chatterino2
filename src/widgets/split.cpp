@@ -5,6 +5,7 @@
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
+#include "widgets/helper/searchpopup.hpp"
 #include "widgets/qualitypopup.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
@@ -75,6 +76,9 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 
     // CTRL+R: Change Channel
     ezShortcut(this, "CTRL+R", &Split::doChangeChannel);
+
+    // CTRL+F: Search
+    ezShortcut(this, "CTRL+F", &Split::doSearch);
 
     // xd
     // ezShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
@@ -471,6 +475,14 @@ void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
 void Split::doCopy()
 {
     QApplication::clipboard()->setText(this->view.getSelectedText());
+}
+
+void Split::doSearch()
+{
+    SearchPopup *popup = new SearchPopup();
+
+    popup->setChannel(this->getChannel());
+    popup->show();
 }
 
 template <typename Iter, typename RandomGenerator>

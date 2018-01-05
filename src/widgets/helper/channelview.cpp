@@ -26,7 +26,6 @@
 
 #define LAYOUT_WIDTH \
     (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier())
-#define PAUSE_TIME 1000
 
 using namespace chatterino::messages;
 
@@ -443,6 +442,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
     this->channel = newChannel;
 
     this->userPopupWidget.setChannel(newChannel);
+    this->layoutMessages();
 }
 
 void ChannelView::detachChannel()

@@ -1,0 +1,87 @@
+#include "searchpopup.hpp"
+
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QVBoxLayout>
+
+#include "channel.hpp"
+#include "widgets/helper/channelview.hpp"
+
+namespace chatterino {
+namespace widgets {
+SearchPopup::SearchPopup()
+{
+    this->initAsWindow();
+    this->initLayout();
+    this->resize(400, 600);
+}
+
+void SearchPopup::initLayout()
+{
+    // VBOX
+    {
+        QVBoxLayout *layout1 = new QVBoxLayout(this);
+        layout1->setMargin(0);
+
+        // HBOX
+        {
+            QHBoxLayout *layout2 = new QHBoxLayout(this);
+            layout2->setMargin(6);
+
+            // SEARCH INPUT
+            {
+                this->searchInput = new QLineEdit(this);
+                layout2->addWidget(this->searchInput);
+                QObject::connect(this->searchInput, &QLineEdit::returnPressed,
+                                 [this] { this->performSearch(); });
+            }
+
+            // SEARCH BUTTON
+            {
+                QPushButton *searchButton = new QPushButton(this);
+                searchButton->setText("Search");
+                layout2->addWidget(searchButton);
+                QObject::connect(searchButton, &QPushButton::clicked,
+                                 [this] { this->performSearch(); });
+            }
+
+            layout1->addLayout(layout2);
+        }
+
+        // CHANNELVIEW
+        {
+            this->channelView = new ChannelView(this);
+
+            layout1->addWidget(this->channelView);
+        }
+
+        this->setLayout(layout1);
+    }
+}
+
+void SearchPopup::setChannel(std::shared_ptr<Channel> channel)
+{
+    this->snapshot = channel->getMessageSnapshot();
+    this->performSearch();
+
+    this->setWindowTitle("Searching in " + channel->name + "s history");
+}
+
+void SearchPopup::performSearch()
+{
+    QString text = searchInput->text();
+
+    std::shared_ptr<Channel> channel(new Channel("search"));
+
+    for (size_t i = 0; i < this->snapshot.getLength(); i++) {
+        messages::SharedMessage message = this->snapshot[i];
+
+        if (text.isEmpty() || message->getContent().indexOf(this->searchInput->text()) != -1) {
+            channel->addMessage(message);
+        }
+    }
+
+    this->channelView->setChannel(channel);
+}
+}
+}
