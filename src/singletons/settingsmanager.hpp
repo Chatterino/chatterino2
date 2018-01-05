@@ -40,7 +40,7 @@ public:
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
-    BoolSetting enableSmoothScrollingNewMessages = {"/appearance/smoothScrolling", true};
+    BoolSetting enableSmoothScrollingNewMessages = {"/appearance/smoothScrollingNewMessages", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
 
     /// Behaviour
