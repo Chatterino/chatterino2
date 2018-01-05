@@ -204,6 +204,7 @@ void ChannelView::actuallyLayoutMessages()
         this->scrollBar.scrollToBottom(
             this->messageWasAdded &&
             singletons::SettingManager::getInstance().enableSmoothScrollingNewMessages.getValue());
+        this->messageWasAdded = false;
     }
 
     // MARK(timer);
