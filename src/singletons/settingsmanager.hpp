@@ -25,7 +25,7 @@ public:
     messages::Word::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
 
-    void load();
+    bool init(int argc, char **argv);
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};

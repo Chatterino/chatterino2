@@ -19,7 +19,6 @@ Application::Application()
     singletons::WindowManager::getInstance();
 
     logging::init();
-    singletons::SettingManager::getInstance().load();
 
     singletons::WindowManager::getInstance().initMainWindow();
 

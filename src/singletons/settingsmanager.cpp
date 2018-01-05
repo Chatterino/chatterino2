@@ -42,10 +42,38 @@ bool SettingManager::isIgnoredEmote(const QString &)
     return false;
 }
 
-void SettingManager::load()
+bool SettingManager::init(int argc, char **argv)
 {
-    // Just to make sure the singleton is initialized
-    debug::Log(".");
+    // Options
+    bool portable = false;
+
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "portable") == 0) {
+            portable = true;
+        }
+    }
+
+    QString settingsPath;
+    if (portable) {
+        settingsPath.append(QDir::currentPath());
+    } else {
+        // Get settings path
+        settingsPath.append(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+        if (settingsPath.isEmpty()) {
+            printf("Error finding writable location for settings\n");
+            return false;
+        }
+    }
+
+    if (!QDir().mkpath(settingsPath)) {
+        printf("Error creating directories for settings: %s\n", qPrintable(settingsPath));
+        return false;
+    }
+    settingsPath.append("/settings.json");
+
+    pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
+
+    return true;
 }
 
 void SettingManager::updateWordTypeMask()

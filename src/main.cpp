@@ -1,48 +1,15 @@
 #include "application.hpp"
+#include "singletons/settingsmanager.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
-#include <QDir>
 #include <QLibrary>
-#include <QStandardPaths>
-#include <pajlada/settings/settingmanager.hpp>
 
 #include "util/networkmanager.hpp"
 
 #ifdef USEWINSDK
 #include "util/nativeeventhelper.hpp"
 #endif
-
-namespace {
-
-inline bool initSettings(bool portable)
-{
-    QString settingsPath;
-    if (portable) {
-        settingsPath.append(QDir::currentPath());
-    } else {
-        // Get settings path
-        settingsPath.append(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
-        if (settingsPath.isEmpty()) {
-            printf("Error finding writable location for settings\n");
-            return false;
-        }
-    }
-
-    qDebug() << settingsPath;
-
-    if (!QDir().mkpath(settingsPath)) {
-        printf("Error creating directories for settings: %s\n", qPrintable(settingsPath));
-        return false;
-    }
-    settingsPath.append("/settings.json");
-
-    pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
-
-    return true;
-}
-
-}  // namespace
 
 int main(int argc, char *argv[])
 {
@@ -56,17 +23,9 @@ int main(int argc, char *argv[])
     a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
 #endif
 
-    // Options
-    bool portable = false;
-
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "portable") == 0) {
-            portable = true;
-        }
-    }
-
     // Initialize settings
-    if (!initSettings(portable)) {
+    bool success = chatterino::singletons::SettingManager::getInstance().init(argc, argv);
+    if (!success) {
         printf("Error initializing settings\n");
         return 1;
     }
