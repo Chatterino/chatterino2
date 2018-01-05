@@ -815,8 +815,59 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     if (this->scrollBar.isVisible()) {
         float mouseMultiplier = singletons::SettingManager::getInstance().mouseScrollMultiplier;
 
-        this->scrollBar.setDesiredValue(
-            this->scrollBar.getDesiredValue() - event->delta() / 10.0 * mouseMultiplier, true);
+        float desired = this->scrollBar.getDesiredValue();
+        float delta = event->delta() * 1.5 * mouseMultiplier;
+
+        auto snapshot = this->getMessagesSnapshot();
+        int i = std::min((int)desired, (int)snapshot.getLength());
+
+        if (delta > 0) {
+            float scrollFactor = fmod(desired, 1);
+            float currentScrollLeft = (int)(scrollFactor * snapshot[i]->getHeight());
+
+            for (; i >= 0; i--) {
+                if (delta < currentScrollLeft) {
+                    desired -= scrollFactor * (delta / currentScrollLeft);
+                    break;
+                } else {
+                    delta -= currentScrollLeft;
+                    desired -= scrollFactor;
+                }
+
+                if (i == 0) {
+                    desired = 0;
+                } else {
+                    snapshot[i - 1]->layout(this->width(), this->getDpiMultiplier());
+                    scrollFactor = 1;
+                    currentScrollLeft = snapshot[i - 1]->getHeight();
+                }
+            }
+        } else {
+            delta = -delta;
+            float scrollFactor = 1 - fmod(desired, 1);
+            float currentScrollLeft = (int)(scrollFactor * snapshot[i]->getHeight());
+
+            for (; i < snapshot.getLength(); i++) {
+                if (delta < currentScrollLeft) {
+                    desired += scrollFactor * ((double)delta / currentScrollLeft);
+                    break;
+                } else {
+                    delta -= currentScrollLeft;
+                    desired += scrollFactor;
+                }
+
+                if (i == snapshot.getLength() - 1) {
+                    desired = snapshot.getLength();
+                } else {
+                    snapshot[i + 1]->layout(this->width(), this->getDpiMultiplier());
+
+                    scrollFactor = 1;
+                    currentScrollLeft = snapshot[i + 1]->getHeight();
+                }
+            }
+        }
+
+        this->scrollBar.setDesiredValue(desired, true);
     }
 }
 
