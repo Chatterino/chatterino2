@@ -113,7 +113,6 @@ void SettingsDialog::addTabs()
 QVBoxLayout *SettingsDialog::createAccountsTab()
 {
     auto layout = new QVBoxLayout();
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     // add remove buttons
     auto buttonBox = new QDialogButtonBox(this);
@@ -281,7 +280,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
         form->addRow("Scrolling:", enableSmoothScrolling);
 
         auto enableSmoothScrollingNewMessages = createCheckbox(
-            "Enable smooth scrolling for new messages", settings.enableSmoothScrolling);
+            "Enable smooth scrolling for new messages", settings.enableSmoothScrollingNewMessages);
         form->addRow("", enableSmoothScrollingNewMessages);
 
         group->setLayout(form);
