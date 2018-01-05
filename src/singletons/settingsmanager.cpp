@@ -58,7 +58,7 @@ bool SettingManager::init(int argc, char **argv)
         settingsPath.append(QDir::currentPath());
     } else {
         // Get settings path
-        settingsPath.append(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+        settingsPath.append(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
         if (settingsPath.isEmpty()) {
             printf("Error finding writable location for settings\n");
             return false;
