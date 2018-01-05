@@ -174,21 +174,27 @@ void Notebook::previousTab()
 
 void Notebook::performLayout(bool animated)
 {
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+
     int x = 0, y = 0;
     float scale = this->getDpiMultiplier();
 
-    if (!showButtons || singletons::SettingManager::getInstance().hidePreferencesButton) {
+    if (!showButtons || settings.hidePreferencesButton) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (!showButtons || singletons::SettingManager::getInstance().hideUserButton) {
+    if (!showButtons || settings.hideUserButton) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);
         this->userButton.show();
         x += userButton.width();
+    }
+
+    if (!showButtons || (settings.hideUserButton && settings.hidePreferencesButton)) {
+        x += (int)(scale * 2);
     }
 
     int tabHeight = static_cast<int>(24 * scale);
