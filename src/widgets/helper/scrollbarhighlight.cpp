@@ -5,15 +5,31 @@
 namespace chatterino {
 namespace widgets {
 
-ScrollBarHighlight::ScrollBarHighlight(double _position, int _colorIndex, ScrollBar *parent,
-                                       Style _style, QString _tag)
-    : themeManager(parent->themeManager)
-    , position(_position)
-    //    , colorIndex(std::max(0, std::min(this->themeManager.HighlightColorCount, _colorIndex)))
-    , colorIndex(0)
-    , style(_style)
-    , tag(_tag)
+ScrollbarHighlight::ScrollbarHighlight()
+    : color(Color::Highlight)
+    , style(Style::None)
 {
+}
+
+ScrollbarHighlight::ScrollbarHighlight(Color _color, Style _style)
+    : color(_color)
+    , style(_style)
+{
+}
+
+ScrollbarHighlight::Color ScrollbarHighlight::getColor() const
+{
+    return this->color;
+}
+
+ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const
+{
+    return this->style;
+}
+
+bool ScrollbarHighlight::isNull() const
+{
+    return this->style == None;
 }
 
 }  // namespace widgets

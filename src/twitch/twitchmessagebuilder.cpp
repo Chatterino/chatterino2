@@ -460,6 +460,10 @@ void TwitchMessageBuilder::parseHighlights()
             QApplication::alert(singletons::WindowManager::getInstance().getMainWindow().window(),
                                 2500);
         }
+
+        if (doHighlight) {
+            this->message->addFlags(Message::Highlighted);
+        }
     }
 }
 

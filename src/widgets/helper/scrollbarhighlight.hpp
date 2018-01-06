@@ -3,51 +3,23 @@
 #include "QString"
 
 namespace chatterino {
-namespace singletons {
-class ThemeManager;
-}
-
 namespace widgets {
-
-class ScrollBar;
-
-class ScrollBarHighlight
+class ScrollbarHighlight
 {
 public:
-    enum Style { Default, Left, Right, SingleLine };
+    enum Style : char { None, Default, Line };
+    enum Color : char { Highlight };
 
-    ScrollBarHighlight(double _position, int _colorIndex, ScrollBar *parent, Style _style = Default,
-                       QString _tag = "");
+    ScrollbarHighlight();
+    ScrollbarHighlight(Color _color, Style _style = Default);
 
-    singletons::ThemeManager &themeManager;
-
-    double getPosition()
-    {
-        return this->position;
-    }
-
-    int getColorIndex()
-    {
-        return this->colorIndex;
-    }
-
-    Style getStyle()
-    {
-        return this->style;
-    }
-
-    QString getTag()
-    {
-        return this->tag;
-    }
-
-    ScrollBarHighlight *next = nullptr;
+    Color getColor() const;
+    Style getStyle() const;
+    bool isNull() const;
 
 private:
-    double position;
-    int colorIndex;
+    Color color;
     Style style;
-    QString tag;
 };
 
 }  // namespace widgets

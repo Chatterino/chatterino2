@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/limitedqueue.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
@@ -15,21 +16,18 @@ namespace widgets {
 
 class ChannelView;
 
-class ScrollBar : public BaseWidget
+class Scrollbar : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    ScrollBar(ChannelView *parent = 0);
-    ~ScrollBar();
+    Scrollbar(ChannelView *parent = 0);
 
-    void removeHighlightsWhere(std::function<bool(ScrollBarHighlight &)> func);
-    void addHighlight(ScrollBarHighlight *highlight);
-
-    Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
+    void addHighlight(ScrollbarHighlight highlight);
+    void addHighlightsAtStart(const std::vector<ScrollbarHighlight> &highlights);
+    void replaceHighlight(size_t index, ScrollbarHighlight replacement);
 
     void scrollToBottom(bool animate = false);
-
     bool isAtBottom() const;
 
     void setMaximum(qreal value);
@@ -50,6 +48,8 @@ public:
 
     void printCurrentState(const QString &prefix = QString()) const;
 
+    Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
+
 protected:
     void paintEvent(QPaintEvent *) override;
     void resizeEvent(QResizeEvent *) override;
@@ -65,7 +65,7 @@ private:
 
     QPropertyAnimation currentValueAnimation;
 
-    ScrollBarHighlight *highlights;
+    messages::LimitedQueue<ScrollbarHighlight> highlights;
 
     bool atBottom = false;
 
@@ -73,7 +73,6 @@ private:
     int mouseDownIndex = -1;
     QPoint lastMousePosition;
 
-    //    int buttonHeight = 16;
     int buttonHeight = 0;
     int trackHeight = 100;
 

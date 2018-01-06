@@ -1,6 +1,7 @@
 #pragma once
 
 #include "messages/word.hpp"
+#include "widgets/helper/scrollbarhighlight.hpp"
 
 #include <chrono>
 #include <memory>
@@ -23,6 +24,7 @@ public:
         None = 0,
         System = (1 << 1),
         Timeout = (1 << 2),
+        Highlighted = (1 << 3),
     };
 
     bool containsHighlightedPhrase() const;
@@ -44,6 +46,7 @@ public:
     bool getDisableCompactEmotes() const;
     void setDisableCompactEmotes(bool value);
     void updateContent() const;
+    widgets::ScrollbarHighlight getScrollBarHighlight() const;
 
     QString loginName;
     QString displayName;

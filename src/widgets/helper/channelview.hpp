@@ -33,7 +33,7 @@ public:
 
     void updateGifEmotes();
     void queueUpdate();
-    ScrollBar &getScrollBar();
+    Scrollbar &getScrollBar();
     QString getSelectedText();
     bool hasSelection();
     void clearSelection();
@@ -94,7 +94,7 @@ private:
 
     std::vector<GifEmoteData> gifEmotes;
 
-    ScrollBar scrollBar;
+    Scrollbar scrollBar;
     RippleEffectLabel *goToBottom;
 
     // This variable can be used to decide whether or not we should render the "Show latest

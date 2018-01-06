@@ -13,6 +13,8 @@
 #include <list>
 #include <tuple>
 
+typedef chatterino::widgets::ScrollbarHighlight SBHighlight;
+
 namespace chatterino {
 namespace messages {
 
@@ -126,6 +128,14 @@ void Message::updateContent() const
     }
 
     this->content = _content;
+}
+
+SBHighlight Message::getScrollBarHighlight() const
+{
+    if (this->getFlags() & Message::Highlighted) {
+        return SBHighlight(SBHighlight::Highlight);
+    }
+    return SBHighlight();
 }
 
 namespace {

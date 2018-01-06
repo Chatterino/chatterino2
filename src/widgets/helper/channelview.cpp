@@ -233,7 +233,7 @@ void ChannelView::updateGifEmotes()
     }
 }
 
-ScrollBar &ChannelView::getScrollBar()
+Scrollbar &ChannelView::getScrollBar()
 {
     return this->scrollBar;
 }
@@ -395,6 +395,8 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 this->highlightedMessageReceived.invoke();
             }
 
+            this->scrollBar.addHighlight(message->getScrollBarHighlight());
+
             this->messageWasAdded = true;
             this->layoutMessages();
         });
@@ -416,6 +418,14 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
                 }
             }
 
+            std::vector<ScrollbarHighlight> highlights;
+            highlights.reserve(messages.size());
+            for (int i = 0; i < messages.size(); i++) {
+                highlights.push_back(messages.at(i)->getScrollBarHighlight());
+            }
+
+            this->scrollBar.addHighlightsAtStart(highlights);
+
             this->messageWasAdded = true;
             this->layoutMessages();
         });
@@ -435,6 +445,8 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
     this->messageReplacedConnection =
         newChannel->messageReplaced.connect([this](size_t index, SharedMessage replacement) {
             SharedMessageRef newItem(new MessageRef(replacement));
+
+            this->scrollBar.replaceHighlight(index, replacement->getScrollBarHighlight());
 
             this->messages.replaceItem(this->messages.getSnapshot()[index], newItem);
             this->layoutMessages();
