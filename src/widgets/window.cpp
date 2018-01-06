@@ -58,20 +58,26 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
 
     /// Initialize program-wide hotkeys
     // CTRL+P: Open Settings Dialog
-    CreateShortcut(this, "CTRL+P", [] {
+    CreateWindowShortcut(this, "CTRL+P", [] {
         SettingsDialog::showDialog();  //
     });
 
     // CTRL+Number: Switch to n'th tab
-    CreateShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
-    CreateShortcut(this, "CTRL+2", [this] { this->notebook.selectIndex(1); });
-    CreateShortcut(this, "CTRL+3", [this] { this->notebook.selectIndex(2); });
-    CreateShortcut(this, "CTRL+4", [this] { this->notebook.selectIndex(3); });
-    CreateShortcut(this, "CTRL+5", [this] { this->notebook.selectIndex(4); });
-    CreateShortcut(this, "CTRL+6", [this] { this->notebook.selectIndex(5); });
-    CreateShortcut(this, "CTRL+7", [this] { this->notebook.selectIndex(6); });
-    CreateShortcut(this, "CTRL+8", [this] { this->notebook.selectIndex(7); });
-    CreateShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
+    CreateWindowShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
+    CreateWindowShortcut(this, "CTRL+2", [this] { this->notebook.selectIndex(1); });
+    CreateWindowShortcut(this, "CTRL+3", [this] { this->notebook.selectIndex(2); });
+    CreateWindowShortcut(this, "CTRL+4", [this] { this->notebook.selectIndex(3); });
+    CreateWindowShortcut(this, "CTRL+5", [this] { this->notebook.selectIndex(4); });
+    CreateWindowShortcut(this, "CTRL+6", [this] { this->notebook.selectIndex(5); });
+    CreateWindowShortcut(this, "CTRL+7", [this] { this->notebook.selectIndex(6); });
+    CreateWindowShortcut(this, "CTRL+8", [this] { this->notebook.selectIndex(7); });
+    CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
+
+    // CTRL+SHIFT+T: New tab
+    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addNewPage(); });
+
+    // CTRL+SHIFT+W: Close current tab
+    CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
 }
 
 void Window::repaintVisibleChatWidgets(Channel *channel)

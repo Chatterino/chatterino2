@@ -28,6 +28,7 @@ public:
     SplitContainer *addPage(const std::string &uuid, bool select = false);
 
     void removePage(SplitContainer *page);
+    void removeCurrentPage();
     void select(SplitContainer *page);
     void selectIndex(unsigned index);
 

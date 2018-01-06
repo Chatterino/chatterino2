@@ -95,6 +95,15 @@ void Notebook::removePage(SplitContainer *page)
     this->performLayout();
 }
 
+void Notebook::removeCurrentPage()
+{
+    if (this->selectedPage == nullptr) {
+        return;
+    }
+
+    this->removePage(this->selectedPage);
+}
+
 void Notebook::select(SplitContainer *page)
 {
     if (page == this->selectedPage) {
