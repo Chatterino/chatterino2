@@ -226,7 +226,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     int w = this->width();
     float y = 0;
-    float dY = (float)(this->height() + MIN_THUMB_HEIGHT) / (float)snapshotLength;
+    float dY = (float)(this->height()) / (float)snapshotLength;
     int highlightHeight = std::ceil(dY);
 
     for (int i = 0; i < snapshotLength; i++) {

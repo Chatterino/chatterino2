@@ -466,6 +466,7 @@ void ChannelView::setChannel(std::shared_ptr<Channel> newChannel)
 
     this->userPopupWidget.setChannel(newChannel);
     this->layoutMessages();
+    this->queueUpdate();
 }
 
 void ChannelView::detachChannel()

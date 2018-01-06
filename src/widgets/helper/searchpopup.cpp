@@ -76,7 +76,9 @@ void SearchPopup::performSearch()
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
         messages::SharedMessage message = this->snapshot[i];
 
-        if (text.isEmpty() || message->getContent().indexOf(this->searchInput->text()) != -1) {
+        if (text.isEmpty() ||
+            message->getContent().indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) !=
+                -1) {
             channel->addMessage(message);
         }
     }
