@@ -3,6 +3,7 @@
 #include "singletons/channelmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "widgets/helper/shortcut.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
 #include "widgets/split.hpp"
@@ -55,14 +56,22 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
 
     this->loadGeometry();
 
-    // Initialize program-wide hotkeys
-    {
-        // CTRL+P: Open Settings Dialog
-        auto shortcut = new QShortcut(QKeySequence("CTRL+P"), this);
-        connect(shortcut, &QShortcut::activated, []() {
-            SettingsDialog::showDialog();  //
-        });
-    }
+    /// Initialize program-wide hotkeys
+    // CTRL+P: Open Settings Dialog
+    CreateShortcut(this, "CTRL+P", [] {
+        SettingsDialog::showDialog();  //
+    });
+
+    // CTRL+Number: Switch to n'th tab
+    CreateShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
+    CreateShortcut(this, "CTRL+2", [this] { this->notebook.selectIndex(1); });
+    CreateShortcut(this, "CTRL+3", [this] { this->notebook.selectIndex(2); });
+    CreateShortcut(this, "CTRL+4", [this] { this->notebook.selectIndex(3); });
+    CreateShortcut(this, "CTRL+5", [this] { this->notebook.selectIndex(4); });
+    CreateShortcut(this, "CTRL+6", [this] { this->notebook.selectIndex(5); });
+    CreateShortcut(this, "CTRL+7", [this] { this->notebook.selectIndex(6); });
+    CreateShortcut(this, "CTRL+8", [this] { this->notebook.selectIndex(7); });
+    CreateShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
 }
 
 void Window::repaintVisibleChatWidgets(Channel *channel)

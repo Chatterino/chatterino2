@@ -117,6 +117,15 @@ void Notebook::select(SplitContainer *page)
     this->performLayout();
 }
 
+void Notebook::selectIndex(unsigned index)
+{
+    if (index >= this->pages.size()) {
+        return;
+    }
+
+    this->select(this->pages.at(index));
+}
+
 int Notebook::tabCount()
 {
     return this->pages.size();

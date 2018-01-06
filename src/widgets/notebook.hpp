@@ -29,6 +29,7 @@ public:
 
     void removePage(SplitContainer *page);
     void select(SplitContainer *page);
+    void selectIndex(unsigned index);
 
     SplitContainer *getSelectedPage() const
     {

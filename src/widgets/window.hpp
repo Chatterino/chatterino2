@@ -44,7 +44,8 @@ class Window : public BaseWidget
     WindowGeometry windowGeometry;
 
 public:
-    explicit Window(const QString &windowName, singletons::ThemeManager &_themeManager, bool isMainWindow);
+    explicit Window(const QString &windowName, singletons::ThemeManager &_themeManager,
+                    bool isMainWindow);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
