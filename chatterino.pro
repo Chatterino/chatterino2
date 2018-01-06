@@ -199,7 +199,8 @@ HEADERS  += \
     src/messages/highlightphrase.hpp \
     src/messages/selection.hpp \
     src/singletons/pathmanager.hpp \
-    src/widgets/helper/searchpopup.hpp
+    src/widgets/helper/searchpopup.hpp \
+    src/widgets/helper/shortcut.hpp
 
 
 PRECOMPILED_HEADER =

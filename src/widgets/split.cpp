@@ -6,6 +6,7 @@
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/helper/searchpopup.hpp"
+#include "widgets/helper/shortcut.hpp"
 #include "widgets/qualitypopup.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
@@ -34,18 +35,6 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-namespace {
-
-template <typename T>
-inline void ezShortcut(Split *w, const char *key, T t)
-{
-    auto s = new QShortcut(QKeySequence(key), w);
-    s->setContext(Qt::WidgetWithChildrenShortcut);
-    QObject::connect(s, &QShortcut::activated, w, t);
-}
-
-}  // namespace
-
 Split::Split(SplitContainer *parent, const std::string &_uuid)
     : BaseWidget(parent)
     , uuid(_uuid)
@@ -69,22 +58,22 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 
     // Initialize chat widget-wide hotkeys
     // CTRL+T: Create new split (Add page)
-    ezShortcut(this, "CTRL+T", &Split::doAddSplit);
+    CreateShortcut(this, "CTRL+T", &Split::doAddSplit);
 
     // CTRL+W: Close Split
-    ezShortcut(this, "CTRL+W", &Split::doCloseSplit);
+    CreateShortcut(this, "CTRL+W", &Split::doCloseSplit);
 
     // CTRL+R: Change Channel
-    ezShortcut(this, "CTRL+R", &Split::doChangeChannel);
+    CreateShortcut(this, "CTRL+R", &Split::doChangeChannel);
 
     // CTRL+F: Search
-    ezShortcut(this, "CTRL+F", &Split::doSearch);
+    CreateShortcut(this, "CTRL+F", &Split::doSearch);
 
     // xd
-    // ezShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
-    // ezShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
-    // ezShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
-    // ezShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
+    // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
+    // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
+    // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
+    // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
     this->channelName.getValueChangedSignal().connect(
         std::bind(&Split::channelNameUpdated, this, std::placeholders::_1));
