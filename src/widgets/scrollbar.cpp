@@ -219,6 +219,11 @@ void Scrollbar::paintEvent(QPaintEvent *)
     // draw highlights
     auto snapshot = this->highlights.getSnapshot();
     int snapshotLength = (int)snapshot.getLength();
+
+    if (snapshotLength == 0) {
+        return;
+    }
+
     int w = this->width();
     float y = 0;
     float dY = (this->height() - MIN_THUMB_HEIGHT) / snapshotLength;
