@@ -110,14 +110,14 @@ ChannelView::~ChannelView()
 
 void ChannelView::queueUpdate()
 {
-    if (this->updateTimer.isActive()) {
-        this->updateQueued = true;
-        return;
-    }
+    //    if (this->updateTimer.isActive()) {
+    //        this->updateQueued = true;
+    //        return;
+    //    }
 
     this->repaint();
 
-    this->updateTimer.start();
+    //    this->updateTimer.start();
 }
 
 void ChannelView::layoutMessages()

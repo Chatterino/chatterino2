@@ -218,11 +218,11 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     // draw highlights
     auto snapshot = this->highlights.getSnapshot();
-    int snapshotLength = snapshot.getLength();
+    int snapshotLength = (int)snapshot.getLength();
     int w = this->width();
     float y = 0;
     float dY = (this->height() - MIN_THUMB_HEIGHT) / snapshotLength;
-    int highlightHeight = std::ceilf(dY);
+    int highlightHeight = std::ceil(dY);
 
     for (int i = 0; i < snapshotLength; i++) {
         ScrollbarHighlight const &highlight = snapshot[i];
