@@ -4,14 +4,16 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN32
-#define DEFAULT_FONT_FAMILY "Segoe UI"
-#define DEFAULT_FONT_SIZE 10
-#elif Q_OS_MACOS
-#define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#define DEFAULT_FONT_SIZE 12
+    #define DEFAULT_FONT_FAMILY "Segoe UI"
+    #define DEFAULT_FONT_SIZE 10
 #else
-#define DEFAULT_FONT_FAMILY "Arial"
-#define DEFAULT_FONT_SIZE 11
+    #ifdef Q_OS_MACOS
+        #define DEFAULT_FONT_FAMILY "Helvetica Neue"
+        #define DEFAULT_FONT_SIZE 12
+    #else
+        #define DEFAULT_FONT_FAMILY "Arial"
+        #define DEFAULT_FONT_SIZE 11
+    #endif
 #endif
 
 namespace chatterino {

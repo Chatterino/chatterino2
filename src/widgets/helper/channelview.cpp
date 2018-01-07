@@ -516,7 +516,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     QPainter painter(this);
 
 // only update gif emotes
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 //    if (this->onlyUpdateEmotes) {
 //        this->onlyUpdateEmotes = false;
 
@@ -583,8 +583,18 @@ void ChannelView::drawMessages(QPainter &painter, bool overlays)
             bool updateBuffer = false;
 
             if (!buffer) {
-                buffer =
-                    std::shared_ptr<QPixmap>(new QPixmap(this->width(), messageRef->getHeight()));
+                QPixmap *pixmap;
+
+#ifdef Q_OS_MACOS
+
+                pixmap = new QPixmap(
+                    (int)(this->width() * painter.device()->devicePixelRatioF()),
+                    (int)(messageRef->getHeight() * painter.device()->devicePixelRatioF()));
+                pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
+#else
+                pixmap = new QPixmap(this->width(), messageRef->getHeight());
+#endif
+                buffer = std::shared_ptr<QPixmap>(pixmap);
                 updateBuffer = true;
             }
 
@@ -617,7 +627,16 @@ void ChannelView::drawMessages(QPainter &painter, bool overlays)
             messageRef->buffer = buffer;
 
             if (buffer) {
-                painter.drawPixmap(0, y, *buffer.get());
+//#ifdef Q_OS_MACOS
+//                painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+//                painter.drawPixmap(0, y,
+
+//                    (int)(buffer->width() / painter.device()->devicePixelRatioF()),
+//                    (int)(buffer->height() / painter.device()->devicePixelRatioF()),
+//                                    *buffer.get());
+//#else
+                painter.drawPixmap(0, y,  *buffer.get());
+//#endif
             }
         }
 
