@@ -16,6 +16,8 @@
 #include <QFont>
 #include <QFontDialog>
 #include <QFormLayout>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
@@ -23,8 +25,6 @@
 #include <QResource>
 #include <QTextEdit>
 #include <QtSvg>
-#include <QGraphicsScene>
-#include <QGraphicsView>
 
 namespace chatterino {
 namespace widgets {
@@ -485,7 +485,6 @@ QVBoxLayout *SettingsDialog::createAboutTab()
 
     return layout;
 }
-
 
 QVBoxLayout *SettingsDialog::createIgnoredUsersTab()
 {
