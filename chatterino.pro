@@ -212,7 +212,12 @@ DISTFILES +=
 
 # Include boost
 win32 {
-    INCLUDEPATH += C:\local\boost\
+    isEmpty(BOOST_DIRECTORY) {
+        message(Using default boost directory C:\\local\\boost\\)
+        BOOST_DIRECTORY = C:\local\boost\
+    }
+
+    INCLUDEPATH += $$BOOST_DIRECTORY
 }
 
 win32 {
