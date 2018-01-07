@@ -18,6 +18,7 @@ class SettingManager : public QObject
 
     using BoolSetting = ChatterinoSetting<bool>;
     using FloatSetting = ChatterinoSetting<float>;
+    using IntSetting = ChatterinoSetting<int>;
     using StringSetting = ChatterinoSetting<std::string>;
     using QStringSetting = ChatterinoSetting<QString>;
 
@@ -63,6 +64,12 @@ public:
     BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
+
+    // 0 = Smallest size
+    // 1 = One size above 0 (usually size of 0 * 2)
+    // 2 = One size above 1 (usually size of 1 * 2)
+    // etc...
+    IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

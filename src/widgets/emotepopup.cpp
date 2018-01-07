@@ -59,8 +59,11 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         builder2.getMessage()->centered = true;
         builder2.getMessage()->setDisableCompactEmotes(true);
 
+        int preferredEmoteSize = singletons::SettingManager::getInstance().preferredEmoteQuality;
+
         map.each([&](const QString &key, const util::EmoteData &value) {
-            builder2.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, emoteDesc,
+            builder2.appendWord(Word(value.getImageForSize(preferredEmoteSize),
+                                     Word::Flags::AlwaysShow, key, emoteDesc,
                                      Link(Link::Type::InsertText, key)));
         });
 
@@ -82,6 +85,7 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
 void EmotePopup::loadEmojis()
 {
+    int preferredEmoteSize = singletons::SettingManager::getInstance().preferredEmoteQuality;
     util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
     std::shared_ptr<Channel> emojiChannel(new Channel(""));
@@ -99,10 +103,13 @@ void EmotePopup::loadEmojis()
     messages::MessageBuilder builder;
     builder.getMessage()->centered = true;
     builder.getMessage()->setDisableCompactEmotes(true);
-    emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
-        builder.appendWord(Word(value.image, Word::Flags::AlwaysShow, key, "emoji",
-                                Link(Link::Type::InsertText, key)));
-    });
+
+    emojis.each(
+        [this, &builder, preferredEmoteSize](const QString &key, const util::EmoteData &value) {
+            auto emoteImage = value.getImageForSize(preferredEmoteSize);
+            builder.appendWord(Word(emoteImage, Word::Flags::AlwaysShow, key, "emoji",
+                                    Link(Link::Type::InsertText, key)));
+        });
     emojiChannel->addMessage(builder.getMessage());
 
     this->viewEmojis->setChannel(emojiChannel);

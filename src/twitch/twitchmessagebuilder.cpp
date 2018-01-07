@@ -34,6 +34,8 @@ SharedMessage TwitchMessageBuilder::parse()
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
 
+    auto preferredEmoteQuality = settings.preferredEmoteQuality.getValue();
+
     this->originalMessage = this->ircMessage->content();
 
     this->parseUsername();
@@ -121,14 +123,9 @@ SharedMessage TwitchMessageBuilder::parse()
 
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
-            this->appendWord(
-                Word(currentTwitchEmote->second.image, Word::TwitchEmoteImage,
-                     currentTwitchEmote->second.image->getName(),
-                     currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
-            this->appendWord(
-                Word(currentTwitchEmote->second.image->getName(), Word::TwitchEmoteText, textColor,
-                     singletons::FontManager::Medium, currentTwitchEmote->second.image->getName(),
-                     currentTwitchEmote->second.image->getName() + QString("\nTwitch Emote")));
+            auto emoteImage = currentTwitchEmote->second.getImageForSize(preferredEmoteQuality);
+            this->appendWord(Word(emoteImage, Word::TwitchEmoteImage, emoteImage->getName(),
+                                  emoteImage->getTooltip(), Link(Link::Url, emoteImage->getUrl())));
 
             i += split.length() + 1;
             currentTwitchEmote = std::next(currentTwitchEmote);
@@ -145,7 +142,7 @@ SharedMessage TwitchMessageBuilder::parse()
         for (const auto &tuple : parsed) {
             const util::EmoteData &emoteData = std::get<0>(tuple);
 
-            if (emoteData.image == nullptr) {  // is text
+            if (!emoteData.isValid()) {  // is text
                 QString string = std::get<1>(tuple);
 
                 static QRegularExpression cheerRegex("cheer[1-9][0-9]*");
@@ -234,11 +231,12 @@ SharedMessage TwitchMessageBuilder::parse()
                 this->appendWord(Word(string, Word::Text, textColor,
                                       singletons::FontManager::Medium, string, QString(), link));
             } else {  // is emoji
-                this->appendWord(Word(emoteData.image, Word::EmojiImage, emoteData.image->getName(),
-                                      emoteData.image->getTooltip()));
-                Word(emoteData.image->getName(), Word::EmojiText, textColor,
-                     singletons::FontManager::Medium, emoteData.image->getName(),
-                     emoteData.image->getTooltip());
+                auto emoteImage = emoteData.getImageForSize(preferredEmoteQuality);
+                this->appendWord(Word(emoteImage, Word::EmojiImage, emoteImage->getName(),
+                                      emoteImage->getTooltip()));
+                Word(emoteImage->getName(), Word::EmojiText, textColor,
+                     singletons::FontManager::Medium, emoteImage->getName(),
+                     emoteImage->getTooltip());
             }
         }
 
@@ -547,11 +545,13 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
     return false;
 }
 
-bool TwitchMessageBuilder::appendEmote(util::EmoteData &emoteData)
+bool TwitchMessageBuilder::appendEmote(const util::EmoteData &emoteData)
 {
-    this->appendWord(Word(emoteData.image, Word::BttvEmoteImage, emoteData.image->getName(),
-                          emoteData.image->getTooltip(),
-                          Link(Link::Url, emoteData.image->getUrl())));
+    auto emoteImage = emoteData.getImageForSize(
+        singletons::SettingManager::getInstance().preferredEmoteQuality.getValue());
+
+    this->appendWord(Word(emoteImage, Word::BttvEmoteImage, emoteImage->getName(),
+                          emoteImage->getTooltip(), Link(Link::Url, emoteImage->getUrl())));
 
     // Perhaps check for ignored emotes here?
     return true;

@@ -153,10 +153,7 @@ private:
     bool gifUpdateTimerInitiated = false;
 
     int _generation = 0;
-
-    // methods
-    static QString getTwitchEmoteLink(long id, qreal &scale);
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}

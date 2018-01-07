@@ -426,6 +426,29 @@ QVBoxLayout *SettingsDialog::createEmotesTab()
 
     layout->addWidget(createCheckbox("Enable Twitch Emotes", settings.enableTwitchEmotes));
 
+    // Preferred emote quality
+    {
+        auto box = new QHBoxLayout();
+        auto label = new QLabel("Preferred emote quality");
+        label->setToolTip("Select which emote quality you prefer to download");
+        auto widget = new QComboBox();
+        widget->addItems({"1x", "2x", "4x"});
+        box->addWidget(label);
+        box->addWidget(widget);
+
+        settings.preferredEmoteQuality.connect([widget](int newIndex, auto) {
+            widget->setCurrentIndex(newIndex);  //
+        });
+
+        QObject::connect(
+            widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [](int index) {
+                singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+                settings.preferredEmoteQuality = index;  //
+            });
+
+        layout->addLayout(box);
+    }
+
     return layout;
 }
 
