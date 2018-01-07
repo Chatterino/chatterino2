@@ -463,7 +463,7 @@ QVBoxLayout *SettingsDialog::createAboutTab()
     image.load(":/images/aboutlogo.png");
 
     auto aboutimage = new QLabel();
-    aboutimage->setPixmap(image);
+    aboutimage->setPixmap(image.scaled(QSize(631,132)));
     layout->addWidget(aboutimage);
 
     auto created = new QLabel();
