@@ -1,13 +1,25 @@
 #include "singletons/fontmanager.hpp"
 
 #include <QDebug>
+#include <QtGlobal>
+
+#ifdef Q_OS_WIN32
+#define DEFAULT_FONT_FAMILY "Segoe UI"
+#define DEFAULT_FONT_SIZE 10
+#elif Q_OS_MACOS
+#define DEFAULT_FONT_FAMILY "Helvetica Neue"
+#define DEFAULT_FONT_SIZE 12
+#else
+#define DEFAULT_FONT_FAMILY "Arial"
+#define DEFAULT_FONT_SIZE 11
+#endif
 
 namespace chatterino {
 namespace singletons {
 
 FontManager::FontManager()
-    : currentFontFamily("/appearance/currentFontFamily", "Arial")
-    , currentFontSize("/appearance/currentFontSize", 12)
+    : currentFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
+    , currentFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 //    , currentFont(this->currentFontFamily.getValue().c_str(), currentFontSize.getValue())
 {
     this->currentFontFamily.connect([this](const std::string &newValue, auto) {
