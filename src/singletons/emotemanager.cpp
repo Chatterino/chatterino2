@@ -542,14 +542,17 @@ void EmoteManager::loadFFZEmotes()
 // emoteName is used for giving a name to the emote in case it doesn't exist
 util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteName)
 {
-    return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &id] {
+    QString _emoteName = emoteName;
+    _emoteName.replace("<", "&lt;");
+
+    return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
         newEmoteData.image1x = new LazyLoadedImage(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
-                                                   emoteName + "<br/>Twitch Emote 1x");
+                                                   _emoteName + "<br/>Twitch Emote 1x");
         newEmoteData.image2x = new LazyLoadedImage(GetTwitchEmoteLink(id, "2.0"), .5, emoteName,
-                                                   emoteName + "<br/>Twitch Emote 2x");
+                                                   _emoteName + "<br/>Twitch Emote 2x");
         newEmoteData.image3x = new LazyLoadedImage(GetTwitchEmoteLink(id, "3.0"), .25, emoteName,
-                                                   emoteName + "<br/>Twitch Emote 3x");
+                                                   _emoteName + "<br/>Twitch Emote 3x");
 
         return newEmoteData;
     });

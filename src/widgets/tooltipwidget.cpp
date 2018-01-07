@@ -19,6 +19,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     palette.setColor(QPalette::WindowText, white);
     palette.setColor(QPalette::Background, black);
     this->setPalette(palette);
+    this->displayText->setStyleSheet("color: #ffffff");
     this->setWindowOpacity(0.8);
     this->setFont(singletons::FontManager::getInstance().getFont(singletons::FontManager::Type::MediumSmall,
                                                      this->getDpiMultiplier()));
@@ -27,6 +28,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 
     displayText->setAlignment(Qt::AlignHCenter);
+    displayText->setText("lmao xD");
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(10, 5, 10, 5);
     layout->addWidget(displayText);
