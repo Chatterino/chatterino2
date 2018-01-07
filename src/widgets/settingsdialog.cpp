@@ -461,13 +461,10 @@ QVBoxLayout *SettingsDialog::createAboutTab()
     auto layout = this->createTabLayout();
     QPixmap image;
     image.load(":/images/aboutlogo.png");
-    auto scene = new QGraphicsScene(this);
-    scene->addPixmap(image);
-    scene->setSceneRect(image.rect());
 
-    QGraphicsView *view = new QGraphicsView(scene);
-    view->setStyleSheet("background: transparent");
-    layout->addWidget(view);
+    auto aboutimage = new QLabel();
+    aboutimage->setPixmap(image);
+    layout->addWidget(aboutimage);
 
     auto created = new QLabel();
     created->setText("Twitch Chat Client created by <a href=\"github.com/fourtf\">fourtf</a>");
