@@ -7,6 +7,8 @@ Chatterino 2 is the second installment of the Twitch chat client series "Chatter
 ## Code style
 The code is normally formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
 
+To setup automatic code formating with QT Creator, see [this guide](https://gist.github.com/pajlada/0296454198eb8f8789fd6fe7ea660c5b).
+
 ## Building
 Before building run `git submodule update --init --recursive` to get required submodules. In case you are new to using qt creator or c++ be sure to add -j to your make arguments as shown here [image](https://i.fourtf.com/GreenSweetImage.png) so it uses all your cpu cores to build.
 
