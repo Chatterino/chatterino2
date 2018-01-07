@@ -49,7 +49,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     this->emotesLabel.getLabel().setTextFormat(Qt::RichText);
     this->emotesLabel.getLabel().setText(
-        "<img src=':/images/Emoji_Color_1F60A_19.png' width='12' height='12' "
+        "<img src=':/images/emote.svg' width='12' height='12' "
         "/>");
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
