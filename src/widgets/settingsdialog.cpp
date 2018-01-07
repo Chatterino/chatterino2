@@ -23,6 +23,8 @@
 #include <QResource>
 #include <QTextEdit>
 #include <QtSvg>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 
 namespace chatterino {
 namespace widgets {
@@ -105,6 +107,8 @@ void SettingsDialog::addTabs()
     this->addTab(this->createHighlightingTab(), "Highlighting", ":/images/notifications.svg");
 
     //    this->addTab(this->createWhispersTab(), "Whispers", ":/images/Message_16xLG.png");
+
+    this->addTab(this->createAboutTab(), "About", ":/images/about.svg");
 
     // Add stretch
     this->ui.tabs.addStretch(1);
@@ -451,6 +455,37 @@ QVBoxLayout *SettingsDialog::createEmotesTab()
 
     return layout;
 }
+
+QVBoxLayout *SettingsDialog::createAboutTab()
+{
+    auto layout = this->createTabLayout();
+    QPixmap image;
+    image.load(":/images/aboutlogo.png");
+    auto scene = new QGraphicsScene(this);
+    scene->addPixmap(image);
+    scene->setSceneRect(image.rect());
+
+    QGraphicsView *view = new QGraphicsView(scene);
+    view->setStyleSheet("background: transparent");
+    layout->addWidget(view);
+
+    auto created = new QLabel();
+    created->setText("Twitch Chat Client created by <a href=\"github.com/fourtf\">fourtf</a>");
+    created->setTextFormat(Qt::RichText);
+    created->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    created->setOpenExternalLinks(true);
+    layout->addWidget(created);
+
+    auto github = new QLabel();
+    github->setText("<a href=\"github.com/fourt/chatterino2\">Chatterino on Github</a>");
+    github->setTextFormat(Qt::RichText);
+    github->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    github->setOpenExternalLinks(true);
+    layout->addWidget(github);
+
+    return layout;
+}
+
 
 QVBoxLayout *SettingsDialog::createIgnoredUsersTab()
 {

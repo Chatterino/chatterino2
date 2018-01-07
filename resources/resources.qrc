@@ -42,6 +42,8 @@
         <file>images/chatterino2.icns</file>
         <file>images/icon.png</file>
         <file>images/commands.svg</file>
+        <file>images/aboutlogo.png</file>
+        <file>images/about.svg</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

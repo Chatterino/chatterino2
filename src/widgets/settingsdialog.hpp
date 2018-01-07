@@ -83,6 +83,7 @@ private:
     QVBoxLayout *createLogsTab();
     QVBoxLayout *createHighlightingTab();
     QVBoxLayout *createWhispersTab();
+    QVBoxLayout *createAboutTab();
 
     SettingsDialogTab *selectedTab = nullptr;
 
