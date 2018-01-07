@@ -10,3 +10,6 @@
 [submodule "lib/signals"]
 	path = lib/signals
 	url = https://github.com/pajlada/signals.git
+[submodule "lib/rapidjson"]
+	path = lib/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
