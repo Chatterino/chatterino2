@@ -12,7 +12,8 @@ Before building run `git submodule update --init --recursive` to get required su
 
 ### Windows
 #### Using Qt Creator
-##### boost
+##### Visual Studio 2017
+Install Visual Studio 2017 and select "Desktop development with C++" and "Universal Windows Platform development.
 download the [boost library](https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.zip/download) and extract it to `C:\local\boost`
 ##### open-ssl
 1. download binaries for OpenSSL >= 1.0.2 or compile it from source. [example download](https://indy.fulgan.com/SSL/)
