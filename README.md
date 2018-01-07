@@ -17,9 +17,6 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 ##### open-ssl
 1. download binaries for OpenSSL >= 1.0.2 or compile it from source. [example download](https://indy.fulgan.com/SSL/)
 2. Place libeay32.dll and ssleay32.dll from OpenSSL in a directory in PATH.
-##### rapidjson
-1. download rapidjson zip from https://github.com/miloyip/rapidjson/releases/latest
-2. extract to `C:/local/rapidjson` so that `C:/local/rapidjson/include/rapidjson/` is a proper path
 
 #### Using MSYS2
 Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org](http://www.msys2.org/).
