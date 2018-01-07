@@ -88,7 +88,7 @@ void SettingsDialog::addTabs()
 
     this->addTab(this->createBehaviourTab(), "Behaviour", ":/images/behave.svg");
 
-    this->addTab(this->createCommandsTab(), "Commands", ":/images/CustomActionEditor_16x.png");
+    this->addTab(this->createCommandsTab(), "Commands", ":/images/commands.svg");
 
     this->addTab(this->createEmotesTab(), "Emotes", ":/images/emote.svg");
 
