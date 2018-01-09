@@ -25,7 +25,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
                                                      this->getDpiMultiplier()));
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint);
 
     displayText->setAlignment(Qt::AlignHCenter);
     displayText->setText("lmao xD");
