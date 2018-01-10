@@ -6,6 +6,7 @@
 #include "widgets/splitcontainer.hpp"
 
 #include <QList>
+#include <QMessageBox>
 #include <QWidget>
 
 namespace chatterino {
@@ -72,6 +73,8 @@ private:
     pajlada::Settings::Setting<std::vector<std::string>> tabs;
 
     void loadTabs();
+
+    QMessageBox closeConfirmDialog;
 
 public:
     void save();

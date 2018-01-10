@@ -31,6 +31,7 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     , userButton(this)
     , showButtons(_showButtons)
     , tabs(fS("{}/tabs", this->settingRoot))
+    , closeConfirmDialog(this)
 {
     this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
     this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
@@ -47,6 +48,11 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
 
     this->loadTabs();
+
+    closeConfirmDialog.setText("Are you sure to close this tab?");
+    closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
+    closeConfirmDialog.setStandardButtons(QMessageBox::Close | QMessageBox::Abort);
+    closeConfirmDialog.setDefaultButton(QMessageBox::Close);
 }
 
 SplitContainer *Notebook::addNewPage()
@@ -74,6 +80,9 @@ SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
 
 void Notebook::removePage(SplitContainer *page)
 {
+    if (closeConfirmDialog.exec() != QMessageBox::Close)
+        return;
+
     int index = this->pages.indexOf(page);
 
     if (this->pages.size() == 1) {
