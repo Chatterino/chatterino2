@@ -247,6 +247,10 @@ win32 {
     }
 }
 
+win32::exists(C:\fourtf) {
+    DEFINES += "OHHEYITSFOURTF"
+}
+
 macx {
     INCLUDEPATH += /usr/local/include
 }
