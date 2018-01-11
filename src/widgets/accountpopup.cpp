@@ -37,15 +37,19 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
     this->permission = permissions::User;
     for (auto button : this->ui->profileLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
+        button->setAttribute(Qt::WA_MacShowFocusRect, 0);
     }
     for (auto button : this->ui->userLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
+        button->setAttribute(Qt::WA_MacShowFocusRect, 0);
     }
     for (auto button : this->ui->modLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
+        button->setAttribute(Qt::WA_MacShowFocusRect, 0);
     }
     for (auto button : this->ui->ownerLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
+        button->setAttribute(Qt::WA_MacShowFocusRect, 0);
     }
 
     this->timeout(this->ui->purge, 1);
