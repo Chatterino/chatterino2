@@ -378,10 +378,12 @@ void ChannelView::setChannel(SharedChannel newChannel)
             auto messageRef = new MessageLayout(message);
 
             if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted)) {
-                if (this->scrollBar.isAtBottom()) {
-                    this->scrollBar.scrollToBottom();
-                } else {
-                    this->scrollBar.offset(-1);
+                if (!this->paused) {
+                    if (this->scrollBar.isAtBottom()) {
+                        this->scrollBar.scrollToBottom();
+                    } else {
+                        this->scrollBar.offset(-1);
+                    }
                 }
             }
 
@@ -404,11 +406,13 @@ void ChannelView::setChannel(SharedChannel newChannel)
                 messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
             }
 
-            if (this->messages.pushFront(messageRefs).size() > 0) {
-                if (this->scrollBar.isAtBottom()) {
-                    this->scrollBar.scrollToBottom();
-                } else {
-                    this->scrollBar.offset((qreal)messages.size());
+            if (!this->paused) {
+                if (this->messages.pushFront(messageRefs).size() > 0) {
+                    if (this->scrollBar.isAtBottom()) {
+                        this->scrollBar.scrollToBottom();
+                    } else {
+                        this->scrollBar.offset((qreal)messages.size());
+                    }
                 }
             }
 
