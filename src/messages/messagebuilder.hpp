@@ -14,25 +14,32 @@ class MessageBuilder
 public:
     MessageBuilder();
 
-    SharedMessage getMessage();
+    MessagePtr getMessage();
 
-    void appendWord(const Word &&word);
-    void appendTimestamp();
-    void appendTimestamp(QDateTime &time);
     void setHighlight(bool value);
+    void appendElement(MessageElement *element);
+
+    //    typename std::enable_if<std::is_base_of<MessageElement, T>::value, T>::type
+
+    template <class T, class... Args>
+    T *append(Args &&... args)
+    {
+        static_assert(std::is_base_of<MessageElement, T>::value, "T must extend MessageElement");
+
+        T *element = new T(std::forward<Args>(args)...);
+        this->appendElement(element);
+        return element;
+    }
+
+    void appendTimestamp();
+    void appendTimestamp(const QTime &time);
 
     QString matchLink(const QString &string);
-    QRegularExpression linkRegex;
 
     QString originalMessage;
 
 protected:
-    std::shared_ptr<messages::Message> message;
-
-private:
-    std::vector<Word> _words;
-    bool highlight = false;
-    std::chrono::time_point<std::chrono::system_clock> _parseTime;
+    MessagePtr message;
 };
 
 }  // namespace messages

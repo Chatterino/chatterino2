@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messages/highlightphrase.hpp"
-#include "messages/word.hpp"
+#include "messages/messageelement.hpp"
 #include "singletons/helper/chatterinosetting.hpp"
 
 #include <pajlada/settings/setting.hpp>
@@ -23,14 +23,14 @@ class SettingManager : public QObject
     using QStringSetting = ChatterinoSetting<QString>;
 
 public:
-    messages::Word::Flags getWordTypeMask();
+    messages::MessageElement::Flags getWordTypeMask();
     bool isIgnoredEmote(const QString &emote);
 
     void init();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
-    BoolSetting showTimestampSeconds = {"/appearance/messages/showTimestampSeconds", true};
+    QStringSetting timestampFormat = {"/appearance/messages/timestampFormat", "h:mm"};
     BoolSetting showBadges = {"/appearance/messages/showBadges", true};
     BoolSetting showLastMessageIndicator = {"/appearance/messages/showLastMessageIndicator", false};
     BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
@@ -110,7 +110,7 @@ private:
 
     SettingManager();
 
-    messages::Word::Flags wordTypeMask = messages::Word::Default;
+    messages::MessageElement::Flags wordTypeMask = messages::MessageElement::Default;
 
     pajlada::Settings::SettingListener wordMaskListener;
 };

@@ -29,14 +29,14 @@ bool Channel::isEmpty() const
     return false;
 }
 
-messages::LimitedQueueSnapshot<messages::SharedMessage> Channel::getMessageSnapshot()
+messages::LimitedQueueSnapshot<messages::MessagePtr> Channel::getMessageSnapshot()
 {
     return this->messages.getSnapshot();
 }
 
-void Channel::addMessage(std::shared_ptr<Message> message)
+void Channel::addMessage(MessagePtr message)
 {
-    std::shared_ptr<Message> deleted;
+    MessagePtr deleted;
 
     const QString &username = message->loginName;
 
@@ -56,16 +56,16 @@ void Channel::addMessage(std::shared_ptr<Message> message)
     this->messageAppended(message);
 }
 
-void Channel::addMessagesAtStart(std::vector<messages::SharedMessage> &_messages)
+void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
 {
-    std::vector<messages::SharedMessage> addedMessages = this->messages.pushFront(_messages);
+    std::vector<messages::MessagePtr> addedMessages = this->messages.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart(addedMessages);
     }
 }
 
-void Channel::replaceMessage(messages::SharedMessage message, messages::SharedMessage replacement)
+void Channel::replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement)
 {
     int index = this->messages.replaceItem(message, replacement);
 

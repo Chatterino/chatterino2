@@ -1,7 +1,7 @@
 #include "messagebuilder.hpp"
-#include "singletons/thememanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/resourcemanager.hpp"
+#include "singletons/thememanager.hpp"
 
 #include <QDateTime>
 
@@ -11,43 +11,35 @@ namespace messages {
 MessageBuilder::MessageBuilder()
     : message(new Message)
 {
-    _parseTime = std::chrono::system_clock::now();
 }
 
-SharedMessage MessageBuilder::getMessage()
+MessagePtr MessageBuilder::getMessage()
 {
     return this->message;
 }
 
-void MessageBuilder::appendWord(const Word &&word)
+void MessageBuilder::appendElement(MessageElement *element)
 {
-    this->message->getWords().push_back(word);
+    this->message->addElement(element);
 }
 
 void MessageBuilder::appendTimestamp()
 {
-    QDateTime t = QDateTime::currentDateTime();
-    this->appendTimestamp(t);
+    this->appendTimestamp(QTime::currentTime());
 }
 
 void MessageBuilder::setHighlight(bool value)
 {
-    this->message->setHighlight(value);
+    if (value) {
+        this->message->addFlags(Message::Highlighted);
+    } else {
+        this->message->removeFlags(Message::Highlighted);
+    }
 }
 
-void MessageBuilder::appendTimestamp(QDateTime &time)
+void MessageBuilder::appendTimestamp(const QTime &time)
 {
-    // Add word for timestamp with no seconds
-    QString timestampNoSeconds(time.toString("hh:mm"));
-    this->appendWord(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                          MessageColor(MessageColor::System), singletons::FontManager::Medium, QString(),
-                          QString()));
-
-    // Add word for timestamp with seconds
-    QString timestampWithSeconds(time.toString("hh:mm:ss"));
-    this->appendWord(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                          MessageColor(MessageColor::System), singletons::FontManager::Medium, QString(),
-                          QString()));
+    this->appendElement(new TimestampElement(time));
 }
 
 QString MessageBuilder::matchLink(const QString &string)

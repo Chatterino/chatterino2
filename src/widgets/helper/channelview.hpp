@@ -1,11 +1,11 @@
 #pragma once
 
 #include "channel.hpp"
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
+#include "messages/layouts/messagelayout.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageref.hpp"
+#include "messages/messageelement.hpp"
 #include "messages/selection.hpp"
-#include "messages/word.hpp"
 #include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
@@ -31,7 +31,6 @@ public:
     explicit ChannelView(BaseWidget *parent = 0);
     ~ChannelView();
 
-    void updateGifEmotes();
     void queueUpdate();
     Scrollbar &getScrollBar();
     QString getSelectedText();
@@ -41,8 +40,8 @@ public:
     bool getEnableScrollingToBottom() const;
     void pause(int msecTimeout);
 
-    void setChannel(std::shared_ptr<Channel> channel);
-    messages::LimitedQueueSnapshot<messages::SharedMessageRef> getMessagesSnapshot();
+    void setChannel(SharedChannel channel);
+    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
     void clearMessages();
@@ -64,35 +63,25 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageRef> &message,
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &message,
                          QPoint &relativePos, int &index);
 
 private:
-    struct GifEmoteData {
-        messages::LazyLoadedImage *image;
-        QRect rect;
-    };
-
     QTimer updateTimer;
     bool updateQueued = false;
     bool messageWasAdded = false;
     bool paused = false;
     QTimer pauseTimeout;
 
-    messages::LimitedQueueSnapshot<messages::SharedMessageRef> snapshot;
+    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
 
     void detachChannel();
     void actuallyLayoutMessages();
 
-    void drawMessages(QPainter &painter, bool overlays);
-    void updateMessageBuffer(messages::MessageRef *messageRef, QPixmap *buffer, int messageIndex);
-    void drawMessageSelection(QPainter &painter, messages::MessageRef *messageRef, int messageIndex,
-                              int bufferHeight);
+    void drawMessages(QPainter &painter);
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
 
-    std::shared_ptr<Channel> channel;
-
-    std::vector<GifEmoteData> gifEmotes;
+    SharedChannel channel;
 
     Scrollbar scrollBar;
     RippleEffectLabel *goToBottom;
@@ -112,7 +101,7 @@ private:
     messages::Selection selection;
     bool selecting = false;
 
-    messages::LimitedQueue<messages::SharedMessageRef> messages;
+    messages::LimitedQueue<messages::MessageLayoutPtr> messages;
 
     boost::signals2::connection messageAppendedConnection;
     boost::signals2::connection messageAddedAtStartConnection;
@@ -123,7 +112,7 @@ private:
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
-    std::unordered_set<std::shared_ptr<messages::MessageRef>> messagesOnScreen;
+    std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen;
 
 private slots:
     void wordTypeMaskChanged()

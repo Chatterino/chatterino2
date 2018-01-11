@@ -171,7 +171,7 @@ public:
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 
-        int x = 0;
+        size_t x = 0;
 
         for (size_t i = 0; i < this->chunks->size(); i++) {
             Chunk &chunk = this->chunks->at(i);
@@ -191,11 +191,12 @@ public:
                     newChunk->at(j) = replacement;
                     this->chunks->at(i) = newChunk;
 
-                    return x;
+                    return true;
                 }
                 x++;
             }
         }
+        return false;
     }
 
     //    void insertAfter(const std::vector<T> &items, const T &index)

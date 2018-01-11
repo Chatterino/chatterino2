@@ -59,7 +59,7 @@ void SearchPopup::initLayout()
     }
 }
 
-void SearchPopup::setChannel(std::shared_ptr<Channel> channel)
+void SearchPopup::setChannel(SharedChannel channel)
 {
     this->snapshot = channel->getMessageSnapshot();
     this->performSearch();
@@ -71,13 +71,13 @@ void SearchPopup::performSearch()
 {
     QString text = searchInput->text();
 
-    std::shared_ptr<Channel> channel(new Channel("search"));
+    SharedChannel channel(new Channel("search"));
 
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
-        messages::SharedMessage message = this->snapshot[i];
+        messages::MessagePtr message = this->snapshot[i];
 
         if (text.isEmpty() ||
-            message->getContent().indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) !=
+            message->getSearchText().indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) !=
                 -1) {
             channel->addMessage(message);
         }

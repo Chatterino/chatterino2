@@ -34,7 +34,7 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     this->loadEmojis();
 }
 
-void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
+void EmotePopup::loadChannel(SharedChannel _channel)
 {
     TwitchChannel *channel = dynamic_cast<TwitchChannel *>(_channel.get());
 
@@ -42,29 +42,25 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
         return;
     }
 
-    std::shared_ptr<Channel> emoteChannel(new Channel(""));
+    SharedChannel emoteChannel(new Channel(""));
 
     auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
         messages::MessageBuilder builder1;
 
-        builder1.appendWord(Word(title, Word::Flags::Text, MessageColor(MessageColor::Text),
-                                 singletons::FontManager::Medium, QString(), QString()));
+        builder1.appendElement(new TextElement(title, MessageElement::Text));
 
-        builder1.getMessage()->centered = true;
+        builder1.getMessage()->addFlags(Message::Centered);
         emoteChannel->addMessage(builder1.getMessage());
 
         // EMOTES
         messages::MessageBuilder builder2;
-        builder2.getMessage()->centered = true;
-        builder2.getMessage()->setDisableCompactEmotes(true);
-
-        int preferredEmoteSize = singletons::SettingManager::getInstance().preferredEmoteQuality;
+        builder2.getMessage()->addFlags(Message::Centered);
+        builder2.getMessage()->addFlags(Message::DisableCompactEmotes);
 
         map.each([&](const QString &key, const util::EmoteData &value) {
-            builder2.appendWord(Word(value.getImageForSize(preferredEmoteSize),
-                                     Word::Flags::AlwaysShow, key, emoteDesc,
-                                     Link(Link::Type::InsertText, key)));
+            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+                                       ->setLink(Link(Link::InsertText, key)));
         });
 
         emoteChannel->addMessage(builder2.getMessage());
@@ -85,31 +81,26 @@ void EmotePopup::loadChannel(std::shared_ptr<Channel> _channel)
 
 void EmotePopup::loadEmojis()
 {
-    int preferredEmoteSize = singletons::SettingManager::getInstance().preferredEmoteQuality;
     util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
-    std::shared_ptr<Channel> emojiChannel(new Channel(""));
+    SharedChannel emojiChannel(new Channel(""));
 
     // title
     messages::MessageBuilder builder1;
 
-    builder1.appendWord(Word("emojis", Word::Flags::Text, MessageColor(MessageColor::Text),
-                             singletons::FontManager::Medium, QString(), QString()));
-
-    builder1.getMessage()->centered = true;
+    builder1.appendElement(new TextElement("emojis", MessageElement::Text));
+    builder1.getMessage()->addFlags(Message::Centered);
     emojiChannel->addMessage(builder1.getMessage());
 
     // emojis
     messages::MessageBuilder builder;
-    builder.getMessage()->centered = true;
-    builder.getMessage()->setDisableCompactEmotes(true);
+    builder.getMessage()->addFlags(Message::Centered);
+    builder.getMessage()->setFlags(Message::DisableCompactEmotes);
 
-    emojis.each(
-        [this, &builder, preferredEmoteSize](const QString &key, const util::EmoteData &value) {
-            auto emoteImage = value.getImageForSize(preferredEmoteSize);
-            builder.appendWord(Word(emoteImage, Word::Flags::AlwaysShow, key, "emoji",
-                                    Link(Link::Type::InsertText, key)));
-        });
+    emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
+        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+                                  ->setLink(Link(Link::Type::InsertText, key)));
+    });
     emojiChannel->addMessage(builder.getMessage());
 
     this->viewEmojis->setChannel(emojiChannel);

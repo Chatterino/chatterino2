@@ -30,7 +30,7 @@ public:
     void removePage(SplitContainer *page);
     void removeCurrentPage();
     void select(SplitContainer *page);
-    void selectIndex(unsigned index);
+    void selectIndex(int index);
 
     SplitContainer *getSelectedPage() const
     {

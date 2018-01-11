@@ -10,9 +10,9 @@ namespace singletons {
 
 namespace {
 
-inline messages::LazyLoadedImage *lli(const char *pixmapPath, qreal scale = 1)
+inline messages::Image *lli(const char *pixmapPath, qreal scale = 1)
 {
-    return new messages::LazyLoadedImage(new QPixmap(pixmapPath), scale);
+    return new messages::Image(new QPixmap(pixmapPath), scale);
 }
 
 }  // namespace
@@ -49,9 +49,9 @@ ResourceManager &ResourceManager::getInstance()
 }
 
 ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
-    : badgeImage1x(new messages::LazyLoadedImage(root.value("image_url_1x").toString()))
-    , badgeImage2x(new messages::LazyLoadedImage(root.value("image_url_2x").toString()))
-    , badgeImage4x(new messages::LazyLoadedImage(root.value("image_url_4x").toString()))
+    : badgeImage1x(new messages::Image(root.value("image_url_1x").toString()))
+    , badgeImage2x(new messages::Image(root.value("image_url_2x").toString()))
+    , badgeImage4x(new messages::Image(root.value("image_url_4x").toString()))
     , description(root.value("description").toString().toStdString())
     , title(root.value("title").toString().toStdString())
     , clickAction(root.value("clickAction").toString().toStdString())
@@ -139,7 +139,7 @@ void ResourceManager::loadChatterinoBadges()
             const QString &badgeVariantImageURL = badgeVariant.value("image").toString();
 
             auto badgeVariantPtr = std::make_shared<ChatterinoBadge>(
-                badgeVariantTooltip, new messages::LazyLoadedImage(badgeVariantImageURL));
+                badgeVariantTooltip, new messages::Image(badgeVariantImageURL));
 
             QJsonArray badgeVariantUsers = badgeVariant.value("users").toArray();
 

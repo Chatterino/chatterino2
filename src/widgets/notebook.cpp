@@ -126,9 +126,9 @@ void Notebook::select(SplitContainer *page)
     this->performLayout();
 }
 
-void Notebook::selectIndex(unsigned index)
+void Notebook::selectIndex(int index)
 {
-    if (index >= this->pages.size()) {
+    if (index < 0 || index >= this->pages.size()) {
         return;
     }
 

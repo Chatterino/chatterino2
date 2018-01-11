@@ -71,9 +71,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
-        SharedMessage msg(Message::createSystemMessage("Chat has been cleared by a moderator."));
-
-        c->addMessage(msg);
+        c->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
         return;
     }
@@ -94,12 +92,13 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // add the notice that the user has been timed out
-    LimitedQueueSnapshot<SharedMessage> snapshot = c->getMessageSnapshot();
+    LimitedQueueSnapshot<MessagePtr> snapshot = c->getMessageSnapshot();
     bool addMessage = true;
+    int snapshotLength = snapshot.getLength();
 
-    for (int i = std::max(0, (int)snapshot.getLength() - 20); i < snapshot.getLength(); i++) {
-        if (snapshot[i]->getFlags() & Message::Timeout && snapshot[i]->timeoutUser == username) {
-            SharedMessage replacement(
+    for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
+        if (snapshot[i]->hasFlags(Message::Timeout) && snapshot[i]->loginName == username) {
+            MessagePtr replacement(
                 Message::createTimeoutMessage(username, durationInSeconds, reason, true));
             c->replaceMessage(snapshot[i], replacement);
             addMessage = false;
@@ -108,16 +107,13 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     if (addMessage) {
-        SharedMessage msg(
-            Message::createTimeoutMessage(username, durationInSeconds, reason, false));
-        c->addMessage(msg);
+        c->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason, false));
     }
 
     // disable the messages from the user
-    for (int i = 0; i < snapshot.getLength(); i++) {
-        if (!(snapshot[i]->getFlags() & Message::Timeout) &&
-            snapshot[i]->getTimeoutUser() == username) {
-            snapshot[i]->setDisabled(true);
+    for (int i = 0; i < snapshotLength; i++) {
+        if (!snapshot[i]->hasFlags(Message::Timeout) && snapshot[i]->loginName == username) {
+            snapshot[i]->setFlags(Message::Disabled);
         }
     }
 
@@ -155,7 +151,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto rawChannelName = message->target();
 
     bool broadcast = rawChannelName.length() < 2;
-    std::shared_ptr<Message> msg(Message::createSystemMessage(message->content()));
+    MessagePtr msg = Message::createSystemMessage(message->content());
 
     if (broadcast) {
         this->channelManager.doOnAll([msg](const auto &c) {

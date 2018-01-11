@@ -38,11 +38,11 @@ public:
     QString messageID;
     QString userName;
 
-    messages::SharedMessage parse();
+    messages::MessagePtr parse();
 
     //    static bool sortTwitchEmotes(
-    //        const std::pair<long int, messages::LazyLoadedImage *> &a,
-    //        const std::pair<long int, messages::LazyLoadedImage *> &b);
+    //        const std::pair<long int, messages::Image *> &a,
+    //        const std::pair<long int, messages::Image *> &b);
 
 private:
     QString roomID;
@@ -56,14 +56,13 @@ private:
     void appendUsername();
     void parseHighlights();
 
-    void appendModerationButtons();
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
                            std::vector<std::pair<long, util::EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
     bool appendEmote(const util::EmoteData &emoteData);
 
     void parseTwitchBadges();
-    void parseChatterinoBadges();
+    void addChatterinoBadges();
 };
 
 }  // namespace twitch

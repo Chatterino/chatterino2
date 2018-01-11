@@ -62,14 +62,14 @@ static void FillInFFZEmoteData(const QJsonObject &urls, const QString &code,
 
     assert(!url1x.isEmpty());
 
-    emoteData.image1x = new LazyLoadedImage(url1x, 1, code, code + "<br />Global FFZ Emote");
+    emoteData.image1x = new Image(url1x, 1, code, code + "<br />Global FFZ Emote");
 
     if (!url2x.isEmpty()) {
-        emoteData.image2x = new LazyLoadedImage(url2x, 0.5, code, code + "<br />Global FFZ Emote");
+        emoteData.image2x = new Image(url2x, 0.5, code, code + "<br />Global FFZ Emote");
     }
 
     if (!url3x.isEmpty()) {
-        emoteData.image3x = new LazyLoadedImage(url3x, 0.25, code, code + "<br />Global FFZ Emote");
+        emoteData.image3x = new Image(url3x, 0.25, code, code + "<br />Global FFZ Emote");
     }
 }
 
@@ -143,7 +143,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
 
             auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
                 return util::EmoteData(
-                    new LazyLoadedImage(link, 1, code, code + "<br/>Channel BTTV Emote"));
+                    new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
             });
 
             this->bttvChannelEmotes.insert(code, emote);
@@ -294,7 +294,7 @@ void EmoteManager::loadEmojis()
                       code + ".png";
 
         this->emojis.insert(code,
-                            util::EmoteData(new LazyLoadedImage(url, 0.35, ":" + shortCode + ":",
+                            util::EmoteData(new Image(url, 0.35, ":" + shortCode + ":",
                                                                 ":" + shortCode + ":<br/>Emoji")));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
@@ -375,7 +375,7 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
         // Create or fetch cached emoji image
         auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [this, &url] {
             return util::EmoteData(
-                new LazyLoadedImage(url, 0.35, "?????????", "???????????????"));  //
+                new Image(url, 0.35, "?????????", "???????????????"));  //
         });
 
         // Push the emoji as a word to parsedWords
@@ -489,11 +489,11 @@ void EmoteManager::loadBTTVEmotes()
             QString code = emote.toObject().value("code").toString();
 
             util::EmoteData emoteData;
-            emoteData.image1x = new LazyLoadedImage(GetBTTVEmoteLink(urlTemplate, id, "1x"), 1,
+            emoteData.image1x = new Image(GetBTTVEmoteLink(urlTemplate, id, "1x"), 1,
                                                     code, code + "<br />Global BTTV Emote");
-            emoteData.image2x = new LazyLoadedImage(GetBTTVEmoteLink(urlTemplate, id, "2x"), 0.5,
+            emoteData.image2x = new Image(GetBTTVEmoteLink(urlTemplate, id, "2x"), 0.5,
                                                     code, code + "<br />Global BTTV Emote");
-            emoteData.image3x = new LazyLoadedImage(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25,
+            emoteData.image3x = new Image(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25,
                                                     code, code + "<br />Global BTTV Emote");
 
             this->bttvGlobalEmotes.insert(code, emoteData);
@@ -547,11 +547,11 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
 
     return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
-        newEmoteData.image1x = new LazyLoadedImage(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
+        newEmoteData.image1x = new Image(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 1x");
-        newEmoteData.image2x = new LazyLoadedImage(GetTwitchEmoteLink(id, "2.0"), .5, emoteName,
+        newEmoteData.image2x = new Image(GetTwitchEmoteLink(id, "2.0"), .5, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 2x");
-        newEmoteData.image3x = new LazyLoadedImage(GetTwitchEmoteLink(id, "3.0"), .25, emoteName,
+        newEmoteData.image3x = new Image(GetTwitchEmoteLink(id, "3.0"), .25, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 3x");
 
         return newEmoteData;

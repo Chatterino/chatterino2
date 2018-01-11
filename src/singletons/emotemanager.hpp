@@ -3,7 +3,7 @@
 #define GIF_FRAME_LENGTH 33
 
 #include "emojis.hpp"
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 #include "signalvector.hpp"
 #include "twitch/emotevalue.hpp"
 #include "twitch/twitchuser.hpp"
@@ -63,7 +63,7 @@ public:
     boost::signals2::signal<void()> &getGifUpdateSignal();
 
     // Bit badge/emotes?
-    util::ConcurrentMap<QString, messages::LazyLoadedImage *> miscImageCache;
+    util::ConcurrentMap<QString, messages::Image *> miscImageCache;
 
 private:
     SettingManager &settingsManager;

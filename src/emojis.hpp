@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 #include "util/concurrentmap.hpp"
 
 #include <QObject>

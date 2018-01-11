@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 #include "util/concurrentmap.hpp"
 
 #include <cassert>
@@ -13,14 +13,14 @@ struct EmoteData {
     {
     }
 
-    EmoteData(messages::LazyLoadedImage *_image)
+    EmoteData(messages::Image *_image)
         : image1x(_image)
     {
     }
 
-    messages::LazyLoadedImage *getImageForSize(unsigned emoteSize) const
+    messages::Image *getImageForSize(unsigned emoteSize) const
     {
-        messages::LazyLoadedImage *ret = nullptr;
+        messages::Image *ret = nullptr;
 
         switch (emoteSize) {
             case 0:
@@ -53,9 +53,9 @@ struct EmoteData {
         return this->image1x != nullptr;
     }
 
-    messages::LazyLoadedImage *image1x = nullptr;
-    messages::LazyLoadedImage *image2x = nullptr;
-    messages::LazyLoadedImage *image3x = nullptr;
+    messages::Image *image1x = nullptr;
+    messages::Image *image2x = nullptr;
+    messages::Image *image3x = nullptr;
 };
 
 typedef ConcurrentMap<QString, EmoteData> EmoteMap;

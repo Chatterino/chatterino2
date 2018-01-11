@@ -48,7 +48,7 @@ private:
     QLabel textLengthLabel;
     RippleEffectLabel emotesLabel;
     QStringList prevMsg;
-    unsigned int prevIndex = 0;
+    int prevIndex = 0;
     virtual void refreshTheme() override;
 
 private slots:

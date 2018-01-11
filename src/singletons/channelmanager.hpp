@@ -17,20 +17,20 @@ class ChannelManager
 public:
     static ChannelManager &getInstance();
 
-    const std::vector<std::shared_ptr<Channel>> getItems();
+    const std::vector<SharedChannel> getItems();
 
-    std::shared_ptr<Channel> addTwitchChannel(const QString &channel);
-    std::shared_ptr<Channel> getTwitchChannel(const QString &channel);
+    SharedChannel addTwitchChannel(const QString &channel);
+    SharedChannel getTwitchChannel(const QString &channel);
     void removeTwitchChannel(const QString &channel);
 
     const std::string &getUserID(const std::string &username);
 
-    void doOnAll(std::function<void(std::shared_ptr<Channel>)> func);
+    void doOnAll(std::function<void(SharedChannel)> func);
 
     // Special channels
-    const std::shared_ptr<Channel> whispersChannel;
-    const std::shared_ptr<Channel> mentionsChannel;
-    const std::shared_ptr<Channel> emptyChannel;
+    const SharedChannel whispersChannel;
+    const SharedChannel mentionsChannel;
+    const SharedChannel emptyChannel;
 
 private:
     std::map<std::string, std::string> usernameToID;

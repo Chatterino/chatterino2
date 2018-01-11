@@ -20,7 +20,7 @@ public:
     void setChannel(std::shared_ptr<Channel> channel);
 
 private:
-    messages::LimitedQueueSnapshot<messages::SharedMessage> snapshot;
+    messages::LimitedQueueSnapshot<messages::MessagePtr> snapshot;
     QLineEdit *searchInput;
     ChannelView *channelView;
 

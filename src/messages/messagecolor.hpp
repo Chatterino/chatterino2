@@ -12,8 +12,8 @@ class MessageColor
 public:
     enum Type { Custom, Text, Link, System };
 
-    explicit MessageColor(const QColor &color);
-    explicit MessageColor(Type type = Text);
+    MessageColor(const QColor &color);
+    MessageColor(Type type = Text);
 
     Type getType() const;
     const QColor &getColor(singletons::ThemeManager &themeManager) const;

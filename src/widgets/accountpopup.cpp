@@ -18,7 +18,7 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(std::shared_ptr<Channel> _channel)
+AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
     : BaseWidget()
     , ui(new Ui::AccountPopup)
     , channel(_channel)
@@ -132,7 +132,7 @@ void AccountPopupWidget::setName(const QString &name)
     this->getUserId();
 }
 
-void AccountPopupWidget::setChannel(std::shared_ptr<Channel> _channel)
+void AccountPopupWidget::setChannel(SharedChannel _channel)
 {
     this->channel = _channel;
 }

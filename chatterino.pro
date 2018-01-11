@@ -58,11 +58,8 @@ SOURCES += \
     src/channel.cpp \
     src/channeldata.cpp \
     src/singletons/ircmanager.cpp \
-    src/messages/lazyloadedimage.cpp \
     src/messages/link.cpp \
     src/messages/message.cpp \
-    src/messages/word.cpp \
-    src/messages/wordpart.cpp \
     src/widgets/notebook.cpp \
     src/widgets/helper/notebookbutton.cpp \
     src/widgets/helper/notebooktab.cpp \
@@ -71,7 +68,6 @@ SOURCES += \
     src/widgets/settingsdialog.cpp \
     src/widgets/helper/settingsdialogtab.cpp \
     src/widgets/textinputdialog.cpp \
-    src/messages/messageref.cpp \
     src/logging/loggingmanager.cpp \
     src/logging/loggingchannel.cpp \
     src/singletons/windowmanager.cpp \
@@ -115,7 +111,12 @@ SOURCES += \
     src/singletons/resourcemanager.cpp \
     src/singletons/helper/ircmessagehandler.cpp \
     src/singletons/pathmanager.cpp \
-    src/widgets/helper/searchpopup.cpp
+    src/widgets/helper/searchpopup.cpp \
+    src/messages/messageelement.cpp \
+    src/messages/image.cpp \
+    src/messages/layouts/messagelayout.cpp \
+    src/messages/layouts/messagelayoutelement.cpp \
+    src/messages/layouts/messagelayoutcontainer.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -124,11 +125,8 @@ HEADERS  += \
     src/util/concurrentmap.hpp \
     src/emojis.hpp \
     src/singletons/ircmanager.hpp \
-    src/messages/lazyloadedimage.hpp \
     src/messages/link.hpp \
     src/messages/message.hpp \
-    src/messages/word.hpp \
-    src/messages/wordpart.hpp \
     src/twitch/emotevalue.hpp \
     src/widgets/notebook.hpp \
     src/widgets/helper/notebookbutton.hpp \
@@ -142,7 +140,6 @@ HEADERS  += \
     src/widgets/helper/resizingtextedit.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
-    src/messages/messageref.hpp \
     src/logging/loggingmanager.hpp \
     src/logging/loggingchannel.hpp \
     src/singletons/channelmanager.hpp \
@@ -200,7 +197,13 @@ HEADERS  += \
     src/messages/selection.hpp \
     src/singletons/pathmanager.hpp \
     src/widgets/helper/searchpopup.hpp \
-    src/widgets/helper/shortcut.hpp
+    src/widgets/helper/shortcut.hpp \
+    src/messages/messageelement.hpp \
+    src/messages/image.hpp \
+    src/messages/layouts/messagelayout.hpp \
+    src/messages/layouts/messagelayoutelement.hpp \
+    src/messages/layouts/messagelayoutcontainer.hpp \
+    src/util/property.hpp
 
 
 PRECOMPILED_HEADER =

@@ -1,65 +1,32 @@
 #include "messages/message.hpp"
-#include "channel.hpp"
-#include "emojis.hpp"
-#include "messages/link.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/fontmanager.hpp"
-#include "singletons/ircmanager.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/thememanager.hpp"
+#include "messageelement.hpp"
 #include "util/irchelpers.hpp"
-
-#include <ctime>
-#include <list>
-#include <tuple>
 
 typedef chatterino::widgets::ScrollbarHighlight SBHighlight;
 
 namespace chatterino {
 namespace messages {
 
-bool Message::containsHighlightedPhrase() const
+// elements
+void Message::addElement(MessageElement *element)
 {
-    return this->highlightTab;
+    this->elements.push_back(std::unique_ptr<MessageElement>(element));
 }
 
-void Message::setHighlight(bool value)
+const std::vector<std::unique_ptr<MessageElement>> &Message::getElements() const
 {
-    this->highlightTab = value;
+    return this->elements;
 }
 
-const QString &Message::getTimeoutUser() const
-{
-    return this->timeoutUser;
-}
-
-int Message::getTimeoutCount() const
-{
-    return this->timeoutCount;
-}
-
-const QString &Message::getContent() const
-{
-    if (this->content.isNull()) {
-        this->updateContent();
-    }
-
-    return this->content;
-}
-
-const std::chrono::time_point<std::chrono::system_clock> &Message::getParseTime() const
-{
-    return this->parseTime;
-}
-
-std::vector<Word> &Message::getWords()
-{
-    return this->words;
-}
-
+// Flags
 Message::MessageFlags Message::getFlags() const
 {
     return this->flags;
+}
+
+bool Message::hasFlags(MessageFlags _flags) const
+{
+    return this->flags & _flags;
 }
 
 void Message::setFlags(MessageFlags _flags)
@@ -77,113 +44,74 @@ void Message::removeFlags(MessageFlags _flags)
     this->flags = (MessageFlags)((MessageFlagsType)this->flags & ~((MessageFlagsType)_flags));
 }
 
-bool Message::isDisabled() const
+// Parse Time
+const QTime &Message::getParseTime() const
 {
-    return this->disabled;
+    return this->parseTime;
 }
 
-void Message::setDisabled(bool value)
-{
-    this->disabled = value;
-}
-
+// Id
 const QString &Message::getId() const
 {
     return this->id;
 }
 
-bool Message::getCollapsedDefault() const
+void Message::setId(const QString &_id)
 {
-    return this->collapsedDefault;
+    this->id = _id;
 }
 
-void Message::setCollapsedDefault(bool value)
+// Search
+const QString &Message::getSearchText() const
 {
-    this->collapsedDefault = value;
+    // fourtf: asdf
+    //    if (this->searchText.isNull()) {
+    //        QString _content("");
+
+    //        bool first;
+
+    //        for (const MessageElement &word : this->words) {
+    //            if (!first) {
+    //                _content += "";
+    //            }
+
+    //            _content += word.getCopyText();
+    //            first = false;
+    //        }
+
+    //        this->searchText = _content;
+    //    }
+
+    //    return this->searchText;
+
+    static QString xd;
+
+    return xd;
 }
 
-bool Message::getDisableCompactEmotes() const
-{
-    return this->disableCompactEmotes;
-}
-
-void Message::setDisableCompactEmotes(bool value)
-{
-    this->disableCompactEmotes = value;
-}
-
-void Message::updateContent() const
-{
-    QString _content("");
-
-    bool first;
-
-    for (const Word &word : this->words) {
-        if (!first) {
-            _content += "";
-        }
-
-        _content += word.getCopyText();
-        first = false;
-    }
-
-    this->content = _content;
-}
-
+// Highlight
 SBHighlight Message::getScrollBarHighlight() const
 {
-    if (this->getFlags() & Message::Highlighted) {
+    if (this->hasFlags(Message::Highlighted)) {
         return SBHighlight(SBHighlight::Highlight);
     }
     return SBHighlight();
 }
 
-namespace {
-
-void AddCurrentTimestamp(Message *message)
+// Static
+MessagePtr Message::createSystemMessage(const QString &text)
 {
-    std::time_t t;
-    time(&t);
-    char timeStampBuffer[69];
+    MessagePtr message(new Message);
 
-    // Add word for timestamp with no seconds
-    strftime(timeStampBuffer, 69, "%H:%M", localtime(&t));
-    QString timestampNoSeconds(timeStampBuffer);
-    message->getWords().push_back(Word(timestampNoSeconds, Word::TimestampNoSeconds,
-                                       MessageColor(MessageColor::System),
-                                       singletons::FontManager::Medium, QString(), QString()));
-
-    // Add word for timestamp with seconds
-    strftime(timeStampBuffer, 69, "%H:%M:%S", localtime(&t));
-    QString timestampWithSeconds(timeStampBuffer);
-    message->getWords().push_back(Word(timestampWithSeconds, Word::TimestampWithSeconds,
-                                       MessageColor(MessageColor::System),
-                                       singletons::FontManager::Medium, QString(), QString()));
-}
-
-}  // namespace
-
-/// Static
-Message *Message::createSystemMessage(const QString &text)
-{
-    Message *message = new Message;
-
-    AddCurrentTimestamp(message);
-
-    QStringList words = text.split(' ');
-
-    for (QString word : words) {
-        message->getWords().push_back(Word(word, Word::Flags::Default,
-                                           MessageColor(MessageColor::Type::System),
-                                           singletons::FontManager::Medium, word, QString()));
-    }
+    message->addElement(new TimestampElement(QTime::currentTime()));
+    message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
     message->addFlags(Message::System);
 
-    return message;
+    return MessagePtr(message);
 }
 
-Message *Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
-                                       const QString &reason, bool multipleTimes)
+MessagePtr Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
+                                         const QString &reason, bool multipleTimes)
 {
     QString text;
 
@@ -207,7 +135,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
 
     if (reason.length() > 0) {
         text.append(": \"");
-        text.append(ParseTagString(reason));
+        text.append(util::ParseTagString(reason));
         text.append("\"");
     }
     text.append(".");
@@ -216,7 +144,7 @@ Message *Message::createTimeoutMessage(const QString &username, const QString &d
         text.append(" (multiple times)");
     }
 
-    Message *message = Message::createSystemMessage(text);
+    MessagePtr message = Message::createSystemMessage(text);
     message->addFlags(Message::Timeout);
     message->timeoutUser = username;
     return message;

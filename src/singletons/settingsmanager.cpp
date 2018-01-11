@@ -18,7 +18,6 @@ SettingManager::SettingManager()
     : snapshot(nullptr)
 {
     this->wordMaskListener.addSetting(this->showTimestamps);
-    this->wordMaskListener.addSetting(this->showTimestampSeconds);
     this->wordMaskListener.addSetting(this->showBadges);
     this->wordMaskListener.addSetting(this->enableBttvEmotes);
     this->wordMaskListener.addSetting(this->enableEmojis);
@@ -29,7 +28,7 @@ SettingManager::SettingManager()
     };
 }
 
-Word::Flags SettingManager::getWordTypeMask()
+MessageElement::Flags SettingManager::getWordTypeMask()
 {
     return this->wordTypeMask;
 }
@@ -48,35 +47,31 @@ void SettingManager::init()
 
 void SettingManager::updateWordTypeMask()
 {
-    uint32_t newMaskUint = Word::Text;
+    uint32_t newMaskUint = MessageElement::Text;
 
     if (this->showTimestamps) {
-        if (this->showTimestampSeconds) {
-            newMaskUint |= Word::TimestampWithSeconds;
-        } else {
-            newMaskUint |= Word::TimestampNoSeconds;
-        }
+        newMaskUint |= MessageElement::Timestamp;
     }
 
-    newMaskUint |= enableTwitchEmotes ? Word::TwitchEmoteImage : Word::TwitchEmoteText;
-    newMaskUint |= enableFfzEmotes ? Word::FfzEmoteImage : Word::FfzEmoteText;
-    newMaskUint |= enableBttvEmotes ? Word::BttvEmoteImage : Word::BttvEmoteText;
     newMaskUint |=
-        (enableBttvEmotes && enableGifAnimations) ? Word::BttvEmoteImage : Word::BttvEmoteText;
-    newMaskUint |= enableEmojis ? Word::EmojiImage : Word::EmojiText;
+        enableTwitchEmotes ? MessageElement::TwitchEmoteImage : MessageElement::TwitchEmoteText;
+    newMaskUint |= enableFfzEmotes ? MessageElement::FfzEmoteImage : MessageElement::FfzEmoteText;
+    newMaskUint |=
+        enableBttvEmotes ? MessageElement::BttvEmoteImage : MessageElement::BttvEmoteText;
+    newMaskUint |= enableEmojis ? MessageElement::EmojiImage : MessageElement::EmojiText;
 
-    newMaskUint |= Word::BitsAmount;
-    newMaskUint |= enableGifAnimations ? Word::BitsAnimated : Word::BitsStatic;
+    newMaskUint |= MessageElement::BitsAmount;
+    newMaskUint |= enableGifAnimations ? MessageElement::BitsAnimated : MessageElement::BitsStatic;
 
     if (this->showBadges) {
-        newMaskUint |= Word::Badges;
+        newMaskUint |= MessageElement::Badges;
     }
 
-    newMaskUint |= Word::Username;
+    newMaskUint |= MessageElement::Username;
 
-    newMaskUint |= Word::AlwaysShow;
+    newMaskUint |= MessageElement::AlwaysShow;
 
-    Word::Flags newMask = static_cast<Word::Flags>(newMaskUint);
+    MessageElement::Flags newMask = static_cast<MessageElement::Flags>(newMaskUint);
 
     if (newMask != this->wordTypeMask) {
         this->wordTypeMask = newMask;

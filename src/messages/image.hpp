@@ -3,21 +3,23 @@
 #include <QPixmap>
 #include <QString>
 
+#include <boost/noncopyable.hpp>
+
 namespace chatterino {
 namespace messages {
 
-class LazyLoadedImage : public QObject
+class Image : public QObject, boost::noncopyable
 {
 public:
-    LazyLoadedImage() = delete;
+    Image() = delete;
 
-    explicit LazyLoadedImage(const QString &_url, qreal _scale = 1, const QString &_name = "",
-                             const QString &_tooltip = "", const QMargins &_margin = QMargins(),
-                             bool isHat = false);
+    explicit Image(const QString &_url, qreal _scale = 1, const QString &_name = "",
+                   const QString &_tooltip = "", const QMargins &_margin = QMargins(),
+                   bool isHat = false);
 
-    explicit LazyLoadedImage(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
-                             const QString &_tooltip = "", const QMargins &_margin = QMargins(),
-                             bool isHat = false);
+    explicit Image(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
+                   const QString &_tooltip = "", const QMargins &_margin = QMargins(),
+                   bool isHat = false);
 
     const QPixmap *getPixmap();
     qreal getScale() const;
@@ -25,7 +27,7 @@ public:
     const QString &getName() const;
     const QString &getTooltip() const;
     const QMargins &getMargin() const;
-    bool getAnimated() const;
+    bool isAnimated() const;
     bool isHat() const;
     int getWidth() const;
     int getScaledWidth() const;

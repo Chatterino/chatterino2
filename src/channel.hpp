@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logging/loggingchannel.hpp"
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 #include "messages/limitedqueue.hpp"
 #include "util/concurrentmap.hpp"
 
@@ -24,17 +24,17 @@ class Channel : public std::enable_shared_from_this<Channel>
 public:
     explicit Channel(const QString &_name);
 
-    boost::signals2::signal<void(messages::SharedMessage &)> messageRemovedFromStart;
-    boost::signals2::signal<void(messages::SharedMessage &)> messageAppended;
-    boost::signals2::signal<void(std::vector<messages::SharedMessage> &)> messagesAddedAtStart;
-    boost::signals2::signal<void(size_t index, messages::SharedMessage &)> messageReplaced;
+    boost::signals2::signal<void(messages::MessagePtr &)> messageRemovedFromStart;
+    boost::signals2::signal<void(messages::MessagePtr &)> messageAppended;
+    boost::signals2::signal<void(std::vector<messages::MessagePtr> &)> messagesAddedAtStart;
+    boost::signals2::signal<void(size_t index, messages::MessagePtr &)> messageReplaced;
 
     virtual bool isEmpty() const;
-    messages::LimitedQueueSnapshot<messages::SharedMessage> getMessageSnapshot();
+    messages::LimitedQueueSnapshot<messages::MessagePtr> getMessageSnapshot();
 
-    void addMessage(messages::SharedMessage message);
-    void addMessagesAtStart(std::vector<messages::SharedMessage> &messages);
-    void replaceMessage(messages::SharedMessage message, messages::SharedMessage replacement);
+    void addMessage(messages::MessagePtr message);
+    void addMessagesAtStart(std::vector<messages::MessagePtr> &messages);
+    void replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement);
     void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
     struct NameOptions {
@@ -55,9 +55,11 @@ public:
     virtual void sendMessage(const QString &message);
 
 private:
-    messages::LimitedQueue<messages::SharedMessage> messages;
+    messages::LimitedQueue<messages::MessagePtr> messages;
 
     // std::shared_ptr<logging::Channel> loggingChannel;
 };
+
+typedef std::shared_ptr<Channel> SharedChannel;
 
 }  // namespace chatterino

@@ -29,15 +29,14 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 {
 }
 
-SharedMessage TwitchMessageBuilder::parse()
+MessagePtr TwitchMessageBuilder::parse()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
 
-    auto preferredEmoteQuality = settings.preferredEmoteQuality.getValue();
-
     this->originalMessage = this->ircMessage->content();
 
+    // PARSING
     this->parseUsername();
 
     //    this->message->setCollapsedDefault(true);
@@ -48,25 +47,27 @@ SharedMessage TwitchMessageBuilder::parse()
     // Whether or not will be rendered is decided/checked later
 
     // Appends the correct timestamp if the message is a past message
+
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg) {
         // This may be architecture dependent(datatype)
         qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
-        QDateTime time = QDateTime::fromMSecsSinceEpoch(ts);
-        this->appendTimestamp(time);
+        QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
+        this->append<TimestampElement>(dateTime.time());
     } else {
-        this->appendTimestamp();
+        this->append<TimestampElement>();
     }
 
     this->parseMessageID();
 
     this->parseRoomID();
 
-    this->appendModerationButtons();
+    // TIMESTAMP
+    this->append<TwitchModerationElement>();
 
     this->parseTwitchBadges();
 
-    this->parseChatterinoBadges();
+    this->addChatterinoBadges();
 
     if (this->args.includeChannelName) {
         this->parseChannelName();
@@ -123,9 +124,8 @@ SharedMessage TwitchMessageBuilder::parse()
 
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
-            auto emoteImage = currentTwitchEmote->second.getImageForSize(preferredEmoteQuality);
-            this->appendWord(Word(emoteImage, Word::TwitchEmoteImage, emoteImage->getName(),
-                                  emoteImage->getTooltip(), Link(Link::Url, emoteImage->getUrl())));
+            auto emoteImage = currentTwitchEmote->second;
+            this->append<EmoteElement>(emoteImage, MessageElement::TwitchEmote);
 
             i += split.length() + 1;
             currentTwitchEmote = std::next(currentTwitchEmote);
@@ -177,31 +177,13 @@ SharedMessage TwitchMessageBuilder::parse()
                     QString bitsLink =
                         QString("http://static-cdn.jtvnw.net/bits/dark/static/" + color + "/1");
 
-                    LazyLoadedImage *imageAnimated = emoteManager.miscImageCache.getOrAdd(
-                        bitsLinkAnimated, [this, &bitsLinkAnimated] {
-                            return new LazyLoadedImage(bitsLinkAnimated);
-                        });
-                    LazyLoadedImage *image = emoteManager.miscImageCache.getOrAdd(
-                        bitsLink, [this, &bitsLink] { return new LazyLoadedImage(bitsLink); });
+                    Image *imageAnimated = emoteManager.miscImageCache.getOrAdd(
+                        bitsLinkAnimated,
+                        [this, &bitsLinkAnimated] { return new Image(bitsLinkAnimated); });
+                    Image *image = emoteManager.miscImageCache.getOrAdd(
+                        bitsLink, [this, &bitsLink] { return new Image(bitsLink); });
 
-                    this->appendWord(Word(imageAnimated, Word::BitsAnimated, QString("cheer"),
-                                          QString("Twitch Cheer"),
-                                          Link(Link::Url, QString("https://blog.twitch.tv/"
-                                                                  "introducing-cheering-celebrate-"
-                                                                  "together-da62af41fac6"))));
-                    this->appendWord(Word(
-                        image, Word::BitsStatic, QString("cheer"), QString("Twitch Cheer"),
-                        Link(Link::Url,
-                             QString("https://blog.twitch.tv/"
-                                     "introducing-cheering-celebrate-together-da62af41fac6"))));
-
-                    this->appendWord(Word(
-                        QString("x" + string.mid(5)), Word::BitsAmount, MessageColor(bitsColor),
-                        singletons::FontManager::Medium, QString(string.mid(5)),
-                        QString("Twitch Cheer"),
-                        Link(Link::Url,
-                             QString("https://blog.twitch.tv/"
-                                     "introducing-cheering-celebrate-together-da62af41fac6"))));
+                    // append bits
 
                     continue;
                 }
@@ -228,15 +210,10 @@ SharedMessage TwitchMessageBuilder::parse()
                     textColor = MessageColor(MessageColor::Link);
                 }
 
-                this->appendWord(Word(string, Word::Text, textColor,
-                                      singletons::FontManager::Medium, string, QString(), link));
+                this->append<TextElement>(string, EmoteElement::Text)  //
+                    ->setLink(link);
             } else {  // is emoji
-                auto emoteImage = emoteData.getImageForSize(preferredEmoteQuality);
-                this->appendWord(Word(emoteImage, Word::EmojiImage, emoteImage->getName(),
-                                      emoteImage->getTooltip()));
-                Word(emoteImage->getName(), Word::EmojiText, textColor,
-                     singletons::FontManager::Medium, emoteImage->getName(),
-                     emoteImage->getTooltip());
+                this->append<EmoteElement>(emoteData, EmoteElement::EmojiAll);
             }
         }
 
@@ -283,9 +260,10 @@ void TwitchMessageBuilder::parseRoomID()
 void TwitchMessageBuilder::parseChannelName()
 {
     QString channelName("#" + this->channel->name);
-    this->appendWord(Word(channelName, Word::Misc, MessageColor(MessageColor::System),
-                          singletons::FontManager::Medium, QString(channelName), QString(),
-                          Link(Link::Url, this->channel->name + "\n" + this->messageID)));
+    Link link(Link::Url, this->channel->name + "\n" + this->messageID);
+
+    this->append<TextElement>(channelName, MessageElement::ChannelName, MessageColor::System)  //
+        ->setLink(link);
 }
 
 void TwitchMessageBuilder::parseUsername()
@@ -303,7 +281,6 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     this->message->loginName = this->userName;
-    this->message->timeoutUser = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -330,30 +307,30 @@ void TwitchMessageBuilder::appendUsername()
     bool hasLocalizedName = !localizedName.isEmpty();
 
     // The full string that will be rendered in the chat widget
-    QString usernameString;
+    QString usernameText;
 
     pajlada::Settings::Setting<int> usernameDisplayMode(
         "/appearance/messages/usernameDisplayMode", UsernameDisplayMode::UsernameAndLocalizedName);
 
     switch (usernameDisplayMode.getValue()) {
         case UsernameDisplayMode::Username: {
-            usernameString = username;
+            usernameText = username;
         } break;
 
         case UsernameDisplayMode::LocalizedName: {
             if (hasLocalizedName) {
-                usernameString = localizedName;
+                usernameText = localizedName;
             } else {
-                usernameString = username;
+                usernameText = username;
             }
         } break;
 
         default:
         case UsernameDisplayMode::UsernameAndLocalizedName: {
             if (hasLocalizedName) {
-                usernameString = username + "(" + localizedName + ")";
+                usernameText = username + "(" + localizedName + ")";
             } else {
-                usernameString = username;
+                usernameText = username;
             }
         } break;
     }
@@ -369,12 +346,12 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     if (!ircMessage->isAction()) {
-        usernameString += ":";
+        usernameText += ":";
     }
 
-    this->appendWord(Word(usernameString, Word::Username, MessageColor(this->usernameColor),
-                          singletons::FontManager::MediumBold, usernameString, QString(),
-                          Link(Link::UserInfo, this->userName)));
+    this->append<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
+                              FontStyle::MediumBold)
+        ->setLink({Link::UserInfo, this->userName});
 }
 
 void TwitchMessageBuilder::parseHighlights()
@@ -465,19 +442,6 @@ void TwitchMessageBuilder::parseHighlights()
     }
 }
 
-void TwitchMessageBuilder::appendModerationButtons()
-{
-    // mod buttons
-    static QString buttonBanTooltip("Ban user");
-    static QString buttonTimeoutTooltip("Timeout user");
-
-    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonBan, Word::ButtonBan,
-                          QString(), buttonBanTooltip, Link(Link::UserBan, ircMessage->account())));
-    this->appendWord(Word(singletons::ResourceManager::getInstance().buttonTimeout,
-                          Word::ButtonTimeout, QString(), buttonTimeoutTooltip,
-                          Link(Link::UserTimeout, ircMessage->account())));
-}
-
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage,
                                              const QString &emote,
                                              std::vector<std::pair<long int, util::EmoteData>> &vec)
@@ -547,20 +511,18 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 
 bool TwitchMessageBuilder::appendEmote(const util::EmoteData &emoteData)
 {
-    auto emoteImage = emoteData.getImageForSize(
-        singletons::SettingManager::getInstance().preferredEmoteQuality.getValue());
-
-    this->appendWord(Word(emoteImage, Word::BttvEmoteImage, emoteImage->getName(),
-                          emoteImage->getTooltip(), Link(Link::Url, emoteImage->getUrl())));
+    this->append<EmoteElement>(emoteData, MessageElement::BttvEmote);
 
     // Perhaps check for ignored emotes here?
     return true;
 }
 
+// fourtf: this is ugly
+//		   maybe put the individual badges into a map instead of this mess
 void TwitchMessageBuilder::parseTwitchBadges()
 {
-    const auto &channelResources =
-        singletons::ResourceManager::getInstance().channels[this->roomID];
+    singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
+    const auto &channelResources = resourceManager.channels[this->roomID];
 
     auto iterator = this->tags.find("badges");
 
@@ -586,14 +548,14 @@ void TwitchMessageBuilder::parseTwitchBadges()
             std::string versionKey = cheerAmountQS.toStdString();
 
             try {
-                auto &badgeSet = singletons::ResourceManager::getInstance().badgeSets.at("bits");
+                auto &badgeSet = resourceManager.badgeSets.at("bits");
 
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);
 
-                    appendWord(
-                        Word(badgeVersion.badgeImage1x, Word::BadgeVanity, QString(),
-                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+                    this->append<ImageElement>(*badgeVersion.badgeImage1x,
+                                               MessageElement::BadgeVanity)
+                        ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
                 } catch (const std::exception &e) {
                     debug::Log("Exception caught: {} when trying to fetch badge version {} ",
                                e.what(), versionKey);
@@ -602,36 +564,40 @@ void TwitchMessageBuilder::parseTwitchBadges()
                 debug::Log("No badge set with key bits. Exception: {}", e.what());
             }
         } else if (badge == "staff/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeStaff,
-                            Word::BadgeGlobalAuthority, QString(), QString("Twitch Staff")));
+            this->append<ImageElement>(*resourceManager.badgeStaff,
+                                       MessageElement::BadgeGlobalAuthority)
+                ->setTooltip("Twitch Staff");
         } else if (badge == "admin/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeAdmin,
-                            Word::BadgeGlobalAuthority, QString(), QString("Twitch Admin")));
+            this->append<ImageElement>(*resourceManager.badgeAdmin,
+                                       MessageElement::BadgeGlobalAuthority)
+                ->setTooltip("Twitch Admin");
         } else if (badge == "global_mod/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeGlobalModerator,
-                            Word::BadgeGlobalAuthority, QString(), QString("Global Moderator")));
+            this->append<ImageElement>(*resourceManager.badgeGlobalModerator,
+                                       MessageElement::BadgeGlobalAuthority)
+                ->setTooltip("Twitch Global Moderator");
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeModerator,
-                            Word::BadgeChannelAuthority, QString(),
-                            QString("Channel Moderator")));  // custom badge
+            this->append<ImageElement>(*resourceManager.badgeModerator,
+                                       MessageElement::BadgeChannelAuthority)
+                ->setTooltip("Twitch Channel Moderator");
         } else if (badge == "turbo/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeTurbo,
-                            Word::BadgeVanity, QString(), QString("Turbo Subscriber")));
+            this->append<ImageElement>(*resourceManager.badgeTurbo,
+                                       MessageElement::BadgeGlobalAuthority)
+                ->setTooltip("Twitch Turbo Subscriber");
         } else if (badge == "broadcaster/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgeBroadcaster,
-                            Word::BadgeChannelAuthority, QString(),
-                            QString("Channel Broadcaster")));
+            this->append<ImageElement>(*resourceManager.badgeBroadcaster,
+                                       MessageElement::BadgeChannelAuthority)
+                ->setTooltip("Twitch Broadcaster");
         } else if (badge == "premium/1") {
-            appendWord(Word(singletons::ResourceManager::getInstance().badgePremium,
-                            Word::BadgeVanity, QString(), QString("Twitch Prime")));
-
+            this->append<ImageElement>(*resourceManager.badgePremium, MessageElement::BadgeVanity)
+                ->setTooltip("Twitch Prime Subscriber");
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    appendWord(Word(singletons::ResourceManager::getInstance().badgeVerified,
-                                    Word::BadgeVanity, QString(), "Twitch Verified"));
+                    this->append<ImageElement>(*resourceManager.badgeVerified,
+                                               MessageElement::BadgeVanity)
+                        ->setTooltip("Twitch Verified");
                 } break;
                 default: {
                     printf("[TwitchMessageBuilder] Unhandled partner badge index: %d\n", index);
@@ -646,9 +612,9 @@ void TwitchMessageBuilder::parseTwitchBadges()
             auto badgeSetIt = channelResources.badgeSets.find("subscriber");
             if (badgeSetIt == channelResources.badgeSets.end()) {
                 // Fall back to default badge
-                appendWord(Word(singletons::ResourceManager::getInstance().badgeSubscriber,
-                                Word::Flags::BadgeSubscription, QString(),
-                                QString("Twitch Subscriber")));
+                this->append<ImageElement>(*resourceManager.badgeSubscriber,
+                                           MessageElement::BadgeSubscription)
+                    ->setTooltip("Twitch Subscriber");
                 continue;
             }
 
@@ -660,18 +626,19 @@ void TwitchMessageBuilder::parseTwitchBadges()
 
             if (badgeVersionIt == badgeSet.versions.end()) {
                 // Fall back to default badge
-                appendWord(Word(singletons::ResourceManager::getInstance().badgeSubscriber,
-                                Word::Flags::BadgeSubscription, QString(),
-                                QString("Twitch Subscriber")));
+                this->append<ImageElement>(*resourceManager.badgeSubscriber,
+                                           MessageElement::BadgeSubscription)
+                    ->setTooltip("Twitch Subscriber");
                 continue;
             }
 
             auto &badgeVersion = badgeVersionIt->second;
 
-            appendWord(Word(badgeVersion.badgeImage1x, Word::Flags::BadgeSubscription, QString(),
-                            QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+            this->append<ImageElement>(*badgeVersion.badgeImage1x,
+                                       MessageElement::BadgeSubscription)
+                ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
         } else {
-            if (!singletons::ResourceManager::getInstance().dynamicBadgesLoaded) {
+            if (!resourceManager.dynamicBadgesLoaded) {
                 // Do nothing
                 continue;
             }
@@ -683,21 +650,19 @@ void TwitchMessageBuilder::parseTwitchBadges()
                 continue;
             }
 
-            Word::Flags badgeType = Word::Flags::BadgeVanity;
+            MessageElement::Flags badgeType = MessageElement::Flags::BadgeVanity;
 
             std::string badgeSetKey = parts[0].toStdString();
             std::string versionKey = parts[1].toStdString();
 
             try {
-                auto &badgeSet =
-                    singletons::ResourceManager::getInstance().badgeSets.at(badgeSetKey);
+                auto &badgeSet = resourceManager.badgeSets.at(badgeSetKey);
 
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);
 
-                    appendWord(
-                        Word(badgeVersion.badgeImage1x, badgeType, QString(),
-                             QString("Twitch " + QString::fromStdString(badgeVersion.title))));
+                    this->append<ImageElement>(*badgeVersion.badgeImage1x, badgeType)
+                        ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
                 } catch (const std::exception &e) {
                     qDebug() << "Exception caught:" << e.what()
                              << "when trying to fetch badge version " << versionKey.c_str();
@@ -710,7 +675,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
     }
 }
 
-void TwitchMessageBuilder::parseChatterinoBadges()
+void TwitchMessageBuilder::addChatterinoBadges()
 {
     auto &badges = singletons::ResourceManager::getInstance().chatterinoBadges;
     auto it = badges.find(this->userName.toStdString());
@@ -721,12 +686,13 @@ void TwitchMessageBuilder::parseChatterinoBadges()
 
     const auto badge = it->second;
 
-    this->appendWord(Word(badge->image, Word::BadgeChatterino, QString(), badge->tooltip.c_str()));
+    this->append<ImageElement>(*badge->image, MessageElement::BadgeChatterino)
+        ->setTooltip(QString::fromStdString(badge->tooltip));
 }
 
 // bool
-// sortTwitchEmotes(const std::pair<long int, LazyLoadedImage *> &a,
-//                 const std::pair<long int, LazyLoadedImage *> &b)
+// sortTwitchEmotes(const std::pair<long int, Image *> &a,
+//                 const std::pair<long int, Image *> &b)
 //{
 //    return a.first < b.first;
 //}

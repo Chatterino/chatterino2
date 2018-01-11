@@ -23,10 +23,10 @@ class AccountPopupWidget : public BaseWidget
 {
     Q_OBJECT
 public:
-    AccountPopupWidget(std::shared_ptr<Channel> _channel);
+    AccountPopupWidget(SharedChannel _channel);
 
     void setName(const QString &name);
-    void setChannel(std::shared_ptr<Channel> _channel);
+    void setChannel(SharedChannel _channel);
 
     void updatePermissions();
 
@@ -47,7 +47,7 @@ private:
     enum class permissions { User, Mod, Owner };
     permissions permission;
 
-    std::shared_ptr<Channel> channel;
+    SharedChannel channel;
 
     QString userID;
     QPixmap avatar;

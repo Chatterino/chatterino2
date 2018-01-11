@@ -3,7 +3,7 @@
 #include <QString>
 
 namespace chatterino {
-
+namespace util {
 QString ParseTagString(const QString &input)
 {
     QString output = input;
@@ -53,5 +53,5 @@ QString ParseTagString(const QString &input)
         return output;
     }
 }
-
+}
 }  // namespace chatterino

@@ -132,6 +132,7 @@ private:
 
     int generation = 0;
 };
-
-}  // namespace chatterino
 }
+
+typedef singletons::FontManager::Type FontStyle;
+}  // namespace chatterino

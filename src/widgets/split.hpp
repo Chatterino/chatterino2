@@ -1,10 +1,10 @@
 #pragma once
 
 #include "channel.hpp"
+#include "messages/layouts/messagelayout.hpp"
+#include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageref.hpp"
-#include "messages/word.hpp"
-#include "messages/wordpart.hpp"
+#include "messages/messageelement.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/channelview.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
@@ -55,8 +55,8 @@ public:
     }
 
     const std::string &getUUID() const;
-    std::shared_ptr<Channel> getChannel() const;
-    std::shared_ptr<Channel> &getChannelRef();
+    SharedChannel getChannel() const;
+    SharedChannel &getChannelRef();
     void setFlexSizeX(double x);
     double getFlexSizeX();
     void setFlexSizeY(double y);
@@ -73,7 +73,7 @@ protected:
 
 private:
     SplitContainer &parentPage;
-    std::shared_ptr<Channel> channel;
+    SharedChannel channel;
 
     QVBoxLayout vbox;
     SplitHeader header;
@@ -84,7 +84,7 @@ private:
 
     boost::signals2::connection channelIDChangedConnection;
 
-    void setChannel(std::shared_ptr<Channel> newChannel);
+    void setChannel(SharedChannel newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const std::string &newChannelName);
 

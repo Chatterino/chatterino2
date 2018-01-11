@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 
 #include <map>
 #include <memory>
@@ -16,34 +16,34 @@ class ResourceManager
 public:
     static ResourceManager &getInstance();
 
-    messages::LazyLoadedImage *badgeStaff;
-    messages::LazyLoadedImage *badgeAdmin;
-    messages::LazyLoadedImage *badgeGlobalModerator;
-    messages::LazyLoadedImage *badgeModerator;
-    messages::LazyLoadedImage *badgeTurbo;
-    messages::LazyLoadedImage *badgeBroadcaster;
-    messages::LazyLoadedImage *badgePremium;
-    messages::LazyLoadedImage *badgeVerified;
-    messages::LazyLoadedImage *badgeSubscriber;
-    messages::LazyLoadedImage *badgeCollapsed;
+    messages::Image *badgeStaff;
+    messages::Image *badgeAdmin;
+    messages::Image *badgeGlobalModerator;
+    messages::Image *badgeModerator;
+    messages::Image *badgeTurbo;
+    messages::Image *badgeBroadcaster;
+    messages::Image *badgePremium;
+    messages::Image *badgeVerified;
+    messages::Image *badgeSubscriber;
+    messages::Image *badgeCollapsed;
 
-    messages::LazyLoadedImage *cheerBadge100000;
-    messages::LazyLoadedImage *cheerBadge10000;
-    messages::LazyLoadedImage *cheerBadge5000;
-    messages::LazyLoadedImage *cheerBadge1000;
-    messages::LazyLoadedImage *cheerBadge100;
-    messages::LazyLoadedImage *cheerBadge1;
+    messages::Image *cheerBadge100000;
+    messages::Image *cheerBadge10000;
+    messages::Image *cheerBadge5000;
+    messages::Image *cheerBadge1000;
+    messages::Image *cheerBadge100;
+    messages::Image *cheerBadge1;
 
-    std::map<std::string, messages::LazyLoadedImage *> cheerBadges;
+    std::map<std::string, messages::Image *> cheerBadges;
 
     struct BadgeVersion {
         BadgeVersion() = delete;
 
         explicit BadgeVersion(QJsonObject &&root);
 
-        messages::LazyLoadedImage *badgeImage1x;
-        messages::LazyLoadedImage *badgeImage2x;
-        messages::LazyLoadedImage *badgeImage4x;
+        messages::Image *badgeImage1x;
+        messages::Image *badgeImage2x;
+        messages::Image *badgeImage4x;
         std::string description;
         std::string title;
         std::string clickAction;
@@ -58,8 +58,8 @@ public:
 
     bool dynamicBadgesLoaded = false;
 
-    messages::LazyLoadedImage *buttonBan;
-    messages::LazyLoadedImage *buttonTimeout;
+    messages::Image *buttonBan;
+    messages::Image *buttonTimeout;
 
     struct Channel {
         std::map<std::string, BadgeSet> badgeSets;
@@ -72,14 +72,14 @@ public:
 
     // Chatterino badges
     struct ChatterinoBadge {
-        ChatterinoBadge(const std::string &_tooltip, messages::LazyLoadedImage *_image)
+        ChatterinoBadge(const std::string &_tooltip, messages::Image *_image)
             : tooltip(_tooltip)
             , image(_image)
         {
         }
 
         std::string tooltip;
-        messages::LazyLoadedImage *image;
+        messages::Image *image;
     };
 
     //       username

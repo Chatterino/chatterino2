@@ -1,4 +1,4 @@
-#include "messages/lazyloadedimage.hpp"
+#include "messages/image.hpp"
 #include "asyncexec.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
@@ -19,8 +19,8 @@
 namespace chatterino {
 namespace messages {
 
-LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString &name,
-                                 const QString &tooltip, const QMargins &margin, bool isHat)
+Image::Image(const QString &url, qreal scale, const QString &name, const QString &tooltip,
+             const QMargins &margin, bool isHat)
     : currentPixmap(nullptr)
     , url(url)
     , name(name)
@@ -32,8 +32,8 @@ LazyLoadedImage::LazyLoadedImage(const QString &url, qreal scale, const QString 
 {
 }
 
-LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &name,
-                                 const QString &tooltip, const QMargins &margin, bool isHat)
+Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &tooltip,
+             const QMargins &margin, bool isHat)
     : currentPixmap(image)
     , name(name)
     , tooltip(tooltip)
@@ -44,7 +44,7 @@ LazyLoadedImage::LazyLoadedImage(QPixmap *image, qreal scale, const QString &nam
 {
 }
 
-void LazyLoadedImage::loadImage()
+void Image::loadImage()
 {
     util::NetworkRequest req(this->getUrl());
     req.setCaller(this);
@@ -67,7 +67,7 @@ void LazyLoadedImage::loadImage()
                     lli->currentPixmap = pixmap;
                 }
 
-                chatterino::messages::LazyLoadedImage::FrameData data;
+                chatterino::messages::Image::FrameData data;
                 data.duration = std::max(20, reader.nextImageDelay());
                 data.image = pixmap;
 
@@ -90,7 +90,7 @@ void LazyLoadedImage::loadImage()
          // doesn't work, so this is the fix.
 }
 
-void LazyLoadedImage::gifUpdateTimout()
+void Image::gifUpdateTimout()
 {
     if (animated) {
         this->currentFrameOffset += GIF_FRAME_LENGTH;
@@ -108,7 +108,7 @@ void LazyLoadedImage::gifUpdateTimout()
     }
 }
 
-const QPixmap *LazyLoadedImage::getPixmap()
+const QPixmap *Image::getPixmap()
 {
     if (!this->isLoading) {
         this->isLoading = true;
@@ -118,42 +118,42 @@ const QPixmap *LazyLoadedImage::getPixmap()
     return this->currentPixmap;
 }
 
-qreal LazyLoadedImage::getScale() const
+qreal Image::getScale() const
 {
     return this->scale;
 }
 
-const QString &LazyLoadedImage::getUrl() const
+const QString &Image::getUrl() const
 {
     return this->url;
 }
 
-const QString &LazyLoadedImage::getName() const
+const QString &Image::getName() const
 {
     return this->name;
 }
 
-const QString &LazyLoadedImage::getTooltip() const
+const QString &Image::getTooltip() const
 {
     return this->tooltip;
 }
 
-const QMargins &LazyLoadedImage::getMargin() const
+const QMargins &Image::getMargin() const
 {
     return this->margin;
 }
 
-bool LazyLoadedImage::getAnimated() const
+bool Image::isAnimated() const
 {
     return this->animated;
 }
 
-bool LazyLoadedImage::isHat() const
+bool Image::isHat() const
 {
     return this->ishat;
 }
 
-int LazyLoadedImage::getWidth() const
+int Image::getWidth() const
 {
     if (this->currentPixmap == nullptr) {
         return 16;
@@ -161,12 +161,12 @@ int LazyLoadedImage::getWidth() const
     return this->currentPixmap->width();
 }
 
-int LazyLoadedImage::getScaledWidth() const
+int Image::getScaledWidth() const
 {
-    return static_cast<int>(getWidth() * this->scale);
+    return static_cast<int>(this->getWidth() * this->scale);
 }
 
-int LazyLoadedImage::getHeight() const
+int Image::getHeight() const
 {
     if (this->currentPixmap == nullptr) {
         return 16;
@@ -174,9 +174,9 @@ int LazyLoadedImage::getHeight() const
     return this->currentPixmap->height();
 }
 
-int LazyLoadedImage::getScaledHeight() const
+int Image::getScaledHeight() const
 {
-    return static_cast<int>(getHeight() * this->scale);
+    return static_cast<int>(this->getHeight() * this->scale);
 }
 
 }  // namespace messages

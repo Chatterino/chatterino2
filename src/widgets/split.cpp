@@ -121,17 +121,17 @@ const std::string &Split::getUUID() const
     return this->uuid;
 }
 
-std::shared_ptr<Channel> Split::getChannel() const
+SharedChannel Split::getChannel() const
 {
     return this->channel;
 }
 
-std::shared_ptr<Channel> &Split::getChannelRef()
+SharedChannel &Split::getChannelRef()
 {
     return this->channel;
 }
 
-void Split::setChannel(std::shared_ptr<Channel> _newChannel)
+void Split::setChannel(SharedChannel _newChannel)
 {
     this->view.setChannel(_newChannel);
 
@@ -212,7 +212,8 @@ void Split::layoutMessages()
 
 void Split::updateGifEmotes()
 {
-    this->view.updateGifEmotes();
+    qDebug() << "this shouldn't even exist";
+    this->view.queueUpdate();
 }
 
 void Split::giveFocus(Qt::FocusReason reason)

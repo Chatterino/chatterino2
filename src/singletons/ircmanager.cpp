@@ -381,9 +381,9 @@ void IrcManager::removeIgnoredUser(QString const &username)
 
 void IrcManager::onConnected()
 {
-    std::shared_ptr<Message> msg(Message::createSystemMessage("connected to chat"));
+    MessagePtr msg = Message::createSystemMessage("connected to chat");
 
-    this->channelManager.doOnAll([msg](std::shared_ptr<Channel> channel) {
+    this->channelManager.doOnAll([msg](SharedChannel channel) {
         assert(channel);
         channel->addMessage(msg);
     });
@@ -391,9 +391,9 @@ void IrcManager::onConnected()
 
 void IrcManager::onDisconnected()
 {
-    std::shared_ptr<Message> msg(Message::createSystemMessage("disconnected from chat"));
+    MessagePtr msg = Message::createSystemMessage("disconnected from chat");
 
-    this->channelManager.doOnAll([msg](std::shared_ptr<Channel> channel) {
+    this->channelManager.doOnAll([msg](SharedChannel channel) {
         assert(channel);
         channel->addMessage(msg);
     });

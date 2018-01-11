@@ -1,94 +1,88 @@
 #pragma once
 
-#include "messages/word.hpp"
+#include "messages/messageelement.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
-#include <chrono>
+#include <cinttypes>
 #include <memory>
 #include <vector>
 
+#include <QTime>
+
 namespace chatterino {
-
-class Channel;
-
 namespace messages {
 class Message;
 
-typedef std::shared_ptr<Message> SharedMessage;
-typedef char MessageFlagsType;
+typedef std::shared_ptr<Message> MessagePtr;
+typedef uint8_t MessageFlagsType;
 
 class Message
 {
 public:
     enum MessageFlags : MessageFlagsType {
         None = 0,
-        System = (1 << 1),
-        Timeout = (1 << 2),
-        Highlighted = (1 << 3),
+        System = (1 << 0),
+        Timeout = (1 << 1),
+        Highlighted = (1 << 2),
+        DoNotTriggerNotification = (1 << 3),  // disable notification sound
+        Centered = (1 << 4),
+        Disabled = (1 << 5),
+        DisableCompactEmotes = (1 << 6),
+        Collapsed = (1 << 7),
     };
 
-    bool containsHighlightedPhrase() const;
-    void setHighlight(bool value);
-    const QString &getTimeoutUser() const;
-    int getTimeoutCount() const;
-    const QString &getContent() const;
-    const std::chrono::time_point<std::chrono::system_clock> &getParseTime() const;
-    std::vector<Word> &getWords();
+    // Elements
+    // Messages should not be added after the message is done initializing.
+    void addElement(MessageElement *element);
+    const std::vector<std::unique_ptr<MessageElement>> &getElements() const;
+
+    // Message flags
     MessageFlags getFlags() const;
+    bool hasFlags(MessageFlags flags) const;
     void setFlags(MessageFlags flags);
     void addFlags(MessageFlags flags);
     void removeFlags(MessageFlags flags);
-    bool isDisabled() const;
-    void setDisabled(bool value);
+
+    // Parse Time
+    const QTime &getParseTime() const;
+
+    // Id
     const QString &getId() const;
-    bool getCollapsedDefault() const;
-    void setCollapsedDefault(bool value);
-    bool getDisableCompactEmotes() const;
-    void setDisableCompactEmotes(bool value);
-    void updateContent() const;
+    void setId(const QString &id);
+
+    // Searching
+    const QString &getSearchText() const;
+
+    // Scrollbar
     widgets::ScrollbarHighlight getScrollBarHighlight() const;
 
+    // Usernames
     QString loginName;
     QString displayName;
     QString localizedName;
-    QString timeoutUser;
 
-    const QString text;
-    bool centered = false;
+    // Timeouts
+    const QString &getTimeoutUser(const QString &value) const;
+    void setTimeoutUser();
 
-    static Message *createSystemMessage(const QString &text);
+    // Static
+    static MessagePtr createSystemMessage(const QString &text);
 
-    static Message *createTimeoutMessage(const QString &username, const QString &durationInSeconds,
-                                         const QString &reason, bool multipleTimes);
+    static MessagePtr createTimeoutMessage(const QString &username,
+                                           const QString &durationInSeconds, const QString &reason,
+                                           bool multipleTimes);
 
 private:
-    static LazyLoadedImage *badgeStaff;
-    static LazyLoadedImage *badgeAdmin;
-    static LazyLoadedImage *badgeGlobalmod;
-    static LazyLoadedImage *badgeModerator;
-    static LazyLoadedImage *badgeTurbo;
-    static LazyLoadedImage *badgeBroadcaster;
-    static LazyLoadedImage *badgePremium;
-
     static QRegularExpression *cheerRegex;
 
     MessageFlags flags = MessageFlags::None;
-
-    // what is highlightTab?
-    bool highlightTab = false;
-
-    int timeoutCount = 0;
-    bool disabled = false;
-
+    QString timeoutUser;
     bool collapsedDefault = false;
-    bool disableCompactEmotes = false;
-
-    std::chrono::time_point<std::chrono::system_clock> parseTime;
-
-    mutable QString content;
+    QTime parseTime;
+    mutable QString searchText;
     QString id = "";
 
-    std::vector<Word> words;
+    std::vector<std::unique_ptr<MessageElement>> elements;
 };
 
 }  // namespace messages

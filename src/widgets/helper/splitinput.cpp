@@ -48,9 +48,8 @@ SplitInput::SplitInput(Split *_chatWidget)
     this->textLengthLabel.setAlignment(Qt::AlignRight);
 
     this->emotesLabel.getLabel().setTextFormat(Qt::RichText);
-    this->emotesLabel.getLabel().setText(
-        "<img src=':/images/emote.svg' width='12' height='12' "
-        "/>");
+    this->emotesLabel.getLabel().setText("<img src=':/images/emote.svg' width='12' height='12' "
+                                         "/>");
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
         if (this->emotePopup == nullptr) {
@@ -86,16 +85,17 @@ SplitInput::SplitInput(Split *_chatWidget)
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
-            prevMsg.append(message);
+            this->prevMsg.append(message);
 
             event->accept();
             if (!(event->modifiers() == Qt::ControlModifier)) {
-                textInput.setText(QString());
-                prevIndex = 0;
-            } else if (textInput.toPlainText() == prevMsg.at(prevMsg.size() - 1)) {
-                prevMsg.removeLast();
+                this->textInput.setText(QString());
+                this->prevIndex = 0;
+            } else if (this->textInput.toPlainText() ==
+                       this->prevMsg.at(this->prevMsg.size() - 1)) {
+                this->prevMsg.removeLast();
             }
-            prevIndex = prevMsg.size();
+            this->prevIndex = this->prevMsg.size();
         } else if (event->key() == Qt::Key_Up) {
             if (event->modifiers() == Qt::AltModifier) {
                 SplitContainer *page =
@@ -108,9 +108,9 @@ SplitInput::SplitInput(Split *_chatWidget)
 
                 page->requestFocus(reqX, reqY);
             } else {
-                if (prevMsg.size() && prevIndex) {
-                    prevIndex--;
-                    textInput.setText(prevMsg.at(prevIndex));
+                if (this->prevMsg.size() && this->prevIndex) {
+                    this->prevIndex--;
+                    this->textInput.setText(this->prevMsg.at(this->prevIndex));
                 }
             }
         } else if (event->key() == Qt::Key_Down) {
@@ -125,12 +125,13 @@ SplitInput::SplitInput(Split *_chatWidget)
 
                 page->requestFocus(reqX, reqY);
             } else {
-                if (prevIndex != (prevMsg.size() - 1) && prevIndex != prevMsg.size()) {
-                    prevIndex++;
-                    textInput.setText(prevMsg.at(prevIndex));
+                if (this->prevIndex != (this->prevMsg.size() - 1) &&
+                    this->prevIndex != this->prevMsg.size()) {
+                    this->prevIndex++;
+                    this->textInput.setText(this->prevMsg.at(this->prevIndex));
                 } else {
-                    prevIndex = prevMsg.size();
-                    textInput.setText(QString());
+                    this->prevIndex = this->prevMsg.size();
+                    this->textInput.setText(QString());
                 }
             }
         } else if (event->key() == Qt::Key_Left) {

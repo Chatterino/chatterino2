@@ -88,7 +88,7 @@ QStringList CommandManager::getCommands()
     return this->commandsStringList;
 }
 
-QString CommandManager::execCommand(const QString &text, std::shared_ptr<Channel> channel,
+QString CommandManager::execCommand(const QString &text, SharedChannel channel,
                                     bool dryRun)
 {
     QStringList words = text.split(' ', QString::SkipEmptyParts);
@@ -110,9 +110,8 @@ QString CommandManager::execCommand(const QString &text, std::shared_ptr<Channel
             if (commandName == "/uptime") {
                 QString messageText =
                     twitchChannel->isLive ? twitchChannel->streamUptime : "Channel is not live.";
-                messages::SharedMessage message(
-                    messages::Message::createSystemMessage(messageText));
-                channel->addMessage(message);
+
+                channel->addMessage(messages::Message::createSystemMessage(messageText));
 
                 return "";
             } else if (commandName == "/ignore" && words.size() >= 2) {
@@ -122,9 +121,7 @@ QString CommandManager::execCommand(const QString &text, std::shared_ptr<Channel
                     messageText = "Ignored user \"" + words.at(1) + "\".";
                 }
 
-                messages::SharedMessage message(
-                    messages::Message::createSystemMessage(messageText));
-                channel->addMessage(message);
+                channel->addMessage(messages::Message::createSystemMessage(messageText));
                 return "";
             } else if (commandName == "/unignore") {
                 QString messageText;
@@ -133,9 +130,7 @@ QString CommandManager::execCommand(const QString &text, std::shared_ptr<Channel
                     messageText = "Ignored user \"" + words.at(1) + "\".";
                 }
 
-                messages::SharedMessage message(
-                    messages::Message::createSystemMessage(messageText));
-                channel->addMessage(message);
+                channel->addMessage(messages::Message::createSystemMessage(messageText));
                 return "";
             }
         }

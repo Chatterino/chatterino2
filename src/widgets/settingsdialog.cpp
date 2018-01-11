@@ -297,7 +297,7 @@ QVBoxLayout *SettingsDialog::createAppearanceTab()
 
         auto v = new QVBoxLayout();
         v->addWidget(createCheckbox("Show timestamp", settings.showTimestamps));
-        v->addWidget(createCheckbox("Show seconds in timestamp", settings.showTimestampSeconds));
+        // fourtf: add timestamp format
         v->addWidget(createCheckbox("Show badges", settings.showBadges));
         v->addWidget(createCheckbox("Allow sending duplicate messages (add a space at the end)",
                                     settings.allowDuplicateMessages));
