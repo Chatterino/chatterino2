@@ -507,21 +507,22 @@ void TwitchMessageBuilder::parseTwitchBadges()
             QString cheerAmountQS = badge.mid(5);
             std::string versionKey = cheerAmountQS.toStdString();
 
+            // Try to fetch channel-specific bit badge
             try {
-                auto &badgeSet = resourceManager.badgeSets.at("bits");
+                const auto &badge = channelResources.badgeSets.at("bits").versions.at(versionKey);
+                this->append<ImageElement>(*(badge.badgeImage1x), MessageElement::BadgeVanity);
+                continue;
+            } catch (const std::out_of_range &) {
+                // Channel does not contain a special bit badge for this version
+            }
 
-                try {
-                    auto &badgeVersion = badgeSet.versions.at(versionKey);
-
-                    this->append<ImageElement>(*badgeVersion.badgeImage1x,
-                                               MessageElement::BadgeVanity)
-                        ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
-                } catch (const std::exception &e) {
-                    debug::Log("Exception caught: {} when trying to fetch badge version {} ",
-                               e.what(), versionKey);
-                }
-            } catch (const std::exception &e) {
-                debug::Log("No badge set with key bits. Exception: {}", e.what());
+            // Use default bit badge
+            try {
+                const auto &badge = resourceManager.badgeSets.at("bits").versions.at(versionKey);
+                this->append<ImageElement>(*(badge.badgeImage1x), MessageElement::BadgeVanity);
+            } catch (const std::out_of_range &) {
+                debug::Log("No default bit badge for version {} found", versionKey);
+                continue;
             }
         } else if (badge == "staff/1") {
             this->append<ImageElement>(*resourceManager.badgeStaff,
