@@ -28,6 +28,7 @@ MessageElement *MessageElement::setTooltip(const QString &_tooltip)
 MessageElement *MessageElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
+    return this;
 }
 
 const QString &MessageElement::getTooltip() const
