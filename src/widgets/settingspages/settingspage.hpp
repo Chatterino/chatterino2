@@ -14,9 +14,10 @@ namespace settingspages {
 class SettingsPage : public QWidget
 {
 public:
-    SettingsPage(const QString &name, const QString &resourceName);
+    SettingsPage(const QString &name, const QString &iconResource);
 
     const QString &getName();
+    const QString &getIconResource();
 
     void cancel();
 
@@ -27,7 +28,7 @@ public:
 
 protected:
     QString name;
-    QString resourceName;
+    QString iconResource;
 
     pajlada::Signals::NoArgSignal onCancel;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;

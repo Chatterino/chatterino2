@@ -17,7 +17,7 @@ namespace chatterino {
 namespace widgets {
 namespace settingspages {
 BehaviourPage::BehaviourPage()
-    : SettingsPage("Behaviour", nullptr)
+    : SettingsPage("Behaviour", ":/images/behave.svg")
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<BehaviourPage> layoutCreator(this);

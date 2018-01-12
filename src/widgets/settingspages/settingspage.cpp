@@ -6,15 +6,20 @@ namespace chatterino {
 namespace widgets {
 namespace settingspages {
 
-SettingsPage::SettingsPage(const QString &_name, const QString &_resourceName)
+SettingsPage::SettingsPage(const QString &_name, const QString &_iconResource)
     : name(_name)
-    , resourceName(_resourceName)
+    , iconResource(_iconResource)
 {
 }
 
 const QString &SettingsPage::getName()
 {
     return this->name;
+}
+
+const QString &SettingsPage::getIconResource()
+{
+    return this->iconResource;
 }
 
 void SettingsPage::cancel()

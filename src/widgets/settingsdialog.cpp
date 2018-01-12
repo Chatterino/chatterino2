@@ -88,7 +88,7 @@ void SettingsDialog::addTabs()
 
 void SettingsDialog::addTab(settingspages::SettingsPage *page, Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, page, "xD");
+    auto tab = new SettingsDialogTab(this, page, page->getIconResource());
 
     this->ui.pageStack->addWidget(page);
     this->ui.tabContainer->addWidget(tab, 0, alignment);
