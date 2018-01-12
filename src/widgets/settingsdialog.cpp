@@ -1,14 +1,6 @@
 #include "widgets/settingsdialog.hpp"
-#include "const.hpp"
-#include "debug/log.hpp"
-#include "singletons/accountmanager.hpp"
-#include "singletons/commandmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "twitch/twitchmessagebuilder.hpp"
-#include "twitch/twitchuser.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
-#include "widgets/logindialog.hpp"
 #include "widgets/settingspages/aboutpage.hpp"
 #include "widgets/settingspages/accountspage.hpp"
 #include "widgets/settingspages/appearancepage.hpp"
@@ -19,22 +11,7 @@
 #include "widgets/settingspages/logspage.hpp"
 #include "widgets/settingspages/moderationpage.hpp"
 
-#include <QComboBox>
-#include <QDebug>
-#include <QFile>
-#include <QFileDialog>
-#include <QFont>
-#include <QFontDialog>
-#include <QFormLayout>
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QGroupBox>
-#include <QLabel>
-#include <QListWidget>
-#include <QPalette>
-#include <QResource>
-#include <QTextEdit>
-#include <QtSvg>
+#include <QDialogButtonBox>
 
 namespace chatterino {
 namespace widgets {

@@ -1,41 +1,27 @@
 #pragma once
 
-#include "singletons/settingsmanager.hpp"
-#include "widgets/accountswitchwidget.hpp"
-#include "widgets/helper/settingsdialogtab.hpp"
-#include "widgets/settingspages/appearancepage.hpp"
+#include "basewidget.hpp"
 
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QDialogButtonBox>
-#include <QHBoxLayout>
-#include <QListView>
-#include <QListWidget>
-#include <QMainWindow>
 #include <QPushButton>
 #include <QStackedLayout>
-#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 
-#include "basewidget.hpp"
-
 namespace chatterino {
-
 namespace widgets {
+
+namespace settingspages {
+class SettingsPage;
+}
+
+class SettingsDialogTab;
 
 class SettingsDialog : public BaseWidget
 {
 public:
     SettingsDialog();
 
-    void select(SettingsDialogTab *tab);
-
-    friend class SettingsDialogTab;
-
-public:
     static SettingsDialog *getHandle();  // may be NULL
 
     enum class PreferredTab {
@@ -66,10 +52,14 @@ private:
     void addTabs();
     void addTab(settingspages::SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
 
+    void select(SettingsDialogTab *tab);
+
     SettingsDialogTab *selectedTab = nullptr;
 
     void okButtonClicked();
     void cancelButtonClicked();
+
+    friend class SettingsDialogTab;
 
     //    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
 };

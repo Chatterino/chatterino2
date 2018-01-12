@@ -73,6 +73,7 @@ QLineEdit *SettingsPage::createLineEdit(pajlada::Settings::Setting<QString> &set
 
     return edit;
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

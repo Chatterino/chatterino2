@@ -32,6 +32,7 @@ protected:
     pajlada::Signals::NoArgSignal onCancel;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino
