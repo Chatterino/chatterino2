@@ -404,5 +404,13 @@ Communi::IrcConnection *IrcManager::getReadConnection()
     return this->readConnection.get();
 }
 
+void
+IrcManager::addFakeMessage(const QString &data)
+{
+    auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection.get());
+
+    this->privateMessageReceived(qobject_cast<Communi::IrcPrivateMessage*>(fakeMessage));
+}
+
 }  // namespace singletons
 }  // namespace chatterino

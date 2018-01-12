@@ -53,6 +53,9 @@ public:
 
     Communi::IrcConnection *getReadConnection();
 
+    /// Debug function
+    void addFakeMessage(const QString &data);
+
 private:
     ChannelManager &channelManager;
     ResourceManager &resources;
