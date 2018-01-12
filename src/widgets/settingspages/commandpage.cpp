@@ -22,7 +22,7 @@ CommandPage::CommandPage()
     : SettingsPage("Commands", ":/images/commands.svg")
 {
     util::LayoutCreator<CommandPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>();
+    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     layout.emplace<QLabel>(TEXT)->setWordWrap(true);
 
