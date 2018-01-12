@@ -63,6 +63,7 @@ private:
 
     void parseTwitchBadges();
     void addChatterinoBadges();
+    bool tryParseCheermote(const QString &string);
 };
 
 }  // namespace twitch

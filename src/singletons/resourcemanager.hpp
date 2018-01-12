@@ -1,6 +1,8 @@
 #pragma once
 
-#include "messages/image.hpp"
+#include "util/emotemap.hpp"
+
+#include <QRegularExpression>
 
 #include <map>
 #include <memory>
@@ -61,8 +63,47 @@ public:
     messages::Image *buttonBan;
     messages::Image *buttonTimeout;
 
+    struct JSONCheermoteSet {
+        QString prefix;
+        std::vector<QString> scales;
+
+        std::vector<QString> backgrounds;
+        std::vector<QString> states;
+
+        QString type;
+        QString updatedAt;
+        int priority;
+
+        struct CheermoteTier {
+            int minBits;
+            QString id;
+            QString color;
+
+            //       Background        State             Scale
+            std::map<QString, std::map<QString, std::map<QString, messages::Image *>>> images;
+        };
+
+        std::vector<CheermoteTier> tiers;
+    };
+
+    struct Cheermote {
+        // a Cheermote indicates one tier
+        QColor color;
+        int minBits;
+
+        util::EmoteData emoteDataAnimated;
+        util::EmoteData emoteDataStatic;
+    };
+
+    struct CheermoteSet {
+        QRegularExpression regex;
+        std::vector<Cheermote> cheermotes;
+    };
+
     struct Channel {
         std::map<std::string, BadgeSet> badgeSets;
+        std::vector<JSONCheermoteSet> jsonCheermoteSets;
+        std::vector<CheermoteSet> cheermoteSets;
 
         bool loaded = false;
     };
@@ -90,5 +131,5 @@ public:
     void loadChatterinoBadges();
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}

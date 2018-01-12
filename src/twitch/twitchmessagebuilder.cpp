@@ -80,9 +80,7 @@ MessagePtr TwitchMessageBuilder::parse()
         this->parseHighlights();
     }
 
-    // bits
-    QString bits = "";
-
+    QString bits;
     auto iterator = this->tags.find("bits");
     if (iterator != this->tags.end()) {
         bits = iterator.value().toString();
@@ -145,46 +143,8 @@ MessagePtr TwitchMessageBuilder::parse()
             if (!emoteData.isValid()) {  // is text
                 QString string = std::get<1>(tuple);
 
-                static QRegularExpression cheerRegex("cheer[1-9][0-9]*");
-
-                // cheers
-                if (!bits.isEmpty() && string.length() >= 6 && cheerRegex.match(string).isValid()) {
-                    auto cheer = string.mid(5).toInt();
-
-                    QString color;
-
-                    QColor bitsColor;
-
-                    if (cheer >= 10000) {
-                        color = "red";
-                        bitsColor = QColor::fromHslF(0, 1, 0.5);
-                    } else if (cheer >= 5000) {
-                        color = "blue";
-                        bitsColor = QColor::fromHslF(0.61, 1, 0.4);
-                    } else if (cheer >= 1000) {
-                        color = "green";
-                        bitsColor = QColor::fromHslF(0.5, 1, 0.5);
-                    } else if (cheer >= 100) {
-                        color = "purple";
-                        bitsColor = QColor::fromHslF(0.8, 1, 0.5);
-                    } else {
-                        color = "gray";
-                        bitsColor = QColor::fromHslF(0.5f, 0.5f, 0.5f);
-                    }
-
-                    QString bitsLinkAnimated =
-                        QString("http://static-cdn.jtvnw.net/bits/dark/animated/" + color + "/1");
-                    QString bitsLink =
-                        QString("http://static-cdn.jtvnw.net/bits/dark/static/" + color + "/1");
-
-                    Image *imageAnimated = emoteManager.miscImageCache.getOrAdd(
-                        bitsLinkAnimated,
-                        [this, &bitsLinkAnimated] { return new Image(bitsLinkAnimated); });
-                    Image *image = emoteManager.miscImageCache.getOrAdd(
-                        bitsLink, [this, &bitsLink] { return new Image(bitsLink); });
-
-                    // append bits
-
+                if (!bits.isEmpty() && this->tryParseCheermote(string)) {
+                    // This string was parsed as a cheermote
                     continue;
                 }
 
@@ -688,6 +648,55 @@ void TwitchMessageBuilder::addChatterinoBadges()
 
     this->append<ImageElement>(*badge->image, MessageElement::BadgeChatterino)
         ->setTooltip(QString::fromStdString(badge->tooltip));
+}
+
+bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
+{
+    // Try to parse custom cheermotes
+    const auto &channelResources =
+        singletons::ResourceManager::getInstance().channels[this->roomID];
+    if (channelResources.loaded) {
+        for (const auto &cheermoteSet : channelResources.cheermoteSets) {
+            auto match = cheermoteSet.regex.match(string);
+            if (!match.hasMatch()) {
+                continue;
+            }
+            QString amount = match.captured(1);
+            bool ok = false;
+            int numBits = amount.toInt(&ok);
+            if (!ok) {
+                debug::Log("Error parsing bit amount in tryParseCheermote");
+                return false;
+            }
+
+            auto savedIt = cheermoteSet.cheermotes.end();
+
+            // Fetch cheermote that matches our numBits
+            for (auto it = cheermoteSet.cheermotes.begin(); it != cheermoteSet.cheermotes.end();
+                 ++it) {
+                if (numBits >= it->minBits) {
+                    savedIt = it;
+                } else {
+                    break;
+                }
+            }
+
+            if (savedIt == cheermoteSet.cheermotes.end()) {
+                debug::Log("Error getting a cheermote from a cheermote set for the bit amount {}",
+                           numBits);
+                return false;
+            }
+
+            const auto &cheermote = *savedIt;
+
+            this->append<EmoteElement>(cheermote.emoteDataAnimated, EmoteElement::BitsAnimated);
+            this->append<TextElement>(amount, EmoteElement::Text, cheermote.color);
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // bool
