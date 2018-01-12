@@ -18,35 +18,6 @@ struct EmoteData {
     {
     }
 
-    messages::Image *getImageForSize(unsigned emoteSize) const
-    {
-        messages::Image *ret = nullptr;
-
-        switch (emoteSize) {
-            case 0:
-                ret = this->image1x;
-                break;
-            case 1:
-                ret = this->image2x;
-                break;
-            case 2:
-                ret = this->image3x;
-                break;
-
-            default:
-                ret = this->image1x;
-                break;
-        }
-
-        if (ret == nullptr) {
-            ret = this->image1x;
-        }
-
-        assert(ret != nullptr);
-
-        return ret;
-    }
-
     // Emotes must have a 1x image to be valid
     bool isValid() const
     {
