@@ -189,6 +189,7 @@ class TimestampElement : public MessageElement
 {
     QTime time;
     TextElement *element;
+    QString format;
 
 public:
     TimestampElement();

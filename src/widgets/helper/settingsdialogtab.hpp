@@ -1,11 +1,14 @@
 #pragma once
 
+#include <QIcon>
 #include <QPaintEvent>
 #include <QWidget>
-#include <QIcon>
 
 namespace chatterino {
 namespace widgets {
+namespace settingspages {
+class SettingsPage;
+}
 
 class SettingsDialog;
 
@@ -14,11 +17,11 @@ class SettingsDialogTab : public QWidget
     Q_OBJECT
 
 public:
-    SettingsDialogTab(SettingsDialog *dialog, QString _label, QString imageFileName);
+    SettingsDialogTab(SettingsDialog *dialog, settingspages::SettingsPage *page,
+                      QString imageFileName);
 
     void setSelected(bool selected);
-    QWidget *getWidget();
-    void setWidget(QWidget *widget);
+    settingspages::SettingsPage *getSettingsPage();
 
 signals:
     void selectedChanged(bool);
@@ -28,13 +31,13 @@ private:
     void mousePressEvent(QMouseEvent *event);
 
     struct {
-        QWidget *widget;
         QString labelText;
         QIcon icon;
     } ui;
 
     // Parent settings dialog
     SettingsDialog *dialog;
+    settingspages::SettingsPage *page;
 
     bool selected = false;
 };

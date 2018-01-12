@@ -213,23 +213,25 @@ TimestampElement::~TimestampElement()
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       MessageElement::Flags _flags)
 {
+    if (singletons::SettingManager::getInstance().timestampFormat != this->format) {
+        this->format = singletons::SettingManager::getInstance().timestampFormat;
+        delete this->element;
+        this->element = TimestampElement::formatTime(this->time);
+    }
+
     this->element->addToContainer(container, _flags);
 }
 
 void TimestampElement::update(UpdateFlags _flags)
 {
-    if (_flags == UpdateFlags::Update_All) {
-        this->element = TimestampElement::formatTime(this->time);
-    } else {
-        this->element->update(_flags);
-    }
+    this->element->update(_flags);
 }
 
 TextElement *TimestampElement::formatTime(const QTime &time)
 {
-    QString text = time.toString(singletons::SettingManager::getInstance().timestampFormat);
+    QString format = time.toString(singletons::SettingManager::getInstance().timestampFormat);
 
-    return new TextElement(text, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
+    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
 }
 
 // TWITCH MODERATION

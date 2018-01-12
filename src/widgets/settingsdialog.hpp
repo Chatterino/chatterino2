@@ -3,6 +3,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "widgets/accountswitchwidget.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
+#include "widgets/settingspages/appearancepage.hpp"
 
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -27,6 +28,7 @@ namespace widgets {
 
 class SettingsDialog : public BaseWidget
 {
+public:
     SettingsDialog();
 
     void select(SettingsDialogTab *tab);
@@ -50,62 +52,26 @@ private:
     void refresh();
     static SettingsDialog *handle;
 
-    std::vector<SettingsDialogTab *> tabs;
-
-    pajlada::Settings::Setting<int> usernameDisplayMode;
-    QTimer commandsTextChangedDelay;
-
     struct {
-        QVBoxLayout tabs;
-        QVBoxLayout vbox;
-        QHBoxLayout hbox;
-        QWidget tabWidget;
-        QStackedLayout pageStack;
-        QDialogButtonBox buttonBox;
-        QPushButton okButton;
-        QPushButton cancelButton;
-
-        AccountSwitchWidget *accountSwitchWidget = nullptr;
+        QWidget *tabContainerContainer;
+        QVBoxLayout *tabContainer;
+        QStackedLayout *pageStack;
+        QPushButton *okButton;
+        QPushButton *cancelButton;
     } ui;
 
-    void addTab(QBoxLayout *layout, QString title, QString imageRes);
-    void addTabs();
+    std::vector<SettingsDialogTab *> tabs;
 
-    QVBoxLayout *createAccountsTab();
-    QVBoxLayout *createAppearanceTab();
-    QVBoxLayout *createMessagesTab();
-    QVBoxLayout *createBehaviourTab();
-    QVBoxLayout *createCommandsTab();
-    QVBoxLayout *createEmotesTab();
-    QVBoxLayout *createIgnoredUsersTab();
-    QVBoxLayout *createIgnoredMessagesTab();
-    QVBoxLayout *createLinksTab();
-    QVBoxLayout *createLogsTab();
-    QVBoxLayout *createHighlightingTab();
-    QVBoxLayout *createWhispersTab();
-    QVBoxLayout *createAboutTab();
+    void initUi();
+    void addTabs();
+    void addTab(settingspages::SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
 
     SettingsDialogTab *selectedTab = nullptr;
-
-    QListWidget *globalHighlights;
-
-    /// Widget creation helpers
-    QVBoxLayout *createTabLayout();
-    QCheckBox *createCheckbox(const QString &title, pajlada::Settings::Setting<bool> &setting);
-    QHBoxLayout *createCombobox(const QString &title, pajlada::Settings::Setting<int> &setting,
-                                QStringList items,
-                                std::function<void(QString, pajlada::Settings::Setting<int> &)> cb);
-    QHBoxLayout *createCombobox(
-        const QString &title, pajlada::Settings::Setting<std::string> &setting, QStringList items,
-        std::function<void(QString, pajlada::Settings::Setting<std::string> &)> cb);
-    QLineEdit *createLineEdit(pajlada::Settings::Setting<std::string> &setting);
 
     void okButtonClicked();
     void cancelButtonClicked();
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-
-    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
+    //    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
 };
 
 }  // namespace widgets

@@ -11,7 +11,7 @@ namespace singletons {
 
 namespace detail {
 
-double getMultiplierByTheme(const std::string &themeName)
+double getMultiplierByTheme(const QString &themeName)
 {
     if (themeName == "Light") {
         return 0.8;
@@ -46,7 +46,7 @@ ThemeManager::ThemeManager()
 
 void ThemeManager::update()
 {
-    this->actuallyUpdate(this->themeHue, detail::getMultiplierByTheme(this->themeName));
+    this->actuallyUpdate(this->themeHue, detail::getMultiplierByTheme(this->themeName.getValue()));
 }
 
 // hue: theme color (0 - 1)
@@ -157,10 +157,10 @@ void ThemeManager::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() > 0.4f && color.hueF() > 0.1 && color.hueF() < 0.33333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() -
-                              sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
-                                  color.saturationF() * 0.2);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
+                                         color.saturationF() * 0.2);
         }
     } else {
         if (color.lightnessF() < 0.5f) {
@@ -168,13 +168,13 @@ void ThemeManager::normalizeColor(QColor &color)
         }
 
         if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
-            color.setHslF(color.hueF(), color.saturationF(),
-                          color.lightnessF() +
-                              sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
-                                  color.saturationF() * 0.4);
+            color.setHslF(
+                color.hueF(), color.saturationF(),
+                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                                         color.saturationF() * 0.4);
         }
     }
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}

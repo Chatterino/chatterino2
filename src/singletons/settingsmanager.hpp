@@ -49,8 +49,8 @@ public:
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
-    StringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
-    StringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
+    QStringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
+    QStringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
     BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
 
     /// Commands

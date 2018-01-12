@@ -289,10 +289,9 @@ void Split::doOpenPopupPlayer()
 void Split::doOpenStreamlink()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    QString preferredQuality =
-        QString::fromStdString(settings.preferredQuality.getValue()).toLower();
+    QString preferredQuality = settings.preferredQuality;
     // TODO(Confuseh): Default streamlink paths
-    QString path = QString::fromStdString(settings.streamlinkPath.getValue());
+    QString path = settings.streamlinkPath;
     QString channel = QString::fromStdString(this->channelName.getValue());
     QFileInfo fileinfo = QFileInfo(path);
 

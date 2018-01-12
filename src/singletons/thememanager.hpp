@@ -4,6 +4,7 @@
 #include <QColor>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
+#include <util/serialize-custom.hpp>
 
 namespace chatterino {
 namespace singletons {
@@ -102,10 +103,10 @@ public:
 
     boost::signals2::signal<void()> updated;
 
-private:
-    pajlada::Settings::Setting<std::string> themeName;
+    pajlada::Settings::Setting<QString> themeName;
     pajlada::Settings::Setting<double> themeHue;
 
+private:
     void actuallyUpdate(double hue, double multiplier);
     QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
 
@@ -122,5 +123,5 @@ private:
     friend class WindowManager;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}

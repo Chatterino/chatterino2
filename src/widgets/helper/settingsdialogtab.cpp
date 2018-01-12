@@ -7,11 +7,12 @@
 namespace chatterino {
 namespace widgets {
 
-SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, QString _labelText,
+SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, settingspages::SettingsPage *_page,
                                      QString imageFileName)
     : dialog(_dialog)
+    , page(_page)
 {
-    this->ui.labelText = _labelText;
+    this->ui.labelText = page->getName();
     this->ui.icon.addFile(imageFileName);
 
     this->setCursor(QCursor(Qt::PointingHandCursor));
@@ -31,14 +32,9 @@ void SettingsDialogTab::setSelected(bool _selected)
     emit selectedChanged(selected);
 }
 
-QWidget *SettingsDialogTab::getWidget()
+settingspages::SettingsPage *SettingsDialogTab::getSettingsPage()
 {
-    return this->ui.widget;
-}
-
-void SettingsDialogTab::setWidget(QWidget *widget)
-{
-    this->ui.widget = widget;
+    return this->page;
 }
 
 void SettingsDialogTab::paintEvent(QPaintEvent *)
@@ -51,8 +47,7 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
     int a = (this->height() - 20) / 2;
-    QPixmap pixmap = this->ui.icon.pixmap(QSize(20,20));
-
+    QPixmap pixmap = this->ui.icon.pixmap(QSize(20, 20));
 
     painter.drawPixmap(0, a, pixmap);
 

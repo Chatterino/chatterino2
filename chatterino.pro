@@ -116,7 +116,17 @@ SOURCES += \
     src/messages/image.cpp \
     src/messages/layouts/messagelayout.cpp \
     src/messages/layouts/messagelayoutelement.cpp \
-    src/messages/layouts/messagelayoutcontainer.cpp
+    src/messages/layouts/messagelayoutcontainer.cpp \
+    src/widgets/settingspages/appearancepage.cpp \
+    src/widgets/settingspages/settingspage.cpp \
+    src/widgets/settingspages/behaviourpage.cpp \
+    src/widgets/settingspages/commandpage.cpp \
+    src/widgets/settingspages/emotespage.cpp \
+    src/widgets/settingspages/highlightingpage.cpp \
+    src/widgets/settingspages/accountspage.cpp \
+    src/widgets/settingspages/aboutpage.cpp \
+    src/widgets/settingspages/moderationpage.cpp \
+    src/widgets/settingspages/logspage.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -203,7 +213,18 @@ HEADERS  += \
     src/messages/layouts/messagelayout.hpp \
     src/messages/layouts/messagelayoutelement.hpp \
     src/messages/layouts/messagelayoutcontainer.hpp \
-    src/util/property.hpp
+    src/util/property.hpp \
+    src/widgets/settingspages/appearancepage.hpp \
+    src/widgets/settingspages/settingspage.hpp \
+    src/util/layoutcreator.hpp \
+    src/widgets/settingspages/behaviourpage.hpp \
+    src/widgets/settingspages/commandpage.hpp \
+    src/widgets/settingspages/emotespage.hpp \
+    src/widgets/settingspages/highlightingpage.hpp \
+    src/widgets/settingspages/accountspage.hpp \
+    src/widgets/settingspages/aboutpage.hpp \
+    src/widgets/settingspages/moderationpage.hpp \
+    src/widgets/settingspages/logspage.hpp
 
 
 PRECOMPILED_HEADER =
