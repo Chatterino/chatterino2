@@ -142,6 +142,7 @@ void MessageLayout::actuallyLayout(int width)
 void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection &selection)
 {
     QPixmap *pixmap = this->buffer.get();
+    singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
 
     // create new buffer if required
     if (!pixmap) {
@@ -166,6 +167,11 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     // draw on buffer
     painter.drawPixmap(0, y, pixmap->width(), pixmap->height(), *pixmap);
 
+    // draw disabled
+    if (this->message->hasFlags(Message::Disabled)) {
+        painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
+    }
+
     this->bufferValid = true;
 }
 
@@ -178,10 +184,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    painter.fillRect(buffer->rect(),
-                     this->message->hasFlags(Message::Highlighted)
-                         ? themeManager.messages.backgrounds.highlighted
-                         : themeManager.messages.backgrounds.regular);
+    painter.fillRect(buffer->rect(), this->message->hasFlags(Message::Highlighted)
+                                         ? themeManager.messages.backgrounds.highlighted
+                                         : themeManager.messages.backgrounds.regular);
 
     // draw selection
     if (!selection.isEmpty()) {
