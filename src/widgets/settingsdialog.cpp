@@ -81,7 +81,7 @@ void SettingsDialog::addTabs()
     this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
     //    this->addTab(new settingspages::LogsPage);
-    //    this->addTab(new settingspages::ModerationPage);
+    this->addTab(new settingspages::ModerationPage);
     this->ui.tabContainer->addStretch(1);
     this->addTab(new settingspages::AboutPage, Qt::AlignBottom);
 }

@@ -74,6 +74,9 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
 
+    /// Moderation
+    QStringSetting moderationActions = {"/moderation/actions", "/ban {user}\n/timeout {user} 300"};
+
     /// Highlighting
     BoolSetting enableHighlights = {"/highlighting/enabled", true};
     BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword", true};

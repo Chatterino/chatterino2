@@ -1,6 +1,10 @@
 #pragma once
 
+#include <QTimer>
+
 #include "widgets/settingspages/settingspage.hpp"
+
+class QPushButton;
 
 namespace chatterino {
 namespace widgets {
@@ -10,6 +14,9 @@ class ModerationPage : public SettingsPage
 {
 public:
     ModerationPage();
+
+private:
+    QTimer itemsChangedTimer;
 };
 }  // namespace settingspages
 }  // namespace widgets
