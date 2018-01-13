@@ -44,7 +44,7 @@ SplitHeader::SplitHeader(Split *_split)
         title->setMouseTracking(true);
         QSizePolicy policy;
         policy.setHorizontalStretch(1);
-        policy.setHorizontalPolicy(QSizePolicy::Policy::Expanding);
+        policy.setHorizontalPolicy(QSizePolicy::Policy::MinimumExpanding);
         title->setSizePolicy(policy);
         //        title->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
         //        layout->setStretch(1, 1000);
@@ -56,7 +56,7 @@ SplitHeader::SplitHeader(Split *_split)
         moderation->setMouseTracking(true);
         moderation->getLabel().setScaledContents(true);
         moderation->getLabel().setTextFormat(Qt::RichText);
-        moderation->getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
+        moderation->getLabel().setText("<img src=':/images/moderator_bg.png' />");
     }
 
     // ---- misc
