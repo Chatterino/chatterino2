@@ -26,6 +26,8 @@ class SplitHeader : public BaseWidget
 
 public:
     explicit SplitHeader(Split *_chatWidget);
+    ~SplitHeader();
+
     // Update channel text from chat widget
     void updateChannelText();
 
@@ -38,25 +40,18 @@ protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
-    Split *const chatWidget;
+    Split *const split;
 
     QPoint dragStart;
     bool dragging = false;
 
     boost::signals2::connection onlineStatusChangedConnection;
 
-    QHBoxLayout hbox;
+    RippleEffectLabel *dropdownLabel;
+    SignalLabel *titleLabel;
+    RippleEffectLabel *moderationLabel;
 
-    // top left
-    RippleEffectLabel leftLabel;
-    QMenu leftMenu;
-
-    // center
-    SignalLabel channelNameLabel;
-
-    // top right
-    RippleEffectLabel rightLabel;
-    QMenu rightMenu;
+    QMenu dropdownMenu;
 
     void leftButtonClicked();
     void rightButtonClicked();
@@ -69,6 +64,8 @@ private:
     bool isLive;
 
 public slots:
+    void addDropdownItems(RippleEffectLabel *label);
+
     void menuMoveSplit();
     void menuReloadChannelEmotes();
     void menuManualReconnect();

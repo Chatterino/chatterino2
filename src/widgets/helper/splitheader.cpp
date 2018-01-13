@@ -1,6 +1,7 @@
 #include "widgets/helper/splitheader.hpp"
 #include "singletons/thememanager.hpp"
 #include "twitch/twitchchannel.hpp"
+#include "util/layoutcreator.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
@@ -14,71 +15,93 @@
 namespace chatterino {
 namespace widgets {
 
-SplitHeader::SplitHeader(Split *_chatWidget)
-    : BaseWidget(_chatWidget)
-    , chatWidget(_chatWidget)
-    , leftLabel(this)
-    , leftMenu(this)
-    , rightLabel(this)
-    , rightMenu(this)
+SplitHeader::SplitHeader(Split *_split)
+    : BaseWidget(_split)
+    , split(_split)
 {
     this->setMouseTracking(true);
-    this->leftLabel.setMouseTracking(true);
-    this->channelNameLabel.setMouseTracking(true);
-    this->rightLabel.setMouseTracking(true);
 
+    util::LayoutCreator<SplitHeader> layoutCreator(this);
+    auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
+    {
+        // dropdown label
+        auto dropdown = layout.emplace<RippleEffectLabel>(this).assign(&this->dropdownLabel);
+        dropdown->getLabel().setTextFormat(Qt::RichText);
+        dropdown->getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
+        dropdown->getLabel().setScaledContents(true);
+        dropdown->setMouseTracking(true);
+        this->addDropdownItems(dropdown.getElement());
+        QObject::connect(dropdown.getElement(), &RippleEffectLabel::clicked, this, [this] {
+            QTimer::singleShot(80, [&] {
+                this->dropdownMenu.move(
+                    this->dropdownLabel->mapToGlobal(QPoint(0, this->dropdownLabel->height())));
+                this->dropdownMenu.show();
+            });
+        });
+
+        // channel name label
+        auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
+        title->setMouseTracking(true);
+        QSizePolicy policy;
+        policy.setHorizontalStretch(1);
+        policy.setHorizontalPolicy(QSizePolicy::Policy::Expanding);
+        title->setSizePolicy(policy);
+        //        title->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        //        layout->setStretch(1, 1000);
+        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
+                         &SplitHeader::mouseDoubleClickEvent);
+
+        // moderation mode
+        auto moderation = layout.emplace<RippleEffectLabel>(this).assign(&this->moderationLabel);
+        moderation->setMouseTracking(true);
+        moderation->getLabel().setScaledContents(true);
+        moderation->getLabel().setTextFormat(Qt::RichText);
+        moderation->getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
+    }
+
+    // ---- misc
+    this->layout()->setMargin(0);
     this->refreshTheme();
 
     this->updateChannelText();
 
-    this->setLayout(&this->hbox);
-    this->hbox.setMargin(0);
-    this->hbox.addWidget(&this->leftLabel);
-    this->hbox.addWidget(&this->channelNameLabel, 1);
-    this->hbox.addWidget(&this->rightLabel);
-
-    // left
-    this->leftLabel.getLabel().setTextFormat(Qt::RichText);
-    this->leftLabel.getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
-
-    connect(&this->leftLabel, &RippleEffectLabel::clicked, this, &SplitHeader::leftButtonClicked);
-
-    this->leftMenu.addAction("Add new split", this->chatWidget, &Split::doAddSplit,
-                             QKeySequence(tr("Ctrl+T")));
-    this->leftMenu.addAction("Close split", this->chatWidget, &Split::doCloseSplit,
-                             QKeySequence(tr("Ctrl+W")));
-    this->leftMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
-    this->leftMenu.addAction("Popup", this->chatWidget, &Split::doPopup);
-    this->leftMenu.addAction("Open viewer list", this->chatWidget, &Split::doOpenViewerList);
-    this->leftMenu.addSeparator();
-    this->leftMenu.addAction("Change channel", this->chatWidget, &Split::doChangeChannel,
-                             QKeySequence(tr("Ctrl+R")));
-    this->leftMenu.addAction("Clear chat", this->chatWidget, &Split::doClearChat);
-    this->leftMenu.addAction("Open channel", this->chatWidget, &Split::doOpenChannel);
-    this->leftMenu.addAction("Open popup player", this->chatWidget, &Split::doOpenPopupPlayer);
-    this->leftMenu.addAction("Open in Streamlink", this->chatWidget, &Split::doOpenStreamlink);
-    this->leftMenu.addSeparator();
-    this->leftMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
-    this->leftMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
-    this->leftMenu.addSeparator();
-    this->leftMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
-
-    // middle
-    this->channelNameLabel.setAlignment(Qt::AlignCenter);
-
-    connect(&this->channelNameLabel, &SignalLabel::mouseDoubleClick, this,
-            &SplitHeader::mouseDoubleClickEvent);
-
-    // right
-    this->rightLabel.setMinimumWidth(this->height());
-    this->rightLabel.getLabel().setTextFormat(Qt::RichText);
-    this->rightLabel.getLabel().setText("ayy");
+    //    this->titleLabel.setAlignment(Qt::AlignCenter);
 
     this->initializeChannelSignals();
 
-    this->chatWidget->channelChanged.connect([this]() {
+    this->split->channelChanged.connect([this]() {
         this->initializeChannelSignals();  //
     });
+}
+
+SplitHeader::~SplitHeader()
+{
+    this->onlineStatusChangedConnection.disconnect();
+}
+
+void SplitHeader::addDropdownItems(RippleEffectLabel *label)
+{
+    connect(this->dropdownLabel, &RippleEffectLabel::clicked, this,
+            &SplitHeader::leftButtonClicked);
+
+    // clang-format off
+    this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
+    this->dropdownMenu.addAction("Close split", this->split, &Split::doCloseSplit, QKeySequence(tr("Ctrl+W")));
+    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
+    this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
+    this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
+    this->dropdownMenu.addSeparator();
+    this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
+    this->dropdownMenu.addAction("Clear chat", this->split, &Split::doClearChat);
+    this->dropdownMenu.addAction("Open channel", this->split, &Split::doOpenChannel);
+    this->dropdownMenu.addAction("Open popup player", this->split, &Split::doOpenPopupPlayer);
+    this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
+    this->dropdownMenu.addSeparator();
+    this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
+    this->dropdownMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
+    this->dropdownMenu.addSeparator();
+    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
+    // clang-format on
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -86,7 +109,7 @@ void SplitHeader::initializeChannelSignals()
     // Disconnect any previous signal first
     this->onlineStatusChangedConnection.disconnect();
 
-    auto channel = this->chatWidget->getChannel();
+    auto channel = this->split->getChannel();
     twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
@@ -98,16 +121,20 @@ void SplitHeader::initializeChannelSignals()
 
 void SplitHeader::resizeEvent(QResizeEvent *event)
 {
-    this->setFixedHeight(static_cast<float>(28 * getDpiMultiplier()));
+    int w = 28 * getDpiMultiplier();
+
+    this->setFixedHeight(w);
+    this->dropdownLabel->setFixedWidth(w);
+    this->moderationLabel->setFixedWidth(w);
 }
 
 void SplitHeader::updateChannelText()
 {
-    const std::string channelName = this->chatWidget->channelName;
+    const std::string channelName = this->split->channelName;
     if (channelName.empty()) {
-        this->channelNameLabel.setText("<no channel>");
+        this->titleLabel->setText("<no channel>");
     } else {
-        auto channel = this->chatWidget->getChannel();
+        auto channel = this->split->getChannel();
 
         twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
 
@@ -119,12 +146,13 @@ void SplitHeader::updateChannelText()
                             "<br>"
                             "Live for " +
                             twitchChannel->streamUptime + " with " +
-                            twitchChannel->streamViewerCount + " viewers"
-                                                               "</p>";
-            this->channelNameLabel.setText(QString::fromStdString(channelName) + " (live)");
+                            twitchChannel->streamViewerCount +
+                            " viewers"
+                            "</p>";
+            this->titleLabel->setText(QString::fromStdString(channelName) + " (live)");
         } else {
             this->isLive = false;
-            this->channelNameLabel.setText(QString::fromStdString(channelName));
+            this->titleLabel->setText(QString::fromStdString(channelName));
             this->tooltip = "";
         }
     }
@@ -158,17 +186,17 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
     if (this->dragging) {
         if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
             std::abs(this->dragStart.y() - event->pos().y()) > 12) {
-            auto page = static_cast<SplitContainer *>(this->chatWidget->parentWidget());
+            auto page = static_cast<SplitContainer *>(this->split->parentWidget());
 
             if (page != nullptr) {
                 SplitContainer::isDraggingSplit = true;
-                SplitContainer::draggingSplit = this->chatWidget;
+                SplitContainer::draggingSplit = this->split;
 
-                auto originalLocation = page->removeFromLayout(this->chatWidget);
+                auto originalLocation = page->removeFromLayout(this->split);
 
                 // page->update();
 
-                QDrag *drag = new QDrag(this->chatWidget);
+                QDrag *drag = new QDrag(this->split);
                 QMimeData *mimeData = new QMimeData;
 
                 mimeData->setData("chatterino/split", "xD");
@@ -178,7 +206,7 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
                 Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
 
                 if (dropAction == Qt::IgnoreAction) {
-                    page->addToLayout(this->chatWidget, originalLocation);
+                    page->addToLayout(this->split, originalLocation);
                 }
 
                 SplitContainer::isDraggingSplit = false;
@@ -197,16 +225,12 @@ void SplitHeader::leaveEvent(QEvent *event)
 void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        this->chatWidget->doChangeChannel();
+        this->split->doChangeChannel();
     }
 }
 
 void SplitHeader::leftButtonClicked()
 {
-    QTimer::singleShot(80, [&] {
-        this->leftMenu.move(this->leftLabel.mapToGlobal(QPoint(0, this->leftLabel.height())));
-        this->leftMenu.show();
-    });
 }
 
 void SplitHeader::rightButtonClicked()
@@ -218,9 +242,9 @@ void SplitHeader::refreshTheme()
     QPalette palette;
     palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);
 
-    this->leftLabel.setPalette(palette);
-    this->channelNameLabel.setPalette(palette);
-    this->rightLabel.setPalette(palette);
+    this->dropdownLabel->setPalette(palette);
+    this->titleLabel->setPalette(palette);
+    this->moderationLabel->setPalette(palette);
 }
 
 void SplitHeader::menuMoveSplit()
