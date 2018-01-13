@@ -20,7 +20,7 @@ namespace chatterino {
 namespace widgets {
 namespace settingspages {
 HighlightingPage::HighlightingPage()
-    : SettingsPage("Highlights", ":/images/VSO_Link_blue_16x.png")
+    : SettingsPage("Highlights", ":/images/notifications.svg")
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<HighlightingPage> layoutCreator(this);
