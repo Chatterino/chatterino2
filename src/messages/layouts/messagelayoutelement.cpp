@@ -77,7 +77,7 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
         if (this->image.getPixmap() != nullptr) {
             // fourtf: make it use qreal values
             QRect rect = this->getRect();
-            rect.moveTop(yOffset);
+            rect.moveTop(rect.y() + yOffset);
             painter.drawPixmap(QRectF(rect), *this->image.getPixmap(), QRectF());
         }
     }
