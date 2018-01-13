@@ -50,11 +50,11 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     int a = (this->height() - 20) / 2;
     QPixmap pixmap = this->ui.icon.pixmap(QSize(20, 20));
 
-    painter.drawPixmap(0, a + a, pixmap);
+    painter.drawPixmap(a, a, pixmap);
 
     a = a + a + 20;
 
-    painter.drawText(QRect(a, 0, width() - a, height()), this->ui.labelText,
+    painter.drawText(QRect(a + a, 0, width() - a, height()), this->ui.labelText,
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
