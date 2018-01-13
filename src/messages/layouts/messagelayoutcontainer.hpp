@@ -64,6 +64,7 @@ public:
 
     // painting
     void paintElements(QPainter &painter);
+    void paintAnimatedElements(QPainter &painter, int yOffset);
     void paintSelection(QPainter &painter, int messageIndex, Selection &selection);
 
 private:
@@ -80,5 +81,5 @@ private:
     std::vector<std::unique_ptr<MessageLayoutElement>> elements;
 };
 }  // namespace layouts
-}
-}
+}  // namespace messages
+}  // namespace chatterino

@@ -34,7 +34,7 @@ public:
     virtual void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const = 0;
     virtual int getSelectionIndexCount() = 0;
     virtual void paint(QPainter &painter) = 0;
-    virtual void paintAnimated(QPainter &painter) = 0;
+    virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) = 0;
 
 protected:
@@ -56,7 +56,7 @@ protected:
     virtual void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
     virtual int getSelectionIndexCount() override;
     virtual void paint(QPainter &painter) override;
-    virtual void paintAnimated(QPainter &painter) override;
+    virtual void paintAnimated(QPainter &painter, int yOffset) override;
     virtual int getMouseOverIndex(const QPoint &abs) override;
 
 private:
@@ -74,7 +74,7 @@ protected:
     virtual void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
     virtual int getSelectionIndexCount() override;
     virtual void paint(QPainter &painter) override;
-    virtual void paintAnimated(QPainter &painter) override;
+    virtual void paintAnimated(QPainter &painter, int yOffset) override;
     virtual int getMouseOverIndex(const QPoint &abs) override;
 
 private:

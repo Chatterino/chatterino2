@@ -148,10 +148,17 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
     }
 }
 
+void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffset)
+{
+    for (const std::unique_ptr<MessageLayoutElement> &element : this->elements) {
+        element->paintAnimated(painter, yOffset);
+    }
+}
+
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                                             Selection &selection)
 {
 }
 }  // namespace layouts
-}
-}
+}  // namespace messages
+}  // namespace chatterino

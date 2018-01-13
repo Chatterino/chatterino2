@@ -71,12 +71,14 @@ void ImageLayoutElement::paint(QPainter &painter)
     }
 }
 
-void ImageLayoutElement::paintAnimated(QPainter &painter)
+void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
     if (this->image.isAnimated()) {
         if (this->image.getPixmap() != nullptr) {
             // fourtf: make it use qreal values
-            painter.drawPixmap(QRectF(this->getRect()), *this->image.getPixmap(), QRectF());
+            QRect rect = this->getRect();
+            rect.moveTop(yOffset);
+            painter.drawPixmap(QRectF(rect), *this->image.getPixmap(), QRectF());
         }
     }
 }
@@ -119,7 +121,7 @@ void TextLayoutElement::paint(QPainter &painter)
                      QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
-void TextLayoutElement::paintAnimated(QPainter &painter)
+void TextLayoutElement::paintAnimated(QPainter &, int)
 {
 }
 

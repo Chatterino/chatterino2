@@ -172,6 +172,9 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
         painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
     }
 
+    // draw gif emotes
+    this->container.paintAnimatedElements(painter, y);
+
     this->bufferValid = true;
 }
 
