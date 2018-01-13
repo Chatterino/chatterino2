@@ -52,9 +52,9 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     painter.drawPixmap(a, a, pixmap);
 
-    a = a + a + 20;
+    a = a + a + 20 + a;
 
-    painter.drawText(QRect(a + a, 0, width() - a, height()), this->ui.labelText,
+    painter.drawText(QRect(a, 0, width() - a, height()), this->ui.labelText,
                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 }
 
