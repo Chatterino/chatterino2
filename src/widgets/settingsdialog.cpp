@@ -42,9 +42,9 @@ void SettingsDialog::initUi()
         .assign(&this->ui.tabContainer);
 
     // right side layout
-    auto right = layoutCreator.emplace<QVBoxLayout>();
+    auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
-        right.emplace<QStackedLayout>().assign(&this->ui.pageStack).emplace<QPushButton>("NaM");
+        right.emplace<QStackedLayout>().assign(&this->ui.pageStack).withoutMargin();
 
         auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
         {
@@ -79,7 +79,7 @@ void SettingsDialog::addTabs()
     this->addTab(new settingspages::BehaviourPage);
     this->addTab(new settingspages::CommandPage);
     this->addTab(new settingspages::EmotesPage);
-    //    this->addTab(new settingspages::HighlightingPage);
+    this->addTab(new settingspages::HighlightingPage);
     //    this->addTab(new settingspages::LogsPage);
     //    this->addTab(new settingspages::ModerationPage);
     this->ui.tabContainer->addStretch(1);

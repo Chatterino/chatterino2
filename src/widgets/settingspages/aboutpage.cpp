@@ -16,7 +16,7 @@ AboutPage::AboutPage()
 {
     util::LayoutCreator<AboutPage> layoutCreator(this);
 
-    auto layout = layoutCreator.emplace<QVBoxLayout>();
+    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         QPixmap pixmap;
         pixmap.load(":/images/aboutlogo.png");

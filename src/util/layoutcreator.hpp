@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QHBoxLayout>
+#include <QTabWidget>
 #include <QWidget>
 
 #include <cassert>
@@ -60,6 +61,20 @@ public:
         this->item->setContentsMargins(0, 0, 0, 0);
 
         return *this;
+    }
+
+    template <typename Q = T, typename T2,
+              typename std::enable_if<std::is_same<QTabWidget, Q>::value, int>::type = 0>
+    LayoutCreator<T2> appendTab(T2 *item, const QString &title)
+    {
+        static_assert(std::is_base_of<QLayout, T2>::value, "needs to be QLayout");
+
+        QWidget *widget = new QWidget;
+        widget->setLayout(item);
+
+        this->item->addTab(widget, title);
+
+        return LayoutCreator<T2>(item);
     }
 
 private:

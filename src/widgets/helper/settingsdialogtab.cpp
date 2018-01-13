@@ -50,7 +50,7 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
     int a = (this->height() - 20) / 2;
     QPixmap pixmap = this->ui.icon.pixmap(QSize(20, 20));
 
-    painter.drawPixmap(0, a, pixmap);
+    painter.drawPixmap(0, a + a, pixmap);
 
     a = a + a + 20;
 
