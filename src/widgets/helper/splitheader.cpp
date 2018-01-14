@@ -39,17 +39,15 @@ SplitHeader::SplitHeader(Split *_split)
             });
         });
 
+        layout->addStretch(1);
+
         // channel name label
         auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
         title->setMouseTracking(true);
-        QSizePolicy policy;
-        policy.setHorizontalStretch(1);
-        policy.setHorizontalPolicy(QSizePolicy::Policy::MinimumExpanding);
-        title->setSizePolicy(policy);
-        //        title->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-        //        layout->setStretch(1, 1000);
         QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
                          &SplitHeader::mouseDoubleClickEvent);
+
+        layout->addStretch(1);
 
         // moderation mode
         auto moderation = layout.emplace<RippleEffectLabel>(this).assign(&this->moderationLabel);
