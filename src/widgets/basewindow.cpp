@@ -7,6 +7,8 @@
 #include <QDebug>
 #include <QIcon>
 
+#include <windows.h>
+
 namespace chatterino {
 namespace widgets {
 
@@ -60,10 +62,12 @@ void BaseWindow::leaveEvent(QEvent *)
 #ifdef USEWINSDK
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-    int dpi;
+    MSG *msg = reinterpret_cast<MSG *>(message);
 
-    if (util::tryHandleDpiChangedMessage(message, dpi)) {
+    // WM_DPICHANGED
+    if (msg->message == 0x02E0) {
         qDebug() << "dpi changed";
+        int dpi = HIWORD(msg->wParam);
 
         float oldDpiMultiplier = this->dpiMultiplier;
         this->dpiMultiplier = dpi / 96.f;
@@ -73,10 +77,13 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
         this->resize(static_cast<int>(this->width() * scale),
                      static_cast<int>(this->height() * scale));
+
+        return true;
     }
 
     return QWidget::nativeEvent(eventType, message, result);
-}
+}  // namespace widgets
+
 #endif
 
 }  // namespace widgets
