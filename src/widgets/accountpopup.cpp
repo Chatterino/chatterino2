@@ -19,7 +19,7 @@ namespace chatterino {
 namespace widgets {
 
 AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
-    : BaseWidget()
+    : BaseWindow()
     , ui(new Ui::AccountPopup)
     , channel(_channel)
 {
@@ -28,7 +28,6 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
     this->layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     this->setWindowFlags(Qt::FramelessWindowHint);
-    this->initAsWindow();
 
     this->resize(0, 0);
 

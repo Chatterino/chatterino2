@@ -8,13 +8,13 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "basewidget.hpp"
+#include "basewindow.hpp"
 
 namespace chatterino {
 
 namespace widgets {
 
-class QualityPopup : public BaseWidget
+class QualityPopup : public BaseWindow
 {
 public:
     QualityPopup(const QString &channel, const QString &path, QStringList options);

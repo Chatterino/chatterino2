@@ -1,6 +1,6 @@
 #pragma once
 
-#include "basewidget.hpp"
+#include "basewindow.hpp"
 
 #include <QPushButton>
 #include <QStackedLayout>
@@ -17,7 +17,7 @@ class SettingsPage;
 
 class SettingsDialogTab;
 
-class SettingsDialog : public BaseWidget
+class SettingsDialog : public BaseWindow
 {
 public:
     SettingsDialog();

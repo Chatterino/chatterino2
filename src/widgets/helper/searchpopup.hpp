@@ -4,7 +4,7 @@
 
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
-#include "widgets/basewidget.hpp"
+#include "widgets/basewindow.hpp"
 
 class QLineEdit;
 namespace chatterino {
@@ -12,7 +12,7 @@ class Channel;
 namespace widgets {
 class ChannelView;
 
-class SearchPopup : public BaseWidget
+class SearchPopup : public BaseWindow
 {
 public:
     SearchPopup();
@@ -27,5 +27,5 @@ private:
     void initLayout();
     void performSearch();
 };
-}
-}
+}  // namespace widgets
+}  // namespace chatterino

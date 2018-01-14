@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/helpers.hpp"
-#include "widgets/basewidget.hpp"
+#include "widgets/basewindow.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/titlebar.hpp"
 
@@ -35,7 +35,7 @@ struct WindowGeometry {
     pajlada::Settings::Setting<int> height;
 };
 
-class Window : public BaseWidget
+class Window : public BaseWindow
 {
     Q_OBJECT
 

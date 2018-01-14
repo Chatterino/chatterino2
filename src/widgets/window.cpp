@@ -18,15 +18,13 @@ namespace widgets {
 
 Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager,
                bool _isMainWindow)
-    : BaseWidget(_themeManager, nullptr)
+    : BaseWindow(_themeManager, nullptr)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
     , dpi(this->getDpiMultiplier())
     , themeManager(_themeManager)
     , notebook(this, _isMainWindow, this->settingRoot)
 {
-    this->initAsWindow();
-
     singletons::AccountManager::getInstance().Twitch.currentUsername.connect(
         [this](const std::string &newUsername, auto) {
             if (newUsername.empty()) {

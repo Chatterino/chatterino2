@@ -11,7 +11,6 @@ namespace chatterino {
 namespace widgets {
 SearchPopup::SearchPopup()
 {
-    this->initAsWindow();
     this->initLayout();
     this->resize(400, 600);
 }
@@ -76,14 +75,13 @@ void SearchPopup::performSearch()
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
         messages::MessagePtr message = this->snapshot[i];
 
-        if (text.isEmpty() ||
-            message->getSearchText().indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) !=
-                -1) {
+        if (text.isEmpty() || message->getSearchText().indexOf(this->searchInput->text(), 0,
+                                                               Qt::CaseInsensitive) != -1) {
             channel->addMessage(message);
         }
     }
 
     this->channelView->setChannel(channel);
 }
-}
-}
+}  // namespace widgets
+}  // namespace chatterino

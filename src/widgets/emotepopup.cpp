@@ -13,10 +13,8 @@ namespace chatterino {
 namespace widgets {
 
 EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
-    : BaseWidget(themeManager, 0)
+    : BaseWindow(themeManager, 0)
 {
-    this->initAsWindow();
-
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
 

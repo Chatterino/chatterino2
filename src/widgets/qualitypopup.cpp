@@ -6,12 +6,10 @@ namespace chatterino {
 namespace widgets {
 
 QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringList options)
-    : BaseWidget()
+    : BaseWindow()
     , channel(channel)
     , path(path)
 {
-    this->initAsWindow();
-
     this->ui.okButton.setText("OK");
     this->ui.cancelButton.setText("Cancel");
 

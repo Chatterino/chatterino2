@@ -1,13 +1,13 @@
 #pragma once
 
 #include "channel.hpp"
-#include "widgets/basewidget.hpp"
+#include "widgets/basewindow.hpp"
 #include "widgets/helper/channelview.hpp"
 
 namespace chatterino {
 namespace widgets {
 
-class EmotePopup : public BaseWidget
+class EmotePopup : public BaseWindow
 {
 public:
     explicit EmotePopup(singletons::ThemeManager &);

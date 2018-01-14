@@ -19,10 +19,8 @@ namespace widgets {
 SettingsDialog *SettingsDialog::handle = nullptr;
 
 SettingsDialog::SettingsDialog()
-    : BaseWidget()
+    : BaseWindow()
 {
-    this->initAsWindow();
-
     this->initUi();
 
     this->addTabs();
