@@ -20,7 +20,7 @@ public:
 
     inline bool isLightTheme() const
     {
-        return this->lightTheme;
+        return this->isLight;
     }
 
     struct TabColors {
@@ -97,6 +97,9 @@ public:
         QColor background;
     } tooltip;
 
+    QColor windowBg;
+    QColor windowText;
+
     void normalizeColor(QColor &color);
 
     void update();
@@ -116,7 +119,7 @@ private:
     void fillLookupTableValues(double (&array)[360], double from, double to, double fromValue,
                                double toValue);
 
-    bool lightTheme = false;
+    bool isLight = false;
 
     pajlada::Signals::NoArgSignal repaintVisibleChatWidgets;
 

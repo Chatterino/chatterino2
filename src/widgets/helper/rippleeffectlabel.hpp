@@ -15,7 +15,7 @@ namespace widgets {
 class RippleEffectLabel : public RippleEffectButton
 {
 public:
-    explicit RippleEffectLabel(BaseWidget *parent, int spacing = 6);
+    explicit RippleEffectLabel(BaseWidget *parent = nullptr, int spacing = 6);
 
     SignalLabel &getLabel()
     {

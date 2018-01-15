@@ -11,22 +11,22 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWidget::BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent)
-    : QWidget(parent)
+BaseWidget::BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
     , themeManager(_themeManager)
 {
     this->init();
 }
 
-BaseWidget::BaseWidget(BaseWidget *parent)
-    : QWidget(parent)
+BaseWidget::BaseWidget(BaseWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
     , themeManager(singletons::ThemeManager::getInstance())
 {
     this->init();
 }
 
-BaseWidget::BaseWidget(QWidget *parent)
-    : QWidget(parent)
+BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
+    : QWidget(parent, f)
     , themeManager(singletons::ThemeManager::getInstance())
 {
 }

@@ -63,8 +63,6 @@ private:
 
     float dpi;
 
-    virtual void refreshTheme() override;
-
     void loadGeometry();
 
     Notebook notebook;

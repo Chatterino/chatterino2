@@ -53,7 +53,23 @@ void ThemeManager::update()
 // multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
 void ThemeManager::actuallyUpdate(double hue, double multiplier)
 {
-    lightTheme = multiplier > 0;
+    isLight = multiplier > 0;
+    bool isLightTabs;
+
+    QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
+    QColor themeColorNoSat = QColor::fromHslF(hue, 0.5, 0.5);
+
+#ifdef USEWINSDK
+    QColor tabFg = isLight ? "#000" : "#fff";
+    this->windowBg = isLight ? "#fff" : "#444";
+
+    isLightTabs = isLight;
+#else
+    QColor tabFg = lightTheme ? "#000" : "#fff";
+    this->windowBg = "#fff";
+
+    isLightTabs = true;
+#endif
 
     qreal sat = 0.05;
 
@@ -70,30 +86,30 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     // message (referenced later)
     this->messages.textColors.caret =  //
-        this->messages.textColors.regular = lightTheme ? QColor(0, 0, 0) : QColor(255, 255, 255);
+        this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
     // tabs
     // text, {regular, hover, unfocused}
-    this->tabs.regular = {QColor(0, 0, 0),
-                          {QColor(255, 255, 255), QColor(200, 200, 200), QColor(255, 255, 255)}};
+    this->tabs.regular = {tabFg, {windowBg, blendColors(windowBg, "#999", 0.5), windowBg}};
 
-    this->tabs.selected = {QColor(255, 255, 255),
-                           {QColor::fromHslF(hue, 0.5, 0.5), QColor::fromHslF(hue, 0.5, 0.5),
-                            QColor::fromHslF(hue, 0, 0.5)}};
+    this->tabs.selected = {"#fff", {themeColor, themeColor, QColor::fromHslF(hue, 0, 0.5)}};
 
-    this->tabs.newMessage = {QColor(0, 0, 0),
-                             {QBrush(QColor::fromHslF(hue, 0.5, 0.8), Qt::DiagCrossPattern),
-                              QBrush(QColor::fromHslF(hue, 0.5, 0.7), Qt::DiagCrossPattern),
-                              QBrush(QColor::fromHslF(hue, 0, 0.8), Qt::DiagCrossPattern)}};
+    this->tabs.newMessage = {
+        tabFg,
+        {QBrush(blendColors(themeColor, windowBg, 0.5), Qt::DiagCrossPattern),
+         QBrush(blendColors(themeColor, windowBg, 0.3), Qt::DiagCrossPattern),
+         QBrush(blendColors(themeColorNoSat, windowBg, 0.5), Qt::DiagCrossPattern)}};
 
-    this->tabs.highlighted = {QColor(0, 0, 0),
-                              {QColor::fromHslF(hue, 0.5, 0.8), QColor::fromHslF(hue, 0.5, 0.7),
-                               QColor::fromHslF(hue, 0, 0.8)}};
+    this->tabs.highlighted = {
+        tabFg,
+        {QBrush(blendColors(themeColor, windowBg, 0.5), Qt::DiagCrossPattern),
+         QBrush(blendColors(themeColor, windowBg, 0.3), Qt::DiagCrossPattern),
+         QBrush(blendColors(themeColorNoSat, windowBg, 0.5), Qt::DiagCrossPattern)}};
 
     // Split
-    bool flat = lightTheme;
+    bool flat = isLight;
 
-    this->splits.messageSeperator = lightTheme ? QColor(127, 127, 127) : QColor(80, 80, 80);
+    this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(80, 80, 80);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = getColor(hue, 0.5, 0.5, 0.6);
     // this->splits.border
@@ -113,7 +129,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         "selection-background-color:" + this->tabs.selected.backgrounds.regular.color().name();
 
     // Message
-    this->messages.textColors.link = lightTheme ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    this->messages.textColors.link = isLight ? QColor(66, 134, 244) : QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
@@ -151,7 +167,7 @@ QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qre
 
 void ThemeManager::normalizeColor(QColor &color)
 {
-    if (this->lightTheme) {
+    if (this->isLight) {
         if (color.lightnessF() > 0.5f) {
             color.setHslF(color.hueF(), color.saturationF(), 0.5f);
         }

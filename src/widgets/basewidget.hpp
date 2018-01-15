@@ -14,9 +14,10 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent);
-    explicit BaseWidget(BaseWidget *parent);
-    explicit BaseWidget(QWidget *parent = nullptr);
+    explicit BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent,
+                        Qt::WindowFlags f = Qt::WindowFlags());
+    explicit BaseWidget(BaseWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit BaseWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     singletons::ThemeManager &themeManager;
 

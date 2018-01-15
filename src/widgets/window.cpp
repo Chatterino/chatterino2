@@ -18,7 +18,7 @@ namespace widgets {
 
 Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager,
                bool _isMainWindow)
-    : BaseWindow(_themeManager, nullptr)
+    : BaseWindow(_themeManager, nullptr, true)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
     , dpi(this->getDpiMultiplier())
@@ -34,6 +34,11 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
             }
         });
 
+    if (this->hasCustomWindowFrame()) {
+        this->addTitleBarButton("Preferences");
+        this->addTitleBarButton("User");
+    }
+
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     // add titlebar
@@ -42,7 +47,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     //    }
 
     layout->addWidget(&this->notebook);
-    setLayout(layout);
+    this->getLayoutContainer()->setLayout(layout);
 
     // set margin
     //    if (SettingsManager::getInstance().useCustomWindowFrame.get()) {
@@ -137,14 +142,6 @@ void Window::closeEvent(QCloseEvent *)
     this->windowGeometry.height = geom.height();
 
     this->closed();
-}
-
-void Window::refreshTheme()
-{
-    QPalette palette;
-    palette.setColor(QPalette::Background,
-                     this->themeManager.tabs.regular.backgrounds.regular.color());
-    this->setPalette(palette);
 }
 
 void Window::loadGeometry()

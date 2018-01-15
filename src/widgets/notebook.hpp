@@ -57,6 +57,8 @@ public slots:
     void addPageButtonClicked();
 
 private:
+    Window *parentWindow;
+
     QList<SplitContainer *> pages;
 
     NotebookButton addButton;

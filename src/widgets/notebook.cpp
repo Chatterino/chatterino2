@@ -24,6 +24,7 @@ namespace widgets {
 
 Notebook::Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix)
     : BaseWidget(parent)
+    , parentWindow(parent)
     , settingRoot(fS("{}/notebook", settingPrefix))
     , addButton(this)
     , settingsButton(this)
@@ -196,14 +197,15 @@ void Notebook::performLayout(bool animated)
 
     int x = 0, y = 0;
     float scale = this->getDpiMultiplier();
+    bool customFrame = this->parentWindow->hasCustomWindowFrame();
 
-    if (!showButtons || settings.hidePreferencesButton) {
+    if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (!showButtons || settings.hideUserButton) {
+    if (!this->showButtons || settings.hideUserButton || customFrame) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);
@@ -211,7 +213,8 @@ void Notebook::performLayout(bool animated)
         x += userButton.width();
     }
 
-    if (!showButtons || (settings.hideUserButton && settings.hidePreferencesButton)) {
+    if (customFrame || !this->showButtons ||
+        (settings.hideUserButton && settings.hidePreferencesButton)) {
         x += (int)(scale * 2);
     }
 
