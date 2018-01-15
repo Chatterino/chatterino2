@@ -57,7 +57,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     bool isLightTabs;
 
     QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
-    QColor themeColorNoSat = QColor::fromHslF(hue, 0.5, 0.5);
+    QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
 #ifdef USEWINSDK
     QColor tabFg = isLight ? "#000" : "#fff";
