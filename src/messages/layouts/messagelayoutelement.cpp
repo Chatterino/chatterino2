@@ -1,6 +1,7 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/messageelement.hpp"
 
+#include <QDebug>
 #include <QPainter>
 
 namespace chatterino {
@@ -88,6 +89,18 @@ int ImageLayoutElement::getMouseOverIndex(const QPoint &abs)
     return 0;
 }
 
+int ImageLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0) {
+        return this->getRect().left();
+    } else if (index == 1) {
+        // fourtf: remove space width
+        return this->getRect().right();
+    } else {
+        return this->getRect().right();
+    }
+}
+
 //
 // TEXT
 //
@@ -127,7 +140,44 @@ void TextLayoutElement::paintAnimated(QPainter &, int)
 
 int TextLayoutElement::getMouseOverIndex(const QPoint &abs)
 {
-    return 0;
+    if (abs.x() < this->getRect().left()) {
+        return 0;
+    }
+
+    QFontMetrics &metrics =
+        singletons::FontManager::getInstance().getFontMetrics(this->style, this->scale);
+
+    int x = this->getRect().left();
+
+    for (int i = 0; i < this->text.size(); i++) {
+        int w = metrics.width(this->text[i]);
+
+        if (x + w > abs.x()) {
+            return i;
+        }
+
+        x += w;
+    }
+
+    return this->getSelectionIndexCount();
+}
+
+int TextLayoutElement::getXFromIndex(int index)
+{
+    QFontMetrics &metrics =
+        singletons::FontManager::getInstance().getFontMetrics(this->style, this->scale);
+
+    if (index <= 0) {
+        return this->getRect().left();
+    } else if (index < this->text.size()) {
+        int x = 0;
+        for (int i = 0; i < index; i++) {
+            x += metrics.width(this->text[i]);
+        }
+        return x + this->getRect().left();
+    } else {
+        return this->getRect().right();
+    }
 }
 }  // namespace layouts
 }  // namespace messages

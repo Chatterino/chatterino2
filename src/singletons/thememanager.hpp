@@ -4,7 +4,7 @@
 #include <QColor>
 #include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
-#include <util/serialize-custom.hpp>
+#include "util/serialize-custom.hpp"
 
 namespace chatterino {
 namespace singletons {

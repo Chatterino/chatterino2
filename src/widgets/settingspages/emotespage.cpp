@@ -1,6 +1,6 @@
 #include "emotespage.hpp"
 
-#include <util/layoutcreator.hpp>
+#include "util/layoutcreator.hpp"
 
 namespace chatterino {
 namespace widgets {

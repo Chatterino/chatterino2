@@ -11,7 +11,7 @@
 #include <QTime>
 
 #include <boost/noncopyable.hpp>
-#include <util/emotemap.hpp>
+#include "util/emotemap.hpp"
 
 namespace chatterino {
 class Channel;

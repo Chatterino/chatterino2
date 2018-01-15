@@ -160,7 +160,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
         this->bufferValid = false;
     }
 
-    if (!this->bufferValid) {
+    if (!this->bufferValid || !selection.isEmpty()) {
         this->updateBuffer(pixmap, messageIndex, selection);
     }
 

@@ -258,14 +258,6 @@ win32 {
             -ldwmapi \
             -lgdi32
 
-#        SOURCES += platform/borderless/qwinwidget.cpp \
-#            platform/borderless/winnativewindow.cpp \
-#            platform/borderless/widget.cpp
-
-#        HEADERS += platform/borderless/qwinwidget.h \
-#            platform/borderless/winnativewindow.h \
-#            platform/borderless/widget.h
-
         DEFINES += "USEWINSDK"
     }
 }

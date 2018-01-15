@@ -1,6 +1,6 @@
 #include "aboutpage.hpp"
 
-#include <util/layoutcreator.hpp>
+#include "util/layoutcreator.hpp"
 
 #include <QLabel>
 #include <QVBoxLayout>

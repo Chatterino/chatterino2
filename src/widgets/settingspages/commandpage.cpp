@@ -3,8 +3,8 @@
 #include <QLabel>
 #include <QTextEdit>
 
-#include <util/layoutcreator.hpp>
 #include "singletons/commandmanager.hpp"
+#include "util/layoutcreator.hpp"
 
 // clang-format off
 #define TEXT "One command per line.\n"\

@@ -7,7 +7,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include <util/layoutcreator.hpp>
+#include "util/layoutcreator.hpp"
 
 #define THEME_ITEMS "White", "Light", "Dark", "Black"
 

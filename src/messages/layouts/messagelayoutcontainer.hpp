@@ -6,11 +6,12 @@
 #include <QPoint>
 #include <QRect>
 
+#include "messages/selection.hpp"
+
 class QPainter;
 
 namespace chatterino {
 namespace messages {
-class Selection;
 
 namespace layouts {
 class MessageLayoutElement;
@@ -72,22 +73,27 @@ public:
     int getSelectionIndex(QPoint point);
 
 private:
+    struct Line {
+        int startIndex;
+        int endIndex;
+        int startCharIndex;
+        int endCharIndex;
+        QRect rect;
+    };
+
     // helpers
     void _addElement(MessageLayoutElement *element);
+    void _paintLine(QPainter &painter, Line &line, int x, int y);
 
     // variables
     int line;
     int height;
     int currentX, currentY;
+    int charIndex = 0;
     size_t lineStart = 0;
     int lineHeight = 0;
     int spaceWidth = 4;
     std::vector<std::unique_ptr<MessageLayoutElement>> elements;
-
-    struct Line {
-        int startIndex;
-        QRect rect;
-    };
 
     std::vector<Line> lines;
 };

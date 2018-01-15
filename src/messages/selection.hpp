@@ -8,24 +8,36 @@ struct SelectionItem {
 
     SelectionItem()
     {
-        messageIndex = charIndex = 0;
+        this->messageIndex = 0;
+        this->charIndex = 0;
     }
 
     SelectionItem(int _messageIndex, int _charIndex)
     {
         this->messageIndex = _messageIndex;
+
         this->charIndex = _charIndex;
     }
 
-    bool isSmallerThan(const SelectionItem &other) const
+    bool operator<(const SelectionItem &b) const
     {
-        return this->messageIndex < other.messageIndex ||
-               (this->messageIndex == other.messageIndex && this->charIndex < other.charIndex);
+        if (this->messageIndex < b.messageIndex) {
+            return true;
+        }
+        if (this->messageIndex == b.messageIndex && this->charIndex < b.charIndex) {
+            return true;
+        }
+        return false;
     }
 
-    bool equals(const SelectionItem &other) const
+    bool operator>(const SelectionItem &b) const
     {
-        return this->messageIndex == other.messageIndex && this->charIndex == other.charIndex;
+        return b.operator<(*this);
+    }
+
+    bool operator==(const SelectionItem &b) const
+    {
+        return this->messageIndex == b.messageIndex && this->charIndex == b.charIndex;
     }
 };
 
@@ -45,14 +57,14 @@ struct Selection {
         , min(start)
         , max(end)
     {
-        if (max.isSmallerThan(min)) {
+        if (min > max) {
             std::swap(this->min, this->max);
         }
     }
 
     bool isEmpty() const
     {
-        return this->start.equals(this->end);
+        return this->start == this->end;
     }
 
     bool isSingleMessage() const
@@ -60,5 +72,5 @@ struct Selection {
         return this->min.messageIndex == this->max.messageIndex;
     }
 };
-}
-}
+}  // namespace messages
+}  // namespace chatterino

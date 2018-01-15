@@ -36,6 +36,7 @@ public:
     virtual void paint(QPainter &painter) = 0;
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) = 0;
+    virtual int getXFromIndex(int index) = 0;
 
 protected:
     bool trailingSpace = true;
@@ -58,6 +59,7 @@ protected:
     virtual void paint(QPainter &painter) override;
     virtual void paintAnimated(QPainter &painter, int yOffset) override;
     virtual int getMouseOverIndex(const QPoint &abs) override;
+    virtual int getXFromIndex(int index) override;
 
 private:
     Image &image;
@@ -76,6 +78,7 @@ protected:
     virtual void paint(QPainter &painter) override;
     virtual void paintAnimated(QPainter &painter, int yOffset) override;
     virtual int getMouseOverIndex(const QPoint &abs) override;
+    virtual int getXFromIndex(int index) override;
 
 private:
     QString text;

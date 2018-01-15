@@ -29,6 +29,7 @@ int MessageLayoutContainer::getHeight() const
 void MessageLayoutContainer::clear()
 {
     this->elements.clear();
+    this->lines.clear();
 
     this->height = 0;
     this->line = 0;
@@ -36,6 +37,7 @@ void MessageLayoutContainer::clear()
     this->currentY = 0;
     this->lineStart = 0;
     this->lineHeight = 0;
+    this->charIndex = 0;
 }
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
@@ -106,7 +108,16 @@ void MessageLayoutContainer::breakLine()
                                     element->getRect().y() + this->lineHeight + yExtra));
     }
 
-    this->lines.push_back({(int)lineStart, QRect(0, this->currentY, this->width, lineHeight)});
+    if (this->lines.size() != 0) {
+        this->lines.back().endIndex = this->lineStart;
+        this->lines.back().endCharIndex = this->charIndex;
+    }
+    this->lines.push_back({(int)lineStart, 0, this->charIndex, 0,
+                           QRect(-100000, this->currentY, 200000, lineHeight)});
+
+    for (int i = this->lineStart; i < this->elements.size(); i++) {
+        this->charIndex += this->elements[i]->getSelectionIndexCount();
+    }
 
     this->lineStart = this->elements.size();
     this->currentX = 0;
@@ -132,8 +143,10 @@ void MessageLayoutContainer::finish()
     }
 
     if (this->lines.size() != 0) {
-        this->lines[0].rect.setTop(0);
-        this->lines.back().rect.setBottom(this->height);
+        this->lines[0].rect.setTop(-100000);
+        this->lines.back().rect.setBottom(100000);
+        this->lines.back().endIndex = this->elements.size();
+        this->lines.back().endCharIndex = this->charIndex;
     }
 }
 
@@ -166,6 +179,166 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffse
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                                             Selection &selection)
 {
+    // don't draw anything
+    if (selection.min.messageIndex > messageIndex || selection.max.messageIndex < messageIndex) {
+        return;
+    }
+
+    // fully selected
+    if (selection.min.messageIndex < messageIndex && selection.max.messageIndex > messageIndex) {
+        for (Line &line : this->lines) {
+            QRect rect = line.rect;
+
+            rect.setTop(std::max(0, rect.top()));
+            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setLeft(this->elements[line.startIndex]->getRect().left());
+            rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
+
+            painter.fillRect(rect, QColor(255, 255, 0, 127));
+        }
+        return;
+    }
+
+    int lineIndex = 0;
+    int index = 0;
+
+    // start in this message
+    if (selection.min.messageIndex == messageIndex) {
+        for (; lineIndex < this->lines.size(); lineIndex++) {
+            Line &line = this->lines[lineIndex];
+            index = line.startCharIndex;
+
+            bool returnAfter = false;
+            bool breakAfter = false;
+            int x = this->elements[line.startIndex]->getRect().left();
+            int r = this->elements[line.endIndex - 1]->getRect().right();
+
+            if (line.endCharIndex < selection.min.charIndex) {
+                continue;
+            }
+
+            for (int i = line.startIndex; i < line.endIndex; i++) {
+                int c = this->elements[i]->getSelectionIndexCount();
+
+                if (index + c > selection.min.charIndex) {
+                    x = this->elements[i]->getXFromIndex(selection.min.charIndex - index);
+
+                    // ends in same line
+                    if (selection.max.messageIndex == messageIndex &&
+                        line.endCharIndex > /*=*/selection.max.charIndex)  //
+                    {
+                        returnAfter = true;
+                        index = line.startCharIndex;
+                        for (int i = line.startIndex; i < line.endIndex; i++) {
+                            int c = this->elements[i]->getSelectionIndexCount();
+
+                            if (index + c > selection.max.charIndex) {
+                                r = this->elements[i]->getXFromIndex(selection.max.charIndex -
+                                                                     index);
+                                break;
+                            }
+                            index += c;
+                        }
+                    }
+                    // ends in same line end
+
+                    if (selection.max.messageIndex != messageIndex) {
+                        int lineIndex2 = lineIndex + 1;
+                        for (; lineIndex2 < this->lines.size(); lineIndex2++) {
+                            Line &line = this->lines[lineIndex2];
+                            QRect rect = line.rect;
+
+                            rect.setTop(std::max(0, rect.top()));
+                            rect.setBottom(std::min(this->height, rect.bottom()));
+                            rect.setLeft(this->elements[line.startIndex]->getRect().left());
+                            rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
+
+                            painter.fillRect(rect, QColor(255, 255, 0, 127));
+                        }
+                        returnAfter = true;
+                    } else {
+                        lineIndex++;
+                        breakAfter = true;
+                    }
+
+                    break;
+                }
+                index += c;
+            }
+
+            QRect rect = line.rect;
+
+            rect.setTop(std::max(0, rect.top()));
+            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setLeft(x);
+            rect.setRight(r);
+
+            painter.fillRect(rect, QColor(255, 255, 0, 127));
+
+            if (returnAfter) {
+                return;
+            }
+
+            if (breakAfter) {
+                break;
+            }
+        }
+    }
+
+    // start in this message
+    for (; lineIndex < this->lines.size(); lineIndex++) {
+        Line &line = this->lines[lineIndex];
+        index = line.startCharIndex;
+        bool breakAfter = false;
+
+        // just draw the garbage
+        if (line.endCharIndex < /*=*/selection.max.charIndex) {
+            QRect rect = line.rect;
+
+            rect.setTop(std::max(0, rect.top()));
+            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setLeft(this->elements[line.startIndex]->getRect().left());
+            rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
+
+            painter.fillRect(rect, QColor(255, 255, 0, 127));
+            continue;
+        }
+
+        int r = this->elements[line.endIndex - 1]->getRect().right();
+
+        for (int i = line.startIndex; i < line.endIndex; i++) {
+            int c = this->elements[i]->getSelectionIndexCount();
+
+            if (index + c > selection.max.charIndex) {
+                r = this->elements[i]->getXFromIndex(selection.max.charIndex - index);
+                break;
+            }
+
+            index += c;
+        }
+
+        QRect rect = line.rect;
+
+        rect.setTop(std::max(0, rect.top()));
+        rect.setBottom(std::min(this->height, rect.bottom()));
+        rect.setLeft(this->elements[line.startIndex]->getRect().left());
+        rect.setRight(r);
+
+        painter.fillRect(rect, QColor(255, 255, 0, 127));
+        break;
+    }
+}
+
+void MessageLayoutContainer::_paintLine(QPainter &painter, Line &line, int x, int y)
+{
+    QRect rect = line.rect;
+
+    rect.setTop(std::max(0, rect.top()));
+    rect.setBottom(std::min(this->height, rect.bottom()));
+    rect.setLeft(this->elements[line.startIndex]->getRect().left());
+    rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
+
+    painter.fillRect(rect, QColor(255, 255, 0, 127));
 }
 
 // selection
@@ -183,10 +356,10 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         }
     }
 
-    assert(line != this->lines.end());
-
-    int lineStart = line->startIndex;
-    line++;
+    int lineStart = line == this->lines.end() ? this->lines.back().startIndex : line->startIndex;
+    if (line != this->lines.end()) {
+        line++;
+    }
     int lineEnd = line == this->lines.end() ? this->elements.size() : line->startIndex;
 
     int index = 0;
@@ -204,10 +377,12 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         }
 
         // this is the word
-        if (point.x() > this->elements[i]->getRect().left()) {
+        if (point.x() < this->elements[i]->getRect().right()) {
             index += this->elements[i]->getMouseOverIndex(point);
             break;
         }
+
+        index += this->elements[i]->getSelectionIndexCount();
     }
 
     qDebug() << index;
