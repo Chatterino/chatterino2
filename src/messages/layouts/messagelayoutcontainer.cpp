@@ -179,6 +179,9 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffse
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                                             Selection &selection)
 {
+    singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
+    QColor selectionColor = themeManager.messages.selection;
+
     // don't draw anything
     if (selection.min.messageIndex > messageIndex || selection.max.messageIndex < messageIndex) {
         return;
@@ -194,7 +197,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             rect.setLeft(this->elements[line.startIndex]->getRect().left());
             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
-            painter.fillRect(rect, QColor(255, 255, 0, 127));
+            painter.fillRect(rect, selectionColor);
         }
         return;
     }
@@ -253,7 +256,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                             rect.setLeft(this->elements[line.startIndex]->getRect().left());
                             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
-                            painter.fillRect(rect, QColor(255, 255, 0, 127));
+                            painter.fillRect(rect, selectionColor);
                         }
                         returnAfter = true;
                     } else {
@@ -273,7 +276,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             rect.setLeft(x);
             rect.setRight(r);
 
-            painter.fillRect(rect, QColor(255, 255, 0, 127));
+            painter.fillRect(rect, selectionColor);
 
             if (returnAfter) {
                 return;
@@ -289,7 +292,6 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
     for (; lineIndex < this->lines.size(); lineIndex++) {
         Line &line = this->lines[lineIndex];
         index = line.startCharIndex;
-        bool breakAfter = false;
 
         // just draw the garbage
         if (line.endCharIndex < /*=*/selection.max.charIndex) {
@@ -300,7 +302,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             rect.setLeft(this->elements[line.startIndex]->getRect().left());
             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
-            painter.fillRect(rect, QColor(255, 255, 0, 127));
+            painter.fillRect(rect, selectionColor);
             continue;
         }
 
@@ -324,21 +326,9 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
         rect.setLeft(this->elements[line.startIndex]->getRect().left());
         rect.setRight(r);
 
-        painter.fillRect(rect, QColor(255, 255, 0, 127));
+        painter.fillRect(rect, selectionColor);
         break;
     }
-}
-
-void MessageLayoutContainer::_paintLine(QPainter &painter, Line &line, int x, int y)
-{
-    QRect rect = line.rect;
-
-    rect.setTop(std::max(0, rect.top()));
-    rect.setBottom(std::min(this->height, rect.bottom()));
-    rect.setLeft(this->elements[line.startIndex]->getRect().left());
-    rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
-
-    painter.fillRect(rect, QColor(255, 255, 0, 127));
 }
 
 // selection

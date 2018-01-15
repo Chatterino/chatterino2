@@ -83,7 +83,6 @@ private:
 
     // helpers
     void _addElement(MessageLayoutElement *element);
-    void _paintLine(QPainter &painter, Line &line, int x, int y);
 
     // variables
     int line;
