@@ -4,6 +4,7 @@
 #include "messages/selection.hpp"
 #include "singletons/settingsmanager.hpp"
 
+#include <QDebug>
 #include <QPainter>
 
 #define COMPACT_EMOTES_OFFSET 6
@@ -105,6 +106,8 @@ void MessageLayoutContainer::breakLine()
                                     element->getRect().y() + this->lineHeight + yExtra));
     }
 
+    this->lines.push_back({(int)lineStart, QRect(0, this->currentY, this->width, lineHeight)});
+
     this->lineStart = this->elements.size();
     this->currentX = 0;
     this->currentY += this->lineHeight;
@@ -126,6 +129,11 @@ void MessageLayoutContainer::finish()
 {
     if (!this->atStartOfLine()) {
         this->breakLine();
+    }
+
+    if (this->lines.size() != 0) {
+        this->lines[0].rect.setTop(0);
+        this->lines.back().rect.setBottom(this->height);
     }
 }
 
@@ -158,6 +166,53 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffse
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                                             Selection &selection)
 {
+}
+
+// selection
+int MessageLayoutContainer::getSelectionIndex(QPoint point)
+{
+    if (this->elements.size() == 0) {
+        return 0;
+    }
+
+    auto line = this->lines.begin();
+
+    for (; line != this->lines.end(); line++) {
+        if (line->rect.contains(point)) {
+            break;
+        }
+    }
+
+    assert(line != this->lines.end());
+
+    int lineStart = line->startIndex;
+    line++;
+    int lineEnd = line == this->lines.end() ? this->elements.size() : line->startIndex;
+
+    int index = 0;
+
+    for (int i = 0; i < lineEnd; i++) {
+        // end of line
+        if (i == lineEnd) {
+            break;
+        }
+
+        // before line
+        if (i < lineStart) {
+            index += this->elements[i]->getSelectionIndexCount();
+            continue;
+        }
+
+        // this is the word
+        if (point.x() > this->elements[i]->getRect().left()) {
+            index += this->elements[i]->getMouseOverIndex(point);
+            break;
+        }
+    }
+
+    qDebug() << index;
+
+    return index;
 }
 }  // namespace layouts
 }  // namespace messages

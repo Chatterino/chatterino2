@@ -18,10 +18,11 @@
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include "widgets/helper/rippleeffectlabel.hpp"
 
 #define WM_DPICHANGED 0x02E0
 #endif
+
+#include "widgets/helper/rippleeffectlabel.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -114,7 +115,7 @@ void BaseWindow::init()
 
 QWidget *BaseWindow::getLayoutContainer()
 {
-    if (this->enableCustomFrame) {
+    if (this->hasCustomWindowFrame()) {
         return this->layoutBase;
     } else {
         return this;

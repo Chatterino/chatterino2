@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <QPoint>
+#include <QRect>
 
 class QPainter;
 
@@ -67,6 +68,9 @@ public:
     void paintAnimatedElements(QPainter &painter, int yOffset);
     void paintSelection(QPainter &painter, int messageIndex, Selection &selection);
 
+    // selection
+    int getSelectionIndex(QPoint point);
+
 private:
     // helpers
     void _addElement(MessageLayoutElement *element);
@@ -79,6 +83,13 @@ private:
     int lineHeight = 0;
     int spaceWidth = 4;
     std::vector<std::unique_ptr<MessageLayoutElement>> elements;
+
+    struct Line {
+        int startIndex;
+        QRect rect;
+    };
+
+    std::vector<Line> lines;
 };
 }  // namespace layouts
 }  // namespace messages

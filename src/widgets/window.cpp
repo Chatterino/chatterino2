@@ -50,11 +50,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
-    //    if (SettingsManager::getInstance().useCustomWindowFrame.get()) {
-    //        layout->setMargin(1);
-    //    } else {
     layout->setMargin(0);
-    //    }
 
     this->refreshTheme();
 
