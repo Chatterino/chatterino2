@@ -59,17 +59,17 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
-#ifdef USEWINSDK
-    QColor tabFg = isLight ? "#000" : "#fff";
-    this->windowBg = isLight ? "#fff" : "#444";
+    //#ifdef USEWINSDK
+    //    isLightTabs = isLight;
+    //    QColor tabFg = isLight ? "#000" : "#fff";
+    //    this->windowBg = isLight ? "#fff" : "#444";
 
-    isLightTabs = isLight;
-#else
-    QColor tabFg = lightTheme ? "#000" : "#fff";
+    //#else
+    isLightTabs = true;
+    QColor tabFg = isLightTabs ? "#000" : "#fff";
     this->windowBg = "#fff";
 
-    isLightTabs = true;
-#endif
+    //#endif
 
     qreal sat = 0.05;
 
