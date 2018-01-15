@@ -129,10 +129,12 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
     singletons::ThemeManager &themeManager = singletons::ThemeManager::ThemeManager::getInstance();
 
     for (Word &word : this->words) {
-        auto getTextLayoutElement = [&](QString text, int width) {
-            return new TextLayoutElement(*this, text, QSize(width, metrics.height()),
-                                         this->color.getColor(themeManager), this->style,
-                                         container.scale);
+        auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
+            auto e = new TextLayoutElement(*this, text, QSize(width, metrics.height()),
+                                           this->color.getColor(themeManager), this->style,
+                                           container.scale);
+            e->setTrailingSpace(trailingSpace);
+            return e;
         };
 
         if (word.width == -1) {
@@ -141,7 +143,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 
         // see if the text fits in the current line
         if (container.fitsInLine(word.width)) {
-            container.addElementNoLineBreak(getTextLayoutElement(word.text, word.width));
+            container.addElementNoLineBreak(
+                getTextLayoutElement(word.text, word.width, this->hasTrailingSpace()));
             continue;
         }
 
@@ -150,7 +153,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
             container.breakLine();
 
             if (container.fitsInLine(word.width)) {
-                container.addElementNoLineBreak(getTextLayoutElement(word.text, word.width));
+                container.addElementNoLineBreak(
+                    getTextLayoutElement(word.text, word.width, this->hasTrailingSpace()));
                 continue;
             }
         }
@@ -163,22 +167,29 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
         int lastWidth = 0;
 
         for (int i = 1; i < textLength; i++) {
-            int chatWidth = metrics.width(text[i]);
+            int charWidth = metrics.width(text[i]);
 
-            if (!container.fitsInLine(width + chatWidth)) {
-                container.addElementNoLineBreak(
-                    getTextLayoutElement(text.mid(wordStart, i - wordStart), width - lastWidth));
+            if (!container.fitsInLine(width + charWidth)) {
+                container.addElementNoLineBreak(getTextLayoutElement(
+                    text.mid(wordStart, i - wordStart), width - lastWidth, false));
                 container.breakLine();
 
-                i += 2;
                 wordStart = i;
                 lastWidth = width;
-                width += chatWidth;
+                width = 0;
+                if (textLength > i + 2) {
+                    width += metrics.width(text[i]);
+                    width += metrics.width(text[i + 1]);
+                    i += 1;
+                }
                 continue;
             }
+            width += charWidth;
         }
 
-        container.addElement(getTextLayoutElement(text.mid(wordStart), word.width - lastWidth));
+        container.addElement(getTextLayoutElement(text.mid(wordStart), word.width - lastWidth,
+                                                  this->hasTrailingSpace()));
+        container.breakLine();
     }
 }
 
