@@ -124,7 +124,8 @@ QWidget *BaseWindow::getLayoutContainer()
 bool BaseWindow::hasCustomWindowFrame()
 {
 #ifdef Q_OS_WIN
-    return this->enableCustomFrame;
+    //    return this->enableCustomFrame;
+    return false;
 #else
     return false;
 #endif
