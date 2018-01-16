@@ -379,6 +379,41 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
 
     return index;
 }
+
+// fourtf: no idea if this is acurate LOL
+int MessageLayoutContainer::getLastCharacterIndex() const
+{
+    if (this->lines.size() == 0) {
+        return 0;
+    }
+    return this->lines.back().endCharIndex;
+}
+
+void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
+{
+    int index = 0;
+    bool xd = true;
+
+    for (std::unique_ptr<MessageLayoutElement> &ele : this->elements) {
+        int c = ele->getSelectionIndexCount();
+
+        if (xd) {
+            if (index + c > from) {
+                ele->addCopyTextToString(str, index - from, to - from);
+                xd = false;
+            }
+        } else {
+            if (index + c > from) {
+                ele->addCopyTextToString(str, 0, index - to);
+                break;
+            } else {
+                ele->addCopyTextToString(str);
+            }
+        }
+
+        index += c;
+    }
+}
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino

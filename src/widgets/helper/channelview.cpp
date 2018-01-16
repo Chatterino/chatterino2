@@ -235,106 +235,26 @@ Scrollbar &ChannelView::getScrollBar()
 
 QString ChannelView::getSelectedText()
 {
-    // fourtf: xD
-    //    auto messagesSnapshot = this->getMessagesSnapshot();
+    QString result = "";
 
-    //    QString text;
-    //    bool isSingleMessage = this->selection.isSingleMessage();
+    messages::LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot = this->getMessagesSnapshot();
 
-    //    size_t i = std::max(0, this->selection.min.messageIndex);
+    Selection selection = this->selection;
 
-    //    int charIndex = 0;
+    if (selection.isEmpty()) {
+        return result;
+    }
 
-    //    bool first = true;
+    for (int msg = selection.min.messageIndex; msg <= selection.min.messageIndex; msg++) {
+        MessageLayoutPtr layout = messagesSnapshot[msg];
+        int from = msg == selection.min.messageIndex ? selection.min.charIndex : 0;
+        int to = msg == selection.max.messageIndex ? selection.max.charIndex
+                                                   : layout->getLastCharacterIndex();
 
-    //    auto addPart = [&](const MessageLayoutElement &part, int from = 0, int to = -1) {
-    //        if (part.getCopyText().isEmpty()) {
-    //            return;
-    //        }
+        layout->addSelectionText(result, from, to);
+    }
 
-    //        if (part.getWord().isText()) {
-    //            text += part.getText().mid(from, to);
-    //        } else {
-    //            text += part.getCopyText();
-    //        }
-    //    };
-
-    //    // first line
-    //    for (const messages::MessageLayoutElement &part : messagesSnapshot[i]->getWordParts()) {
-    //        int charLength = part.getCharacterLength();
-
-    //        if (charIndex + charLength < this->selection.min.charIndex) {
-    //            charIndex += charLength;
-    //            continue;
-    //        }
-
-    //        if (first) {
-    //            first = false;
-    //            bool isSingleWord =
-    //                isSingleMessage &&
-    //                this->selection.max.charIndex - charIndex < part.getCharacterLength();
-
-    //            if (isSingleWord) {
-    //                // return single word
-    //                addPart(part, this->selection.min.charIndex - charIndex,
-    //                        this->selection.max.charIndex - this->selection.min.charIndex);
-    //                return text;
-    //            } else {
-    //                // add first word of the selection
-    //                addPart(part, this->selection.min.charIndex - charIndex);
-    //            }
-    //        } else if (isSingleMessage && charIndex + charLength >= selection.max.charIndex) {
-    //            addPart(part, 0, this->selection.max.charIndex - charIndex);
-
-    //            return text;
-    //        } else {
-    //            text += part.getCopyText() + (part.hasTrailingSpace() ? " " : "");
-    //        }
-
-    //        charIndex += charLength;
-    //    }
-
-    //    text += "\n";
-
-    //    // middle lines
-    //    for (i++; (int)i < this->selection.max.messageIndex; i++) {
-    //        for (const messages::MessageLayoutElement &part : messagesSnapshot[i]->getWordParts())
-    //        {
-    //            if (!part.getCopyText().isEmpty()) {
-    //                text += part.getCopyText();
-
-    //                if (part.hasTrailingSpace()) {
-    //                    text += " ";
-    //                }
-    //            }
-    //        }
-    //        text += "\n";
-    //    }
-
-    //    // last line
-    //    charIndex = 0;
-
-    //    for (const messages::MessageLayoutElement &part :
-    //         messagesSnapshot[this->selection.max.messageIndex]->getWordParts()) {
-    //        int charLength = part.getCharacterLength();
-
-    //        if (charIndex + charLength >= this->selection.max.charIndex) {
-    //            addPart(part, 0, this->selection.max.charIndex - charIndex);
-
-    //            return text;
-    //        }
-
-    //        text += part.getCopyText();
-
-    //        if (part.hasTrailingSpace()) {
-    //            text += " ";
-    //        }
-
-    //        charIndex += charLength;
-    //    }
-
-    //    return text;
-    return "";
+    return result;
 }
 
 bool ChannelView::hasSelection()
@@ -587,151 +507,6 @@ void ChannelView::drawMessages(QPainter &painter)
         }
     }
 }
-
-// void ChannelView::drawMessageSelection(QPainter &painter, messages::MessageLayout *messageRef,
-//                                       int messageIndex, int bufferHeight)
-//{
-//    if (this->selection.min.messageIndex > messageIndex ||
-//        this->selection.max.messageIndex < messageIndex) {
-//        return;
-//    }
-//
-//    QColor selectionColor = this->themeManager.messages.selection;
-//
-//    int charIndex = 0;
-//    size_t i = 0;
-//    auto &parts = messageRef->getWordParts();
-//
-//    int currentLineNumber = 0;
-//    QRect rect;
-//
-//    if (parts.size() > 0) {
-//        if (selection.min.messageIndex == messageIndex) {
-//            rect.setTop(parts.at(0).getY());
-//        }
-//        rect.setLeft(parts.at(0).getX());
-//    }
-//
-//    // skip until selection start
-//    if (this->selection.min.messageIndex == messageIndex && this->selection.min.charIndex != 0) {
-//        for (; i < parts.size(); i++) {
-//            const messages::MessageLayoutElement &part = parts.at(i);
-//            auto characterLength = part.getCharacterLength();
-//
-//            if (characterLength + charIndex > selection.min.charIndex) {
-//                break;
-//            }
-//
-//            charIndex += characterLength;
-//            currentLineNumber = part.getLineNumber();
-//        }
-//
-//        if (i >= parts.size()) {
-//            return;
-//        }
-//
-//        // handle word that has a cut of selection
-//        const messages::MessageLayoutElement &part = parts.at(i);
-//
-//        // check if selection if single word
-//        int characterLength = part.getCharacterLength();
-//        bool isSingleWord = charIndex + characterLength > this->selection.max.charIndex &&
-//                            this->selection.max.messageIndex == messageIndex;
-//
-//        rect = part.getRect();
-//        currentLineNumber = part.getLineNumber();
-//
-//        if (part.getWord().isText()) {
-//            int offset = this->selection.min.charIndex - charIndex;
-//
-//            for (int j = 0; j < offset; j++) {
-//                rect.setLeft(rect.left() + part.getCharWidth(j, this->getDpiMultiplier()));
-//            }
-//
-//            if (isSingleWord) {
-//                int length = (this->selection.max.charIndex - charIndex) - offset;
-//
-//                rect.setRight(part.getX());
-//
-//                for (int j = 0; j < offset + length; j++) {
-//                    rect.setRight(rect.right() + part.getCharWidth(j, this->getDpiMultiplier()));
-//                }
-//
-//                painter.fillRect(rect, selectionColor);
-//
-//                return;
-//            }
-//        } else {
-//            if (isSingleWord) {
-//                if (charIndex + 1 != this->selection.max.charIndex) {
-//                    rect.setRight(part.getX() + part.getWord().getImage().getScaledWidth());
-//                }
-//                painter.fillRect(rect, selectionColor);
-//
-//                return;
-//            }
-//
-//            if (charIndex != this->selection.min.charIndex) {
-//                rect.setLeft(part.getX() + part.getWord().getImage().getScaledWidth());
-//            }
-//        }
-//
-//        i++;
-//        charIndex += characterLength;
-//    }
-//
-//    // go through lines and draw selection
-//    for (; i < parts.size(); i++) {
-//        const messages::MessageLayoutElement &part = parts.at(i);
-//
-//        int charLength = part.getCharacterLength();
-//
-//        bool isLastSelectedWord = this->selection.max.messageIndex == messageIndex &&
-//                                  charIndex + charLength > this->selection.max.charIndex;
-//
-//        if (part.getLineNumber() == currentLineNumber) {
-//            rect.setLeft(std::min(rect.left(), part.getX()));
-//            rect.setTop(std::min(rect.top(), part.getY()));
-//            rect.setRight(std::max(rect.right(), part.getRight()));
-//            rect.setBottom(std::max(rect.bottom(), part.getBottom() - 1));
-//        } else {
-//            painter.fillRect(rect, selectionColor);
-//
-//            currentLineNumber = part.getLineNumber();
-//
-//            rect = part.getRect();
-//        }
-//
-//        if (isLastSelectedWord) {
-//            if (part.getWord().isText()) {
-//                int offset = this->selection.min.charIndex - charIndex;
-//
-//                int length = (this->selection.max.charIndex - charIndex) - offset;
-//
-//                rect.setRight(part.getX());
-//
-//                for (int j = 0; j < offset + length; j++) {
-//                    rect.setRight(rect.right() + part.getCharWidth(j, this->getDpiMultiplier()));
-//                }
-//            } else {
-//                if (this->selection.max.charIndex == charIndex) {
-//                    rect.setRight(part.getX());
-//                }
-//            }
-//            painter.fillRect(rect, selectionColor);
-//
-//            return;
-//        }
-//
-//        charIndex += charLength;
-//    }
-//
-//    if (this->selection.max.messageIndex != messageIndex) {
-//        rect.setBottom(bufferHeight);
-//    }
-//
-//    painter.fillRect(rect, selectionColor);
-//}
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {

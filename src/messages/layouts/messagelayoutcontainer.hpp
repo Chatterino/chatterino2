@@ -71,6 +71,8 @@ public:
 
     // selection
     int getSelectionIndex(QPoint point);
+    int getLastCharacterIndex() const;
+    void addSelectionText(QString &str, int from, int to);
 
 private:
     struct Line {

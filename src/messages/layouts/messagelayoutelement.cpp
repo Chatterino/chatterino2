@@ -54,7 +54,11 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image &_image, 
 
 void ImageLayoutElement::addCopyTextToString(QString &str, int from, int to) const
 {
-    str += "<image>";
+    str += this->image.getName();
+
+    if (this->hasTrailingSpace()) {
+        str += " ";
+    }
 }
 
 int ImageLayoutElement::getSelectionIndexCount()
@@ -117,6 +121,11 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text, Q
 
 void TextLayoutElement::addCopyTextToString(QString &str, int from, int to) const
 {
+    str += this->text.mid(from, to - from);
+
+    if (this->hasTrailingSpace()) {
+        str += " ";
+    }
 }
 
 int TextLayoutElement::getSelectionIndexCount()
