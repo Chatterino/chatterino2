@@ -50,6 +50,7 @@ public:
     void requestFocus(int x, int y);
 
     void updateFlexValues();
+    int splitCount() const;
 
 protected:
     virtual bool eventFilter(QObject *object, QEvent *event) override;
@@ -86,7 +87,7 @@ private:
         QHBoxLayout hbox;
     } ui;
 
-    std::vector<Split *> chatWidgets;
+    std::vector<Split *> splits;
     std::vector<DropRegion> dropRegions;
 
     pajlada::Settings::Setting<std::vector<std::vector<std::string>>> chats;

@@ -32,7 +32,7 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::s
     , chats(fS("{}/chats", this->settingRoot))
     , tab(_tab)
     , dropPreview(this)
-    , chatWidgets()
+    , splits()
 {
     this->tab->page = this;
 
@@ -64,12 +64,17 @@ void SplitContainer::updateFlexValues()
     }
 }
 
+int SplitContainer::splitCount() const
+{
+    return this->splits.size();
+}
+
 std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
 {
     // remove reference to chat widget from chatWidgets vector
-    auto it = std::find(std::begin(this->chatWidgets), std::end(this->chatWidgets), widget);
-    if (it != std::end(this->chatWidgets)) {
-        this->chatWidgets.erase(it);
+    auto it = std::find(std::begin(this->splits), std::end(this->splits), widget);
+    if (it != std::end(this->splits)) {
+        this->splits.erase(it);
 
         this->refreshTitle();
     }
@@ -102,7 +107,7 @@ std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
 
 void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
 {
-    this->chatWidgets.push_back(widget);
+    this->splits.push_back(widget);
 
     this->refreshTitle();
 
@@ -139,7 +144,7 @@ void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
 
 const std::vector<Split *> &SplitContainer::getChatWidgets() const
 {
-    return this->chatWidgets;
+    return this->splits;
 }
 
 NotebookTab *SplitContainer::getTab() const
@@ -448,7 +453,7 @@ void SplitContainer::refreshTitle()
     QString newTitle = "";
     bool first = true;
 
-    for (const auto &chatWidget : this->chatWidgets) {
+    for (const auto &chatWidget : this->splits) {
         auto channelName = QString::fromStdString(chatWidget->channelName.getValue());
 
         if (channelName.isEmpty()) {

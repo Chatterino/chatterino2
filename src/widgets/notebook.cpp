@@ -49,10 +49,10 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
 
     this->loadTabs();
 
-    closeConfirmDialog.setText("Are you sure to close this tab?");
+    closeConfirmDialog.setText("Are you sure you want to close this tab?");
     closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
-    closeConfirmDialog.setStandardButtons(QMessageBox::Close | QMessageBox::Abort);
-    closeConfirmDialog.setDefaultButton(QMessageBox::Close);
+    closeConfirmDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    closeConfirmDialog.setDefaultButton(QMessageBox::Yes);
 }
 
 SplitContainer *Notebook::addNewPage()
@@ -80,8 +80,9 @@ SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
 
 void Notebook::removePage(SplitContainer *page)
 {
-    if (closeConfirmDialog.exec() != QMessageBox::Close)
+    if (page->splitCount() > 0 && closeConfirmDialog.exec() != QMessageBox::Yes) {
         return;
+    }
 
     int index = this->pages.indexOf(page);
 
