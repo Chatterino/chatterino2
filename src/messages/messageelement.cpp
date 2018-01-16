@@ -225,7 +225,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       MessageElement::Flags _flags)
 {
     if (singletons::SettingManager::getInstance().timestampFormat != this->format) {
-        this->format = singletons::SettingManager::getInstance().timestampFormat;
+        this->format = singletons::SettingManager::getInstance().timestampFormat.getValue();
         delete this->element;
         this->element = TimestampElement::formatTime(this->time);
     }

@@ -147,9 +147,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     // create new buffer if required
     if (!pixmap) {
 #ifdef Q_OS_MACOS
-
         pixmap =
-            new QPixmap((int)(this->container.getWidth() * painter.device()->devicePixelRatioF()),
+            new QPixmap((int)(this->container.width * painter.device()->devicePixelRatioF()),
                         (int)(this->container.getHeight() * painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
@@ -165,7 +164,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     }
 
     // draw on buffer
-    painter.drawPixmap(0, y, pixmap->width(), pixmap->height(), *pixmap);
+    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
     // draw disabled
     if (this->message->hasFlags(Message::Disabled)) {
