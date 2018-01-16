@@ -92,6 +92,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     });
 
     this->pauseTimeout.setSingleShot(true);
+
+    auto e = new QResizeEvent(this->size(), this->size());
+    this->resizeEvent(e);
+    delete e;
 }
 
 ChannelView::~ChannelView()
