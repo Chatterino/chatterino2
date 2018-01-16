@@ -54,5 +54,4 @@ int main(int argc, char *argv[])
     chatterino::util::NetworkManager::deinit();
 
     exit(0);
-    return ret;
 }
