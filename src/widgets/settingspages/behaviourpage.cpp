@@ -25,9 +25,9 @@ BehaviourPage::BehaviourPage()
     auto form = layoutCreator.emplace<QFormLayout>().withoutMargin();
     {
         form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, settings.windowTopMost));
-        form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, settings.windowTopMost));
-        form->addRow("", this->createCheckBox(LAST_MSG, settings.windowTopMost));
-        form->addRow("Pause chat:", this->createCheckBox(PAUSE_HOVERING, settings.windowTopMost));
+        form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, settings.hideEmptyInput));
+        form->addRow("", this->createCheckBox(LAST_MSG, settings.showLastMessageIndicator));
+        form->addRow("Pause chat:", this->createCheckBox(PAUSE_HOVERING, settings.pauseChatHover));
 
         form->addRow("Mouse scroll speed:", this->createMouseScrollSlider());
         form->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
