@@ -27,9 +27,7 @@ ModerationPage::ModerationPage()
 
         auto text = layout.emplace<QTextEdit>().getElement();
 
-        settings.moderationActions.connect([=](const QString &str, auto) {
-            text->setPlainText(str);  //
-        });
+        text->setPlainText(settings.moderationActions);
 
         QObject::connect(text, &QTextEdit::textChanged, this,
                          [this] { this->itemsChangedTimer.start(200); });

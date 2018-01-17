@@ -1,6 +1,7 @@
 #include "twitchchannel.hpp"
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/ircmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 
@@ -18,6 +19,7 @@ TwitchChannel::TwitchChannel(const QString &channelName)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , isLive(false)
+    , mod(false)
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
@@ -36,10 +38,15 @@ TwitchChannel::TwitchChannel(const QString &channelName)
     this->fetchMessages.connect([this] {
         this->fetchRecentMessages();  //
     });
+
+    this->connectedConnection = singletons::IrcManager::getInstance().connected.connect(
+        [this] { this->userStateChanged(); });
 }
 
 TwitchChannel::~TwitchChannel()
 {
+    this->connectedConnection.disconnect();
+
     this->liveStatusTimer->stop();
     this->liveStatusTimer->deleteLater();
 }
@@ -88,9 +95,24 @@ bool TwitchChannel::isMod()
     return this->mod;
 }
 
+void TwitchChannel::setMod(bool value)
+{
+    if (this->mod != value) {
+        this->mod = value;
+
+        this->userStateChanged();
+    }
+}
+
 bool TwitchChannel::isBroadcaster()
 {
-    return this->name == singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserId();
+    QString xD = this->name;
+    QString xD2 = singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName();
+
+    qDebug() << xD << xD2;
+
+    return this->name ==
+           singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasModRights()

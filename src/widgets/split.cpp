@@ -123,6 +123,8 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 Split::~Split()
 {
     this->channelNameUpdated("");
+    this->usermodeChangedConnection.disconnect();
+    this->channelIDChangedConnection.disconnect();
 }
 
 const std::string &Split::getUUID() const
@@ -144,7 +146,18 @@ void Split::setChannel(SharedChannel _newChannel)
 {
     this->view.setChannel(_newChannel);
 
+    this->usermodeChangedConnection.disconnect();
+
     this->channel = _newChannel;
+
+    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_newChannel.get());
+
+    if (tc != nullptr) {
+        this->usermodeChangedConnection =
+            tc->userStateChanged.connect([this] { this->header.updateModerationModeIcon(); });
+    }
+
+    this->header.updateModerationModeIcon();
 
     this->channelChanged();
 }

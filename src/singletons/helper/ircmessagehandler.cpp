@@ -123,7 +123,18 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    // TODO: Implement
+    QVariant _mod = message->tag("mod");
+
+    if (_mod.isValid()) {
+        auto rawChannelName = message->parameters().at(0);
+        auto trimmedChannelName = rawChannelName.mid(1);
+
+        auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+        twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(c.get());
+        if (tc != nullptr) {
+            tc->setMod(_mod == "1");
+        }
+    }
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)

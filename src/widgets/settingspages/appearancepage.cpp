@@ -18,7 +18,9 @@
 #define SCROLL_SMOOTH "Enable smooth scrolling"
 #define SCROLL_NEWMSG "Enable smooth scrolling for new messages"
 
-#define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "HH:mm", "H:mm"
+// clang-format off
+#define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "hh:mm:ss a", "h:mm:ss a", "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss"
+// clang-format on
 
 namespace chatterino {
 namespace widgets {
@@ -55,7 +57,7 @@ AppearancePage::AppearancePage()
         messages.append(this->createCheckBox("Show timestamp", settings.showTimestamps));
         auto tbox = messages.emplace<QHBoxLayout>();
         {
-            tbox.emplace<QLabel>("timestamp format:");
+            tbox.emplace<QLabel>("timestamp format (a = am/pm):");
             tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, settings.timestampFormat));
         }
         messages.append(this->createCheckBox("Show badges", settings.showBadges));

@@ -13,6 +13,7 @@
 #include <QPoint>
 #include <QWidget>
 #include <boost/signals2/connection.hpp>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 

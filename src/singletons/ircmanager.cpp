@@ -188,6 +188,8 @@ void IrcManager::beginConnecting()
 
     this->writeConnection->open();
     this->readConnection->open();
+
+    this->connected();
 }
 
 void IrcManager::disconnect()

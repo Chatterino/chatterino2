@@ -44,7 +44,7 @@ class Split : public BaseWidget
 
 public:
     Split(SplitContainer *parent, const std::string &_uuid);
-    ~Split();
+    virtual ~Split();
 
     pajlada::Settings::Setting<std::string> channelName;
     boost::signals2::signal<void()> channelChanged;
@@ -94,6 +94,7 @@ private:
     bool moderationMode;
 
     boost::signals2::connection channelIDChangedConnection;
+    boost::signals2::connection usermodeChangedConnection;
 
     void setChannel(SharedChannel newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);

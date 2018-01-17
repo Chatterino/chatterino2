@@ -220,7 +220,10 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 
 TextElement *TimestampElement::formatTime(const QTime &time)
 {
-    QString format = time.toString(singletons::SettingManager::getInstance().timestampFormat);
+    static QLocale locale("en_US");
+
+    QString format =
+        locale.toString(time, singletons::SettingManager::getInstance().timestampFormat);
 
     return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
 }

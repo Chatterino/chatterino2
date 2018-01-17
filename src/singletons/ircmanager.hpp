@@ -50,6 +50,7 @@ public:
 
     pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
     void privateMessageReceived(Communi::IrcPrivateMessage *message);
+    boost::signals2::signal<void()> connected;
 
     Communi::IrcConnection *getReadConnection();
 

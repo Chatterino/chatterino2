@@ -23,6 +23,7 @@ public:
     void sendMessage(const QString &message) override;
 
     bool isMod();
+    void setMod(bool value);
     bool isBroadcaster();
     bool hasModRights();
 
@@ -38,7 +39,7 @@ public:
     boost::signals2::signal<void()> onlineStatusChanged;
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
-    pajlada::Signals::NoArgSignal userStateChanged;
+    boost::signals2::signal<void()> userStateChanged;
 
     QString roomID;
     bool isLive;
@@ -52,6 +53,8 @@ private:
     void refreshLiveStatus();
 
     void fetchRecentMessages();
+
+    boost::signals2::connection connectedConnection;
 
     bool mod;
 };

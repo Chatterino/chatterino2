@@ -161,7 +161,16 @@ void SplitHeader::updateModerationModeIcon()
                                           ? resourceManager.moderationmode_enabled->getPixmap()
                                           : resourceManager.moderationmode_disabled->getPixmap());
 
-    //    this->moderationButton->setVisible(this->split->channel->hasModRights());
+    bool modButtonVisible = false;
+    SharedChannel channel = this->split->getChannel();
+
+    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+
+    if (tc != nullptr && tc->hasModRights()) {
+        modButtonVisible = true;
+    }
+
+    this->moderationButton->setVisible(modButtonVisible);
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)
