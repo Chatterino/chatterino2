@@ -53,6 +53,7 @@ public:
 
     // Searching
     const QString &getSearchText() const;
+    void setSearchText(const QString &value);
 
     // Scrollbar
     widgets::ScrollbarHighlight getScrollBarHighlight() const;

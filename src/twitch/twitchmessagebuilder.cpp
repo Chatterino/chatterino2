@@ -188,6 +188,8 @@ MessagePtr TwitchMessageBuilder::parse()
         i++;
     }
 
+    this->message->setSearchText(this->userName + ": " + this->originalMessage);
+
     return this->getMessage();
 }
 

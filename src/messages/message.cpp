@@ -64,29 +64,12 @@ void Message::setId(const QString &_id)
 // Search
 const QString &Message::getSearchText() const
 {
-    // fourtf: asdf
-    //    if (this->searchText.isNull()) {
-    //        QString _content("");
+    return this->searchText;
+}
 
-    //        bool first;
-
-    //        for (const MessageElement &word : this->words) {
-    //            if (!first) {
-    //                _content += "";
-    //            }
-
-    //            _content += word.getCopyText();
-    //            first = false;
-    //            }
-
-    //        this->searchText = _content;
-    //    }
-
-    //    return this->searchText;
-
-    static QString xd;
-
-    return xd;
+void Message::setSearchText(const QString &value)
+{
+    this->searchText = value;
 }
 
 // Highlight
@@ -106,6 +89,7 @@ MessagePtr Message::createSystemMessage(const QString &text)
     message->addElement(new TimestampElement(QTime::currentTime()));
     message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
     message->addFlags(Message::System);
+    message->setSearchText(text);
 
     return MessagePtr(message);
 }
