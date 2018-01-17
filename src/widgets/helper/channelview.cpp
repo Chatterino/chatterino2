@@ -43,8 +43,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->setMouseTracking(true);
 
     QObject::connect(&singletons::SettingManager::getInstance(),
-                     &singletons::SettingManager::wordTypeMaskChanged, this,
-                     &ChannelView::wordTypeMaskChanged);
+                     &singletons::SettingManager::wordFlagsChanged, this,
+                     &ChannelView::wordFlagsChanged);
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
@@ -101,8 +101,8 @@ ChannelView::ChannelView(BaseWidget *parent)
 ChannelView::~ChannelView()
 {
     QObject::disconnect(&singletons::SettingManager::getInstance(),
-                        &singletons::SettingManager::wordTypeMaskChanged, this,
-                        &ChannelView::wordTypeMaskChanged);
+                        &singletons::SettingManager::wordFlagsChanged, this,
+                        &ChannelView::wordFlagsChanged);
     this->messageAppendedConnection.disconnect();
     this->messageRemovedConnection.disconnect();
     this->repaintGifsConnection.disconnect();
@@ -429,14 +429,11 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
     this->selection = Selection(start, end);
 
     this->selectionChanged();
-
-    //    qDebug() << min.messageIndex << ":" << min.charIndex << " " << max.messageIndex << ":"
-    //             << max.charIndex;
 }
 
 messages::MessageElement::Flags ChannelView::getFlags() const
 {
-    MessageElement::Flags flags = MessageElement::Default;
+    MessageElement::Flags flags = singletons::SettingManager::getInstance().getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 

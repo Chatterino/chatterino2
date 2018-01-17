@@ -176,6 +176,7 @@ void Split::setModerationMode(bool value)
     if (value != this->moderationMode) {
         this->moderationMode = value;
         this->header.updateModerationModeIcon();
+        this->view.layoutMessages();
     }
 }
 

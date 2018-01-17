@@ -24,7 +24,7 @@ class SettingManager : public QObject
     using QStringSetting = ChatterinoSetting<QString>;
 
 public:
-    messages::MessageElement::Flags getWordTypeMask();
+    messages::MessageElement::Flags getWordFlags();
     bool isIgnoredEmote(const QString &emote);
 
     void init();
@@ -109,7 +109,7 @@ public:
     std::vector<ModerationAction> getModerationActions() const;
 
 signals:
-    void wordTypeMaskChanged();
+    void wordFlagsChanged();
 
 private:
     std::vector<ModerationAction> _moderationActions;
@@ -119,9 +119,9 @@ private:
 
     void updateModerationActions();
 
-    messages::MessageElement::Flags wordTypeMask = messages::MessageElement::Default;
+    messages::MessageElement::Flags wordFlags = messages::MessageElement::Default;
 
-    pajlada::Settings::SettingListener wordMaskListener;
+    pajlada::Settings::SettingListener wordFlagsListener;
 };
 
 }  // namespace singletons

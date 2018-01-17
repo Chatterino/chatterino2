@@ -84,10 +84,10 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->fontGeneration = singletons::FontManager::getInstance().getGeneration();
 
     // check if work mask changed
-    bool wordMaskChanged =
-        this->currentWordTypes != singletons::SettingManager::getInstance().getWordTypeMask();
+    bool wordMaskChanged = this->currentWordFlags !=
+                           flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
     layoutRequired |= wordMaskChanged;
-    this->currentWordTypes = singletons::SettingManager::getInstance().getWordTypeMask();
+    this->currentWordFlags = flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
 
     // check if dpi changed
     bool scaleChanged = this->scale != scale;

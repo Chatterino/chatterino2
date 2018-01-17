@@ -116,7 +116,7 @@ private:
     std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen;
 
 private slots:
-    void wordTypeMaskChanged()
+    void wordFlagsChanged()
     {
         layoutMessages();
         update();

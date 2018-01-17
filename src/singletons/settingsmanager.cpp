@@ -18,22 +18,22 @@ void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
 SettingManager::SettingManager()
     : snapshot(nullptr)
 {
-    this->wordMaskListener.addSetting(this->showTimestamps);
-    this->wordMaskListener.addSetting(this->showBadges);
-    this->wordMaskListener.addSetting(this->enableBttvEmotes);
-    this->wordMaskListener.addSetting(this->enableEmojis);
-    this->wordMaskListener.addSetting(this->enableFfzEmotes);
-    this->wordMaskListener.addSetting(this->enableTwitchEmotes);
-    this->wordMaskListener.cb = [this](auto) {
+    this->wordFlagsListener.addSetting(this->showTimestamps);
+    this->wordFlagsListener.addSetting(this->showBadges);
+    this->wordFlagsListener.addSetting(this->enableBttvEmotes);
+    this->wordFlagsListener.addSetting(this->enableEmojis);
+    this->wordFlagsListener.addSetting(this->enableFfzEmotes);
+    this->wordFlagsListener.addSetting(this->enableTwitchEmotes);
+    this->wordFlagsListener.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
 
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
 }
 
-MessageElement::Flags SettingManager::getWordTypeMask()
+MessageElement::Flags SettingManager::getWordFlags()
 {
-    return this->wordTypeMask;
+    return this->wordFlags;
 }
 
 bool SettingManager::isIgnoredEmote(const QString &)
@@ -76,10 +76,10 @@ void SettingManager::updateWordTypeMask()
 
     MessageElement::Flags newMask = static_cast<MessageElement::Flags>(newMaskUint);
 
-    if (newMask != this->wordTypeMask) {
-        this->wordTypeMask = newMask;
+    if (newMask != this->wordFlags) {
+        this->wordFlags = newMask;
 
-        emit wordTypeMaskChanged();
+        emit wordFlagsChanged();
     }
 }
 

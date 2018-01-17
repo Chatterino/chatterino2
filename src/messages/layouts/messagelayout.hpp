@@ -70,7 +70,7 @@ private:
     float scale = -1;
     unsigned int bufferUpdatedCount = 0;
 
-    MessageElement::Flags currentWordTypes = MessageElement::None;
+    MessageElement::Flags currentWordFlags = MessageElement::None;
 
     int collapsedHeight = 32;
 
