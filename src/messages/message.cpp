@@ -29,10 +29,10 @@ bool Message::hasFlags(MessageFlags _flags) const
     return this->flags & _flags;
 }
 
-void Message::setFlags(MessageFlags _flags)
-{
-    this->flags = flags;
-}
+// void Message::setFlags(MessageFlags _flags)
+//{
+//    this->flags = flags;
+//}
 
 void Message::addFlags(MessageFlags _flags)
 {
@@ -77,7 +77,7 @@ const QString &Message::getSearchText() const
 
     //            _content += word.getCopyText();
     //            first = false;
-    //        }
+    //            }
 
     //        this->searchText = _content;
     //    }

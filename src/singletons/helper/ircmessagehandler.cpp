@@ -113,7 +113,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     // disable the messages from the user
     for (int i = 0; i < snapshotLength; i++) {
         if (!snapshot[i]->hasFlags(Message::Timeout) && snapshot[i]->loginName == username) {
-            snapshot[i]->setFlags(Message::Disabled);
+            snapshot[i]->addFlags(Message::Disabled);
         }
     }
 
@@ -191,6 +191,6 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
 
     this->handleNoticeMessage(message);
 }
-}
-}
-}
+}  // namespace helper
+}  // namespace singletons
+}  // namespace chatterino

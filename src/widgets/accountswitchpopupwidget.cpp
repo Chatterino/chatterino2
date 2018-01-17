@@ -4,6 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QLayout>
+#include <QPainter>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -47,5 +48,11 @@ void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent *)
     this->hide();
 }
 
+void AccountSwitchPopupWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+
+    painter.fillRect(this->rect(), QColor(255, 255, 255));
+}
 }  // namespace widgets
 }  // namespace chatterino

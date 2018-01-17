@@ -93,7 +93,7 @@ void EmotePopup::loadEmojis()
     // emojis
     messages::MessageBuilder builder;
     builder.getMessage()->addFlags(Message::Centered);
-    builder.getMessage()->setFlags(Message::DisableCompactEmotes);
+    builder.getMessage()->addFlags(Message::DisableCompactEmotes);
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
         builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //

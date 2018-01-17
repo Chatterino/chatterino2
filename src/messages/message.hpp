@@ -39,7 +39,7 @@ public:
     // Message flags
     MessageFlags getFlags() const;
     bool hasFlags(MessageFlags flags) const;
-    void setFlags(MessageFlags flags);
+    //    void setFlags(MessageFlags flags);
     void addFlags(MessageFlags flags);
     void removeFlags(MessageFlags flags);
 

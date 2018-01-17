@@ -18,6 +18,7 @@ public:
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override final;
+    virtual void paintEvent(QPaintEvent *event) override;
 
 private:
     struct {
