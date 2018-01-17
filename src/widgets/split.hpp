@@ -68,8 +68,14 @@ public:
     void layoutMessages();
     void updateGifEmotes();
 
+    void drag();
+
 protected:
     virtual void paintEvent(QPaintEvent *) override;
+    virtual void mouseMoveEvent(QMouseEvent *) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *) override;
+    virtual void keyReleaseEvent(QKeyEvent *) override;
 
 private:
     SplitContainer &parentPage;
@@ -87,6 +93,7 @@ private:
     void setChannel(SharedChannel newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const std::string &newChannelName);
+    void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);
 
 public slots:
     // Add new split to the notebook page that this chat widget is in

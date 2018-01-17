@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "singletons/thememanager.hpp"
 #include "util/helpers.hpp"
+#include "util/layoutcreator.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/split.hpp"

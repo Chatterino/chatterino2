@@ -96,15 +96,14 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     this->tabs.newMessage = {
         tabFg,
-        {QBrush(blendColors(themeColor, windowBg, 0.5), Qt::DiagCrossPattern),
-         QBrush(blendColors(themeColor, windowBg, 0.3), Qt::DiagCrossPattern),
-         QBrush(blendColors(themeColorNoSat, windowBg, 0.5), Qt::DiagCrossPattern)}};
+        {QBrush(blendColors(themeColor, windowBg, 0.7), Qt::FDiagPattern),
+         QBrush(blendColors(themeColor, windowBg, 0.5), Qt::FDiagPattern),
+         QBrush(blendColors(themeColorNoSat, windowBg, 0.7), Qt::FDiagPattern)}};
 
     this->tabs.highlighted = {
         tabFg,
-        {QBrush(blendColors(themeColor, windowBg, 0.5), Qt::DiagCrossPattern),
-         QBrush(blendColors(themeColor, windowBg, 0.3), Qt::DiagCrossPattern),
-         QBrush(blendColors(themeColorNoSat, windowBg, 0.5), Qt::DiagCrossPattern)}};
+        {blendColors(themeColor, windowBg, 0.7), blendColors(themeColor, windowBg, 0.5),
+         blendColors(themeColorNoSat, windowBg, 0.7)}};
 
     // Split
     bool flat = isLight;

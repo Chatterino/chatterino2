@@ -16,10 +16,12 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QDockWidget>
+#include <QDrag>
 #include <QFileInfo>
 #include <QFont>
 #include <QFontDatabase>
 #include <QListWidget>
+#include <QMimeData>
 #include <QPainter>
 #include <QProcess>
 #include <QShortcut>
@@ -49,6 +51,8 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     , flexSizeX(1)
     , flexSizeY(1)
 {
+    this->setMouseTracking(true);
+
     this->vbox.setSpacing(0);
     this->vbox.setMargin(1);
 
@@ -232,6 +236,43 @@ void Split::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.fillRect(this->rect(), this->themeManager.splits.background);
+}
+
+void Split::mouseMoveEvent(QMouseEvent *event)
+{
+    this->handleModifiers(event, event->modifiers());
+}
+
+void Split::mousePressEvent(QMouseEvent *event)
+{
+    if (event->buttons() == Qt::LeftButton && event->modifiers() & Qt::AltModifier) {
+        this->drag();
+    }
+}
+
+void Split::keyPressEvent(QKeyEvent *event)
+{
+    this->view.unsetCursor();
+    this->handleModifiers(event, event->modifiers());
+}
+
+void Split::keyReleaseEvent(QKeyEvent *event)
+{
+    this->view.unsetCursor();
+    this->handleModifiers(event, event->modifiers());
+}
+
+void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
+{
+    if (modifiers == Qt::AltModifier) {
+        this->setCursor(Qt::SizeAllCursor);
+        event->accept();
+        //    } else if (modifiers == Qt::ControlModifier) {
+        //        this->setCursor(Qt::SplitHCursor);
+        //        event->accept();
+    } else {
+        this->setCursor(Qt::ArrowCursor);
+    }
 }
 
 /// Slots
@@ -508,6 +549,33 @@ void Split::doIncFlexY()
 void Split::doDecFlexY()
 {
     this->setFlexSizeY(this->getFlexSizeY() * (1 / 1.2));
+}
+
+void Split::drag()
+{
+    auto container = dynamic_cast<SplitContainer *>(this->parentWidget());
+
+    if (container != nullptr) {
+        SplitContainer::isDraggingSplit = true;
+        SplitContainer::draggingSplit = this;
+
+        auto originalLocation = container->removeFromLayout(this);
+
+        QDrag *drag = new QDrag(this);
+        QMimeData *mimeData = new QMimeData;
+
+        mimeData->setData("chatterino/split", "xD");
+
+        drag->setMimeData(mimeData);
+
+        Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+
+        if (dropAction == Qt::IgnoreAction) {
+            container->addToLayout(this, originalLocation);
+        }
+
+        SplitContainer::isDraggingSplit = false;
+    }
 }
 }  // namespace widgets
 }  // namespace chatterino

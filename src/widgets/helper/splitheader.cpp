@@ -184,32 +184,8 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
     if (this->dragging) {
         if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
             std::abs(this->dragStart.y() - event->pos().y()) > 12) {
-            auto page = static_cast<SplitContainer *>(this->split->parentWidget());
-
-            if (page != nullptr) {
-                SplitContainer::isDraggingSplit = true;
-                SplitContainer::draggingSplit = this->split;
-
-                auto originalLocation = page->removeFromLayout(this->split);
-
-                // page->update();
-
-                QDrag *drag = new QDrag(this->split);
-                QMimeData *mimeData = new QMimeData;
-
-                mimeData->setData("chatterino/split", "xD");
-
-                drag->setMimeData(mimeData);
-
-                Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
-
-                if (dropAction == Qt::IgnoreAction) {
-                    page->addToLayout(this->split, originalLocation);
-                }
-
-                SplitContainer::isDraggingSplit = false;
-                this->dragging = false;
-            }
+            this->split->drag();
+            this->dragging = false;
         }
     }
 }

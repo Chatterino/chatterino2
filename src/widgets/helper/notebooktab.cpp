@@ -1,4 +1,4 @@
-//#include "widgets/helper/notebooktab.hpp"
+#include "widgets/helper/notebooktab.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -167,6 +167,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
+    singletons::ThemeManager::TabColors regular = this->themeManager.tabs.regular;
 
     if (this->selected) {
         colors = this->themeManager.tabs.selected;
@@ -181,11 +182,14 @@ void NotebookTab::paintEvent(QPaintEvent *)
     bool windowFocused = this->window() == QApplication::activeWindow();
     // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
+    painter.fillRect(rect(), this->mouseOver ? regular.backgrounds.hover
+                                             : (windowFocused ? regular.backgrounds.regular
+                                                              : regular.backgrounds.unfocused));
+
     // fill the tab background
-    painter.fillRect(rect(),
-                     this->mouseOver ? colors.backgrounds.hover
-                                     : (windowFocused ? colors.backgrounds.regular
-                                                      : colors.backgrounds.unfocused));
+    painter.fillRect(rect(), this->mouseOver ? colors.backgrounds.hover
+                                             : (windowFocused ? colors.backgrounds.regular
+                                                              : colors.backgrounds.unfocused));
 
     // set the pen color
     painter.setPen(colors.text);

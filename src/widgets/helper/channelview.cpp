@@ -582,6 +582,13 @@ void ChannelView::leaveEvent(QEvent *)
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
+    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
+        this->unsetCursor();
+
+        event->ignore();
+        return;
+    }
+
     if (singletons::SettingManager::getInstance().pauseChatHover.getValue()) {
         this->pause(300);
     }
@@ -639,6 +646,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
 void ChannelView::mousePressEvent(QMouseEvent *event)
 {
+    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
+        this->unsetCursor();
+
+        event->ignore();
+        return;
+    }
+
     if (singletons::SettingManager::getInstance().linksDoubleClickOnly.getValue()) {
         this->pause(200);
     }
@@ -689,6 +703,13 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
 void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
+        this->unsetCursor();
+
+        event->ignore();
+        return;
+    }
+
     if (!this->isMouseDown) {
         // We didn't grab the mouse press, so we shouldn't be handling the mouse
         // release
