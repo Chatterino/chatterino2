@@ -246,6 +246,7 @@ void TwitchMessageBuilder::parseUsername()
 void TwitchMessageBuilder::appendUsername()
 {
     QString username = this->userName;
+    this->message->loginName = username;
     QString localizedName;
 
     auto iterator = this->tags.find("display-name");
