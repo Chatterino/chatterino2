@@ -11,7 +11,7 @@
 #define LAST_MSG "Show last read message indicator"
 #define PAUSE_HOVERING "When hovering"
 
-#define STREAMLINK_QUALITY "Source", "High", "Medium", "Low", "Audio only"
+#define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
 namespace widgets {

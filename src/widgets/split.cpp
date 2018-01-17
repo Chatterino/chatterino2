@@ -371,6 +371,7 @@ void Split::doOpenStreamlink()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     QString preferredQuality = settings.preferredQuality;
+    preferredQuality = preferredQuality.toLower();
     // TODO(Confuseh): Default streamlink paths
     QString path = settings.streamlinkPath;
     QString channel = QString::fromStdString(this->channelName.getValue());
