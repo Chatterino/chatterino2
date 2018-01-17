@@ -161,7 +161,7 @@ void SplitContainer::addChat(bool openChannelNameDialog, std::string chatUUID)
     Split *w = this->createChatWidget(chatUUID);
 
     if (openChannelNameDialog) {
-        bool ret = w->showChangeChannelPopup("Open channel", true);
+        bool ret = w->showChangeChannelPopup("Open channel name", true);
 
         if (!ret) {
             delete w;
@@ -394,7 +394,19 @@ void SplitContainer::paintEvent(QPaintEvent *)
         painter.fillRect(rect(), this->themeManager.splits.background);
 
         painter.setPen(this->themeManager.splits.header.text);
-        painter.drawText(rect(), "Add Chat", QTextOption(Qt::AlignCenter));
+
+        QString text = "Click to add a <split>";
+
+        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+
+        if (notebook != nullptr) {
+            if (notebook->tabCount() > 1) {
+                text += "\n\ntip: you can drag a <split> while holding <Alt>";
+                text += "\nor add another one by pressing <Ctrl+T>";
+            }
+        }
+
+        painter.drawText(rect(), text, QTextOption(Qt::AlignCenter));
     } else {
         painter.fillRect(rect(), this->themeManager.splits.messageSeperator);
     }
@@ -439,6 +451,7 @@ Split *SplitContainer::createChatWidget(const std::string &uuid)
     auto split = new Split(this, uuid);
 
     split->getChannelView().highlightedMessageReceived.connect([this] {
+        // fourtf: error potentionally here
         this->tab->setHighlightState(HighlightState::Highlighted);  //
     });
 

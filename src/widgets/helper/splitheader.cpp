@@ -85,14 +85,14 @@ void SplitHeader::addDropdownItems(RippleEffectLabel *label)
     // clang-format off
     this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
     this->dropdownMenu.addAction("Close split", this->split, &Split::doCloseSplit, QKeySequence(tr("Ctrl+W")));
-    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
+//    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
     this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
     this->dropdownMenu.addAction("Clear chat", this->split, &Split::doClearChat);
-    this->dropdownMenu.addAction("Open channel", this->split, &Split::doOpenChannel);
-    this->dropdownMenu.addAction("Open popup player", this->split, &Split::doOpenPopupPlayer);
+    this->dropdownMenu.addAction("Open in web browser", this->split, &Split::doOpenChannel);
+    this->dropdownMenu.addAction("Open web popup player", this->split, &Split::doOpenPopupPlayer);
     this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
