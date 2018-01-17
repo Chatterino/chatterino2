@@ -83,6 +83,22 @@ void TwitchChannel::sendMessage(const QString &message)
     singletons::IrcManager::getInstance().sendMessage(this->name, parsedMessage);
 }
 
+bool TwitchChannel::isMod()
+{
+    return this->mod;
+}
+
+bool TwitchChannel::isBroadcaster()
+{
+    return this->name == singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserId();
+}
+
+bool TwitchChannel::hasModRights()
+{
+    // fourtf: check if staff
+    return this->isMod() || this->isBroadcaster();
+}
+
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     if (this->isLive == newLiveStatus) {

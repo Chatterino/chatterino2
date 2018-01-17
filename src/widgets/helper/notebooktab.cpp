@@ -120,9 +120,11 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
         return;
     }
 
-    this->highlightState = newHighlightStyle;
+    if (this->highlightState != HighlightState::Highlighted) {
+        this->highlightState = newHighlightStyle;
 
-    this->update();
+        this->update();
+    }
 }
 
 QRect NotebookTab::getDesiredRect() const

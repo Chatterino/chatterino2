@@ -22,6 +22,10 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
+    bool isMod();
+    bool isBroadcaster();
+    bool hasModRights();
+
     const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
     const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
 
@@ -34,6 +38,7 @@ public:
     boost::signals2::signal<void()> onlineStatusChanged;
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
+    pajlada::Signals::NoArgSignal userStateChanged;
 
     QString roomID;
     bool isLive;
@@ -47,6 +52,8 @@ private:
     void refreshLiveStatus();
 
     void fetchRecentMessages();
+
+    bool mod;
 };
 
 }  // namespace twitch

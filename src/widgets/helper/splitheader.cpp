@@ -160,6 +160,8 @@ void SplitHeader::updateModerationModeIcon()
     this->moderationButton->setPixmap(this->split->getModerationMode()
                                           ? resourceManager.moderationmode_enabled->getPixmap()
                                           : resourceManager.moderationmode_disabled->getPixmap());
+
+    this->moderationButton->setVisible(this->split->channel->hasModRights());
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)
