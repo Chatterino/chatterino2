@@ -382,9 +382,20 @@ void IrcManager::removeIgnoredUser(QString const &username)
 void IrcManager::onConnected()
 {
     MessagePtr msg = Message::createSystemMessage("connected to chat");
+    MessagePtr remsg = Message::createSystemMessage("reconnected to chat");
 
-    this->channelManager.doOnAll([msg](SharedChannel channel) {
+    this->channelManager.doOnAll([msg, remsg](SharedChannel channel) {
         assert(channel);
+
+        LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
+
+        if (snapshot.getLength() > 0 &&
+            snapshot[snapshot.getLength() - 1]->hasFlags(Message::DisconnectedMessage))  //
+        {
+            channel->replaceMessage(snapshot[snapshot.getLength() - 1], remsg);
+            return;
+        }
+
         channel->addMessage(msg);
     });
 }
@@ -392,6 +403,7 @@ void IrcManager::onConnected()
 void IrcManager::onDisconnected()
 {
     MessagePtr msg = Message::createSystemMessage("disconnected from chat");
+    msg->addFlags(Message::DisconnectedMessage);
 
     this->channelManager.doOnAll([msg](SharedChannel channel) {
         assert(channel);
@@ -404,12 +416,11 @@ Communi::IrcConnection *IrcManager::getReadConnection()
     return this->readConnection.get();
 }
 
-void
-IrcManager::addFakeMessage(const QString &data)
+void IrcManager::addFakeMessage(const QString &data)
 {
     auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection.get());
 
-    this->privateMessageReceived(qobject_cast<Communi::IrcPrivateMessage*>(fakeMessage));
+    this->privateMessageReceived(qobject_cast<Communi::IrcPrivateMessage *>(fakeMessage));
 }
 
 }  // namespace singletons

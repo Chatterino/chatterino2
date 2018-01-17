@@ -14,7 +14,7 @@ namespace messages {
 class Message;
 
 typedef std::shared_ptr<Message> MessagePtr;
-typedef uint8_t MessageFlagsType;
+typedef uint16_t MessageFlagsType;
 
 class Message
 {
@@ -29,6 +29,7 @@ public:
         Disabled = (1 << 5),
         DisableCompactEmotes = (1 << 6),
         Collapsed = (1 << 7),
+        DisconnectedMessage = (1 << 8),
     };
 
     // Elements
