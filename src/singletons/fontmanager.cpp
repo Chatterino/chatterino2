@@ -4,16 +4,16 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN32
-    #define DEFAULT_FONT_FAMILY "Segoe UI"
-    #define DEFAULT_FONT_SIZE 10
+#define DEFAULT_FONT_FAMILY "Segoe UI"
+#define DEFAULT_FONT_SIZE 10
 #else
-    #ifdef Q_OS_MACOS
-        #define DEFAULT_FONT_FAMILY "Helvetica Neue"
-        #define DEFAULT_FONT_SIZE 12
-    #else
-        #define DEFAULT_FONT_FAMILY "Arial"
-        #define DEFAULT_FONT_SIZE 11
-    #endif
+#ifdef Q_OS_MACOS
+#define DEFAULT_FONT_FAMILY "Helvetica Neue"
+#define DEFAULT_FONT_SIZE 12
+#else
+#define DEFAULT_FONT_FAMILY "Arial"
+#define DEFAULT_FONT_SIZE 11
+#endif
 #endif
 
 namespace chatterino {
@@ -27,13 +27,13 @@ FontManager::FontManager()
     this->currentFontFamily.connect([this](const std::string &newValue, auto) {
         this->incGeneration();
         //        this->currentFont.setFamily(newValue.c_str());
-        this->currentFontByDpi.clear();
+        this->currentFontByScale.clear();
         this->fontChanged.invoke();
     });
     this->currentFontSize.connect([this](const int &newValue, auto) {
         this->incGeneration();
         //        this->currentFont.setSize(newValue);
-        this->currentFontByDpi.clear();
+        this->currentFontByScale.clear();
         this->fontChanged.invoke();
     });
 }
@@ -45,21 +45,23 @@ FontManager &FontManager::getInstance()
     return instance;
 }
 
-QFont &FontManager::getFont(Type type, float dpi)
+QFont &FontManager::getFont(Type type, float scale)
 {
     //    return this->currentFont.getFont(type);
-    return this->getCurrentFont(dpi).getFont(type);
+    return this->getCurrentFont(scale).getFont(type);
 }
 
-QFontMetrics &FontManager::getFontMetrics(Type type, float dpi)
+QFontMetrics &FontManager::getFontMetrics(Type type, float scale)
 {
     //    return this->currentFont.getFontMetrics(type);
-    return this->getCurrentFont(dpi).getFontMetrics(type);
+    return this->getCurrentFont(scale).getFontMetrics(type);
 }
 
 FontManager::FontData &FontManager::Font::getFontData(Type type)
 {
     switch (type) {
+        case Tiny:
+            return this->tiny;
         case Small:
             return this->small;
         case MediumSmall:
@@ -90,18 +92,18 @@ QFontMetrics &FontManager::Font::getFontMetrics(Type type)
     return this->getFontData(type).metrics;
 }
 
-FontManager::Font &FontManager::getCurrentFont(float dpi)
+FontManager::Font &FontManager::getCurrentFont(float scale)
 {
-    for (auto it = this->currentFontByDpi.begin(); it != this->currentFontByDpi.end(); it++) {
-        if (it->first == dpi) {
+    for (auto it = this->currentFontByScale.begin(); it != this->currentFontByScale.end(); it++) {
+        if (it->first == scale) {
             return it->second;
         }
     }
-    this->currentFontByDpi.push_back(std::make_pair(
-        dpi,
-        Font(this->currentFontFamily.getValue().c_str(), this->currentFontSize.getValue() * dpi)));
+    this->currentFontByScale.push_back(
+        std::make_pair(scale, Font(this->currentFontFamily.getValue().c_str(),
+                                   this->currentFontSize.getValue() * scale)));
 
-    return this->currentFontByDpi.back().second;
+    return this->currentFontByScale.back().second;
 }
+}  // namespace singletons
 }  // namespace chatterino
-}

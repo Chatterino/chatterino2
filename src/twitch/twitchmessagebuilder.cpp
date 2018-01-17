@@ -511,7 +511,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
             // Try to fetch channel-specific bit badge
             try {
                 const auto &badge = channelResources.badgeSets.at("bits").versions.at(versionKey);
-                this->append<ImageElement>(*(badge.badgeImage1x), MessageElement::BadgeVanity);
+                this->append<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity);
                 continue;
             } catch (const std::out_of_range &) {
                 // Channel does not contain a special bit badge for this version
@@ -520,44 +520,44 @@ void TwitchMessageBuilder::parseTwitchBadges()
             // Use default bit badge
             try {
                 const auto &badge = resourceManager.badgeSets.at("bits").versions.at(versionKey);
-                this->append<ImageElement>(*(badge.badgeImage1x), MessageElement::BadgeVanity);
+                this->append<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity);
             } catch (const std::out_of_range &) {
                 debug::Log("No default bit badge for version {} found", versionKey);
                 continue;
             }
         } else if (badge == "staff/1") {
-            this->append<ImageElement>(*resourceManager.badgeStaff,
+            this->append<ImageElement>(resourceManager.badgeStaff,
                                        MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Staff");
         } else if (badge == "admin/1") {
-            this->append<ImageElement>(*resourceManager.badgeAdmin,
+            this->append<ImageElement>(resourceManager.badgeAdmin,
                                        MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Admin");
         } else if (badge == "global_mod/1") {
-            this->append<ImageElement>(*resourceManager.badgeGlobalModerator,
+            this->append<ImageElement>(resourceManager.badgeGlobalModerator,
                                        MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Global Moderator");
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            this->append<ImageElement>(*resourceManager.badgeModerator,
+            this->append<ImageElement>(resourceManager.badgeModerator,
                                        MessageElement::BadgeChannelAuthority)
                 ->setTooltip("Twitch Channel Moderator");
         } else if (badge == "turbo/1") {
-            this->append<ImageElement>(*resourceManager.badgeTurbo,
+            this->append<ImageElement>(resourceManager.badgeTurbo,
                                        MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Turbo Subscriber");
         } else if (badge == "broadcaster/1") {
-            this->append<ImageElement>(*resourceManager.badgeBroadcaster,
+            this->append<ImageElement>(resourceManager.badgeBroadcaster,
                                        MessageElement::BadgeChannelAuthority)
                 ->setTooltip("Twitch Broadcaster");
         } else if (badge == "premium/1") {
-            this->append<ImageElement>(*resourceManager.badgePremium, MessageElement::BadgeVanity)
+            this->append<ImageElement>(resourceManager.badgePremium, MessageElement::BadgeVanity)
                 ->setTooltip("Twitch Prime Subscriber");
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    this->append<ImageElement>(*resourceManager.badgeVerified,
+                    this->append<ImageElement>(resourceManager.badgeVerified,
                                                MessageElement::BadgeVanity)
                         ->setTooltip("Twitch Verified");
                 } break;
@@ -574,7 +574,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
             auto badgeSetIt = channelResources.badgeSets.find("subscriber");
             if (badgeSetIt == channelResources.badgeSets.end()) {
                 // Fall back to default badge
-                this->append<ImageElement>(*resourceManager.badgeSubscriber,
+                this->append<ImageElement>(resourceManager.badgeSubscriber,
                                            MessageElement::BadgeSubscription)
                     ->setTooltip("Twitch Subscriber");
                 continue;
@@ -588,7 +588,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
 
             if (badgeVersionIt == badgeSet.versions.end()) {
                 // Fall back to default badge
-                this->append<ImageElement>(*resourceManager.badgeSubscriber,
+                this->append<ImageElement>(resourceManager.badgeSubscriber,
                                            MessageElement::BadgeSubscription)
                     ->setTooltip("Twitch Subscriber");
                 continue;
@@ -596,8 +596,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
 
             auto &badgeVersion = badgeVersionIt->second;
 
-            this->append<ImageElement>(*badgeVersion.badgeImage1x,
-                                       MessageElement::BadgeSubscription)
+            this->append<ImageElement>(badgeVersion.badgeImage1x, MessageElement::BadgeSubscription)
                 ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
         } else {
             if (!resourceManager.dynamicBadgesLoaded) {
@@ -623,7 +622,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
                 try {
                     auto &badgeVersion = badgeSet.versions.at(versionKey);
 
-                    this->append<ImageElement>(*badgeVersion.badgeImage1x, badgeType)
+                    this->append<ImageElement>(badgeVersion.badgeImage1x, badgeType)
                         ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
                 } catch (const std::exception &e) {
                     qDebug() << "Exception caught:" << e.what()
@@ -648,7 +647,7 @@ void TwitchMessageBuilder::addChatterinoBadges()
 
     const auto badge = it->second;
 
-    this->append<ImageElement>(*badge->image, MessageElement::BadgeChatterino)
+    this->append<ImageElement>(badge->image, MessageElement::BadgeChatterino)
         ->setTooltip(QString::fromStdString(badge->tooltip));
 }
 

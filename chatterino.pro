@@ -127,7 +127,8 @@ SOURCES += \
     src/widgets/settingspages/aboutpage.cpp \
     src/widgets/settingspages/moderationpage.cpp \
     src/widgets/settingspages/logspage.cpp \
-    src/widgets/basewindow.cpp
+    src/widgets/basewindow.cpp \
+    src/singletons/helper/moderationaction.cpp
 
 HEADERS  += \
     src/precompiled_headers.hpp \
@@ -226,7 +227,8 @@ HEADERS  += \
     src/widgets/settingspages/aboutpage.hpp \
     src/widgets/settingspages/moderationpage.hpp \
     src/widgets/settingspages/logspage.hpp \
-    src/widgets/basewindow.hpp
+    src/widgets/basewindow.hpp \
+    src/singletons/helper/moderationaction.hpp
 
 
 PRECOMPILED_HEADER =

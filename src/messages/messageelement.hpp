@@ -137,10 +137,10 @@ private:
 // contains a simple image
 class ImageElement : public MessageElement
 {
-    Image &image;
+    Image *image;
 
 public:
-    ImageElement(Image &image, MessageElement::Flags flags);
+    ImageElement(Image *image, MessageElement::Flags flags);
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;

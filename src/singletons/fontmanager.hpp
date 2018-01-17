@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QFont>
+#include <QFontDatabase>
 #include <QFontMetrics>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -16,6 +17,7 @@ class FontManager
 
 public:
     enum Type : uint8_t {
+        Tiny,
         Small,
         MediumSmall,
         Medium,
@@ -28,8 +30,8 @@ public:
     // FontManager is initialized only once, on first use
     static FontManager &getInstance();
 
-    QFont &getFont(Type type, float dpi);
-    QFontMetrics &getFontMetrics(Type type, float dpi);
+    QFont &getFont(Type type, float scale);
+    QFontMetrics &getFontMetrics(Type type, float scale);
 
     int getGeneration() const
     {
@@ -62,7 +64,8 @@ private:
         Font() = delete;
 
         explicit Font(const char *fontFamilyName, int mediumSize)
-            : small(QFont(fontFamilyName, mediumSize - 4))
+            : tiny(QFont("Monospace", 8))
+            , small(QFont(fontFamilyName, mediumSize - 4))
             , mediumSmall(QFont(fontFamilyName, mediumSize - 2))
             , medium(QFont(fontFamilyName, mediumSize))
             , mediumBold(QFont(fontFamilyName, mediumSize, QFont::DemiBold))
@@ -70,6 +73,7 @@ private:
             , large(QFont(fontFamilyName, mediumSize))
             , veryLarge(QFont(fontFamilyName, mediumSize))
         {
+            tiny.font.setStyleHint(QFont::TypeWriter);
         }
 
         void setFamily(const char *newFamily)
@@ -114,6 +118,7 @@ private:
         QFont &getFont(Type type);
         QFontMetrics &getFontMetrics(Type type);
 
+        FontData tiny;
         FontData small;
         FontData mediumSmall;
         FontData medium;
@@ -123,16 +128,16 @@ private:
         FontData veryLarge;
     };
 
-    Font &getCurrentFont(float dpi);
+    Font &getCurrentFont(float scale);
 
     // Future plans:
     // Could have multiple fonts in here, such as "Menu font", "Application font", "Chat font"
 
-    std::list<std::pair<float, Font>> currentFontByDpi;
+    std::list<std::pair<float, Font>> currentFontByScale;
 
     int generation = 0;
 };
-}
+}  // namespace singletons
 
 typedef singletons::FontManager::Type FontStyle;
 }  // namespace chatterino

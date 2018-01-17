@@ -21,21 +21,21 @@ ModerationPage::ModerationPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         // clang-format off
-        auto label = layout.emplace<QLabel>("In channels that you moderate there is a button <insert image of button here> to enable moderation mode.");
+        auto label = layout.emplace<QLabel>("In channels that you moderate there is a button <insert image of button here> to enable moderation mode.\n\nOne action per line. {user} will be replaced with the username.\nExample `/timeout {user} 120`");
         label->setWordWrap(true);
         // clang-format on
 
         auto text = layout.emplace<QTextEdit>().getElement();
+
+        settings.moderationActions.connect([=](const QString &str, auto) {
+            text->setPlainText(str);  //
+        });
 
         QObject::connect(text, &QTextEdit::textChanged, this,
                          [this] { this->itemsChangedTimer.start(200); });
 
         QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this,
                          [text, &settings]() { settings.moderationActions = text->toPlainText(); });
-
-        settings.highlightUserBlacklist.connect([=](const QString &str, auto) {
-            text->setPlainText(str);  //
-        });
     }
 
     // ---- misc

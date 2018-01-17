@@ -52,19 +52,20 @@ MessageElement::Flags MessageElement::getFlags() const
 }
 
 // IMAGE
-ImageElement::ImageElement(Image &_image, MessageElement::Flags flags)
+ImageElement::ImageElement(Image *_image, MessageElement::Flags flags)
     : MessageElement(flags)
     , image(_image)
 {
-    this->setTooltip(_image.getTooltip());
+    this->setTooltip(_image->getTooltip());
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
-    QSize size(this->image.getWidth() * this->image.getScale() * container.scale,
-               this->image.getHeight() * this->image.getScale() * container.scale);
+    QSize size(this->image->getWidth() * this->image->getScale() * container.scale,
+               this->image->getHeight() * this->image->getScale() * container.scale);
 
-    container.addElement(new ImageLayoutElement(*this, this->image, size));
+    container.addElement(
+        (new ImageLayoutElement(*this, this->image, size))->setLink(this->getLink()));
 }
 
 void ImageElement::update(UpdateFlags _flags)
@@ -102,7 +103,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
     QSize size((int)(container.scale * _image->getScaledWidth()),
                (int)(container.scale * _image->getScaledHeight()));
 
-    container.addElement(new ImageLayoutElement(*this, *_image, size));
+    container.addElement((new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));
 }
 
 void EmoteElement::update(UpdateFlags _flags)
@@ -130,9 +131,10 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 
     for (Word &word : this->words) {
         auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
-            auto e = new TextLayoutElement(*this, text, QSize(width, metrics.height()),
-                                           this->color.getColor(themeManager), this->style,
-                                           container.scale);
+            auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()),
+                                            this->color.getColor(themeManager), this->style,
+                                            container.scale))
+                         ->setLink(this->getLink());
             e->setTrailingSpace(trailingSpace);
             return e;
         };
@@ -254,6 +256,19 @@ TwitchModerationElement::TwitchModerationElement()
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElement::Flags _flags)
 {
+    QSize size((int)(container.scale * 16), (int)(container.scale * 16));
+
+    for (const singletons::ModerationAction &m :
+         singletons::SettingManager::getInstance().getModerationActions()) {
+        if (m.isImage()) {
+            container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
+                                     ->setLink(Link(Link::UserAction, m.getAction())));
+        } else {
+            container.addElement((new TextIconLayoutElement(*this, m.getLine1(), m.getLine2(),
+                                                            container.scale, size))
+                                     ->setLink(Link(Link::UserAction, m.getAction())));
+        }
+    }
 }
 
 void TwitchModerationElement::update(UpdateFlags _flags)

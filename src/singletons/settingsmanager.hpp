@@ -3,6 +3,7 @@
 #include "messages/highlightphrase.hpp"
 #include "messages/messageelement.hpp"
 #include "singletons/helper/chatterinosetting.hpp"
+#include "singletons/helper/moderationaction.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -105,13 +106,18 @@ public:
     void saveSnapshot();
     void recallSnapshot();
 
+    std::vector<ModerationAction> getModerationActions() const;
+
 signals:
     void wordTypeMaskChanged();
 
 private:
+    std::vector<ModerationAction> _moderationActions;
     std::unique_ptr<rapidjson::Document> snapshot;
 
     SettingManager();
+
+    void updateModerationActions();
 
     messages::MessageElement::Flags wordTypeMask = messages::MessageElement::Default;
 

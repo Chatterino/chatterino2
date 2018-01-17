@@ -17,6 +17,7 @@ public:
         UserBan,
         InsertText,
         ShowMessage,
+        UserAction,
     };
 
     Link();

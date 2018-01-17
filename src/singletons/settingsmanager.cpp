@@ -1,6 +1,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
+#include "singletons/resourcemanager.hpp"
 
 using namespace chatterino::messages;
 
@@ -26,6 +27,8 @@ SettingManager::SettingManager()
     this->wordMaskListener.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
+
+    this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
 }
 
 MessageElement::Flags SettingManager::getWordTypeMask()
@@ -127,5 +130,77 @@ void SettingManager::recallSnapshot()
     }
 }
 
+std::vector<ModerationAction> SettingManager::getModerationActions() const
+{
+    return this->_moderationActions;
+}
+
+void SettingManager::updateModerationActions()
+{
+    auto &resources = singletons::ResourceManager::getInstance();
+
+    this->_moderationActions.clear();
+
+    static QRegularExpression newLineRegex("(\r\n?|\n)+");
+    static QRegularExpression replaceRegex("[!/.]");
+    static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)");
+    QStringList list = this->moderationActions.getValue().split(newLineRegex);
+
+    int multipleTimeouts = 0;
+
+    for (QString &str : list) {
+        if (timeoutRegex.match(str).hasMatch()) {
+            multipleTimeouts++;
+            if (multipleTimeouts > 1) {
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i < list.size(); i++) {
+        QString &str = list[i];
+
+        if (str.isEmpty()) {
+            continue;
+        }
+
+        auto timeoutMatch = timeoutRegex.match(str);
+
+        if (timeoutMatch.hasMatch()) {
+            if (multipleTimeouts > 1) {
+                QString line1;
+                QString line2;
+
+                int amount = timeoutMatch.captured(1).toInt();
+
+                if (amount < 60) {
+                    line1 = QString::number(amount);
+                    line2 = "s";
+                } else if (amount < 60 * 60) {
+                    line1 = QString::number(amount / 60);
+                    line2 = "m";
+                } else if (amount < 60 * 60 * 24) {
+                    line1 = QString::number(amount / 60 / 60);
+                    line2 = "h";
+                } else {
+                    line1 = QString::number(amount / 60 / 60 / 24);
+                    line2 = "d";
+                }
+
+                this->_moderationActions.emplace_back(line1, line2, str);
+            } else {
+                this->_moderationActions.emplace_back(resources.buttonTimeout, str);
+            }
+        } else if (str.startsWith("/ban ")) {
+            this->_moderationActions.emplace_back(resources.buttonBan, str);
+        } else {
+            QString xD = str;
+
+            xD.replace(replaceRegex, "");
+
+            this->_moderationActions.emplace_back(xD.mid(0, 2), xD.mid(2, 2), str);
+        }
+    }
+}
 }  // namespace singletons
 }  // namespace chatterino

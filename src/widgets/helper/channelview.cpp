@@ -641,7 +641,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // check if word has a link
-    if (hoverLayoutElement->getCreator().getLink().isValid()) {
+    if (hoverLayoutElement->getLink().isValid()) {
         this->setCursor(Qt::PointingHandCursor);
     } else {
         this->setCursor(Qt::ArrowCursor);
@@ -764,7 +764,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    auto &link = hoverLayoutElement->getCreator().getLink();
+    auto &link = hoverLayoutElement->getLink();
 
     switch (link.getType()) {
         case messages::Link::UserInfo: {
@@ -781,6 +781,11 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         case messages::Link::Url: {
             QDesktopServices::openUrl(QUrl(link.getValue()));
             break;
+        }
+        case messages::Link::UserAction: {
+            QString value = link.getValue();
+            value.replace("{user}", layout->getMessage()->loginName);
+            this->channel->sendMessage(value);
         }
     }
 }

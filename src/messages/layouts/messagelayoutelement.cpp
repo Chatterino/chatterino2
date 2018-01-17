@@ -41,11 +41,22 @@ MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
     return this;
 }
 
+MessageLayoutElement *MessageLayoutElement::setLink(const Link &_link)
+{
+    this->link = _link;
+    return this;
+}
+
+const Link &MessageLayoutElement::getLink() const
+{
+    return this->link;
+}
+
 //
 // IMAGE
 //
 
-ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image &_image, QSize _size)
+ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image *_image, const QSize &_size)
     : MessageLayoutElement(_creator, _size)
     , image(_image)
 {
@@ -54,7 +65,7 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image &_image, 
 
 void ImageLayoutElement::addCopyTextToString(QString &str, int from, int to) const
 {
-    str += this->image.getName();
+    str += this->image->getName();
 
     if (this->hasTrailingSpace()) {
         str += " ";
@@ -68,9 +79,9 @@ int ImageLayoutElement::getSelectionIndexCount()
 
 void ImageLayoutElement::paint(QPainter &painter)
 {
-    const QPixmap *pixmap = this->image.getPixmap();
+    const QPixmap *pixmap = this->image->getPixmap();
 
-    if (pixmap != nullptr && !this->image.isAnimated()) {
+    if (pixmap != nullptr && !this->image->isAnimated()) {
         // fourtf: make it use qreal values
         painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
     }
@@ -78,12 +89,12 @@ void ImageLayoutElement::paint(QPainter &painter)
 
 void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
-    if (this->image.isAnimated()) {
-        if (this->image.getPixmap() != nullptr) {
+    if (this->image->isAnimated()) {
+        if (this->image->getPixmap() != nullptr) {
             // fourtf: make it use qreal values
             QRect rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
-            painter.drawPixmap(QRectF(rect), *this->image.getPixmap(), QRectF());
+            painter.drawPixmap(QRectF(rect), *this->image->getPixmap(), QRectF());
         }
     }
 }
@@ -109,7 +120,7 @@ int ImageLayoutElement::getXFromIndex(int index)
 // TEXT
 //
 
-TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text, QSize _size,
+TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text, const QSize &_size,
                                      QColor _color, FontStyle _style, float _scale)
     : MessageLayoutElement(_creator, _size)
     , text(_text)
@@ -184,6 +195,69 @@ int TextLayoutElement::getXFromIndex(int index)
             x += metrics.width(this->text[i]);
         }
         return x + this->getRect().left();
+    } else {
+        return this->getRect().right();
+    }
+}
+
+// TEXT ICON
+TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator, const QString &_line1,
+                                             const QString &_line2, float _scale, const QSize &size)
+    : MessageLayoutElement(creator, size)
+    , scale(_scale)
+    , line1(_line1)
+    , line2(_line2)
+{
+}
+
+void TextIconLayoutElement::addCopyTextToString(QString &str, int from, int to) const
+{
+}
+
+int TextIconLayoutElement::getSelectionIndexCount()
+{
+    return this->trailingSpace ? 2 : 1;
+}
+
+void TextIconLayoutElement::paint(QPainter &painter)
+{
+    QFont font = singletons::FontManager::getInstance().getFont(FontStyle::Tiny, this->scale);
+
+    painter.setBrush(singletons::ThemeManager::getInstance().messages.textColors.regular);
+    painter.setFont(font);
+
+    QTextOption option;
+    option.setAlignment(Qt::AlignHCenter);
+
+    if (this->line2.isEmpty()) {
+        QRect rect(this->getRect());
+        painter.drawText(rect, this->line1, option);
+    } else {
+        painter.drawText(
+            QPoint(this->getRect().x(), this->getRect().y() + this->getRect().height() / 2),
+            this->line1);
+        painter.drawText(
+            QPoint(this->getRect().x(), this->getRect().y() + this->getRect().height()),
+            this->line2);
+    }
+}
+
+void TextIconLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+}
+
+int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs)
+{
+    return 0;
+}
+
+int TextIconLayoutElement::getXFromIndex(int index)
+{
+    if (index <= 0) {
+        return this->getRect().left();
+    } else if (index == 1) {
+        // fourtf: remove space width
+        return this->getRect().right();
     } else {
         return this->getRect().right();
     }
