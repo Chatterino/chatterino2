@@ -231,6 +231,7 @@ void SplitHeader::menuReloadChannelEmotes()
 
 void SplitHeader::menuManualReconnect()
 {
+    singletons::IrcManager::getInstance().connect();
 }
 
 void SplitHeader::menuShowChangelog()

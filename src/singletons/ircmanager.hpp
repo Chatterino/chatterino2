@@ -93,5 +93,5 @@ private:
     QByteArray messageSuffix;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}
