@@ -304,6 +304,7 @@ void Split::doAddSplit()
 void Split::doCloseSplit()
 {
     SplitContainer *page = static_cast<SplitContainer *>(this->parentWidget());
+    singletons::ChannelManager::getInstance().removeTwitchChannel(this->channel->name);
     page->removeFromLayout(this);
 }
 
