@@ -632,9 +632,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
 
-    tooltipWidget->moveTo(event->globalPos());
-    tooltipWidget->setText(tooltip);
-    tooltipWidget->show();
+    if (tooltip.isEmpty()) {
+        tooltipWidget->hide();
+    } else {
+        tooltipWidget->moveTo(event->globalPos());
+        tooltipWidget->setText(tooltip);
+        tooltipWidget->show();
+    }
 
     // check if word has a link
     if (hoverLayoutElement->getCreator().getLink().isValid()) {

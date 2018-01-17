@@ -163,6 +163,8 @@ MessagePtr TwitchMessageBuilder::parse()
 
                 Link link;
 
+                qDebug() << linkString;
+
                 if (linkString.isEmpty()) {
                     link = Link();
                 } else {
