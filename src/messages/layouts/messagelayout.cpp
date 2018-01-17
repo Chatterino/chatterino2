@@ -61,7 +61,7 @@ void MessageLayout::removeFlags(Flags _flags)
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale)
+bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 {
     auto &emoteManager = singletons::EmoteManager::getInstance();
 
@@ -114,20 +114,20 @@ bool MessageLayout::layout(int width, float scale)
         return false;
     }
 
-    this->actuallyLayout(width);
+    this->actuallyLayout(width, flags);
     this->invalidateBuffer();
 
     return true;
 }
 
-void MessageLayout::actuallyLayout(int width)
+void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
 {
     this->container.clear();
     this->container.width = width;
     this->container.scale = this->scale;
 
     for (const std::unique_ptr<MessageElement> &element : this->message->getElements()) {
-        element->addToContainer(this->container, MessageElement::Default);
+        element->addToContainer(this->container, flags);
     }
 
     if (this->height != this->container.getHeight()) {

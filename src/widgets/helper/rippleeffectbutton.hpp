@@ -31,6 +31,8 @@ public:
     RippleEffectButton(BaseWidget *parent);
 
     void setMouseEffectColor(boost::optional<QColor> color);
+    void setPixmap(const QPixmap *pixmap);
+    const QPixmap *getPixmap() const;
 
 signals:
     void clicked();
@@ -50,6 +52,7 @@ protected:
     void fancyPaint(QPainter &painter);
 
 private:
+    QPixmap *pixmap;
     QPoint mousePos;
     double hoverMultiplier = 0.0;
     QTimer effectTimer;

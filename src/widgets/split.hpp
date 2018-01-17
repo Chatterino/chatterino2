@@ -62,6 +62,9 @@ public:
     void setFlexSizeY(double y);
     double getFlexSizeY();
 
+    void setModerationMode(bool value);
+    bool getModerationMode() const;
+
     bool showChangeChannelPopup(const char *dialogTitle, bool empty = false);
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
@@ -87,6 +90,8 @@ private:
     SplitInput input;
     double flexSizeX;
     double flexSizeY;
+
+    bool moderationMode;
 
     boost::signals2::connection channelIDChangedConnection;
 

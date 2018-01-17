@@ -10,7 +10,7 @@ namespace widgets {
 
 RippleEffectButton::RippleEffectButton(BaseWidget *parent)
     : BaseWidget(parent)
-
+    , pixmap(nullptr)
 {
     connect(&effectTimer, &QTimer::timeout, this, &RippleEffectButton::onMouseEffectTimeout);
 
@@ -23,11 +23,36 @@ void RippleEffectButton::setMouseEffectColor(boost::optional<QColor> color)
     this->mouseEffectColor = color;
 }
 
+void RippleEffectButton::setPixmap(const QPixmap *_pixmap)
+{
+    this->pixmap = const_cast<QPixmap *>(_pixmap);
+    this->update();
+}
+
+const QPixmap *RippleEffectButton::getPixmap() const
+{
+    return this->pixmap;
+}
+
 void RippleEffectButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+
     this->fancyPaint(painter);
+
+    if (this->pixmap != nullptr) {
+        QRect rect = this->rect();
+        int xD = 6 * this->getDpiMultiplier();
+
+        rect.moveLeft(xD);
+        rect.setRight(rect.right() - xD - xD);
+        rect.moveTop(xD);
+        rect.setBottom(rect.bottom() - xD - xD);
+
+        painter.drawPixmap(rect, *this->pixmap);
+    }
 }
 
 void RippleEffectButton::fancyPaint(QPainter &painter)

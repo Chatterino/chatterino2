@@ -44,6 +44,8 @@
         <file>images/commands.svg</file>
         <file>images/aboutlogo.png</file>
         <file>images/about.svg</file>
+        <file>images/moderatormode_disabled.png</file>
+        <file>images/moderatormode_enabled.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

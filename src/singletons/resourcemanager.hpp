@@ -36,6 +36,11 @@ public:
     messages::Image *cheerBadge100;
     messages::Image *cheerBadge1;
 
+    messages::Image *moderationmode_enabled;
+    messages::Image *moderationmode_disabled;
+
+    messages::Image *splitHeaderContext;
+
     std::map<std::string, messages::Image *> cheerBadges;
 
     struct BadgeVersion {

@@ -30,6 +30,7 @@ public:
 
     // Update channel text from chat widget
     void updateChannelText();
+    void updateModerationModeIcon();
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
@@ -47,13 +48,12 @@ private:
 
     boost::signals2::connection onlineStatusChangedConnection;
 
-    RippleEffectLabel *dropdownLabel;
+    RippleEffectButton *dropdownButton;
     SignalLabel *titleLabel;
-    RippleEffectLabel *moderationLabel;
+    RippleEffectButton *moderationButton;
 
     QMenu dropdownMenu;
 
-    void leftButtonClicked();
     void rightButtonClicked();
 
     virtual void refreshTheme() override;
@@ -64,7 +64,7 @@ private:
     bool isLive;
 
 public slots:
-    void addDropdownItems(RippleEffectLabel *label);
+    void addDropdownItems(RippleEffectButton *label);
 
     void menuMoveSplit();
     void menuReloadChannelEmotes();

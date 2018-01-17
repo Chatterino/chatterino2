@@ -153,6 +153,8 @@ void ChannelView::actuallyLayoutMessages()
     //        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
     int layoutWidth = LAYOUT_WIDTH;
 
+    MessageElement::Flags flags = this->getFlags();
+
     // layout the visible messages in the view
     if (messagesSnapshot.getLength() > start) {
         int y =
@@ -161,7 +163,7 @@ void ChannelView::actuallyLayoutMessages()
         for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
             auto message = messagesSnapshot[i];
 
-            redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier());
+            redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier(), flags);
 
             y += message->getHeight();
 
@@ -177,7 +179,7 @@ void ChannelView::actuallyLayoutMessages()
     for (int i = (int)messagesSnapshot.getLength() - 1; i >= 0; i--) {
         auto *message = messagesSnapshot[i].get();
 
-        message->layout(layoutWidth, this->getDpiMultiplier());
+        message->layout(layoutWidth, this->getDpiMultiplier(), flags);
 
         h -= message->getHeight();
 
@@ -432,6 +434,21 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
     //             << max.charIndex;
 }
 
+messages::MessageElement::Flags ChannelView::getFlags() const
+{
+    MessageElement::Flags flags = MessageElement::Default;
+
+    Split *split = dynamic_cast<Split *>(this->parentWidget());
+
+    if (split != nullptr) {
+        if (split->getModerationMode()) {
+            flags = (MessageElement::Flags)(flags | MessageElement::ModeratorTools);
+        }
+    }
+
+    return flags;
+}
+
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
     //    BENCH(timer);
@@ -536,7 +553,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == 0) {
                     desired = 0;
                 } else {
-                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier());
+                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
+                                            this->getFlags());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -558,7 +576,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == snapshotLength - 1) {
                     desired = snapshot.getLength();
                 } else {
-                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier());
+                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
+                                            this->getFlags());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();

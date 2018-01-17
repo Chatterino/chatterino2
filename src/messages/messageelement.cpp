@@ -68,10 +68,6 @@ void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElem
         (new ImageLayoutElement(*this, this->image, size))->setLink(this->getLink()));
 }
 
-void ImageElement::update(UpdateFlags _flags)
-{
-}
-
 // EMOTE
 EmoteElement::EmoteElement(const util::EmoteData &_data, MessageElement::Flags flags)
     : MessageElement(flags)
@@ -104,10 +100,6 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
                (int)(container.scale * _image->getScaledHeight()));
 
     container.addElement((new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));
-}
-
-void EmoteElement::update(UpdateFlags _flags)
-{
 }
 
 // TEXT
@@ -195,15 +187,6 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
     }
 }
 
-void TextElement::update(UpdateFlags _flags)
-{
-    if (_flags & UpdateFlags::Update_Text) {
-        for (Word &word : this->words) {
-            word.width = -1;
-        }
-    }
-}
-
 // TIMESTAMP
 TimestampElement::TimestampElement()
     : TimestampElement(QTime::currentTime())
@@ -235,11 +218,6 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
     this->element->addToContainer(container, _flags);
 }
 
-void TimestampElement::update(UpdateFlags _flags)
-{
-    this->element->update(_flags);
-}
-
 TextElement *TimestampElement::formatTime(const QTime &time)
 {
     QString format = time.toString(singletons::SettingManager::getInstance().timestampFormat);
@@ -256,23 +234,24 @@ TwitchModerationElement::TwitchModerationElement()
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElement::Flags _flags)
 {
-    QSize size((int)(container.scale * 16), (int)(container.scale * 16));
+    qDebug() << _flags;
 
-    for (const singletons::ModerationAction &m :
-         singletons::SettingManager::getInstance().getModerationActions()) {
-        if (m.isImage()) {
-            container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
-                                     ->setLink(Link(Link::UserAction, m.getAction())));
-        } else {
-            container.addElement((new TextIconLayoutElement(*this, m.getLine1(), m.getLine2(),
-                                                            container.scale, size))
-                                     ->setLink(Link(Link::UserAction, m.getAction())));
+    if (_flags & MessageElement::ModeratorTools) {
+        QSize size((int)(container.scale * 16), (int)(container.scale * 16));
+
+        for (const singletons::ModerationAction &m :
+             singletons::SettingManager::getInstance().getModerationActions()) {
+            if (m.isImage()) {
+                container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
+                                         ->setLink(Link(Link::UserAction, m.getAction())));
+            } else {
+                container.addElement((new TextIconLayoutElement(*this, m.getLine1(), m.getLine2(),
+                                                                container.scale, size))
+                                         ->setLink(Link(Link::UserAction, m.getAction())));
+            }
         }
     }
 }
 
-void TwitchModerationElement::update(UpdateFlags _flags)
-{
-}
 }  // namespace messages
 }  // namespace chatterino

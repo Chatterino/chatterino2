@@ -52,6 +52,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     , input(this)
     , flexSizeX(1)
     , flexSizeY(1)
+    , moderationMode(false)
 {
     this->setMouseTracking(true);
 
@@ -115,6 +116,8 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
                 this->input.show();
             }
         });
+
+    this->header.updateModerationModeIcon();
 }
 
 Split::~Split()
@@ -166,6 +169,19 @@ void Split::setFlexSizeY(double y)
 double Split::getFlexSizeY()
 {
     return this->flexSizeY;
+}
+
+void Split::setModerationMode(bool value)
+{
+    if (value != this->moderationMode) {
+        this->moderationMode = value;
+        this->header.updateModerationModeIcon();
+    }
+}
+
+bool Split::getModerationMode() const
+{
+    return this->moderationMode;
 }
 
 void Split::channelNameUpdated(const std::string &newChannelName)

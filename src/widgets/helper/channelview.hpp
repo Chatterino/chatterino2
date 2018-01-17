@@ -29,7 +29,7 @@ class ChannelView : public BaseWidget
 
 public:
     explicit ChannelView(BaseWidget *parent = 0);
-    ~ChannelView();
+    virtual ~ChannelView();
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -80,6 +80,7 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
+    messages::MessageElement::Flags getFlags() const;
 
     SharedChannel channel;
 

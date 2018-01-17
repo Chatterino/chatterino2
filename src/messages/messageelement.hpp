@@ -122,7 +122,6 @@ public:
     Flags getFlags() const;
 
     virtual void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) = 0;
-    virtual void update(UpdateFlags flags) = 0;
 
 protected:
     MessageElement(Flags flags);
@@ -144,7 +143,6 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
-    virtual void update(UpdateFlags flags) override;
 };
 
 // contains emote data and will pick the emote based on :
@@ -159,7 +157,6 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
-    virtual void update(UpdateFlags flags) override;
 };
 
 // contains a text, it will split it into words
@@ -181,7 +178,6 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
-    virtual void update(UpdateFlags flags);
 };
 
 // contains a text, formated depending on the preferences
@@ -198,7 +194,6 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
-    virtual void update(UpdateFlags flags);
 
     TextElement *formatTime(const QTime &time);
 };
@@ -212,7 +207,6 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
-    virtual void update(UpdateFlags flags);
 };
 
 // adds bits as text, static image or animated image

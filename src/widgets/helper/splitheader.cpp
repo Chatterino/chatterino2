@@ -1,4 +1,5 @@
 #include "widgets/helper/splitheader.hpp"
+#include "singletons/resourcemanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "twitch/twitchchannel.hpp"
 #include "util/layoutcreator.hpp"
@@ -21,20 +22,20 @@ SplitHeader::SplitHeader(Split *_split)
 {
     this->setMouseTracking(true);
 
+    singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
+
     util::LayoutCreator<SplitHeader> layoutCreator(this);
     auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
     {
         // dropdown label
-        auto dropdown = layout.emplace<RippleEffectLabel>(this).assign(&this->dropdownLabel);
-        dropdown->getLabel().setTextFormat(Qt::RichText);
-        dropdown->getLabel().setText("<img src=':/images/tool_moreCollapser_off16.png' />");
-        dropdown->getLabel().setScaledContents(true);
+        auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
+        dropdown->setPixmap(resourceManager.splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
-        QObject::connect(dropdown.getElement(), &RippleEffectLabel::clicked, this, [this] {
+        QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
                 this->dropdownMenu.move(
-                    this->dropdownLabel->mapToGlobal(QPoint(0, this->dropdownLabel->height())));
+                    this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
                 this->dropdownMenu.show();
             });
         });
@@ -50,11 +51,13 @@ SplitHeader::SplitHeader(Split *_split)
         layout->addStretch(1);
 
         // moderation mode
-        auto moderation = layout.emplace<RippleEffectLabel>(this).assign(&this->moderationLabel);
-        moderation->setMouseTracking(true);
-        moderation->getLabel().setScaledContents(true);
-        moderation->getLabel().setTextFormat(Qt::RichText);
-        moderation->getLabel().setText("<img src=':/images/moderator_bg.png' />");
+        auto moderator = layout.emplace<RippleEffectButton>(this).assign(&this->moderationButton);
+
+        QObject::connect(moderator.getElement(), &RippleEffectButton::clicked, this, [this] {
+            this->split->setModerationMode(!this->split->getModerationMode());
+        });
+
+        this->updateModerationModeIcon();
     }
 
     // ---- misc
@@ -62,8 +65,6 @@ SplitHeader::SplitHeader(Split *_split)
     this->refreshTheme();
 
     this->updateChannelText();
-
-    //    this->titleLabel.setAlignment(Qt::AlignCenter);
 
     this->initializeChannelSignals();
 
@@ -77,11 +78,8 @@ SplitHeader::~SplitHeader()
     this->onlineStatusChangedConnection.disconnect();
 }
 
-void SplitHeader::addDropdownItems(RippleEffectLabel *label)
+void SplitHeader::addDropdownItems(RippleEffectButton *label)
 {
-    connect(this->dropdownLabel, &RippleEffectLabel::clicked, this,
-            &SplitHeader::leftButtonClicked);
-
     // clang-format off
     this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
     this->dropdownMenu.addAction("Close split", this->split, &Split::doCloseSplit, QKeySequence(tr("Ctrl+W")));
@@ -122,8 +120,8 @@ void SplitHeader::resizeEvent(QResizeEvent *event)
     int w = 28 * getDpiMultiplier();
 
     this->setFixedHeight(w);
-    this->dropdownLabel->setFixedWidth(w);
-    this->moderationLabel->setFixedWidth(w);
+    this->dropdownButton->setFixedWidth(w);
+    this->moderationButton->setFixedWidth(w);
 }
 
 void SplitHeader::updateChannelText()
@@ -154,6 +152,14 @@ void SplitHeader::updateChannelText()
             this->tooltip = "";
         }
     }
+}
+
+void SplitHeader::updateModerationModeIcon()
+{
+    singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
+    this->moderationButton->setPixmap(this->split->getModerationMode()
+                                          ? resourceManager.moderationmode_enabled->getPixmap()
+                                          : resourceManager.moderationmode_disabled->getPixmap());
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)
@@ -203,10 +209,6 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void SplitHeader::leftButtonClicked()
-{
-}
-
 void SplitHeader::rightButtonClicked()
 {
 }
@@ -216,9 +218,9 @@ void SplitHeader::refreshTheme()
     QPalette palette;
     palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);
 
-    this->dropdownLabel->setPalette(palette);
+    //    this->dropdownButton->setPalette(palette);
     this->titleLabel->setPalette(palette);
-    this->moderationLabel->setPalette(palette);
+    //    this->moderationLabel->setPalette(palette);
 }
 
 void SplitHeader::menuMoveSplit()

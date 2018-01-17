@@ -38,7 +38,7 @@ public:
     void removeFlags(Flags flags);
 
     // Layout
-    bool layout(int width, float scale);
+    bool layout(int width, float scale, MessageElement::Flags flags);
 
     // Painting
     void paint(QPainter &painter, int y, int messageIndex, Selection &selection);
@@ -75,7 +75,7 @@ private:
     int collapsedHeight = 32;
 
     // methods
-    void actuallyLayout(int width);
+    void actuallyLayout(int width, MessageElement::Flags flags);
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 };
 

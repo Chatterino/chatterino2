@@ -265,7 +265,6 @@ inline void ParseCheermoteSets(std::vector<ResourceManager::JSONCheermoteSet> &s
 }
 
 }  // namespace
-
 ResourceManager::ResourceManager()
     : badgeStaff(lli(":/images/staff_bg.png"))
     , badgeAdmin(lli(":/images/admin_bg.png"))
@@ -285,6 +284,9 @@ ResourceManager::ResourceManager()
     , cheerBadge1(lli(":/images/cheer1"))
     , buttonBan(lli(":/images/button_ban.png", 0.25))
     , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
+    , moderationmode_enabled(lli(":/images/moderatormode_enabled"))
+    , moderationmode_disabled(lli(":/images/moderatormode_disabled"))
+    , splitHeaderContext(lli(":/images/tool_moreCollapser_off16.png"))
 {
     this->loadDynamicTwitchBadges();
 
