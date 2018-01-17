@@ -3,6 +3,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "twitch/twitchchannel.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/helper/searchpopup.hpp"
@@ -15,6 +16,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
 #include <QFileInfo>
@@ -317,14 +319,22 @@ void Split::doClearChat()
 
 void Split::doOpenChannel()
 {
-    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
-             << QString::fromStdString(this->channelName.getValue());
+    SharedChannel _channel = this->channel;
+    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+
+    if (tc != nullptr) {
+        QDesktopServices::openUrl("https://twitch.tv/" + tc->name);
+    }
 }
 
 void Split::doOpenPopupPlayer()
 {
-    qDebug() << "[UNIMPLEMENTED] Open twitch.tv/"
-             << QString::fromStdString(this->channelName.getValue()) << "/popout";
+    SharedChannel _channel = this->channel;
+    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+
+    if (tc != nullptr) {
+        QDesktopServices::openUrl("https://player.twitch.tv/?channel=" + tc->name);
+    }
 }
 
 void Split::doOpenStreamlink()

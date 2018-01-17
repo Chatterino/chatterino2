@@ -92,7 +92,7 @@ void SplitHeader::addDropdownItems(RippleEffectLabel *label)
     this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
     this->dropdownMenu.addAction("Clear chat", this->split, &Split::doClearChat);
     this->dropdownMenu.addAction("Open in web browser", this->split, &Split::doOpenChannel);
-    this->dropdownMenu.addAction("Open web popup player", this->split, &Split::doOpenPopupPlayer);
+    this->dropdownMenu.addAction("Open web player", this->split, &Split::doOpenPopupPlayer);
     this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
