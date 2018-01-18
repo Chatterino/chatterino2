@@ -22,7 +22,7 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
-    bool isMod();
+    bool isMod() const override;
     void setMod(bool value);
     bool isBroadcaster();
     bool hasModRights();

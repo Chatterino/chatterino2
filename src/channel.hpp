@@ -53,6 +53,10 @@ public:
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
+    virtual bool isMod() const
+    {
+        return false;
+    }
 
 private:
     messages::LimitedQueue<messages::MessagePtr> messages;

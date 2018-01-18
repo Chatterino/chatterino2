@@ -90,7 +90,7 @@ void TwitchChannel::sendMessage(const QString &message)
     singletons::IrcManager::getInstance().sendMessage(this->name, parsedMessage);
 }
 
-bool TwitchChannel::isMod()
+bool TwitchChannel::isMod() const
 {
     return this->mod;
 }
