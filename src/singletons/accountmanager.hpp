@@ -17,5 +17,5 @@ public:
     twitch::TwitchAccountManager Twitch;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}

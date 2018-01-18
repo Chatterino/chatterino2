@@ -1,8 +1,8 @@
 #pragma once
 
-#include "singletons/accountmanager.hpp"
 #include "credentials.hpp"
 #include "debug/log.hpp"
+#include "singletons/accountmanager.hpp"
 #include "util/networkmanager.hpp"
 
 #include <rapidjson/document.h>
@@ -154,6 +154,36 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
                 QJsonObject rootNode = jsonDoc.object();
 
                 successCallback(rootNode);
+            }
+        }
+        reply->deleteLater();
+    });
+}
+
+static void sendDelete(QUrl url, std::function<void()> successCallback)
+{
+    QNetworkRequest request(url);
+
+    auto &accountManager = singletons::AccountManager::getInstance();
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    QByteArray oauthToken;
+    if (currentTwitchUser) {
+        oauthToken = currentTwitchUser->getOAuthToken().toUtf8();
+    } else {
+        // XXX(pajlada): Bail out?
+    }
+
+    request.setRawHeader("Client-ID", getDefaultClientID());
+    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    request.setRawHeader("Authorization", "OAuth " + oauthToken);
+
+    NetworkManager::urlDelete(std::move(request), [=](QNetworkReply *reply) {
+        if (reply->error() == QNetworkReply::NetworkError::NoError) {
+            int code =
+                reply->attribute(QNetworkRequest::Attribute::HttpStatusCodeAttribute).toInt();
+
+            if (code >= 200 && code <= 299) {
+                successCallback();
             }
         }
         reply->deleteLater();

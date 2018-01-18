@@ -63,5 +63,6 @@ private:
 
     friend class chatterino::singletons::AccountManager;
 };
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino

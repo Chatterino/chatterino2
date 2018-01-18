@@ -28,7 +28,11 @@ public:
     void setName(const QString &name);
     void setChannel(SharedChannel _channel);
 
-    void updatePermissions();
+public slots:
+    void actuallyRefreshButtons();
+
+signals:
+    void refreshButtons();
 
 protected:
     virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
@@ -44,15 +48,32 @@ private:
     void timeout(QPushButton *button, int time);
     void sendCommand(QPushButton *button, QString command);
 
-    enum class permissions { User, Mod, Owner };
-    permissions permission;
+    void refreshLayouts();
+
+    enum class UserType { User, Mod, Owner };
 
     SharedChannel channel;
 
-    QString userID;
     QPixmap avatar;
 
     util::ConcurrentMap<QString, QPixmap> avatarMap;
+
+    struct User {
+        QString username;
+        QString userID;
+        UserType userType = UserType::User;
+
+        void refreshUserType(const SharedChannel &channel, bool loggedInUser);
+    };
+
+    User loggedInUser;
+
+    User popupWidgetUser;
+
+    struct {
+        bool following = false;
+        bool ignoring = false;
+    } relationship;
 
 protected:
     virtual void focusOutEvent(QFocusEvent *event) override;

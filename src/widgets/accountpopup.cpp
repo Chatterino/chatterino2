@@ -31,9 +31,29 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
 
     this->resize(0, 0);
 
+    auto &accountManager = singletons::AccountManager::getInstance();
+
+    connect(this, &AccountPopupWidget::refreshButtons, this,
+            &AccountPopupWidget::actuallyRefreshButtons, Qt::QueuedConnection);
+
+    accountManager.Twitch.userChanged.connect([this] {
+        singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
+
+        auto currentTwitchUser = accountManager.Twitch.getCurrent();
+        if (!currentTwitchUser) {
+            // No twitch user set (should never happen)
+            return;
+        }
+
+        this->loggedInUser.username = currentTwitchUser->getUserName();
+        this->loggedInUser.userID = currentTwitchUser->getUserId();
+
+        this->loggedInUser.refreshUserType(this->channel, true);
+
+    });
+
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
-    this->permission = permissions::User;
     for (auto button : this->ui->profileLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
     }
@@ -58,17 +78,8 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
     this->sendCommand(this->ui->mod, "/mod ");
     this->sendCommand(this->ui->unMod, "/unmod ");
 
-    auto &accountManager = singletons::AccountManager::getInstance();
-    QString userId;
-    QString userNickname;
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
-    if (currentTwitchUser) {
-        userId = currentTwitchUser->getUserId();
-        userNickname = currentTwitchUser->getNickName();
-    }
-
     QObject::connect(this->ui->profile, &QPushButton::clicked, this, [=]() {
-        QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->ui->lblUsername->text()));
+        QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->popupWidgetUser.username));
     });
 
     QObject::connect(this->ui->sendMessage, &QPushButton::clicked, this, [=]() {
@@ -80,17 +91,41 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
                      [=]() { QApplication::clipboard()->setText(this->ui->lblUsername->text()); });
 
     QObject::connect(this->ui->follow, &QPushButton::clicked, this, [=]() {
-        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + userId + "/follows/channels/" +
-                        this->userID);
+        debug::Log("Attempt to toggle follow user {}({}) as user {}({})",
+                   this->popupWidgetUser.username, this->popupWidgetUser.userID,
+                   this->loggedInUser.username, this->loggedInUser.userID);
 
-        util::twitch::put(requestUrl,
-                          [](QJsonObject obj) { qDebug() << "follows channel: " << obj; });
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->loggedInUser.userID +
+                        "/follows/channels/" + this->popupWidgetUser.userID);
+
+        this->ui->follow->setEnabled(false);
+        if (!this->relationship.following) {
+            util::twitch::put(requestUrl, [this](QJsonObject obj) {
+                qDebug() << "follows channel: " << obj;
+                this->relationship.following = true;
+                emit refreshButtons();
+            });
+        } else {
+            util::twitch::sendDelete(requestUrl, [this] {
+                this->relationship.following = false;
+                emit refreshButtons();
+            });
+        }
     });
 
     QObject::connect(this->ui->ignore, &QPushButton::clicked, this, [=]() {
-        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + userId + "/blocks/" + this->userID);
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->loggedInUser.userID +
+                        "/blocks/" + this->popupWidgetUser.userID);
 
-        util::twitch::put(requestUrl, [](QJsonObject obj) { qDebug() << "blocks user: " << obj; });
+        if (!this->relationship.ignoring) {
+            util::twitch::put(requestUrl, [this](auto) {
+                this->relationship.ignoring = true;  //
+            });
+        } else {
+            util::twitch::sendDelete(requestUrl, [this] {
+                this->relationship.ignoring = false;  //
+            });
+        }
     });
 
     QObject::connect(this->ui->disableHighlights, &QPushButton::clicked, this, [=, &settings]() {
@@ -119,16 +154,32 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
         this->hide();  //
     });
 
-    util::twitch::getUserID(userNickname, this,
-                            [=](const QString &id) { currentTwitchUser->setUserId(id); });
-
     this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
 }
 
 void AccountPopupWidget::setName(const QString &name)
 {
+    this->relationship.following = false;
+    this->relationship.ignoring = false;
+
+    this->popupWidgetUser.username = name;
     this->ui->lblUsername->setText(name);
     this->getUserId();
+
+    // Refresh popup widget users type
+
+    this->popupWidgetUser.refreshUserType(this->channel, false);
+}
+
+void AccountPopupWidget::User::refreshUserType(const SharedChannel &channel, bool loggedInUser)
+{
+    if (channel->name == this->username) {
+        this->userType = UserType::Owner;
+    } else if ((loggedInUser && channel->isMod()) || channel->modList.contains(this->username)) {
+        this->userType = UserType::Mod;
+    } else {
+        this->userType = UserType::User;
+    }
 }
 
 void AccountPopupWidget::setChannel(SharedChannel _channel)
@@ -138,8 +189,8 @@ void AccountPopupWidget::setChannel(SharedChannel _channel)
 
 void AccountPopupWidget::getUserId()
 {
-    util::twitch::getUserID(this->ui->lblUsername->text(), this, [=](const QString &id) {
-        userID = id;
+    util::twitch::getUserID(this->popupWidgetUser.username, this, [=](const QString &id) {
+        this->popupWidgetUser.userID = id;
         this->getUserData();
     });
 }
@@ -147,18 +198,31 @@ void AccountPopupWidget::getUserId()
 void AccountPopupWidget::getUserData()
 {
     util::twitch::get(
-        "https://api.twitch.tv/kraken/channels/" + this->userID, this, [=](const QJsonObject &obj) {
+        "https://api.twitch.tv/kraken/channels/" + this->popupWidgetUser.userID, this,
+        [=](const QJsonObject &obj) {
             this->ui->lblFollowers->setText(QString::number(obj.value("followers").toInt()));
             this->ui->lblViews->setText(QString::number(obj.value("views").toInt()));
             this->ui->lblAccountAge->setText(obj.value("created_at").toString().section("T", 0, 0));
 
             this->loadAvatar(QUrl(obj.value("logo").toString()));
         });
+
+    util::twitch::get("https://api.twitch.tv/kraken/users/" + this->loggedInUser.userID +
+                          "/follows/channels/" + this->popupWidgetUser.userID,
+                      this, [=](const QJsonObject &obj) {
+                          this->ui->follow->setEnabled(true);
+                          this->relationship.following = obj.contains("channel");
+
+                          emit refreshButtons();
+                      });
+
+    // TODO: Get ignore relationship between logged in user and popup widget user and update
+    // relationship.ignoring
 }
 
 void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 {
-    if (!this->avatarMap.tryGet(this->userID, this->avatar)) {
+    if (!this->avatarMap.tryGet(this->popupWidgetUser.userID, this->avatar)) {
         if (!avatarUrl.isEmpty()) {
             QNetworkRequest req(avatarUrl);
             static auto manager = new QNetworkAccessManager();
@@ -168,7 +232,7 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
                 if (reply->error() == QNetworkReply::NoError) {
                     const auto data = reply->readAll();
                     this->avatar.loadFromData(data);
-                    this->avatarMap.insert(this->userID, this->avatar);
+                    this->avatarMap.insert(this->popupWidgetUser.userID, this->avatar);
                     this->ui->lblAvatar->setPixmap(this->avatar);
                 } else {
                     this->ui->lblAvatar->setText("ERROR");
@@ -179,24 +243,6 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
         }
     } else {
         this->ui->lblAvatar->setPixmap(this->avatar);
-    }
-}
-
-void AccountPopupWidget::updatePermissions()
-{
-    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
-
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
-    if (!currentTwitchUser) {
-        // No twitch user set (should never happen)
-        return;
-    }
-
-    if (this->channel.get()->name == currentTwitchUser->getNickName()) {
-        this->permission = permissions::Owner;
-    } else if (this->channel->modList.contains(currentTwitchUser->getNickName())) {
-        // XXX(pajlada): This might always trigger if user is anonymous (if nickName is empty?)
-        this->permission = permissions::Mod;
     }
 }
 
@@ -230,6 +276,84 @@ void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
     });
 }
 
+void AccountPopupWidget::refreshLayouts()
+{
+    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
+    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    if (!currentTwitchUser) {
+        // No twitch user set (should never happen)
+        return;
+    }
+
+    QString loggedInUsername = currentTwitchUser->getUserName();
+    QString popupUsername = this->ui->lblUsername->text();
+
+    bool showModLayout = false;
+    bool showUserLayout = false;
+    bool showOwnerLayout = false;
+
+    if (loggedInUsername == popupUsername) {
+        // Clicked user is the same as the logged in user
+        showModLayout = false;
+        showUserLayout = false;
+        showOwnerLayout = false;
+    } else {
+        showUserLayout = true;
+
+        switch (this->loggedInUser.userType) {
+            case UserType::Mod: {
+                showModLayout = true;
+            } break;
+
+            case UserType::Owner: {
+                showModLayout = true;
+                showOwnerLayout = true;
+            } break;
+        }
+    }
+
+    if (this->popupWidgetUser.userType == UserType::Owner) {
+        showModLayout = false;
+        showOwnerLayout = false;
+    }
+
+    if (this->popupWidgetUser.userType == UserType::Mod &&
+        this->loggedInUser.userType != UserType::Owner) {
+        showModLayout = false;
+    }
+
+    this->updateButtons(this->ui->modLayout, showModLayout);
+    this->updateButtons(this->ui->userLayout, showUserLayout);
+    this->updateButtons(this->ui->ownerLayout, showOwnerLayout);
+}
+
+void AccountPopupWidget::actuallyRefreshButtons()
+{
+    if (this->relationship.following) {
+        if (this->ui->follow->text() != "Unfollow") {
+            this->ui->follow->setText("Unfollow");
+            this->ui->follow->setEnabled(true);
+        }
+    } else {
+        if (this->ui->follow->text() != "Follow") {
+            this->ui->follow->setText("Follow");
+            this->ui->follow->setEnabled(true);
+        }
+    }
+
+    if (this->relationship.ignoring) {
+        if (this->ui->ignore->text() != "Unignore") {
+            this->ui->ignore->setText("Unignore");
+            this->ui->ignore->setEnabled(true);
+        }
+    } else {
+        if (this->ui->ignore->text() != "Ignore") {
+            this->ui->ignore->setText("Ignore");
+            this->ui->ignore->setEnabled(true);
+        }
+    }
+}
+
 void AccountPopupWidget::focusOutEvent(QFocusEvent *)
 {
     this->hide();
@@ -242,29 +366,16 @@ void AccountPopupWidget::focusOutEvent(QFocusEvent *)
 
 void AccountPopupWidget::showEvent(QShowEvent *)
 {
-    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
-    if (!currentTwitchUser) {
-        // No twitch user set (should never happen)
-        return;
-    }
+    this->loggedInUser.refreshUserType(this->channel, true);
+    this->popupWidgetUser.refreshUserType(this->channel, false);
 
-    if (this->ui->lblUsername->text() != currentTwitchUser->getNickName()) {
-        this->updateButtons(this->ui->userLayout, true);
-        if (this->permission != permissions::User) {
-            if (!this->channel->modList.contains(this->ui->lblUsername->text())) {
-                this->updateButtons(this->ui->modLayout, true);
-            }
-            if (this->permission == permissions::Owner) {
-                this->updateButtons(this->ui->ownerLayout, true);
-                this->updateButtons(this->ui->modLayout, true);
-            }
-        }
-    } else {
-        this->updateButtons(this->ui->modLayout, false);
-        this->updateButtons(this->ui->userLayout, false);
-        this->updateButtons(this->ui->ownerLayout, false);
-    }
+    this->ui->follow->setEnabled(false);
+    // XXX: Uncomment when ignore/unignore is fully implemented
+    // this->ui->ignore->setEnabled(false);
+
+    this->refreshButtons();
+
+    this->refreshLayouts();
 
     QString blacklisted = singletons::SettingManager::getInstance().highlightUserBlacklist;
     QStringList list = blacklisted.split("\n", QString::SkipEmptyParts);

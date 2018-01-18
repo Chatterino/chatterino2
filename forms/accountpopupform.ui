@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
+    <width>469</width>
     <height>301</height>
    </rect>
   </property>
@@ -189,6 +189,9 @@
       </property>
       <item>
        <widget class="QPushButton" name="follow">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Follow</string>
         </property>
@@ -196,6 +199,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="ignore">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
          <string>Ignore</string>
         </property>

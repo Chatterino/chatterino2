@@ -539,7 +539,6 @@ void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
 {
     widget->setName(user);
     widget->move(QCursor::pos());
-    widget->updatePermissions();
     widget->show();
     widget->setFocus();
 }

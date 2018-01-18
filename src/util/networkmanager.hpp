@@ -159,6 +159,28 @@ public:
 
         emit requester.requestUrl();
     }
+
+    template <typename FinishedCallback>
+    static void urlDelete(QNetworkRequest request, FinishedCallback onFinished)
+    {
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+        QObject::connect(
+            &requester, &NetworkRequester::requestUrl, worker,
+            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
+                QNetworkReply *reply = NetworkManager::NaM.deleteResource(request);
+
+                QObject::connect(reply, &QNetworkReply::finished,
+                                 [ onFinished = std::move(onFinished), reply, worker ]() {
+                                     onFinished(reply);
+                                     delete worker;
+                                 });
+            });
+
+        emit requester.requestUrl();
+    }
 };
 
 class NetworkRequest

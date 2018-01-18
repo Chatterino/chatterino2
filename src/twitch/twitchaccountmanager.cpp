@@ -186,5 +186,6 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
     return AddUserResponse::UserAdded;
 }
-}
-}
+
+}  // namespace twitch
+}  // namespace chatterino
