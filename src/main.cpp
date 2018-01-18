@@ -53,5 +53,5 @@ int main(int argc, char *argv[])
     // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
     chatterino::util::NetworkManager::deinit();
 
-    exit(0);
+    _exit(0);
 }
