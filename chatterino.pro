@@ -166,7 +166,7 @@ SOURCES += \
 
 HEADERS  += \
     src/precompiled_header.hpp \
-    src/asyncexec.hpp \
+    src/util/posttothread.hpp \
     src/channel.hpp \
     src/util/concurrentmap.hpp \
     src/emojis.hpp \

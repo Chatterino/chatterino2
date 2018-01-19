@@ -1,5 +1,4 @@
 #include "messages/image.hpp"
-#include "asyncexec.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/windowmanager.hpp"

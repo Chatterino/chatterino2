@@ -1,5 +1,4 @@
 #include "singletons/ircmanager.hpp"
-#include "asyncexec.hpp"
 #include "channel.hpp"
 #include "debug/log.hpp"
 #include "messages/messageparseargs.hpp"
@@ -12,6 +11,7 @@
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "twitch/twitchuser.hpp"
+#include "util/posttothread.hpp"
 #include "util/urlfetch.hpp"
 
 #include <irccommand.h>
