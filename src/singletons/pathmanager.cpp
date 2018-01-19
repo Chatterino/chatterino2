@@ -50,6 +50,13 @@ bool PathManager::init(int argc, char **argv)
         return false;
     }
 
+    this->cacheFolderPath = rootPath + "/Cache";
+
+    if (!QDir().mkpath(this->cacheFolderPath)) {
+        printf("Error creating cache directory: %s\n", qPrintable(this->cacheFolderPath));
+        return false;
+    }
+
     return true;
 }
 

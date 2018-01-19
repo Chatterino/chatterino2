@@ -121,8 +121,8 @@ public:
             newChunks->at(0) = newFirstChunk;
 
             this->chunks = newChunks;
-            qDebug() << acceptedItems.size();
-            qDebug() << this->chunks->at(0)->size();
+            // qDebug() << acceptedItems.size();
+            // qDebug() << this->chunks->at(0)->size();
 
             if (this->chunks->size() == 1) {
                 this->lastChunkEnd += offset;

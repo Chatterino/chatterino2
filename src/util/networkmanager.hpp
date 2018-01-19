@@ -1,6 +1,8 @@
 #pragma once
 
 #include "debug/log.hpp"
+#include "util/networkrequester.hpp"
+#include "util/networkworker.hpp"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -28,22 +30,6 @@ static QJsonObject parseJSONFromReplyxD(QNetworkReply *reply)
 
     return jsonDoc.object();
 }
-
-class NetworkWorker : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void doneUrl(QNetworkReply *);
-};
-
-class NetworkRequester : public QObject
-{
-    Q_OBJECT
-
-signals:
-    void requestUrl();
-};
 
 class NetworkManager : public QObject
 {
@@ -180,123 +166,6 @@ public:
             });
 
         emit requester.requestUrl();
-    }
-};
-
-class NetworkRequest
-{
-    struct Data {
-        QNetworkRequest request;
-        const QObject *caller = nullptr;
-        std::function<void(QNetworkReply *)> onReplyCreated;
-        int timeoutMS = -1;
-    } data;
-
-public:
-    NetworkRequest() = delete;
-
-    explicit NetworkRequest(const char *url)
-    {
-        this->data.request.setUrl(QUrl(url));
-    }
-
-    explicit NetworkRequest(const std::string &url)
-    {
-        this->data.request.setUrl(QUrl(QString::fromStdString(url)));
-    }
-
-    explicit NetworkRequest(const QString &url)
-    {
-        this->data.request.setUrl(QUrl(url));
-    }
-
-    void setCaller(const QObject *_caller)
-    {
-        this->data.caller = _caller;
-    }
-
-    void setOnReplyCreated(std::function<void(QNetworkReply *)> f)
-    {
-        this->data.onReplyCreated = f;
-    }
-
-    void setRawHeader(const QByteArray &headerName, const QByteArray &value)
-    {
-        this->data.request.setRawHeader(headerName, value);
-    }
-
-    void setTimeout(int ms)
-    {
-        this->data.timeoutMS = ms;
-    }
-
-    template <typename FinishedCallback>
-    void get(FinishedCallback onFinished)
-    {
-        QTimer *timer = nullptr;
-        if (this->data.timeoutMS > 0) {
-            timer = new QTimer;
-        }
-
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-
-        if (this->data.caller != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
-                             [onFinished](auto reply) {
-                                 onFinished(reply);
-                                 reply->deleteLater();
-                             });
-        }
-
-        if (timer != nullptr) {
-            timer->start(this->data.timeoutMS);
-        }
-
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [ timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)} ]() {
-                QNetworkReply *reply = NetworkManager::NaM.get(data.request);
-
-                if (timer != nullptr) {
-                    QObject::connect(timer, &QTimer::timeout, worker, [reply, timer]() {
-                        debug::Log("Aborted!");
-                        reply->abort();
-                        timer->deleteLater();
-                    });
-                }
-
-                if (data.onReplyCreated) {
-                    data.onReplyCreated(reply);
-                }
-
-                QObject::connect(reply, &QNetworkReply::finished, worker, [
-                    data = std::move(data), worker, reply, onFinished = std::move(onFinished)
-                ]() {
-                    if (data.caller == nullptr) {
-                        onFinished(reply);
-
-                        reply->deleteLater();
-                    } else {
-                        emit worker->doneUrl(reply);
-                    }
-
-                    delete worker;
-                });
-            });
-
-        emit requester.requestUrl();
-    }
-
-    template <typename FinishedCallback>
-    void getJSON(FinishedCallback onFinished)
-    {
-        this->get([onFinished{std::move(onFinished)}](auto reply) {
-            auto object = parseJSONFromReplyxD(reply);
-            onFinished(object);
-        });
     }
 };
 

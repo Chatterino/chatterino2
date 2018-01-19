@@ -47,9 +47,10 @@ void Image::loadImage()
 {
     util::NetworkRequest req(this->getUrl());
     req.setCaller(this);
-    req.get([lli = this](QNetworkReply * reply) {
-        QByteArray array = reply->readAll();
-        QBuffer buffer(&array);
+    req.setUseQuickLoadCache(true);
+    req.get([lli = this](QByteArray bytes) {
+        QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
+        QBuffer buffer(&copy);
         buffer.open(QIODevice::ReadOnly);
 
         QImage image;
@@ -63,7 +64,7 @@ void Image::loadImage()
 
                 if (first) {
                     first = false;
-                    lli->currentPixmap = pixmap;
+                    lli->loadedPixmap = pixmap;
                 }
 
                 chatterino::messages::Image::FrameData data;
@@ -78,6 +79,10 @@ void Image::loadImage()
             lli->animated = true;
         }
 
+        lli->currentPixmap = lli->loadedPixmap;
+
+        lli->isLoaded = true;
+
         singletons::EmoteManager::getInstance().incGeneration();
 
         singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
@@ -91,7 +96,7 @@ void Image::loadImage()
 
 void Image::gifUpdateTimout()
 {
-    if (animated) {
+    if (this->animated) {
         this->currentFrameOffset += GIF_FRAME_LENGTH;
 
         while (true) {
@@ -112,9 +117,16 @@ const QPixmap *Image::getPixmap()
     if (!this->isLoading) {
         this->isLoading = true;
 
-        loadImage();
+        this->loadImage();
+
+        return nullptr;
     }
-    return this->currentPixmap;
+
+    if (this->isLoaded) {
+        return this->currentPixmap;
+    } else {
+        return nullptr;
+    }
 }
 
 qreal Image::getScale() const
@@ -157,6 +169,7 @@ int Image::getWidth() const
     if (this->currentPixmap == nullptr) {
         return 16;
     }
+
     return this->currentPixmap->width();
 }
 

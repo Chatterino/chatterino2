@@ -79,6 +79,10 @@ int ImageLayoutElement::getSelectionIndexCount()
 
 void ImageLayoutElement::paint(QPainter &painter)
 {
+    if (this->image == nullptr) {
+        return;
+    }
+
     const QPixmap *pixmap = this->image->getPixmap();
 
     if (pixmap != nullptr && !this->image->isAnimated()) {
@@ -89,12 +93,18 @@ void ImageLayoutElement::paint(QPainter &painter)
 
 void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
+    if (this->image == nullptr) {
+        return;
+    }
+
     if (this->image->isAnimated()) {
-        if (this->image->getPixmap() != nullptr) {
+        auto pixmap = this->image->getPixmap();
+
+        if (pixmap != nullptr) {
             // fourtf: make it use qreal values
             QRect rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
-            painter.drawPixmap(QRectF(rect), *this->image->getPixmap(), QRectF());
+            painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
         }
     }
 }

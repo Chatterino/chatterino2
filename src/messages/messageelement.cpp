@@ -237,7 +237,7 @@ TwitchModerationElement::TwitchModerationElement()
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElement::Flags _flags)
 {
-    qDebug() << _flags;
+    // qDebug() << _flags;
 
     if (_flags & MessageElement::ModeratorTools) {
         QSize size((int)(container.scale * 16), (int)(container.scale * 16));

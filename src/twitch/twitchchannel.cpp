@@ -106,11 +106,6 @@ void TwitchChannel::setMod(bool value)
 
 bool TwitchChannel::isBroadcaster()
 {
-    QString xD = this->name;
-    QString xD2 = singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName();
-
-    qDebug() << xD << xD2;
-
     return this->name ==
            singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName();
 }
@@ -144,7 +139,7 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    util::twitch::get2(url, QThread::currentThread(), [weak](rapidjson::Document &d) {
+    util::twitch::get2(url, QThread::currentThread(), [weak](const rapidjson::Document &d) {
         SharedChannel shared = weak.lock();
 
         if (!shared) {

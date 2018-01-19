@@ -16,6 +16,7 @@ public:
 
     QString settingsFolderPath;
     QString customFolderPath;
+    QString cacheFolderPath;
 };
 
 }  // namespace singletons

@@ -2,8 +2,10 @@
 
 #include <QPixmap>
 #include <QString>
-
 #include <boost/noncopyable.hpp>
+
+#include <atomic>
+#include <mutex>
 
 namespace chatterino {
 namespace messages {
@@ -41,6 +43,7 @@ private:
     };
 
     QPixmap *currentPixmap;
+    QPixmap *loadedPixmap;
     std::vector<FrameData> allFrames;
     int currentFrame = 0;
     int currentFrameOffset = 0;
@@ -53,7 +56,8 @@ private:
     bool ishat;
     qreal scale;
 
-    bool isLoading;
+    bool isLoading = false;
+    std::atomic<bool> isLoaded{false};
 
     void loadImage();
     void gifUpdateTimout();

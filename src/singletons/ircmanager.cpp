@@ -253,6 +253,11 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
         return;
     }
 
+    auto xd = message->content();
+    auto xd2 = message->toData();
+
+    debug::Log("HEHE: {}", xd2.toStdString());
+
     messages::MessageParseArgs args;
 
     twitch::TwitchMessageBuilder builder(c.get(), message, args);

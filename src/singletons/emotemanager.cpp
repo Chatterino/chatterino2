@@ -142,8 +142,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
             link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
             auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
-                return util::EmoteData(
-                    new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
+                return util::EmoteData(new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
             });
 
             this->bttvChannelEmotes.insert(code, emote);
@@ -293,9 +292,8 @@ void EmoteManager::loadEmojis()
                       "emojione/2.2.6/assets/png/" +
                       code + ".png";
 
-        this->emojis.insert(code,
-                            util::EmoteData(new Image(url, 0.35, ":" + shortCode + ":",
-                                                                ":" + shortCode + ":<br/>Emoji")));
+        this->emojis.insert(code, util::EmoteData(new Image(url, 0.35, ":" + shortCode + ":",
+                                                            ":" + shortCode + ":<br/>Emoji")));
 
         // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
         // emojiData.code.length()
@@ -374,8 +372,7 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
 
         // Create or fetch cached emoji image
         auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [this, &url] {
-            return util::EmoteData(
-                new Image(url, 0.35, "?????????", "???????????????"));  //
+            return util::EmoteData(new Image(url, 0.35, "?????????", "???????????????"));  //
         });
 
         // Push the emoji as a word to parsedWords
@@ -447,7 +444,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser>
 
     util::twitch::getAuthorized(
         url, clientID, oauthToken, QThread::currentThread(),
-        [=, &emoteData](QJsonObject &root) {
+        [=, &emoteData](const QJsonObject &root) {
             emoteData.emoteSets.clear();
             emoteData.emoteCodes.clear();
             auto emoticonSets = root.value("emoticon_sets").toObject();
@@ -477,6 +474,7 @@ void EmoteManager::loadBTTVEmotes()
     util::NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(30000);
+    req.setUseQuickLoadCache(true);
     req.getJSON([this](QJsonObject &root) {
         debug::Log("Got global bttv emotes");
         auto emotes = root.value("emotes").toArray();
@@ -489,12 +487,12 @@ void EmoteManager::loadBTTVEmotes()
             QString code = emote.toObject().value("code").toString();
 
             util::EmoteData emoteData;
-            emoteData.image1x = new Image(GetBTTVEmoteLink(urlTemplate, id, "1x"), 1,
-                                                    code, code + "<br />Global BTTV Emote");
-            emoteData.image2x = new Image(GetBTTVEmoteLink(urlTemplate, id, "2x"), 0.5,
-                                                    code, code + "<br />Global BTTV Emote");
-            emoteData.image3x = new Image(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25,
-                                                    code, code + "<br />Global BTTV Emote");
+            emoteData.image1x = new Image(GetBTTVEmoteLink(urlTemplate, id, "1x"), 1, code,
+                                          code + "<br />Global BTTV Emote");
+            emoteData.image2x = new Image(GetBTTVEmoteLink(urlTemplate, id, "2x"), 0.5, code,
+                                          code + "<br />Global BTTV Emote");
+            emoteData.image3x = new Image(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25, code,
+                                          code + "<br />Global BTTV Emote");
 
             this->bttvGlobalEmotes.insert(code, emoteData);
             codes.push_back(code.toStdString());
@@ -548,11 +546,11 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
     return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
         newEmoteData.image1x = new Image(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 1x");
+                                         _emoteName + "<br/>Twitch Emote 1x");
         newEmoteData.image2x = new Image(GetTwitchEmoteLink(id, "2.0"), .5, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 2x");
+                                         _emoteName + "<br/>Twitch Emote 2x");
         newEmoteData.image3x = new Image(GetTwitchEmoteLink(id, "3.0"), .25, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 3x");
+                                         _emoteName + "<br/>Twitch Emote 3x");
 
         return newEmoteData;
     });

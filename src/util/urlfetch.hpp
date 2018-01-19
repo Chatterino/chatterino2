@@ -4,6 +4,7 @@
 #include "debug/log.hpp"
 #include "singletons/accountmanager.hpp"
 #include "util/networkmanager.hpp"
+#include "util/networkrequest.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -21,82 +22,47 @@
 
 namespace chatterino {
 namespace util {
-
-static QJsonObject parseJSONFromReply(QNetworkReply *reply)
-{
-    if (reply->error() != QNetworkReply::NetworkError::NoError) {
-        return QJsonObject();
-    }
-
-    QByteArray data = reply->readAll();
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-
-    if (jsonDoc.isNull()) {
-        return QJsonObject();
-    }
-
-    return jsonDoc.object();
-}
-
-static rapidjson::Document parseJSONFromReply2(QNetworkReply *reply)
-{
-    rapidjson::Document ret(rapidjson::kNullType);
-
-    if (reply->error() != QNetworkReply::NetworkError::NoError) {
-        return ret;
-    }
-
-    QByteArray data = reply->readAll();
-    rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
-
-    if (result.Code() != rapidjson::kParseErrorNone) {
-        debug::Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-                   result.Offset());
-        return ret;
-    }
-
-    return ret;
-}
-
 namespace twitch {
 
 static void get(QString url, const QObject *caller,
-                std::function<void(QJsonObject &)> successCallback)
+                std::function<void(const QJsonObject &)> successCallback)
 {
     util::NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", getDefaultClientID());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    req.get([=](QNetworkReply *reply) {
-        auto node = parseJSONFromReply(reply);
-        successCallback(node);
+
+    req.getJSON([=](const QJsonObject &node) {
+        successCallback(node);  //
     });
 }
 
 static void get2(QString url, const QObject *caller,
-                 std::function<void(rapidjson::Document &)> successCallback)
+                 std::function<void(const rapidjson::Document &)> successCallback)
 {
     util::NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", getDefaultClientID());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    req.get([=](QNetworkReply *reply) {
-        auto document = parseJSONFromReply2(reply);
-        successCallback(document);
+    req.setUseQuickLoadCache(true);
+
+    req.getJSON2([=](const rapidjson::Document &document) {
+        successCallback(document);  //
     });
 }
 
 static void getAuthorized(QString url, const QString &clientID, const QString &oauthToken,
-                          const QObject *caller, std::function<void(QJsonObject &)> successCallback)
+                          const QObject *caller,
+                          std::function<void(const QJsonObject &)> successCallback)
 {
     util::NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", clientID.toUtf8());
     req.setRawHeader("Authorization", "OAuth " + oauthToken.toUtf8());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    req.get([=](QNetworkReply *reply) {
-        auto node = parseJSONFromReply(reply);
-        successCallback(node);
+
+    req.getJSON([=](const QJsonObject &node) {
+        successCallback(node);  //
     });
 }
 

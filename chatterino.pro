@@ -162,7 +162,8 @@ SOURCES += \
     src/widgets/settingspages/logspage.cpp \
     src/widgets/basewindow.cpp \
     src/singletons/helper/moderationaction.cpp \
-    src/widgets/streamview.cpp
+    src/widgets/streamview.cpp \
+    src/util/networkrequest.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -262,7 +263,10 @@ HEADERS  += \
     src/widgets/settingspages/logspage.hpp \
     src/widgets/basewindow.hpp \
     src/singletons/helper/moderationaction.hpp \
-    src/widgets/streamview.hpp
+    src/widgets/streamview.hpp \
+    src/util/networkrequest.hpp \
+    src/util/networkworker.hpp \
+    src/util/networkrequester.hpp
 
 RESOURCES += \
     resources/resources.qrc
