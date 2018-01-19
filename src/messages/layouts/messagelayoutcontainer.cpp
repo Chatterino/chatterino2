@@ -375,8 +375,6 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         index += this->elements[i]->getSelectionIndexCount();
     }
 
-    qDebug() << index;
-
     return index;
 }
 

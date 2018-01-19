@@ -131,6 +131,8 @@ public:
                 if (cachedFile.open(QIODevice::ReadOnly)) {
                     QByteArray bytes = cachedFile.readAll();
 
+                    qDebug() << "loaded cached resource" << this->data.request.url();
+
                     onFinished(bytes);
 
                     cachedFile.close();
@@ -158,7 +160,7 @@ public:
 
                                  QByteArray bytes = reply->readAll();
                                  data.writeToCache(bytes);
-                                 // onFinished(bytes);
+                                 onFinished(bytes);
 
                                  reply->deleteLater();
                              });
@@ -191,7 +193,7 @@ public:
                     if (data.caller == nullptr) {
                         QByteArray bytes = reply->readAll();
                         data.writeToCache(bytes);
-                        // onFinished(bytes);
+                        onFinished(bytes);
 
                         reply->deleteLater();
                     } else {

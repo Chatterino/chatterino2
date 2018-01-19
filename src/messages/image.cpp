@@ -3,6 +3,7 @@
 #include "singletons/ircmanager.hpp"
 #include "singletons/windowmanager.hpp"
 #include "util/networkmanager.hpp"
+#include "util/posttothread.hpp"
 #include "util/urlfetch.hpp"
 
 #include <QBuffer>
@@ -40,6 +41,7 @@ Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &to
     , ishat(isHat)
     , scale(scale)
     , isLoading(true)
+    , isLoaded(true)
 {
 }
 
@@ -85,7 +87,7 @@ void Image::loadImage()
 
         singletons::EmoteManager::getInstance().incGeneration();
 
-        singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
+        postToThread([] { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
     });
 
     singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
