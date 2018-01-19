@@ -4,54 +4,87 @@
 #
 #-------------------------------------------------
 
-QT      += core gui network multimedia svg
-CONFIG  += communi
-COMMUNI += core model util
-CONFIG  += c++14
-PRECOMPILED_HEADER = precompiled_header.hpp
+message(----)
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT                += widgets core gui network multimedia svg
+CONFIG            += communi
+COMMUNI           += core model util
+CONFIG            += c++14
+INCLUDEPATH       += src/
+TARGET             = chatterino
+TEMPLATE           = app
+DEFINES           += QT_DEPRECATED_WARNINGS
+PRECOMPILED_HEADER = src/precompiled_header.hpp
+CONFIG            += precompile_header
 
-# Include ourself
-INCLUDEPATH += src/
+# Icons
+macx:ICON = resources/images/chatterino2.icns
+win32:RC_FILE = resources/windows.rc
 
-TARGET   = chatterino
-TEMPLATE = app
+# Submodules
+include(dependencies/rapidjson.pri)
+include(dependencies/settings.pri)
+include(dependencies/signals.pri)
+include(dependencies/humanize.pri)
+include(dependencies/fmt.pri)
+DEFINES += IRC_NAMESPACE=Communi
+include(dependencies/libcommuni.pri)
 
-DEFINES += QT_DEPRECATED_WARNINGS
-
-# Define warning flags for Chatterino
-win32-msvc* {
-    QMAKE_CXXFLAGS_WARN_ON = /W4
-    # 4714 - function marked as __forceinline not inlined
-    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
-    #        These functions may have a different preferred name, may be insecure or have
-    #        a more secure variant, or may be obsolete.
-    # 4505 - unreferenced local version has been removed
-    # 4127 - conditional expression is constant
-    # 4503 - decorated name length exceeded, name was truncated
-    # 4100 - unreferences formal parameter
-    QMAKE_CXXFLAGS_WARN_ON += /wd4714
-    QMAKE_CXXFLAGS_WARN_ON += /wd4996
-    QMAKE_CXXFLAGS_WARN_ON += /wd4505
-    QMAKE_CXXFLAGS_WARN_ON += /wd4127
-    QMAKE_CXXFLAGS_WARN_ON += /wd4503
-    QMAKE_CXXFLAGS_WARN_ON += /wd4100
-
-} else {
-    QMAKE_CXXFLAGS_WARN_ON = -Wall
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+# Optional feature: QtWebEngine
+exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
+    message(Using QWebEngine)
+    QT += webenginewidgets
+    DEFINES += "USEWEBENGINE"
 }
 
-# do not use windows min/max macros
+# Include boost
 win32 {
-    DEFINES += NOMINMAX
+    isEmpty(BOOST_DIRECTORY) {
+        message(Using default boost directory C:\\local\\boost\\)
+        BOOST_DIRECTORY = C:\local\boost\
+    }
+
+    INCLUDEPATH += $$BOOST_DIRECTORY
 }
 
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+win32 {
+    LIBS += -luser32
+}
 
+# OSX include directory
+macx {
+    INCLUDEPATH += /usr/local/include
+}
+
+# Optional dependency on Windows SDK 7
+!contains(QMAKE_TARGET.arch, x86_64) {
+    win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
+        LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
+            -ldwmapi
+
+        DEFINES += "USEWINSDK"
+        message(Using Windows SDK 7)
+    }
+}
+
+# Optional dependency on Windows SDK 10
+contains(QMAKE_TARGET.arch, x86_64) {
+    WIN_SDK_VERSION = $$(WindowsSDKVersion)
+    !isEmpty(WIN_SDK_VERSION) {
+        !equals(WIN_SDK_VERSION, "\\") {
+            DEFINES += "USEWINSDK"
+            message(Using Windows SDK 10)
+        }
+    }
+}
+
+werr {
+    QMAKE_CXXFLAGS += -Werror
+
+    message("Enabling error on warning")
+}
+
+# src
 SOURCES += \
     src/main.cpp \
     src/application.cpp \
@@ -128,10 +161,11 @@ SOURCES += \
     src/widgets/settingspages/moderationpage.cpp \
     src/widgets/settingspages/logspage.cpp \
     src/widgets/basewindow.cpp \
-    src/singletons/helper/moderationaction.cpp
+    src/singletons/helper/moderationaction.cpp \
+    src/widgets/streamview.cpp
 
 HEADERS  += \
-    src/precompiled_headers.hpp \
+    src/precompiled_header.hpp \
     src/asyncexec.hpp \
     src/channel.hpp \
     src/util/concurrentmap.hpp \
@@ -196,7 +230,6 @@ HEADERS  += \
     src/widgets/accountswitchpopupwidget.hpp \
     src/const.hpp \
     src/widgets/tooltipwidget.hpp \
-    src/precompiled_headers.hpp \
     src/singletons/thememanager.hpp \
     src/twitch/twitchaccountmanager.hpp \
     src/singletons/helper/completionmodel.hpp \
@@ -228,69 +261,49 @@ HEADERS  += \
     src/widgets/settingspages/moderationpage.hpp \
     src/widgets/settingspages/logspage.hpp \
     src/widgets/basewindow.hpp \
-    src/singletons/helper/moderationaction.hpp
-
-
-PRECOMPILED_HEADER =
+    src/singletons/helper/moderationaction.hpp \
+    src/widgets/streamview.hpp
 
 RESOURCES += \
     resources/resources.qrc
 
 DISTFILES +=
 
-# Include boost
-win32 {
-    isEmpty(BOOST_DIRECTORY) {
-        message(Using default boost directory C:\\local\\boost\\)
-        BOOST_DIRECTORY = C:\local\boost\
-    }
+FORMS += \
+    forms/accountpopupform.ui
 
-    INCLUDEPATH += $$BOOST_DIRECTORY
+# Define warning flags for Chatterino
+win32-msvc* {
+    QMAKE_CXXFLAGS_WARN_ON = /W4
+    # 4714 - function marked as __forceinline not inlined
+    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
+    #        These functions may have a different preferred name, may be insecure or have
+    #        a more secure variant, or may be obsolete.
+    # 4505 - unreferenced local version has been removed
+    # 4127 - conditional expression is constant
+    # 4503 - decorated name length exceeded, name was truncated
+    # 4100 - unreferences formal parameter
+    QMAKE_CXXFLAGS_WARN_ON += /wd4714
+    QMAKE_CXXFLAGS_WARN_ON += /wd4996
+    QMAKE_CXXFLAGS_WARN_ON += /wd4505
+    QMAKE_CXXFLAGS_WARN_ON += /wd4127
+    QMAKE_CXXFLAGS_WARN_ON += /wd4503
+    QMAKE_CXXFLAGS_WARN_ON += /wd4100
+
+} else {
+    QMAKE_CXXFLAGS_WARN_ON = -Wall
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
 }
 
-win32 {
-    LIBS += -luser32
-    LIBS += -lgdi32
-}
+# do not use windows min/max macros
+#win32 {
+#    DEFINES += NOMINMAX
+#}
 
-# Optional dependency on windows sdk 7.1
-!contains(QMAKE_TARGET.arch, x86_64) {
-    win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
-        LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
-            -ldwmapi \
-            -lgdi32
-
-        DEFINES += "USEWINSDK"
-    }
-}
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 win32::exists(C:\fourtf) {
     DEFINES += "OHHEYITSFOURTF"
 }
-
-macx {
-    INCLUDEPATH += /usr/local/include
-}
-
-FORMS += \
-    forms/accountpopupform.ui
-
-werr {
-    QMAKE_CXXFLAGS += -Werror
-
-    message("Enabling error on warning")
-}
-
-# External dependencies
-include(dependencies/rapidjson.pri)
-include(dependencies/settings.pri)
-include(dependencies/signals.pri)
-include(dependencies/humanize.pri)
-include(dependencies/fmt.pri)
-DEFINES += IRC_NAMESPACE=Communi
-include(dependencies/libcommuni.pri)
-
-
-#ICONs
-macx:ICON = resources/images/chatterino2.icns
-win32:RC_FILE = resources/windows.rc

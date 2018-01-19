@@ -13,6 +13,10 @@
 #include <QMimeData>
 #include <QPainter>
 
+#ifdef USEWEBENGINE
+#include "widgets/streamview.hpp"
+#endif
+
 namespace chatterino {
 namespace widgets {
 
@@ -87,10 +91,24 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
     this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
     this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
     this->dropdownMenu.addSeparator();
+#ifdef USEWEBENGINE
+    this->dropdownMenu.addAction("Start watching", this, [this]{
+        SharedChannel _channel = this->split->getChannel();
+        twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+
+        if (tc != nullptr) {
+            StreamView *view = new StreamView(_channel, "https://player.twitch.tv/?channel=" + tc->name);
+            view->setAttribute(Qt::WA_DeleteOnClose, true);
+            view->show();
+        }
+    });
+#endif
     this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
     this->dropdownMenu.addAction("Clear chat", this->split, &Split::doClearChat);
     this->dropdownMenu.addAction("Open in web browser", this->split, &Split::doOpenChannel);
+#ifndef USEWEBENGINE
     this->dropdownMenu.addAction("Open web player", this->split, &Split::doOpenPopupPlayer);
+#endif
     this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));

@@ -1,3 +1,4 @@
+#ifdef __cplusplus
 #include <fmt/format.h>
 #include <irccommand.h>
 #include <ircconnection.h>
@@ -154,3 +155,4 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#endif

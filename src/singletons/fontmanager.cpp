@@ -45,19 +45,19 @@ FontManager &FontManager::getInstance()
     return instance;
 }
 
-QFont &FontManager::getFont(Type type, float scale)
+QFont &FontManager::getFont(FontManager::Type type, float scale)
 {
     //    return this->currentFont.getFont(type);
     return this->getCurrentFont(scale).getFont(type);
 }
 
-QFontMetrics &FontManager::getFontMetrics(Type type, float scale)
+QFontMetrics &FontManager::getFontMetrics(FontManager::Type type, float scale)
 {
     //    return this->currentFont.getFontMetrics(type);
     return this->getCurrentFont(scale).getFontMetrics(type);
 }
 
-FontManager::FontData &FontManager::Font::getFontData(Type type)
+FontManager::FontData &FontManager::Font::getFontData(FontManager::Type type)
 {
     switch (type) {
         case Tiny:

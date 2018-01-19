@@ -63,7 +63,7 @@ private:
     struct Font {
         Font() = delete;
 
-        explicit Font(const char *fontFamilyName, int mediumSize)
+        Font(const char *fontFamilyName, int mediumSize)
             : tiny(QFont("Monospace", 8))
             , small(QFont(fontFamilyName, mediumSize - 4))
             , mediumSmall(QFont(fontFamilyName, mediumSize - 2))

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN32
     QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 #endif
-    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
+    //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
 // Install native event handler for hidpi on windows
