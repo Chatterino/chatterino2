@@ -170,7 +170,7 @@ MessagePtr TwitchMessageBuilder::parse()
                     textColor = MessageColor(MessageColor::Link);
                 }
 
-                this->emplace<TextElement>(string, textColor)  //
+                this->emplace<TextElement>(string, MessageElement::Text, textColor)  //
                     ->setLink(link);
             } else {  // is emoji
                 this->emplace<EmoteElement>(emoteData, EmoteElement::EmojiAll);

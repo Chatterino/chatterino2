@@ -2,6 +2,7 @@
 #include "singletons/fontmanager.hpp"
 #include "singletons/thememanager.hpp"
 
+#include <QDebug>
 #include <QDesktopWidget>
 #include <QStyle>
 #include <QVBoxLayout>
@@ -13,33 +14,40 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow(parent)
     , displayText(new QLabel())
 {
-    QColor black(0, 0, 0);
-    QColor white(255, 255, 255);
-
-    QPalette palette;
-    palette.setColor(QPalette::WindowText, white);
-    palette.setColor(QPalette::Background, black);
-    this->setPalette(palette);
-    this->displayText->setStyleSheet("color: #ffffff");
+    this->setStyleSheet("color: #fff; background: #000");
     this->setWindowOpacity(0.8);
-    this->setFont(singletons::FontManager::getInstance().getFont(
-        singletons::FontManager::Type::MediumSmall, this->getDpiMultiplier()));
+    this->updateFont();
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
-                         Qt::X11BypassWindowManagerHint);
+                         Qt::X11BypassWindowManagerHint | Qt::BypassWindowManagerHint |
+                         Qt::SubWindow);
 
     displayText->setAlignment(Qt::AlignHCenter);
-    displayText->setText("lmao xD");
+    displayText->setText("tooltip text");
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(10, 5, 10, 5);
     layout->addWidget(displayText);
     this->setLayout(layout);
 
-    singletons::FontManager::getInstance().fontChanged.connect([this] {
-        this->setFont(singletons::FontManager::getInstance().getFont(
-            singletons::FontManager::Type::MediumSmall, this->getDpiMultiplier()));
-    });
+    this->fontChangedConnection =
+        singletons::FontManager::getInstance().fontChanged.connect([this] { this->updateFont(); });
+}
+
+TooltipWidget::~TooltipWidget()
+{
+    this->fontChangedConnection.disconnect();
+}
+
+void TooltipWidget::dpiMultiplierChanged(float, float)
+{
+    this->updateFont();
+}
+
+void TooltipWidget::updateFont()
+{
+    this->setFont(singletons::FontManager::getInstance().getFont(
+        singletons::FontManager::Type::MediumSmall, this->getDpiMultiplier()));
 }
 
 void TooltipWidget::setText(QString text)
@@ -51,7 +59,9 @@ void TooltipWidget::moveTo(QWidget *parent, QPoint point)
 {
     point.rx() += 16;
     point.ry() += 16;
+
     this->move(point);
+    this->moveIntoDesktopRect(parent);
 }
 
 void TooltipWidget::resizeEvent(QResizeEvent *)
@@ -64,22 +74,34 @@ void TooltipWidget::moveIntoDesktopRect(QWidget *parent)
     QDesktopWidget *desktop = QApplication::desktop();
 
     QRect s = desktop->screenGeometry(parent);
-    QRect w = this->geometry();
+    QPoint p = this->pos();
 
-    if (w.left() < s.left()) {
-        w.moveLeft(s.left());
+    if (p.x() < s.left()) {
+        p.setX(s.left());
     }
-    if (w.right() < s.right()) {
-        w.moveRight(s.right());
+    if (p.y() < s.top()) {
+        p.setY(s.top());
     }
-    if (w.top() < s.top()) {
-        w.moveTop(s.top());
+    if (p.x() + this->width() > s.right()) {
+        p.setX(s.right() - this->width());
     }
-    if (w.bottom() < s.bottom()) {
-        w.moveBottom(s.bottom());
+    if (p.y() + this->height() > s.bottom()) {
+        p.setY(s.bottom() - this->height());
     }
 
-    this->setGeometry(w);
+    if (p != this->pos()) {
+        this->move(p);
+    }
+}
+
+void TooltipWidget::changeEvent(QEvent *)
+{
+    // clear parents event
+}
+
+void TooltipWidget::leaveEvent(QEvent *)
+{
+    // clear parents event
 }
 }  // namespace widgets
 }  // namespace chatterino

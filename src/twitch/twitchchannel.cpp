@@ -2,6 +2,7 @@
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 

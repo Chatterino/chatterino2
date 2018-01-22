@@ -150,12 +150,12 @@ void BaseWindow::addTitleBarButton(const QString &text)
 
 void BaseWindow::changeEvent(QEvent *)
 {
-    TooltipWidget::getInstance()->hide();
+    //    TooltipWidget::getInstance()->hide();
 }
 
 void BaseWindow::leaveEvent(QEvent *)
 {
-    TooltipWidget::getInstance()->hide();
+    //    TooltipWidget::getInstance()->hide();
 }
 
 #ifdef USEWINSDK
