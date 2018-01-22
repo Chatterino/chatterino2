@@ -55,7 +55,6 @@ private:
     void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
                            std::vector<std::pair<long, util::EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
-    bool appendEmote(const util::EmoteData &emoteData);
 
     void parseTwitchBadges();
     void addChatterinoBadges();

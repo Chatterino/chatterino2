@@ -450,34 +450,31 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
     util::EmoteData emoteData;
 
+    auto appendEmote = [=](MessageElement::Flags flags) {
+        this->emplace<EmoteElement>(emoteData, flags);
+        return true;
+    };
+
     if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::BttvEmote);
     } else if (emoteManager.ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::FfzEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::FfzEmote);
     } else if (emoteManager.getChatterinoEmotes().tryGet(emoteString, emoteData)) {
         // Chatterino Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::Misc);
     }
 
     return false;
-}
-
-bool TwitchMessageBuilder::appendEmote(const util::EmoteData &emoteData)
-{
-    this->emplace<EmoteElement>(emoteData, MessageElement::BttvEmote);
-
-    // Perhaps check for ignored emotes here?
-    return true;
 }
 
 // fourtf: this is ugly
