@@ -22,7 +22,7 @@ public:
     //    typename std::enable_if<std::is_base_of<MessageElement, T>::value, T>::type
 
     template <class T, class... Args>
-    T *append(Args &&... args)
+    T *emplace(Args &&... args)
     {
         static_assert(std::is_base_of<MessageElement, T>::value, "T must extend MessageElement");
 
