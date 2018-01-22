@@ -1,5 +1,5 @@
 #pragma once
-#include "widgets/basewidget.hpp"
+#include "widgets/basewindow.hpp"
 
 #include <QLabel>
 #include <QWidget>
@@ -7,14 +7,14 @@
 namespace chatterino {
 namespace widgets {
 
-class TooltipWidget : public BaseWidget
+class TooltipWidget : public BaseWindow
 {
     Q_OBJECT
 public:
     TooltipWidget(BaseWidget *parent = nullptr);
 
     void setText(QString text);
-    void moveTo(QPoint point);
+    void moveTo(QWidget *widget, QPoint point);
 
     static TooltipWidget *getInstance()
     {
@@ -25,8 +25,13 @@ public:
         return tooltipWidget;
     }
 
+protected:
+    virtual void resizeEvent(QResizeEvent *) override;
+
 private:
     QLabel *displayText;
+
+    void moveIntoDesktopRect(QWidget *parent);
 };
 
 }  // namespace widgets

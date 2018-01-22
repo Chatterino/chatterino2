@@ -652,7 +652,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     if (tooltip.isEmpty()) {
         tooltipWidget->hide();
     } else {
-        tooltipWidget->moveTo(event->globalPos());
+        tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
         tooltipWidget->show();
     }

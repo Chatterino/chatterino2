@@ -211,7 +211,7 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
     if (!this->dragging && this->isLive) {
         auto tooltipWidget = TooltipWidget::getInstance();
-        tooltipWidget->moveTo(event->globalPos());
+        tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
         tooltipWidget->show();
     }
