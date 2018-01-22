@@ -291,14 +291,14 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    if (this->mouseDown && !this->getDesiredRect().contains(event->pos())) {
-        QPoint relPoint = this->mapToParent(event->pos());
+    QPoint relPoint = this->mapToParent(event->pos());
 
+    if (this->mouseDown && !this->getDesiredRect().contains(relPoint)) {
         int index;
-        SplitContainer *clickedPage = notebook->tabAt(relPoint, index);
+        SplitContainer *clickedPage = notebook->tabAt(relPoint, index, this->width());
 
         if (clickedPage != nullptr && clickedPage != this->page) {
-            this->notebook->rearrangePage(clickedPage, index);
+            this->notebook->rearrangePage(this->page, index);
         }
     }
 }

@@ -151,12 +151,15 @@ int Notebook::tabCount()
     return this->pages.size();
 }
 
-SplitContainer *Notebook::tabAt(QPoint point, int &index)
+SplitContainer *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 {
     int i = 0;
 
     for (auto *page : this->pages) {
-        if (page->getTab()->getDesiredRect().contains(point)) {
+        QRect rect = page->getTab()->getDesiredRect();
+        rect.setWidth(std::min(maxWidth, rect.width()));
+
+        if (rect.contains(point)) {
             index = i;
             return page;
         }
@@ -250,6 +253,7 @@ void Notebook::performLayout(bool animated)
     if (this->selectedPage != nullptr) {
         this->selectedPage->move(0, y + tabHeight);
         this->selectedPage->resize(width(), height() - y - tabHeight);
+        this->selectedPage->raise();
     }
 }
 
