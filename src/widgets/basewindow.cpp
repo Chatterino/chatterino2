@@ -6,6 +6,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QIcon>
 
 #ifdef USEWINSDK
@@ -113,6 +114,16 @@ void BaseWindow::init()
     }
 }
 
+void BaseWindow::setStayInScreenRect(bool value)
+{
+    this->stayInScreenRect = value;
+}
+
+bool BaseWindow::getStayInScreenRect() const
+{
+    return this->stayInScreenRect;
+}
+
 QWidget *BaseWindow::getLayoutContainer()
 {
     if (this->hasCustomWindowFrame()) {
@@ -150,12 +161,54 @@ void BaseWindow::addTitleBarButton(const QString &text)
 
 void BaseWindow::changeEvent(QEvent *)
 {
-    //    TooltipWidget::getInstance()->hide();
+    TooltipWidget::getInstance()->hide();
 }
 
 void BaseWindow::leaveEvent(QEvent *)
 {
-    //    TooltipWidget::getInstance()->hide();
+    TooltipWidget::getInstance()->hide();
+}
+
+void BaseWindow::moveTo(QWidget *parent, QPoint point)
+{
+    point.rx() += 16;
+    point.ry() += 16;
+
+    this->move(point);
+    this->moveIntoDesktopRect(parent);
+}
+
+void BaseWindow::resizeEvent(QResizeEvent *)
+{
+    this->moveIntoDesktopRect(this);
+}
+
+void BaseWindow::moveIntoDesktopRect(QWidget *parent)
+{
+    if (!this->stayInScreenRect)
+        return;
+
+    // move the widget into the screen geometry if it's not already in there
+    QDesktopWidget *desktop = QApplication::desktop();
+
+    QRect s = desktop->screenGeometry(parent);
+    QPoint p = this->pos();
+
+    if (p.x() < s.left()) {
+        p.setX(s.left());
+    }
+    if (p.y() < s.top()) {
+        p.setY(s.top());
+    }
+    if (p.x() + this->width() > s.right()) {
+        p.setX(s.right() - this->width());
+    }
+    if (p.y() + this->height() > s.bottom()) {
+        p.setY(s.bottom() - this->height());
+    }
+
+    if (p != this->pos())
+        this->move(p);
 }
 
 #ifdef USEWINSDK

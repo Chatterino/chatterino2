@@ -19,6 +19,11 @@ public:
     bool hasCustomWindowFrame();
     void addTitleBarButton(const QString &text);
 
+    void setStayInScreenRect(bool value);
+    bool getStayInScreenRect() const;
+
+    void moveTo(QWidget *widget, QPoint point);
+
 protected:
 #ifdef USEWINSDK
     virtual void showEvent(QShowEvent *);
@@ -28,13 +33,16 @@ protected:
 
     virtual void changeEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
+    virtual void resizeEvent(QResizeEvent *) override;
 
     virtual void refreshTheme() override;
 
 private:
     void init();
+    void moveIntoDesktopRect(QWidget *parent);
 
     bool enableCustomFrame;
+    bool stayInScreenRect = false;
 
     QHBoxLayout *titlebarBox;
     QWidget *titleLabel;

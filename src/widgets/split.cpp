@@ -460,6 +460,7 @@ void Split::doOpenViewerList()
     viewerDock->move(0, this->header.height());
 
     auto accountPopup = new AccountPopupWidget(this->channel);
+    accountPopup->setAttribute(Qt::WA_DeleteOnClose);
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
     auto searchBar = new QLineEdit(viewerDock);
@@ -538,9 +539,9 @@ void Split::doOpenViewerList()
 void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
 {
     widget->setName(user);
-    widget->move(QCursor::pos());
     widget->show();
     widget->setFocus();
+    widget->moveTo(this, QCursor::pos());
 }
 
 void Split::doCopy()

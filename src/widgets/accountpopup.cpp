@@ -25,6 +25,8 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
 {
     this->ui->setupUi(this);
 
+    this->setStayInScreenRect(true);
+
     this->layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     this->setWindowFlags(Qt::FramelessWindowHint);
@@ -49,7 +51,6 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
         this->loggedInUser.userID = currentTwitchUser->getUserId();
 
         this->loggedInUser.refreshUserType(this->channel, true);
-
     });
 
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();

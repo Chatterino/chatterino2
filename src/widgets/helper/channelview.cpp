@@ -787,7 +787,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         case messages::Link::UserInfo: {
             auto user = link.getValue();
             this->userPopupWidget.setName(user);
-            this->userPopupWidget.move(event->screenPos().toPoint());
+            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
             this->userPopupWidget.show();
             this->userPopupWidget.setFocus();
 
