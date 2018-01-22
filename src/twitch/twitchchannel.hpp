@@ -57,6 +57,8 @@ private:
     boost::signals2::connection connectedConnection;
 
     bool mod;
+    QByteArray messageSuffix;
+    QString lastSentMessage;
 };
 
 }  // namespace twitch

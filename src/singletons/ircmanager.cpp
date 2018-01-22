@@ -34,9 +34,6 @@ IrcManager::IrcManager(ChannelManager &_channelManager, ResourceManager &_resour
     , resources(_resources)
     , accountManager(_accountManager)
 {
-    this->messageSuffix.append(' ');
-    this->messageSuffix.append(QChar(0x206D));
-
     this->account = accountManager.Twitch.getCurrent();
     accountManager.Twitch.userChanged.connect([this]() {
         this->setUser(accountManager.Twitch.getCurrent());
@@ -208,12 +205,8 @@ void IrcManager::sendMessage(const QString &channelName, QString message)
     }
 
     this->connectionMutex.lock();
-    static int i = 0;
 
     if (this->writeConnection) {
-        if (singletons::SettingManager::getInstance().allowDuplicateMessages && (++i % 2) == 0) {
-            trimmedMessage.append(this->messageSuffix);
-        }
         this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + trimmedMessage);
     }
 

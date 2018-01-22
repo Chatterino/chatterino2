@@ -89,9 +89,6 @@ private:
 
     void onConnected();
     void onDisconnected();
-
-private:
-    QByteArray messageSuffix;
 };
 
 }  // namespace singletons

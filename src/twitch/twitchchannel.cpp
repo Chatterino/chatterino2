@@ -41,6 +41,9 @@ TwitchChannel::TwitchChannel(const QString &channelName)
 
     this->connectedConnection = singletons::IrcManager::getInstance().connected.connect(
         [this] { this->userStateChanged(); });
+
+    this->messageSuffix.append(' ');
+    this->messageSuffix.append(QChar(0x206D));
 }
 
 TwitchChannel::~TwitchChannel()
@@ -86,6 +89,19 @@ void TwitchChannel::sendMessage(const QString &message)
 
     // Do last message processing
     QString parsedMessage = emoteManager.replaceShortCodes(message);
+
+    parsedMessage = parsedMessage.trimmed();
+
+    if (parsedMessage.isEmpty())
+        return;
+
+    if (singletons::SettingManager::getInstance().allowDuplicateMessages) {
+        if (parsedMessage == this->lastSentMessage) {
+            parsedMessage.append(this->messageSuffix);
+
+            this->lastSentMessage = "";
+        }
+    }
 
     singletons::IrcManager::getInstance().sendMessage(this->name, parsedMessage);
 }
@@ -228,6 +244,5 @@ void TwitchChannel::fetchRecentMessages()
         }
     });
 }
-
 }  // namespace twitch
 }  // namespace chatterino
