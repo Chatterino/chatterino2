@@ -702,12 +702,5 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
     return false;
 }
 
-// bool
-// sortTwitchEmotes(const std::pair<long int, Image *> &a,
-//                 const std::pair<long int, Image *> &b)
-//{
-//    return a.first < b.first;
-//}
-
 }  // namespace twitch
 }  // namespace chatterino

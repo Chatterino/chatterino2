@@ -40,10 +40,6 @@ public:
 
     messages::MessagePtr parse();
 
-    //    static bool sortTwitchEmotes(
-    //        const std::pair<long int, messages::Image *> &a,
-    //        const std::pair<long int, messages::Image *> &b);
-
 private:
     QString roomID;
 
