@@ -123,9 +123,11 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 
     for (Word &word : this->words) {
         auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
-            auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()),
-                                            this->color.getColor(themeManager), this->style,
-                                            container.scale))
+            QColor color = this->color.getColor(themeManager);
+            themeManager.normalizeColor(color);
+
+            auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()), color,
+                                            this->style, container.scale))
                          ->setLink(this->getLink());
             e->setTrailingSpace(trailingSpace);
             return e;
