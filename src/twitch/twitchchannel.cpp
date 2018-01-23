@@ -230,7 +230,6 @@ void TwitchChannel::fetchRecentMessages()
         auto msgArray = obj.value("messages").toArray();
         if (msgArray.size() > 0) {
             std::vector<messages::MessagePtr> messages;
-            messages.resize(msgArray.size());
 
             for (int i = 0; i < msgArray.size(); i++) {
                 QByteArray content = msgArray[i].toString().toUtf8();
@@ -239,7 +238,9 @@ void TwitchChannel::fetchRecentMessages()
 
                 messages::MessageParseArgs args;
                 twitch::TwitchMessageBuilder builder(channel, privMsg, args);
-                messages.at(i) = builder.parse();
+                if (!builder.isIgnored()) {
+                    messages.push_back(builder.parse());
+                }
             }
             channel->addMessagesAtStart(messages);
         }

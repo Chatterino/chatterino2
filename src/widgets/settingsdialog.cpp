@@ -8,6 +8,8 @@
 #include "widgets/settingspages/commandpage.hpp"
 #include "widgets/settingspages/emotespage.hpp"
 #include "widgets/settingspages/highlightingpage.hpp"
+#include "widgets/settingspages/ignoremessagespage.hpp"
+#include "widgets/settingspages/ignoreuserspage.hpp"
 #include "widgets/settingspages/logspage.hpp"
 #include "widgets/settingspages/moderationpage.hpp"
 
@@ -77,6 +79,8 @@ void SettingsDialog::addTabs()
     this->addTab(new settingspages::BehaviourPage);
     this->addTab(new settingspages::CommandPage);
     this->addTab(new settingspages::EmotesPage);
+    this->addTab(new settingspages::IgnoreUsersPage);
+    this->addTab(new settingspages::IgnoreMessagesPage);
     this->addTab(new settingspages::HighlightingPage);
     //    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);

@@ -255,7 +255,9 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
     twitch::TwitchMessageBuilder builder(c.get(), message, args);
 
-    c->addMessage(builder.parse());
+    if (!builder.isIgnored()) {
+        c->addMessage(builder.parse());
+    }
 }
 
 void IrcManager::messageReceived(Communi::IrcMessage *message)

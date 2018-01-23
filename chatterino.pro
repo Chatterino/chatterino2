@@ -163,7 +163,9 @@ SOURCES += \
     src/widgets/basewindow.cpp \
     src/singletons/helper/moderationaction.cpp \
     src/widgets/streamview.cpp \
-    src/util/networkrequest.cpp
+    src/util/networkrequest.cpp \
+    src/widgets/settingspages/ignoreuserspage.cpp \
+    src/widgets/settingspages/ignoremessagespage.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -266,7 +268,9 @@ HEADERS  += \
     src/widgets/streamview.hpp \
     src/util/networkrequest.hpp \
     src/util/networkworker.hpp \
-    src/util/networkrequester.hpp
+    src/util/networkrequester.hpp \
+    src/widgets/settingspages/ignoreuserspage.hpp \
+    src/widgets/settingspages/ignoremessagespage.hpp
 
 RESOURCES += \
     resources/resources.qrc

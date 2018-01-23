@@ -38,6 +38,7 @@ public:
     QString messageID;
     QString userName;
 
+    bool isIgnored() const;
     messages::MessagePtr parse();
 
 private:

@@ -47,6 +47,18 @@ public:
         return LayoutCreator<T2>(t);
     }
 
+    template <typename T2, typename Q = T,
+              typename std::enable_if<std::is_base_of<QWidget, Q>::value, int>::type = 0,
+              typename std::enable_if<std::is_base_of<QLayout, T2>::value, int>::type = 0>
+    LayoutCreator<T2> setLayoutType()
+    {
+        T2 *layout = new T2;
+
+        this->item->setLayout(layout);
+
+        return LayoutCreator<T2>(layout);
+    }
+
     LayoutCreator<T> assign(T **ptr)
     {
         *ptr = this->item;

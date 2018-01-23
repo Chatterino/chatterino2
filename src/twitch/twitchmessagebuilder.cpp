@@ -27,14 +27,27 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , tags(this->ircMessage->tags())
     , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
 {
+    this->originalMessage = this->ircMessage->content();
+}
+
+bool TwitchMessageBuilder::isIgnored() const
+{
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    std::shared_ptr<std::vector<QString>> ignoredKeywords = settings.getIgnoredKeywords();
+
+    for (const QString &keyword : *ignoredKeywords) {
+        if (this->originalMessage.contains(keyword, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 MessagePtr TwitchMessageBuilder::parse()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
-
-    this->originalMessage = this->ircMessage->content();
 
     // PARSING
     this->parseUsername();
