@@ -156,7 +156,7 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    util::twitch::get2(url, QThread::currentThread(), [weak](const rapidjson::Document &d) {
+    util::twitch::get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
         SharedChannel shared = weak.lock();
 
         if (!shared) {

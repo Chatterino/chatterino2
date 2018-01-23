@@ -345,7 +345,7 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
     QString cheermoteURL = "https://api.twitch.tv/kraken/bits/actions?channel_id=" + roomID;
 
     util::twitch::get2(
-        cheermoteURL, QThread::currentThread(), [this, roomID](const rapidjson::Document &d) {
+        cheermoteURL, QThread::currentThread(), true, [this, roomID](const rapidjson::Document &d) {
             ResourceManager::Channel &ch = this->channels[roomID];
 
             ParseCheermoteSets(ch.jsonCheermoteSets, d);
