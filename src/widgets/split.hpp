@@ -70,6 +70,7 @@ public:
     bool hasFocus() const;
     void layoutMessages();
     void updateGifEmotes();
+    void updateLastReadMessage();
 
     void drag();
 

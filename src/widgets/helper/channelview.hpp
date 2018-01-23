@@ -39,6 +39,7 @@ public:
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
     void pause(int msecTimeout);
+    void updateLastReadMessage();
 
     void setChannel(SharedChannel channel);
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
@@ -72,6 +73,7 @@ private:
     bool messageWasAdded = false;
     bool paused = false;
     QTimer pauseTimeout;
+    messages::MessageLayoutPtr lastReadMessage;
 
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
 

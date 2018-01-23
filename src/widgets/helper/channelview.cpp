@@ -96,6 +96,9 @@ ChannelView::ChannelView(BaseWidget *parent)
     auto e = new QResizeEvent(this->size(), this->size());
     this->resizeEvent(e);
     delete e;
+
+    singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
+        [this](auto, auto) { this->update(); }, this->managedConnections);
 }
 
 ChannelView::~ChannelView()
@@ -410,6 +413,17 @@ void ChannelView::pause(int msecTimeout)
     this->pauseTimeout.start(msecTimeout);
 }
 
+void ChannelView::updateLastReadMessage()
+{
+    auto _snapshot = this->getMessagesSnapshot();
+
+    if (_snapshot.getLength() > 0) {
+        this->lastReadMessage = _snapshot[_snapshot.getLength() - 1];
+    }
+
+    this->update();
+}
+
 void ChannelView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
@@ -477,11 +491,17 @@ void ChannelView::drawMessages(QPainter &painter)
               (fmod(this->scrollBar.getCurrentValue(), 1)));
 
     messages::MessageLayout *end = nullptr;
+    bool windowFocused = this->window() == QApplication::activeWindow();
 
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
         messages::MessageLayout *layout = messagesSnapshot[i].get();
 
-        layout->paint(painter, y, i, this->selection);
+        bool isLastMessage = false;
+        if (singletons::SettingManager::getInstance().showLastMessageIndicator) {
+            isLastMessage = this->lastReadMessage.get() == layout;
+        }
+
+        layout->paint(painter, y, i, this->selection, isLastMessage, windowFocused);
 
         y += layout->getHeight();
 

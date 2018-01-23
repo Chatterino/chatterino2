@@ -252,6 +252,11 @@ void Split::updateGifEmotes()
     this->view.queueUpdate();
 }
 
+void Split::updateLastReadMessage()
+{
+    this->view.updateLastReadMessage();
+}
+
 void Split::giveFocus(Qt::FocusReason reason)
 {
     this->input.textInput.setFocus(reason);

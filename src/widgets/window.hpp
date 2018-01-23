@@ -57,6 +57,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
+    virtual bool event(QEvent *event) override;
 
 private:
     singletons::ThemeManager &themeManager;

@@ -143,7 +143,7 @@ void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
     this->refreshCurrentFocusCoordinates();
 }
 
-const std::vector<Split *> &SplitContainer::getChatWidgets() const
+const std::vector<Split *> &SplitContainer::getSplits() const
 {
     return this->splits;
 }

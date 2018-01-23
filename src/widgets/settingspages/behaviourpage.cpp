@@ -8,7 +8,7 @@
 
 #define WINDOW_TOPMOST "Window always on top (requires restart)"
 #define INPUT_EMPTY "Hide input box when empty"
-#define LAST_MSG "Show last read message indicator"
+#define LAST_MSG "Show last read message indicator (marks the spot where you left the window)"
 #define PAUSE_HOVERING "When hovering"
 
 #define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
