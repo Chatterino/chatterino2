@@ -165,7 +165,8 @@ SOURCES += \
     src/widgets/streamview.cpp \
     src/util/networkrequest.cpp \
     src/widgets/settingspages/ignoreuserspage.cpp \
-    src/widgets/settingspages/ignoremessagespage.cpp
+    src/widgets/settingspages/ignoremessagespage.cpp \
+    src/widgets/settingspages/specialchannelspage.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -270,7 +271,8 @@ HEADERS  += \
     src/util/networkworker.hpp \
     src/util/networkrequester.hpp \
     src/widgets/settingspages/ignoreuserspage.hpp \
-    src/widgets/settingspages/ignoremessagespage.hpp
+    src/widgets/settingspages/ignoremessagespage.hpp \
+    src/widgets/settingspages/specialchannelspage.hpp
 
 RESOURCES += \
     resources/resources.qrc

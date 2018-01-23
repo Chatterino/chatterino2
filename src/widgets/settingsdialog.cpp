@@ -12,6 +12,7 @@
 #include "widgets/settingspages/ignoreuserspage.hpp"
 #include "widgets/settingspages/logspage.hpp"
 #include "widgets/settingspages/moderationpage.hpp"
+#include "widgets/settingspages/specialchannelspage.hpp"
 
 #include <QDialogButtonBox>
 
@@ -79,11 +80,13 @@ void SettingsDialog::addTabs()
     this->addTab(new settingspages::BehaviourPage);
     this->addTab(new settingspages::CommandPage);
     this->addTab(new settingspages::EmotesPage);
-    this->addTab(new settingspages::IgnoreUsersPage);
-    this->addTab(new settingspages::IgnoreMessagesPage);
     this->addTab(new settingspages::HighlightingPage);
-    //    this->addTab(new settingspages::LogsPage);
+    this->addTab(new settingspages::IgnoreMessagesPage);
+    this->addTab(new settingspages::IgnoreUsersPage);
+    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
+    this->addTab(new settingspages::SpecialChannelsPage);
+
     this->ui.tabContainer->addStretch(1);
     this->addTab(new settingspages::AboutPage, Qt::AlignBottom);
 }

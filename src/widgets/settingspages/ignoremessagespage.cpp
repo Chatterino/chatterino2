@@ -9,7 +9,7 @@ namespace chatterino {
 namespace widgets {
 namespace settingspages {
 IgnoreMessagesPage::IgnoreMessagesPage()
-    : SettingsPage("Ignore Messages", ":/images/theme.svg")
+    : SettingsPage("Ignore Messages", "")
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<IgnoreMessagesPage> layoutCreator(this);
