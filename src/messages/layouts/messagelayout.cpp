@@ -171,7 +171,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     }
 
     // draw on buffer
-    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
+    painter.drawPixmap(0, y, *pixmap);
+    //    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
     // draw disabled
     if (this->message->hasFlags(Message::Disabled)) {
