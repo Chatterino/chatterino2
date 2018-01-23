@@ -2,6 +2,7 @@
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/resourcemanager.hpp"
+#include "singletons/windowmanager.hpp"
 
 using namespace chatterino::messages;
 
@@ -31,6 +32,9 @@ SettingManager::SettingManager()
 
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
     this->ignoredKeywords.connect([this](auto, auto) { this->updateIgnoredKeywords(); });
+
+    this->timestampFormat.connect(
+        [](auto, auto) { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()
@@ -216,8 +220,12 @@ void SettingManager::updateIgnoredKeywords()
 
     auto items = new std::vector<QString>();
 
-    for (QString line : this->ignoredKeywords.getValue().split(newLineRegex)) {
-        items->push_back(line);
+    for (const QString &line : this->ignoredKeywords.getValue().split(newLineRegex)) {
+        QString line2 = line.trimmed();
+
+        if (!line2.isEmpty()) {
+            items->push_back(line2);
+        }
     }
 
     this->_ignoredKeywords = std::shared_ptr<std::vector<QString>>(items);

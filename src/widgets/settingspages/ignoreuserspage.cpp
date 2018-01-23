@@ -21,7 +21,7 @@ IgnoreUsersPage::IgnoreUsersPage()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<IgnoreUsersPage> layoutCreator(this);
-    auto layout = layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin();
+    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     auto label = layout.emplace<QLabel>(INFO);
     label->setWordWrap(true);

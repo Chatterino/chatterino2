@@ -27,8 +27,6 @@ IgnoreMessagesPage::IgnoreMessagesPage()
         QString text = textEdit->toPlainText();
 
         settings.ignoredKeywords = text;
-
-        qDebug() << "xD";
     });
 
     // ---- misc

@@ -89,6 +89,12 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     layoutRequired |= wordMaskChanged;
     this->currentWordFlags = flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
 
+    // check if timestamp format changed
+    bool timestampFormatChanged =
+        this->timestampFormat != singletons::SettingManager::getInstance().timestampFormat;
+
+    layoutRequired |= timestampFormatChanged;
+
     // check if dpi changed
     bool scaleChanged = this->scale != scale;
     layoutRequired |= scaleChanged;
