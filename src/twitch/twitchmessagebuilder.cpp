@@ -44,7 +44,7 @@ bool TwitchMessageBuilder::isIgnored() const
     return false;
 }
 
-MessagePtr TwitchMessageBuilder::parse()
+MessagePtr TwitchMessageBuilder::build()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
@@ -56,11 +56,14 @@ MessagePtr TwitchMessageBuilder::parse()
     //    this->appendWord(Word(Resources::getInstance().badgeCollapsed, Word::Collapsed, QString(),
     //    QString()));
 
-    // The timestamp is always appended to the builder
-    // Whether or not will be rendered is decided/checked later
+    // PARSING
+    this->parseMessageID();
 
-    // Appends the correct timestamp if the message is a past message
+    this->parseRoomID();
 
+    this->appendChannelName();
+
+    // timestamp
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg) {
         // This may be architecture dependent(datatype)
@@ -71,20 +74,11 @@ MessagePtr TwitchMessageBuilder::parse()
         this->emplace<TimestampElement>();
     }
 
-    this->parseMessageID();
-
-    this->parseRoomID();
-
-    // TIMESTAMP
     this->emplace<TwitchModerationElement>();
 
-    this->parseTwitchBadges();
+    this->appendTwitchBadges();
 
-    this->addChatterinoBadges();
-
-    if (this->args.includeChannelName) {
-        this->parseChannelName();
-    }
+    this->appendChatterinoBadges();
 
     this->appendUsername();
 
@@ -232,7 +226,7 @@ void TwitchMessageBuilder::parseRoomID()
     }
 }
 
-void TwitchMessageBuilder::parseChannelName()
+void TwitchMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->name);
     Link link(Link::Url, this->channel->name + "\n" + this->messageID);
@@ -492,7 +486,7 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 
 // fourtf: this is ugly
 //		   maybe put the individual badges into a map instead of this mess
-void TwitchMessageBuilder::parseTwitchBadges()
+void TwitchMessageBuilder::appendTwitchBadges()
 {
     singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
     const auto &channelResources = resourceManager.channels[this->roomID];
@@ -649,7 +643,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
     }
 }
 
-void TwitchMessageBuilder::addChatterinoBadges()
+void TwitchMessageBuilder::appendChatterinoBadges()
 {
     auto &badges = singletons::ResourceManager::getInstance().chatterinoBadges;
     auto it = badges.find(this->userName.toStdString());

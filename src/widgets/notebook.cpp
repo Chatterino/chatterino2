@@ -130,6 +130,9 @@ void Notebook::select(SplitContainer *page)
     if (this->selectedPage != nullptr) {
         this->selectedPage->setHidden(true);
         this->selectedPage->getTab()->setSelected(false);
+        for (auto split : this->selectedPage->getSplits()) {
+            split->updateLastReadMessage();
+        }
     }
 
     this->selectedPage = page;

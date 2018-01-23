@@ -39,7 +39,7 @@ public:
     QString userName;
 
     bool isIgnored() const;
-    messages::MessagePtr parse();
+    messages::MessagePtr build();
 
 private:
     QString roomID;
@@ -48,7 +48,7 @@ private:
 
     void parseMessageID();
     void parseRoomID();
-    void parseChannelName();
+    void appendChannelName();
     void parseUsername();
     void appendUsername();
     void parseHighlights();
@@ -57,8 +57,8 @@ private:
                            std::vector<std::pair<long, util::EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
 
-    void parseTwitchBadges();
-    void addChatterinoBadges();
+    void appendTwitchBadges();
+    void appendChatterinoBadges();
     bool tryParseCheermote(const QString &string);
 };
 

@@ -456,6 +456,9 @@ messages::MessageElement::Flags ChannelView::getFlags() const
         if (split->getModerationMode()) {
             flags = (MessageElement::Flags)(flags | MessageElement::ModeratorTools);
         }
+        if (this->channel == singletons::ChannelManager::getInstance().mentionsChannel) {
+            flags = (MessageElement::Flags)(flags | MessageElement::ChannelName);
+        }
     }
 
     return flags;

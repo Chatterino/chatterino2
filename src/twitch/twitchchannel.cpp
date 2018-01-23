@@ -1,5 +1,7 @@
 #include "twitchchannel.hpp"
 #include "debug/log.hpp"
+#include "messages/message.hpp"
+#include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -239,7 +241,7 @@ void TwitchChannel::fetchRecentMessages()
                 messages::MessageParseArgs args;
                 twitch::TwitchMessageBuilder builder(channel, privMsg, args);
                 if (!builder.isIgnored()) {
-                    messages.push_back(builder.parse());
+                    messages.push_back(builder.build());
                 }
             }
             channel->addMessagesAtStart(messages);

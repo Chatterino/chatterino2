@@ -11,10 +11,9 @@
 
 namespace chatterino {
 namespace messages {
-class Message;
-
-typedef std::shared_ptr<Message> MessagePtr;
 typedef uint16_t MessageFlagsType;
+class Message;
+typedef std::shared_ptr<Message> MessagePtr;
 
 class Message
 {
@@ -86,6 +85,5 @@ private:
 
     std::vector<std::unique_ptr<MessageElement>> elements;
 };
-
 }  // namespace messages
 }  // namespace chatterino
