@@ -155,9 +155,10 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 return e;
             };
 
-            if (word.width == -1) {
-                word.width = metrics.width(word.text);
-            }
+            // fourtf: add again
+            //            if (word.width == -1) {
+            word.width = metrics.width(word.text);
+            //            }
 
             // see if the text fits in the current line
             if (container.fitsInLine(word.width)) {

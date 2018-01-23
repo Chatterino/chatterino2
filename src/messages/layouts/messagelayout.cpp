@@ -104,11 +104,11 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
     // update word sizes if needed
     if (imagesChanged) {
-        // fourtf: update images
+        //        this->container.updateImages();
         this->addFlags(MessageLayout::RequiresBufferUpdate);
     }
     if (textChanged) {
-        // fourtf: update text
+        //        this->container.updateText();
         this->addFlags(MessageLayout::RequiresBufferUpdate);
     }
     if (widthChanged || wordMaskChanged) {
