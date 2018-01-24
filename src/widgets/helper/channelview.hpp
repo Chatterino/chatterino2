@@ -52,6 +52,8 @@ public:
     pajlada::Signals::NoArgSignal highlightedMessageReceived;
 
 protected:
+    virtual void refreshTheme() override;
+
     virtual void resizeEvent(QResizeEvent *) override;
 
     virtual void paintEvent(QPaintEvent *) override;

@@ -30,10 +30,10 @@ protected:
 
     float dpiMultiplier = 1.f;
 
+    virtual void refreshTheme();
+
 private:
     void init();
-
-    virtual void refreshTheme();
 };
 
 }  // namespace widgets

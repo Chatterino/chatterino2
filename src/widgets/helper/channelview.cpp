@@ -114,6 +114,13 @@ ChannelView::~ChannelView()
     this->messageReplacedConnection.disconnect();
 }
 
+void ChannelView::refreshTheme()
+{
+    BaseWidget::refreshTheme();
+
+    this->layoutMessages();
+}
+
 void ChannelView::queueUpdate()
 {
     if (this->updateTimer.isActive()) {
