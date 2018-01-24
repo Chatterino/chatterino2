@@ -2,10 +2,13 @@
 
 #include "basewidget.hpp"
 
+#include <functional>
+
 class QHBoxLayout;
 
 namespace chatterino {
 namespace widgets {
+class RippleEffectLabel;
 
 class BaseWindow : public BaseWidget
 {
@@ -17,7 +20,7 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    void addTitleBarButton(const QString &text);
+    void addTitleBarButton(const QString &text, std::function<void()> onClicked);
 
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;
@@ -43,14 +46,15 @@ private:
 
     bool enableCustomFrame;
     bool stayInScreenRect = false;
+    bool shown = false;
 
     QHBoxLayout *titlebarBox;
     QWidget *titleLabel;
-    QWidget *minButton;
-    QWidget *maxButton;
-    QWidget *exitButton;
+    RippleEffectLabel *minButton;
+    RippleEffectLabel *maxButton;
+    RippleEffectLabel *exitButton;
     QWidget *layoutBase;
-    std::vector<QWidget *> widgets;
+    std::vector<RippleEffectLabel *> buttons;
 };
 }  // namespace widgets
 }  // namespace chatterino

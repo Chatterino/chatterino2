@@ -1,7 +1,7 @@
 #include "widgets/notebook.hpp"
 #include "debug/log.hpp"
 #include "singletons/thememanager.hpp"
-#include "widgets/accountswitchpopupwidget.hpp"
+#include "singletons/windowmanager.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -277,31 +277,13 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::settingsButtonClicked()
 {
-    QTimer::singleShot(80, [this] { SettingsDialog::showDialog(); });
+    singletons::WindowManager::getInstance().showSettingsDialog();
 }
 
 void Notebook::usersButtonClicked()
 {
-    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget(this);
-
-    if (w->hasFocus()) {
-        w->hide();
-        if (lastFocusedWidget) {
-            lastFocusedWidget->setFocus();
-        }
-        return;
-    }
-
-    lastFocusedWidget = this->focusWidget();
-
-    w->refresh();
-
-    QPoint buttonPos = this->userButton.rect().bottomRight();
-    w->move(buttonPos.x(), buttonPos.y());
-
-    w->show();
-    w->setFocus();
+    singletons::WindowManager::getInstance().showAccountSelectPopup(
+        this->mapToGlobal(this->userButton.rect().bottomRight()));
 }
 
 void Notebook::addPageButtonClicked()

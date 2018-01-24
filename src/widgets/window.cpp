@@ -4,6 +4,8 @@
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "singletons/windowmanager.hpp"
+#include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -35,8 +37,11 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
         });
 
     if (this->hasCustomWindowFrame()) {
-        this->addTitleBarButton("Preferences");
-        this->addTitleBarButton("User");
+        this->addTitleBarButton(
+            "preferences", [] { singletons::WindowManager::getInstance().showSettingsDialog(); });
+        this->addTitleBarButton("user", [this] {
+            singletons::WindowManager::getInstance().showAccountSelectPopup(QCursor::pos());
+        });
     }
 
     QVBoxLayout *layout = new QVBoxLayout(this);

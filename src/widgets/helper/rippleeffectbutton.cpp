@@ -57,6 +57,8 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
 void RippleEffectButton::fancyPaint(QPainter &painter)
 {
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
     QColor c;
 
     if (this->mouseEffectColor) {

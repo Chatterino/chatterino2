@@ -59,16 +59,17 @@ void BaseWindow::init()
         // CUSTOM WINDOW FRAME
         QVBoxLayout *layout = new QVBoxLayout;
         layout->setMargin(1);
+        layout->setSpacing(0);
         this->setLayout(layout);
         {
-            QHBoxLayout *buttons = this->titlebarBox = new QHBoxLayout;
-            buttons->setMargin(0);
-            layout->addLayout(buttons);
+            QHBoxLayout *buttonLayout = this->titlebarBox = new QHBoxLayout;
+            buttonLayout->setMargin(0);
+            layout->addLayout(buttonLayout);
 
             // title
-            QLabel *titleLabel = new QLabel("Chatterino");
-            buttons->addWidget(titleLabel);
-            this->titleLabel = titleLabel;
+            QLabel *title = new QLabel("   Chatterino");
+            buttonLayout->addWidget(title);
+            this->titleLabel = title;
 
             // buttons
             RippleEffectLabel *min = new RippleEffectLabel;
@@ -81,21 +82,31 @@ void BaseWindow::init()
             exit->setFixedSize(46, 30);
             exit->getLabel().setText("exit");
 
+            QObject::connect(min, &RippleEffectLabel::clicked, this, [this] {
+                this->setWindowState(Qt::WindowMinimized | this->windowState());
+            });
+            QObject::connect(max, &RippleEffectLabel::clicked, this, [this] {
+                this->setWindowState(this->windowState() == Qt::WindowMaximized
+                                         ? Qt::WindowActive
+                                         : Qt::WindowMaximized);
+            });
+            QObject::connect(exit, &RippleEffectLabel::clicked, this, [this] { this->close(); });
+
             this->minButton = min;
             this->maxButton = max;
             this->exitButton = exit;
 
-            this->widgets.push_back(min);
-            this->widgets.push_back(max);
-            this->widgets.push_back(exit);
+            this->buttons.push_back(min);
+            this->buttons.push_back(max);
+            this->buttons.push_back(exit);
 
-            buttons->addStretch(1);
-            buttons->addWidget(min);
-            buttons->addWidget(max);
-            buttons->addWidget(exit);
+            buttonLayout->addStretch(1);
+            buttonLayout->addWidget(min);
+            buttonLayout->addWidget(max);
+            buttonLayout->addWidget(exit);
+            buttonLayout->setSpacing(0);
         }
         this->layoutBase = new QWidget(this);
-        this->widgets.push_back(this->layoutBase);
         layout->addWidget(this->layoutBase);
     }
 
@@ -136,8 +147,8 @@ QWidget *BaseWindow::getLayoutContainer()
 bool BaseWindow::hasCustomWindowFrame()
 {
 #ifdef Q_OS_WIN
-    //    return this->enableCustomFrame;
-    return false;
+    return this->enableCustomFrame;
+//    return false;
 #else
     return false;
 #endif
@@ -149,14 +160,19 @@ void BaseWindow::refreshTheme()
     palette.setColor(QPalette::Background, this->themeManager.windowBg);
     palette.setColor(QPalette::Foreground, this->themeManager.windowText);
     this->setPalette(palette);
+
+    for (RippleEffectLabel *label : this->buttons) {
+        label->setMouseEffectColor(this->themeManager.windowText);
+    }
 }
 
-void BaseWindow::addTitleBarButton(const QString &text)
+void BaseWindow::addTitleBarButton(const QString &text, std::function<void()> onClicked)
 {
     RippleEffectLabel *label = new RippleEffectLabel;
     label->getLabel().setText(text);
-    this->widgets.push_back(label);
+    this->buttons.push_back(label);
     this->titlebarBox->insertWidget(2, label);
+    QObject::connect(label, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
 }
 
 void BaseWindow::changeEvent(QEvent *)
@@ -303,10 +319,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     bool client = false;
 
                     QPoint point(x - winrect.left, y - winrect.top);
-                    for (QWidget *widget : this->widgets) {
+                    for (QWidget *widget : this->buttons) {
                         if (widget->geometry().contains(point)) {
                             client = true;
                         }
+                    }
+
+                    if (this->layoutBase->geometry().contains(point)) {
+                        client = true;
                     }
 
                     if (client) {
@@ -325,9 +345,10 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             break;
         }  // end case WM_NCHITTEST
         case WM_CLOSE: {
-            if (this->enableCustomFrame) {
-                return close();
-            }
+            //            if (this->enableCustomFrame) {
+            //                this->close();
+            //            }
+            return QWidget::nativeEvent(eventType, message, result);
             break;
         }
         default:
@@ -335,9 +356,10 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     }
 }
 
-void BaseWindow::showEvent(QShowEvent *)
+void BaseWindow::showEvent(QShowEvent *event)
 {
-    if (this->isVisible() && this->hasCustomWindowFrame()) {
+    if (!this->shown && this->isVisible() && this->hasCustomWindowFrame()) {
+        this->shown = true;
         SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
                          WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
 
@@ -347,6 +369,8 @@ void BaseWindow::showEvent(QShowEvent *)
         SetWindowPos((HWND)this->winId(), 0, 0, 0, 0, 0,
                      SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
     }
+
+    BaseWidget::showEvent(event);
 }
 
 void BaseWindow::paintEvent(QPaintEvent *event)
@@ -358,11 +382,16 @@ void BaseWindow::paintEvent(QPaintEvent *event)
 
         bool windowFocused = this->window() == QApplication::activeWindow();
 
+        QLinearGradient gradient(0, 0, 10, 250);
+        gradient.setColorAt(1, this->themeManager.tabs.selected.backgrounds.unfocused.color());
+
         if (windowFocused) {
-            painter.setPen(this->themeManager.tabs.selected.backgrounds.regular.color());
+            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.regular.color());
         } else {
-            painter.setPen(this->themeManager.tabs.selected.backgrounds.unfocused.color());
+            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.unfocused.color());
         }
+        painter.setPen(QPen(QBrush(gradient), 1));
+
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
 }
