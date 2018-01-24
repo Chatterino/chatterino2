@@ -13,6 +13,7 @@
 #include "widgets/split.hpp"
 #include "widgets/tooltipwidget.hpp"
 
+#include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -825,7 +826,24 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             break;
         }
         case messages::Link::Url: {
-            QDesktopServices::openUrl(QUrl(link.getValue()));
+            if (event->button() == Qt::RightButton) {
+                static QMenu *menu = nullptr;
+                static QString url;
+
+                if (menu == nullptr) {
+                    menu = new QMenu;
+                    menu->addAction("Open in browser",
+                                    [] { QDesktopServices::openUrl(QUrl(url)); });
+                    menu->addAction("Copy to clipboard",
+                                    [] { QApplication::clipboard()->setText(url); });
+                }
+
+                url = link.getValue();
+                menu->move(QCursor::pos());
+                menu->show();
+            } else {
+                QDesktopServices::openUrl(QUrl(link.getValue()));
+            }
             break;
         }
         case messages::Link::UserAction: {
