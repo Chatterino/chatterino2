@@ -813,7 +813,44 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     auto &link = hoverLayoutElement->getLink();
+    if (!singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+        this->handleLinkClick(event, link, layout.get());
+    }
 
+    this->linkClicked.invoke(link);
+}
+
+void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+        std::shared_ptr<messages::MessageLayout> layout;
+        QPoint relativePos;
+        int messageIndex;
+
+        if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
+            return;
+        }
+
+        // message under cursor is collapsed
+        if (layout->getFlags() & MessageLayout::Collapsed) {
+            return;
+        }
+
+        const messages::MessageLayoutElement *hoverLayoutElement =
+            layout->getElementAt(relativePos);
+
+        if (hoverLayoutElement == nullptr) {
+            return;
+        }
+
+        auto &link = hoverLayoutElement->getLink();
+        this->handleLinkClick(event, link, layout.get());
+    }
+}
+
+void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,
+                                  messages::MessageLayout *layout)
+{
     switch (link.getType()) {
         case messages::Link::UserInfo: {
             auto user = link.getValue();
@@ -852,8 +889,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->channel->sendMessage(value);
         }
     }
-
-    this->linkClicked.invoke(link);
 }
 
 bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &_message,

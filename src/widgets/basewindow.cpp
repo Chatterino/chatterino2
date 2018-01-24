@@ -387,9 +387,9 @@ void BaseWindow::showEvent(QShowEvent *event)
 
 void BaseWindow::paintEvent(QPaintEvent *event)
 {
-    BaseWidget::paintEvent(event);
-
     if (this->hasCustomWindowFrame()) {
+        BaseWidget::paintEvent(event);
+
         QPainter painter(this);
 
         bool windowFocused = this->window() == QApplication::activeWindow();

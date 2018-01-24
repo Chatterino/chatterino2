@@ -66,6 +66,10 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+
+    void handleLinkClick(QMouseEvent *event, const messages::Link &link,
+                         messages::MessageLayout *layout);
 
     bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &message,
                          QPoint &relativePos, int &index);
