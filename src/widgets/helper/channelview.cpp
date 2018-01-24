@@ -813,7 +813,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     auto &link = hoverLayoutElement->getLink();
-    if (!singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+    if (event->button() != Qt::LeftButton ||
+        !singletons::SettingManager::getInstance().linksDoubleClickOnly) {
         this->handleLinkClick(event, link, layout.get());
     }
 

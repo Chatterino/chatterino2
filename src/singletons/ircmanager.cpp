@@ -256,12 +256,12 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
     twitch::TwitchMessageBuilder builder(c.get(), message, args);
 
     if (!builder.isIgnored()) {
-        messages::MessagePtr message = builder.build();
-        if (message->hasFlags(messages::Message::Highlighted)) {
-            singletons::ChannelManager::getInstance().mentionsChannel->addMessage(message);
+        messages::MessagePtr _message = builder.build();
+        if (_message->hasFlags(messages::Message::Highlighted)) {
+            singletons::ChannelManager::getInstance().mentionsChannel->addMessage(_message);
         }
 
-        c->addMessage(message);
+        c->addMessage(_message);
     }
 }
 
