@@ -4,6 +4,8 @@
 #include "widgets/basewindow.hpp"
 #include "widgets/helper/channelview.hpp"
 
+#include <pajlada/signals/signal.hpp>
+
 namespace chatterino {
 namespace widgets {
 
@@ -14,6 +16,8 @@ public:
 
     void loadChannel(ChannelPtr channel);
     void loadEmojis();
+
+    pajlada::Signals::Signal<messages::Link> linkClicked;
 
 private:
     ChannelView *viewEmotes;

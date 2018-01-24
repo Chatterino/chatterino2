@@ -834,6 +834,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             this->channel->sendMessage(value);
         }
     }
+
+    this->linkClicked.invoke(link);
 }
 
 bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &_message,

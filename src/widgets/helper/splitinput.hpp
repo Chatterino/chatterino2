@@ -27,6 +27,7 @@ public:
 
     void clearSelection();
     QString getInputText() const;
+    void insertText(const QString &text);
 
     pajlada::Signals::Signal<const QString &> textChanged;
 
@@ -38,7 +39,7 @@ protected:
 
 private:
     Split *const chatWidget;
-    EmotePopup *emotePopup = nullptr;
+    std::unique_ptr<EmotePopup> emotePopup;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
     QHBoxLayout hbox;

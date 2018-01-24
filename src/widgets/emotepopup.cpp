@@ -30,6 +30,11 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     tabs->addTab(this->viewEmojis, "Emojis");
 
     this->loadEmojis();
+
+    this->viewEmotes->linkClicked.connect(
+        [this](const Link &link) { this->linkClicked.invoke(link); });
+    this->viewEmojis->linkClicked.connect(
+        [this](const Link &link) { this->linkClicked.invoke(link); });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

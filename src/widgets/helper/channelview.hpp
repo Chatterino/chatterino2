@@ -50,6 +50,7 @@ public:
     boost::signals2::signal<void(QMouseEvent *)> mouseDown;
     boost::signals2::signal<void()> selectionChanged;
     pajlada::Signals::NoArgSignal highlightedMessageReceived;
+    pajlada::Signals::Signal<const messages::Link &> linkClicked;
 
 protected:
     virtual void refreshTheme() override;

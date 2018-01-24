@@ -52,8 +52,13 @@ SplitInput::SplitInput(Split *_chatWidget)
                                          "/>");
 
     connect(&this->emotesLabel, &RippleEffectLabel::clicked, [this] {
-        if (this->emotePopup == nullptr) {
-            this->emotePopup = new EmotePopup(this->themeManager);
+        if (!this->emotePopup) {
+            this->emotePopup = std::make_unique<EmotePopup>(this->themeManager);
+            this->emotePopup->linkClicked.connect([this](const messages::Link &link) {
+                if (link.getType() == messages::Link::InsertText) {
+                    this->insertText(link.getValue());
+                }
+            });
         }
 
         this->emotePopup->resize((int)(300 * this->emotePopup->getDpiMultiplier()),
@@ -208,6 +213,11 @@ void SplitInput::clearSelection()
 QString SplitInput::getInputText() const
 {
     return this->textInput.toPlainText();
+}
+
+void SplitInput::insertText(const QString &text)
+{
+    this->textInput.insertPlainText(text);
 }
 
 void SplitInput::refreshTheme()
