@@ -1,6 +1,7 @@
 #pragma once
 
 #include "basewidget.hpp"
+#include "widgets/helper/titlebarbutton.hpp"
 
 #include <functional>
 
@@ -8,7 +9,8 @@ class QHBoxLayout;
 
 namespace chatterino {
 namespace widgets {
-class RippleEffectLabel;
+class RippleEffectButton;
+class TitleBarButton;
 
 class BaseWindow : public BaseWidget
 {
@@ -20,7 +22,7 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    void addTitleBarButton(const QString &text, std::function<void()> onClicked);
+    void addTitleBarButton(const TitleBarButton::Style &style, std::function<void()> onClicked);
 
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;
@@ -50,11 +52,11 @@ private:
 
     QHBoxLayout *titlebarBox;
     QWidget *titleLabel;
-    RippleEffectLabel *minButton;
-    RippleEffectLabel *maxButton;
-    RippleEffectLabel *exitButton;
+    TitleBarButton *minButton;
+    TitleBarButton *maxButton;
+    TitleBarButton *exitButton;
     QWidget *layoutBase;
-    std::vector<RippleEffectLabel *> buttons;
+    std::vector<RippleEffectButton *> buttons;
 };
 }  // namespace widgets
 }  // namespace chatterino

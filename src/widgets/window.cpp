@@ -37,9 +37,10 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
         });
 
     if (this->hasCustomWindowFrame()) {
-        this->addTitleBarButton(
-            "preferences", [] { singletons::WindowManager::getInstance().showSettingsDialog(); });
-        this->addTitleBarButton("user", [this] {
+        this->addTitleBarButton(TitleBarButton::Settings, [] {
+            singletons::WindowManager::getInstance().showSettingsDialog();
+        });
+        this->addTitleBarButton(TitleBarButton::User, [this] {
             singletons::WindowManager::getInstance().showAccountSelectPopup(QCursor::pos());
         });
     }

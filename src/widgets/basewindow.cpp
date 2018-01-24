@@ -23,7 +23,7 @@
 #define WM_DPICHANGED 0x02E0
 #endif
 
-#include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/helper/titlebarbutton.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -72,38 +72,39 @@ void BaseWindow::init()
             this->titleLabel = title;
 
             // buttons
-            RippleEffectLabel *min = new RippleEffectLabel;
-            min->getLabel().setText("min");
-            min->setFixedSize(46, 30);
-            RippleEffectLabel *max = new RippleEffectLabel;
-            max->setFixedSize(46, 30);
-            max->getLabel().setText("max");
-            RippleEffectLabel *exit = new RippleEffectLabel;
-            exit->setFixedSize(46, 30);
-            exit->getLabel().setText("exit");
+            TitleBarButton *_minButton = new TitleBarButton;
+            _minButton->setFixedSize(46, 30);
+            _minButton->setButtonStyle(TitleBarButton::Minimize);
+            TitleBarButton *_maxButton = new TitleBarButton;
+            _maxButton->setFixedSize(46, 30);
+            _maxButton->setButtonStyle(TitleBarButton::Maximize);
+            TitleBarButton *_exitButton = new TitleBarButton;
+            _exitButton->setFixedSize(46, 30);
+            _exitButton->setButtonStyle(TitleBarButton::Close);
 
-            QObject::connect(min, &RippleEffectLabel::clicked, this, [this] {
+            QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
                 this->setWindowState(Qt::WindowMinimized | this->windowState());
             });
-            QObject::connect(max, &RippleEffectLabel::clicked, this, [this] {
+            QObject::connect(_maxButton, &TitleBarButton::clicked, this, [this] {
                 this->setWindowState(this->windowState() == Qt::WindowMaximized
                                          ? Qt::WindowActive
                                          : Qt::WindowMaximized);
             });
-            QObject::connect(exit, &RippleEffectLabel::clicked, this, [this] { this->close(); });
+            QObject::connect(_exitButton, &TitleBarButton::clicked, this,
+                             [this] { this->close(); });
 
-            this->minButton = min;
-            this->maxButton = max;
-            this->exitButton = exit;
+            this->minButton = _minButton;
+            this->maxButton = _maxButton;
+            this->exitButton = _exitButton;
 
-            this->buttons.push_back(min);
-            this->buttons.push_back(max);
-            this->buttons.push_back(exit);
+            this->buttons.push_back(_minButton);
+            this->buttons.push_back(_maxButton);
+            this->buttons.push_back(_exitButton);
 
             buttonLayout->addStretch(1);
-            buttonLayout->addWidget(min);
-            buttonLayout->addWidget(max);
-            buttonLayout->addWidget(exit);
+            buttonLayout->addWidget(_minButton);
+            buttonLayout->addWidget(_maxButton);
+            buttonLayout->addWidget(_exitButton);
             buttonLayout->setSpacing(0);
         }
         this->layoutBase = new QWidget(this);
@@ -161,23 +162,34 @@ void BaseWindow::refreshTheme()
     palette.setColor(QPalette::Foreground, this->themeManager.windowText);
     this->setPalette(palette);
 
-    for (RippleEffectLabel *label : this->buttons) {
-        label->setMouseEffectColor(this->themeManager.windowText);
+    for (RippleEffectButton *button : this->buttons) {
+        button->setMouseEffectColor(this->themeManager.windowText);
     }
 }
 
-void BaseWindow::addTitleBarButton(const QString &text, std::function<void()> onClicked)
+void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
+                                   std::function<void()> onClicked)
 {
-    RippleEffectLabel *label = new RippleEffectLabel;
-    label->getLabel().setText(text);
-    this->buttons.push_back(label);
-    this->titlebarBox->insertWidget(2, label);
-    QObject::connect(label, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
+    TitleBarButton *button = new TitleBarButton;
+
+    this->buttons.push_back(button);
+    this->titlebarBox->insertWidget(2, button);
+    button->setButtonStyle(style);
+
+    QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
 }
 
 void BaseWindow::changeEvent(QEvent *)
 {
     TooltipWidget::getInstance()->hide();
+
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame()) {
+        this->maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
+                                            ? TitleBarButton::Unmaximize
+                                            : TitleBarButton::Maximize);
+    }
+#endif
 }
 
 void BaseWindow::leaveEvent(QEvent *)

@@ -167,7 +167,8 @@ SOURCES += \
     src/widgets/settingspages/ignoreuserspage.cpp \
     src/widgets/settingspages/ignoremessagespage.cpp \
     src/widgets/settingspages/specialchannelspage.cpp \
-    src/widgets/settingspages/keyboardsettingspage.cpp
+    src/widgets/settingspages/keyboardsettingspage.cpp \
+    src/widgets/helper/titlebarbutton.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -275,7 +276,8 @@ HEADERS  += \
     src/widgets/settingspages/ignoremessagespage.hpp \
     src/widgets/settingspages/specialchannelspage.hpp \
     src/widgets/settingspages/keyboardsettings.hpp \
-    src/widgets/settingspages/keyboardsettingspage.hpp
+    src/widgets/settingspages/keyboardsettingspage.hpp \
+    src/widgets/helper/titlebarbutton.hpp
 
 RESOURCES += \
     resources/resources.qrc
