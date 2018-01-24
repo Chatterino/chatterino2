@@ -55,8 +55,8 @@ public:
     }
 
     const std::string &getUUID() const;
-    SharedChannel getChannel() const;
-    SharedChannel &getChannelRef();
+    ChannelPtr getChannel() const;
+    ChannelPtr &getChannelRef();
     void setFlexSizeX(double x);
     double getFlexSizeX();
     void setFlexSizeY(double y);
@@ -83,7 +83,7 @@ protected:
 
 private:
     SplitContainer &parentPage;
-    SharedChannel channel;
+    ChannelPtr channel;
 
     QVBoxLayout vbox;
     SplitHeader header;
@@ -97,7 +97,7 @@ private:
     boost::signals2::connection channelIDChangedConnection;
     boost::signals2::connection usermodeChangedConnection;
 
-    void setChannel(SharedChannel newChannel);
+    void setChannel(ChannelPtr newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const std::string &newChannelName);
     void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);

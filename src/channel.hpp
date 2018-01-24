@@ -64,6 +64,6 @@ private:
     // std::shared_ptr<logging::Channel> loggingChannel;
 };
 
-typedef std::shared_ptr<Channel> SharedChannel;
+typedef std::shared_ptr<Channel> ChannelPtr;
 
 }  // namespace chatterino

@@ -12,7 +12,7 @@ class EmotePopup : public BaseWindow
 public:
     explicit EmotePopup(singletons::ThemeManager &);
 
-    void loadChannel(SharedChannel channel);
+    void loadChannel(ChannelPtr channel);
     void loadEmojis();
 
 private:

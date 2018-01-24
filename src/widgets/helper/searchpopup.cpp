@@ -58,7 +58,7 @@ void SearchPopup::initLayout()
     }
 }
 
-void SearchPopup::setChannel(SharedChannel channel)
+void SearchPopup::setChannel(ChannelPtr channel)
 {
     this->snapshot = channel->getMessageSnapshot();
     this->performSearch();
@@ -70,7 +70,7 @@ void SearchPopup::performSearch()
 {
     QString text = searchInput->text();
 
-    SharedChannel channel(new Channel("search"));
+    ChannelPtr channel(new Channel("search"));
 
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
         messages::MessagePtr message = this->snapshot[i];

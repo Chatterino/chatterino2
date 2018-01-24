@@ -93,7 +93,7 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
     this->dropdownMenu.addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
-        SharedChannel _channel = this->split->getChannel();
+        ChannelPtr _channel = this->split->getChannel();
         twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
 
         if (tc != nullptr) {
@@ -180,7 +180,7 @@ void SplitHeader::updateModerationModeIcon()
                                           : resourceManager.moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
-    SharedChannel channel = this->split->getChannel();
+    ChannelPtr channel = this->split->getChannel();
 
     twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(channel.get());
 

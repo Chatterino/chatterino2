@@ -159,7 +159,7 @@ void TwitchChannel::refreshLiveStatus()
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
     util::twitch::get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
-        SharedChannel shared = weak.lock();
+        ChannelPtr shared = weak.lock();
 
         if (!shared) {
             return;
@@ -220,7 +220,7 @@ void TwitchChannel::fetchRecentMessages()
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
     util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
-        SharedChannel shared = weak.lock();
+        ChannelPtr shared = weak.lock();
 
         if (!shared) {
             return;

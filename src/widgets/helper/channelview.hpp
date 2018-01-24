@@ -41,7 +41,7 @@ public:
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
-    void setChannel(SharedChannel channel);
+    void setChannel(ChannelPtr channel);
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
@@ -84,7 +84,7 @@ private:
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
     messages::MessageElement::Flags getFlags() const;
 
-    SharedChannel channel;
+    ChannelPtr channel;
 
     Scrollbar scrollBar;
     RippleEffectLabel *goToBottom;

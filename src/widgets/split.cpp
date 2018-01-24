@@ -132,17 +132,17 @@ const std::string &Split::getUUID() const
     return this->uuid;
 }
 
-SharedChannel Split::getChannel() const
+ChannelPtr Split::getChannel() const
 {
     return this->channel;
 }
 
-SharedChannel &Split::getChannelRef()
+ChannelPtr &Split::getChannelRef()
 {
     return this->channel;
 }
 
-void Split::setChannel(SharedChannel _newChannel)
+void Split::setChannel(ChannelPtr _newChannel)
 {
     this->view.setChannel(_newChannel);
 
@@ -355,7 +355,7 @@ void Split::doClearChat()
 
 void Split::doOpenChannel()
 {
-    SharedChannel _channel = this->channel;
+    ChannelPtr _channel = this->channel;
     twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {
@@ -365,7 +365,7 @@ void Split::doOpenChannel()
 
 void Split::doOpenPopupPlayer()
 {
-    SharedChannel _channel = this->channel;
+    ChannelPtr _channel = this->channel;
     twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {

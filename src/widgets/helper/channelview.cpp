@@ -293,7 +293,7 @@ messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapsho
     return this->snapshot;
 }
 
-void ChannelView::setChannel(SharedChannel newChannel)
+void ChannelView::setChannel(ChannelPtr newChannel)
 {
     if (this->channel) {
         this->detachChannel();

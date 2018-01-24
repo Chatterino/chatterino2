@@ -32,7 +32,7 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     this->loadEmojis();
 }
 
-void EmotePopup::loadChannel(SharedChannel _channel)
+void EmotePopup::loadChannel(ChannelPtr _channel)
 {
     TwitchChannel *channel = dynamic_cast<TwitchChannel *>(_channel.get());
 
@@ -40,7 +40,7 @@ void EmotePopup::loadChannel(SharedChannel _channel)
         return;
     }
 
-    SharedChannel emoteChannel(new Channel(""));
+    ChannelPtr emoteChannel(new Channel(""));
 
     auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
@@ -81,7 +81,7 @@ void EmotePopup::loadEmojis()
 {
     util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
-    SharedChannel emojiChannel(new Channel(""));
+    ChannelPtr emojiChannel(new Channel(""));
 
     // title
     messages::MessageBuilder builder1;

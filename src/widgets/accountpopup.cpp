@@ -18,7 +18,7 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
+AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     : BaseWindow()
     , ui(new Ui::AccountPopup)
     , channel(_channel)
@@ -172,7 +172,7 @@ void AccountPopupWidget::setName(const QString &name)
     this->popupWidgetUser.refreshUserType(this->channel, false);
 }
 
-void AccountPopupWidget::User::refreshUserType(const SharedChannel &channel, bool loggedInUser)
+void AccountPopupWidget::User::refreshUserType(const ChannelPtr &channel, bool loggedInUser)
 {
     if (channel->name == this->username) {
         this->userType = UserType::Owner;
@@ -183,7 +183,7 @@ void AccountPopupWidget::User::refreshUserType(const SharedChannel &channel, boo
     }
 }
 
-void AccountPopupWidget::setChannel(SharedChannel _channel)
+void AccountPopupWidget::setChannel(ChannelPtr _channel)
 {
     this->channel = _channel;
 }

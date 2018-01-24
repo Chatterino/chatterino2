@@ -391,7 +391,7 @@ void IrcManager::onConnected()
     MessagePtr msg = Message::createSystemMessage("connected to chat");
     MessagePtr remsg = Message::createSystemMessage("reconnected to chat");
 
-    this->channelManager.doOnAll([msg, remsg](SharedChannel channel) {
+    this->channelManager.doOnAll([msg, remsg](ChannelPtr channel) {
         assert(channel);
 
         LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
@@ -412,7 +412,7 @@ void IrcManager::onDisconnected()
     MessagePtr msg = Message::createSystemMessage("disconnected from chat");
     msg->addFlags(Message::DisconnectedMessage);
 
-    this->channelManager.doOnAll([msg](SharedChannel channel) {
+    this->channelManager.doOnAll([msg](ChannelPtr channel) {
         assert(channel);
         channel->addMessage(msg);
     });
