@@ -10,6 +10,7 @@
 #include "widgets/settingspages/highlightingpage.hpp"
 #include "widgets/settingspages/ignoremessagespage.hpp"
 #include "widgets/settingspages/ignoreuserspage.hpp"
+#include "widgets/settingspages/keyboardsettingspage.hpp"
 #include "widgets/settingspages/logspage.hpp"
 #include "widgets/settingspages/moderationpage.hpp"
 #include "widgets/settingspages/specialchannelspage.hpp"
@@ -75,14 +76,20 @@ SettingsDialog *SettingsDialog::getHandle()
 
 void SettingsDialog::addTabs()
 {
+    this->ui.tabContainer->setSpacing(0);
+
     this->addTab(new settingspages::AccountsPage);
     this->addTab(new settingspages::AppearancePage);
     this->addTab(new settingspages::BehaviourPage);
     this->addTab(new settingspages::CommandPage);
     this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
+
+    this->ui.tabContainer->addStretch(1);
+
     this->addTab(new settingspages::IgnoreMessagesPage);
     this->addTab(new settingspages::IgnoreUsersPage);
+    this->addTab(new settingspages::KeyboardSettingsPage);
     this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
     this->addTab(new settingspages::SpecialChannelsPage);
