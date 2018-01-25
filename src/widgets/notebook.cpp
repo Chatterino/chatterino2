@@ -54,7 +54,7 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     closeConfirmDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     closeConfirmDialog.setDefaultButton(QMessageBox::Yes);
 
-    //    this->scaleChangedEvent(this->getScale());
+    this->scaleChangedEvent(this->getScale());
 }
 
 SplitContainer *Notebook::addNewPage()
