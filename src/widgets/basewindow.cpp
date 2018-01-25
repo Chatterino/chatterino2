@@ -73,13 +73,13 @@ void BaseWindow::init()
 
             // buttons
             TitleBarButton *_minButton = new TitleBarButton;
-            _minButton->setFixedSize(46, 30);
+            _minButton->setScaleIndependantSize(46, 30);
             _minButton->setButtonStyle(TitleBarButton::Minimize);
             TitleBarButton *_maxButton = new TitleBarButton;
-            _maxButton->setFixedSize(46, 30);
+            _maxButton->setScaleIndependantSize(46, 30);
             _maxButton->setButtonStyle(TitleBarButton::Maximize);
             TitleBarButton *_exitButton = new TitleBarButton;
-            _exitButton->setFixedSize(46, 30);
+            _exitButton->setScaleIndependantSize(46, 30);
             _exitButton->setButtonStyle(TitleBarButton::Close);
 
             QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
@@ -171,6 +171,7 @@ void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
                                    std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
+    button->setScaleIndependantSize(30, 30);
 
     this->buttons.push_back(button);
     this->titlebarBox->insertWidget(2, button);

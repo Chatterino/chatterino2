@@ -34,12 +34,14 @@ public:
     void updateModerationModeIcon();
 
 protected:
+    virtual void scaleChangedEvent(float) override;
+    virtual void themeRefreshEvent() override;
+
     virtual void paintEvent(QPaintEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
-    virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
     Split *const split;
@@ -56,8 +58,6 @@ private:
     QMenu dropdownMenu;
 
     void rightButtonClicked();
-
-    virtual void themeRefreshEvent() override;
 
     void initializeChannelSignals();
 

@@ -38,6 +38,48 @@ float BaseWidget::getScale() const
     }
 }
 
+QSize BaseWidget::getScaleIndependantSize() const
+{
+    return this->scaleIndependantSize;
+}
+
+int BaseWidget::getScaleIndependantWidth() const
+{
+    return this->scaleIndependantSize.width();
+}
+
+int BaseWidget::getScaleIndependantHeight() const
+{
+    return this->scaleIndependantSize.height();
+}
+
+void BaseWidget::setScaleIndependantSize(int width, int height)
+{
+    this->setScaleIndependantSize(QSize(width, height));
+}
+
+void BaseWidget::setScaleIndependantSize(QSize size)
+{
+    this->scaleIndependantSize = size;
+
+    if (size.width() > 0) {
+        this->setFixedWidth((int)(size.width() * this->getScale()));
+    }
+    if (size.height() > 0) {
+        this->setFixedHeight((int)(size.height() * this->getScale()));
+    }
+}
+
+void BaseWidget::setScaleIndependantWidth(int value)
+{
+    this->setScaleIndependantSize(QSize(value, this->scaleIndependantSize.height()));
+}
+
+void BaseWidget::setScaleIndependantHeight(int value)
+{
+    this->setScaleIndependantSize(QSize(this->scaleIndependantSize.height(), value));
+}
+
 void BaseWidget::init()
 {
     auto connection = this->themeManager.updated.connect([this]() {
@@ -68,6 +110,7 @@ void BaseWidget::childEvent(QChildEvent *event)
         }
     }
 }
+
 void BaseWidget::setScale(float value)
 {
     // update scale value
@@ -75,6 +118,8 @@ void BaseWidget::setScale(float value)
 
     this->scaleChangedEvent(value);
     this->scaleChanged.invoke(value);
+
+    this->setScaleIndependantSize(this->getScaleIndependantSize());
 
     // set scale for all children
     BaseWidget::setScaleRecursive(value, this);

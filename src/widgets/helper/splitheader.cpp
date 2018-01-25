@@ -67,6 +67,7 @@ SplitHeader::SplitHeader(Split *_split)
     // ---- misc
     this->layout()->setMargin(0);
     this->themeRefreshEvent();
+    this->scaleChangedEvent(this->getScale());
 
     this->updateChannelText();
 
@@ -133,9 +134,9 @@ void SplitHeader::initializeChannelSignals()
     }
 }
 
-void SplitHeader::resizeEvent(QResizeEvent *event)
+void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = 28 * getScale();
+    int w = 28 * scale;
 
     this->setFixedHeight(w);
     this->dropdownButton->setFixedWidth(w);

@@ -16,7 +16,6 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *) override;
-    virtual void resizeEvent(QResizeEvent *) override;
 
 private:
     Style style;

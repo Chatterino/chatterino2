@@ -18,15 +18,6 @@ void TitleBarButton::setButtonStyle(Style _style)
     this->update();
 }
 
-void TitleBarButton::resizeEvent(QResizeEvent *)
-{
-    if (this->style & (Maximize | Minimize | Unmaximize | Close)) {
-        this->setFixedWidth(this->height() * 46 / 30);
-    } else {
-        this->setFixedWidth(this->height());
-    }
-}
-
 void TitleBarButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);

@@ -23,8 +23,15 @@ public:
     singletons::ThemeManager &themeManager;
 
     float getScale() const;
-
     pajlada::Signals::Signal<float> scaleChanged;
+
+    QSize getScaleIndependantSize() const;
+    int getScaleIndependantWidth() const;
+    int getScaleIndependantHeight() const;
+    void setScaleIndependantSize(int width, int height);
+    void setScaleIndependantSize(QSize);
+    void setScaleIndependantWidth(int value);
+    void setScaleIndependantHeight(int value);
 
 protected:
     virtual void childEvent(QChildEvent *) override;
@@ -37,6 +44,7 @@ protected:
 private:
     void init();
     float scale = 1.f;
+    QSize scaleIndependantSize;
 
     std::vector<BaseWidget *> widgets;
 
