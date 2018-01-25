@@ -57,7 +57,7 @@ private:
 
     void rightButtonClicked();
 
-    virtual void refreshTheme() override;
+    virtual void themeRefreshEvent() override;
 
     void initializeChannelSignals();
 

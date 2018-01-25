@@ -44,7 +44,7 @@ BaseWindow::BaseWindow(BaseWidget *parent, bool _enableCustomFrame)
 }
 
 BaseWindow::BaseWindow(QWidget *parent, bool _enableCustomFrame)
-    : BaseWidget(parent, Qt::Window)
+    : BaseWidget(singletons::ThemeManager::getInstance(), parent, Qt::Window)
     , enableCustomFrame(_enableCustomFrame)
 {
     this->init();
@@ -57,12 +57,12 @@ void BaseWindow::init()
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame()) {
         // CUSTOM WINDOW FRAME
-        QVBoxLayout *layout = new QVBoxLayout;
+        QVBoxLayout *layout = new QVBoxLayout();
         layout->setMargin(1);
         layout->setSpacing(0);
         this->setLayout(layout);
         {
-            QHBoxLayout *buttonLayout = this->titlebarBox = new QHBoxLayout;
+            QHBoxLayout *buttonLayout = this->titlebarBox = new QHBoxLayout();
             buttonLayout->setMargin(0);
             layout->addLayout(buttonLayout);
 
@@ -107,7 +107,7 @@ void BaseWindow::init()
             buttonLayout->addWidget(_exitButton);
             buttonLayout->setSpacing(0);
         }
-        this->layoutBase = new QWidget(this);
+        this->layoutBase = new BaseWidget(this);
         layout->addWidget(this->layoutBase);
     }
 
@@ -115,10 +115,10 @@ void BaseWindow::init()
     auto dpi = util::getWindowDpi(this->winId());
 
     if (dpi) {
-        this->dpiMultiplier = dpi.value() / 96.f;
+        this->scale = dpi.value() / 96.f;
     }
 
-    this->dpiMultiplierChanged(1, this->dpiMultiplier);
+    this->scaleChangedEvent(this->scale);
 #endif
 
     if (singletons::SettingManager::getInstance().windowTopMost.getValue()) {
@@ -155,7 +155,7 @@ bool BaseWindow::hasCustomWindowFrame()
 #endif
 }
 
-void BaseWindow::refreshTheme()
+void BaseWindow::themeRefreshEvent()
 {
     QPalette palette;
     palette.setColor(QPalette::Background, this->themeManager.windowBg);
@@ -249,14 +249,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             qDebug() << "dpi changed";
             int dpi = HIWORD(msg->wParam);
 
-            float oldDpiMultiplier = this->dpiMultiplier;
-            this->dpiMultiplier = dpi / 96.f;
-            float scale = this->dpiMultiplier / oldDpiMultiplier;
+            float oldScale = this->scale;
+            float _scale = dpi / 96.f;
+            float resizeScale = _scale / oldScale;
 
-            this->dpiMultiplierChanged(oldDpiMultiplier, this->dpiMultiplier);
+            this->resize(static_cast<int>(this->width() * resizeScale),
+                         static_cast<int>(this->height() * resizeScale));
 
-            this->resize(static_cast<int>(this->width() * scale),
-                         static_cast<int>(this->height() * scale));
+            this->setScale(_scale);
 
             return true;
         }

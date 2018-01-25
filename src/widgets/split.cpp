@@ -87,7 +87,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 
     this->channelNameUpdated(this->channelName.getValue());
 
-    this->input.textInput.installEventFilter(parent);
+    this->input.ui.textEdit->installEventFilter(parent);
 
     this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
     this->view.selectionChanged.connect([this]() {
@@ -259,12 +259,12 @@ void Split::updateLastReadMessage()
 
 void Split::giveFocus(Qt::FocusReason reason)
 {
-    this->input.textInput.setFocus(reason);
+    this->input.ui.textEdit->setFocus(reason);
 }
 
 bool Split::hasFocus() const
 {
-    return this->input.textInput.hasFocus();
+    return this->input.ui.textEdit->hasFocus();
 }
 
 void Split::paintEvent(QPaintEvent *)

@@ -40,7 +40,7 @@ protected:
     virtual void leaveEvent(QEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
 
-    virtual void refreshTheme() override;
+    virtual void themeRefreshEvent() override;
 
 private:
     void init();

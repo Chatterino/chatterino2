@@ -25,8 +25,7 @@
 #include <functional>
 #include <memory>
 
-#define LAYOUT_WIDTH \
-    (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier())
+#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
 
 using namespace chatterino::messages;
 
@@ -115,9 +114,9 @@ ChannelView::~ChannelView()
     this->messageReplacedConnection.disconnect();
 }
 
-void ChannelView::refreshTheme()
+void ChannelView::themeRefreshEvent()
 {
-    BaseWidget::refreshTheme();
+    BaseWidget::themeRefreshEvent();
 
     this->layoutMessages();
 }
@@ -175,7 +174,7 @@ void ChannelView::actuallyLayoutMessages()
         for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
             auto message = messagesSnapshot[i];
 
-            redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier(), flags);
+            redrawRequired |= message->layout(layoutWidth, this->getScale(), flags);
 
             y += message->getHeight();
 
@@ -191,7 +190,7 @@ void ChannelView::actuallyLayoutMessages()
     for (int i = (int)messagesSnapshot.getLength() - 1; i >= 0; i--) {
         auto *message = messagesSnapshot[i].get();
 
-        message->layout(layoutWidth, this->getDpiMultiplier(), flags);
+        message->layout(layoutWidth, this->getScale(), flags);
 
         h -= message->getHeight();
 
@@ -582,8 +581,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == 0) {
                     desired = 0;
                 } else {
-                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
-                                            this->getFlags());
+                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -605,8 +603,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == snapshotLength - 1) {
                     desired = snapshot.getLength();
                 } else {
-                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
-                                            this->getFlags());
+                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();

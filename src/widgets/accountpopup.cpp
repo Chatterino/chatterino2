@@ -155,7 +155,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
         this->hide();  //
     });
 
-    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->scaleChangedEvent(this->getScale());
 }
 
 void AccountPopupWidget::setName(const QString &name)
@@ -247,7 +247,7 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
     }
 }
 
-void AccountPopupWidget::dpiMultiplierChanged(float /*oldDpi*/, float newDpi)
+void AccountPopupWidget::scaleChangedEvent(float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));

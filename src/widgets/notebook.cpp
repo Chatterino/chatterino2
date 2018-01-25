@@ -53,6 +53,8 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
     closeConfirmDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     closeConfirmDialog.setDefaultButton(QMessageBox::Yes);
+
+    //    this->scaleChangedEvent(this->getScale());
 }
 
 SplitContainer *Notebook::addNewPage()
@@ -212,7 +214,7 @@ void Notebook::performLayout(bool animated)
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     int x = 0, y = 0;
-    float scale = this->getDpiMultiplier();
+    float scale = this->getScale();
     bool customFrame = this->parentWindow->hasCustomWindowFrame();
 
     if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
@@ -262,17 +264,20 @@ void Notebook::performLayout(bool animated)
 
 void Notebook::resizeEvent(QResizeEvent *)
 {
-    float scale = this->getDpiMultiplier();
+    this->performLayout(false);
+}
 
-    this->settingsButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
-    this->userButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
-    this->addButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
+void Notebook::scaleChangedEvent(float)
+{
+    float h = 24 * this->getScale();
+
+    this->settingsButton.setFixedSize(h, h);
+    this->userButton.setFixedSize(h, h);
+    this->addButton.setFixedSize(h, h);
 
     for (auto &i : this->pages) {
-        i->getTab()->calcSize();
+        i->getTab()->updateSize();
     }
-
-    this->performLayout(false);
 }
 
 void Notebook::settingsButtonClicked()

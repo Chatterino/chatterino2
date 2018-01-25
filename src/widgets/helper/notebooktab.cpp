@@ -25,7 +25,6 @@ NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
     , useDefaultBehaviour(fS("{}/useDefaultBehaviour", this->settingRoot), true)
     , menu(this)
 {
-    this->calcSize();
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
@@ -65,22 +64,25 @@ NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
 
     this->menu.addAction(enableHighlightsOnNewMessageAction);
 
-    connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool newValue) {
+    QObject::connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool newValue) {
         debug::Log("New value is {}", newValue);  //
     });
 }
 
-void NotebookTab::calcSize()
+void NotebookTab::themeRefreshEvent()
 {
-    float scale = getDpiMultiplier();
+    this->update();
+}
+
+void NotebookTab::updateSize()
+{
+    float scale = getScale();
     QString qTitle(qS(this->title));
 
     if (singletons::SettingManager::getInstance().hideTabX) {
-        this->resize(static_cast<int>((fontMetrics().width(qTitle) + 16) * scale),
-                     static_cast<int>(24 * scale));
+        this->resize((int)((fontMetrics().width(qTitle) + 16) * scale), (int)(24 * scale));
     } else {
-        this->resize(static_cast<int>((fontMetrics().width(qTitle) + 8 + 24) * scale),
-                     static_cast<int>(24 * scale));
+        this->resize((int)((fontMetrics().width(qTitle) + 8 + 24) * scale), (int)(24 * scale));
     }
 
     if (this->parent() != nullptr) {
@@ -97,7 +99,7 @@ void NotebookTab::setTitle(const QString &newTitle)
 {
     this->title = newTitle.toStdString();
 
-    this->calcSize();
+    this->updateSize();
 }
 
 bool NotebookTab::isSelected() const
@@ -134,7 +136,7 @@ QRect NotebookTab::getDesiredRect() const
 
 void NotebookTab::hideTabXChanged(bool)
 {
-    this->calcSize();
+    this->updateSize();
     this->update();
 }
 
@@ -197,7 +199,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    float scale = this->getDpiMultiplier();
+    float scale = this->getScale();
     int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, this->height());
 

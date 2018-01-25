@@ -66,7 +66,7 @@ SplitHeader::SplitHeader(Split *_split)
 
     // ---- misc
     this->layout()->setMargin(0);
-    this->refreshTheme();
+    this->themeRefreshEvent();
 
     this->updateChannelText();
 
@@ -135,7 +135,7 @@ void SplitHeader::initializeChannelSignals()
 
 void SplitHeader::resizeEvent(QResizeEvent *event)
 {
-    int w = 28 * getDpiMultiplier();
+    int w = 28 * getScale();
 
     this->setFixedHeight(w);
     this->dropdownButton->setFixedWidth(w);
@@ -242,7 +242,7 @@ void SplitHeader::rightButtonClicked()
 {
 }
 
-void SplitHeader::refreshTheme()
+void SplitHeader::themeRefreshEvent()
 {
     QPalette palette;
     palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);

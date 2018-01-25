@@ -40,7 +40,7 @@ TooltipWidget::~TooltipWidget()
     this->fontChangedConnection.disconnect();
 }
 
-void TooltipWidget::dpiMultiplierChanged(float, float)
+void TooltipWidget::scaleChangedEvent(float)
 {
     this->updateFont();
 }
@@ -48,7 +48,7 @@ void TooltipWidget::dpiMultiplierChanged(float, float)
 void TooltipWidget::updateFont()
 {
     this->setFont(singletons::FontManager::getInstance().getFont(
-        singletons::FontManager::Type::MediumSmall, this->getDpiMultiplier()));
+        singletons::FontManager::Type::MediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)

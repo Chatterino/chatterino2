@@ -29,7 +29,7 @@ public:
 protected:
     virtual void changeEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
-    virtual void dpiMultiplierChanged(float, float) override;
+    virtual void scaleChangedEvent(float) override;
 
 private:
     QLabel *displayText;

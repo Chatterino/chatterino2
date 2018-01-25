@@ -48,6 +48,7 @@ public:
     void previousTab();
 
 protected:
+    void scaleChangedEvent(float scale);
     void resizeEvent(QResizeEvent *);
 
     void settingsButtonMouseReleased(QMouseEvent *event);

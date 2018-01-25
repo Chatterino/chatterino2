@@ -23,7 +23,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     : BaseWindow(_themeManager, nullptr, true)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
-    , dpi(this->getDpiMultiplier())
+    , dpi(this->getScale())
     , themeManager(_themeManager)
     , notebook(this, _isMainWindow, this->settingRoot)
 {
@@ -58,7 +58,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     // set margin
     layout->setMargin(0);
 
-    this->refreshTheme();
+    this->themeRefreshEvent();
 
     this->loadGeometry();
 

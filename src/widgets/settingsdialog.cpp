@@ -29,7 +29,7 @@ SettingsDialog::SettingsDialog()
 
     this->addTabs();
 
-    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->scaleChangedEvent(this->getScale());
 }
 
 void SettingsDialog::initUi()
@@ -149,7 +149,7 @@ void SettingsDialog::refresh()
     singletons::SettingManager::getInstance().saveSnapshot();
 }
 
-void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)
+void SettingsDialog::scaleChangedEvent(float newDpi)
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);

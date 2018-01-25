@@ -25,7 +25,7 @@ class NotebookTab : public BaseWidget
 public:
     explicit NotebookTab(Notebook *_notebook, const std::string &_uuid);
 
-    void calcSize();
+    void updateSize();
 
     SplitContainer *page;
 
@@ -42,16 +42,18 @@ public:
     void hideTabXChanged(bool);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+    virtual void themeRefreshEvent() override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void enterEvent(QEvent *) override;
-    void leaveEvent(QEvent *) override;
+    virtual void paintEvent(QPaintEvent *) override;
 
-    void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void enterEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
 
-    void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
@@ -80,7 +82,7 @@ private:
 
     QRect getXRect()
     {
-        float scale = this->getDpiMultiplier();
+        float scale = this->getScale();
         return QRect(this->width() - static_cast<int>(20 * scale), static_cast<int>(4 * scale),
                      static_cast<int>(16 * scale), static_cast<int>(16 * scale));
     }

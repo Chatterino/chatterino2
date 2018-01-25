@@ -44,7 +44,7 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
     if (this->pixmap != nullptr) {
         QRect rect = this->rect();
-        int xD = 6 * this->getDpiMultiplier();
+        int xD = 6 * this->getScale();
 
         rect.moveLeft(xD);
         rect.setRight(rect.right() - xD - xD);

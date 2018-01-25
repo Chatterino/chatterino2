@@ -35,7 +35,7 @@ signals:
     void refreshButtons();
 
 protected:
-    virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
+    virtual void scaleChangedEvent(float newDpi) override;
 
 private:
     Ui::AccountPopup *ui;
