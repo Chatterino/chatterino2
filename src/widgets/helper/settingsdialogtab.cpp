@@ -10,7 +10,8 @@ namespace widgets {
 
 SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, settingspages::SettingsPage *_page,
                                      QString imageFileName)
-    : dialog(_dialog)
+    : BaseWidget(_dialog)
+    , dialog(_dialog)
     , page(_page)
 {
     this->ui.labelText = page->getName();
@@ -47,8 +48,8 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (this->height() - 20) / 2;
-    QPixmap pixmap = this->ui.icon.pixmap(QSize(20, 20));
+    int a = (this->height() - (20 * this->getScale())) / 2;
+    QPixmap pixmap = this->ui.icon.pixmap(QSize(this->height() - a * 2, this->height() - a * 2));
 
     painter.drawPixmap(a, a, pixmap);
 
