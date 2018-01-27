@@ -4,6 +4,7 @@
 #include "twitch/twitchchannel.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/urlfetch.hpp"
+#include "widgets/helper/label.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/tooltipwidget.hpp"
@@ -47,7 +48,9 @@ SplitHeader::SplitHeader(Split *_split)
         layout->addStretch(1);
 
         // channel name label
+        //        auto title = layout.emplace<Label>(this).assign(&this->titleLabel);
         auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
+        title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         title->setMouseTracking(true);
         QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
                          &SplitHeader::mouseDoubleClickEvent);
@@ -141,6 +144,8 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton->setFixedWidth(w);
     this->moderationButton->setFixedWidth(w);
+    //    this->titleLabel->setFont(
+    //        singletons::FontManager::getInstance().getFont(FontStyle::Medium, scale));
 }
 
 void SplitHeader::updateChannelText()

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
+#include "widgets/helper/label.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/helper/signallabel.hpp"
 
@@ -52,6 +53,7 @@ private:
     boost::signals2::connection onlineStatusChangedConnection;
 
     RippleEffectButton *dropdownButton;
+    //    Label *titleLabel;
     SignalLabel *titleLabel;
     RippleEffectButton *moderationButton;
 

@@ -78,7 +78,6 @@ EmoteElement::EmoteElement(const util::EmoteData &_data, MessageElement::Flags f
 {
     if (_data.isValid()) {
         this->setTooltip(data.image1x->getTooltip());
-        qDebug() << "valid xDDDDDDDDD" << _data.image1x->getName();
         this->textElement = new TextElement(_data.image1x->getName(), MessageElement::Misc);
     }
 }
@@ -93,7 +92,7 @@ EmoteElement::~EmoteElement()
 void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        if (_flags & this->getFlags() & MessageElement::EmoteImages) {
+        if (_flags & MessageElement::EmoteImages) {
             if (!this->data.isValid()) {
                 return;
             }

@@ -18,6 +18,11 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
 
+    this->viewEmotes->setOverrideFlags((MessageElement::Flags)(
+        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+    this->viewEmojis->setOverrideFlags((MessageElement::Flags)(
+        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+
     this->viewEmotes->setEnableScrollingToBottom(false);
     this->viewEmojis->setEnableScrollingToBottom(false);
 
@@ -62,7 +67,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->addFlags(Message::DisableCompactEmotes);
 
         map.each([&](const QString &key, const util::EmoteData &value) {
-            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                        ->setLink(Link(Link::InsertText, key)));
         });
 
@@ -101,7 +106,7 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->addFlags(Message::DisableCompactEmotes);
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
-        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                   ->setLink(Link(Link::Type::InsertText, key)));
     });
     emojiChannel->addMessage(builder.getMessage());

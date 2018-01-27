@@ -291,6 +291,16 @@ bool ChannelView::getEnableScrollingToBottom() const
     return this->enableScrollingToBottom;
 }
 
+void ChannelView::setOverrideFlags(boost::optional<messages::MessageElement::Flags> value)
+{
+    this->overrideFlags = value;
+}
+
+const boost::optional<messages::MessageElement::Flags> &ChannelView::getOverrideFlags() const
+{
+    return this->overrideFlags;
+}
+
 messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
     if (!this->paused) {
@@ -338,7 +348,6 @@ void ChannelView::setChannel(ChannelPtr newChannel)
         newChannel->messagesAddedAtStart.connect([this](std::vector<MessagePtr> &messages) {
             std::vector<MessageLayoutPtr> messageRefs;
             messageRefs.resize(messages.size());
-            qDebug() << messages.size();
             for (size_t i = 0; i < messages.size(); i++) {
                 messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
             }
@@ -455,6 +464,10 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 
 messages::MessageElement::Flags ChannelView::getFlags() const
 {
+    if (this->overrideFlags) {
+        return this->overrideFlags.get();
+    }
+
     MessageElement::Flags flags = singletons::SettingManager::getInstance().getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());

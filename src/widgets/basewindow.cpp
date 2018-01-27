@@ -247,7 +247,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
     switch (msg->message) {
         case WM_DPICHANGED: {
-            qDebug() << "dpi changed";
             int dpi = HIWORD(msg->wParam);
 
             float oldScale = this->scale;
@@ -348,8 +347,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                         *result = HTCAPTION;
                     }
                 }
-
-                qDebug() << *result;
 
                 return true;
             } else {

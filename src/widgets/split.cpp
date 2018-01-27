@@ -248,7 +248,6 @@ void Split::layoutMessages()
 
 void Split::updateGifEmotes()
 {
-    qDebug() << "this shouldn't even exist";
     this->view.queueUpdate();
 }
 

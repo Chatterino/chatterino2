@@ -457,7 +457,7 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
     util::EmoteData emoteData;
 
-    auto appendEmote = [=](MessageElement::Flags flags) {
+    auto appendEmote = [&](MessageElement::Flags flags) {
         this->emplace<EmoteElement>(emoteData, flags);
         return true;
     };

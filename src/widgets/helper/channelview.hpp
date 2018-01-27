@@ -38,6 +38,8 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
+    void setOverrideFlags(boost::optional<messages::MessageElement::Flags> value);
+    const boost::optional<messages::MessageElement::Flags> &getOverrideFlags() const;
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
@@ -80,6 +82,7 @@ private:
     bool messageWasAdded = false;
     bool paused = false;
     QTimer pauseTimeout;
+    boost::optional<messages::MessageElement::Flags> overrideFlags;
     messages::MessageLayoutPtr lastReadMessage;
 
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
