@@ -12,7 +12,6 @@ QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringL
 {
     this->ui.okButton.setText("OK");
     this->ui.cancelButton.setText("Cancel");
-    this->setAttribute(Qt::WA_DeleteOnClose, true);
 
     QObject::connect(&this->ui.okButton, &QPushButton::clicked, this,
                      &QualityPopup::okButtonClicked);
@@ -36,6 +35,8 @@ void QualityPopup::showDialog(const QString &channel, const QString &path, QStri
 {
     QualityPopup *instance = new QualityPopup(channel, path, options);
 
+    instance->setAttribute(Qt::WA_DeleteOnClose, true);
+
     instance->show();
     instance->activateWindow();
     instance->raise();
@@ -45,8 +46,8 @@ void QualityPopup::showDialog(const QString &channel, const QString &path, QStri
 void QualityPopup::okButtonClicked()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    QProcess::startDetached(this->path,
-                            {"twitch.tv/" + this->channel, this->ui.selector.currentText(), settings.streamlinkOpts});
+    QProcess::startDetached(this->path, {"twitch.tv/" + this->channel,
+                                         this->ui.selector.currentText(), settings.streamlinkOpts});
     this->close();
 }
 

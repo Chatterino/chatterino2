@@ -1,5 +1,4 @@
-#ifndef QUALITYPOPUP_H
-#define QUALITYPOPUP_H
+#pragma once
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -39,5 +38,3 @@ private:
 
 }  // namespace widgets
 }  // namespace chatterino
-
-#endif  // QUALITYPOPUP_H
