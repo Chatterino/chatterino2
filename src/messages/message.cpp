@@ -31,10 +31,10 @@ MessagePtr Message::createSystemMessage(const QString &text)
 
     message->addElement(new TimestampElement(QTime::currentTime()));
     message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
-    message->flags &= Message::System;
+    message->flags |= MessageFlags::System;
     message->searchText = text;
 
-    return MessagePtr(message);
+    return message;
 }
 
 MessagePtr Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
@@ -72,7 +72,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     }
 
     MessagePtr message = Message::createSystemMessage(text);
-    message->flags &= Message::Timeout;
+    message->flags |= MessageFlags::System;
     message->timeoutUser = username;
     return message;
 }
