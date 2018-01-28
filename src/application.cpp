@@ -1,5 +1,5 @@
 #include "application.hpp"
-#include "logging/loggingmanager.hpp"
+#include "singletons/loggingmanager.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/commandmanager.hpp"
 #include "singletons/emotemanager.hpp"
@@ -18,7 +18,7 @@ Application::Application()
 {
     singletons::WindowManager::getInstance();
 
-    logging::init();
+    singletons::LoggingManager::getInstance();
 
     singletons::SettingManager::getInstance().init();
     singletons::CommandManager::getInstance().loadCommands();

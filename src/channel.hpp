@@ -1,8 +1,8 @@
 #pragma once
 
-#include "logging/loggingchannel.hpp"
 #include "messages/image.hpp"
 #include "messages/limitedqueue.hpp"
+#include "messages/message.hpp"
 #include "util/concurrentmap.hpp"
 
 #include <QMap>
@@ -60,8 +60,6 @@ public:
 
 private:
     messages::LimitedQueue<messages::MessagePtr> messages;
-
-    // std::shared_ptr<logging::Channel> loggingChannel;
 };
 
 typedef std::shared_ptr<Channel> ChannelPtr;

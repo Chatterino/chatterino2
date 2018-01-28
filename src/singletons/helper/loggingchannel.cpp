@@ -1,35 +1,34 @@
 #include "loggingchannel.hpp"
-#include "loggingmanager.hpp"
 
 #include <QDir>
 
 #include <ctime>
 
 namespace chatterino {
-namespace logging {
+namespace singletons {
 
-Channel::Channel(const QString &_channelName, const QString &_baseDirectory)
+LoggingChannel::LoggingChannel(const QString &_channelName, const QString &_baseDirectory)
     : channelName(_channelName)
     , baseDirectory(_baseDirectory)
 {
     QDateTime now = QDateTime::currentDateTime();
 
-    this->fileName = this->channelName + "-" + now.toString("yyyy-MM-dd") + ".log";
+    QString baseFileName = this->channelName + "-" + now.toString("yyyy-MM-dd") + ".log";
 
     // Open file handle to log file of current date
-    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + this->fileName);
+    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + baseFileName);
 
     this->fileHandle.open(QIODevice::Append);
     this->appendLine(this->generateOpeningString(now));
 }
 
-Channel::~Channel()
+LoggingChannel::~LoggingChannel()
 {
     this->appendLine(this->generateClosingString());
     this->fileHandle.close();
 }
 
-void Channel::append(std::shared_ptr<messages::Message> message)
+void LoggingChannel::addMessage(std::shared_ptr<messages::Message> message)
 {
     QDateTime now = QDateTime::currentDateTime();
 
@@ -37,14 +36,21 @@ void Channel::append(std::shared_ptr<messages::Message> message)
     str.append('[');
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
-    str.append(message->loginName);
-    str.append(": ");
-    str.append(message->searchText);
-    str.append('\n');
+
+    if ((message->flags & messages::Message::MessageFlags::System) != 0) {
+        str.append(message->searchText);
+        str.append('\n');
+    } else {
+        str.append(message->loginName);
+        str.append(": ");
+        str.append(message->searchText);
+        str.append('\n');
+    }
+
     this->appendLine(str);
 }
 
-QString Channel::generateOpeningString(const QDateTime &now) const
+QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 {
     QString ret = QLatin1Literal("# Start logging at ");
 
@@ -55,7 +61,7 @@ QString Channel::generateOpeningString(const QDateTime &now) const
     return ret;
 }
 
-QString Channel::generateClosingString(const QDateTime &now) const
+QString LoggingChannel::generateClosingString(const QDateTime &now) const
 {
     QString ret = QLatin1Literal("# Stop logging at ");
 
@@ -66,11 +72,11 @@ QString Channel::generateClosingString(const QDateTime &now) const
     return ret;
 }
 
-void Channel::appendLine(const QString &line)
+void LoggingChannel::appendLine(const QString &line)
 {
     this->fileHandle.write(line.toUtf8());
     this->fileHandle.flush();
 }
 
-}  // namespace logging
+}  // namespace singletons
 }  // namespace chatterino

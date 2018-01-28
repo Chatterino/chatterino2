@@ -89,6 +89,9 @@ public:
     BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing", true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
+    /// Logging
+    BoolSetting enableLogging = {"/logging/enabled", false};
+
     ChatterinoSetting<std::vector<messages::HighlightPhrase>> highlightProperties = {
         "/highlighting/highlights"};
 

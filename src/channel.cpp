@@ -1,9 +1,9 @@
 #include "channel.hpp"
 #include "debug/log.hpp"
-#include "logging/loggingmanager.hpp"
 #include "messages/message.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
+#include "singletons/loggingmanager.hpp"
 #include "singletons/windowmanager.hpp"
 
 #include <QJsonArray>
@@ -20,7 +20,6 @@ namespace chatterino {
 
 Channel::Channel(const QString &_name)
     : name(_name)
-//    , loggingChannel(logging::get(name))
 {
 }
 
@@ -45,12 +44,10 @@ void Channel::addMessage(MessagePtr message)
         this->addRecentChatter(message);
     }
 
-    //    if (_loggingChannel.get() != nullptr) {
-    //        _loggingChannel->append(message);
-    //    }
+    singletons::LoggingManager::getInstance().addMessage(this->name, message);
 
     if (this->messages.pushBack(message, deleted)) {
-        messageRemovedFromStart(deleted);
+        this->messageRemovedFromStart(deleted);
     }
 
     this->messageAppended(message);

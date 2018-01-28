@@ -57,7 +57,43 @@ bool PathManager::init(int argc, char **argv)
         return false;
     }
 
+    this->logsFolderPath = rootPath + "/Logs";
+
+    if (!QDir().mkpath(this->logsFolderPath)) {
+        printf("Error creating logs directory: %s\n", qPrintable(this->logsFolderPath));
+        return false;
+    }
+
+    this->channelsLogsFolderPath = this->logsFolderPath + "/Channels";
+
+    if (!QDir().mkpath(this->channelsLogsFolderPath)) {
+        printf("Error creating channelsLogs directory: %s\n",
+               qPrintable(this->channelsLogsFolderPath));
+        return false;
+    }
+
+    this->whispersLogsFolderPath = this->logsFolderPath + "/Whispers";
+
+    if (!QDir().mkpath(this->whispersLogsFolderPath)) {
+        printf("Error creating whispersLogs directory: %s\n",
+               qPrintable(this->whispersLogsFolderPath));
+        return false;
+    }
+
+    this->mentionsLogsFolderPath = this->logsFolderPath + "/Mentions";
+
+    if (!QDir().mkpath(this->mentionsLogsFolderPath)) {
+        printf("Error creating mentionsLogs directory: %s\n",
+               qPrintable(this->mentionsLogsFolderPath));
+        return false;
+    }
+
     return true;
+}
+
+bool PathManager::createFolder(const QString &folderPath)
+{
+    return QDir().mkpath(folderPath);
 }
 
 }  // namespace singletons

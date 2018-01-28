@@ -101,8 +101,8 @@ SOURCES += \
     src/widgets/settingsdialog.cpp \
     src/widgets/helper/settingsdialogtab.cpp \
     src/widgets/textinputdialog.cpp \
-    src/logging/loggingmanager.cpp \
-    src/logging/loggingchannel.cpp \
+    src/singletons/loggingmanager.cpp \
+    src/singletons/helper/loggingchannel.cpp \
     src/singletons/windowmanager.cpp \
     src/singletons/channelmanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -193,8 +193,8 @@ HEADERS  += \
     src/widgets/helper/resizingtextedit.hpp \
     src/messages/limitedqueue.hpp \
     src/messages/limitedqueuesnapshot.hpp \
-    src/logging/loggingmanager.hpp \
-    src/logging/loggingchannel.hpp \
+    src/singletons/loggingmanager.hpp \
+    src/singletons/helper/loggingchannel.hpp \
     src/singletons/channelmanager.hpp \
     src/singletons/windowmanager.hpp \
     src/singletons/settingsmanager.hpp \

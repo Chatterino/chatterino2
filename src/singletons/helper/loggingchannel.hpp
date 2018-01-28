@@ -5,19 +5,20 @@
 #include <QDateTime>
 #include <QFile>
 #include <QString>
+#include <boost/noncopyable.hpp>
 
 #include <memory>
 
 namespace chatterino {
-namespace logging {
+namespace singletons {
 
-class Channel
+class LoggingChannel : boost::noncopyable
 {
-public:
-    explicit Channel(const QString &_channelName, const QString &_baseDirectory);
-    ~Channel();
+    explicit LoggingChannel(const QString &_channelName, const QString &_baseDirectory);
 
-    void append(std::shared_ptr<messages::Message> message);
+public:
+    ~LoggingChannel();
+    void addMessage(std::shared_ptr<messages::Message> message);
 
 private:
     QString generateOpeningString(const QDateTime &now = QDateTime::currentDateTime()) const;
@@ -30,7 +31,9 @@ private:
     const QString &baseDirectory;
     QString fileName;
     QFile fileHandle;
+
+    friend class LoggingManager;
 };
 
-}  // namespace logging
+}  // namespace singletons
 }  // namespace chatterino

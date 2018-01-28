@@ -17,6 +17,14 @@ public:
     QString settingsFolderPath;
     QString customFolderPath;
     QString cacheFolderPath;
+
+    // Logs
+    QString logsFolderPath;
+    QString channelsLogsFolderPath;
+    QString whispersLogsFolderPath;
+    QString mentionsLogsFolderPath;
+
+    bool createFolder(const QString &folderPath);
 };
 
 }  // namespace singletons
