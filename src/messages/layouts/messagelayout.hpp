@@ -4,6 +4,7 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/message.hpp"
 #include "messages/selection.hpp"
+#include "util/flagsenum.h"
 
 #include <QPixmap>
 
@@ -14,15 +15,9 @@
 namespace chatterino {
 namespace messages {
 namespace layouts {
-
-struct MessageLayout;
-typedef std::shared_ptr<MessageLayout> MessageLayoutPtr;
-typedef uint8_t MessageLayoutFlagsType;
-
-struct MessageLayout : boost::noncopyable
-{
+struct MessageLayout : boost::noncopyable {
 public:
-    enum Flags : MessageLayoutFlagsType { Collapsed, RequiresBufferUpdate, RequiresLayout };
+    enum Flags : uint8_t { Collapsed, RequiresBufferUpdate, RequiresLayout };
 
     MessageLayout(MessagePtr message);
 
@@ -32,10 +27,7 @@ public:
     int getHeight() const;
 
     // Flags
-    Flags getFlags() const;
-    bool hasFlags(Flags flags) const;
-    void addFlags(Flags flags);
-    void removeFlags(Flags flags);
+    util::FlagsEnum<Flags> flags;
 
     // Layout
     bool layout(int width, float scale, MessageElement::Flags flags);
@@ -61,7 +53,6 @@ private:
     MessageLayoutContainer container;
     std::shared_ptr<QPixmap> buffer = nullptr;
     bool bufferValid = false;
-    Flags flags;
 
     int height = 0;
 
@@ -81,6 +72,7 @@ private:
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 };
 
+typedef std::shared_ptr<MessageLayout> MessageLayoutPtr;
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino

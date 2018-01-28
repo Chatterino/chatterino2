@@ -23,7 +23,7 @@ MessageLayout::MessageLayout(MessagePtr _message)
     , buffer(nullptr)
 {
     if (_message->flags & Message::Collapsed) {
-        this->addFlags(MessageLayout::Collapsed);
+        this->flags &= MessageLayout::Collapsed;
     }
 }
 
@@ -36,27 +36,6 @@ Message *MessageLayout::getMessage()
 int MessageLayout::getHeight() const
 {
     return container.getHeight();
-}
-
-// Flags
-MessageLayout::Flags MessageLayout::getFlags() const
-{
-    return this->flags;
-}
-
-bool MessageLayout::hasFlags(Flags _flags) const
-{
-    return this->flags & _flags;
-}
-
-void MessageLayout::addFlags(Flags _flags)
-{
-    this->flags = (Flags)((MessageLayoutFlagsType)this->flags | (MessageLayoutFlagsType)_flags);
-}
-
-void MessageLayout::removeFlags(Flags _flags)
-{
-    this->flags = (Flags)((MessageLayoutFlagsType)this->flags & ~((MessageLayoutFlagsType)_flags));
 }
 
 // Layout
@@ -105,11 +84,11 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     // update word sizes if needed
     if (imagesChanged) {
         //        this->container.updateImages();
-        this->addFlags(MessageLayout::RequiresBufferUpdate);
+        this->flags &= MessageLayout::RequiresBufferUpdate;
     }
     if (textChanged) {
         //        this->container.updateText();
-        this->addFlags(MessageLayout::RequiresBufferUpdate);
+        this->flags &= MessageLayout::RequiresBufferUpdate;
     }
     if (widthChanged || wordMaskChanged) {
         this->deleteBuffer();
