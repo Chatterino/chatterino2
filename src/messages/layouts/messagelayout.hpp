@@ -4,7 +4,7 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/message.hpp"
 #include "messages/selection.hpp"
-#include "util/flagsenum.h"
+#include "util/flagsenum.hpp"
 
 #include <QPixmap>
 

@@ -5,8 +5,9 @@
 namespace chatterino {
 namespace util {
 
-template <typename T, typename _ = std::enable_if<std::is_enum<T>::value>::type,
-          typename Q = std::underlying_type<T>::type>
+// = std::enable_if<std::is_enum<T>::value>::type
+
+template <typename T, typename Q = typename std::underlying_type<T>::type>
 class FlagsEnum
 {
 public:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messages/messageelement.hpp"
-#include "util/flagsenum.h"
+#include "util/flagsenum.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
 #include <cinttypes>

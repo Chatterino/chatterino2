@@ -21,8 +21,7 @@ public:
     void appendTimestamp(const QTime &time);
     QString matchLink(const QString &string);
 
-    template <typename T, typename... Args,
-              typename _ = std::enable_if<std::is_base_of<MessageElement, T>::value>::type>
+    template <typename T, typename... Args>
     T *emplace(Args &&... args)
     {
         static_assert(std::is_base_of<MessageElement, T>::value, "T must extend MessageElement");

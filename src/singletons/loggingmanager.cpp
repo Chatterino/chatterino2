@@ -34,7 +34,8 @@ void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr
     if (it == this->loggingChannels.end()) {
         auto channel = new LoggingChannel(channelName, this->getDirectoryForChannel(channelName));
         channel->addMessage(message);
-        this->loggingChannels.emplace(channelName, std::move(channel));
+        this->loggingChannels.emplace(channelName,
+                                      std::unique_ptr<LoggingChannel>(std::move(channel)));
     } else {
         it->second->addMessage(message);
     }
