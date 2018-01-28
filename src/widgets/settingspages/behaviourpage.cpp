@@ -45,6 +45,7 @@ BehaviourPage::BehaviourPage()
         groupLayout->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
         groupLayout->addRow("Prefered quality:",
                             this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
+        groupLayout->addRow("Additional options:", this->createLineEdit(settings.streamlinkOpts));
     }
 
     layout->addStretch(1);
