@@ -6,8 +6,6 @@ typedef chatterino::widgets::ScrollbarHighlight SBHighlight;
 
 namespace chatterino {
 namespace messages {
-
-// elements
 void Message::addElement(MessageElement *element)
 {
     this->elements.push_back(std::unique_ptr<MessageElement>(element));
@@ -18,64 +16,9 @@ const std::vector<std::unique_ptr<MessageElement>> &Message::getElements() const
     return this->elements;
 }
 
-// Flags
-Message::MessageFlags Message::getFlags() const
-{
-    return this->flags;
-}
-
-bool Message::hasFlags(MessageFlags _flags) const
-{
-    return this->flags & _flags;
-}
-
-// void Message::setFlags(MessageFlags _flags)
-//{
-//    this->flags = flags;
-//}
-
-void Message::addFlags(MessageFlags _flags)
-{
-    this->flags = (MessageFlags)((MessageFlagsType)this->flags | (MessageFlagsType)_flags);
-}
-
-void Message::removeFlags(MessageFlags _flags)
-{
-    this->flags = (MessageFlags)((MessageFlagsType)this->flags & ~((MessageFlagsType)_flags));
-}
-
-// Parse Time
-const QTime &Message::getParseTime() const
-{
-    return this->parseTime;
-}
-
-// Id
-const QString &Message::getId() const
-{
-    return this->id;
-}
-
-void Message::setId(const QString &_id)
-{
-    this->id = _id;
-}
-
-// Search
-const QString &Message::getSearchText() const
-{
-    return this->searchText;
-}
-
-void Message::setSearchText(const QString &value)
-{
-    this->searchText = value;
-}
-
-// Highlight
 SBHighlight Message::getScrollBarHighlight() const
 {
-    if (this->hasFlags(Message::Highlighted)) {
+    if (this->flags & Message::Highlighted) {
         return SBHighlight(SBHighlight::Highlight);
     }
     return SBHighlight();
@@ -88,8 +31,8 @@ MessagePtr Message::createSystemMessage(const QString &text)
 
     message->addElement(new TimestampElement(QTime::currentTime()));
     message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
-    message->addFlags(Message::System);
-    message->setSearchText(text);
+    message->flags &= Message::System;
+    message->searchText = text;
 
     return MessagePtr(message);
 }
@@ -129,7 +72,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     }
 
     MessagePtr message = Message::createSystemMessage(text);
-    message->addFlags(Message::Timeout);
+    message->flags &= Message::Timeout;
     message->timeoutUser = username;
     return message;
 }

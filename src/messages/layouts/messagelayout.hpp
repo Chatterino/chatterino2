@@ -15,11 +15,11 @@ namespace chatterino {
 namespace messages {
 namespace layouts {
 
-class MessageLayout;
+struct MessageLayout;
 typedef std::shared_ptr<MessageLayout> MessageLayoutPtr;
 typedef uint8_t MessageLayoutFlagsType;
 
-class MessageLayout : boost::noncopyable
+struct MessageLayout : boost::noncopyable
 {
 public:
     enum Flags : MessageLayoutFlagsType { Collapsed, RequiresBufferUpdate, RequiresLayout };

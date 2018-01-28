@@ -381,29 +381,31 @@ void IrcManager::removeIgnoredUser(QString const &username)
 
 void IrcManager::onConnected()
 {
-    MessagePtr msg = Message::createSystemMessage("connected to chat");
-    MessagePtr remsg = Message::createSystemMessage("reconnected to chat");
+    MessagePtr connMsg = Message::createSystemMessage("connected to chat");
+    MessagePtr reconnMsg = Message::createSystemMessage("reconnected to chat");
 
-    this->channelManager.doOnAll([msg, remsg](SharedChannel channel) {
+    this->channelManager.doOnAll([connMsg, reconnMsg](SharedChannel channel) {
         assert(channel);
 
         LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
 
-        if (snapshot.getLength() > 0 &&
-            snapshot[snapshot.getLength() - 1]->hasFlags(Message::DisconnectedMessage))  //
-        {
-            channel->replaceMessage(snapshot[snapshot.getLength() - 1], remsg);
+        bool replaceMessage =
+            snapshot.getLength() > 0 &&
+            snapshot[snapshot.getLength() - 1]->flags & Message::DisconnectedMessage;
+
+        if (replaceMessage) {
+            channel->replaceMessage(snapshot[snapshot.getLength() - 1], reconnMsg);
             return;
         }
 
-        channel->addMessage(msg);
+        channel->addMessage(connMsg);
     });
 }
 
 void IrcManager::onDisconnected()
 {
     MessagePtr msg = Message::createSystemMessage("disconnected from chat");
-    msg->addFlags(Message::DisconnectedMessage);
+    msg->flags &= Message::DisconnectedMessage;
 
     this->channelManager.doOnAll([msg](SharedChannel channel) {
         assert(channel);

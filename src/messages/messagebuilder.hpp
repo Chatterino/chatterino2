@@ -9,7 +9,7 @@
 namespace chatterino {
 namespace messages {
 
-class MessageBuilder
+struct MessageBuilder
 {
 public:
     MessageBuilder();

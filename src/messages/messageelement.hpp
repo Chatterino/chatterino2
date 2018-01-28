@@ -20,12 +20,12 @@ struct EmoteData;
 }
 namespace messages {
 namespace layouts {
-class MessageLayoutContainer;
+struct MessageLayoutContainer;
 }
 
 using namespace chatterino::messages::layouts;
 
-class MessageElement : boost::noncopyable
+struct MessageElement : boost::noncopyable
 {
 public:
     enum Flags : uint32_t {

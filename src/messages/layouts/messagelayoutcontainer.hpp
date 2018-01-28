@@ -14,7 +14,7 @@ namespace chatterino {
 namespace messages {
 
 namespace layouts {
-class MessageLayoutElement;
+struct MessageLayoutElement;
 
 struct Margin {
     int top;
@@ -41,7 +41,7 @@ struct Margin {
     }
 };
 
-class MessageLayoutContainer
+struct MessageLayoutContainer
 {
 public:
     MessageLayoutContainer();

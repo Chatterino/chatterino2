@@ -266,7 +266,8 @@ HEADERS  += \
     src/widgets/streamview.hpp \
     src/util/networkrequest.hpp \
     src/util/networkworker.hpp \
-    src/util/networkrequester.hpp
+    src/util/networkrequester.hpp \
+    src/util/flagsenum.h
 
 RESOURCES += \
     resources/resources.qrc

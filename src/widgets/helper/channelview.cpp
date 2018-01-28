@@ -314,7 +314,7 @@ void ChannelView::setChannel(SharedChannel newChannel)
                 }
             }
 
-            if (!message->hasFlags(Message::DoNotTriggerNotification)) {
+            if (message->flags & ~Message::DoNotTriggerNotification) {
                 this->highlightedMessageReceived.invoke();
             }
 

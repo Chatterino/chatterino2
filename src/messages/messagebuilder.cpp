@@ -31,9 +31,9 @@ void MessageBuilder::appendTimestamp()
 void MessageBuilder::setHighlight(bool value)
 {
     if (value) {
-        this->message->addFlags(Message::Highlighted);
+        this->message->flags |= Message::Highlighted;
     } else {
-        this->message->removeFlags(Message::Highlighted);
+        this->message->flags &= ~Message::Highlighted;
     }
 }
 

@@ -188,7 +188,7 @@ MessagePtr TwitchMessageBuilder::parse()
         i++;
     }
 
-    this->message->setSearchText(this->userName + ": " + this->originalMessage);
+    this->message->searchText = this->userName + ": " + this->originalMessage;
 
     return this->getMessage();
 }
@@ -400,7 +400,7 @@ void TwitchMessageBuilder::parseHighlights()
         }
 
         if (doHighlight) {
-            this->message->addFlags(Message::Highlighted);
+            this->message->flags &= Message::Highlighted;
         }
     }
 }

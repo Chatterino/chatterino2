@@ -39,7 +39,7 @@ void Channel::append(std::shared_ptr<messages::Message> message)
     str.append("] ");
     str.append(message->loginName);
     str.append(": ");
-    str.append(message->getSearchText());
+    str.append(message->searchText);
     str.append('\n');
     this->appendLine(str);
 }

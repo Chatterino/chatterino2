@@ -97,7 +97,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     int snapshotLength = snapshot.getLength();
 
     for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
-        if (snapshot[i]->hasFlags(Message::Timeout) && snapshot[i]->loginName == username) {
+        if (snapshot[i]->flags & Message::Timeout && snapshot[i]->loginName == username) {
             MessagePtr replacement(
                 Message::createTimeoutMessage(username, durationInSeconds, reason, true));
             c->replaceMessage(snapshot[i], replacement);
@@ -112,8 +112,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // disable the messages from the user
     for (int i = 0; i < snapshotLength; i++) {
-        if (!snapshot[i]->hasFlags(Message::Timeout) && snapshot[i]->loginName == username) {
-            snapshot[i]->addFlags(Message::Disabled);
+        if (!(snapshot[i]->flags & Message::Timeout) && snapshot[i]->loginName == username) {
+            snapshot[i]->flags &= Message::Disabled;
         }
     }
 

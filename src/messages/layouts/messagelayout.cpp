@@ -22,7 +22,7 @@ MessageLayout::MessageLayout(MessagePtr _message)
     : message(_message)
     , buffer(nullptr)
 {
-    if (_message->hasFlags(Message::Collapsed)) {
+    if (_message->flags & Message::Collapsed) {
         this->addFlags(MessageLayout::Collapsed);
     }
 }
@@ -167,7 +167,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
     // draw disabled
-    if (this->message->hasFlags(Message::Disabled)) {
+    if (this->message->flags & Message::Disabled) {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
     }
 
@@ -186,7 +186,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    painter.fillRect(buffer->rect(), this->message->hasFlags(Message::Highlighted)
+    painter.fillRect(buffer->rect(), this->message->flags & Message::Highlighted
                                          ? themeManager.messages.backgrounds.highlighted
                                          : themeManager.messages.backgrounds.regular);
 

@@ -48,13 +48,13 @@ void EmotePopup::loadChannel(SharedChannel _channel)
 
         builder1.appendElement(new TextElement(title, MessageElement::Text));
 
-        builder1.getMessage()->addFlags(Message::Centered);
+        builder1.getMessage()->flags &= Message::Centered;
         emoteChannel->addMessage(builder1.getMessage());
 
         // EMOTES
         messages::MessageBuilder builder2;
-        builder2.getMessage()->addFlags(Message::Centered);
-        builder2.getMessage()->addFlags(Message::DisableCompactEmotes);
+        builder2.getMessage()->flags &= Message::Centered;
+        builder2.getMessage()->flags &= Message::DisableCompactEmotes;
 
         map.each([&](const QString &key, const util::EmoteData &value) {
             builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
@@ -87,13 +87,13 @@ void EmotePopup::loadEmojis()
     messages::MessageBuilder builder1;
 
     builder1.appendElement(new TextElement("emojis", MessageElement::Text));
-    builder1.getMessage()->addFlags(Message::Centered);
+    builder1.getMessage()->flags &= Message::Centered;
     emojiChannel->addMessage(builder1.getMessage());
 
     // emojis
     messages::MessageBuilder builder;
-    builder.getMessage()->addFlags(Message::Centered);
-    builder.getMessage()->addFlags(Message::DisableCompactEmotes);
+    builder.getMessage()->flags &= Message::Centered;
+    builder.getMessage()->flags &= Message::DisableCompactEmotes;
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
         builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
