@@ -862,9 +862,9 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,
                                   messages::MessageLayout *layout)
 {
-    switch (link.getType()) {
+    switch (link.type) {
         case messages::Link::UserInfo: {
-            auto user = link.getValue();
+            auto user = link.value;
             this->userPopupWidget.setName(user);
             this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
             this->userPopupWidget.show();
@@ -886,16 +886,16 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
                                     [] { QApplication::clipboard()->setText(url); });
                 }
 
-                url = link.getValue();
+                url = link.value;
                 menu->move(QCursor::pos());
                 menu->show();
             } else {
-                QDesktopServices::openUrl(QUrl(link.getValue()));
+                QDesktopServices::openUrl(QUrl(link.value));
             }
             break;
         }
         case messages::Link::UserAction: {
-            QString value = link.getValue();
+            QString value = link.value;
             value.replace("{user}", layout->getMessage()->loginName);
             this->channel->sendMessage(value);
         }

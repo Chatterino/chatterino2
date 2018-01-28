@@ -74,8 +74,8 @@ void SplitInput::initLayout()
         if (!this->emotePopup) {
             this->emotePopup = std::make_unique<EmotePopup>(this->themeManager);
             this->emotePopup->linkClicked.connect([this](const messages::Link &link) {
-                if (link.getType() == messages::Link::InsertText) {
-                    this->insertText(link.getValue() + " ");
+                if (link.type == messages::Link::InsertText) {
+                    this->insertText(link.value + " ");
                 }
             });
         }

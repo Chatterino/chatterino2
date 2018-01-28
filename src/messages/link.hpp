@@ -4,9 +4,7 @@
 
 namespace chatterino {
 namespace messages {
-
-class Link
-{
+struct Link {
 public:
     enum Type {
         None,
@@ -23,14 +21,10 @@ public:
     Link();
     Link(Type getType, const QString &getValue);
 
-    bool isValid() const;
-    Type getType() const;
-    const QString &getValue() const;
-
-private:
     Type type;
     QString value;
-};
 
+    bool isValid() const;
+};
 }  // namespace messages
 }  // namespace chatterino
