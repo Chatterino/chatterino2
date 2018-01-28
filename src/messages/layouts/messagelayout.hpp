@@ -15,7 +15,8 @@
 namespace chatterino {
 namespace messages {
 namespace layouts {
-struct MessageLayout : boost::noncopyable {
+class MessageLayout : boost::noncopyable
+{
 public:
     enum Flags : uint8_t { Collapsed, RequiresBufferUpdate, RequiresLayout };
 

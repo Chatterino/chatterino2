@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QRect>
 
+#include "messages/message.hpp"
 #include "messages/selection.hpp"
 
 class QPainter;
@@ -41,27 +42,28 @@ struct Margin {
     }
 };
 
-struct MessageLayoutContainer
-{
+struct MessageLayoutContainer {
 public:
     MessageLayoutContainer();
 
-    float scale;
     Margin margin;
     bool centered;
     bool enableCompactEmotes;
-    int width;
 
     int getHeight() const;
+    int getWidth() const;
+    float getScale() const;
 
     // methods
+    void begin(int width, float scale, Message::MessageFlags flags);
+    void finish();
+
     void clear();
     void addElement(MessageLayoutElement *element);
     void addElementNoLineBreak(MessageLayoutElement *element);
     void breakLine();
     bool atStartOfLine();
     bool fitsInLine(int width);
-    void finish();
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
@@ -87,6 +89,9 @@ private:
     void _addElement(MessageLayoutElement *element);
 
     // variables
+    float scale;
+    int width;
+    Message::MessageFlags flags;
     int line;
     int height;
     int currentX, currentY;

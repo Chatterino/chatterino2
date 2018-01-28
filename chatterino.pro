@@ -276,7 +276,6 @@ HEADERS  += \
     src/widgets/settingspages/ignoreuserspage.hpp \
     src/widgets/settingspages/ignoremessagespage.hpp \
     src/widgets/settingspages/specialchannelspage.hpp \
-    src/widgets/settingspages/keyboardsettings.hpp \
     src/widgets/settingspages/keyboardsettingspage.hpp \
     src/widgets/helper/titlebarbutton.hpp \
     src/widgets/helper/label.hpp \

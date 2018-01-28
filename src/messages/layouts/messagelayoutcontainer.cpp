@@ -14,8 +14,8 @@ namespace messages {
 namespace layouts {
 MessageLayoutContainer::MessageLayoutContainer()
     : scale(1)
+    , flags(Message::None)
     , margin(4, 8, 4, 8)
-    , centered(false)
 {
     this->clear();
 }
@@ -25,7 +25,25 @@ int MessageLayoutContainer::getHeight() const
     return this->height;
 }
 
+int MessageLayoutContainer::getWidth() const
+{
+    return this->width;
+}
+
+float MessageLayoutContainer::getScale() const
+{
+    return this->scale;
+}
+
 // methods
+void MessageLayoutContainer::begin(int width, float _scale, Message::MessageFlags _flags)
+{
+    this->clear();
+    this->width = width;
+    this->scale = this->scale;
+    this->flags = _flags;
+}
+
 void MessageLayoutContainer::clear()
 {
     this->elements.clear();
@@ -56,24 +74,31 @@ void MessageLayoutContainer::addElementNoLineBreak(MessageLayoutElement *element
 
 void MessageLayoutContainer::_addElement(MessageLayoutElement *element)
 {
+    // top margin
     if (this->elements.size() == 0) {
         this->currentY = this->margin.top * this->scale;
     }
 
     int newLineHeight = element->getRect().height();
 
-    // fourtf: xD
-    //    bool compactEmotes = true;
-    //    if (compactEmotes && element->word.isImage() && word.getFlags() &
-    //    MessageElement::EmoteImages) {
-    //        newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale;
-    //    }
+    // compact emote offset
+    bool isCompactEmote = !(this->flags & Message::DisableCompactEmotes) &&
+                          element->getCreator().getFlags() & MessageElement::EmoteImages;
 
+    if (isCompactEmote) {
+        newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale;
+    }
+
+    // update line height
     this->lineHeight = std::max(this->lineHeight, newLineHeight);
 
+    // set move element
     element->setPosition(QPoint(this->currentX, this->currentY - element->getRect().height()));
+
+    // add element
     this->elements.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
+    // set current x
     this->currentX += element->getRect().width();
 
     if (element->hasTrailingSpace()) {
@@ -85,19 +110,16 @@ void MessageLayoutContainer::breakLine()
 {
     int xOffset = 0;
 
-    if (this->centered && this->elements.size() > 0) {
+    if (this->flags & Message::Centered && this->elements.size() > 0) {
         xOffset = (width - this->elements.at(this->elements.size() - 1)->getRect().right()) / 2;
     }
 
     for (size_t i = lineStart; i < this->elements.size(); i++) {
         MessageLayoutElement *element = this->elements.at(i).get();
 
-        bool isCompactEmote = false;
-
-        // fourtf: xD
-        // this->enableCompactEmotes && element->getWord().isImage() &&
-        //                     element->getWord().getFlags() &
-        //                     MessageElement::EmoteImages;
+        bool isCompactEmote =
+            !(this->flags & Message::DisableCompactEmotes) &&
+            (this->flags & element->getCreator().getFlags()) & MessageElement::EmoteImages;
 
         int yExtra = 0;
         if (isCompactEmote) {

@@ -62,8 +62,8 @@ ImageElement::ImageElement(Image *_image, MessageElement::Flags flags)
 void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        QSize size(this->image->getWidth() * this->image->getScale() * container.scale,
-                   this->image->getHeight() * this->image->getScale() * container.scale);
+        QSize size(this->image->getWidth() * this->image->getScale() * container.getScale(),
+                   this->image->getHeight() * this->image->getScale() * container.getScale());
 
         container.addElement(
             (new ImageLayoutElement(*this, this->image, size))->setLink(this->getLink()));
@@ -108,8 +108,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
                 _image = this->data.image1x;
             }
 
-            QSize size((int)(container.scale * _image->getScaledWidth()),
-                       (int)(container.scale * _image->getScaledHeight()));
+            QSize size((int)(container.getScale() * _image->getScaledWidth()),
+                       (int)(container.getScale() * _image->getScaledHeight()));
 
             container.addElement(
                 (new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));
@@ -137,8 +137,8 @@ TextElement::TextElement(const QString &text, MessageElement::Flags flags,
 void TextElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        QFontMetrics &metrics =
-            singletons::FontManager::getInstance().getFontMetrics(this->style, container.scale);
+        QFontMetrics &metrics = singletons::FontManager::getInstance().getFontMetrics(
+            this->style, container.getScale());
         singletons::ThemeManager &themeManager =
             singletons::ThemeManager::ThemeManager::getInstance();
 
@@ -148,7 +148,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 themeManager.normalizeColor(color);
 
                 auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()), color,
-                                                this->style, container.scale))
+                                                this->style, container.getScale()))
                              ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
                 return e;
@@ -265,7 +265,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElement::Flags _flags)
 {
     if (_flags & MessageElement::ModeratorTools) {
-        QSize size((int)(container.scale * 16), (int)(container.scale * 16));
+        QSize size((int)(container.getScale() * 16), (int)(container.getScale() * 16));
 
         for (const singletons::ModerationAction &m :
              singletons::SettingManager::getInstance().getModerationActions()) {
@@ -274,7 +274,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                          ->setLink(Link(Link::UserAction, m.getAction())));
             } else {
                 container.addElement((new TextIconLayoutElement(*this, m.getLine1(), m.getLine2(),
-                                                                container.scale, size))
+                                                                container.getScale(), size))
                                          ->setLink(Link(Link::UserAction, m.getAction())));
             }
         }

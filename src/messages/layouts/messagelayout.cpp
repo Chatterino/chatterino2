@@ -107,9 +107,7 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
 void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
 {
-    this->container.clear();
-    this->container.width = width;
-    this->container.scale = this->scale;
+    this->container.begin(width, this->scale, this->message->flags.value);
 
     for (const std::unique_ptr<MessageElement> &element : this->message->getElements()) {
         element->addToContainer(this->container, flags);
@@ -138,7 +136,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
                         (int)(this->container.getHeight() * painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
-        pixmap = new QPixmap(this->container.width, std::max(16, this->container.getHeight()));
+        pixmap = new QPixmap(this->container.getWidth(), std::max(16, this->container.getHeight()));
 #endif
 
         this->buffer = std::shared_ptr<QPixmap>(pixmap);
@@ -168,7 +166,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
         QBrush brush = QBrush(color, Qt::VerPattern);
 
-        painter.fillRect(0, y + this->container.getHeight() - 1, this->container.width, 1, brush);
+        painter.fillRect(0, y + this->container.getHeight() - 1, this->container.getWidth(), 1,
+                         brush);
     }
 
     this->bufferValid = true;

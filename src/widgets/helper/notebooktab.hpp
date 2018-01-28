@@ -82,9 +82,9 @@ private:
 
     QRect getXRect()
     {
-        float scale = this->getScale();
-        return QRect(this->width() - static_cast<int>(20 * scale), static_cast<int>(4 * scale),
-                     static_cast<int>(16 * scale), static_cast<int>(16 * scale));
+        float s = this->getScale();
+        return QRect(this->width() - static_cast<int>(20 * s), static_cast<int>(4 * s),
+                     static_cast<int>(16 * s), static_cast<int>(16 * s));
     }
 };
 
