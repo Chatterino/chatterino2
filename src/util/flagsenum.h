@@ -38,15 +38,15 @@ public:
     }
     inline T &operator|=(const Q &a)
     {
-        return (T &)((Q &)a |= (Q)this->value);
+        return (T &)((Q &)this->value |= (Q)a);
     }
     inline T &operator&=(const Q &a)
     {
-        return (T &)((Q &)a &= (Q)this->value);
+        return (T &)((Q &)this->value &= (Q)a);
     }
     inline T &operator^=(const Q &a)
     {
-        return (T &)((Q &)a ^= (Q)this->value);
+        return (T &)((Q &)this->value ^= (Q)a);
     }
 
     T value;
