@@ -52,6 +52,7 @@ public:
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
     QStringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
     QStringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
+    QStringSetting streamlinkOpts = {"/behaviour/streamlink/options", ""};
     BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
 
     /// Commands

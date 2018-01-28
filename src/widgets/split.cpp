@@ -422,6 +422,7 @@ void Split::doOpenStreamlink()
             args << quality;
         if (exclude != "")
             args << "--stream-sorting-excludes" << exclude;
+        args << settings.streamlinkOpts;
         QProcess::startDetached(path, args);
     } else {
         QProcess *p = new QProcess();

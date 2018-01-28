@@ -9,6 +9,7 @@
 #include <QWidget>
 
 #include "basewindow.hpp"
+#include "singletons/settingsmanager.hpp"
 
 namespace chatterino {
 
