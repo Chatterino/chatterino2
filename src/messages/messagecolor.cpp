@@ -2,10 +2,9 @@
 
 namespace chatterino {
 namespace messages {
-
 MessageColor::MessageColor(const QColor &_color)
     : type(Type::Custom)
-    , color(_color)
+    , customColor(_color)
 {
 }
 
@@ -14,16 +13,11 @@ MessageColor::MessageColor(Type _type)
 {
 }
 
-MessageColor::Type MessageColor::getType() const
-{
-    return this->type;
-}
-
 const QColor &MessageColor::getColor(singletons::ThemeManager &themeManager) const
 {
     switch (this->type) {
         case Type::Custom:
-            return this->color;
+            return this->customColor;
         case Type::Text:
             return themeManager.messages.textColors.regular;
         case Type::System:
@@ -35,6 +29,5 @@ const QColor &MessageColor::getColor(singletons::ThemeManager &themeManager) con
     static QColor _default;
     return _default;
 }
-
 }  // namespace messages
 }  // namespace chatterino
