@@ -56,7 +56,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         // TITLE
         messages::MessageBuilder builder1;
 
-        builder1.appendElement(new TextElement(title, MessageElement::Text));
+        builder1.append(new TextElement(title, MessageElement::Text));
 
         builder1.getMessage()->flags &= Message::Centered;
         emoteChannel->addMessage(builder1.getMessage());
@@ -67,7 +67,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags &= Message::DisableCompactEmotes;
 
         map.each([&](const QString &key, const util::EmoteData &value) {
-            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
+            builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                        ->setLink(Link(Link::InsertText, key)));
         });
 
@@ -96,7 +96,7 @@ void EmotePopup::loadEmojis()
     // title
     messages::MessageBuilder builder1;
 
-    builder1.appendElement(new TextElement("emojis", MessageElement::Text));
+    builder1.append(new TextElement("emojis", MessageElement::Text));
     builder1.getMessage()->flags &= Message::Centered;
     emojiChannel->addMessage(builder1.getMessage());
 
@@ -106,7 +106,7 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags &= Message::DisableCompactEmotes;
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
-        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
+        builder.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                   ->setLink(Link(Link::Type::InsertText, key)));
     });
     emojiChannel->addMessage(builder.getMessage());

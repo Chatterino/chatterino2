@@ -9,34 +9,28 @@
 namespace chatterino {
 namespace messages {
 
-struct MessageBuilder
-{
+struct MessageBuilder {
 public:
     MessageBuilder();
 
     MessagePtr getMessage();
 
     void setHighlight(bool value);
-    void appendElement(MessageElement *element);
+    void append(MessageElement *element);
+    void appendTimestamp();
+    void appendTimestamp(const QTime &time);
+    QString matchLink(const QString &string);
 
-    //    typename std::enable_if<std::is_base_of<MessageElement, T>::value, T>::type
-
-    template <class T, class... Args>
+    template <typename T, typename... Args,
+              typename _ = std::enable_if<std::is_base_of<MessageElement, T>::value>::type>
     T *emplace(Args &&... args)
     {
         static_assert(std::is_base_of<MessageElement, T>::value, "T must extend MessageElement");
 
         T *element = new T(std::forward<Args>(args)...);
-        this->appendElement(element);
+        this->append(element);
         return element;
     }
-
-    void appendTimestamp();
-    void appendTimestamp(const QTime &time);
-
-    QString matchLink(const QString &string);
-
-    QString originalMessage;
 
 protected:
     MessagePtr message;

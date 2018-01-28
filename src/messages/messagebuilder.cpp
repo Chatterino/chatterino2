@@ -18,7 +18,7 @@ MessagePtr MessageBuilder::getMessage()
     return this->message;
 }
 
-void MessageBuilder::appendElement(MessageElement *element)
+void MessageBuilder::append(MessageElement *element)
 {
     this->message->addElement(element);
 }
@@ -39,7 +39,7 @@ void MessageBuilder::setHighlight(bool value)
 
 void MessageBuilder::appendTimestamp(const QTime &time)
 {
-    this->appendElement(new TimestampElement(time));
+    this->append(new TimestampElement(time));
 }
 
 QString MessageBuilder::matchLink(const QString &string)

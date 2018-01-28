@@ -7,9 +7,7 @@
 namespace chatterino {
 namespace messages {
 
-struct MessageColor
-{
-public:
+struct MessageColor {
     enum Type { Custom, Text, Link, System };
 
     MessageColor(const QColor &color);

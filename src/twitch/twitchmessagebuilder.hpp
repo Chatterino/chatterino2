@@ -45,6 +45,7 @@ private:
     QString roomID;
 
     QColor usernameColor;
+    QString originalMessage;
 
     void parseMessageID();
     void parseRoomID();
