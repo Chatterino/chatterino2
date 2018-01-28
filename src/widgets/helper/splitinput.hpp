@@ -27,10 +27,13 @@ public:
 
     void clearSelection();
     QString getInputText() const;
+    void insertText(const QString &text);
 
     pajlada::Signals::Signal<const QString &> textChanged;
 
 protected:
+    virtual void scaleChangedEvent(float scale) override;
+
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
 
@@ -38,18 +41,29 @@ protected:
 
 private:
     Split *const chatWidget;
-    EmotePopup *emotePopup = nullptr;
+    std::unique_ptr<EmotePopup> emotePopup;
+
+    struct {
+        ResizingTextEdit *textEdit;
+        QLabel *textEditLength;
+        RippleEffectLabel *emoteButton;
+
+        QHBoxLayout *hbox;
+    } ui;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-    QHBoxLayout hbox;
-    QVBoxLayout vbox;
-    QHBoxLayout editContainer;
-    ResizingTextEdit textInput;
-    QLabel textLengthLabel;
-    RippleEffectLabel emotesLabel;
+    //    QHBoxLayout hbox;
+    //    QVBoxLayout vbox;
+    //    QHBoxLayout editContainer;
+    //    ResizingTextEdit textInput;
+    //    QLabel textLengthLabel;
+    //    RippleEffectLabel emotesLabel;
     QStringList prevMsg;
     int prevIndex = 0;
-    virtual void refreshTheme() override;
+
+    void initLayout();
+    void installKeyPressedEvent();
+    virtual void themeRefreshEvent() override;
 
 private slots:
     void editTextChanged();

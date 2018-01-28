@@ -75,6 +75,10 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
 
+    /// Ingored Users
+    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers", true};
+    QStringSetting ignoredKeywords = {"/ignore/ignoredKeywords", ""};
+
     /// Moderation
     QStringSetting moderationActions = {"/moderation/actions", "/ban {user}\n/timeout {user} 300"};
 
@@ -107,6 +111,7 @@ public:
     void recallSnapshot();
 
     std::vector<ModerationAction> getModerationActions() const;
+    const std::shared_ptr<std::vector<QString>> getIgnoredKeywords() const;
 
 signals:
     void wordFlagsChanged();
@@ -114,10 +119,12 @@ signals:
 private:
     std::vector<ModerationAction> _moderationActions;
     std::unique_ptr<rapidjson::Document> snapshot;
+    std::shared_ptr<std::vector<QString>> _ignoredKeywords;
 
     SettingManager();
 
     void updateModerationActions();
+    void updateIgnoredKeywords();
 
     messages::MessageElement::Flags wordFlags = messages::MessageElement::Default;
 

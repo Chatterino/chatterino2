@@ -27,14 +27,27 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , tags(this->ircMessage->tags())
     , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
 {
+    this->originalMessage = this->ircMessage->content();
 }
 
-MessagePtr TwitchMessageBuilder::parse()
+bool TwitchMessageBuilder::isIgnored() const
+{
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    std::shared_ptr<std::vector<QString>> ignoredKeywords = settings.getIgnoredKeywords();
+
+    for (const QString &keyword : *ignoredKeywords) {
+        if (this->originalMessage.contains(keyword, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+MessagePtr TwitchMessageBuilder::build()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
-
-    this->originalMessage = this->ircMessage->content();
 
     // PARSING
     this->parseUsername();
@@ -43,11 +56,14 @@ MessagePtr TwitchMessageBuilder::parse()
     //    this->appendWord(Word(Resources::getInstance().badgeCollapsed, Word::Collapsed, QString(),
     //    QString()));
 
-    // The timestamp is always appended to the builder
-    // Whether or not will be rendered is decided/checked later
+    // PARSING
+    this->parseMessageID();
 
-    // Appends the correct timestamp if the message is a past message
+    this->parseRoomID();
 
+    this->appendChannelName();
+
+    // timestamp
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg) {
         // This may be architecture dependent(datatype)
@@ -58,20 +74,11 @@ MessagePtr TwitchMessageBuilder::parse()
         this->emplace<TimestampElement>();
     }
 
-    this->parseMessageID();
-
-    this->parseRoomID();
-
-    // TIMESTAMP
     this->emplace<TwitchModerationElement>();
 
-    this->parseTwitchBadges();
+    this->appendTwitchBadges();
 
-    this->addChatterinoBadges();
-
-    if (this->args.includeChannelName) {
-        this->parseChannelName();
-    }
+    this->appendChatterinoBadges();
 
     this->appendUsername();
 
@@ -219,7 +226,7 @@ void TwitchMessageBuilder::parseRoomID()
     }
 }
 
-void TwitchMessageBuilder::parseChannelName()
+void TwitchMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->name);
     Link link(Link::Url, this->channel->name + "\n" + this->messageID);
@@ -450,39 +457,36 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
     util::EmoteData emoteData;
 
+    auto appendEmote = [&](MessageElement::Flags flags) {
+        this->emplace<EmoteElement>(emoteData, flags);
+        return true;
+    };
+
     if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::BttvEmote);
     } else if (emoteManager.ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::FfzEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::FfzEmote);
     } else if (emoteManager.getChatterinoEmotes().tryGet(emoteString, emoteData)) {
         // Chatterino Emote
-        return this->appendEmote(emoteData);
+        return appendEmote(MessageElement::Misc);
     }
 
     return false;
 }
 
-bool TwitchMessageBuilder::appendEmote(const util::EmoteData &emoteData)
-{
-    this->emplace<EmoteElement>(emoteData, MessageElement::BttvEmote);
-
-    // Perhaps check for ignored emotes here?
-    return true;
-}
-
 // fourtf: this is ugly
 //		   maybe put the individual badges into a map instead of this mess
-void TwitchMessageBuilder::parseTwitchBadges()
+void TwitchMessageBuilder::appendTwitchBadges()
 {
     singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
     const auto &channelResources = resourceManager.channels[this->roomID];
@@ -639,7 +643,7 @@ void TwitchMessageBuilder::parseTwitchBadges()
     }
 }
 
-void TwitchMessageBuilder::addChatterinoBadges()
+void TwitchMessageBuilder::appendChatterinoBadges()
 {
     auto &badges = singletons::ResourceManager::getInstance().chatterinoBadges;
     auto it = badges.find(this->userName.toStdString());

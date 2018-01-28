@@ -1,12 +1,15 @@
-#include "logspage.hpp"
+#pragma once
+
+#include "widgets/settingspages/settingspage.hpp"
 
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
-LogsPage::LogsPage()
-    : SettingsPage("Logs", "")
+class KeyboardSettingsPage : public SettingsPage
 {
-}
+public:
+    KeyboardSettingsPage();
+};
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

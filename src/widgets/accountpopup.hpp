@@ -23,10 +23,10 @@ class AccountPopupWidget : public BaseWindow
 {
     Q_OBJECT
 public:
-    AccountPopupWidget(SharedChannel _channel);
+    AccountPopupWidget(ChannelPtr _channel);
 
     void setName(const QString &name);
-    void setChannel(SharedChannel _channel);
+    void setChannel(ChannelPtr _channel);
 
 public slots:
     void actuallyRefreshButtons();
@@ -35,7 +35,7 @@ signals:
     void refreshButtons();
 
 protected:
-    virtual void dpiMultiplierChanged(float oldDpi, float newDpi) override;
+    virtual void scaleChangedEvent(float newDpi) override;
 
 private:
     Ui::AccountPopup *ui;
@@ -52,7 +52,7 @@ private:
 
     enum class UserType { User, Mod, Owner };
 
-    SharedChannel channel;
+    ChannelPtr channel;
 
     QPixmap avatar;
 
@@ -63,7 +63,7 @@ private:
         QString userID;
         UserType userType = UserType::User;
 
-        void refreshUserType(const SharedChannel &channel, bool loggedInUser);
+        void refreshUserType(const ChannelPtr &channel, bool loggedInUser);
     };
 
     User loggedInUser;

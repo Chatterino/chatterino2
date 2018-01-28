@@ -6,6 +6,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QIcon>
 
 #ifdef USEWINSDK
@@ -22,7 +23,7 @@
 #define WM_DPICHANGED 0x02E0
 #endif
 
-#include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/helper/titlebarbutton.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -43,7 +44,7 @@ BaseWindow::BaseWindow(BaseWidget *parent, bool _enableCustomFrame)
 }
 
 BaseWindow::BaseWindow(QWidget *parent, bool _enableCustomFrame)
-    : BaseWidget(parent, Qt::Window)
+    : BaseWidget(singletons::ThemeManager::getInstance(), parent, Qt::Window)
     , enableCustomFrame(_enableCustomFrame)
 {
     this->init();
@@ -56,45 +57,57 @@ void BaseWindow::init()
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame()) {
         // CUSTOM WINDOW FRAME
-        QVBoxLayout *layout = new QVBoxLayout;
+        QVBoxLayout *layout = new QVBoxLayout();
         layout->setMargin(1);
+        layout->setSpacing(0);
         this->setLayout(layout);
         {
-            QHBoxLayout *buttons = this->titlebarBox = new QHBoxLayout;
-            buttons->setMargin(0);
-            layout->addLayout(buttons);
+            QHBoxLayout *buttonLayout = this->titlebarBox = new QHBoxLayout();
+            buttonLayout->setMargin(0);
+            layout->addLayout(buttonLayout);
 
             // title
-            QLabel *titleLabel = new QLabel("Chatterino");
-            buttons->addWidget(titleLabel);
-            this->titleLabel = titleLabel;
+            QLabel *title = new QLabel("   Chatterino");
+            buttonLayout->addWidget(title);
+            this->titleLabel = title;
 
             // buttons
-            RippleEffectLabel *min = new RippleEffectLabel;
-            min->getLabel().setText("min");
-            min->setFixedSize(46, 30);
-            RippleEffectLabel *max = new RippleEffectLabel;
-            max->setFixedSize(46, 30);
-            max->getLabel().setText("max");
-            RippleEffectLabel *exit = new RippleEffectLabel;
-            exit->setFixedSize(46, 30);
-            exit->getLabel().setText("exit");
+            TitleBarButton *_minButton = new TitleBarButton;
+            _minButton->setScaleIndependantSize(46, 30);
+            _minButton->setButtonStyle(TitleBarButton::Minimize);
+            TitleBarButton *_maxButton = new TitleBarButton;
+            _maxButton->setScaleIndependantSize(46, 30);
+            _maxButton->setButtonStyle(TitleBarButton::Maximize);
+            TitleBarButton *_exitButton = new TitleBarButton;
+            _exitButton->setScaleIndependantSize(46, 30);
+            _exitButton->setButtonStyle(TitleBarButton::Close);
 
-            this->minButton = min;
-            this->maxButton = max;
-            this->exitButton = exit;
+            QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
+                this->setWindowState(Qt::WindowMinimized | this->windowState());
+            });
+            QObject::connect(_maxButton, &TitleBarButton::clicked, this, [this] {
+                this->setWindowState(this->windowState() == Qt::WindowMaximized
+                                         ? Qt::WindowActive
+                                         : Qt::WindowMaximized);
+            });
+            QObject::connect(_exitButton, &TitleBarButton::clicked, this,
+                             [this] { this->close(); });
 
-            this->widgets.push_back(min);
-            this->widgets.push_back(max);
-            this->widgets.push_back(exit);
+            this->minButton = _minButton;
+            this->maxButton = _maxButton;
+            this->exitButton = _exitButton;
 
-            buttons->addStretch(1);
-            buttons->addWidget(min);
-            buttons->addWidget(max);
-            buttons->addWidget(exit);
+            this->buttons.push_back(_minButton);
+            this->buttons.push_back(_maxButton);
+            this->buttons.push_back(_exitButton);
+
+            buttonLayout->addStretch(1);
+            buttonLayout->addWidget(_minButton);
+            buttonLayout->addWidget(_maxButton);
+            buttonLayout->addWidget(_exitButton);
+            buttonLayout->setSpacing(0);
         }
-        this->layoutBase = new QWidget(this);
-        this->widgets.push_back(this->layoutBase);
+        this->layoutBase = new BaseWidget(this);
         layout->addWidget(this->layoutBase);
     }
 
@@ -102,15 +115,25 @@ void BaseWindow::init()
     auto dpi = util::getWindowDpi(this->winId());
 
     if (dpi) {
-        this->dpiMultiplier = dpi.value() / 96.f;
+        this->scale = dpi.value() / 96.f;
     }
 
-    this->dpiMultiplierChanged(1, this->dpiMultiplier);
+    this->scaleChangedEvent(this->scale);
 #endif
 
     if (singletons::SettingManager::getInstance().windowTopMost.getValue()) {
         this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     }
+}
+
+void BaseWindow::setStayInScreenRect(bool value)
+{
+    this->stayInScreenRect = value;
+}
+
+bool BaseWindow::getStayInScreenRect() const
+{
+    return this->stayInScreenRect;
 }
 
 QWidget *BaseWindow::getLayoutContainer()
@@ -125,37 +148,96 @@ QWidget *BaseWindow::getLayoutContainer()
 bool BaseWindow::hasCustomWindowFrame()
 {
 #ifdef Q_OS_WIN
-    //    return this->enableCustomFrame;
-    return false;
+    return this->enableCustomFrame;
+//    return false;
 #else
     return false;
 #endif
 }
 
-void BaseWindow::refreshTheme()
+void BaseWindow::themeRefreshEvent()
 {
     QPalette palette;
     palette.setColor(QPalette::Background, this->themeManager.windowBg);
     palette.setColor(QPalette::Foreground, this->themeManager.windowText);
     this->setPalette(palette);
+
+    for (RippleEffectButton *button : this->buttons) {
+        button->setMouseEffectColor(this->themeManager.windowText);
+    }
 }
 
-void BaseWindow::addTitleBarButton(const QString &text)
+void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
+                                   std::function<void()> onClicked)
 {
-    RippleEffectLabel *label = new RippleEffectLabel;
-    label->getLabel().setText(text);
-    this->widgets.push_back(label);
-    this->titlebarBox->insertWidget(2, label);
+    TitleBarButton *button = new TitleBarButton;
+    button->setScaleIndependantSize(30, 30);
+
+    this->buttons.push_back(button);
+    this->titlebarBox->insertWidget(2, button);
+    button->setButtonStyle(style);
+
+    QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
 }
 
 void BaseWindow::changeEvent(QEvent *)
 {
-    //    TooltipWidget::getInstance()->hide();
+    TooltipWidget::getInstance()->hide();
+
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame()) {
+        this->maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
+                                            ? TitleBarButton::Unmaximize
+                                            : TitleBarButton::Maximize);
+    }
+#endif
 }
 
 void BaseWindow::leaveEvent(QEvent *)
 {
-    //    TooltipWidget::getInstance()->hide();
+    TooltipWidget::getInstance()->hide();
+}
+
+void BaseWindow::moveTo(QWidget *parent, QPoint point)
+{
+    point.rx() += 16;
+    point.ry() += 16;
+
+    this->move(point);
+    this->moveIntoDesktopRect(parent);
+}
+
+void BaseWindow::resizeEvent(QResizeEvent *)
+{
+    this->moveIntoDesktopRect(this);
+}
+
+void BaseWindow::moveIntoDesktopRect(QWidget *parent)
+{
+    if (!this->stayInScreenRect)
+        return;
+
+    // move the widget into the screen geometry if it's not already in there
+    QDesktopWidget *desktop = QApplication::desktop();
+
+    QRect s = desktop->screenGeometry(parent);
+    QPoint p = this->pos();
+
+    if (p.x() < s.left()) {
+        p.setX(s.left());
+    }
+    if (p.y() < s.top()) {
+        p.setY(s.top());
+    }
+    if (p.x() + this->width() > s.right()) {
+        p.setX(s.right() - this->width());
+    }
+    if (p.y() + this->height() > s.bottom()) {
+        p.setY(s.bottom() - this->height());
+    }
+
+    if (p != this->pos())
+        this->move(p);
 }
 
 #ifdef USEWINSDK
@@ -165,17 +247,16 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
     switch (msg->message) {
         case WM_DPICHANGED: {
-            qDebug() << "dpi changed";
             int dpi = HIWORD(msg->wParam);
 
-            float oldDpiMultiplier = this->dpiMultiplier;
-            this->dpiMultiplier = dpi / 96.f;
-            float scale = this->dpiMultiplier / oldDpiMultiplier;
+            float oldScale = this->scale;
+            float _scale = dpi / 96.f;
+            float resizeScale = _scale / oldScale;
 
-            this->dpiMultiplierChanged(oldDpiMultiplier, this->dpiMultiplier);
+            this->resize(static_cast<int>(this->width() * resizeScale),
+                         static_cast<int>(this->height() * resizeScale));
 
-            this->resize(static_cast<int>(this->width() * scale),
-                         static_cast<int>(this->height() * scale));
+            this->setScale(_scale);
 
             return true;
         }
@@ -250,10 +331,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     bool client = false;
 
                     QPoint point(x - winrect.left, y - winrect.top);
-                    for (QWidget *widget : this->widgets) {
+                    for (QWidget *widget : this->buttons) {
                         if (widget->geometry().contains(point)) {
                             client = true;
                         }
+                    }
+
+                    if (this->layoutBase->geometry().contains(point)) {
+                        client = true;
                     }
 
                     if (client) {
@@ -263,8 +348,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     }
                 }
 
-                qDebug() << *result;
-
                 return true;
             } else {
                 return QWidget::nativeEvent(eventType, message, result);
@@ -272,9 +355,10 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             break;
         }  // end case WM_NCHITTEST
         case WM_CLOSE: {
-            if (this->enableCustomFrame) {
-                return close();
-            }
+            //            if (this->enableCustomFrame) {
+            //                this->close();
+            //            }
+            return QWidget::nativeEvent(eventType, message, result);
             break;
         }
         default:
@@ -282,9 +366,10 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     }
 }
 
-void BaseWindow::showEvent(QShowEvent *)
+void BaseWindow::showEvent(QShowEvent *event)
 {
-    if (this->isVisible() && this->hasCustomWindowFrame()) {
+    if (!this->shown && this->isVisible() && this->hasCustomWindowFrame()) {
+        this->shown = true;
         SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
                          WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
 
@@ -294,22 +379,29 @@ void BaseWindow::showEvent(QShowEvent *)
         SetWindowPos((HWND)this->winId(), 0, 0, 0, 0, 0,
                      SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
     }
+
+    BaseWidget::showEvent(event);
 }
 
 void BaseWindow::paintEvent(QPaintEvent *event)
 {
-    BaseWidget::paintEvent(event);
-
     if (this->hasCustomWindowFrame()) {
+        BaseWidget::paintEvent(event);
+
         QPainter painter(this);
 
         bool windowFocused = this->window() == QApplication::activeWindow();
 
+        QLinearGradient gradient(0, 0, 10, 250);
+        gradient.setColorAt(1, this->themeManager.tabs.selected.backgrounds.unfocused.color());
+
         if (windowFocused) {
-            painter.setPen(this->themeManager.tabs.selected.backgrounds.regular.color());
+            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.regular.color());
         } else {
-            painter.setPen(this->themeManager.tabs.selected.backgrounds.unfocused.color());
+            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.unfocused.color());
         }
+        painter.setPen(QPen(QBrush(gradient), 1));
+
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
 }

@@ -37,14 +37,14 @@ static void get(QString url, const QObject *caller,
     });
 }
 
-static void get2(QString url, const QObject *caller,
+static void get2(QString url, const QObject *caller, bool useQuickLoadCache,
                  std::function<void(const rapidjson::Document &)> successCallback)
 {
     util::NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", getDefaultClientID());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    req.setUseQuickLoadCache(true);
+    req.setUseQuickLoadCache(useQuickLoadCache);
 
     req.getJSON2([=](const rapidjson::Document &document) {
         successCallback(document);  //

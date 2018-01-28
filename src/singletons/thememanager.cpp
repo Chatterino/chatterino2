@@ -59,23 +59,22 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
-    //#ifdef USEWINSDK
-    //    isLightTabs = isLight;
-    //    QColor tabFg = isLight ? "#000" : "#fff";
-    //    this->windowBg = isLight ? "#fff" : "#444";
-
-    //#else
-    isLightTabs = true;
-    QColor tabFg = isLightTabs ? "#000" : "#fff";
-    this->windowBg = "#fff";
-
-    //#endif
-
-    qreal sat = 0.05;
+    qreal sat = 0.1;
+    //    0.05;
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
     };
+
+    //#ifdef USEWINSDK
+    //    isLightTabs = isLight;
+    //    QColor tabFg = isLight ? "#000" : "#fff";
+    //    this->windowBg = isLight ? "#fff" : getColor(0, sat, 0.9);
+    //#else
+    isLightTabs = true;
+    QColor tabFg = isLightTabs ? "#000" : "#fff";
+    this->windowBg = "#fff";
+    //#endif
 
     // Ubuntu style
     // TODO: add setting for this

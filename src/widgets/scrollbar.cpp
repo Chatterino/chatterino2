@@ -18,7 +18,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     , currentValueAnimation(this, "currentValue")
     , smoothScrollingSetting(singletons::SettingManager::getInstance().enableSmoothScrolling)
 {
-    resize((int)(16 * this->getDpiMultiplier()), 100);
+    resize((int)(16 * this->getScale()), 100);
     this->currentValueAnimation.setDuration(150);
     this->currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
@@ -29,7 +29,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     timer->setSingleShot(true);
 
     connect(timer, &QTimer::timeout, [=]() {
-        resize((int)(16 * this->getDpiMultiplier()), 100);
+        resize((int)(16 * this->getScale()), 100);
         timer->deleteLater();
     });
 
@@ -194,7 +194,7 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 void Scrollbar::paintEvent(QPaintEvent *)
 {
     bool mouseOver = this->mouseOverIndex != -1;
-    int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getDpiMultiplier());
+    int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getScale());
 
     QPainter painter(this);
     //    painter.fillRect(rect(), this->themeManager.ScrollbarBG);
@@ -248,7 +248,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
 void Scrollbar::resizeEvent(QResizeEvent *)
 {
-    this->resize((int)(16 * this->getDpiMultiplier()), this->height());
+    this->resize((int)(16 * this->getScale()), this->height());
 }
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)

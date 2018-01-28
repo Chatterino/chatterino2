@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
+#include "widgets/helper/label.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/helper/signallabel.hpp"
 
@@ -34,12 +35,14 @@ public:
     void updateModerationModeIcon();
 
 protected:
+    virtual void scaleChangedEvent(float) override;
+    virtual void themeRefreshEvent() override;
+
     virtual void paintEvent(QPaintEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
-    virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
     Split *const split;
@@ -50,14 +53,13 @@ private:
     boost::signals2::connection onlineStatusChangedConnection;
 
     RippleEffectButton *dropdownButton;
+    //    Label *titleLabel;
     SignalLabel *titleLabel;
     RippleEffectButton *moderationButton;
 
     QMenu dropdownMenu;
 
     void rightButtonClicked();
-
-    virtual void refreshTheme() override;
 
     void initializeChannelSignals();
 

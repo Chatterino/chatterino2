@@ -1,10 +1,10 @@
-#include "logspage.hpp"
+#include "keyboardsettingspage.hpp"
 
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
-LogsPage::LogsPage()
-    : SettingsPage("Logs", "")
+KeyboardSettingsPage::KeyboardSettingsPage()
+    : SettingsPage("Keybindings", "")
 {
 }
 }  // namespace settingspages

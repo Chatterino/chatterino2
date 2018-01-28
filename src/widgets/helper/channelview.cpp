@@ -13,6 +13,7 @@
 #include "widgets/split.hpp"
 #include "widgets/tooltipwidget.hpp"
 
+#include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -24,8 +25,7 @@
 #include <functional>
 #include <memory>
 
-#define LAYOUT_WIDTH \
-    (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getDpiMultiplier())
+#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
 
 using namespace chatterino::messages;
 
@@ -96,6 +96,9 @@ ChannelView::ChannelView(BaseWidget *parent)
     auto e = new QResizeEvent(this->size(), this->size());
     this->resizeEvent(e);
     delete e;
+
+    singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
+        [this](auto, auto) { this->update(); }, this->managedConnections);
 }
 
 ChannelView::~ChannelView()
@@ -109,6 +112,13 @@ ChannelView::~ChannelView()
     this->layoutConnection.disconnect();
     this->messageAddedAtStartConnection.disconnect();
     this->messageReplacedConnection.disconnect();
+}
+
+void ChannelView::themeRefreshEvent()
+{
+    BaseWidget::themeRefreshEvent();
+
+    this->layoutMessages();
 }
 
 void ChannelView::queueUpdate()
@@ -164,7 +174,7 @@ void ChannelView::actuallyLayoutMessages()
         for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
             auto message = messagesSnapshot[i];
 
-            redrawRequired |= message->layout(layoutWidth, this->getDpiMultiplier(), flags);
+            redrawRequired |= message->layout(layoutWidth, this->getScale(), flags);
 
             y += message->getHeight();
 
@@ -180,7 +190,7 @@ void ChannelView::actuallyLayoutMessages()
     for (int i = (int)messagesSnapshot.getLength() - 1; i >= 0; i--) {
         auto *message = messagesSnapshot[i].get();
 
-        message->layout(layoutWidth, this->getDpiMultiplier(), flags);
+        message->layout(layoutWidth, this->getScale(), flags);
 
         h -= message->getHeight();
 
@@ -281,6 +291,16 @@ bool ChannelView::getEnableScrollingToBottom() const
     return this->enableScrollingToBottom;
 }
 
+void ChannelView::setOverrideFlags(boost::optional<messages::MessageElement::Flags> value)
+{
+    this->overrideFlags = value;
+}
+
+const boost::optional<messages::MessageElement::Flags> &ChannelView::getOverrideFlags() const
+{
+    return this->overrideFlags;
+}
+
 messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
     if (!this->paused) {
@@ -290,7 +310,7 @@ messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapsho
     return this->snapshot;
 }
 
-void ChannelView::setChannel(SharedChannel newChannel)
+void ChannelView::setChannel(ChannelPtr newChannel)
 {
     if (this->channel) {
         this->detachChannel();
@@ -328,7 +348,6 @@ void ChannelView::setChannel(SharedChannel newChannel)
         newChannel->messagesAddedAtStart.connect([this](std::vector<MessagePtr> &messages) {
             std::vector<MessageLayoutPtr> messageRefs;
             messageRefs.resize(messages.size());
-            qDebug() << messages.size();
             for (size_t i = 0; i < messages.size(); i++) {
                 messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
             }
@@ -410,6 +429,17 @@ void ChannelView::pause(int msecTimeout)
     this->pauseTimeout.start(msecTimeout);
 }
 
+void ChannelView::updateLastReadMessage()
+{
+    auto _snapshot = this->getMessagesSnapshot();
+
+    if (_snapshot.getLength() > 0) {
+        this->lastReadMessage = _snapshot[_snapshot.getLength() - 1];
+    }
+
+    this->update();
+}
+
 void ChannelView::resizeEvent(QResizeEvent *)
 {
     this->scrollBar.resize(this->scrollBar.width(), height());
@@ -434,6 +464,10 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 
 messages::MessageElement::Flags ChannelView::getFlags() const
 {
+    if (this->overrideFlags) {
+        return this->overrideFlags.get();
+    }
+
     MessageElement::Flags flags = singletons::SettingManager::getInstance().getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
@@ -441,6 +475,9 @@ messages::MessageElement::Flags ChannelView::getFlags() const
     if (split != nullptr) {
         if (split->getModerationMode()) {
             flags = (MessageElement::Flags)(flags | MessageElement::ModeratorTools);
+        }
+        if (this->channel == singletons::ChannelManager::getInstance().mentionsChannel) {
+            flags = (MessageElement::Flags)(flags | MessageElement::ChannelName);
         }
     }
 
@@ -477,11 +514,17 @@ void ChannelView::drawMessages(QPainter &painter)
               (fmod(this->scrollBar.getCurrentValue(), 1)));
 
     messages::MessageLayout *end = nullptr;
+    bool windowFocused = this->window() == QApplication::activeWindow();
 
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
         messages::MessageLayout *layout = messagesSnapshot[i].get();
 
-        layout->paint(painter, y, i, this->selection);
+        bool isLastMessage = false;
+        if (singletons::SettingManager::getInstance().showLastMessageIndicator) {
+            isLastMessage = this->lastReadMessage.get() == layout;
+        }
+
+        layout->paint(painter, y, i, this->selection, isLastMessage, windowFocused);
 
         y += layout->getHeight();
 
@@ -551,8 +594,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == 0) {
                     desired = 0;
                 } else {
-                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
-                                            this->getFlags());
+                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -574,8 +616,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == snapshotLength - 1) {
                     desired = snapshot.getLength();
                 } else {
-                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getDpiMultiplier(),
-                                            this->getFlags());
+                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
@@ -782,12 +823,50 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     auto &link = hoverLayoutElement->getLink();
+    if (event->button() != Qt::LeftButton ||
+        !singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+        this->handleLinkClick(event, link, layout.get());
+    }
 
+    this->linkClicked.invoke(link);
+}
+
+void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+        std::shared_ptr<messages::MessageLayout> layout;
+        QPoint relativePos;
+        int messageIndex;
+
+        if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
+            return;
+        }
+
+        // message under cursor is collapsed
+        if (layout->getFlags() & MessageLayout::Collapsed) {
+            return;
+        }
+
+        const messages::MessageLayoutElement *hoverLayoutElement =
+            layout->getElementAt(relativePos);
+
+        if (hoverLayoutElement == nullptr) {
+            return;
+        }
+
+        auto &link = hoverLayoutElement->getLink();
+        this->handleLinkClick(event, link, layout.get());
+    }
+}
+
+void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,
+                                  messages::MessageLayout *layout)
+{
     switch (link.getType()) {
         case messages::Link::UserInfo: {
             auto user = link.getValue();
             this->userPopupWidget.setName(user);
-            this->userPopupWidget.move(event->screenPos().toPoint());
+            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
             this->userPopupWidget.show();
             this->userPopupWidget.setFocus();
 
@@ -795,7 +874,24 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             break;
         }
         case messages::Link::Url: {
-            QDesktopServices::openUrl(QUrl(link.getValue()));
+            if (event->button() == Qt::RightButton) {
+                static QMenu *menu = nullptr;
+                static QString url;
+
+                if (menu == nullptr) {
+                    menu = new QMenu;
+                    menu->addAction("Open in browser",
+                                    [] { QDesktopServices::openUrl(QUrl(url)); });
+                    menu->addAction("Copy to clipboard",
+                                    [] { QApplication::clipboard()->setText(url); });
+                }
+
+                url = link.getValue();
+                menu->move(QCursor::pos());
+                menu->show();
+            } else {
+                QDesktopServices::openUrl(QUrl(link.getValue()));
+            }
             break;
         }
         case messages::Link::UserAction: {

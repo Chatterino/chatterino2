@@ -18,6 +18,11 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
 
+    this->viewEmotes->setOverrideFlags((MessageElement::Flags)(
+        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+    this->viewEmojis->setOverrideFlags((MessageElement::Flags)(
+        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+
     this->viewEmotes->setEnableScrollingToBottom(false);
     this->viewEmojis->setEnableScrollingToBottom(false);
 
@@ -30,9 +35,14 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     tabs->addTab(this->viewEmojis, "Emojis");
 
     this->loadEmojis();
+
+    this->viewEmotes->linkClicked.connect(
+        [this](const Link &link) { this->linkClicked.invoke(link); });
+    this->viewEmojis->linkClicked.connect(
+        [this](const Link &link) { this->linkClicked.invoke(link); });
 }
 
-void EmotePopup::loadChannel(SharedChannel _channel)
+void EmotePopup::loadChannel(ChannelPtr _channel)
 {
     TwitchChannel *channel = dynamic_cast<TwitchChannel *>(_channel.get());
 
@@ -40,7 +50,7 @@ void EmotePopup::loadChannel(SharedChannel _channel)
         return;
     }
 
-    SharedChannel emoteChannel(new Channel(""));
+    ChannelPtr emoteChannel(new Channel(""));
 
     auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
@@ -57,7 +67,7 @@ void EmotePopup::loadChannel(SharedChannel _channel)
         builder2.getMessage()->flags &= Message::DisableCompactEmotes;
 
         map.each([&](const QString &key, const util::EmoteData &value) {
-            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+            builder2.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                        ->setLink(Link(Link::InsertText, key)));
         });
 
@@ -81,7 +91,7 @@ void EmotePopup::loadEmojis()
 {
     util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
-    SharedChannel emojiChannel(new Channel(""));
+    ChannelPtr emojiChannel(new Channel(""));
 
     // title
     messages::MessageBuilder builder1;
@@ -96,7 +106,7 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags &= Message::DisableCompactEmotes;
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
-        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))  //
+        builder.appendElement((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                   ->setLink(Link(Link::Type::InsertText, key)));
     });
     emojiChannel->addMessage(builder.getMessage());

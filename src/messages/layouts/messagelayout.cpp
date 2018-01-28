@@ -89,6 +89,12 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     layoutRequired |= wordMaskChanged;
     this->currentWordFlags = flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
 
+    // check if timestamp format changed
+    bool timestampFormatChanged =
+        this->timestampFormat != singletons::SettingManager::getInstance().timestampFormat;
+
+    layoutRequired |= timestampFormatChanged;
+
     // check if dpi changed
     bool scaleChanged = this->scale != scale;
     layoutRequired |= scaleChanged;
@@ -98,11 +104,11 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
     // update word sizes if needed
     if (imagesChanged) {
-        // fourtf: update images
+        //        this->container.updateImages();
         this->addFlags(MessageLayout::RequiresBufferUpdate);
     }
     if (textChanged) {
-        // fourtf: update text
+        //        this->container.updateText();
         this->addFlags(MessageLayout::RequiresBufferUpdate);
     }
     if (widthChanged || wordMaskChanged) {
@@ -139,7 +145,8 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
 }
 
 // Painting
-void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection &selection)
+void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection &selection,
+                          bool isLastReadMessage, bool isWindowFocused)
 {
     QPixmap *pixmap = this->buffer.get();
     singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
@@ -164,7 +171,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     }
 
     // draw on buffer
-    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
+    painter.drawPixmap(0, y, *pixmap);
+    //    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
     // draw disabled
     if (this->message->flags & Message::Disabled) {
@@ -173,6 +181,16 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
     // draw gif emotes
     this->container.paintAnimatedElements(painter, y);
+
+    // draw last read message line
+    if (isLastReadMessage) {
+        QColor color = isWindowFocused ? themeManager.tabs.selected.backgrounds.regular.color()
+                                       : themeManager.tabs.selected.backgrounds.unfocused.color();
+
+        QBrush brush = QBrush(color, Qt::VerPattern);
+
+        painter.fillRect(0, y + this->container.getHeight() - 1, this->container.width, 1, brush);
+    }
 
     this->bufferValid = true;
 }

@@ -14,6 +14,9 @@ class WindowManager
 public:
     static WindowManager &getInstance();
 
+    void showSettingsDialog();
+    void showAccountSelectPopup(QPoint point);
+
     void initMainWindow();
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);

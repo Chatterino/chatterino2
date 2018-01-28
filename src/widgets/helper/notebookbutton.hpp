@@ -21,8 +21,11 @@ public:
     NotebookButton(BaseWidget *parent);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void mouseReleaseEvent(QMouseEvent *) override;
+    virtual void dragEnterEvent(QDragEnterEvent *) override;
+    virtual void dragLeaveEvent(QDragLeaveEvent *) override;
+    virtual void dropEvent(QDropEvent *) override;
 
 signals:
     void clicked();

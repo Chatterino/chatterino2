@@ -4,6 +4,7 @@
 #include "twitch/twitchchannel.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/urlfetch.hpp"
+#include "widgets/helper/label.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/tooltipwidget.hpp"
@@ -47,7 +48,9 @@ SplitHeader::SplitHeader(Split *_split)
         layout->addStretch(1);
 
         // channel name label
+        //        auto title = layout.emplace<Label>(this).assign(&this->titleLabel);
         auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
+        title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         title->setMouseTracking(true);
         QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
                          &SplitHeader::mouseDoubleClickEvent);
@@ -66,7 +69,8 @@ SplitHeader::SplitHeader(Split *_split)
 
     // ---- misc
     this->layout()->setMargin(0);
-    this->refreshTheme();
+    this->themeRefreshEvent();
+    this->scaleChangedEvent(this->getScale());
 
     this->updateChannelText();
 
@@ -93,7 +97,7 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
     this->dropdownMenu.addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
-        SharedChannel _channel = this->split->getChannel();
+        ChannelPtr _channel = this->split->getChannel();
         twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
 
         if (tc != nullptr) {
@@ -133,13 +137,15 @@ void SplitHeader::initializeChannelSignals()
     }
 }
 
-void SplitHeader::resizeEvent(QResizeEvent *event)
+void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = 28 * getDpiMultiplier();
+    int w = 28 * scale;
 
     this->setFixedHeight(w);
     this->dropdownButton->setFixedWidth(w);
     this->moderationButton->setFixedWidth(w);
+    //    this->titleLabel->setFont(
+    //        singletons::FontManager::getInstance().getFont(FontStyle::Medium, scale));
 }
 
 void SplitHeader::updateChannelText()
@@ -180,7 +186,7 @@ void SplitHeader::updateModerationModeIcon()
                                           : resourceManager.moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
-    SharedChannel channel = this->split->getChannel();
+    ChannelPtr channel = this->split->getChannel();
 
     twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(channel.get());
 
@@ -242,7 +248,7 @@ void SplitHeader::rightButtonClicked()
 {
 }
 
-void SplitHeader::refreshTheme()
+void SplitHeader::themeRefreshEvent()
 {
     QPalette palette;
     palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);

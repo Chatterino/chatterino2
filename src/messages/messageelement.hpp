@@ -145,20 +145,6 @@ public:
                                 MessageElement::Flags flags) override;
 };
 
-// contains emote data and will pick the emote based on :
-//   a) are images for the emote type enabled
-//   b) which size it wants
-class EmoteElement : public MessageElement
-{
-    const util::EmoteData data;
-
-public:
-    EmoteElement(const util::EmoteData &data, MessageElement::Flags flags);
-
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
-};
-
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
@@ -175,6 +161,22 @@ public:
     TextElement(const QString &text, MessageElement::Flags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::Medium);
+
+    virtual void addToContainer(MessageLayoutContainer &container,
+                                MessageElement::Flags flags) override;
+};
+
+// contains emote data and will pick the emote based on :
+//   a) are images for the emote type enabled
+//   b) which size it wants
+class EmoteElement : public MessageElement
+{
+    const util::EmoteData data;
+    TextElement *textElement;
+
+public:
+    EmoteElement(const util::EmoteData &data, MessageElement::Flags flags);
+    ~EmoteElement();
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
@@ -208,12 +210,5 @@ public:
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElement::Flags flags) override;
 };
-
-// adds bits as text, static image or animated image
-// class BitsElement : public MessageElement
-//{
-// public:
-//    virtual void addToContainer(LayoutContainer &container) override;
-//};
 }  // namespace messages
 }  // namespace chatterino

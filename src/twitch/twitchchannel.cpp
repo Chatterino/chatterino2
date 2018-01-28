@@ -1,5 +1,7 @@
 #include "twitchchannel.hpp"
 #include "debug/log.hpp"
+#include "messages/message.hpp"
+#include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -156,8 +158,8 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    util::twitch::get2(url, QThread::currentThread(), [weak](const rapidjson::Document &d) {
-        SharedChannel shared = weak.lock();
+    util::twitch::get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
+        ChannelPtr shared = weak.lock();
 
         if (!shared) {
             return;
@@ -218,7 +220,7 @@ void TwitchChannel::fetchRecentMessages()
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
     util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
-        SharedChannel shared = weak.lock();
+        ChannelPtr shared = weak.lock();
 
         if (!shared) {
             return;
@@ -230,7 +232,6 @@ void TwitchChannel::fetchRecentMessages()
         auto msgArray = obj.value("messages").toArray();
         if (msgArray.size() > 0) {
             std::vector<messages::MessagePtr> messages;
-            messages.resize(msgArray.size());
 
             for (int i = 0; i < msgArray.size(); i++) {
                 QByteArray content = msgArray[i].toString().toUtf8();
@@ -239,7 +240,9 @@ void TwitchChannel::fetchRecentMessages()
 
                 messages::MessageParseArgs args;
                 twitch::TwitchMessageBuilder builder(channel, privMsg, args);
-                messages.at(i) = builder.parse();
+                if (!builder.isIgnored()) {
+                    messages.push_back(builder.build());
+                }
             }
             channel->addMessagesAtStart(messages);
         }

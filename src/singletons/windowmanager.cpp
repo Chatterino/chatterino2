@@ -2,6 +2,8 @@
 #include "debug/log.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "widgets/accountswitchpopupwidget.hpp"
+#include "widgets/settingsdialog.hpp"
 
 #include <QDebug>
 
@@ -12,6 +14,35 @@ WindowManager &WindowManager::getInstance()
 {
     static WindowManager instance(ThemeManager::getInstance());
     return instance;
+}
+
+void WindowManager::showSettingsDialog()
+{
+    QTimer::singleShot(80, [] { widgets::SettingsDialog::showDialog(); });
+}
+
+void WindowManager::showAccountSelectPopup(QPoint point)
+{
+    //    static QWidget *lastFocusedWidget = nullptr;
+    static widgets::AccountSwitchPopupWidget *w = new widgets::AccountSwitchPopupWidget();
+
+    if (w->hasFocus()) {
+        w->hide();
+        //            if (lastFocusedWidget) {
+        //                lastFocusedWidget->setFocus();
+        //            }
+        return;
+    }
+
+    //    lastFocusedWidget = this->focusWidget();
+
+    w->refresh();
+
+    QPoint buttonPos = point;
+    w->move(buttonPos.x(), buttonPos.y());
+
+    w->show();
+    w->setFocus();
 }
 
 WindowManager::WindowManager(ThemeManager &_themeManager)

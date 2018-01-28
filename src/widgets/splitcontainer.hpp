@@ -33,7 +33,7 @@ public:
     std::pair<int, int> removeFromLayout(Split *widget);
     void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1, -1));
 
-    const std::vector<Split *> &getChatWidgets() const;
+    const std::vector<Split *> &getSplits() const;
     NotebookTab *getTab() const;
 
     void addChat(bool openChannelNameDialog = false, std::string chatUUID = std::string());

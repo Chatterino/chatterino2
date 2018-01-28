@@ -18,12 +18,14 @@
 namespace chatterino {
 namespace widgets {
 
-AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
+AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     : BaseWindow()
     , ui(new Ui::AccountPopup)
     , channel(_channel)
 {
     this->ui->setupUi(this);
+
+    this->setStayInScreenRect(true);
 
     this->layout()->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -49,7 +51,6 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
         this->loggedInUser.userID = currentTwitchUser->getUserId();
 
         this->loggedInUser.refreshUserType(this->channel, true);
-
     });
 
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
@@ -154,7 +155,7 @@ AccountPopupWidget::AccountPopupWidget(SharedChannel _channel)
         this->hide();  //
     });
 
-    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->scaleChangedEvent(this->getScale());
 }
 
 void AccountPopupWidget::setName(const QString &name)
@@ -171,7 +172,7 @@ void AccountPopupWidget::setName(const QString &name)
     this->popupWidgetUser.refreshUserType(this->channel, false);
 }
 
-void AccountPopupWidget::User::refreshUserType(const SharedChannel &channel, bool loggedInUser)
+void AccountPopupWidget::User::refreshUserType(const ChannelPtr &channel, bool loggedInUser)
 {
     if (channel->name == this->username) {
         this->userType = UserType::Owner;
@@ -182,7 +183,7 @@ void AccountPopupWidget::User::refreshUserType(const SharedChannel &channel, boo
     }
 }
 
-void AccountPopupWidget::setChannel(SharedChannel _channel)
+void AccountPopupWidget::setChannel(ChannelPtr _channel)
 {
     this->channel = _channel;
 }
@@ -246,7 +247,7 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
     }
 }
 
-void AccountPopupWidget::dpiMultiplierChanged(float /*oldDpi*/, float newDpi)
+void AccountPopupWidget::scaleChangedEvent(float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
                             .replace("<font-size>", QString::number((int)(12 * newDpi))));

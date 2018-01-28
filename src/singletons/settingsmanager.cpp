@@ -2,6 +2,7 @@
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/resourcemanager.hpp"
+#include "singletons/windowmanager.hpp"
 
 using namespace chatterino::messages;
 
@@ -17,6 +18,7 @@ void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
 
 SettingManager::SettingManager()
     : snapshot(nullptr)
+    , _ignoredKeywords(new std::vector<QString>)
 {
     this->wordFlagsListener.addSetting(this->showTimestamps);
     this->wordFlagsListener.addSetting(this->showBadges);
@@ -29,6 +31,10 @@ SettingManager::SettingManager()
     };
 
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
+    this->ignoredKeywords.connect([this](auto, auto) { this->updateIgnoredKeywords(); });
+
+    this->timestampFormat.connect(
+        [](auto, auto) { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()
@@ -135,6 +141,11 @@ std::vector<ModerationAction> SettingManager::getModerationActions() const
     return this->_moderationActions;
 }
 
+const std::shared_ptr<std::vector<QString>> SettingManager::getIgnoredKeywords() const
+{
+    return this->_ignoredKeywords;
+}
+
 void SettingManager::updateModerationActions()
 {
     auto &resources = singletons::ResourceManager::getInstance();
@@ -201,6 +212,23 @@ void SettingManager::updateModerationActions()
             this->_moderationActions.emplace_back(xD.mid(0, 2), xD.mid(2, 2), str);
         }
     }
+}
+
+void SettingManager::updateIgnoredKeywords()
+{
+    static QRegularExpression newLineRegex("(\r\n?|\n)+");
+
+    auto items = new std::vector<QString>();
+
+    for (const QString &line : this->ignoredKeywords.getValue().split(newLineRegex)) {
+        QString line2 = line.trimmed();
+
+        if (!line2.isEmpty()) {
+            items->push_back(line2);
+        }
+    }
+
+    this->_ignoredKeywords = std::shared_ptr<std::vector<QString>>(items);
 }
 }  // namespace singletons
 }  // namespace chatterino

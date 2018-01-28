@@ -8,8 +8,12 @@
 #include "widgets/settingspages/commandpage.hpp"
 #include "widgets/settingspages/emotespage.hpp"
 #include "widgets/settingspages/highlightingpage.hpp"
+#include "widgets/settingspages/ignoremessagespage.hpp"
+#include "widgets/settingspages/ignoreuserspage.hpp"
+#include "widgets/settingspages/keyboardsettingspage.hpp"
 #include "widgets/settingspages/logspage.hpp"
 #include "widgets/settingspages/moderationpage.hpp"
+#include "widgets/settingspages/specialchannelspage.hpp"
 
 #include <QDialogButtonBox>
 
@@ -25,7 +29,7 @@ SettingsDialog::SettingsDialog()
 
     this->addTabs();
 
-    this->dpiMultiplierChanged(this->getDpiMultiplier(), this->getDpiMultiplier());
+    this->scaleChangedEvent(this->getScale());
 }
 
 void SettingsDialog::initUi()
@@ -72,14 +76,24 @@ SettingsDialog *SettingsDialog::getHandle()
 
 void SettingsDialog::addTabs()
 {
+    this->ui.tabContainer->setSpacing(0);
+
     this->addTab(new settingspages::AccountsPage);
     this->addTab(new settingspages::AppearancePage);
     this->addTab(new settingspages::BehaviourPage);
     this->addTab(new settingspages::CommandPage);
     this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
-    //    this->addTab(new settingspages::LogsPage);
+
+    this->ui.tabContainer->addStretch(1);
+
+    this->addTab(new settingspages::IgnoreMessagesPage);
+    this->addTab(new settingspages::IgnoreUsersPage);
+    this->addTab(new settingspages::KeyboardSettingsPage);
+    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
+    this->addTab(new settingspages::SpecialChannelsPage);
+
     this->ui.tabContainer->addStretch(1);
     this->addTab(new settingspages::AboutPage, Qt::AlignBottom);
 }
@@ -135,7 +149,7 @@ void SettingsDialog::refresh()
     singletons::SettingManager::getInstance().saveSnapshot();
 }
 
-void SettingsDialog::dpiMultiplierChanged(float oldDpi, float newDpi)
+void SettingsDialog::scaleChangedEvent(float newDpi)
 {
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);

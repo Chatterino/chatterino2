@@ -16,7 +16,6 @@ public:
     ~TooltipWidget();
 
     void setText(QString text);
-    void moveTo(QWidget *widget, QPoint point);
 
     static TooltipWidget *getInstance()
     {
@@ -28,16 +27,14 @@ public:
     }
 
 protected:
-    virtual void resizeEvent(QResizeEvent *) override;
     virtual void changeEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
-    virtual void dpiMultiplierChanged(float, float) override;
+    virtual void scaleChangedEvent(float) override;
 
 private:
     QLabel *displayText;
     pajlada::Signals::Connection fontChangedConnection;
 
-    void moveIntoDesktopRect(QWidget *parent);
     void updateFont();
 };
 

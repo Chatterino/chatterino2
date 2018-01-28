@@ -38,9 +38,12 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
+    void setOverrideFlags(boost::optional<messages::MessageElement::Flags> value);
+    const boost::optional<messages::MessageElement::Flags> &getOverrideFlags() const;
     void pause(int msecTimeout);
+    void updateLastReadMessage();
 
-    void setChannel(SharedChannel channel);
+    void setChannel(ChannelPtr channel);
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
@@ -49,8 +52,11 @@ public:
     boost::signals2::signal<void(QMouseEvent *)> mouseDown;
     boost::signals2::signal<void()> selectionChanged;
     pajlada::Signals::NoArgSignal highlightedMessageReceived;
+    pajlada::Signals::Signal<const messages::Link &> linkClicked;
 
 protected:
+    virtual void themeRefreshEvent() override;
+
     virtual void resizeEvent(QResizeEvent *) override;
 
     virtual void paintEvent(QPaintEvent *) override;
@@ -62,6 +68,10 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+
+    void handleLinkClick(QMouseEvent *event, const messages::Link &link,
+                         messages::MessageLayout *layout);
 
     bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &message,
                          QPoint &relativePos, int &index);
@@ -72,6 +82,8 @@ private:
     bool messageWasAdded = false;
     bool paused = false;
     QTimer pauseTimeout;
+    boost::optional<messages::MessageElement::Flags> overrideFlags;
+    messages::MessageLayoutPtr lastReadMessage;
 
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
 
@@ -82,7 +94,7 @@ private:
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
     messages::MessageElement::Flags getFlags() const;
 
-    SharedChannel channel;
+    ChannelPtr channel;
 
     Scrollbar scrollBar;
     RippleEffectLabel *goToBottom;

@@ -17,6 +17,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setStyleSheet("color: #fff; background: #000");
     this->setWindowOpacity(0.8);
     this->updateFont();
+    this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
@@ -39,7 +40,7 @@ TooltipWidget::~TooltipWidget()
     this->fontChangedConnection.disconnect();
 }
 
-void TooltipWidget::dpiMultiplierChanged(float, float)
+void TooltipWidget::scaleChangedEvent(float)
 {
     this->updateFont();
 }
@@ -47,51 +48,12 @@ void TooltipWidget::dpiMultiplierChanged(float, float)
 void TooltipWidget::updateFont()
 {
     this->setFont(singletons::FontManager::getInstance().getFont(
-        singletons::FontManager::Type::MediumSmall, this->getDpiMultiplier()));
+        singletons::FontManager::Type::MediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)
 {
     this->displayText->setText(text);
-}
-
-void TooltipWidget::moveTo(QWidget *parent, QPoint point)
-{
-    point.rx() += 16;
-    point.ry() += 16;
-
-    this->move(point);
-    this->moveIntoDesktopRect(parent);
-}
-
-void TooltipWidget::resizeEvent(QResizeEvent *)
-{
-    this->moveIntoDesktopRect(this);
-}
-
-void TooltipWidget::moveIntoDesktopRect(QWidget *parent)
-{
-    QDesktopWidget *desktop = QApplication::desktop();
-
-    QRect s = desktop->screenGeometry(parent);
-    QPoint p = this->pos();
-
-    if (p.x() < s.left()) {
-        p.setX(s.left());
-    }
-    if (p.y() < s.top()) {
-        p.setY(s.top());
-    }
-    if (p.x() + this->width() > s.right()) {
-        p.setX(s.right() - this->width());
-    }
-    if (p.y() + this->height() > s.bottom()) {
-        p.setY(s.bottom() - this->height());
-    }
-
-    if (p != this->pos()) {
-        this->move(p);
-    }
 }
 
 void TooltipWidget::changeEvent(QEvent *)

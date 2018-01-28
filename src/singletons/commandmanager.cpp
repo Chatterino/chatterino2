@@ -88,7 +88,7 @@ QStringList CommandManager::getCommands()
     return this->commandsStringList;
 }
 
-QString CommandManager::execCommand(const QString &text, SharedChannel channel,
+QString CommandManager::execCommand(const QString &text, ChannelPtr channel,
                                     bool dryRun)
 {
     QStringList words = text.split(' ', QString::SkipEmptyParts);

@@ -41,13 +41,14 @@ public:
     void performLayout(bool animate = true);
 
     int tabCount();
-    SplitContainer *tabAt(QPoint point, int &index);
+    SplitContainer *tabAt(QPoint point, int &index, int maxWidth = 2000000000);
     void rearrangePage(SplitContainer *page, int index);
 
     void nextTab();
     void previousTab();
 
 protected:
+    void scaleChangedEvent(float scale);
     void resizeEvent(QResizeEvent *);
 
     void settingsButtonMouseReleased(QMouseEvent *event);

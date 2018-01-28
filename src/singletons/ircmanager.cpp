@@ -246,16 +246,23 @@ void IrcManager::privateMessageReceived(Communi::IrcPrivateMessage *message)
         return;
     }
 
-    auto xd = message->content();
-    auto xd2 = message->toData();
+    //    auto xd = message->content();
+    //    auto xd2 = message->toData();
 
-    debug::Log("HEHE: {}", xd2.toStdString());
+    //    debug::Log("HEHE: {}", xd2.toStdString());
 
     messages::MessageParseArgs args;
 
     twitch::TwitchMessageBuilder builder(c.get(), message, args);
 
-    c->addMessage(builder.parse());
+    if (!builder.isIgnored()) {
+        messages::MessagePtr _message = builder.build();
+        if (_message->flags & messages::Message::Highlighted) {
+            singletons::ChannelManager::getInstance().mentionsChannel->addMessage(_message);
+        }
+
+        c->addMessage(_message);
+    }
 }
 
 void IrcManager::messageReceived(Communi::IrcMessage *message)
@@ -384,7 +391,7 @@ void IrcManager::onConnected()
     MessagePtr connMsg = Message::createSystemMessage("connected to chat");
     MessagePtr reconnMsg = Message::createSystemMessage("reconnected to chat");
 
-    this->channelManager.doOnAll([connMsg, reconnMsg](SharedChannel channel) {
+    this->channelManager.doOnAll([connMsg, reconnMsg](ChannelPtr channel) {
         assert(channel);
 
         LimitedQueueSnapshot<MessagePtr> snapshot = channel->getMessageSnapshot();
@@ -407,7 +414,7 @@ void IrcManager::onDisconnected()
     MessagePtr msg = Message::createSystemMessage("disconnected from chat");
     msg->flags &= Message::DisconnectedMessage;
 
-    this->channelManager.doOnAll([msg](SharedChannel channel) {
+    this->channelManager.doOnAll([msg](ChannelPtr channel) {
         assert(channel);
         channel->addMessage(msg);
     });

@@ -4,6 +4,8 @@
 #include <QPaintEvent>
 #include <QWidget>
 
+#include "widgets/basewidget.hpp"
+
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
@@ -12,7 +14,7 @@ class SettingsPage;
 
 class SettingsDialog;
 
-class SettingsDialogTab : public QWidget
+class SettingsDialogTab : public BaseWidget
 {
     Q_OBJECT
 

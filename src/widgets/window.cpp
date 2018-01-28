@@ -4,6 +4,8 @@
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "singletons/windowmanager.hpp"
+#include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -21,7 +23,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     : BaseWindow(_themeManager, nullptr, true)
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
-    , dpi(this->getDpiMultiplier())
+    , dpi(this->getScale())
     , themeManager(_themeManager)
     , notebook(this, _isMainWindow, this->settingRoot)
 {
@@ -35,8 +37,12 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
         });
 
     if (this->hasCustomWindowFrame()) {
-        this->addTitleBarButton("Preferences");
-        this->addTitleBarButton("User");
+        this->addTitleBarButton(TitleBarButton::Settings, [] {
+            singletons::WindowManager::getInstance().showSettingsDialog();
+        });
+        this->addTitleBarButton(TitleBarButton::User, [this] {
+            singletons::WindowManager::getInstance().showAccountSelectPopup(QCursor::pos());
+        });
     }
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -52,7 +58,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     // set margin
     layout->setMargin(0);
 
-    this->refreshTheme();
+    this->themeRefreshEvent();
 
     this->loadGeometry();
 
@@ -107,7 +113,7 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
         return;
     }
 
-    const std::vector<Split *> &widgets = page->getChatWidgets();
+    const std::vector<Split *> &widgets = page->getSplits();
 
     for (auto it = widgets.begin(); it != widgets.end(); ++it) {
         Split *widget = *it;
@@ -138,6 +144,27 @@ void Window::closeEvent(QCloseEvent *)
     this->windowGeometry.height = geom.height();
 
     this->closed();
+}
+
+bool Window::event(QEvent *e)
+{
+    switch (e->type()) {
+        case QEvent::WindowActivate:
+            break;
+
+        case QEvent::WindowDeactivate: {
+            auto page = this->notebook.getSelectedPage();
+
+            if (page != nullptr) {
+                std::vector<Split *> splits = page->getSplits();
+
+                for (Split *split : splits) {
+                    split->updateLastReadMessage();
+                }
+            }
+        } break;
+    };
+    return BaseWindow::event(e);
 }
 
 void Window::loadGeometry()

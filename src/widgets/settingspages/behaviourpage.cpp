@@ -1,6 +1,7 @@
 #include "behaviourpage.hpp"
 
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QVBoxLayout>
 
@@ -8,7 +9,7 @@
 
 #define WINDOW_TOPMOST "Window always on top (requires restart)"
 #define INPUT_EMPTY "Hide input box when empty"
-#define LAST_MSG "Show last read message indicator"
+#define LAST_MSG "Show last read message indicator (marks the spot where you left the window)"
 #define PAUSE_HOVERING "When hovering"
 
 #define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
@@ -22,7 +23,9 @@ BehaviourPage::BehaviourPage()
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<BehaviourPage> layoutCreator(this);
 
-    auto form = layoutCreator.emplace<QFormLayout>().withoutMargin();
+    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
+
+    auto form = layout.emplace<QFormLayout>().withoutMargin();
     {
         form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, settings.windowTopMost));
         form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, settings.hideEmptyInput));
@@ -30,10 +33,21 @@ BehaviourPage::BehaviourPage()
         form->addRow("Pause chat:", this->createCheckBox(PAUSE_HOVERING, settings.pauseChatHover));
 
         form->addRow("Mouse scroll speed:", this->createMouseScrollSlider());
-        form->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
-        form->addRow("Prefered quality:",
-                     this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
+        form->addRow("Links:", this->createCheckBox("Open links only on double click",
+                                                    settings.linksDoubleClickOnly));
     }
+
+    layout->addSpacing(16);
+
+    auto group = layout.emplace<QGroupBox>("Streamlink");
+    {
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+        groupLayout->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
+        groupLayout->addRow("Prefered quality:",
+                            this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
+    }
+
+    layout->addStretch(1);
 }
 
 QSlider *BehaviourPage::createMouseScrollSlider()

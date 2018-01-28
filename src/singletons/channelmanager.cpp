@@ -19,11 +19,11 @@ ChannelManager::ChannelManager()
 {
 }
 
-const std::vector<SharedChannel> ChannelManager::getItems()
+const std::vector<ChannelPtr> ChannelManager::getItems()
 {
     QMutexLocker locker(&this->channelsMutex);
 
-    std::vector<SharedChannel> items;
+    std::vector<ChannelPtr> items;
 
     for (auto &item : this->twitchChannels.values()) {
         items.push_back(std::get<0>(item));
@@ -32,7 +32,7 @@ const std::vector<SharedChannel> ChannelManager::getItems()
     return items;
 }
 
-SharedChannel ChannelManager::addTwitchChannel(const QString &rawChannelName)
+ChannelPtr ChannelManager::addTwitchChannel(const QString &rawChannelName)
 {
     QString channelName = rawChannelName.toLower();
 
@@ -63,7 +63,7 @@ SharedChannel ChannelManager::addTwitchChannel(const QString &rawChannelName)
     return std::get<0>(it.value());
 }
 
-SharedChannel ChannelManager::getTwitchChannel(const QString &channel)
+ChannelPtr ChannelManager::getTwitchChannel(const QString &channel)
 {
     QMutexLocker locker(&this->channelsMutex);
 
@@ -128,7 +128,7 @@ const std::string &ChannelManager::getUserID(const std::string &username)
     return temporary;
 }
 
-void ChannelManager::doOnAll(std::function<void(SharedChannel)> func)
+void ChannelManager::doOnAll(std::function<void(ChannelPtr)> func)
 {
     for (const auto &channel : this->twitchChannels) {
         func(std::get<0>(channel));

@@ -10,7 +10,7 @@ The code is normally formated using clang format in Qt Creator. [.clang-format](
 To setup automatic code formating with QT Creator, see [this guide](https://gist.github.com/pajlada/0296454198eb8f8789fd6fe7ea660c5b).
 
 ## Building
-Before building run `git submodule update --init --recursive` to get required submodules. In case you are new to using qt creator or c++ be sure to add -j to your make arguments as shown here [image](https://i.fourtf.com/GreenSweetImage.png) so it uses all your cpu cores to build.
+Before building run `git submodule update --init --recursive` to get required submodules.
 
 ### Windows
 #### Using Qt Creator
@@ -23,6 +23,7 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 
 #### Using MSYS2
 Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org](http://www.msys2.org/).
+Be sure to add "-j <number of cores\*2>" as a make argument so it will use all your cpu cores to build. [example setup](https://i.imgur.com/qlESlS1.png)
 1. open appropriate MSYS2 terminal and do `pacman -S mingw-w64-<arch>-boost mingw-w64-<arch>-qt5 mingw-w64-<arch>-rapidjson` where `<arch>` is x86_64 or i686
 2. go into the project directory
 3. create build folder `mkdir build && cd build`

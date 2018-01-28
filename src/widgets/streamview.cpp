@@ -11,7 +11,7 @@
 
 namespace chatterino {
 namespace widgets {
-StreamView::StreamView(SharedChannel channel, QUrl url)
+StreamView::StreamView(ChannelPtr channel, QUrl url)
 {
     util::LayoutCreator<StreamView> layoutCreator(this);
 

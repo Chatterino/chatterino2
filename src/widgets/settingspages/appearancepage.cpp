@@ -44,8 +44,10 @@ AppearancePage::AppearancePage()
         form->addRow("Font:",        this->createFontChanger());
 
         form->addRow("Tab bar:",     this->createCheckBox(TAB_X,         settings.hideTabX));
+#ifndef USEWINSDK
         form->addRow("",             this->createCheckBox(TAB_PREF,      settings.hidePreferencesButton));
         form->addRow("",             this->createCheckBox(TAB_USER,      settings.hideUserButton));
+#endif
 
         form->addRow("Scrolling:",   this->createCheckBox(SCROLL_SMOOTH, settings.enableSmoothScrolling));
         form->addRow("",             this->createCheckBox(SCROLL_NEWMSG, settings.enableSmoothScrollingNewMessages));
@@ -59,6 +61,7 @@ AppearancePage::AppearancePage()
         {
             tbox.emplace<QLabel>("timestamp format (a = am/pm):");
             tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, settings.timestampFormat));
+            tbox->addStretch(1);
         }
         messages.append(this->createCheckBox("Show badges", settings.showBadges));
         messages.append(this->createCheckBox("Seperate messages", settings.seperateMessages));
@@ -77,7 +80,7 @@ QLayout *AppearancePage::createThemeColorChanger()
     // SLIDER
     QSlider *slider = new QSlider(Qt::Horizontal);
     layout->addWidget(slider);
-    slider->setValue(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 1000);
+    slider->setValue(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100);
 
     // BUTTON
     QPushButton *button = new QPushButton;
@@ -87,7 +90,7 @@ QLayout *AppearancePage::createThemeColorChanger()
 
     // SIGNALS
     QObject::connect(slider, &QSlider::valueChanged, this, [button, &themeHue](int value) mutable {
-        double newValue = value / 1000.0;
+        double newValue = value / 100.0;
 
         themeHue.setValue(newValue);
 

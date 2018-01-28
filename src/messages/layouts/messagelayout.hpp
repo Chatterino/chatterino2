@@ -41,7 +41,8 @@ public:
     bool layout(int width, float scale, MessageElement::Flags flags);
 
     // Painting
-    void paint(QPainter &painter, int y, int messageIndex, Selection &selection);
+    void paint(QPainter &painter, int y, int messageIndex, Selection &selection,
+               bool isLastReadMessage, bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();
 
@@ -67,6 +68,7 @@ private:
     int currentLayoutWidth = -1;
     int fontGeneration = -1;
     int emoteGeneration = -1;
+    QString timestampFormat;
     float scale = -1;
     unsigned int bufferUpdatedCount = 0;
 

@@ -1,7 +1,7 @@
 #include "widgets/notebook.hpp"
 #include "debug/log.hpp"
 #include "singletons/thememanager.hpp"
-#include "widgets/accountswitchpopupwidget.hpp"
+#include "singletons/windowmanager.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -53,6 +53,8 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
     closeConfirmDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
     closeConfirmDialog.setDefaultButton(QMessageBox::Yes);
+
+    this->scaleChangedEvent(this->getScale());
 }
 
 SplitContainer *Notebook::addNewPage()
@@ -130,6 +132,9 @@ void Notebook::select(SplitContainer *page)
     if (this->selectedPage != nullptr) {
         this->selectedPage->setHidden(true);
         this->selectedPage->getTab()->setSelected(false);
+        for (auto split : this->selectedPage->getSplits()) {
+            split->updateLastReadMessage();
+        }
     }
 
     this->selectedPage = page;
@@ -151,12 +156,15 @@ int Notebook::tabCount()
     return this->pages.size();
 }
 
-SplitContainer *Notebook::tabAt(QPoint point, int &index)
+SplitContainer *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 {
     int i = 0;
 
     for (auto *page : this->pages) {
-        if (page->getTab()->getDesiredRect().contains(point)) {
+        QRect rect = page->getTab()->getDesiredRect();
+        rect.setWidth(std::min(maxWidth, rect.width()));
+
+        if (rect.contains(point)) {
             index = i;
             return page;
         }
@@ -206,7 +214,7 @@ void Notebook::performLayout(bool animated)
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     int x = 0, y = 0;
-    float scale = this->getDpiMultiplier();
+    float scale = this->getScale();
     bool customFrame = this->parentWindow->hasCustomWindowFrame();
 
     if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
@@ -250,51 +258,37 @@ void Notebook::performLayout(bool animated)
     if (this->selectedPage != nullptr) {
         this->selectedPage->move(0, y + tabHeight);
         this->selectedPage->resize(width(), height() - y - tabHeight);
+        this->selectedPage->raise();
     }
 }
 
 void Notebook::resizeEvent(QResizeEvent *)
 {
-    float scale = this->getDpiMultiplier();
+    this->performLayout(false);
+}
 
-    this->settingsButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
-    this->userButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
-    this->addButton.resize(static_cast<int>(24 * scale), static_cast<int>(24 * scale));
+void Notebook::scaleChangedEvent(float)
+{
+    float h = 24 * this->getScale();
+
+    this->settingsButton.setFixedSize(h, h);
+    this->userButton.setFixedSize(h, h);
+    this->addButton.setFixedSize(h, h);
 
     for (auto &i : this->pages) {
-        i->getTab()->calcSize();
+        i->getTab()->updateSize();
     }
-
-    this->performLayout(false);
 }
 
 void Notebook::settingsButtonClicked()
 {
-    QTimer::singleShot(80, [this] { SettingsDialog::showDialog(); });
+    singletons::WindowManager::getInstance().showSettingsDialog();
 }
 
 void Notebook::usersButtonClicked()
 {
-    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget(this);
-
-    if (w->hasFocus()) {
-        w->hide();
-        if (lastFocusedWidget) {
-            lastFocusedWidget->setFocus();
-        }
-        return;
-    }
-
-    lastFocusedWidget = this->focusWidget();
-
-    w->refresh();
-
-    QPoint buttonPos = this->userButton.rect().bottomRight();
-    w->move(buttonPos.x(), buttonPos.y());
-
-    w->show();
-    w->setFocus();
+    singletons::WindowManager::getInstance().showAccountSelectPopup(
+        this->mapToGlobal(this->userButton.rect().bottomRight()));
 }
 
 void Notebook::addPageButtonClicked()

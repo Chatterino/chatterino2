@@ -1,11 +1,16 @@
 #pragma once
 
 #include "basewidget.hpp"
+#include "widgets/helper/titlebarbutton.hpp"
+
+#include <functional>
 
 class QHBoxLayout;
 
 namespace chatterino {
 namespace widgets {
+class RippleEffectButton;
+class TitleBarButton;
 
 class BaseWindow : public BaseWidget
 {
@@ -17,7 +22,12 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    void addTitleBarButton(const QString &text);
+    void addTitleBarButton(const TitleBarButton::Style &style, std::function<void()> onClicked);
+
+    void setStayInScreenRect(bool value);
+    bool getStayInScreenRect() const;
+
+    void moveTo(QWidget *widget, QPoint point);
 
 protected:
 #ifdef USEWINSDK
@@ -28,21 +38,25 @@ protected:
 
     virtual void changeEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
+    virtual void resizeEvent(QResizeEvent *) override;
 
-    virtual void refreshTheme() override;
+    virtual void themeRefreshEvent() override;
 
 private:
     void init();
+    void moveIntoDesktopRect(QWidget *parent);
 
     bool enableCustomFrame;
+    bool stayInScreenRect = false;
+    bool shown = false;
 
     QHBoxLayout *titlebarBox;
     QWidget *titleLabel;
-    QWidget *minButton;
-    QWidget *maxButton;
-    QWidget *exitButton;
+    TitleBarButton *minButton;
+    TitleBarButton *maxButton;
+    TitleBarButton *exitButton;
     QWidget *layoutBase;
-    std::vector<QWidget *> widgets;
+    std::vector<RippleEffectButton *> buttons;
 };
 }  // namespace widgets
 }  // namespace chatterino

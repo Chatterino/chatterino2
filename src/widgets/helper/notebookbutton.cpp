@@ -1,11 +1,15 @@
 #include "widgets/helper/notebookbutton.hpp"
 #include "singletons/thememanager.hpp"
 #include "widgets/helper/rippleeffectbutton.hpp"
+#include "widgets/notebook.hpp"
+#include "widgets/splitcontainer.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QRadialGradient>
+
+#define nuuls nullptr
 
 namespace chatterino {
 namespace widgets {
@@ -14,6 +18,8 @@ NotebookButton::NotebookButton(BaseWidget *parent)
     : RippleEffectButton(parent)
 {
     setMouseEffectColor(QColor(0, 0, 0));
+
+    this->setAcceptDrops(true);
 }
 
 void NotebookButton::paintEvent(QPaintEvent *)
@@ -97,5 +103,46 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
     RippleEffectButton::mouseReleaseEvent(event);
 }
 
+void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (!event->mimeData()->hasFormat("chatterino/split"))
+        return;
+
+    event->acceptProposedAction();
+
+    auto e = new QMouseEvent(QMouseEvent::MouseButtonPress,
+                             QPointF(this->width() / 2, this->height() / 2), Qt::LeftButton,
+                             Qt::LeftButton, 0);
+    RippleEffectButton::mousePressEvent(e);
+    delete e;
+}
+
+void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
+{
+    this->mouseDown = true;
+    this->update();
+
+    auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
+                             QPointF(this->width() / 2, this->height() / 2), Qt::LeftButton,
+                             Qt::LeftButton, 0);
+    RippleEffectButton::mouseReleaseEvent(e);
+    delete e;
+}
+
+void NotebookButton::dropEvent(QDropEvent *event)
+{
+    if (SplitContainer::isDraggingSplit) {
+        event->acceptProposedAction();
+
+        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+
+        if (notebook != nuuls) {
+            SplitContainer *tab = notebook->addNewPage();
+
+            SplitContainer::draggingSplit->setParent(tab);
+            tab->addToLayout(SplitContainer::draggingSplit);
+        }
+    }
+}
 }  // namespace widgets
 }  // namespace chatterino

@@ -2,6 +2,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 
+#include <QChildEvent>
 #include <QDebug>
 #include <QIcon>
 #include <QLayout>
@@ -25,13 +26,7 @@ BaseWidget::BaseWidget(BaseWidget *parent, Qt::WindowFlags f)
     this->init();
 }
 
-BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
-    , themeManager(singletons::ThemeManager::getInstance())
-{
-}
-
-float BaseWidget::getDpiMultiplier()
+float BaseWidget::getScale() const
 {
     //    return 1.f;
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
@@ -39,17 +34,56 @@ float BaseWidget::getDpiMultiplier()
     if (baseWidget == nullptr) {
         return 1.f;
     } else {
-        return baseWidget->dpiMultiplier;
-        //    int screenNr = QApplication::desktop()->screenNumber(this);
-        //    QScreen *screen = QApplication::screens().at(screenNr);
-        //    return screen->logicalDotsPerInch() / 96.f;
+        return baseWidget->scale;
     }
+}
+
+QSize BaseWidget::getScaleIndependantSize() const
+{
+    return this->scaleIndependantSize;
+}
+
+int BaseWidget::getScaleIndependantWidth() const
+{
+    return this->scaleIndependantSize.width();
+}
+
+int BaseWidget::getScaleIndependantHeight() const
+{
+    return this->scaleIndependantSize.height();
+}
+
+void BaseWidget::setScaleIndependantSize(int width, int height)
+{
+    this->setScaleIndependantSize(QSize(width, height));
+}
+
+void BaseWidget::setScaleIndependantSize(QSize size)
+{
+    this->scaleIndependantSize = size;
+
+    if (size.width() > 0) {
+        this->setFixedWidth((int)(size.width() * this->getScale()));
+    }
+    if (size.height() > 0) {
+        this->setFixedHeight((int)(size.height() * this->getScale()));
+    }
+}
+
+void BaseWidget::setScaleIndependantWidth(int value)
+{
+    this->setScaleIndependantSize(QSize(value, this->scaleIndependantSize.height()));
+}
+
+void BaseWidget::setScaleIndependantHeight(int value)
+{
+    this->setScaleIndependantSize(QSize(this->scaleIndependantSize.height(), value));
 }
 
 void BaseWidget::init()
 {
     auto connection = this->themeManager.updated.connect([this]() {
-        this->refreshTheme();
+        this->themeRefreshEvent();
 
         this->update();
     });
@@ -59,7 +93,69 @@ void BaseWidget::init()
     });
 }
 
-void BaseWidget::refreshTheme()
+void BaseWidget::childEvent(QChildEvent *event)
+{
+    if (event->added()) {
+        BaseWidget *widget = dynamic_cast<BaseWidget *>(event->child());
+
+        if (widget) {
+            this->widgets.push_back(widget);
+        }
+    } else if (event->removed()) {
+        for (auto it = this->widgets.begin(); it != this->widgets.end(); it++) {
+            if (*it == event->child()) {
+                this->widgets.erase(it);
+                break;
+            }
+        }
+    }
+}
+
+void BaseWidget::setScale(float value)
+{
+    // update scale value
+    this->scale = value;
+
+    this->scaleChangedEvent(value);
+    this->scaleChanged.invoke(value);
+
+    this->setScaleIndependantSize(this->getScaleIndependantSize());
+
+    // set scale for all children
+    BaseWidget::setScaleRecursive(value, this);
+}
+
+void BaseWidget::setScaleRecursive(float scale, QObject *object)
+{
+    for (QObject *child : object->children()) {
+        BaseWidget *widget = dynamic_cast<BaseWidget *>(child);
+        if (widget != nullptr) {
+            widget->setScale(scale);
+            continue;
+        }
+
+        //        QLayout *layout = nullptr;
+        //        QWidget *widget = dynamic_cast<QWidget *>(child);
+
+        //        if (widget != nullptr) {
+        //            layout = widget->layout();
+        //        }
+
+        //        else {
+        QLayout *layout = dynamic_cast<QLayout *>(object);
+
+        if (layout != nullptr) {
+            setScaleRecursive(scale, layout);
+        }
+        //        }
+    }
+}
+
+void BaseWidget::scaleChangedEvent(float newDpi)
+{
+}
+
+void BaseWidget::themeRefreshEvent()
 {
     // Do any color scheme updates here
 }
