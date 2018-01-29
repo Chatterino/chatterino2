@@ -115,7 +115,6 @@ SOURCES += \
     src/singletons/emotemanager.cpp \
     src/messages/messagebuilder.cpp \
     src/twitch/twitchmessagebuilder.cpp \
-    src/widgets/titlebar.cpp \
     src/singletons/accountmanager.cpp \
     src/twitch/twitchuser.cpp \
     src/ircaccount.cpp \

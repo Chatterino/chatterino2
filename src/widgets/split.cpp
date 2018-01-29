@@ -1,4 +1,5 @@
 #include "widgets/split.hpp"
+
 #include "singletons/channelmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
@@ -133,11 +134,6 @@ const std::string &Split::getUUID() const
 }
 
 ChannelPtr Split::getChannel() const
-{
-    return this->channel;
-}
-
-ChannelPtr &Split::getChannelRef()
 {
     return this->channel;
 }

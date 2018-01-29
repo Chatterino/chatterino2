@@ -47,11 +47,6 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    // add titlebar
-    //    if (SettingsManager::getInstance().useCustomWindowFrame.get()) {
-    //        layout->addWidget(&_titleBar);
-    //    }
-
     layout->addWidget(&this->notebook);
     this->getLayoutContainer()->setLayout(layout);
 
@@ -64,9 +59,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
 
     /// Initialize program-wide hotkeys
     // CTRL+P: Open Settings Dialog
-    CreateWindowShortcut(this, "CTRL+P", [] {
-        SettingsDialog::showDialog();  //
-    });
+    CreateWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
 
     // CTRL+Number: Switch to n'th tab
     CreateWindowShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
