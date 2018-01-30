@@ -3,7 +3,7 @@
 #include "util/helpers.hpp"
 #include "widgets/basewindow.hpp"
 #include "widgets/notebook.hpp"
-#include "widgets/titlebar.hpp"
+//#include "widgets/titlebar.hpp"
 
 //#ifdef USEWINSDK
 //#include <platform/borderless/qwinwidget.h>
@@ -67,7 +67,7 @@ private:
     void loadGeometry();
 
     Notebook notebook;
-    TitleBar titleBar;
+    //TitleBar titleBar;
 
     friend class Notebook;
 
