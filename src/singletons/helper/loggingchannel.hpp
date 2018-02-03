@@ -21,16 +21,21 @@ public:
     void addMessage(std::shared_ptr<messages::Message> message);
 
 private:
+    void openLogFile();
+
     QString generateOpeningString(const QDateTime &now = QDateTime::currentDateTime()) const;
     QString generateClosingString(const QDateTime &now = QDateTime::currentDateTime()) const;
 
     void appendLine(const QString &line);
 
-private:
-    QString channelName;
-    const QString &baseDirectory;
-    QString fileName;
+    QString generateDateString(const QDateTime &now);
+
+    const QString channelName;
+    const QString baseDirectory;
+
     QFile fileHandle;
+
+    QString dateString;
 
     friend class LoggingManager;
 };
