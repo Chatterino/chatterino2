@@ -28,10 +28,12 @@ public:
 
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
                                   const messages::MessageParseArgs &_args);
+    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
+                                  QString content, const messages::MessageParseArgs &_args);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
-    const Communi::IrcPrivateMessage *ircMessage;
+    const Communi::IrcMessage *ircMessage;
     messages::MessageParseArgs args;
     const QVariantMap tags;
 
@@ -45,7 +47,9 @@ private:
     QString roomID;
 
     QColor usernameColor;
-    QString originalMessage;
+    const QString originalMessage;
+
+    const bool action = false;
 
     void parseMessageID();
     void parseRoomID();
@@ -54,7 +58,7 @@ private:
     void appendUsername();
     void parseHighlights();
 
-    void appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage, const QString &emote,
+    void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
                            std::vector<std::pair<long, util::EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
 

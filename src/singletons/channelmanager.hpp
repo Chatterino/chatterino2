@@ -26,6 +26,7 @@ public:
     const std::string &getUserID(const std::string &username);
 
     void doOnAll(std::function<void(ChannelPtr)> func);
+    void doOnAllNormalChannels(std::function<void(ChannelPtr)> func);
 
     // Special channels
     const ChannelPtr whispersChannel;

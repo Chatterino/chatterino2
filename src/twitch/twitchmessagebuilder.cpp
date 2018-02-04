@@ -1,5 +1,6 @@
 #include "twitchmessagebuilder.hpp"
 #include "debug/log.hpp"
+#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/resourcemanager.hpp"
@@ -26,8 +27,22 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , args(_args)
     , tags(this->ircMessage->tags())
     , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
+    , originalMessage(_ircMessage->content())
+    , action(_ircMessage->isAction())
 {
-    this->originalMessage = this->ircMessage->content();
+}
+
+TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
+                                           const Communi::IrcMessage *_ircMessage, QString content,
+                                           const messages::MessageParseArgs &_args)
+    : channel(_channel)
+    , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
+    , ircMessage(_ircMessage)
+    , args(_args)
+    , tags(this->ircMessage->tags())
+    , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
+    , originalMessage(content)
+{
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -124,8 +139,8 @@ MessagePtr TwitchMessageBuilder::build()
     long int i = 0;
 
     for (QString split : splits) {
-        MessageColor textColor = ircMessage->isAction() ? MessageColor(this->usernameColor)
-                                                        : MessageColor(MessageColor::Text);
+        MessageColor textColor =
+            this->action ? MessageColor(this->usernameColor) : MessageColor(MessageColor::Text);
 
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
@@ -243,7 +258,7 @@ void TwitchMessageBuilder::parseUsername()
     }
 
     // username
-    this->userName = ircMessage->nick();
+    this->userName = this->ircMessage->nick();
 
     if (this->userName.isEmpty()) {
         this->userName = this->tags.value(QLatin1String("login")).toString();
@@ -308,20 +323,36 @@ void TwitchMessageBuilder::appendUsername()
     if (this->args.isSentWhisper) {
         // TODO(pajlada): Re-implement
         // userDisplayString += IrcManager::getInstance().getUser().getUserName();
-    }
+    } else if (this->args.isReceivedWhisper) {
+        // Sender username
+        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
+                                   FontStyle::MediumBold)
+            ->setLink({Link::UserInfo, this->userName});
 
-    if (this->args.isReceivedWhisper) {
-        // TODO(pajlada): Re-implement
-        // userDisplayString += " -> " + IrcManager::getInstance().getUser().getUserName();
-    }
+        auto currentUser = singletons::AccountManager::getInstance().Twitch.getCurrent();
 
-    if (!ircMessage->isAction()) {
-        usernameText += ":";
-    }
+        // Separator
+        this->emplace<TextElement>(
+            "->", MessageElement::Text,
+            singletons::ThemeManager::getInstance().messages.textColors.system, FontStyle::Medium);
 
-    this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
-                               FontStyle::MediumBold)
-        ->setLink({Link::UserInfo, this->userName});
+        QColor selfColor = currentUser->color;
+        if (!selfColor.isValid()) {
+            selfColor = singletons::ThemeManager::getInstance().messages.textColors.system;
+        }
+
+        // Your own username
+        this->emplace<TextElement>(currentUser->getUserName() + ":", MessageElement::Text,
+                                   selfColor, FontStyle::MediumBold);
+    } else {
+        if (!this->action) {
+            usernameText += ":";
+        }
+
+        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
+                                   FontStyle::MediumBold)
+            ->setLink({Link::UserInfo, this->userName});
+    }
 }
 
 void TwitchMessageBuilder::parseHighlights()
@@ -329,11 +360,12 @@ void TwitchMessageBuilder::parseHighlights()
     static auto player = new QMediaPlayer;
     static QUrl currentPlayerUrl;
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    static pajlada::Settings::Setting<std::string> currentUser("/accounts/current");
+    auto currentUser = singletons::AccountManager::getInstance().Twitch.getCurrent();
 
-    QString currentUsername = QString::fromStdString(currentUser.getValue());
+    QString currentUsername = currentUser->getUserName();
 
     if (this->ircMessage->nick() == currentUsername) {
+        currentUser->color = this->usernameColor;
         // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
@@ -412,7 +444,7 @@ void TwitchMessageBuilder::parseHighlights()
     }
 }
 
-void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *ircMessage,
+void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessage,
                                              const QString &emote,
                                              std::vector<std::pair<long int, util::EmoteData>> &vec)
 {
@@ -441,11 +473,11 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcPrivateMessage *i
         long int start = std::stol(coords.at(0).toStdString(), nullptr, 10);
         long int end = std::stol(coords.at(1).toStdString(), nullptr, 10);
 
-        if (start >= end || start < 0 || end > ircMessage->content().length()) {
+        if (start >= end || start < 0 || end > this->originalMessage.length()) {
             return;
         }
 
-        QString name = ircMessage->content().mid(start, end - start + 1);
+        QString name = this->originalMessage.mid(start, end - start + 1);
 
         vec.push_back(
             std::pair<long int, util::EmoteData>(start, emoteManager.getTwitchEmoteById(id, name)));

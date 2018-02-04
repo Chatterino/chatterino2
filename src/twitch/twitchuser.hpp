@@ -2,6 +2,7 @@
 
 #include "ircaccount.hpp"
 
+#include <QColor>
 #include <QString>
 
 namespace chatterino {
@@ -26,6 +27,8 @@ public:
     bool setOAuthToken(const QString &newOAuthToken);
 
     bool isAnon() const;
+
+    QColor color;
 
 private:
     QString _oauthClient;

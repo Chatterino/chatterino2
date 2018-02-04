@@ -9,6 +9,7 @@
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
 #include "twitch/twitchchannel.hpp"
+#include "twitch/twitchmessagebuilder.hpp"
 
 using namespace chatterino::messages;
 
@@ -139,7 +140,29 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
-    // TODO: Implement
+    debug::Log("Received whisper!");
+    messages::MessageParseArgs args;
+
+    args.isReceivedWhisper = true;
+
+    auto c = this->channelManager.whispersChannel.get();
+
+    twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
+
+    if (!builder.isIgnored()) {
+        messages::MessagePtr _message = builder.build();
+        if (_message->flags & messages::Message::Highlighted) {
+            singletons::ChannelManager::getInstance().mentionsChannel->addMessage(_message);
+        }
+
+        c->addMessage(_message);
+
+        if (SettingManager::getInstance().inlineWhispers) {
+            this->channelManager.doOnAllNormalChannels([_message](ChannelPtr channel) {
+                channel->addMessage(_message);  //
+            });
+        }
+    }
 }
 
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
@@ -202,6 +225,7 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
 
     this->handleNoticeMessage(message);
 }
+
 }  // namespace helper
 }  // namespace singletons
 }  // namespace chatterino

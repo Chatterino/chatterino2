@@ -138,5 +138,12 @@ void ChannelManager::doOnAll(std::function<void(ChannelPtr)> func)
     func(this->mentionsChannel);
 }
 
+void ChannelManager::doOnAllNormalChannels(std::function<void(ChannelPtr)> func)
+{
+    for (const auto &channel : this->twitchChannels) {
+        func(std::get<0>(channel));
+    }
+}
+
 }  // namespace chatterino
 }

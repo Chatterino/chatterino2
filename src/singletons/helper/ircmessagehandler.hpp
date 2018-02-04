@@ -27,6 +27,7 @@ public:
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
     void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
 };
-}
-}
-}
+
+}  // namespace helper
+}  // namespace singletons
+}  // namespace chatterino
