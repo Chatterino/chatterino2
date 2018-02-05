@@ -23,9 +23,14 @@ Channel::Channel(const QString &_name)
 {
 }
 
+Channel::~Channel()
+{
+    this->destroyed.invoke();
+}
+
 bool Channel::isEmpty() const
 {
-    return false;
+    return this->name.isEmpty();
 }
 
 messages::LimitedQueueSnapshot<messages::MessagePtr> Channel::getMessageSnapshot()
@@ -103,4 +108,13 @@ void Channel::sendMessage(const QString &message)
 {
 }
 
+std::shared_ptr<Channel> Channel::getEmpty()
+{
+    static std::shared_ptr<Channel> channel(new Channel(""));
+    return channel;
+}
+
+void Channel::onConnected()
+{
+}
 }  // namespace chatterino

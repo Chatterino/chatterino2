@@ -12,6 +12,7 @@
 namespace chatterino {
 class Channel;
 
+namespace providers {
 namespace twitch {
 class TwitchChannel;
 
@@ -64,4 +65,5 @@ private:
 };
 
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

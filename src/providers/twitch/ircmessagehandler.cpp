@@ -5,73 +5,83 @@
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
-#include "singletons/channelmanager.hpp"
+#include "providers/twitch/twitchchannel.hpp"
+//#include "singletons/channelmanager.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "twitch/twitchchannel.hpp"
+#include "twitchserver.hpp"
 
+using namespace chatterino::singletons;
 using namespace chatterino::messages;
 
 namespace chatterino {
-namespace singletons {
-namespace helper {
+namespace providers {
+namespace twitch {
 
-IrcMessageHandler::IrcMessageHandler(ChannelManager &_channelManager,
-                                     ResourceManager &_resourceManager)
-    : channelManager(_channelManager)
-    , resourceManager(_resourceManager)
+IrcMessageHandler::IrcMessageHandler(singletons::ResourceManager &_resourceManager)
+    : resourceManager(_resourceManager)
 {
 }
 
 IrcMessageHandler &IrcMessageHandler::getInstance()
 {
-    static IrcMessageHandler instance(ChannelManager::getInstance(),
-                                      ResourceManager::getInstance());
+    static IrcMessageHandler instance(singletons::ResourceManager::getInstance());
     return instance;
 }
 
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
-
     auto iterator = tags.find("room-id");
 
     if (iterator != tags.end()) {
         auto roomID = iterator.value().toString();
 
-        auto channel =
-            this->channelManager.getTwitchChannel(QString(message->toData()).split("#").at(1));
-        auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
-        if (twitchChannel != nullptr) {
+        QStringList words = QString(message->toData()).split("#");
+
+        // ensure the format is valid
+        if (words.length() < 2)
+            return;
+
+        QString channelName = words.at(1);
+
+        auto channel = TwitchServer::getInstance().getChannel(channelName);
+
+        if (auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get())) {
+            // set the room id of the channel
             twitchChannel->setRoomID(roomID);
         }
 
-        this->resourceManager.loadChannelData(roomID);
+        ResourceManager::getInstance().loadChannelData(roomID);
     }
 }
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    assert(message->parameters().length() >= 1);
+    // check parameter count
+    if (message->parameters().length() < 1)
+        return;
 
-    auto rawChannelName = message->parameter(0);
+    QString chanName = message->parameter(0);
 
-    assert(rawChannelName.length() >= 2);
+    // check channel name length
+    if (chanName.length() >= 2)
+        return;
 
-    auto trimmedChannelName = rawChannelName.mid(1);
+    chanName = chanName.mid(1);
 
-    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+    // get channel
+    auto chan = TwitchServer::getInstance().getChannel(chanName);
 
-    if (!c) {
-        debug::Log(
-            "[IrcMessageHandler:handleClearChatMessage] Channel {} not found in channel manager",
-            trimmedChannelName);
+    if (!chan) {
+        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
+                   chanName);
         return;
     }
 
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
-        c->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
+        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
         return;
     }
@@ -92,7 +102,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // add the notice that the user has been timed out
-    LimitedQueueSnapshot<MessagePtr> snapshot = c->getMessageSnapshot();
+    LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
     bool addMessage = true;
     int snapshotLength = snapshot.getLength();
 
@@ -100,14 +110,14 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         if (snapshot[i]->flags & Message::Timeout && snapshot[i]->loginName == username) {
             MessagePtr replacement(
                 Message::createTimeoutMessage(username, durationInSeconds, reason, true));
-            c->replaceMessage(snapshot[i], replacement);
+            chan->replaceMessage(snapshot[i], replacement);
             addMessage = false;
             break;
         }
     }
 
     if (addMessage) {
-        c->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason, false));
+        chan->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason, false));
     }
 
     // disable the messages from the user
@@ -118,7 +128,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // refresh all
-    WindowManager::getInstance().repaintVisibleChatWidgets(c.get());
+    WindowManager::getInstance().repaintVisibleChatWidgets(chan.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
@@ -129,7 +139,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         auto rawChannelName = message->parameters().at(0);
         auto trimmedChannelName = rawChannelName.mid(1);
 
-        auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+        auto c = TwitchServer::getInstance().getChannel(trimmedChannelName);
         twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(c.get());
         if (tc != nullptr) {
             tc->setMod(_mod == "1");
@@ -149,7 +159,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 {
-    auto channel = channelManager.getTwitchChannel(message->parameter(0).remove(0, 1));
+    auto channel = TwitchServer::getInstance().getChannel(message->parameter(0).remove(0, 1));
+
     if (message->parameter(1) == "+o") {
         channel->modList.append(message->parameter(2));
     } else if (message->parameter(1) == "-o") {
@@ -165,24 +176,25 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     MessagePtr msg = Message::createSystemMessage(message->content());
 
     if (broadcast) {
-        this->channelManager.doOnAll([msg](const auto &c) {
-            c->addMessage(msg);  //
-        });
+        // fourtf: send to all twitch channels
+        //        this->channelManager.doOnAll([msg](const auto &c) {
+        //            c->addMessage(msg);  //
+        //        });
 
         return;
     }
 
     auto trimmedChannelName = rawChannelName.mid(1);
 
-    auto c = this->channelManager.getTwitchChannel(trimmedChannelName);
+    auto channel = TwitchServer::getInstance().getChannel(trimmedChannelName);
 
-    if (!c) {
+    if (!channel) {
         debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
                    trimmedChannelName);
         return;
     }
 
-    c->addMessage(msg);
+    channel->addMessage(msg);
 }
 
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
@@ -202,6 +214,6 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
 
     this->handleNoticeMessage(message);
 }
-}  // namespace helper
-}  // namespace singletons
+}  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

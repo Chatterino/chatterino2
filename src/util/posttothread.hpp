@@ -9,6 +9,8 @@
 
 #define async_exec(a) QThreadPool::globalInstance()->start(new LambdaRunnable(a));
 
+namespace chatterino {
+namespace util {
 class LambdaRunnable : public QRunnable
 {
 public:
@@ -52,3 +54,5 @@ static void postToThread(F &&fun, QObject *obj = qApp)
     };
     QCoreApplication::postEvent(obj, new Event(std::forward<F>(fun)));
 }
+}  // namespace util
+}  // namespace chatterino

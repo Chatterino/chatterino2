@@ -16,11 +16,11 @@ class CompletionManager
 public:
     static CompletionManager &getInstance();
 
-    CompletionModel *createModel(const std::string &channelName);
+    CompletionModel *createModel(const QString &channelName);
 
 private:
-    std::map<std::string, CompletionModel *> models;
+    std::map<QString, CompletionModel *> models;
 };
 
+}  // namespace singletons
 }  // namespace chatterino
-}

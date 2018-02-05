@@ -30,10 +30,9 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::s
     : BaseWidget(parent->themeManager, parent)
     , uuid(_uuid)
     , settingRoot(fS("/containers/{}", this->uuid))
-    , chats(fS("{}/chats", this->settingRoot))
     , tab(_tab)
+    , chats(fS("{}/chats", this->settingRoot))
     , dropPreview(this)
-    , splits()
 {
     this->tab->page = this;
 
@@ -468,8 +467,7 @@ void SplitContainer::refreshTitle()
     bool first = true;
 
     for (const auto &chatWidget : this->splits) {
-        auto channelName = QString::fromStdString(chatWidget->channelName.getValue());
-
+        auto channelName = chatWidget->channelName.getValue();
         if (channelName.isEmpty()) {
             continue;
         }

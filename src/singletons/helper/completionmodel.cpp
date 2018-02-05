@@ -61,18 +61,19 @@ void CompletionModel::refresh()
     }
 
     // Channel-specific: Usernames
-    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
-    auto usernames = c->getUsernamesForCompletions();
-    for (const auto &name : usernames) {
-        assert(!name.displayName.isEmpty());
-        this->addString(name.displayName);
-        this->addString('@' + name.displayName);
+    // fourtf: only works with twitch chat
+    //    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
+    //    auto usernames = c->getUsernamesForCompletions();
+    //    for (const auto &name : usernames) {
+    //        assert(!name.displayName.isEmpty());
+    //        this->addString(name.displayName);
+    //        this->addString('@' + name.displayName);
 
-        if (!name.localizedName.isEmpty()) {
-            this->addString(name.localizedName);
-            this->addString('@' + name.localizedName);
-        }
-    }
+    //        if (!name.localizedName.isEmpty()) {
+    //            this->addString(name.localizedName);
+    //            this->addString('@' + name.localizedName);
+    //        }
+    //    }
 }
 
 void CompletionModel::addString(const std::string &str)
@@ -86,5 +87,5 @@ void CompletionModel::addString(const QString &str)
     // Always add a space at the end of completions
     this->emotes.push_back(str + " ");
 }
-}
-}
+}  // namespace singletons
+}  // namespace chatterino

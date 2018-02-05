@@ -1,15 +1,16 @@
-#include "twitchaccountmanager.hpp"
+#include "providers/twitch/twitchaccountmanager.hpp"
 
 #include "common.hpp"
 #include "const.hpp"
 #include "debug/log.hpp"
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
 
 TwitchAccountManager::TwitchAccountManager()
 {
-    this->anonymousUser.reset(new twitch::TwitchUser(twitch::ANONYMOUS_USERNAME, "", ""));
+    this->anonymousUser.reset(new TwitchAccount(ANONYMOUS_USERNAME, "", ""));
 
     this->currentUsername.connect([this](const auto &newValue, auto) {
         QString newUsername(QString::fromStdString(newValue));
@@ -28,7 +29,7 @@ TwitchAccountManager::TwitchAccountManager()
     });
 }
 
-std::shared_ptr<twitch::TwitchUser> TwitchAccountManager::getCurrent()
+std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
 {
     if (!this->currentUser) {
         return this->anonymousUser;
@@ -50,7 +51,7 @@ std::vector<QString> TwitchAccountManager::getUsernames() const
     return userNames;
 }
 
-std::shared_ptr<twitch::TwitchUser> TwitchAccountManager::findUserByUsername(
+std::shared_ptr<TwitchAccount> TwitchAccountManager::findUserByUsername(
     const QString &username) const
 {
     std::lock_guard<std::mutex> lock(this->mutex);
@@ -107,7 +108,7 @@ void TwitchAccountManager::reloadUsers()
             } break;
             case AddUserResponse::UserValuesUpdated: {
                 debug::Log("User {} already exists, and values updated!", userData.username);
-                if (userData.username == this->getCurrent()->getNickName()) {
+                if (userData.username == this->getCurrent()->getUserName()) {
                     debug::Log("It was the current user, so we need to reconnect stuff!");
                     this->userChanged.invoke();
                 }
@@ -132,7 +133,7 @@ bool TwitchAccountManager::removeUser(const QString &username)
 
     this->mutex.lock();
     this->users.erase(std::remove_if(this->users.begin(), this->users.end(), [username](auto user) {
-        if (user->getNickName() == username) {
+        if (user->getUserName() == username) {
             std::string userID(user->getUserId().toStdString());
             assert(!userID.empty());
             pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
@@ -174,8 +175,8 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
         }
     }
 
-    auto newUser = std::make_shared<twitch::TwitchUser>(userData.username, userData.oauthToken,
-                                                        userData.clientID);
+    auto newUser =
+        std::make_shared<TwitchAccount>(userData.username, userData.oauthToken, userData.clientID);
 
     // Set users User ID without the uid prefix
     newUser->setUserId(userData.userID);
@@ -188,4 +189,5 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 }
 
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

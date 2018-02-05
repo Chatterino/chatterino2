@@ -24,7 +24,6 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     , settingRoot(fS("/windows/{}", windowName))
     , windowGeometry(this->settingRoot)
     , dpi(this->getScale())
-    , themeManager(_themeManager)
     , notebook(this, _isMainWindow, this->settingRoot)
 {
     singletons::AccountManager::getInstance().Twitch.currentUsername.connect(
@@ -98,11 +97,11 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     cheerMessages.emplace_back(R"(@badges=subscriber/3,premium/1;bits=1;color=#FF0000;display-name=kalvarenga;emotes=;id=4744d6f0-de1d-475d-a3ff-38647113265a;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515782860740;turbo=0;user-id=108393131;user-type= :kalvarenga!kalvarenga@kalvarenga.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
     // clang-format on
 
-    CreateWindowShortcut(this, "F5", [cheerMessages] {
-        auto &ircManager = singletons::IrcManager::getInstance();
-        static int index = 0;
-        ircManager.addFakeMessage(cheerMessages[index++ % cheerMessages.size()]);
-    });
+    //    CreateWindowShortcut(this, "F5", [cheerMessages] {
+    //        auto &ircManager = singletons::IrcManager::getInstance();
+    //        static int index = 0;
+    //        ircManager.addFakeMessage(cheerMessages[index++ % cheerMessages.size()]);
+    //    });
 }
 
 void Window::repaintVisibleChatWidgets(Channel *channel)

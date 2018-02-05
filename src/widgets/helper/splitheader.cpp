@@ -1,7 +1,8 @@
 #include "widgets/helper/splitheader.hpp"
+#include "providers/twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/thememanager.hpp"
-#include "twitch/twitchchannel.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/helper/label.hpp"
@@ -17,6 +18,8 @@
 #ifdef USEWEBENGINE
 #include "widgets/streamview.hpp"
 #endif
+
+using namespace chatterino::providers::twitch;
 
 namespace chatterino {
 namespace widgets {
@@ -98,7 +101,7 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
         ChannelPtr _channel = this->split->getChannel();
-        twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
 
         if (tc != nullptr) {
             StreamView *view = new StreamView(_channel, "https://player.twitch.tv/?channel=" + tc->name);
@@ -128,7 +131,7 @@ void SplitHeader::initializeChannelSignals()
     this->onlineStatusChangedConnection.disconnect();
 
     auto channel = this->split->getChannel();
-    twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
         twitchChannel->onlineStatusChanged.connect([this]() {
@@ -150,13 +153,13 @@ void SplitHeader::scaleChangedEvent(float scale)
 
 void SplitHeader::updateChannelText()
 {
-    const std::string channelName = this->split->channelName;
-    if (channelName.empty()) {
+    const QString channelName = this->split->channelName;
+    if (channelName.isEmpty()) {
         this->titleLabel->setText("<no channel>");
     } else {
         auto channel = this->split->getChannel();
 
-        twitch::TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+        TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (twitchChannel != nullptr && twitchChannel->isLive) {
             this->isLive = true;
@@ -169,10 +172,10 @@ void SplitHeader::updateChannelText()
                             twitchChannel->streamViewerCount +
                             " viewers"
                             "</p>";
-            this->titleLabel->setText(QString::fromStdString(channelName) + " (live)");
+            this->titleLabel->setText(channelName + " (live)");
         } else {
             this->isLive = false;
-            this->titleLabel->setText(QString::fromStdString(channelName));
+            this->titleLabel->setText(channelName);
             this->tooltip = "";
         }
     }
@@ -188,7 +191,7 @@ void SplitHeader::updateModerationModeIcon()
     bool modButtonVisible = false;
     ChannelPtr channel = this->split->getChannel();
 
-    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (tc != nullptr && tc->hasModRights()) {
         modButtonVisible = true;
@@ -268,7 +271,8 @@ void SplitHeader::menuReloadChannelEmotes()
 
 void SplitHeader::menuManualReconnect()
 {
-    singletons::IrcManager::getInstance().connect();
+    // fourtf: connection
+    providers::twitch::TwitchServer::getInstance().connect();
 }
 
 void SplitHeader::menuShowChangelog()

@@ -24,8 +24,8 @@ namespace widgets {
 
 Notebook::Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix)
     : BaseWidget(parent)
-    , parentWindow(parent)
     , settingRoot(fS("{}/notebook", settingPrefix))
+    , parentWindow(parent)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)

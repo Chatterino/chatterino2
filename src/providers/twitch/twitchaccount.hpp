@@ -1,19 +1,19 @@
 #pragma once
 
-#include "ircaccount.hpp"
-
 #include <QString>
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
-
-class TwitchUser : public IrcUser2
+class TwitchAccount
 {
 public:
-    TwitchUser(const QString &username, const QString &oauthToken, const QString &oauthClient);
+    TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient);
 
+    const QString &getUserName() const;
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
+
     const QString &getUserId() const;
     void setUserId(const QString &id);
 
@@ -28,11 +28,12 @@ public:
     bool isAnon() const;
 
 private:
-    QString _oauthClient;
-    QString _oauthToken;
-    QString _userId;
+    QString oauthClient;
+    QString oauthToken;
+    QString userId;
+    QString userName;
     const bool _isAnon;
 };
-
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

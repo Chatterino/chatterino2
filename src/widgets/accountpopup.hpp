@@ -1,7 +1,7 @@
 #pragma once
 
 #include "basewindow.hpp"
-#include "twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchchannel.hpp"
 #include "util/concurrentmap.hpp"
 
 #include <QPushButton>

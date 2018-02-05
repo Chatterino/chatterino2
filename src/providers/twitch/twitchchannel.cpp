@@ -1,20 +1,22 @@
-#include "twitchchannel.hpp"
+#include "providers/twitch/twitchchannel.hpp"
+#include "common.hpp"
 #include "debug/log.hpp"
 #include "messages/message.hpp"
+#include "providers/twitch/twitchmessagebuilder.hpp"
 #include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
-#include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 
+#include <IrcConnection>
 #include <QThread>
 #include <QTimer>
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
-
-TwitchChannel::TwitchChannel(const QString &channelName)
+TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
     : Channel(channelName)
     , bttvChannelEmotes(new util::EmoteMap)
     , ffzChannelEmotes(new util::EmoteMap)
@@ -23,6 +25,7 @@ TwitchChannel::TwitchChannel(const QString &channelName)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , isLive(false)
     , mod(false)
+    , readConnecetion(_readConnection)
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
@@ -41,9 +44,6 @@ TwitchChannel::TwitchChannel(const QString &channelName)
     this->fetchMessages.connect([this] {
         this->fetchRecentMessages();  //
     });
-
-    this->connectedConnection = singletons::IrcManager::getInstance().connected.connect(
-        [this] { this->userStateChanged(); });
 
     this->messageSuffix.append(' ');
     this->messageSuffix.append(QChar(0x206D));
@@ -95,8 +95,9 @@ void TwitchChannel::sendMessage(const QString &message)
 
     parsedMessage = parsedMessage.trimmed();
 
-    if (parsedMessage.isEmpty())
+    if (parsedMessage.isEmpty()) {
         return;
+    }
 
     if (singletons::SettingManager::getInstance().allowDuplicateMessages) {
         if (parsedMessage == this->lastSentMessage) {
@@ -106,7 +107,7 @@ void TwitchChannel::sendMessage(const QString &message)
         }
     }
 
-    singletons::IrcManager::getInstance().sendMessage(this->name, parsedMessage);
+    this->sendMessageSignal.invoke(this->name, parsedMessage);
 }
 
 bool TwitchChannel::isMod() const
@@ -227,7 +228,7 @@ void TwitchChannel::fetchRecentMessages()
         }
 
         TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
-        static auto readConnection = singletons::IrcManager::getInstance().getReadConnection();
+        static auto readConnection = channel->readConnecetion;
 
         auto msgArray = obj.value("messages").toArray();
         if (msgArray.size() > 0) {
@@ -249,4 +250,5 @@ void TwitchChannel::fetchRecentMessages()
     });
 }
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

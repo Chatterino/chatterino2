@@ -4,9 +4,9 @@
 
 #include "emojis.hpp"
 #include "messages/image.hpp"
+#include "providers/twitch/emotevalue.hpp"
+#include "providers/twitch/twitchaccount.hpp"
 #include "signalvector.hpp"
-#include "twitch/emotevalue.hpp"
-#include "twitch/twitchuser.hpp"
 #include "util/concurrentmap.hpp"
 #include "util/emotemap.hpp"
 
@@ -38,7 +38,7 @@ public:
     void reloadFFZChannelEmotes(const QString &channelName,
                                 std::weak_ptr<util::EmoteMap> channelEmoteMap);
 
-    util::ConcurrentMap<QString, twitch::EmoteValue *> &getTwitchEmotes();
+    util::ConcurrentMap<QString, providers::twitch::EmoteValue *> &getTwitchEmotes();
     util::EmoteMap &getFFZEmotes();
     util::EmoteMap &getChatterinoEmotes();
     util::EmoteMap &getBTTVChannelEmoteFromCaches();
@@ -92,7 +92,7 @@ public:
     std::vector<std::string> emojiShortCodes;
 
     /// Twitch emotes
-    void refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser> &user);
+    void refreshTwitchEmotes(const std::shared_ptr<providers::twitch::TwitchAccount> &user);
 
     struct TwitchAccountEmoteData {
         struct TwitchEmote {
@@ -112,7 +112,7 @@ public:
 
 private:
     //            emote code
-    util::ConcurrentMap<QString, twitch::EmoteValue *> _twitchEmotes;
+    util::ConcurrentMap<QString, providers::twitch::EmoteValue *> _twitchEmotes;
 
     //        emote id
     util::ConcurrentMap<long, util::EmoteData> _twitchEmoteFromCache;

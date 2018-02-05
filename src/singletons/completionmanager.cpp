@@ -13,18 +13,18 @@ CompletionManager &CompletionManager::getInstance()
     return instance;
 }
 
-CompletionModel *CompletionManager::createModel(const std::string &channelName)
+CompletionModel *CompletionManager::createModel(const QString &channelName)
 {
     auto it = this->models.find(channelName);
     if (it != this->models.end()) {
         return it->second;
     }
 
-    CompletionModel *ret = new CompletionModel(qS(channelName));
+    CompletionModel *ret = new CompletionModel(channelName);
     this->models[channelName] = ret;
 
     return ret;
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}

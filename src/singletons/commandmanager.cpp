@@ -6,7 +6,9 @@
 #include <QRegularExpression>
 
 #include "channel.hpp"
-#include "twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchchannel.hpp"
+
+using namespace chatterino::providers::twitch;
 
 namespace chatterino {
 namespace singletons {
@@ -88,8 +90,7 @@ QStringList CommandManager::getCommands()
     return this->commandsStringList;
 }
 
-QString CommandManager::execCommand(const QString &text, ChannelPtr channel,
-                                    bool dryRun)
+QString CommandManager::execCommand(const QString &text, ChannelPtr channel, bool dryRun)
 {
     QStringList words = text.split(' ', QString::SkipEmptyParts);
     Command command;
@@ -104,7 +105,7 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel,
         QString commandName = words[0];
 
         // check if default command exists
-        auto *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get());
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (!dryRun && twitchChannel != nullptr) {
             if (commandName == "/uptime") {
@@ -115,22 +116,26 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel,
 
                 return "";
             } else if (commandName == "/ignore" && words.size() >= 2) {
-                QString messageText;
+                // fourtf: ignore user
+                //                QString messageText;
 
-                if (IrcManager::getInstance().tryAddIgnoredUser(words.at(1), messageText)) {
-                    messageText = "Ignored user \"" + words.at(1) + "\".";
-                }
+                //                if (IrcManager::getInstance().tryAddIgnoredUser(words.at(1),
+                //                messageText)) {
+                //                    messageText = "Ignored user \"" + words.at(1) + "\".";
+                //                }
 
-                channel->addMessage(messages::Message::createSystemMessage(messageText));
+                //                channel->addMessage(messages::Message::createSystemMessage(messageText));
                 return "";
             } else if (commandName == "/unignore") {
-                QString messageText;
+                // fourtf: ignore user
+                //                QString messageText;
 
-                if (IrcManager::getInstance().tryRemoveIgnoredUser(words.at(1), messageText)) {
-                    messageText = "Ignored user \"" + words.at(1) + "\".";
-                }
+                //                if (IrcManager::getInstance().tryRemoveIgnoredUser(words.at(1),
+                //                messageText)) {
+                //                    messageText = "Ignored user \"" + words.at(1) + "\".";
+                //                }
 
-                channel->addMessage(messages::Message::createSystemMessage(messageText));
+                //                channel->addMessage(messages::Message::createSystemMessage(messageText));
                 return "";
             }
         }

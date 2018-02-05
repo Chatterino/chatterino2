@@ -20,8 +20,7 @@ class Image;
 
 namespace layouts {
 
-struct MessageLayoutElement : boost::noncopyable
-{
+struct MessageLayoutElement : boost::noncopyable {
 public:
     MessageLayoutElement(MessageElement &creator, const QSize &size);
 
@@ -47,7 +46,6 @@ protected:
 private:
     QRect rect;
     Link link;
-    //    bool isInNewLine;
     MessageElement &creator;
 };
 

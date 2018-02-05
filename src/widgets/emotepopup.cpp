@@ -4,9 +4,9 @@
 #include <QTabWidget>
 
 #include "messages/messagebuilder.hpp"
-#include "twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchchannel.hpp"
 
-using namespace chatterino::twitch;
+using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -68,7 +68,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
         map.each([&](const QString &key, const util::EmoteData &value) {
             builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
-                                       ->setLink(Link(Link::InsertText, key)));
+                                ->setLink(Link(Link::InsertText, key)));
         });
 
         emoteChannel->addMessage(builder2.getMessage());
@@ -107,7 +107,7 @@ void EmotePopup::loadEmojis()
 
     emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
         builder.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
-                                  ->setLink(Link(Link::Type::InsertText, key)));
+                           ->setLink(Link(Link::Type::InsertText, key)));
     });
     emojiChannel->addMessage(builder.getMessage());
 

@@ -5,6 +5,7 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/messageelement.hpp"
+#include "util/serialize-custom.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/channelview.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
@@ -46,7 +47,7 @@ public:
     Split(SplitContainer *parent, const std::string &_uuid);
     virtual ~Split();
 
-    pajlada::Settings::Setting<std::string> channelName;
+    pajlada::Settings::Setting<QString> channelName;
     boost::signals2::signal<void()> channelChanged;
 
     ChannelView &getChannelView()
@@ -99,7 +100,7 @@ private:
 
     void setChannel(ChannelPtr newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
-    void channelNameUpdated(const std::string &newChannelName);
+    void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);
 
 public slots:

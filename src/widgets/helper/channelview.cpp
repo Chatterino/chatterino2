@@ -3,6 +3,7 @@
 #include "messages/layouts/messagelayout.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/channelmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
@@ -28,6 +29,7 @@
 #define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
 
 using namespace chatterino::messages;
+using namespace chatterino::providers::twitch;
 
 namespace chatterino {
 namespace widgets {
@@ -35,7 +37,7 @@ namespace widgets {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar(this)
-    , userPopupWidget(std::shared_ptr<twitch::TwitchChannel>())
+    , userPopupWidget(std::shared_ptr<TwitchChannel>())
 {
 #ifndef Q_OS_MAC
 //    this->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -476,7 +478,7 @@ messages::MessageElement::Flags ChannelView::getFlags() const
         if (split->getModerationMode()) {
             flags = (MessageElement::Flags)(flags | MessageElement::ModeratorTools);
         }
-        if (this->channel == singletons::ChannelManager::getInstance().mentionsChannel) {
+        if (this->channel == TwitchServer::getInstance().mentionsChannel) {
             flags = (MessageElement::Flags)(flags | MessageElement::ChannelName);
         }
     }

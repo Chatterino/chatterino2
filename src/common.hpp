@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QString>
-
+#include <boost/preprocessor.hpp>
 #include <string>
+
+#include "debug/log.hpp"
 
 namespace chatterino {
 

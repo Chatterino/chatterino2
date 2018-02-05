@@ -87,7 +87,8 @@ void Image::loadImage()
 
         singletons::EmoteManager::getInstance().incGeneration();
 
-        postToThread([] { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
+        util::postToThread(
+            [] { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
     });
 
     singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {

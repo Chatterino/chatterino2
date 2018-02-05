@@ -1,6 +1,6 @@
 #pragma once
 
-#include "twitch/twitchaccountmanager.hpp"
+#include "providers/twitch/twitchaccountmanager.hpp"
 
 namespace chatterino {
 namespace singletons {
@@ -14,7 +14,7 @@ public:
 
     void load();
 
-    twitch::TwitchAccountManager Twitch;
+    providers::twitch::TwitchAccountManager Twitch;
 };
 
 }  // namespace singletons

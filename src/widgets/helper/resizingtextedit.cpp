@@ -1,4 +1,5 @@
 #include "widgets/helper/resizingtextedit.hpp"
+#include "common.hpp"
 #include "singletons/completionmanager.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
@@ -79,13 +80,17 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    if (event->key() == Qt::Key_Tab &&
-        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier) {
+    bool doComplete =
+        event->key() == Qt::Key_Tab && (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+
+    if (doComplete) {
+        // check if there is a completer
+        return_if_not(this->completer);
+
         QString currentCompletionPrefix = this->textUnderCursor();
 
-        if (!currentCompletionPrefix.size()) {
-            return;
-        }
+        // check if there is something to complete
+        return_if_not(currentCompletionPrefix.size());
 
         auto *completionModel =
             static_cast<chatterino::singletons::CompletionModel *>(this->completer->model());
@@ -109,6 +114,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         this->completer->complete();
         return;
     }
+
     // (hemirt)
     // this resets the selection in the completion list, it should probably only trigger on actual
     // chat input (space, character) and not on every key input (pressing alt for example)

@@ -43,5 +43,5 @@ void AccountManager::load()
     this->Twitch.userChanged.invoke();
 }
 
+}  // namespace singletons
 }  // namespace chatterino
-}

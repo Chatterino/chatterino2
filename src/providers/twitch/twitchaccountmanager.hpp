@@ -1,6 +1,6 @@
 #pragma once
 
-#include "twitch/twitchuser.hpp"
+#include "providers/twitch/twitchaccount.hpp"
 
 #include <pajlada/settings/setting.hpp>
 
@@ -16,9 +16,8 @@ namespace chatterino {
 namespace singletons {
 class AccountManager;
 }
-
+namespace providers {
 namespace twitch {
-
 class TwitchAccountManager
 {
     TwitchAccountManager();
@@ -32,11 +31,11 @@ public:
     };
 
     // Returns the current twitchUsers, or the anonymous user if we're not currently logged in
-    std::shared_ptr<twitch::TwitchUser> getCurrent();
+    std::shared_ptr<TwitchAccount> getCurrent();
 
     std::vector<QString> getUsernames() const;
 
-    std::shared_ptr<twitch::TwitchUser> findUserByUsername(const QString &username) const;
+    std::shared_ptr<TwitchAccount> findUserByUsername(const QString &username) const;
     bool userExists(const QString &username) const;
 
     void reloadUsers();
@@ -55,14 +54,14 @@ private:
     };
     AddUserResponse addUser(const UserData &data);
 
-    std::shared_ptr<twitch::TwitchUser> currentUser;
+    std::shared_ptr<TwitchAccount> currentUser;
 
-    std::shared_ptr<twitch::TwitchUser> anonymousUser;
-    std::vector<std::shared_ptr<twitch::TwitchUser>> users;
+    std::shared_ptr<TwitchAccount> anonymousUser;
+    std::vector<std::shared_ptr<TwitchAccount>> users;
     mutable std::mutex mutex;
 
     friend class chatterino::singletons::AccountManager;
 };
-
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

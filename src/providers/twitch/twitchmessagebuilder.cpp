@@ -1,12 +1,12 @@
-#include "twitchmessagebuilder.hpp"
+#include "providers/twitch/twitchmessagebuilder.hpp"
 #include "debug/log.hpp"
+#include "providers/twitch/twitchchannel.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "twitch/twitchchannel.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -15,6 +15,7 @@
 using namespace chatterino::messages;
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
@@ -707,4 +708,5 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
     return false;
 }
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

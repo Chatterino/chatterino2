@@ -6,14 +6,15 @@ namespace chatterino {
 namespace singletons {
 class ChannelManager;
 class ResourceManager;
+}  // namespace singletons
 
-namespace helper {
+namespace providers {
+namespace twitch {
 class IrcMessageHandler
 {
-    IrcMessageHandler(ChannelManager &channelManager, ResourceManager &resourceManager);
+    IrcMessageHandler(singletons::ResourceManager &resourceManager);
 
-    ChannelManager &channelManager;
-    ResourceManager &resourceManager;
+    singletons::ResourceManager &resourceManager;
 
 public:
     static IrcMessageHandler &getInstance();
@@ -27,6 +28,6 @@ public:
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
     void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
 };
-}
-}
-}
+}  // namespace twitch
+}  // namespace providers
+}  // namespace chatterino

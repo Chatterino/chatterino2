@@ -3,6 +3,7 @@
 #include "QString"
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
 
 struct EmoteValue {
@@ -29,4 +30,5 @@ private:
 };
 
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

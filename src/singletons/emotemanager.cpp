@@ -18,6 +18,7 @@
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
+using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -206,7 +207,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
     });
 }
 
-util::ConcurrentMap<QString, twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
+util::ConcurrentMap<QString, providers::twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
 {
     return _twitchEmotes;
 }
@@ -420,9 +421,9 @@ QString EmoteManager::replaceShortCodes(const QString &text)
     return ret;
 }
 
-void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser> &user)
+void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &user)
 {
-    debug::Log("Loading Twitch emotes for user {}", user->getNickName());
+    debug::Log("Loading Twitch emotes for user {}", user->getUserName());
 
     const auto &roomID = user->getUserId();
     const auto &clientID = user->getOAuthClient();
@@ -462,9 +463,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<twitch::TwitchUser>
             }
 
             emoteData.filled = true;
-        }
-
-    );
+        });
 }
 
 void EmoteManager::loadBTTVEmotes()

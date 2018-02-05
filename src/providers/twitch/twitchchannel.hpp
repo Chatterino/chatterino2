@@ -1,19 +1,22 @@
 #pragma once
 
+#include <IrcConnection>
+
 #include "channel.hpp"
+#include "common.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
 
 namespace chatterino {
+namespace providers {
 namespace twitch {
-
-class TwitchChannel : public Channel
+class TwitchServer;
+class TwitchChannel final : public Channel
 {
     QTimer *liveStatusTimer;
 
 public:
-    explicit TwitchChannel(const QString &channelName);
     ~TwitchChannel();
 
     void reloadChannelEmotes();
@@ -49,6 +52,8 @@ public:
     QString streamUptime;
 
 private:
+    explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
+
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
 
@@ -59,7 +64,11 @@ private:
     bool mod;
     QByteArray messageSuffix;
     QString lastSentMessage;
-};
 
+    Communi::IrcConnection *readConnecetion;
+
+    friend class TwitchServer;
+};
 }  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

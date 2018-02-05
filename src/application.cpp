@@ -1,8 +1,9 @@
 #include "application.hpp"
-#include "singletons/loggingmanager.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/commandmanager.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/loggingmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -42,7 +43,7 @@ Application::~Application()
 int Application::run(QApplication &qtApp)
 {
     // Start connecting to the IRC Servers (Twitch only for now)
-    singletons::IrcManager::getInstance().connect();
+    providers::twitch::TwitchServer::getInstance().connect();
 
     // Show main window
     singletons::WindowManager::getInstance().getMainWindow().show();

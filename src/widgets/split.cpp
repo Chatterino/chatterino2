@@ -1,10 +1,12 @@
 #include "widgets/split.hpp"
+#include "providers/twitch/emotevalue.hpp"
+#include "providers/twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchmessagebuilder.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/channelmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "twitch/twitchchannel.hpp"
-#include "twitch/twitchmessagebuilder.hpp"
 #include "util/urlfetch.hpp"
 #include "widgets/helper/searchpopup.hpp"
 #include "widgets/helper/shortcut.hpp"
@@ -34,6 +36,7 @@
 #include <functional>
 #include <random>
 
+using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -45,7 +48,7 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     , settingRoot(fS("/splits/{}", this->uuid))
     , channelName(fS("{}/channelName", this->settingRoot))
     , parentPage(*parent)
-    , channel(singletons::ChannelManager::getInstance().emptyChannel)
+    , channel(Channel::getEmpty())
     , vbox(this)
     , header(this)
     , view(this)
@@ -122,7 +125,6 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 
 Split::~Split()
 {
-    this->channelNameUpdated("");
     this->usermodeChangedConnection.disconnect();
     this->channelIDChangedConnection.disconnect();
 }
@@ -150,7 +152,7 @@ void Split::setChannel(ChannelPtr _newChannel)
 
     this->channel = _newChannel;
 
-    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_newChannel.get());
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_newChannel.get());
 
     if (tc != nullptr) {
         this->usermodeChangedConnection =
@@ -198,20 +200,13 @@ bool Split::getModerationMode() const
     return this->moderationMode;
 }
 
-void Split::channelNameUpdated(const std::string &newChannelName)
+void Split::channelNameUpdated(const QString &newChannelName)
 {
-    auto &cman = singletons::ChannelManager::getInstance();
-
-    // remove current channel
-    if (!this->channel->isEmpty()) {
-        cman.removeTwitchChannel(this->channel->name);
-    }
-
     // update messages
-    if (newChannelName.empty()) {
-        this->setChannel(cman.emptyChannel);
+    if (newChannelName.isEmpty()) {
+        this->setChannel(Channel::getEmpty());
     } else {
-        this->setChannel(cman.addTwitchChannel(QString::fromStdString(newChannelName)));
+        this->setChannel(TwitchServer::getInstance().addChannel(newChannelName));
     }
 
     // update header
@@ -226,13 +221,13 @@ bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
     dialog.setWindowTitle(dialogTitle);
 
     if (!empty) {
-        dialog.setText(QString::fromStdString(this->channelName));
+        dialog.setText(this->channelName);
     }
 
     if (dialog.exec() == QDialog::Accepted) {
         QString newChannelName = dialog.getText().trimmed();
 
-        this->channelName = newChannelName.toStdString();
+        this->channelName = newChannelName;
         this->parentPage.refreshTitle();
 
         return true;
@@ -355,7 +350,7 @@ void Split::doClearChat()
 void Split::doOpenChannel()
 {
     ChannelPtr _channel = this->channel;
-    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {
         QDesktopServices::openUrl("https://twitch.tv/" + tc->name);
@@ -365,7 +360,7 @@ void Split::doOpenChannel()
 void Split::doOpenPopupPlayer()
 {
     ChannelPtr _channel = this->channel;
-    twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(_channel.get());
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {
         QDesktopServices::openUrl("https://player.twitch.tv/?channel=" + tc->name);
@@ -379,7 +374,7 @@ void Split::doOpenStreamlink()
     preferredQuality = preferredQuality.toLower();
     // TODO(Confuseh): Default streamlink paths
     QString path = settings.streamlinkPath;
-    QString channel = QString::fromStdString(this->channelName.getValue());
+    QString channel = this->channelName.getValue();
     QFileInfo fileinfo = QFileInfo(path);
 
     if (path.isEmpty()) {
