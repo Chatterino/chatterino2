@@ -17,6 +17,11 @@ DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/precompiled_header.hpp
 CONFIG            += precompile_header
 
+# https://bugreports.qt.io/browse/QTBUG-27018
+equals(QMAKE_CXX, "clang++") {
+    TARGET = bin/chatterino
+}
+
 # Icons
 macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
@@ -167,7 +172,6 @@ SOURCES += \
     src/widgets/splitcontainer.cpp \
     src/widgets/streamview.cpp \
     src/widgets/textinputdialog.cpp \
-    src/widgets/titlebar.cpp \
     src/widgets/tooltipwidget.cpp \
     src/widgets/window.cpp \
     src/providers/irc/_ircaccount.cpp \
@@ -280,7 +284,6 @@ HEADERS  += \
     src/widgets/splitcontainer.hpp \
     src/widgets/streamview.hpp \
     src/widgets/textinputdialog.hpp \
-    src/widgets/titlebar.hpp \
     src/widgets/tooltipwidget.hpp \
     src/widgets/window.hpp \
     src/common.hpp \

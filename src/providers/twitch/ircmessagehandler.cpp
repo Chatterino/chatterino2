@@ -6,10 +6,10 @@
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
 #include "providers/twitch/twitchchannel.hpp"
-//#include "singletons/channelmanager.hpp"
+#include "providers/twitch/twitchmessagebuilder.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "twitchserver.hpp"
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -149,7 +149,29 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
-    // TODO: Implement
+    debug::Log("Received whisper!");
+    messages::MessageParseArgs args;
+
+    args.isReceivedWhisper = true;
+
+    auto c = TwitchServer::getInstance().whispersChannel.get();
+
+    twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
+
+    if (!builder.isIgnored()) {
+        messages::MessagePtr _message = builder.build();
+        if (_message->flags & messages::Message::Highlighted) {
+            TwitchServer::getInstance().mentionsChannel->addMessage(_message);
+        }
+
+        c->addMessage(_message);
+
+        if (SettingManager::getInstance().inlineWhispers) {
+            TwitchServer::getInstance().forEachChannel([_message](ChannelPtr channel) {
+                channel->addMessage(_message);  //
+            });
+        }
+    }
 }
 
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
@@ -177,9 +199,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
     if (broadcast) {
         // fourtf: send to all twitch channels
-        //        this->channelManager.doOnAll([msg](const auto &c) {
-        //            c->addMessage(msg);  //
-        //        });
+        TwitchServer::getInstance().forEachChannelAndSpecialChannels([msg](const auto &c) {
+            c->addMessage(msg);  //
+        });
 
         return;
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <IrcMessage>
+#include <functional>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
 
@@ -31,6 +32,9 @@ public:
 
     void addFakeMessage(const QString &data);
 
+    // iteration
+    void forEachChannel(std::function<void(ChannelPtr)> func);
+
 protected:
     AbstractIrcServer();
 
@@ -47,16 +51,16 @@ protected:
 
     virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelName);
 
+    QMap<QString, std::weak_ptr<Channel>> channels;
+    std::mutex channelMutex;
+
 private:
     void initConnection();
-
-    QMap<QString, std::weak_ptr<Channel>> channels;
 
     std::unique_ptr<Communi::IrcConnection> writeConnection = nullptr;
     std::unique_ptr<Communi::IrcConnection> readConnection = nullptr;
 
     std::mutex connectionMutex;
-    std::mutex channelMutex;
 };
 }  // namespace irc
 }  // namespace providers

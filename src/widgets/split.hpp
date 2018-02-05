@@ -57,7 +57,6 @@ public:
 
     const std::string &getUUID() const;
     ChannelPtr getChannel() const;
-    ChannelPtr &getChannelRef();
     void setFlexSizeX(double x);
     double getFlexSizeX();
     void setFlexSizeY(double y);

@@ -139,11 +139,6 @@ ChannelPtr Split::getChannel() const
     return this->channel;
 }
 
-ChannelPtr &Split::getChannelRef()
-{
-    return this->channel;
-}
-
 void Split::setChannel(ChannelPtr _newChannel)
 {
     this->view.setChannel(_newChannel);

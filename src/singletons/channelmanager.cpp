@@ -136,5 +136,14 @@
 //    func(this->mentionsChannel);
 //}
 
-//}  // namespace singletons
+//}
+
+// void ChannelManager::doOnAllNormalChannels(std::function<void(ChannelPtr)> func)
+//{
+//    for (const auto &channel : this->twitchChannels) {
+//        func(std::get<0>(channel));
+//    }
+//}
+
 //}  // namespace chatterino
+//}

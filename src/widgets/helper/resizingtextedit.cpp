@@ -85,12 +85,16 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     if (doComplete) {
         // check if there is a completer
-        return_if_not(this->completer);
+        if (!this->completer) {
+            return;
+        }
 
         QString currentCompletionPrefix = this->textUnderCursor();
 
         // check if there is something to complete
-        return_if_not(currentCompletionPrefix.size());
+        if (!currentCompletionPrefix.size()) {
+            return;
+        }
 
         auto *completionModel =
             static_cast<chatterino::singletons::CompletionModel *>(this->completer->model());

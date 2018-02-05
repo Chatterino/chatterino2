@@ -13,12 +13,19 @@ namespace settingspages {
 SpecialChannelsPage::SpecialChannelsPage()
     : SettingsPage("Special channels", "")
 {
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<SpecialChannelsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     auto mentions = layout.emplace<QGroupBox>("Mentions channel").setLayoutType<QVBoxLayout>();
     {
         mentions.emplace<QLabel>("Join /mentions to view your mentions.");
+    }
+
+    auto whispers = layout.emplace<QGroupBox>("Whispers").setLayoutType<QVBoxLayout>();
+    {
+        whispers.emplace<QLabel>("Join /whispers to view your mentions.");
+        whispers.append(this->createCheckBox("Show whispers inline", settings.inlineWhispers));
     }
 
     layout->addStretch(1);

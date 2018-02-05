@@ -249,6 +249,7 @@ void TwitchChannel::fetchRecentMessages()
         }
     });
 }
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

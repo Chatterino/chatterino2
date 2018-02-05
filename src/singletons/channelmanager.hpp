@@ -27,6 +27,8 @@
 //    const ChannelPtr whispersChannel;
 //    const ChannelPtr mentionsChannel;
 //    const ChannelPtr emptyChannel;
+//    void doOnAll(std::function<void(ChannelPtr)> func);
+//    void doOnAllNormalChannels(std::function<void(ChannelPtr)> func);
 
 // private:
 //    std::map<std::string, std::string> usernameToID;

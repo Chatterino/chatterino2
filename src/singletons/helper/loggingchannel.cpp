@@ -7,18 +7,18 @@
 namespace chatterino {
 namespace singletons {
 
+QByteArray endline("\n");
+
 LoggingChannel::LoggingChannel(const QString &_channelName, const QString &_baseDirectory)
     : channelName(_channelName)
     , baseDirectory(_baseDirectory)
 {
     QDateTime now = QDateTime::currentDateTime();
 
-    QString baseFileName = this->channelName + "-" + now.toString("yyyy-MM-dd") + ".log";
+    this->dateString = this->generateDateString(now);
 
-    // Open file handle to log file of current date
-    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + baseFileName);
+    this->openLogFile();
 
-    this->fileHandle.open(QIODevice::Append);
     this->appendLine(this->generateOpeningString(now));
 }
 
@@ -28,24 +28,38 @@ LoggingChannel::~LoggingChannel()
     this->fileHandle.close();
 }
 
+void LoggingChannel::openLogFile()
+{
+    if (this->fileHandle.isOpen()) {
+        this->fileHandle.flush();
+        this->fileHandle.close();
+    }
+
+    QString baseFileName = this->channelName + "-" + this->dateString + ".log";
+
+    // Open file handle to log file of current date
+    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + baseFileName);
+
+    this->fileHandle.open(QIODevice::Append);
+}
+
 void LoggingChannel::addMessage(std::shared_ptr<messages::Message> message)
 {
     QDateTime now = QDateTime::currentDateTime();
+
+    QString messageDateString = this->generateDateString(now);
+    if (messageDateString != this->dateString) {
+        this->dateString = messageDateString;
+        this->openLogFile();
+    }
 
     QString str;
     str.append('[');
     str.append(now.toString("HH:mm:ss"));
     str.append("] ");
 
-    if ((message->flags & messages::Message::MessageFlags::System) != 0) {
-        str.append(message->searchText);
-        str.append('\n');
-    } else {
-        str.append(message->loginName);
-        str.append(": ");
-        str.append(message->searchText);
-        str.append('\n');
-    }
+    str.append(message->searchText);
+    str.append(endline);
 
     this->appendLine(str);
 }
@@ -56,7 +70,7 @@ QString LoggingChannel::generateOpeningString(const QDateTime &now) const
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss "));
     ret.append(now.timeZoneAbbreviation());
-    ret.append('\n');
+    ret.append(endline);
 
     return ret;
 }
@@ -67,15 +81,30 @@ QString LoggingChannel::generateClosingString(const QDateTime &now) const
 
     ret.append(now.toString("yyyy-MM-dd HH:mm:ss"));
     ret.append(now.timeZoneAbbreviation());
-    ret.append('\n');
+    ret.append(endline);
 
     return ret;
 }
 
 void LoggingChannel::appendLine(const QString &line)
 {
+    auto a1 = line.toUtf8();
+    auto a2 = line.toLatin1();
+    auto a3 = line.toLocal8Bit();
+
+    auto a4 = line.data();
+
+    auto a5 = line.toStdString();
+
+    // this->fileHandle.write(a5.c_str(), a5.length());
+    // this->fileHandle.write(a5.c_str(), a5.length());
     this->fileHandle.write(line.toUtf8());
     this->fileHandle.flush();
+}
+
+QString LoggingChannel::generateDateString(const QDateTime &now)
+{
+    return now.toString("yyyy-MM-dd");
 }
 
 }  // namespace singletons

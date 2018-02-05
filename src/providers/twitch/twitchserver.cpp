@@ -143,6 +143,23 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelNa
 
     return nullptr;
 }
+
+void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    for (std::weak_ptr<Channel> &weak : this->channels) {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan) {
+            continue;
+        }
+
+        func(chan);
+    }
+
+    func(this->whispersChannel);
+    func(this->mentionsChannel);
+}
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

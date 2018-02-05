@@ -16,6 +16,9 @@ class TwitchServer final : public irc::AbstractIrcServer
 public:
     static TwitchServer &getInstance();
 
+    // fourtf: ugh
+    void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
+
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
 

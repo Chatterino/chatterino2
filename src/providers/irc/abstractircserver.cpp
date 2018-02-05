@@ -97,20 +97,16 @@ void AbstractIrcServer::writeConnectionMessageReceived(Communi::IrcMessage *mess
 
 std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &channelName)
 {
-    std::lock_guard<std::mutex> lock(this->channelMutex);
-
-    // value exists
-    auto it = this->channels.find(channelName);
-    if (it != this->channels.end()) {
-        std::shared_ptr<Channel> chan = it.value().lock();
-
-        if (chan) {
-            return chan;
-        }
+    // try get channel
+    ChannelPtr chan = this->getChannel(channelName);
+    if (chan != Channel::getEmpty()) {
+        return chan;
     }
 
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
     // value doesn't exist
-    std::shared_ptr<Channel> chan = this->createChannel(channelName);
+    chan = this->createChannel(channelName);
     if (!chan) {
         return Channel::getEmpty();
     }
@@ -119,7 +115,7 @@ std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &channelNam
 
     this->channels.insert(channelName, chan);
     chan->destroyed.connect([this, clojuresInCppAreShit] {
-        // fourtf: issues when the server itself in destroyed
+        // fourtf: issues when the server itself is destroyed
 
         debug::Log("[AbstractIrcServer::addChannel] {} was destroyed", clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
@@ -128,6 +124,7 @@ std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &channelNam
     // join irc channel
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex);
+
         if (this->readConnection) {
             this->readConnection->sendRaw("JOIN #" + channelName);
         }
@@ -144,10 +141,16 @@ std::shared_ptr<Channel> AbstractIrcServer::getChannel(const QString &channelNam
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
+    // try get special channel
+    ChannelPtr chan = this->getCustomChannel(channelName);
+    if (chan) {
+        return chan;
+    }
+
     // value exists
     auto it = this->channels.find(channelName);
     if (it != this->channels.end()) {
-        std::shared_ptr<Channel> chan = it.value().lock();
+        chan = it.value().lock();
 
         if (chan) {
             return chan;
@@ -220,6 +223,20 @@ void AbstractIrcServer::privateMessageReceived(Communi::IrcPrivateMessage *messa
 
 void AbstractIrcServer::messageReceived(Communi::IrcMessage *message)
 {
+}
+
+void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    for (std::weak_ptr<Channel> &weak : this->channels.values()) {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan) {
+            continue;
+        }
+
+        func(chan);
+    }
 }
 }  // namespace irc
 }  // namespace providers
