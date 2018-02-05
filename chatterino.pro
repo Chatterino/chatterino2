@@ -174,9 +174,9 @@ SOURCES += \
     src/widgets/textinputdialog.cpp \
     src/widgets/tooltipwidget.cpp \
     src/widgets/window.cpp \
-    src/providers/irc/_ircaccount.cpp \
-    src/providers/irc/_ircserver.cpp \
-    src/providers/irc/_ircchannel.cpp
+    src/providers/irc/ircaccount.cpp \
+    src/providers/irc/ircchannel.cpp \
+    src/providers/irc/ircserver.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -287,10 +287,10 @@ HEADERS  += \
     src/widgets/tooltipwidget.hpp \
     src/widgets/window.hpp \
     src/common.hpp \
-    src/providers/irc/_ircchannel.hpp \
-    src/providers/irc/_ircaccount.hpp \
-    src/providers/irc/_ircserver.hpp \
-    src/providers/irc/abstractircserver.hpp
+    src/providers/irc/abstractircserver.hpp \
+    src/providers/irc/ircaccount.hpp \
+    src/providers/irc/ircchannel.hpp \
+    src/providers/irc/ircserver.hpp
 
 RESOURCES += \
     resources/resources.qrc

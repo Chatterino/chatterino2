@@ -1,13 +1,10 @@
-#include "_ircserver.hpp"
-
-#include <cassert>
+#include "ircchannel.hpp"
 
 namespace chatterino {
 namespace providers {
 namespace irc {
-// IrcServer::IrcServer(const QString &hostname, int port)
+// IrcChannel::IrcChannel()
 //{
-//    this->initConnection();
 //}
 }  // namespace irc
 }  // namespace providers

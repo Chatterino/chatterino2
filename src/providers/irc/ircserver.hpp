@@ -1,6 +1,6 @@
 #pragma once
 
-#include "providers/irc/_ircaccount.hpp"
+#include "providers/irc/ircaccount.hpp"
 #include "providers/irc/abstractircserver.hpp"
 
 namespace chatterino {
