@@ -132,7 +132,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     if (!pixmap) {
 #ifdef Q_OS_MACOS
         pixmap =
-            new QPixmap((int)(this->container.width * painter.device()->devicePixelRatioF()),
+            new QPixmap((int)(this->container.getWidth() * painter.device()->devicePixelRatioF()),
                         (int)(this->container.getHeight() * painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
