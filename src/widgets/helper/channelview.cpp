@@ -789,8 +789,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
 
-    // qDebug() << "Distance: " << distance;
-
     if (fabsf(distance) > 15.f) {
         // It wasn't a proper click, so we don't care about that here
         return;
@@ -799,7 +797,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // If you clicked and released less than  X pixels away, it counts
     // as a click!
 
-    // show user thing pajaW
+    this->layoutMessages();
 
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
@@ -814,7 +812,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // message under cursor is collapsed
     if (layout->flags & MessageLayout::Collapsed) {
         layout->flags &= MessageLayout::Collapsed;
-        this->layoutMessages();
+        //        this->layoutMessages();
         return;
     }
 

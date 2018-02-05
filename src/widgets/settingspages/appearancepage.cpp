@@ -88,11 +88,9 @@ QLayout *AppearancePage::createThemeColorChanger()
     button->setFlat(true);
     button->setFixedWidth(64);
 
-    // SIGNALS
-    QObject::connect(slider, &QSlider::valueChanged, this, [button, &themeHue](int value) mutable {
+    auto setButtonColor = [button](int value) mutable {
         double newValue = value / 100.0;
-
-        themeHue.setValue(newValue);
+        singletons::ThemeManager::getInstance().themeHue.setValue(newValue);
 
         QPalette pal = button->palette();
         QColor color;
@@ -101,10 +99,12 @@ QLayout *AppearancePage::createThemeColorChanger()
         button->setAutoFillBackground(true);
         button->setPalette(pal);
         button->update();
+    };
 
-        // TODO(pajlada): re-implement
-        // this->windowManager.updateAll();
-    });
+    // SIGNALS
+    QObject::connect(slider, &QSlider::valueChanged, this, setButtonColor);
+
+    setButtonColor(themeHue * 100);
 
     return layout;
 }
