@@ -157,13 +157,15 @@ bool BaseWindow::hasCustomWindowFrame()
 
 void BaseWindow::themeRefreshEvent()
 {
-    QPalette palette;
-    palette.setColor(QPalette::Background, this->themeManager.windowBg);
-    palette.setColor(QPalette::Foreground, this->themeManager.windowText);
-    this->setPalette(palette);
+    if (this->enableCustomFrame) {
+        QPalette palette;
+        palette.setColor(QPalette::Background, this->themeManager.windowBg);
+        palette.setColor(QPalette::Foreground, this->themeManager.windowText);
+        this->setPalette(palette);
 
-    for (RippleEffectButton *button : this->buttons) {
-        button->setMouseEffectColor(this->themeManager.windowText);
+        for (RippleEffectButton *button : this->buttons) {
+            button->setMouseEffectColor(this->themeManager.windowText);
+        }
     }
 }
 
