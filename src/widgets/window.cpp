@@ -39,8 +39,13 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
         this->addTitleBarButton(TitleBarButton::Settings, [] {
             singletons::WindowManager::getInstance().showSettingsDialog();
         });
-        this->addTitleBarButton(TitleBarButton::User, [this] {
+        auto user = this->addTitleBarLabel([this] {
             singletons::WindowManager::getInstance().showAccountSelectPopup(QCursor::pos());
+        });
+
+        singletons::AccountManager::getInstance().Twitch.userChanged.connect([this, user] {
+            user->getLabel().setText(
+                singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName());
         });
     }
 

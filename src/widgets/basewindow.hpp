@@ -10,6 +10,7 @@ class QHBoxLayout;
 namespace chatterino {
 namespace widgets {
 class RippleEffectButton;
+class RippleEffectLabel;
 class TitleBarButton;
 
 class BaseWindow : public BaseWidget
@@ -23,6 +24,7 @@ public:
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
     void addTitleBarButton(const TitleBarButton::Style &style, std::function<void()> onClicked);
+    RippleEffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;

@@ -2,6 +2,7 @@
 
 #include "singletons/settingsmanager.hpp"
 #include "util/nativeeventhelper.hpp"
+#include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/tooltipwidget.hpp"
 
 #include <QApplication>
@@ -149,7 +150,6 @@ bool BaseWindow::hasCustomWindowFrame()
 {
 #ifdef Q_OS_WIN
     return this->enableCustomFrame;
-//    return false;
 #else
     return false;
 #endif
@@ -180,6 +180,19 @@ void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
     button->setButtonStyle(style);
 
     QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
+}
+
+RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+{
+    RippleEffectLabel *button = new RippleEffectLabel;
+    button->setScaleIndependantHeight(30);
+
+    this->buttons.push_back(button);
+    this->titlebarBox->insertWidget(2, button);
+
+    QObject::connect(button, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
+
+    return button;
 }
 
 void BaseWindow::changeEvent(QEvent *)
