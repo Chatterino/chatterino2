@@ -1,5 +1,8 @@
 #include "singletons/commandmanager.hpp"
 #include "debug/log.hpp"
+#include "messages/messagebuilder.hpp"
+#include "providers/twitch/twitchserver.hpp"
+#include "singletons/accountmanager.hpp"
 #include "singletons/pathmanager.hpp"
 
 #include <QFile>
@@ -137,6 +140,28 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
 
                 //                channel->addMessage(messages::Message::createSystemMessage(messageText));
                 return "";
+            } else if (commandName == "/w") {
+                if (words.length() <= 2) {
+                    return "";
+                }
+
+                messages::MessageBuilder b;
+
+                b.emplace<messages::TextElement>(
+                    singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName(),
+                    messages::MessageElement::Text);
+                b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
+                b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
+
+                QString rest = "";
+
+                for (int i = 2; i < words.length(); i++) {
+                    rest += words[i];
+                }
+
+                b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
+
+                TwitchServer::getInstance().whispersChannel->addMessage(b.getMessage());
             }
         }
 
