@@ -217,7 +217,6 @@ HEADERS  += \
     src/singletons/helper/moderationaction.hpp \
     src/singletons/loggingmanager.hpp \
     src/singletons/pathmanager.hpp \
-    src/singletons/providermanager.hp \
     src/singletons/resourcemanager.hpp \
     src/singletons/settingsmanager.hpp \
     src/singletons/thememanager.hpp \
