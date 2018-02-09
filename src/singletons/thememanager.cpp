@@ -59,7 +59,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
-    qreal sat = 0.1;
+    qreal sat = 0;
     //    0.05;
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
