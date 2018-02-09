@@ -175,8 +175,8 @@ SOURCES += \
     src/widgets/tooltipwidget.cpp \
     src/widgets/window.cpp \
     src/providers/irc/ircaccount.cpp \
-    src/providers/irc/ircchannel.cpp \
-    src/providers/irc/ircserver.cpp
+    src/providers/irc/ircserver.cpp \
+    src/providers/irc/ircchannel2.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -289,8 +289,8 @@ HEADERS  += \
     src/common.hpp \
     src/providers/irc/abstractircserver.hpp \
     src/providers/irc/ircaccount.hpp \
-    src/providers/irc/ircchannel.hpp \
-    src/providers/irc/ircserver.hpp
+    src/providers/irc/ircserver.hpp \
+    src/providers/irc/ircchannel2.hpp
 
 RESOURCES += \
     resources/resources.qrc
