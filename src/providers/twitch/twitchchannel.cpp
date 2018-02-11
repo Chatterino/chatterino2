@@ -105,6 +105,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
             this->lastSentMessage = "";
         }
+        this->lastSentMessage = parsedMessage;
     }
 
     this->sendMessageSignal.invoke(this->name, parsedMessage);
