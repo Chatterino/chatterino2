@@ -63,14 +63,14 @@ static void FillInFFZEmoteData(const QJsonObject &urls, const QString &code,
 
     assert(!url1x.isEmpty());
 
-    emoteData.image1x = new Image(url1x, 1, code, code + "<br />Global FFZ Emote");
+    emoteData.image1x = new Image(url1x, 1, code, code);
 
     if (!url2x.isEmpty()) {
-        emoteData.image2x = new Image(url2x, 0.5, code, code + "<br />Global FFZ Emote");
+        emoteData.image2x = new Image(url2x, 0.5, code, code);
     }
 
     if (!url3x.isEmpty()) {
-        emoteData.image3x = new Image(url3x, 0.25, code, code + "<br />Global FFZ Emote");
+        emoteData.image3x = new Image(url3x, 0.25, code, code);
     }
 }
 
@@ -192,7 +192,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
                 auto emote =
                     this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &urls] {
                         util::EmoteData emoteData;
-                        FillInFFZEmoteData(urls, code, emoteData);
+                        FillInFFZEmoteData(urls, code + "<br/>Channel FFZ Emote", emoteData);
 
                         return emoteData;
                     });
@@ -524,7 +524,7 @@ void EmoteManager::loadFFZEmotes()
                 QJsonObject urls = object.value("urls").toObject();
 
                 util::EmoteData emoteData;
-                FillInFFZEmoteData(urls, code, emoteData);
+                FillInFFZEmoteData(urls, code + "<br/>Global FFZ Emote", emoteData);
 
                 this->ffzGlobalEmotes.insert(code, emoteData);
                 codes.push_back(code.toStdString());
