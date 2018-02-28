@@ -243,7 +243,7 @@ void TwitchChannel::fetchRecentMessages()
 
                 messages::MessageParseArgs args;
                 twitch::TwitchMessageBuilder builder(channel, privMsg, args);
-                if (!builder.isIgnored()) {
+                if (!builder.isIgnored() && privMsg->nick() != "airbrushgrenade") {
                     messages.push_back(builder.build());
                 }
             }

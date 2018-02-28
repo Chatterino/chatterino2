@@ -83,7 +83,7 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 
     TwitchMessageBuilder builder(chan.get(), message, args);
 
-    if (!builder.isIgnored()) {
+    if (!builder.isIgnored() && message->nick() != "airbrushgrenade") {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {
             TwitchServer::getInstance().mentionsChannel->addMessage(_message);
