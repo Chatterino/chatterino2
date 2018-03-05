@@ -17,7 +17,7 @@ CompletionModel::CompletionModel(const QString &_channelName)
 
 void CompletionModel::refresh()
 {
-    // debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
+    debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
 
     auto &emoteManager = singletons::EmoteManager::getInstance();
 

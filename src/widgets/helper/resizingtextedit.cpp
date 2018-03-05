@@ -99,12 +99,11 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         auto *completionModel =
             static_cast<chatterino::singletons::CompletionModel *>(this->completer->model());
 
-        if (!this->nextCompletion) {
+        if (!this->completionInProgress) {
+            // First type pressing tab after modifying a message, we refresh our completion model
             completionModel->refresh();
-            this->completer->setModel(completionModel);
-            // first selection
+            this->completionInProgress = true;
             this->completer->setCompletionPrefix(currentCompletionPrefix);
-            this->nextCompletion = true;
             this->completer->complete();
             return;
         }
@@ -122,7 +121,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     // (hemirt)
     // this resets the selection in the completion list, it should probably only trigger on actual
     // chat input (space, character) and not on every key input (pressing alt for example)
-    this->nextCompletion = false;
+    this->completionInProgress = false;
 
     if (!event->isAccepted()) {
         QTextEdit::keyPressEvent(event);

@@ -25,11 +25,10 @@ protected:
 
 private:
     QCompleter *completer = nullptr;
+    bool completionInProgress = false;
 
     // hadSpace is set to true in case the "textUnderCursor" word was after a space
     QString textUnderCursor(bool *hadSpace = nullptr) const;
-
-    bool nextCompletion = false;
 
 private slots:
     void insertCompletion(const QString &completion);
