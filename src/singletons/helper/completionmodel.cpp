@@ -20,7 +20,6 @@ void CompletionModel::refresh()
     // debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
 
     auto &emoteManager = singletons::EmoteManager::getInstance();
-    this->emotes.clear();
 
     // User-specific: Twitch Emotes
     // TODO: Fix this so it properly updates with the proper api. oauth token needs proper scope
@@ -62,8 +61,6 @@ void CompletionModel::refresh()
         this->addString(":" + m + ":");
     }
 
-    qSort(this->emotes);
-
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
     //    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
@@ -83,13 +80,19 @@ void CompletionModel::refresh()
 void CompletionModel::addString(const std::string &str)
 {
     // Always add a space at the end of completions
-    this->emotes.push_back(qS(str) + " ");
+    this->emotes.insert(this->createEmote(str + " "));
 }
 
 void CompletionModel::addString(const QString &str)
 {
     // Always add a space at the end of completions
-    this->emotes.push_back(str + " ");
+    this->emotes.insert(this->createEmote(str + " "));
+}
+
+void CompletionModel::addUser(const QString &str)
+{
+    // Always add a space at the end of completions
+    this->emotes.insert(this->createUser(str + " "));
 }
 }  // namespace singletons
 }  // namespace chatterino
