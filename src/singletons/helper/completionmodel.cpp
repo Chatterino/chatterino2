@@ -6,6 +6,8 @@
 #include "singletons/completionmanager.hpp"
 #include "singletons/emotemanager.hpp"
 
+#include <QtAlgorithms>
+
 namespace chatterino {
 namespace singletons {
 CompletionModel::CompletionModel(const QString &_channelName)
@@ -59,6 +61,8 @@ void CompletionModel::refresh()
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":");
     }
+
+    qSort(this->emotes);
 
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
