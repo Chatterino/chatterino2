@@ -45,30 +45,41 @@ private:
         // emote == true
         // username == false
         bool isEmote = true;
-        bool operator<(const TaggedString& that) const {
+        bool operator<(const TaggedString &that) const
+        {
             if (this->isEmote) {
                 if (that.isEmote) {
-                    return this->str < that.str;
-                } else return true;
+                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
+                    if (k == 0) return this->str > that.str;
+                    else return k < 0;
+                } else
+                    return true;
             } else {
-                if (that.isEmote) return false;
-                else return this->str < that.str;
+                if (that.isEmote)
+                    return false;
+                else {
+                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);;
+                    if (k == 0) return this->str > that.str;
+                    else return k < 0;
+                }
             }
         }
-
     };
-    TaggedString createEmote(const std::string &str) {
+    TaggedString createEmote(const std::string &str)
+    {
         return TaggedString{qS(str), true};
     }
-    TaggedString createEmote(const QString &str) {
+    TaggedString createEmote(const QString &str)
+    {
         return TaggedString{str, true};
     }
-    TaggedString createUser(const QString &str) {
+    TaggedString createUser(const QString &str)
+    {
         return TaggedString{str, false};
     }
     std::set<TaggedString> emotes;
 
     QString channelName;
 };
-}
-}
+}  // namespace singletons
+}  // namespace chatterino
