@@ -243,7 +243,8 @@ void TwitchChannel::fetchRecentMessages()
 
                 messages::MessageParseArgs args;
                 twitch::TwitchMessageBuilder builder(channel, privMsg, args);
-                if (!builder.isIgnored() && privMsg->nick() != "airbrushgrenade") {
+                const static std::vector<QString> vec{"airbrushgrenade", "scizth0"};
+                if (!builder.isIgnored() && std::find(vec.begin(), vec.end(), privMsg->nick()) == vec.end()) {
                     messages.push_back(builder.build());
                 }
             }
