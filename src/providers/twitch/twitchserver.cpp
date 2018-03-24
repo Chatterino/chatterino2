@@ -87,8 +87,7 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
     auto cm = singletons::CompletionManager::getInstance().createModel(chan->name);
     cm->addUser(message->nick());
 
-    const static std::vector<QString> vec{"airbrushgrenade", "scizth0"};
-    if (!builder.isIgnored() && std::find(vec.begin(), vec.end(), message->nick()) == vec.end()) {
+    if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {
             TwitchServer::getInstance().mentionsChannel->addMessage(_message);
