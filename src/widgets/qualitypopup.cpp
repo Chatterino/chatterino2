@@ -1,14 +1,12 @@
 #include "qualitypopup.hpp"
-
-#include <QProcess>
+#include "debug/log.hpp"
+#include "util/streamlink.hpp"
 
 namespace chatterino {
 namespace widgets {
 
-QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringList options)
-    : BaseWindow()
-    , channel(channel)
-    , path(path)
+QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
+    : channelName(_channelName)
 {
     this->ui.okButton.setText("OK");
     this->ui.cancelButton.setText("Cancel");
@@ -21,9 +19,7 @@ QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringL
     this->ui.buttonBox.addButton(&this->ui.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
     this->ui.buttonBox.addButton(&this->ui.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
 
-    for (int i = 0; i < options.length(); ++i) {
-        this->ui.selector.addItem(options.at(i));
-    }
+    this->ui.selector.addItems(options);
 
     this->ui.vbox.addWidget(&this->ui.selector);
     this->ui.vbox.addWidget(&this->ui.buttonBox);
@@ -31,9 +27,9 @@ QualityPopup::QualityPopup(const QString &channel, const QString &path, QStringL
     this->setLayout(&this->ui.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channel, const QString &path, QStringList options)
+void QualityPopup::showDialog(const QString &channelName, QStringList options)
 {
-    QualityPopup *instance = new QualityPopup(channel, path, options);
+    QualityPopup *instance = new QualityPopup(channelName, options);
 
     instance->setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -45,9 +41,16 @@ void QualityPopup::showDialog(const QString &channel, const QString &path, QStri
 
 void QualityPopup::okButtonClicked()
 {
+    QString channelURL = "twitch.tv/" + this->channelName;
+
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    QProcess::startDetached(this->path, {"twitch.tv/" + this->channel,
-                                         this->ui.selector.currentText(), settings.streamlinkOpts});
+
+    try {
+        streamlink::OpenStreamlink(channelURL, this->ui.selector.currentText());
+    } catch (const streamlink::Exception &ex) {
+        debug::Log("Exception caught trying to open streamlink: {}", ex.what());
+    }
+
     this->close();
 }
 

@@ -17,8 +17,8 @@ namespace widgets {
 class QualityPopup : public BaseWindow
 {
 public:
-    QualityPopup(const QString &channel, const QString &path, QStringList options);
-    static void showDialog(const QString &channel, const QString &path, QStringList options);
+    QualityPopup(const QString &_channelName, QStringList options);
+    static void showDialog(const QString &_channelName, QStringList options);
 
 private:
     struct {
@@ -29,8 +29,7 @@ private:
         QPushButton cancelButton;
     } ui;
 
-    QString channel;
-    QString path;
+    QString channelName;
 
     void okButtonClicked();
     void cancelButtonClicked();
