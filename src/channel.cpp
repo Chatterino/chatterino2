@@ -20,6 +20,7 @@ namespace chatterino {
 
 Channel::Channel(const QString &_name)
     : name(_name)
+    , completionModel(this->name)
 {
 }
 

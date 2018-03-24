@@ -114,7 +114,6 @@ SOURCES += \
     src/singletons/accountmanager.cpp \
     src/singletons/channelmanager.cpp \
     src/singletons/commandmanager.cpp \
-    src/singletons/completionmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
     src/singletons/helper/completionmodel.cpp \
@@ -208,7 +207,6 @@ HEADERS  += \
     src/singletons/accountmanager.hpp \
     src/singletons/channelmanager.hpp \
     src/singletons/commandmanager.hpp \
-    src/singletons/completionmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
     src/singletons/helper/chatterinosetting.hpp \

@@ -11,10 +11,13 @@
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 class TwitchServer;
+
 class TwitchChannel final : public Channel
 {
     QTimer *liveStatusTimer;
+    QTimer *chattersListTimer;
 
 public:
     ~TwitchChannel();
@@ -69,6 +72,7 @@ private:
 
     friend class TwitchServer;
 };
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

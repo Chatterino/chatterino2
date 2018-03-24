@@ -1,14 +1,13 @@
 #include "widgets/helper/splitinput.hpp"
 #include "singletons/commandmanager.hpp"
-#include "singletons/completionmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "util/layoutcreator.hpp"
+#include "util/urlfetch.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
-#include "util/urlfetch.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -22,25 +21,13 @@ SplitInput::SplitInput(Split *_chatWidget)
 {
     this->initLayout();
 
-    // auto completion
-    auto completer = new QCompleter(
-        singletons::CompletionManager::getInstance().createModel(this->chatWidget->channelName));
-    auto cc = singletons::CompletionManager::getInstance().createModel(this->chatWidget->channelName);
-    cc->refresh();
-
-
-    static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
-    util::twitch::get("https://tmi.twitch.tv/group/user/" + this->chatWidget->channelName + "/chatters", this,
-                      [cc](QJsonObject obj) {
-                          QJsonObject chattersObj = obj.value("chatters").toObject();
-                          for (int i = 0; i < jsonLabels.size(); i++) {
-                              foreach (const QJsonValue &v,
-                                       chattersObj.value(jsonLabels.at(i)).toArray())
-                                  cc->addUser(v.toString());
-                          }
-                      });
-
+    auto completer = new QCompleter(&this->chatWidget->getChannel()->completionModel);
     this->ui.textEdit->setCompleter(completer);
+
+    this->chatWidget->channelChanged.connect([this] {
+        auto completer = new QCompleter(&this->chatWidget->getChannel()->completionModel);
+        this->ui.textEdit->setCompleter(completer);
+    });
 
     // misc
     this->installKeyPressedEvent();

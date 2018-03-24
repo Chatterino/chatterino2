@@ -3,13 +3,13 @@
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/channelmanager.hpp"
-#include "singletons/completionmanager.hpp"
 #include "singletons/emotemanager.hpp"
 
 #include <QtAlgorithms>
 
 namespace chatterino {
 namespace singletons {
+
 CompletionModel::CompletionModel(const QString &_channelName)
     : channelName(_channelName)
 {
@@ -94,5 +94,6 @@ void CompletionModel::addUser(const QString &str)
     // Always add a space at the end of completions
     this->emotes.insert(this->createUser(str + " "));
 }
+
 }  // namespace singletons
 }  // namespace chatterino

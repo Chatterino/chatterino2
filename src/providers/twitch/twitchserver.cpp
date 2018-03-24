@@ -5,7 +5,6 @@
 #include "providers/twitch/twitchmessagebuilder.hpp"
 #include "singletons/accountmanager.hpp"
 #include "util/posttothread.hpp"
-#include "singletons/completionmanager.hpp"
 
 #include <cassert>
 
@@ -84,8 +83,8 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 
     TwitchMessageBuilder builder(chan.get(), message, args);
 
-    auto cm = singletons::CompletionManager::getInstance().createModel(chan->name);
-    cm->addUser(message->nick());
+    // XXX: Thread-safety
+    chan->completionModel.addUser(message->nick());
 
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();

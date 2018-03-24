@@ -16,6 +16,7 @@
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
     : Channel(channelName)
     , bttvChannelEmotes(new util::EmoteMap)
@@ -47,6 +48,27 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
     this->messageSuffix.append(' ');
     this->messageSuffix.append(QChar(0x206D));
+
+    static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
+    auto refreshChatters = [=](QJsonObject obj) {
+        QJsonObject chattersObj = obj.value("chatters").toObject();
+        for (int i = 0; i < jsonLabels.size(); i++) {
+            foreach (const QJsonValue &v, chattersObj.value(jsonLabels.at(i)).toArray()) {
+                this->completionModel.addUser(v.toString());
+            }
+        }
+    };
+
+    auto doRefreshChatters = [=]() {
+        util::twitch::get("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
+                          QThread::currentThread(), refreshChatters);
+    };
+
+    doRefreshChatters();
+
+    this->chattersListTimer = new QTimer;
+    QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
+    this->chattersListTimer->start(5 * 60 * 1000);
 }
 
 TwitchChannel::~TwitchChannel()
@@ -55,6 +77,9 @@ TwitchChannel::~TwitchChannel()
 
     this->liveStatusTimer->stop();
     this->liveStatusTimer->deleteLater();
+
+    this->chattersListTimer->stop();
+    this->chattersListTimer->deleteLater();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -104,7 +129,7 @@ void TwitchChannel::sendMessage(const QString &message)
             parsedMessage.append(this->messageSuffix);
 
             this->lastSentMessage = "";
-        }     
+        }
     }
 
     this->lastSentMessage = parsedMessage;

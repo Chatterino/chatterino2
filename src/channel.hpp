@@ -3,6 +3,7 @@
 #include "messages/image.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
+#include "singletons/helper/completionmodel.hpp"
 #include "util/concurrentmap.hpp"
 
 #include <QMap>
@@ -63,6 +64,8 @@ public:
     }
 
     static std::shared_ptr<Channel> getEmpty();
+
+    singletons::CompletionModel completionModel;
 
 protected:
     virtual void onConnected();

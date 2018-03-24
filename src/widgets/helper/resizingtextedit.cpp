@@ -1,6 +1,6 @@
 #include "widgets/helper/resizingtextedit.hpp"
 #include "common.hpp"
-#include "singletons/completionmanager.hpp"
+#include "singletons/helper/completionmodel.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
 {

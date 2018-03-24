@@ -1,15 +1,16 @@
 #pragma once
 
+#include "common.hpp"
+
 #include <QAbstractListModel>
-#include <set>
 
 #include <map>
+#include <set>
 #include <string>
-
-#include "common.hpp"
 
 namespace chatterino {
 namespace singletons {
+
 class CompletionModel : public QAbstractListModel
 {
 public:
@@ -50,17 +51,23 @@ private:
             if (this->isEmote) {
                 if (that.isEmote) {
                     int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-                    if (k == 0) return this->str > that.str;
-                    else return k < 0;
+                    if (k == 0) {
+                        return this->str > that.str;
+                    } else {
+                        return k < 0;
+                    }
                 } else
                     return true;
             } else {
                 if (that.isEmote)
                     return false;
                 else {
-                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);;
-                    if (k == 0) return this->str > that.str;
-                    else return k < 0;
+                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
+                    if (k == 0) {
+                        return this->str > that.str;
+                    } else {
+                        return k < 0;
+                    }
                 }
             }
         }
@@ -81,5 +88,6 @@ private:
 
     QString channelName;
 };
+
 }  // namespace singletons
 }  // namespace chatterino
