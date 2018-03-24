@@ -1,4 +1,4 @@
-#include "completionmodel.hpp"
+#include "util/completionmodel.hpp"
 
 #include "common.hpp"
 #include "debug/log.hpp"
@@ -8,7 +8,6 @@
 #include <QtAlgorithms>
 
 namespace chatterino {
-namespace singletons {
 
 CompletionModel::CompletionModel(const QString &_channelName)
     : channelName(_channelName)
@@ -95,5 +94,4 @@ void CompletionModel::addUser(const QString &str)
     this->emotes.insert(this->createUser(str + " "));
 }
 
-}  // namespace singletons
 }  // namespace chatterino

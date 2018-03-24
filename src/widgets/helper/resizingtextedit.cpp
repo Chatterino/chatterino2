@@ -1,6 +1,6 @@
 #include "widgets/helper/resizingtextedit.hpp"
 #include "common.hpp"
-#include "singletons/helper/completionmodel.hpp"
+#include "util/completionmodel.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
 {
@@ -97,7 +97,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         auto *completionModel =
-            static_cast<chatterino::singletons::CompletionModel *>(this->completer->model());
+            static_cast<chatterino::CompletionModel *>(this->completer->model());
 
         if (!this->completionInProgress) {
             // First type pressing tab after modifying a message, we refresh our completion model

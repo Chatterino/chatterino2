@@ -116,7 +116,7 @@ SOURCES += \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
-    src/singletons/helper/completionmodel.cpp \
+    src/util/completionmodel.cpp \
     src/singletons/helper/loggingchannel.cpp \
     src/singletons/helper/moderationaction.cpp \
     src/singletons/loggingmanager.cpp \
@@ -210,7 +210,7 @@ HEADERS  += \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
     src/singletons/helper/chatterinosetting.hpp \
-    src/singletons/helper/completionmodel.hpp \
+    src/util/completionmodel.hpp \
     src/singletons/helper/loggingchannel.hpp \
     src/singletons/helper/moderationaction.hpp \
     src/singletons/loggingmanager.hpp \
