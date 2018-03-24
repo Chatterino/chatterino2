@@ -144,7 +144,9 @@ void SplitInput::installKeyPressedEvent()
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
-            this->prevMsg.append(message);
+            // don't add duplicate messages to message history
+            if (this->prevMsg.isEmpty() || !this->prevMsg.endsWith(message))
+                this->prevMsg.append(message);
 
             event->accept();
             if (!(event->modifiers() == Qt::ControlModifier)) {
