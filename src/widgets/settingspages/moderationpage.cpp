@@ -13,6 +13,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 ModerationPage::ModerationPage()
     : SettingsPage("Moderation", "")
 {
@@ -26,6 +27,12 @@ ModerationPage::ModerationPage()
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on
+
+        auto form = layout.emplace<QFormLayout>();
+        {
+            form->addRow("Action on timed out messages (unimplemented):",
+                         this->createComboBox({"Disable", "Hide"}, settings.timeoutAction));
+        }
 
         auto modButtons =
             layout.emplace<QGroupBox>("Custom moderator buttons").setLayoutType<QVBoxLayout>();

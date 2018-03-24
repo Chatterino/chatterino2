@@ -18,6 +18,7 @@ public:
 private:
     QTimer itemsChangedTimer;
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

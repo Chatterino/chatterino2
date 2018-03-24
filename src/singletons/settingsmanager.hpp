@@ -82,6 +82,7 @@ public:
 
     /// Moderation
     QStringSetting moderationActions = {"/moderation/actions", "/ban {user}\n/timeout {user} 300"};
+    QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
 
     /// Highlighting
     BoolSetting enableHighlights = {"/highlighting/enabled", true};
