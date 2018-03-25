@@ -176,7 +176,8 @@ SOURCES += \
     src/providers/irc/ircaccount.cpp \
     src/providers/irc/ircserver.cpp \
     src/providers/irc/ircchannel2.cpp \
-    src/util/streamlink.cpp
+    src/util/streamlink.cpp \
+    src/providers/twitch/twitchhelpers.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -289,7 +290,8 @@ HEADERS  += \
     src/providers/irc/ircaccount.hpp \
     src/providers/irc/ircserver.hpp \
     src/providers/irc/ircchannel2.hpp \
-    src/util/streamlink.hpp
+    src/util/streamlink.hpp \
+    src/providers/twitch/twitchhelpers.hpp
 
 RESOURCES += \
     resources/resources.qrc

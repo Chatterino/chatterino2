@@ -6,6 +6,7 @@
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
 #include "providers/twitch/twitchchannel.hpp"
+#include "providers/twitch/twitchhelpers.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
@@ -59,16 +60,14 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
     // check parameter count
-    if (message->parameters().length() < 1)
+    if (message->parameters().length() < 1) {
         return;
+    }
 
-    QString chanName = message->parameter(0);
-
-    // check channel name length
-    if (chanName.length() >= 2)
+    QString chanName;
+    if (!TrimChannelName(message->parameter(0), chanName)) {
         return;
-
-    chanName = chanName.mid(1);
+    }
 
     // get channel
     auto chan = TwitchServer::getInstance().getChannel(chanName);
@@ -85,8 +84,6 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
         return;
     }
-
-    assert(message->parameters().length() >= 2);
 
     // get username, duration and message of the timed out user
     QString username = message->parameter(1);
@@ -136,10 +133,12 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     QVariant _mod = message->tag("mod");
 
     if (_mod.isValid()) {
-        auto rawChannelName = message->parameters().at(0);
-        auto trimmedChannelName = rawChannelName.mid(1);
+        QString channelName;
+        if (!TrimChannelName(message->parameter(0), channelName)) {
+            return;
+        }
 
-        auto c = TwitchServer::getInstance().getChannel(trimmedChannelName);
+        auto c = TwitchServer::getInstance().getChannel(channelName);
         twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(c.get());
         if (tc != nullptr) {
             tc->setMod(_mod == "1");
@@ -192,13 +191,11 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
-    auto rawChannelName = message->target();
-
-    bool broadcast = rawChannelName.length() < 2;
     MessagePtr msg = Message::createSystemMessage(message->content());
 
-    if (broadcast) {
-        // fourtf: send to all twitch channels
+    QString channelName;
+    if (!TrimChannelName(message->target(), channelName)) {
+        // Notice wasn't targeted at a single channel, send to all twitch channels
         TwitchServer::getInstance().forEachChannelAndSpecialChannels([msg](const auto &c) {
             c->addMessage(msg);  //
         });
@@ -206,13 +203,11 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         return;
     }
 
-    auto trimmedChannelName = rawChannelName.mid(1);
-
-    auto channel = TwitchServer::getInstance().getChannel(trimmedChannelName);
+    auto channel = TwitchServer::getInstance().getChannel(channelName);
 
     if (!channel) {
         debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
-                   trimmedChannelName);
+                   channelName);
         return;
     }
 
