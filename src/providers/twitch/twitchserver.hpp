@@ -9,6 +9,7 @@
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 class TwitchServer final : public irc::AbstractIrcServer
 {
     TwitchServer();
@@ -33,6 +34,7 @@ protected:
 
     virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
 };
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

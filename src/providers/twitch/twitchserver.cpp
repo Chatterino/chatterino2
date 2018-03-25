@@ -2,6 +2,7 @@
 
 #include "providers/twitch/ircmessagehandler.hpp"
 #include "providers/twitch/twitchaccount.hpp"
+#include "providers/twitch/twitchhelpers.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
 #include "singletons/accountmanager.hpp"
 #include "util/posttothread.hpp"
@@ -14,6 +15,7 @@ using namespace chatterino::singletons;
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 TwitchServer::TwitchServer()
     : whispersChannel(new Channel("/mentions"))
     , mentionsChannel(new Channel("/mentions"))
@@ -72,8 +74,13 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 
 void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 {
+    QString channelName;
+    if (!TrimChannelName(message->target(), channelName)) {
+        return;
+    }
+
     this->onPrivateMessage.invoke(message);
-    auto chan = TwitchServer::getInstance().getChannel(message->target().mid(1));
+    auto chan = TwitchServer::getInstance().getChannel(channelName);
 
     if (!chan) {
         return;
@@ -163,6 +170,7 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
     func(this->whispersChannel);
     func(this->mentionsChannel);
 }
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino
