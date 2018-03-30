@@ -38,7 +38,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
     }
 
     painter.setPen(Qt::NoPen);
-    painter.fillRect(this->rect(), background);
+    //    painter.fillRect(this->rect(), background);
 
     float h = height(), w = width();
 

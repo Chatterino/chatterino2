@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QLinearGradient>
 #include <QPainter>
 
 namespace chatterino {
@@ -78,15 +79,16 @@ void NotebookTab::updateSize()
 {
     float scale = getScale();
 
-    this->resize((int)(150 * scale), (int)(24 * scale));
+    int width;
 
-    //    QString qTitle(qS(this->title));
-    //    if (singletons::SettingManager::getInstance().hideTabX) {
-    //        this->resize((int)((fontMetrics().width(qTitle) + 16) * scale), (int)(24 * scale));
-    //    } else {
-    //        this->resize((int)((fontMetrics().width(qTitle) + 8 + 24) * scale), (int)(24 *
-    //        scale));
-    //    }
+    QString qTitle(qS(this->title));
+    if (singletons::SettingManager::getInstance().hideTabX) {
+        width = (int)((fontMetrics().width(qTitle) + 16 + 16) * scale);
+    } else {
+        width = (int)((fontMetrics().width(qTitle) + 8 + 24 + 16) * scale);
+    }
+
+    this->resize(std::min((int)(150 * scale), width), (int)(48 * scale));
 
     if (this->parent() != nullptr) {
         (static_cast<Notebook *>(this->parent()))->performLayout(true);
@@ -173,6 +175,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->getScale();
 
+    int height = (int)(scale * 24);
+    int fullHeight = (int)(scale * 48);
+
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
     singletons::ThemeManager::TabColors regular = this->themeManager.tabs.regular;
@@ -190,32 +195,39 @@ void NotebookTab::paintEvent(QPaintEvent *)
     bool windowFocused = this->window() == QApplication::activeWindow();
     // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
+    QBrush tabBackground = this->mouseOver ? colors.backgrounds.hover
+                                           : (windowFocused ? colors.backgrounds.regular
+                                                            : colors.backgrounds.unfocused);
+
     if (false) {
         painter.fillRect(rect(), this->mouseOver ? regular.backgrounds.hover
                                                  : (windowFocused ? regular.backgrounds.regular
                                                                   : regular.backgrounds.unfocused));
 
         // fill the tab background
-        painter.fillRect(rect(), this->mouseOver ? colors.backgrounds.hover
-                                                 : (windowFocused ? colors.backgrounds.regular
-                                                                  : colors.backgrounds.unfocused));
+        painter.fillRect(rect(), tabBackground);
     } else {
-        QPainterPath path(QPointF(0, this->height()));
+        QPainterPath path(QPointF(0, height));
         path.lineTo(8 * scale, 0);
         path.lineTo(this->width() - 8 * scale, 0);
-        path.lineTo(this->width(), this->height());
+        path.lineTo(this->width(), height);
         painter.fillPath(path, this->mouseOver ? regular.backgrounds.hover
                                                : (windowFocused ? regular.backgrounds.regular
                                                                 : regular.backgrounds.unfocused));
 
         // fill the tab background
-        painter.fillPath(path, this->mouseOver ? colors.backgrounds.hover
-                                               : (windowFocused ? colors.backgrounds.regular
-                                                                : colors.backgrounds.unfocused));
+        painter.fillPath(path, tabBackground);
         painter.setPen(QColor("#FFF"));
         painter.setRenderHint(QPainter::Antialiasing);
         painter.drawPath(path);
         //        painter.setBrush(QColor("#000"));
+
+        QLinearGradient gradient(0, height, 0, fullHeight);
+        gradient.setColorAt(0, tabBackground.color());
+        gradient.setColorAt(1, "#fff");
+
+        QBrush brush(gradient);
+        painter.fillRect(0, height, this->width(), fullHeight - height, brush);
     }
 
     // set the pen color
@@ -223,7 +235,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // set area for text
     int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
-    QRect rect(0, 0, this->width() - rectW, this->height());
+    QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
     if (false) {  // legacy
@@ -232,7 +244,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
         option.setWrapMode(QTextOption::NoWrap);
         int offset = (int)(scale * 16);
-        QRect textRect(offset, 0, this->width() - offset - offset, this->height());
+        QRect textRect(offset, 0, this->width() - offset - offset, height);
         painter.drawText(textRect, this->getTitle(), option);
     }
 

@@ -162,6 +162,8 @@ SplitContainer *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 
     for (auto *page : this->pages) {
         QRect rect = page->getTab()->getDesiredRect();
+        rect.setHeight((int)(this->getScale() * 22));
+
         rect.setWidth(std::min(maxWidth, rect.width()));
 
         if (rect.contains(point)) {
@@ -242,7 +244,8 @@ void Notebook::performLayout(bool animated)
     for (auto &i : this->pages) {
         if (!first &&
             (i == this->pages.last() ? tabHeight : 0) + x + i->getTab()->width() > width()) {
-            y += i->getTab()->height();
+            //            y += i->getTab()->height();
+            y += 20;
             i->getTab()->moveAnimated(QPoint(0, y), animated);
             x = i->getTab()->width();
         } else {
@@ -255,7 +258,15 @@ void Notebook::performLayout(bool animated)
         first = false;
     }
 
+    x += (int)(8 * scale);
+
     this->addButton.move(x, y);
+
+    for (auto &i : this->pages) {
+        i->getTab()->raise();
+    }
+
+    this->addButton.raise();
 
     if (this->selectedPage != nullptr) {
         this->selectedPage->move(0, y + tabHeight);
