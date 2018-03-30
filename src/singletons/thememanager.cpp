@@ -90,6 +90,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     // tabs
     // text, {regular, hover, unfocused}
     this->windowBg = "#ccc";
+
+    this->tabs.border = "#999";
     this->tabs.regular = {tabFg, {windowBg, blendColors(windowBg, "#999", 0.5), windowBg}};
 
     this->tabs.selected = {"#fff", {themeColor, themeColor, QColor::fromHslF(hue, 0, 0.5)}};
@@ -104,6 +106,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         tabFg,
         {blendColors(themeColor, windowBg, 0.7), blendColors(themeColor, windowBg, 0.5),
          blendColors(themeColorNoSat, windowBg, 0.7)}};
+
     this->windowBg = "#fff";
 
     // Split

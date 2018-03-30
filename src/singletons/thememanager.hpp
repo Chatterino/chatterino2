@@ -37,6 +37,7 @@ public:
         TabColors selected;
         TabColors highlighted;
         TabColors newMessage;
+        QColor border;
     } tabs;
 
     struct {
