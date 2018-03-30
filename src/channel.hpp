@@ -59,6 +59,6 @@ private:
     messages::LimitedQueue<messages::MessagePtr> messages;
 };
 
-typedef std::shared_ptr<Channel> ChannelPtr;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 }  // namespace chatterino
