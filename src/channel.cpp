@@ -22,11 +22,19 @@ Channel::Channel(const QString &_name)
     : name(_name)
     , completionModel(this->name)
 {
+    this->clearCompletionModelTimer = new QTimer;
+    QObject::connect(this->clearCompletionModelTimer, &QTimer::timeout, [this]() {
+        this->completionModel.ClearExpiredStrings();  //
+    });
+    this->clearCompletionModelTimer->start(60 * 1000);
 }
 
 Channel::~Channel()
 {
     this->destroyed.invoke();
+
+    this->clearCompletionModelTimer->stop();
+    this->clearCompletionModelTimer->deleteLater();
 }
 
 bool Channel::isEmpty() const
