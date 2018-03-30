@@ -30,5 +30,6 @@ void SignalLabel::mouseReleaseEvent(QMouseEvent *event)
 
 void SignalLabel::mouseMoveEvent(QMouseEvent *event)
 {
+    emit this->mouseMove(event);
     event->ignore();
 }
