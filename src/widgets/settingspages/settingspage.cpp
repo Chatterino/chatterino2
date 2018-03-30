@@ -79,6 +79,20 @@ QLineEdit *SettingsPage::createLineEdit(pajlada::Settings::Setting<QString> &set
     return edit;
 }
 
+QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting, int min, int max)
+{
+    QSpinBox *w = new QSpinBox;
+
+    w->setMinimum(min);
+    w->setMaximum(max);
+
+    setting.connect([w](const int &value, auto) { w->setValue(value); });
+    QObject::connect(w, QOverload<int>::of(&QSpinBox::valueChanged),
+                     [&setting](int value) { setting.setValue(value); });
+
+    return w;
+}
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino
