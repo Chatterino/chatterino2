@@ -250,6 +250,8 @@ void Notebook::performLayout(bool animated)
             x += i->getTab()->width();
         }
 
+        x -= (int)(8 * scale);
+
         first = false;
     }
 

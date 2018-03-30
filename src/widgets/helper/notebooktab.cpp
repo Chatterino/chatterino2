@@ -77,13 +77,16 @@ void NotebookTab::themeRefreshEvent()
 void NotebookTab::updateSize()
 {
     float scale = getScale();
-    QString qTitle(qS(this->title));
 
-    if (singletons::SettingManager::getInstance().hideTabX) {
-        this->resize((int)((fontMetrics().width(qTitle) + 16) * scale), (int)(24 * scale));
-    } else {
-        this->resize((int)((fontMetrics().width(qTitle) + 8 + 24) * scale), (int)(24 * scale));
-    }
+    this->resize((int)(150 * scale), (int)(24 * scale));
+
+    //    QString qTitle(qS(this->title));
+    //    if (singletons::SettingManager::getInstance().hideTabX) {
+    //        this->resize((int)((fontMetrics().width(qTitle) + 16) * scale), (int)(24 * scale));
+    //    } else {
+    //        this->resize((int)((fontMetrics().width(qTitle) + 8 + 24) * scale), (int)(24 *
+    //        scale));
+    //    }
 
     if (this->parent() != nullptr) {
         (static_cast<Notebook *>(this->parent()))->performLayout(true);
@@ -168,6 +171,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 {
     singletons::SettingManager &settingManager = singletons::SettingManager::getInstance();
     QPainter painter(this);
+    float scale = this->getScale();
 
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
@@ -186,25 +190,51 @@ void NotebookTab::paintEvent(QPaintEvent *)
     bool windowFocused = this->window() == QApplication::activeWindow();
     // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
-    painter.fillRect(rect(), this->mouseOver ? regular.backgrounds.hover
-                                             : (windowFocused ? regular.backgrounds.regular
-                                                              : regular.backgrounds.unfocused));
+    if (false) {
+        painter.fillRect(rect(), this->mouseOver ? regular.backgrounds.hover
+                                                 : (windowFocused ? regular.backgrounds.regular
+                                                                  : regular.backgrounds.unfocused));
 
-    // fill the tab background
-    painter.fillRect(rect(), this->mouseOver ? colors.backgrounds.hover
-                                             : (windowFocused ? colors.backgrounds.regular
-                                                              : colors.backgrounds.unfocused));
+        // fill the tab background
+        painter.fillRect(rect(), this->mouseOver ? colors.backgrounds.hover
+                                                 : (windowFocused ? colors.backgrounds.regular
+                                                                  : colors.backgrounds.unfocused));
+    } else {
+        QPainterPath path(QPointF(0, this->height()));
+        path.lineTo(8 * scale, 0);
+        path.lineTo(this->width() - 8 * scale, 0);
+        path.lineTo(this->width(), this->height());
+        painter.fillPath(path, this->mouseOver ? regular.backgrounds.hover
+                                               : (windowFocused ? regular.backgrounds.regular
+                                                                : regular.backgrounds.unfocused));
+
+        // fill the tab background
+        painter.fillPath(path, this->mouseOver ? colors.backgrounds.hover
+                                               : (windowFocused ? colors.backgrounds.regular
+                                                                : colors.backgrounds.unfocused));
+        painter.setPen(QColor("#FFF"));
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.drawPath(path);
+        //        painter.setBrush(QColor("#000"));
+    }
 
     // set the pen color
     painter.setPen(colors.text);
 
     // set area for text
-    float scale = this->getScale();
     int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, this->height());
 
     // draw text
-    painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
+    if (false) {  // legacy
+        painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
+    } else {
+        QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
+        option.setWrapMode(QTextOption::NoWrap);
+        int offset = (int)(scale * 16);
+        QRect textRect(offset, 0, this->width() - offset - offset, this->height());
+        painter.drawText(textRect, this->getTitle(), option);
+    }
 
     // draw close x
     if (!settingManager.hideTabX && (mouseOver || selected)) {
