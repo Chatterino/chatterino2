@@ -177,7 +177,8 @@ SOURCES += \
     src/providers/irc/ircserver.cpp \
     src/providers/irc/ircchannel2.cpp \
     src/util/streamlink.cpp \
-    src/providers/twitch/twitchhelpers.cpp
+    src/providers/twitch/twitchhelpers.cpp \
+    src/widgets/helper/signallabel.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
