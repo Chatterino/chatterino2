@@ -4,7 +4,6 @@
 
 #include <QAbstractListModel>
 
-#include <map>
 #include <set>
 #include <string>
 
@@ -12,6 +11,56 @@ namespace chatterino {
 
 class CompletionModel : public QAbstractListModel
 {
+    struct TaggedString {
+        QString str;
+
+        // Type will help decide the lifetime of the tagged strings
+        enum Type {
+            Username,
+
+            // Emotes
+            FFZGlobalEmote = 20,
+            FFZChannelEmote,
+            BTTVGlobalEmote,
+            BTTVChannelEmote,
+            TwitchGlobalEmote,
+            TwitchSubscriberEmote,
+            Emoji,
+        } type;
+
+        bool IsEmote() const
+        {
+            return this->type >= 20;
+        }
+
+        bool operator<(const TaggedString &that) const
+        {
+            if (this->IsEmote()) {
+                if (that.IsEmote()) {
+                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
+                    if (k == 0) {
+                        return this->str > that.str;
+                    } else {
+                        return k < 0;
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                if (that.IsEmote()) {
+                    return false;
+                } else {
+                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
+                    if (k == 0) {
+                        return false;
+                    } else {
+                        return k < 0;
+                    }
+                }
+            }
+        }
+    };
+
 public:
     CompletionModel(const QString &_channelName);
 
@@ -34,55 +83,17 @@ public:
     }
 
     void refresh();
-    void addString(const std::string &str);
-    void addString(const QString &str);
+    void addString(const std::string &str, TaggedString::Type type);
+    void addString(const QString &str, TaggedString::Type type);
 
     void addUser(const QString &str);
 
 private:
-    struct TaggedString {
-        QString str;
-        // emote == true
-        // username == false
-        bool isEmote = true;
-        bool operator<(const TaggedString &that) const
-        {
-            if (this->isEmote) {
-                if (that.isEmote) {
-                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-                    if (k == 0) {
-                        return this->str > that.str;
-                    } else {
-                        return k < 0;
-                    }
-                } else
-                    return true;
-            } else {
-                if (that.isEmote)
-                    return false;
-                else {
-                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-                    if (k == 0) {
-                        return this->str > that.str;
-                    } else {
-                        return k < 0;
-                    }
-                }
-            }
-        }
-    };
-    TaggedString createEmote(const std::string &str)
-    {
-        return TaggedString{qS(str), true};
-    }
-    TaggedString createEmote(const QString &str)
-    {
-        return TaggedString{str, true};
-    }
     TaggedString createUser(const QString &str)
     {
-        return TaggedString{str, false};
+        return TaggedString{str, TaggedString::Type::Username};
     }
+
     std::set<TaggedString> emotes;
 
     QString channelName;
