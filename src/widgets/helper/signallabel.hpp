@@ -18,6 +18,7 @@ signals:
 
     void mouseDown();
     void mouseUp();
+    void mouseMove(QMouseEvent *event);
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *ev) override;
