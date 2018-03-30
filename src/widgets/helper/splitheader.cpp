@@ -157,29 +157,36 @@ void SplitHeader::updateChannelText()
     const QString channelName = this->split->channelName;
     if (channelName.isEmpty()) {
         this->titleLabel->setText("<no channel>");
-    } else {
-        auto channel = this->split->getChannel();
+        return;
+    }
 
-        TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    auto channel = this->split->getChannel();
 
-        if (twitchChannel != nullptr && twitchChannel->isLive) {
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel != nullptr) {
+        const auto &streamStatus = twitchChannel->GetStreamStatus();
+
+        if (streamStatus.live) {
             this->isLive = true;
             this->tooltip = "<style>.center    { text-align: center; }</style>"
                             "<p class = \"center\">" +
-                            twitchChannel->streamStatus + "<br><br>" + twitchChannel->streamGame +
+                            streamStatus.title + "<br><br>" + streamStatus.game +
                             "<br>"
                             "Live for " +
-                            twitchChannel->streamUptime + " with " +
-                            twitchChannel->streamViewerCount +
+                            streamStatus.uptime + " with " +
+                            QString::number(streamStatus.viewerCount) +
                             " viewers"
                             "</p>";
             this->titleLabel->setText(channelName + " (live)");
-        } else {
-            this->isLive = false;
-            this->titleLabel->setText(channelName);
-            this->tooltip = "";
+
+            return;
         }
     }
+
+    this->isLive = false;
+    this->titleLabel->setText(channelName);
+    this->tooltip = "";
 }
 
 void SplitHeader::updateModerationModeIcon()

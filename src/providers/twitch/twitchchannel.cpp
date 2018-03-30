@@ -24,7 +24,6 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
-    , isLive(false)
     , mod(false)
     , readConnecetion(_readConnection)
 {
@@ -176,11 +175,16 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
-    if (this->isLive == newLiveStatus) {
-        return;
+    {
+        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+        if (this->streamStatus.live == newLiveStatus) {
+            // Nothing changed
+            return;
+        }
+
+        this->streamStatus.live = newLiveStatus;
     }
 
-    this->isLive = newLiveStatus;
     this->onlineStatusChanged();
 }
 
@@ -239,13 +243,17 @@ void TwitchChannel::refreshLiveStatus()
         }
 
         // Stream is live
-        channel->streamViewerCount = QString::number(stream["viewers"].GetInt());
-        channel->streamGame = stream["game"].GetString();
-        channel->streamStatus = streamChannel["status"].GetString();
-        QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
-        auto diff = since.secsTo(QDateTime::currentDateTime());
-        channel->streamUptime =
-            QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+
+        {
+            std::lock_guard<std::mutex> lock(channel->streamStatusMutex);
+            channel->streamStatus.viewerCount = stream["viewers"].GetUint();
+            channel->streamStatus.game = stream["game"].GetString();
+            channel->streamStatus.title = streamChannel["status"].GetString();
+            QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
+            auto diff = since.secsTo(QDateTime::currentDateTime());
+            channel->streamStatus.uptime =
+                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+        }
 
         channel->setLive(true);
     });

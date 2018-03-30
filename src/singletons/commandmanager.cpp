@@ -112,8 +112,10 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
 
         if (!dryRun && twitchChannel != nullptr) {
             if (commandName == "/uptime") {
+                const auto &streamStatus = twitchChannel->GetStreamStatus();
+
                 QString messageText =
-                    twitchChannel->isLive ? twitchChannel->streamUptime : "Channel is not live.";
+                    streamStatus.live ? streamStatus.uptime : "Channel is not live.";
 
                 channel->addMessage(messages::Message::createSystemMessage(messageText));
 

@@ -8,6 +8,8 @@
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
 
+#include <mutex>
+
 namespace chatterino {
 namespace providers {
 namespace twitch {
@@ -20,6 +22,14 @@ class TwitchChannel final : public Channel
     QTimer *chattersListTimer;
 
 public:
+    struct StreamStatus {
+        bool live = false;
+        unsigned viewerCount = 0;
+        QString title;
+        QString game;
+        QString uptime;
+    };
+
     ~TwitchChannel() final;
 
     void reloadChannelEmotes();
@@ -50,22 +60,32 @@ public:
     boost::signals2::signal<void()> userStateChanged;
 
     QString roomID;
-    bool isLive;
-    QString streamViewerCount;
-    QString streamStatus;
-    QString streamGame;
-    QString streamUptime;
+
+    StreamStatus GetStreamStatus() const
+    {
+        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+        return this->streamStatus;
+    }
 
     struct NameOptions {
         QString displayName;
         QString localizedName;
     };
 
+    bool IsLive() const
+    {
+        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+        return this->streamStatus.live;
+    }
+
 private:
     explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
 
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
+
+    mutable std::mutex streamStatusMutex;
+    StreamStatus streamStatus;
 
     void fetchRecentMessages();
 
