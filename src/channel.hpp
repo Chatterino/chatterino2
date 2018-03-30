@@ -6,14 +6,10 @@
 #include "util/completionmodel.hpp"
 #include "util/concurrentmap.hpp"
 
-#include <QMap>
-#include <QMutex>
 #include <QString>
-#include <QVector>
 #include <boost/signals2.hpp>
 
 #include <memory>
-#include <set>
 
 namespace chatterino {
 namespace messages {
@@ -40,21 +36,10 @@ public:
     void addMessage(messages::MessagePtr message);
     void addMessagesAtStart(std::vector<messages::MessagePtr> &messages);
     void replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement);
-    void addRecentChatter(const std::shared_ptr<messages::Message> &message);
-
-    struct NameOptions {
-        QString displayName;
-        QString localizedName;
-    };
-
-    std::vector<NameOptions> getUsernamesForCompletions();
+    virtual void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
     QString name;
     QStringList modList;
-
-    // Key = login name
-    std::map<QString, NameOptions> recentChatters;
-    std::mutex recentChattersMutex;
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);

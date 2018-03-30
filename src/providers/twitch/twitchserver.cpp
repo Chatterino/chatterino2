@@ -90,9 +90,6 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 
     TwitchMessageBuilder builder(chan.get(), message, args);
 
-    // XXX: Thread-safety
-    chan->completionModel.addUser(message->nick());
-
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {

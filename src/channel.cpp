@@ -79,25 +79,7 @@ void Channel::replaceMessage(messages::MessagePtr message, messages::MessagePtr 
 
 void Channel::addRecentChatter(const std::shared_ptr<messages::Message> &message)
 {
-    assert(!message->loginName.isEmpty());
-
-    std::lock_guard<std::mutex> lock(this->recentChattersMutex);
-
-    this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
-}
-
-std::vector<Channel::NameOptions> Channel::getUsernamesForCompletions()
-{
-    std::vector<NameOptions> names;
-
-    this->recentChattersMutex.lock();
-    for (const auto &p : this->recentChatters) {
-        names.push_back(p.second);
-    }
-    // usernames.insert(this->recentChatters.begin(), this->recentChatters.end());
-    this->recentChattersMutex.unlock();
-
-    return names;
+    // Do nothing by default
 }
 
 bool Channel::canSendMessage() const
@@ -118,4 +100,5 @@ std::shared_ptr<Channel> Channel::getEmpty()
 void Channel::onConnected()
 {
 }
+
 }  // namespace chatterino

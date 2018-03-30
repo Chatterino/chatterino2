@@ -163,6 +163,17 @@ bool TwitchChannel::hasModRights()
     return this->isMod() || this->isBroadcaster();
 }
 
+void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &message)
+{
+    assert(!message->loginName.isEmpty());
+
+    std::lock_guard<std::mutex> lock(this->recentChattersMutex);
+
+    this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
+
+    this->completionModel.addUser(message->displayName);
+}
+
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     if (this->isLive == newLiveStatus) {
