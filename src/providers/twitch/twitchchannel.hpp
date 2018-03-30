@@ -33,6 +33,8 @@ public:
     bool isBroadcaster();
     bool hasModRights();
 
+    void addRecentChatter(const std::shared_ptr<messages::Message> &message) final;
+
     const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
     const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
 
@@ -54,6 +56,11 @@ public:
     QString streamGame;
     QString streamUptime;
 
+    struct NameOptions {
+        QString displayName;
+        QString localizedName;
+    };
+
 private:
     explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
 
@@ -71,6 +78,10 @@ private:
     Communi::IrcConnection *readConnecetion;
 
     friend class TwitchServer;
+
+    // Key = login name
+    std::map<QString, NameOptions> recentChatters;
+    std::mutex recentChattersMutex;
 };
 
 }  // namespace twitch
