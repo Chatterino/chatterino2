@@ -59,6 +59,15 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     };
 
     auto doRefreshChatters = [=]() {
+        const auto streamStatus = this->GetStreamStatus();
+
+        auto &settingManager = singletons::SettingManager::getInstance();
+        if (settingManager.onlyFetchChattersForSmallerStreamers) {
+            if (streamStatus.live && streamStatus.viewerCount > settingManager.smallStreamerLimit) {
+                return;
+            }
+        }
+
         util::twitch::get("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
                           QThread::currentThread(), refreshChatters);
     };

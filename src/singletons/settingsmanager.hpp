@@ -50,6 +50,13 @@ public:
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
+
+    // Auto-completion
+    BoolSetting onlyFetchChattersForSmallerStreamers = {
+        "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
+    IntSetting smallStreamerLimit = {"/behaviour/autocompletion/smallStreamerLimit", 1000};
+
+    // Streamlink
     QStringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
     QStringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
     QStringSetting streamlinkOpts = {"/behaviour/streamlink/options", ""};

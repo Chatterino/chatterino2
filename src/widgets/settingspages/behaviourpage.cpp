@@ -12,6 +12,8 @@
 #define LAST_MSG "Show last read message indicator (marks the spot where you left the window)"
 #define PAUSE_HOVERING "When hovering"
 
+#define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
+
 #define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
@@ -39,8 +41,19 @@ BehaviourPage::BehaviourPage()
 
     layout->addSpacing(16);
 
-    auto group = layout.emplace<QGroupBox>("Streamlink");
     {
+        auto group = layout.emplace<QGroupBox>("Auto-completion");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+        groupLayout->addRow(
+            LIMIT_CHATTERS_FOR_SMALLER_STREAMERS,
+            this->createCheckBox("", settings.onlyFetchChattersForSmallerStreamers));
+
+        groupLayout->addRow("What viewer count counts as a \"smaller streamer\"",
+                            this->createSpinBox(settings.smallStreamerLimit, 10, 50000));
+    }
+
+    {
+        auto group = layout.emplace<QGroupBox>("Streamlink");
         auto groupLayout = group.setLayoutType<QFormLayout>();
         groupLayout->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
         groupLayout->addRow("Prefered quality:",
@@ -53,7 +66,7 @@ BehaviourPage::BehaviourPage()
 
 QSlider *BehaviourPage::createMouseScrollSlider()
 {
-    QSlider *slider = new QSlider(Qt::Horizontal);
+    auto slider = new QSlider(Qt::Horizontal);
 
     float currentValue = singletons::SettingManager::getInstance().mouseScrollMultiplier;
     int sliderValue = ((currentValue - 0.1f) / 2.f) * 99.f;
