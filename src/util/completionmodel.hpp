@@ -39,7 +39,7 @@ class CompletionModel : public QAbstractListModel
         // Type will help decide the lifetime of the tagged strings
         Type type;
 
-        std::chrono::steady_clock::time_point timeAdded;
+        mutable std::chrono::steady_clock::time_point timeAdded;
 
         bool HasExpired(const std::chrono::steady_clock::time_point &now) const
         {
