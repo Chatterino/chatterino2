@@ -7,6 +7,7 @@
 #include "util/concurrentmap.hpp"
 
 #include <QString>
+#include <QTimer>
 #include <boost/signals2.hpp>
 
 #include <memory>
@@ -18,6 +19,8 @@ struct Message;
 
 class Channel : public std::enable_shared_from_this<Channel>
 {
+    QTimer *clearCompletionModelTimer;
+
 public:
     explicit Channel(const QString &_name);
     virtual ~Channel();

@@ -81,12 +81,13 @@ void CompletionModel::refresh()
 
 void CompletionModel::addString(const std::string &str, TaggedString::Type type)
 {
-    // Always add a space at the end of completions
-    this->emotes.insert({qS(str + " "), type});
+    this->addString(qS(str), type);
 }
 
 void CompletionModel::addString(const QString &str, TaggedString::Type type)
 {
+    std::lock_guard<std::mutex> lock(this->emotesMutex);
+
     // Always add a space at the end of completions
     this->emotes.insert({str + " ", type});
 }
@@ -104,6 +105,24 @@ void CompletionModel::addUser(const QString &str)
             this->emotes.erase(p.first);
             auto result2 = this->emotes.insert(ts);
             assert(result2.second);
+        }
+    }
+}
+
+void CompletionModel::ClearExpiredStrings()
+{
+    std::lock_guard<std::mutex> lock(this->emotesMutex);
+
+    auto now = std::chrono::steady_clock::now();
+
+    for (auto it = this->emotes.begin(); it != this->emotes.end();) {
+        const auto &taggedString = *it;
+
+        if (taggedString.HasExpired(now)) {
+            // debug::Log("String {} expired", taggedString.str);
+            it = this->emotes.erase(it);
+        } else {
+            ++it;
         }
     }
 }
