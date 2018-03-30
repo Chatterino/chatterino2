@@ -20,7 +20,7 @@ class TwitchChannel final : public Channel
     QTimer *chattersListTimer;
 
 public:
-    ~TwitchChannel();
+    ~TwitchChannel() final;
 
     void reloadChannelEmotes();
 

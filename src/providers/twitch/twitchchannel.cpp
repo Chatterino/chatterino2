@@ -265,26 +265,30 @@ void TwitchChannel::fetchRecentMessages()
             return;
         }
 
-        TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
+        auto channel = dynamic_cast<TwitchChannel *>(shared.get());
+        assert(channel != nullptr);
+
         static auto readConnection = channel->readConnecetion;
 
-        auto msgArray = obj.value("messages").toArray();
-        if (msgArray.size() > 0) {
-            std::vector<messages::MessagePtr> messages;
-
-            for (int i = 0; i < msgArray.size(); i++) {
-                QByteArray content = msgArray[i].toString().toUtf8();
-                auto msg = Communi::IrcMessage::fromData(content, readConnection);
-                auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
-
-                messages::MessageParseArgs args;
-                twitch::TwitchMessageBuilder builder(channel, privMsg, args);
-                if (!builder.isIgnored()) {
-                    messages.push_back(builder.build());
-                }
-            }
-            channel->addMessagesAtStart(messages);
+        QJsonArray msgArray = obj.value("messages").toArray();
+        if (msgArray.empty()) {
+            return;
         }
+
+        std::vector<messages::MessagePtr> messages;
+
+        for (const QJsonValueRef _msg : msgArray) {
+            QByteArray content = _msg.toString().toUtf8();
+            auto msg = Communi::IrcMessage::fromData(content, readConnection);
+            auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
+
+            messages::MessageParseArgs args;
+            twitch::TwitchMessageBuilder builder(channel, privMsg, args);
+            if (!builder.isIgnored()) {
+                messages.push_back(builder.build());
+            }
+        }
+        channel->addMessagesAtStart(messages);
     });
 }
 
