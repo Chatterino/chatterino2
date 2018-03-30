@@ -105,6 +105,8 @@ void CompletionModel::addUser(const QString &str)
             this->emotes.erase(p.first);
             auto result2 = this->emotes.insert(ts);
             assert(result2.second);
+        } else {
+            p.first->timeAdded = std::chrono::steady_clock::now();
         }
     }
 }
