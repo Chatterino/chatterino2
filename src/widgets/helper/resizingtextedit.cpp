@@ -101,6 +101,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
         if (!this->completionInProgress) {
             // First type pressing tab after modifying a message, we refresh our completion model
+            this->completer->setModel(completionModel);
             completionModel->refresh();
             this->completionInProgress = true;
             this->completer->setCompletionPrefix(currentCompletionPrefix);
