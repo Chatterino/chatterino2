@@ -12,7 +12,7 @@ class FlagsEnum
 {
 public:
     FlagsEnum()
-        : value((T)0)
+        : value(static_cast<T>(0))
     {
     }
 
@@ -50,7 +50,18 @@ public:
         return (T &)((Q &)this->value ^= (Q)a);
     }
 
+    void EnableFlag(T flag)
+    {
+        reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
+    }
+
+    bool HasFlag(Q flag) const
+    {
+        return (this->value & flag) == flag;
+    }
+
     T value;
 };
+
 }  // namespace util
 }  // namespace chatterino
