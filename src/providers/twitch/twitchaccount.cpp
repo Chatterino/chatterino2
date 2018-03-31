@@ -1,15 +1,15 @@
 #include "providers/twitch/twitchaccount.hpp"
 #include "const.hpp"
-#include "util/urlfetch.hpp"
 
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
                              const QString &_oauthClient)
-    : userName(_username)
-    , oauthClient(_oauthClient)
+    : oauthClient(_oauthClient)
     , oauthToken(_oauthToken)
+    , userName(_username)
     , _isAnon(_username == ANONYMOUS_USERNAME)
 {
 }
@@ -65,6 +65,7 @@ bool TwitchAccount::isAnon() const
 {
     return this->_isAnon;
 }
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

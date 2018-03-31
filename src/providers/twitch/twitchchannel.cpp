@@ -25,7 +25,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , mod(false)
-    , readConnecetion(_readConnection)
+    , readConnection(_readConnection)
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
@@ -285,7 +285,7 @@ void TwitchChannel::fetchRecentMessages()
         auto channel = dynamic_cast<TwitchChannel *>(shared.get());
         assert(channel != nullptr);
 
-        static auto readConnection = channel->readConnecetion;
+        static auto readConnection = channel->readConnection;
 
         QJsonArray msgArray = obj.value("messages").toArray();
         if (msgArray.empty()) {

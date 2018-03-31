@@ -1,16 +1,11 @@
 #pragma once
 
-#include "messages/image.hpp"
-#include "util/concurrentmap.hpp"
-
-#include <QObject>
 #include <QString>
-
-#include <unordered_map>
 
 namespace chatterino {
 
 struct EmojiData {
+    // actual byte-representation of the emoji (i.e. \154075\156150 which is :male:)
     QString value;
 
     // what's used in the emoji-one url

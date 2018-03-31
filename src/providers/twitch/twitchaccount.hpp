@@ -6,6 +6,7 @@
 namespace chatterino {
 namespace providers {
 namespace twitch {
+
 class TwitchAccount
 {
 public:
@@ -37,6 +38,7 @@ private:
     QString userName;
     const bool _isAnon;
 };
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

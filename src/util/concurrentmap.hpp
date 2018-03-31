@@ -15,9 +15,7 @@ template <typename TKey, typename TValue>
 class ConcurrentMap
 {
 public:
-    ConcurrentMap()
-    {
-    }
+    ConcurrentMap() = default;
 
     bool tryGet(const TKey &name, TValue &value) const
     {
@@ -84,5 +82,6 @@ private:
     mutable QMutex mutex;
     QMap<TKey, TValue> data;
 };
+
+}  // namespace util
 }  // namespace chatterino
-}

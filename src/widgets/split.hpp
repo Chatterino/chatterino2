@@ -19,7 +19,6 @@
 #include <boost/signals2/connection.hpp>
 
 namespace chatterino {
-
 namespace widgets {
 
 class SplitContainer;
@@ -45,7 +44,7 @@ class Split : public BaseWidget
 
 public:
     Split(SplitContainer *parent, const std::string &_uuid);
-    virtual ~Split();
+    ~Split() override;
 
     pajlada::Settings::Setting<QString> channelName;
     boost::signals2::signal<void()> channelChanged;
@@ -75,11 +74,11 @@ public:
     void drag();
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void mouseMoveEvent(QMouseEvent *) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void keyPressEvent(QKeyEvent *) override;
-    virtual void keyReleaseEvent(QKeyEvent *) override;
+    void paintEvent(QPaintEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *) override;
+    void keyReleaseEvent(QKeyEvent *) override;
 
 private:
     SplitContainer &parentPage;

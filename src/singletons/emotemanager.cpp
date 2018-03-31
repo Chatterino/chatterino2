@@ -26,7 +26,7 @@ namespace singletons {
 
 namespace {
 
-static QString GetTwitchEmoteLink(long id, const QString &emoteScale)
+QString GetTwitchEmoteLink(long id, const QString &emoteScale)
 {
     QString value = TWITCH_EMOTE_TEMPLATE;
 
@@ -35,14 +35,14 @@ static QString GetTwitchEmoteLink(long id, const QString &emoteScale)
     return value.replace("{id}", QString::number(id)).replace("{scale}", emoteScale);
 }
 
-static QString GetBTTVEmoteLink(QString urlTemplate, const QString &id, const QString &emoteScale)
+QString GetBTTVEmoteLink(QString urlTemplate, const QString &id, const QString &emoteScale)
 {
     urlTemplate.detach();
 
     return urlTemplate.replace("{{id}}", id).replace("{{image}}", emoteScale);
 }
 
-static QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScale)
+QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 {
     auto emote = urls.value(emoteScale);
     if (emote.isUndefined()) {
@@ -54,8 +54,7 @@ static QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScal
     return "http:" + emote.toString();
 }
 
-static void FillInFFZEmoteData(const QJsonObject &urls, const QString &code,
-                               util::EmoteData &emoteData)
+void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, util::EmoteData &emoteData)
 {
     QString url1x = GetFFZEmoteLink(urls, "1");
     QString url2x = GetFFZEmoteLink(urls, "2");
@@ -366,9 +365,8 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
 
         if (charactersFromLastParsedEmoji > 0) {
             // Add characters inbetween emojis
-            parsedWords.push_back(std::tuple<util::EmoteData, QString>(
-                util::EmoteData(),
-                text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji)));
+            parsedWords.emplace_back(util::EmoteData(), text.mid(lastParsedEmojiEndIndex,
+                                                                 charactersFromLastParsedEmoji));
         }
 
         QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
@@ -376,7 +374,7 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
                       matchedEmoji.code + ".png";
 
         // Create or fetch cached emoji image
-        auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [this, &url] {
+        auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [&url] {
             return util::EmoteData(new Image(url, 0.35, "?????????", "???????????????"));  //
         });
 
@@ -390,8 +388,7 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
 
     if (lastParsedEmojiEndIndex < text.length()) {
         // Add remaining characters
-        parsedWords.push_back(std::tuple<util::EmoteData, QString>(
-            util::EmoteData(), text.mid(lastParsedEmojiEndIndex)));
+        parsedWords.emplace_back(util::EmoteData(), text.mid(lastParsedEmojiEndIndex));
     }
 }
 
@@ -546,7 +543,7 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
 
-    return _twitchEmoteFromCache.getOrAdd(id, [this, &emoteName, &_emoteName, &id] {
+    return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
         newEmoteData.image1x = new Image(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
                                          _emoteName + "<br/>Twitch Emote 1x");
@@ -593,3 +590,61 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
 
 }  // namespace singletons
 }  // namespace chatterino
+
+#if 0
+namespace chatterino {
+
+void EmojiTest()
+{
+    auto &emoteManager = singletons::EmoteManager::getInstance();
+
+    emoteManager.loadEmojis();
+
+    {
+        std::vector<std::tuple<util::EmoteData, QString>> dummy;
+
+        // couple_mm 1f468-2764-1f468
+        // "\154075\156150❤\154075\156150"
+        // [0]            55357    0xd83d    QChar
+        // [1]            56424    0xdc68    QChar
+        // [2]    '❤'     10084    0x2764    QChar
+        // [3]            55357    0xd83d    QChar
+        // [4]            56424    0xdc68    QChar
+        QString text = "👨❤👨";
+
+        emoteManager.parseEmojis(dummy, text);
+
+        assert(dummy.size() == 1);
+    }
+
+    {
+        std::vector<std::tuple<util::EmoteData, QString>> dummy;
+
+        // "✍\154074\157777"
+        // [0]    '✍'     9997    0x270d    QChar
+        // [1]            55356    0xd83c    QChar
+        // [2]            57343    0xdfff    QChar
+        QString text = "✍🏿";
+
+        emoteManager.parseEmojis(dummy, text);
+
+        assert(dummy.size() == 1);
+
+        assert(std::get<0>(dummy[0]).isValid());
+    }
+
+    {
+        std::vector<std::tuple<util::EmoteData, QString>> dummy;
+
+        QString text = "✍";
+
+        emoteManager.parseEmojis(dummy, text);
+
+        assert(dummy.size() == 1);
+
+        assert(std::get<0>(dummy[0]).isValid());
+    }
+}
+
+}  // namespace chatterino
+#endif

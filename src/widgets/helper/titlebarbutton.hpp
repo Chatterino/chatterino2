@@ -4,6 +4,7 @@
 
 namespace chatterino {
 namespace widgets {
+
 class TitleBarButton : public RippleEffectButton
 {
 public:
@@ -15,10 +16,11 @@ public:
     void setButtonStyle(Style style);
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     Style style;
 };
+
 }  // namespace widgets
 }  // namespace chatterino
