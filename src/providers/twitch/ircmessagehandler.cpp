@@ -104,10 +104,11 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     int snapshotLength = snapshot.getLength();
 
     for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
-        if (snapshot[i]->flags & Message::Timeout && snapshot[i]->loginName == username) {
+        auto &s = snapshot[i];
+        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == username) {
             MessagePtr replacement(
                 Message::createTimeoutMessage(username, durationInSeconds, reason, true));
-            chan->replaceMessage(snapshot[i], replacement);
+            chan->replaceMessage(s, replacement);
             addMessage = false;
             break;
         }
