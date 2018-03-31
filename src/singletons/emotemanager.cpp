@@ -295,9 +295,12 @@ void EmoteManager::loadEmojis()
 
         this->emojis.insert(code, util::EmoteData(new Image(url, 0.35, ":" + shortCode + ":",
                                                             ":" + shortCode + ":<br/>Emoji")));
+    }
 
-        // TODO(pajlada): The vectors in emojiFirstByte need to be sorted by
-        // emojiData.code.length()
+    for (auto &p : this->emojiFirstByte) {
+        std::stable_sort(p.begin(), p.end(), [](const auto &lhs, const auto &rhs) {
+            return lhs.value.length() > rhs.value.length();
+        });
     }
 }
 
@@ -306,7 +309,7 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
 {
     int lastParsedEmojiEndIndex = 0;
 
-    for (auto i = 0; i < text.length() - 1; i++) {
+    for (auto i = 0; i < text.length(); ++i) {
         const QChar character = text.at(i);
 
         if (character.isLowSurrogate()) {
@@ -321,14 +324,15 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
 
         const QVector<EmojiData> possibleEmojis = it.value();
 
-        int remainingCharacters = text.length() - i;
+        int remainingCharacters = text.length() - i - 1;
 
         EmojiData matchedEmoji;
 
         int matchedEmojiLength = 0;
 
         for (const EmojiData &emoji : possibleEmojis) {
-            if (remainingCharacters < emoji.value.length()) {
+            int emojiExtraCharacters = emoji.value.length() - 1;
+            if (emojiExtraCharacters > remainingCharacters) {
                 // It cannot be this emoji, there's not enough space for it
                 continue;
             }
