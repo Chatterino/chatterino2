@@ -95,7 +95,7 @@ private:
     QByteArray messageSuffix;
     QString lastSentMessage;
 
-    Communi::IrcConnection *readConnecetion;
+    Communi::IrcConnection *readConnection;
 
     friend class TwitchServer;
 

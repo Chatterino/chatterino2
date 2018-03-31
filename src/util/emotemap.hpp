@@ -9,9 +9,7 @@ namespace chatterino {
 namespace util {
 
 struct EmoteData {
-    EmoteData()
-    {
-    }
+    EmoteData() = default;
 
     EmoteData(messages::Image *_image)
         : image1x(_image)
@@ -29,7 +27,7 @@ struct EmoteData {
     messages::Image *image3x = nullptr;
 };
 
-typedef ConcurrentMap<QString, EmoteData> EmoteMap;
+using EmoteMap = ConcurrentMap<QString, EmoteData>;
 
 }  // namespace util
 }  // namespace chatterino

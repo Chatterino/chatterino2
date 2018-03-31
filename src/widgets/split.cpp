@@ -18,17 +18,12 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
-#include <QFont>
-#include <QFontDatabase>
 #include <QListWidget>
 #include <QMimeData>
 #include <QPainter>
-#include <QShortcut>
-#include <QTimer>
 #include <QVBoxLayout>
 #include <boost/signals2.hpp>
 
@@ -540,5 +535,6 @@ void Split::drag()
         SplitContainer::isDraggingSplit = false;
     }
 }
+
 }  // namespace widgets
 }  // namespace chatterino

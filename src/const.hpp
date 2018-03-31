@@ -4,13 +4,14 @@
 
 namespace chatterino {
 
-static const QString ANONYMOUS_USERNAME_LABEL(" - anonymous - ");
+static const char *ANONYMOUS_USERNAME_LABEL = " - anonymous - ";
 
 namespace providers {
 namespace twitch {
 
-static const QString ANONYMOUS_USERNAME("justinfan64537");
-}
+static const char *ANONYMOUS_USERNAME = "justinfan64537";
+
+}  // namespace twitch
 }  // namespace providers
 
 }  // namespace chatterino

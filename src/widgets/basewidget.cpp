@@ -33,9 +33,9 @@ float BaseWidget::getScale() const
 
     if (baseWidget == nullptr) {
         return 1.f;
-    } else {
-        return baseWidget->scale;
     }
+
+    return baseWidget->scale;
 }
 
 QSize BaseWidget::getScaleIndependantSize() const
@@ -98,7 +98,7 @@ void BaseWidget::childEvent(QChildEvent *event)
     if (event->added()) {
         BaseWidget *widget = dynamic_cast<BaseWidget *>(event->child());
 
-        if (widget) {
+        if (widget != nullptr) {
             this->widgets.push_back(widget);
         }
     } else if (event->removed()) {

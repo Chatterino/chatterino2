@@ -1,6 +1,8 @@
 #pragma once
 
-#include <math.h>
+#include <QPointF>
+
+#include <cmath>
 
 namespace chatterino {
 namespace util {

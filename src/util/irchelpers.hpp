@@ -4,7 +4,8 @@
 
 namespace chatterino {
 namespace util {
-QString ParseTagString(const QString &input)
+
+inline QString ParseTagString(const QString &input)
 {
     QString output = input;
     output.detach();
@@ -49,9 +50,10 @@ QString ParseTagString(const QString &input)
 
     if (changed) {
         return output.replace("\0", "");
-    } else {
-        return output;
     }
+
+    return output;
 }
-}
+
+}  // namespace util
 }  // namespace chatterino
