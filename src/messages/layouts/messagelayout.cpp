@@ -152,7 +152,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     //    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
     // draw disabled
-    if (this->message->flags & Message::Disabled) {
+    if (this->message->flags.HasFlag(Message::Disabled)) {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
     }
 
