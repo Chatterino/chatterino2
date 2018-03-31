@@ -119,8 +119,9 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // disable the messages from the user
     for (int i = 0; i < snapshotLength; i++) {
-        if (!(snapshot[i]->flags & Message::Timeout) && snapshot[i]->loginName == username) {
-            snapshot[i]->flags &= Message::Disabled;
+        auto &s = snapshot[i];
+        if (!(s->flags & Message::Timeout) && s->loginName == username) {
+            s->flags.EnableFlag(Message::Disabled);
         }
     }
 

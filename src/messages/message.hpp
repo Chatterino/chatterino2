@@ -12,6 +12,7 @@
 
 namespace chatterino {
 namespace messages {
+
 struct Message {
     enum MessageFlags : uint16_t {
         None = 0,
@@ -53,6 +54,7 @@ public:
                                                          const QString &reason, bool multipleTimes);
 };
 
-typedef std::shared_ptr<Message> MessagePtr;
+using MessagePtr = std::shared_ptr<Message>;
+
 }  // namespace messages
 }  // namespace chatterino
