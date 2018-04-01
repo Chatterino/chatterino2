@@ -56,7 +56,7 @@ public:
 
     // methods
     void begin(int width, float scale, Message::MessageFlags flags);
-    void finish();
+    void end();
 
     void clear();
     void addElement(MessageLayoutElement *element);
