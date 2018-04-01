@@ -151,13 +151,13 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     painter.drawPixmap(0, y, *pixmap);
     //    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
 
+    // draw gif emotes
+    this->container.paintAnimatedElements(painter, y);
+
     // draw disabled
     if (this->message->flags.HasFlag(Message::Disabled)) {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
     }
-
-    // draw gif emotes
-    this->container.paintAnimatedElements(painter, y);
 
     // draw last read message line
     if (isLastReadMessage) {
