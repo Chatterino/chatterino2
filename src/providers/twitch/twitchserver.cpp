@@ -168,6 +168,11 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
     func(this->mentionsChannel);
 }
 
+QString TwitchServer::CleanChannelName(const QString &dirtyChannelName)
+{
+    return dirtyChannelName.toLower();
+}
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

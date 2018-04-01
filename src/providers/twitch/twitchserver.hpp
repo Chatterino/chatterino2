@@ -33,6 +33,8 @@ protected:
     virtual void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
 
     virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
+
+    QString CleanChannelName(const QString &dirtyChannelName) override;
 };
 
 }  // namespace twitch
