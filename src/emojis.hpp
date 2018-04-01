@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/emotemap.hpp"
+
 #include <QString>
 
 namespace chatterino {
@@ -13,6 +15,14 @@ struct EmojiData {
 
     // i.e. thinking
     QString shortCode;
+
+    util::EmoteData emoteData;
 };
+
+namespace util {
+
+using EmojiMap = ConcurrentMap<QString, EmojiData>;
+
+}  // namespace util
 
 }  // namespace chatterino
