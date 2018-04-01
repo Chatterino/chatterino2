@@ -247,6 +247,7 @@ void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
         func(chan);
     }
 }
+
 }  // namespace irc
 }  // namespace providers
 }  // namespace chatterino

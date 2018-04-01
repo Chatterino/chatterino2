@@ -3,8 +3,6 @@
 #include "messages/image.hpp"
 #include "util/concurrentmap.hpp"
 
-#include <cassert>
-
 namespace chatterino {
 namespace util {
 

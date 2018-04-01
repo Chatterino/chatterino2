@@ -75,10 +75,8 @@ void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, util::Emot
 
 }  // namespace
 
-EmoteManager::EmoteManager(SettingManager &_settingsManager, WindowManager &_windowManager)
-    : settingsManager(_settingsManager)
-    , windowManager(_windowManager)
-    , findShortCodesRegex(":([-+\\w]+):")
+EmoteManager::EmoteManager()
+    : findShortCodesRegex(":([-+\\w]+):")
 {
     auto &accountManager = AccountManager::getInstance();
 
@@ -91,7 +89,7 @@ EmoteManager::EmoteManager(SettingManager &_settingsManager, WindowManager &_win
 
 EmoteManager &EmoteManager::getInstance()
 {
-    static EmoteManager instance(SettingManager::getInstance(), WindowManager::getInstance());
+    static EmoteManager instance;
     return instance;
 }
 
@@ -562,7 +560,9 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         this->gifUpdateTimer.setInterval(30);
         this->gifUpdateTimer.start();
 
-        this->settingsManager.enableGifAnimations.connect([this](bool enabled, auto) {
+        auto &settingManager = singletons::SettingManager::getInstance();
+
+        settingManager.enableGifAnimations.connect([this](bool enabled, auto) {
             if (enabled) {
                 this->gifUpdateTimer.start();
             } else {
@@ -573,7 +573,8 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
             this->gifUpdateTimerSignal();
             // fourtf:
-            this->windowManager.repaintGifEmotes();
+            auto &windowManager = singletons::WindowManager::getInstance();
+            windowManager.repaintGifEmotes();
         });
     }
 

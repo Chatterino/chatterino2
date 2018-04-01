@@ -20,13 +20,9 @@
 namespace chatterino {
 namespace singletons {
 
-class SettingManager;
-class WindowManager;
-
 class EmoteManager
 {
-    explicit EmoteManager(singletons::SettingManager &manager,
-                          singletons::WindowManager &windowManager);
+    EmoteManager();
 
 public:
     static EmoteManager &getInstance();
@@ -66,9 +62,6 @@ public:
     util::ConcurrentMap<QString, messages::Image *> miscImageCache;
 
 private:
-    SettingManager &settingsManager;
-    WindowManager &windowManager;
-
     /// Emojis
     QRegularExpression findShortCodesRegex;
 

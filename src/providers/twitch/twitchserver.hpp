@@ -24,15 +24,15 @@ public:
     const ChannelPtr mentionsChannel;
 
 protected:
-    virtual void initializeConnection(Communi::IrcConnection *connection, bool isRead,
-                                      bool isWrite) override;
-    virtual std::shared_ptr<Channel> createChannel(const QString &channelName) override;
+    void initializeConnection(Communi::IrcConnection *connection, bool isRead,
+                              bool isWrite) override;
+    std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
-    virtual void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
-    virtual void messageReceived(Communi::IrcMessage *message) override;
-    virtual void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
+    void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
+    void messageReceived(Communi::IrcMessage *message) override;
+    void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
 
-    virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
+    std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
 
     QString CleanChannelName(const QString &dirtyChannelName) override;
 };

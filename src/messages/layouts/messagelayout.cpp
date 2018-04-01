@@ -244,6 +244,7 @@ void MessageLayout::addSelectionText(QString &str, int from, int to)
 {
     this->container.addSelectionText(str, from, to);
 }
+
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino
