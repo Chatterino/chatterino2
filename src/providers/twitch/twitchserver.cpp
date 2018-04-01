@@ -17,7 +17,7 @@ namespace providers {
 namespace twitch {
 
 TwitchServer::TwitchServer()
-    : whispersChannel(new Channel("/mentions"))
+    : whispersChannel(new Channel("/whispers"))
     , mentionsChannel(new Channel("/mentions"))
 {
     AccountManager::getInstance().Twitch.userChanged.connect([this]() {  //
