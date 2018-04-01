@@ -83,12 +83,12 @@ void NotebookTab::updateSize()
 
     QString qTitle(qS(this->title));
     if (singletons::SettingManager::getInstance().hideTabX) {
-        width = (int)((fontMetrics().width(qTitle) + 16 + 16) * scale);
+        width = (int)((fontMetrics().width(qTitle) + 16 /*+ 16*/) * scale);
     } else {
-        width = (int)((fontMetrics().width(qTitle) + 8 + 24 + 16) * scale);
+        width = (int)((fontMetrics().width(qTitle) + 8 + 24 /*+ 16*/) * scale);
     }
 
-    this->resize(std::min((int)(150 * scale), width), (int)(48 * scale));
+    this->resize(std::min((int)(150 * scale), width), (int)(24 * scale));
 
     if (this->parent() != nullptr) {
         (static_cast<Notebook *>(this->parent()))->performLayout(true);
@@ -176,7 +176,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     float scale = this->getScale();
 
     int height = (int)(scale * 24);
-    int fullHeight = (int)(scale * 48);
+    //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
@@ -199,35 +199,47 @@ void NotebookTab::paintEvent(QPaintEvent *)
                                            : (windowFocused ? colors.backgrounds.regular
                                                             : colors.backgrounds.unfocused);
 
-    if (false) {
+    if (true) {
         painter.fillRect(rect(), this->mouseOver ? regular.backgrounds.hover
                                                  : (windowFocused ? regular.backgrounds.regular
                                                                   : regular.backgrounds.unfocused));
 
         // fill the tab background
         painter.fillRect(rect(), tabBackground);
-    } else {
+
+        // draw border
+        painter.setPen(QPen("#ccc"));
         QPainterPath path(QPointF(0, height));
-        path.lineTo(8 * scale, 0);
-        path.lineTo(this->width() - 8 * scale, 0);
-        path.lineTo(this->width(), height);
-        painter.fillPath(path, this->mouseOver ? regular.backgrounds.hover
-                                               : (windowFocused ? regular.backgrounds.regular
-                                                                : regular.backgrounds.unfocused));
-
-        // fill the tab background
-        painter.fillPath(path, tabBackground);
-        painter.setPen(QColor("#FFF"));
-        painter.setRenderHint(QPainter::Antialiasing);
+        path.lineTo(0, 0);
+        path.lineTo(this->width() - 1, 0);
+        path.lineTo(this->width() - 1, this->height() - 1);
+        path.lineTo(0, this->height() - 1);
         painter.drawPath(path);
-        //        painter.setBrush(QColor("#000"));
+    } else {
+        //        QPainterPath path(QPointF(0, height));
+        //        path.lineTo(8 * scale, 0);
+        //        path.lineTo(this->width() - 8 * scale, 0);
+        //        path.lineTo(this->width(), height);
+        //        painter.fillPath(path, this->mouseOver ? regular.backgrounds.hover
+        //                                               : (windowFocused ?
+        //                                               regular.backgrounds.regular
+        //                                                                :
+        //                                                                regular.backgrounds.unfocused));
 
-        QLinearGradient gradient(0, height, 0, fullHeight);
-        gradient.setColorAt(0, tabBackground.color());
-        gradient.setColorAt(1, "#fff");
+        //        // fill the tab background
+        //        painter.fillPath(path, tabBackground);
+        //        painter.setPen(QColor("#FFF"));
+        //        painter.setRenderHint(QPainter::Antialiasing);
+        //        painter.drawPath(path);
+        //        //        painter.setBrush(QColor("#000"));
 
-        QBrush brush(gradient);
-        painter.fillRect(0, height, this->width(), fullHeight - height, brush);
+        //        QLinearGradient gradient(0, height, 0, fullHeight);
+        //        gradient.setColorAt(0, tabBackground.color());
+        //        gradient.setColorAt(1, "#fff");
+
+        //        QBrush brush(gradient);
+        //        painter.fillRect(0, height, this->width(), fullHeight - height,
+        //        brush);
     }
 
     // set the pen color
@@ -238,14 +250,20 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
-    if (false) {  // legacy
-        painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
-    } else {
+    if (true) {  // legacy
+        //    painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
+        int offset = (int)(scale * 8);
+        QRect textRect(offset, 0, this->width() - offset - offset, height);
+
         QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
         option.setWrapMode(QTextOption::NoWrap);
-        int offset = (int)(scale * 16);
-        QRect textRect(offset, 0, this->width() - offset - offset, height);
         painter.drawText(textRect, this->getTitle(), option);
+    } else {
+        //    QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
+        //    option.setWrapMode(QTextOption::NoWrap);
+        //    int offset = (int)(scale * 16);
+        //    QRect textRect(offset, 0, this->width() - offset - offset, height);
+        //    painter.drawText(textRect, this->getTitle(), option);
     }
 
     // draw close x
@@ -264,7 +282,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         painter.drawLine(xRect.topLeft() + QPoint(a, a), xRect.bottomRight() + QPoint(-a, -a));
         painter.drawLine(xRect.topRight() + QPoint(-a, a), xRect.bottomLeft() + QPoint(a, -a));
     }
-}
+}  // namespace widgets
 
 void NotebookTab::mousePressEvent(QMouseEvent *event)
 {

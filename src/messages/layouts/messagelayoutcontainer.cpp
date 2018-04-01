@@ -142,7 +142,7 @@ void MessageLayoutContainer::breakLine()
     }
 
     this->lineStart = this->elements.size();
-    this->currentX = 0;
+    this->currentX = (int)(this->scale * 8);
     this->currentY += this->lineHeight;
     this->height = this->currentY + (this->margin.bottom * this->scale);
     this->lineHeight = 0;
@@ -158,7 +158,7 @@ bool MessageLayoutContainer::fitsInLine(int _width)
     return this->currentX + _width <= this->width - this->margin.left - this->margin.right;
 }
 
-void MessageLayoutContainer::finish()
+void MessageLayoutContainer::end()
 {
     if (!this->atStartOfLine()) {
         this->breakLine();

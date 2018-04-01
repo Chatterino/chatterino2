@@ -117,7 +117,7 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
         this->deleteBuffer();
     }
 
-    this->container.finish();
+    this->container.end();
     this->height = this->container.getHeight();
 }
 
