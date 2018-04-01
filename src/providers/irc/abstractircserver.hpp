@@ -1,15 +1,16 @@
 #pragma once
 
+#include "channel.hpp"
+
 #include <IrcMessage>
 #include <functional>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
 
-#include "channel.hpp"
-
 namespace chatterino {
 namespace providers {
 namespace irc {
+
 class AbstractIrcServer
 {
 public:
@@ -64,6 +65,7 @@ private:
 
     std::mutex connectionMutex;
 };
+
 }  // namespace irc
 }  // namespace providers
 }  // namespace chatterino

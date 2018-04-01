@@ -12,13 +12,6 @@
 namespace chatterino {
 namespace messages {
 namespace layouts {
-MessageLayoutContainer::MessageLayoutContainer()
-    : scale(1)
-    , flags(Message::None)
-    , margin(4, 8, 4, 8)
-{
-    this->clear();
-}
 
 int MessageLayoutContainer::getHeight() const
 {
@@ -36,11 +29,11 @@ float MessageLayoutContainer::getScale() const
 }
 
 // methods
-void MessageLayoutContainer::begin(int width, float _scale, Message::MessageFlags _flags)
+void MessageLayoutContainer::begin(int _width, float _scale, Message::MessageFlags _flags)
 {
     this->clear();
-    this->width = width;
-    this->scale = this->scale;
+    this->width = _width;
+    this->scale = _scale;
     this->flags = _flags;
 }
 
@@ -434,6 +427,7 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
         index += c;
     }
 }
+
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino

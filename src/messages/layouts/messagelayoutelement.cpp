@@ -272,6 +272,7 @@ int TextIconLayoutElement::getXFromIndex(int index)
         return this->getRect().right();
     }
 }
+
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino

@@ -15,6 +15,7 @@
 namespace chatterino {
 namespace messages {
 namespace layouts {
+
 class MessageLayout : boost::noncopyable
 {
 public:
@@ -73,7 +74,8 @@ private:
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 };
 
-typedef std::shared_ptr<MessageLayout> MessageLayoutPtr;
+using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
+
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino

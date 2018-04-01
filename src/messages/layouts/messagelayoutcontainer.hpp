@@ -43,12 +43,11 @@ struct Margin {
 };
 
 struct MessageLayoutContainer {
-public:
-    MessageLayoutContainer();
+    MessageLayoutContainer() = default;
 
-    Margin margin;
-    bool centered;
-    bool enableCompactEmotes;
+    Margin margin = {4, 8, 4, 8};
+    bool centered = false;
+    bool enableCompactEmotes = false;
 
     int getHeight() const;
     int getWidth() const;
@@ -89,20 +88,22 @@ private:
     void _addElement(MessageLayoutElement *element);
 
     // variables
-    float scale;
-    int width;
-    Message::MessageFlags flags;
-    int line;
-    int height;
-    int currentX, currentY;
+    float scale = 1.f;
+    int width = 0;
+    Message::MessageFlags flags = Message::MessageFlags::None;
+    int line = 0;
+    int height = 0;
+    int currentX = 0;
+    int currentY = 0;
     int charIndex = 0;
     size_t lineStart = 0;
     int lineHeight = 0;
     int spaceWidth = 4;
-    std::vector<std::unique_ptr<MessageLayoutElement>> elements;
 
+    std::vector<std::unique_ptr<MessageLayoutElement>> elements;
     std::vector<Line> lines;
 };
+
 }  // namespace layouts
 }  // namespace messages
 }  // namespace chatterino
