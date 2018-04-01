@@ -42,7 +42,7 @@ public:
     util::EmoteMap &getFFZEmotes();
     util::EmoteMap &getChatterinoEmotes();
     util::EmoteMap &getBTTVChannelEmoteFromCaches();
-    util::EmoteMap &getEmojis();
+    util::EmojiMap &getEmojis();
     util::ConcurrentMap<int, util::EmoteData> &getFFZChannelEmoteFromCaches();
     util::ConcurrentMap<long, util::EmoteData> &getTwitchEmoteFromCache();
 
@@ -78,8 +78,7 @@ private:
     // Maps the first character of the emoji unicode string to a vector of possible emojis
     QMap<QChar, QVector<EmojiData>> emojiFirstByte;
 
-    //            url      Emoji-one image
-    util::EmoteMap emojis;
+    util::EmojiMap emojis;
 
     void loadEmojis();
 

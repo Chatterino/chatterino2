@@ -226,7 +226,7 @@ util::EmoteMap &EmoteManager::getBTTVChannelEmoteFromCaches()
     return _bttvChannelEmoteFromCaches;
 }
 
-util::EmoteMap &EmoteManager::getEmojis()
+util::EmojiMap &EmoteManager::getEmojis()
 {
     return this->emojis;
 }
@@ -277,10 +277,15 @@ void EmoteManager::loadEmojis()
             unicodeBytes[numUnicodeBytes++] = QString(unicodeCharacter).toUInt(nullptr, 16);
         }
 
+        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
+                      "emojione/2.2.6/assets/png/" +
+                      code + ".png";
+
         EmojiData emojiData{
             QString::fromUcs4(unicodeBytes, numUnicodeBytes),  //
             code,                                              //
             shortCode,                                         //
+            {new Image(url, 0.35, ":" + shortCode + ":", ":" + shortCode + ":<br/>Emoji")},
         };
 
         this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
@@ -288,12 +293,7 @@ void EmoteManager::loadEmojis()
 
         this->emojiFirstByte[emojiData.value.at(0)].append(emojiData);
 
-        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
-                      "emojione/2.2.6/assets/png/" +
-                      code + ".png";
-
-        this->emojis.insert(code, util::EmoteData(new Image(url, 0.35, ":" + shortCode + ":",
-                                                            ":" + shortCode + ":<br/>Emoji")));
+        this->emojis.insert(code, emojiData);
     }
 
     for (auto &p : this->emojiFirstByte) {
@@ -369,17 +369,9 @@ void EmoteManager::parseEmojis(std::vector<std::tuple<util::EmoteData, QString>>
                                                                  charactersFromLastParsedEmoji));
         }
 
-        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
-                      "emojione/2.2.6/assets/png/" +
-                      matchedEmoji.code + ".png";
-
-        // Create or fetch cached emoji image
-        auto emojiImage = this->emojis.getOrAdd(matchedEmoji.code, [&url] {
-            return util::EmoteData(new Image(url, 0.35, "?????????", "???????????????"));  //
-        });
-
         // Push the emoji as a word to parsedWords
-        parsedWords.push_back(std::tuple<util::EmoteData, QString>(emojiImage, QString()));
+        parsedWords.push_back(
+            std::tuple<util::EmoteData, QString>(matchedEmoji.emoteData, QString()));
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 

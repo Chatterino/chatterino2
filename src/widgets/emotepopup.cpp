@@ -89,7 +89,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
 void EmotePopup::loadEmojis()
 {
-    util::EmoteMap &emojis = singletons::EmoteManager::getInstance().getEmojis();
+    auto &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
     ChannelPtr emojiChannel(new Channel(""));
 
@@ -105,9 +105,9 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags &= Message::Centered;
     builder.getMessage()->flags &= Message::DisableCompactEmotes;
 
-    emojis.each([this, &builder](const QString &key, const util::EmoteData &value) {
-        builder.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
-                           ->setLink(Link(Link::Type::InsertText, key)));
+    emojis.each([this, &builder](const QString &key, const auto &value) {
+        builder.append((new EmoteElement(value.emoteData, MessageElement::Flags::AlwaysShow))
+                           ->setLink(Link(Link::Type::InsertText, ":" + value.shortCode + ":")));
     });
     emojiChannel->addMessage(builder.getMessage());
 
