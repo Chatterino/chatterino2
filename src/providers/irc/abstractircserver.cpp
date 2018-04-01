@@ -95,8 +95,10 @@ void AbstractIrcServer::writeConnectionMessageReceived(Communi::IrcMessage *mess
 {
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &channelName)
+std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &dirtyChannelName)
 {
+    auto channelName = this->CleanChannelName(dirtyChannelName);
+
     // try get channel
     ChannelPtr chan = this->getChannel(channelName);
     if (chan != Channel::getEmpty()) {
@@ -137,8 +139,10 @@ std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &channelNam
     return chan;
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::getChannel(const QString &channelName)
+std::shared_ptr<Channel> AbstractIrcServer::getChannel(const QString &dirtyChannelName)
 {
+    auto channelName = this->CleanChannelName(dirtyChannelName);
+
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     // try get special channel
@@ -208,6 +212,11 @@ void AbstractIrcServer::onDisconnected()
 std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(const QString &channelName)
 {
     return nullptr;
+}
+
+QString AbstractIrcServer::CleanChannelName(const QString &dirtyChannelName)
+{
+    return dirtyChannelName;
 }
 
 void AbstractIrcServer::addFakeMessage(const QString &data)
