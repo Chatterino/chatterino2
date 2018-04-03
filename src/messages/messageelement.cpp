@@ -74,18 +74,10 @@ void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElem
 EmoteElement::EmoteElement(const util::EmoteData &_data, MessageElement::Flags flags)
     : MessageElement(flags)
     , data(_data)
-    , textElement(nullptr)
 {
     if (_data.isValid()) {
         this->setTooltip(data.image1x->getTooltip());
-        this->textElement = new TextElement(_data.image1x->getName(), MessageElement::Misc);
-    }
-}
-
-EmoteElement::~EmoteElement()
-{
-    if (this->textElement != nullptr) {
-        delete this->textElement;
+        this->textElement.reset(new TextElement(_data.image1x->getName(), MessageElement::Misc));
     }
 }
 
@@ -114,7 +106,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
             container.addElement(
                 (new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));
         } else {
-            if (this->textElement != nullptr) {
+            if (this->textElement) {
                 this->textElement->addToContainer(container, MessageElement::Misc);
             }
         }
@@ -130,7 +122,7 @@ TextElement::TextElement(const QString &text, MessageElement::Flags flags,
 {
     for (QString word : text.split(' ')) {
         this->words.push_back({word, -1});
-        // fourtf: add logic to store mutliple spaces after message
+        // fourtf: add logic to store multiple spaces after message
     }
 }
 
@@ -213,22 +205,12 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 }
 
 // TIMESTAMP
-TimestampElement::TimestampElement()
-    : TimestampElement(QTime::currentTime())
-{
-}
-
 TimestampElement::TimestampElement(QTime _time)
     : MessageElement(MessageElement::Timestamp)
     , time(_time)
-    , element(formatTime(_time))
+    , element(this->formatTime(_time))
 {
     assert(this->element != nullptr);
-}
-
-TimestampElement::~TimestampElement()
-{
-    delete this->element;
 }
 
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
@@ -237,8 +219,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
     if (_flags & this->getFlags()) {
         if (singletons::SettingManager::getInstance().timestampFormat != this->format) {
             this->format = singletons::SettingManager::getInstance().timestampFormat.getValue();
-            delete this->element;
-            this->element = TimestampElement::formatTime(this->time);
+            this->element.reset(this->formatTime(this->time));
         }
 
         this->element->addToContainer(container, _flags);

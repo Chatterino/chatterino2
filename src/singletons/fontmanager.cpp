@@ -105,5 +105,6 @@ FontManager::Font &FontManager::getCurrentFont(float scale)
 
     return this->currentFontByScale.back().second;
 }
+
 }  // namespace singletons
 }  // namespace chatterino

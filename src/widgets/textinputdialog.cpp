@@ -7,8 +7,6 @@ namespace widgets {
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)
     , _vbox(this)
-    , _lineEdit()
-    , _buttonBox()
     , _okButton("OK")
     , _cancelButton("Cancel")
 {

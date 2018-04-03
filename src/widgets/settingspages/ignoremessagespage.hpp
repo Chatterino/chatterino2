@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QTimer>
 #include "widgets/settingspages/settingspage.hpp"
+
+#include <QTimer>
 
 namespace chatterino {
 namespace widgets {
@@ -14,6 +15,7 @@ public:
 
     QTimer keywordsUpdated;
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

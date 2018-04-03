@@ -65,5 +65,6 @@ void TooltipWidget::leaveEvent(QEvent *)
 {
     // clear parents event
 }
+
 }  // namespace widgets
 }  // namespace chatterino

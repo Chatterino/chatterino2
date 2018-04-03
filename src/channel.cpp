@@ -61,10 +61,10 @@ void Channel::addMessage(MessagePtr message)
     singletons::LoggingManager::getInstance().addMessage(this->name, message);
 
     if (this->messages.pushBack(message, deleted)) {
-        this->messageRemovedFromStart(deleted);
+        this->messageRemovedFromStart.invoke(deleted);
     }
 
-    this->messageAppended(message);
+    this->messageAppended.invoke(message);
 }
 
 void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
@@ -72,7 +72,7 @@ void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
     std::vector<messages::MessagePtr> addedMessages = this->messages.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
-        this->messagesAddedAtStart(addedMessages);
+        this->messagesAddedAtStart.invoke(addedMessages);
     }
 }
 
@@ -81,7 +81,7 @@ void Channel::replaceMessage(messages::MessagePtr message, messages::MessagePtr 
     int index = this->messages.replaceItem(message, replacement);
 
     if (index >= 0) {
-        this->messageReplaced((size_t)index, replacement);
+        this->messageReplaced.invoke((size_t)index, replacement);
     }
 }
 

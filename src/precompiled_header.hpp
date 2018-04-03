@@ -2,11 +2,9 @@
 #include <fmt/format.h>
 #include <irccommand.h>
 #include <ircconnection.h>
-#include <math.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
-#include <stdint.h>
 #include <IrcMessage>
 #include <QAbstractListModel>
 #include <QAbstractNativeEventFilter>
@@ -127,13 +125,12 @@
 #include <boost/foreach.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
-#include <boost/signals2.hpp>
-#include <boost/signals2/connection.hpp>
 #include <cassert>
 #include <chrono>
 #include <cinttypes>
 #include <climits>
 #include <cmath>
+#include <cstdint>
 #include <ctime>
 #include <functional>
 #include <future>

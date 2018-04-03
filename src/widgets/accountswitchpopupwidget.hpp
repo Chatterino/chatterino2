@@ -17,8 +17,8 @@ public:
     void refresh();
 
 protected:
-    virtual void focusOutEvent(QFocusEvent *event) override final;
-    virtual void paintEvent(QPaintEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) final;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     struct {

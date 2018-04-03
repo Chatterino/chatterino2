@@ -11,10 +11,7 @@ template <typename T>
 class LimitedQueueSnapshot
 {
 public:
-    LimitedQueueSnapshot()
-        : length(0)
-    {
-    }
+    LimitedQueueSnapshot() = default;
 
     LimitedQueueSnapshot(std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> _chunks,
                          size_t _length, size_t _firstChunkOffset, size_t _lastChunkEnd)
@@ -53,9 +50,9 @@ public:
 private:
     std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> chunks;
 
-    size_t length;
-    size_t firstChunkOffset;
-    size_t lastChunkEnd;
+    size_t length = 0;
+    size_t firstChunkOffset = 0;
+    size_t lastChunkEnd = 0;
 };
 
 }  // namespace messages

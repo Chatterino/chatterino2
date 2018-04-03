@@ -1,15 +1,19 @@
 #pragma once
 
-#include <memory>
-
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 #include "widgets/basewindow.hpp"
 
+#include <memory>
+
 class QLineEdit;
+
 namespace chatterino {
+
 class Channel;
+
 namespace widgets {
+
 class ChannelView;
 
 class SearchPopup : public BaseWindow
@@ -27,5 +31,6 @@ private:
     void initLayout();
     void performSearch();
 };
+
 }  // namespace widgets
 }  // namespace chatterino

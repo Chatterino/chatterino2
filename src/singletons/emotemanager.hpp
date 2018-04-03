@@ -15,7 +15,7 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QTimer>
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 namespace singletons {
@@ -56,7 +56,7 @@ public:
         _generation++;
     }
 
-    boost::signals2::signal<void()> &getGifUpdateSignal();
+    pajlada::Signals::NoArgSignal &getGifUpdateSignal();
 
     // Bit badge/emotes?
     util::ConcurrentMap<QString, messages::Image *> miscImageCache;
@@ -140,7 +140,7 @@ private:
     /// Chatterino emotes
     util::EmoteMap _chatterinoEmotes;
 
-    boost::signals2::signal<void()> gifUpdateTimerSignal;
+    pajlada::Signals::NoArgSignal gifUpdateTimerSignal;
     QTimer gifUpdateTimer;
     bool gifUpdateTimerInitiated = false;
 

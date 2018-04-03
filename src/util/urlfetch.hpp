@@ -9,6 +9,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
+#include <QByteArray>
 #include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>

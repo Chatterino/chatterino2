@@ -2,6 +2,7 @@
 
 namespace chatterino {
 namespace messages {
+
 Link::Link()
     : type(None)
     , value(QString())
@@ -18,5 +19,6 @@ bool Link::isValid() const
 {
     return this->type != None;
 }
+
 }  // namespace messages
 }  // namespace chatterino

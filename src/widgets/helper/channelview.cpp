@@ -20,9 +20,9 @@
 #include <QGraphicsBlurEffect>
 #include <QPainter>
 
-#include <math.h>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <functional>
 #include <memory>
 
@@ -461,7 +461,7 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
     // selections
     this->selection = Selection(start, end);
 
-    this->selectionChanged();
+    this->selectionChanged.invoke();
 }
 
 messages::MessageElement::Flags ChannelView::getFlags() const
@@ -729,7 +729,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
-    this->mouseDown(event);
+    this->mouseDown.invoke(event);
 
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);

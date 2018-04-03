@@ -126,5 +126,6 @@ private:
         return this->item->layout();
     }
 };
+
 }  // namespace util
 }  // namespace chatterino

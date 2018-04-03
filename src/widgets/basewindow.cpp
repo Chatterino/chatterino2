@@ -1,5 +1,6 @@
 #include "basewindow.hpp"
 
+#include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/nativeeventhelper.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
@@ -11,10 +12,10 @@
 #include <QIcon>
 
 #ifdef USEWINSDK
+#include <ObjIdl.h>
+#include <Windows.h>
 #include <dwmapi.h>
 #include <gdiplus.h>
-#include <objidl.h>
-#include <windows.h>
 #include <windowsx.h>
 #pragma comment(lib, "Dwmapi.lib")
 

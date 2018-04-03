@@ -8,7 +8,7 @@
 #include <QMutex>
 #include <QPropertyAnimation>
 #include <QWidget>
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 
@@ -43,7 +43,7 @@ public:
     qreal getCurrentValue() const;
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
-    boost::signals2::signal<void()> &getCurrentValueChanged();
+    pajlada::Signals::NoArgSignal &getCurrentValueChanged();
     void setCurrentValue(qreal value);
 
     void printCurrentState(const QString &prefix = QString()) const;
@@ -86,7 +86,7 @@ private:
     qreal currentValue = 0;
     qreal smoothScrollingOffset = 0;
 
-    boost::signals2::signal<void()> currentValueChanged;
+    pajlada::Signals::NoArgSignal currentValueChanged;
 
     pajlada::Settings::Setting<bool> &smoothScrollingSetting;
 

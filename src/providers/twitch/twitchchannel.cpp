@@ -81,8 +81,6 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
 TwitchChannel::~TwitchChannel()
 {
-    this->connectedConnection.disconnect();
-
     this->liveStatusTimer->stop();
     this->liveStatusTimer->deleteLater();
 
@@ -103,7 +101,7 @@ bool TwitchChannel::canSendMessage() const
 void TwitchChannel::setRoomID(const QString &_roomID)
 {
     this->roomID = _roomID;
-    this->roomIDchanged();
+    this->roomIDchanged.invoke();
     this->fetchMessages.invoke();
 }
 
@@ -155,7 +153,7 @@ void TwitchChannel::setMod(bool value)
     if (this->mod != value) {
         this->mod = value;
 
-        this->userStateChanged();
+        this->userStateChanged.invoke();
     }
 }
 
@@ -194,7 +192,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
         this->streamStatus.live = newLiveStatus;
     }
 
-    this->onlineStatusChanged();
+    this->onlineStatusChanged.invoke();
 }
 
 void TwitchChannel::refreshLiveStatus()

@@ -11,6 +11,7 @@ class LogsPage : public SettingsPage
 public:
     LogsPage();
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

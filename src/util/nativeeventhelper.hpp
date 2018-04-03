@@ -9,6 +9,7 @@
 
 namespace chatterino {
 namespace util {
+
 static boost::optional<UINT> getWindowDpi(quintptr ptr)
 {
     typedef UINT(WINAPI * GetDpiForWindow)(HWND);

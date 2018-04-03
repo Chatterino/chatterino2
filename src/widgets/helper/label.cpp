@@ -5,6 +5,7 @@
 
 namespace chatterino {
 namespace widgets {
+
 Label::Label(BaseWidget *parent)
     : BaseWidget(parent)
 {
@@ -74,5 +75,6 @@ void Label::paintEvent(QPaintEvent *)
 
     painter.drawText(this->rect(), flags, this->text);
 }
+
 }  // namespace widgets
 }  // namespace chatterino

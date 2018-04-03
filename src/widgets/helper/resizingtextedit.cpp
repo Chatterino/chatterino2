@@ -73,7 +73,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
     event->ignore();
 
-    this->keyPressed(event);
+    this->keyPressed.invoke(event);
 
     if (event->key() == Qt::Key_Backtab) {
         // Ignore for now. We want to use it for autocomplete later

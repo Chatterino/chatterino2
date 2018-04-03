@@ -25,7 +25,6 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QVBoxLayout>
-#include <boost/signals2.hpp>
 
 #include <functional>
 #include <random>
@@ -150,7 +149,7 @@ void Split::setChannel(ChannelPtr _newChannel)
 
     this->header.updateModerationModeIcon();
 
-    this->channelChanged();
+    this->channelChanged.invoke();
 }
 
 void Split::setFlexSizeX(double x)

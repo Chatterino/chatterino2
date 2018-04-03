@@ -16,8 +16,8 @@
 #include <QTimer>
 #include <QWheelEvent>
 #include <QWidget>
-#include <boost/signals2.hpp>
 #include <pajlada/signals/signal.hpp>
+
 #include <unordered_set>
 
 namespace chatterino {
@@ -28,7 +28,7 @@ class ChannelView : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit ChannelView(BaseWidget *parent = 0);
+    explicit ChannelView(BaseWidget *parent = nullptr);
     virtual ~ChannelView();
 
     void queueUpdate();
@@ -49,26 +49,26 @@ public:
 
     void clearMessages();
 
-    boost::signals2::signal<void(QMouseEvent *)> mouseDown;
-    boost::signals2::signal<void()> selectionChanged;
+    pajlada::Signals::Signal<QMouseEvent *> mouseDown;
+    pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::NoArgSignal highlightedMessageReceived;
     pajlada::Signals::Signal<const messages::Link &> linkClicked;
 
 protected:
-    virtual void themeRefreshEvent() override;
+    void themeRefreshEvent() override;
 
-    virtual void resizeEvent(QResizeEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
 
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void wheelEvent(QWheelEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
+    void wheelEvent(QWheelEvent *event) override;
 
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
 
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void handleLinkClick(QMouseEvent *event, const messages::Link &link,
                          messages::MessageLayout *layout);
@@ -116,12 +116,12 @@ private:
 
     messages::LimitedQueue<messages::MessageLayoutPtr> messages;
 
-    boost::signals2::connection messageAppendedConnection;
-    boost::signals2::connection messageAddedAtStartConnection;
-    boost::signals2::connection messageRemovedConnection;
-    boost::signals2::connection messageReplacedConnection;
-    boost::signals2::connection repaintGifsConnection;
-    boost::signals2::connection layoutConnection;
+    pajlada::Signals::Connection messageAppendedConnection;
+    pajlada::Signals::Connection messageAddedAtStartConnection;
+    pajlada::Signals::Connection messageRemovedConnection;
+    pajlada::Signals::Connection messageReplacedConnection;
+    pajlada::Signals::Connection repaintGifsConnection;
+    pajlada::Signals::Connection layoutConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 

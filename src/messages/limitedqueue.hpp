@@ -1,8 +1,8 @@
 #pragma once
 
-#include "QDebug"
-
 #include "messages/limitedqueuesnapshot.hpp"
+
+#include <QDebug>
 
 #include <memory>
 #include <mutex>

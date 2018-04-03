@@ -2,6 +2,8 @@
 
 #include <QObject>
 
+class QNetworkReply;
+
 namespace chatterino {
 namespace util {
 

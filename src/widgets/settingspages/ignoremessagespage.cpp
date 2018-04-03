@@ -8,6 +8,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 IgnoreMessagesPage::IgnoreMessagesPage()
     : SettingsPage("Ignore Messages", "")
 {
@@ -32,6 +33,7 @@ IgnoreMessagesPage::IgnoreMessagesPage()
     // ---- misc
     this->keywordsUpdated.setSingleShot(true);
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

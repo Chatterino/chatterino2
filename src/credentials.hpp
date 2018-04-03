@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QByteArray>
+
 namespace chatterino {
 
 inline QByteArray getDefaultClientID()
