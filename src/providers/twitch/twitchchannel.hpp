@@ -53,11 +53,11 @@ public:
     const QString popoutPlayerURL;
 
     void setRoomID(const QString &_roomID);
-    boost::signals2::signal<void()> roomIDchanged;
-    boost::signals2::signal<void()> onlineStatusChanged;
+    pajlada::Signals::NoArgSignal roomIDchanged;
+    pajlada::Signals::NoArgSignal onlineStatusChanged;
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
-    boost::signals2::signal<void()> userStateChanged;
+    pajlada::Signals::NoArgSignal userStateChanged;
 
     QString roomID;
 
@@ -88,8 +88,6 @@ private:
     StreamStatus streamStatus;
 
     void fetchRecentMessages();
-
-    boost::signals2::connection connectedConnection;
 
     bool mod;
     QByteArray messageSuffix;

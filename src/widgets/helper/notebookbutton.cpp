@@ -144,5 +144,6 @@ void NotebookButton::dropEvent(QDropEvent *event)
         }
     }
 }
+
 }  // namespace widgets
 }  // namespace chatterino

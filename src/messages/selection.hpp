@@ -1,7 +1,10 @@
 #pragma once
 
+#include <utility>
+
 namespace chatterino {
 namespace messages {
+
 struct SelectionItem {
     int messageIndex;
     int charIndex;
@@ -47,9 +50,7 @@ struct Selection {
     SelectionItem min;
     SelectionItem max;
 
-    Selection()
-    {
-    }
+    Selection() = default;
 
     Selection(const SelectionItem &start, const SelectionItem &end)
         : start(start)
@@ -72,5 +73,6 @@ struct Selection {
         return this->min.messageIndex == this->max.messageIndex;
     }
 };
+
 }  // namespace messages
 }  // namespace chatterino

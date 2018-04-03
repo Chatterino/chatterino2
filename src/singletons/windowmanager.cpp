@@ -58,7 +58,7 @@ void WindowManager::initMainWindow()
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
 {
-    this->layout(channel);
+    this->layout.invoke(channel);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -70,7 +70,7 @@ void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 
 void WindowManager::repaintGifEmotes()
 {
-    this->repaintGifs();
+    this->repaintGifs.invoke();
 }
 
 // void WindowManager::updateAll()

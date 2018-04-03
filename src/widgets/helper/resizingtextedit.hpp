@@ -3,7 +3,7 @@
 #include <QCompleter>
 #include <QKeyEvent>
 #include <QTextEdit>
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 
 class ResizingTextEdit : public QTextEdit
 {
@@ -14,14 +14,14 @@ public:
 
     bool hasHeightForWidth() const override;
 
-    boost::signals2::signal<void(QKeyEvent *)> keyPressed;
+    pajlada::Signals::Signal<QKeyEvent *> keyPressed;
 
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
 
 protected:
-    virtual int heightForWidth(int) const override;
-    virtual void keyPressEvent(QKeyEvent *event) override;
+    int heightForWidth(int) const override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QCompleter *completer = nullptr;

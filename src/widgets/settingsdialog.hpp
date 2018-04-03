@@ -13,7 +13,7 @@ namespace widgets {
 
 namespace settingspages {
 class SettingsPage;
-}
+}  // namespace settingspages
 
 class SettingsDialogTab;
 
@@ -32,7 +32,7 @@ public:
     static void showDialog(PreferredTab preferredTab = PreferredTab::NoPreference);
 
 protected:
-    virtual void scaleChangedEvent(float newDpi) override;
+    void scaleChangedEvent(float newDpi) override;
 
 private:
     void refresh();

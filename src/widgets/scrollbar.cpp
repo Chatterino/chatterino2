@@ -162,7 +162,7 @@ void Scrollbar::offset(qreal value)
     }
 }
 
-boost::signals2::signal<void()> &Scrollbar::getCurrentValueChanged()
+pajlada::Signals::NoArgSignal &Scrollbar::getCurrentValueChanged()
 {
     return this->currentValueChanged;
 }
@@ -176,7 +176,7 @@ void Scrollbar::setCurrentValue(qreal value)
         this->currentValue = value;
 
         this->updateScroll();
-        this->currentValueChanged();
+        this->currentValueChanged.invoke();
 
         this->update();
     }

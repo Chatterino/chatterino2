@@ -5,6 +5,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QSlider>
 #include <QVBoxLayout>
 
 #include "util/layoutcreator.hpp"
@@ -65,7 +66,8 @@ AppearancePage::AppearancePage()
         }
         messages.append(this->createCheckBox("Show badges", settings.showBadges));
         messages.append(this->createCheckBox("Seperate messages", settings.seperateMessages));
-        messages.append(this->createCheckBox("Show message length while typing", settings.showMessageLength));
+        messages.append(
+            this->createCheckBox("Show message length while typing", settings.showMessageLength));
     }
 
     layout->addStretch(1);
@@ -148,6 +150,7 @@ QLayout *AppearancePage::createFontChanger()
 
     return layout;
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

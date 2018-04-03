@@ -1,15 +1,16 @@
 #pragma once
 
-#include <vector>
-
 #include "widgets/split.hpp"
+
+#include <vector>
 
 namespace chatterino {
 namespace helper {
+
 class SplitColumn
 {
 public:
-    SplitColumn();
+    SplitColumn() = default;
 
     void insert(widgets::Split *split, int index = -1);
     void remove(int index);
@@ -19,5 +20,6 @@ public:
 private:
     std::vector<widgets::Split> items;
 };
-}
-}
+
+}  // namespace helper
+}  // namespace chatterino

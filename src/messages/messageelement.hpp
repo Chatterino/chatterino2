@@ -4,28 +4,29 @@
 #include "messages/link.hpp"
 #include "messages/messagecolor.hpp"
 #include "singletons/fontmanager.hpp"
+#include "util/emotemap.hpp"
 
-#include <stdint.h>
 #include <QRect>
 #include <QString>
 #include <QTime>
-
 #include <boost/noncopyable.hpp>
-#include "util/emotemap.hpp"
+
+#include <cstdint>
+#include <memory>
 
 namespace chatterino {
 class Channel;
 namespace util {
 struct EmoteData;
-}
+}  // namespace util
 namespace messages {
 namespace layouts {
 struct MessageLayoutContainer;
-}
+}  // namespace layouts
 
 using namespace chatterino::messages::layouts;
 
-struct MessageElement : boost::noncopyable
+class MessageElement : boost::noncopyable
 {
 public:
     enum Flags : uint32_t {
@@ -109,9 +110,7 @@ public:
         Update_All = Update_Text | Update_Emotes | Update_Images
     };
 
-    virtual ~MessageElement()
-    {
-    }
+    virtual ~MessageElement() = default;
 
     MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);
@@ -141,8 +140,7 @@ class ImageElement : public MessageElement
 public:
     ImageElement(Image *image, MessageElement::Flags flags);
 
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 };
 
 // contains a text, it will split it into words
@@ -161,9 +159,9 @@ public:
     TextElement(const QString &text, MessageElement::Flags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::Medium);
+    ~TextElement() override = default;
 
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 };
 
 // contains emote data and will pick the emote based on :
@@ -172,30 +170,27 @@ public:
 class EmoteElement : public MessageElement
 {
     const util::EmoteData data;
-    TextElement *textElement;
+    std::unique_ptr<TextElement> textElement;
 
 public:
     EmoteElement(const util::EmoteData &data, MessageElement::Flags flags);
-    ~EmoteElement();
+    ~EmoteElement() override = default;
 
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 };
 
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {
     QTime time;
-    TextElement *element;
+    std::unique_ptr<TextElement> element;
     QString format;
 
 public:
-    TimestampElement();
-    TimestampElement(QTime time);
-    virtual ~TimestampElement();
+    TimestampElement(QTime time = QTime::currentTime());
+    ~TimestampElement() override = default;
 
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 
     TextElement *formatTime(const QTime &time);
 };
@@ -207,8 +202,8 @@ class TwitchModerationElement : public MessageElement
 public:
     TwitchModerationElement();
 
-    virtual void addToContainer(MessageLayoutContainer &container,
-                                MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 };
+
 }  // namespace messages
 }  // namespace chatterino

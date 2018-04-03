@@ -1,4 +1,5 @@
 #pragma once
+
 #include "widgets/basewindow.hpp"
 
 #include <QLabel>
@@ -11,6 +12,7 @@ namespace widgets {
 class TooltipWidget : public BaseWindow
 {
     Q_OBJECT
+
 public:
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget();
@@ -27,9 +29,9 @@ public:
     }
 
 protected:
-    virtual void changeEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-    virtual void scaleChangedEvent(float) override;
+    void changeEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void scaleChangedEvent(float) override;
 
 private:
     QLabel *displayText;

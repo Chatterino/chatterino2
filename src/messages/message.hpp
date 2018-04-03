@@ -4,11 +4,11 @@
 #include "util/flagsenum.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
+#include <QTime>
+
 #include <cinttypes>
 #include <memory>
 #include <vector>
-
-#include <QTime>
 
 namespace chatterino {
 namespace messages {

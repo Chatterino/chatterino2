@@ -8,14 +8,14 @@
 
 #include <QString>
 #include <QTimer>
-#include <boost/signals2.hpp>
+#include <pajlada/signals/signal.hpp>
 
 #include <memory>
 
 namespace chatterino {
 namespace messages {
 struct Message;
-}
+}  // namespace messages
 
 class Channel : public std::enable_shared_from_this<Channel>
 {
@@ -27,10 +27,10 @@ public:
 
     pajlada::Signals::Signal<const QString &, const QString &> sendMessageSignal;
 
-    boost::signals2::signal<void(messages::MessagePtr &)> messageRemovedFromStart;
-    boost::signals2::signal<void(messages::MessagePtr &)> messageAppended;
-    boost::signals2::signal<void(std::vector<messages::MessagePtr> &)> messagesAddedAtStart;
-    boost::signals2::signal<void(size_t index, messages::MessagePtr &)> messageReplaced;
+    pajlada::Signals::Signal<messages::MessagePtr &> messageRemovedFromStart;
+    pajlada::Signals::Signal<messages::MessagePtr &> messageAppended;
+    pajlada::Signals::Signal<std::vector<messages::MessagePtr> &> messagesAddedAtStart;
+    pajlada::Signals::Signal<size_t, messages::MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
 
     virtual bool isEmpty() const;

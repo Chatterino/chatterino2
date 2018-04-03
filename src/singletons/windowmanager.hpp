@@ -32,8 +32,8 @@ public:
 
     void save();
 
-    boost::signals2::signal<void()> repaintGifs;
-    boost::signals2::signal<void(Channel *)> layout;
+    pajlada::Signals::NoArgSignal repaintGifs;
+    pajlada::Signals::Signal<Channel *> layout;
 
 private:
     ThemeManager &themeManager;

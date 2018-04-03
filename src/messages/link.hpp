@@ -4,6 +4,7 @@
 
 namespace chatterino {
 namespace messages {
+
 struct Link {
 public:
     enum Type {
@@ -26,5 +27,6 @@ public:
 
     bool isValid() const;
 };
+
 }  // namespace messages
 }  // namespace chatterino

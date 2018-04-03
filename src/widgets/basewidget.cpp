@@ -1,4 +1,5 @@
 #include "widgets/basewidget.hpp"
+#include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 
@@ -7,7 +8,6 @@
 #include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
-#include <boost/signals2.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -82,13 +82,13 @@ void BaseWidget::setScaleIndependantHeight(int value)
 
 void BaseWidget::init()
 {
-    auto connection = this->themeManager.updated.connect([this]() {
+    pajlada::Signals::Connection connection = this->themeManager.updated.connect([this]() {
         this->themeRefreshEvent();
 
         this->update();
     });
 
-    QObject::connect(this, &QObject::destroyed, [connection] {
+    QObject::connect(this, &QObject::destroyed, [connection]() mutable {
         connection.disconnect();  //
     });
 }

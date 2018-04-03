@@ -9,12 +9,15 @@ class QHBoxLayout;
 
 namespace chatterino {
 namespace widgets {
+
 class RippleEffectButton;
 class RippleEffectLabel;
 class TitleBarButton;
 
 class BaseWindow : public BaseWidget
 {
+    Q_OBJECT
+
 public:
     explicit BaseWindow(singletons::ThemeManager &_themeManager, QWidget *parent,
                         bool enableCustomFrame = false);
@@ -60,5 +63,6 @@ private:
     QWidget *layoutBase;
     std::vector<RippleEffectButton *> buttons;
 };
+
 }  // namespace widgets
 }  // namespace chatterino

@@ -1,11 +1,12 @@
 #pragma once
 
-#include <QColor>
-
 #include "singletons/thememanager.hpp"
+
+#include <QColor>
 
 namespace chatterino {
 namespace messages {
+
 struct MessageColor {
     enum Type { Custom, Text, Link, System };
 
@@ -18,5 +19,6 @@ private:
     Type type;
     QColor customColor;
 };
+
 }  // namespace messages
 }  // namespace chatterino

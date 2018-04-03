@@ -19,6 +19,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 HighlightingPage::HighlightingPage()
     : SettingsPage("Highlights", ":/images/notifications.svg")
 {
@@ -239,6 +240,7 @@ void HighlightingPage::addHighlightTabSignals()
         delete selectedHighlight;
     });
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

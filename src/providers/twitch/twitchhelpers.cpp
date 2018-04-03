@@ -8,7 +8,7 @@ namespace twitch {
 bool TrimChannelName(const QString &channelName, QString &outChannelName)
 {
     if (channelName.length() < 3) {
-        debug::Log("channel name length below 2");
+        debug::Log("channel name length below 3");
         return false;
     }
 

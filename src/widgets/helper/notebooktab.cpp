@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QLinearGradient>
 #include <QPainter>
+#include <boost/bind.hpp>
 
 namespace chatterino {
 namespace widgets {

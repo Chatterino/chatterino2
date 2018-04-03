@@ -10,6 +10,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 SpecialChannelsPage::SpecialChannelsPage()
     : SettingsPage("Special channels", "")
 {
@@ -30,6 +31,7 @@ SpecialChannelsPage::SpecialChannelsPage()
 
     layout->addStretch(1);
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

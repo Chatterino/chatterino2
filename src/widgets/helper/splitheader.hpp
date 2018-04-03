@@ -13,11 +13,9 @@
 #include <QPaintEvent>
 #include <QPoint>
 #include <QWidget>
-#include <boost/signals2/connection.hpp>
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
-
 namespace widgets {
 
 class Split;
@@ -50,7 +48,7 @@ private:
     QPoint dragStart;
     bool dragging = false;
 
-    boost::signals2::connection onlineStatusChangedConnection;
+    pajlada::Signals::Connection onlineStatusChangedConnection;
 
     RippleEffectButton *dropdownButton;
     //    Label *titleLabel;

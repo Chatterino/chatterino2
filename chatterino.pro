@@ -313,12 +313,16 @@ win32-msvc* {
     # 4127 - conditional expression is constant
     # 4503 - decorated name length exceeded, name was truncated
     # 4100 - unreferences formal parameter
+    # 4305 - possible truncation of data
+    # 4267 - possible loss of data in return
     QMAKE_CXXFLAGS_WARN_ON += /wd4714
     QMAKE_CXXFLAGS_WARN_ON += /wd4996
     QMAKE_CXXFLAGS_WARN_ON += /wd4505
     QMAKE_CXXFLAGS_WARN_ON += /wd4127
     QMAKE_CXXFLAGS_WARN_ON += /wd4503
     QMAKE_CXXFLAGS_WARN_ON += /wd4100
+    QMAKE_CXXFLAGS_WARN_ON += /wd4305
+    QMAKE_CXXFLAGS_WARN_ON += /wd4267
 
 } else {
     QMAKE_CXXFLAGS_WARN_ON = -Wall

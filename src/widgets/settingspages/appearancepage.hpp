@@ -2,8 +2,6 @@
 
 #include "widgets/settingspages/settingspage.hpp"
 
-#include <QSlider>
-
 namespace chatterino {
 namespace widgets {
 namespace settingspages {

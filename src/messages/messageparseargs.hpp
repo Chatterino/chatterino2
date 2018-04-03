@@ -4,8 +4,7 @@ namespace chatterino {
 namespace messages {
 
 struct MessageParseArgs {
-public:
-    bool disablePingSoungs = false;
+    bool disablePingSounds = false;
     bool isReceivedWhisper = false;
     bool isSentWhisper = false;
 };

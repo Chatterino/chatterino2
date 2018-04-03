@@ -4,7 +4,7 @@
 
 #include <QColor>
 
-#include <math.h>
+#include <cmath>
 
 namespace chatterino {
 namespace singletons {
@@ -156,7 +156,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     // Selection
     this->messages.selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
-    this->updated();
+    this->updated.invoke();
 }
 
 QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qreal ratio)

@@ -2,10 +2,12 @@
 
 #include "channel.hpp"
 
+#include <IrcConnection>
 #include <IrcMessage>
+#include <pajlada/signals/signal.hpp>
+
 #include <functional>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 namespace providers {
@@ -14,6 +16,8 @@ namespace irc {
 class AbstractIrcServer
 {
 public:
+    virtual ~AbstractIrcServer() = default;
+
     // connection
     Communi::IrcConnection *getReadConnection() const;
 

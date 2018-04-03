@@ -2,14 +2,17 @@
 
 #include <QUrl>
 #include <QWidget>
+
 #include <memory>
 
 class QWebEngineView;
 
 namespace chatterino {
+
 class Channel;
 
 namespace widgets {
+
 class StreamView : public QWidget
 {
 public:
@@ -18,5 +21,6 @@ public:
 private:
     QWebEngineView *stream;
 };
+
 }  // namespace widgets
 }  // namespace chatterino

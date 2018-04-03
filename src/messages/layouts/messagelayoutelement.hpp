@@ -15,14 +15,16 @@ class QPainter;
 
 namespace chatterino {
 namespace messages {
-struct MessageElement;
+class MessageElement;
 class Image;
 
 namespace layouts {
 
-struct MessageLayoutElement : boost::noncopyable {
+class MessageLayoutElement : boost::noncopyable
+{
 public:
     MessageLayoutElement(MessageElement &creator, const QSize &size);
+    virtual ~MessageLayoutElement() = default;
 
     const QRect &getRect() const;
     MessageElement &getCreator() const;

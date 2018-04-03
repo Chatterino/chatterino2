@@ -552,7 +552,7 @@ util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
     return util::EmoteData();
 }
 
-boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
+pajlada::Signals::NoArgSignal &EmoteManager::getGifUpdateSignal()
 {
     if (!this->gifUpdateTimerInitiated) {
         this->gifUpdateTimerInitiated = true;
@@ -571,7 +571,7 @@ boost::signals2::signal<void()> &EmoteManager::getGifUpdateSignal()
         });
 
         QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
-            this->gifUpdateTimerSignal();
+            this->gifUpdateTimerSignal.invoke();
             // fourtf:
             auto &windowManager = singletons::WindowManager::getInstance();
             windowManager.repaintGifEmotes();

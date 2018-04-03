@@ -6,9 +6,10 @@
 namespace chatterino {
 namespace singletons {
 class ThemeManager;
-}
+}  // namespace singletons
 
 namespace widgets {
+
 class BaseWindow;
 
 class BaseWidget : public QWidget
@@ -34,7 +35,7 @@ public:
     void setScaleIndependantHeight(int value);
 
 protected:
-    virtual void childEvent(QChildEvent *) override;
+    void childEvent(QChildEvent *) override;
 
     virtual void scaleChangedEvent(float newScale);
     virtual void themeRefreshEvent();

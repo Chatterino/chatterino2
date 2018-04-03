@@ -17,6 +17,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 IgnoreUsersPage::IgnoreUsersPage()
     : SettingsPage("Ignore Users", "")
 {
@@ -50,6 +51,7 @@ IgnoreUsersPage::IgnoreUsersPage()
         auto userList = group.emplace<QListView>();
     }
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

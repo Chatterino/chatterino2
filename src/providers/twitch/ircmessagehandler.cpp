@@ -1,7 +1,5 @@
 #include "ircmessagehandler.hpp"
 
-#include <memory>
-
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
@@ -11,6 +9,8 @@
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
+
+#include <memory>
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -233,6 +233,7 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
 
     this->handleNoticeMessage(message);
 }
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

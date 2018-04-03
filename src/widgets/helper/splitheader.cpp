@@ -57,7 +57,8 @@ SplitHeader::SplitHeader(Split *_split)
         title->setMouseTracking(true);
         QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
                          &SplitHeader::mouseDoubleClickEvent);
-        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this, &SplitHeader::mouseMoveEvent);
+        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
+                         &SplitHeader::mouseMoveEvent);
 
         layout->addStretch(1);
 

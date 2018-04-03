@@ -2,7 +2,7 @@
 #include "messageelement.hpp"
 #include "util/irchelpers.hpp"
 
-typedef chatterino::widgets::ScrollbarHighlight SBHighlight;
+using SBHighlight = chatterino::widgets::ScrollbarHighlight;
 
 namespace chatterino {
 namespace messages {

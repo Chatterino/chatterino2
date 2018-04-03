@@ -29,5 +29,6 @@ private:
     QString text;
     FontStyle fontStyle = FontStyle::Medium;
 };
+
 }  // namespace widgets
 }  // namespace chatterino

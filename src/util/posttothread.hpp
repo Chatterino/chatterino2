@@ -11,6 +11,7 @@
 
 namespace chatterino {
 namespace util {
+
 class LambdaRunnable : public QRunnable
 {
 public:
@@ -47,12 +48,13 @@ static void postToThread(F &&fun, QObject *obj = qApp)
             , fun(fun)
         {
         }
-        ~Event()
+        ~Event() override
         {
             fun();
         }
     };
     QCoreApplication::postEvent(obj, new Event(std::forward<F>(fun)));
 }
+
 }  // namespace util
 }  // namespace chatterino

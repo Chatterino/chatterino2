@@ -2,8 +2,6 @@
 
 namespace chatterino {
 namespace helper {
-SplitColumn::SplitColumn()
-{
-}
-}
-}
+
+}  // namespace helper
+}  // namespace chatterino

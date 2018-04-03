@@ -102,9 +102,9 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 
         if (pixmap != nullptr) {
             // fourtf: make it use qreal values
-            QRect rect = this->getRect();
-            rect.moveTop(rect.y() + yOffset);
-            painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
+            QRect _rect = this->getRect();
+            _rect.moveTop(_rect.y() + yOffset);
+            painter.drawPixmap(QRectF(_rect), *pixmap, QRectF());
         }
     }
 }
@@ -240,8 +240,8 @@ void TextIconLayoutElement::paint(QPainter &painter)
     option.setAlignment(Qt::AlignHCenter);
 
     if (this->line2.isEmpty()) {
-        QRect rect(this->getRect());
-        painter.drawText(rect, this->line1, option);
+        QRect _rect(this->getRect());
+        painter.drawText(_rect, this->line1, option);
     } else {
         painter.drawText(
             QPoint(this->getRect().x(), this->getRect().y() + this->getRect().height() / 2),

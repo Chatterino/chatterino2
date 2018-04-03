@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QPushButton>
-
 #include "widgets/accountswitchwidget.hpp"
 #include "widgets/settingspages/settingspage.hpp"
+
+#include <QPushButton>
 
 namespace chatterino {
 namespace widgets {
@@ -19,6 +19,7 @@ private:
     QPushButton *removeButton;
     AccountSwitchWidget *accSwitchWidget;
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

@@ -11,6 +11,7 @@
 
 namespace chatterino {
 namespace widgets {
+
 StreamView::StreamView(ChannelPtr channel, QUrl url)
 {
     util::LayoutCreator<StreamView> layoutCreator(this);
@@ -30,5 +31,6 @@ StreamView::StreamView(ChannelPtr channel, QUrl url)
     this->layout()->setSpacing(0);
     this->layout()->setMargin(0);
 }
+
 }  // namespace widgets
 }  // namespace chatterino

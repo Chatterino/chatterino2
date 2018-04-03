@@ -1,10 +1,10 @@
 #pragma once
 
+#include "util/serialize-custom.hpp"
+
 #include <QBrush>
 #include <QColor>
-#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
-#include "util/serialize-custom.hpp"
 
 namespace chatterino {
 namespace singletons {
@@ -105,7 +105,7 @@ public:
 
     void update();
 
-    boost::signals2::signal<void()> updated;
+    pajlada::Signals::NoArgSignal updated;
 
     pajlada::Settings::Setting<QString> themeName;
     pajlada::Settings::Setting<double> themeHue;

@@ -16,8 +16,8 @@ public:
     void setBounds(const QRect &rect);
 
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void hideEvent(QHideEvent *) override;
+    void paintEvent(QPaintEvent *) override;
+    void hideEvent(QHideEvent *) override;
 
     QPropertyAnimation positionAnimation;
     QRect desiredGeometry;

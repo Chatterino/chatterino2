@@ -13,11 +13,14 @@
 //
 
 namespace chatterino {
+
 namespace singletons {
 class AccountManager;
-}
+}  // namespace singletons
+
 namespace providers {
 namespace twitch {
+
 class TwitchAccountManager
 {
     TwitchAccountManager();
@@ -62,6 +65,7 @@ private:
 
     friend class chatterino::singletons::AccountManager;
 };
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

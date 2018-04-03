@@ -3,9 +3,11 @@
 #include <QString>
 
 namespace chatterino {
+
 namespace messages {
 class Image;
-}
+}  // namespace messages
+
 namespace singletons {
 
 class ModerationAction
@@ -27,5 +29,6 @@ private:
     QString line2;
     QString action;
 };
+
 }  // namespace singletons
 }  // namespace chatterino

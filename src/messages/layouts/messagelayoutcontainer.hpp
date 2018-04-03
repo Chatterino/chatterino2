@@ -15,7 +15,7 @@ namespace chatterino {
 namespace messages {
 
 namespace layouts {
-struct MessageLayoutElement;
+class MessageLayoutElement;
 
 struct Margin {
     int top;

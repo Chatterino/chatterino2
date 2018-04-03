@@ -11,7 +11,7 @@
 
 namespace Ui {
 class AccountPopup;
-}
+}  // namespace Ui
 
 namespace chatterino {
 
@@ -35,7 +35,7 @@ signals:
     void refreshButtons();
 
 protected:
-    virtual void scaleChangedEvent(float newDpi) override;
+    void scaleChangedEvent(float newDpi) override;
 
 private:
     Ui::AccountPopup *ui;
@@ -76,8 +76,8 @@ private:
     } relationship;
 
 protected:
-    virtual void focusOutEvent(QFocusEvent *event) override;
-    virtual void showEvent(QShowEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 };
 
 }  // namespace widgets

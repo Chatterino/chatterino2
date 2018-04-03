@@ -46,5 +46,6 @@ const QString &ModerationAction::getAction() const
 {
     return this->action;
 }
+
 }  // namespace singletons
 }  // namespace chatterino

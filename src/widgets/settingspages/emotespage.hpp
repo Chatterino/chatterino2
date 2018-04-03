@@ -11,6 +11,7 @@ class EmotesPage : public SettingsPage
 public:
     EmotesPage();
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

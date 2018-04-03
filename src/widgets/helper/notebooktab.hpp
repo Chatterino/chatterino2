@@ -9,7 +9,6 @@
 #include <pajlada/signals/connection.hpp>
 
 namespace chatterino {
-
 namespace widgets {
 
 class Notebook;

@@ -110,13 +110,9 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
         return;
     }
 
-    const std::vector<Split *> &widgets = page->getSplits();
-
-    for (auto it = widgets.begin(); it != widgets.end(); ++it) {
-        Split *widget = *it;
-
-        if (channel == nullptr || channel == widget->getChannel().get()) {
-            widget->layoutMessages();
+    for (const auto &split : page->getSplits()) {
+        if (channel == nullptr || channel == split->getChannel().get()) {
+            split->layoutMessages();
         }
     }
 }
@@ -140,7 +136,7 @@ void Window::closeEvent(QCloseEvent *)
     this->windowGeometry.width = geom.width();
     this->windowGeometry.height = geom.height();
 
-    this->closed();
+    this->closed.invoke();
 }
 
 bool Window::event(QEvent *e)

@@ -16,6 +16,7 @@ public:
 private:
     QLabel *logo;
 };
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

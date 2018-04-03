@@ -54,5 +54,6 @@ void AccountSwitchPopupWidget::paintEvent(QPaintEvent *event)
 
     painter.fillRect(this->rect(), QColor(255, 255, 255));
 }
+
 }  // namespace widgets
 }  // namespace chatterino

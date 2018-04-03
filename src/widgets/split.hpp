@@ -16,7 +16,6 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <boost/signals2/connection.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -47,7 +46,7 @@ public:
     ~Split() override;
 
     pajlada::Settings::Setting<QString> channelName;
-    boost::signals2::signal<void()> channelChanged;
+    pajlada::Signals::NoArgSignal channelChanged;
 
     ChannelView &getChannelView()
     {
@@ -93,8 +92,8 @@ private:
 
     bool moderationMode;
 
-    boost::signals2::connection channelIDChangedConnection;
-    boost::signals2::connection usermodeChangedConnection;
+    pajlada::Signals::Connection channelIDChangedConnection;
+    pajlada::Signals::Connection usermodeChangedConnection;
 
     void setChannel(ChannelPtr newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);

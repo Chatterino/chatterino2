@@ -8,14 +8,13 @@
 //#include <platform/borderless/qwinwidget.h>
 //#endif
 
-#include <boost/signals2.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 namespace singletons {
 class ThemeManager;
-}
+}  // namespace singletons
 
 namespace widgets {
 
@@ -52,11 +51,11 @@ public:
 
     void refreshWindowTitle(const QString &username);
 
-    boost::signals2::signal<void()> closed;
+    pajlada::Signals::NoArgSignal closed;
 
 protected:
-    virtual void closeEvent(QCloseEvent *event) override;
-    virtual bool event(QEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    bool event(QEvent *event) override;
 
 private:
     float dpi;

@@ -19,6 +19,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 BehaviourPage::BehaviourPage()
     : SettingsPage("Behaviour", ":/images/behave.svg")
 {
@@ -80,6 +81,7 @@ QSlider *BehaviourPage::createMouseScrollSlider()
 
     return slider;
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

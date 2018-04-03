@@ -11,6 +11,7 @@
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
+
 AccountsPage::AccountsPage()
     : SettingsPage("Accounts", ":/images/accounts.svg")
 {
@@ -41,6 +42,7 @@ AccountsPage::AccountsPage()
         singletons::AccountManager::getInstance().Twitch.removeUser(selectedUser);
     });
 }
+
 }  // namespace settingspages
 }  // namespace widgets
 }  // namespace chatterino

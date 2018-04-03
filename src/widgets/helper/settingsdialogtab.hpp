@@ -1,16 +1,16 @@
 #pragma once
 
+#include "widgets/basewidget.hpp"
+
 #include <QIcon>
 #include <QPaintEvent>
 #include <QWidget>
-
-#include "widgets/basewidget.hpp"
 
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
 class SettingsPage;
-}
+}  // namespace settingspages
 
 class SettingsDialog;
 

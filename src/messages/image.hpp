@@ -5,7 +5,6 @@
 #include <boost/noncopyable.hpp>
 
 #include <atomic>
-#include <mutex>
 
 namespace chatterino {
 namespace messages {

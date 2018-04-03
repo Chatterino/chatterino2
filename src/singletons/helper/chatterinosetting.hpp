@@ -2,6 +2,7 @@
 
 namespace chatterino {
 namespace singletons {
+
 static void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
 template <typename Type>
@@ -71,5 +72,6 @@ public:
         return this->getValue();
     }
 };
-}
-}
+
+}  // namespace singletons
+}  // namespace chatterino
