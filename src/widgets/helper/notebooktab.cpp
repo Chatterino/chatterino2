@@ -103,9 +103,13 @@ QString NotebookTab::getTitle() const
 
 void NotebookTab::setTitle(const QString &newTitle)
 {
-    this->title = newTitle.toStdString();
+    auto stdTitle = newTitle.toStdString();
 
-    this->updateSize();
+    if (this->title != stdTitle) {
+        this->title = stdTitle;
+        this->updateSize();
+        this->update();
+    }
 }
 
 bool NotebookTab::isSelected() const
