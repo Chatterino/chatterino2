@@ -414,7 +414,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
                               ? this->themeManager.tabs.selected.backgrounds.regular
                               : this->themeManager.tabs.selected.backgrounds.unfocused);
 
-    painter.fillRect(0, 0, width(), 2, accentColor);
+    painter.fillRect(0, 0, width(), 1, accentColor);
 }
 
 void SplitContainer::showEvent(QShowEvent *event)
