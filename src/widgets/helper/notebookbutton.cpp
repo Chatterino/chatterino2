@@ -17,9 +17,12 @@ namespace widgets {
 NotebookButton::NotebookButton(BaseWidget *parent)
     : RippleEffectButton(parent)
 {
-    setMouseEffectColor(QColor(0, 0, 0));
-
     this->setAcceptDrops(true);
+}
+
+void NotebookButton::themeRefreshEvent()
+{
+    this->setMouseEffectColor(this->themeManager.tabs.regular.text);
 }
 
 void NotebookButton::paintEvent(QPaintEvent *)
@@ -30,15 +33,14 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor foreground;
 
     if (mouseDown || mouseOver) {
-        background = this->themeManager.tabs.regular.backgrounds.regular.color();
+        background = this->themeManager.tabs.regular.backgrounds.hover.color();
         foreground = this->themeManager.tabs.regular.text;
     } else {
         background = this->themeManager.tabs.regular.backgrounds.regular.color();
-        foreground = QColor(70, 80, 80);
+        foreground = this->themeManager.tabs.regular.text;
     }
 
     painter.setPen(Qt::NoPen);
-    //    painter.fillRect(this->rect(), background);
 
     float h = height(), w = width();
 

@@ -54,9 +54,10 @@ void ThemeManager::update()
 void ThemeManager::actuallyUpdate(double hue, double multiplier)
 {
     isLight = multiplier > 0;
-    bool isLightTabs;
+    bool lightWin = isLight;
 
-    QColor themeColor = QColor::fromHslF(hue, 0.5, 0.5);
+    QColor none(0, 0, 0, 0);
+    QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
     qreal sat = 0;
@@ -66,48 +67,40 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
     };
 
-    //#ifdef USEWINSDK
-    //    isLightTabs = isLight;
-    //    QColor tabFg = isLight ? "#000" : "#fff";
-    //    this->windowBg = isLight ? "#fff" : getColor(0, sat, 0.9);
-    //#else
-    isLightTabs = true;
-    QColor tabFg = isLightTabs ? "#000" : "#fff";
-    this->windowBg = "#fff";
-    //#endif
+    /// WINDOW
+    {
+        QColor bg = this->window.background = lightWin ? "#fff" : "#444";
+        QColor fg = this->window.text = lightWin ? "#000" : "#eee";
+        this->window.borderFocused = lightWin ? "#ccc" : themeColor;
+        this->window.borderUnfocused = lightWin ? "#ccc" : themeColorNoSat;
 
-    // Ubuntu style
-    // TODO: add setting for this
-    //        TabText = QColor(210, 210, 210);
-    //        TabBackground = QColor(61, 60, 56);
-    //        TabHoverText = QColor(210, 210, 210);
-    //        TabHoverBackground = QColor(73, 72, 68);
+        // Ubuntu style
+        // TODO: add setting for this
+        //        TabText = QColor(210, 210, 210);
+        //        TabBackground = QColor(61, 60, 56);
+        //        TabHoverText = QColor(210, 210, 210);
+        //        TabHoverBackground = QColor(73, 72, 68);
 
-    // message (referenced later)
-    this->messages.textColors.caret =  //
-        this->messages.textColors.regular = isLight ? "#000" : "#fff";
+        // message (referenced later)
+        this->messages.textColors.caret =  //
+            this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
-    // tabs
-    // text, {regular, hover, unfocused}
-    //    this->windowBg = "#ccc";
+        /// TABS
+        // text, {regular, hover, unfocused}
 
-    this->tabs.border = "#999";
-    this->tabs.regular = {tabFg, {windowBg, blendColors(windowBg, "#999", 0.5), windowBg}};
-
-    this->tabs.selected = {"#fff", {themeColor, themeColor, QColor::fromHslF(hue, 0, 0.5)}};
-
-    this->tabs.newMessage = {
-        tabFg,
-        {QBrush(blendColors(themeColor, windowBg, 0.7), Qt::FDiagPattern),
-         QBrush(blendColors(themeColor, windowBg, 0.5), Qt::FDiagPattern),
-         QBrush(blendColors(themeColorNoSat, windowBg, 0.7), Qt::FDiagPattern)}};
-
-    this->tabs.highlighted = {
-        tabFg,
-        {blendColors(themeColor, windowBg, 0.7), blendColors(themeColor, windowBg, 0.5),
-         blendColors(themeColorNoSat, windowBg, 0.7)}};
-
-    //    this->windowBg = "#fff";
+        if (lightWin) {
+            this->tabs.regular = {fg, {bg, "#ccc", bg}};
+            this->tabs.newMessage = {fg, {bg, "#ccc", bg}};
+            this->tabs.highlighted = {fg, {bg, "#ccc", bg}};
+            this->tabs.selected = {"#fff", {"#333", "#333", "#666"}};
+        } else {
+            this->tabs.regular = {fg, {bg, "#555", bg}};
+            this->tabs.newMessage = {fg, {bg, "#555", bg}};
+            this->tabs.highlighted = {fg, {bg, "#555", bg}};
+            //            this->tabs.selected = {"#000", {themeColor, themeColor, themeColorNoSat}};
+            this->tabs.selected = {"#000", {"#999", "#999", "#888"}};
+        }
+    }
 
     // Split
     bool flat = isLight;

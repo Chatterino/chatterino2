@@ -32,6 +32,15 @@ public:
         } backgrounds;
     };
 
+    /// WINDOW
+    struct {
+        QColor background;
+        QColor text;
+        QColor borderUnfocused;
+        QColor borderFocused;
+    } window;
+
+    /// TABS
     struct {
         TabColors regular;
         TabColors selected;
@@ -40,6 +49,7 @@ public:
         QColor border;
     } tabs;
 
+    /// SPLITS
     struct {
         QColor messageSeperator;
         QColor background;
@@ -64,6 +74,7 @@ public:
         } input;
     } splits;
 
+    /// MESSAGES
     struct {
         struct {
             QColor regular;
@@ -85,6 +96,7 @@ public:
         QColor selection;
     } messages;
 
+    /// SCROLLBAR
     struct {
         QColor background;
         QColor thumb;
@@ -93,13 +105,11 @@ public:
         // QColor highlights[3];
     } scrollbars;
 
+    /// TOOLTIP
     struct {
         QColor text;
         QColor background;
     } tooltip;
-
-    QColor windowBg;
-    QColor windowText;
 
     void normalizeColor(QColor &color);
 

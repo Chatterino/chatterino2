@@ -160,12 +160,12 @@ void BaseWindow::themeRefreshEvent()
 {
     if (this->enableCustomFrame) {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->themeManager.windowBg);
-        palette.setColor(QPalette::Foreground, this->themeManager.windowText);
+        palette.setColor(QPalette::Background, this->themeManager.window.background);
+        palette.setColor(QPalette::Foreground, this->themeManager.window.text);
         this->setPalette(palette);
 
         for (RippleEffectButton *button : this->buttons) {
-            button->setMouseEffectColor(this->themeManager.windowText);
+            button->setMouseEffectColor(this->themeManager.window.text);
         }
     }
 }
@@ -408,15 +408,22 @@ void BaseWindow::paintEvent(QPaintEvent *event)
 
         bool windowFocused = this->window() == QApplication::activeWindow();
 
-        QLinearGradient gradient(0, 0, 10, 250);
-        gradient.setColorAt(1, this->themeManager.tabs.selected.backgrounds.unfocused.color());
+        //        QLinearGradient gradient(0, 0, 10, 250);
+        //        gradient.setColorAt(1,
+        //        this->themeManager.tabs.selected.backgrounds.unfocused.color());
 
-        if (windowFocused) {
-            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.regular.color());
-        } else {
-            gradient.setColorAt(.4, this->themeManager.tabs.selected.backgrounds.unfocused.color());
-        }
-        painter.setPen(QPen(QBrush(gradient), 1));
+        //        if (windowFocused) {
+        //            gradient.setColorAt(.4,
+        //            this->themeManager.tabs.selected.backgrounds.regular.color());
+        //        } else {
+        //            gradient.setColorAt(.4,
+        //            this->themeManager.tabs.selected.backgrounds.unfocused.color());
+        //        }
+        //        painter.setPen(QPen(QBrush(gradient), 1));
+
+        QColor &border = windowFocused ? this->themeManager.window.borderFocused
+                                       : this->themeManager.window.borderUnfocused;
+        painter.setPen(QPen(QBrush(border), 1));
 
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }

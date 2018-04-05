@@ -1,5 +1,7 @@
 #include "titlebarbutton.hpp"
 
+#include "singletons/thememanager.hpp"
+
 namespace chatterino {
 namespace widgets {
 
@@ -23,8 +25,8 @@ void TitleBarButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QColor color = "#000";
-    QColor background = "#fff";
+    QColor color = this->themeManager.window.text;
+    QColor background = this->themeManager.window.background;
 
     int xD = this->height() / 3;
     int centerX = this->width() / 2;
@@ -59,7 +61,8 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             break;
         }
         case User: {
-            color = QColor("#333");
+            //            color = QColor("#333");
+            color = "#999";
 
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -85,7 +88,8 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             break;
         }
         case Settings: {
-            color = QColor("#333");
+            //            color = QColor("#333");
+            color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
