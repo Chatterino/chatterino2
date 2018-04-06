@@ -77,6 +77,9 @@ protected:
                          QPoint &relativePos, int &index);
 
 private:
+    QTimer *layoutCooldown;
+    bool layoutQueued;
+
     QTimer updateTimer;
     bool updateQueued = false;
     bool messageWasAdded = false;

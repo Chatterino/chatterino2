@@ -12,8 +12,6 @@ namespace messages {
 class Image : public QObject, boost::noncopyable
 {
 public:
-    Image() = delete;
-
     explicit Image(const QString &_url, qreal _scale = 1, const QString &_name = "",
                    const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                    bool isHat = false);
@@ -21,6 +19,7 @@ public:
     explicit Image(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
                    const QString &_tooltip = "", const QMargins &_margin = QMargins(),
                    bool isHat = false);
+    ~Image();
 
     const QPixmap *getPixmap();
     qreal getScale() const;

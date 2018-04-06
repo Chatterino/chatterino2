@@ -41,7 +41,7 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::s
     this->setHidden(true);
     this->setAcceptDrops(true);
 
-    this->ui.parentLayout.addSpacing(2);
+    this->ui.parentLayout.addSpacing(1);
     this->ui.parentLayout.addLayout(&this->ui.hbox);
     this->ui.parentLayout.setMargin(0);
 
@@ -414,7 +414,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
                               ? this->themeManager.tabs.selected.backgrounds.regular
                               : this->themeManager.tabs.selected.backgrounds.unfocused);
 
-    painter.fillRect(0, 0, width(), 2, accentColor);
+    painter.fillRect(0, 0, width(), 1, accentColor);
 }
 
 void SplitContainer::showEvent(QShowEvent *event)

@@ -178,7 +178,9 @@ SOURCES += \
     src/providers/irc/ircchannel2.cpp \
     src/util/streamlink.cpp \
     src/providers/twitch/twitchhelpers.cpp \
-    src/widgets/helper/signallabel.cpp
+    src/widgets/helper/signallabel.cpp \
+    src/widgets/helper/debugpopup.cpp \
+    src/util/debugcount.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -292,7 +294,9 @@ HEADERS  += \
     src/providers/irc/ircserver.hpp \
     src/providers/irc/ircchannel2.hpp \
     src/util/streamlink.hpp \
-    src/providers/twitch/twitchhelpers.hpp
+    src/providers/twitch/twitchhelpers.hpp \
+    src/util/debugcount.hpp \
+    src/widgets/helper/debugpopup.hpp
 
 RESOURCES += \
     resources/resources.qrc

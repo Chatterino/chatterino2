@@ -9,6 +9,7 @@
 #include "singletons/windowmanager.hpp"
 #include "util/streamlink.hpp"
 #include "util/urlfetch.hpp"
+#include "widgets/helper/debugpopup.hpp"
 #include "widgets/helper/searchpopup.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/qualitypopup.hpp"
@@ -71,6 +72,13 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
 
     // CTRL+F: Search
     CreateShortcut(this, "CTRL+F", &Split::doSearch);
+
+    // F12
+    CreateShortcut(this, "F10", [] {
+        auto *popup = new DebugPopup;
+        popup->setAttribute(Qt::WA_DeleteOnClose);
+        popup->show();
+    });
 
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);

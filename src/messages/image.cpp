@@ -30,6 +30,7 @@ Image::Image(const QString &url, qreal scale, const QString &name, const QString
     , scale(scale)
     , isLoading(false)
 {
+    util::DebugCount::increase("images");
 }
 
 Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &tooltip,
@@ -43,6 +44,20 @@ Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &to
     , isLoading(true)
     , isLoaded(true)
 {
+    util::DebugCount::increase("images");
+}
+
+Image::~Image()
+{
+    util::DebugCount::decrease("images");
+
+    if (this->isAnimated()) {
+        util::DebugCount::decrease("animated images");
+    }
+
+    if (this->isLoaded) {
+        util::DebugCount::decrease("loaded images");
+    }
 }
 
 void Image::loadImage()
@@ -59,6 +74,15 @@ void Image::loadImage()
         QImageReader reader(&buffer);
 
         bool first = true;
+
+        // clear stuff before loading the image again
+        lli->allFrames.clear();
+        if (lli->isAnimated()) {
+            util::DebugCount::decrease("animated images");
+        }
+        if (lli->isLoaded) {
+            util::DebugCount::decrease("loaded images");
+        }
 
         for (int index = 0; index < reader.imageCount(); ++index) {
             if (reader.read(&image)) {
@@ -79,11 +103,14 @@ void Image::loadImage()
 
         if (lli->allFrames.size() > 1) {
             lli->animated = true;
+
+            util::DebugCount::increase("animated images");
         }
 
         lli->currentPixmap = lli->loadedPixmap;
 
         lli->isLoaded = true;
+        util::DebugCount::increase("loaded images");
 
         singletons::EmoteManager::getInstance().incGeneration();
 

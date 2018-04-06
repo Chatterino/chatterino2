@@ -1,5 +1,6 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/messageelement.hpp"
+#include "util/debugcount.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -17,6 +18,12 @@ MessageLayoutElement::MessageLayoutElement(MessageElement &_creator, const QSize
     : creator(_creator)
 {
     this->rect.setSize(size);
+    util::DebugCount::increase("message layout elements");
+}
+
+MessageLayoutElement::~MessageLayoutElement()
+{
+    util::DebugCount::decrease("message layout elements");
 }
 
 MessageElement &MessageLayoutElement::getCreator() const
@@ -98,6 +105,7 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
     }
 
     if (this->image->isAnimated()) {
+        //        qDebug() << this->image->getUrl();
         auto pixmap = this->image->getPixmap();
 
         if (pixmap != nullptr) {

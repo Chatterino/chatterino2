@@ -83,24 +83,36 @@ ChannelView::ChannelView(BaseWidget *parent)
         });
     });
 
-    this->updateTimer.setInterval(1000 / 60);
-    this->updateTimer.setSingleShot(true);
-    connect(&this->updateTimer, &QTimer::timeout, this, [this] {
-        if (this->updateQueued) {
-            this->updateQueued = false;
-            this->repaint();
-            this->updateTimer.start();
-        }
-    });
+    //    this->updateTimer.setInterval(1000 / 60);
+    //    this->updateTimer.setSingleShot(true);
+    //    connect(&this->updateTimer, &QTimer::timeout, this, [this] {
+    //        if (this->updateQueued) {
+    //            this->updateQueued = false;
+    //            this->repaint();
+    //            this->updateTimer.start();
+    //        }
+    //    });
 
     this->pauseTimeout.setSingleShot(true);
 
-    auto e = new QResizeEvent(this->size(), this->size());
-    this->resizeEvent(e);
-    delete e;
+    //    auto e = new QResizeEvent(this->size(), this->size());
+    //    this->resizeEvent(e);
+    //    delete e;
+
+    this->scrollBar.resize(this->scrollBar.width(), height() + 1);
 
     singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
         [this](auto, auto) { this->update(); }, this->managedConnections);
+
+    this->layoutCooldown = new QTimer(this);
+    this->layoutCooldown->setSingleShot(true);
+    this->layoutCooldown->setInterval(66);
+
+    QObject::connect(this->layoutCooldown, &QTimer::timeout, [this] {
+        if (this->layoutQueued) {
+            this->layoutMessages();
+        }
+    });
 }
 
 ChannelView::~ChannelView()
@@ -138,7 +150,13 @@ void ChannelView::queueUpdate()
 
 void ChannelView::layoutMessages()
 {
-    this->actuallyLayoutMessages();
+    if (!this->layoutCooldown->isActive()) {
+        this->actuallyLayoutMessages();
+
+        this->layoutCooldown->start();
+    } else {
+        this->layoutQueued = true;
+    }
 }
 
 void ChannelView::actuallyLayoutMessages()

@@ -103,9 +103,13 @@ QString NotebookTab::getTitle() const
 
 void NotebookTab::setTitle(const QString &newTitle)
 {
-    this->title = newTitle.toStdString();
+    auto stdTitle = newTitle.toStdString();
 
-    this->updateSize();
+    if (this->title != stdTitle) {
+        this->title = stdTitle;
+        this->updateSize();
+        this->update();
+    }
 }
 
 bool NotebookTab::isSelected() const
@@ -209,13 +213,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
         painter.fillRect(rect(), tabBackground);
 
         // draw border
-        painter.setPen(QPen("#ccc"));
-        QPainterPath path(QPointF(0, height));
-        path.lineTo(0, 0);
-        path.lineTo(this->width() - 1, 0);
-        path.lineTo(this->width() - 1, this->height() - 1);
-        path.lineTo(0, this->height() - 1);
-        painter.drawPath(path);
+        //        painter.setPen(QPen("#ccc"));
+        //        QPainterPath path(QPointF(0, height));
+        //        path.lineTo(0, 0);
+        //        path.lineTo(this->width() - 1, 0);
+        //        path.lineTo(this->width() - 1, this->height() - 1);
+        //        path.lineTo(0, this->height() - 1);
+        //        painter.drawPath(path);
     } else {
         //        QPainterPath path(QPointF(0, height));
         //        path.lineTo(8 * scale, 0);
