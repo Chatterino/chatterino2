@@ -110,9 +110,8 @@ void MessageLayoutContainer::breakLine()
     for (size_t i = lineStart; i < this->elements.size(); i++) {
         MessageLayoutElement *element = this->elements.at(i).get();
 
-        bool isCompactEmote =
-            !(this->flags & Message::DisableCompactEmotes) &&
-            (this->flags & element->getCreator().getFlags()) & MessageElement::EmoteImages;
+        bool isCompactEmote = !(this->flags & Message::DisableCompactEmotes) &&
+                              element->getCreator().getFlags() & MessageElement::EmoteImages;
 
         int yExtra = 0;
         if (isCompactEmote) {
