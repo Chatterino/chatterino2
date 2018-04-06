@@ -75,6 +75,15 @@ void Image::loadImage()
 
         bool first = true;
 
+        // clear stuff before loading the image again
+        lli->allFrames.clear();
+        if (lli->isAnimated()) {
+            util::DebugCount::decrease("animated images");
+        }
+        if (lli->isLoaded) {
+            util::DebugCount::decrease("loaded images");
+        }
+
         for (int index = 0; index < reader.imageCount(); ++index) {
             if (reader.read(&image)) {
                 auto pixmap = new QPixmap(QPixmap::fromImage(image));

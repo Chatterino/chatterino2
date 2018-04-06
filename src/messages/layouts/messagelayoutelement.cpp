@@ -105,6 +105,7 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
     }
 
     if (this->image->isAnimated()) {
+        //        qDebug() << this->image->getUrl();
         auto pixmap = this->image->getPixmap();
 
         if (pixmap != nullptr) {
