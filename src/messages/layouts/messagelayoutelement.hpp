@@ -24,7 +24,7 @@ class MessageLayoutElement : boost::noncopyable
 {
 public:
     MessageLayoutElement(MessageElement &creator, const QSize &size);
-    virtual ~MessageLayoutElement() = default;
+    virtual ~MessageLayoutElement();
 
     const QRect &getRect() const;
     MessageElement &getCreator() const;

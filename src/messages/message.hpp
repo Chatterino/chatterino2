@@ -10,10 +10,22 @@
 #include <memory>
 #include <vector>
 
+#include "util/debugcount.hpp"
+
 namespace chatterino {
 namespace messages {
 
 struct Message {
+    Message()
+    {
+        util::DebugCount::increase("messages");
+    }
+
+    ~Message()
+    {
+        util::DebugCount::decrease("messages");
+    }
+
     enum MessageFlags : uint16_t {
         None = 0,
         System = (1 << 0),

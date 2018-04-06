@@ -22,6 +22,7 @@ public:
     enum Flags : uint8_t { Collapsed, RequiresBufferUpdate, RequiresLayout };
 
     MessageLayout(MessagePtr message);
+    ~MessageLayout();
 
     Message *getMessage();
 
