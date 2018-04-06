@@ -34,8 +34,8 @@ Be sure to add "-j <number of cores\*2>" as a make argument so it will use all y
 ### Linux
 #### Ubuntu 16.04.2 LTS
 *most likely works the same for other Debian-like distros*
-1. install QT Creator `sudo apt-get install qtcreator qtmultimedia5-dev`
-2. install boost-dev  `sudo apt-get install libboost-dev`
+1. install QT Creator `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev`
+2. install boost-dev  `sudo apt install libboost-dev`
 3. copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory so that the file `<chatterino2 directory>/rapidjson/document.h` exists
 4. open `chatterino.pro` with QT Creator and build
 
