@@ -89,16 +89,16 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         // text, {regular, hover, unfocused}
 
         if (lightWin) {
-            this->tabs.regular = {fg, {bg, "#ccc", bg}};
-            this->tabs.newMessage = {fg, {bg, "#ccc", bg}};
-            this->tabs.highlighted = {fg, {bg, "#ccc", bg}};
-            this->tabs.selected = {"#fff", {"#333", "#333", "#666"}};
+            this->tabs.regular = {fg, {bg, QColor("#ccc"), bg}};
+            this->tabs.newMessage = {fg, {bg, QColor("#ccc"), bg}};
+            this->tabs.highlighted = {fg, {bg, QColor("#ccc"), bg}};
+            this->tabs.selected = {QColor("#fff"), {QColor("#333"), QColor("#333"), QColor("#666")}};
         } else {
-            this->tabs.regular = {fg, {bg, "#555", bg}};
-            this->tabs.newMessage = {fg, {bg, "#555", bg}};
-            this->tabs.highlighted = {fg, {bg, "#555", bg}};
+            this->tabs.regular = {fg, {bg, QColor("#555"), bg}};
+            this->tabs.newMessage = {fg, {bg, QColor("#555"), bg}};
+            this->tabs.highlighted = {fg, {bg, QColor("#555"), bg}};
             //            this->tabs.selected = {"#000", {themeColor, themeColor, themeColorNoSat}};
-            this->tabs.selected = {"#000", {"#999", "#999", "#888"}};
+            this->tabs.selected = {QColor("#000"), {QColor("#999"), QColor("#999"), QColor("#888")}};
         }
     }
 
