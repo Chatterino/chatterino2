@@ -36,11 +36,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-Split::Split(SplitContainer *parent, const std::string &_uuid)
+Split::Split(SplitContainer *parent)
     : BaseWidget(parent)
-    , uuid(_uuid)
-    , settingRoot(fS("/splits/{}", this->uuid))
-    , channelName(fS("{}/channelName", this->settingRoot))
     , parentPage(*parent)
     , channel(Channel::getEmpty())
     , vbox(this)
@@ -86,11 +83,6 @@ Split::Split(SplitContainer *parent, const std::string &_uuid)
     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
-    this->channelName.getValueChangedSignal().connect(
-        std::bind(&Split::channelNameUpdated, this, std::placeholders::_1));
-
-    this->channelNameUpdated(this->channelName.getValue());
-
     this->input.ui.textEdit->installEventFilter(parent);
 
     this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
@@ -130,11 +122,6 @@ Split::~Split()
     this->channelIDChangedConnection.disconnect();
 }
 
-const std::string &Split::getUUID() const
-{
-    return this->uuid;
-}
-
 ChannelPtr Split::getChannel() const
 {
     return this->channel;
@@ -156,6 +143,7 @@ void Split::setChannel(ChannelPtr _newChannel)
     }
 
     this->header.updateModerationModeIcon();
+    this->header.updateChannelText();
 
     this->channelChanged.invoke();
 }
@@ -196,19 +184,6 @@ bool Split::getModerationMode() const
     return this->moderationMode;
 }
 
-void Split::channelNameUpdated(const QString &newChannelName)
-{
-    // update messages
-    if (newChannelName.isEmpty()) {
-        this->setChannel(Channel::getEmpty());
-    } else {
-        this->setChannel(TwitchServer::getInstance().addChannel(newChannelName));
-    }
-
-    // update header
-    this->header.updateChannelText();
-}
-
 bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
 {
     // create new input dialog and execute it
@@ -217,13 +192,13 @@ bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
     dialog.setWindowTitle(dialogTitle);
 
     if (!empty) {
-        dialog.setText(this->channelName);
+        dialog.setText(this->channel->name);
     }
 
     if (dialog.exec() == QDialog::Accepted) {
         QString newChannelName = dialog.getText().trimmed();
 
-        this->channelName = newChannelName;
+        this->setChannel(providers::twitch::TwitchServer::getInstance().addChannel(newChannelName));
         this->parentPage.refreshTitle();
 
         return true;
@@ -328,12 +303,13 @@ void Split::doChangeChannel()
 
 void Split::doPopup()
 {
-    Window &window = singletons::WindowManager::getInstance().createWindow();
+    Window &window = singletons::WindowManager::getInstance().createWindow(Window::Popup);
 
-    Split *split = new Split(static_cast<SplitContainer *>(window.getNotebook().getSelectedPage()),
-                             this->uuid);
+    Split *split =
+        new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));
 
-    window.getNotebook().getSelectedPage()->addToLayout(split);
+    split->setChannel(this->getChannel());
+    window.getNotebook().getOrAddSelectedPage()->addToLayout(split);
 
     window.show();
 }
@@ -366,7 +342,7 @@ void Split::doOpenPopupPlayer()
 void Split::doOpenStreamlink()
 {
     try {
-        streamlink::Start(this->channelName.getValue());
+        streamlink::Start(this->channel->name);
     } catch (const streamlink::Exception &ex) {
         debug::Log("Error in doOpenStreamlink: {}", ex.what());
     }

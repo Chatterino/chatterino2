@@ -47,7 +47,7 @@ bool SettingManager::isIgnoredEmote(const QString &)
     return false;
 }
 
-void SettingManager::init()
+void SettingManager::initialize()
 {
     QString settingsPath = PathManager::getInstance().settingsFolderPath + "/settings.json";
 

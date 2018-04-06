@@ -18,13 +18,11 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(const QString &windowName, singletons::ThemeManager &_themeManager,
-               bool _isMainWindow)
+Window::Window(singletons::ThemeManager &_themeManager, WindowType _type)
     : BaseWindow(_themeManager, nullptr, true)
-    , settingRoot(fS("/windows/{}", windowName))
-    , windowGeometry(this->settingRoot)
+    , type(_type)
     , dpi(this->getScale())
-    , notebook(this, _isMainWindow, this->settingRoot)
+    , notebook(this, !this->hasCustomWindowFrame())
 {
     singletons::AccountManager::getInstance().Twitch.currentUsername.connect(
         [this](const std::string &newUsername, auto) {
@@ -35,7 +33,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
             }
         });
 
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame() && _type == Window::Main) {
         this->addTitleBarButton(TitleBarButton::Settings, [] {
             singletons::WindowManager::getInstance().showSettingsDialog();
         });
@@ -49,6 +47,12 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
         });
     }
 
+    if (_type == Window::Main) {
+        this->resize((int)(600 * this->getScale()), (int)(500 * this->getScale()));
+    } else {
+        this->resize((int)(300 * this->getScale()), (int)(500 * this->getScale()));
+    }
+
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     layout->addWidget(&this->notebook);
@@ -58,8 +62,6 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     layout->setMargin(0);
 
     this->themeRefreshEvent();
-
-    this->loadGeometry();
 
     /// Initialize program-wide hotkeys
     // CTRL+P: Open Settings Dialog
@@ -77,7 +79,7 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
 
     // CTRL+SHIFT+T: New tab
-    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addNewPage(); });
+    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addNewPage(true); });
 
     // CTRL+SHIFT+W: Close current tab
     CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
@@ -102,9 +104,14 @@ Window::Window(const QString &windowName, singletons::ThemeManager &_themeManage
     //    });
 }
 
+Window::WindowType Window::getType()
+{
+    return this->type;
+}
+
 void Window::repaintVisibleChatWidgets(Channel *channel)
 {
-    auto *page = this->notebook.getSelectedPage();
+    auto *page = this->notebook.getOrAddSelectedPage();
 
     if (page == nullptr) {
         return;
@@ -127,18 +134,6 @@ void Window::refreshWindowTitle(const QString &username)
     this->setWindowTitle(username + " - Chatterino for Twitch");
 }
 
-void Window::closeEvent(QCloseEvent *)
-{
-    const QRect &geom = this->geometry();
-
-    this->windowGeometry.x = geom.x();
-    this->windowGeometry.y = geom.y();
-    this->windowGeometry.width = geom.width();
-    this->windowGeometry.height = geom.height();
-
-    this->closed.invoke();
-}
-
 bool Window::event(QEvent *e)
 {
     switch (e->type()) {
@@ -146,7 +141,7 @@ bool Window::event(QEvent *e)
             break;
 
         case QEvent::WindowDeactivate: {
-            auto page = this->notebook.getSelectedPage();
+            auto page = this->notebook.getOrAddSelectedPage();
 
             if (page != nullptr) {
                 std::vector<Split *> splits = page->getSplits();
@@ -160,35 +155,14 @@ bool Window::event(QEvent *e)
     return BaseWindow::event(e);
 }
 
-void Window::loadGeometry()
+void Window::closeEvent(QCloseEvent *event)
 {
-    bool doSetGeometry = false;
-    QRect loadedGeometry;
-    if (!this->windowGeometry.x.isDefaultValue() && !this->windowGeometry.y.isDefaultValue()) {
-        loadedGeometry.setX(this->windowGeometry.x);
-        loadedGeometry.setY(this->windowGeometry.y);
-        doSetGeometry = true;
+    if (this->type == Window::Main) {
+        singletons::WindowManager::getInstance().save();
+        singletons::WindowManager::getInstance().closeAll();
     }
 
-    if (!this->windowGeometry.width.isDefaultValue() &&
-        !this->windowGeometry.height.isDefaultValue()) {
-        loadedGeometry.setWidth(this->windowGeometry.width);
-        loadedGeometry.setHeight(this->windowGeometry.height);
-    } else {
-        loadedGeometry.setWidth(1280);
-        loadedGeometry.setHeight(720);
-    }
-
-    if (doSetGeometry) {
-        this->setGeometry(loadedGeometry);
-    } else {
-        this->resize(loadedGeometry.width(), loadedGeometry.height());
-    }
-}
-
-void Window::save()
-{
-    this->notebook.save();
+    this->closed.invoke();
 }
 
 }  // namespace widgets

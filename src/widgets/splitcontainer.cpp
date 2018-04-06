@@ -26,12 +26,9 @@ bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
 std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
-SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::string &_uuid)
+SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab)
     : BaseWidget(parent->themeManager, parent)
-    , uuid(_uuid)
-    , settingRoot(fS("/containers/{}", this->uuid))
     , tab(_tab)
-    , chats(fS("{}/chats", this->settingRoot))
     , dropPreview(this)
 {
     this->tab->page = this;
@@ -47,8 +44,6 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::s
 
     this->ui.hbox.setSpacing(1);
     this->ui.hbox.setMargin(0);
-
-    this->loadSplits();
 
     this->refreshTitle();
 }
@@ -145,6 +140,24 @@ void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
 const std::vector<Split *> &SplitContainer::getSplits() const
 {
     return this->splits;
+}
+
+std::vector<std::vector<Split *>> SplitContainer::getColumns() const
+{
+    std::vector<std::vector<Split *>> columns;
+
+    for (int i = 0; i < this->ui.hbox.count(); i++) {
+        std::vector<Split *> cells;
+
+        QLayout *vbox = this->ui.hbox.itemAt(i)->layout();
+        for (int j = 0; j < vbox->count(); j++) {
+            cells.push_back(dynamic_cast<Split *>(vbox->itemAt(j)->widget()));
+        }
+
+        columns.push_back(cells);
+    }
+
+    return columns;
 }
 
 NotebookTab *SplitContainer::getTab() const
@@ -447,7 +460,7 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
 
 Split *SplitContainer::createChatWidget(const std::string &uuid)
 {
-    auto split = new Split(this, uuid);
+    auto split = new Split(this);
 
     split->getChannelView().highlightedMessageReceived.connect([this] {
         // fourtf: error potentionally here
@@ -459,7 +472,7 @@ Split *SplitContainer::createChatWidget(const std::string &uuid)
 
 void SplitContainer::refreshTitle()
 {
-    if (!this->tab->useDefaultBehaviour) {
+    if (!this->tab->useDefaultTitle) {
         return;
     }
 
@@ -467,7 +480,7 @@ void SplitContainer::refreshTitle()
     bool first = true;
 
     for (const auto &chatWidget : this->splits) {
-        auto channelName = chatWidget->channelName.getValue();
+        auto channelName = chatWidget->getChannel()->name;
         if (channelName.isEmpty()) {
             continue;
         }
@@ -485,84 +498,6 @@ void SplitContainer::refreshTitle()
     }
 
     this->tab->setTitle(newTitle);
-}
-
-void SplitContainer::loadSplits()
-{
-    const auto hboxes = this->chats.getValue();
-    int column = 0;
-    for (const std::vector<std::string> &hbox : hboxes) {
-        int row = 0;
-        for (const std::string &chatUUID : hbox) {
-            Split *split = this->createChatWidget(chatUUID);
-
-            this->addToLayout(split, std::pair<int, int>(column, row));
-
-            ++row;
-        }
-        ++column;
-    }
-}
-
-template <typename Container>
-static void saveFromLayout(QLayout *layout, Container &container)
-{
-    for (int i = 0; i < layout->count(); ++i) {
-        auto item = layout->itemAt(i);
-
-        auto innerLayout = item->layout();
-        if (innerLayout != nullptr) {
-            std::vector<std::string> vbox;
-
-            for (int j = 0; j < innerLayout->count(); ++j) {
-                auto innerItem = innerLayout->itemAt(j);
-                auto innerWidget = innerItem->widget();
-                if (innerWidget == nullptr) {
-                    assert(false);
-                    continue;
-                }
-                Split *innerSplit = qobject_cast<Split *>(innerWidget);
-                vbox.push_back(innerSplit->getUUID());
-            }
-
-            container.push_back(vbox);
-
-            continue;
-        }
-    }
-}
-
-void SplitContainer::save()
-{
-    auto layout = this->ui.hbox.layout();
-
-    std::vector<std::vector<std::string>> _chats;
-
-    for (int i = 0; i < layout->count(); ++i) {
-        auto item = layout->itemAt(i);
-
-        auto innerLayout = item->layout();
-        if (innerLayout != nullptr) {
-            std::vector<std::string> vbox;
-
-            for (int j = 0; j < innerLayout->count(); ++j) {
-                auto innerItem = innerLayout->itemAt(j);
-                auto innerWidget = innerItem->widget();
-                if (innerWidget == nullptr) {
-                    assert(false);
-                    continue;
-                }
-                Split *innerSplit = qobject_cast<Split *>(innerWidget);
-                vbox.push_back(innerSplit->getUUID());
-            }
-
-            _chats.push_back(vbox);
-
-            continue;
-        }
-    }
-
-    this->chats = _chats;
 }
 
 }  // namespace widgets

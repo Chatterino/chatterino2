@@ -17,14 +17,10 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
+NotebookTab::NotebookTab(Notebook *_notebook)
     : BaseWidget(_notebook)
-    , uuid(_uuid)
-    , settingRoot(fS("/containers/{}/tab", this->uuid))
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
-    , title(fS("{}/title", this->settingRoot), "")
-    , useDefaultBehaviour(fS("{}/useDefaultBehaviour", this->settingRoot), true)
     , menu(this)
 {
     this->setAcceptDrops(true);
@@ -40,7 +36,7 @@ NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
         TextInputDialog d(this);
 
         d.setWindowTitle("Change tab title (Leave empty for default behaviour)");
-        if (this->useDefaultBehaviour) {
+        if (this->useDefaultTitle) {
             d.setText("");
         } else {
             d.setText(this->getTitle());
@@ -49,10 +45,10 @@ NotebookTab::NotebookTab(Notebook *_notebook, const std::string &_uuid)
         if (d.exec() == QDialog::Accepted) {
             QString newTitle = d.getText();
             if (newTitle.isEmpty()) {
-                this->useDefaultBehaviour = true;
+                this->useDefaultTitle = true;
                 this->page->refreshTitle();
             } else {
-                this->useDefaultBehaviour = false;
+                this->useDefaultTitle = false;
                 this->setTitle(newTitle);
             }
         }
@@ -82,11 +78,10 @@ void NotebookTab::updateSize()
 
     int width;
 
-    QString qTitle(qS(this->title));
     if (singletons::SettingManager::getInstance().hideTabX) {
-        width = (int)((fontMetrics().width(qTitle) + 16 /*+ 16*/) * scale);
+        width = (int)((fontMetrics().width(this->title) + 16 /*+ 16*/) * scale);
     } else {
-        width = (int)((fontMetrics().width(qTitle) + 8 + 24 /*+ 16*/) * scale);
+        width = (int)((fontMetrics().width(this->title) + 8 + 24 /*+ 16*/) * scale);
     }
 
     this->resize(std::min((int)(150 * scale), width), (int)(24 * scale));
@@ -96,17 +91,15 @@ void NotebookTab::updateSize()
     }
 }
 
-QString NotebookTab::getTitle() const
+const QString &NotebookTab::getTitle() const
 {
-    return qS(this->title);
+    return this->title;
 }
 
 void NotebookTab::setTitle(const QString &newTitle)
 {
-    auto stdTitle = newTitle.toStdString();
-
-    if (this->title != stdTitle) {
-        this->title = stdTitle;
+    if (this->title != newTitle) {
+        this->title = newTitle;
         this->updateSize();
         this->update();
     }

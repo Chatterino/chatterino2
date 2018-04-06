@@ -155,7 +155,7 @@ void SplitHeader::scaleChangedEvent(float scale)
 
 void SplitHeader::updateChannelText()
 {
-    const QString channelName = this->split->channelName;
+    const QString channelName = this->split->getChannel()->name;
     if (channelName.isEmpty()) {
         this->titleLabel->setText("<no channel>");
         return;

@@ -42,14 +42,10 @@ class Split : public BaseWidget
 
     Q_OBJECT
 
-    const std::string uuid;
-    const std::string settingRoot;
-
 public:
-    Split(SplitContainer *parent, const std::string &_uuid);
+    Split(SplitContainer *parent);
     ~Split() override;
 
-    pajlada::Settings::Setting<QString> channelName;
     pajlada::Signals::NoArgSignal channelChanged;
 
     ChannelView &getChannelView()
@@ -57,8 +53,9 @@ public:
         return this->view;
     }
 
-    const std::string &getUUID() const;
     ChannelPtr getChannel() const;
+    void setChannel(ChannelPtr newChannel);
+
     void setFlexSizeX(double x);
     double getFlexSizeX();
     void setFlexSizeY(double y);
@@ -98,8 +95,6 @@ private:
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
-
-    void setChannel(ChannelPtr newChannel);
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);
