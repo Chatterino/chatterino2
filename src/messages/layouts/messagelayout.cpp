@@ -147,6 +147,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
         this->buffer = std::shared_ptr<QPixmap>(pixmap);
         this->bufferValid = false;
+        util::DebugCount::increase("message drawing buffers");
     }
 
     if (!this->bufferValid || !selection.isEmpty()) {
@@ -221,7 +222,11 @@ void MessageLayout::invalidateBuffer()
 
 void MessageLayout::deleteBuffer()
 {
-    this->buffer = nullptr;
+    if (this->buffer != nullptr) {
+        util::DebugCount::decrease("message drawing buffers");
+
+        this->buffer = nullptr;
+    }
 }
 
 // Elements
