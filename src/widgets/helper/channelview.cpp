@@ -111,6 +111,7 @@ ChannelView::ChannelView(BaseWidget *parent)
     QObject::connect(this->layoutCooldown, &QTimer::timeout, [this] {
         if (this->layoutQueued) {
             this->layoutMessages();
+            this->layoutQueued = false;
         }
     });
 }
@@ -137,15 +138,15 @@ void ChannelView::themeRefreshEvent()
 
 void ChannelView::queueUpdate()
 {
-    if (this->updateTimer.isActive()) {
-        this->updateQueued = true;
-        return;
-    }
+    //    if (this->updateTimer.isActive()) {
+    //        this->updateQueued = true;
+    //        return;
+    //    }
 
     //    this->repaint();
     this->update();
 
-    this->updateTimer.start();
+    //    this->updateTimer.start();
 }
 
 void ChannelView::layoutMessages()

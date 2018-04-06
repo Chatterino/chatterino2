@@ -22,15 +22,13 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook::Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix)
+Notebook::Notebook(Window *parent, bool _showButtons)
     : BaseWidget(parent)
-    , settingRoot(fS("{}/notebook", settingPrefix))
     , parentWindow(parent)
     , addButton(this)
     , settingsButton(this)
     , userButton(this)
     , showButtons(_showButtons)
-    , tabs(fS("{}/tabs", this->settingRoot))
     , closeConfirmDialog(this)
 {
     this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
@@ -47,8 +45,6 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
     settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
 
-    this->loadTabs();
-
     closeConfirmDialog.setText("Are you sure you want to close this tab?");
     closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
     closeConfirmDialog.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
@@ -57,15 +53,10 @@ Notebook::Notebook(Window *parent, bool _showButtons, const std::string &setting
     this->scaleChangedEvent(this->getScale());
 }
 
-SplitContainer *Notebook::addNewPage()
+SplitContainer *Notebook::addNewPage(bool select)
 {
-    return this->addPage(CreateUUID().toStdString(), true);
-}
-
-SplitContainer *Notebook::addPage(const std::string &uuid, bool select)
-{
-    auto tab = new NotebookTab(this, uuid);
-    auto page = new SplitContainer(this, tab, uuid);
+    auto tab = new NotebookTab(this);
+    auto page = new SplitContainer(this, tab);
 
     tab->show();
 
@@ -178,6 +169,11 @@ SplitContainer *Notebook::tabAt(QPoint point, int &index, int maxWidth)
     return nullptr;
 }
 
+SplitContainer *Notebook::tabAt(int index)
+{
+    return this->pages[index];
+}
+
 void Notebook::rearrangePage(SplitContainer *page, int index)
 {
     this->pages.move(this->pages.indexOf(page), index);
@@ -244,7 +240,7 @@ void Notebook::performLayout(bool animated)
     for (auto &i : this->pages) {
         if (!first &&
             (i == this->pages.last() ? tabHeight : 0) + x + i->getTab()->width() > width()) {
-            y += i->getTab()->height() - 1;
+            y += i->getTab()->height();
             //            y += 20;
             i->getTab()->moveAnimated(QPoint(0, y), animated);
             x = i->getTab()->width();
@@ -310,33 +306,7 @@ void Notebook::usersButtonClicked()
 
 void Notebook::addPageButtonClicked()
 {
-    QTimer::singleShot(80, [this] { this->addNewPage(); });
-}
-
-void Notebook::loadTabs()
-{
-    const std::vector<std::string> tabArray = this->tabs.getValue();
-
-    if (tabArray.size() == 0) {
-        this->addNewPage();
-        return;
-    }
-
-    for (const std::string &tabUUID : tabArray) {
-        this->addPage(tabUUID);
-    }
-}
-
-void Notebook::save()
-{
-    std::vector<std::string> tabArray;
-
-    for (const auto &page : this->pages) {
-        tabArray.push_back(page->getUUID());
-        page->save();
-    }
-
-    this->tabs = tabArray;
+    QTimer::singleShot(80, [this] { this->addNewPage(true); });
 }
 
 }  // namespace widgets

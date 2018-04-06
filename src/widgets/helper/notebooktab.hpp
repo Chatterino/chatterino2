@@ -18,17 +18,14 @@ class NotebookTab : public BaseWidget
 {
     Q_OBJECT
 
-    const std::string uuid;
-    const std::string settingRoot;
-
 public:
-    explicit NotebookTab(Notebook *_notebook, const std::string &_uuid);
+    explicit NotebookTab(Notebook *_notebook);
 
     void updateSize();
 
     SplitContainer *page;
 
-    QString getTitle() const;
+    const QString &getTitle() const;
     void setTitle(const QString &newTitle);
     bool isSelected() const;
     void setSelected(bool value);
@@ -63,10 +60,10 @@ private:
 
     Notebook *notebook;
 
-    pajlada::Settings::Setting<std::string> title;
+    QString title;
 
 public:
-    pajlada::Settings::Setting<bool> useDefaultBehaviour;
+    bool useDefaultTitle = true;
 
 private:
     bool selected = false;

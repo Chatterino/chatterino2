@@ -21,10 +21,10 @@ Application::Application()
 
     singletons::LoggingManager::getInstance();
 
-    singletons::SettingManager::getInstance().init();
+    singletons::SettingManager::getInstance().initialize();
     singletons::CommandManager::getInstance().loadCommands();
 
-    singletons::WindowManager::getInstance().initMainWindow();
+    singletons::WindowManager::getInstance().initialize();
 
     // Initialize everything we need
     singletons::EmoteManager::getInstance().loadGlobalEmotes();

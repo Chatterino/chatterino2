@@ -18,32 +18,14 @@ class ThemeManager;
 
 namespace widgets {
 
-struct WindowGeometry {
-    WindowGeometry(const std::string &settingPrefix)
-        : x(fS("{}/geometry/x", settingPrefix))
-        , y(fS("{}/geometry/y", settingPrefix))
-        , width(fS("{}/geometry/width", settingPrefix))
-        , height(fS("{}/geometry/height", settingPrefix))
-    {
-    }
-
-    pajlada::Settings::Setting<int> x;
-    pajlada::Settings::Setting<int> y;
-    pajlada::Settings::Setting<int> width;
-    pajlada::Settings::Setting<int> height;
-};
-
 class Window : public BaseWindow
 {
     Q_OBJECT
 
-    std::string settingRoot;
-
-    WindowGeometry windowGeometry;
-
 public:
-    explicit Window(const QString &windowName, singletons::ThemeManager &_themeManager,
-                    bool isMainWindow);
+    enum WindowType { Main, Popup };
+
+    explicit Window(singletons::ThemeManager &_themeManager, WindowType type);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
@@ -53,17 +35,19 @@ public:
 
     pajlada::Signals::NoArgSignal closed;
 
+    WindowType getType();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
     bool event(QEvent *event) override;
 
 private:
+    WindowType type;
     float dpi;
 
     void loadGeometry();
 
     Notebook notebook;
-    // TitleBar titleBar;
 
     friend class Notebook;
 

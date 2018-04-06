@@ -19,21 +19,14 @@ class SplitContainer : public BaseWidget
 {
     Q_OBJECT
 
-    const std::string uuid;
-    const std::string settingRoot;
-
 public:
-    SplitContainer(Notebook *parent, NotebookTab *_tab, const std::string &_uuid);
-
-    const std::string &getUUID() const
-    {
-        return this->uuid;
-    }
+    SplitContainer(Notebook *parent, NotebookTab *_tab);
 
     std::pair<int, int> removeFromLayout(Split *widget);
     void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1, -1));
 
     const std::vector<Split *> &getSplits() const;
+    std::vector<std::vector<Split *>> getColumns() const;
     NotebookTab *getTab() const;
 
     void addChat(bool openChannelNameDialog = false, std::string chatUUID = std::string());
@@ -89,8 +82,6 @@ private:
 
     std::vector<Split *> splits;
     std::vector<DropRegion> dropRegions;
-
-    pajlada::Settings::Setting<std::vector<std::vector<std::string>>> chats;
 
     NotebookPageDropPreview dropPreview;
 

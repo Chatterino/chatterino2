@@ -17,7 +17,6 @@ public:
     void showSettingsDialog();
     void showAccountSelectPopup(QPoint point);
 
-    void initMainWindow();
     void layoutVisibleChatWidgets(Channel *channel = nullptr);
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
@@ -25,18 +24,22 @@ public:
 
     widgets::Window &getMainWindow();
     widgets::Window &getSelectedWindow();
-    widgets::Window &createWindow();
+    widgets::Window &createWindow(widgets::Window::WindowType type);
 
     int windowCount();
     widgets::Window *windowAt(int index);
 
     void save();
+    void initialize();
+    void closeAll();
 
     pajlada::Signals::NoArgSignal repaintGifs;
     pajlada::Signals::Signal<Channel *> layout;
 
 private:
     ThemeManager &themeManager;
+
+    bool initialized = false;
 
     std::vector<widgets::Window *> windows;
 

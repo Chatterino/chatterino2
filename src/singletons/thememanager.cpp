@@ -129,8 +129,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
-    this->messages.backgrounds.highlighted = blendColors(
-        this->tabs.selected.backgrounds.regular.color(), this->messages.backgrounds.regular, 0.8);
+    this->messages.backgrounds.highlighted =
+        blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
     // this->messages.backgrounds.resub
     // this->messages.backgrounds.whisper
     this->messages.disabled = getColor(0, sat, 1, 0.6);

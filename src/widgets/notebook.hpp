@@ -18,23 +18,24 @@ class Notebook : public BaseWidget
 {
     Q_OBJECT
 
-    std::string settingRoot;
-
 public:
     enum HighlightType { none, highlighted, newMessage };
 
-    explicit Notebook(Window *parent, bool _showButtons, const std::string &settingPrefix);
+    explicit Notebook(Window *parent, bool _showButtons);
 
-    SplitContainer *addNewPage();
-    SplitContainer *addPage(const std::string &uuid, bool select = false);
+    SplitContainer *addNewPage(bool select = false);
 
     void removePage(SplitContainer *page);
     void removeCurrentPage();
     void select(SplitContainer *page);
     void selectIndex(int index);
 
-    SplitContainer *getSelectedPage() const
+    SplitContainer *getOrAddSelectedPage()
     {
+        if (selectedPage == nullptr) {
+            this->addNewPage(true);
+        }
+
         return selectedPage;
     }
 
@@ -42,6 +43,7 @@ public:
 
     int tabCount();
     SplitContainer *tabAt(QPoint point, int &index, int maxWidth = 2000000000);
+    SplitContainer *tabAt(int index);
     void rearrangePage(SplitContainer *page, int index);
 
     void nextTab();
@@ -71,14 +73,7 @@ private:
 
     bool showButtons;
 
-    pajlada::Settings::Setting<std::vector<std::string>> tabs;
-
-    void loadTabs();
-
     QMessageBox closeConfirmDialog;
-
-public:
-    void save();
 };
 
 }  // namespace widgets

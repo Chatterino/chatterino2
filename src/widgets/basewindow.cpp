@@ -69,7 +69,12 @@ void BaseWindow::init()
             layout->addLayout(buttonLayout);
 
             // title
-            QLabel *title = new QLabel("   Chatterino");
+            //            QLabel *title = new QLabel("   Chatterino");
+            QLabel *title = new QLabel("");
+            QSizePolicy policy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+            policy.setHorizontalStretch(1);
+            title->setBaseSize(0, 0);
+            title->setSizePolicy(policy);
             buttonLayout->addWidget(title);
             this->titleLabel = title;
 
