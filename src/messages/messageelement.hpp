@@ -110,7 +110,7 @@ public:
         Update_All = Update_Text | Update_Emotes | Update_Images
     };
 
-    virtual ~MessageElement() = default;
+    virtual ~MessageElement();
 
     MessageElement *setLink(const Link &link);
     MessageElement *setTooltip(const QString &tooltip);

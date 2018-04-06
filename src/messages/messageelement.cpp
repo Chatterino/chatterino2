@@ -11,6 +11,12 @@ namespace messages {
 MessageElement::MessageElement(Flags _flags)
     : flags(_flags)
 {
+    util::DebugCount::increase("message elements");
+}
+
+MessageElement::~MessageElement()
+{
+    util::DebugCount::decrease("message elements");
 }
 
 MessageElement *MessageElement::setLink(const Link &_link)

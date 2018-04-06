@@ -25,6 +25,12 @@ MessageLayout::MessageLayout(MessagePtr _message)
     if (_message->flags & Message::Collapsed) {
         this->flags &= MessageLayout::Collapsed;
     }
+    util::DebugCount::increase("message layout");
+}
+
+MessageLayout::~MessageLayout()
+{
+    util::DebugCount::decrease("message layout");
 }
 
 Message *MessageLayout::getMessage()

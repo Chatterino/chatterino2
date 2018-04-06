@@ -41,7 +41,7 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab, const std::s
     this->setHidden(true);
     this->setAcceptDrops(true);
 
-    this->ui.parentLayout.addSpacing(2);
+    this->ui.parentLayout.addSpacing(1);
     this->ui.parentLayout.addLayout(&this->ui.hbox);
     this->ui.parentLayout.setMargin(0);
 

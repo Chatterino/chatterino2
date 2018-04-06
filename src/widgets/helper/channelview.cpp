@@ -95,9 +95,11 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->pauseTimeout.setSingleShot(true);
 
-    auto e = new QResizeEvent(this->size(), this->size());
-    this->resizeEvent(e);
-    delete e;
+    //    auto e = new QResizeEvent(this->size(), this->size());
+    //    this->resizeEvent(e);
+    //    delete e;
+
+    this->scrollBar.resize(this->scrollBar.width(), height());
 
     singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
         [this](auto, auto) { this->update(); }, this->managedConnections);
