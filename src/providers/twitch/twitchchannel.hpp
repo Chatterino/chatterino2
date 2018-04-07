@@ -54,7 +54,7 @@ public:
 
     void setRoomID(const QString &_roomID);
     pajlada::Signals::NoArgSignal roomIDchanged;
-    pajlada::Signals::NoArgSignal onlineStatusChanged;
+    pajlada::Signals::NoArgSignal updateLiveInfo;
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
     pajlada::Signals::NoArgSignal userStateChanged;
