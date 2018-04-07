@@ -27,6 +27,8 @@ public:
         _lineEdit.setText(text);
     }
 
+    void highlightText();
+
 private:
     QVBoxLayout _vbox;
     QLineEdit _lineEdit;

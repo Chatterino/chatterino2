@@ -37,5 +37,10 @@ void TextInputDialog::cancelButtonClicked()
     close();
 }
 
+void TextInputDialog::highlightText()
+{
+    this->_lineEdit.selectAll();
+}
+
 }  // namespace widgets
 }  // namespace chatterino
