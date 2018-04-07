@@ -40,6 +40,7 @@ NotebookTab::NotebookTab(Notebook *_notebook)
             d.setText("");
         } else {
             d.setText(this->getTitle());
+            d.highlightText();
         }
 
         if (d.exec() == QDialog::Accepted) {
