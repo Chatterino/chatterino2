@@ -74,30 +74,77 @@ std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
         this->refreshTitle();
     }
 
-    // remove from box and return location
+    Split *neighbouringSplit = nullptr;
+
+    // Position the split was found at
+    int positionX = -1, positionY = -1;
+
+    bool removed = false;
+
+    QVBoxLayout *layoutToRemove = nullptr;
+
+    // Find widget in box, remove it, return its position
     for (int i = 0; i < this->ui.hbox.count(); ++i) {
         auto vbox = static_cast<QVBoxLayout *>(this->ui.hbox.itemAt(i));
 
-        for (int j = 0; j < vbox->count(); ++j) {
+        auto vboxCount = vbox->count();
+
+        for (int j = 0; j < vboxCount; ++j) {
             if (vbox->itemAt(j)->widget() != widget) {
+                neighbouringSplit = dynamic_cast<Split *>(vbox->itemAt(j)->widget());
+
+                if (removed && neighbouringSplit != nullptr) {
+                    // The widget we searched for has been found, and we have a split to switch
+                    // focus to
+                    break;
+                }
+
                 continue;
             }
 
+            removed = true;
+            positionX = i;
+
+            // Remove split from box
             widget->setParent(nullptr);
 
-            bool isLastItem = vbox->count() == 0;
-
-            if (isLastItem) {
-                this->ui.hbox.removeItem(vbox);
-
-                delete vbox;
+            if (vbox->count() == 0) {
+                // The split was the last item remaining in the vbox
+                // Remove the vbox once all iteration is done
+                layoutToRemove = vbox;
+                positionY = -1;
+                break;
             }
 
-            return std::pair<int, int>(i, isLastItem ? -1 : j);
+            // Don't break here yet, we want to keep iterating this vbox if possible to find the
+            // closest still-alive neighbour that we can switch focus to
+            positionY = j;
+
+            --j;
+            --vboxCount;
+        }
+
+        if (removed && neighbouringSplit != nullptr) {
+            // The widget we searched for has been found, and we have a split to switch focus to
+            break;
         }
     }
 
-    return std::pair<int, int>(-1, -1);
+    if (removed) {
+        if (layoutToRemove != nullptr) {
+            // The split we removed was the last split in its box. Remove the box
+            // We delay the removing of the box so we can keep iterating over hbox safely
+            this->ui.hbox.removeItem(layoutToRemove);
+            delete layoutToRemove;
+        }
+
+        if (neighbouringSplit != nullptr) {
+            // We found a neighbour split we can switch focus to
+            neighbouringSplit->giveFocus(Qt::MouseFocusReason);
+        }
+    }
+
+    return std::make_pair(positionX, positionY);
 }
 
 void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
