@@ -4,6 +4,7 @@
 #include "singletons/windowmanager.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
+#include "widgets/helper/shortcut.hpp"
 #include "widgets/settingsdialog.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/window.hpp"
@@ -51,6 +52,16 @@ Notebook::Notebook(Window *parent, bool _showButtons)
     closeConfirmDialog.setDefaultButton(QMessageBox::Yes);
 
     this->scaleChangedEvent(this->getScale());
+
+    // Window-wide hotkeys
+    // CTRL+T: Create new split in selected notebook page
+    CreateWindowShortcut(this, "CTRL+T", [this]() {
+        if (this->selectedPage == nullptr) {
+            return;
+        }
+
+        this->selectedPage->addChat(true);
+    });
 }
 
 SplitContainer *Notebook::addNewPage(bool select)

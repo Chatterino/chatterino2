@@ -101,7 +101,7 @@ private:
 
 public slots:
     // Add new split to the notebook page that this chat widget is in
-    // Maybe we should use this chat widget as a hint to where the new split should be created
+    // This is only activated from the menu now. Hotkey is handled in Notebook
     void doAddSplit();
 
     // Close current split (chat widget)

@@ -58,9 +58,6 @@ Split::Split(SplitContainer *parent)
     this->vbox.addWidget(&this->input);
 
     // Initialize chat widget-wide hotkeys
-    // CTRL+T: Create new split (Add page)
-    CreateShortcut(this, "CTRL+T", &Split::doAddSplit);
-
     // CTRL+W: Close Split
     CreateShortcut(this, "CTRL+W", &Split::doCloseSplit);
 
