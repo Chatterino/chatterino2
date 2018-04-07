@@ -74,11 +74,11 @@ public:
     void drag();
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void mouseMoveEvent(QMouseEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
-    void keyPressEvent(QKeyEvent *) override;
-    void keyReleaseEvent(QKeyEvent *) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     SplitContainer &parentPage;

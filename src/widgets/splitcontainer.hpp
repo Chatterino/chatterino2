@@ -29,7 +29,7 @@ public:
     std::vector<std::vector<Split *>> getColumns() const;
     NotebookTab *getTab() const;
 
-    void addChat(bool openChannelNameDialog = false, std::string chatUUID = std::string());
+    void addChat(bool openChannelNameDialog = false);
 
     static bool isDraggingSplit;
     static Split *draggingSplit;
@@ -46,19 +46,19 @@ public:
     int splitCount() const;
 
 protected:
-    virtual bool eventFilter(QObject *object, QEvent *event) override;
-    virtual void paintEvent(QPaintEvent *) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
-    virtual void showEvent(QShowEvent *) override;
+    void showEvent(QShowEvent *event) override;
 
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
-    virtual void dragEnterEvent(QDragEnterEvent *event) override;
-    virtual void dragMoveEvent(QDragMoveEvent *event) override;
-    virtual void dragLeaveEvent(QDragLeaveEvent *event) override;
-    virtual void dropEvent(QDropEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private:
     struct DropRegion {
@@ -89,7 +89,7 @@ private:
 
     std::pair<int, int> getChatPosition(const Split *chatWidget);
 
-    Split *createChatWidget(const std::string &uuid);
+    Split *createChatWidget();
 
 public:
     void refreshTitle();
