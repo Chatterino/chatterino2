@@ -16,7 +16,7 @@ namespace widgets {
 class StreamView : public QWidget
 {
 public:
-    StreamView(std::shared_ptr<Channel> channel, QUrl url);
+    StreamView(std::shared_ptr<Channel> channel, const QUrl &url);
 
 private:
     QWebEngineView *stream;

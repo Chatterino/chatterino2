@@ -103,7 +103,7 @@ void Notebook::removePage(SplitContainer *page)
 
     this->pages.removeOne(page);
 
-    if (this->pages.size() == 0) {
+    if (this->pages.empty()) {
         this->addNewPage();
     }
 

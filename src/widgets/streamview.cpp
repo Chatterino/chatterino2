@@ -12,7 +12,7 @@
 namespace chatterino {
 namespace widgets {
 
-StreamView::StreamView(ChannelPtr channel, QUrl url)
+StreamView::StreamView(ChannelPtr channel, const QUrl &url)
 {
     util::LayoutCreator<StreamView> layoutCreator(this);
 
@@ -21,8 +21,6 @@ StreamView::StreamView(ChannelPtr channel, QUrl url)
     web->setUrl(url);
     web->settings()->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
 #endif
-
-    //    QString uuid = CreateUUID();
 
     auto chat = layoutCreator.emplace<ChannelView>();
     chat->setFixedWidth(300);

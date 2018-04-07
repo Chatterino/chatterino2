@@ -212,12 +212,9 @@ NotebookTab *SplitContainer::getTab() const
     return this->tab;
 }
 
-void SplitContainer::addChat(bool openChannelNameDialog, std::string chatUUID)
+void SplitContainer::addChat(bool openChannelNameDialog)
 {
-    if (chatUUID.empty()) {
-        chatUUID = CreateUUID().toStdString();
-    }
-    Split *w = this->createChatWidget(chatUUID);
+    Split *w = this->createChatWidget();
 
     if (openChannelNameDialog) {
         bool ret = w->showChangeChannelPopup("Open channel name", true);
@@ -505,7 +502,7 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
     return getWidgetPositionInLayout(layout, chatWidget);
 }
 
-Split *SplitContainer::createChatWidget(const std::string &uuid)
+Split *SplitContainer::createChatWidget()
 {
     auto split = new Split(this);
 
