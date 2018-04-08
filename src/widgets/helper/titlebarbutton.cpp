@@ -48,7 +48,8 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             int xD3 = xD * 4 / 5;
 
             painter.drawRect(centerX - xD / 2 + xD2, xD, xD3, xD3);
-            painter.fillRect(centerX - xD / 2, xD + xD2, xD3, xD3, QColor("#fff"));
+            painter.fillRect(centerX - xD / 2, xD + xD2, xD3, xD3,
+                             this->themeManager.window.background);
             painter.drawRect(centerX - xD / 2, xD + xD2, xD3, xD3);
             break;
         }
@@ -61,7 +62,6 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             break;
         }
         case User: {
-            //            color = QColor("#333");
             color = "#999";
 
             painter.setRenderHint(QPainter::Antialiasing);
@@ -88,7 +88,6 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             break;
         }
         case Settings: {
-            //            color = QColor("#333");
             color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
