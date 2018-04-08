@@ -95,9 +95,21 @@ widgets::Window &WindowManager::getSelectedWindow()
 widgets::Window &WindowManager::createWindow(widgets::Window::WindowType type)
 {
     auto *window = new widgets::Window(this->themeManager, type);
-
     this->windows.push_back(window);
     window->show();
+
+    if (type != widgets::Window::Main) {
+        window->setAttribute(Qt::WA_DeleteOnClose);
+
+        QObject::connect(window, &QWidget::destroyed, [this, window] {
+            for (auto it = this->windows.begin(); it != this->windows.end(); it++) {
+                if (*it == window) {
+                    this->windows.erase(it);
+                    break;
+                }
+            }
+        });
+    }
 
     return *window;
 }

@@ -150,6 +150,7 @@ void SplitInput::installKeyPressedEvent()
 
             event->accept();
             if (!(event->modifiers() == Qt::ControlModifier)) {
+                this->currMsg = QString();
                 this->ui.textEdit->setText(QString());
                 this->prevIndex = 0;
             } else if (this->ui.textEdit->toPlainText() ==
@@ -170,8 +171,16 @@ void SplitInput::installKeyPressedEvent()
                 page->requestFocus(reqX, reqY);
             } else {
                 if (this->prevMsg.size() && this->prevIndex) {
+                    if (this->prevIndex == (this->prevMsg.size())) {
+                        this->currMsg = ui.textEdit->toPlainText();
+                    }
+
                     this->prevIndex--;
                     this->ui.textEdit->setText(this->prevMsg.at(this->prevIndex));
+
+                    QTextCursor cursor = this->ui.textEdit->textCursor();
+                    cursor.movePosition(QTextCursor::End);
+                    this->ui.textEdit->setTextCursor(cursor);
                 }
             }
         } else if (event->key() == Qt::Key_Down) {
@@ -192,8 +201,12 @@ void SplitInput::installKeyPressedEvent()
                     this->ui.textEdit->setText(this->prevMsg.at(this->prevIndex));
                 } else {
                     this->prevIndex = this->prevMsg.size();
-                    this->ui.textEdit->setText(QString());
+                    this->ui.textEdit->setText(this->currMsg);
                 }
+
+                QTextCursor cursor = this->ui.textEdit->textCursor();
+                cursor.movePosition(QTextCursor::End);
+                this->ui.textEdit->setTextCursor(cursor);
             }
         } else if (event->key() == Qt::Key_Left) {
             if (event->modifiers() == Qt::AltModifier) {

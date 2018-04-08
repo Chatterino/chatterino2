@@ -23,7 +23,7 @@ download the [boost library](https://sourceforge.net/projects/boost/files/boost/
 
 #### Using MSYS2
 Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org](http://www.msys2.org/).
-Be sure to add "-j <number of cores\*2>" as a make argument so it will use all your cpu cores to build. [example setup](https://i.imgur.com/qlESlS1.png)
+Be sure to add "-j <number of threads>" as a make argument so it will use all your cpu cores to build. [example setup](https://i.imgur.com/qlESlS1.png)
 You can also add "-o2" to optimize the final binary size but increase compilation time, and add "-pipe" to use more ram in compilation but increase compilation speed
 1. open appropriate MSYS2 terminal and do `pacman -S mingw-w64-<arch>-boost mingw-w64-<arch>-qt5 mingw-w64-<arch>-rapidjson` where `<arch>` is x86_64 or i686
 2. go into the project directory

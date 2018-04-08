@@ -59,6 +59,7 @@ private:
     //    QLabel textLengthLabel;
     //    RippleEffectLabel emotesLabel;
     QStringList prevMsg;
+    QString currMsg;
     int prevIndex = 0;
 
     void initLayout();
