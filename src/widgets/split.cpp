@@ -190,6 +190,7 @@ bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
 
     if (!empty) {
         dialog.setText(this->channel->name);
+        dialog.highlightText();
     }
 
     if (dialog.exec() == QDialog::Accepted) {
