@@ -259,6 +259,19 @@ void TwitchChannel::refreshLiveStatus()
             auto diff = since.secsTo(QDateTime::currentDateTime());
             channel->streamStatus.uptime =
                 QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+
+            channel->streamStatus.rerun = false;
+
+            if (stream.HasMember("broadcast_platform")) {
+                const auto &broadcastPlatformValue = stream["broadcast_platform"];
+
+                if (broadcastPlatformValue.IsString()) {
+                    const char *broadcastPlatform = stream["broadcast_platform"].GetString();
+                    if (strcmp(broadcastPlatform, "rerun") == 0) {
+                        channel->streamStatus.rerun = true;
+                    }
+                }
+            }
         }
 
         channel->setLive(true);

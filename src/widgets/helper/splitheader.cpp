@@ -172,14 +172,17 @@ void SplitHeader::updateChannelText()
             this->isLive = true;
             this->tooltip = "<style>.center    { text-align: center; }</style>"
                             "<p class = \"center\">" +
-                            streamStatus.title + "<br><br>" + streamStatus.game +
-                            "<br>"
-                            "Live for " +
+                            streamStatus.title + "<br><br>" + streamStatus.game + "<br>" +
+                            (streamStatus.rerun ? "Vod-casting" : "Live") + " for " +
                             streamStatus.uptime + " with " +
                             QString::number(streamStatus.viewerCount) +
                             " viewers"
                             "</p>";
-            this->titleLabel->setText(channelName + " (live)");
+            if (streamStatus.rerun) {
+                this->titleLabel->setText(channelName + " (rerun)");
+            } else {
+                this->titleLabel->setText(channelName + " (live)");
+            }
 
             return;
         }
