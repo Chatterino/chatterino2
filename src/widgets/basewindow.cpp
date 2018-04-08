@@ -402,7 +402,7 @@ void BaseWindow::showEvent(QShowEvent *event)
         SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
                          WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
 
-        const MARGINS shadow = {1, 1, 1, 1};
+        const MARGINS shadow = {8, 8, 8, 8};
         DwmExtendFrameIntoClientArea((HWND)this->winId(), &shadow);
     }
 
@@ -416,7 +416,7 @@ void BaseWindow::paintEvent(QPaintEvent *event)
 
         //        bool windowFocused = this->window() == QApplication::activeWindow();
 
-        painter.fillRect(QRect(0, 1, this->width(), this->height()),
+        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
                          this->themeManager.window.background);
     }
 }
