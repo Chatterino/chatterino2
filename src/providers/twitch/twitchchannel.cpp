@@ -187,10 +187,9 @@ void TwitchChannel::setLive(bool newLiveStatus)
         if (this->streamStatus.live != newLiveStatus) {
             this->streamStatus.live = newLiveStatus;
         }
-
     }
 
-    if(newLiveStatus) {
+    if (newLiveStatus) {
         this->updateLiveInfo.invoke();
     }
 }
