@@ -24,6 +24,7 @@ class TwitchChannel final : public Channel
 public:
     struct StreamStatus {
         bool live = false;
+        bool rerun = false;
         unsigned viewerCount = 0;
         QString title;
         QString game;
