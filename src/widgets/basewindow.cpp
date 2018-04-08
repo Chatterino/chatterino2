@@ -13,6 +13,7 @@
 
 #ifdef USEWINSDK
 #include <ObjIdl.h>
+#include <VersionHelpers.h>
 #include <Windows.h>
 #include <dwmapi.h>
 #include <gdiplus.h>
@@ -60,7 +61,7 @@ void BaseWindow::init()
     if (this->hasCustomWindowFrame()) {
         // CUSTOM WINDOW FRAME
         QVBoxLayout *layout = new QVBoxLayout();
-        layout->setMargin(1);
+        layout->setContentsMargins(0, 1, 0, 0);
         layout->setSpacing(0);
         this->setLayout(layout);
         {
@@ -155,7 +156,9 @@ QWidget *BaseWindow::getLayoutContainer()
 bool BaseWindow::hasCustomWindowFrame()
 {
 #ifdef USEWINSDK
-    return this->enableCustomFrame;
+    static bool isWin8 = IsWindows8OrGreater();
+
+    return isWin8 && this->enableCustomFrame;
 #else
     return false;
 #endif
@@ -165,7 +168,8 @@ void BaseWindow::themeRefreshEvent()
 {
     if (this->enableCustomFrame) {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->themeManager.window.background);
+        //        palette.setColor(QPalette::Background, this->themeManager.window.background);
+        palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
         palette.setColor(QPalette::Foreground, this->themeManager.window.text);
         this->setPalette(palette);
 
@@ -283,8 +287,19 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         }
         case WM_NCCALCSIZE: {
             if (this->hasCustomWindowFrame()) {
-                // this kills the window frame and title bar we added with
-                // WS_THICKFRAME and WS_CAPTION
+                int cx = GetSystemMetrics(SM_CXSIZEFRAME);
+                int cy = GetSystemMetrics(SM_CYSIZEFRAME);
+
+                if (msg->wParam == TRUE) {
+                    NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
+                    ncp->lppos->flags |= SWP_NOREDRAW;
+                    RECT *clientRect = &ncp->rgrc[0];
+                    clientRect->left += cx;
+                    clientRect->top += 0;
+                    clientRect->right -= cx;
+                    clientRect->bottom -= cy;
+                }
+
                 *result = 0;
                 return true;
             } else {
@@ -307,21 +322,21 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
                 if (resizeWidth) {
                     // left border
-                    if (x >= winrect.left && x < winrect.left + border_width) {
+                    if (x < winrect.left + border_width) {
                         *result = HTLEFT;
                     }
                     // right border
-                    if (x < winrect.right && x >= winrect.right - border_width) {
+                    if (x >= winrect.right - border_width) {
                         *result = HTRIGHT;
                     }
                 }
                 if (resizeHeight) {
                     // bottom border
-                    if (y < winrect.bottom && y >= winrect.bottom - border_width) {
+                    if (y >= winrect.bottom - border_width) {
                         *result = HTBOTTOM;
                     }
                     // top border
-                    if (y >= winrect.top && y < winrect.top + border_width) {
+                    if (y < winrect.top + border_width) {
                         *result = HTTOP;
                     }
                 }
@@ -374,13 +389,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                 return QWidget::nativeEvent(eventType, message, result);
             }
             break;
-        }  // end case WM_NCHITTEST
-        case WM_CLOSE: {
-            //            if (this->enableCustomFrame) {
-            //                this->close();
-            //            }
-            return QWidget::nativeEvent(eventType, message, result);
-            break;
         }
         default:
             return QWidget::nativeEvent(eventType, message, result);
@@ -396,9 +404,6 @@ void BaseWindow::showEvent(QShowEvent *event)
 
         const MARGINS shadow = {1, 1, 1, 1};
         DwmExtendFrameIntoClientArea((HWND)this->winId(), &shadow);
-
-        SetWindowPos((HWND)this->winId(), 0, 0, 0, 0, 0,
-                     SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
     }
 
     BaseWidget::showEvent(event);
@@ -407,30 +412,12 @@ void BaseWindow::showEvent(QShowEvent *event)
 void BaseWindow::paintEvent(QPaintEvent *event)
 {
     if (this->hasCustomWindowFrame()) {
-        BaseWidget::paintEvent(event);
-
         QPainter painter(this);
 
-        bool windowFocused = this->window() == QApplication::activeWindow();
+        //        bool windowFocused = this->window() == QApplication::activeWindow();
 
-        //        QLinearGradient gradient(0, 0, 10, 250);
-        //        gradient.setColorAt(1,
-        //        this->themeManager.tabs.selected.backgrounds.unfocused.color());
-
-        //        if (windowFocused) {
-        //            gradient.setColorAt(.4,
-        //            this->themeManager.tabs.selected.backgrounds.regular.color());
-        //        } else {
-        //            gradient.setColorAt(.4,
-        //            this->themeManager.tabs.selected.backgrounds.unfocused.color());
-        //        }
-        //        painter.setPen(QPen(QBrush(gradient), 1));
-
-        QColor &border = windowFocused ? this->themeManager.window.borderFocused
-                                       : this->themeManager.window.borderUnfocused;
-        painter.setPen(QPen(QBrush(border), 1));
-
-        painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+        painter.fillRect(QRect(0, 1, this->width(), this->height()),
+                         this->themeManager.window.background);
     }
 }
 #endif
