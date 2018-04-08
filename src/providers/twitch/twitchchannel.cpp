@@ -184,15 +184,14 @@ void TwitchChannel::setLive(bool newLiveStatus)
 {
     {
         std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        if (this->streamStatus.live == newLiveStatus) {
-            // Nothing changed
-            return;
+        if (this->streamStatus.live != newLiveStatus) {
+            this->streamStatus.live = newLiveStatus;
         }
-
-        this->streamStatus.live = newLiveStatus;
     }
 
-    this->onlineStatusChanged.invoke();
+    if (newLiveStatus) {
+        this->updateLiveInfo.invoke();
+    }
 }
 
 void TwitchChannel::refreshLiveStatus()

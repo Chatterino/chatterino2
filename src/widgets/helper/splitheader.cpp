@@ -136,7 +136,7 @@ void SplitHeader::initializeChannelSignals()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
-        twitchChannel->onlineStatusChanged.connect([this]() {
+        twitchChannel->updateLiveInfo.connect([this]() {
             this->updateChannelText();  //
         });
     }
