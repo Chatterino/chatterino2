@@ -75,13 +75,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     this->keyPressed.invoke(event);
 
-    if (event->key() == Qt::Key_Backtab) {
-        // Ignore for now. We want to use it for autocomplete later
-        return;
-    }
-
-    bool doComplete =
-        event->key() == Qt::Key_Tab && (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+    bool doComplete = (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
+                      (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
 
     if (doComplete) {
         // check if there is a completer
@@ -110,9 +105,16 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         // scrolling through selections
-        if (!this->completer->setCurrentRow(this->completer->currentRow() + 1)) {
-            // wrap over and start again
-            this->completer->setCurrentRow(0);
+        if (event->key() == Qt::Key_Tab) {
+            if (!this->completer->setCurrentRow(this->completer->currentRow() + 1)) {
+                // wrap over and start again
+                this->completer->setCurrentRow(0);
+            }
+        } else {
+            if (!this->completer->setCurrentRow(this->completer->currentRow() - 1)) {
+                // wrap over and start again
+                this->completer->setCurrentRow(this->completer->completionCount() - 1);
+            }
         }
 
         this->completer->complete();
@@ -122,7 +124,13 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     // (hemirt)
     // this resets the selection in the completion list, it should probably only trigger on actual
     // chat input (space, character) and not on every key input (pressing alt for example)
-    this->completionInProgress = false;
+    // (fourtf)
+    // fixed for shift+tab, there might be a better solution but nobody is gonna bother anyways
+    if (event->key() != Qt::Key_Shift && event->key() != Qt::Key_Control &&
+        event->key() != Qt::Key_Alt && event->key() != Qt::Key_Super_L &&
+        event->key() != Qt::Key_Super_R) {
+        this->completionInProgress = false;
+    }
 
     if (!event->isAccepted()) {
         QTextEdit::keyPressEvent(event);
