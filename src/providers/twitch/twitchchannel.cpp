@@ -3,7 +3,6 @@
 #include "debug/log.hpp"
 #include "messages/message.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"

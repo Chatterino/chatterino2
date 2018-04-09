@@ -103,7 +103,6 @@ SOURCES += \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
     src/singletons/accountmanager.cpp \
-    src/singletons/channelmanager.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -171,7 +170,8 @@ SOURCES += \
     src/providers/twitch/twitchhelpers.cpp \
     src/widgets/helper/signallabel.cpp \
     src/widgets/helper/debugpopup.cpp \
-    src/util/debugcount.cpp
+    src/util/debugcount.cpp \
+    src/singletons/nativemessagingmanager.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -201,7 +201,6 @@ HEADERS  += \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
     src/singletons/accountmanager.hpp \
-    src/singletons/channelmanager.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
@@ -212,7 +211,6 @@ HEADERS  += \
     src/singletons/loggingmanager.hpp \
     src/singletons/pathmanager.hpp \
     src/singletons/resourcemanager.hpp \
-    src/singletons/settingsmanager.hpp \
     src/singletons/thememanager.hpp \
     src/singletons/windowmanager.hpp \
     src/util/benchmark.hpp \
@@ -288,7 +286,9 @@ HEADERS  += \
     src/providers/twitch/twitchhelpers.hpp \
     src/util/debugcount.hpp \
     src/widgets/helper/debugpopup.hpp \
-    src/version.hpp
+    src/version.hpp \
+    src/singletons/settingsmanager.hpp \
+    src/singletons/nativemessagingmanager.hpp
 
 RESOURCES += \
     resources/resources.qrc

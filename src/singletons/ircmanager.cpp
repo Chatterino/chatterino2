@@ -1,28 +1,28 @@
-#include "singletons/ircmanager.hpp"
-#include "channel.hpp"
-#include "debug/log.hpp"
-#include "messages/messageparseargs.hpp"
-#include "providers/twitch/twitchaccount.hpp"
-#include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/accountmanager.hpp"
-#include "singletons/channelmanager.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/posttothread.hpp"
-#include "util/urlfetch.hpp"
+//#include "singletons/ircmanager.hpp"
+//#include "channel.hpp"
+//#include "debug/log.hpp"
+//#include "messages/messageparseargs.hpp"
+//#include "providers/twitch/twitchaccount.hpp"
+//#include "providers/twitch/twitchmessagebuilder.hpp"
+//#include "singletons/accountmanager.hpp"
+//#include "singletons/channelmanager.hpp"
+//#include "singletons/emotemanager.hpp"
+//#include "singletons/resourcemanager.hpp"
+//#include "singletons/settingsmanager.hpp"
+//#include "singletons/windowmanager.hpp"
+//#include "util/posttothread.hpp"
+//#include "util/urlfetch.hpp"
 
-#include <irccommand.h>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+//#include <irccommand.h>
+//#include <QJsonArray>
+//#include <QJsonDocument>
+//#include <QJsonObject>
+//#include <QNetworkReply>
+//#include <QNetworkRequest>
 
-#include <future>
+//#include <future>
 
-using namespace chatterino::messages;
+//using namespace chatterino::messages;
 
 // void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oauthClient,
 //                                     const QString &oauthToken)

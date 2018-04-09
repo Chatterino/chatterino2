@@ -2,7 +2,6 @@
 
 #include "common.hpp"
 #include "debug/log.hpp"
-#include "singletons/channelmanager.hpp"
 #include "singletons/emotemanager.hpp"
 
 #include <QtAlgorithms>
