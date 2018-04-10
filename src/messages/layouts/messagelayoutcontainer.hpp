@@ -68,7 +68,7 @@ struct MessageLayoutContainer {
     // painting
     void paintElements(QPainter &painter);
     void paintAnimatedElements(QPainter &painter, int yOffset);
-    void paintSelection(QPainter &painter, int messageIndex, Selection &selection);
+    void paintSelection(QPainter &painter, int messageIndex, Selection &selection, int yOffset);
 
     // selection
     int getSelectionIndex(QPoint point);
