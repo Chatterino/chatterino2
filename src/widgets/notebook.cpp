@@ -119,6 +119,20 @@ void Notebook::removeCurrentPage()
     this->removePage(this->selectedPage);
 }
 
+SplitContainer *Notebook::getOrAddSelectedPage()
+{
+    if (selectedPage == nullptr) {
+        this->addNewPage(true);
+    }
+
+    return selectedPage;
+}
+
+SplitContainer *Notebook::getSelectedPage()
+{
+    return selectedPage;
+}
+
 void Notebook::select(SplitContainer *page)
 {
     if (page == this->selectedPage) {
