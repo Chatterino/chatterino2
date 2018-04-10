@@ -241,7 +241,7 @@ void TextIconLayoutElement::paint(QPainter &painter)
 {
     QFont font = singletons::FontManager::getInstance().getFont(FontStyle::Tiny, this->scale);
 
-    painter.setBrush(singletons::ThemeManager::getInstance().messages.textColors.regular);
+    painter.setPen(singletons::ThemeManager::getInstance().messages.textColors.system);
     painter.setFont(font);
 
     QTextOption option;
