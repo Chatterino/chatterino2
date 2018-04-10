@@ -186,8 +186,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 int charWidth = metrics.width(text[i]);
 
                 if (!container.fitsInLine(width + charWidth)) {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        text.mid(wordStart, i - wordStart), width - lastWidth, false));
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(text.mid(wordStart, i - wordStart), width, false));
                     container.breakLine();
 
                     wordStart = i;
