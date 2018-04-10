@@ -296,7 +296,8 @@ HEADERS  += \
     src/util/streamlink.hpp \
     src/providers/twitch/twitchhelpers.hpp \
     src/util/debugcount.hpp \
-    src/widgets/helper/debugpopup.hpp
+    src/widgets/helper/debugpopup.hpp \
+    src/version.hpp
 
 RESOURCES += \
     resources/resources.qrc
