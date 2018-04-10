@@ -134,7 +134,8 @@ void MessageLayoutContainer::breakLine()
     }
 
     this->lineStart = this->elements.size();
-    this->currentX = (int)(this->scale * 8);
+    //    this->currentX = (int)(this->scale * 8);
+    this->currentX = 0;
     this->currentY += this->lineHeight;
     this->height = this->currentY + (this->margin.bottom * this->scale);
     this->lineHeight = 0;
@@ -409,19 +410,21 @@ int MessageLayoutContainer::getLastCharacterIndex() const
 void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
 {
     int index = 0;
-    bool xd = true;
+    bool first = true;
 
     for (std::unique_ptr<MessageLayoutElement> &ele : this->elements) {
         int c = ele->getSelectionIndexCount();
 
-        if (xd) {
+        qDebug() << c;
+
+        if (first) {
             if (index + c > from) {
-                ele->addCopyTextToString(str, index - from, to - from);
-                xd = false;
+                ele->addCopyTextToString(str, from - index, to - from);
+                first = false;
             }
         } else {
-            if (index + c > from) {
-                ele->addCopyTextToString(str, 0, index - to);
+            if (index + c > to) {
+                ele->addCopyTextToString(str, 0, to - index);
                 break;
             } else {
                 ele->addCopyTextToString(str);

@@ -279,14 +279,18 @@ QString ChannelView::getSelectedText()
         return result;
     }
 
-    for (int msg = selection.min.messageIndex; msg <= selection.min.messageIndex; msg++) {
+    qDebug() << "xd >>>>";
+    for (int msg = selection.min.messageIndex; msg <= selection.max.messageIndex; msg++) {
         MessageLayoutPtr layout = messagesSnapshot[msg];
         int from = msg == selection.min.messageIndex ? selection.min.charIndex : 0;
         int to = msg == selection.max.messageIndex ? selection.max.charIndex
-                                                   : layout->getLastCharacterIndex();
+                                                   : layout->getLastCharacterIndex() + 1;
+
+        qDebug() << "from:" << from << ", to:" << to;
 
         layout->addSelectionText(result, from, to);
     }
+    qDebug() << "xd <<<<";
 
     return result;
 }
