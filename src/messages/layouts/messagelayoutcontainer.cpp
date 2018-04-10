@@ -419,8 +419,12 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
 
         if (first) {
             if (index + c > from) {
-                ele->addCopyTextToString(str, from - index, to - from);
+                ele->addCopyTextToString(str, from - index, to - index);
                 first = false;
+
+                if (index + c > to) {
+                    break;
+                }
             }
         } else {
             if (index + c > to) {
