@@ -14,6 +14,9 @@
 #include <QPoint>
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
+#include <pajlada/signals/connection.hpp>
+
+#include <vector>
 
 namespace chatterino {
 namespace widgets {
@@ -63,6 +66,8 @@ private:
 
     QString tooltip;
     bool isLive;
+
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
 public slots:
     void addDropdownItems(RippleEffectButton *label);
