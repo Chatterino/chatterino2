@@ -179,6 +179,11 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 void MessageLayoutContainer::paintElements(QPainter &painter)
 {
     for (const std::unique_ptr<MessageLayoutElement> &element : this->elements) {
+#ifdef OHHEYITSFOURTF
+        painter.setPen(QColor(0, 255, 0));
+        painter.drawRect(element->getRect());
+#endif
+
         element->paint(painter);
     }
 }

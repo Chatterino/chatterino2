@@ -210,7 +210,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
     QTextOption option;
     option.setAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    painter.drawText(QRectF(1, 1, this->container.width - 3, 1000),
+    painter.drawText(QRectF(1, 1, this->container.getWidth() - 3, 1000),
                      QString::number(++this->bufferUpdatedCount), option);
 #endif
 }
