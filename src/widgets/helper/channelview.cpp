@@ -359,8 +359,12 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 }
             }
 
-            if (message->flags & ~Message::DoNotTriggerNotification) {
-                this->highlightedMessageReceived.invoke();
+            if (!(message->flags & Message::DoNotTriggerNotification)) {
+                if (message->flags & Message::Highlighted) {
+                    this->tabHighlightRequested.invoke(HighlightState::Highlighted);
+                } else {
+                    this->tabHighlightRequested.invoke(HighlightState::NewMessage);
+                }
             }
 
             this->scrollBar.addHighlight(message->getScrollBarHighlight());

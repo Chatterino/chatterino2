@@ -86,19 +86,26 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
             this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
         /// TABS
-        // text, {regular, hover, unfocused}
-
         if (lightWin) {
             this->tabs.regular = {fg, {bg, QColor("#ccc"), bg}};
-            this->tabs.newMessage = {fg, {bg, QColor("#ccc"), bg}};
-            this->tabs.highlighted = {fg, {bg, QColor("#ccc"), bg}};
-            this->tabs.selected = {QColor("#fff"), {QColor("#333"), QColor("#333"), QColor("#666")}};
+            this->tabs.newMessage = {
+                fg,
+                {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
+                 QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
+                 QBrush(blendColors(themeColorNoSat, "#ccc", 0.9), Qt::FDiagPattern)}};
+            this->tabs.highlighted = {fg, {QColor("#ccc"), QColor("#ccc"), QColor("#bbb")}};
+            this->tabs.selected = {QColor("#fff"),
+                                   {QColor("#777"), QColor("#777"), QColor("#888")}};
         } else {
             this->tabs.regular = {fg, {bg, QColor("#555"), bg}};
-            this->tabs.newMessage = {fg, {bg, QColor("#555"), bg}};
-            this->tabs.highlighted = {fg, {bg, QColor("#555"), bg}};
-            //            this->tabs.selected = {"#000", {themeColor, themeColor, themeColorNoSat}};
-            this->tabs.selected = {QColor("#000"), {QColor("#999"), QColor("#999"), QColor("#888")}};
+            this->tabs.newMessage = {
+                fg,
+                {QBrush(blendColors(themeColor, "#666", 0.7), Qt::FDiagPattern),
+                 QBrush(blendColors(themeColor, "#666", 0.5), Qt::FDiagPattern),
+                 QBrush(blendColors(themeColorNoSat, "#666", 0.7), Qt::FDiagPattern)}};
+            this->tabs.highlighted = {fg, {QColor("#777"), QColor("#777"), QColor("#666")}};
+            this->tabs.selected = {QColor("#000"),
+                                   {QColor("#999"), QColor("#999"), QColor("#888")}};
         }
     }
 
