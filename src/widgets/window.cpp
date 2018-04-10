@@ -11,6 +11,7 @@
 #include "widgets/settingsdialog.hpp"
 #include "widgets/split.hpp"
 
+#include <QApplication>
 #include <QPalette>
 #include <QShortcut>
 #include <QVBoxLayout>
@@ -163,6 +164,8 @@ void Window::closeEvent(QCloseEvent *event)
     }
 
     this->closed.invoke();
+
+    QApplication::exit();
 }
 
 }  // namespace widgets
