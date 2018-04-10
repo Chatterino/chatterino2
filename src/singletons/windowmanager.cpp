@@ -204,7 +204,7 @@ void WindowManager::initialize()
                             channelName_val.toString()));
                     }
 
-                    tab->addToLayout(split, std::make_pair(colNr, -1));
+                    tab->addToLayout(split, std::make_pair(colNr, 10000000));
                 }
                 colNr++;
             }
