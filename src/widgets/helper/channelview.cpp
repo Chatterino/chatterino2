@@ -151,13 +151,13 @@ void ChannelView::queueUpdate()
 
 void ChannelView::layoutMessages()
 {
-    if (!this->layoutCooldown->isActive()) {
-        this->actuallyLayoutMessages();
+    //    if (!this->layoutCooldown->isActive()) {
+    this->actuallyLayoutMessages();
 
-        this->layoutCooldown->start();
-    } else {
-        this->layoutQueued = true;
-    }
+    //        this->layoutCooldown->start();
+    //    } else {
+    //        this->layoutQueued = true;
+    //    }
 }
 
 void ChannelView::actuallyLayoutMessages()
