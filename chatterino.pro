@@ -34,22 +34,13 @@ include(dependencies/humanize.pri)
 include(dependencies/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
+include(dependencies/boost.pri)
 
 # Optional feature: QtWebEngine
 exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
     message(Using QWebEngine)
     QT += webenginewidgets
     DEFINES += "USEWEBENGINE"
-}
-
-# Include boost
-win32 {
-    isEmpty(BOOST_DIRECTORY) {
-        message(Using default boost directory C:\\local\\boost\\)
-        BOOST_DIRECTORY = C:\local\boost\
-    }
-
-    INCLUDEPATH += $$BOOST_DIRECTORY
 }
 
 win32 {
