@@ -166,6 +166,11 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
         painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
     }
 
+    // draw selection
+    if (!selection.isEmpty()) {
+        this->container.paintSelection(painter, messageIndex, selection, y);
+    }
+
     // draw last read message line
     if (isLastReadMessage) {
         QColor color = isWindowFocused ? themeManager.tabs.selected.backgrounds.regular.color()
@@ -192,11 +197,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
     painter.fillRect(buffer->rect(), this->message->flags & Message::Highlighted
                                          ? themeManager.messages.backgrounds.highlighted
                                          : themeManager.messages.backgrounds.regular);
-
-    // draw selection
-    if (!selection.isEmpty()) {
-        this->container.paintSelection(painter, messageIndex, selection);
-    }
 
     // draw message
     this->container.paintElements(painter);

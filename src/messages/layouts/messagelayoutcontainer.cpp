@@ -196,7 +196,7 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffse
 }
 
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
-                                            Selection &selection)
+                                            Selection &selection, int yOffset)
 {
     singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
     QColor selectionColor = themeManager.messages.selection;
@@ -211,8 +211,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
         for (Line &line : this->lines) {
             QRect rect = line.rect;
 
-            rect.setTop(std::max(0, rect.top()));
-            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setTop(std::max(0, rect.top()) + yOffset);
+            rect.setBottom(std::min(this->height, rect.bottom()) + yOffset);
             rect.setLeft(this->elements[line.startIndex]->getRect().left());
             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
@@ -270,8 +270,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                             Line &line = this->lines[lineIndex2];
                             QRect rect = line.rect;
 
-                            rect.setTop(std::max(0, rect.top()));
-                            rect.setBottom(std::min(this->height, rect.bottom()));
+                            rect.setTop(std::max(0, rect.top()) + yOffset);
+                            rect.setBottom(std::min(this->height, rect.bottom()) + yOffset);
                             rect.setLeft(this->elements[line.startIndex]->getRect().left());
                             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
@@ -290,8 +290,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
             QRect rect = line.rect;
 
-            rect.setTop(std::max(0, rect.top()));
-            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setTop(std::max(0, rect.top()) + yOffset);
+            rect.setBottom(std::min(this->height, rect.bottom()) + yOffset);
             rect.setLeft(x);
             rect.setRight(r);
 
@@ -316,8 +316,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
         if (line.endCharIndex < /*=*/selection.max.charIndex) {
             QRect rect = line.rect;
 
-            rect.setTop(std::max(0, rect.top()));
-            rect.setBottom(std::min(this->height, rect.bottom()));
+            rect.setTop(std::max(0, rect.top()) + yOffset);
+            rect.setBottom(std::min(this->height, rect.bottom()) + yOffset);
             rect.setLeft(this->elements[line.startIndex]->getRect().left());
             rect.setRight(this->elements[line.endIndex - 1]->getRect().right());
 
@@ -340,8 +340,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
         QRect rect = line.rect;
 
-        rect.setTop(std::max(0, rect.top()));
-        rect.setBottom(std::min(this->height, rect.bottom()));
+        rect.setTop(std::max(0, rect.top()) + yOffset);
+        rect.setBottom(std::min(this->height, rect.bottom()) + yOffset);
         rect.setLeft(this->elements[line.startIndex]->getRect().left());
         rect.setRight(r);
 
