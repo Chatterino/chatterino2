@@ -30,14 +30,8 @@ public:
     void select(SplitContainer *page);
     void selectIndex(int index);
 
-    SplitContainer *getOrAddSelectedPage()
-    {
-        if (selectedPage == nullptr) {
-            this->addNewPage(true);
-        }
-
-        return selectedPage;
-    }
+    SplitContainer *getOrAddSelectedPage();
+    SplitContainer *getSelectedPage();
 
     void performLayout(bool animate = true);
 

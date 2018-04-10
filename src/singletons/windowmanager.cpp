@@ -186,6 +186,11 @@ void WindowManager::initialize()
                 tab->getTab()->useDefaultTitle = false;
             }
 
+            // selected
+            if (tab_obj.value("selected").toBool(false)) {
+                window.getNotebook().select(tab);
+            }
+
             // load splits
             int colNr = 0;
             for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
@@ -249,6 +254,11 @@ void WindowManager::save()
             // custom tab title
             if (!tab->getTab()->useDefaultTitle) {
                 tab_obj.insert("title", tab->getTab()->getTitle());
+            }
+
+            // selected
+            if (window->getNotebook().getSelectedPage() == tab) {
+                tab_obj.insert("selected", true);
             }
 
             // splits
