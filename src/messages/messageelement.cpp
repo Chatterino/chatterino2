@@ -203,8 +203,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 width += charWidth;
             }
 
-            container.addElement(getTextLayoutElement(text.mid(wordStart), word.width - lastWidth,
-                                                      this->hasTrailingSpace()));
+            container.addElement(
+                getTextLayoutElement(text.mid(wordStart), width, this->hasTrailingSpace()));
             container.breakLine();
         }
     }
