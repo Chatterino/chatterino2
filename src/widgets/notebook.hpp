@@ -19,8 +19,6 @@ class Notebook : public BaseWidget
     Q_OBJECT
 
 public:
-    enum HighlightType { none, highlighted, newMessage };
-
     explicit Notebook(Window *parent, bool _showButtons);
 
     SplitContainer *addNewPage(bool select = false);

@@ -66,6 +66,8 @@ int SplitContainer::splitCount() const
 
 std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
 {
+    widget->getChannelView().tabHighlightRequested.disconnectAll();
+
     // remove reference to chat widget from chatWidgets vector
     auto it = std::find(std::begin(this->splits), std::end(this->splits), widget);
     if (it != std::end(this->splits)) {
@@ -150,6 +152,8 @@ std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
 void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
 {
     this->splits.push_back(widget);
+    widget->getChannelView().tabHighlightRequested.connect(
+        [this](HighlightState state) { this->tab->setHighlightState(state); });
 
     this->refreshTitle();
 
@@ -505,11 +509,6 @@ std::pair<int, int> SplitContainer::getChatPosition(const Split *chatWidget)
 Split *SplitContainer::createChatWidget()
 {
     auto split = new Split(this);
-
-    split->getChannelView().highlightedMessageReceived.connect([this] {
-        // fourtf: error potentionally here
-        this->tab->setHighlightState(HighlightState::Highlighted);  //
-    });
 
     return split;
 }

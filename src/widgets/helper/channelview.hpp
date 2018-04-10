@@ -51,7 +51,7 @@ public:
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
-    pajlada::Signals::NoArgSignal highlightedMessageReceived;
+    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::Signal<const messages::Link &> linkClicked;
 
 protected:
