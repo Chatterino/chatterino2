@@ -10,5 +10,10 @@ win32 {
 
     INCLUDEPATH += $$BOOST_DIRECTORY
 
-    LIBS += -L$$BOOST_DIRECTORY\lib
+    isEmpty(BOOST_LIB_SUFFIX) {
+        message(Using default boost lib directory suffix lib)
+        BOOST_LIB_SUFFIX = lib
+    }
+
+    LIBS += -L$$BOOST_DIRECTORY\$$BOOST_LIB_SUFFIX
 }
