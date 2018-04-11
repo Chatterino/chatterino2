@@ -114,11 +114,7 @@ void runNativeMessagingHost()
         std::cin.read(b, size);
         *(b + size) = '\0';
 
-        nmm.writeByteArray("{\"a\":1}");
-
         nmm.sendToGuiProcess(QByteArray(b, size));
-
-        nmm.writeByteArray("{\"a\":2}");
 
         free(b);
     }

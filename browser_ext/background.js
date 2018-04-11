@@ -10,41 +10,37 @@ const ignoredPages = {
 
 const appName = "com.chatterino.chatterino";
 
-let port;
+/// Connect to port
 
-function matchUrl(url) {
-  if (!url)
-    return;
-
-  const match = url.match(/^https?:\/\/(www\.)?twitch.tv\/([a-zA-Z0-9]+)\/?$/);
-
-  if (match) {
-    const channelName = match[2];
-
-    if (!ignoredPages[channelName]) {
-      selectChannel(channelName);
-    }
-  }
-}
+let port = null;
 
 function connectPort() {
-  let port = chrome.runtime.connectNative("com.chatterino.chatterino");
+  port = chrome.runtime.connectNative("com.chatterino.chatterino");
+  console.log("port connected");
 
   port.onMessage.addListener(function(msg) {
     console.log(msg);
   });
   port.onDisconnect.addListener(function() {
-    console.log("Disconnected");
+    console.log("port disconnected");
+
+    port = null;
   });
 }
 
-function selectChannel(channelName) {
-  console.log(channelName);
+function getPort() {
+  if (port) {
+    return port;
+  } else {
+    // TODO: add cooldown
+    connectPort();
 
-  port.postMessage({channelName: channelName});
+    return port;
+  }
 }
 
-/// add listeners
+/// Tab listeners
+
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
     if (!tab)
@@ -63,3 +59,30 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   matchUrl(changeInfo.url);
 });
+
+
+/// Misc
+
+function matchUrl(url) {
+  if (!url)
+    return;
+
+  const match = url.match(/^https?:\/\/(www\.)?twitch.tv\/([a-zA-Z0-9]+)\/?$/);
+
+  if (match) {
+    const channelName = match[2];
+
+    if (!ignoredPages[channelName]) {
+      selectChannel(channelName);
+    }
+  }
+}
+
+function selectChannel(channelName) {
+  console.log("select" + channelName);
+
+  let port = getPort();
+  if (port) {
+    port.postMessage({action: "select", channelName: channelName});
+  }
+}

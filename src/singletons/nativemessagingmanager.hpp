@@ -16,6 +16,9 @@ public:
     {
     public:
         void run() override;
+
+    private:
+        void handleMessage(const QJsonObject &root);
     };
 
     void writeByteArray(QByteArray a);
