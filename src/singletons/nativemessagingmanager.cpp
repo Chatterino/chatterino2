@@ -8,7 +8,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#ifdef BOOSTLIBS
 #include <boost/interprocess/ipc/message_queue.hpp>
+#endif
 
 #ifdef Q_OS_WIN
 #include <QProcess>
@@ -79,6 +81,7 @@ void NativeMessagingManager::registerHost()
 
 void NativeMessagingManager::openGuiMessageQueue()
 {
+#ifdef BOOSTLIBS
     static ReceiverThread thread;
 
     if (thread.isRunning()) {
@@ -86,13 +89,14 @@ void NativeMessagingManager::openGuiMessageQueue()
     }
 
     thread.start();
+#endif
 }
 
 void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
 {
 #ifdef BOOSTLIBS
     writeByteArray("{\"b\": 1}");
-    ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
+    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
     writeByteArray("{\"b\": 2}");
 
     try {
@@ -108,7 +112,7 @@ void NativeMessagingManager::ReceiverThread::run()
 #ifdef BOOSTLIBS
     ipc::message_queue::remove("chatterino_gui");
 
-    ipc::message_queue messageQueue(ipc::create_only, "chatterino_gui", 100, MESSAGE_SIZE);
+    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
 
     while (true) {
         try {

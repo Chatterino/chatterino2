@@ -36,6 +36,8 @@ Application::Application()
 
     // XXX
     singletons::SettingManager::getInstance().updateWordTypeMask();
+
+    singletons::NativeMessagingManager::getInstance().openGuiMessageQueue();
 }
 
 Application::~Application()
