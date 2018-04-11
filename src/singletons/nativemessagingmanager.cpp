@@ -10,6 +10,8 @@
 
 #ifdef BOOSTLIBS
 #include <boost/interprocess/ipc/message_queue.hpp>
+
+namespace ipc = boost::interprocess;
 #endif
 
 #ifdef Q_OS_WIN
@@ -20,8 +22,6 @@
 
 #define EXTENSION_ID "aeicjepmjkgmbeohnchmpfjbpchogmjn"
 #define MESSAGE_SIZE 1024
-
-namespace ipc = boost::interprocess;
 
 namespace chatterino {
 namespace singletons {

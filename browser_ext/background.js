@@ -10,6 +10,8 @@ const ignoredPages = {
 
 const appName = "com.chatterino.chatterino";
 
+let port;
+
 function matchUrl(url) {
   if (!url)
     return;
@@ -25,24 +27,21 @@ function matchUrl(url) {
   }
 }
 
-var port = chrome.runtime.connectNative("com.chatterino.chatterino");
+function connectPort() {
+  let port = chrome.runtime.connectNative("com.chatterino.chatterino");
 
-port.onMessage.addListener(function(msg) {
-  console.log(msg);
-});
-port.onDisconnect.addListener(function() {
-  console.log("Disconnected");
-});
-port.postMessage({ text: "Hello, my_application" });
+  port.onMessage.addListener(function(msg) {
+    console.log(msg);
+  });
+  port.onDisconnect.addListener(function() {
+    console.log("Disconnected");
+  });
+}
 
 function selectChannel(channelName) {
   console.log(channelName);
 
   port.postMessage({channelName: channelName});
-
-  // chrome.runtime.sendNativeMessage(appName, { "xd": true }, (resp) => {
-  //   console.log(resp);
-  // })
 }
 
 /// add listeners
