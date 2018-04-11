@@ -90,17 +90,22 @@ void NativeMessagingManager::openGuiMessageQueue()
 
 void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
 {
+#ifdef BOOSTLIBS
+    writeByteArray("{\"b\": 1}");
     ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
+    writeByteArray("{\"b\": 2}");
 
     try {
         messageQueue.try_send(array.data(), array.size(), 1);
     } catch (ipc::interprocess_exception &ex) {
         qDebug() << "send to gui process:" << ex.what();
     }
+#endif
 }
 
 void NativeMessagingManager::ReceiverThread::run()
 {
+#ifdef BOOSTLIBS
     ipc::message_queue::remove("chatterino_gui");
 
     ipc::message_queue messageQueue(ipc::create_only, "chatterino_gui", 100, MESSAGE_SIZE);
@@ -119,6 +124,7 @@ void NativeMessagingManager::ReceiverThread::run()
             qDebug() << "received from gui process:" << ex.what();
         }
     }
+#endif
 }
 }  // namespace singletons
 }  // namespace chatterino
