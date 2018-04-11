@@ -37,8 +37,7 @@ You can also add "-o2" to optimize the final binary size but increase compilatio
 *most likely works the same for other Debian-like distros*
 1. install QT Creator `sudo apt-get install qtcreator qtmultimedia5-dev`
 2. install boost-dev  `sudo apt-get install libboost-dev`
-3. copy `include/rapidjson` from [rapidjson](https://github.com/miloyip/rapidjson/releases/latest) into the chatterino directory so that the file `<chatterino2 directory>/rapidjson/document.h` exists
-4. open `chatterino.pro` with QT Creator and build
+3. open `chatterino.pro` with QT Creator and build
 
 #### Ubuntu 18.04
 *most likely works the same for other Debian-like distros*
