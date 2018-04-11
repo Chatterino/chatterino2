@@ -8,16 +8,13 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-//#ifdef USEWINSDK
-//#include <windows.h>
-//#pragma comment(lib, "Advapi32.lib")
-//#endif
-
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 #ifdef Q_OS_WIN
 #include <QProcess>
 #endif
+
+#include <iostream>
 
 #define EXTENSION_ID "aeicjepmjkgmbeohnchmpfjbpchogmjn"
 #define MESSAGE_SIZE 1024
@@ -35,6 +32,16 @@ NativeMessagingManager &NativeMessagingManager::getInstance()
 {
     static NativeMessagingManager manager;
     return manager;
+}
+
+void NativeMessagingManager::writeByteArray(QByteArray a)
+{
+    char *data = a.data();
+    uint32_t size;
+    size = a.size();
+    std::cout.write(reinterpret_cast<char *>(&size), 4);
+    std::cout.write(data, a.size());
+    std::cout.flush();
 }
 
 void NativeMessagingManager::registerHost()
@@ -61,10 +68,12 @@ void NativeMessagingManager::registerHost()
     file.write(document.toJson());
     file.flush();
 
+#ifdef XD
 #ifdef Q_OS_WIN
     // clang-format off
     QProcess::execute("REG ADD \"HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
 // clang-format on
+#endif
 #endif
 }
 
@@ -86,7 +95,7 @@ void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
     try {
         messageQueue.try_send(array.data(), array.size(), 1);
     } catch (ipc::interprocess_exception &ex) {
-        // rip
+        qDebug() << "send to gui process:" << ex.what();
     }
 }
 
@@ -107,7 +116,7 @@ void NativeMessagingManager::ReceiverThread::run()
             QString text = QString::fromUtf8(buf, retSize);
             qDebug() << text;
         } catch (ipc::interprocess_exception &ex) {
-            // rip
+            qDebug() << "received from gui process:" << ex.what();
         }
     }
 }

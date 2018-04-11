@@ -18,6 +18,7 @@ public:
         void run() override;
     };
 
+    void writeByteArray(QByteArray a);
     void registerHost();
     void openGuiMessageQueue();
     void sendToGuiProcess(const QByteArray &array);

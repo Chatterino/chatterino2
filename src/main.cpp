@@ -1,5 +1,7 @@
 #include "application.hpp"
+#include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
+#include "util/networkmanager.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
@@ -7,20 +9,17 @@
 #include <QLibrary>
 #include <QStringList>
 
-#include <iostream>
-
-#include "util/networkmanager.hpp"
-
 #ifdef USEWINSDK
 #include "util/nativeeventhelper.hpp"
 #endif
 
-#include "fstream"
+#include <fstream>
+#include <iostream>
 
 #ifdef Q_OS_WIN
-#include "fcntl.h"
-#include "io.h"
-#include "stdio.h"
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
 #endif
 
 void runNativeMessagingHost();
@@ -90,15 +89,6 @@ int runGui(int argc, char *argv[])
     _exit(0);
 }
 
-void writeByteArray(QByteArray a)
-{
-    char *data = a.data();
-    uint32_t size;
-    size = a.size();
-    std::cout.write(reinterpret_cast<char *>(&size), 4);
-    std::cout.write(data, a.size());
-}
-
 void runNativeMessagingHost()
 {
 #ifdef Q_OS_WIN
@@ -106,7 +96,9 @@ void runNativeMessagingHost()
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    //    std::ofstream xd("C:\\users\\daniel\\desktop\\xd.lmao");
+    std::ofstream xD("C:\Users\daniel\Desktop\1");
+
+    auto &nmm = chatterino::singletons::NativeMessagingManager::getInstance();
 
     while (true) {
         char size_c[4];
@@ -122,11 +114,12 @@ void runNativeMessagingHost()
         std::cin.read(b, size);
         *(b + size) = '\0';
 
-        //        xd << b;
-        //        xd.flush();
+        nmm.writeByteArray("{\"a\":1}");
+
+        nmm.sendToGuiProcess(QByteArray(b, size));
+
+        nmm.writeByteArray("{\"a\":2}");
 
         free(b);
-
-        //        writeByteArray(QString("{\"xd\":1}").toUtf8());
     }
 }
