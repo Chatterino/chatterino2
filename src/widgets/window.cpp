@@ -1,6 +1,5 @@
 #include "widgets/window.hpp"
 #include "singletons/accountmanager.hpp"
-#include "singletons/channelmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"

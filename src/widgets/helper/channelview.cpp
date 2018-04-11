@@ -4,7 +4,6 @@
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/channelmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"

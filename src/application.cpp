@@ -4,6 +4,7 @@
 #include "singletons/commandmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/loggingmanager.hpp"
+#include "singletons/nativemessagingmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -17,6 +18,8 @@ namespace chatterino {
 
 Application::Application()
 {
+    singletons::NativeMessagingManager::getInstance().registerHost();
+
     singletons::WindowManager::getInstance();
 
     singletons::LoggingManager::getInstance();

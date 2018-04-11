@@ -5,6 +5,7 @@
 #include "singletons/accountmanager.hpp"
 #include "singletons/pathmanager.hpp"
 
+#include <QApplication>
 #include <QFile>
 #include <QRegularExpression>
 
@@ -111,7 +112,13 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         if (!dryRun && twitchChannel != nullptr) {
-            if (commandName == "/uptime") {
+            if (commandName == "/debug-args") {
+                QString msg = QApplication::instance()->arguments().join(' ');
+
+                channel->addMessage(messages::Message::createSystemMessage(msg));
+
+                return "";
+            } else if (commandName == "/uptime") {
                 const auto &streamStatus = twitchChannel->GetStreamStatus();
 
                 QString messageText =
