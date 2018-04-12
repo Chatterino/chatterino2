@@ -34,6 +34,7 @@ include(dependencies/humanize.pri)
 include(dependencies/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
+include(dependencies/websocketpp.pri)
 include(dependencies/boost.pri)
 
 # Optional feature: QtWebEngine
