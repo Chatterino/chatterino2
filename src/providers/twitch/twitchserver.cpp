@@ -90,7 +90,8 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 
     TwitchMessageBuilder builder(chan.get(), message, args);
 
-    if (!builder.isIgnored()) {
+    const static std::vector<QString> vec{"airbrushgrenade", "scizth0"};
+    if (!builder.isIgnored() && std::find(vec.begin(), vec.end(), message->nick()) == vec.end()) {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {
             TwitchServer::getInstance().mentionsChannel->addMessage(_message);

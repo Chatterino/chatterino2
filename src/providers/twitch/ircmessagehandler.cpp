@@ -11,6 +11,7 @@
 #include "singletons/windowmanager.hpp"
 
 #include <memory>
+#include <algorithm>
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -159,7 +160,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
 
-    if (!builder.isIgnored()) {
+    const static std::vector<QString> vec{"airbrushgrenade", "scizth0"};
+    if (!builder.isIgnored() && std::find(vec.begin(), vec.end(), message->nick()) == vec.end()) {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {
             TwitchServer::getInstance().mentionsChannel->addMessage(_message);
