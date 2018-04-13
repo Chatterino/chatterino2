@@ -175,12 +175,12 @@ void BaseWindow::themeRefreshEvent()
         for (RippleEffectButton *button : this->buttons) {
             button->setMouseEffectColor(this->themeManager.window.text);
         }
+    } else {
+        QPalette palette;
+        palette.setColor(QPalette::Background, this->themeManager.window.background);
+        palette.setColor(QPalette::Foreground, this->themeManager.window.text);
+        this->setPalette(palette);
     }
-
-    QPalette palette;
-    palette.setColor(QPalette::Background, this->themeManager.window.background);
-    palette.setColor(QPalette::Foreground, this->themeManager.window.text);
-    this->setPalette(palette);
 }
 
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
@@ -221,7 +221,9 @@ void BaseWindow::changeEvent(QEvent *)
     }
 #endif
 
+#ifndef Q_OS_WIN
     this->update();
+#endif
 }
 
 void BaseWindow::leaveEvent(QEvent *)
