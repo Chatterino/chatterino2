@@ -96,8 +96,6 @@ void runNativeMessagingHost()
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    std::ofstream xD("C:\Users\daniel\Desktop\1");
-
     auto &nmm = chatterino::singletons::NativeMessagingManager::getInstance();
 
     while (true) {
