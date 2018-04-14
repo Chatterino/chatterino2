@@ -326,7 +326,14 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
     QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
+
+    # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
+
+    equals(QMAKE_CXX, "clang++") {
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
+    }
 }
 
 # do not use windows min/max macros
