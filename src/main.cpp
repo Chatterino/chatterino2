@@ -104,7 +104,9 @@ void runNativeMessagingHost()
 
     auto &nmm = chatterino::singletons::NativeMessagingManager::getInstance();
 
+#if 0
     bool bigEndian = isBigEndian();
+#endif
 
     while (true) {
         char size_c[4];
@@ -114,6 +116,9 @@ void runNativeMessagingHost()
             break;
         }
 
+        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+#if 0
+        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
         uint32_t size = 0;
         if (bigEndian) {
             size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
@@ -122,6 +127,7 @@ void runNativeMessagingHost()
             size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
                    static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
         }
+#endif
 
         char *b = (char *)malloc(size + 1);
         std::cin.read(b, size);
