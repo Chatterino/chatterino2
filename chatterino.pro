@@ -325,6 +325,7 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
     QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
 }
 
 # do not use windows min/max macros
