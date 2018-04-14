@@ -54,7 +54,8 @@ QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     return "http:" + emote.toString();
 }
 
-void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, const QString &tooltip, util::EmoteData &emoteData)
+void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, const QString &tooltip,
+                        util::EmoteData &emoteData)
 {
     QString url1x = GetFFZEmoteLink(urls, "1");
     QString url2x = GetFFZEmoteLink(urls, "2");
@@ -139,7 +140,7 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
 
             link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
-            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [this, &code, &link] {
+            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&code, &link] {
                 return util::EmoteData(new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
             });
 
@@ -186,13 +187,12 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
 
                 QJsonObject urls = emoteObject.value("urls").toObject();
 
-                auto emote =
-                    this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &urls] {
-                        util::EmoteData emoteData;
-                        FillInFFZEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
+                auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [&code, &urls] {
+                    util::EmoteData emoteData;
+                    FillInFFZEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
 
-                        return emoteData;
-                    });
+                    return emoteData;
+                });
 
                 this->ffzChannelEmotes.insert(code, emote);
                 map->insert(code, emote);

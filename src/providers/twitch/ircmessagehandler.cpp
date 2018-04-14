@@ -10,8 +10,6 @@
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
 
-#include <memory>
-
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
 
@@ -19,14 +17,9 @@ namespace chatterino {
 namespace providers {
 namespace twitch {
 
-IrcMessageHandler::IrcMessageHandler(singletons::ResourceManager &_resourceManager)
-    : resourceManager(_resourceManager)
-{
-}
-
 IrcMessageHandler &IrcMessageHandler::getInstance()
 {
-    static IrcMessageHandler instance(singletons::ResourceManager::getInstance());
+    static IrcMessageHandler instance;
     return instance;
 }
 

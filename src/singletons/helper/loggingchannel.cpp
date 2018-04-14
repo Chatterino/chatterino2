@@ -88,6 +88,7 @@ QString LoggingChannel::generateClosingString(const QDateTime &now) const
 
 void LoggingChannel::appendLine(const QString &line)
 {
+    /*
     auto a1 = line.toUtf8();
     auto a2 = line.toLatin1();
     auto a3 = line.toLocal8Bit();
@@ -95,6 +96,7 @@ void LoggingChannel::appendLine(const QString &line)
     auto a4 = line.data();
 
     auto a5 = line.toStdString();
+    */
 
     // this->fileHandle.write(a5.c_str(), a5.length());
     // this->fileHandle.write(a5.c_str(), a5.length());

@@ -3,7 +3,7 @@
 namespace chatterino {
 namespace singletons {
 
-static void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
+void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
 template <typename Type>
 class ChatterinoSetting : public pajlada::Settings::Setting<Type>
@@ -20,8 +20,6 @@ public:
     {
         _registerSetting(this->data);
     }
-
-    void saveRecall();
 
     ChatterinoSetting &operator=(const Type &newValue)
     {

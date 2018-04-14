@@ -11,7 +11,7 @@
 namespace chatterino {
 namespace singletons {
 
-static void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
+void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
 class SettingManager : public QObject
 {

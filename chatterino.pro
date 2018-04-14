@@ -109,6 +109,7 @@ SOURCES += \
     src/util/completionmodel.cpp \
     src/singletons/helper/loggingchannel.cpp \
     src/singletons/helper/moderationaction.cpp \
+    src/singletons/helper/chatterinosetting.cpp \
     src/singletons/loggingmanager.cpp \
     src/singletons/pathmanager.cpp \
     src/singletons/resourcemanager.cpp \

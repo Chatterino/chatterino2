@@ -45,10 +45,13 @@ IgnoreUsersPage::IgnoreUsersPage()
         {
             auto add = addremove.emplace<QPushButton>("Ignore user");
             auto remove = addremove.emplace<QPushButton>("Unignore User");
+            UNUSED(add);     // TODO: Add on-clicked event
+            UNUSED(remove);  // TODO: Add on-clicked event
             addremove->addStretch(1);
         }
 
         auto userList = group.emplace<QListView>();
+        UNUSED(userList);  // TODO: Fill this list in with ignored users
     }
 }
 

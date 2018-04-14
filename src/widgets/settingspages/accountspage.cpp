@@ -24,7 +24,7 @@ AccountsPage::AccountsPage()
         this->removeButton = buttons->addButton("Remove", QDialogButtonBox::NoRole);
     }
 
-    auto accountSwitch = layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
+    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
 
     // ----
     QObject::connect(this->addButton, &QPushButton::clicked, []() {

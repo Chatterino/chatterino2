@@ -19,7 +19,9 @@ public:
     StreamView(std::shared_ptr<Channel> channel, const QUrl &url);
 
 private:
+#ifdef USEWEBENGINE
     QWebEngineView *stream;
+#endif
 };
 
 }  // namespace widgets

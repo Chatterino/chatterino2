@@ -108,9 +108,9 @@ protected:
     int getXFromIndex(int index) override;
 
 private:
+    float scale;
     QString line1;
     QString line2;
-    float scale;
 };
 
 }  // namespace layouts

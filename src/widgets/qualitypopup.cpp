@@ -43,8 +43,6 @@ void QualityPopup::okButtonClicked()
 {
     QString channelURL = "twitch.tv/" + this->channelName;
 
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-
     try {
         streamlink::OpenStreamlink(channelURL, this->ui.selector.currentText());
     } catch (const streamlink::Exception &ex) {

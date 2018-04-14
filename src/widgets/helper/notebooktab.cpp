@@ -63,7 +63,7 @@ NotebookTab::NotebookTab(Notebook *_notebook)
 
     this->menu.addAction(enableHighlightsOnNewMessageAction);
 
-    QObject::connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool newValue) {
+    QObject::connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [](bool newValue) {
         debug::Log("New value is {}", newValue);  //
     });
 }

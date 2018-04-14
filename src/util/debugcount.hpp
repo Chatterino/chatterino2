@@ -52,6 +52,7 @@ public:
 
     QString toString()
     {
+        return "";
     }
 };
 

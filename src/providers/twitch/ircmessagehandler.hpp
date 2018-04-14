@@ -3,19 +3,12 @@
 #include <IrcMessage>
 
 namespace chatterino {
-namespace singletons {
-class ChannelManager;
-class ResourceManager;
-}  // namespace singletons
-
 namespace providers {
 namespace twitch {
 
 class IrcMessageHandler
 {
-    IrcMessageHandler(singletons::ResourceManager &resourceManager);
-
-    singletons::ResourceManager &resourceManager;
+    IrcMessageHandler() = default;
 
 public:
     static IrcMessageHandler &getInstance();

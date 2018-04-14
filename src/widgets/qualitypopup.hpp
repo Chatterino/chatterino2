@@ -1,17 +1,13 @@
 #pragma once
 
+#include "basewindow.hpp"
+
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QHBoxLayout>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QWidget>
-
-#include "basewindow.hpp"
-#include "singletons/settingsmanager.hpp"
 
 namespace chatterino {
-
 namespace widgets {
 
 class QualityPopup : public BaseWindow

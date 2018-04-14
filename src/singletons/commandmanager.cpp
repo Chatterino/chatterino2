@@ -254,7 +254,7 @@ CommandManager::Command::Command(QString _text)
     int index = _text.indexOf(' ');
 
     if (index == -1) {
-        this->name == _text;
+        this->name = _text;
         return;
     }
 

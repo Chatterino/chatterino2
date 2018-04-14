@@ -282,11 +282,11 @@ ResourceManager::ResourceManager()
     , cheerBadge1000(lli(":/images/cheer1000"))
     , cheerBadge100(lli(":/images/cheer100"))
     , cheerBadge1(lli(":/images/cheer1"))
-    , buttonBan(lli(":/images/button_ban.png", 0.25))
-    , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
     , moderationmode_enabled(lli(":/images/moderatormode_enabled"))
     , moderationmode_disabled(lli(":/images/moderatormode_disabled"))
     , splitHeaderContext(lli(":/images/tool_moreCollapser_off16.png"))
+    , buttonBan(lli(":/images/button_ban.png", 0.25))
+    , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
 {
     this->loadDynamicTwitchBadges();
 
