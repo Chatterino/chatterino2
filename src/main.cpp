@@ -22,6 +22,14 @@
 #include <stdio.h>
 #endif
 
+bool isBigEndian()
+{
+    int test = 1;
+    char *p = (char *)&test;
+
+    return p[0] == 0;
+}
+
 void runNativeMessagingHost();
 int runGui(int argc, char *argv[]);
 
@@ -68,14 +76,12 @@ int runGui(int argc, char *argv[])
     // Initialize NetworkManager
     chatterino::util::NetworkManager::init();
 
-    int ret = 0;
-
     {
         // Initialize application
         chatterino::Application app;
 
         // Start the application
-        ret = app.run(a);
+        app.run(a);
 
         // Application will go out of scope here and deinitialize itself
     }
@@ -98,6 +104,8 @@ void runNativeMessagingHost()
 
     auto &nmm = chatterino::singletons::NativeMessagingManager::getInstance();
 
+    bool bigEndian = isBigEndian();
+
     while (true) {
         char size_c[4];
         std::cin.read(size_c, 4);
@@ -106,7 +114,14 @@ void runNativeMessagingHost()
             break;
         }
 
-        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+        uint32_t size = 0;
+        if (bigEndian) {
+            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
+                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
+        } else {
+            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
+                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
+        }
 
         char *b = (char *)malloc(size + 1);
         std::cin.read(b, size);
