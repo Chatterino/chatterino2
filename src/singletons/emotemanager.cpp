@@ -157,7 +157,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
 {
     printf("[EmoteManager] Reload FFZ Channel Emotes for channel %s\n", qPrintable(channelName));
 
-    QString url("http://api.frankerfacez.com/v1/room/" + channelName);
+    QString url("https://api.frankerfacez.com/v1/room/" + channelName);
 
     util::NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
