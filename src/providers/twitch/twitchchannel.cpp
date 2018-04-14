@@ -181,14 +181,16 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
+    bool gotNewLiveStatus = false;
     {
         std::lock_guard<std::mutex> lock(this->streamStatusMutex);
         if (this->streamStatus.live != newLiveStatus) {
+            gotNewLiveStatus = true;
             this->streamStatus.live = newLiveStatus;
         }
     }
 
-    if (newLiveStatus) {
+    if (gotNewLiveStatus) {
         this->updateLiveInfo.invoke();
     }
 }
