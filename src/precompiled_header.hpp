@@ -157,4 +157,12 @@
 #define UNUSED(x) (void)(x)
 #endif
 
+#ifndef ATTR_UNUSED
+#ifdef Q_OS_WIN
+#define ATTR_UNUSED
+#else
+#define ATTR_UNUSED __attribute__((unused))
+#endif
+#endif
+
 #endif
