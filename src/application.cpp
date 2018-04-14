@@ -5,6 +5,7 @@
 #include "singletons/emotemanager.hpp"
 #include "singletons/loggingmanager.hpp"
 #include "singletons/nativemessagingmanager.hpp"
+#include "singletons/pubsubmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -38,6 +39,63 @@ Application::Application()
     singletons::SettingManager::getInstance().updateWordTypeMask();
 
     singletons::NativeMessagingManager::getInstance().openGuiMessageQueue();
+    auto &pubsub = singletons::PubSubManager::getInstance();
+
+    pubsub.sig.whisper.sent.connect([](const auto &msg) {
+        debug::Log("WHISPER SENT LOL");  //
+    });
+
+    pubsub.sig.whisper.received.connect([](const auto &msg) {
+        debug::Log("WHISPER RECEIVED LOL");  //
+    });
+
+    pubsub.sig.moderation.chatCleared.connect([&](const auto &action) {
+        debug::Log("Chat cleared by {}", action.source.name);  //
+    });
+
+    pubsub.sig.moderation.modeChanged.connect([&](const auto &action) {
+        debug::Log("Mode {} was turned {} by {} (duration {})", (int &)action.mode,
+                   (bool &)action.state, action.source.name, action.args.duration);
+    });
+
+    pubsub.sig.moderation.moderationStateChanged.connect([&](const auto &action) {
+        debug::Log("User {} was {} by {}", action.target.id, action.modded ? "modded" : "unmodded",
+                   action.source.name);
+    });
+
+    pubsub.sig.moderation.userTimedOut.connect([&](const auto &action) {
+        debug::Log("User {}({}) was timed out by {} for {} seconds with reason: '{}'",
+                   action.target.name, action.target.id, action.source.name, action.duration,
+                   action.reason);
+    });
+
+    pubsub.sig.moderation.userBanned.connect([&](const auto &action) {
+        debug::Log("User {}({}) was banned by {} with reason: '{}'", action.target.name,
+                   action.target.id, action.source.name, action.reason);
+    });
+
+    pubsub.sig.moderation.userUnbanned.connect([&](const auto &action) {
+        debug::Log(
+            "User {}({}) was unbanned by {}. User was previously {}", action.target.name,
+            action.target.id, action.source.name,
+            action.previousState == singletons::UnbanAction::Banned ? "banned" : "timed out");
+    });
+
+    auto &accountManager = singletons::AccountManager::getInstance();
+
+    pubsub.Start();
+
+    auto RequestModerationActions = [&]() {
+        pubsub.UnlistenAllModerationActions();
+        // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
+        // pubsub.UnlistenAllAuthedTopics();
+
+        pubsub.ListenToWhispers(singletons::AccountManager::getInstance().Twitch.getCurrent());  //
+    };
+
+    accountManager.Twitch.userChanged.connect(RequestModerationActions);
+
+    RequestModerationActions();
 }
 
 Application::~Application()

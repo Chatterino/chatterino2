@@ -133,7 +133,7 @@ public:
                 if (cachedFile.open(QIODevice::ReadOnly)) {
                     QByteArray bytes = cachedFile.readAll();
 
-                    qDebug() << "loaded cached resource" << this->data.request.url();
+                    // qDebug() << "Loaded cached resource" << this->data.request.url();
 
                     onFinished(bytes);
 

@@ -6,10 +6,11 @@ namespace providers {
 namespace twitch {
 
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
-                             const QString &_oauthClient)
+                             const QString &_oauthClient, const QString &_userID)
     : oauthClient(_oauthClient)
     , oauthToken(_oauthToken)
     , userName(_username)
+    , userId(_userID)
     , _isAnon(_username == ANONYMOUS_USERNAME)
 {
 }
@@ -32,11 +33,6 @@ const QString &TwitchAccount::getOAuthToken() const
 const QString &TwitchAccount::getUserId() const
 {
     return this->userId;
-}
-
-void TwitchAccount::setUserId(const QString &id)
-{
-    this->userId = id;
 }
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)

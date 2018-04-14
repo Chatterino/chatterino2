@@ -172,7 +172,11 @@ SOURCES += \
     src/widgets/helper/signallabel.cpp \
     src/widgets/helper/debugpopup.cpp \
     src/util/debugcount.cpp \
-    src/singletons/nativemessagingmanager.cpp
+    src/singletons/nativemessagingmanager.cpp \
+    src/singletons/pubsubmanager.cpp \
+    src/util/rapidjson-helpers.cpp \
+    src/singletons/helper/pubsubhelpers.cpp \
+    src/singletons/helper/pubsubactions.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -289,7 +293,11 @@ HEADERS  += \
     src/widgets/helper/debugpopup.hpp \
     src/version.hpp \
     src/singletons/settingsmanager.hpp \
-    src/singletons/nativemessagingmanager.hpp
+    src/singletons/nativemessagingmanager.hpp \
+    src/singletons/pubsubmanager.hpp \
+    src/util/rapidjson-helpers.hpp \
+    src/singletons/helper/pubsubhelpers.hpp \
+    src/singletons/helper/pubsubactions.hpp
 
 RESOURCES += \
     resources/resources.qrc

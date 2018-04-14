@@ -606,7 +606,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         } else if (badge.startsWith("subscriber/")) {
             if (channelResources.loaded == false) {
-                qDebug() << "Channel resources are not loaded, can't add the subscriber badge";
+                // qDebug() << "Channel resources are not loaded, can't add the subscriber badge";
                 continue;
             }
 

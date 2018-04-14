@@ -312,8 +312,6 @@ ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
 
 void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 {
-    qDebug() << "Load channel data for" << roomID;
-
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + roomID + "/display?language=en";
 
     util::NetworkRequest req(url);
@@ -393,7 +391,6 @@ void ResourceManager::loadDynamicTwitchBadges()
     req.setCaller(QThread::currentThread());
     req.getJSON([this](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
-        qDebug() << "badges fetched";
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
             QJsonObject versions = it.value().toObject().value("versions").toObject();
 
@@ -424,7 +421,6 @@ void ResourceManager::loadChatterinoBadges()
 
     req.getJSON([this](QJsonObject &root) {
         QJsonArray badgeVariants = root.value("badges").toArray();
-        qDebug() << "chatbadges fetched";
         for (QJsonArray::iterator it = badgeVariants.begin(); it != badgeVariants.end(); ++it) {
             QJsonObject badgeVariant = it->toObject();
             const std::string badgeVariantTooltip =

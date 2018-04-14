@@ -279,11 +279,13 @@ QString ChannelView::getSelectedText()
     }
 
     qDebug() << "xd >>>>";
-    for (int msg = selection.min.messageIndex; msg <= selection.max.messageIndex; msg++) {
+    for (int msg = selection.selectionMin.messageIndex; msg <= selection.selectionMax.messageIndex;
+         msg++) {
         MessageLayoutPtr layout = messagesSnapshot[msg];
-        int from = msg == selection.min.messageIndex ? selection.min.charIndex : 0;
-        int to = msg == selection.max.messageIndex ? selection.max.charIndex
-                                                   : layout->getLastCharacterIndex() + 1;
+        int from =
+            msg == selection.selectionMin.messageIndex ? selection.selectionMin.charIndex : 0;
+        int to = msg == selection.selectionMax.messageIndex ? selection.selectionMax.charIndex
+                                                            : layout->getLastCharacterIndex() + 1;
 
         qDebug() << "from:" << from << ", to:" << to;
 
@@ -405,8 +407,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     // on message removed
     this->messageRemovedConnection =
         newChannel->messageRemovedFromStart.connect([this](MessagePtr &) {
-            this->selection.min.messageIndex--;
-            this->selection.max.messageIndex--;
+            this->selection.selectionMin.messageIndex--;
+            this->selection.selectionMax.messageIndex--;
             this->selection.start.messageIndex--;
             this->selection.end.messageIndex--;
 

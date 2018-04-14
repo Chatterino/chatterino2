@@ -1,10 +1,10 @@
 #pragma once
 
-#include <memory>
-
 #include "providers/irc/abstractircserver.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchchannel.hpp"
+
+#include <memory>
 
 namespace chatterino {
 namespace providers {

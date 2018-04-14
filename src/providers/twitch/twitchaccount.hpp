@@ -10,14 +10,14 @@ namespace twitch {
 class TwitchAccount
 {
 public:
-    TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient);
+    TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient,
+                  const QString &_userID);
 
     const QString &getUserName() const;
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
 
     const QString &getUserId() const;
-    void setUserId(const QString &id);
 
     // Attempts to update the users OAuth Client ID
     // Returns true if the value has changed, otherwise false
@@ -34,8 +34,8 @@ public:
 private:
     QString oauthClient;
     QString oauthToken;
-    QString userId;
     QString userName;
+    QString userId;
     const bool _isAnon;
 };
 
