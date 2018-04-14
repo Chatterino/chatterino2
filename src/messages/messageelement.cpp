@@ -203,6 +203,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 width += charWidth;
             }
 
+            UNUSED(lastWidth);  // XXX: What should this be used for (if anything)? KKona
+
             container.addElement(
                 getTextLayoutElement(text.mid(wordStart), width, this->hasTrailingSpace()));
             container.breakLine();
