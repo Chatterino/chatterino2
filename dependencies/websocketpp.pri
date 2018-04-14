@@ -1,7 +1,6 @@
 INCLUDEPATH += $$PWD/../lib/websocketpp
-INCLUDEPATH += C:/local/openssl-64/include
-LIBS += -LC:\local\openssl-64\lib
-# LIBS += -LC:\local\openssl-64\lib\VC
+INCLUDEPATH += C:/local/openssl/include
+LIBS += -LC:\local\openssl\lib
 
 LIBS += -llibssl
 LIBS += -llibcrypto
