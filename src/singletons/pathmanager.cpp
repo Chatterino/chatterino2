@@ -1,5 +1,6 @@
-#include "pathmanager.hpp"
+#include "singletons/pathmanager.hpp"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -23,10 +24,14 @@ bool PathManager::init(int argc, char **argv)
         }
     }
 
+    if (QFileInfo::exists(QCoreApplication::applicationDirPath() + "/portable")) {
+        portable = true;
+    }
+
     // Root path = %APPDATA%/Chatterino or the folder that the executable resides in
     QString rootPath;
     if (portable) {
-        rootPath.append(QDir::currentPath());
+        rootPath.append(QCoreApplication::applicationDirPath());
     } else {
         // Get settings path
         rootPath.append(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
