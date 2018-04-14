@@ -54,7 +54,7 @@ QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     return "http:" + emote.toString();
 }
 
-void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, util::EmoteData &emoteData)
+void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, const QString &tooltip, util::EmoteData &emoteData)
 {
     QString url1x = GetFFZEmoteLink(urls, "1");
     QString url2x = GetFFZEmoteLink(urls, "2");
@@ -62,14 +62,14 @@ void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, util::Emot
 
     assert(!url1x.isEmpty());
 
-    emoteData.image1x = new Image(url1x, 1, code, code);
+    emoteData.image1x = new Image(url1x, 1, code, tooltip);
 
     if (!url2x.isEmpty()) {
-        emoteData.image2x = new Image(url2x, 0.5, code, code);
+        emoteData.image2x = new Image(url2x, 0.5, code, tooltip);
     }
 
     if (!url3x.isEmpty()) {
-        emoteData.image3x = new Image(url3x, 0.25, code, code);
+        emoteData.image3x = new Image(url3x, 0.25, code, tooltip);
     }
 }
 
@@ -189,7 +189,7 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
                 auto emote =
                     this->getFFZChannelEmoteFromCaches().getOrAdd(id, [this, &code, &urls] {
                         util::EmoteData emoteData;
-                        FillInFFZEmoteData(urls, code + "<br/>Channel FFZ Emote", emoteData);
+                        FillInFFZEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
 
                         return emoteData;
                     });
@@ -515,7 +515,7 @@ void EmoteManager::loadFFZEmotes()
                 QJsonObject urls = object.value("urls").toObject();
 
                 util::EmoteData emoteData;
-                FillInFFZEmoteData(urls, code + "<br/>Global FFZ Emote", emoteData);
+                FillInFFZEmoteData(urls, code, code + "<br/>Global FFZ Emote", emoteData);
 
                 this->ffzGlobalEmotes.insert(code, emoteData);
                 codes.push_back(code.toStdString());
