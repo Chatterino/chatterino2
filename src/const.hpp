@@ -4,12 +4,12 @@
 
 namespace chatterino {
 
-static const char *ANONYMOUS_USERNAME_LABEL = " - anonymous - ";
+static const char *ANONYMOUS_USERNAME_LABEL __attribute__((unused)) = " - anonymous - ";
 
 namespace providers {
 namespace twitch {
 
-static const char *ANONYMOUS_USERNAME = "justinfan64537";
+static const char *ANONYMOUS_USERNAME __attribute__((unused)) = "justinfan64537";
 
 }  // namespace twitch
 }  // namespace providers
