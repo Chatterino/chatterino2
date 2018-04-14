@@ -152,4 +152,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
+
 #endif
