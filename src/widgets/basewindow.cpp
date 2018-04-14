@@ -168,7 +168,6 @@ void BaseWindow::themeRefreshEvent()
 {
     if (this->enableCustomFrame) {
         QPalette palette;
-        //        palette.setColor(QPalette::Background, this->themeManager.window.background);
         palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
         palette.setColor(QPalette::Foreground, this->themeManager.window.text);
         this->setPalette(palette);
@@ -177,6 +176,11 @@ void BaseWindow::themeRefreshEvent()
             button->setMouseEffectColor(this->themeManager.window.text);
         }
     }
+
+    QPalette palette;
+    palette.setColor(QPalette::Background, this->themeManager.window.background);
+    palette.setColor(QPalette::Foreground, this->themeManager.window.text);
+    this->setPalette(palette);
 }
 
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
@@ -216,6 +220,8 @@ void BaseWindow::changeEvent(QEvent *)
                                             : TitleBarButton::Maximize);
     }
 #endif
+
+    this->update();
 }
 
 void BaseWindow::leaveEvent(QEvent *)

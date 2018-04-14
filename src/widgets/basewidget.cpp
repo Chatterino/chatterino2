@@ -26,6 +26,11 @@ BaseWidget::BaseWidget(BaseWidget *parent, Qt::WindowFlags f)
     this->init();
 }
 
+BaseWidget::~BaseWidget()
+{
+    this->themeConnection.disconnect();
+}
+
 float BaseWidget::getScale() const
 {
     //    return 1.f;
@@ -82,14 +87,10 @@ void BaseWidget::setScaleIndependantHeight(int value)
 
 void BaseWidget::init()
 {
-    pajlada::Signals::Connection connection = this->themeManager.updated.connect([this]() {
+    this->themeConnection = this->themeManager.updated.connect([this]() {
         this->themeRefreshEvent();
 
         this->update();
-    });
-
-    QObject::connect(this, &QObject::destroyed, [connection]() mutable {
-        connection.disconnect();  //
     });
 }
 

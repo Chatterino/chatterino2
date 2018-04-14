@@ -29,7 +29,7 @@ class SplitHeader : public BaseWidget
 
 public:
     explicit SplitHeader(Split *_chatWidget);
-    ~SplitHeader();
+    virtual ~SplitHeader();
 
     // Update channel text from chat widget
     void updateChannelText();

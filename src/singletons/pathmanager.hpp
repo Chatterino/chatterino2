@@ -14,8 +14,13 @@ public:
 
     bool init(int argc, char **argv);
 
+    // %APPDATA%/chatterino or ExecutablePath for portable mode
     QString settingsFolderPath;
+
+    // %APPDATA%/chatterino/Custom or ExecutablePath/Custom for portable mode
     QString customFolderPath;
+
+    // %APPDATA%/chatterino/Cache or ExecutablePath/Cache for portable mode
     QString cacheFolderPath;
 
     // Logs

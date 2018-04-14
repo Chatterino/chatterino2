@@ -20,6 +20,7 @@ public:
     explicit BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent,
                         Qt::WindowFlags f = Qt::WindowFlags());
     explicit BaseWidget(BaseWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
+    virtual ~BaseWidget();
 
     singletons::ThemeManager &themeManager;
 
@@ -48,6 +49,8 @@ private:
     QSize scaleIndependantSize;
 
     std::vector<BaseWidget *> widgets;
+
+    pajlada::Signals::Connection themeConnection;
 
     static void setScaleRecursive(float scale, QObject *object);
 
