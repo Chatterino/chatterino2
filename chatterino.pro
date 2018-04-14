@@ -18,7 +18,7 @@ PRECOMPILED_HEADER = src/precompiled_header.hpp
 CONFIG            += precompile_header
 
 # https://bugreports.qt.io/browse/QTBUG-27018
-equals(QMAKE_CXX, "clang++") {
+equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
     TARGET = bin/chatterino
 }
 
