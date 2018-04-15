@@ -203,12 +203,12 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
     QColor selectionColor = themeManager.messages.selection;
 
     // don't draw anything
-    if (selection.min.messageIndex > messageIndex || selection.max.messageIndex < messageIndex) {
+    if (selection.selectionMin.messageIndex > messageIndex || selection.selectionMax.messageIndex < messageIndex) {
         return;
     }
 
     // fully selected
-    if (selection.min.messageIndex < messageIndex && selection.max.messageIndex > messageIndex) {
+    if (selection.selectionMin.messageIndex < messageIndex && selection.selectionMax.messageIndex > messageIndex) {
         for (Line &line : this->lines) {
             QRect rect = line.rect;
 
@@ -226,7 +226,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
     int index = 0;
 
     // start in this message
-    if (selection.min.messageIndex == messageIndex) {
+    if (selection.selectionMin.messageIndex == messageIndex) {
         for (; lineIndex < this->lines.size(); lineIndex++) {
             Line &line = this->lines[lineIndex];
             index = line.startCharIndex;
@@ -236,27 +236,27 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             int x = this->elements[line.startIndex]->getRect().left();
             int r = this->elements[line.endIndex - 1]->getRect().right();
 
-            if (line.endCharIndex < selection.min.charIndex) {
+            if (line.endCharIndex < selection.selectionMin.charIndex) {
                 continue;
             }
 
             for (int i = line.startIndex; i < line.endIndex; i++) {
                 int c = this->elements[i]->getSelectionIndexCount();
 
-                if (index + c > selection.min.charIndex) {
-                    x = this->elements[i]->getXFromIndex(selection.min.charIndex - index);
+                if (index + c > selection.selectionMin.charIndex) {
+                    x = this->elements[i]->getXFromIndex(selection.selectionMin.charIndex - index);
 
                     // ends in same line
-                    if (selection.max.messageIndex == messageIndex &&
-                        line.endCharIndex > /*=*/selection.max.charIndex)  //
+                    if (selection.selectionMax.messageIndex == messageIndex &&
+                        line.endCharIndex > /*=*/selection.selectionMax.charIndex)  //
                     {
                         returnAfter = true;
                         index = line.startCharIndex;
                         for (int i = line.startIndex; i < line.endIndex; i++) {
                             int c = this->elements[i]->getSelectionIndexCount();
 
-                            if (index + c > selection.max.charIndex) {
-                                r = this->elements[i]->getXFromIndex(selection.max.charIndex -
+                            if (index + c > selection.selectionMax.charIndex) {
+                                r = this->elements[i]->getXFromIndex(selection.selectionMax.charIndex -
                                                                      index);
                                 break;
                             }
@@ -265,7 +265,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     }
                     // ends in same line end
 
-                    if (selection.max.messageIndex != messageIndex) {
+                    if (selection.selectionMax.messageIndex != messageIndex) {
                         int lineIndex2 = lineIndex + 1;
                         for (; lineIndex2 < this->lines.size(); lineIndex2++) {
                             Line &line = this->lines[lineIndex2];
@@ -314,7 +314,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
         index = line.startCharIndex;
 
         // just draw the garbage
-        if (line.endCharIndex < /*=*/selection.max.charIndex) {
+        if (line.endCharIndex < /*=*/selection.selectionMax.charIndex) {
             QRect rect = line.rect;
 
             rect.setTop(std::max(0, rect.top()) + yOffset);
@@ -331,8 +331,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
         for (int i = line.startIndex; i < line.endIndex; i++) {
             int c = this->elements[i]->getSelectionIndexCount();
 
-            if (index + c > selection.max.charIndex) {
-                r = this->elements[i]->getXFromIndex(selection.max.charIndex - index);
+            if (index + c > selection.selectionMax.charIndex) {
+                r = this->elements[i]->getXFromIndex(selection.selectionMax.charIndex - index);
                 break;
             }
 

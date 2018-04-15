@@ -3,9 +3,12 @@
 #include "debug/log.hpp"
 #include "messages/message.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
+#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
+#include "singletons/pubsubmanager.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "util/posttothread.hpp"
 #include "util/urlfetch.hpp"
 
 #include <IrcConnection>
@@ -39,6 +42,32 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     this->roomIDchanged.connect([this]() {
         this->refreshLiveStatus();  //
     });
+
+    this->managedConnect(singletons::AccountManager::getInstance().Twitch.userChanged,
+                         [this]() { this->setMod(false); });
+
+    auto refreshPubSubState = [this]() {
+        const auto &x = this;
+        if (!this->hasModRights()) {
+            return;
+        }
+
+        if (this->roomID.isEmpty()) {
+            return;
+        }
+
+        auto account = singletons::AccountManager::getInstance().Twitch.getCurrent();
+        if (account && !account->getUserId().isEmpty()) {
+            singletons::PubSubManager::getInstance().ListenToChannelModerationActions(this->roomID,
+                                                                                      account);
+        }
+    };
+
+    this->userStateChanged.connect(refreshPubSubState);
+    this->roomIDchanged.connect(refreshPubSubState);
+    this->managedConnect(singletons::AccountManager::getInstance().Twitch.userChanged,
+                         refreshPubSubState);
+    refreshPubSubState();
 
     this->fetchMessages.connect([this] {
         this->fetchRecentMessages();  //

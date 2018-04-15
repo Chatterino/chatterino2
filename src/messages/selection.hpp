@@ -47,19 +47,19 @@ struct SelectionItem {
 struct Selection {
     SelectionItem start;
     SelectionItem end;
-    SelectionItem min;
-    SelectionItem max;
+    SelectionItem selectionMin;
+    SelectionItem selectionMax;
 
     Selection() = default;
 
     Selection(const SelectionItem &start, const SelectionItem &end)
         : start(start)
         , end(end)
-        , min(start)
-        , max(end)
+        , selectionMin(start)
+        , selectionMax(end)
     {
-        if (min > max) {
-            std::swap(this->min, this->max);
+        if (selectionMin > selectionMax) {
+            std::swap(this->selectionMin, this->selectionMax);
         }
     }
 
@@ -70,7 +70,7 @@ struct Selection {
 
     bool isSingleMessage() const
     {
-        return this->min.messageIndex == this->max.messageIndex;
+        return this->selectionMin.messageIndex == this->selectionMax.messageIndex;
     }
 };
 

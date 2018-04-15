@@ -10,7 +10,7 @@ namespace twitch {
 
 TwitchAccountManager::TwitchAccountManager()
 {
-    this->anonymousUser.reset(new TwitchAccount(ANONYMOUS_USERNAME, "", ""));
+    this->anonymousUser.reset(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""));
 
     this->currentUsername.connect([this](const auto &newValue, auto) {
         QString newUsername(QString::fromStdString(newValue));
@@ -175,11 +175,8 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
         }
     }
 
-    auto newUser =
-        std::make_shared<TwitchAccount>(userData.username, userData.oauthToken, userData.clientID);
-
-    // Set users User ID without the uid prefix
-    newUser->setUserId(userData.userID);
+    auto newUser = std::make_shared<TwitchAccount>(userData.username, userData.oauthToken,
+                                                   userData.clientID, userData.userID);
 
     std::lock_guard<std::mutex> lock(this->mutex);
 

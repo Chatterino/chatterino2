@@ -114,7 +114,6 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
     req.setCaller(QThread::currentThread());
     req.setTimeout(3000);
     req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
-        debug::Log("Got bttv channel emotes for {}", channelName);
         auto map = _map.lock();
 
         if (_map.expired()) {
@@ -470,7 +469,6 @@ void EmoteManager::loadBTTVEmotes()
     req.setTimeout(30000);
     req.setUseQuickLoadCache(true);
     req.getJSON([this](QJsonObject &root) {
-        debug::Log("Got global bttv emotes");
         auto emotes = root.value("emotes").toArray();
 
         QString urlTemplate = "https:" + root.value("urlTemplate").toString();
@@ -504,8 +502,6 @@ void EmoteManager::loadFFZEmotes()
     req.setCaller(QThread::currentThread());
     req.setTimeout(30000);
     req.getJSON([this](QJsonObject &root) {
-        debug::Log("Got global ffz emotes");
-
         auto sets = root.value("sets").toObject();
 
         std::vector<std::string> codes;

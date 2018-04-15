@@ -8,6 +8,8 @@
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 #include <mutex>
 
 namespace chatterino {
@@ -16,7 +18,7 @@ namespace twitch {
 
 class TwitchServer;
 
-class TwitchChannel final : public Channel
+class TwitchChannel final : public Channel, pajlada::Signals::SignalHolder
 {
     QTimer *liveStatusTimer;
     QTimer *chattersListTimer;
@@ -29,6 +31,11 @@ public:
         QString title;
         QString game;
         QString uptime;
+    };
+
+    struct UserState {
+        bool mod;
+        bool broadcaster;
     };
 
     ~TwitchChannel() final;
@@ -87,6 +94,9 @@ private:
 
     mutable std::mutex streamStatusMutex;
     StreamStatus streamStatus;
+
+    mutable std::mutex userStateMutex;
+    UserState userState;
 
     void fetchRecentMessages();
 
