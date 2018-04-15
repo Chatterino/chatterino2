@@ -1,7 +1,12 @@
 win32 {
-    INCLUDEPATH += C:/local/openssl/include
+    isEmpty(OPENSSL_DIRECTORY) {
+        message(Using default openssl directory C:\\local\\openssl)
+        OPENSSL_DIRECTORY = C:\local\openssl
+    }
 
-    LIBS += -LC:\local\openssl\lib
+    INCLUDEPATH += $$OPENSSL_DIRECTORY\\include
+
+    LIBS += -L$$OPENSSL_DIRECTORY\lib
 
     LIBS += -llibssl
     LIBS += -llibcrypto
