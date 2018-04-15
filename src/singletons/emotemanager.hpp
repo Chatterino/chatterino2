@@ -97,6 +97,8 @@ public:
 
         std::vector<std::string> emoteCodes;
 
+        util::EmoteMap emotes;
+
         bool filled = false;
     };
 
