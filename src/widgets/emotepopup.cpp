@@ -5,6 +5,7 @@
 
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
+#include "singletons/accountmanager.hpp"
 
 using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
@@ -76,6 +77,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
 
+    QString userID = singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserId();
+
+    addEmotes(emoteManager.twitchAccountEmotes[userID.toStdString()].emotes,
+              "Twitch Account Emotes", "Twitch Account Emote");
     addEmotes(emoteManager.bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");

@@ -450,6 +450,10 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
                     std::string code = emoticon["code"].toString().toStdString();
                     emoteData.emoteSets[emoteSetString].push_back({id, code});
                     emoteData.emoteCodes.push_back(code);
+
+                    util::EmoteData emote = getTwitchEmoteById(emoticon["id"].toInt(),
+                                                               emoticon["code"].toString());
+                    emoteData.emotes.insert(emoticon["code"].toString(), emote);
                 }
             }
 
