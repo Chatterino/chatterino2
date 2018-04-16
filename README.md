@@ -47,7 +47,10 @@ Before building run `git submodule update --init --recursive` to get required su
   - Select Qt Creator, and Qt Creator CDB Debugger Support
 
 
-#### Using MSYS2
+### Windows (Using MSYS2)
+Note: This guide is currently out of date and will not work as is.
+Note: This build will have some features missing from the build.
+
 Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org](http://www.msys2.org/).
 Be sure to add `-j <number of threads>` as a make argument so it will use all your cpu cores to build. ![example setup](https://i.imgur.com/qlESlS1.png)
 You can also add `-o2` to optimize the final binary size but increase compilation time, and add `-pipe` to use more ram in compilation but increase compilation speed
