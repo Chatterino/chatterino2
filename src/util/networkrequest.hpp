@@ -135,9 +135,15 @@ public:
 
                     // qDebug() << "Loaded cached resource" << this->data.request.url();
 
-                    onFinished(bytes);
+                    bool success = onFinished(bytes);
 
                     cachedFile.close();
+
+                    if (!success) {
+                        // The images were not successfully loaded from the file
+                        // XXX: Invalidate the cache file so we don't attempt to load it again next
+                        // time
+                    }
                 }
             }
         }
@@ -160,7 +166,9 @@ public:
                                      return;
                                  }
 
-                                 QByteArray bytes = reply->readAll();
+                                 QByteArray readBytes = reply->readAll();
+                                 QByteArray bytes;
+                                 bytes.setRawData(readBytes.data(), readBytes.size());
                                  data.writeToCache(bytes);
                                  onFinished(bytes);
 
@@ -212,18 +220,26 @@ public:
     template <typename FinishedCallback>
     void getJSON(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData(bytes);
             onFinished(object);
+
+            // XXX: Maybe return onFinished? For now I don't want to force onFinished to have a
+            // return value
+            return true;
         });
     }
 
     template <typename FinishedCallback>
     void getJSON2(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData2(bytes);
             onFinished(object);
+
+            // XXX: Maybe return onFinished? For now I don't want to force onFinished to have a
+            // return value
+            return true;
         });
     }
 };

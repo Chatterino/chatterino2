@@ -40,8 +40,8 @@ private:
         int duration;
     };
 
-    QPixmap *currentPixmap;
-    QPixmap *loadedPixmap;
+    QPixmap *currentPixmap = nullptr;
+    QPixmap *loadedPixmap = nullptr;
     std::vector<FrameData> allFrames;
     int currentFrame = 0;
     int currentFrameOffset = 0;

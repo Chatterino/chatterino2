@@ -21,14 +21,12 @@ namespace messages {
 
 Image::Image(const QString &url, qreal scale, const QString &name, const QString &tooltip,
              const QMargins &margin, bool isHat)
-    : currentPixmap(nullptr)
-    , url(url)
+    : url(url)
     , name(name)
     , tooltip(tooltip)
     , margin(margin)
     , ishat(isHat)
     , scale(scale)
-    , isLoading(false)
 {
     util::DebugCount::increase("images");
 }
@@ -65,7 +63,7 @@ void Image::loadImage()
     util::NetworkRequest req(this->getUrl());
     req.setCaller(this);
     req.setUseQuickLoadCache(true);
-    req.get([lli = this](QByteArray bytes) {
+    req.get([lli = this](QByteArray bytes) -> bool {
         QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
         QBuffer buffer(&copy);
         buffer.open(QIODevice::ReadOnly);
@@ -82,6 +80,19 @@ void Image::loadImage()
         }
         if (lli->isLoaded) {
             util::DebugCount::decrease("loaded images");
+        }
+
+        if (reader.imageCount() == -1) {
+            // An error occured in the reader
+            debug::Log("An error occured reading the image: '{}'", reader.errorString());
+            debug::Log("Image url: {}", lli->url);
+            return false;
+        }
+
+        if (reader.imageCount() == 0) {
+            debug::Log("Error: No images read in the buffer");
+            // No images read in the buffer. maybe a cache error?
+            return false;
         }
 
         for (int index = 0; index < reader.imageCount(); ++index) {
@@ -101,6 +112,12 @@ void Image::loadImage()
             }
         }
 
+        if (lli->allFrames.size() != reader.imageCount()) {
+            // debug::Log("Error: Wrong amount of images read");
+            // One or more images failed to load from the buffer
+            // return false;
+        }
+
         if (lli->allFrames.size() > 1) {
             lli->animated = true;
 
@@ -116,6 +133,8 @@ void Image::loadImage()
 
         util::postToThread(
             [] { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
+
+        return true;
     });
 
     singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
