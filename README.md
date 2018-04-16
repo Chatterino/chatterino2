@@ -84,3 +84,5 @@ install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) f
 3. install brew https://brew.sh/
 4. `brew install boost openssl rapidjson`
 5. build the project using Qt Creator
+
+Test 1
