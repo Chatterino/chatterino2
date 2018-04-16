@@ -51,7 +51,7 @@ QString GetFFZEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 
     assert(emote.isString());
 
-    return "http:" + emote.toString();
+    return "https:" + emote.toString();
 }
 
 void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, const QString &tooltip,
