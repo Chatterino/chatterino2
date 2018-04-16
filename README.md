@@ -15,36 +15,36 @@ Before building run `git submodule update --init --recursive` to get required su
 ### Windows
 #### Using Qt Creator
 ##### Visual Studio 2017
-Install Visual Studio 2017 and select "Desktop development with C++" and "Universal Windows Platform development.
+1. Install Visual Studio 2017 and select "Desktop development with C++" and "Universal Windows Platform development.
 
-###### Boost
-Visual Studio 2017 64-bit: https://dl.bintray.com/boostorg/release/1.66.0/binaries/boost_1_66_0-msvc-14.1-64.exe
-When prompted, install boost to C:\local\boost
-When the installation is finished, go to C:\local\boost and rename the "lib64-msvc-14.1" folder to "lib"
+##### Boost
+1. Visual Studio 2017 64-bit: https://dl.bintray.com/boostorg/release/1.66.0/binaries/boost_1_66_0-msvc-14.1-64.exe
+2. When prompted, install boost to C:\local\boost
+3. When the installation is finished, go to C:\local\boost and rename the "lib64-msvc-14.1" folder to "lib"
 
-###### OpenSSL
-For our websocket library, we need OpenSSL 1.1
-Download OpenSSL development library: https://slproweb.com/download/Win64OpenSSL-1_1_0h.exe
-When prompted, install openssl to C:\local\openssl
-When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory"
-For Qt SSL, we need OpenSSL 1.0
-Download OpenSSL light: https://slproweb.com/download/Win64OpenSSL_Light-1_0_2o.exe
-When prompted, install it anywhere
-When prompted, copy the OpenSSL DLLS to "The OpenSSL binaries (/bin) directory"
-Copy the OpenSSL 1.0 files from its /bin folder to C:/local/bin (You will need to create the folder)
-Then copy the OpenSSL 1.1 files from its /bin folder to C:/local/bin (Overwrite any duplicate files)
-Add C:/local/bin to your path folder (Follow guide here if you don't know how to do it: https://www.computerhope.com/issues/ch000549.htm#windows8 )
+##### OpenSSL
+###### For our websocket library, we need OpenSSL 1.1
+1. Download OpenSSL development library: https://slproweb.com/download/Win64OpenSSL-1_1_0h.exe
+2. When prompted, install openssl to C:\local\openssl
+3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory"
+###### For Qt SSL, we need OpenSSL 1.0
+1. Download OpenSSL light: https://slproweb.com/download/Win64OpenSSL_Light-1_0_2o.exe
+2. When prompted, install it anywhere
+3. When prompted, copy the OpenSSL DLLS to "The OpenSSL binaries (/bin) directory"
+4. Copy the OpenSSL 1.0 files from its /bin folder to C:/local/bin (You will need to create the folder)
+5. Then copy the OpenSSL 1.1 files from its /bin folder to C:/local/bin (Overwrite any duplicate files)
+6. Add C:/local/bin to your path folder (Follow guide here if you don't know how to do it: https://www.computerhope.com/issues/ch000549.htm#windows8 )
 
-###### Qt
-Download Qt: https://www.qt.io/download
-Select "Open source" at the bottom of this page
-Then select "Download"
-When prompted which components to install:
- - Under the latest Qt version:
-   - Select MSVC 2017 64-bit (or MSVC 2015 64-bit if you still use Visual Studio 2015)
-   - Optionally, enable Qt WebEngine
- - Under Tools:
-   - Select Qt Creator, and Qt Creator CDB Debugger Support
+##### Qt
+1. Download Qt: https://www.qt.io/download
+2. Select "Open source" at the bottom of this page
+3. Then select "Download"
+###### When prompted which components to install:
+1. Under the latest Qt version:
+  - Select MSVC 2017 64-bit (or MSVC 2015 64-bit if you still use Visual Studio 2015)
+  - Optionally, enable Qt WebEngine
+2. Under Tools:
+  - Select Qt Creator, and Qt Creator CDB Debugger Support
 
 
 #### Using MSYS2
