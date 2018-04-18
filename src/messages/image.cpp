@@ -19,6 +19,8 @@
 namespace chatterino {
 namespace messages {
 
+bool Image::loadedEventQueued = false;
+
 Image::Image(const QString &url, qreal scale, const QString &name, const QString &tooltip,
              const QMargins &margin, bool isHat)
     : url(url)
@@ -63,7 +65,7 @@ void Image::loadImage()
     util::NetworkRequest req(this->getUrl());
     req.setCaller(this);
     req.setUseQuickLoadCache(true);
-    req.get([lli = this](QByteArray bytes) -> bool {
+    req.get([lli = this](QByteArray bytes)->bool {
         QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
         QBuffer buffer(&copy);
         buffer.open(QIODevice::ReadOnly);
@@ -131,8 +133,14 @@ void Image::loadImage()
 
         singletons::EmoteManager::getInstance().incGeneration();
 
-        util::postToThread(
-            [] { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
+        if (!loadedEventQueued) {
+            loadedEventQueued = true;
+
+            QTimer::singleShot(750, [] {
+                singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
+                loadedEventQueued = false;
+            });
+        }
 
         return true;
     });

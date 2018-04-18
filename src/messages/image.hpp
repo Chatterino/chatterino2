@@ -40,6 +40,8 @@ private:
         int duration;
     };
 
+    static bool loadedEventQueued;
+
     QPixmap *currentPixmap = nullptr;
     QPixmap *loadedPixmap = nullptr;
     std::vector<FrameData> allFrames;
