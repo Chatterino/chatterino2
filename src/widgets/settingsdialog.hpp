@@ -32,7 +32,8 @@ public:
     static void showDialog(PreferredTab preferredTab = PreferredTab::NoPreference);
 
 protected:
-    void scaleChangedEvent(float newDpi) override;
+    virtual void scaleChangedEvent(float newDpi) override;
+    virtual void themeRefreshEvent() override;
 
 private:
     void refresh();

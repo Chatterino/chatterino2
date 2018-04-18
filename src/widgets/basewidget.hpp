@@ -41,6 +41,8 @@ protected:
     virtual void scaleChangedEvent(float newScale);
     virtual void themeRefreshEvent();
 
+    virtual void showEvent(QShowEvent *) override;
+
     void setScale(float value);
 
 private:

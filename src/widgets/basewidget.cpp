@@ -112,6 +112,12 @@ void BaseWidget::childEvent(QChildEvent *event)
     }
 }
 
+void BaseWidget::showEvent(QShowEvent *)
+{
+    this->scaleChangedEvent(this->getScale());
+    this->themeRefreshEvent();
+}
+
 void BaseWidget::setScale(float value)
 {
     // update scale value

@@ -56,10 +56,6 @@ void SettingsDialog::initUi()
     }
 
     // ---- misc
-    QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#444"));
-    this->setPalette(palette);
-
     this->ui.tabContainerContainer->setObjectName("tabWidget");
     this->ui.pageStack->setObjectName("pages");
 
@@ -164,6 +160,15 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     this->setStyleSheet(styleSheet);
 
     this->ui.tabContainerContainer->setFixedWidth((int)(200 * newDpi));
+}
+
+void SettingsDialog::themeRefreshEvent()
+{
+    BaseWindow::themeRefreshEvent();
+
+    QPalette palette;
+    palette.setColor(QPalette::Background, QColor("#444"));
+    this->setPalette(palette);
 }
 
 // void SettingsDialog::setChildrensFont(QLayout *object, QFont &font, int indent)

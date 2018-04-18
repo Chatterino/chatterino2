@@ -123,8 +123,6 @@ SelectChannelDialog::SelectChannelDialog()
 
     this->setScaleIndependantSize(300, 210);
 
-    this->setStyleSheet("QRadioButton { color: #fff } QLabel { color: #fff }");
-
     // Shortcuts
     auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
     QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
@@ -255,14 +253,20 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched, QEvent *eve
     return false;
 }
 
-void SelectChannelDialog::SelectChannelDialog::showEvent(QShowEvent *)
-{
-    //    QTimer::singleShot(100, [=] { this->setSelectedChannel(this->selectedChannel); });
-}
-
 void SelectChannelDialog::closeEvent(QCloseEvent *)
 {
     this->closed.invoke();
+}
+
+void SelectChannelDialog::themeRefreshEvent()
+{
+    BaseWindow::themeRefreshEvent();
+
+    if (this->themeManager.isLightTheme()) {
+        this->setStyleSheet("QRadioButton { color: #000 } QLabel { color: #000 }");
+    } else {
+        this->setStyleSheet("QRadioButton { color: #fff } QLabel { color: #fff }");
+    }
 }
 
 }  // namespace widgets

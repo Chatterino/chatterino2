@@ -25,7 +25,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent *) override;
-    virtual void showEvent(QShowEvent *) override;
+    virtual void themeRefreshEvent() override;
 
 private:
     class EventFilter : public QObject

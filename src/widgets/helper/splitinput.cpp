@@ -31,7 +31,6 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
-    this->themeRefreshEvent();
     this->scaleChangedEvent(this->getScale());
 }
 
@@ -112,8 +111,6 @@ void SplitInput::scaleChangedEvent(float scale)
 
     // set maximum height
     this->setMaximumHeight((int)(150 * this->getScale()));
-
-    this->themeRefreshEvent();
 }
 
 void SplitInput::themeRefreshEvent()

@@ -74,7 +74,6 @@ SplitHeader::SplitHeader(Split *_split)
 
     // ---- misc
     this->layout()->setMargin(0);
-    this->themeRefreshEvent();
     this->scaleChangedEvent(this->getScale());
 
     this->updateChannelText();

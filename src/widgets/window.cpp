@@ -61,8 +61,6 @@ Window::Window(singletons::ThemeManager &_themeManager, WindowType _type)
     // set margin
     layout->setMargin(0);
 
-    this->themeRefreshEvent();
-
     /// Initialize program-wide hotkeys
     // CTRL+P: Open Settings Dialog
     CreateWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
