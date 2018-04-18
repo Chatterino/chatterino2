@@ -65,7 +65,7 @@ void Image::loadImage()
     util::NetworkRequest req(this->getUrl());
     req.setCaller(this);
     req.setUseQuickLoadCache(true);
-    req.get([lli = this](QByteArray bytes)->bool {
+    req.get([this](QByteArray bytes) -> bool {
         QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
         QBuffer buffer(&copy);
         buffer.open(QIODevice::ReadOnly);
@@ -76,18 +76,18 @@ void Image::loadImage()
         bool first = true;
 
         // clear stuff before loading the image again
-        lli->allFrames.clear();
-        if (lli->isAnimated()) {
+        this->allFrames.clear();
+        if (this->isAnimated()) {
             util::DebugCount::decrease("animated images");
         }
-        if (lli->isLoaded) {
+        if (this->isLoaded) {
             util::DebugCount::decrease("loaded images");
         }
 
         if (reader.imageCount() == -1) {
             // An error occured in the reader
             debug::Log("An error occured reading the image: '{}'", reader.errorString());
-            debug::Log("Image url: {}", lli->url);
+            debug::Log("Image url: {}", this->url);
             return false;
         }
 
@@ -103,32 +103,42 @@ void Image::loadImage()
 
                 if (first) {
                     first = false;
-                    lli->loadedPixmap = pixmap;
+                    this->loadedPixmap = pixmap;
                 }
 
                 chatterino::messages::Image::FrameData data;
                 data.duration = std::max(20, reader.nextImageDelay());
                 data.image = pixmap;
 
-                lli->allFrames.push_back(data);
+                this->allFrames.push_back(data);
             }
         }
 
-        if (lli->allFrames.size() != reader.imageCount()) {
+        if (this->allFrames.size() != reader.imageCount()) {
             // debug::Log("Error: Wrong amount of images read");
             // One or more images failed to load from the buffer
             // return false;
         }
 
-        if (lli->allFrames.size() > 1) {
-            lli->animated = true;
+        if (this->allFrames.size() > 1) {
+            if (!this->animated) {
+                util::postToThread([this] {
+                    singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
+                        this->gifUpdateTimout();
+                    });  // For some reason when Boost signal is in
+                         // thread scope and thread deletes the signal
+                         // doesn't work, so this is the fix.
+                });
+            }
+
+            this->animated = true;
 
             util::DebugCount::increase("animated images");
         }
 
-        lli->currentPixmap = lli->loadedPixmap;
+        this->currentPixmap = this->loadedPixmap;
 
-        lli->isLoaded = true;
+        this->isLoaded = true;
         util::DebugCount::increase("loaded images");
 
         if (!loadedEventQueued) {
@@ -144,11 +154,6 @@ void Image::loadImage()
 
         return true;
     });
-
-    singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
-        this->gifUpdateTimout();
-    });  // For some reason when Boost signal is in thread scope and thread deletes the signal
-         // doesn't work, so this is the fix.
 }
 
 void Image::gifUpdateTimout()
