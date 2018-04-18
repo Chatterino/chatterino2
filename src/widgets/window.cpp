@@ -100,6 +100,8 @@ Window::Window(singletons::ThemeManager &_themeManager, WindowType _type)
     //        static int index = 0;
     //        ircManager.addFakeMessage(cheerMessages[index++ % cheerMessages.size()]);
     //    });
+
+    this->setWindowTitle("Chatterino 2 Development Build");
 }
 
 Window::WindowType Window::getType()

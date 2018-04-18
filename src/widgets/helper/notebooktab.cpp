@@ -342,7 +342,9 @@ void NotebookTab2::leaveEvent(QEvent *)
 
 void NotebookTab2::dragEnterEvent(QDragEnterEvent *)
 {
-    this->notebook->select(this->page);
+    if (this->notebook->getAllowUserTabManagement()) {
+        this->notebook->select(this->page);
+    }
 }
 
 void NotebookTab2::mouseMoveEvent(QMouseEvent *event)

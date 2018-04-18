@@ -19,6 +19,7 @@
 #include <gdiplus.h>
 #include <windowsx.h>
 #pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "Gdi32.lib")
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -70,11 +71,14 @@ void BaseWindow::init()
             layout->addLayout(buttonLayout);
 
             // title
-            //            QLabel *title = new QLabel("   Chatterino");
-            QLabel *title = new QLabel("");
-            QSizePolicy policy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+            QLabel *title = new QLabel("   Chatterino");
+            QObject::connect(this, &QWidget::windowTitleChanged,
+                             [title](const QString &text) { title->setText("   " + text); });
+
+            QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
             policy.setHorizontalStretch(1);
-            title->setBaseSize(0, 0);
+            //            title->setBaseSize(0, 0);
+            title->setScaledContents(true);
             title->setSizePolicy(policy);
             buttonLayout->addWidget(title);
             this->ui.titleLabel = title;
@@ -106,7 +110,7 @@ void BaseWindow::init()
             this->ui.buttons.push_back(_maxButton);
             this->ui.buttons.push_back(_exitButton);
 
-            buttonLayout->addStretch(1);
+            //            buttonLayout->addStretch(1);
             buttonLayout->addWidget(_minButton);
             buttonLayout->addWidget(_maxButton);
             buttonLayout->addWidget(_exitButton);
@@ -167,6 +171,11 @@ void BaseWindow::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager.window.text);
         this->setPalette(palette);
 
+        QPalette palette_title;
+        palette_title.setColor(QPalette::Foreground,
+                               this->themeManager.isLightTheme() ? "#333" : "#ccc");
+        this->ui.titleLabel->setPalette(palette_title);
+
         for (RippleEffectButton *button : this->ui.buttons) {
             button->setMouseEffectColor(this->themeManager.window.text);
         }
@@ -185,7 +194,7 @@ void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
     button->setScaleIndependantSize(30, 30);
 
     this->ui.buttons.push_back(button);
-    this->ui.titlebarBox->insertWidget(2, button);
+    this->ui.titlebarBox->insertWidget(1, button);
     button->setButtonStyle(style);
 
     QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
@@ -197,7 +206,7 @@ RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
     button->setScaleIndependantHeight(30);
 
     this->ui.buttons.push_back(button);
-    this->ui.titlebarBox->insertWidget(2, button);
+    this->ui.titlebarBox->insertWidget(1, button);
 
     QObject::connect(button, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
 

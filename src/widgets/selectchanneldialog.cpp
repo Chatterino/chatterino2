@@ -19,6 +19,8 @@ SelectChannelDialog::SelectChannelDialog()
     : BaseWindow((QWidget *)nullptr, true)
     , selectedChannel(Channel::getEmpty())
 {
+    this->setWindowTitle("Select a channel to join");
+
     this->tabFilter.dialog = this;
 
     util::LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());

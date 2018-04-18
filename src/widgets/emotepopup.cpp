@@ -48,6 +48,8 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
 {
+    this->setWindowTitle("Emotes from " + _channel->name);
+
     TwitchChannel *channel = dynamic_cast<TwitchChannel *>(_channel.get());
 
     if (channel == nullptr) {
