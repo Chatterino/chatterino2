@@ -19,7 +19,6 @@
 #include <gdiplus.h>
 #include <windowsx.h>
 #pragma comment(lib, "Dwmapi.lib")
-#pragma comment(lib, "Gdi32.lib")
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

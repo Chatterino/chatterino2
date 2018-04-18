@@ -111,6 +111,8 @@ Split::Split(SplitContainer *parent)
         });
 
     this->header.updateModerationModeIcon();
+
+    this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
 Split::~Split()
