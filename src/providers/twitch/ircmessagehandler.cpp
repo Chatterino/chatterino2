@@ -154,6 +154,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
+        _message->flags |= messages::Message::DoNotTriggerNotification;
+
         if (_message->flags & messages::Message::Highlighted) {
             TwitchServer::getInstance().mentionsChannel->addMessage(_message);
         }
