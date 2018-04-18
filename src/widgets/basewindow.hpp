@@ -38,7 +38,8 @@ protected:
 #ifdef USEWINSDK
     virtual void showEvent(QShowEvent *);
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void paintEvent(QPaintEvent *) override;
+    virtual void scaleChangedEvent(float) override;
 #endif
 
     virtual void changeEvent(QEvent *) override;
@@ -50,18 +51,21 @@ protected:
 private:
     void init();
     void moveIntoDesktopRect(QWidget *parent);
+    void calcButtonsSizes();
 
     bool enableCustomFrame;
     bool stayInScreenRect = false;
     bool shown = false;
 
-    QHBoxLayout *titlebarBox;
-    QWidget *titleLabel;
-    TitleBarButton *minButton;
-    TitleBarButton *maxButton;
-    TitleBarButton *exitButton;
-    QWidget *layoutBase;
-    std::vector<RippleEffectButton *> buttons;
+    struct {
+        QHBoxLayout *titlebarBox;
+        QWidget *titleLabel;
+        TitleBarButton *minButton = nullptr;
+        TitleBarButton *maxButton = nullptr;
+        TitleBarButton *exitButton = nullptr;
+        QWidget *layoutBase;
+        std::vector<RippleEffectButton *> buttons;
+    } ui;
 };
 
 }  // namespace widgets
