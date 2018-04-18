@@ -131,12 +131,12 @@ void Image::loadImage()
         lli->isLoaded = true;
         util::DebugCount::increase("loaded images");
 
-        singletons::EmoteManager::getInstance().incGeneration();
-
         if (!loadedEventQueued) {
             loadedEventQueued = true;
 
-            QTimer::singleShot(750, [] {
+            QTimer::singleShot(500, [] {
+                singletons::EmoteManager::getInstance().incGeneration();
+
                 singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
                 loadedEventQueued = false;
             });
