@@ -274,15 +274,17 @@ void EmoteManager::loadEmojis()
             unicodeBytes[numUnicodeBytes++] = QString(unicodeCharacter).toUInt(nullptr, 16);
         }
 
+        QString unicodeString = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
+
         QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
                       "emojione/2.2.6/assets/png/" +
                       code + ".png";
 
         EmojiData emojiData{
-            QString::fromUcs4(unicodeBytes, numUnicodeBytes),  //
-            code,                                              //
-            shortCode,                                         //
-            {new Image(url, 0.35, ":" + shortCode + ":", ":" + shortCode + ":<br/>Emoji")},
+            unicodeString,  //
+            code,           //
+            shortCode,      //
+            {new Image(url, 0.35, unicodeString, ":" + shortCode + ":<br/>Emoji")},
         };
 
         this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
@@ -450,8 +452,8 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
                     emoteData.emoteSets[emoteSetString].push_back({id, code});
                     emoteData.emoteCodes.push_back(code);
 
-                    util::EmoteData emote = getTwitchEmoteById(emoticon["id"].toInt(),
-                                                               emoticon["code"].toString());
+                    util::EmoteData emote =
+                        getTwitchEmoteById(emoticon["id"].toInt(), emoticon["code"].toString());
                     emoteData.emotes.insert(emoticon["code"].toString(), emote);
                 }
             }
