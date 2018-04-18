@@ -21,7 +21,7 @@ class Notebook2 : public BaseWidget
 public:
     explicit Notebook2(QWidget *parent);
 
-    NotebookTab2 *addPage(QWidget *page, bool select = false);
+    NotebookTab2 *addPage(QWidget *page, QString title = QString(), bool select = false);
     void removePage(QWidget *page);
     void removeCurrentPage();
 

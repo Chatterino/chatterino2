@@ -6,6 +6,7 @@
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "singletons/accountmanager.hpp"
+#include "widgets/notebook.hpp"
 
 using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
@@ -14,7 +15,7 @@ namespace chatterino {
 namespace widgets {
 
 EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
-    : BaseWindow(themeManager, 0)
+    : BaseWindow(themeManager, nullptr, true)
 {
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
@@ -27,13 +28,15 @@ EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
     this->viewEmotes->setEnableScrollingToBottom(false);
     this->viewEmojis->setEnableScrollingToBottom(false);
 
-    this->setLayout(new QVBoxLayout(this));
+    auto *layout = new QVBoxLayout(this);
+    this->getLayoutContainer()->setLayout(layout);
 
-    QTabWidget *tabs = new QTabWidget(this);
-    this->layout()->addWidget(tabs);
-    this->layout()->setMargin(0);
-    tabs->addTab(this->viewEmotes, "Emotes");
-    tabs->addTab(this->viewEmojis, "Emojis");
+    Notebook2 *notebook = new Notebook2(this);
+    layout->addWidget(notebook);
+    layout->setMargin(0);
+
+    notebook->addPage(this->viewEmotes, "Emotes");
+    notebook->addPage(this->viewEmojis, "Emojis");
 
     this->loadEmojis();
 

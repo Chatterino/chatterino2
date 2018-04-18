@@ -36,10 +36,15 @@ Notebook2::Notebook2(QWidget *parent)
     QObject::connect(shortcut_prev, &QShortcut::activated, [this] { this->selectPreviousTab(); });
 }
 
-NotebookTab2 *Notebook2::addPage(QWidget *page, bool select)
+NotebookTab2 *Notebook2::addPage(QWidget *page, QString title, bool select)
 {
     auto *tab = new NotebookTab2(this);
     tab->page = page;
+
+    if (!title.isEmpty()) {
+        tab->setTitle(title);
+        tab->useDefaultTitle = false;
+    }
 
     Item item;
     item.page = page;
