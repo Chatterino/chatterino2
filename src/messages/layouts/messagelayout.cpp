@@ -22,9 +22,6 @@ MessageLayout::MessageLayout(MessagePtr _message)
     : message(_message)
     , buffer(nullptr)
 {
-    if (_message->flags & Message::Collapsed) {
-        this->flags &= MessageLayout::Collapsed;
-    }
     util::DebugCount::increase("message layout");
 }
 
@@ -90,11 +87,11 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     // update word sizes if needed
     if (imagesChanged) {
         //        this->container.updateImages();
-        this->flags &= MessageLayout::RequiresBufferUpdate;
+        this->flags |= MessageLayout::RequiresBufferUpdate;
     }
     if (textChanged) {
         //        this->container.updateText();
-        this->flags &= MessageLayout::RequiresBufferUpdate;
+        this->flags |= MessageLayout::RequiresBufferUpdate;
     }
     if (widthChanged || wordMaskChanged) {
         this->deleteBuffer();
@@ -227,6 +224,15 @@ void MessageLayout::deleteBuffer()
 
         this->buffer = nullptr;
     }
+}
+
+void MessageLayout::deleteCache()
+{
+    this->deleteBuffer();
+
+#ifdef XD
+    this->container.clear();
+#endif
 }
 
 // Elements

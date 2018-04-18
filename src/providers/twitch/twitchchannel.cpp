@@ -20,7 +20,7 @@ namespace providers {
 namespace twitch {
 
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
-    : Channel(channelName)
+    : Channel(channelName, Channel::Twitch)
     , bttvChannelEmotes(new util::EmoteMap)
     , ffzChannelEmotes(new util::EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)

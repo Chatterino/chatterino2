@@ -446,10 +446,14 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 void ChannelView::detachChannel()
 {
     // on message added
-    this->messageAppendedConnection.disconnect();
+    if (this->messageAppendedConnection.isConnected()) {
+        this->messageAppendedConnection.disconnect();
+    }
 
     // on message removed
-    this->messageRemovedConnection.disconnect();
+    if (this->messageRemovedConnection.isConnected()) {
+        this->messageRemovedConnection.disconnect();
+    }
 }
 
 void ChannelView::pause(int msecTimeout)
@@ -704,7 +708,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
+    if (layout->getMessage()->flags & Message::Collapsed) {
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
@@ -780,7 +784,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     }
 
     // check if message is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
+    if (layout->getMessage()->flags & Message::Collapsed) {
         return;
     }
 
@@ -838,9 +842,10 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
-        layout->flags &= MessageLayout::Collapsed;
-        //        this->layoutMessages();
+    if (layout->getMessage()->flags & Message::MessageFlags::Collapsed) {
+        layout->getMessage()->flags &= ~Message::MessageFlags::Collapsed;
+
+        this->layoutMessages();
         return;
     }
 
@@ -871,7 +876,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
         // message under cursor is collapsed
-        if (layout->flags & MessageLayout::Collapsed) {
+        if (layout->getMessage()->flags & Message::Collapsed) {
             return;
         }
 
@@ -885,6 +890,15 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         auto &link = hoverLayoutElement->getLink();
         this->handleLinkClick(event, link, layout.get());
     }
+}
+
+void ChannelView::hideEvent(QHideEvent *)
+{
+    for (auto &layout : this->messagesOnScreen) {
+        layout->deleteBuffer();
+    }
+
+    this->messagesOnScreen.clear();
 }
 
 void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,

@@ -64,7 +64,8 @@ public:
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
-    bool showChangeChannelPopup(const char *dialogTitle, bool empty = false);
+    void showChangeChannelPopup(const char *dialogTitle, bool empty,
+                                std::function<void(bool)> callback);
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
     void layoutMessages();

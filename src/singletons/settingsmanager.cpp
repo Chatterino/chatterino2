@@ -79,6 +79,7 @@ void SettingManager::updateWordTypeMask()
     newMaskUint |= MessageElement::Username;
 
     newMaskUint |= MessageElement::AlwaysShow;
+    newMaskUint |= MessageElement::Collapsed;
 
     MessageElement::Flags newMask = static_cast<MessageElement::Flags>(newMaskUint);
 

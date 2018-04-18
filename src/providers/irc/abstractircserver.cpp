@@ -197,7 +197,7 @@ void AbstractIrcServer::onDisconnected()
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     MessagePtr msg = Message::createSystemMessage("disconnected from chat");
-    msg->flags &= Message::DisconnectedMessage;
+    msg->flags |= Message::DisconnectedMessage;
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {
         std::shared_ptr<Channel> chan = weak.lock();

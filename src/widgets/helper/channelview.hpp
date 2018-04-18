@@ -70,6 +70,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
+    void hideEvent(QHideEvent *) override;
+
     void handleLinkClick(QMouseEvent *event, const messages::Link &link,
                          messages::MessageLayout *layout);
 

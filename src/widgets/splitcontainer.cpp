@@ -219,17 +219,16 @@ NotebookTab *SplitContainer::getTab() const
 void SplitContainer::addChat(bool openChannelNameDialog)
 {
     Split *w = this->createChatWidget();
+    this->addToLayout(w, std::pair<int, int>(-1, -1));
 
     if (openChannelNameDialog) {
-        bool ret = w->showChangeChannelPopup("Open channel name", true);
-
-        if (!ret) {
-            delete w;
-            return;
-        }
+        w->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
+            if (!ok) {
+                this->removeFromLayout(w);
+                delete w;
+            }
+        });
     }
-
-    this->addToLayout(w, std::pair<int, int>(-1, -1));
 }
 
 void SplitContainer::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)

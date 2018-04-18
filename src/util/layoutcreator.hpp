@@ -24,6 +24,11 @@ public:
         return this->item;
     }
 
+    T *operator*()
+    {
+        return this->item;
+    }
+
     T *getElement()
     {
         return this->item;
@@ -71,6 +76,15 @@ public:
     LayoutCreator<T> withoutMargin()
     {
         this->item->setContentsMargins(0, 0, 0, 0);
+
+        return *this;
+    }
+
+    template <typename Q = T,
+              typename std::enable_if<std::is_base_of<QWidget, Q>::value, int>::type = 0>
+    LayoutCreator<T> hidden()
+    {
+        this->item->setVisible(false);
 
         return *this;
     }

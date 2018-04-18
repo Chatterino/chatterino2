@@ -22,7 +22,15 @@ class Channel : public std::enable_shared_from_this<Channel>
     QTimer *clearCompletionModelTimer;
 
 public:
-    explicit Channel(const QString &_name);
+    enum Type {
+        None,
+        Twitch,
+        TwitchWhispers,
+        TwitchWatching,
+        TwitchMentions,
+    };
+
+    explicit Channel(const QString &_name, Type type);
     virtual ~Channel();
 
     pajlada::Signals::Signal<const QString &, const QString &> sendMessageSignal;
@@ -33,6 +41,7 @@ public:
     pajlada::Signals::Signal<size_t, messages::MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
 
+    Type getType() const;
     virtual bool isEmpty() const;
     messages::LimitedQueueSnapshot<messages::MessagePtr> getMessageSnapshot();
 
@@ -46,10 +55,7 @@ public:
 
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
-    virtual bool isMod() const
-    {
-        return false;
-    }
+    virtual bool isMod() const;
 
     static std::shared_ptr<Channel> getEmpty();
 
@@ -60,6 +66,7 @@ protected:
 
 private:
     messages::LimitedQueue<messages::MessagePtr> messages;
+    Type type;
 };
 
 using ChannelPtr = std::shared_ptr<Channel>;

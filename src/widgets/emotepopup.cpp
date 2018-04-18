@@ -51,7 +51,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         return;
     }
 
-    ChannelPtr emoteChannel(new Channel(""));
+    ChannelPtr emoteChannel(new Channel("", Channel::None));
 
     auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
@@ -59,13 +59,13 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
         builder1.append(new TextElement(title, MessageElement::Text));
 
-        builder1.getMessage()->flags &= Message::Centered;
+        builder1.getMessage()->flags |= Message::Centered;
         emoteChannel->addMessage(builder1.getMessage());
 
         // EMOTES
         messages::MessageBuilder builder2;
-        builder2.getMessage()->flags &= Message::Centered;
-        builder2.getMessage()->flags &= Message::DisableCompactEmotes;
+        builder2.getMessage()->flags |= Message::Centered;
+        builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
         map.each([&](const QString &key, const util::EmoteData &value) {
             builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
@@ -96,19 +96,19 @@ void EmotePopup::loadEmojis()
 {
     auto &emojis = singletons::EmoteManager::getInstance().getEmojis();
 
-    ChannelPtr emojiChannel(new Channel(""));
+    ChannelPtr emojiChannel(new Channel("", Channel::None));
 
     // title
     messages::MessageBuilder builder1;
 
     builder1.append(new TextElement("emojis", MessageElement::Text));
-    builder1.getMessage()->flags &= Message::Centered;
+    builder1.getMessage()->flags |= Message::Centered;
     emojiChannel->addMessage(builder1.getMessage());
 
     // emojis
     messages::MessageBuilder builder;
-    builder.getMessage()->flags &= Message::Centered;
-    builder.getMessage()->flags &= Message::DisableCompactEmotes;
+    builder.getMessage()->flags |= Message::Centered;
+    builder.getMessage()->flags |= Message::DisableCompactEmotes;
 
     emojis.each([&builder](const QString &key, const auto &value) {
         builder.append((new EmoteElement(value.emoteData, MessageElement::Flags::AlwaysShow))

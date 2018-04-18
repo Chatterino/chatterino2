@@ -65,8 +65,18 @@ void MessageLayoutContainer::addElementNoLineBreak(MessageLayoutElement *element
     this->_addElement(element);
 }
 
+bool MessageLayoutContainer::canAddElements()
+{
+    return !(this->flags & Message::MessageFlags::Collapsed && line >= 3);
+}
+
 void MessageLayoutContainer::_addElement(MessageLayoutElement *element)
 {
+    if (!this->canAddElements()) {
+        delete element;
+        return;
+    }
+
     // top margin
     if (this->elements.size() == 0) {
         this->currentY = this->margin.top * this->scale;
@@ -139,6 +149,7 @@ void MessageLayoutContainer::breakLine()
     this->currentY += this->lineHeight;
     this->height = this->currentY + (this->margin.bottom * this->scale);
     this->lineHeight = 0;
+    this->line++;
 }
 
 bool MessageLayoutContainer::atStartOfLine()

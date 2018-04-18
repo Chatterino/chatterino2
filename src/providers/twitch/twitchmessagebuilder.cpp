@@ -68,9 +68,13 @@ MessagePtr TwitchMessageBuilder::build()
     // PARSING
     this->parseUsername();
 
-    //    this->message->setCollapsedDefault(true);
-    //    this->appendWord(Word(Resources::getInstance().badgeCollapsed, Word::Collapsed, QString(),
-    //    QString()));
+#ifdef XD
+    if (this->originalMessage.length() > 100) {
+        this->message->flags |= Message::Collapsed;
+        this->emplace<EmoteElement>(singletons::ResourceManager::getInstance().badgeCollapsed,
+                                    MessageElement::Collapsed);
+    }
+#endif
 
     // PARSING
     this->parseMessageID();
@@ -440,7 +444,7 @@ void TwitchMessageBuilder::parseHighlights()
         }
 
         if (doHighlight) {
-            this->message->flags &= Message::Highlighted;
+            this->message->flags |= Message::Highlighted;
         }
     }
 }

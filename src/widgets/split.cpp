@@ -12,6 +12,7 @@
 #include "widgets/helper/searchpopup.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/qualitypopup.hpp"
+#include "widgets/selectchanneldialog.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
 #include "widgets/window.hpp"
@@ -180,28 +181,23 @@ bool Split::getModerationMode() const
     return this->moderationMode;
 }
 
-bool Split::showChangeChannelPopup(const char *dialogTitle, bool empty)
+void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
+                                   std::function<void(bool)> callback)
 {
-    // create new input dialog and execute it
-    TextInputDialog dialog(this);
-
-    dialog.setWindowTitle(dialogTitle);
-
+    SelectChannelDialog *dialog = new SelectChannelDialog();
     if (!empty) {
-        dialog.setText(this->channel->name);
-        dialog.highlightText();
+        dialog->setSelectedChannel(this->getChannel());
     }
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+    dialog->closed.connect([=] {
+        if (dialog->hasSeletedChannel()) {
+            this->setChannel(dialog->getSelectedChannel());
+            this->parentPage.refreshTitle();
+        }
 
-    if (dialog.exec() == QDialog::Accepted) {
-        QString newChannelName = dialog.getText().trimmed();
-
-        this->setChannel(providers::twitch::TwitchServer::getInstance().addChannel(newChannelName));
-        this->parentPage.refreshTitle();
-
-        return true;
-    }
-
-    return false;
+        callback(dialog->hasSeletedChannel());
+    });
 }
 
 void Split::layoutMessages()
@@ -290,7 +286,7 @@ void Split::doCloseSplit()
 
 void Split::doChangeChannel()
 {
-    this->showChangeChannelPopup("Change channel");
+    this->showChangeChannelPopup("Change channel", false, [](bool) {});
     auto popup = this->findChildren<QDockWidget *>();
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
         popup.at(0)->hide();

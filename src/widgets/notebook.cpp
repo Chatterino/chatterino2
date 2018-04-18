@@ -23,6 +23,335 @@
 namespace chatterino {
 namespace widgets {
 
+Notebook2::Notebook2(QWidget *parent)
+    : BaseWidget(singletons::ThemeManager::getInstance(), parent)
+    , addButton(this)
+{
+    this->addButton.setHidden(true);
+
+    auto *shortcut_next = new QShortcut(QKeySequence("Ctrl+Tab"), this);
+    QObject::connect(shortcut_next, &QShortcut::activated, [this] { this->selectNextTab(); });
+
+    auto *shortcut_prev = new QShortcut(QKeySequence("Ctrl+Shift+Tab"), this);
+    QObject::connect(shortcut_prev, &QShortcut::activated, [this] { this->selectPreviousTab(); });
+}
+
+NotebookTab2 *Notebook2::addPage(QWidget *page, bool select)
+{
+    auto *tab = new NotebookTab2(this);
+    tab->page = page;
+
+    Item item;
+    item.page = page;
+    item.tab = tab;
+
+    this->items.append(item);
+
+    page->hide();
+    page->setParent(this);
+
+    if (select || this->items.count() == 1) {
+        this->select(page);
+    }
+
+    this->performLayout();
+
+    return tab;
+}
+
+void Notebook2::removePage(QWidget *page)
+{
+    for (int i = 0; i < this->items.count(); i++) {
+        if (this->items[i].page == page) {
+            if (this->items.count() == 1) {
+                this->select(nullptr);
+            } else if (i == this->items.count() - 1) {
+                this->select(this->items[i - 1].page);
+            } else {
+                this->select(this->items[i + 1].page);
+            }
+
+            this->items[i].page->deleteLater();
+            this->items[i].tab->deleteLater();
+
+            //    if (this->items.empty()) {
+            //        this->addNewPage();
+            //    }
+
+            this->items.removeAt(i);
+            break;
+        }
+    }
+}
+
+void Notebook2::removeCurrentPage()
+{
+    if (this->selectedPage != nullptr) {
+        this->removePage(this->selectedPage);
+    }
+}
+
+int Notebook2::indexOf(QWidget *page) const
+{
+    for (int i = 0; i < this->items.count(); i++) {
+        if (this->items[i].page == page) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void Notebook2::select(QWidget *page)
+{
+    if (page == this->selectedPage) {
+        return;
+    }
+
+    if (page != nullptr) {
+        page->setHidden(false);
+
+        NotebookTab2 *tab = this->getTabFromPage(page);
+        tab->setSelected(true);
+        tab->raise();
+    }
+
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->setHidden(true);
+
+        NotebookTab2 *tab = this->getTabFromPage(selectedPage);
+        tab->setSelected(false);
+
+        //        for (auto split : this->selectedPage->getSplits()) {
+        //            split->updateLastReadMessage();
+        //        }
+    }
+
+    this->selectedPage = page;
+
+    this->performLayout();
+}
+
+void Notebook2::selectIndex(int index)
+{
+    if (index < 0 || this->items.count() <= index) {
+        return;
+    }
+
+    this->select(this->items[index].page);
+}
+
+void Notebook2::selectNextTab()
+{
+    if (this->items.size() <= 1) {
+        return;
+    }
+
+    int index = (this->indexOf(this->selectedPage) + 1) % this->items.count();
+
+    this->select(this->items[index].page);
+}
+
+void Notebook2::selectPreviousTab()
+{
+    if (this->items.size() <= 1) {
+        return;
+    }
+
+    int index = this->indexOf(this->selectedPage) - 1;
+
+    if (index < 0) {
+        index += this->items.count();
+    }
+
+    this->select(this->items[index].page);
+}
+
+int Notebook2::getPageCount() const
+{
+    return this->items.count();
+}
+
+int Notebook2::getSelectedIndex() const
+{
+    return this->indexOf(this->selectedPage);
+}
+
+QWidget *Notebook2::getSelectedPage() const
+{
+    return this->selectedPage;
+}
+
+QWidget *Notebook2::tabAt(QPoint point, int &index, int maxWidth)
+{
+    int i = 0;
+
+    for (auto &item : this->items) {
+        QRect rect = item.tab->getDesiredRect();
+        rect.setHeight((int)(this->getScale() * 24));
+
+        rect.setWidth(std::min(maxWidth, rect.width()));
+
+        if (rect.contains(point)) {
+            index = i;
+            return item.page;
+        }
+
+        i++;
+    }
+
+    index = -1;
+    return nullptr;
+}
+
+void Notebook2::rearrangePage(QWidget *page, int index)
+{
+    this->items.move(this->indexOf(page), index);
+
+    this->performLayout();
+}
+
+bool Notebook2::getAllowUserTabManagement() const
+{
+    return this->allowUserTabManagement;
+}
+
+void Notebook2::setAllowUserTabManagement(bool value)
+{
+    this->allowUserTabManagement = value;
+}
+
+bool Notebook2::getShowAddButton() const
+{
+    return this->showAddButton;
+}
+
+void Notebook2::setShowAddButton(bool value)
+{
+    this->showAddButton = value;
+
+    this->addButton.setHidden(!value);
+}
+
+void Notebook2::scaleChangedEvent(float scale)
+{
+    //    float h = 24 * this->getScale();
+
+    //    this->settingsButton.setFixedSize(h, h);
+    //    this->userButton.setFixedSize(h, h);
+    //    this->addButton.setFixedSize(h, h);
+
+    for (auto &i : this->items) {
+        i.tab->updateSize();
+    }
+}
+
+void Notebook2::resizeEvent(QResizeEvent *)
+{
+    this->performLayout();
+}
+
+void Notebook2::performLayout(bool animated)
+{
+    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+
+    int xStart = (int)(2 * this->getScale());
+
+    int x = xStart, y = 0;
+    float scale = this->getScale();
+
+    //    bool customFrame = this->parentWindow->hasCustomWindowFrame();
+
+    //    bool customFrame = false;
+
+    //    if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
+    //        this->settingsButton.hide();
+    //    } else {
+    //        this->settingsButton.show();
+    //        x += settingsButton.width();
+    //    }
+    //    if (!this->showButtons || settings.hideUserButton || customFrame) {
+    //        this->userButton.hide();
+    //    } else {
+    //        this->userButton.move(x, 0);
+    //        this->userButton.show();
+    //        x += userButton.width();
+    //    }
+
+    //    if (customFrame || !this->showButtons ||
+    //        (settings.hideUserButton && settings.hidePreferencesButton)) {
+    //        x += (int)(scale * 2);
+    //    }
+
+    int tabHeight = static_cast<int>(24 * scale);
+    bool first = true;
+
+    for (auto i = this->items.begin(); i != this->items.end(); i++) {
+        if (!first &&
+            (i == this->items.end() && this->showAddButton ? tabHeight : 0) + x + i->tab->width() >
+                width())  //
+        {
+            y += i->tab->height();
+            //            y += 20;
+            i->tab->moveAnimated(QPoint(xStart, y), animated);
+            x = i->tab->width() + xStart;
+        } else {
+            i->tab->moveAnimated(QPoint(x, y), animated);
+            x += i->tab->width();
+        }
+
+        x += 1;
+
+        first = false;
+    }
+
+    if (this->showAddButton) {
+        this->addButton.move(x, y);
+    }
+
+    if (this->lineY != y + tabHeight) {
+        this->lineY = y + tabHeight;
+        this->update();
+    }
+
+    y += (int)(1 * scale);
+
+    for (auto &i : this->items) {
+        i.tab->raise();
+    }
+
+    if (this->showAddButton) {
+        this->addButton.raise();
+    }
+
+    if (this->selectedPage != nullptr) {
+        this->selectedPage->move(0, y + tabHeight);
+        this->selectedPage->resize(width(), height() - y - tabHeight);
+        this->selectedPage->raise();
+    }
+}
+
+void Notebook2::paintEvent(QPaintEvent *event)
+{
+    BaseWidget::paintEvent(event);
+
+    QPainter painter(this);
+    painter.fillRect(0, this->lineY, this->width(), (int)(1 * this->getScale()),
+                     this->themeManager.tabs.bottomLine);
+}
+
+NotebookTab2 *Notebook2::getTabFromPage(QWidget *page)
+{
+    for (auto &it : this->items) {
+        if (it.page == page) {
+            return it.tab;
+        }
+    }
+
+    return nullptr;
+}
+
+// Notebook2::OLD NOTEBOOK
 Notebook::Notebook(Window *parent, bool _showButtons)
     : BaseWidget(parent)
     , parentWindow(parent)

@@ -47,6 +47,7 @@ public:
         TabColors highlighted;
         TabColors newMessage;
         QColor border;
+        QColor bottomLine;
     } tabs;
 
     /// SPLITS

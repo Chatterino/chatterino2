@@ -19,7 +19,7 @@ namespace layouts {
 class MessageLayout : boost::noncopyable
 {
 public:
-    enum Flags : uint8_t { Collapsed, RequiresBufferUpdate, RequiresLayout };
+    enum Flags : uint8_t { RequiresBufferUpdate = 1 << 1, RequiresLayout = 1 << 2 };
 
     MessageLayout(MessagePtr message);
     ~MessageLayout();
@@ -40,6 +40,7 @@ public:
                bool isLastReadMessage, bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();
+    void deleteCache();
 
     // Elements
     const MessageLayoutElement *getElementAt(QPoint point);

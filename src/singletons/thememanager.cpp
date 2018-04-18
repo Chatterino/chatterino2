@@ -113,6 +113,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
             this->tabs.selected = {QColor("#000"),
                                    {QColor("#999"), QColor("#999"), QColor("#888")}};
         }
+
+        this->tabs.bottomLine = this->tabs.selected.backgrounds.regular.color();
     }
 
     // Split

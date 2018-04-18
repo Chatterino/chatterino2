@@ -178,7 +178,8 @@ SOURCES += \
     src/singletons/pubsubmanager.cpp \
     src/util/rapidjson-helpers.cpp \
     src/singletons/helper/pubsubhelpers.cpp \
-    src/singletons/helper/pubsubactions.cpp
+    src/singletons/helper/pubsubactions.cpp \
+    src/widgets/selectchanneldialog.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -299,7 +300,8 @@ HEADERS  += \
     src/singletons/pubsubmanager.hpp \
     src/util/rapidjson-helpers.hpp \
     src/singletons/helper/pubsubhelpers.hpp \
-    src/singletons/helper/pubsubactions.hpp
+    src/singletons/helper/pubsubactions.hpp \
+    src/widgets/selectchanneldialog.hpp
 
 RESOURCES += \
     resources/resources.qrc

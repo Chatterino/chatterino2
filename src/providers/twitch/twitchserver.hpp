@@ -22,6 +22,7 @@ public:
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+    const ChannelPtr watchingChannel;
 
 protected:
     void initializeConnection(Communi::IrcConnection *connection, bool isRead,

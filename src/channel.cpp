@@ -18,8 +18,9 @@ using namespace chatterino::messages;
 
 namespace chatterino {
 
-Channel::Channel(const QString &_name)
-    : name(_name)
+Channel::Channel(const QString &_name, Type _type)
+    : type(_type)
+    , name(_name)
     , completionModel(this->name)
 {
     this->clearCompletionModelTimer = new QTimer;
@@ -35,6 +36,11 @@ Channel::~Channel()
 
     this->clearCompletionModelTimer->stop();
     this->clearCompletionModelTimer->deleteLater();
+}
+
+Channel::Type Channel::getType() const
+{
+    return this->type;
 }
 
 bool Channel::isEmpty() const
@@ -99,9 +105,14 @@ void Channel::sendMessage(const QString &message)
 {
 }
 
+bool Channel::isMod() const
+{
+    return false;
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
-    static std::shared_ptr<Channel> channel(new Channel(""));
+    static std::shared_ptr<Channel> channel(new Channel("", None));
     return channel;
 }
 
