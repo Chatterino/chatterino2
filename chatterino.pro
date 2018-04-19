@@ -179,7 +179,8 @@ SOURCES += \
     src/util/rapidjson-helpers.cpp \
     src/singletons/helper/pubsubhelpers.cpp \
     src/singletons/helper/pubsubactions.cpp \
-    src/widgets/selectchanneldialog.cpp
+    src/widgets/selectchanneldialog.cpp \
+    src/singletons/updatemanager.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -301,7 +302,8 @@ HEADERS  += \
     src/util/rapidjson-helpers.hpp \
     src/singletons/helper/pubsubhelpers.hpp \
     src/singletons/helper/pubsubactions.hpp \
-    src/widgets/selectchanneldialog.hpp
+    src/widgets/selectchanneldialog.hpp \
+    src/singletons/updatemanager.hpp
 
 RESOURCES += \
     resources/resources.qrc
