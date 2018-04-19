@@ -180,7 +180,8 @@ SOURCES += \
     src/singletons/helper/pubsubhelpers.cpp \
     src/singletons/helper/pubsubactions.cpp \
     src/widgets/selectchanneldialog.cpp \
-    src/singletons/updatemanager.cpp
+    src/singletons/updatemanager.cpp \
+    src/widgets/lastruncrashdialog.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -303,7 +304,8 @@ HEADERS  += \
     src/singletons/helper/pubsubhelpers.hpp \
     src/singletons/helper/pubsubactions.hpp \
     src/widgets/selectchanneldialog.hpp \
-    src/singletons/updatemanager.hpp
+    src/singletons/updatemanager.hpp \
+    src/widgets/lastruncrashdialog.hpp
 
 RESOURCES += \
     resources/resources.qrc

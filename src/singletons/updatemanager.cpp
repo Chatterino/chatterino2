@@ -33,13 +33,8 @@ void UpdateManager::checkForUpdates()
 
     util::NetworkRequest req(url);
     req.setTimeout(20000);
-    req.getJSON([this](QJsonDocument &document) {
-        if (document.isEmpty()) {
-            qDebug() << "error updating";
-            return;
-        }
-
-        QJsonValue version_val = document.object().value("version");
+    req.getJSON([this](QJsonObject &object) {
+        QJsonValue version_val = object.value("version");
         if (!version_val.isString()) {
             qDebug() << "error updating";
             return;

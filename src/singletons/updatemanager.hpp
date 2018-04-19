@@ -17,7 +17,7 @@ public:
     const QString &getCurrentVersion() const;
     const QString &getOnlineVersion() const;
 
-    pajlada::Signals::Signal onlineVersionUpdated;
+    pajlada::Signals::NoArgSignal onlineVersionUpdated;
 
 private:
     QString currentVersion;

@@ -29,6 +29,8 @@ public:
     QString whispersLogsFolderPath;
     QString mentionsLogsFolderPath;
 
+    QString appPathHash;
+
     bool createFolder(const QString &folderPath);
 };
 

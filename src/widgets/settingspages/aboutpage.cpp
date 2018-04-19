@@ -51,6 +51,7 @@ AboutPage::AboutPage()
         github->setOpenExternalLinks(true);
         //        github->setPalette(palette);
     }
+
     layout->addStretch(1);
 }
 

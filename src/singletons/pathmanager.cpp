@@ -1,6 +1,7 @@
 #include "singletons/pathmanager.hpp"
 
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QStandardPaths>
 
@@ -15,6 +16,14 @@ PathManager &PathManager::getInstance()
 
 bool PathManager::init(int argc, char **argv)
 {
+    // hash of app path
+    this->appPathHash = QCryptographicHash::hash(QCoreApplication::applicationFilePath().toUtf8(),
+                                                 QCryptographicHash::Sha224)
+                            .toBase64()
+                            .mid(0, 32)
+                            .replace("+", "-")
+                            .replace("/", "x");
+
     // Options
     bool portable = false;
 

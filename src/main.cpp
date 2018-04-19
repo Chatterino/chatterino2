@@ -2,6 +2,7 @@
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "util/networkmanager.hpp"
+#include "widgets/lastruncrashdialog.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
@@ -76,6 +77,22 @@ int runGui(int argc, char *argv[])
     // Initialize NetworkManager
     chatterino::util::NetworkManager::init();
 
+    // Running file
+    auto &pathMan = chatterino::singletons::PathManager::getInstance();
+    auto runningPath = pathMan.settingsFolderPath + "/running_" + pathMan.appPathHash;
+
+    if (QFile::exists(runningPath)) {
+        chatterino::widgets::LastRunCrashDialog dialog;
+        dialog.exec();
+    } else {
+        QFile runningFile(runningPath);
+
+        runningFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        runningFile.flush();
+        runningFile.close();
+    }
+
+    // Application
     {
         // Initialize application
         chatterino::Application app;
@@ -85,6 +102,9 @@ int runGui(int argc, char *argv[])
 
         // Application will go out of scope here and deinitialize itself
     }
+
+    // Running file
+    QFile::remove(runningPath);
 
     // Save settings
     pajlada::Settings::SettingManager::save();

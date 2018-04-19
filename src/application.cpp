@@ -5,6 +5,7 @@
 #include "singletons/emotemanager.hpp"
 #include "singletons/loggingmanager.hpp"
 #include "singletons/nativemessagingmanager.hpp"
+#include "singletons/pathmanager.hpp"
 #include "singletons/pubsubmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
