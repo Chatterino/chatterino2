@@ -164,7 +164,7 @@ bool BaseWindow::hasCustomWindowFrame()
 
 void BaseWindow::themeRefreshEvent()
 {
-    if (this->enableCustomFrame) {
+    if (this->hasCustomWindowFrame()) {
         QPalette palette;
         palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
         palette.setColor(QPalette::Foreground, this->themeManager.window.text);
