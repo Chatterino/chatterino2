@@ -36,7 +36,7 @@ void AccountManager::load()
         this->Twitch.currentUser = this->Twitch.anonymousUser;
     }
 
-    this->Twitch.userChanged.invoke();
+    //    this->Twitch.userChanged.invoke();
 }
 
 }  // namespace singletons

@@ -45,6 +45,9 @@ private:
 
     widgets::Window *mainWindow = nullptr;
     widgets::Window *selectedWindow = nullptr;
+
+    void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    IndirectChannel decodeChannel(const QJsonObject &obj);
 };
 
 }  // namespace singletons

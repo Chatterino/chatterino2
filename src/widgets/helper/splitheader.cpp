@@ -154,12 +154,13 @@ void SplitHeader::scaleChangedEvent(float scale)
 
 void SplitHeader::updateChannelText()
 {
+    auto indirectChannel = this->split->getIndirectChannel();
     auto channel = this->split->getChannel();
 
-    const QString channelName = channel->name;
-    if (channelName.isEmpty()) {
-        this->titleLabel->setText("<no channel>");
-        return;
+    QString title = channel->name;
+
+    if (indirectChannel.getType() == Channel::TwitchWatching) {
+        title = "watching: " + (title.isEmpty() ? "none" : title);
     }
 
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -178,17 +179,19 @@ void SplitHeader::updateChannelText()
                             " viewers"
                             "</p>";
             if (streamStatus.rerun) {
-                this->titleLabel->setText(channelName + " (rerun)");
+                title += " (rerun)";
             } else {
-                this->titleLabel->setText(channelName + " (live)");
+                title += " (live)";
             }
-
-            return;
         }
     }
 
+    if (title.isEmpty()) {
+        title = "<empty>";
+    }
+
     this->isLive = false;
-    this->titleLabel->setText(channelName);
+    this->titleLabel->setText(title);
     this->tooltip = "";
 }
 

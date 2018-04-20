@@ -146,7 +146,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     this->selectedChannel = channel;
 
-    switch (channel->getType()) {
+    switch (_channel.getType()) {
         case Channel::Twitch: {
             this->ui.notebook->selectIndex(TAB_TWITCH);
             this->ui.twitch.channel->setFocus();

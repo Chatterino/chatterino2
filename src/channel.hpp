@@ -90,7 +90,7 @@ class IndirectChannel
     std::shared_ptr<Data> data;
 
 public:
-    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::None)
+    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::Direct)
         : data(new Data(channel, type))
     {
     }

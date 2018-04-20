@@ -134,12 +134,12 @@ ChannelPtr Split::getChannel()
 
 void Split::setChannel(IndirectChannel newChannel)
 {
+    this->channel = newChannel;
+
     this->view.setChannel(newChannel.get());
 
     this->usermodeChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
-
-    this->channel = newChannel;
 
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
 
@@ -199,7 +199,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
 {
     SelectChannelDialog *dialog = new SelectChannelDialog();
     if (!empty) {
-        dialog->setSelectedChannel(this->getChannel());
+        dialog->setSelectedChannel(this->getIndirectChannel());
     }
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();

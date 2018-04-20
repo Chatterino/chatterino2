@@ -198,11 +198,7 @@ void WindowManager::initialize()
                     widgets::Split *split = new widgets::Split(tab);
 
                     QJsonObject split_obj = split_val.toObject();
-                    QJsonValue channelName_val = split_obj.value("channelName");
-                    if (channelName_val.isString()) {
-                        split->setChannel(providers::twitch::TwitchServer::getInstance().addChannel(
-                            channelName_val.toString()));
-                    }
+                    split->setChannel(this->decodeChannel(split_obj));
 
                     tab->addToLayout(split, std::make_pair(colNr, 10000000));
                 }
@@ -270,7 +266,8 @@ void WindowManager::save()
 
                 for (widgets::Split *cell : cells) {
                     QJsonObject cell_obj;
-                    cell_obj.insert("channelName", cell->getChannel().get()->name);
+
+                    this->encodeChannel(cell->getIndirectChannel(), cell_obj);
 
                     cells_arr.append(cell_obj);
                 }
@@ -295,6 +292,42 @@ void WindowManager::save()
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.write(document.toJson());
     file.flush();
+}
+
+void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
+{
+    switch (channel.getType()) {
+        case Channel::Twitch: {
+            obj.insert("type", "twitch");
+            obj.insert("name", channel.get()->name);
+        } break;
+        case Channel::TwitchMentions: {
+            obj.insert("type", "mentions");
+        } break;
+        case Channel::TwitchWatching: {
+            obj.insert("type", "watching");
+        } break;
+        case Channel::TwitchWhispers: {
+            obj.insert("type", "whispers");
+        } break;
+    }
+}
+
+IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
+{
+    QString type = obj.value("type").toString();
+    if (type == "twitch") {
+        return providers::twitch::TwitchServer::getInstance().addChannel(
+            obj.value("name").toString());
+    } else if (type == "mentions") {
+        return providers::twitch::TwitchServer::getInstance().mentionsChannel;
+    } else if (type == "watching") {
+        return providers::twitch::TwitchServer::getInstance().watchingChannel;
+    } else if (type == "whispers") {
+        return providers::twitch::TwitchServer::getInstance().whispersChannel;
+    }
+
+    return Channel::getEmpty();
 }
 
 void WindowManager::closeAll()
