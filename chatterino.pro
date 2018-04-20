@@ -362,3 +362,7 @@ win32-msvc* {
 win32::exists(C:\fourtf) {
     DEFINES += "OHHEYITSFOURTF"
 }
+
+linux {
+    QMAKE_LFLAGS += -lrt
+}
