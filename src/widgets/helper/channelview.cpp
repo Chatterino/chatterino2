@@ -341,6 +341,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     if (this->channel) {
         this->detachChannel();
     }
+
     this->messages.clear();
 
     // on new message
@@ -445,15 +446,10 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
 void ChannelView::detachChannel()
 {
-    // on message added
-    if (this->messageAppendedConnection.isConnected()) {
-        this->messageAppendedConnection.disconnect();
-    }
-
-    // on message removed
-    if (this->messageRemovedConnection.isConnected()) {
-        this->messageRemovedConnection.disconnect();
-    }
+    messageAppendedConnection.disconnect();
+    messageAddedAtStartConnection.disconnect();
+    messageRemovedConnection.disconnect();
+    messageReplacedConnection.disconnect();
 }
 
 void ChannelView::pause(int msecTimeout)

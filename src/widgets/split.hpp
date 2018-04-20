@@ -53,8 +53,9 @@ public:
         return this->view;
     }
 
-    ChannelPtr getChannel() const;
-    void setChannel(ChannelPtr newChannel);
+    IndirectChannel getIndirectChannel();
+    ChannelPtr getChannel();
+    void setChannel(IndirectChannel newChannel);
 
     void setFlexSizeX(double x);
     double getFlexSizeX();
@@ -83,7 +84,7 @@ protected:
 
 private:
     SplitContainer &parentPage;
-    ChannelPtr channel;
+    IndirectChannel channel;
 
     QVBoxLayout vbox;
     SplitHeader header;
@@ -96,6 +97,7 @@ private:
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
+    pajlada::Signals::Connection indirectChannelChangedConnection;
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);

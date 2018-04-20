@@ -21,7 +21,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 {
     this->initLayout();
 
-    auto completer = new QCompleter(&this->chatWidget->getChannel()->completionModel);
+    auto completer = new QCompleter(&this->chatWidget->getChannel().get()->completionModel);
     this->ui.textEdit->setCompleter(completer);
 
     this->chatWidget->channelChanged.connect([this] {

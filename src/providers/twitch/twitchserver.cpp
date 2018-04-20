@@ -19,7 +19,7 @@ namespace twitch {
 TwitchServer::TwitchServer()
     : whispersChannel(new Channel("/whispers", Channel::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::TwitchMentions))
-    , watchingChannel(new Channel("/watching", Channel::TwitchWatching))
+    , watchingChannel(Channel::getEmpty(), Channel::TwitchWatching)
 {
     AccountManager::getInstance().Twitch.userChanged.connect([this]() {  //
         util::postToThread([this] { this->connect(); });

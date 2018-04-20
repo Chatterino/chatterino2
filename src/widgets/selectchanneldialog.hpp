@@ -17,8 +17,8 @@ class SelectChannelDialog : public BaseWindow
 public:
     SelectChannelDialog();
 
-    void setSelectedChannel(ChannelPtr selectedChannel);
-    ChannelPtr getSelectedChannel() const;
+    void setSelectedChannel(IndirectChannel selectedChannel);
+    IndirectChannel getSelectedChannel() const;
     bool hasSeletedChannel() const;
 
     pajlada::Signals::NoArgSignal closed;

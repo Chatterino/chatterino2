@@ -83,6 +83,6 @@ function selectChannel(channelName) {
 
   let port = getPort();
   if (port) {
-    port.postMessage({action: "select", channelName: channelName});
+    port.postMessage({action: "select", type: "twitch", name: channelName});
   }
 }

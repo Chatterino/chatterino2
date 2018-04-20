@@ -138,8 +138,10 @@ void SelectChannelDialog::ok()
     this->close();
 }
 
-void SelectChannelDialog::setSelectedChannel(ChannelPtr channel)
+void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 {
+    auto channel = _channel.get();
+
     assert(channel);
 
     this->selectedChannel = channel;
@@ -171,7 +173,7 @@ void SelectChannelDialog::setSelectedChannel(ChannelPtr channel)
     this->_hasSelectedChannel = false;
 }
 
-ChannelPtr SelectChannelDialog::getSelectedChannel() const
+IndirectChannel SelectChannelDialog::getSelectedChannel() const
 {
     if (!this->_hasSelectedChannel) {
         return this->selectedChannel;

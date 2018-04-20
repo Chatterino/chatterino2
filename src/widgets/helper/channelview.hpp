@@ -129,6 +129,7 @@ private:
     pajlada::Signals::Connection layoutConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    std::vector<pajlada::Signals::ScopedConnection> channelConnections;
 
     std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen;
 

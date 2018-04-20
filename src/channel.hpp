@@ -24,6 +24,7 @@ class Channel : public std::enable_shared_from_this<Channel>
 public:
     enum Type {
         None,
+        Direct,
         Twitch,
         TwitchWhispers,
         TwitchWatching,
@@ -70,5 +71,56 @@ private:
 };
 
 using ChannelPtr = std::shared_ptr<Channel>;
+
+class IndirectChannel
+{
+    struct Data {
+        ChannelPtr channel;
+        Channel::Type type;
+        pajlada::Signals::NoArgSignal changed;
+
+        Data() = delete;
+        Data(ChannelPtr _channel, Channel::Type _type)
+            : channel(_channel)
+            , type(_type)
+        {
+        }
+    };
+
+    std::shared_ptr<Data> data;
+
+public:
+    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::None)
+        : data(new Data(channel, type))
+    {
+    }
+
+    ChannelPtr get()
+    {
+        return data->channel;
+    }
+
+    void update(ChannelPtr ptr)
+    {
+        assert(this->data->type != Channel::Direct);
+
+        this->data->channel = ptr;
+        this->data->changed.invoke();
+    }
+
+    pajlada::Signals::NoArgSignal &getChannelChanged()
+    {
+        return this->data->changed;
+    }
+
+    Channel::Type getType()
+    {
+        if (this->data->type == Channel::Direct) {
+            return this->get()->getType();
+        } else {
+            return this->data->type;
+        }
+    }
+};
 
 }  // namespace chatterino

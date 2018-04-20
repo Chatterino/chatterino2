@@ -119,27 +119,38 @@ Split::~Split()
 {
     this->usermodeChangedConnection.disconnect();
     this->channelIDChangedConnection.disconnect();
+    this->indirectChannelChangedConnection.disconnect();
 }
 
-ChannelPtr Split::getChannel() const
+IndirectChannel Split::getIndirectChannel()
 {
     return this->channel;
 }
 
-void Split::setChannel(ChannelPtr _newChannel)
+ChannelPtr Split::getChannel()
 {
-    this->view.setChannel(_newChannel);
+    return this->channel.get();
+}
+
+void Split::setChannel(IndirectChannel newChannel)
+{
+    this->view.setChannel(newChannel.get());
 
     this->usermodeChangedConnection.disconnect();
+    this->indirectChannelChangedConnection.disconnect();
 
-    this->channel = _newChannel;
+    this->channel = newChannel;
 
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_newChannel.get());
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
 
     if (tc != nullptr) {
         this->usermodeChangedConnection =
             tc->userStateChanged.connect([this] { this->header.updateModerationModeIcon(); });
     }
+
+    this->indirectChannelChangedConnection = newChannel.getChannelChanged().connect([this] {  //
+        QTimer::singleShot(0, [this] { this->setChannel(this->channel); });
+    });
 
     this->header.updateModerationModeIcon();
     this->header.updateChannelText();
@@ -316,7 +327,7 @@ void Split::doClearChat()
 
 void Split::doOpenChannel()
 {
-    ChannelPtr _channel = this->channel;
+    ChannelPtr _channel = this->getChannel();
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {
@@ -326,7 +337,7 @@ void Split::doOpenChannel()
 
 void Split::doOpenPopupPlayer()
 {
-    ChannelPtr _channel = this->channel;
+    ChannelPtr _channel = this->getChannel();
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
 
     if (tc != nullptr) {
@@ -337,7 +348,7 @@ void Split::doOpenPopupPlayer()
 void Split::doOpenStreamlink()
 {
     try {
-        streamlink::Start(this->channel->name);
+        streamlink::Start(this->getChannel()->name);
     } catch (const streamlink::Exception &ex) {
         debug::Log("Error in doOpenStreamlink: {}", ex.what());
     }
@@ -353,7 +364,7 @@ void Split::doOpenViewerList()
                        this->height() - this->header.height() - this->input.height());
     viewerDock->move(0, this->header.height());
 
-    auto accountPopup = new AccountPopupWidget(this->channel);
+    auto accountPopup = new AccountPopupWidget(this->getChannel());
     accountPopup->setAttribute(Qt::WA_DeleteOnClose);
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
@@ -372,8 +383,8 @@ void Split::doOpenViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    util::twitch::get("https://tmi.twitch.tv/group/user/" + channel->name + "/chatters", this,
-                      [=](QJsonObject obj) {
+    util::twitch::get("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
+                      this, [=](QJsonObject obj) {
                           QJsonObject chattersObj = obj.value("chatters").toObject();
 
                           loadingLabel->hide();

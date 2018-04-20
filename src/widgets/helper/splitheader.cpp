@@ -154,13 +154,13 @@ void SplitHeader::scaleChangedEvent(float scale)
 
 void SplitHeader::updateChannelText()
 {
-    const QString channelName = this->split->getChannel()->name;
+    auto channel = this->split->getChannel();
+
+    const QString channelName = channel->name;
     if (channelName.isEmpty()) {
         this->titleLabel->setText("<no channel>");
         return;
     }
-
-    auto channel = this->split->getChannel();
 
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 

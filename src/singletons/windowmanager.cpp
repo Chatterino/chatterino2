@@ -270,7 +270,7 @@ void WindowManager::save()
 
                 for (widgets::Split *cell : cells) {
                     QJsonObject cell_obj;
-                    cell_obj.insert("channelName", cell->getChannel()->name);
+                    cell_obj.insert("channelName", cell->getChannel().get()->name);
 
                     cells_arr.append(cell_obj);
                 }

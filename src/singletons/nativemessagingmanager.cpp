@@ -1,6 +1,8 @@
 #include "nativemessagingmanager.hpp"
 
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/pathmanager.hpp"
+#include "util/posttothread.hpp"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -8,11 +10,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#ifdef BOOSTLIBS
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 namespace ipc = boost::interprocess;
-#endif
 
 #ifdef Q_OS_WIN
 #include <QProcess>
@@ -81,7 +81,6 @@ void NativeMessagingManager::registerHost()
 
 void NativeMessagingManager::openGuiMessageQueue()
 {
-#ifdef BOOSTLIBS
     static ReceiverThread thread;
 
     if (thread.isRunning()) {
@@ -89,12 +88,10 @@ void NativeMessagingManager::openGuiMessageQueue()
     }
 
     thread.start();
-#endif
 }
 
 void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
 {
-#ifdef BOOSTLIBS
     ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
 
     try {
@@ -102,12 +99,10 @@ void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
     } catch (ipc::interprocess_exception &ex) {
         qDebug() << "send to gui process:" << ex.what();
     }
-#endif
 }
 
 void NativeMessagingManager::ReceiverThread::run()
 {
-#ifdef BOOSTLIBS
     ipc::message_queue::remove("chatterino_gui");
 
     ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
@@ -120,19 +115,43 @@ void NativeMessagingManager::ReceiverThread::run()
 
             messageQueue.receive(buf, MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document = QJsonDocument::fromRawData(buf, retSize);
+            QJsonDocument document = QJsonDocument::fromJson(QByteArray(buf, retSize));
 
             this->handleMessage(document.object());
         } catch (ipc::interprocess_exception &ex) {
             qDebug() << "received from gui process:" << ex.what();
         }
     }
-#endif
 }
 
 void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &root)
 {
-    // TODO: add code xD
+    QString action = root.value("action").toString();
+
+    if (action.isNull()) {
+        qDebug() << "NM action was null";
+        return;
+    }
+
+    if (action == "select") {
+        QString _type = root.value("type").toString();
+        QString name = root.value("name").toString();
+
+        if (_type.isNull() || name.isNull()) {
+            qDebug() << "NM type or name missing";
+            return;
+        }
+
+        if (_type == "twitch") {
+            util::postToThread([name] {
+                auto &ts = providers::twitch::TwitchServer::getInstance();
+
+                ts.watchingChannel.update(ts.addChannel(name));
+            });
+        } else {
+            qDebug() << "NM unknown channel type";
+        }
+    }
 }
 
 }  // namespace singletons
