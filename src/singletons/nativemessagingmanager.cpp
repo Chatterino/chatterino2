@@ -146,7 +146,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
             util::postToThread([name] {
                 auto &ts = providers::twitch::TwitchServer::getInstance();
 
-                ts.watchingChannel.update(ts.addChannel(name));
+                ts.watchingChannel.update(ts.getOrAddChannel(name));
             });
         } else {
             qDebug() << "NM unknown channel type";

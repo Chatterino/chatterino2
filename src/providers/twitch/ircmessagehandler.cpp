@@ -39,7 +39,11 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 
         QString channelName = words.at(1);
 
-        auto channel = TwitchServer::getInstance().getChannel(channelName);
+        auto channel = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+
+        if (channel->isEmpty()) {
+            return;
+        }
 
         if (auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get())) {
             // set the room id of the channel
@@ -63,9 +67,9 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     // get channel
-    auto chan = TwitchServer::getInstance().getChannel(chanName);
+    auto chan = TwitchServer::getInstance().getChannelOrEmpty(chanName);
 
-    if (!chan) {
+    if (chan->isEmpty()) {
         debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
                    chanName);
         return;
@@ -133,7 +137,11 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             return;
         }
 
-        auto c = TwitchServer::getInstance().getChannel(channelName);
+        auto c = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+        if (c->isEmpty()) {
+            return;
+        }
+
         twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(c.get());
         if (tc != nullptr) {
             tc->setMod(_mod == "1");
@@ -177,7 +185,12 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 {
-    auto channel = TwitchServer::getInstance().getChannel(message->parameter(0).remove(0, 1));
+    auto channel =
+        TwitchServer::getInstance().getChannelOrEmpty(message->parameter(0).remove(0, 1));
+
+    if (channel->isEmpty()) {
+        return;
+    }
 
     if (message->parameter(1) == "+o") {
         channel->modList.append(message->parameter(2));
@@ -200,9 +213,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         return;
     }
 
-    auto channel = TwitchServer::getInstance().getChannel(channelName);
+    auto channel = TwitchServer::getInstance().getChannelOrEmpty(channelName);
 
-    if (!channel) {
+    if (channel->isEmpty()) {
         debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
                    channelName);
         return;

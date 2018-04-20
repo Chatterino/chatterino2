@@ -81,9 +81,9 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
     }
 
     this->onPrivateMessage.invoke(message);
-    auto chan = TwitchServer::getInstance().getChannel(channelName);
+    auto chan = TwitchServer::getInstance().getChannelOrEmpty(channelName);
 
-    if (!chan) {
+    if (chan->isEmpty()) {
         return;
     }
 
@@ -169,7 +169,7 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
     func(this->mentionsChannel);
 }
 
-QString TwitchServer::CleanChannelName(const QString &dirtyChannelName)
+QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
 {
     return dirtyChannelName.toLower();
 }

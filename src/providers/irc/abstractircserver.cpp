@@ -95,12 +95,12 @@ void AbstractIrcServer::writeConnectionMessageReceived(Communi::IrcMessage *mess
 {
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &dirtyChannelName)
+std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 {
-    auto channelName = this->CleanChannelName(dirtyChannelName);
+    auto channelName = this->cleanChannelName(dirtyChannelName);
 
     // try get channel
-    ChannelPtr chan = this->getChannel(channelName);
+    ChannelPtr chan = this->getChannelOrEmpty(channelName);
     if (chan != Channel::getEmpty()) {
         return chan;
     }
@@ -121,6 +121,14 @@ std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &dirtyChann
 
         debug::Log("[AbstractIrcServer::addChannel] {} was destroyed", clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
+
+        if (this->readConnection) {
+            this->readConnection->sendRaw("PART #" + clojuresInCppAreShit);
+        }
+
+        if (this->writeConnection) {
+            this->writeConnection->sendRaw("PART #" + clojuresInCppAreShit);
+        }
     });
 
     // join irc channel
@@ -139,9 +147,9 @@ std::shared_ptr<Channel> AbstractIrcServer::addChannel(const QString &dirtyChann
     return chan;
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::getChannel(const QString &dirtyChannelName)
+std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
 {
-    auto channelName = this->CleanChannelName(dirtyChannelName);
+    auto channelName = this->cleanChannelName(dirtyChannelName);
 
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
@@ -214,7 +222,7 @@ std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(const QString &chan
     return nullptr;
 }
 
-QString AbstractIrcServer::CleanChannelName(const QString &dirtyChannelName)
+QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
     return dirtyChannelName;
 }

@@ -27,8 +27,8 @@ public:
     void sendMessage(const QString &channelName, const QString &message);
 
     // channels
-    std::shared_ptr<Channel> addChannel(const QString &dirtyChannelName);
-    std::shared_ptr<Channel> getChannel(const QString &dirtyChannelName);
+    std::shared_ptr<Channel> getOrAddChannel(const QString &dirtyChannelName);
+    std::shared_ptr<Channel> getChannelOrEmpty(const QString &dirtyChannelName);
 
     // signals
     pajlada::Signals::NoArgSignal connected;
@@ -56,7 +56,7 @@ protected:
 
     virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelName);
 
-    virtual QString CleanChannelName(const QString &dirtyChannelName);
+    virtual QString cleanChannelName(const QString &dirtyChannelName);
 
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;

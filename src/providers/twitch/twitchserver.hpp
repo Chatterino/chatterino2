@@ -35,7 +35,7 @@ protected:
 
     std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
 
-    QString CleanChannelName(const QString &dirtyChannelName) override;
+    QString cleanChannelName(const QString &dirtyChannelName) override;
 };
 
 }  // namespace twitch

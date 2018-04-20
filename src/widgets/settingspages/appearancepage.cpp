@@ -64,7 +64,10 @@ AppearancePage::AppearancePage()
             tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, settings.timestampFormat));
             tbox->addStretch(1);
         }
-        messages.append(this->createCheckBox("Show badges", settings.showBadges));
+
+        auto checkbox = this->createCheckBox("Show badges", settings.showBadges);
+        checkbox->setEnabled(false);
+        messages.append(checkbox);
         messages.append(this->createCheckBox("Seperate messages", settings.seperateMessages));
         messages.append(
             this->createCheckBox("Show message length while typing", settings.showMessageLength));

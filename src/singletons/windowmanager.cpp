@@ -317,7 +317,7 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 {
     QString type = obj.value("type").toString();
     if (type == "twitch") {
-        return providers::twitch::TwitchServer::getInstance().addChannel(
+        return providers::twitch::TwitchServer::getInstance().getOrAddChannel(
             obj.value("name").toString());
     } else if (type == "mentions") {
         return providers::twitch::TwitchServer::getInstance().mentionsChannel;

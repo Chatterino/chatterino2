@@ -182,7 +182,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
     switch (this->ui.notebook->getSelectedIndex()) {
         case TAB_TWITCH: {
             if (this->ui.twitch.channel->isChecked()) {
-                return providers::twitch::TwitchServer::getInstance().addChannel(
+                return providers::twitch::TwitchServer::getInstance().getOrAddChannel(
                     this->ui.twitch.channelName->text());
             } else if (this->ui.twitch.watching->isChecked()) {
                 return providers::twitch::TwitchServer::getInstance().watchingChannel;
