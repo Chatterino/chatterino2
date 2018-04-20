@@ -164,7 +164,9 @@ void Window::closeEvent(QCloseEvent *event)
 
     this->closed.invoke();
 
-    QApplication::exit();
+    if (this->type == Window::Main) {
+        QApplication::exit();
+    }
 }
 
 }  // namespace widgets

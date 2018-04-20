@@ -314,7 +314,7 @@ void Split::doPopup()
     Split *split =
         new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));
 
-    split->setChannel(this->getChannel());
+    split->setChannel(this->getIndirectChannel());
     window.getNotebook().getOrAddSelectedPage()->addToLayout(split);
 
     window.show();
