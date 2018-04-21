@@ -411,7 +411,16 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
         for (const messages::HighlightPhrase &highlight : activeHighlights) {
-            if (this->originalMessage.contains(highlight.key, Qt::CaseInsensitive)) {
+            int index = -1;
+
+            while ((index = this->originalMessage.indexOf(highlight.key, index + 1,
+                                                          Qt::CaseInsensitive)) != -1) {
+                if ((index != 0 && this->originalMessage[index - 1] != ' ') ||
+                    (index + highlight.key.length() != this->originalMessage.length() &&
+                     this->originalMessage[index + highlight.key.length()] != ' ')) {
+                    continue;
+                }
+
                 debug::Log("Highlight because {} contains {}", this->originalMessage,
                            highlight.key);
                 doHighlight = true;
