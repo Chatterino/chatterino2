@@ -20,6 +20,8 @@ public:
     // fourtf: ugh
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
+    std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
+
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     IndirectChannel watchingChannel;
