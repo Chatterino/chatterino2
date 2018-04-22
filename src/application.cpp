@@ -65,6 +65,23 @@ Application::Application()
     });
 
     pubsub.sig.moderation.userTimedOut.connect([&](const auto &action) {
+        auto &server = providers::twitch::TwitchServer::getInstance();
+        auto chan = server.getChannelOrEmptyByID(action.roomID);
+
+        if (chan->isEmpty()) {
+            return;
+        }
+
+        auto msg = messages::Message::createSystemMessage(
+            QString("User %1(%2) was timed out by %3 for %4 seconds with reason: '%5'")
+                .arg(action.target.name)
+                .arg(action.target.id)
+                .arg(action.source.name)
+                .arg(action.duration)
+                .arg(action.reason));
+
+        chan->addMessage(msg);
+
         debug::Log("User {}({}) was timed out by {} for {} seconds with reason: '{}'",
                    action.target.name, action.target.id, action.source.name, action.duration,
                    action.reason);
