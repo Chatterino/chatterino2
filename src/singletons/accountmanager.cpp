@@ -25,18 +25,7 @@ AccountManager &AccountManager::getInstance()
 
 void AccountManager::load()
 {
-    this->Twitch.reloadUsers();
-
-    auto currentUser = this->Twitch.findUserByUsername(
-        QString::fromStdString(this->Twitch.currentUsername.getValue()));
-
-    if (currentUser) {
-        this->Twitch.currentUser = currentUser;
-    } else {
-        this->Twitch.currentUser = this->Twitch.anonymousUser;
-    }
-
-    //    this->Twitch.userChanged.invoke();
+    this->Twitch.load();
 }
 
 }  // namespace singletons

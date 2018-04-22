@@ -11,22 +11,6 @@ namespace twitch {
 TwitchAccountManager::TwitchAccountManager()
 {
     this->anonymousUser.reset(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""));
-
-    this->currentUsername.connect([this](const auto &newValue, auto) {
-        QString newUsername(QString::fromStdString(newValue));
-        auto user = this->findUserByUsername(newUsername);
-        if (user) {
-            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
-                       newUsername);
-            this->currentUser = user;
-        } else {
-            debug::Log(
-                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
-            this->currentUser = this->anonymousUser;
-        }
-
-        this->userChanged.invoke();
-    });
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
@@ -123,6 +107,27 @@ void TwitchAccountManager::reloadUsers()
     if (listUpdated) {
         this->userListUpdated.invoke();
     }
+}
+
+void TwitchAccountManager::load()
+{
+    this->reloadUsers();
+
+    this->currentUsername.connect([this](const auto &newValue, auto) {
+        QString newUsername(QString::fromStdString(newValue));
+        auto user = this->findUserByUsername(newUsername);
+        if (user) {
+            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
+                       newUsername);
+            this->currentUser = user;
+        } else {
+            debug::Log(
+                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
+            this->currentUser = this->anonymousUser;
+        }
+
+        this->userChanged.invoke();
+    });
 }
 
 bool TwitchAccountManager::removeUser(const QString &username)

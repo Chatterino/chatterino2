@@ -42,6 +42,7 @@ public:
     bool userExists(const QString &username) const;
 
     void reloadUsers();
+    void load();
 
     bool removeUser(const QString &username);
 
