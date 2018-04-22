@@ -21,20 +21,9 @@ public:
         _registerSetting(this->data);
     }
 
-    ChatterinoSetting &operator=(const Type &newValue)
-    {
-        assert(this->data != nullptr);
-
-        this->setValue(newValue);
-
-        return *this;
-    }
-
     template <typename T2>
     ChatterinoSetting &operator=(const T2 &newValue)
     {
-        assert(this->data != nullptr);
-
         this->setValue(newValue);
 
         return *this;
@@ -42,33 +31,15 @@ public:
 
     ChatterinoSetting &operator=(Type &&newValue) noexcept
     {
-        assert(this->data != nullptr);
-
-        this->setValue(std::move(newValue));
+        pajlada::Settings::Setting<Type>::operator=(newValue);
 
         return *this;
     }
 
-    bool operator==(const Type &rhs) const
-    {
-        assert(this->data != nullptr);
+    using pajlada::Settings::Setting<Type>::operator==;
+    using pajlada::Settings::Setting<Type>::operator!=;
 
-        return this->getValue() == rhs;
-    }
-
-    bool operator!=(const Type &rhs) const
-    {
-        assert(this->data != nullptr);
-
-        return this->getValue() != rhs;
-    }
-
-    operator const Type() const
-    {
-        assert(this->data != nullptr);
-
-        return this->getValue();
-    }
+    using pajlada::Settings::Setting<Type>::operator const Type;
 };
 
 }  // namespace singletons
