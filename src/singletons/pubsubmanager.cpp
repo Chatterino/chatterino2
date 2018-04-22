@@ -172,14 +172,14 @@ bool PubSubClient::Send(const char *payload)
 
 PubSubManager::PubSubManager()
 {
-    this->moderationActionHandlers["clear"] = [this](const auto &data) {
-        ClearChatAction action(data);
+    this->moderationActionHandlers["clear"] = [this](const auto &data, const auto &roomID) {
+        ClearChatAction action(data, roomID);
 
         this->sig.moderation.chatCleared.invoke(action);
     };
 
-    this->moderationActionHandlers["slowoff"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["slowoff"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::Off;
@@ -187,8 +187,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["slow"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["slow"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::On;
@@ -224,8 +224,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::Off;
@@ -233,8 +233,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["r9kbeta"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["r9kbeta"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::On;
@@ -242,8 +242,9 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["subscribersoff"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["subscribersoff"] = [this](const auto &data,
+                                                              const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
         action.state = ModeChangedAction::State::Off;
@@ -251,8 +252,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["subscribers"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["subscribers"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
         action.state = ModeChangedAction::State::On;
@@ -260,8 +261,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["emoteonlyoff"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["emoteonlyoff"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::EmoteOnly;
         action.state = ModeChangedAction::State::Off;
@@ -269,8 +270,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["emoteonly"] = [this](const auto &data) {
-        ModeChangedAction action(data);
+    this->moderationActionHandlers["emoteonly"] = [this](const auto &data, const auto &roomID) {
+        ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::EmoteOnly;
         action.state = ModeChangedAction::State::On;
@@ -278,8 +279,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["unmod"] = [this](const auto &data) {
-        ModerationStateAction action(data);
+    this->moderationActionHandlers["unmod"] = [this](const auto &data, const auto &roomID) {
+        ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
         action.modded = false;
@@ -287,8 +288,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.moderationStateChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["mod"] = [this](const auto &data) {
-        ModerationStateAction action(data);
+    this->moderationActionHandlers["mod"] = [this](const auto &data, const auto &roomID) {
+        ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
         action.modded = true;
@@ -296,8 +297,8 @@ PubSubManager::PubSubManager()
         this->sig.moderation.moderationStateChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["timeout"] = [this](const auto &data) {
-        TimeoutAction action(data);
+    this->moderationActionHandlers["timeout"] = [this](const auto &data, const auto &roomID) {
+        TimeoutAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
         getTargetUser(data, action.target);
@@ -332,8 +333,8 @@ PubSubManager::PubSubManager()
         }
     };
 
-    this->moderationActionHandlers["ban"] = [this](const auto &data) {
-        BanAction action(data);
+    this->moderationActionHandlers["ban"] = [this](const auto &data, const auto &roomID) {
+        BanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
         getTargetUser(data, action.target);
@@ -361,8 +362,8 @@ PubSubManager::PubSubManager()
         }
     };
 
-    this->moderationActionHandlers["unban"] = [this](const auto &data) {
-        UnbanAction action(data);
+    this->moderationActionHandlers["unban"] = [this](const auto &data, const auto &roomID) {
+        UnbanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
         getTargetUser(data, action.target);
@@ -386,8 +387,8 @@ PubSubManager::PubSubManager()
         }
     };
 
-    this->moderationActionHandlers["untimeout"] = [this](const auto &data) {
-        UnbanAction action(data);
+    this->moderationActionHandlers["untimeout"] = [this](const auto &data, const auto &roomID) {
+        UnbanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
         getTargetUser(data, action.target);
@@ -667,7 +668,7 @@ void PubSubManager::HandleListenResponse(const rapidjson::Document &msg)
 
 void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
 {
-    std::string topic;
+    QString topic;
 
     if (!rj::getSafe(outerData, "topic", topic)) {
         debug::Log("Missing required string member `topic` in outerData");
@@ -691,7 +692,7 @@ void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
         return;
     }
 
-    if (topic.find("whispers.") == 0) {
+    if (topic.startsWith("whispers.")) {
         std::string whisperType;
 
         if (!rj::getSafe(msg, "type", whisperType)) {
@@ -710,7 +711,9 @@ void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
             assert(false);
             return;
         }
-    } else if (topic.find("chat_moderator_actions.") == 0) {
+    } else if (topic.startsWith("chat_moderator_actions.")) {
+        auto topicParts = topic.split(".");
+        assert(topicParts.length() == 3);
         const auto &data = msg["data"];
 
         std::string moderationAction;
@@ -728,7 +731,7 @@ void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
         }
 
         // Invoke handler function
-        handlerIt->second(data);
+        handlerIt->second(data, topicParts[2]);
     } else {
         debug::Log("Unknown topic: {}", topic);
         return;

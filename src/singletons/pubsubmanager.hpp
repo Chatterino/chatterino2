@@ -140,7 +140,7 @@ private:
     std::map<WebsocketHandle, std::shared_ptr<PubSubClient>, std::owner_less<WebsocketHandle>>
         clients;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &)>>
+    std::unordered_map<std::string, std::function<void(const rapidjson::Value &, const QString &)>>
         moderationActionHandlers;
 
     void OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);

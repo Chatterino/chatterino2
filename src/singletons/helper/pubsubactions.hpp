@@ -16,18 +16,16 @@ struct ActionUser {
 };
 
 struct PubSubAction {
-    PubSubAction(const rapidjson::Value &data);
+    PubSubAction(const rapidjson::Value &data, const QString &_roomID);
     ActionUser source;
 
     std::chrono::steady_clock::time_point timestamp;
+    QString roomID;
 };
 
 // Used when a chat mode (i.e. slowmode, subscribers only mode) is enabled or disabled
 struct ModeChangedAction : PubSubAction {
-    ModeChangedAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 
     enum Mode {
         Unknown,
@@ -49,10 +47,7 @@ struct ModeChangedAction : PubSubAction {
 };
 
 struct TimeoutAction : PubSubAction {
-    TimeoutAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 
     ActionUser target;
 
@@ -61,10 +56,7 @@ struct TimeoutAction : PubSubAction {
 };
 
 struct BanAction : PubSubAction {
-    BanAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 
     ActionUser target;
 
@@ -72,10 +64,7 @@ struct BanAction : PubSubAction {
 };
 
 struct UnbanAction : PubSubAction {
-    UnbanAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 
     ActionUser target;
 
@@ -86,17 +75,11 @@ struct UnbanAction : PubSubAction {
 };
 
 struct ClearChatAction : PubSubAction {
-    ClearChatAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 };
 
 struct ModerationStateAction : PubSubAction {
-    ModerationStateAction(const rapidjson::Value &data)
-        : PubSubAction(data)
-    {
-    }
+    using PubSubAction::PubSubAction;
 
     ActionUser target;
 
