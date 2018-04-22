@@ -82,8 +82,10 @@ int runGui(int argc, char *argv[])
     auto runningPath = pathMan.settingsFolderPath + "/running_" + pathMan.appPathHash;
 
     if (QFile::exists(runningPath)) {
+#ifndef DISABLE_CRASH_DIALOG
         chatterino::widgets::LastRunCrashDialog dialog;
         dialog.exec();
+#endif
     } else {
         QFile runningFile(runningPath);
 
