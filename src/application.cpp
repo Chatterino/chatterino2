@@ -10,6 +10,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/posttothread.hpp"
 
 using namespace chatterino::singletons;
 
@@ -80,7 +81,7 @@ Application::Application()
                 .arg(action.duration)
                 .arg(action.reason));
 
-        chan->addMessage(msg);
+        util::postToThread([chan, msg] { chan->addMessage(msg); });
 
         debug::Log("User {}({}) was timed out by {} for {} seconds with reason: '{}'",
                    action.target.name, action.target.id, action.source.name, action.duration,
