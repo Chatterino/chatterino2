@@ -37,16 +37,24 @@ namespace chatterino {
 namespace widgets {
 
 Split::Split(SplitContainer *parent)
-    : BaseWidget(parent)
-    , parentPage(*parent)
+    : Split((BaseWidget *)parent)
+{
+    this->container = parent;
+}
+
+Split::Split(BaseWidget *widget)
+    : Split(widget->themeManager, widget)
+{
+}
+
+Split::Split(singletons::ThemeManager &manager, QWidget *parent)
+    : BaseWidget(manager, parent)
+    , container(nullptr)
     , channel(Channel::getEmpty())
     , vbox(this)
     , header(this)
     , view(this)
     , input(this)
-    , flexSizeX(1)
-    , flexSizeY(1)
-    , moderationMode(false)
 {
     this->setMouseTracking(true);
 
@@ -122,6 +130,11 @@ Split::~Split()
     this->indirectChannelChangedConnection.disconnect();
 }
 
+bool Split::isInContainer() const
+{
+    return this->container != nullptr;
+}
+
 IndirectChannel Split::getIndirectChannel()
 {
     return this->channel;
@@ -160,24 +173,26 @@ void Split::setChannel(IndirectChannel newChannel)
 
 void Split::setFlexSizeX(double x)
 {
-    this->flexSizeX = x;
-    this->parentPage.updateFlexValues();
+    //    this->flexSizeX = x;
+    //    this->parentPage->updateFlexValues();
 }
 
 double Split::getFlexSizeX()
 {
-    return this->flexSizeX;
+    //    return this->flexSizeX;
+    return 1;
 }
 
 void Split::setFlexSizeY(double y)
 {
-    this->flexSizeY = y;
-    this->parentPage.updateFlexValues();
+    //    this->flexSizeY = y;
+    //    this->parentPage.updateFlexValues();
 }
 
 double Split::getFlexSizeY()
 {
-    return this->flexSizeY;
+    //    return this->flexSizeY;
+    return 1;
 }
 
 void Split::setModerationMode(bool value)
@@ -206,7 +221,9 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->closed.connect([=] {
         if (dialog->hasSeletedChannel()) {
             this->setChannel(dialog->getSelectedChannel());
-            this->parentPage.refreshTitle();
+            if (this->isInContainer()) {
+                this->container->refreshTitle();
+            }
         }
 
         callback(dialog->hasSeletedChannel());
@@ -286,15 +303,17 @@ void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
 /// Slots
 void Split::doAddSplit()
 {
-    SplitContainer *page = static_cast<SplitContainer *>(this->parentWidget());
-    page->addChat(true);
+    if (this->container) {
+        this->container->addChat(true);
+    }
 }
 
 void Split::doCloseSplit()
 {
-    SplitContainer *page = static_cast<SplitContainer *>(this->parentWidget());
-    page->removeFromLayout(this);
-    deleteLater();
+    if (this->container) {
+        this->container->removeFromLayout(this);
+        deleteLater();
+    }
 }
 
 void Split::doChangeChannel()

@@ -43,7 +43,9 @@ class Split : public BaseWidget
     Q_OBJECT
 
 public:
-    Split(SplitContainer *parent);
+    explicit Split(SplitContainer *parent);
+    explicit Split(BaseWidget *widget);
+    explicit Split(singletons::ThemeManager &manager, QWidget *parent);
     ~Split() override;
 
     pajlada::Signals::NoArgSignal channelChanged;
@@ -75,6 +77,8 @@ public:
 
     void drag();
 
+    bool isInContainer() const;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -83,21 +87,22 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
-    SplitContainer &parentPage;
+    SplitContainer *container;
     IndirectChannel channel;
 
     QVBoxLayout vbox;
     SplitHeader header;
     ChannelView view;
     SplitInput input;
-    double flexSizeX;
-    double flexSizeY;
+    double flexSizeX = 1;
+    double flexSizeY = 1;
 
-    bool moderationMode;
+    bool moderationMode = false;
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
     pajlada::Signals::Connection indirectChannelChangedConnection;
+
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);

@@ -191,7 +191,7 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 void MessageLayoutContainer::paintElements(QPainter &painter)
 {
     for (const std::unique_ptr<MessageLayoutElement> &element : this->elements) {
-#ifdef OHHEYITSFOURTF
+#ifdef FOURTF
         painter.setPen(QColor(0, 255, 0));
         painter.drawRect(element->getRect());
 #endif
@@ -214,12 +214,14 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
     QColor selectionColor = themeManager.messages.selection;
 
     // don't draw anything
-    if (selection.selectionMin.messageIndex > messageIndex || selection.selectionMax.messageIndex < messageIndex) {
+    if (selection.selectionMin.messageIndex > messageIndex ||
+        selection.selectionMax.messageIndex < messageIndex) {
         return;
     }
 
     // fully selected
-    if (selection.selectionMin.messageIndex < messageIndex && selection.selectionMax.messageIndex > messageIndex) {
+    if (selection.selectionMin.messageIndex < messageIndex &&
+        selection.selectionMax.messageIndex > messageIndex) {
         for (Line &line : this->lines) {
             QRect rect = line.rect;
 
@@ -267,8 +269,8 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                             int c = this->elements[i]->getSelectionIndexCount();
 
                             if (index + c > selection.selectionMax.charIndex) {
-                                r = this->elements[i]->getXFromIndex(selection.selectionMax.charIndex -
-                                                                     index);
+                                r = this->elements[i]->getXFromIndex(
+                                    selection.selectionMax.charIndex - index);
                                 break;
                             }
                             index += c;

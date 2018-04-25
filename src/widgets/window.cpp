@@ -11,9 +11,13 @@
 #include "widgets/split.hpp"
 
 #include <QApplication>
+#include <QHeaderView>
 #include <QPalette>
 #include <QShortcut>
 #include <QVBoxLayout>
+
+#include <QTableView>
+#include "util/tupletablemodel.hpp"
 
 namespace chatterino {
 namespace widgets {

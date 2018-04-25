@@ -9,19 +9,18 @@ const ignoredPages = {
 };
 
 const appName = "com.chatterino.chatterino";
-
-/// Connect to port
-
 let port = null;
 
+
+/// Connect to port
 function connectPort() {
   port = chrome.runtime.connectNative("com.chatterino.chatterino");
   console.log("port connected");
 
-  port.onMessage.addListener(function(msg) {
+  port.onMessage.addListener(function (msg) {
     console.log(msg);
   });
-  port.onDisconnect.addListener(function() {
+  port.onDisconnect.addListener(function () {
     console.log("port disconnected");
 
     port = null;
@@ -39,8 +38,8 @@ function getPort() {
   }
 }
 
-/// Tab listeners
 
+/// Tab listeners
 chrome.tabs.onActivated.addListener((activeInfo) => {
   chrome.tabs.get(activeInfo.tabId, (tab) => {
     if (!tab)
@@ -49,7 +48,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
     if (!tab.url)
       return;
 
-    matchUrl(tab.url);
+    matchUrl(tab.url, tab);
   });
 });
 
@@ -57,32 +56,47 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (!tab.highlighted)
     return;
 
-  matchUrl(changeInfo.url);
+  matchUrl(changeInfo.url, tab);
 });
 
 
 /// Misc
-
-function matchUrl(url) {
+function matchUrl(url, tab) {
   if (!url)
     return;
 
   const match = url.match(/^https?:\/\/(www\.)?twitch.tv\/([a-zA-Z0-9]+)\/?$/);
 
-  if (match) {
-    const channelName = match[2];
+  let channelName;
 
-    if (!ignoredPages[channelName]) {
-      selectChannel(channelName);
+  console.log(tab);
+
+  if (match && (channelName = match[2], !ignoredPages[channelName])) {
+    console.log("channelName " + channelName);
+    console.log("winId " + tab.windowId);
+
+    chrome.windows.get(tab.windowId, {}, (window) => {
+      let yOffset = window.height - tab.height;
+
+      let port = getPort();
+      if (port) {
+        port.postMessage({
+          action: "select",
+          attach: true,
+          type: "twitch",
+          name: channelName,
+          winId: "" + tab.windowId,
+          yOffset: yOffset
+        });
+      }
+    });
+  } else {
+    let port = getPort();
+    if (port) {
+      port.postMessage({
+        action: "detach",
+        winId: "" + tab.windowId
+      })
     }
-  }
-}
-
-function selectChannel(channelName) {
-  console.log("select" + channelName);
-
-  let port = getPort();
-  if (port) {
-    port.postMessage({action: "select", type: "twitch", name: channelName});
   }
 }

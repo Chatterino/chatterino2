@@ -2,6 +2,7 @@
 
 #include "widgets/settingspages/settingspage.hpp"
 
+#include <QAbstractTableModel>
 #include <QTimer>
 
 class QPushButton;
@@ -17,14 +18,7 @@ public:
     HighlightingPage();
 
 private:
-    QListWidget *highlightList;
-    QPushButton *highlightAdd;
-    QPushButton *highlightEdit;
-    QPushButton *highlightRemove;
-
     QTimer disabledUsersChangedTimer;
-
-    void addHighlightTabSignals();
 };
 
 }  // namespace settingspages

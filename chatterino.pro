@@ -181,7 +181,9 @@ SOURCES += \
     src/singletons/helper/pubsubactions.cpp \
     src/widgets/selectchanneldialog.cpp \
     src/singletons/updatemanager.cpp \
-    src/widgets/lastruncrashdialog.cpp
+    src/widgets/lastruncrashdialog.cpp \
+    src/widgets/attachedwindow.cpp \
+    src/util/tupletablemodel.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -305,7 +307,9 @@ HEADERS  += \
     src/singletons/helper/pubsubactions.hpp \
     src/widgets/selectchanneldialog.hpp \
     src/singletons/updatemanager.hpp \
-    src/widgets/lastruncrashdialog.hpp
+    src/widgets/lastruncrashdialog.hpp \
+    src/widgets/attachedwindow.hpp \
+    src/util/tupletablemodel.hpp
 
 RESOURCES += \
     resources/resources.qrc
@@ -358,10 +362,6 @@ win32-msvc* {
 #}
 
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
-win32::exists(C:\fourtf) {
-    DEFINES += "OHHEYITSFOURTF"
-}
 
 linux {
     QMAKE_LFLAGS += -lrt

@@ -98,7 +98,7 @@ ChannelView::ChannelView(BaseWidget *parent)
     //    this->resizeEvent(e);
     //    delete e;
 
-    this->scrollBar.resize(this->scrollBar.width(), height() + 1);
+    this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
 
     singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
         [this](auto, auto) { this->update(); }, this->managedConnections);
@@ -198,14 +198,14 @@ void ChannelView::actuallyLayoutMessages()
 
             y += message->getHeight();
 
-            if (y >= height()) {
+            if (y >= this->height()) {
                 break;
             }
         }
     }
 
     // layout the messages at the bottom to determine the scrollbar thumb size
-    int h = height() - 8;
+    int h = this->height() - 8;
 
     for (int i = (int)messagesSnapshot.getLength() - 1; i >= 0; i--) {
         auto *message = messagesSnapshot[i].get();
@@ -472,7 +472,7 @@ void ChannelView::updateLastReadMessage()
 
 void ChannelView::resizeEvent(QResizeEvent *)
 {
-    this->scrollBar.resize(this->scrollBar.width(), height());
+    this->scrollBar.resize(this->scrollBar.width(), this->height());
     this->scrollBar.move(this->width() - this->scrollBar.width(), 0);
 
     this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
@@ -559,7 +559,7 @@ void ChannelView::drawMessages(QPainter &painter)
         y += layout->getHeight();
 
         end = layout;
-        if (y > height()) {
+        if (y > this->height()) {
             break;
         }
     }

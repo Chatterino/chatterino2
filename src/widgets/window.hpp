@@ -23,7 +23,7 @@ class Window : public BaseWindow
     Q_OBJECT
 
 public:
-    enum WindowType { Main, Popup };
+    enum WindowType { Main, Popup, Attached };
 
     explicit Window(singletons::ThemeManager &_themeManager, WindowType type);
 

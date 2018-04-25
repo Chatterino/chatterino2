@@ -10,13 +10,14 @@ namespace messages {
 
 struct HighlightPhrase {
     QString key;
-    bool sound;
     bool alert;
+    bool sound;
+    bool regex;
 
-    bool operator==(const HighlightPhrase &rhs) const
+    bool operator==(const HighlightPhrase &other) const
     {
-        return std::tie(this->key, this->sound, this->alert) ==
-               std::tie(rhs.key, rhs.sound, rhs.alert);
+        return std::tie(this->key, this->sound, this->alert, this->regex) ==
+               std::tie(other.key, other.sound, other.alert, other.regex);
     }
 };
 }  // namespace messages
@@ -35,6 +36,7 @@ struct Serialize<chatterino::messages::HighlightPhrase> {
         AddMember(ret, "key", value.key, a);
         AddMember(ret, "alert", value.alert, a);
         AddMember(ret, "sound", value.sound, a);
+        AddMember(ret, "regex", value.regex, a);
 
         return ret;
     }
@@ -67,6 +69,13 @@ struct Deserialize<chatterino::messages::HighlightPhrase> {
             const rapidjson::Value &sound = value["sound"];
             if (sound.IsBool()) {
                 ret.sound = sound.GetBool();
+            }
+        }
+
+        if (value.HasMember("regex")) {
+            const rapidjson::Value &regex = value["regex"];
+            if (regex.IsBool()) {
+                ret.regex = regex.GetBool();
             }
         }
 

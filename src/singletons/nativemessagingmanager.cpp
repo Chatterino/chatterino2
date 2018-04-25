@@ -16,6 +16,10 @@ namespace ipc = boost::interprocess;
 
 #ifdef Q_OS_WIN
 #include <QProcess>
+
+#include <windows.h>
+#include "singletons/windowmanager.hpp"
+#include "widgets/attachedwindow.hpp"
 #endif
 
 #include <iostream>
@@ -56,8 +60,13 @@ void NativeMessagingManager::registerHost()
     root_obj.insert("path", QCoreApplication::applicationFilePath());
     root_obj.insert("type", "stdio");
 
+    // chrome
     QJsonArray allowed_origins_arr = {"chrome-extension://aeicjepmjkgmbeohnchmpfjbpchogmjn/"};
     root_obj.insert("allowed_origins", allowed_origins_arr);
+
+    // firefox
+    QJsonArray allowed_extensions = {"585a153c7e1ac5463478f25f8f12220e9097e716@temporary-addon"};
+    root_obj.insert("allowed_extensions", allowed_extensions);
 
     // save the manifest
     QString manifestPath =
@@ -70,12 +79,10 @@ void NativeMessagingManager::registerHost()
     file.write(document.toJson());
     file.flush();
 
-#ifdef XD
 #ifdef Q_OS_WIN
     // clang-format off
     QProcess::execute("REG ADD \"HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
 // clang-format on
-#endif
 #endif
 }
 
@@ -135,22 +142,45 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 
     if (action == "select") {
         QString _type = root.value("type").toString();
+        bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
+        QString winId = root.value("winId").toString();
+        int yOffset = root.value("yOffset").toInt(-1);
 
-        if (_type.isNull() || name.isNull()) {
-            qDebug() << "NM type or name missing";
+        if (_type.isNull() || name.isNull() || winId.isNull()) {
+            qDebug() << "NM type, name or winId missing";
+            attach = false;
             return;
         }
 
         if (_type == "twitch") {
-            util::postToThread([name] {
+            util::postToThread([name, attach, winId, yOffset] {
                 auto &ts = providers::twitch::TwitchServer::getInstance();
 
                 ts.watchingChannel.update(ts.getOrAddChannel(name));
+
+                if (attach) {
+                    auto *window =
+                        widgets::AttachedWindow::get(::GetForegroundWindow(), winId, yOffset);
+                    window->setChannel(ts.getOrAddChannel(name));
+                    window->show();
+                }
             });
+
         } else {
             qDebug() << "NM unknown channel type";
         }
+    } else if (action == "detach") {
+        QString winId = root.value("winId").toString();
+
+        if (winId.isNull()) {
+            qDebug() << "NM winId missing";
+            return;
+        }
+
+        util::postToThread([winId] { widgets::AttachedWindow::detach(winId); });
+    } else {
+        qDebug() << "NM unknown action " + action;
     }
 }
 

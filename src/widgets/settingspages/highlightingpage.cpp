@@ -4,11 +4,13 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <QTabWidget>
+#include <QTableView>
 #include <QTextEdit>
 
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
+#include "util/tupletablemodel.hpp"
 
 #define ENABLE_HIGHLIGHTS "Enable Highlighting"
 #define HIGHLIGHT_MSG "Highlight messages containing your name"
@@ -54,15 +56,47 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
-                highlights.emplace<QListWidget>().assign(&this->highlightList);
+                QTableView *view = *highlights.emplace<QTableView>();
+                auto *model = new util::TupleTableModel<QString, bool, bool, bool>;
+                model->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
+
+                // fourtf: could crash
+                for (const messages::HighlightPhrase &phrase :
+                     settings.highlightProperties.getValue()) {
+                    model->addRow(phrase.key, phrase.alert, phrase.sound, phrase.regex);
+                }
+
+                view->setModel(model);
+                view->setSelectionMode(QAbstractItemView::SingleSelection);
+                view->setSelectionBehavior(QAbstractItemView::SelectRows);
+                view->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                view->resizeColumnsToContents();
+                view->setColumnWidth(0, 250);
 
                 auto buttons = highlights.emplace<QHBoxLayout>();
 
-                buttons.emplace<QPushButton>("Add").assign(&this->highlightAdd);
-                buttons.emplace<QPushButton>("Edit").assign(&this->highlightEdit);
-                buttons.emplace<QPushButton>("Remove").assign(&this->highlightRemove);
+                model->itemsChanged.connect([model] {
+                    std::vector<messages::HighlightPhrase> phrases;
+                    for (int i = 0; i < model->getRowCount(); i++) {
+                        auto t = model->getRow(i);
+                        phrases.push_back(messages::HighlightPhrase{
+                            std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t),
+                        });
+                    }
+                    singletons::SettingManager::getInstance().highlightProperties.setValue(phrases);
+                });
 
-                this->addHighlightTabSignals();
+                auto add = buttons.emplace<QPushButton>("Add");
+                QObject::connect(*add, &QPushButton::clicked,
+                                 [model] { model->addRow("", true, false, false); });
+                auto remove = buttons.emplace<QPushButton>("Remove");
+                QObject::connect(*remove, &QPushButton::clicked, [view, model] {
+                    if (view->selectionModel()->hasSelection()) {
+                        model->removeRow(view->selectionModel()->selectedRows()[0].row());
+                    }
+                });
+
+                view->hideColumn(3);
             }
             // DISABLED USERS
             auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
@@ -88,157 +122,6 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer.setSingleShot(true);
-}
-
-//
-// DISCLAIMER:
-//
-// If you are trying to learn from reading the chatterino code please ignore this segment.
-//
-void HighlightingPage::addHighlightTabSignals()
-{
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-
-    auto addBtn = this->highlightAdd;
-    auto editBtn = this->highlightEdit;
-    auto delBtn = this->highlightRemove;
-    auto highlights = this->highlightList;
-
-    // Open "Add new highlight" dialog
-    QObject::connect(addBtn, &QPushButton::clicked, this, [highlights, this, &settings] {
-        auto show = new QWidget();
-        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
-
-        auto edit = new QLineEdit();
-        auto add = new QPushButton("Add");
-
-        auto sound = new QCheckBox("Play sound");
-        auto task = new QCheckBox("Flash taskbar");
-
-        // Save highlight
-        QObject::connect(add, &QPushButton::clicked, this, [=, &settings] {
-            if (edit->text().length()) {
-                QString highlightKey = edit->text();
-                highlights->addItem(highlightKey);
-
-                auto properties = settings.highlightProperties.getValue();
-
-                messages::HighlightPhrase newHighlightProperty;
-                newHighlightProperty.key = highlightKey;
-                newHighlightProperty.sound = sound->isChecked();
-                newHighlightProperty.alert = task->isChecked();
-
-                properties.push_back(newHighlightProperty);
-
-                settings.highlightProperties = properties;
-
-                show->close();
-            }
-        });
-        box->addWidget(edit);
-        box->addWidget(add);
-        box->addWidget(sound);
-        box->addWidget(task);
-        show->setLayout(box);
-        show->show();
-    });
-
-    // Open "Edit selected highlight" dialog
-    QObject::connect(editBtn, &QPushButton::clicked, this, [highlights, this, &settings] {
-        if (highlights->selectedItems().isEmpty()) {
-            // No item selected
-            return;
-        }
-
-        QListWidgetItem *selectedHighlight = highlights->selectedItems().first();
-        QString highlightKey = selectedHighlight->text();
-        auto properties = settings.highlightProperties.getValue();
-        auto highlightIt = std::find_if(properties.begin(), properties.end(),
-                                        [highlightKey](const auto &highlight) {
-                                            return highlight.key == highlightKey;  //
-                                        });
-
-        if (highlightIt == properties.end()) {
-            debug::Log("Unable to find highlight key {} in highlight properties. "
-                       "This is weird",
-                       highlightKey);
-            return;
-        }
-
-        messages::HighlightPhrase &selectedSetting = *highlightIt;
-        auto show = new QWidget();
-        auto box = new QBoxLayout(QBoxLayout::TopToBottom);
-
-        auto edit = new QLineEdit(highlightKey);
-        auto apply = new QPushButton("Apply");
-
-        auto sound = new QCheckBox("Play sound");
-        sound->setChecked(selectedSetting.sound);
-        auto task = new QCheckBox("Flash taskbar");
-        task->setChecked(selectedSetting.alert);
-
-        // Apply edited changes
-        QObject::connect(apply, &QPushButton::clicked, this, [=, &settings] {
-            QString newHighlightKey = edit->text();
-
-            if (newHighlightKey.length() == 0) {
-                return;
-            }
-
-            auto properties = settings.highlightProperties.getValue();
-            auto highlightIt =
-                std::find_if(properties.begin(), properties.end(), [=](const auto &highlight) {
-                    return highlight.key == highlightKey;  //
-                });
-
-            if (highlightIt == properties.end()) {
-                debug::Log("Unable to find highlight key {} in highlight properties. "
-                           "This is weird",
-                           highlightKey);
-                return;
-            }
-            auto &highlightProperty = *highlightIt;
-            highlightProperty.key = newHighlightKey;
-            highlightProperty.sound = sound->isCheckable();
-            highlightProperty.alert = task->isCheckable();
-
-            settings.highlightProperties = properties;
-
-            selectedHighlight->setText(newHighlightKey);
-            selectedHighlight->setText(newHighlightKey);
-
-            show->close();
-        });
-
-        box->addWidget(edit);
-        box->addWidget(apply);
-        box->addWidget(sound);
-        box->addWidget(task);
-        show->setLayout(box);
-        show->show();
-    });
-
-    // Delete selected highlight
-    QObject::connect(delBtn, &QPushButton::clicked, this, [highlights, &settings] {
-        if (highlights->selectedItems().isEmpty()) {
-            // No highlight selected
-            return;
-        }
-
-        QListWidgetItem *selectedHighlight = highlights->selectedItems().first();
-        QString highlightKey = selectedHighlight->text();
-
-        auto properties = settings.highlightProperties.getValue();
-        properties.erase(std::remove_if(properties.begin(), properties.end(),
-                                        [highlightKey](const auto &highlight) {
-                                            return highlight.key == highlightKey;  //
-                                        }),
-                         properties.end());
-
-        settings.highlightProperties = properties;
-
-        delete selectedHighlight;
-    });
 }
 
 }  // namespace settingspages
