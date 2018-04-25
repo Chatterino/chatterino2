@@ -26,7 +26,6 @@ SpecialChannelsPage::SpecialChannelsPage()
     auto whispers = layout.emplace<QGroupBox>("Whispers").setLayoutType<QVBoxLayout>();
     {
         whispers.emplace<QLabel>("Join /whispers to view your mentions.");
-        whispers.append(this->createCheckBox("Show whispers inline", settings.inlineWhispers));
     }
 
     layout->addStretch(1);

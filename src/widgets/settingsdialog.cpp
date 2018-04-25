@@ -7,6 +7,7 @@
 #include "widgets/settingspages/behaviourpage.hpp"
 #include "widgets/settingspages/commandpage.hpp"
 #include "widgets/settingspages/emotespage.hpp"
+#include "widgets/settingspages/externaltoolspage.hpp"
 #include "widgets/settingspages/highlightingpage.hpp"
 #include "widgets/settingspages/ignoremessagespage.hpp"
 #include "widgets/settingspages/ignoreuserspage.hpp"
@@ -75,10 +76,16 @@ void SettingsDialog::addTabs()
     this->ui.tabContainer->setSpacing(0);
 
     this->addTab(new settingspages::AccountsPage);
+
+    this->ui.tabContainer->addStretch(1);
+
     this->addTab(new settingspages::AppearancePage);
     this->addTab(new settingspages::BehaviourPage);
+
+    this->ui.tabContainer->addStretch(1);
+
     this->addTab(new settingspages::CommandPage);
-    this->addTab(new settingspages::EmotesPage);
+    //    this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
 
     this->ui.tabContainer->addStretch(1);
@@ -88,7 +95,8 @@ void SettingsDialog::addTabs()
     this->addTab(new settingspages::KeyboardSettingsPage);
     this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
-    this->addTab(new settingspages::SpecialChannelsPage);
+    //    this->addTab(new settingspages::SpecialChannelsPage);
+    this->addTab(new settingspages::ExternalToolsPage);
 
     this->ui.tabContainer->addStretch(1);
     this->addTab(new settingspages::AboutPage, Qt::AlignBottom);

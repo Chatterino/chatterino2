@@ -70,8 +70,12 @@ HighlightingPage::HighlightingPage()
                 view->setSelectionMode(QAbstractItemView::SingleSelection);
                 view->setSelectionBehavior(QAbstractItemView::SelectRows);
                 view->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-                view->resizeColumnsToContents();
-                view->setColumnWidth(0, 250);
+
+                // fourtf: make class extrend BaseWidget and add this to dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->resizeColumnsToContents();
+                    view->setColumnWidth(0, 250);
+                });
 
                 auto buttons = highlights.emplace<QHBoxLayout>();
 

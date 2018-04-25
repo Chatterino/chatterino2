@@ -9,19 +9,16 @@
 
 #define WINDOW_TOPMOST "Window always on top (requires restart)"
 #define INPUT_EMPTY "Hide input box when empty"
-#define LAST_MSG "Show last read message indicator (marks the spot where you left the window)"
 #define PAUSE_HOVERING "When hovering"
 
 #define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
-
-#define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
 namespace widgets {
 namespace settingspages {
 
 BehaviourPage::BehaviourPage()
-    : SettingsPage("Behaviour", ":/images/behave.svg")
+    : SettingsPage("Feel", ":/images/behave.svg")
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<BehaviourPage> layoutCreator(this);
@@ -32,7 +29,6 @@ BehaviourPage::BehaviourPage()
     {
         form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, settings.windowTopMost));
         form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, settings.hideEmptyInput));
-        form->addRow("", this->createCheckBox(LAST_MSG, settings.showLastMessageIndicator));
         form->addRow("Pause chat:", this->createCheckBox(PAUSE_HOVERING, settings.pauseChatHover));
 
         form->addRow("Mouse scroll speed:", this->createMouseScrollSlider());
@@ -54,12 +50,10 @@ BehaviourPage::BehaviourPage()
     }
 
     {
-        auto group = layout.emplace<QGroupBox>("Streamlink");
-        auto groupLayout = group.setLayoutType<QFormLayout>();
-        groupLayout->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
-        groupLayout->addRow("Prefered quality:",
-                            this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
-        groupLayout->addRow("Additional options:", this->createLineEdit(settings.streamlinkOpts));
+        auto group = layout.emplace<QGroupBox>("Misc");
+        auto groupLayout = group.setLayoutType<QVBoxLayout>();
+
+        groupLayout.append(this->createCheckBox("Show whispers inline", settings.inlineWhispers));
     }
 
     layout->addStretch(1);

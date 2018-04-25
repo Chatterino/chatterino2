@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QHBoxLayout>
+#include <QScrollArea>
 #include <QTabWidget>
 #include <QWidget>
 
@@ -50,6 +51,15 @@ public:
         this->_addItem(this->getOrCreateLayout(), t);
 
         return LayoutCreator<T2>(t);
+    }
+
+    template <typename Q = T,
+              typename std::enable_if<std::is_base_of<QScrollArea, Q>::value, int>::type = 0>
+    LayoutCreator<QWidget> emplaceScrollAreaWidget()
+    {
+        QWidget *widget = new QWidget;
+        this->item->setWidget(widget);
+        return LayoutCreator<QWidget>(widget);
     }
 
     template <typename T2, typename Q = T,

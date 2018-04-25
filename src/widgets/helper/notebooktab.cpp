@@ -80,11 +80,12 @@ void NotebookTab2::updateSize()
     float scale = getScale();
 
     int width;
+    QFontMetrics metrics(this->font());
 
     if (singletons::SettingManager::getInstance().hideTabX) {
-        width = (int)((fontMetrics().width(this->title) + 16 /*+ 16*/) * scale);
+        width = (int)((metrics.width(this->title) + 16 /*+ 16*/) * scale);
     } else {
-        width = (int)((fontMetrics().width(this->title) + 8 + 24 /*+ 16*/) * scale);
+        width = (int)((metrics.width(this->title) + 8 + 24 /*+ 16*/) * scale);
     }
 
     this->resize(std::min((int)(150 * scale), width), (int)(24 * scale));
