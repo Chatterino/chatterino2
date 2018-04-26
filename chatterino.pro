@@ -312,7 +312,8 @@ HEADERS  += \
     src/widgets/attachedwindow.hpp \
     src/util/tupletablemodel.hpp \
     src/widgets/settingspages/externaltoolspage.hpp \
-    src/util/removescrollareabackground.hpp
+    src/util/removescrollareabackground.hpp \
+    src/util/assertinguithread.h
 
 RESOURCES += \
     resources/resources.qrc

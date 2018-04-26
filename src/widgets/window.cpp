@@ -16,8 +16,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 
-#include <QTableView>
-#include "util/tupletablemodel.hpp"
+#include <QStandardItemModel>
 
 namespace chatterino {
 namespace widgets {

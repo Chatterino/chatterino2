@@ -9,8 +9,8 @@ namespace providers {
 namespace twitch {
 
 TwitchAccountManager::TwitchAccountManager()
+    : anonymousUser(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
-    this->anonymousUser.reset(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""));
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()

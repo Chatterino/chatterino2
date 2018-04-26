@@ -17,6 +17,11 @@ inline QString getEnvString(const char *target)
 
 }  // namespace
 
+AccountManager::AccountManager()
+{
+    qDebug() << "init AccountManager";
+}
+
 AccountManager &AccountManager::getInstance()
 {
     static AccountManager instance;

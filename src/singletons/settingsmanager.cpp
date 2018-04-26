@@ -20,6 +20,8 @@ SettingManager::SettingManager()
     : snapshot(nullptr)
     , _ignoredKeywords(new std::vector<QString>)
 {
+    qDebug() << "init SettingManager";
+
     this->wordFlagsListener.addSetting(this->showTimestamps);
     this->wordFlagsListener.addSetting(this->showBadges);
     this->wordFlagsListener.addSetting(this->enableBttvEmotes);

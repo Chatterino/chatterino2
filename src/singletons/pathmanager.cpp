@@ -8,6 +8,11 @@
 namespace chatterino {
 namespace singletons {
 
+PathManager::PathManager()
+{
+    qDebug() << "init PathManager";
+}
+
 PathManager &PathManager::getInstance()
 {
     static PathManager instance;

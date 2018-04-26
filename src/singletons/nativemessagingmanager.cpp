@@ -32,6 +32,7 @@ namespace singletons {
 
 NativeMessagingManager::NativeMessagingManager()
 {
+    qDebug() << "init NativeMessagingManager";
 }
 
 NativeMessagingManager &NativeMessagingManager::getInstance()

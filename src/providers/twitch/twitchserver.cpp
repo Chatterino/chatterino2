@@ -21,9 +21,10 @@ TwitchServer::TwitchServer()
     , mentionsChannel(new Channel("/mentions", Channel::TwitchMentions))
     , watchingChannel(Channel::getEmpty(), Channel::TwitchWatching)
 {
-    AccountManager::getInstance().Twitch.userChanged.connect([this]() {  //
-        util::postToThread([this] { this->connect(); });
-    });
+    qDebug() << "init TwitchServer";
+
+    AccountManager::getInstance().Twitch.userChanged.connect(
+        [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
 TwitchServer &TwitchServer::getInstance()
@@ -35,6 +36,8 @@ TwitchServer &TwitchServer::getInstance()
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
     std::shared_ptr<TwitchAccount> account = AccountManager::getInstance().Twitch.getCurrent();
+
+    qDebug() << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
     //    QString oauthClient = account->getOAuthClient();

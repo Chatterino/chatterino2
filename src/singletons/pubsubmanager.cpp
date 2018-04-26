@@ -172,6 +172,8 @@ bool PubSubClient::Send(const char *payload)
 
 PubSubManager::PubSubManager()
 {
+    qDebug() << "init PubSubManager";
+
     this->moderationActionHandlers["clear"] = [this](const auto &data, const auto &roomID) {
         ClearChatAction action(data, roomID);
 
@@ -444,7 +446,6 @@ void PubSubManager::AddClient()
 PubSubManager &PubSubManager::getInstance()
 {
     static PubSubManager instance;
-
     return instance;
 }
 

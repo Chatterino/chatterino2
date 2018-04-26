@@ -16,7 +16,7 @@ namespace singletons {
 
 class CommandManager
 {
-    CommandManager() = default;
+    CommandManager();
 
 public:
     static CommandManager &getInstance();

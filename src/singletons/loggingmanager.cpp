@@ -14,6 +14,7 @@ namespace singletons {
 LoggingManager::LoggingManager()
     : pathManager(PathManager::getInstance())
 {
+    qDebug() << "init LoggingManager";
 }
 
 LoggingManager &LoggingManager::getInstance()

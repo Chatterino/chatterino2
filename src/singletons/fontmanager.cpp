@@ -24,6 +24,8 @@ FontManager::FontManager()
     , currentFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 //    , currentFont(this->currentFontFamily.getValue().c_str(), currentFontSize.getValue())
 {
+    qDebug() << "init FontManager";
+
     this->currentFontFamily.connect([this](const std::string &newValue, auto) {
         this->incGeneration();
         //        this->currentFont.setFamily(newValue.c_str());
@@ -41,7 +43,6 @@ FontManager::FontManager()
 FontManager &FontManager::getInstance()
 {
     static FontManager instance;
-
     return instance;
 }
 

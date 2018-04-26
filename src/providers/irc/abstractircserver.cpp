@@ -69,7 +69,7 @@ void AbstractIrcServer::connect()
     }
 
     this->onConnected();
-    this->connected.invoke();
+    //    this->connected.invoke();
 }
 
 void AbstractIrcServer::disconnect()

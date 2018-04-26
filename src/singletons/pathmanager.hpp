@@ -7,7 +7,7 @@ namespace singletons {
 
 class PathManager
 {
-    PathManager() = default;
+    PathManager();
 
 public:
     static PathManager &getInstance();

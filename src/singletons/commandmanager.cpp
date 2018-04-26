@@ -17,6 +17,11 @@ using namespace chatterino::providers::twitch;
 namespace chatterino {
 namespace singletons {
 
+CommandManager::CommandManager()
+{
+    qDebug() << "init CommandManager";
+}
+
 CommandManager &CommandManager::getInstance()
 {
     static CommandManager instance;

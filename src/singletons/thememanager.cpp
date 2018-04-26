@@ -38,6 +38,8 @@ ThemeManager::ThemeManager()
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
 {
+    qDebug() << "init ThemeManager";
+
     this->update();
 
     this->themeName.connectSimple([this](auto) { this->update(); });

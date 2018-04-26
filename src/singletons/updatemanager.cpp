@@ -9,6 +9,7 @@ namespace singletons {
 UpdateManager::UpdateManager()
     : currentVersion(CHATTERINO_VERSION)
 {
+    qDebug() << "init UpdateManager";
 }
 
 UpdateManager &UpdateManager::getInstance()

@@ -4,6 +4,7 @@
 #include "singletons/fontmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "util/assertinguithread.h"
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/settingsdialog.hpp"
 
@@ -55,6 +56,7 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 WindowManager::WindowManager(ThemeManager &_themeManager)
     : themeManager(_themeManager)
 {
+    qDebug() << "init WindowManager";
     _themeManager.repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
 }
 
@@ -84,16 +86,22 @@ void WindowManager::repaintGifEmotes()
 
 widgets::Window &WindowManager::getMainWindow()
 {
+    util::assertInGuiThread();
+
     return *this->mainWindow;
 }
 
 widgets::Window &WindowManager::getSelectedWindow()
 {
+    util::assertInGuiThread();
+
     return *this->selectedWindow;
 }
 
 widgets::Window &WindowManager::createWindow(widgets::Window::WindowType type)
 {
+    util::assertInGuiThread();
+
     auto *window = new widgets::Window(this->themeManager, type);
     this->windows.push_back(window);
     window->show();
@@ -121,6 +129,8 @@ int WindowManager::windowCount()
 
 widgets::Window *WindowManager::windowAt(int index)
 {
+    util::assertInGuiThread();
+
     if (index < 0 || (size_t)index >= this->windows.size()) {
         return nullptr;
     }
@@ -131,6 +141,8 @@ widgets::Window *WindowManager::windowAt(int index)
 
 void WindowManager::initialize()
 {
+    util::assertInGuiThread();
+
     assert(!this->initialized);
 
     // load file
@@ -217,6 +229,8 @@ void WindowManager::initialize()
 
 void WindowManager::save()
 {
+    util::assertInGuiThread();
+
     QJsonDocument document;
 
     // "serialize"
@@ -296,6 +310,8 @@ void WindowManager::save()
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 {
+    util::assertInGuiThread();
+
     switch (channel.getType()) {
         case Channel::Twitch: {
             obj.insert("type", "twitch");
@@ -315,6 +331,8 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 
 IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 {
+    util::assertInGuiThread();
+
     QString type = obj.value("type").toString();
     if (type == "twitch") {
         return providers::twitch::TwitchServer::getInstance().getOrAddChannel(
@@ -332,6 +350,8 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 
 void WindowManager::closeAll()
 {
+    util::assertInGuiThread();
+
     for (widgets::Window *window : windows) {
         window->close();
     }

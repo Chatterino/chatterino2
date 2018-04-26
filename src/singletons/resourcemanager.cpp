@@ -288,6 +288,8 @@ ResourceManager::ResourceManager()
     , buttonBan(lli(":/images/button_ban.png", 0.25))
     , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
 {
+    qDebug() << "init ResourceManager";
+
     this->loadDynamicTwitchBadges();
 
     this->loadChatterinoBadges();

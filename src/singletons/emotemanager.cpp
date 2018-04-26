@@ -79,6 +79,7 @@ void FillInFFZEmoteData(const QJsonObject &urls, const QString &code, const QStr
 EmoteManager::EmoteManager()
     : findShortCodesRegex(":([-+\\w]+):")
 {
+    qDebug() << "init EmoteManager";
     auto &accountManager = AccountManager::getInstance();
 
     accountManager.Twitch.userChanged.connect([this] {

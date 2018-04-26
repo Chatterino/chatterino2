@@ -7,7 +7,7 @@ namespace singletons {
 
 class AccountManager
 {
-    AccountManager() = default;
+    AccountManager();
 
 public:
     static AccountManager &getInstance();
