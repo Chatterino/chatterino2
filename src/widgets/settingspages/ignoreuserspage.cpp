@@ -11,7 +11,7 @@
 #include <QVBoxLayout>
 
 // clang-format off
-#define INFO "/ignore <user> in chat ignores a user\n/unignore <user> in chat unignores a user\n\nChatterino uses the twitch api for ignored users so they are shared with the webchat.\nIf you use your own oauth key make sure that it has the correct permissions.\n"
+#define INFO "/ignore <user> in chat ignores a user\n/unignore <user> in chat unignores a user"
 // clang-format on
 
 namespace chatterino {
@@ -19,15 +19,11 @@ namespace widgets {
 namespace settingspages {
 
 IgnoreUsersPage::IgnoreUsersPage()
-    : SettingsPage("Ignore Users", "")
+    : SettingsPage("Ignores", "")
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<IgnoreUsersPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
-
-    auto label = layout.emplace<QLabel>(INFO);
-    label->setWordWrap(true);
-    label->setStyleSheet("color: #BBB");
 
     auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
     {
@@ -53,6 +49,10 @@ IgnoreUsersPage::IgnoreUsersPage()
         auto userList = group.emplace<QListView>();
         UNUSED(userList);  // TODO: Fill this list in with ignored users
     }
+
+    auto label = layout.emplace<QLabel>(INFO);
+    label->setWordWrap(true);
+    label->setStyleSheet("color: #BBB");
 }
 
 }  // namespace settingspages

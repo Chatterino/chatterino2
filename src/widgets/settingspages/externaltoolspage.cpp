@@ -15,7 +15,7 @@ ExternalToolsPage::ExternalToolsPage()
 {
     singletons::SettingManager &settings = singletons::SettingManager::getInstance();
     util::LayoutCreator<ExternalToolsPage> layoutCreator(this);
-    auto layout = layoutCreator.setLayoutType<QVBoxLayout>().withoutMargin();
+    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     {
         auto group = layout.emplace<QGroupBox>("Streamlink");
@@ -25,6 +25,8 @@ ExternalToolsPage::ExternalToolsPage()
                             this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
         groupLayout->addRow("Additional options:", this->createLineEdit(settings.streamlinkOpts));
     }
+
+    layout->addStretch(1);
 }
 
 }  // namespace settingspages

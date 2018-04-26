@@ -77,23 +77,23 @@ void SettingsDialog::addTabs()
 
     this->addTab(new settingspages::AccountsPage);
 
-    this->ui.tabContainer->addStretch(1);
+    this->ui.tabContainer->addSpacing(16);
 
     this->addTab(new settingspages::AppearancePage);
     this->addTab(new settingspages::BehaviourPage);
 
-    this->ui.tabContainer->addStretch(1);
+    this->ui.tabContainer->addSpacing(16);
 
     this->addTab(new settingspages::CommandPage);
     //    this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
-
-    this->ui.tabContainer->addStretch(1);
-
-    this->addTab(new settingspages::IgnoreMessagesPage);
+    //    this->addTab(new settingspages::IgnoreMessagesPage);
     this->addTab(new settingspages::IgnoreUsersPage);
-    this->addTab(new settingspages::KeyboardSettingsPage);
-    this->addTab(new settingspages::LogsPage);
+
+    this->ui.tabContainer->addSpacing(16);
+
+    //    this->addTab(new settingspages::KeyboardSettingsPage);
+    //    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
     //    this->addTab(new settingspages::SpecialChannelsPage);
     this->addTab(new settingspages::ExternalToolsPage);

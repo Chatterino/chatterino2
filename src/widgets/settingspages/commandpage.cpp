@@ -19,7 +19,7 @@ namespace widgets {
 namespace settingspages {
 
 CommandPage::CommandPage()
-    : SettingsPage("Macros", ":/images/commands.svg")
+    : SettingsPage("Commands", ":/images/commands.svg")
 {
     util::LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();

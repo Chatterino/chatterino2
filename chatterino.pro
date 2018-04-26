@@ -311,7 +311,8 @@ HEADERS  += \
     src/widgets/attachedwindow.hpp \
     src/widgets/settingspages/externaltoolspage.hpp \
     src/util/removescrollareabackground.hpp \
-    src/util/assertinguithread.h
+    src/util/assertinguithread.h \
+    src/util/standarditemhelper.hpp
 
 RESOURCES += \
     resources/resources.qrc
