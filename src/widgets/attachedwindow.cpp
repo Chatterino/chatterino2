@@ -5,8 +5,10 @@
 
 #include "widgets/split.hpp"
 
+#ifdef USEWINSDK
 #include "Windows.h"
 #pragma comment(lib, "Dwmapi.lib")
+#endif
 
 namespace chatterino {
 namespace widgets {
@@ -70,6 +72,7 @@ void AttachedWindow::showEvent(QShowEvent *)
 
 void AttachedWindow::attachToHwnd(void *_hwnd)
 {
+#ifdef USEWINSDK
     QTimer *timer = new QTimer(this);
     timer->setInterval(1);
 
@@ -96,6 +99,7 @@ void AttachedWindow::attachToHwnd(void *_hwnd)
         //                     false);
     });
     timer->start();
+#endif
 }
 
 // void AttachedWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)

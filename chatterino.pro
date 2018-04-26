@@ -183,7 +183,6 @@ SOURCES += \
     src/singletons/updatemanager.cpp \
     src/widgets/lastruncrashdialog.cpp \
     src/widgets/attachedwindow.cpp \
-    src/util/tupletablemodel.cpp \
     src/widgets/settingspages/externaltoolspage.cpp
 
 HEADERS  += \
@@ -310,7 +309,6 @@ HEADERS  += \
     src/singletons/updatemanager.hpp \
     src/widgets/lastruncrashdialog.hpp \
     src/widgets/attachedwindow.hpp \
-    src/util/tupletablemodel.hpp \
     src/widgets/settingspages/externaltoolspage.hpp \
     src/util/removescrollareabackground.hpp \
     src/util/assertinguithread.h

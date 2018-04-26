@@ -161,10 +161,12 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
                 ts.watchingChannel.update(ts.getOrAddChannel(name));
 
                 if (attach) {
+#ifdef USEWINSDK
                     auto *window =
                         widgets::AttachedWindow::get(::GetForegroundWindow(), winId, yOffset);
                     window->setChannel(ts.getOrAddChannel(name));
                     window->show();
+#endif
                 }
             });
 
@@ -179,7 +181,9 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
             return;
         }
 
+#ifdef USEWINSDK
         util::postToThread([winId] { widgets::AttachedWindow::detach(winId); });
+#endif
     } else {
         qDebug() << "NM unknown action " + action;
     }

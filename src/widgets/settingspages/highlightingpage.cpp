@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QListWidget>
 #include <QPushButton>
+#include <QStandardItemModel>
 #include <QTabWidget>
 #include <QTableView>
 #include <QTextEdit>
@@ -10,7 +11,6 @@
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
-#include "util/tupletablemodel.hpp"
 
 #define ENABLE_HIGHLIGHTS "Enable Highlighting"
 #define HIGHLIGHT_MSG "Highlight messages containing your name"
@@ -57,13 +57,23 @@ HighlightingPage::HighlightingPage()
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
                 QTableView *view = *highlights.emplace<QTableView>();
-                auto *model = new util::TupleTableModel<QString, bool, bool, bool>;
-                model->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
+                auto *model = new QStandardItemModel(0, 4, view);
+                // model->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
 
                 // fourtf: could crash
                 for (const messages::HighlightPhrase &phrase :
                      settings.highlightProperties.getValue()) {
-                    model->addRow(phrase.key, phrase.alert, phrase.sound, phrase.regex);
+                    auto *item1 = new QStandardItem(phrase.key);
+                    auto *item2 = new QStandardItem();
+                    item2->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item2->setData(phrase.alert, Qt::CheckStateRole);
+                    auto *item3 = new QStandardItem();
+                    item3->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item3->setData(phrase.sound, Qt::CheckStateRole);
+                    auto *item4 = new QStandardItem();
+                    item4->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item4->setData(phrase.regex, Qt::CheckStateRole);
+                    model->appendRow({item1, item2, item3, item4});
                 }
 
                 view->setModel(model);
@@ -79,20 +89,36 @@ HighlightingPage::HighlightingPage()
 
                 auto buttons = highlights.emplace<QHBoxLayout>();
 
-                model->itemsChanged.connect([model] {
-                    std::vector<messages::HighlightPhrase> phrases;
-                    for (int i = 0; i < model->getRowCount(); i++) {
-                        auto t = model->getRow(i);
-                        phrases.push_back(messages::HighlightPhrase{
-                            std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t),
-                        });
-                    }
-                    singletons::SettingManager::getInstance().highlightProperties.setValue(phrases);
-                });
+                QObject::connect(
+                    model, &QStandardItemModel::dataChanged,
+                    [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                            const QVector<int> &roles) {
+                        std::vector<messages::HighlightPhrase> phrases;
+                        for (int i = 0; i < model->rowCount(); i++) {
+                            phrases.push_back(messages::HighlightPhrase{
+                                model->item(i, 0)->data(Qt::DisplayRole).toString(),
+                                model->item(i, 1)->data(Qt::CheckStateRole).toBool(),
+                                model->item(i, 2)->data(Qt::CheckStateRole).toBool(),
+                                model->item(i, 3)->data(Qt::CheckStateRole).toBool()});
+                        }
+                        singletons::SettingManager::getInstance().highlightProperties.setValue(
+                            phrases);
+                    });
 
                 auto add = buttons.emplace<QPushButton>("Add");
-                QObject::connect(*add, &QPushButton::clicked,
-                                 [model] { model->addRow("", true, false, false); });
+                QObject::connect(*add, &QPushButton::clicked, [model] {
+                    auto *item1 = new QStandardItem();
+                    auto *item2 = new QStandardItem();
+                    item2->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item2->setData(true, Qt::CheckStateRole);
+                    auto *item3 = new QStandardItem();
+                    item3->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item3->setData(true, Qt::CheckStateRole);
+                    auto *item4 = new QStandardItem();
+                    item4->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+                    item4->setData(false, Qt::CheckStateRole);
+                    model->appendRow({item1, item2, item3, item4});
+                });
                 auto remove = buttons.emplace<QPushButton>("Remove");
                 QObject::connect(*remove, &QPushButton::clicked, [view, model] {
                     if (view->selectionModel()->hasSelection()) {
