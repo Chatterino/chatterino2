@@ -25,19 +25,24 @@ IgnoreUsersPage::IgnoreUsersPage()
     util::LayoutCreator<IgnoreUsersPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
+    //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
+    auto tabs = layout.emplace<QTabWidget>();
+    tabs->setStyleSheet("color: #000");
+
+    // users
+    auto users = tabs.appendTab(new QVBoxLayout, "Users");
     {
-        group.append(
+        users.append(
             this->createCheckBox("Enable twitch ignored users", settings.enableTwitchIgnoredUsers));
 
-        auto anyways = group.emplace<QHBoxLayout>().withoutMargin();
+        auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
         {
             anyways.emplace<QLabel>("Show anyways if:");
             anyways.emplace<QComboBox>();
             anyways->addStretch(1);
         }
 
-        auto addremove = group.emplace<QHBoxLayout>().withoutMargin();
+        auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
         {
             auto add = addremove.emplace<QPushButton>("Ignore user");
             auto remove = addremove.emplace<QPushButton>("Unignore User");
@@ -46,8 +51,14 @@ IgnoreUsersPage::IgnoreUsersPage()
             addremove->addStretch(1);
         }
 
-        auto userList = group.emplace<QListView>();
+        auto userList = users.emplace<QListView>();
         UNUSED(userList);  // TODO: Fill this list in with ignored users
+    }
+
+    // messages
+    auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
+    {
+        messages.emplace<QLabel>("wip");
     }
 
     auto label = layout.emplace<QLabel>(INFO);

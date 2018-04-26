@@ -103,7 +103,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendUsername();
 
     // highlights
-    if (settings.enableHighlights && !isPastMsg) {
+    if (/*settings.enableHighlights &&*/ !isPastMsg) {
         this->parseHighlights();
     }
 

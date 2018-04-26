@@ -1,17 +1,20 @@
 #include "commandpage.hpp"
 
 #include <QLabel>
+#include <QPushButton>
+#include <QStandardItemModel>
+#include <QTableView>
 #include <QTextEdit>
 
 #include "singletons/commandmanager.hpp"
 #include "util/layoutcreator.hpp"
+#include "util/standarditemhelper.hpp"
+//#include "widgets/helper/comboboxitemdelegate.hpp"
 
 // clang-format off
-#define TEXT "One command per line.\n"\
-    "\"/cmd example command\" will print \"example command\" when you type /cmd in chat.\n"\
-    "{1} will be replaced with the first word you type after then command, {2} with the second and so on.\n"\
-    "{1+} will be replaced with first word and everything after, {2+} with everything after the second word and so on\n"\
-    "Duplicate commands will be ignored."
+#define TEXT "{1} => first word, {2} => second word, ...\n"\
+    "{1+} => first word and after, {2+} => second word and after, ...\n"\
+    "{{1} => {1}"
 // clang-format on
 
 namespace chatterino {
@@ -21,12 +24,81 @@ namespace settingspages {
 CommandPage::CommandPage()
     : SettingsPage("Commands", ":/images/commands.svg")
 {
+    auto &settings = singletons::SettingManager::getInstance();
+
     util::LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    layout.emplace<QLabel>(TEXT)->setWordWrap(true);
+    QTableView *view = *layout.emplace<QTableView>();
+    QStandardItemModel *model = new QStandardItemModel(0, 2, view);
 
-    layout.append(this->getCommandsTextEdit());
+    view->setModel(model);
+    model->setHeaderData(0, Qt::Horizontal, "Trigger");
+    model->setHeaderData(1, Qt::Horizontal, "Command");
+    view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+
+    for (const QString &string : singletons::CommandManager::getInstance().getCommands()) {
+        int index = string.indexOf(' ');
+        if (index == -1) {
+            model->appendRow({util::stringItem(string), util::stringItem("")});
+        } else {
+            model->appendRow(
+                {util::stringItem(string.mid(0, index)), util::stringItem(string.mid(index + 1))});
+        }
+    }
+
+    QObject::connect(
+        model, &QStandardItemModel::dataChanged,
+        [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                const QVector<int> &roles) {
+            QStringList list;
+
+            for (int i = 0; i < model->rowCount(); i++) {
+                QString command = model->item(i, 0)->data(Qt::EditRole).toString();
+                // int index = command.indexOf(' ');
+                // if (index != -1) {
+                //     command = command.mid(index);
+                // }
+
+                list.append(command + " " + model->item(i, 1)->data(Qt::EditRole).toString());
+            }
+
+            singletons::CommandManager::getInstance().setCommands(list);
+        });
+
+    auto buttons = layout.emplace<QHBoxLayout>().withoutMargin();
+    {
+        auto add = buttons.emplace<QPushButton>("Add");
+        QObject::connect(*add, &QPushButton::clicked, [model, view] {
+            model->appendRow({util::stringItem("/command"), util::stringItem("")});
+            view->scrollToBottom();
+        });
+
+        auto remove = buttons.emplace<QPushButton>("Remove");
+        QObject::connect(*remove, &QPushButton::clicked, [view, model] {
+            std::vector<int> indices;
+
+            for (const QModelIndex &index : view->selectionModel()->selectedRows(0)) {
+                indices.push_back(index.row());
+            }
+
+            std::sort(indices.begin(), indices.end());
+
+            for (int i = indices.size() - 1; i >= 0; i--) {
+                model->removeRow(indices[i]);
+            }
+        });
+        buttons->addStretch(1);
+    }
+
+    layout.append(this->createCheckBox("Also match the trigger at the end of the message",
+                                       settings.allowCommandsAtEnd));
+
+    QLabel *text = *layout.emplace<QLabel>(TEXT);
+    text->setWordWrap(true);
+    text->setStyleSheet("color: #bbb");
 
     // ---- end of layout
     this->commandsEditTimer.setSingleShot(true);

@@ -183,7 +183,8 @@ SOURCES += \
     src/singletons/updatemanager.cpp \
     src/widgets/lastruncrashdialog.cpp \
     src/widgets/attachedwindow.cpp \
-    src/widgets/settingspages/externaltoolspage.cpp
+    src/widgets/settingspages/externaltoolspage.cpp \
+    src/widgets/helper/comboboxitemdelegate.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -312,7 +313,8 @@ HEADERS  += \
     src/widgets/settingspages/externaltoolspage.hpp \
     src/util/removescrollareabackground.hpp \
     src/util/assertinguithread.h \
-    src/util/standarditemhelper.hpp
+    src/util/standarditemhelper.hpp \
+    src/widgets/helper/comboboxitemdelegate.hpp
 
 RESOURCES += \
     resources/resources.qrc

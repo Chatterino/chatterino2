@@ -53,7 +53,7 @@ AppearancePage::AppearancePage()
             form->addRow("Theme color:", this->createThemeColorChanger());
             form->addRow("Font:",        this->createFontChanger());
 
-            form->addRow("Tabs:",        this->createCheckBox(TAB_X, settings.hideTabX));
+            form->addRow("Tabs:",        this->createCheckBox(TAB_X, settings.showTabCloseButton));
     #ifndef USEWINSDK
             form->addRow("",             this->createCheckBox(TAB_PREF, settings.hidePreferencesButton));
             form->addRow("",             this->createCheckBox(TAB_USER, settings.hideUserButton));

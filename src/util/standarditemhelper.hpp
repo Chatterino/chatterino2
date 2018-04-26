@@ -5,7 +5,7 @@
 namespace chatterino {
 namespace util {
 
-QStandardItem *boolItem(bool value, bool userCheckable = true, bool selectable = true)
+static QStandardItem *boolItem(bool value, bool userCheckable = true, bool selectable = true)
 {
     auto *item = new QStandardItem();
     item->setFlags((Qt::ItemFlags)(Qt::ItemIsEnabled | (selectable ? Qt::ItemIsSelectable : 0) |
@@ -14,7 +14,7 @@ QStandardItem *boolItem(bool value, bool userCheckable = true, bool selectable =
     return item;
 }
 
-QStandardItem *stringItem(const QString &value, bool editable = true, bool selectable = true)
+static QStandardItem *stringItem(const QString &value, bool editable = true, bool selectable = true)
 {
     auto *item = new QStandardItem(value);
     item->setFlags((Qt::ItemFlags)(Qt::ItemIsEnabled | (selectable ? Qt::ItemIsSelectable : 0) |
@@ -22,7 +22,7 @@ QStandardItem *stringItem(const QString &value, bool editable = true, bool selec
     return item;
 }
 
-QStandardItem *emptyItem()
+static QStandardItem *emptyItem()
 {
     auto *item = new QStandardItem();
     item->setFlags((Qt::ItemFlags)0);

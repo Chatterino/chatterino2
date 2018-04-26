@@ -27,7 +27,7 @@ NotebookTab2::NotebookTab2(Notebook2 *_notebook)
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    singletons::SettingManager::getInstance().hideTabX.connect(
+    singletons::SettingManager::getInstance().showTabCloseButton.connect(
         boost::bind(&NotebookTab2::hideTabXChanged, this, _1), this->managedConnections);
 
     this->setMouseTracking(true);
@@ -82,7 +82,7 @@ void NotebookTab2::updateSize()
     int width;
     QFontMetrics metrics(this->font());
 
-    if (singletons::SettingManager::getInstance().hideTabX) {
+    if (!singletons::SettingManager::getInstance().showTabCloseButton) {
         width = (int)((metrics.width(this->title) + 16 /*+ 16*/) * scale);
     } else {
         width = (int)((metrics.width(this->title) + 8 + 24 /*+ 16*/) * scale);
@@ -248,7 +248,7 @@ void NotebookTab2::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
+    int rectW = (!settingManager.showTabCloseButton ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -269,7 +269,7 @@ void NotebookTab2::paintEvent(QPaintEvent *)
     }
 
     // draw close x
-    if (!settingManager.hideTabX && (mouseOver || selected)) {
+    if (settingManager.showTabCloseButton && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (!xRect.isNull()) {
             if (mouseOverX) {
@@ -315,7 +315,7 @@ void NotebookTab2::mouseReleaseEvent(QMouseEvent *event)
             this->notebook->removePage(this->page);
         }
     } else {
-        if (!singletons::SettingManager::getInstance().hideTabX && this->mouseDownX &&
+        if (singletons::SettingManager::getInstance().showTabCloseButton && this->mouseDownX &&
             this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
@@ -350,7 +350,7 @@ void NotebookTab2::dragEnterEvent(QDragEnterEvent *)
 
 void NotebookTab2::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!singletons::SettingManager::getInstance().hideTabX &&
+    if (singletons::SettingManager::getInstance().showTabCloseButton &&
         this->notebook->getAllowUserTabManagement())  //
     {
         bool overX = this->getXRect().contains(event->pos());
@@ -401,7 +401,7 @@ NotebookTab::NotebookTab(Notebook *_notebook)
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    singletons::SettingManager::getInstance().hideTabX.connect(
+    singletons::SettingManager::getInstance().showTabCloseButton.connect(
         boost::bind(&NotebookTab::hideTabXChanged, this, _1), this->managedConnections);
 
     this->setMouseTracking(true);
@@ -453,7 +453,7 @@ void NotebookTab::updateSize()
 
     int width;
 
-    if (singletons::SettingManager::getInstance().hideTabX) {
+    if (!singletons::SettingManager::getInstance().showTabCloseButton) {
         width = (int)((fontMetrics().width(this->title) + 16 /*+ 16*/) * scale);
     } else {
         width = (int)((fontMetrics().width(this->title) + 8 + 24 /*+ 16*/) * scale);
@@ -619,7 +619,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (settingManager.hideTabX ? 0 : static_cast<int>(16) * scale);
+    int rectW = (!settingManager.showTabCloseButton ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -640,7 +640,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 
     // draw close x
-    if (!settingManager.hideTabX && (mouseOver || selected)) {
+    if (settingManager.showTabCloseButton && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (mouseOverX) {
             painter.fillRect(xRect, QColor(0, 0, 0, 64));
@@ -682,7 +682,7 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
             this->notebook->removePage(this->page);
         }
     } else {
-        if (!singletons::SettingManager::getInstance().hideTabX && this->mouseDownX &&
+        if (singletons::SettingManager::getInstance().showTabCloseButton && this->mouseDownX &&
             this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
@@ -715,7 +715,7 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *)
 
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!singletons::SettingManager::getInstance().hideTabX) {
+    if (singletons::SettingManager::getInstance().showTabCloseButton) {
         bool overX = this->getXRect().contains(event->pos());
 
         if (overX != this->mouseOverX) {

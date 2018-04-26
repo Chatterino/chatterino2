@@ -38,7 +38,7 @@ public:
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting seperateMessages = {"/appearance/messages/separateMessages", false};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
-    BoolSetting hideTabX = {"/appearance/hideTabX", false};
+    BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
@@ -92,7 +92,7 @@ public:
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
 
     /// Highlighting
-    BoolSetting enableHighlights = {"/highlighting/enabled", true};
+    //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
     BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword", true};
     BoolSetting enableHighlightSound = {"/highlighting/enableSound", true};
     BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing", true};

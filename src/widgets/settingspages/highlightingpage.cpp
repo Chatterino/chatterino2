@@ -32,7 +32,7 @@ HighlightingPage::HighlightingPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         // GENERAL
-        layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, settings.enableHighlights));
+        //        layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, settings.enableHighlights));
 
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
@@ -77,7 +77,7 @@ HighlightingPage::HighlightingPage()
                     view->setColumnWidth(0, 250);
                 });
 
-                auto buttons = highlights.emplace<QHBoxLayout>();
+                auto buttons = highlights.emplace<QHBoxLayout>().withoutMargin();
 
                 QObject::connect(model, &QStandardItemModel::dataChanged,
                                  [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
@@ -126,28 +126,31 @@ HighlightingPage::HighlightingPage()
                         model->removeRow(indices[i]);
                     }
                 });
+                buttons->addStretch(1);
 
                 view->hideColumn(3);
             }
+
             // DISABLED USERS
-            auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
-            {
-                auto text = disabledUsers.emplace<QTextEdit>().getElement();
+            // auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
+            // {
+            //     auto text = disabledUsers.emplace<QTextEdit>().getElement();
 
-                QObject::connect(text, &QTextEdit::textChanged, this,
-                                 [this] { this->disabledUsersChangedTimer.start(200); });
+            //     QObject::connect(text, &QTextEdit::textChanged, this,
+            //                      [this] { this->disabledUsersChangedTimer.start(200); });
 
-                QObject::connect(
-                    &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, &settings]() {
-                        QStringList list = text->toPlainText().split("\n", QString::SkipEmptyParts);
-                        list.removeDuplicates();
-                        settings.highlightUserBlacklist = list.join("\n") + "\n";
-                    });
+            //     QObject::connect(
+            //         &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, &settings]()
+            //         {
+            //             QStringList list = text->toPlainText().split("\n",
+            //             QString::SkipEmptyParts); list.removeDuplicates();
+            //             settings.highlightUserBlacklist = list.join("\n") + "\n";
+            //         });
 
-                settings.highlightUserBlacklist.connect([=](const QString &str, auto) {
-                    text->setPlainText(str);  //
-                });
-            }
+            //     settings.highlightUserBlacklist.connect([=](const QString &str, auto) {
+            //         text->setPlainText(str);  //
+            //     });
+            // }
         }
 
         // MISC
