@@ -1,6 +1,7 @@
 #pragma once
 
 #include "messages/messageelement.hpp"
+#include "singletons/helper/pubsubactions.hpp"
 #include "util/flagsenum.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
@@ -37,6 +38,7 @@ struct Message {
         DisableCompactEmotes = (1 << 6),
         Collapsed = (1 << 7),
         DisconnectedMessage = (1 << 8),
+        Untimeout = (1 << 9),
     };
 
     util::FlagsEnum<MessageFlags> flags;
@@ -47,6 +49,9 @@ struct Message {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
+
+    std::unique_ptr<singletons::BanAction> banAction;
+    uint32_t count = 1;
 
     // Messages should not be added after the message is done initializing.
     void addElement(MessageElement *element);
@@ -64,6 +69,10 @@ public:
     static std::shared_ptr<Message> createTimeoutMessage(const QString &username,
                                                          const QString &durationInSeconds,
                                                          const QString &reason, bool multipleTimes);
+
+    static std::shared_ptr<Message> createTimeoutMessage(const singletons::BanAction &action,
+                                                         uint32_t count = 1);
+    static std::shared_ptr<Message> createUntimeoutMessage(const singletons::UnbanAction &action);
 };
 
 using MessagePtr = std::shared_ptr<Message>;
