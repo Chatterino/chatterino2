@@ -71,8 +71,6 @@ rapidjson::Document CreateUnlistenMessage(const std::vector<std::string> &topics
 
     rj::set(msg, "type", "UNLISTEN");
 
-    auto &accountManager = AccountManager::getInstance();
-
     rapidjson::Value data(rapidjson::kObjectType);
 
     rapidjson::Value topics(rapidjson::kArrayType);

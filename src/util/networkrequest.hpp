@@ -1,5 +1,6 @@
 #pragma once
 
+#include "application.hpp"
 #include "singletons/pathmanager.hpp"
 #include "util/networkmanager.hpp"
 #include "util/networkrequester.hpp"
@@ -125,9 +126,9 @@ public:
     void get(FinishedCallback onFinished)
     {
         if (this->data.useQuickLoadCache) {
-            auto &pathManager = singletons::PathManager::getInstance();
+            auto app = getApp();
 
-            QFile cachedFile(pathManager.cacheFolderPath + "/" + this->data.getHash());
+            QFile cachedFile(app->paths->cacheFolderPath + "/" + this->data.getHash());
 
             if (cachedFile.exists()) {
                 if (cachedFile.open(QIODevice::ReadOnly)) {

@@ -1,4 +1,6 @@
 #include "messages/image.hpp"
+
+#include "application.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -123,7 +125,7 @@ void Image::loadImage()
         if (this->allFrames.size() > 1) {
             if (!this->animated) {
                 util::postToThread([this] {
-                    singletons::EmoteManager::getInstance().getGifUpdateSignal().connect([=]() {
+                    getApp()->emotes->getGifUpdateSignal().connect([=]() {
                         this->gifUpdateTimout();
                     });  // For some reason when Boost signal is in
                          // thread scope and thread deletes the signal
@@ -145,9 +147,10 @@ void Image::loadImage()
             loadedEventQueued = true;
 
             QTimer::singleShot(500, [] {
-                singletons::EmoteManager::getInstance().incGeneration();
+                getApp()->emotes->incGeneration();
 
-                singletons::WindowManager::getInstance().layoutVisibleChatWidgets();
+                auto app = getApp();
+                app->windows->layoutVisibleChatWidgets();
                 loadedEventQueued = false;
             });
         }

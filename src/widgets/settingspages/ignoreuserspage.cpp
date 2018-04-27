@@ -1,5 +1,6 @@
 #include "ignoreuserspage.hpp"
 
+#include "application.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 
@@ -21,14 +22,15 @@ namespace settingspages {
 IgnoreUsersPage::IgnoreUsersPage()
     : SettingsPage("Ignores", "")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
+
     util::LayoutCreator<IgnoreUsersPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
     {
-        group.append(
-            this->createCheckBox("Enable twitch ignored users", settings.enableTwitchIgnoredUsers));
+        group.append(this->createCheckBox("Enable twitch ignored users",
+                                          app->settings->enableTwitchIgnoredUsers));
 
         auto anyways = group.emplace<QHBoxLayout>().withoutMargin();
         {

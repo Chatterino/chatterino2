@@ -1,5 +1,6 @@
 #include "util/completionmodel.hpp"
 
+#include "application.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
@@ -19,11 +20,11 @@ void CompletionModel::refresh()
 {
     debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
 
-    auto &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
     // User-specific: Twitch Emotes
     // TODO: Fix this so it properly updates with the proper api. oauth token needs proper scope
-    for (const auto &m : emoteManager.twitchAccountEmotes) {
+    for (const auto &m : app->emotes->twitchAccountEmotes) {
         for (const auto &emoteName : m.second.emoteCodes) {
             // XXX: No way to discern between a twitch global emote and sub emote right now
             this->addString(emoteName, TaggedString::Type::TwitchGlobalEmote);
@@ -31,33 +32,33 @@ void CompletionModel::refresh()
     }
 
     // Global: BTTV Global Emotes
-    std::vector<std::string> &bttvGlobalEmoteCodes = emoteManager.bttvGlobalEmoteCodes;
+    std::vector<std::string> &bttvGlobalEmoteCodes = app->emotes->bttvGlobalEmoteCodes;
     for (const auto &m : bttvGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Global: FFZ Global Emotes
-    std::vector<std::string> &ffzGlobalEmoteCodes = emoteManager.ffzGlobalEmoteCodes;
+    std::vector<std::string> &ffzGlobalEmoteCodes = app->emotes->ffzGlobalEmoteCodes;
     for (const auto &m : ffzGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZGlobalEmote);
     }
 
     // Channel-specific: BTTV Channel Emotes
     std::vector<std::string> &bttvChannelEmoteCodes =
-        emoteManager.bttvChannelEmoteCodes[this->channelName.toStdString()];
+        app->emotes->bttvChannelEmoteCodes[this->channelName.toStdString()];
     for (const auto &m : bttvChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Channel-specific: FFZ Channel Emotes
     std::vector<std::string> &ffzChannelEmoteCodes =
-        emoteManager.ffzChannelEmoteCodes[this->channelName.toStdString()];
+        app->emotes->ffzChannelEmoteCodes[this->channelName.toStdString()];
     for (const auto &m : ffzChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZChannelEmote);
     }
 
     // Global: Emojis
-    const auto &emojiShortCodes = emoteManager.emojiShortCodes;
+    const auto &emojiShortCodes = app->emotes->emojiShortCodes;
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":", TaggedString::Type::Emoji);
     }

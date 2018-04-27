@@ -1,4 +1,6 @@
 #include "emotemanager.hpp"
+
+#include "application.hpp"
 #include "common.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -80,19 +82,15 @@ EmoteManager::EmoteManager()
     : findShortCodesRegex(":([-+\\w]+):")
 {
     qDebug() << "init EmoteManager";
-    auto &accountManager = AccountManager::getInstance();
+}
 
-    accountManager.Twitch.userChanged.connect([this] {
-        auto currentUser = AccountManager::getInstance().Twitch.getCurrent();
+void EmoteManager::initialize()
+{
+    getApp()->accounts->Twitch.userChanged.connect([this] {
+        auto currentUser = getApp()->accounts->Twitch.getCurrent();
         assert(currentUser);
         this->refreshTwitchEmotes(currentUser);
     });
-}
-
-EmoteManager &EmoteManager::getInstance()
-{
-    static EmoteManager instance;
-    return instance;
 }
 
 void EmoteManager::loadGlobalEmotes()
@@ -558,14 +556,14 @@ util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
 pajlada::Signals::NoArgSignal &EmoteManager::getGifUpdateSignal()
 {
     if (!this->gifUpdateTimerInitiated) {
+        auto app = getApp();
+
         this->gifUpdateTimerInitiated = true;
 
         this->gifUpdateTimer.setInterval(30);
         this->gifUpdateTimer.start();
 
-        auto &settingManager = singletons::SettingManager::getInstance();
-
-        settingManager.enableGifAnimations.connect([this](bool enabled, auto) {
+        app->settings->enableGifAnimations.connect([this](bool enabled, auto) {
             if (enabled) {
                 this->gifUpdateTimer.start();
             } else {
@@ -576,8 +574,8 @@ pajlada::Signals::NoArgSignal &EmoteManager::getGifUpdateSignal()
         QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
             this->gifUpdateTimerSignal.invoke();
             // fourtf:
-            auto &windowManager = singletons::WindowManager::getInstance();
-            windowManager.repaintGifEmotes();
+            auto app = getApp();
+            app->windows->repaintGifEmotes();
         });
     }
 

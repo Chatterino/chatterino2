@@ -1,4 +1,6 @@
 #include "channel.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "messages/message.hpp"
 #include "singletons/emotemanager.hpp"
@@ -55,6 +57,7 @@ messages::LimitedQueueSnapshot<messages::MessagePtr> Channel::getMessageSnapshot
 
 void Channel::addMessage(MessagePtr message)
 {
+    auto app = getApp();
     MessagePtr deleted;
 
     bool isTimeout = (message->flags & Message::Timeout) != 0;
@@ -67,7 +70,7 @@ void Channel::addMessage(MessagePtr message)
         }
     }
 
-    singletons::LoggingManager::getInstance().addMessage(this->name, message);
+    app->logging->addMessage(this->name, message);
 
     if (isTimeout) {
         LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();

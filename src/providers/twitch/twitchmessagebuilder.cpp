@@ -1,4 +1,6 @@
 #include "providers/twitch/twitchmessagebuilder.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "singletons/accountmanager.hpp"
@@ -27,10 +29,11 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
     , originalMessage(_ircMessage->content())
     , action(_ircMessage->isAction())
 {
+    auto app = getApp();
+    this->usernameColor = app->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
@@ -41,15 +44,16 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , usernameColor(singletons::ThemeManager::getInstance().messages.textColors.system)
     , originalMessage(content)
 {
+    auto app = getApp();
+    this->usernameColor = app->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    std::shared_ptr<std::vector<QString>> ignoredKeywords = settings.getIgnoredKeywords();
+    auto app = getApp();
+    std::shared_ptr<std::vector<QString>> ignoredKeywords = app->settings->getIgnoredKeywords();
 
     for (const QString &keyword : *ignoredKeywords) {
         if (this->originalMessage.contains(keyword, Qt::CaseInsensitive)) {
@@ -62,8 +66,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
 MessagePtr TwitchMessageBuilder::build()
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
     // PARSING
     this->parseUsername();
@@ -103,7 +106,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendUsername();
 
     // highlights
-    if (settings.enableHighlights && !isPastMsg) {
+    if (app->settings->enableHighlights && !isPastMsg) {
         this->parseHighlights();
     }
 
@@ -162,7 +165,7 @@ MessagePtr TwitchMessageBuilder::build()
         std::vector<std::tuple<util::EmoteData, QString>> parsed;
 
         // Parse emojis and take all non-emojis and put them in parsed as full text-words
-        emoteManager.parseEmojis(parsed, split);
+        app->emotes->parseEmojis(parsed, split);
 
         for (const auto &tuple : parsed) {
             const util::EmoteData &emoteData = std::get<0>(tuple);
@@ -274,6 +277,8 @@ void TwitchMessageBuilder::parseUsername()
 
 void TwitchMessageBuilder::appendUsername()
 {
+    auto app = getApp();
+
     QString username = this->userName;
     this->message->loginName = username;
     QString localizedName;
@@ -334,16 +339,16 @@ void TwitchMessageBuilder::appendUsername()
                                    FontStyle::MediumBold)
             ->setLink({Link::UserInfo, this->userName});
 
-        auto currentUser = singletons::AccountManager::getInstance().Twitch.getCurrent();
+        auto currentUser = app->accounts->Twitch.getCurrent();
 
         // Separator
-        this->emplace<TextElement>(
-            "->", MessageElement::Text,
-            singletons::ThemeManager::getInstance().messages.textColors.system, FontStyle::Medium);
+        this->emplace<TextElement>("->", MessageElement::Text,
+                                   app->themes->messages.textColors.system,
+                                   FontStyle::Medium);
 
         QColor selfColor = currentUser->color;
         if (!selfColor.isValid()) {
-            selfColor = singletons::ThemeManager::getInstance().messages.textColors.system;
+            selfColor = app->themes->messages.textColors.system;
         }
 
         // Your own username
@@ -364,8 +369,10 @@ void TwitchMessageBuilder::parseHighlights()
 {
     static auto player = new QMediaPlayer;
     static QUrl currentPlayerUrl;
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    auto currentUser = singletons::AccountManager::getInstance().Twitch.getCurrent();
+
+    auto app = getApp();
+
+    auto currentUser = app->accounts->Twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
 
@@ -377,8 +384,8 @@ void TwitchMessageBuilder::parseHighlights()
 
     // update the media player url if necessary
     QUrl highlightSoundUrl;
-    if (settings.customHighlightSound) {
-        highlightSoundUrl = QUrl(settings.pathHighlightSound.getValue());
+    if (app->settings->customHighlightSound) {
+        highlightSoundUrl = QUrl(app->settings->pathHighlightSound.getValue());
     } else {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
@@ -390,16 +397,16 @@ void TwitchMessageBuilder::parseHighlights()
     }
 
     QStringList blackList =
-        settings.highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
+        app->settings->highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
-    auto activeHighlights = settings.highlightProperties.getValue();
+    auto activeHighlights = app->settings->highlightProperties.getValue();
 
-    if (settings.enableHighlightsSelf && currentUsername.size() > 0) {
+    if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
         messages::HighlightPhrase selfHighlight;
         selfHighlight.key = currentUsername;
-        selfHighlight.sound = settings.enableHighlightSound;
-        selfHighlight.alert = settings.enableHighlightTaskbar;
+        selfHighlight.sound = app->settings->enableHighlightSound;
+        selfHighlight.alert = app->settings->enableHighlightTaskbar;
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -443,13 +450,12 @@ void TwitchMessageBuilder::parseHighlights()
 
         this->setHighlight(doHighlight);
 
-        if (playSound && (!hasFocus || settings.highlightAlwaysPlaySound)) {
+        if (playSound && (!hasFocus || app->settings->highlightAlwaysPlaySound)) {
             player->play();
         }
 
         if (doAlert) {
-            QApplication::alert(singletons::WindowManager::getInstance().getMainWindow().window(),
-                                2500);
+            QApplication::alert(getApp()->windows->getMainWindow().window(), 2500);
         }
 
         if (doHighlight) {
@@ -462,7 +468,7 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
                                              const QString &emote,
                                              std::vector<std::pair<long int, util::EmoteData>> &vec)
 {
-    singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
     if (!emote.contains(':')) {
         return;
     }
@@ -494,13 +500,13 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
         QString name = this->originalMessage.mid(start, end - start + 1);
 
         vec.push_back(
-            std::pair<long int, util::EmoteData>(start, emoteManager.getTwitchEmoteById(id, name)));
+            std::pair<long int, util::EmoteData>(start, app->emotes->getTwitchEmoteById(id, name)));
     }
 }
 
 bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 {
-    singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
     util::EmoteData emoteData;
 
     auto appendEmote = [&](MessageElement::Flags flags) {
@@ -508,21 +514,21 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
         return true;
     };
 
-    if (emoteManager.bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
+    if (app->emotes->bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
         return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
         return appendEmote(MessageElement::BttvEmote);
-    } else if (emoteManager.ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
+    } else if (app->emotes->ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
         return appendEmote(MessageElement::FfzEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
         return appendEmote(MessageElement::FfzEmote);
-    } else if (emoteManager.getChatterinoEmotes().tryGet(emoteString, emoteData)) {
+    } else if (app->emotes->getChatterinoEmotes().tryGet(emoteString, emoteData)) {
         // Chatterino Emote
         return appendEmote(MessageElement::Misc);
     }

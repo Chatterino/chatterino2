@@ -27,7 +27,7 @@ Split *SplitContainer::draggingSplit = nullptr;
 std::pair<int, int> SplitContainer::dropPosition = std::pair<int, int>(-1, -1);
 
 SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab)
-    : BaseWidget(parent->themeManager, parent)
+    : BaseWidget(parent)
     , tab(_tab)
     , dropPreview(this)
 {
@@ -450,9 +450,9 @@ void SplitContainer::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (this->ui.hbox.count() == 0) {
-        painter.fillRect(rect(), this->themeManager.splits.background);
+        painter.fillRect(rect(), this->themeManager->splits.background);
 
-        painter.setPen(this->themeManager.splits.header.text);
+        painter.setPen(this->themeManager->splits.header.text);
 
         QString text = "Click to add a <split>";
 
@@ -467,12 +467,12 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         painter.drawText(rect(), text, QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), this->themeManager.splits.messageSeperator);
+        painter.fillRect(rect(), this->themeManager->splits.messageSeperator);
     }
 
     QBrush accentColor = (QApplication::activeWindow() == this->window()
-                              ? this->themeManager.tabs.selected.backgrounds.regular
-                              : this->themeManager.tabs.selected.backgrounds.unfocused);
+                              ? this->themeManager->tabs.selected.backgrounds.regular
+                              : this->themeManager->tabs.selected.backgrounds.unfocused);
 
     painter.fillRect(0, 0, width(), 1, accentColor);
 }

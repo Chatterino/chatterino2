@@ -8,18 +8,7 @@
 namespace chatterino {
 namespace singletons {
 
-PathManager::PathManager()
-{
-    qDebug() << "init PathManager";
-}
-
-PathManager &PathManager::getInstance()
-{
-    static PathManager instance;
-    return instance;
-}
-
-bool PathManager::init(int argc, char **argv)
+PathManager::PathManager(int argc, char **argv)
 {
     // hash of app path
     this->appPathHash = QCryptographicHash::hash(QCoreApplication::applicationFilePath().toUtf8(),
@@ -50,64 +39,51 @@ bool PathManager::init(int argc, char **argv)
         // Get settings path
         rootPath.append(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
         if (rootPath.isEmpty()) {
-            printf("Error finding writable location for settings\n");
-            return false;
+            throw std::runtime_error("Error finding writable location for settings");
         }
     }
 
     this->settingsFolderPath = rootPath;
 
     if (!QDir().mkpath(this->settingsFolderPath)) {
-        printf("Error creating directory: %s\n", qPrintable(this->settingsFolderPath));
-        return false;
+        throw std::runtime_error("Error creating settings folder");
     }
 
     this->customFolderPath = rootPath + "/Custom";
 
     if (!QDir().mkpath(this->customFolderPath)) {
-        printf("Error creating directory: %s\n", qPrintable(this->customFolderPath));
-        return false;
+        throw std::runtime_error("Error creating custom folder");
     }
 
     this->cacheFolderPath = rootPath + "/Cache";
 
     if (!QDir().mkpath(this->cacheFolderPath)) {
-        printf("Error creating cache directory: %s\n", qPrintable(this->cacheFolderPath));
-        return false;
+        throw std::runtime_error("Error creating cache folder");
     }
 
     this->logsFolderPath = rootPath + "/Logs";
 
     if (!QDir().mkpath(this->logsFolderPath)) {
-        printf("Error creating logs directory: %s\n", qPrintable(this->logsFolderPath));
-        return false;
+        throw std::runtime_error("Error creating logs folder");
     }
 
     this->channelsLogsFolderPath = this->logsFolderPath + "/Channels";
 
     if (!QDir().mkpath(this->channelsLogsFolderPath)) {
-        printf("Error creating channelsLogs directory: %s\n",
-               qPrintable(this->channelsLogsFolderPath));
-        return false;
+        throw std::runtime_error("Error creating channel logs folder");
     }
 
     this->whispersLogsFolderPath = this->logsFolderPath + "/Whispers";
 
     if (!QDir().mkpath(this->whispersLogsFolderPath)) {
-        printf("Error creating whispersLogs directory: %s\n",
-               qPrintable(this->whispersLogsFolderPath));
-        return false;
+        throw std::runtime_error("Error creating whisper logs folder");
     }
 
     this->mentionsLogsFolderPath = this->logsFolderPath + "/Mentions";
 
     if (!QDir().mkpath(this->mentionsLogsFolderPath)) {
-        printf("Error creating mentionsLogs directory: %s\n",
-               qPrintable(this->mentionsLogsFolderPath));
-        return false;
+        throw std::runtime_error("Error creating mentions logs folder");
     }
-
-    return true;
 }
 
 bool PathManager::createFolder(const QString &folderPath)

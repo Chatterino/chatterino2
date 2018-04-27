@@ -1,5 +1,6 @@
 #include "basewindow.hpp"
 
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/nativeeventhelper.hpp"
@@ -31,23 +32,8 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWindow::BaseWindow(singletons::ThemeManager &_themeManager, QWidget *parent,
-                       bool _enableCustomFrame)
-    : BaseWidget(_themeManager, parent, Qt::Window)
-    , enableCustomFrame(_enableCustomFrame)
-{
-    this->init();
-}
-
-BaseWindow::BaseWindow(BaseWidget *parent, bool _enableCustomFrame)
-    : BaseWidget(parent, Qt::Window)
-    , enableCustomFrame(_enableCustomFrame)
-{
-    this->init();
-}
-
 BaseWindow::BaseWindow(QWidget *parent, bool _enableCustomFrame)
-    : BaseWidget(singletons::ThemeManager::getInstance(), parent, Qt::Window)
+    : BaseWidget(parent, Qt::Window)
     , enableCustomFrame(_enableCustomFrame)
 {
     this->init();
@@ -55,6 +41,8 @@ BaseWindow::BaseWindow(QWidget *parent, bool _enableCustomFrame)
 
 void BaseWindow::init()
 {
+    auto app = getApp();
+
     this->setWindowIcon(QIcon(":/images/icon.png"));
 
 #ifdef USEWINSDK
@@ -127,7 +115,7 @@ void BaseWindow::init()
     }
 #endif
 
-    if (singletons::SettingManager::getInstance().windowTopMost.getValue()) {
+    if (app->settings->windowTopMost.getValue()) {
         this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     }
 }
@@ -167,21 +155,21 @@ void BaseWindow::themeRefreshEvent()
     if (this->hasCustomWindowFrame()) {
         QPalette palette;
         palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
-        palette.setColor(QPalette::Foreground, this->themeManager.window.text);
+        palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
 
         QPalette palette_title;
         palette_title.setColor(QPalette::Foreground,
-                               this->themeManager.isLightTheme() ? "#333" : "#ccc");
+                               this->themeManager->isLightTheme() ? "#333" : "#ccc");
         this->ui.titleLabel->setPalette(palette_title);
 
         for (RippleEffectButton *button : this->ui.buttons) {
-            button->setMouseEffectColor(this->themeManager.window.text);
+            button->setMouseEffectColor(this->themeManager->window.text);
         }
     } else {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->themeManager.window.background);
-        palette.setColor(QPalette::Foreground, this->themeManager.window.text);
+        palette.setColor(QPalette::Background, this->themeManager->window.background);
+        palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
     }
 }
@@ -430,7 +418,7 @@ void BaseWindow::paintEvent(QPaintEvent *event)
         //        bool windowFocused = this->window() == QApplication::activeWindow();
 
         painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
-                         this->themeManager.window.background);
+                         this->themeManager->window.background);
     }
 }
 

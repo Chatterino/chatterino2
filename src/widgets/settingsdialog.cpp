@@ -1,4 +1,6 @@
 #include "widgets/settingsdialog.hpp"
+
+#include "application.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/helper/settingsdialogtab.hpp"
 #include "widgets/settingspages/aboutpage.hpp"
@@ -150,7 +152,7 @@ void SettingsDialog::refresh()
 {
     //    this->ui.accountSwitchWidget->refresh();
 
-    singletons::SettingManager::getInstance().saveSnapshot();
+    getApp()->settings->saveSnapshot();
 }
 
 void SettingsDialog::scaleChangedEvent(float newDpi)
@@ -209,13 +211,11 @@ void SettingsDialog::okButtonClicked()
 
 void SettingsDialog::cancelButtonClicked()
 {
-    auto &settings = singletons::SettingManager::getInstance();
-
     for (auto &tab : this->tabs) {
         tab->getSettingsPage()->cancel();
     }
 
-    settings.recallSnapshot();
+    getApp()->settings->recallSnapshot();
 
     this->close();
 }

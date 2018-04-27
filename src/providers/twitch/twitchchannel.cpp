@@ -31,6 +31,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
+    auto app = getApp();
     this->reloadChannelEmotes();
 
     this->liveStatusTimer = new QTimer;
@@ -43,11 +44,9 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->refreshLiveStatus();  //
     });
 
-    this->managedConnect(singletons::AccountManager::getInstance().Twitch.userChanged,
-                         [this]() { this->setMod(false); });
+    this->managedConnect(app->accounts->Twitch.userChanged, [this]() { this->setMod(false); });
 
-    auto refreshPubSubState = [this]() {
-        const auto &x = this;
+    auto refreshPubSubState = [=]() {
         if (!this->hasModRights()) {
             return;
         }
@@ -56,17 +55,15 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             return;
         }
 
-        auto account = singletons::AccountManager::getInstance().Twitch.getCurrent();
+        auto account = app->accounts->Twitch.getCurrent();
         if (account && !account->getUserId().isEmpty()) {
-            singletons::PubSubManager::getInstance().ListenToChannelModerationActions(this->roomID,
-                                                                                      account);
+            app->pubsub->ListenToChannelModerationActions(this->roomID, account);
         }
     };
 
     this->userStateChanged.connect(refreshPubSubState);
     this->roomIDchanged.connect(refreshPubSubState);
-    this->managedConnect(singletons::AccountManager::getInstance().Twitch.userChanged,
-                         refreshPubSubState);
+    this->managedConnect(app->accounts->Twitch.userChanged, refreshPubSubState);
     refreshPubSubState();
 
     this->fetchMessages.connect([this] {
@@ -89,9 +86,8 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     auto doRefreshChatters = [=]() {
         const auto streamStatus = this->GetStreamStatus();
 
-        auto &settingManager = singletons::SettingManager::getInstance();
-        if (settingManager.onlyFetchChattersForSmallerStreamers) {
-            if (streamStatus.live && streamStatus.viewerCount > settingManager.smallStreamerLimit) {
+        if (app->settings->onlyFetchChattersForSmallerStreamers) {
+            if (streamStatus.live && streamStatus.viewerCount > app->settings->smallStreamerLimit) {
                 return;
             }
         }
@@ -135,22 +131,22 @@ void TwitchChannel::setRoomID(const QString &_roomID)
 
 void TwitchChannel::reloadChannelEmotes()
 {
-    auto &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
     debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
-    emoteManager.reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
-    emoteManager.reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
+    app->emotes->reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
+    app->emotes->reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
 }
 
 void TwitchChannel::sendMessage(const QString &message)
 {
-    auto &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
-    QString parsedMessage = emoteManager.replaceShortCodes(message);
+    QString parsedMessage = app->emotes->replaceShortCodes(message);
 
     parsedMessage = parsedMessage.trimmed();
 
@@ -158,7 +154,7 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (singletons::SettingManager::getInstance().allowDuplicateMessages) {
+    if (app->settings->allowDuplicateMessages) {
         if (parsedMessage == this->lastSentMessage) {
             parsedMessage.append(this->messageSuffix);
 
@@ -187,8 +183,9 @@ void TwitchChannel::setMod(bool value)
 
 bool TwitchChannel::isBroadcaster()
 {
-    return this->name ==
-           singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName();
+    auto app = getApp();
+
+    return this->name == app->accounts->Twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasModRights()

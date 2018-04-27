@@ -1,10 +1,11 @@
 #include "commandpage.hpp"
 
-#include <QLabel>
-#include <QTextEdit>
-
+#include "application.hpp"
 #include "singletons/commandmanager.hpp"
 #include "util/layoutcreator.hpp"
+
+#include <QLabel>
+#include <QTextEdit>
 
 // clang-format off
 #define TEXT "One command per line.\n"\
@@ -34,27 +35,27 @@ CommandPage::CommandPage()
 
 QTextEdit *CommandPage::getCommandsTextEdit()
 {
-    singletons::CommandManager &commandManager = singletons::CommandManager::getInstance();
+    auto app = getApp();
 
     // cancel
-    QStringList currentCommands = commandManager.getCommands();
+    QStringList currentCommands = app->commands->getCommands();
 
     this->onCancel.connect(
-        [currentCommands, &commandManager] { commandManager.setCommands(currentCommands); });
+        [currentCommands, app] { app->commands->setCommands(currentCommands); });
 
     // create text edit
     QTextEdit *textEdit = new QTextEdit;
 
-    textEdit->setPlainText(QString(commandManager.getCommands().join('\n')));
+    textEdit->setPlainText(QString(app->commands->getCommands().join('\n')));
 
     QObject::connect(textEdit, &QTextEdit::textChanged,
                      [this] { this->commandsEditTimer.start(200); });
 
-    QObject::connect(&this->commandsEditTimer, &QTimer::timeout, [textEdit, &commandManager] {
+    QObject::connect(&this->commandsEditTimer, &QTimer::timeout, [textEdit, app] {
         QString text = textEdit->toPlainText();
         QStringList lines = text.split(QRegularExpression("(\r?\n|\r\n?)"));
 
-        commandManager.setCommands(lines);
+        app->commands->setCommands(lines);
     });
 
     return textEdit;

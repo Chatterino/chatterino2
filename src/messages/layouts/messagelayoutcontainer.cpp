@@ -1,5 +1,6 @@
 #include "messagelayoutcontainer.hpp"
 
+#include "application.hpp"
 #include "messagelayoutelement.hpp"
 #include "messages/selection.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -210,8 +211,8 @@ void MessageLayoutContainer::paintAnimatedElements(QPainter &painter, int yOffse
 void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                                             Selection &selection, int yOffset)
 {
-    singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
-    QColor selectionColor = themeManager.messages.selection;
+    auto app = getApp();
+    QColor selectionColor = app->themes->messages.selection;
 
     // don't draw anything
     if (selection.selectionMin.messageIndex > messageIndex ||

@@ -1,5 +1,6 @@
 #include "twitchserver.hpp"
 
+#include "application.hpp"
 #include "providers/twitch/ircmessagehandler.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchhelpers.hpp"
@@ -23,7 +24,7 @@ TwitchServer::TwitchServer()
 {
     qDebug() << "init TwitchServer";
 
-    AccountManager::getInstance().Twitch.userChanged.connect(
+    getApp()->accounts->Twitch.userChanged.connect(
         [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
@@ -35,7 +36,7 @@ TwitchServer &TwitchServer::getInstance()
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
-    std::shared_ptr<TwitchAccount> account = AccountManager::getInstance().Twitch.getCurrent();
+    std::shared_ptr<TwitchAccount> account = getApp()->accounts->Twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();
 

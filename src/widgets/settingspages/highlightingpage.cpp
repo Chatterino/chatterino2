@@ -1,5 +1,11 @@
 #include "highlightingpage.hpp"
 
+#include "application.hpp"
+#include "debug/log.hpp"
+#include "singletons/settingsmanager.hpp"
+#include "util/layoutcreator.hpp"
+#include "util/standarditemhelper.hpp"
+
 #include <QFileDialog>
 #include <QListWidget>
 #include <QPushButton>
@@ -7,11 +13,6 @@
 #include <QTabWidget>
 #include <QTableView>
 #include <QTextEdit>
-
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/standarditemhelper.hpp"
 
 #define ENABLE_HIGHLIGHTS "Enable Highlighting"
 #define HIGHLIGHT_MSG "Highlight messages containing your name"
@@ -26,13 +27,13 @@ namespace settingspages {
 HighlightingPage::HighlightingPage()
     : SettingsPage("Highlights", ":/images/notifications.svg")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
     util::LayoutCreator<HighlightingPage> layoutCreator(this);
 
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         // GENERAL
-        layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, settings.enableHighlights));
+        layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, app->settings->enableHighlights));
 
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
@@ -56,17 +57,17 @@ HighlightingPage::HighlightingPage()
                 yourName->setData(QBrush("#666"), Qt::ForegroundRole);
                 yourName->setFlags(yourName->flags() | Qt::ItemIsUserCheckable |
                                    Qt::ItemIsUserCheckable);
-                yourName->setData(settings.enableHighlightsSelf ? 2 : 0, Qt::CheckStateRole);
+                yourName->setData(app->settings->enableHighlightsSelf ? 2 : 0, Qt::CheckStateRole);
                 model->appendRow(
                     {yourName,
-                     util::boolItem(settings.enableHighlightTaskbar.getValue(), true, false),
-                     util::boolItem(settings.enableHighlightSound.getValue(), true, false),
+                     util::boolItem(app->settings->enableHighlightTaskbar.getValue(), true, false),
+                     util::boolItem(app->settings->enableHighlightSound.getValue(), true, false),
                      util::emptyItem()});
 
                 // highlight phrases
                 // fourtf: could crash
                 for (const messages::HighlightPhrase &phrase :
-                     settings.highlightProperties.getValue()) {
+                     app->settings->highlightProperties.getValue()) {
                     model->appendRow({util::stringItem(phrase.key), util::boolItem(phrase.alert),
                                       util::boolItem(phrase.sound), util::boolItem(phrase.regex)});
                 }
@@ -79,26 +80,26 @@ HighlightingPage::HighlightingPage()
 
                 auto buttons = highlights.emplace<QHBoxLayout>();
 
-                QObject::connect(model, &QStandardItemModel::dataChanged,
-                                 [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                                         const QVector<int> &roles) {
-                                     std::vector<messages::HighlightPhrase> phrases;
-                                     for (int i = 1; i < model->rowCount(); i++) {
-                                         phrases.push_back(messages::HighlightPhrase{
-                                             model->item(i, 0)->data(Qt::DisplayRole).toString(),
-                                             model->item(i, 1)->data(Qt::CheckStateRole).toBool(),
-                                             model->item(i, 2)->data(Qt::CheckStateRole).toBool(),
-                                             model->item(i, 3)->data(Qt::CheckStateRole).toBool()});
-                                     }
-                                     auto &settings = singletons::SettingManager::getInstance();
-                                     settings.highlightProperties.setValue(phrases);
-                                     settings.enableHighlightsSelf.setValue(
-                                         model->item(0, 0)->data(Qt::CheckStateRole).toBool());
-                                     settings.enableHighlightTaskbar.setValue(
-                                         model->item(0, 1)->data(Qt::CheckStateRole).toBool());
-                                     settings.enableHighlightSound.setValue(
-                                         model->item(0, 2)->data(Qt::CheckStateRole).toBool());
-                                 });
+                QObject::connect(
+                    model, &QStandardItemModel::dataChanged,
+                    [model, app](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                                 const QVector<int> &roles) {
+                        std::vector<messages::HighlightPhrase> phrases;
+                        for (int i = 1; i < model->rowCount(); i++) {
+                            phrases.push_back(messages::HighlightPhrase{
+                                model->item(i, 0)->data(Qt::DisplayRole).toString(),
+                                model->item(i, 1)->data(Qt::CheckStateRole).toBool(),
+                                model->item(i, 2)->data(Qt::CheckStateRole).toBool(),
+                                model->item(i, 3)->data(Qt::CheckStateRole).toBool()});
+                        }
+                        app->settings->highlightProperties.setValue(phrases);
+                        app->settings->enableHighlightsSelf.setValue(
+                            model->item(0, 0)->data(Qt::CheckStateRole).toBool());
+                        app->settings->enableHighlightTaskbar.setValue(
+                            model->item(0, 1)->data(Qt::CheckStateRole).toBool());
+                        app->settings->enableHighlightSound.setValue(
+                            model->item(0, 2)->data(Qt::CheckStateRole).toBool());
+                    });
 
                 auto add = buttons.emplace<QPushButton>("Add");
                 QObject::connect(*add, &QPushButton::clicked, [model, view] {
@@ -138,13 +139,13 @@ HighlightingPage::HighlightingPage()
                                  [this] { this->disabledUsersChangedTimer.start(200); });
 
                 QObject::connect(
-                    &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, &settings]() {
+                    &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, app]() {
                         QStringList list = text->toPlainText().split("\n", QString::SkipEmptyParts);
                         list.removeDuplicates();
-                        settings.highlightUserBlacklist = list.join("\n") + "\n";
+                        app->settings->highlightUserBlacklist = list.join("\n") + "\n";
                     });
 
-                settings.highlightUserBlacklist.connect([=](const QString &str, auto) {
+                app->settings->highlightUserBlacklist.connect([=](const QString &str, auto) {
                     text->setPlainText(str);  //
                 });
             }
@@ -153,17 +154,17 @@ HighlightingPage::HighlightingPage()
         // MISC
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
-            customSound.append(this->createCheckBox("Custom sound", settings.customHighlightSound));
+            customSound.append(
+                this->createCheckBox("Custom sound", app->settings->customHighlightSound));
             auto selectFile = customSound.emplace<QPushButton>("Select custom sound file");
-            QObject::connect(selectFile.getElement(), &QPushButton::clicked, this,
-                             [&settings, this] {
-                                 auto fileName = QFileDialog::getOpenFileName(
-                                     this, tr("Open Sound"), "", tr("Audio Files (*.mp3 *.wav)"));
-                                 settings.pathHighlightSound = fileName;
-                             });
+            QObject::connect(selectFile.getElement(), &QPushButton::clicked, this, [this, app] {
+                auto fileName = QFileDialog::getOpenFileName(this, tr("Open Sound"), "",
+                                                             tr("Audio Files (*.mp3 *.wav)"));
+                app->settings->pathHighlightSound = fileName;
+            });
         }
 
-        layout.append(createCheckBox(ALWAYS_PLAY, settings.highlightAlwaysPlaySound));
+        layout.append(createCheckBox(ALWAYS_PLAY, app->settings->highlightAlwaysPlaySound));
     }
 
     // ---- misc

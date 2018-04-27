@@ -3,8 +3,6 @@
 #include "messages/message.hpp"
 #include "singletons/helper/loggingchannel.hpp"
 
-#include <boost/noncopyable.hpp>
-
 #include <memory>
 
 namespace chatterino {
@@ -12,14 +10,17 @@ namespace singletons {
 
 class PathManager;
 
-class LoggingManager : boost::noncopyable
+class LoggingManager
 {
-    LoggingManager();
+    LoggingManager() = default;
+    friend class Application;
 
-    PathManager &pathManager;
+    PathManager *pathManager = nullptr;
 
 public:
-    static LoggingManager &getInstance();
+    ~LoggingManager() = delete;
+
+    void initialize();
 
     void addMessage(const QString &channelName, messages::MessagePtr message);
 

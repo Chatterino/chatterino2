@@ -1,4 +1,6 @@
 #include "messages/messageelement.hpp"
+
+#include "application.hpp"
 #include "messages/layouts/messagelayoutcontainer.hpp"
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -95,7 +97,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
                 return;
             }
 
-            int quality = singletons::SettingManager::getInstance().preferredEmoteQuality;
+            int quality = getApp()->settings->preferredEmoteQuality;
 
             Image *_image;
             if (quality == 3 && this->data.image3x != nullptr) {
@@ -134,16 +136,16 @@ TextElement::TextElement(const QString &text, MessageElement::Flags flags,
 
 void TextElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
+    auto app = getApp();
+
     if (_flags & this->getFlags()) {
         QFontMetrics &metrics = singletons::FontManager::getInstance().getFontMetrics(
             this->style, container.getScale());
-        singletons::ThemeManager &themeManager =
-            singletons::ThemeManager::ThemeManager::getInstance();
 
         for (Word &word : this->words) {
             auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
-                QColor color = this->color.getColor(themeManager);
-                themeManager.normalizeColor(color);
+                QColor color = this->color.getColor(*app->themes);
+                app->themes->normalizeColor(color);
 
                 auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()), color,
                                                 this->style, container.getScale()))
@@ -225,8 +227,9 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        if (singletons::SettingManager::getInstance().timestampFormat != this->format) {
-            this->format = singletons::SettingManager::getInstance().timestampFormat.getValue();
+        auto app = getApp();
+        if (app->settings->timestampFormat != this->format) {
+            this->format = app->settings->timestampFormat.getValue();
             this->element.reset(this->formatTime(this->time));
         }
 
@@ -238,8 +241,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 {
     static QLocale locale("en_US");
 
-    QString format =
-        locale.toString(time, singletons::SettingManager::getInstance().timestampFormat);
+    QString format = locale.toString(time, getApp()->settings->timestampFormat);
 
     return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
 }
@@ -256,8 +258,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     if (_flags & MessageElement::ModeratorTools) {
         QSize size((int)(container.getScale() * 16), (int)(container.getScale() * 16));
 
-        for (const singletons::ModerationAction &m :
-             singletons::SettingManager::getInstance().getModerationActions()) {
+        for (const singletons::ModerationAction &m : getApp()->settings->getModerationActions()) {
             if (m.isImage()) {
                 container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
                                          ->setLink(Link(Link::UserAction, m.getAction())));

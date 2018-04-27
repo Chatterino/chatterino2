@@ -69,6 +69,7 @@ private:
 class PubSubManager
 {
     PubSubManager();
+    friend class Application;
 
     using WebsocketMessagePtr = websocketpp::config::asio_tls_client::message_type::ptr;
     using WebsocketContextPtr = websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
@@ -80,12 +81,12 @@ class PubSubManager
     std::unique_ptr<std::thread> mainThread;
 
 public:
+    ~PubSubManager() = delete;
+
     enum class State {
         Connected,
         Disconnected,
     };
-
-    static PubSubManager &getInstance();
 
     void Start();
 

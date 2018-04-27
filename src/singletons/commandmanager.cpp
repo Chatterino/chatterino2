@@ -1,4 +1,6 @@
 #include "singletons/commandmanager.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchserver.hpp"
@@ -17,20 +19,10 @@ using namespace chatterino::providers::twitch;
 namespace chatterino {
 namespace singletons {
 
-CommandManager::CommandManager()
-{
-    qDebug() << "init CommandManager";
-}
-
-CommandManager &CommandManager::getInstance()
-{
-    static CommandManager instance;
-    return instance;
-}
-
 void CommandManager::loadCommands()
 {
-    this->filePath = PathManager::getInstance().customFolderPath + "/Commands.txt";
+    auto app = getApp();
+    this->filePath = app->paths->customFolderPath + "/Commands.txt";
 
     QFile textFile(this->filePath);
     if (!textFile.open(QIODevice::ReadOnly)) {
@@ -162,7 +154,7 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
                 messages::MessageBuilder b;
 
                 b.emplace<messages::TextElement>(
-                    singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName(),
+                    getApp()->accounts->Twitch.getCurrent()->getUserName(),
                     messages::MessageElement::Text);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
                 b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);

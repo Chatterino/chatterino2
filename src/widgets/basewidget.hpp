@@ -17,12 +17,8 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent,
-                        Qt::WindowFlags f = Qt::WindowFlags());
-    explicit BaseWidget(BaseWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~BaseWidget();
-
-    singletons::ThemeManager &themeManager;
 
     float getScale() const;
     pajlada::Signals::Signal<float> scaleChanged;
@@ -44,6 +40,8 @@ protected:
     virtual void showEvent(QShowEvent *) override;
 
     void setScale(float value);
+
+    singletons::ThemeManager *themeManager;
 
 private:
     void init();

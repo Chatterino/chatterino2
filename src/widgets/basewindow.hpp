@@ -19,9 +19,6 @@ class BaseWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit BaseWindow(singletons::ThemeManager &_themeManager, QWidget *parent,
-                        bool enableCustomFrame = false);
-    explicit BaseWindow(BaseWidget *parent, bool enableCustomFrame = false);
     explicit BaseWindow(QWidget *parent = nullptr, bool enableCustomFrame = false);
 
     QWidget *getLayoutContainer();

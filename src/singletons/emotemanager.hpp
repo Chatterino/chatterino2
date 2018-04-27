@@ -23,9 +23,12 @@ namespace singletons {
 class EmoteManager
 {
     EmoteManager();
+    friend class Application;
 
 public:
-    static EmoteManager &getInstance();
+    ~EmoteManager() = delete;
+
+    void initialize();
 
     void loadGlobalEmotes();
 

@@ -14,9 +14,10 @@ class WindowManager;
 class ThemeManager
 {
     ThemeManager();
+    friend class Application;
 
 public:
-    static ThemeManager &getInstance();
+    ~ThemeManager() = delete;
 
     inline bool isLightTheme() const
     {

@@ -1,4 +1,6 @@
 #include "singletons/loggingmanager.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -11,23 +13,16 @@
 namespace chatterino {
 namespace singletons {
 
-LoggingManager::LoggingManager()
-    : pathManager(PathManager::getInstance())
+void LoggingManager::initialize()
 {
-    qDebug() << "init LoggingManager";
-}
-
-LoggingManager &LoggingManager::getInstance()
-{
-    static LoggingManager instance;
-    return instance;
+    this->pathManager = getApp()->paths;
 }
 
 void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr message)
 {
-    const auto &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
-    if (!settings.enableLogging) {
+    if (!app->settings->enableLogging) {
         return;
     }
 
@@ -45,13 +40,14 @@ void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr
 QString LoggingManager::getDirectoryForChannel(const QString &channelName)
 {
     if (channelName.startsWith("/whispers")) {
-        return this->pathManager.whispersLogsFolderPath;
+        return this->pathManager->whispersLogsFolderPath;
     } else if (channelName.startsWith("/mentions")) {
-        return this->pathManager.mentionsLogsFolderPath;
+        return this->pathManager->mentionsLogsFolderPath;
     } else {
-        QString logPath(this->pathManager.channelsLogsFolderPath + QDir::separator() + channelName);
+        QString logPath(this->pathManager->channelsLogsFolderPath + QDir::separator() +
+                        channelName);
 
-        if (!this->pathManager.createFolder(logPath)) {
+        if (!this->pathManager->createFolder(logPath)) {
             debug::Log("Error creating channel logs folder for channel {}", channelName);
         }
 

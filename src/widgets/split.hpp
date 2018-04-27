@@ -43,9 +43,7 @@ class Split : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit Split(SplitContainer *parent);
-    explicit Split(BaseWidget *widget);
-    explicit Split(singletons::ThemeManager &manager, QWidget *parent);
+    explicit Split(QWidget *parent);
     ~Split() override;
 
     pajlada::Signals::NoArgSignal channelChanged;
@@ -102,6 +100,8 @@ private:
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
     pajlada::Signals::Connection indirectChannelChangedConnection;
+
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);

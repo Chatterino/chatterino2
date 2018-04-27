@@ -50,7 +50,7 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/oauthToken",
                                                  oauthToken);
 
-    singletons::AccountManager::getInstance().Twitch.reloadUsers();
+    getApp()->accounts->Twitch.reloadUsers();
 
     messageBox.exec();
 }

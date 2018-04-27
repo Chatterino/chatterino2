@@ -12,7 +12,7 @@ namespace widgets {
 class EmotePopup : public BaseWindow
 {
 public:
-    explicit EmotePopup(singletons::ThemeManager &);
+    EmotePopup();
 
     void loadChannel(ChannelPtr channel);
     void loadEmojis();

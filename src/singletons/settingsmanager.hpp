@@ -13,17 +13,20 @@ namespace singletons {
 
 void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
-class SettingManager : public QObject
+class SettingManager
 {
-    Q_OBJECT
-
     using BoolSetting = ChatterinoSetting<bool>;
     using FloatSetting = ChatterinoSetting<float>;
     using IntSetting = ChatterinoSetting<int>;
     using StringSetting = ChatterinoSetting<std::string>;
     using QStringSetting = ChatterinoSetting<QString>;
 
+    SettingManager();
+    friend class Application;
+
 public:
+    ~SettingManager() = delete;
+
     messages::MessageElement::Flags getWordFlags();
     bool isIgnoredEmote(const QString &emote);
 
@@ -112,11 +115,6 @@ public:
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
-    static SettingManager &getInstance()
-    {
-        static SettingManager instance;
-        return instance;
-    }
     void updateWordTypeMask();
 
     void saveSnapshot();
@@ -124,16 +122,12 @@ public:
 
     std::vector<ModerationAction> getModerationActions() const;
     const std::shared_ptr<std::vector<QString>> getIgnoredKeywords() const;
-
-signals:
-    void wordFlagsChanged();
+    pajlada::Signals::NoArgSignal wordFlagsChanged;
 
 private:
     std::vector<ModerationAction> _moderationActions;
     std::unique_ptr<rapidjson::Document> snapshot;
     std::shared_ptr<std::vector<QString>> _ignoredKeywords;
-
-    SettingManager();
 
     void updateModerationActions();
     void updateIgnoredKeywords();
