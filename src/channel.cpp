@@ -57,14 +57,56 @@ void Channel::addMessage(MessagePtr message)
 {
     MessagePtr deleted;
 
-    const QString &username = message->loginName;
+    bool isTimeout = (message->flags & Message::Timeout) != 0;
 
-    if (!username.isEmpty()) {
-        // TODO: Add recent chatters display name. This should maybe be a setting
-        this->addRecentChatter(message);
+    if (!isTimeout) {
+        const QString &username = message->loginName;
+        if (!username.isEmpty()) {
+            // TODO: Add recent chatters display name. This should maybe be a setting
+            this->addRecentChatter(message);
+        }
     }
 
     singletons::LoggingManager::getInstance().addMessage(this->name, message);
+
+    if (isTimeout) {
+        LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+        bool addMessage = true;
+        int snapshotLength = snapshot.getLength();
+
+        int end = std::max(0, snapshotLength - 20);
+
+        for (int i = snapshotLength - 1; i >= end; --i) {
+            auto &s = snapshot[i];
+            if (s->flags.HasFlag(Message::Untimeout) && s->timeoutUser == message->timeoutUser) {
+                break;
+            }
+
+            if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == message->timeoutUser) {
+                assert(message->banAction != nullptr);
+                MessagePtr replacement(
+                    Message::createTimeoutMessage(*(message->banAction), s->count + 1));
+                this->replaceMessage(s, replacement);
+                addMessage = false;
+            }
+        }
+
+        // disable the messages from the user
+        for (int i = 0; i < snapshotLength; i++) {
+            auto &s = snapshot[i];
+            if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
+                s->loginName == message->timeoutUser) {
+                s->flags.EnableFlag(Message::Disabled);
+            }
+        }
+
+        // XXX: Might need the following line
+        // WindowManager::getInstance().repaintVisibleChatWidgets(this);
+
+        if (!addMessage) {
+            return;
+        }
+    }
 
     if (this->messages.pushBack(message, deleted)) {
         this->messageRemovedFromStart.invoke(deleted);

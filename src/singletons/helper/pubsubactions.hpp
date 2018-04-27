@@ -46,21 +46,19 @@ struct ModeChangedAction : PubSubAction {
     } args;
 };
 
-struct TimeoutAction : PubSubAction {
-    using PubSubAction::PubSubAction;
-
-    ActionUser target;
-
-    QString reason;
-    uint32_t duration;
-};
-
 struct BanAction : PubSubAction {
     using PubSubAction::PubSubAction;
 
     ActionUser target;
 
     QString reason;
+
+    uint32_t duration = 0;
+
+    bool isBan() const
+    {
+        return this->duration == 0;
+    }
 };
 
 struct UnbanAction : PubSubAction {
@@ -72,6 +70,11 @@ struct UnbanAction : PubSubAction {
         Banned,
         TimedOut,
     } previousState;
+
+    bool wasBan() const
+    {
+        return this->previousState == Banned;
+    }
 };
 
 struct ClearChatAction : PubSubAction {

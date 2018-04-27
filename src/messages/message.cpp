@@ -1,5 +1,6 @@
 #include "messages/message.hpp"
 #include "messageelement.hpp"
+#include "singletons/helper/pubsubactions.hpp"
 #include "util/irchelpers.hpp"
 
 using SBHighlight = chatterino::widgets::ScrollbarHighlight;
@@ -76,6 +77,86 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     message->flags.EnableFlag(MessageFlags::Timeout);
     message->timeoutUser = username;
     return message;
+}
+
+MessagePtr Message::createTimeoutMessage(const singletons::BanAction &action, uint32_t count)
+{
+    MessagePtr msg(new Message);
+
+    msg->addElement(new TimestampElement(QTime::currentTime()));
+    msg->flags.EnableFlag(MessageFlags::System);
+    msg->flags.EnableFlag(MessageFlags::Timeout);
+
+    msg->timeoutUser = action.target.name;
+    msg->count = count;
+    msg->banAction.reset(new singletons::BanAction(action));
+
+    QString text;
+
+    if (action.isBan()) {
+        if (action.reason.isEmpty()) {
+            text = QString("%1 banned %2.")  //
+                       .arg(action.source.name)
+                       .arg(action.target.name);
+        } else {
+            text = QString("%1 banned %2: \"%3\".")  //
+                       .arg(action.source.name)
+                       .arg(action.target.name)
+                       .arg(action.reason);
+        }
+    } else {
+        if (action.reason.isEmpty()) {
+            text = QString("%1 timed out %2 for %3 seconds.")  //
+                       .arg(action.source.name)
+                       .arg(action.target.name)
+                       .arg(action.duration);
+        } else {
+            text = QString("%1 timed out %2 for %3 seconds: \"%4\".")  //
+                       .arg(action.source.name)
+                       .arg(action.target.name)
+                       .arg(action.duration)
+                       .arg(action.reason);
+        }
+
+        if (count > 1) {
+            text.append(QString(" (%1 times)").arg(count));
+        }
+    }
+
+    msg->addElement(new messages::TextElement(text, messages::MessageElement::Text,
+                                              messages::MessageColor::System));
+    msg->searchText = text;
+
+    return msg;
+}
+
+MessagePtr Message::createUntimeoutMessage(const singletons::UnbanAction &action)
+{
+    MessagePtr msg(new Message);
+
+    msg->addElement(new TimestampElement(QTime::currentTime()));
+    msg->flags.EnableFlag(MessageFlags::System);
+    msg->flags.EnableFlag(MessageFlags::Untimeout);
+
+    msg->timeoutUser = action.target.name;
+
+    QString text;
+
+    if (action.wasBan()) {
+        text = QString("%1 unbanned %2.")  //
+                   .arg(action.source.name)
+                   .arg(action.target.name);
+    } else {
+        text = QString("%1 untimedout %2.")  //
+                   .arg(action.source.name)
+                   .arg(action.target.name);
+    }
+
+    msg->addElement(new messages::TextElement(text, messages::MessageElement::Text,
+                                              messages::MessageColor::System));
+    msg->searchText = text;
+
+    return msg;
 }
 
 }  // namespace messages

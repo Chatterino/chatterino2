@@ -300,7 +300,7 @@ PubSubManager::PubSubManager()
     };
 
     this->moderationActionHandlers["timeout"] = [this](const auto &data, const auto &roomID) {
-        TimeoutAction action(data, roomID);
+        BanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
         getTargetUser(data, action.target);
@@ -329,7 +329,7 @@ PubSubManager::PubSubManager()
                 }
             }
 
-            this->sig.moderation.userTimedOut.invoke(action);
+            this->sig.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
             debug::Log("Error parsing moderation action: {}", ex.what());
         }

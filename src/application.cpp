@@ -65,7 +65,7 @@ Application::Application()
                    action.source.name);
     });
 
-    pubsub.sig.moderation.userTimedOut.connect([&](const auto &action) {
+    pubsub.sig.moderation.userBanned.connect([&](const auto &action) {
         auto &server = providers::twitch::TwitchServer::getInstance();
         auto chan = server.getChannelOrEmptyByID(action.roomID);
 
@@ -73,31 +73,22 @@ Application::Application()
             return;
         }
 
-        auto msg = messages::Message::createSystemMessage(
-            QString("User %1(%2) was timed out by %3 for %4 seconds with reason: '%5'")
-                .arg(action.target.name)
-                .arg(action.target.id)
-                .arg(action.source.name)
-                .arg(action.duration)
-                .arg(action.reason));
+        auto msg = messages::Message::createTimeoutMessage(action);
 
         util::postToThread([chan, msg] { chan->addMessage(msg); });
-
-        debug::Log("User {}({}) was timed out by {} for {} seconds with reason: '{}'",
-                   action.target.name, action.target.id, action.source.name, action.duration,
-                   action.reason);
-    });
-
-    pubsub.sig.moderation.userBanned.connect([&](const auto &action) {
-        debug::Log("User {}({}) was banned by {} with reason: '{}'", action.target.name,
-                   action.target.id, action.source.name, action.reason);
     });
 
     pubsub.sig.moderation.userUnbanned.connect([&](const auto &action) {
-        debug::Log(
-            "User {}({}) was unbanned by {}. User was previously {}", action.target.name,
-            action.target.id, action.source.name,
-            action.previousState == singletons::UnbanAction::Banned ? "banned" : "timed out");
+        auto &server = providers::twitch::TwitchServer::getInstance();
+        auto chan = server.getChannelOrEmptyByID(action.roomID);
+
+        if (chan->isEmpty()) {
+            return;
+        }
+
+        auto msg = messages::Message::createUntimeoutMessage(action);
+
+        util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     auto &accountManager = singletons::AccountManager::getInstance();

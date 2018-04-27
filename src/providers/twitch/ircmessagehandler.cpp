@@ -56,6 +56,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
+    return;
     // check parameter count
     if (message->parameters().length() < 1) {
         return;

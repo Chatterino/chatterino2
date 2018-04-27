@@ -102,7 +102,6 @@ public:
             Signal<ModeChangedAction> modeChanged;
             Signal<ModerationStateAction> moderationStateChanged;
 
-            Signal<TimeoutAction> userTimedOut;
             Signal<BanAction> userBanned;
             Signal<UnbanAction> userUnbanned;
         } moderation;
