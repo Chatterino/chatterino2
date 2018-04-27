@@ -36,17 +36,17 @@ public:
 
 protected:
 #ifdef USEWINSDK
-    virtual void showEvent(QShowEvent *);
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-    virtual void paintEvent(QPaintEvent *) override;
-    virtual void scaleChangedEvent(float) override;
+    void showEvent(QShowEvent *) override;
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+    void paintEvent(QPaintEvent *) override;
+    void scaleChangedEvent(float) override;
 #endif
 
-    virtual void changeEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-    virtual void resizeEvent(QResizeEvent *) override;
+    void changeEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
 
-    virtual void themeRefreshEvent() override;
+    void themeRefreshEvent() override;
 
 private:
     void init();
