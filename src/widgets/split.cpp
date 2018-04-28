@@ -38,6 +38,12 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
+Split::Split(SplitContainer *parent)
+    : Split((QWidget *)parent)
+{
+    this->container = parent;
+}
+
 Split::Split(QWidget *parent)
     : BaseWidget(parent)
     , container(nullptr)

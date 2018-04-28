@@ -22,10 +22,6 @@ namespace widgets {
 
 class SplitContainer;
 
-class xD
-{
-};
-
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
 // ChatWidgetHeader
 //   - Responsible for rendering which channel the ChatWidget is in, and the menu in the top-left of
@@ -43,7 +39,10 @@ class Split : public BaseWidget
     Q_OBJECT
 
 public:
+    explicit Split(SplitContainer *parent);
+    explicit Split(BaseWidget *parent);
     explicit Split(QWidget *parent);
+
     ~Split() override;
 
     pajlada::Signals::NoArgSignal channelChanged;
