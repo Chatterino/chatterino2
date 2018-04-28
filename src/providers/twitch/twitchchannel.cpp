@@ -1,12 +1,13 @@
 #include "providers/twitch/twitchchannel.hpp"
+
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "messages/message.hpp"
+#include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
-#include "singletons/pubsubmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/posttothread.hpp"
 #include "util/urlfetch.hpp"
@@ -57,7 +58,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
         auto account = app->accounts->Twitch.getCurrent();
         if (account && !account->getUserId().isEmpty()) {
-            app->pubsub->ListenToChannelModerationActions(this->roomID, account);
+            app->twitch.pubsub->ListenToChannelModerationActions(this->roomID, account);
         }
     };
 

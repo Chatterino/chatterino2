@@ -1,9 +1,9 @@
-#include "singletons/pubsubmanager.hpp"
+#include "providers/twitch/pubsub.hpp"
 
 #include "debug/log.hpp"
+#include "providers/twitch/pubsubactions.hpp"
+#include "providers/twitch/pubsubhelpers.hpp"
 #include "singletons/accountmanager.hpp"
-#include "singletons/helper/pubsubactions.hpp"
-#include "singletons/helper/pubsubhelpers.hpp"
 #include "util/rapidjson-helpers.hpp"
 
 #include <rapidjson/error/en.h>
@@ -18,11 +18,14 @@ using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
 namespace chatterino {
-namespace singletons {
+namespace providers {
+namespace twitch {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
 static std::map<std::string, std::string> sentMessages;
+
+namespace detail {
 
 PubSubClient::PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle)
     : websocketClient(_websocketClient)
@@ -170,9 +173,11 @@ bool PubSubClient::Send(const char *payload)
     return true;
 }
 
-PubSubManager::PubSubManager()
+}  // namespace detail
+
+PubSub::PubSub()
 {
-    qDebug() << "init PubSubManager";
+    qDebug() << "init PubSub";
 
     this->moderationActionHandlers["clear"] = [this](const auto &data, const auto &roomID) {
         ClearChatAction action(data, roomID);
@@ -420,17 +425,17 @@ PubSubManager::PubSubManager()
     this->websocketClient.init_asio();
 
     // SSL Handshake
-    this->websocketClient.set_tls_init_handler(bind(&PubSubManager::OnTLSInit, this, ::_1));
+    this->websocketClient.set_tls_init_handler(bind(&PubSub::OnTLSInit, this, ::_1));
 
-    this->websocketClient.set_message_handler(bind(&PubSubManager::OnMessage, this, ::_1, ::_2));
-    this->websocketClient.set_open_handler(bind(&PubSubManager::OnConnectionOpen, this, ::_1));
-    this->websocketClient.set_close_handler(bind(&PubSubManager::OnConnectionClose, this, ::_1));
+    this->websocketClient.set_message_handler(bind(&PubSub::OnMessage, this, ::_1, ::_2));
+    this->websocketClient.set_open_handler(bind(&PubSub::OnConnectionOpen, this, ::_1));
+    this->websocketClient.set_close_handler(bind(&PubSub::OnConnectionClose, this, ::_1));
 
     // Add an initial client
     this->AddClient();
 }
 
-void PubSubManager::AddClient()
+void PubSub::AddClient()
 {
     websocketpp::lib::error_code ec;
     auto con = this->websocketClient.get_connection(TWITCH_PUBSUB_URL, ec);
@@ -443,12 +448,12 @@ void PubSubManager::AddClient()
     this->websocketClient.connect(con);
 }
 
-void PubSubManager::Start()
+void PubSub::Start()
 {
-    this->mainThread.reset(new std::thread(std::bind(&PubSubManager::RunThread, this)));
+    this->mainThread.reset(new std::thread(std::bind(&PubSub::RunThread, this)));
 }
 
-void PubSubManager::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account)
+void PubSub::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
     assert(account != nullptr);
 
@@ -467,7 +472,7 @@ void PubSubManager::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAc
     }
 }
 
-void PubSubManager::UnlistenAllModerationActions()
+void PubSub::UnlistenAllModerationActions()
 {
     for (const auto &p : this->clients) {
         const auto &client = p.second;
@@ -475,7 +480,7 @@ void PubSubManager::UnlistenAllModerationActions()
     }
 }
 
-void PubSubManager::ListenToChannelModerationActions(
+void PubSub::ListenToChannelModerationActions(
     const QString &channelID, std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
     assert(!channelID.isEmpty());
@@ -495,15 +500,15 @@ void PubSubManager::ListenToChannelModerationActions(
     this->listenToTopic(topic, account);
 }
 
-void PubSubManager::listenToTopic(const std::string &topic,
-                                  std::shared_ptr<providers::twitch::TwitchAccount> account)
+void PubSub::listenToTopic(const std::string &topic,
+                           std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
     auto message = CreateListenMessage({topic}, account);
 
     this->Listen(std::move(message));
 }
 
-void PubSubManager::Listen(rapidjson::Document &&msg)
+void PubSub::Listen(rapidjson::Document &&msg)
 {
     if (this->TryListen(msg)) {
         debug::Log("Successfully listened!");
@@ -514,7 +519,7 @@ void PubSubManager::Listen(rapidjson::Document &&msg)
     this->requests.emplace_back(std::make_unique<rapidjson::Document>(std::move(msg)));
 }
 
-bool PubSubManager::TryListen(rapidjson::Document &msg)
+bool PubSub::TryListen(rapidjson::Document &msg)
 {
     debug::Log("TryListen with {} clients", this->clients.size());
     for (const auto &p : this->clients) {
@@ -527,7 +532,7 @@ bool PubSubManager::TryListen(rapidjson::Document &msg)
     return false;
 }
 
-bool PubSubManager::isListeningToTopic(const std::string &topic)
+bool PubSub::isListeningToTopic(const std::string &topic)
 {
     for (const auto &p : this->clients) {
         const auto &client = p.second;
@@ -539,7 +544,7 @@ bool PubSubManager::isListeningToTopic(const std::string &topic)
     return false;
 }
 
-void PubSubManager::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr websocketMessage)
+void PubSub::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr websocketMessage)
 {
     const std::string &payload = websocketMessage->get_payload();
 
@@ -596,9 +601,9 @@ void PubSubManager::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessageP
     }
 }
 
-void PubSubManager::OnConnectionOpen(WebsocketHandle hdl)
+void PubSub::OnConnectionOpen(WebsocketHandle hdl)
 {
-    auto client = std::make_shared<PubSubClient>(this->websocketClient, hdl);
+    auto client = std::make_shared<detail::PubSubClient>(this->websocketClient, hdl);
 
     // We separate the starting from the constructor because we will want to use shared_from_this
     client->Start();
@@ -608,7 +613,7 @@ void PubSubManager::OnConnectionOpen(WebsocketHandle hdl)
     this->connected.invoke();
 }
 
-void PubSubManager::OnConnectionClose(WebsocketHandle hdl)
+void PubSub::OnConnectionClose(WebsocketHandle hdl)
 {
     auto clientIt = this->clients.find(hdl);
 
@@ -625,7 +630,7 @@ void PubSubManager::OnConnectionClose(WebsocketHandle hdl)
     this->connected.invoke();
 }
 
-PubSubManager::WebsocketContextPtr PubSubManager::OnTLSInit(websocketpp::connection_hdl hdl)
+PubSub::WebsocketContextPtr PubSub::OnTLSInit(websocketpp::connection_hdl hdl)
 {
     WebsocketContextPtr ctx(new boost::asio::ssl::context(boost::asio::ssl::context::tlsv1));
 
@@ -640,7 +645,7 @@ PubSubManager::WebsocketContextPtr PubSubManager::OnTLSInit(websocketpp::connect
     return ctx;
 }
 
-void PubSubManager::HandleListenResponse(const rapidjson::Document &msg)
+void PubSub::HandleListenResponse(const rapidjson::Document &msg)
 {
     std::string error;
 
@@ -661,7 +666,7 @@ void PubSubManager::HandleListenResponse(const rapidjson::Document &msg)
     }
 }
 
-void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
+void PubSub::HandleMessageResponse(const rapidjson::Value &outerData)
 {
     QString topic;
 
@@ -733,12 +738,13 @@ void PubSubManager::HandleMessageResponse(const rapidjson::Value &outerData)
     }
 }
 
-void PubSubManager::RunThread()
+void PubSub::RunThread()
 {
     debug::Log("Start pubsub manager thread");
     this->websocketClient.run();
     debug::Log("Done with pubsub manager thread");
 }
 
-}  // namespace singletons
+}  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

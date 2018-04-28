@@ -1,6 +1,6 @@
 #include "messages/message.hpp"
 #include "messageelement.hpp"
-#include "singletons/helper/pubsubactions.hpp"
+#include "providers/twitch/pubsubactions.hpp"
 #include "util/irchelpers.hpp"
 
 using SBHighlight = chatterino::widgets::ScrollbarHighlight;
@@ -79,7 +79,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     return message;
 }
 
-MessagePtr Message::createTimeoutMessage(const singletons::BanAction &action, uint32_t count)
+MessagePtr Message::createTimeoutMessage(const providers::twitch::BanAction &action, uint32_t count)
 {
     MessagePtr msg(new Message);
 
@@ -89,7 +89,7 @@ MessagePtr Message::createTimeoutMessage(const singletons::BanAction &action, ui
 
     msg->timeoutUser = action.target.name;
     msg->count = count;
-    msg->banAction.reset(new singletons::BanAction(action));
+    msg->banAction.reset(new providers::twitch::BanAction(action));
 
     QString text;
 
@@ -130,7 +130,7 @@ MessagePtr Message::createTimeoutMessage(const singletons::BanAction &action, ui
     return msg;
 }
 
-MessagePtr Message::createUntimeoutMessage(const singletons::UnbanAction &action)
+MessagePtr Message::createUntimeoutMessage(const providers::twitch::UnbanAction &action)
 {
     MessagePtr msg(new Message);
 

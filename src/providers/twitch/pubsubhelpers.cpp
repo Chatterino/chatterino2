@@ -1,11 +1,12 @@
-#include "singletons/helper/pubsubhelpers.hpp"
+#include "providers/twitch/pubsubhelpers.hpp"
 
+#include "providers/twitch/pubsubactions.hpp"
 #include "singletons/accountmanager.hpp"
-#include "singletons/helper/pubsubactions.hpp"
 #include "util/rapidjson-helpers.hpp"
 
 namespace chatterino {
-namespace singletons {
+namespace providers {
+namespace twitch {
 
 const rapidjson::Value &getArgs(const rapidjson::Value &data)
 {
@@ -85,5 +86,6 @@ rapidjson::Document CreateUnlistenMessage(const std::vector<std::string> &topics
     return msg;
 }
 
-}  // namespace singletons
+}  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

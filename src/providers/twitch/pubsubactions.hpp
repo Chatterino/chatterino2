@@ -1,14 +1,14 @@
 #pragma once
 
 #include <rapidjson/document.h>
-
 #include <QString>
 
 #include <chrono>
 #include <cinttypes>
 
 namespace chatterino {
-namespace singletons {
+namespace providers {
+namespace twitch {
 
 struct ActionUser {
     QString id;
@@ -91,5 +91,6 @@ struct ModerationStateAction : PubSubAction {
     bool modded;
 };
 
-}  // namespace singletons
+}  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino

@@ -1,5 +1,6 @@
 #include "application.hpp"
 
+#include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/commandmanager.hpp"
@@ -8,7 +9,6 @@
 #include "singletons/loggingmanager.hpp"
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
-#include "singletons/pubsubmanager.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
@@ -66,12 +66,12 @@ void Application::construct()
     this->commands = new singletons::CommandManager;
     this->accounts = new singletons::AccountManager;
     this->emotes = new singletons::EmoteManager;
-    this->pubsub = new singletons::PubSubManager;
     this->settings = new singletons::SettingManager;
     this->fonts = new singletons::FontManager;
     this->resources = new singletons::ResourceManager;
 
     this->twitch.server = new providers::twitch::TwitchServer;
+    this->twitch.pubsub = new providers::twitch::PubSub;
 }
 
 void Application::instantiate(int argc, char **argv)
@@ -106,29 +106,29 @@ void Application::initialize()
 
     this->nativeMessaging->openGuiMessageQueue();
 
-    this->pubsub->sig.whisper.sent.connect([](const auto &msg) {
+    this->twitch.pubsub->sig.whisper.sent.connect([](const auto &msg) {
         debug::Log("WHISPER SENT LOL");  //
     });
 
-    this->pubsub->sig.whisper.received.connect([](const auto &msg) {
+    this->twitch.pubsub->sig.whisper.received.connect([](const auto &msg) {
         debug::Log("WHISPER RECEIVED LOL");  //
     });
 
-    this->pubsub->sig.moderation.chatCleared.connect([&](const auto &action) {
+    this->twitch.pubsub->sig.moderation.chatCleared.connect([&](const auto &action) {
         debug::Log("Chat cleared by {}", action.source.name);  //
     });
 
-    this->pubsub->sig.moderation.modeChanged.connect([&](const auto &action) {
+    this->twitch.pubsub->sig.moderation.modeChanged.connect([&](const auto &action) {
         debug::Log("Mode {} was turned {} by {} (duration {})", (int &)action.mode,
                    (bool &)action.state, action.source.name, action.args.duration);
     });
 
-    this->pubsub->sig.moderation.moderationStateChanged.connect([&](const auto &action) {
+    this->twitch.pubsub->sig.moderation.moderationStateChanged.connect([&](const auto &action) {
         debug::Log("User {} was {} by {}", action.target.id, action.modded ? "modded" : "unmodded",
                    action.source.name);
     });
 
-    this->pubsub->sig.moderation.userBanned.connect([&](const auto &action) {
+    this->twitch.pubsub->sig.moderation.userBanned.connect([&](const auto &action) {
         auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
         if (chan->isEmpty()) {
@@ -140,7 +140,7 @@ void Application::initialize()
         util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    this->pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
+    this->twitch.pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
         auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
         if (chan->isEmpty()) {
@@ -152,14 +152,14 @@ void Application::initialize()
         util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    this->pubsub->Start();
+    this->twitch.pubsub->Start();
 
     auto RequestModerationActions = [=]() {
-        this->pubsub->UnlistenAllModerationActions();
+        this->twitch.pubsub->UnlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
-        // this->pubsub->UnlistenAllAuthedTopics();
+        // this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->pubsub->ListenToWhispers(this->accounts->Twitch.getCurrent());  //
+        this->twitch.pubsub->ListenToWhispers(this->accounts->Twitch.getCurrent());  //
     };
 
     this->accounts->Twitch.userChanged.connect(RequestModerationActions);

@@ -11,6 +11,7 @@ namespace providers {
 namespace twitch {
 
 class TwitchServer;
+class PubSub;
 
 }  // namespace twitch
 }  // namespace providers
@@ -24,7 +25,6 @@ class PathManager;
 class CommandManager;
 class AccountManager;
 class EmoteManager;
-class PubSubManager;
 class NativeMessagingManager;
 class SettingManager;
 class FontManager;
@@ -56,7 +56,6 @@ public:
     singletons::CommandManager *commands = nullptr;
     singletons::AccountManager *accounts = nullptr;
     singletons::EmoteManager *emotes = nullptr;
-    singletons::PubSubManager *pubsub = nullptr;
     singletons::NativeMessagingManager *nativeMessaging = nullptr;
     singletons::SettingManager *settings = nullptr;
     singletons::FontManager *fonts = nullptr;
@@ -64,7 +63,8 @@ public:
 
     /// Provider-specific
     struct {
-        providers::twitch::TwitchServer *server;
+        providers::twitch::TwitchServer *server = nullptr;
+        providers::twitch::PubSub *pubsub = nullptr;
     } twitch;
 
     void save();

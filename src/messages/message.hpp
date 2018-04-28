@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messages/messageelement.hpp"
-#include "singletons/helper/pubsubactions.hpp"
+#include "providers/twitch/pubsubactions.hpp"
 #include "util/flagsenum.hpp"
 #include "widgets/helper/scrollbarhighlight.hpp"
 
@@ -50,7 +50,7 @@ struct Message {
     QString localizedName;
     QString timeoutUser;
 
-    std::unique_ptr<singletons::BanAction> banAction;
+    std::unique_ptr<providers::twitch::BanAction> banAction;
     uint32_t count = 1;
 
     // Messages should not be added after the message is done initializing.
@@ -70,9 +70,10 @@ public:
                                                          const QString &durationInSeconds,
                                                          const QString &reason, bool multipleTimes);
 
-    static std::shared_ptr<Message> createTimeoutMessage(const singletons::BanAction &action,
+    static std::shared_ptr<Message> createTimeoutMessage(const providers::twitch::BanAction &action,
                                                          uint32_t count = 1);
-    static std::shared_ptr<Message> createUntimeoutMessage(const singletons::UnbanAction &action);
+    static std::shared_ptr<Message> createUntimeoutMessage(
+        const providers::twitch::UnbanAction &action);
 };
 
 using MessagePtr = std::shared_ptr<Message>;

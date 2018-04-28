@@ -104,6 +104,7 @@ SOURCES += \
     src/providers/twitch/twitchchannel.cpp \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
+    src/providers/twitch/pubsub.cpp \
     src/singletons/accountmanager.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
@@ -175,10 +176,9 @@ SOURCES += \
     src/widgets/helper/debugpopup.cpp \
     src/util/debugcount.cpp \
     src/singletons/nativemessagingmanager.cpp \
-    src/singletons/pubsubmanager.cpp \
     src/util/rapidjson-helpers.cpp \
-    src/singletons/helper/pubsubhelpers.cpp \
-    src/singletons/helper/pubsubactions.cpp \
+    src/providers/twitch/pubsubhelpers.cpp \
+    src/providers/twitch/pubsubactions.cpp \
     src/widgets/selectchanneldialog.cpp \
     src/singletons/updatemanager.cpp \
     src/widgets/lastruncrashdialog.cpp \
@@ -213,6 +213,7 @@ HEADERS  += \
     src/providers/twitch/twitchchannel.hpp \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
+    src/providers/twitch/pubsub.hpp \
     src/singletons/accountmanager.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
@@ -304,8 +305,8 @@ HEADERS  += \
     src/singletons/nativemessagingmanager.hpp \
     src/singletons/pubsubmanager.hpp \
     src/util/rapidjson-helpers.hpp \
-    src/singletons/helper/pubsubhelpers.hpp \
-    src/singletons/helper/pubsubactions.hpp \
+    src/providers/twitch/pubsubhelpers.hpp \
+    src/providers/twitch/pubsubactions.hpp \
     src/widgets/selectchanneldialog.hpp \
     src/singletons/updatemanager.hpp \
     src/widgets/lastruncrashdialog.hpp \

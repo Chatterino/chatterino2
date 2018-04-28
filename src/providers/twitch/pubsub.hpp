@@ -1,8 +1,8 @@
 #pragma once
 
+#include "providers/twitch/pubsubactions.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/helper/pubsubactions.hpp"
 
 #include <rapidjson/document.h>
 #include <QString>
@@ -21,7 +21,8 @@
 #include <vector>
 
 namespace chatterino {
-namespace singletons {
+namespace providers {
+namespace twitch {
 
 using WebsocketClient = websocketpp::client<websocketpp::config::asio_tls_client>;
 using WebsocketHandle = websocketpp::connection_hdl;
@@ -29,6 +30,8 @@ using WebsocketErrorCode = websocketpp::lib::error_code;
 
 #define MAX_PUBSUB_LISTENS 50
 #define MAX_PUBSUB_CONNECTIONS 10
+
+namespace detail {
 
 struct Listener {
     std::string topic;
@@ -66,7 +69,9 @@ private:
     bool Send(const char *payload);
 };
 
-class PubSubManager
+}  // namespace detail
+
+class PubSub
 {
     using WebsocketMessagePtr = websocketpp::config::asio_tls_client::message_type::ptr;
     using WebsocketContextPtr = websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
@@ -78,9 +83,9 @@ class PubSubManager
     std::unique_ptr<std::thread> mainThread;
 
 public:
-    PubSubManager();
+    PubSub();
 
-    ~PubSubManager() = delete;
+    ~PubSub() = delete;
 
     enum class State {
         Connected,
@@ -136,7 +141,8 @@ private:
 
     State state = State::Connected;
 
-    std::map<WebsocketHandle, std::shared_ptr<PubSubClient>, std::owner_less<WebsocketHandle>>
+    std::map<WebsocketHandle, std::shared_ptr<detail::PubSubClient>,
+             std::owner_less<WebsocketHandle>>
         clients;
 
     std::unordered_map<std::string, std::function<void(const rapidjson::Value &, const QString &)>>
@@ -153,5 +159,6 @@ private:
     void RunThread();
 };
 
-}  // namespace singletons
+}  // namespace twitch
+}  // namespace providers
 }  // namespace chatterino
