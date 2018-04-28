@@ -58,7 +58,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
         auto account = app->accounts->Twitch.getCurrent();
         if (account && !account->getUserId().isEmpty()) {
-            app->twitch.pubsub->ListenToChannelModerationActions(this->roomID, account);
+            app->twitch.pubsub->listenToChannelModerationActions(this->roomID, account);
         }
     };
 

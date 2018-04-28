@@ -152,14 +152,14 @@ void Application::initialize()
         util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    this->twitch.pubsub->Start();
+    this->twitch.pubsub->start();
 
     auto RequestModerationActions = [=]() {
-        this->twitch.pubsub->UnlistenAllModerationActions();
+        this->twitch.pubsub->unlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
         // this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch.pubsub->ListenToWhispers(this->accounts->Twitch.getCurrent());  //
+        this->twitch.pubsub->listenToWhispers(this->accounts->Twitch.getCurrent());  //
     };
 
     this->accounts->Twitch.userChanged.connect(RequestModerationActions);

@@ -33,23 +33,23 @@ PubSubClient::PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _h
 {
 }
 
-void PubSubClient::Start()
+void PubSubClient::start()
 {
     assert(!this->started);
 
     this->started = true;
 
-    this->Ping();
+    this->ping();
 }
 
-void PubSubClient::Stop()
+void PubSubClient::stop()
 {
     assert(this->started);
 
     this->started = false;
 }
 
-bool PubSubClient::Listen(rapidjson::Document &message)
+bool PubSubClient::listen(rapidjson::Document &message)
 {
     int numRequestedListens = message["data"]["topics"].Size();
 
@@ -68,15 +68,15 @@ bool PubSubClient::Listen(rapidjson::Document &message)
 
     rj::set(message, "nonce", uuid);
 
-    std::string payload = Stringify(message);
+    std::string payload = stringify(message);
     sentMessages[uuid.toStdString()] = payload;
 
-    this->Send(payload.c_str());
+    this->send(payload.c_str());
 
     return true;
 }
 
-void PubSubClient::UnlistenPrefix(const std::string &prefix)
+void PubSubClient::unlistenPrefix(const std::string &prefix)
 {
     std::vector<std::string> topics;
 
@@ -94,19 +94,19 @@ void PubSubClient::UnlistenPrefix(const std::string &prefix)
         return;
     }
 
-    auto message = CreateUnlistenMessage(topics);
+    auto message = createUnlistenMessage(topics);
 
     auto uuid = CreateUUID();
 
     rj::set(message, "nonce", CreateUUID());
 
-    std::string payload = Stringify(message);
+    std::string payload = stringify(message);
     sentMessages[uuid.toStdString()] = payload;
 
-    this->Send(payload.c_str());
+    this->send(payload.c_str());
 }
 
-void PubSubClient::HandlePong()
+void PubSubClient::handlePong()
 {
     assert(this->awaitingPong);
 
@@ -126,11 +126,11 @@ bool PubSubClient::isListeningToTopic(const std::string &payload)
     return false;
 }
 
-void PubSubClient::Ping()
+void PubSubClient::ping()
 {
     assert(this->started);
 
-    if (!this->Send(pingPayload)) {
+    if (!this->send(pingPayload)) {
         return;
     }
 
@@ -138,7 +138,7 @@ void PubSubClient::Ping()
 
     auto self = this->shared_from_this();
 
-    RunAfter(this->websocketClient.get_io_service(), std::chrono::seconds(15), [self](auto timer) {
+    runAfter(this->websocketClient.get_io_service(), std::chrono::seconds(15), [self](auto timer) {
         if (!self->started) {
             return;
         }
@@ -149,16 +149,16 @@ void PubSubClient::Ping()
         }
     });
 
-    RunAfter(this->websocketClient.get_io_service(), std::chrono::minutes(5), [self](auto timer) {
+    runAfter(this->websocketClient.get_io_service(), std::chrono::minutes(5), [self](auto timer) {
         if (!self->started) {
             return;
         }
 
-        self->Ping();  //
+        self->ping();  //
     });
 }
 
-bool PubSubClient::Send(const char *payload)
+bool PubSubClient::send(const char *payload)
 {
     WebsocketErrorCode ec;
     this->websocketClient.send(this->handle, payload, websocketpp::frame::opcode::text, ec);
@@ -425,17 +425,17 @@ PubSub::PubSub()
     this->websocketClient.init_asio();
 
     // SSL Handshake
-    this->websocketClient.set_tls_init_handler(bind(&PubSub::OnTLSInit, this, ::_1));
+    this->websocketClient.set_tls_init_handler(bind(&PubSub::onTLSInit, this, ::_1));
 
-    this->websocketClient.set_message_handler(bind(&PubSub::OnMessage, this, ::_1, ::_2));
-    this->websocketClient.set_open_handler(bind(&PubSub::OnConnectionOpen, this, ::_1));
-    this->websocketClient.set_close_handler(bind(&PubSub::OnConnectionClose, this, ::_1));
+    this->websocketClient.set_message_handler(bind(&PubSub::onMessage, this, ::_1, ::_2));
+    this->websocketClient.set_open_handler(bind(&PubSub::onConnectionOpen, this, ::_1));
+    this->websocketClient.set_close_handler(bind(&PubSub::onConnectionClose, this, ::_1));
 
     // Add an initial client
-    this->AddClient();
+    this->addClient();
 }
 
-void PubSub::AddClient()
+void PubSub::addClient()
 {
     websocketpp::lib::error_code ec;
     auto con = this->websocketClient.get_connection(TWITCH_PUBSUB_URL, ec);
@@ -448,12 +448,12 @@ void PubSub::AddClient()
     this->websocketClient.connect(con);
 }
 
-void PubSub::Start()
+void PubSub::start()
 {
-    this->mainThread.reset(new std::thread(std::bind(&PubSub::RunThread, this)));
+    this->mainThread.reset(new std::thread(std::bind(&PubSub::runThread, this)));
 }
 
-void PubSub::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account)
+void PubSub::listenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
     assert(account != nullptr);
 
@@ -464,7 +464,7 @@ void PubSub::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> 
 
     std::vector<std::string> topics({"whispers." + userID});
 
-    this->Listen(std::move(CreateListenMessage(topics, account)));
+    this->listen(std::move(createListenMessage(topics, account)));
 
     if (ec) {
         debug::Log("Unable to send message to websocket server: {}", ec.message());
@@ -472,15 +472,15 @@ void PubSub::ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> 
     }
 }
 
-void PubSub::UnlistenAllModerationActions()
+void PubSub::unlistenAllModerationActions()
 {
     for (const auto &p : this->clients) {
         const auto &client = p.second;
-        client->UnlistenPrefix("chat_moderator_actions.");
+        client->unlistenPrefix("chat_moderator_actions.");
     }
 }
 
-void PubSub::ListenToChannelModerationActions(
+void PubSub::listenToChannelModerationActions(
     const QString &channelID, std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
     assert(!channelID.isEmpty());
@@ -503,14 +503,14 @@ void PubSub::ListenToChannelModerationActions(
 void PubSub::listenToTopic(const std::string &topic,
                            std::shared_ptr<providers::twitch::TwitchAccount> account)
 {
-    auto message = CreateListenMessage({topic}, account);
+    auto message = createListenMessage({topic}, account);
 
-    this->Listen(std::move(message));
+    this->listen(std::move(message));
 }
 
-void PubSub::Listen(rapidjson::Document &&msg)
+void PubSub::listen(rapidjson::Document &&msg)
 {
-    if (this->TryListen(msg)) {
+    if (this->tryListen(msg)) {
         debug::Log("Successfully listened!");
         return;
     }
@@ -519,12 +519,12 @@ void PubSub::Listen(rapidjson::Document &&msg)
     this->requests.emplace_back(std::make_unique<rapidjson::Document>(std::move(msg)));
 }
 
-bool PubSub::TryListen(rapidjson::Document &msg)
+bool PubSub::tryListen(rapidjson::Document &msg)
 {
-    debug::Log("TryListen with {} clients", this->clients.size());
+    debug::Log("tryListen with {} clients", this->clients.size());
     for (const auto &p : this->clients) {
         const auto &client = p.second;
-        if (client->Listen(msg)) {
+        if (client->listen(msg)) {
             return true;
         }
     }
@@ -544,7 +544,7 @@ bool PubSub::isListeningToTopic(const std::string &topic)
     return false;
 }
 
-void PubSub::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr websocketMessage)
+void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr websocketMessage)
 {
     const std::string &payload = websocketMessage->get_payload();
 
@@ -571,7 +571,7 @@ void PubSub::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
     }
 
     if (type == "RESPONSE") {
-        this->HandleListenResponse(msg);
+        this->handleListenResponse(msg);
     } else if (type == "MESSAGE") {
         if (!msg.HasMember("data")) {
             debug::Log("Missing required object member `data` in message root");
@@ -585,7 +585,7 @@ void PubSub::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
             return;
         }
 
-        this->HandleMessageResponse(data);
+        this->handleMessageResponse(data);
     } else if (type == "PONG") {
         auto clientIt = this->clients.find(hdl);
 
@@ -595,25 +595,25 @@ void PubSub::OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
 
         auto &client = *clientIt;
 
-        client.second->HandlePong();
+        client.second->handlePong();
     } else {
         debug::Log("Unknown message type: {}", type);
     }
 }
 
-void PubSub::OnConnectionOpen(WebsocketHandle hdl)
+void PubSub::onConnectionOpen(WebsocketHandle hdl)
 {
     auto client = std::make_shared<detail::PubSubClient>(this->websocketClient, hdl);
 
     // We separate the starting from the constructor because we will want to use shared_from_this
-    client->Start();
+    client->start();
 
     this->clients.emplace(hdl, client);
 
     this->connected.invoke();
 }
 
-void PubSub::OnConnectionClose(WebsocketHandle hdl)
+void PubSub::onConnectionClose(WebsocketHandle hdl)
 {
     auto clientIt = this->clients.find(hdl);
 
@@ -623,14 +623,14 @@ void PubSub::OnConnectionClose(WebsocketHandle hdl)
 
     auto &client = clientIt->second;
 
-    client->Stop();
+    client->stop();
 
     this->clients.erase(clientIt);
 
     this->connected.invoke();
 }
 
-PubSub::WebsocketContextPtr PubSub::OnTLSInit(websocketpp::connection_hdl hdl)
+PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
 {
     WebsocketContextPtr ctx(new boost::asio::ssl::context(boost::asio::ssl::context::tlsv1));
 
@@ -645,7 +645,7 @@ PubSub::WebsocketContextPtr PubSub::OnTLSInit(websocketpp::connection_hdl hdl)
     return ctx;
 }
 
-void PubSub::HandleListenResponse(const rapidjson::Document &msg)
+void PubSub::handleListenResponse(const rapidjson::Document &msg)
 {
     std::string error;
 
@@ -666,7 +666,7 @@ void PubSub::HandleListenResponse(const rapidjson::Document &msg)
     }
 }
 
-void PubSub::HandleMessageResponse(const rapidjson::Value &outerData)
+void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 {
     QString topic;
 
@@ -719,7 +719,7 @@ void PubSub::HandleMessageResponse(const rapidjson::Value &outerData)
         std::string moderationAction;
 
         if (!rj::getSafe(data, "moderation_action", moderationAction)) {
-            debug::Log("Missing moderation action in data: {}", Stringify(data));
+            debug::Log("Missing moderation action in data: {}", stringify(data));
             return;
         }
 
@@ -738,7 +738,7 @@ void PubSub::HandleMessageResponse(const rapidjson::Value &outerData)
     }
 }
 
-void PubSub::RunThread()
+void PubSub::runThread()
 {
     debug::Log("Start pubsub manager thread");
     this->websocketClient.run();

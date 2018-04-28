@@ -54,19 +54,19 @@ class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 public:
     PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle);
 
-    void Start();
-    void Stop();
+    void start();
+    void stop();
 
-    bool Listen(rapidjson::Document &message);
-    void UnlistenPrefix(const std::string &prefix);
+    bool listen(rapidjson::Document &message);
+    void unlistenPrefix(const std::string &prefix);
 
-    void HandlePong();
+    void handlePong();
 
     bool isListeningToTopic(const std::string &topic);
 
 private:
-    void Ping();
-    bool Send(const char *payload);
+    void ping();
+    bool send(const char *payload);
 };
 
 }  // namespace detail
@@ -92,9 +92,9 @@ public:
         Disconnected,
     };
 
-    void Start();
+    void start();
 
-    bool IsConnected() const
+    bool isConnected() const
     {
         return this->state == State::Connected;
     }
@@ -119,11 +119,11 @@ public:
         } whisper;
     } sig;
 
-    void ListenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account);
+    void listenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account);
 
-    void UnlistenAllModerationActions();
+    void unlistenAllModerationActions();
 
-    void ListenToChannelModerationActions(
+    void listenToChannelModerationActions(
         const QString &channelID, std::shared_ptr<providers::twitch::TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
@@ -132,12 +132,12 @@ private:
     void listenToTopic(const std::string &topic,
                        std::shared_ptr<providers::twitch::TwitchAccount> account);
 
-    void Listen(rapidjson::Document &&msg);
-    bool TryListen(rapidjson::Document &msg);
+    void listen(rapidjson::Document &&msg);
+    bool tryListen(rapidjson::Document &msg);
 
     bool isListeningToTopic(const std::string &topic);
 
-    void AddClient();
+    void addClient();
 
     State state = State::Connected;
 
@@ -148,15 +148,15 @@ private:
     std::unordered_map<std::string, std::function<void(const rapidjson::Value &, const QString &)>>
         moderationActionHandlers;
 
-    void OnMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
-    void OnConnectionOpen(websocketpp::connection_hdl hdl);
-    void OnConnectionClose(websocketpp::connection_hdl hdl);
-    WebsocketContextPtr OnTLSInit(websocketpp::connection_hdl hdl);
+    void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
+    void onConnectionOpen(websocketpp::connection_hdl hdl);
+    void onConnectionClose(websocketpp::connection_hdl hdl);
+    WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
-    void HandleListenResponse(const rapidjson::Document &msg);
-    void HandleMessageResponse(const rapidjson::Value &data);
+    void handleListenResponse(const rapidjson::Document &msg);
+    void handleMessageResponse(const rapidjson::Value &data);
 
-    void RunThread();
+    void runThread();
 };
 
 }  // namespace twitch
