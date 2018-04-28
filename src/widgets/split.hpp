@@ -40,7 +40,6 @@ class Split : public BaseWidget
 
 public:
     explicit Split(SplitContainer *parent);
-    explicit Split(BaseWidget *parent);
     explicit Split(QWidget *parent);
 
     ~Split() override;
