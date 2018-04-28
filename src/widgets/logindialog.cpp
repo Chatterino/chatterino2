@@ -103,6 +103,8 @@ BasicLoginWidget::BasicLoginWidget()
         }
 
         LogInWithCredentials(userID, username, clientID, oauthToken);
+
+        clipboard->clear();
     });
 }
 
