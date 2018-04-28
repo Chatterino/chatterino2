@@ -1,5 +1,9 @@
 #include "moderationpage.hpp"
 
+#include "application.hpp"
+#include "singletons/pathmanager.hpp"
+#include "util/layoutcreator.hpp"
+
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -7,9 +11,6 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
-
-#include "singletons/pathmanager.hpp"
-#include "util/layoutcreator.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -28,14 +29,13 @@ inline QString CreateLink(const QString &url, bool file = false)
 ModerationPage::ModerationPage()
     : SettingsPage("Moderation", "")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-    singletons::PathManager &pathManager = singletons::PathManager::getInstance();
+    auto app = getApp();
     util::LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
     {
         // Logs (copied from LoggingMananger)
-        auto logPath = pathManager.logsFolderPath;
+        auto logPath = app->paths->logsFolderPath;
 
         auto created = layout.emplace<QLabel>();
         created->setText("Logs are saved to " + CreateLink(logPath, true));
@@ -44,7 +44,7 @@ ModerationPage::ModerationPage()
                                          Qt::LinksAccessibleByKeyboard |
                                          Qt::LinksAccessibleByKeyboard);
         created->setOpenExternalLinks(true);
-        layout.append(this->createCheckBox("Enable logging", settings.enableLogging));
+        layout.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
         layout->addStretch(1);
         // Logs end
@@ -58,7 +58,7 @@ ModerationPage::ModerationPage()
         auto form = layout.emplace<QFormLayout>();
         {
             form->addRow("Action on timed out messages (unimplemented):",
-                         this->createComboBox({"Disable", "Hide"}, settings.timeoutAction));
+                         this->createComboBox({"Disable", "Hide"}, app->settings->timeoutAction));
         }
 
         auto modButtons =
@@ -71,13 +71,13 @@ ModerationPage::ModerationPage()
 
             auto text = modButtons.emplace<QTextEdit>().getElement();
 
-            text->setPlainText(settings.moderationActions);
+            text->setPlainText(app->settings->moderationActions);
 
             QObject::connect(text, &QTextEdit::textChanged, this,
                              [this] { this->itemsChangedTimer.start(200); });
 
-            QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this, [text, &settings]() {
-                settings.moderationActions = text->toPlainText();
+            QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this, [text, app]() {
+                app->settings->moderationActions = text->toPlainText();
             });
         }
     }

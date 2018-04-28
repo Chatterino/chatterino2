@@ -100,8 +100,7 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
 {
     QNetworkRequest request(url);
 
-    auto &accountManager = singletons::AccountManager::getInstance();
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
     QByteArray oauthToken;
     if (currentTwitchUser) {
         oauthToken = currentTwitchUser->getOAuthToken().toUtf8();
@@ -131,8 +130,7 @@ static void sendDelete(QUrl url, std::function<void()> successCallback)
 {
     QNetworkRequest request(url);
 
-    auto &accountManager = singletons::AccountManager::getInstance();
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
     QByteArray oauthToken;
     if (currentTwitchUser) {
         oauthToken = currentTwitchUser->getOAuthToken().toUtf8();

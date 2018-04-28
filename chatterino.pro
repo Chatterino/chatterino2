@@ -312,9 +312,10 @@ HEADERS  += \
     src/widgets/attachedwindow.hpp \
     src/widgets/settingspages/externaltoolspage.hpp \
     src/util/removescrollareabackground.hpp \
-    src/util/assertinguithread.h \
     src/util/standarditemhelper.hpp \
-    src/widgets/helper/comboboxitemdelegate.hpp
+    src/widgets/helper/comboboxitemdelegate.hpp \
+    src/util/assertinguithread.hpp \
+    src/util/signalvector2.hpp
 
 RESOURCES += \
     resources/resources.qrc

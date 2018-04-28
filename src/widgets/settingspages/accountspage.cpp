@@ -1,12 +1,13 @@
 #include "accountspage.hpp"
 
-#include <QDialogButtonBox>
-#include <QVBoxLayout>
-
+#include "application.hpp"
 #include "const.hpp"
 #include "singletons/accountmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/logindialog.hpp"
+
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
 
 namespace chatterino {
 namespace widgets {
@@ -39,7 +40,7 @@ AccountsPage::AccountsPage()
             return;
         }
 
-        singletons::AccountManager::getInstance().Twitch.removeUser(selectedUser);
+        getApp()->accounts->Twitch.removeUser(selectedUser);
     });
 }
 

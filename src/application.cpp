@@ -1,4 +1,5 @@
 #include "application.hpp"
+
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/commandmanager.hpp"
@@ -12,60 +13,114 @@
 #include "singletons/windowmanager.hpp"
 #include "util/posttothread.hpp"
 
+#include <atomic>
+
+#ifdef Q_OS_WIN
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#endif
+
 using namespace chatterino::singletons;
 
 namespace chatterino {
 
+namespace {
+
+bool isBigEndian()
+{
+    int test = 1;
+    char *p = (char *)&test;
+
+    return p[0] == 0;
+}
+
+}  // namespace
+
+static std::atomic<bool> isAppConstructed{false};
+static std::atomic<bool> isAppInitialized{false};
+
+static Application *staticApp = nullptr;
+
 // this class is responsible for handling the workflow of Chatterino
 // It will create the instances of the major classes, and connect their signals to each other
 
-Application::Application()
+Application::Application(int _argc, char **_argv)
+    : argc(_argc)
+    , argv(_argv)
 {
-    singletons::NativeMessagingManager::getInstance().registerHost();
+}
 
-    singletons::WindowManager::getInstance();
+void Application::construct()
+{
+    assert(isAppConstructed == false);
+    isAppConstructed = true;
 
-    singletons::LoggingManager::getInstance();
+    // 1. Instantiate all classes
+    this->paths = new singletons::PathManager(argc, argv);
+    this->themes = new singletons::ThemeManager;
+    this->windows = new singletons::WindowManager;
+    this->logging = new singletons::LoggingManager;
+    this->commands = new singletons::CommandManager;
+    this->accounts = new singletons::AccountManager;
+    this->emotes = new singletons::EmoteManager;
+    this->pubsub = new singletons::PubSubManager;
+    this->settings = new singletons::SettingManager;
+}
 
-    singletons::SettingManager::getInstance().initialize();
-    singletons::CommandManager::getInstance().loadCommands();
+void Application::instantiate(int argc, char **argv)
+{
+    assert(staticApp == nullptr);
 
-    singletons::WindowManager::getInstance().initialize();
+    staticApp = new Application(argc, argv);
+}
+
+void Application::initialize()
+{
+    assert(isAppInitialized == false);
+    isAppInitialized = true;
+
+    // 2. Initialize/load classes
+    this->windows->initialize();
+
+    this->nativeMessaging->registerHost();
+
+    this->settings->initialize();
+    this->commands->loadCommands();
 
     // Initialize everything we need
-    singletons::EmoteManager::getInstance().loadGlobalEmotes();
+    this->emotes->loadGlobalEmotes();
 
-    singletons::AccountManager::getInstance().load();
+    this->accounts->load();
 
     // XXX
-    singletons::SettingManager::getInstance().updateWordTypeMask();
+    this->settings->updateWordTypeMask();
 
-    singletons::NativeMessagingManager::getInstance().openGuiMessageQueue();
-    auto &pubsub = singletons::PubSubManager::getInstance();
+    this->nativeMessaging->openGuiMessageQueue();
 
-    pubsub.sig.whisper.sent.connect([](const auto &msg) {
+    this->pubsub->sig.whisper.sent.connect([](const auto &msg) {
         debug::Log("WHISPER SENT LOL");  //
     });
 
-    pubsub.sig.whisper.received.connect([](const auto &msg) {
+    this->pubsub->sig.whisper.received.connect([](const auto &msg) {
         debug::Log("WHISPER RECEIVED LOL");  //
     });
 
-    pubsub.sig.moderation.chatCleared.connect([&](const auto &action) {
+    this->pubsub->sig.moderation.chatCleared.connect([&](const auto &action) {
         debug::Log("Chat cleared by {}", action.source.name);  //
     });
 
-    pubsub.sig.moderation.modeChanged.connect([&](const auto &action) {
+    this->pubsub->sig.moderation.modeChanged.connect([&](const auto &action) {
         debug::Log("Mode {} was turned {} by {} (duration {})", (int &)action.mode,
                    (bool &)action.state, action.source.name, action.args.duration);
     });
 
-    pubsub.sig.moderation.moderationStateChanged.connect([&](const auto &action) {
+    this->pubsub->sig.moderation.moderationStateChanged.connect([&](const auto &action) {
         debug::Log("User {} was {} by {}", action.target.id, action.modded ? "modded" : "unmodded",
                    action.source.name);
     });
 
-    pubsub.sig.moderation.userBanned.connect([&](const auto &action) {
+    this->pubsub->sig.moderation.userBanned.connect([&](const auto &action) {
         auto &server = providers::twitch::TwitchServer::getInstance();
         auto chan = server.getChannelOrEmptyByID(action.roomID);
 
@@ -78,7 +133,7 @@ Application::Application()
         util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    pubsub.sig.moderation.userUnbanned.connect([&](const auto &action) {
+    this->pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
         auto &server = providers::twitch::TwitchServer::getInstance();
         auto chan = server.getChannelOrEmptyByID(action.roomID);
 
@@ -91,26 +146,19 @@ Application::Application()
         util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    auto &accountManager = singletons::AccountManager::getInstance();
+    this->pubsub->Start();
 
-    pubsub.Start();
-
-    auto RequestModerationActions = [&]() {
-        pubsub.UnlistenAllModerationActions();
+    auto RequestModerationActions = [=]() {
+        this->pubsub->UnlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
-        // pubsub.UnlistenAllAuthedTopics();
+        // this->pubsub->UnlistenAllAuthedTopics();
 
-        pubsub.ListenToWhispers(singletons::AccountManager::getInstance().Twitch.getCurrent());  //
+        this->pubsub->ListenToWhispers(this->accounts->Twitch.getCurrent());  //
     };
 
-    accountManager.Twitch.userChanged.connect(RequestModerationActions);
+    this->accounts->Twitch.userChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
-}
-
-Application::~Application()
-{
-    this->save();
 }
 
 int Application::run(QApplication &qtApp)
@@ -119,16 +167,74 @@ int Application::run(QApplication &qtApp)
     providers::twitch::TwitchServer::getInstance().connect();
 
     // Show main window
-    singletons::WindowManager::getInstance().getMainWindow().show();
+    this->windows->getMainWindow().show();
 
     return qtApp.exec();
 }
 
 void Application::save()
 {
-    singletons::WindowManager::getInstance().save();
+    this->windows->save();
 
-    singletons::CommandManager::getInstance().saveCommands();
+    this->commands->saveCommands();
+}
+
+void Application::runNativeMessagingHost()
+{
+    auto app = getApp();
+
+    app->nativeMessaging = new singletons::NativeMessagingManager;
+
+#ifdef Q_OS_WIN
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
+#if 0
+    bool bigEndian = isBigEndian();
+#endif
+
+    while (true) {
+        char size_c[4];
+        std::cin.read(size_c, 4);
+
+        if (std::cin.eof()) {
+            break;
+        }
+
+        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+#if 0
+        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
+        uint32_t size = 0;
+        if (bigEndian) {
+            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
+                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
+        } else {
+            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
+                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
+        }
+#endif
+
+        char *b = (char *)malloc(size + 1);
+        std::cin.read(b, size);
+        *(b + size) = '\0';
+
+        app->nativeMessaging->sendToGuiProcess(QByteArray(b, size));
+
+        free(b);
+    }
+}
+
+Application *getApp()
+{
+    assert(staticApp != nullptr);
+
+    return staticApp;
+}
+
+bool appInitialized()
+{
+    return isAppInitialized;
 }
 
 }  // namespace chatterino

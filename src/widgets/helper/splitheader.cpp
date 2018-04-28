@@ -218,8 +218,8 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->themeManager.splits.header.background);
-    painter.setPen(this->themeManager.splits.header.border);
+    painter.fillRect(rect(), this->themeManager->splits.header.background);
+    painter.setPen(this->themeManager->splits.header.border);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
@@ -268,7 +268,7 @@ void SplitHeader::rightButtonClicked()
 void SplitHeader::themeRefreshEvent()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, this->themeManager.splits.header.text);
+    palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
 
     //    this->dropdownButton->setPalette(palette);
     this->titleLabel->setPalette(palette);

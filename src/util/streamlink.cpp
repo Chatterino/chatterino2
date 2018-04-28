@@ -1,4 +1,6 @@
 #include "util/streamlink.hpp"
+
+#include "application.hpp"
 #include "helpers.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "widgets/qualitypopup.hpp"
@@ -50,9 +52,9 @@ bool CheckStreamlinkPath(const QString &path)
 // TODO: Make streamlink binary finder smarter
 QString GetStreamlinkBinaryPath()
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
-    QString settingPath = settings.streamlinkPath;
+    QString settingPath = app->settings->streamlinkPath;
 
     QStringList paths;
     paths << settingPath;
@@ -111,15 +113,15 @@ void GetStreamQualities(const QString &channelURL, std::function<void(QStringLis
 
 void OpenStreamlink(const QString &channelURL, const QString &quality, QStringList extraArguments)
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
     QString path = GetStreamlinkBinaryPath();
 
     QStringList arguments;
 
-    QString additionalOptions = settings.streamlinkOpts.getValue();
+    QString additionalOptions = app->settings->streamlinkOpts.getValue();
     if (!additionalOptions.isEmpty()) {
-        arguments << settings.streamlinkOpts;
+        arguments << app->settings->streamlinkOpts;
     }
 
     arguments.append(extraArguments);
@@ -135,11 +137,11 @@ void OpenStreamlink(const QString &channelURL, const QString &quality, QStringLi
 
 void Start(const QString &channel)
 {
+    auto app = getApp();
+
     QString channelURL = "twitch.tv/" + channel;
 
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
-
-    QString preferredQuality = settings.preferredQuality;
+    QString preferredQuality = app->settings->preferredQuality;
     preferredQuality = preferredQuality.toLower();
 
     if (preferredQuality == "choose") {

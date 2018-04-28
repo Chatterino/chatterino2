@@ -1,4 +1,6 @@
 #include "widgets/helper/notebooktab.hpp"
+
+#include "application.hpp"
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -23,12 +25,14 @@ NotebookTab2::NotebookTab2(Notebook2 *_notebook)
     , notebook(_notebook)
     , menu(this)
 {
+    auto app = getApp();
+
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    singletons::SettingManager::getInstance().showTabCloseButton.connect(
-        boost::bind(&NotebookTab2::hideTabXChanged, this, _1), this->managedConnections);
+    app->settings->showTabCloseButton.connect(boost::bind(&NotebookTab2::hideTabXChanged, this, _1),
+                                              this->managedConnections);
 
     this->setMouseTracking(true);
 
@@ -77,12 +81,13 @@ void NotebookTab2::themeRefreshEvent()
 
 void NotebookTab2::updateSize()
 {
+    auto app = getApp();
     float scale = getScale();
 
     int width;
     QFontMetrics metrics(this->font());
 
-    if (!singletons::SettingManager::getInstance().showTabCloseButton) {
+    if (!app->settings->showTabCloseButton) {
         width = (int)((metrics.width(this->title) + 16 /*+ 16*/) * scale);
     } else {
         width = (int)((metrics.width(this->title) + 8 + 24 /*+ 16*/) * scale);
@@ -173,7 +178,7 @@ void NotebookTab2::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab2::paintEvent(QPaintEvent *)
 {
-    singletons::SettingManager &settingManager = singletons::SettingManager::getInstance();
+    auto app = getApp();
     QPainter painter(this);
     float scale = this->getScale();
 
@@ -182,16 +187,16 @@ void NotebookTab2::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
-    singletons::ThemeManager::TabColors regular = this->themeManager.tabs.regular;
+    singletons::ThemeManager::TabColors regular = this->themeManager->tabs.regular;
 
     if (this->selected) {
-        colors = this->themeManager.tabs.selected;
+        colors = this->themeManager->tabs.selected;
     } else if (this->highlightState == HighlightState::Highlighted) {
-        colors = this->themeManager.tabs.highlighted;
+        colors = this->themeManager->tabs.highlighted;
     } else if (this->highlightState == HighlightState::NewMessage) {
-        colors = this->themeManager.tabs.newMessage;
+        colors = this->themeManager->tabs.newMessage;
     } else {
-        colors = this->themeManager.tabs.regular;
+        colors = this->themeManager->tabs.regular;
     }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -248,7 +253,7 @@ void NotebookTab2::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (!settingManager.showTabCloseButton ? 0 : static_cast<int>(16) * scale);
+    int rectW = (!app->settings->showTabCloseButton ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -269,7 +274,7 @@ void NotebookTab2::paintEvent(QPaintEvent *)
     }
 
     // draw close x
-    if (settingManager.showTabCloseButton && (mouseOver || selected)) {
+    if (!app->settings->showTabCloseButton && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (!xRect.isNull()) {
             if (mouseOverX) {
@@ -315,7 +320,7 @@ void NotebookTab2::mouseReleaseEvent(QMouseEvent *event)
             this->notebook->removePage(this->page);
         }
     } else {
-        if (singletons::SettingManager::getInstance().showTabCloseButton && this->mouseDownX &&
+        if (getApp()->settings->showTabCloseButton && this->mouseDownX &&
             this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
@@ -350,8 +355,9 @@ void NotebookTab2::dragEnterEvent(QDragEnterEvent *)
 
 void NotebookTab2::mouseMoveEvent(QMouseEvent *event)
 {
-    if (singletons::SettingManager::getInstance().showTabCloseButton &&
-        this->notebook->getAllowUserTabManagement())  //
+    auto app = getApp();
+
+    if (app->settings->showTabCloseButton && this->notebook->getAllowUserTabManagement())  //
     {
         bool overX = this->getXRect().contains(event->pos());
 
@@ -397,12 +403,14 @@ NotebookTab::NotebookTab(Notebook *_notebook)
     , notebook(_notebook)
     , menu(this)
 {
+    auto app = getApp();
+
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    singletons::SettingManager::getInstance().showTabCloseButton.connect(
-        boost::bind(&NotebookTab::hideTabXChanged, this, _1), this->managedConnections);
+    app->settings->showTabCloseButton.connect(boost::bind(&NotebookTab::hideTabXChanged, this, _1),
+                                              this->managedConnections);
 
     this->setMouseTracking(true);
 
@@ -449,11 +457,13 @@ void NotebookTab::themeRefreshEvent()
 
 void NotebookTab::updateSize()
 {
+    auto app = getApp();
+
     float scale = getScale();
 
     int width;
 
-    if (!singletons::SettingManager::getInstance().showTabCloseButton) {
+    if (!app->settings->showTabCloseButton) {
         width = (int)((fontMetrics().width(this->title) + 16 /*+ 16*/) * scale);
     } else {
         width = (int)((fontMetrics().width(this->title) + 8 + 24 /*+ 16*/) * scale);
@@ -544,7 +554,7 @@ void NotebookTab::moveAnimated(QPoint pos, bool animated)
 
 void NotebookTab::paintEvent(QPaintEvent *)
 {
-    singletons::SettingManager &settingManager = singletons::SettingManager::getInstance();
+    auto app = getApp();
     QPainter painter(this);
     float scale = this->getScale();
 
@@ -553,16 +563,16 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     singletons::ThemeManager::TabColors colors;
-    singletons::ThemeManager::TabColors regular = this->themeManager.tabs.regular;
+    singletons::ThemeManager::TabColors regular = this->themeManager->tabs.regular;
 
     if (this->selected) {
-        colors = this->themeManager.tabs.selected;
+        colors = this->themeManager->tabs.selected;
     } else if (this->highlightState == HighlightState::Highlighted) {
-        colors = this->themeManager.tabs.highlighted;
+        colors = this->themeManager->tabs.highlighted;
     } else if (this->highlightState == HighlightState::NewMessage) {
-        colors = this->themeManager.tabs.newMessage;
+        colors = this->themeManager->tabs.newMessage;
     } else {
-        colors = this->themeManager.tabs.regular;
+        colors = this->themeManager->tabs.regular;
     }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -619,7 +629,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (!settingManager.showTabCloseButton ? 0 : static_cast<int>(16) * scale);
+    int rectW = (!app->settings->showTabCloseButton ? 0 : static_cast<int>(16) * scale);
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -640,7 +650,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 
     // draw close x
-    if (settingManager.showTabCloseButton && (mouseOver || selected)) {
+    if (app->settings->showTabCloseButton && (mouseOver || selected)) {
         QRect xRect = this->getXRect();
         if (mouseOverX) {
             painter.fillRect(xRect, QColor(0, 0, 0, 64));
@@ -675,6 +685,8 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
 
 void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
+    auto app = getApp();
+
     this->mouseDown = false;
 
     if (event->button() == Qt::MiddleButton) {
@@ -682,7 +694,7 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
             this->notebook->removePage(this->page);
         }
     } else {
-        if (singletons::SettingManager::getInstance().showTabCloseButton && this->mouseDownX &&
+        if (app->settings->showTabCloseButton && this->mouseDownX &&
             this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
@@ -715,7 +727,9 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *)
 
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
-    if (singletons::SettingManager::getInstance().showTabCloseButton) {
+    auto app = getApp();
+
+    if (app->settings->showTabCloseButton) {
         bool overX = this->getXRect().contains(event->pos());
 
         if (overX != this->mouseOverX) {

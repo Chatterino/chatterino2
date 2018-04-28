@@ -20,7 +20,7 @@ void NotebookPageDropPreview::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     painter.fillRect(8, 8, this->width() - 17, this->height() - 17,
-                     this->themeManager.splits.dropPreview);
+                     this->themeManager->splits.dropPreview);
 }
 
 void NotebookPageDropPreview::hideEvent(QHideEvent *)

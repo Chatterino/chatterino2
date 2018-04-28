@@ -443,12 +443,6 @@ void PubSubManager::AddClient()
     this->websocketClient.connect(con);
 }
 
-PubSubManager &PubSubManager::getInstance()
-{
-    static PubSubManager instance;
-    return instance;
-}
-
 void PubSubManager::Start()
 {
     this->mainThread.reset(new std::thread(std::bind(&PubSubManager::RunThread, this)));

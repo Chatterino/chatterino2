@@ -1,4 +1,6 @@
 #include "logspage.hpp"
+
+#include "application.hpp"
 #include "singletons/pathmanager.hpp"
 
 #include <QFormLayout>
@@ -23,12 +25,12 @@ inline QString CreateLink(const QString &url, bool file = false)
 LogsPage::LogsPage()
     : SettingsPage("Logs", "")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
+
     util::LayoutCreator<LogsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    singletons::PathManager &pathManager = singletons::PathManager::getInstance();
-    auto logPath = pathManager.logsFolderPath;
+    auto logPath = app->paths->logsFolderPath;
 
     auto created = layout.emplace<QLabel>();
     created->setText("Logs are saved to " + CreateLink(logPath, true));
@@ -36,7 +38,7 @@ LogsPage::LogsPage()
     created->setTextInteractionFlags(Qt::TextBrowserInteraction | Qt::LinksAccessibleByKeyboard |
                                      Qt::LinksAccessibleByKeyboard);
     created->setOpenExternalLinks(true);
-    layout.append(this->createCheckBox("Enable logging", settings.enableLogging));
+    layout.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
     layout->addStretch(1);
 }

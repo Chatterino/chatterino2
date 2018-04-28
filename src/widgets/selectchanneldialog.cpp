@@ -266,7 +266,7 @@ void SelectChannelDialog::themeRefreshEvent()
 {
     BaseWindow::themeRefreshEvent();
 
-    if (this->themeManager.isLightTheme()) {
+    if (this->themeManager->isLightTheme()) {
         this->setStyleSheet("QRadioButton { color: #000 } QLabel { color: #000 }");
     } else {
         this->setStyleSheet("QRadioButton { color: #fff } QLabel { color: #fff }");

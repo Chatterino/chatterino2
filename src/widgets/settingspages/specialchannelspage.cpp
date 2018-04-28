@@ -1,5 +1,6 @@
 #include "specialchannelspage.hpp"
 
+#include "application.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 
@@ -14,7 +15,8 @@ namespace settingspages {
 SpecialChannelsPage::SpecialChannelsPage()
     : SettingsPage("Special channels", "")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
+
     util::LayoutCreator<SpecialChannelsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 

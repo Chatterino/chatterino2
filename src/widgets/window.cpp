@@ -1,4 +1,6 @@
 #include "widgets/window.hpp"
+
+#include "application.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -21,33 +23,32 @@
 namespace chatterino {
 namespace widgets {
 
-Window::Window(singletons::ThemeManager &_themeManager, WindowType _type)
-    : BaseWindow(_themeManager, nullptr, true)
+Window::Window(WindowType _type)
+    : BaseWindow(nullptr, true)
     , type(_type)
     , dpi(this->getScale())
     , notebook(this, !this->hasCustomWindowFrame())
 {
-    singletons::AccountManager::getInstance().Twitch.currentUsername.connect(
-        [this](const std::string &newUsername, auto) {
-            if (newUsername.empty()) {
-                this->refreshWindowTitle("Not logged in");
-            } else {
-                this->refreshWindowTitle(QString::fromStdString(newUsername));
-            }
-        });
+    auto app = getApp();
+
+    app->accounts->Twitch.currentUsername.connect([this](const std::string &newUsername, auto) {
+        if (newUsername.empty()) {
+            this->refreshWindowTitle("Not logged in");
+        } else {
+            this->refreshWindowTitle(QString::fromStdString(newUsername));
+        }
+    });
 
     if (this->hasCustomWindowFrame() && _type == Window::Main) {
-        this->addTitleBarButton(TitleBarButton::Settings, [] {
-            singletons::WindowManager::getInstance().showSettingsDialog();
+        this->addTitleBarButton(TitleBarButton::Settings, [app] {
+            app->windows->showSettingsDialog();  //
         });
-        auto user = this->addTitleBarLabel([] {
-            singletons::WindowManager::getInstance().showAccountSelectPopup(QCursor::pos());
+        auto user = this->addTitleBarLabel([app] {
+            app->windows->showAccountSelectPopup(QCursor::pos());  //
         });
 
-        singletons::AccountManager::getInstance().Twitch.userChanged.connect([user] {
-            user->getLabel().setText(
-                singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserName());
-        });
+        app->accounts->Twitch.userChanged.connect(
+            [=] { user->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName()); });
     }
 
     if (_type == Window::Main) {
@@ -161,8 +162,9 @@ bool Window::event(QEvent *e)
 void Window::closeEvent(QCloseEvent *event)
 {
     if (this->type == Window::Main) {
-        singletons::WindowManager::getInstance().save();
-        singletons::WindowManager::getInstance().closeAll();
+        auto app = getApp();
+        app->windows->save();
+        app->windows->closeAll();
     }
 
     this->closed.invoke();

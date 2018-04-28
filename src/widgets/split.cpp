@@ -1,4 +1,6 @@
 #include "widgets/split.hpp"
+
+#include "application.hpp"
 #include "providers/twitch/emotevalue.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
@@ -36,19 +38,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-Split::Split(SplitContainer *parent)
-    : Split((BaseWidget *)parent)
-{
-    this->container = parent;
-}
-
-Split::Split(BaseWidget *widget)
-    : Split(widget->themeManager, widget)
-{
-}
-
-Split::Split(singletons::ThemeManager &manager, QWidget *parent)
-    : BaseWidget(manager, parent)
+Split::Split(QWidget *parent)
+    : BaseWidget(parent)
     , container(nullptr)
     , channel(Channel::getEmpty())
     , vbox(this)
@@ -56,6 +47,8 @@ Split::Split(singletons::ThemeManager &manager, QWidget *parent)
     , view(this)
     , input(this)
 {
+    auto app = getApp();
+
     this->setMouseTracking(true);
 
     this->vbox.setSpacing(0);
@@ -97,8 +90,8 @@ Split::Split(singletons::ThemeManager &manager, QWidget *parent)
         }
     });
 
-    this->input.textChanged.connect([this](const QString &newText) {
-        if (!singletons::SettingManager::getInstance().hideEmptyInput) {
+    this->input.textChanged.connect([=](const QString &newText) {
+        if (!app->settings->hideEmptyInput) {
             return;
         }
 
@@ -109,14 +102,15 @@ Split::Split(singletons::ThemeManager &manager, QWidget *parent)
         }
     });
 
-    singletons::SettingManager::getInstance().hideEmptyInput.connect(
+    app->settings->hideEmptyInput.connect(
         [this](const bool &hideEmptyInput, auto) {
             if (hideEmptyInput && this->input.getInputText().length() == 0) {
                 this->input.hide();
             } else {
                 this->input.show();
             }
-        });
+        },
+        this->managedConnections);
 
     this->header.updateModerationModeIcon();
 
@@ -260,7 +254,7 @@ void Split::paintEvent(QPaintEvent *)
     // color the background of the chat
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager.splits.background);
+    painter.fillRect(this->rect(), this->themeManager->splits.background);
 }
 
 void Split::mouseMoveEvent(QMouseEvent *event)
@@ -328,7 +322,8 @@ void Split::doChangeChannel()
 
 void Split::doPopup()
 {
-    Window &window = singletons::WindowManager::getInstance().createWindow(Window::Popup);
+    auto app = getApp();
+    Window &window = app->windows->createWindow(Window::Popup);
 
     Split *split =
         new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));
@@ -397,7 +392,7 @@ void Split::doOpenViewerList()
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels) {
         auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->themeManager.splits.header.background);
+        label->setBackgroundColor(this->themeManager->splits.header.background);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -454,7 +449,7 @@ void Split::doOpenViewerList()
     dockVbox->addWidget(resultList);
     resultList->hide();
 
-    multiWidget->setStyleSheet(this->themeManager.splits.input.styleSheet);
+    multiWidget->setStyleSheet(this->themeManager->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();

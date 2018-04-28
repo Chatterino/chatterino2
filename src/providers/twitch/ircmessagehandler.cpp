@@ -1,5 +1,6 @@
 #include "ircmessagehandler.hpp"
 
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
@@ -124,8 +125,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         }
     }
 
+    auto app = getApp();
+
     // refresh all
-    WindowManager::getInstance().repaintVisibleChatWidgets(chan.get());
+    app->windows->repaintVisibleChatWidgets(chan.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
@@ -152,6 +155,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
+    auto app = getApp();
     debug::Log("Received whisper!");
     messages::MessageParseArgs args;
 
@@ -171,7 +175,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         c->addMessage(_message);
 
-        if (SettingManager::getInstance().inlineWhispers) {
+        if (app->settings->inlineWhispers) {
             TwitchServer::getInstance().forEachChannel([_message](ChannelPtr channel) {
                 channel->addMessage(_message);  //
             });

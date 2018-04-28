@@ -1,4 +1,6 @@
 #include "singletons/settingsmanager.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/resourcemanager.hpp"
@@ -17,8 +19,7 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
 }
 
 SettingManager::SettingManager()
-    : snapshot(nullptr)
-    , _ignoredKeywords(new std::vector<QString>)
+    : _ignoredKeywords(new std::vector<QString>)
 {
     qDebug() << "init SettingManager";
 
@@ -35,8 +36,10 @@ SettingManager::SettingManager()
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
     this->ignoredKeywords.connect([this](auto, auto) { this->updateIgnoredKeywords(); });
 
-    this->timestampFormat.connect(
-        [](auto, auto) { singletons::WindowManager::getInstance().layoutVisibleChatWidgets(); });
+    this->timestampFormat.connect([](auto, auto) {
+        auto app = getApp();
+        app->windows->layoutVisibleChatWidgets();
+    });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()
@@ -51,7 +54,8 @@ bool SettingManager::isIgnoredEmote(const QString &)
 
 void SettingManager::initialize()
 {
-    QString settingsPath = PathManager::getInstance().settingsFolderPath + "/settings.json";
+    auto app = getApp();
+    QString settingsPath = app->paths->settingsFolderPath + "/settings.json";
 
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
 }
@@ -88,7 +92,7 @@ void SettingManager::updateWordTypeMask()
     if (newMask != this->wordFlags) {
         this->wordFlags = newMask;
 
-        emit wordFlagsChanged();
+        this->wordFlagsChanged.invoke();
     }
 }
 

@@ -1,4 +1,6 @@
 #include "messages/layouts/messagelayout.hpp"
+
+#include "application.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 
@@ -45,7 +47,7 @@ int MessageLayout::getHeight() const
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 {
-    auto &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
     bool layoutRequired = false;
 
@@ -55,9 +57,9 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->currentLayoutWidth = width;
 
     // check if emotes changed
-    bool imagesChanged = this->emoteGeneration != emoteManager.getGeneration();
+    bool imagesChanged = this->emoteGeneration != app->emotes->getGeneration();
     layoutRequired |= imagesChanged;
-    this->emoteGeneration = emoteManager.getGeneration();
+    this->emoteGeneration = app->emotes->getGeneration();
 
     // check if text changed
     bool textChanged =
@@ -66,14 +68,12 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->fontGeneration = singletons::FontManager::getInstance().getGeneration();
 
     // check if work mask changed
-    bool wordMaskChanged = this->currentWordFlags !=
-                           flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
+    bool wordMaskChanged = this->currentWordFlags != flags;  // app->settings->getWordTypeMask();
     layoutRequired |= wordMaskChanged;
-    this->currentWordFlags = flags;  // singletons::SettingManager::getInstance().getWordTypeMask();
+    this->currentWordFlags = flags;  // app->settings->getWordTypeMask();
 
     // check if timestamp format changed
-    bool timestampFormatChanged =
-        this->timestampFormat != singletons::SettingManager::getInstance().timestampFormat;
+    bool timestampFormatChanged = this->timestampFormat != app->settings->timestampFormat;
 
     layoutRequired |= timestampFormatChanged;
 
@@ -128,8 +128,8 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
 void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection &selection,
                           bool isLastReadMessage, bool isWindowFocused)
 {
+    auto app = getApp();
     QPixmap *pixmap = this->buffer.get();
-    singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
 
     // create new buffer if required
     if (!pixmap) {
@@ -160,7 +160,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
     // draw disabled
     if (this->message->flags.HasFlag(Message::Disabled)) {
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(), themeManager.messages.disabled);
+        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                         app->themes->messages.disabled);
     }
 
     // draw selection
@@ -170,8 +171,9 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
     // draw last read message line
     if (isLastReadMessage) {
-        QColor color = isWindowFocused ? themeManager.tabs.selected.backgrounds.regular.color()
-                                       : themeManager.tabs.selected.backgrounds.unfocused.color();
+        QColor color = isWindowFocused
+                           ? app->themes->tabs.selected.backgrounds.regular.color()
+                           : app->themes->tabs.selected.backgrounds.unfocused.color();
 
         QBrush brush(color, Qt::VerPattern);
 
@@ -184,7 +186,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
 void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &selection)
 {
-    singletons::ThemeManager &themeManager = singletons::ThemeManager::getInstance();
+    auto app = getApp();
 
     QPainter painter(buffer);
 
@@ -192,8 +194,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
 
     // draw background
     painter.fillRect(buffer->rect(), this->message->flags & Message::Highlighted
-                                         ? themeManager.messages.backgrounds.highlighted
-                                         : themeManager.messages.backgrounds.regular);
+                                         ? app->themes->messages.backgrounds.highlighted
+                                         : app->themes->messages.backgrounds.regular);
 
     // draw message
     this->container.paintElements(painter);

@@ -1,4 +1,6 @@
 #include "widgets/notebook.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -24,7 +26,7 @@ namespace chatterino {
 namespace widgets {
 
 Notebook2::Notebook2(QWidget *parent)
-    : BaseWidget(singletons::ThemeManager::getInstance(), parent)
+    : BaseWidget(parent)
     , addButton(this)
 {
     this->addButton.setHidden(true);
@@ -258,7 +260,7 @@ void Notebook2::resizeEvent(QResizeEvent *)
 
 void Notebook2::performLayout(bool animated)
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
     int xStart = (int)(2 * this->getScale());
 
@@ -269,13 +271,13 @@ void Notebook2::performLayout(bool animated)
 
     //    bool customFrame = false;
 
-    //    if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
+    //    if (!this->showButtons || app->settings->hidePreferencesButton || customFrame) {
     //        this->settingsButton.hide();
     //    } else {
     //        this->settingsButton.show();
     //        x += settingsButton.width();
     //    }
-    //    if (!this->showButtons || settings.hideUserButton || customFrame) {
+    //    if (!this->showButtons || app->settings->hideUserButton || customFrame) {
     //        this->userButton.hide();
     //    } else {
     //        this->userButton.move(x, 0);
@@ -284,7 +286,7 @@ void Notebook2::performLayout(bool animated)
     //    }
 
     //    if (customFrame || !this->showButtons ||
-    //        (settings.hideUserButton && settings.hidePreferencesButton)) {
+    //        (app->settings->hideUserButton && app->settings->hidePreferencesButton)) {
     //        x += (int)(scale * 2);
     //    }
 
@@ -342,7 +344,7 @@ void Notebook2::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.fillRect(0, this->lineY, this->width(), (int)(1 * this->getScale()),
-                     this->themeManager.tabs.bottomLine);
+                     this->themeManager->tabs.bottomLine);
 }
 
 NotebookTab2 *Notebook2::getTabFromPage(QWidget *page)
@@ -366,6 +368,8 @@ Notebook::Notebook(Window *parent, bool _showButtons)
     , showButtons(_showButtons)
     , closeConfirmDialog(this)
 {
+    auto app = getApp();
+
     this->connect(&this->settingsButton, SIGNAL(clicked()), this, SLOT(settingsButtonClicked()));
     this->connect(&this->userButton, SIGNAL(clicked()), this, SLOT(usersButtonClicked()));
     this->connect(&this->addButton, SIGNAL(clicked()), this, SLOT(addPageButtonClicked()));
@@ -375,10 +379,8 @@ Notebook::Notebook(Window *parent, bool _showButtons)
     this->userButton.move(24, 0);
     this->userButton.icon = NotebookButton::IconUser;
 
-    auto &settingsManager = singletons::SettingManager::getInstance();
-
-    settingsManager.hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
-    settingsManager.hideUserButton.connectSimple([this](auto) { this->performLayout(); });
+    app->settings->hidePreferencesButton.connectSimple([this](auto) { this->performLayout(); });
+    app->settings->hideUserButton.connectSimple([this](auto) { this->performLayout(); });
 
     closeConfirmDialog.setText("Are you sure you want to close this tab?");
     closeConfirmDialog.setIcon(QMessageBox::Icon::Question);
@@ -568,19 +570,19 @@ void Notebook::previousTab()
 
 void Notebook::performLayout(bool animated)
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
     int x = 0, y = 0;
     float scale = this->getScale();
     bool customFrame = this->parentWindow->hasCustomWindowFrame();
 
-    if (!this->showButtons || settings.hidePreferencesButton || customFrame) {
+    if (!this->showButtons || app->settings->hidePreferencesButton || customFrame) {
         this->settingsButton.hide();
     } else {
         this->settingsButton.show();
         x += settingsButton.width();
     }
-    if (!this->showButtons || settings.hideUserButton || customFrame) {
+    if (!this->showButtons || app->settings->hideUserButton || customFrame) {
         this->userButton.hide();
     } else {
         this->userButton.move(x, 0);
@@ -589,7 +591,7 @@ void Notebook::performLayout(bool animated)
     }
 
     if (customFrame || !this->showButtons ||
-        (settings.hideUserButton && settings.hidePreferencesButton)) {
+        (app->settings->hideUserButton && app->settings->hidePreferencesButton)) {
         x += (int)(scale * 2);
     }
 
@@ -654,12 +656,14 @@ void Notebook::scaleChangedEvent(float)
 
 void Notebook::settingsButtonClicked()
 {
-    singletons::WindowManager::getInstance().showSettingsDialog();
+    auto app = getApp();
+    app->windows->showSettingsDialog();
 }
 
 void Notebook::usersButtonClicked()
 {
-    singletons::WindowManager::getInstance().showAccountSelectPopup(
+    auto app = getApp();
+    app->windows->showAccountSelectPopup(
         this->mapToGlobal(this->userButton.rect().bottomRight()));
 }
 

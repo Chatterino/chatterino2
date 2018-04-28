@@ -1,5 +1,7 @@
 #include "util/networkrequest.hpp"
 
+#include "application.hpp"
+
 namespace chatterino {
 namespace util {
 
@@ -26,9 +28,9 @@ void NetworkRequest::setUseQuickLoadCache(bool value)
 void NetworkRequest::Data::writeToCache(const QByteArray &bytes)
 {
     if (this->useQuickLoadCache) {
-        auto &pathManager = singletons::PathManager::getInstance();
+        auto app = getApp();
 
-        QFile cachedFile(pathManager.cacheFolderPath + "/" + this->getHash());
+        QFile cachedFile(app->paths->cacheFolderPath + "/" + this->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly)) {
             cachedFile.write(bytes);

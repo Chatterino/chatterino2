@@ -1,12 +1,13 @@
 #include "emotepopup.hpp"
 
-#include <QHBoxLayout>
-#include <QTabWidget>
-
+#include "application.hpp"
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "singletons/accountmanager.hpp"
 #include "widgets/notebook.hpp"
+
+#include <QHBoxLayout>
+#include <QTabWidget>
 
 using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
@@ -14,8 +15,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-EmotePopup::EmotePopup(singletons::ThemeManager &themeManager)
-    : BaseWindow(themeManager, nullptr, true)
+EmotePopup::EmotePopup()
+    : BaseWindow(nullptr, true)
 {
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
@@ -80,16 +81,16 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         emoteChannel->addMessage(builder2.getMessage());
     };
 
-    singletons::EmoteManager &emoteManager = singletons::EmoteManager::getInstance();
+    auto app = getApp();
 
-    QString userID = singletons::AccountManager::getInstance().Twitch.getCurrent()->getUserId();
+    QString userID = app->accounts->Twitch.getCurrent()->getUserId();
 
-    addEmotes(emoteManager.twitchAccountEmotes[userID.toStdString()].emotes,
+    addEmotes(app->emotes->twitchAccountEmotes[userID.toStdString()].emotes,
               "Twitch Account Emotes", "Twitch Account Emote");
-    addEmotes(emoteManager.bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
+    addEmotes(app->emotes->bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");
-    addEmotes(emoteManager.ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
+    addEmotes(app->emotes->ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
               "FrankerFaceZ Global Emote");
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
@@ -99,7 +100,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
 void EmotePopup::loadEmojis()
 {
-    auto &emojis = singletons::EmoteManager::getInstance().getEmojis();
+    auto &emojis = getApp()->emotes->getEmojis();
 
     ChannelPtr emojiChannel(new Channel("", Channel::None));
 

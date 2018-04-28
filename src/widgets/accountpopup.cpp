@@ -1,4 +1,6 @@
 #include "widgets/accountpopup.hpp"
+
+#include "application.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
 #include "singletons/accountmanager.hpp"
@@ -23,6 +25,8 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     , ui(new Ui::AccountPopup)
     , channel(_channel)
 {
+    auto app = getApp();
+
     this->ui->setupUi(this);
 
     this->setStayInScreenRect(true);
@@ -33,15 +37,11 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
 
     this->resize(0, 0);
 
-    auto &accountManager = singletons::AccountManager::getInstance();
-
     connect(this, &AccountPopupWidget::refreshButtons, this,
             &AccountPopupWidget::actuallyRefreshButtons, Qt::QueuedConnection);
 
-    accountManager.Twitch.userChanged.connect([this] {
-        singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
-
-        auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    app->accounts->Twitch.userChanged.connect([=] {
+        auto currentTwitchUser = app->accounts->Twitch.getCurrent();
         if (!currentTwitchUser) {
             // No twitch user set (should never happen)
             return;
@@ -52,8 +52,6 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
 
         this->loggedInUser.refreshUserType(this->channel, true);
     });
-
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
 
     for (auto button : this->ui->profileLayout->findChildren<QPushButton *>()) {
         button->setFocusProxy(this);
@@ -129,19 +127,19 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
         }
     });
 
-    QObject::connect(this->ui->disableHighlights, &QPushButton::clicked, this, [=, &settings]() {
-        QString str = settings.highlightUserBlacklist;
+    QObject::connect(this->ui->disableHighlights, &QPushButton::clicked, this, [=]() {
+        QString str = app->settings->highlightUserBlacklist;
         str.append(this->ui->lblUsername->text() + "\n");
-        settings.highlightUserBlacklist = str;
+        app->settings->highlightUserBlacklist = str;
         this->ui->disableHighlights->hide();
         this->ui->enableHighlights->show();
     });
 
-    QObject::connect(this->ui->enableHighlights, &QPushButton::clicked, this, [=, &settings]() {
-        QString str = settings.highlightUserBlacklist;
+    QObject::connect(this->ui->enableHighlights, &QPushButton::clicked, this, [=]() {
+        QString str = app->settings->highlightUserBlacklist;
         QStringList list = str.split("\n");
         list.removeAll(this->ui->lblUsername->text());
-        settings.highlightUserBlacklist = list.join("\n");
+        app->settings->highlightUserBlacklist = list.join("\n");
         this->ui->enableHighlights->hide();
         this->ui->disableHighlights->show();
     });
@@ -279,8 +277,7 @@ void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
 
 void AccountPopupWidget::refreshLayouts()
 {
-    singletons::AccountManager &accountManager = singletons::AccountManager::getInstance();
-    auto currentTwitchUser = accountManager.Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
     if (!currentTwitchUser) {
         // No twitch user set (should never happen)
         return;
@@ -378,7 +375,7 @@ void AccountPopupWidget::showEvent(QShowEvent *)
 
     this->refreshLayouts();
 
-    QString blacklisted = singletons::SettingManager::getInstance().highlightUserBlacklist;
+    QString blacklisted = getApp()->settings->highlightUserBlacklist;
     QStringList list = blacklisted.split("\n", QString::SkipEmptyParts);
     if (list.contains(this->ui->lblUsername->text(), Qt::CaseInsensitive)) {
         this->ui->disableHighlights->hide();

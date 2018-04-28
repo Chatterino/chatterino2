@@ -1,4 +1,6 @@
 #include "channelview.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "messages/layouts/messagelayout.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
@@ -38,14 +40,17 @@ ChannelView::ChannelView(BaseWidget *parent)
     , scrollBar(this)
     , userPopupWidget(std::shared_ptr<TwitchChannel>())
 {
+    auto app = getApp();
+
 #ifndef Q_OS_MAC
 //    this->setAttribute(Qt::WA_OpaquePaintEvent);
 #endif
     this->setMouseTracking(true);
 
-    QObject::connect(&singletons::SettingManager::getInstance(),
-                     &singletons::SettingManager::wordFlagsChanged, this,
-                     &ChannelView::wordFlagsChanged);
+    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([=] {
+        this->layoutMessages();
+        this->update();
+    }));
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
@@ -56,10 +61,10 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->queueUpdate();
     });
 
-    singletons::WindowManager &windowManager = singletons::WindowManager::getInstance();
-
-    this->repaintGifsConnection = windowManager.repaintGifs.connect([&] { this->queueUpdate(); });
-    this->layoutConnection = windowManager.layout.connect([&](Channel *channel) {
+    this->repaintGifsConnection = app->windows->repaintGifs.connect([&] {
+        this->queueUpdate();  //
+    });
+    this->layoutConnection = app->windows->layout.connect([&](Channel *channel) {
         if (channel == nullptr || this->channel.get() == channel) {
             this->layoutMessages();
         }
@@ -75,10 +80,10 @@ ChannelView::ChannelView(BaseWidget *parent)
             this->layoutMessages();  //
         }));
 
-    connect(goToBottom, &RippleEffectLabel::clicked, this, [this] {
-        QTimer::singleShot(180, [this] {
-            this->scrollBar.scrollToBottom(singletons::SettingManager::getInstance()
-                                               .enableSmoothScrollingNewMessages.getValue());
+    connect(goToBottom, &RippleEffectLabel::clicked, this, [=] {
+        QTimer::singleShot(180, [=] {
+            this->scrollBar.scrollToBottom(
+                app->settings->enableSmoothScrollingNewMessages.getValue());
         });
     });
 
@@ -100,8 +105,11 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
 
-    singletons::SettingManager::getInstance().showLastMessageIndicator.connect(
-        [this](auto, auto) { this->update(); }, this->managedConnections);
+    app->settings->showLastMessageIndicator.connect(
+        [this](auto, auto) {
+            this->update();  //
+        },
+        this->managedConnections);
 
     this->layoutCooldown = new QTimer(this);
     this->layoutCooldown->setSingleShot(true);
@@ -117,9 +125,6 @@ ChannelView::ChannelView(BaseWidget *parent)
 
 ChannelView::~ChannelView()
 {
-    QObject::disconnect(&singletons::SettingManager::getInstance(),
-                        &singletons::SettingManager::wordFlagsChanged, this,
-                        &ChannelView::wordFlagsChanged);
     this->messageAppendedConnection.disconnect();
     this->messageRemovedConnection.disconnect();
     this->repaintGifsConnection.disconnect();
@@ -161,6 +166,8 @@ void ChannelView::layoutMessages()
 
 void ChannelView::actuallyLayoutMessages()
 {
+    auto app = getApp();
+
     // BENCH(timer)
     auto messagesSnapshot = this->getMessagesSnapshot();
 
@@ -238,9 +245,8 @@ void ChannelView::actuallyLayoutMessages()
     // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
     // seconds or something
     if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
-        this->scrollBar.scrollToBottom(
-            this->messageWasAdded &&
-            singletons::SettingManager::getInstance().enableSmoothScrollingNewMessages.getValue());
+        this->scrollBar.scrollToBottom(this->messageWasAdded &&
+                                       app->settings->enableSmoothScrollingNewMessages.getValue());
         this->messageWasAdded = false;
     }
 
@@ -494,11 +500,13 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 
 messages::MessageElement::Flags ChannelView::getFlags() const
 {
+    auto app = getApp();
+
     if (this->overrideFlags) {
         return this->overrideFlags.get();
     }
 
-    MessageElement::Flags flags = singletons::SettingManager::getInstance().getWordFlags();
+    MessageElement::Flags flags = app->settings->getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 
@@ -520,7 +528,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->themeManager.splits.background);
+    painter.fillRect(rect(), this->themeManager->splits.background);
 
     // draw messages
     this->drawMessages(painter);
@@ -532,6 +540,8 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 // overlay when a message is disabled
 void ChannelView::drawMessages(QPainter &painter)
 {
+    auto app = getApp();
+
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     size_t start = this->scrollBar.getCurrentValue();
@@ -550,7 +560,7 @@ void ChannelView::drawMessages(QPainter &painter)
         messages::MessageLayout *layout = messagesSnapshot[i].get();
 
         bool isLastMessage = false;
-        if (singletons::SettingManager::getInstance().showLastMessageIndicator) {
+        if (app->settings->showLastMessageIndicator) {
             isLastMessage = this->lastReadMessage.get() == layout;
         }
 
@@ -599,7 +609,9 @@ void ChannelView::drawMessages(QPainter &painter)
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
     if (this->scrollBar.isVisible()) {
-        float mouseMultiplier = singletons::SettingManager::getInstance().mouseScrollMultiplier;
+        auto app = getApp();
+
+        float mouseMultiplier = app->settings->mouseScrollMultiplier;
 
         float desired = this->scrollBar.getDesiredValue();
         float delta = event->delta() * 1.5 * mouseMultiplier;
@@ -677,7 +689,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    if (singletons::SettingManager::getInstance().pauseChatHover.getValue()) {
+    auto app = getApp();
+
+    if (app->settings->pauseChatHover.getValue()) {
         this->pause(300);
     }
 
@@ -745,7 +759,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    if (singletons::SettingManager::getInstance().linksDoubleClickOnly.getValue()) {
+    auto app = getApp();
+
+    if (app->settings->linksDoubleClickOnly.getValue()) {
         this->pause(200);
     }
 
@@ -808,6 +824,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
+    auto app = getApp();
+
     if (this->selecting) {
         this->paused = false;
     }
@@ -852,8 +870,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     auto &link = hoverLayoutElement->getLink();
-    if (event->button() != Qt::LeftButton ||
-        !singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+    if (event->button() != Qt::LeftButton || !app->settings->linksDoubleClickOnly) {
         this->handleLinkClick(event, link, layout.get());
     }
 
@@ -862,7 +879,9 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (singletons::SettingManager::getInstance().linksDoubleClickOnly) {
+    auto app = getApp();
+
+    if (app->settings->linksDoubleClickOnly) {
         std::shared_ptr<messages::MessageLayout> layout;
         QPoint relativePos;
         int messageIndex;

@@ -1,4 +1,6 @@
 #include "widgets/helper/splitinput.hpp"
+
+#include "application.hpp"
 #include "singletons/commandmanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -36,6 +38,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
 void SplitInput::initLayout()
 {
+    auto app = getApp();
     auto &fontManager = singletons::FontManager::getInstance();
     util::LayoutCreator<SplitInput> layoutCreator(this);
 
@@ -73,7 +76,7 @@ void SplitInput::initLayout()
     // open emote popup
     QObject::connect(this->ui.emoteButton, &RippleEffectLabel::clicked, [this] {
         if (!this->emotePopup) {
-            this->emotePopup = std::make_unique<EmotePopup>(this->themeManager);
+            this->emotePopup = std::make_unique<EmotePopup>();
             this->emotePopup->linkClicked.connect([this](const messages::Link &link) {
                 if (link.type == messages::Link::InsertText) {
                     this->insertText(link.value + " ");
@@ -95,7 +98,7 @@ void SplitInput::initLayout()
     });
 
     // textEditLength visibility
-    singletons::SettingManager::getInstance().showMessageLength.connect(
+    app->settings->showMessageLength.connect(
         [this](const bool &value, auto) { this->ui.textEditLength->setHidden(!value); },
         this->managedConnections);
 }
@@ -117,18 +120,20 @@ void SplitInput::themeRefreshEvent()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, this->themeManager.splits.input.text);
+    palette.setColor(QPalette::Foreground, this->themeManager->splits.input.text);
 
     this->ui.textEditLength->setPalette(palette);
 
-    this->ui.textEdit->setStyleSheet(this->themeManager.splits.input.styleSheet);
+    this->ui.textEdit->setStyleSheet(this->themeManager->splits.input.styleSheet);
 
-    this->ui.hbox->setMargin((this->themeManager.isLightTheme() ? 4 : 2) * this->getScale());
+    this->ui.hbox->setMargin((this->themeManager->isLightTheme() ? 4 : 2) * this->getScale());
 }
 
 void SplitInput::installKeyPressedEvent()
 {
-    this->ui.textEdit->keyPressed.connect([this](QKeyEvent *event) {
+    auto app = getApp();
+
+    this->ui.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
             auto c = this->chatWidget->getChannel();
             if (c == nullptr) {
@@ -136,8 +141,7 @@ void SplitInput::installKeyPressedEvent()
             }
             QString message = ui.textEdit->toPlainText();
 
-            QString sendMessage =
-                singletons::CommandManager::getInstance().execCommand(message, c, false);
+            QString sendMessage = app->commands->execCommand(message, c, false);
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
@@ -278,6 +282,8 @@ void SplitInput::insertText(const QString &text)
 
 void SplitInput::editTextChanged()
 {
+    auto app = getApp();
+
     // set textLengthLabel value
     QString text = this->ui.textEdit->toPlainText();
 
@@ -287,8 +293,7 @@ void SplitInput::editTextChanged()
     static QRegularExpression spaceRegex("\\s\\s+");
     text = text.replace(spaceRegex, " ");
 
-    text = singletons::CommandManager::getInstance().execCommand(
-        text, this->chatWidget->getChannel(), true);
+    text = app->commands->execCommand(text, this->chatWidget->getChannel(), true);
 
     QString labelText;
 
@@ -305,10 +310,10 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager.splits.input.background);
+    painter.fillRect(this->rect(), this->themeManager->splits.input.background);
 
-    QPen pen(this->themeManager.splits.input.border);
-    if (this->themeManager.isLightTheme()) {
+    QPen pen(this->themeManager->splits.input.border);
+    if (this->themeManager->isLightTheme()) {
         pen.setWidth((int)(6 * this->getScale()));
     }
     painter.setPen(pen);

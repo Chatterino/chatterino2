@@ -1,4 +1,5 @@
 #include "messages/layouts/messagelayoutelement.hpp"
+#include "application.hpp"
 #include "messages/messageelement.hpp"
 #include "util/debugcount.hpp"
 
@@ -239,9 +240,11 @@ int TextIconLayoutElement::getSelectionIndexCount()
 
 void TextIconLayoutElement::paint(QPainter &painter)
 {
+    auto app = getApp();
+
     QFont font = singletons::FontManager::getInstance().getFont(FontStyle::Tiny, this->scale);
 
-    painter.setPen(singletons::ThemeManager::getInstance().messages.textColors.system);
+    painter.setPen(app->themes->messages.textColors.system);
     painter.setFont(font);
 
     QTextOption option;

@@ -1,5 +1,9 @@
 #include "appearancepage.hpp"
 
+#include "application.hpp"
+#include "util/layoutcreator.hpp"
+#include "util/removescrollareabackground.hpp"
+
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -8,9 +12,6 @@
 #include <QScrollArea>
 #include <QSlider>
 #include <QVBoxLayout>
-
-#include "util/layoutcreator.hpp"
-#include "util/removescrollareabackground.hpp"
 
 #define THEME_ITEMS "White", "Light", "Dark", "Black"
 
@@ -34,7 +35,7 @@ namespace settingspages {
 AppearancePage::AppearancePage()
     : SettingsPage("Look", ":/images/theme.svg")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
     util::LayoutCreator<AppearancePage> layoutCreator(this);
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
@@ -49,50 +50,52 @@ AppearancePage::AppearancePage()
         auto form = application.emplace<QFormLayout>();
 
         // clang-format off
-            form->addRow("Theme:",       this->createComboBox({THEME_ITEMS}, singletons::ThemeManager::getInstance().themeName));
+            form->addRow("Theme:",       this->createComboBox({THEME_ITEMS}, app->themes->themeName));
             form->addRow("Theme color:", this->createThemeColorChanger());
             form->addRow("Font:",        this->createFontChanger());
 
-            form->addRow("Tabs:",        this->createCheckBox(TAB_X, settings.showTabCloseButton));
+            form->addRow("Tabs:",        this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
     #ifndef USEWINSDK
-            form->addRow("",             this->createCheckBox(TAB_PREF, settings.hidePreferencesButton));
-            form->addRow("",             this->createCheckBox(TAB_USER, settings.hideUserButton));
+            form->addRow("",             this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
+            form->addRow("",             this->createCheckBox(TAB_USER, app->settings->hideUserButton));
     #endif
 
-            form->addRow("Scrolling:",   this->createCheckBox(SCROLL_SMOOTH, settings.enableSmoothScrolling));
-            form->addRow("",			 this->createCheckBox(SCROLL_NEWMSG, settings.enableSmoothScrollingNewMessages));
+            form->addRow("Scrolling:",   this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
+            form->addRow("",			 this->createCheckBox(SCROLL_NEWMSG, app->settings->enableSmoothScrollingNewMessages));
         // clang-format on
     }
 
     auto messages = layout.emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
     {
-        messages.append(this->createCheckBox("Show timestamp", settings.showTimestamps));
+        messages.append(this->createCheckBox("Show timestamp", app->settings->showTimestamps));
         auto tbox = messages.emplace<QHBoxLayout>().withoutMargin();
         {
             tbox.emplace<QLabel>("timestamp format (a = am/pm):");
-            tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, settings.timestampFormat));
+            tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, app->settings->timestampFormat));
             tbox->addStretch(1);
         }
 
-        messages.append(this->createCheckBox("Show badges", settings.showBadges));
-        auto checkbox = this->createCheckBox("Seperate messages", settings.seperateMessages);
+        messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
+        auto checkbox = this->createCheckBox("Seperate messages", app->settings->seperateMessages);
         checkbox->setEnabled(false);
         messages.append(checkbox);
-        messages.append(
-            this->createCheckBox("Show message length while typing", settings.showMessageLength));
+        messages.append(this->createCheckBox("Show message length while typing",
+                                             app->settings->showMessageLength));
 
-        messages.append(this->createCheckBox(LAST_MSG, settings.showLastMessageIndicator));
+        messages.append(this->createCheckBox(LAST_MSG, app->settings->showLastMessageIndicator));
     }
 
     auto emotes = layout.emplace<QGroupBox>("Emotes").setLayoutType<QVBoxLayout>();
     {
-        emotes.append(this->createCheckBox("Enable Twitch emotes", settings.enableTwitchEmotes));
         emotes.append(
-            this->createCheckBox("Enable BetterTTV emotes for Twitch", settings.enableBttvEmotes));
+            this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
+        emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
+                                           app->settings->enableBttvEmotes));
         emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                           settings.enableFfzEmotes));
-        emotes.append(this->createCheckBox("Enable emojis", settings.enableEmojis));
-        emotes.append(this->createCheckBox("Enable animations", settings.enableGifAnimations));
+                                           app->settings->enableFfzEmotes));
+        emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
+        emotes.append(
+            this->createCheckBox("Enable animations", app->settings->enableGifAnimations));
     }
 
     layout->addStretch(1);
@@ -100,9 +103,10 @@ AppearancePage::AppearancePage()
 
 QLayout *AppearancePage::createThemeColorChanger()
 {
+    auto app = getApp();
     QHBoxLayout *layout = new QHBoxLayout;
 
-    auto &themeHue = singletons::ThemeManager::getInstance().themeHue;
+    auto &themeHue = app->themes->themeHue;
 
     // SLIDER
     QSlider *slider = new QSlider(Qt::Horizontal);
@@ -115,9 +119,9 @@ QLayout *AppearancePage::createThemeColorChanger()
     button->setFlat(true);
     button->setFixedWidth(64);
 
-    auto setButtonColor = [button](int value) mutable {
+    auto setButtonColor = [button, app](int value) mutable {
         double newValue = value / 100.0;
-        singletons::ThemeManager::getInstance().themeHue.setValue(newValue);
+        app->themes->themeHue.setValue(newValue);
 
         QPalette pal = button->palette();
         QColor color;

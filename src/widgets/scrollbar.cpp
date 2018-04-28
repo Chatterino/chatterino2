@@ -1,4 +1,6 @@
 #include "widgets/scrollbar.hpp"
+
+#include "application.hpp"
 #include "singletons/thememanager.hpp"
 #include "widgets/helper/channelview.hpp"
 
@@ -6,6 +8,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
+
 #include <cmath>
 
 #define MIN_THUMB_HEIGHT 10
@@ -16,7 +19,6 @@ namespace widgets {
 Scrollbar::Scrollbar(ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation(this, "currentValue")
-    , smoothScrollingSetting(singletons::SettingManager::getInstance().enableSmoothScrolling)
 {
     resize((int)(16 * this->getScale()), 100);
     this->currentValueAnimation.setDuration(150);
@@ -92,7 +94,8 @@ void Scrollbar::setSmallChange(qreal value)
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    animated &= this->smoothScrollingSetting.getValue();
+    auto app = getApp();
+    animated &= app->settings->enableSmoothScrolling.getValue();
     value = std::max(this->minimum, std::min(this->maximum - this->largeChange, value));
 
     if (this->desiredValue + this->smoothScrollingOffset != value) {
@@ -197,23 +200,23 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getScale());
 
     QPainter painter(this);
-    //    painter.fillRect(rect(), this->themeManager.ScrollbarBG);
+    //    painter.fillRect(rect(), this->themeManager->ScrollbarBG);
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
-    //                     this->themeManager.ScrollbarArrow);
+    //                     this->themeManager->ScrollbarArrow);
     //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight, width(),
     //    this->buttonHeight),
-    //                     this->themeManager.ScrollbarArrow);
+    //                     this->themeManager->ScrollbarArrow);
 
     this->thumbRect.setX(xOffset);
 
     // mouse over thumb
     if (this->mouseDownIndex == 2) {
-        painter.fillRect(this->thumbRect, this->themeManager.scrollbars.thumbSelected);
+        painter.fillRect(this->thumbRect, this->themeManager->scrollbars.thumbSelected);
     }
     // mouse not over thumb
     else {
-        painter.fillRect(this->thumbRect, this->themeManager.scrollbars.thumb);
+        painter.fillRect(this->thumbRect, this->themeManager->scrollbars.thumb);
     }
 
     // draw highlights
@@ -235,10 +238,10 @@ void Scrollbar::paintEvent(QPaintEvent *)
         if (!highlight.isNull()) {
             if (highlight.getStyle() == ScrollbarHighlight::Default) {
                 painter.fillRect(w / 8 * 3, (int)y, w / 4, highlightHeight,
-                                 this->themeManager.tabs.selected.backgrounds.regular.color());
+                                 this->themeManager->tabs.selected.backgrounds.regular.color());
             } else {
                 painter.fillRect(0, (int)y, w, 1,
-                                 this->themeManager.tabs.selected.backgrounds.regular.color());
+                                 this->themeManager->tabs.selected.backgrounds.regular.color());
             }
         }
 

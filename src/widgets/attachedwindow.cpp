@@ -1,5 +1,7 @@
 #include "attachedwindow.hpp"
 
+#include "application.hpp"
+
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -22,7 +24,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     layout->setMargin(0);
     this->setLayout(layout);
 
-    auto *split = new Split(singletons::ThemeManager::getInstance(), this);
+    auto *split = new Split(this);
     this->ui.split = split;
     split->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout->addWidget(split);

@@ -22,7 +22,7 @@ NotebookButton::NotebookButton(BaseWidget *parent)
 
 void NotebookButton::themeRefreshEvent()
 {
-    this->setMouseEffectColor(this->themeManager.tabs.regular.text);
+    this->setMouseEffectColor(this->themeManager->tabs.regular.text);
 }
 
 void NotebookButton::paintEvent(QPaintEvent *)
@@ -33,11 +33,11 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor foreground;
 
     if (mouseDown || mouseOver) {
-        background = this->themeManager.tabs.regular.backgrounds.hover.color();
-        foreground = this->themeManager.tabs.regular.text;
+        background = this->themeManager->tabs.regular.backgrounds.hover.color();
+        foreground = this->themeManager->tabs.regular.text;
     } else {
-        background = this->themeManager.tabs.regular.backgrounds.regular.color();
-        foreground = this->themeManager.tabs.regular.text;
+        background = this->themeManager->tabs.regular.backgrounds.regular.color();
+        foreground = this->themeManager->tabs.regular.text;
     }
 
     painter.setPen(Qt::NoPen);

@@ -25,7 +25,7 @@ class Window : public BaseWindow
 public:
     enum WindowType { Main, Popup, Attached };
 
-    explicit Window(singletons::ThemeManager &_themeManager, WindowType type);
+    explicit Window(WindowType type);
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 

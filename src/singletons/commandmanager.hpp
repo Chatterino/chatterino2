@@ -2,6 +2,7 @@
 
 #include <QMap>
 #include <QString>
+
 #include <memory>
 #include <mutex>
 
@@ -16,11 +17,10 @@ namespace singletons {
 
 class CommandManager
 {
-    CommandManager();
+    CommandManager() = default;
+    friend class Application;
 
 public:
-    static CommandManager &getInstance();
-
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
 
     void loadCommands();

@@ -6,10 +6,14 @@
 #include <QTableView>
 #include <QTextEdit>
 
+#include "application.hpp"
 #include "singletons/commandmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/standarditemhelper.hpp"
 //#include "widgets/helper/comboboxitemdelegate.hpp"
+
+#include <QLabel>
+#include <QTextEdit>
 
 // clang-format off
 #define TEXT "{1} => first word, {2} => second word, ...\n"\
@@ -24,7 +28,7 @@ namespace settingspages {
 CommandPage::CommandPage()
     : SettingsPage("Commands", ":/images/commands.svg")
 {
-    auto &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
 
     util::LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
@@ -39,7 +43,7 @@ CommandPage::CommandPage()
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
     view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 
-    for (const QString &string : singletons::CommandManager::getInstance().getCommands()) {
+    for (const QString &string : app->commands->getCommands()) {
         int index = string.indexOf(' ');
         if (index == -1) {
             model->appendRow({util::stringItem(string), util::stringItem("")});
@@ -65,7 +69,7 @@ CommandPage::CommandPage()
                 list.append(command + " " + model->item(i, 1)->data(Qt::EditRole).toString());
             }
 
-            singletons::CommandManager::getInstance().setCommands(list);
+            getApp()->commands->setCommands(list);
         });
 
     auto buttons = layout.emplace<QHBoxLayout>().withoutMargin();
@@ -94,7 +98,7 @@ CommandPage::CommandPage()
     }
 
     layout.append(this->createCheckBox("Also match the trigger at the end of the message",
-                                       settings.allowCommandsAtEnd));
+                                       app->settings->allowCommandsAtEnd));
 
     QLabel *text = *layout.emplace<QLabel>(TEXT);
     text->setWordWrap(true);
@@ -106,27 +110,26 @@ CommandPage::CommandPage()
 
 QTextEdit *CommandPage::getCommandsTextEdit()
 {
-    singletons::CommandManager &commandManager = singletons::CommandManager::getInstance();
+    auto app = getApp();
 
     // cancel
-    QStringList currentCommands = commandManager.getCommands();
+    QStringList currentCommands = app->commands->getCommands();
 
-    this->onCancel.connect(
-        [currentCommands, &commandManager] { commandManager.setCommands(currentCommands); });
+    this->onCancel.connect([currentCommands, app] { app->commands->setCommands(currentCommands); });
 
     // create text edit
     QTextEdit *textEdit = new QTextEdit;
 
-    textEdit->setPlainText(QString(commandManager.getCommands().join('\n')));
+    textEdit->setPlainText(QString(app->commands->getCommands().join('\n')));
 
     QObject::connect(textEdit, &QTextEdit::textChanged,
                      [this] { this->commandsEditTimer.start(200); });
 
-    QObject::connect(&this->commandsEditTimer, &QTimer::timeout, [textEdit, &commandManager] {
+    QObject::connect(&this->commandsEditTimer, &QTimer::timeout, [textEdit, app] {
         QString text = textEdit->toPlainText();
         QStringList lines = text.split(QRegularExpression("(\r?\n|\r\n?)"));
 
-        commandManager.setCommands(lines);
+        app->commands->setCommands(lines);
     });
 
     return textEdit;

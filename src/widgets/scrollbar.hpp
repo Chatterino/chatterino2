@@ -88,8 +88,6 @@ private:
 
     pajlada::Signals::NoArgSignal currentValueChanged;
 
-    pajlada::Settings::Setting<bool> &smoothScrollingSetting;
-
     void updateScroll();
 };
 

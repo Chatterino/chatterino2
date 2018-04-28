@@ -1,5 +1,6 @@
 #include "nativemessagingmanager.hpp"
 
+#include "application.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/pathmanager.hpp"
 #include "util/posttothread.hpp"
@@ -17,7 +18,7 @@ namespace ipc = boost::interprocess;
 #ifdef Q_OS_WIN
 #include <QProcess>
 
-#include <windows.h>
+#include <Windows.h>
 #include "singletons/windowmanager.hpp"
 #include "widgets/attachedwindow.hpp"
 #endif
@@ -35,12 +36,6 @@ NativeMessagingManager::NativeMessagingManager()
     qDebug() << "init NativeMessagingManager";
 }
 
-NativeMessagingManager &NativeMessagingManager::getInstance()
-{
-    static NativeMessagingManager manager;
-    return manager;
-}
-
 void NativeMessagingManager::writeByteArray(QByteArray a)
 {
     char *data = a.data();
@@ -53,6 +48,8 @@ void NativeMessagingManager::writeByteArray(QByteArray a)
 
 void NativeMessagingManager::registerHost()
 {
+    auto app = getApp();
+
     // create manifest
     QJsonDocument document;
     QJsonObject root_obj;
@@ -70,8 +67,7 @@ void NativeMessagingManager::registerHost()
     root_obj.insert("allowed_extensions", allowed_extensions);
 
     // save the manifest
-    QString manifestPath =
-        PathManager::getInstance().settingsFolderPath + "/native-messaging-manifest.json";
+    QString manifestPath = app->paths->settingsFolderPath + "/native-messaging-manifest.json";
 
     document.setObject(root_obj);
 

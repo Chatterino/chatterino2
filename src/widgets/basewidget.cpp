@@ -1,4 +1,6 @@
 #include "widgets/basewidget.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
@@ -12,16 +14,8 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWidget::BaseWidget(singletons::ThemeManager &_themeManager, QWidget *parent, Qt::WindowFlags f)
+BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
-    , themeManager(_themeManager)
-{
-    this->init();
-}
-
-BaseWidget::BaseWidget(BaseWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
-    , themeManager(singletons::ThemeManager::getInstance())
 {
     this->init();
 }
@@ -87,7 +81,10 @@ void BaseWidget::setScaleIndependantHeight(int value)
 
 void BaseWidget::init()
 {
-    this->themeConnection = this->themeManager.updated.connect([this]() {
+    auto app = getApp();
+    this->themeManager = app->themes;
+
+    this->themeConnection = this->themeManager->updated.connect([this]() {
         this->themeRefreshEvent();
 
         this->update();

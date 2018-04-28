@@ -1,10 +1,12 @@
 #include "windowmanager.hpp"
+
+#include "application.hpp"
 #include "debug/log.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/thememanager.hpp"
-#include "util/assertinguithread.h"
+#include "util/assertinguithread.hpp"
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/settingsdialog.hpp"
 
@@ -17,12 +19,6 @@
 
 namespace chatterino {
 namespace singletons {
-
-WindowManager &WindowManager::getInstance()
-{
-    static WindowManager instance(ThemeManager::getInstance());
-    return instance;
-}
 
 void WindowManager::showSettingsDialog()
 {
@@ -53,11 +49,9 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->setFocus();
 }
 
-WindowManager::WindowManager(ThemeManager &_themeManager)
-    : themeManager(_themeManager)
+WindowManager::WindowManager()
 {
     qDebug() << "init WindowManager";
-    _themeManager.repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
 }
 
 void WindowManager::layoutVisibleChatWidgets(Channel *channel)
@@ -102,7 +96,7 @@ widgets::Window &WindowManager::createWindow(widgets::Window::WindowType type)
 {
     util::assertInGuiThread();
 
-    auto *window = new widgets::Window(this->themeManager, type);
+    auto *window = new widgets::Window(type);
     this->windows.push_back(window);
     window->show();
 
@@ -143,10 +137,13 @@ void WindowManager::initialize()
 {
     util::assertInGuiThread();
 
+    auto app = getApp();
+    app->themes->repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
+
     assert(!this->initialized);
 
     // load file
-    QString settingsPath = PathManager::getInstance().settingsFolderPath + SETTINGS_FILENAME;
+    QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
@@ -230,6 +227,7 @@ void WindowManager::initialize()
 void WindowManager::save()
 {
     util::assertInGuiThread();
+    auto app = getApp();
 
     QJsonDocument document;
 
@@ -301,7 +299,7 @@ void WindowManager::save()
     document.setObject(obj);
 
     // save file
-    QString settingsPath = PathManager::getInstance().settingsFolderPath + SETTINGS_FILENAME;
+    QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.write(document.toJson());

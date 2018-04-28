@@ -5,14 +5,13 @@
 namespace chatterino {
 namespace singletons {
 
-class ThemeManager;
-
 class WindowManager
 {
-    explicit WindowManager(ThemeManager &_themeManager);
+    WindowManager();
+    friend class Application;
 
 public:
-    static WindowManager &getInstance();
+    ~WindowManager() = delete;
 
     void showSettingsDialog();
     void showAccountSelectPopup(QPoint point);
@@ -37,8 +36,6 @@ public:
     pajlada::Signals::Signal<Channel *> layout;
 
 private:
-    ThemeManager &themeManager;
-
     bool initialized = false;
 
     std::vector<widgets::Window *> windows;

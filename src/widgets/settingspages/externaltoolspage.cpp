@@ -1,5 +1,6 @@
 #include "externaltoolspage.hpp"
 
+#include "application.hpp"
 #include "util/layoutcreator.hpp"
 
 #include <QGroupBox>
@@ -13,17 +14,21 @@ namespace settingspages {
 ExternalToolsPage::ExternalToolsPage()
     : SettingsPage("External tools", "")
 {
-    singletons::SettingManager &settings = singletons::SettingManager::getInstance();
+    auto app = getApp();
+
     util::LayoutCreator<ExternalToolsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     {
         auto group = layout.emplace<QGroupBox>("Streamlink");
         auto groupLayout = group.setLayoutType<QFormLayout>();
-        groupLayout->addRow("Streamlink path:", this->createLineEdit(settings.streamlinkPath));
-        groupLayout->addRow("Prefered quality:",
-                            this->createComboBox({STREAMLINK_QUALITY}, settings.preferredQuality));
-        groupLayout->addRow("Additional options:", this->createLineEdit(settings.streamlinkOpts));
+        groupLayout->addRow("Streamlink path:",
+                            this->createLineEdit(app->settings->streamlinkPath));
+        groupLayout->addRow(
+            "Prefered quality:",
+            this->createComboBox({STREAMLINK_QUALITY}, app->settings->preferredQuality));
+        groupLayout->addRow("Additional options:",
+                            this->createLineEdit(app->settings->streamlinkOpts));
     }
 
     layout->addStretch(1);

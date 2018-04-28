@@ -28,12 +28,6 @@ double getMultiplierByTheme(const QString &themeName)
 
 }  // namespace detail
 
-ThemeManager &ThemeManager::getInstance()
-{
-    static ThemeManager instance;
-    return instance;
-}
-
 ThemeManager::ThemeManager()
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
@@ -42,8 +36,8 @@ ThemeManager::ThemeManager()
 
     this->update();
 
-    this->themeName.connectSimple([this](auto) { this->update(); });
-    this->themeHue.connectSimple([this](auto) { this->update(); });
+    this->themeName.connectSimple([this](auto) { this->update(); }, false);
+    this->themeHue.connectSimple([this](auto) { this->update(); }, false);
 }
 
 void ThemeManager::update()
