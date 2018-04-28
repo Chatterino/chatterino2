@@ -139,8 +139,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
     auto app = getApp();
 
     if (_flags & this->getFlags()) {
-        QFontMetrics &metrics = singletons::FontManager::getInstance().getFontMetrics(
-            this->style, container.getScale());
+        QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, container.getScale());
 
         for (Word &word : this->words) {
             auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {

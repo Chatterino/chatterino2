@@ -32,7 +32,10 @@ SettingManager::SettingManager()
     this->wordFlagsListener.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
+}
 
+void SettingManager::initialize()
+{
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
     this->ignoredKeywords.connect([this](auto, auto) { this->updateIgnoredKeywords(); });
 
@@ -52,7 +55,7 @@ bool SettingManager::isIgnoredEmote(const QString &)
     return false;
 }
 
-void SettingManager::initialize()
+void SettingManager::load()
 {
     auto app = getApp();
     QString settingsPath = app->paths->settingsFolderPath + "/settings.json";
@@ -155,7 +158,7 @@ const std::shared_ptr<std::vector<QString>> SettingManager::getIgnoredKeywords()
 
 void SettingManager::updateModerationActions()
 {
-    auto &resources = singletons::ResourceManager::getInstance();
+    auto app = getApp();
 
     this->_moderationActions.clear();
 
@@ -207,10 +210,10 @@ void SettingManager::updateModerationActions()
 
                 this->_moderationActions.emplace_back(line1, line2, str);
             } else {
-                this->_moderationActions.emplace_back(resources.buttonTimeout, str);
+                this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
             }
         } else if (str.startsWith("/ban ")) {
-            this->_moderationActions.emplace_back(resources.buttonBan, str);
+            this->_moderationActions.emplace_back(app->resources->buttonBan, str);
         } else {
             QString xD = str;
 

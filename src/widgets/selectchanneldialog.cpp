@@ -1,5 +1,6 @@
 #include "selectchanneldialog.hpp"
 
+#include "application.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "util/layoutcreator.hpp"
 
@@ -179,17 +180,18 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         return this->selectedChannel;
     }
 
+    auto app = getApp();
+
     switch (this->ui.notebook->getSelectedIndex()) {
         case TAB_TWITCH: {
             if (this->ui.twitch.channel->isChecked()) {
-                return providers::twitch::TwitchServer::getInstance().getOrAddChannel(
-                    this->ui.twitch.channelName->text());
+                return app->twitch.server->getOrAddChannel(this->ui.twitch.channelName->text());
             } else if (this->ui.twitch.watching->isChecked()) {
-                return providers::twitch::TwitchServer::getInstance().watchingChannel;
+                return app->twitch.server->watchingChannel;
             } else if (this->ui.twitch.mentions->isChecked()) {
-                return providers::twitch::TwitchServer::getInstance().mentionsChannel;
+                return app->twitch.server->mentionsChannel;
             } else if (this->ui.twitch.whispers->isChecked()) {
-                return providers::twitch::TwitchServer::getInstance().whispersChannel;
+                return app->twitch.server->whispersChannel;
             }
         }
     }

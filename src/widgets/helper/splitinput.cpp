@@ -39,7 +39,6 @@ SplitInput::SplitInput(Split *_chatWidget)
 void SplitInput::initLayout()
 {
     auto app = getApp();
-    auto &fontManager = singletons::FontManager::getInstance();
     util::LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QHBoxLayout>().withoutMargin().assign(&this->ui.hbox);
@@ -66,11 +65,11 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui.textEdit->setFont(
-        fontManager.getFont(singletons::FontManager::Type::Medium, this->getScale()));
+        app->fonts->getFont(singletons::FontManager::Type::Medium, this->getScale()));
 
-    this->managedConnections.emplace_back(fontManager.fontChanged.connect([this, &fontManager]() {
+    this->managedConnections.emplace_back(app->fonts->fontChanged.connect([=]() {
         this->ui.textEdit->setFont(
-            fontManager.getFont(singletons::FontManager::Type::Medium, this->getScale()));
+            app->fonts->getFont(singletons::FontManager::Type::Medium, this->getScale()));
     }));
 
     // open emote popup

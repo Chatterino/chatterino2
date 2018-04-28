@@ -7,10 +7,9 @@ namespace singletons {
 
 class AccountManager
 {
-    AccountManager() = default;
-    friend class Application;
-
 public:
+    AccountManager() = default;
+
     ~AccountManager() = delete;
 
     void load();

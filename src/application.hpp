@@ -7,6 +7,14 @@
 
 namespace chatterino {
 
+namespace providers {
+namespace twitch {
+
+class TwitchServer;
+
+}  // namespace twitch
+}  // namespace providers
+
 namespace singletons {
 
 class ThemeManager;
@@ -19,6 +27,8 @@ class EmoteManager;
 class PubSubManager;
 class NativeMessagingManager;
 class SettingManager;
+class FontManager;
+class ResourceManager;
 
 }  // namespace singletons
 
@@ -37,6 +47,8 @@ public:
 
     int run(QApplication &qtApp);
 
+    friend void test();
+
     singletons::PathManager *paths = nullptr;
     singletons::ThemeManager *themes = nullptr;
     singletons::WindowManager *windows = nullptr;
@@ -47,6 +59,13 @@ public:
     singletons::PubSubManager *pubsub = nullptr;
     singletons::NativeMessagingManager *nativeMessaging = nullptr;
     singletons::SettingManager *settings = nullptr;
+    singletons::FontManager *fonts = nullptr;
+    singletons::ResourceManager *resources = nullptr;
+
+    /// Provider-specific
+    struct {
+        providers::twitch::TwitchServer *server;
+    } twitch;
 
     void save();
 

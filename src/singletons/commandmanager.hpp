@@ -17,10 +17,9 @@ namespace singletons {
 
 class CommandManager
 {
-    CommandManager() = default;
-    friend class Application;
-
 public:
+    CommandManager() = default;
+
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
 
     void loadCommands();

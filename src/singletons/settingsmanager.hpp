@@ -21,16 +21,16 @@ class SettingManager
     using StringSetting = ChatterinoSetting<std::string>;
     using QStringSetting = ChatterinoSetting<QString>;
 
-    SettingManager();
-    friend class Application;
-
 public:
+    SettingManager();
+
     ~SettingManager() = delete;
 
     messages::MessageElement::Flags getWordFlags();
     bool isIgnoredEmote(const QString &emote);
 
     void initialize();
+    void load();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};

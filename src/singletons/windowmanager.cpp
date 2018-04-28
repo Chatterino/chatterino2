@@ -331,16 +331,17 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 {
     util::assertInGuiThread();
 
+    auto app = getApp();
+
     QString type = obj.value("type").toString();
     if (type == "twitch") {
-        return providers::twitch::TwitchServer::getInstance().getOrAddChannel(
-            obj.value("name").toString());
+        return app->twitch.server->getOrAddChannel(obj.value("name").toString());
     } else if (type == "mentions") {
-        return providers::twitch::TwitchServer::getInstance().mentionsChannel;
+        return app->twitch.server->mentionsChannel;
     } else if (type == "watching") {
-        return providers::twitch::TwitchServer::getInstance().watchingChannel;
+        return app->twitch.server->watchingChannel;
     } else if (type == "whispers") {
-        return providers::twitch::TwitchServer::getInstance().whispersChannel;
+        return app->twitch.server->whispersChannel;
     }
 
     return Channel::getEmpty();

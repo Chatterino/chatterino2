@@ -23,15 +23,12 @@ TwitchServer::TwitchServer()
     , watchingChannel(Channel::getEmpty(), Channel::TwitchWatching)
 {
     qDebug() << "init TwitchServer";
-
-    getApp()->accounts->Twitch.userChanged.connect(
-        [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
-TwitchServer &TwitchServer::getInstance()
+void TwitchServer::initialize()
 {
-    static TwitchServer s;
-    return s;
+    getApp()->accounts->Twitch.userChanged.connect(
+        [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
@@ -85,7 +82,7 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
     }
 
     this->onPrivateMessage.invoke(message);
-    auto chan = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+    auto chan = this->getChannelOrEmpty(channelName);
 
     if (chan->isEmpty()) {
         return;
@@ -98,7 +95,7 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
         if (_message->flags & messages::Message::Highlighted) {
-            TwitchServer::getInstance().mentionsChannel->addMessage(_message);
+            this->mentionsChannel->addMessage(_message);
         }
 
         chan->addMessage(_message);

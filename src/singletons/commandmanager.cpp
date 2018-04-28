@@ -151,11 +151,12 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
                     return "";
                 }
 
+                auto app = getApp();
+
                 messages::MessageBuilder b;
 
-                b.emplace<messages::TextElement>(
-                    getApp()->accounts->Twitch.getCurrent()->getUserName(),
-                    messages::MessageElement::Text);
+                b.emplace<messages::TextElement>(app->accounts->Twitch.getCurrent()->getUserName(),
+                                                 messages::MessageElement::Text);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
                 b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
 
@@ -167,7 +168,7 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
 
                 b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
 
-                TwitchServer::getInstance().whispersChannel->addMessage(b.getMessage());
+                app->twitch.server->whispersChannel->addMessage(b.getMessage());
             }
         }
 

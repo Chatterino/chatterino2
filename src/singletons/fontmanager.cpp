@@ -32,18 +32,13 @@ FontManager::FontManager()
         this->currentFontByScale.clear();
         this->fontChanged.invoke();
     });
+
     this->currentFontSize.connect([this](const int &newValue, auto) {
         this->incGeneration();
         //        this->currentFont.setSize(newValue);
         this->currentFontByScale.clear();
         this->fontChanged.invoke();
     });
-}
-
-FontManager &FontManager::getInstance()
-{
-    static FontManager instance;
-    return instance;
 }
 
 QFont &FontManager::getFont(FontManager::Type type, float scale)

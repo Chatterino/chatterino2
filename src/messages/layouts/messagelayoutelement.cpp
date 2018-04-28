@@ -1,4 +1,5 @@
 #include "messages/layouts/messagelayoutelement.hpp"
+
 #include "application.hpp"
 #include "messages/messageelement.hpp"
 #include "util/debugcount.hpp"
@@ -165,9 +166,11 @@ int TextLayoutElement::getSelectionIndexCount()
 
 void TextLayoutElement::paint(QPainter &painter)
 {
+    auto app = getApp();
+
     painter.setPen(this->color);
 
-    painter.setFont(singletons::FontManager::getInstance().getFont(this->style, this->scale));
+    painter.setFont(app->fonts->getFont(this->style, this->scale));
 
     painter.drawText(QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), this->text,
                      QTextOption(Qt::AlignLeft | Qt::AlignTop));
@@ -183,8 +186,9 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs)
         return 0;
     }
 
-    QFontMetrics &metrics =
-        singletons::FontManager::getInstance().getFontMetrics(this->style, this->scale);
+    auto app = getApp();
+
+    QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, this->scale);
 
     int x = this->getRect().left();
 
@@ -203,8 +207,9 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs)
 
 int TextLayoutElement::getXFromIndex(int index)
 {
-    QFontMetrics &metrics =
-        singletons::FontManager::getInstance().getFontMetrics(this->style, this->scale);
+    auto app = getApp();
+
+    QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, this->scale);
 
     if (index <= 0) {
         return this->getRect().left();
@@ -242,7 +247,7 @@ void TextIconLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
 
-    QFont font = singletons::FontManager::getInstance().getFont(FontStyle::Tiny, this->scale);
+    QFont font = app->fonts->getFont(FontStyle::Tiny, this->scale);
 
     painter.setPen(app->themes->messages.textColors.system);
     painter.setFont(font);

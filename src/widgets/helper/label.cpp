@@ -1,4 +1,6 @@
 #include "label.hpp"
+
+#include "application.hpp"
 #include "singletons/fontmanager.hpp"
 
 #include <QPainter>
@@ -9,8 +11,11 @@ namespace widgets {
 Label::Label(BaseWidget *parent)
     : BaseWidget(parent)
 {
-    singletons::FontManager::getInstance().fontChanged.connect(
-        [this]() { this->scaleChangedEvent(this->getScale()); });
+    auto app = getApp();
+
+    app->fonts->fontChanged.connect([=]() {
+        this->scaleChangedEvent(this->getScale());  //
+    });
 }
 
 const QString &Label::getText() const
@@ -37,8 +42,9 @@ void Label::setFontStyle(FontStyle style)
 
 void Label::scaleChangedEvent(float scale)
 {
-    QFontMetrics metrics =
-        singletons::FontManager::getInstance().getFontMetrics(this->fontStyle, scale);
+    auto app = getApp();
+
+    QFontMetrics metrics = app->fonts->getFontMetrics(this->fontStyle, scale);
 
     this->preferedSize = QSize(metrics.width(this->text), metrics.height());
 
@@ -57,13 +63,13 @@ QSize Label::minimumSizeHint() const
 
 void Label::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
-    painter.setFont(singletons::FontManager::getInstance().getFont(
-        this->fontStyle, this->getScale() / painter.device()->devicePixelRatioF()));
+    auto app = getApp();
 
-    int width = singletons::FontManager::getInstance()
-                    .getFontMetrics(this->fontStyle, this->getScale())
-                    .width(this->text);
+    QPainter painter(this);
+    painter.setFont(app->fonts->getFont(this->fontStyle,
+                                        this->getScale() / painter.device()->devicePixelRatioF()));
+
+    int width = app->fonts->getFontMetrics(this->fontStyle, this->getScale()).width(this->text);
 
     int flags = Qt::TextSingleLine;
 

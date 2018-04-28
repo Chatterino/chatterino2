@@ -142,35 +142,33 @@ QLayout *AppearancePage::createThemeColorChanger()
 
 QLayout *AppearancePage::createFontChanger()
 {
-    QHBoxLayout *layout = new QHBoxLayout;
+    auto app = getApp();
 
-    auto &fontManager = singletons::FontManager::getInstance();
+    QHBoxLayout *layout = new QHBoxLayout;
 
     // LABEL
     QLabel *label = new QLabel();
     layout->addWidget(label);
 
-    auto updateFontFamilyLabel = [label, &fontManager](auto) {
-        label->setText(QString::fromStdString(fontManager.currentFontFamily.getValue()) + ", " +
-                       QString::number(fontManager.currentFontSize) + "pt");
+    auto updateFontFamilyLabel = [=](auto) {
+        label->setText(QString::fromStdString(app->fonts->currentFontFamily.getValue()) + ", " +
+                       QString::number(app->fonts->currentFontSize) + "pt");
     };
 
-    fontManager.currentFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
-    fontManager.currentFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->currentFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->currentFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");
     layout->addWidget(button);
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
-    QObject::connect(button, &QPushButton::clicked, []() {
-        auto &fontManager = singletons::FontManager::getInstance();
-        QFontDialog dialog(fontManager.getFont(singletons::FontManager::Medium, 1.));
+    QObject::connect(button, &QPushButton::clicked, [=]() {
+        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::Medium, 1.));
 
-        dialog.connect(&dialog, &QFontDialog::fontSelected, [](const QFont &font) {
-            auto &fontManager = singletons::FontManager::getInstance();
-            fontManager.currentFontFamily = font.family().toStdString();
-            fontManager.currentFontSize = font.pointSize();
+        dialog.connect(&dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
+            app->fonts->currentFontFamily = font.family().toStdString();
+            app->fonts->currentFontSize = font.pointSize();
         });
 
         dialog.show();

@@ -75,10 +75,9 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->goToBottom->getLabel().setText("More messages below");
     this->goToBottom->setVisible(false);
 
-    this->managedConnections.emplace_back(
-        singletons::FontManager::getInstance().fontChanged.connect([this] {
-            this->layoutMessages();  //
-        }));
+    this->managedConnections.emplace_back(app->fonts->fontChanged.connect([this] {
+        this->layoutMessages();  //
+    }));
 
     connect(goToBottom, &RippleEffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
@@ -514,7 +513,7 @@ messages::MessageElement::Flags ChannelView::getFlags() const
         if (split->getModerationMode()) {
             flags = (MessageElement::Flags)(flags | MessageElement::ModeratorTools);
         }
-        if (this->channel == TwitchServer::getInstance().mentionsChannel) {
+        if (this->channel == app->twitch.server->mentionsChannel) {
             flags = (MessageElement::Flags)(flags | MessageElement::ChannelName);
         }
     }

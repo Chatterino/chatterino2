@@ -13,10 +13,12 @@ namespace singletons {
 
 class ResourceManager
 {
+public:
     ResourceManager();
 
-public:
-    static ResourceManager &getInstance();
+    ~ResourceManager() = delete;
+
+    void initialize();
 
     messages::Image *badgeStaff;
     messages::Image *badgeAdmin;

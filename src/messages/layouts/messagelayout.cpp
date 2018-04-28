@@ -62,10 +62,9 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->emoteGeneration = app->emotes->getGeneration();
 
     // check if text changed
-    bool textChanged =
-        this->fontGeneration != singletons::FontManager::getInstance().getGeneration();
+    bool textChanged = this->fontGeneration != app->fonts->getGeneration();
     layoutRequired |= textChanged;
-    this->fontGeneration = singletons::FontManager::getInstance().getGeneration();
+    this->fontGeneration = app->fonts->getGeneration();
 
     // check if work mask changed
     bool wordMaskChanged = this->currentWordFlags != flags;  // app->settings->getWordTypeMask();
@@ -160,8 +159,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
     // draw disabled
     if (this->message->flags.HasFlag(Message::Disabled)) {
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                         app->themes->messages.disabled);
+        painter.fillRect(0, y, pixmap->width(), pixmap->height(), app->themes->messages.disabled);
     }
 
     // draw selection
@@ -171,9 +169,8 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
 
     // draw last read message line
     if (isLastReadMessage) {
-        QColor color = isWindowFocused
-                           ? app->themes->tabs.selected.backgrounds.regular.color()
-                           : app->themes->tabs.selected.backgrounds.unfocused.color();
+        QColor color = isWindowFocused ? app->themes->tabs.selected.backgrounds.regular.color()
+                                       : app->themes->tabs.selected.backgrounds.unfocused.color();
 
         QBrush brush(color, Qt::VerPattern);
 

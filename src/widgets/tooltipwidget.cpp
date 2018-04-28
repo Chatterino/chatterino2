@@ -1,4 +1,6 @@
 #include "tooltipwidget.hpp"
+
+#include "application.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/thememanager.hpp"
 
@@ -14,6 +16,8 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow(parent)
     , displayText(new QLabel())
 {
+    auto app = getApp();
+
     this->setStyleSheet("color: #fff; background: #000");
     this->setWindowOpacity(0.8);
     this->updateFont();
@@ -31,8 +35,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     layout->addWidget(displayText);
     this->setLayout(layout);
 
-    this->fontChangedConnection =
-        singletons::FontManager::getInstance().fontChanged.connect([this] { this->updateFont(); });
+    this->fontChangedConnection = app->fonts->fontChanged.connect([this] { this->updateFont(); });
 }
 
 TooltipWidget::~TooltipWidget()
@@ -47,8 +50,10 @@ void TooltipWidget::scaleChangedEvent(float)
 
 void TooltipWidget::updateFont()
 {
-    this->setFont(singletons::FontManager::getInstance().getFont(
-        singletons::FontManager::Type::MediumSmall, this->getScale()));
+    auto app = getApp();
+
+    this->setFont(
+        app->fonts->getFont(singletons::FontManager::Type::MediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)

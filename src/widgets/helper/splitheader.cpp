@@ -1,4 +1,6 @@
 #include "widgets/helper/splitheader.hpp"
+
+#include "application.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
@@ -28,9 +30,8 @@ SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
     , split(_split)
 {
+    auto app = getApp();
     this->setMouseTracking(true);
-
-    singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
 
     util::LayoutCreator<SplitHeader> layoutCreator(this);
     auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
@@ -38,7 +39,7 @@ SplitHeader::SplitHeader(Split *_split)
         // dropdown label
         auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
-        dropdown->setPixmap(resourceManager.splitHeaderContext->getPixmap());
+        dropdown->setPixmap(app->resources->splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
@@ -197,10 +198,11 @@ void SplitHeader::updateChannelText()
 
 void SplitHeader::updateModerationModeIcon()
 {
-    singletons::ResourceManager &resourceManager = singletons::ResourceManager::getInstance();
+    auto app = getApp();
+
     this->moderationButton->setPixmap(this->split->getModerationMode()
-                                          ? resourceManager.moderationmode_enabled->getPixmap()
-                                          : resourceManager.moderationmode_disabled->getPixmap());
+                                          ? app->resources->moderationmode_enabled->getPixmap()
+                                          : app->resources->moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split->getChannel();
@@ -285,8 +287,10 @@ void SplitHeader::menuReloadChannelEmotes()
 
 void SplitHeader::menuManualReconnect()
 {
+    auto app = getApp();
+
     // fourtf: connection
-    providers::twitch::TwitchServer::getInstance().connect();
+    app->twitch.server->connect();
 }
 
 void SplitHeader::menuShowChangelog()

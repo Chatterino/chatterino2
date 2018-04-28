@@ -7,10 +7,9 @@ namespace singletons {
 
 class PathManager
 {
-    PathManager(int argc, char **argv);
-    friend class Application;
-
 public:
+    PathManager(int argc, char **argv);
+
     // %APPDATA%/chatterino or ExecutablePath for portable mode
     QString settingsFolderPath;
 

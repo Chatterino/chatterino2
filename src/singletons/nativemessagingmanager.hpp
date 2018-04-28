@@ -7,10 +7,9 @@ namespace singletons {
 
 class NativeMessagingManager
 {
-    NativeMessagingManager();
-    friend class Application;
-
 public:
+    NativeMessagingManager();
+
     ~NativeMessagingManager() = delete;
 
     class ReceiverThread : public QThread

@@ -289,16 +289,13 @@ ResourceManager::ResourceManager()
     , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
 {
     qDebug() << "init ResourceManager";
+}
 
+void ResourceManager::initialize()
+{
     this->loadDynamicTwitchBadges();
 
     this->loadChatterinoBadges();
-}
-
-ResourceManager &ResourceManager::getInstance()
-{
-    static ResourceManager instance;
-    return instance;
 }
 
 ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)

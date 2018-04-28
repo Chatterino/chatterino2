@@ -7,10 +7,9 @@ namespace singletons {
 
 class WindowManager
 {
-    WindowManager();
-    friend class Application;
-
 public:
+    WindowManager();
+
     ~WindowManager() = delete;
 
     void showSettingsDialog();

@@ -22,10 +22,9 @@ namespace singletons {
 
 class EmoteManager
 {
-    EmoteManager();
-    friend class Application;
-
 public:
+    EmoteManager();
+
     ~EmoteManager() = delete;
 
     void initialize();

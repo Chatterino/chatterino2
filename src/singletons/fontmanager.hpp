@@ -11,11 +11,13 @@ namespace singletons {
 
 class FontManager
 {
-    FontManager(const FontManager &) = delete;
-    FontManager(FontManager &&) = delete;
+public:
     FontManager();
 
-public:
+    FontManager(const FontManager &) = delete;
+    FontManager(FontManager &&) = delete;
+    ~FontManager() = delete;
+
     enum Type : uint8_t {
         Tiny,
         Small,
@@ -26,9 +28,6 @@ public:
         Large,
         VeryLarge,
     };
-
-    // FontManager is initialized only once, on first use
-    static FontManager &getInstance();
 
     QFont &getFont(Type type, float scale);
     QFontMetrics &getFontMetrics(Type type, float scale);

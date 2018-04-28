@@ -4,10 +4,12 @@
 #include "singletons/accountmanager.hpp"
 #include "singletons/commandmanager.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/fontmanager.hpp"
 #include "singletons/loggingmanager.hpp"
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/pubsubmanager.hpp"
+#include "singletons/resourcemanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -57,7 +59,7 @@ void Application::construct()
     isAppConstructed = true;
 
     // 1. Instantiate all classes
-    this->paths = new singletons::PathManager(argc, argv);
+    this->paths = new singletons::PathManager(this->argc, this->argv);
     this->themes = new singletons::ThemeManager;
     this->windows = new singletons::WindowManager;
     this->logging = new singletons::LoggingManager;
@@ -66,6 +68,10 @@ void Application::construct()
     this->emotes = new singletons::EmoteManager;
     this->pubsub = new singletons::PubSubManager;
     this->settings = new singletons::SettingManager;
+    this->fonts = new singletons::FontManager;
+    this->resources = new singletons::ResourceManager;
+
+    this->twitch.server = new providers::twitch::TwitchServer;
 }
 
 void Application::instantiate(int argc, char **argv)
@@ -81,17 +87,19 @@ void Application::initialize()
     isAppInitialized = true;
 
     // 2. Initialize/load classes
+    this->settings->initialize();
     this->windows->initialize();
 
     this->nativeMessaging->registerHost();
 
-    this->settings->initialize();
+    this->settings->load();
     this->commands->loadCommands();
 
-    // Initialize everything we need
     this->emotes->loadGlobalEmotes();
 
     this->accounts->load();
+
+    this->twitch.server->initialize();
 
     // XXX
     this->settings->updateWordTypeMask();
@@ -121,8 +129,7 @@ void Application::initialize()
     });
 
     this->pubsub->sig.moderation.userBanned.connect([&](const auto &action) {
-        auto &server = providers::twitch::TwitchServer::getInstance();
-        auto chan = server.getChannelOrEmptyByID(action.roomID);
+        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
         if (chan->isEmpty()) {
             return;
@@ -134,8 +141,7 @@ void Application::initialize()
     });
 
     this->pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
-        auto &server = providers::twitch::TwitchServer::getInstance();
-        auto chan = server.getChannelOrEmptyByID(action.roomID);
+        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
         if (chan->isEmpty()) {
             return;
@@ -164,7 +170,7 @@ void Application::initialize()
 int Application::run(QApplication &qtApp)
 {
     // Start connecting to the IRC Servers (Twitch only for now)
-    providers::twitch::TwitchServer::getInstance().connect();
+    this->twitch.server->connect();
 
     // Show main window
     this->windows->getMainWindow().show();

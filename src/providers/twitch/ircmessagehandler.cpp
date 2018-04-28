@@ -35,12 +35,15 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
         QStringList words = QString(message->toData()).split("#");
 
         // ensure the format is valid
-        if (words.length() < 2)
+        if (words.length() < 2) {
             return;
+        }
+
+        auto app = getApp();
 
         QString channelName = words.at(1);
 
-        auto channel = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+        auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
         if (channel->isEmpty()) {
             return;
@@ -51,7 +54,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
             twitchChannel->setRoomID(roomID);
         }
 
-        ResourceManager::getInstance().loadChannelData(roomID);
+        app->resources->loadChannelData(roomID);
     }
 }
 
@@ -68,8 +71,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
+    auto app = getApp();
+
     // get channel
-    auto chan = TwitchServer::getInstance().getChannelOrEmpty(chanName);
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty()) {
         debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
@@ -125,8 +130,6 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         }
     }
 
-    auto app = getApp();
-
     // refresh all
     app->windows->repaintVisibleChatWidgets(chan.get());
 }
@@ -136,12 +139,14 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     QVariant _mod = message->tag("mod");
 
     if (_mod.isValid()) {
+        auto app = getApp();
+
         QString channelName;
         if (!TrimChannelName(message->parameter(0), channelName)) {
             return;
         }
 
-        auto c = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+        auto c = app->twitch.server->getChannelOrEmpty(channelName);
         if (c->isEmpty()) {
             return;
         }
@@ -161,7 +166,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     args.isReceivedWhisper = true;
 
-    auto c = TwitchServer::getInstance().whispersChannel.get();
+    auto c = app->twitch.server->whispersChannel.get();
 
     twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
 
@@ -170,13 +175,13 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
         _message->flags |= messages::Message::DoNotTriggerNotification;
 
         if (_message->flags & messages::Message::Highlighted) {
-            TwitchServer::getInstance().mentionsChannel->addMessage(_message);
+            app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
         c->addMessage(_message);
 
         if (app->settings->inlineWhispers) {
-            TwitchServer::getInstance().forEachChannel([_message](ChannelPtr channel) {
+            app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
                 channel->addMessage(_message);  //
             });
         }
@@ -190,8 +195,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 {
-    auto channel =
-        TwitchServer::getInstance().getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto app = getApp();
+
+    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
 
     if (channel->isEmpty()) {
         return;
@@ -206,19 +212,20 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
+    auto app = getApp();
     MessagePtr msg = Message::createSystemMessage(message->content());
 
     QString channelName;
     if (!TrimChannelName(message->target(), channelName)) {
         // Notice wasn't targeted at a single channel, send to all twitch channels
-        TwitchServer::getInstance().forEachChannelAndSpecialChannels([msg](const auto &c) {
+        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
             c->addMessage(msg);  //
         });
 
         return;
     }
 
-    auto channel = TwitchServer::getInstance().getChannelOrEmpty(channelName);
+    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     if (channel->isEmpty()) {
         debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",

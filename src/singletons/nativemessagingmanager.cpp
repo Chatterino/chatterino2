@@ -130,6 +130,8 @@ void NativeMessagingManager::ReceiverThread::run()
 
 void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &root)
 {
+    auto app = getApp();
+
     QString action = root.value("action").toString();
 
     if (action.isNull()) {
@@ -151,16 +153,15 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         }
 
         if (_type == "twitch") {
-            util::postToThread([name, attach, winId, yOffset] {
-                auto &ts = providers::twitch::TwitchServer::getInstance();
-
-                ts.watchingChannel.update(ts.getOrAddChannel(name));
+            util::postToThread([name, attach, winId, yOffset, app] {
+                app->twitch.server->watchingChannel.update(
+                    app->twitch.server->getOrAddChannel(name));
 
                 if (attach) {
 #ifdef USEWINSDK
                     auto *window =
                         widgets::AttachedWindow::get(::GetForegroundWindow(), winId, yOffset);
-                    window->setChannel(ts.getOrAddChannel(name));
+                    window->setChannel(app->twitch.server->getOrAddChannel(name));
                     window->show();
 #endif
                 }

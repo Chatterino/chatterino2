@@ -12,12 +12,11 @@ class PathManager;
 
 class LoggingManager
 {
-    LoggingManager() = default;
-    friend class Application;
-
     PathManager *pathManager = nullptr;
 
 public:
+    LoggingManager() = default;
+
     ~LoggingManager() = delete;
 
     void initialize();
