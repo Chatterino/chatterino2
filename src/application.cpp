@@ -100,6 +100,7 @@ void Application::initialize()
     this->accounts->load();
 
     this->twitch.server->initialize();
+    this->logging->initialize();
 
     // XXX
     this->settings->updateWordTypeMask();

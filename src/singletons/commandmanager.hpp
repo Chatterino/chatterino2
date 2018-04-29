@@ -29,12 +29,13 @@ struct Command {
 
 class CommandModel : public util::SignalVectorModel<Command>
 {
-    explicit CommandModel(util::BaseSignalVector<Command> *vec, QObject *parent);
+    explicit CommandModel(QObject *parent);
 
 protected:
-    virtual int prepareInsert(const Command &item, int index,
-                              std::vector<QStandardItem *> &rowToAdd) override;
-    virtual int prepareRemove(const Command &item, int index) override;
+    virtual int prepareVectorInserted(const Command &item, int index,
+                                      std::vector<QStandardItem *> &rowToAdd) override;
+    virtual int prepareVectorRemoved(const Command &item, int index) override;
+    virtual int prepareModelItemRemoved(int index) override;
 
     friend class CommandManager;
 };
@@ -54,7 +55,7 @@ public:
 
     CommandModel *createModel(QObject *parent);
 
-    util::UnsortedSignalVector<Command> commands;
+    util::UnsortedSignalVector<Command> items;
 
 private:
     QMap<QString, Command> commandsMap;

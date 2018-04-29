@@ -35,7 +35,40 @@ CommandPage::CommandPage()
 
     QTableView *view = *layout.emplace<QTableView>();
 
-    auto *model = app->commands->createModel(this);
+    auto *model = app->commands->createModel(view);
+    view->setModel(model);
+    model->setHeaderData(0, Qt::Horizontal, "Trigger");
+    model->setHeaderData(1, Qt::Horizontal, "Command");
+    view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    view->verticalHeader()->hide();
+
+    auto buttons = layout.emplace<QHBoxLayout>().withoutMargin();
+    {
+        auto add = buttons.emplace<QPushButton>("Add");
+        QObject::connect(*add, &QPushButton::clicked, [model, view] {
+            getApp()->commands->items.appendItem(
+                singletons::Command{"/command", "I made a new command HeyGuys"});
+            view->scrollToBottom();
+        });
+
+        auto remove = buttons.emplace<QPushButton>("Remove");
+        QObject::connect(*remove, &QPushButton::clicked, [view, model] {
+            std::vector<int> indices;
+
+            for (const QModelIndex &index : view->selectionModel()->selectedRows(0)) {
+                indices.push_back(index.row());
+            }
+
+            std::sort(indices.begin(), indices.end());
+
+            for (int i = indices.size() - 1; i >= 0; i--) {
+                model->removeRow(indices[i]);
+            }
+        });
+        buttons->addStretch(1);
+    }
 
     //    QTableView *view = *layout.emplace<QTableView>();
     //    QStandardItemModel *model = new QStandardItemModel(0, 2, view);

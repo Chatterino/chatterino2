@@ -24,7 +24,7 @@ CommandManager::CommandManager()
     auto addFirstMatchToMap = [this](auto args) {
         this->commandsMap.remove(args.item.name);
 
-        for (const Command &cmd : this->commands.getVector()) {
+        for (const Command &cmd : this->items.getVector()) {
             if (cmd.name == args.item.name) {
                 this->commandsMap[cmd.name] = cmd;
                 break;
@@ -32,8 +32,8 @@ CommandManager::CommandManager()
         }
     };
 
-    this->commands.itemInserted.connect(addFirstMatchToMap);
-    this->commands.itemRemoved.connect(addFirstMatchToMap);
+    this->items.itemInserted.connect(addFirstMatchToMap);
+    this->items.itemRemoved.connect(addFirstMatchToMap);
 }
 
 void CommandManager::load()
@@ -50,7 +50,11 @@ void CommandManager::load()
     QList<QByteArray> test = textFile.readAll().split('\n');
 
     for (const auto &command : test) {
-        this->commands.appendItem(Command(command));
+        if (command.isEmpty()) {
+            continue;
+        }
+
+        this->items.appendItem(Command(command));
     }
 
     textFile.close();
@@ -64,7 +68,7 @@ void CommandManager::save()
         return;
     }
 
-    for (const Command &cmd : this->commands.getVector()) {
+    for (const Command &cmd : this->items.getVector()) {
         textFile.write((cmd.toString() + "\n").toUtf8());
     }
 
@@ -73,7 +77,10 @@ void CommandManager::save()
 
 CommandModel *CommandManager::createModel(QObject *parent)
 {
-    return new CommandModel(&this->commands, parent);
+    CommandModel *model = new CommandModel(parent);
+    model->init(&this->items);
+
+    return model;
 }
 
 QString CommandManager::execCommand(const QString &text, ChannelPtr channel, bool dryRun)
@@ -232,13 +239,13 @@ QString CommandManager::execCustomCommand(const QStringList &words, const Comman
 }
 
 // commandmodel
-CommandModel::CommandModel(util::BaseSignalVector<Command> *vec, QObject *parent)
-    : util::SignalVectorModel<Command>(vec, 2, parent)
+CommandModel::CommandModel(QObject *parent)
+    : util::SignalVectorModel<Command>(2, parent)
 {
 }
 
-int CommandModel::prepareInsert(const Command &item, int index,
-                                std::vector<QStandardItem *> &rowToAdd)
+int CommandModel::prepareVectorInserted(const Command &item, int index,
+                                        std::vector<QStandardItem *> &rowToAdd)
 {
     rowToAdd[0]->setData(item.name, Qt::EditRole);
     rowToAdd[1]->setData(item.func, Qt::EditRole);
@@ -246,10 +253,15 @@ int CommandModel::prepareInsert(const Command &item, int index,
     return index;
 }
 
-int CommandModel::prepareRemove(const Command &item, int index)
+int CommandModel::prepareVectorRemoved(const Command &item, int index)
 {
     UNUSED(item);
 
+    return index;
+}
+
+int CommandModel::prepareModelItemRemoved(int index)
+{
     return index;
 }
 

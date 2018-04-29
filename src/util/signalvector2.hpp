@@ -66,7 +66,7 @@ public:
 
         TVectorItem item = this->vector[index];
         this->vector.erase(this->vector.begin() + index);
-        ItemArgs args{item, args, caller};
+        ItemArgs args{item, index, caller};
         this->itemRemoved.invoke(args);
     }
 };
