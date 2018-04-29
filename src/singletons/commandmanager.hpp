@@ -6,40 +6,60 @@
 #include <memory>
 #include <mutex>
 
+#include <util/signalvector2.hpp>
+#include <util/signalvectormodel.hpp>
+
 namespace chatterino {
 class Channel;
 
 namespace singletons {
 
+class CommandManager;
+
+struct Command {
+    QString name;
+    QString func;
+
+    Command() = default;
+    explicit Command(const QString &text);
+    Command(const QString &name, const QString &func);
+
+    QString toString() const;
+};
+
+class CommandModel : public util::SignalVectorModel<Command>
+{
+    explicit CommandModel(util::BaseSignalVector<Command> *vec, QObject *parent);
+
+protected:
+    virtual int prepareInsert(const Command &item, int index,
+                              std::vector<QStandardItem *> &rowToAdd) override;
+    virtual int prepareRemove(const Command &item, int index) override;
+
+    friend class CommandManager;
+};
+
 //
 // this class managed the custom /commands
 //
-
 class CommandManager
 {
 public:
-    CommandManager() = default;
+    CommandManager();
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
 
-    void loadCommands();
-    void saveCommands();
+    void load();
+    void save();
 
-    void setCommands(const QStringList &commands);
-    QStringList getCommands();
+    CommandModel *createModel(QObject *parent);
+
+    util::UnsortedSignalVector<Command> commands;
 
 private:
-    struct Command {
-        QString name;
-        QString text;
+    QMap<QString, Command> commandsMap;
 
-        Command() = default;
-        Command(QString text);
-    };
-
-    QMap<QString, Command> commands;
     std::mutex mutex;
-    QStringList commandsStringList;
     QString filePath;
 
     QString execCustomCommand(const QStringList &words, const Command &command);

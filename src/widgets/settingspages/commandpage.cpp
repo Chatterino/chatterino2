@@ -34,68 +34,73 @@ CommandPage::CommandPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     QTableView *view = *layout.emplace<QTableView>();
-    QStandardItemModel *model = new QStandardItemModel(0, 2, view);
 
-    view->setModel(model);
-    model->setHeaderData(0, Qt::Horizontal, "Trigger");
-    model->setHeaderData(1, Qt::Horizontal, "Command");
-    view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    view->setSelectionBehavior(QAbstractItemView::SelectRows);
-    view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    auto *model = app->commands->createModel(this);
 
-    for (const QString &string : app->commands->getCommands()) {
-        int index = string.indexOf(' ');
-        if (index == -1) {
-            model->appendRow({util::stringItem(string), util::stringItem("")});
-        } else {
-            model->appendRow(
-                {util::stringItem(string.mid(0, index)), util::stringItem(string.mid(index + 1))});
-        }
-    }
+    //    QTableView *view = *layout.emplace<QTableView>();
+    //    QStandardItemModel *model = new QStandardItemModel(0, 2, view);
 
-    QObject::connect(
-        model, &QStandardItemModel::dataChanged,
-        [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                const QVector<int> &roles) {
-            QStringList list;
+    //    view->setModel(model);
+    //    model->setHeaderData(0, Qt::Horizontal, "Trigger");
+    //    model->setHeaderData(1, Qt::Horizontal, "Command");
+    //    view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //    view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    //    view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 
-            for (int i = 0; i < model->rowCount(); i++) {
-                QString command = model->item(i, 0)->data(Qt::EditRole).toString();
-                // int index = command.indexOf(' ');
-                // if (index != -1) {
-                //     command = command.mid(index);
-                // }
+    //    for (const QString &string : app->commands->getCommands()) {
+    //        int index = string.indexOf(' ');
+    //        if (index == -1) {
+    //            model->appendRow({util::stringItem(string), util::stringItem("")});
+    //        } else {
+    //            model->appendRow(
+    //                {util::stringItem(string.mid(0, index)), util::stringItem(string.mid(index +
+    //                1))});
+    //        }
+    //    }
 
-                list.append(command + " " + model->item(i, 1)->data(Qt::EditRole).toString());
-            }
+    //    QObject::connect(
+    //        model, &QStandardItemModel::dataChanged,
+    //        [model](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+    //                const QVector<int> &roles) {
+    //            QStringList list;
 
-            getApp()->commands->setCommands(list);
-        });
+    //            for (int i = 0; i < model->rowCount(); i++) {
+    //                QString command = model->item(i, 0)->data(Qt::EditRole).toString();
+    //                // int index = command.indexOf(' ');
+    //                // if (index != -1) {
+    //                //     command = command.mid(index);
+    //                // }
 
-    auto buttons = layout.emplace<QHBoxLayout>().withoutMargin();
-    {
-        auto add = buttons.emplace<QPushButton>("Add");
-        QObject::connect(*add, &QPushButton::clicked, [model, view] {
-            model->appendRow({util::stringItem("/command"), util::stringItem("")});
-            view->scrollToBottom();
-        });
+    //                list.append(command + " " + model->item(i, 1)->data(Qt::EditRole).toString());
+    //            }
 
-        auto remove = buttons.emplace<QPushButton>("Remove");
-        QObject::connect(*remove, &QPushButton::clicked, [view, model] {
-            std::vector<int> indices;
+    //            getApp()->commands->setCommands(list);
+    //        });
 
-            for (const QModelIndex &index : view->selectionModel()->selectedRows(0)) {
-                indices.push_back(index.row());
-            }
+    //    auto buttons = layout.emplace<QHBoxLayout>().withoutMargin();
+    //    {
+    //        auto add = buttons.emplace<QPushButton>("Add");
+    //        QObject::connect(*add, &QPushButton::clicked, [model, view] {
+    //            model->appendRow({util::stringItem("/command"), util::stringItem("")});
+    //            view->scrollToBottom();
+    //        });
 
-            std::sort(indices.begin(), indices.end());
+    //        auto remove = buttons.emplace<QPushButton>("Remove");
+    //        QObject::connect(*remove, &QPushButton::clicked, [view, model] {
+    //            std::vector<int> indices;
 
-            for (int i = indices.size() - 1; i >= 0; i--) {
-                model->removeRow(indices[i]);
-            }
-        });
-        buttons->addStretch(1);
-    }
+    //            for (const QModelIndex &index : view->selectionModel()->selectedRows(0)) {
+    //                indices.push_back(index.row());
+    //            }
+
+    //            std::sort(indices.begin(), indices.end());
+
+    //            for (int i = indices.size() - 1; i >= 0; i--) {
+    //                model->removeRow(indices[i]);
+    //            }
+    //        });
+    //        buttons->addStretch(1);
+    //    }
 
     layout.append(this->createCheckBox("Also match the trigger at the end of the message",
                                        app->settings->allowCommandsAtEnd));
@@ -106,33 +111,6 @@ CommandPage::CommandPage()
 
     // ---- end of layout
     this->commandsEditTimer.setSingleShot(true);
-}
-
-QTextEdit *CommandPage::getCommandsTextEdit()
-{
-    auto app = getApp();
-
-    // cancel
-    QStringList currentCommands = app->commands->getCommands();
-
-    this->onCancel.connect([currentCommands, app] { app->commands->setCommands(currentCommands); });
-
-    // create text edit
-    QTextEdit *textEdit = new QTextEdit;
-
-    textEdit->setPlainText(QString(app->commands->getCommands().join('\n')));
-
-    QObject::connect(textEdit, &QTextEdit::textChanged,
-                     [this] { this->commandsEditTimer.start(200); });
-
-    QObject::connect(&this->commandsEditTimer, &QTimer::timeout, [textEdit, app] {
-        QString text = textEdit->toPlainText();
-        QStringList lines = text.split(QRegularExpression("(\r?\n|\r\n?)"));
-
-        app->commands->setCommands(lines);
-    });
-
-    return textEdit;
 }
 
 }  // namespace settingspages

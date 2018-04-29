@@ -15,8 +15,6 @@ public:
     CommandPage();
 
 private:
-    QTextEdit *getCommandsTextEdit();
-
     QTimer commandsEditTimer;
 };
 

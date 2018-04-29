@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QStandardItemModel>
+#include <QTimer>
+#include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
 #include <vector>
 
@@ -10,18 +12,24 @@ namespace chatterino {
 namespace util {
 
 template <typename TVectorItem>
-class ReadOnlySignalVector
+class ReadOnlySignalVector : boost::noncopyable
 {
 public:
+    ReadOnlySignalVector()
+    {
+        QObject::connect(&this->itemsChangedTimer, &QTimer::timeout,
+                         [this] { this->delayedItemsChanged.invoke(); });
+    }
     virtual ~ReadOnlySignalVector() = default;
 
-    struct ItemInsertedArgs {
+    struct ItemArgs {
         const TVectorItem &item;
         int index;
+        void *caller;
     };
 
-    pajlada::Signals::Signal<ItemInsertedArgs> itemInserted;
-    pajlada::Signals::Signal<int> itemRemoved;
+    pajlada::Signals::Signal<ItemArgs> itemInserted;
+    pajlada::Signals::Signal<ItemArgs> itemRemoved;
     pajlada::Signals::NoArgSignal delayedItemsChanged;
 
     const std::vector<TVectorItem> &getVector() const
@@ -31,42 +39,56 @@ public:
         return this->vector;
     }
 
+    void invokeDelayedItemsChanged()
+    {
+        util::assertInGuiThread();
+
+        if (!this->itemsChangedTimer.isActive()) {
+            itemsChangedTimer.start();
+        }
+    }
+
 protected:
     std::vector<TVectorItem> vector;
+    QTimer itemsChangedTimer;
 };
 
 template <typename TVectorItem>
 class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
 {
 public:
-    void removeItem(int index)
+    virtual void appendItem(const TVectorItem &item, void *caller = 0) = 0;
+
+    void removeItem(int index, void *caller = 0)
     {
         util::assertInGuiThread();
         assert(index >= 0 && index < this->vector.size());
 
+        TVectorItem item = this->vector[index];
         this->vector.erase(this->vector.begin() + index);
-        this->itemRemoved.invoke(index);
+        ItemArgs args{item, args, caller};
+        this->itemRemoved.invoke(args);
     }
 };
 
 template <typename TVectorItem>
-class SignalVector2 : public BaseSignalVector<TVectorItem>
+class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    void insertItem(const TVectorItem &item, int index)
+    void insertItem(const TVectorItem &item, int index, void *caller = 0)
     {
         util::assertInGuiThread();
         assert(index >= 0 && index <= this->vector.size());
 
         this->vector.insert(this->vector.begin() + index, item);
 
-        ItemInsertedArgs args{item, index};
+        ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
     }
 
-    void appendItem(const TVectorItem &item)
+    virtual void appendItem(const TVectorItem &item, void *caller = 0) override
     {
-        this->insertItem(item, this->vector.size());
+        this->insertItem(item, this->vector.size(), caller);
     }
 };
 
@@ -74,14 +96,14 @@ template <typename TVectorItem>
 class SortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    void addItem(const TVectorItem &item)
+    virtual void appendItem(const TVectorItem &item, void *caller = 0) override
     {
         util::assertInGuiThread();
 
         int index = this->vector.insert(
                         std::lower_bound(this->vector.begin(), this->vector.end(), item), item) -
                     this->vector.begin();
-        ItemInsertedArgs args{item, index};
+        ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
     }
 };

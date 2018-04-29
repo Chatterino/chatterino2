@@ -93,7 +93,7 @@ void Application::initialize()
     this->nativeMessaging->registerHost();
 
     this->settings->load();
-    this->commands->loadCommands();
+    this->commands->load();
 
     this->emotes->loadGlobalEmotes();
 
@@ -218,7 +218,7 @@ void Application::save()
 {
     this->windows->save();
 
-    this->commands->saveCommands();
+    this->commands->save();
 }
 
 void Application::runNativeMessagingHost()

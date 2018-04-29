@@ -74,8 +74,7 @@ MessagePtr TwitchMessageBuilder::build()
 #ifdef XD
     if (this->originalMessage.length() > 100) {
         this->message->flags |= Message::Collapsed;
-        this->emplace<EmoteElement>(singletons::ResourceManager::getInstance().badgeCollapsed,
-                                    MessageElement::Collapsed);
+        this->emplace<EmoteElement>(getApp()->resources->badgeCollapsed, MessageElement::Collapsed);
     }
 #endif
 

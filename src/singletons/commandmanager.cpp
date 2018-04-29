@@ -19,7 +19,24 @@ using namespace chatterino::providers::twitch;
 namespace chatterino {
 namespace singletons {
 
-void CommandManager::loadCommands()
+CommandManager::CommandManager()
+{
+    auto addFirstMatchToMap = [this](auto args) {
+        this->commandsMap.remove(args.item.name);
+
+        for (const Command &cmd : this->commands.getVector()) {
+            if (cmd.name == args.item.name) {
+                this->commandsMap[cmd.name] = cmd;
+                break;
+            }
+        }
+    };
+
+    this->commands.itemInserted.connect(addFirstMatchToMap);
+    this->commands.itemRemoved.connect(addFirstMatchToMap);
+}
+
+void CommandManager::load()
 {
     auto app = getApp();
     this->filePath = app->paths->customFolderPath + "/Commands.txt";
@@ -32,18 +49,14 @@ void CommandManager::loadCommands()
 
     QList<QByteArray> test = textFile.readAll().split('\n');
 
-    QStringList loadedCommands;
-
     for (const auto &command : test) {
-        loadedCommands.append(command);
+        this->commands.appendItem(Command(command));
     }
-
-    this->setCommands(loadedCommands);
 
     textFile.close();
 }
 
-void CommandManager::saveCommands()
+void CommandManager::save()
 {
     QFile textFile(this->filePath);
     if (!textFile.open(QIODevice::WriteOnly)) {
@@ -51,44 +64,16 @@ void CommandManager::saveCommands()
         return;
     }
 
-    QString commandsString = this->commandsStringList.join('\n');
-
-    textFile.write(commandsString.toUtf8());
+    for (const Command &cmd : this->commands.getVector()) {
+        textFile.write((cmd.toString() + "\n").toUtf8());
+    }
 
     textFile.close();
 }
 
-void CommandManager::setCommands(const QStringList &_commands)
+CommandModel *CommandManager::createModel(QObject *parent)
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
-
-    this->commands.clear();
-
-    for (const QString &commandRef : _commands) {
-        QString command = commandRef;
-
-        if (command.size() == 0) {
-            continue;
-        }
-
-        //        if (command.at(0) != '/') {
-        //            command = QString("/") + command;
-        //        }
-
-        QString commandName = command.mid(0, command.indexOf(' '));
-
-        if (this->commands.find(commandName) == this->commands.end()) {
-            this->commands.insert(commandName, Command(command));
-        }
-    }
-
-    this->commandsStringList = _commands;
-    this->commandsStringList.detach();
-}
-
-QStringList CommandManager::getCommands()
-{
-    return this->commandsStringList;
+    return new CommandModel(&this->commands, parent);
 }
 
 QString CommandManager::execCommand(const QString &text, ChannelPtr channel, bool dryRun)
@@ -173,9 +158,8 @@ QString CommandManager::execCommand(const QString &text, ChannelPtr channel, boo
         }
 
         // check if custom command exists
-        auto it = this->commands.find(commandName);
-
-        if (it == this->commands.end()) {
+        auto it = this->commandsMap.find(commandName);
+        if (it == this->commandsMap.end()) {
             return text;
         }
 
@@ -193,17 +177,17 @@ QString CommandManager::execCustomCommand(const QStringList &words, const Comman
 
     int lastCaptureEnd = 0;
 
-    auto globalMatch = parseCommand.globalMatch(command.text);
+    auto globalMatch = parseCommand.globalMatch(command.func);
     int matchOffset = 0;
 
     while (true) {
-        QRegularExpressionMatch match = parseCommand.match(command.text, matchOffset);
+        QRegularExpressionMatch match = parseCommand.match(command.func, matchOffset);
 
         if (!match.hasMatch()) {
             break;
         }
 
-        result += command.text.mid(lastCaptureEnd, match.capturedStart() - lastCaptureEnd + 1);
+        result += command.func.mid(lastCaptureEnd, match.capturedStart() - lastCaptureEnd + 1);
 
         lastCaptureEnd = match.capturedEnd();
         matchOffset = lastCaptureEnd - 1;
@@ -238,7 +222,7 @@ QString CommandManager::execCustomCommand(const QStringList &words, const Comman
         }
     }
 
-    result += command.text.mid(lastCaptureEnd);
+    result += command.func.mid(lastCaptureEnd);
 
     if (result.size() > 0 && result.at(0) == '{') {
         result = result.mid(1);
@@ -247,7 +231,30 @@ QString CommandManager::execCustomCommand(const QStringList &words, const Comman
     return result.replace("{{", "{");
 }
 
-CommandManager::Command::Command(QString _text)
+// commandmodel
+CommandModel::CommandModel(util::BaseSignalVector<Command> *vec, QObject *parent)
+    : util::SignalVectorModel<Command>(vec, 2, parent)
+{
+}
+
+int CommandModel::prepareInsert(const Command &item, int index,
+                                std::vector<QStandardItem *> &rowToAdd)
+{
+    rowToAdd[0]->setData(item.name, Qt::EditRole);
+    rowToAdd[1]->setData(item.func, Qt::EditRole);
+
+    return index;
+}
+
+int CommandModel::prepareRemove(const Command &item, int index)
+{
+    UNUSED(item);
+
+    return index;
+}
+
+// command
+Command::Command(const QString &_text)
 {
     int index = _text.indexOf(' ');
 
@@ -257,7 +264,18 @@ CommandManager::Command::Command(QString _text)
     }
 
     this->name = _text.mid(0, index);
-    this->text = _text.mid(index + 1);
+    this->func = _text.mid(index + 1);
+}
+
+Command::Command(const QString &_name, const QString &_func)
+    : name(_name)
+    , func(_func)
+{
+}
+
+QString Command::toString() const
+{
+    return this->name + " " + this->func;
 }
 
 }  // namespace singletons

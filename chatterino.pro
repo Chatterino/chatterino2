@@ -184,7 +184,9 @@ SOURCES += \
     src/widgets/lastruncrashdialog.cpp \
     src/widgets/attachedwindow.cpp \
     src/widgets/settingspages/externaltoolspage.cpp \
-    src/widgets/helper/comboboxitemdelegate.cpp
+    src/widgets/helper/comboboxitemdelegate.cpp \
+    src/util/signalvectormodel.cpp \
+    src/managers/commands/command.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -316,7 +318,9 @@ HEADERS  += \
     src/util/standarditemhelper.hpp \
     src/widgets/helper/comboboxitemdelegate.hpp \
     src/util/assertinguithread.hpp \
-    src/util/signalvector2.hpp
+    src/util/signalvector2.hpp \
+    src/util/signalvectormodel.hpp \
+    src/managers/commands/command.hpp
 
 RESOURCES += \
     resources/resources.qrc

@@ -7,7 +7,7 @@
 namespace chatterino {
 namespace util {
 
-void assertInGuiThread()
+static void assertInGuiThread()
 {
 #ifdef _DEBUG
     assert(QCoreApplication::instance()->thread() == QThread::currentThread());
