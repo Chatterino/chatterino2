@@ -41,9 +41,23 @@ struct ModeChangedAction : PubSubAction {
         On,
     } state;
 
-    union {
-        uint32_t duration;
-    } args;
+    uint32_t duration = 0;
+
+    const char *getModeName() const
+    {
+        switch (this->mode) {
+            case Mode::Slow:
+                return "slow";
+            case Mode::R9K:
+                return "r9k";
+            case Mode::SubscribersOnly:
+                return "subscribers-only";
+            case Mode::EmoteOnly:
+                return "emote-only";
+            default:
+                return "unknown";
+        }
+    }
 };
 
 struct BanAction : PubSubAction {

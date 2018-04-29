@@ -212,6 +212,7 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
+    return;
     auto app = getApp();
     MessagePtr msg = Message::createSystemMessage(message->content());
 

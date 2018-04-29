@@ -114,18 +114,54 @@ void Application::initialize()
         debug::Log("WHISPER RECEIVED LOL");  //
     });
 
-    this->twitch.pubsub->sig.moderation.chatCleared.connect([&](const auto &action) {
-        debug::Log("Chat cleared by {}", action.source.name);  //
+    this->twitch.pubsub->sig.moderation.chatCleared.connect([this](const auto &action) {
+        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+        if (chan->isEmpty()) {
+            return;
+        }
+
+        QString text = QString("%1 cleared the chat").arg(action.source.name);
+
+        auto msg = messages::Message::createSystemMessage(text);
+        util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    this->twitch.pubsub->sig.moderation.modeChanged.connect([&](const auto &action) {
-        debug::Log("Mode {} was turned {} by {} (duration {})", (int &)action.mode,
-                   (bool &)action.state, action.source.name, action.args.duration);
+    this->twitch.pubsub->sig.moderation.modeChanged.connect([this](const auto &action) {
+        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+        if (chan->isEmpty()) {
+            return;
+        }
+
+        QString text =
+            QString("%1 turned %2 %3 mode")  //
+                .arg(action.source.name)
+                .arg(action.state == providers::twitch::ModeChangedAction::State::On ? "on" : "off")
+                .arg(action.getModeName());
+
+        if (action.duration > 0) {
+            text.append(" (" + QString::number(action.duration) + " seconds)");
+        }
+
+        auto msg = messages::Message::createSystemMessage(text);
+        util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
-    this->twitch.pubsub->sig.moderation.moderationStateChanged.connect([&](const auto &action) {
-        debug::Log("User {} was {} by {}", action.target.id, action.modded ? "modded" : "unmodded",
-                   action.source.name);
+    this->twitch.pubsub->sig.moderation.moderationStateChanged.connect([this](const auto &action) {
+        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+        if (chan->isEmpty()) {
+            return;
+        }
+
+        QString text;
+
+        if (action.modded) {
+            text = QString("%1 modded %2").arg(action.source.name, action.target.name);
+        } else {
+            text = QString("%1 unmodded %2").arg(action.source.name, action.target.name);
+        }
+
+        auto msg = messages::Message::createSystemMessage(text);
+        util::postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.userBanned.connect([&](const auto &action) {

@@ -226,7 +226,7 @@ PubSub::PubSub()
 
         bool ok;
 
-        action.args.duration = QString(durationArg.GetString()).toUInt(&ok, 10);
+        action.duration = QString(durationArg.GetString()).toUInt(&ok, 10);
 
         this->sig.moderation.modeChanged.invoke(action);
     };
@@ -290,6 +290,21 @@ PubSub::PubSub()
         ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
+
+        try {
+            const auto &args = getArgs(data);
+
+            if (args.Size() < 1) {
+                return;
+            }
+
+            if (!rj::getSafe(args[0], action.target.name)) {
+                return;
+            }
+        } catch (const std::runtime_error &ex) {
+            debug::Log("Error parsing moderation action: {}", ex.what());
+        }
+
         action.modded = false;
 
         this->sig.moderation.moderationStateChanged.invoke(action);
@@ -299,6 +314,21 @@ PubSub::PubSub()
         ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
+
+        try {
+            const auto &args = getArgs(data);
+
+            if (args.Size() < 1) {
+                return;
+            }
+
+            if (!rj::getSafe(args[0], action.target.name)) {
+                return;
+            }
+        } catch (const std::runtime_error &ex) {
+            debug::Log("Error parsing moderation action: {}", ex.what());
+        }
+
         action.modded = true;
 
         this->sig.moderation.moderationStateChanged.invoke(action);
