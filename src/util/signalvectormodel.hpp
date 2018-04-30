@@ -26,7 +26,7 @@ public:
     {
         this->vector = vec;
 
-        auto insert = [this](const BaseSignalVector<TVectorItem>::ItemArgs &args) {
+        auto insert = [this](const typename BaseSignalVector<TVectorItem>::ItemArgs &args) {
             std::vector<QStandardItem *> items;
             for (int i = 0; i < this->_columnCount; i++) {
                 items.push_back(new QStandardItem());
@@ -43,7 +43,7 @@ public:
 
         int i = 0;
         for (const TVectorItem &item : vec->getVector()) {
-            BaseSignalVector<TVectorItem>::ItemArgs args{item, i++, 0};
+            typename BaseSignalVector<TVectorItem>::ItemArgs args{item, i++, 0};
 
             insert(args);
         }

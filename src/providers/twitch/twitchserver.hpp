@@ -12,12 +12,11 @@ namespace twitch {
 
 class TwitchServer final : public irc::AbstractIrcServer
 {
+public:
     TwitchServer();
-    friend class Application;
 
     void initialize();
 
-public:
     // fourtf: ugh
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 

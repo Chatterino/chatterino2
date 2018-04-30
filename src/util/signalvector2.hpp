@@ -66,7 +66,7 @@ public:
 
         TVectorItem item = this->vector[index];
         this->vector.erase(this->vector.begin() + index);
-        ItemArgs args{item, index, caller};
+        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemRemoved.invoke(args);
     }
 };
@@ -82,7 +82,7 @@ public:
 
         this->vector.insert(this->vector.begin() + index, item);
 
-        ItemArgs args{item, index, caller};
+        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
     }
 
@@ -103,7 +103,7 @@ public:
         int index = this->vector.insert(
                         std::lower_bound(this->vector.begin(), this->vector.end(), item), item) -
                     this->vector.begin();
-        ItemArgs args{item, index, caller};
+        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
     }
 };
