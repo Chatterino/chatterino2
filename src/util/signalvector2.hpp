@@ -57,7 +57,8 @@ template <typename TVectorItem>
 class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
 {
 public:
-    virtual void appendItem(const TVectorItem &item, void *caller = 0) = 0;
+    // returns the actual index of the inserted item
+    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1, void *caller = 0) = 0;
 
     void removeItem(int index, void *caller = 0)
     {
@@ -69,26 +70,31 @@ public:
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemRemoved.invoke(args);
     }
+
+    int appendItem(const TVectorItem &item, void *caller = 0)
+    {
+        return this->insertItem(item, -1, caller);
+    }
 };
 
 template <typename TVectorItem>
 class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    void insertItem(const TVectorItem &item, int index, void *caller = 0)
+    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = 0) override
     {
         util::assertInGuiThread();
-        assert(index >= 0 && index <= this->vector.size());
+        if (index == -1) {
+            index = this->vector.size();
+        } else {
+            assert(index >= 0 && index <= this->vector.size());
+        }
 
         this->vector.insert(this->vector.begin() + index, item);
 
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
-    }
-
-    virtual void appendItem(const TVectorItem &item, void *caller = 0) override
-    {
-        this->insertItem(item, this->vector.size(), caller);
+        return index;
     }
 };
 
@@ -96,7 +102,7 @@ template <typename TVectorItem>
 class SortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual void appendItem(const TVectorItem &item, void *caller = 0) override
+    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = 0) override
     {
         util::assertInGuiThread();
 
@@ -105,6 +111,7 @@ public:
                     this->vector.begin();
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
+        return index;
     }
 };
 

@@ -7,7 +7,8 @@
 #include <QTextEdit>
 
 #include "application.hpp"
-#include "singletons/commandmanager.hpp"
+#include "controllers/commands/commandcontroller.hpp"
+#include "controllers/commands/commandmodel.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/standarditemhelper.hpp"
 //#include "widgets/helper/comboboxitemdelegate.hpp"
@@ -49,7 +50,7 @@ CommandPage::CommandPage()
         auto add = buttons.emplace<QPushButton>("Add");
         QObject::connect(*add, &QPushButton::clicked, [model, view] {
             getApp()->commands->items.appendItem(
-                singletons::Command{"/command", "I made a new command HeyGuys"});
+                controllers::commands::Command{"/command", "I made a new command HeyGuys"});
             view->scrollToBottom();
         });
 

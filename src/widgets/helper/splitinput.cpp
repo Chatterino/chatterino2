@@ -1,7 +1,7 @@
 #include "widgets/helper/splitinput.hpp"
 
 #include "application.hpp"
-#include "singletons/commandmanager.hpp"
+#include "controllers/commands/commandcontroller.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"

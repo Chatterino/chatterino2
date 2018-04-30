@@ -186,7 +186,9 @@ SOURCES += \
     src/widgets/settingspages/externaltoolspage.cpp \
     src/widgets/helper/comboboxitemdelegate.cpp \
     src/util/signalvectormodel.cpp \
-    src/managers/commands/command.cpp
+    src/controllers/commands/command.cpp \
+    src/controllers/commands/commandmodel.cpp \
+    src/controllers/commands/commandcontroller.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -320,7 +322,9 @@ HEADERS  += \
     src/util/assertinguithread.hpp \
     src/util/signalvector2.hpp \
     src/util/signalvectormodel.hpp \
-    src/managers/commands/command.hpp
+    src/controllers/commands/command.hpp \
+    src/controllers/commands/commandmodel.hpp \
+    src/controllers/commands/commandcontroller.hpp
 
 RESOURCES += \
     resources/resources.qrc

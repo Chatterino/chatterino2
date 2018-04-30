@@ -16,13 +16,18 @@ class PubSub;
 }  // namespace twitch
 }  // namespace providers
 
+namespace controllers {
+namespace commands {
+class CommandController;
+}
+}
+
 namespace singletons {
 
 class ThemeManager;
 class WindowManager;
 class LoggingManager;
 class PathManager;
-class CommandManager;
 class AccountManager;
 class EmoteManager;
 class NativeMessagingManager;
@@ -53,7 +58,7 @@ public:
     singletons::ThemeManager *themes = nullptr;
     singletons::WindowManager *windows = nullptr;
     singletons::LoggingManager *logging = nullptr;
-    singletons::CommandManager *commands = nullptr;
+    controllers::commands::CommandController *commands = nullptr;
     singletons::AccountManager *accounts = nullptr;
     singletons::EmoteManager *emotes = nullptr;
     singletons::NativeMessagingManager *nativeMessaging = nullptr;
