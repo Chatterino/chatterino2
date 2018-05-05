@@ -32,20 +32,18 @@ public:
             }
 
             // get row index
-            int row = this->getModelIndexFromVectorIndex(args.index);
-            assert(row >= 0 && row <= this->rows.size());
+            int index = this->getModelIndexFromVectorIndex(args.index);
+            assert(index >= 0 && index <= this->rows.size());
 
             // get row items
-            std::vector<QStandardItem *> items;
-            for (int i = 0; i < this->_columnCount; i++) {
-                items.push_back(new QStandardItem());
-            }
-
-            this->getRowFromItem(args.item, items);
+            std::vector<QStandardItem *> row = this->createRow();
+            this->getRowFromItem(args.item, row);
 
             // insert row
-            this->beginInsertRows(QModelIndex(), row, row);
-            this->rows.insert(this->rows.begin() + row, Row(items));
+            index = this->beforeInsert(args.item, row, index);
+
+            this->beginInsertRows(QModelIndex(), index, index);
+            this->rows.insert(this->rows.begin() + index, Row(row));
             this->endInsertRows();
         };
 
@@ -74,6 +72,8 @@ public:
             this->rows.erase(this->rows.begin() + row);
             this->endRemoveRows();
         });
+
+        this->afterInit();
     }
 
     virtual ~SignalVectorModel()
@@ -108,12 +108,18 @@ public:
         int row = index.row(), column = index.column();
         assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
 
-        this->rows[row].items[column]->setData(value, role);
+        Row &rowItem = this->rows[row];
 
-        int vecRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(vecRow, this);
-        TVectorItem item = this->getItemFromRow(this->rows[row].items);
-        this->vector->insertItem(item, vecRow, this);
+        rowItem.items[column]->setData(value, role);
+
+        if (rowItem.isCustomRow) {
+            this->customRowSetData(rowItem.items, column, value, role);
+        } else {
+            int vecRow = this->getVectorIndexFromModelIndex(row);
+            this->vector->removeItem(vecRow, this);
+            TVectorItem item = this->getItemFromRow(this->rows[row].items);
+            this->vector->insertItem(item, vecRow, this);
+        }
 
         return true;
     }
@@ -140,6 +146,8 @@ public:
         }
 
         this->_headerData[section][role] = value;
+
+        emit this->headerDataChanged(Qt::Horizontal, section, section);
         return true;
     }
 
@@ -151,51 +159,133 @@ public:
         return this->rows[index.row()].items[index.column()]->flags();
     }
 
-    virtual QStandardItem *getItem(int row, int column)
+    QStandardItem *getItem(int row, int column)
     {
         assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
 
         return rows[row].items[column];
     }
 
-    void removeRow(int row)
+    void deleteRow(int row)
     {
-        assert(row >= 0 && row <= this->rows.size());
-
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
         this->vector->removeItem(signalVectorRow);
     }
 
+    virtual bool removeRows(int row, int count, const QModelIndex &parent) override
+    {
+        if (count != 1) {
+            return false;
+        }
+
+        assert(row >= 0 && row < this->rows.size());
+
+        int signalVectorRow = this->getVectorIndexFromModelIndex(row);
+        this->vector->removeItem(signalVectorRow);
+
+        return true;
+    }
+
 protected:
+    virtual void afterInit()
+    {
+    }
+
     // turn a vector item into a model row
     virtual TVectorItem getItemFromRow(std::vector<QStandardItem *> &row) = 0;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const TVectorItem &item, std::vector<QStandardItem *> &row) = 0;
 
-    // returns the related index of the SignalVector
-    virtual int getVectorIndexFromModelIndex(int index) = 0;
+    virtual int beforeInsert(const TVectorItem &item, std::vector<QStandardItem *> &row,
+                             int proposedIndex)
+    {
+        return proposedIndex;
+    }
 
-    // returns the related index of the model
-    virtual int getModelIndexFromVectorIndex(int index) = 0;
+    virtual void afterRemoved(const TVectorItem &item, std::vector<QStandardItem *> &row, int index)
+    {
+    }
 
-private:
+    virtual void customRowSetData(const std::vector<QStandardItem *> &row, int column,
+                                  const QVariant &value, int role)
+    {
+    }
+
+    void insertCustomRow(std::vector<QStandardItem *> row, int index)
+    {
+        assert(index >= 0 && index <= this->rows.size());
+
+        this->beginInsertRows(QModelIndex(), index, index);
+        this->rows.insert(this->rows.begin() + index, Row(std::move(row), true));
+        this->endInsertRows();
+    }
+
+    std::vector<QStandardItem *> createRow()
+    {
+        std::vector<QStandardItem *> row;
+        for (int i = 0; i < this->_columnCount; i++) {
+            row.push_back(new QStandardItem());
+        }
+        return row;
+    }
+
     struct Row {
         std::vector<QStandardItem *> items;
         bool isCustomRow;
 
-        Row(const std::vector<QStandardItem *> _items, bool _isCustomRow = false)
-            : items(_items)
+        Row(std::vector<QStandardItem *> _items, bool _isCustomRow = false)
+            : items(std::move(_items))
             , isCustomRow(_isCustomRow)
         {
         }
     };
-
     std::vector<Row> rows;
+
+private:
     std::vector<QMap<int, QVariant>> _headerData;
     BaseSignalVector<TVectorItem> *vector;
 
     int _columnCount;
+
+    // returns the related index of the SignalVector
+    int getVectorIndexFromModelIndex(int index)
+    {
+        int i = 0;
+
+        for (auto &row : this->rows) {
+            if (row.isCustomRow) {
+                index--;
+                continue;
+            }
+
+            if (i == index) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    // returns the related index of the model
+    int getModelIndexFromVectorIndex(int index)
+    {
+        int i = 0;
+
+        for (auto &row : this->rows) {
+            if (row.isCustomRow) {
+                index++;
+            }
+
+            if (i == index) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
 };
 
 }  // namespace util

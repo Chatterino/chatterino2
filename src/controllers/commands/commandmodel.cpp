@@ -25,18 +25,6 @@ void CommandModel::getRowFromItem(const Command &item, std::vector<QStandardItem
     row[1]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
 }
 
-// returns the related index of the SignalVector
-int CommandModel::getVectorIndexFromModelIndex(int index)
-{
-    return index;
-}
-
-// returns the related index of the model
-int CommandModel::getModelIndexFromVectorIndex(int index)
-{
-    return index;
-}
-
 }  // namespace commands
 }  // namespace controllers
 }  // namespace chatterino

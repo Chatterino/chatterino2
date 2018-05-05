@@ -1,6 +1,7 @@
 #include "providers/twitch/twitchmessagebuilder.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "debug/log.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "singletons/accountmanager.hpp"
@@ -398,10 +399,12 @@ void TwitchMessageBuilder::parseHighlights()
         app->settings->highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
 
     // TODO: This vector should only be rebuilt upon highlights being changed
-    auto activeHighlights = app->settings->highlightProperties.getValue();
+    // fourtf: should be implemented in the HighlightsController
+    std::vector<controllers::highlights::HighlightPhrase> activeHighlights =
+        app->highlights->phrases.getVector();
 
     if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
-        messages::HighlightPhrase selfHighlight;
+        controllers::highlights::HighlightPhrase selfHighlight;
         selfHighlight.key = currentUsername;
         selfHighlight.sound = app->settings->enableHighlightSound;
         selfHighlight.alert = app->settings->enableHighlightTaskbar;
@@ -415,7 +418,7 @@ void TwitchMessageBuilder::parseHighlights()
     bool hasFocus = (QApplication::focusWidget() != nullptr);
 
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
-        for (const messages::HighlightPhrase &highlight : activeHighlights) {
+        for (const controllers::highlights::HighlightPhrase &highlight : activeHighlights) {
             int index = -1;
 
             while ((index = this->originalMessage.indexOf(highlight.key, index + 1,

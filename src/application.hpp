@@ -20,6 +20,9 @@ namespace controllers {
 namespace commands {
 class CommandController;
 }
+namespace highlights {
+class HighlightController;
+}
 }
 
 namespace singletons {
@@ -59,6 +62,7 @@ public:
     singletons::WindowManager *windows = nullptr;
     singletons::LoggingManager *logging = nullptr;
     controllers::commands::CommandController *commands = nullptr;
+    controllers::highlights::HighlightController *highlights = nullptr;
     singletons::AccountManager *accounts = nullptr;
     singletons::EmoteManager *emotes = nullptr;
     singletons::NativeMessagingManager *nativeMessaging = nullptr;

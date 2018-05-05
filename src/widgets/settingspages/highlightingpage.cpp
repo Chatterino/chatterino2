@@ -1,10 +1,13 @@
 #include "highlightingpage.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
+#include "controllers/highlights/highlightmodel.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/standarditemhelper.hpp"
+#include "widgets/helper/editablemodelview.hpp"
 
 #include <QFileDialog>
 #include <QListWidget>
@@ -41,95 +44,24 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
-                QTableView *view = *highlights.emplace<QTableView>();
-                auto *model = new QStandardItemModel(0, 4, view);
-                model->setHeaderData(0, Qt::Horizontal, "Pattern");
-                model->setHeaderData(1, Qt::Horizontal, "Flash taskbar");
-                model->setHeaderData(2, Qt::Horizontal, "Play sound");
-                model->setHeaderData(3, Qt::Horizontal, "Regex");
-                view->setModel(model);
-                view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-                view->setSelectionBehavior(QAbstractItemView::SelectRows);
-                view->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                helper::EditableModelView *view = *highlights.emplace<helper::EditableModelView>(
+                    app->highlights->createModel(nullptr));
 
-                // own name
-                auto *yourName = util::stringItem("Your name (automatic)", false, false);
-                yourName->setData(QBrush("#666"), Qt::ForegroundRole);
-                yourName->setFlags(yourName->flags() | Qt::ItemIsUserCheckable |
-                                   Qt::ItemIsUserCheckable);
-                yourName->setData(app->settings->enableHighlightsSelf ? 2 : 0, Qt::CheckStateRole);
-                model->appendRow(
-                    {yourName,
-                     util::boolItem(app->settings->enableHighlightTaskbar.getValue(), true, false),
-                     util::boolItem(app->settings->enableHighlightSound.getValue(), true, false),
-                     util::emptyItem()});
+                view->getTableView()->hideColumn(3);
 
-                // highlight phrases
-                // fourtf: could crash
-                for (const messages::HighlightPhrase &phrase :
-                     app->settings->highlightProperties.getValue()) {
-                    model->appendRow({util::stringItem(phrase.key), util::boolItem(phrase.alert),
-                                      util::boolItem(phrase.sound), util::boolItem(phrase.regex)});
-                }
+                view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
                 // fourtf: make class extrend BaseWidget and add this to dpiChanged
                 QTimer::singleShot(1, [view] {
-                    view->resizeColumnsToContents();
-                    view->setColumnWidth(0, 250);
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 250);
                 });
 
-                auto buttons = highlights.emplace<QHBoxLayout>().withoutMargin();
-
-                QObject::connect(
-                    model, &QStandardItemModel::dataChanged,
-                    [model, app](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                                 const QVector<int> &roles) {
-                        std::vector<messages::HighlightPhrase> phrases;
-                        for (int i = 1; i < model->rowCount(); i++) {
-                            phrases.push_back(messages::HighlightPhrase{
-                                model->item(i, 0)->data(Qt::DisplayRole).toString(),
-                                model->item(i, 1)->data(Qt::CheckStateRole).toBool(),
-                                model->item(i, 2)->data(Qt::CheckStateRole).toBool(),
-                                model->item(i, 3)->data(Qt::CheckStateRole).toBool()});
-                        }
-                        app->settings->highlightProperties.setValue(phrases);
-                        app->settings->enableHighlightsSelf.setValue(
-                            model->item(0, 0)->data(Qt::CheckStateRole).toBool());
-                        app->settings->enableHighlightTaskbar.setValue(
-                            model->item(0, 1)->data(Qt::CheckStateRole).toBool());
-                        app->settings->enableHighlightSound.setValue(
-                            model->item(0, 2)->data(Qt::CheckStateRole).toBool());
-                    });
-
-                auto add = buttons.emplace<QPushButton>("Add");
-                QObject::connect(*add, &QPushButton::clicked, [model, view] {
-                    model->appendRow({util::stringItem(""),
-                                      util::boolItem(model->item(model->rowCount() - 1, 1)
-                                                         ->data(Qt::CheckStateRole)
-                                                         .toBool()),
-                                      util::boolItem(model->item(model->rowCount() - 1, 2)
-                                                         ->data(Qt::CheckStateRole)
-                                                         .toBool()),
-                                      util::boolItem(false)});
-                    view->scrollToBottom();
+                view->addButtonPressed.connect([] {
+                    getApp()->highlights->phrases.appendItem(
+                        controllers::highlights::HighlightPhrase{"my phrase", true, false, false});
                 });
-                auto remove = buttons.emplace<QPushButton>("Remove");
-                QObject::connect(*remove, &QPushButton::clicked, [view, model] {
-                    std::vector<int> indices;
-
-                    for (const QModelIndex &index : view->selectionModel()->selectedRows(0)) {
-                        indices.push_back(index.row());
-                    }
-
-                    std::sort(indices.begin(), indices.end());
-
-                    for (int i = indices.size() - 1; i >= 0; i--) {
-                        model->removeRow(indices[i]);
-                    }
-                });
-                buttons->addStretch(1);
-
-                view->hideColumn(3);
             }
             auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
             {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/highlightphrase.hpp"
+#include "controllers/highlights/highlightphrase.hpp"
 #include "messages/messageelement.hpp"
 #include "singletons/helper/chatterinosetting.hpp"
 #include "singletons/helper/moderationaction.hpp"
@@ -103,9 +103,6 @@ public:
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
-
-    ChatterinoSetting<std::vector<messages::HighlightPhrase>> highlightProperties = {
-        "/highlighting/highlights"};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};

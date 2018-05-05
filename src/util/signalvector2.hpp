@@ -19,6 +19,8 @@ public:
     {
         QObject::connect(&this->itemsChangedTimer, &QTimer::timeout,
                          [this] { this->delayedItemsChanged.invoke(); });
+        this->itemsChangedTimer.setInterval(100);
+        this->itemsChangedTimer.setSingleShot(true);
     }
     virtual ~ReadOnlySignalVector() = default;
 
@@ -69,6 +71,8 @@ public:
         this->vector.erase(this->vector.begin() + index);
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemRemoved.invoke(args);
+
+        this->invokeDelayedItemsChanged();
     }
 
     int appendItem(const TVectorItem &item, void *caller = 0)
@@ -94,6 +98,7 @@ public:
 
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
+        this->invokeDelayedItemsChanged();
         return index;
     }
 };
@@ -111,6 +116,7 @@ public:
                     this->vector.begin();
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
+        this->invokeDelayedItemsChanged();
         return index;
     }
 };

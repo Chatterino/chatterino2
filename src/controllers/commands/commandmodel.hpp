@@ -22,12 +22,6 @@ protected:
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const Command &item, std::vector<QStandardItem *> &row) override;
 
-    // returns the related index of the SignalVector
-    virtual int getVectorIndexFromModelIndex(int index) override;
-
-    // returns the related index of the model
-    virtual int getModelIndexFromVectorIndex(int index) override;
-
     friend class CommandController;
 };
 

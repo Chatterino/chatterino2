@@ -188,7 +188,10 @@ SOURCES += \
     src/util/signalvectormodel.cpp \
     src/controllers/commands/command.cpp \
     src/controllers/commands/commandmodel.cpp \
-    src/controllers/commands/commandcontroller.cpp
+    src/controllers/commands/commandcontroller.cpp \
+    src/controllers/highlights/highlightcontroller.cpp \
+    src/controllers/highlights/highlightmodel.cpp \
+    src/widgets/helper/editablemodelview.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -196,7 +199,6 @@ HEADERS  += \
     src/const.hpp \
     src/debug/log.hpp \
     src/emojis.hpp \
-    src/messages/highlightphrase.hpp \
     src/messages/image.hpp \
     src/messages/layouts/messagelayout.hpp \
     src/messages/layouts/messagelayoutcontainer.hpp \
@@ -324,7 +326,11 @@ HEADERS  += \
     src/util/signalvectormodel.hpp \
     src/controllers/commands/command.hpp \
     src/controllers/commands/commandmodel.hpp \
-    src/controllers/commands/commandcontroller.hpp
+    src/controllers/commands/commandcontroller.hpp \
+    src/controllers/highlights/highlightcontroller.hpp \
+    src/controllers/highlights/highlightphrase.hpp \
+    src/controllers/highlights/highlightmodel.hpp \
+    src/widgets/helper/editablemodelview.hpp
 
 RESOURCES += \
     resources/resources.qrc
