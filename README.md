@@ -78,7 +78,7 @@ You can also add `-o2` to optimize the final binary size but increase compilatio
 
 #### Arch Linux
 install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) from the aur or build manually as follows:
-1. `sudo pacman -S qt5-base qt5-multimedia gst-plugins-ugly gst-plugins-good boost rapidjson`
+1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg gst-plugins-ugly gst-plugins-good boost rapidjson`
 2. go into project directory
 3. create build folder `mkdir build && cd build`
 4. `qmake .. && make`
