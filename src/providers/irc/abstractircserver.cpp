@@ -68,8 +68,8 @@ void AbstractIrcServer::connect()
         this->readConnection->open();
     }
 
-    this->onConnected();
-    //    this->connected.invoke();
+    //    this->onConnected();
+    // possbile event: started to connect
 }
 
 void AbstractIrcServer::disconnect()

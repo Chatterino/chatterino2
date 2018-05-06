@@ -49,6 +49,8 @@ HighlightingPage::HighlightingPage()
 
                 view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
 
                 // fourtf: make class extrend BaseWidget and add this to dpiChanged
                 QTimer::singleShot(1, [view] {
