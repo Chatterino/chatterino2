@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "controllers/accounts/account.hpp"
 #include "util/signalvectormodel.hpp"

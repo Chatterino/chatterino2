@@ -233,7 +233,7 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched, QEvent *eve
             return true;
         } else if (((event_key->key() == Qt::Key_Tab || event_key->key() == Qt::Key_Backtab) &&
                     event_key->modifiers() == Qt::ShiftModifier) ||
-                   (event_key->key() == Qt::Key_Up) && event_key->modifiers() == Qt::NoModifier) {
+                   ((event_key->key() == Qt::Key_Up) && event_key->modifiers() == Qt::NoModifier)) {
             if (widget == this->dialog->ui.twitch.channelName) {
                 this->dialog->ui.twitch.watching->setFocus();
                 return true;

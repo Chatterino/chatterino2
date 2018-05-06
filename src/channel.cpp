@@ -21,9 +21,9 @@ using namespace chatterino::messages;
 namespace chatterino {
 
 Channel::Channel(const QString &_name, Type _type)
-    : type(_type)
-    , name(_name)
+    : name(_name)
     , completionModel(this->name)
+    , type(_type)
 {
     this->clearCompletionModelTimer = new QTimer;
     QObject::connect(this->clearCompletionModelTimer, &QTimer::timeout, [this]() {

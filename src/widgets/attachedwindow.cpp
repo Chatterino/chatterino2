@@ -16,9 +16,9 @@ namespace chatterino {
 namespace widgets {
 
 AttachedWindow::AttachedWindow(void *_target, int _yOffset)
-    : target(_target)
+    : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
+    , target(_target)
     , yOffset(_yOffset)
-    , QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
 {
     QLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);

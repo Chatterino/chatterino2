@@ -374,6 +374,7 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
 
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing

@@ -682,8 +682,6 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
     if (rj::getSafe(msg, "error", error)) {
         std::string nonce;
         rj::getSafe(msg, "nonce", nonce);
-        const auto &xd = sentMessages;
-        const auto &payload = sentMessages[nonce];
 
         if (error.empty()) {
             debug::Log("Successfully listened to nonce {}", nonce);
