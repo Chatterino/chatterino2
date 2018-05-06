@@ -97,6 +97,8 @@ void Application::initialize()
     this->settings->load();
     this->commands->load();
 
+    this->resources->initialize();
+
     this->highlights->initialize();
 
     this->emotes->loadGlobalEmotes();
