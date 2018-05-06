@@ -277,26 +277,26 @@ QString ChannelView::getSelectedText()
 
     messages::LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot = this->getMessagesSnapshot();
 
-    Selection selection = this->selection;
+    Selection _selection = this->selection;
 
-    if (selection.isEmpty()) {
+    if (_selection.isEmpty()) {
         return result;
     }
 
-    qDebug() << "xd >>>>";
-    for (int msg = selection.selectionMin.messageIndex; msg <= selection.selectionMax.messageIndex;
-         msg++) {
+    qDebug() << "xd >";
+    for (int msg = _selection.selectionMin.messageIndex;
+         msg <= _selection.selectionMax.messageIndex; msg++) {
         MessageLayoutPtr layout = messagesSnapshot[msg];
         int from =
-            msg == selection.selectionMin.messageIndex ? selection.selectionMin.charIndex : 0;
-        int to = msg == selection.selectionMax.messageIndex ? selection.selectionMax.charIndex
-                                                            : layout->getLastCharacterIndex() + 1;
+            msg == _selection.selectionMin.messageIndex ? _selection.selectionMin.charIndex : 0;
+        int to = msg == _selection.selectionMax.messageIndex ? _selection.selectionMax.charIndex
+                                                             : layout->getLastCharacterIndex() + 1;
 
         qDebug() << "from:" << from << ", to:" << to;
 
         layout->addSelectionText(result, from, to);
     }
-    qDebug() << "xd <<<<";
+    qDebug() << "xd <";
 
     return result;
 }
@@ -430,6 +430,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->messageReplacedConnection =
         newChannel->messageReplaced.connect([this](size_t index, MessagePtr replacement) {
             MessageLayoutPtr newItem(new MessageLayout(replacement));
+            if (this->messages.getSnapshot()[index]->flags & MessageLayout::AlternateBackground) {
+                newItem->flags |= MessageLayout::AlternateBackground;
+            }
 
             this->scrollBar.replaceHighlight(index, replacement->getScrollBarHighlight());
 
@@ -443,6 +446,11 @@ void ChannelView::setChannel(ChannelPtr newChannel)
         MessageLayoutPtr deleted;
 
         auto messageRef = new MessageLayout(snapshot[i]);
+
+        if (this->lastMessageHasAlternateBackground) {
+            messageRef->flags |= MessageLayout::AlternateBackground;
+        }
+        this->lastMessageHasAlternateBackground = !this->lastMessageHasAlternateBackground;
 
         this->messages.pushBack(MessageLayoutPtr(messageRef), deleted);
     }
