@@ -12,25 +12,7 @@ namespace highlights {
 HighlightModel::HighlightModel(QObject *parent)
     : util::SignalVectorModel<HighlightPhrase>(4, parent)
 {
-    //    auto app = getApp();
-
-    //    std::vector<QStandardItem *> row = this->createRow();
-
-    //    util::setBoolItem(row[0], app->settings->enableHighlightsSelf.getValue(), true, false);
-    //    util::setBoolItem(row[1], app->settings->enableHighlightsSelf.getValue(), true, false);
-    //    util::setBoolItem(row[2], app->settings->enableHighlightsSelf.getValue(), true, false);
-    //    row[0]->setData("Your name (automatic)", Qt::DisplayRole);
-
-    //    this->insertCustomRow(row, 0);
 }
-
-// app->settings->highlightProperties.setValue(phrases);
-// app->settings->enableHighlightsSelf.setValue(
-//     model->item(0, 0)->data(Qt::CheckStateRole).toBool());
-// app->settings->enableHighlightTaskbar.setValue(
-//     model->item(0, 1)->data(Qt::CheckStateRole).toBool());
-// app->settings->enableHighlightSound.setValue(
-//     model->item(0, 2)->data(Qt::CheckStateRole).toBool());
 
 // turn a vector item into a model row
 HighlightPhrase HighlightModel::getItemFromRow(std::vector<QStandardItem *> &row)

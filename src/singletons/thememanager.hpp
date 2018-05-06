@@ -86,6 +86,7 @@ public:
 
         struct {
             QColor regular;
+            QColor alternate;
             QColor highlighted;
             // QColor resub;
             // QColor whisper;

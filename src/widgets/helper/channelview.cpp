@@ -356,6 +356,11 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
             auto messageRef = new MessageLayout(message);
 
+            if (this->lastMessageHasAlternateBackground) {
+                messageRef->flags |= MessageLayout::AlternateBackground;
+            }
+            this->lastMessageHasAlternateBackground = !this->lastMessageHasAlternateBackground;
+
             if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted)) {
                 if (!this->paused) {
                     if (this->scrollBar.isAtBottom()) {

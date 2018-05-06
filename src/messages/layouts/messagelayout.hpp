@@ -19,7 +19,11 @@ namespace layouts {
 class MessageLayout : boost::noncopyable
 {
 public:
-    enum Flags : uint8_t { RequiresBufferUpdate = 1 << 1, RequiresLayout = 1 << 2 };
+    enum Flags : uint8_t {
+        RequiresBufferUpdate = 1 << 1,
+        RequiresLayout = 1 << 2,
+        AlternateBackground = 1 << 3
+    };
 
     MessageLayout(MessagePtr message);
     ~MessageLayout();

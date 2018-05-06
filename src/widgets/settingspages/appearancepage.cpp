@@ -1,6 +1,7 @@
 #include "appearancepage.hpp"
 
 #include "application.hpp"
+#include "singletons/windowmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/removescrollareabackground.hpp"
 
@@ -76,9 +77,22 @@ AppearancePage::AppearancePage()
         }
 
         messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
-        auto checkbox = this->createCheckBox("Seperate messages", app->settings->seperateMessages);
-        checkbox->setEnabled(false);
-        messages.append(checkbox);
+        {
+            auto checkbox =
+                this->createCheckBox("Seperate messages", app->settings->seperateMessages);
+            messages.append(checkbox);
+            QObject::connect(checkbox, &QCheckBox::toggled,
+                             [](bool) { getApp()->windows->repaintVisibleChatWidgets(); });
+        }
+        {
+            auto checkbox = this->createCheckBox("Alternate message background color",
+                                                 app->settings->alternateMessageBackground);
+            messages.append(checkbox);
+            QObject::connect(checkbox, &QCheckBox::toggled, [](bool) {
+                getApp()->fonts->incGeneration();  // fourtf: hacky solution
+                getApp()->windows->repaintVisibleChatWidgets();
+            });
+        }
         messages.append(this->createCheckBox("Show message length while typing",
                                              app->settings->showMessageLength));
 

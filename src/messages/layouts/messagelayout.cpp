@@ -167,6 +167,12 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
         this->container.paintSelection(painter, messageIndex, selection, y);
     }
 
+    // draw message seperation line
+    if (app->settings->seperateMessages.getValue()) {
+        painter.fillRect(0, y + this->container.getHeight() - 1, this->container.getWidth(), 1,
+                         app->themes->splits.messageSeperator);
+    }
+
     // draw last read message line
     if (isLastReadMessage) {
         QColor color = isWindowFocused ? app->themes->tabs.selected.backgrounds.regular.color()
@@ -190,9 +196,16 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &s
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    painter.fillRect(buffer->rect(), this->message->flags & Message::Highlighted
-                                         ? app->themes->messages.backgrounds.highlighted
-                                         : app->themes->messages.backgrounds.regular);
+    QColor backgroundColor;
+    if (this->message->flags & Message::Highlighted) {
+        backgroundColor = app->themes->messages.backgrounds.highlighted;
+    } else if (app->settings->alternateMessageBackground.getValue() &&
+               this->flags & MessageLayout::AlternateBackground) {
+        backgroundColor = app->themes->messages.backgrounds.alternate;
+    } else {
+        backgroundColor = app->themes->messages.backgrounds.regular;
+    }
+    painter.fillRect(buffer->rect(), backgroundColor);
 
     // draw message
     this->container.paintElements(painter);

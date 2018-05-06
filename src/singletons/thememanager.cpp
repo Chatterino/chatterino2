@@ -116,7 +116,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     // Split
     bool flat = isLight;
 
-    this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(80, 80, 80);
+    this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = getColor(hue, 0.5, 0.5, 0.6);
     // this->splits.border
@@ -140,6 +140,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
+    this->messages.backgrounds.alternate = getColor(0, sat, 0.96);
     this->messages.backgrounds.highlighted =
         blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
     // this->messages.backgrounds.resub

@@ -85,6 +85,7 @@ private:
     QTimer updateTimer;
     bool updateQueued = false;
     bool messageWasAdded = false;
+    bool lastMessageHasAlternateBackground = false;
     bool paused = false;
     QTimer pauseTimeout;
     boost::optional<messages::MessageElement::Flags> overrideFlags;

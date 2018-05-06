@@ -40,6 +40,8 @@ public:
     BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting seperateMessages = {"/appearance/messages/separateMessages", false};
+    BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
+                                              false};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
