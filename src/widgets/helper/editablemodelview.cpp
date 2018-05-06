@@ -23,6 +23,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *_model)
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox->setMargin(0);
     vbox->addWidget(this->tableView);
 
     // create button layout

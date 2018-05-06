@@ -40,6 +40,7 @@ void HighlightModel::afterInit()
     row[0]->setData("Your username (automatic)", Qt::DisplayRole);
     util::setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true, false);
     util::setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(), true, false);
+    row[3]->setFlags(0);
     this->insertCustomRow(row, 0);
 }
 

@@ -31,7 +31,7 @@ public:
         , alert(_alert)
         , sound(_sound)
         , _isRegex(isRegex)
-        , regex(_isRegex ? _pattern : "\b" + QRegularExpression::escape(_pattern) + "\b",
+        , regex(_isRegex ? _pattern : "\\b" + QRegularExpression::escape(_pattern) + "\\b",
                 QRegularExpression::CaseInsensitiveOption)
     {
     }
