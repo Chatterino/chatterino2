@@ -47,7 +47,7 @@ Window::Window(WindowType _type)
             app->windows->showAccountSelectPopup(QCursor::pos());  //
         });
 
-        app->accounts->Twitch.userChanged.connect(
+        app->accounts->Twitch.currentUserChanged.connect(
             [=] { user->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName()); });
     }
 

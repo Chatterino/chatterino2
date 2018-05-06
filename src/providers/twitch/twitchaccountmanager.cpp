@@ -94,7 +94,7 @@ void TwitchAccountManager::reloadUsers()
                 debug::Log("User {} already exists, and values updated!", userData.username);
                 if (userData.username == this->getCurrent()->getUserName()) {
                     debug::Log("It was the current user, so we need to reconnect stuff!");
-                    this->userChanged.invoke();
+                    this->currentUserChanged.invoke();
                 }
             } break;
             case AddUserResponse::UserAdded: {
@@ -126,7 +126,7 @@ void TwitchAccountManager::load()
             this->currentUser = this->anonymousUser;
         }
 
-        this->userChanged.invoke();
+        this->currentUserChanged.invoke();
     });
 }
 

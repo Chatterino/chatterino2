@@ -7,12 +7,18 @@ namespace twitch {
 
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
                              const QString &_oauthClient, const QString &_userID)
-    : oauthClient(_oauthClient)
+    : controllers::accounts::Account("Twitch")
+    , oauthClient(_oauthClient)
     , oauthToken(_oauthToken)
     , userName(_username)
     , userId(_userID)
     , _isAnon(_username == ANONYMOUS_USERNAME)
 {
+}
+
+QString TwitchAccount::toString() const
+{
+    return this->getUserName();
 }
 
 const QString &TwitchAccount::getUserName() const

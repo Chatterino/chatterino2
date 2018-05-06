@@ -61,77 +61,79 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
     return;
-    // check parameter count
-    if (message->parameters().length() < 1) {
-        return;
-    }
+    //    // check parameter count
+    //    if (message->parameters().length() < 1) {
+    //        return;
+    //    }
 
-    QString chanName;
-    if (!TrimChannelName(message->parameter(0), chanName)) {
-        return;
-    }
+    //    QString chanName;
+    //    if (!TrimChannelName(message->parameter(0), chanName)) {
+    //        return;
+    //    }
 
-    auto app = getApp();
+    //    auto app = getApp();
 
-    // get channel
-    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    //    // get channel
+    //    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
-    if (chan->isEmpty()) {
-        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
-                   chanName);
-        return;
-    }
+    //    if (chan->isEmpty()) {
+    //        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
+    //                   chanName);
+    //        return;
+    //    }
 
-    // check if the chat has been cleared by a moderator
-    if (message->parameters().length() == 1) {
-        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
+    //    // check if the chat has been cleared by a moderator
+    //    if (message->parameters().length() == 1) {
+    //        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a
+    //        moderator."));
 
-        return;
-    }
+    //        return;
+    //    }
 
-    // get username, duration and message of the timed out user
-    QString username = message->parameter(1);
-    QString durationInSeconds, reason;
-    QVariant v = message->tag("ban-duration");
-    if (v.isValid()) {
-        durationInSeconds = v.toString();
-    }
+    //    // get username, duration and message of the timed out user
+    //    QString username = message->parameter(1);
+    //    QString durationInSeconds, reason;
+    //    QVariant v = message->tag("ban-duration");
+    //    if (v.isValid()) {
+    //        durationInSeconds = v.toString();
+    //    }
 
-    v = message->tag("ban-reason");
-    if (v.isValid()) {
-        reason = v.toString();
-    }
+    //    v = message->tag("ban-reason");
+    //    if (v.isValid()) {
+    //        reason = v.toString();
+    //    }
 
-    // add the notice that the user has been timed out
-    LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
-    bool addMessage = true;
-    int snapshotLength = snapshot.getLength();
+    //    // add the notice that the user has been timed out
+    //    LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
+    //    bool addMessage = true;
+    //    int snapshotLength = snapshot.getLength();
 
-    for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
-        auto &s = snapshot[i];
-        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == username) {
-            MessagePtr replacement(
-                Message::createTimeoutMessage(username, durationInSeconds, reason, true));
-            chan->replaceMessage(s, replacement);
-            addMessage = false;
-            break;
-        }
-    }
+    //    for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
+    //        auto &s = snapshot[i];
+    //        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == username) {
+    //            MessagePtr replacement(
+    //                Message::createTimeoutMessage(username, durationInSeconds, reason, true));
+    //            chan->replaceMessage(s, replacement);
+    //            addMessage = false;
+    //            break;
+    //        }
+    //    }
 
-    if (addMessage) {
-        chan->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason, false));
-    }
+    //    if (addMessage) {
+    //        chan->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason,
+    //        false));
+    //    }
 
-    // disable the messages from the user
-    for (int i = 0; i < snapshotLength; i++) {
-        auto &s = snapshot[i];
-        if (!(s->flags & Message::Timeout) && s->loginName == username) {
-            s->flags.EnableFlag(Message::Disabled);
-        }
-    }
+    //    // disable the messages from the user
+    //    for (int i = 0; i < snapshotLength; i++) {
+    //        auto &s = snapshot[i];
+    //        if (!(s->flags & Message::Timeout) && s->loginName == username) {
+    //            s->flags.EnableFlag(Message::Disabled);
+    //        }
+    //    }
 
-    // refresh all
-    app->windows->repaintVisibleChatWidgets(chan.get());
+    //    // refresh all
+    //    app->windows->repaintVisibleChatWidgets(chan.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
@@ -213,28 +215,28 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     return;
-    auto app = getApp();
-    MessagePtr msg = Message::createSystemMessage(message->content());
+    //    auto app = getApp();
+    //    MessagePtr msg = Message::createSystemMessage(message->content());
 
-    QString channelName;
-    if (!TrimChannelName(message->target(), channelName)) {
-        // Notice wasn't targeted at a single channel, send to all twitch channels
-        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
-            c->addMessage(msg);  //
-        });
+    //    QString channelName;
+    //    if (!TrimChannelName(message->target(), channelName)) {
+    //        // Notice wasn't targeted at a single channel, send to all twitch channels
+    //        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
+    //            c->addMessage(msg);  //
+    //        });
 
-        return;
-    }
+    //        return;
+    //    }
 
-    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
+    //    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
-    if (channel->isEmpty()) {
-        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
-                   channelName);
-        return;
-    }
+    //    if (channel->isEmpty()) {
+    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
+    //                   channelName);
+    //        return;
+    //    }
 
-    channel->addMessage(msg);
+    //    channel->addMessage(msg);
 }
 
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)

@@ -2,24 +2,71 @@
 
 #include "util/serialize-custom.hpp"
 
+#include <QRegularExpression>
 #include <QString>
+#include <memory>
 #include <pajlada/settings/serialize.hpp>
 
 namespace chatterino {
 namespace controllers {
 namespace highlights {
 
-struct HighlightPhrase {
-    QString key;
+class HighlightPhrase
+{
+    QString pattern;
     bool alert;
     bool sound;
-    bool regex;
+    bool _isRegex;
+    QRegularExpression regex;
 
+public:
     bool operator==(const HighlightPhrase &other) const
     {
-        return std::tie(this->key, this->sound, this->alert, this->regex) ==
-               std::tie(other.key, other.sound, other.alert, other.regex);
+        return std::tie(this->pattern, this->sound, this->alert, this->_isRegex) ==
+               std::tie(other.pattern, other.sound, other.alert, other._isRegex);
     }
+
+    HighlightPhrase(const QString &_pattern, bool _alert, bool _sound, bool isRegex)
+        : pattern(_pattern)
+        , alert(_alert)
+        , sound(_sound)
+        , _isRegex(isRegex)
+        , regex(_isRegex ? _pattern : "\b" + QRegularExpression::escape(_pattern) + "\b",
+                QRegularExpression::CaseInsensitiveOption)
+    {
+    }
+
+    const QString &getPattern() const
+    {
+        return this->pattern;
+    }
+    bool getAlert() const
+    {
+        return this->alert;
+    }
+    bool getSound() const
+    {
+        return this->sound;
+    }
+    bool isRegex() const
+    {
+        return this->_isRegex;
+    }
+
+    bool isValid() const
+    {
+        return !this->pattern.isEmpty() && this->regex.isValid();
+    }
+
+    bool isMatch(const QString &subject) const
+    {
+        return this->isValid() && this->regex.match(subject).hasMatch();
+    }
+
+    //    const QRegularExpression &getRegex() const
+    //    {
+    //        return this->regex;
+    //    }
 };
 }  // namespace highlights
 }  // namespace controllers
@@ -35,10 +82,10 @@ struct Serialize<chatterino::controllers::highlights::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "key", value.key, a);
-        AddMember(ret, "alert", value.alert, a);
-        AddMember(ret, "sound", value.sound, a);
-        AddMember(ret, "regex", value.regex, a);
+        AddMember(ret, "pattern", value.getPattern(), a);
+        AddMember(ret, "alert", value.getAlert(), a);
+        AddMember(ret, "sound", value.getSound(), a);
+        AddMember(ret, "regex", value.isRegex(), a);
 
         return ret;
     }
@@ -48,40 +95,45 @@ template <>
 struct Deserialize<chatterino::controllers::highlights::HighlightPhrase> {
     static chatterino::controllers::highlights::HighlightPhrase get(const rapidjson::Value &value)
     {
-        chatterino::controllers::highlights::HighlightPhrase ret;
         if (!value.IsObject()) {
-            return ret;
+            return chatterino::controllers::highlights::HighlightPhrase(QString(), true, false,
+                                                                        false);
         }
 
-        if (value.HasMember("key")) {
-            const rapidjson::Value &key = value["key"];
+        QString _pattern;
+        if (value.HasMember("pattern")) {
+            const rapidjson::Value &key = value["pattern"];
             if (key.IsString()) {
-                ret.key = key.GetString();
+                _pattern = key.GetString();
             }
         }
 
+        bool _alert = true;
         if (value.HasMember("alert")) {
             const rapidjson::Value &alert = value["alert"];
             if (alert.IsBool()) {
-                ret.alert = alert.GetBool();
+                _alert = alert.GetBool();
             }
         }
 
+        bool _sound = false;
         if (value.HasMember("sound")) {
             const rapidjson::Value &sound = value["sound"];
             if (sound.IsBool()) {
-                ret.sound = sound.GetBool();
+                _sound = sound.GetBool();
             }
         }
 
+        bool _isRegex = false;
         if (value.HasMember("regex")) {
             const rapidjson::Value &regex = value["regex"];
             if (regex.IsBool()) {
-                ret.regex = regex.GetBool();
+                _isRegex = regex.GetBool();
             }
         }
 
-        return ret;
+        return chatterino::controllers::highlights::HighlightPhrase(_pattern, _alert, _sound,
+                                                                    _isRegex);
     }
 };
 

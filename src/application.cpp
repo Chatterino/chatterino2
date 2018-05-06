@@ -203,7 +203,7 @@ void Application::initialize()
         this->twitch.pubsub->listenToWhispers(this->accounts->Twitch.getCurrent());  //
     };
 
-    this->accounts->Twitch.userChanged.connect(RequestModerationActions);
+    this->accounts->Twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
 }

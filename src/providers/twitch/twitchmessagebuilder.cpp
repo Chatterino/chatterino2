@@ -404,10 +404,9 @@ void TwitchMessageBuilder::parseHighlights()
         app->highlights->phrases.getVector();
 
     if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
-        controllers::highlights::HighlightPhrase selfHighlight;
-        selfHighlight.key = currentUsername;
-        selfHighlight.sound = app->settings->enableHighlightSound;
-        selfHighlight.alert = app->settings->enableHighlightTaskbar;
+        controllers::highlights::HighlightPhrase selfHighlight(
+            currentUsername, app->settings->enableHighlightTaskbar,
+            app->settings->enableHighlightSound, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -419,26 +418,17 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
         for (const controllers::highlights::HighlightPhrase &highlight : activeHighlights) {
-            int index = -1;
-
-            while ((index = this->originalMessage.indexOf(highlight.key, index + 1,
-                                                          Qt::CaseInsensitive)) != -1) {
-                if ((index != 0 && this->originalMessage[index - 1] != ' ') ||
-                    (index + highlight.key.length() != this->originalMessage.length() &&
-                     this->originalMessage[index + highlight.key.length()] != ' ')) {
-                    continue;
-                }
-
-                debug::Log("Highlight because {} contains {}", this->originalMessage,
-                           highlight.key);
+            if (highlight.isMatch(this->originalMessage)) {
+                debug::Log("Highlight because {} matches {}", this->originalMessage,
+                           highlight.getPattern());
                 doHighlight = true;
 
-                if (highlight.sound) {
-                    playSound = true;
+                if (highlight.getAlert()) {
+                    doAlert = true;
                 }
 
-                if (highlight.alert) {
-                    doAlert = true;
+                if (highlight.getSound()) {
+                    playSound = true;
                 }
 
                 if (playSound && doAlert) {

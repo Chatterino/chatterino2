@@ -45,10 +45,10 @@ HighlightPhrase HighlightModel::getItemFromRow(std::vector<QStandardItem *> &row
 // turns a row in the model into a vector item
 void HighlightModel::getRowFromItem(const HighlightPhrase &item, std::vector<QStandardItem *> &row)
 {
-    util::setStringItem(row[0], item.key);
-    util::setBoolItem(row[1], item.alert);
-    util::setBoolItem(row[2], item.sound);
-    util::setBoolItem(row[3], item.regex);
+    util::setStringItem(row[0], item.getPattern());
+    util::setBoolItem(row[1], item.getAlert());
+    util::setBoolItem(row[2], item.getSound());
+    util::setBoolItem(row[3], item.isRegex());
 }
 
 void HighlightModel::afterInit()

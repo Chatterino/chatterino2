@@ -3,15 +3,19 @@
 #include <QColor>
 #include <QString>
 
+#include "controllers/accounts/account.hpp"
+
 namespace chatterino {
 namespace providers {
 namespace twitch {
 
-class TwitchAccount
+class TwitchAccount : public controllers::accounts::Account
 {
 public:
     TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient,
                   const QString &_userID);
+
+    virtual QString toString() const override;
 
     const QString &getUserName() const;
     const QString &getOAuthToken() const;

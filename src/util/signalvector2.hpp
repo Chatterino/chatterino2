@@ -103,17 +103,19 @@ public:
     }
 };
 
-template <typename TVectorItem>
+template <typename TVectorItem, typename Compare>
 class SortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = 0) override
+    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1,
+                           void *caller = 0) override
     {
         util::assertInGuiThread();
 
-        int index = this->vector.insert(
-                        std::lower_bound(this->vector.begin(), this->vector.end(), item), item) -
-                    this->vector.begin();
+        int index =
+            this->vector.insert(
+                std::lower_bound(this->vector.begin(), this->vector.end(), item, Compare{}), item) -
+            this->vector.begin();
         typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();

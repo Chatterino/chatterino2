@@ -45,7 +45,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->refreshLiveStatus();  //
     });
 
-    this->managedConnect(app->accounts->Twitch.userChanged, [this]() { this->setMod(false); });
+    this->managedConnect(app->accounts->Twitch.currentUserChanged, [this]() { this->setMod(false); });
 
     auto refreshPubSubState = [=]() {
         if (!this->hasModRights()) {
@@ -64,7 +64,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
     this->userStateChanged.connect(refreshPubSubState);
     this->roomIDchanged.connect(refreshPubSubState);
-    this->managedConnect(app->accounts->Twitch.userChanged, refreshPubSubState);
+    this->managedConnect(app->accounts->Twitch.currentUserChanged, refreshPubSubState);
     refreshPubSubState();
 
     this->fetchMessages.connect([this] {

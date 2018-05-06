@@ -40,7 +40,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     connect(this, &AccountPopupWidget::refreshButtons, this,
             &AccountPopupWidget::actuallyRefreshButtons, Qt::QueuedConnection);
 
-    app->accounts->Twitch.userChanged.connect([=] {
+    app->accounts->Twitch.currentUserChanged.connect([=] {
         auto currentTwitchUser = app->accounts->Twitch.getCurrent();
         if (!currentTwitchUser) {
             // No twitch user set (should never happen)

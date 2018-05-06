@@ -47,15 +47,13 @@ HighlightingPage::HighlightingPage()
                 helper::EditableModelView *view = *highlights.emplace<helper::EditableModelView>(
                     app->highlights->createModel(nullptr));
 
-                view->getTableView()->hideColumn(3);
-
                 view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
                 // fourtf: make class extrend BaseWidget and add this to dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 250);
+                    view->getTableView()->setColumnWidth(0, 200);
                 });
 
                 view->addButtonPressed.connect([] {

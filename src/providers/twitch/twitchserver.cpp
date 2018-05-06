@@ -27,7 +27,7 @@ TwitchServer::TwitchServer()
 
 void TwitchServer::initialize()
 {
-    getApp()->accounts->Twitch.userChanged.connect(
+    getApp()->accounts->Twitch.currentUserChanged.connect(
         [this]() { util::postToThread([this] { this->connect(); }); });
 }
 

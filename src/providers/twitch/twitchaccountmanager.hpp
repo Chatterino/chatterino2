@@ -1,6 +1,8 @@
 #pragma once
 
 #include "providers/twitch/twitchaccount.hpp"
+#include "util/sharedptrelementless.hpp"
+#include "util/signalvector2.hpp"
 
 #include <pajlada/settings/setting.hpp>
 
@@ -47,8 +49,12 @@ public:
     bool removeUser(const QString &username);
 
     pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
-    pajlada::Signals::NoArgSignal userChanged;
+    pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
+
+    util::SortedSignalVector<std::shared_ptr<TwitchAccount>,
+                             util::SharedPtrElementLess<TwitchAccount>>
+        accounts;
 
 private:
     enum class AddUserResponse {
