@@ -101,7 +101,7 @@ void Application::initialize()
 
     this->highlights->initialize();
 
-    this->emotes->loadGlobalEmotes();
+    this->emotes->initialize();
 
     this->accounts->load();
 

@@ -29,8 +29,6 @@ public:
 
     void initialize();
 
-    void loadGlobalEmotes();
-
     void reloadBTTVChannelEmotes(const QString &channelName,
                                  std::weak_ptr<util::EmoteMap> channelEmoteMap);
     void reloadFFZChannelEmotes(const QString &channelName,

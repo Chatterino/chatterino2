@@ -91,10 +91,7 @@ void EmoteManager::initialize()
         assert(currentUser);
         this->refreshTwitchEmotes(currentUser);
     });
-}
 
-void EmoteManager::loadGlobalEmotes()
-{
     this->loadEmojis();
     this->loadBTTVEmotes();
     this->loadFFZEmotes();
