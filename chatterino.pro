@@ -312,7 +312,6 @@ HEADERS  += \
     src/version.hpp \
     src/singletons/settingsmanager.hpp \
     src/singletons/nativemessagingmanager.hpp \
-    src/singletons/pubsubmanager.hpp \
     src/util/rapidjson-helpers.hpp \
     src/providers/twitch/pubsubhelpers.hpp \
     src/providers/twitch/pubsubactions.hpp \
