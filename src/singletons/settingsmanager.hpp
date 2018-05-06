@@ -61,10 +61,6 @@ public:
         "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
     IntSetting smallStreamerLimit = {"/behaviour/autocompletion/smallStreamerLimit", 1000};
 
-    // Streamlink
-    QStringSetting streamlinkPath = {"/behaviour/streamlink/path", ""};
-    QStringSetting preferredQuality = {"/behaviour/streamlink/quality", "Choose"};
-    QStringSetting streamlinkOpts = {"/behaviour/streamlink/options", ""};
     BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
 
     /// Commands
@@ -113,6 +109,13 @@ public:
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
+
+    /// External tools
+    // Streamlink
+    BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath", false};
+    QStringSetting streamlinkPath = {"/external/streamlink/customPath", ""};
+    QStringSetting preferredQuality = {"/external/streamlink/quality", "Choose"};
+    QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
     void updateWordTypeMask();
 

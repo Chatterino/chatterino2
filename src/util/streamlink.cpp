@@ -5,6 +5,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "widgets/qualitypopup.hpp"
 
+#include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
 
@@ -33,6 +34,17 @@ const char *GetDefaultBinaryPath()
 #endif
 }
 
+QString getStreamlinkProgram()
+{
+    auto app = getApp();
+
+    if (app->settings->streamlinkUseCustomPath) {
+        return app->settings->streamlinkPath + "/" + GetBinaryName();
+    } else {
+        return GetBinaryName();
+    }
+}
+
 bool CheckStreamlinkPath(const QString &path)
 {
     QFileInfo fileinfo(path);
@@ -42,49 +54,57 @@ bool CheckStreamlinkPath(const QString &path)
         // throw Exception(fS("Streamlink path ({}) is invalid, file does not exist", path));
     }
 
-    if (fileinfo.isDir() || !fileinfo.isExecutable()) {
-        return false;
-    }
-
-    return true;
+    return fileinfo.isExecutable();
 }
 
-// TODO: Make streamlink binary finder smarter
-QString GetStreamlinkBinaryPath()
+void showStreamlinkNotFoundError()
 {
+    static QErrorMessage *msg = new QErrorMessage;
+
     auto app = getApp();
-
-    QString settingPath = app->settings->streamlinkPath;
-
-    QStringList paths;
-    paths << settingPath;
-    paths << GetDefaultBinaryPath();
-#ifdef _WIN32
-    paths << settingPath + "\\" + GetBinaryName();
-    paths << settingPath + "\\bin\\" + GetBinaryName();
-#else
-    paths << "/usr/local/bin/streamlink";
-    paths << "/bin/streamlink";
-#endif
-
-    for (const auto &path : paths) {
-        if (CheckStreamlinkPath(path)) {
-            return path;
-        }
+    if (app->settings->streamlinkUseCustomPath) {
+        msg->showMessage(
+            "Unable to find Streamlink executable\nMake sure your custom path is pointing "
+            "to the DIRECTORY where the streamlink executable is located");
+    } else {
+        msg->showMessage("Unable to find Streamlink executable.\nIf you have Streamlink "
+                         "installed, you might need to enable the custom path option");
     }
-
-    throw Exception("Unable to find streamlink binary. Install streamlink or set the binary path "
-                    "in the settings dialog.");
 }
+
+QProcess *createStreamlinkProcess()
+{
+    auto p = new QProcess;
+    p->setProgram(getStreamlinkProgram());
+
+    QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
+        if (err == QProcess::FailedToStart) {
+            showStreamlinkNotFoundError();
+        } else {
+            qDebug() << "Error occured: " << err;  //
+        }
+
+        p->deleteLater();
+    });
+
+    QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), [=](int res) {
+        p->deleteLater();  //
+    });
+
+    return p;
+}
+
+}  // namespace
 
 void GetStreamQualities(const QString &channelURL, std::function<void(QStringList)> cb)
 {
-    QString path = GetStreamlinkBinaryPath();
+    auto p = createStreamlinkProcess();
 
-    // XXX: Memory leak
-    QProcess *p = new QProcess();
-
-    QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), [=](int) {
+    QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), [=](int res) {
+        if (res != 0) {
+            qDebug() << "Got error code" << res;
+            // return;
+        }
         QString lastLine = QString(p->readAllStandardOutput());
         lastLine = lastLine.trimmed().split('\n').last().trimmed();
         if (lastLine.startsWith("Available streams: ")) {
@@ -106,16 +126,14 @@ void GetStreamQualities(const QString &channelURL, std::function<void(QStringLis
         }
     });
 
-    p->start(path, {channelURL, "--default-stream=KKona"});
-}
+    p->setArguments({channelURL, "--default-stream=KKona"});
 
-}  // namespace
+    p->start();
+}
 
 void OpenStreamlink(const QString &channelURL, const QString &quality, QStringList extraArguments)
 {
     auto app = getApp();
-
-    QString path = GetStreamlinkBinaryPath();
 
     QStringList arguments;
 
@@ -132,7 +150,15 @@ void OpenStreamlink(const QString &channelURL, const QString &quality, QStringLi
         arguments << quality;
     }
 
-    QProcess::startDetached(path, arguments);
+    auto p = createStreamlinkProcess();
+
+    p->setArguments(arguments);
+
+    bool res = p->startDetached();
+
+    if (!res) {
+        showStreamlinkNotFoundError();
+    }
 }
 
 void Start(const QString &channel)
