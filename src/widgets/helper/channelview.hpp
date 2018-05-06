@@ -94,7 +94,7 @@ private:
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
 
     void detachChannel();
-    void actuallyLayoutMessages();
+    void actuallyLayoutMessages(bool causedByScollbar = false);
 
     void drawMessages(QPainter &painter);
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);

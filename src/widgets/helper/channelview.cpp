@@ -54,7 +54,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
-        this->layoutMessages();
+        this->actuallyLayoutMessages(true);
         this->goToBottom->setVisible(this->enableScrollingToBottom && this->scrollBar.isVisible() &&
                                      !this->scrollBar.isAtBottom());
 
@@ -163,7 +163,7 @@ void ChannelView::layoutMessages()
     //    }
 }
 
-void ChannelView::actuallyLayoutMessages()
+void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
     auto app = getApp();
 
@@ -233,7 +233,9 @@ void ChannelView::actuallyLayoutMessages()
     this->scrollBar.setVisible(showScrollbar);
 
     if (!showScrollbar) {
-        this->scrollBar.setDesiredValue(0);
+        if (!causedByScrollbar) {
+            this->scrollBar.setDesiredValue(0);
+        }
     }
 
     this->scrollBar.setMaximum(messagesSnapshot.getLength());
