@@ -403,6 +403,7 @@ void SplitContainer::setPreviewRect(QPoint mousePos)
             this->dropPreview.setBounds(region.rect);
 
             if (!this->dropPreview.isVisible()) {
+                this->dropPreview.setGeometry(this->rect());
                 this->dropPreview.show();
                 this->dropPreview.raise();
             }

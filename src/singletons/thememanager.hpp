@@ -57,6 +57,7 @@ public:
         QColor border;
         QColor borderFocused;
         QColor dropPreview;
+        QColor dropPreviewBorder;
 
         struct {
             QColor border;

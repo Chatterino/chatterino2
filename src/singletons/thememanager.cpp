@@ -118,7 +118,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
-    this->splits.dropPreview = getColor(hue, 0.5, 0.5, 0.6);
+    this->splits.dropPreview = QColor(0, 148, 255, 0x30);
+    this->splits.dropPreviewBorder = QColor(0, 148, 255, 0x70);
     // this->splits.border
     // this->splits.borderFocused
 

@@ -62,10 +62,14 @@ SplitOverlay::SplitOverlay(Split *parent)
     up->setFocusPolicy(Qt::NoFocus);
     down->setFocusPolicy(Qt::NoFocus);
 
-    move->setCursor(Qt::SizeAllCursor);
+    move->setCursor(Qt::PointingHandCursor);
+    left->setCursor(Qt::PointingHandCursor);
+    right->setCursor(Qt::PointingHandCursor);
+    up->setCursor(Qt::PointingHandCursor);
+    down->setCursor(Qt::PointingHandCursor);
 
-    this->managedConnect(this->scaleChanged, [=](float scale) {
-        int a = scale * 40;
+    this->managedConnect(this->scaleChanged, [=](float _scale) {
+        int a = _scale * 40;
         QSize size(a, a);
 
         move->setIconSize(size);
@@ -97,8 +101,8 @@ void SplitOverlay::paintEvent(QPaintEvent *event)
         } break;
     }
     if (!rect.isNull()) {
-        painter.setPen(QColor(0, 148, 255, 0x70));
-        painter.setBrush(QColor(0, 148, 255, 0x30));
+        painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+        painter.setBrush(getApp()->themes->splits.dropPreview);
         painter.drawRect(rect);
     }
 }

@@ -19,9 +19,9 @@ protected:
     void paintEvent(QPaintEvent *) override;
     void hideEvent(QHideEvent *) override;
 
-    QPropertyAnimation positionAnimation;
-    QRect desiredGeometry;
-    bool animate = false;
+    //    QPropertyAnimation positionAnimation;
+    //    QRect desiredGeometry;
+    //    bool animate = false;
 };
 
 }  // namespace widgets
