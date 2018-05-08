@@ -138,9 +138,9 @@ void Window::refreshWindowTitle(const QString &username)
     this->setWindowTitle(username + " - Chatterino for Twitch");
 }
 
-bool Window::event(QEvent *e)
+bool Window::event(QEvent *event)
 {
-    switch (e->type()) {
+    switch (event->type()) {
         case QEvent::WindowActivate:
             break;
 
@@ -156,7 +156,7 @@ bool Window::event(QEvent *e)
             }
         } break;
     };
-    return BaseWindow::event(e);
+    return BaseWindow::event(event);
 }
 
 void Window::closeEvent(QCloseEvent *event)

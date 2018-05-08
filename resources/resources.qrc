@@ -46,6 +46,11 @@
         <file>images/about.svg</file>
         <file>images/moderatormode_disabled.png</file>
         <file>images/moderatormode_enabled.png</file>
+        <file>images/split/splitdown.png</file>
+        <file>images/split/splitleft.png</file>
+        <file>images/split/splitright.png</file>
+        <file>images/split/splitup.png</file>
+        <file>images/split/splitmove.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

@@ -111,7 +111,7 @@ void BaseWidget::childEvent(QChildEvent *event)
 
 void BaseWidget::showEvent(QShowEvent *)
 {
-    this->scaleChangedEvent(this->getScale());
+    this->setScale(this->getScale());
     this->themeRefreshEvent();
 }
 

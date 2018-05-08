@@ -20,6 +20,14 @@ public:
 
     void initialize();
 
+    struct {
+        QIcon left;
+        QIcon right;
+        QIcon up;
+        QIcon down;
+        QIcon move;
+    } split;
+
     messages::Image *badgeStaff;
     messages::Image *badgeAdmin;
     messages::Image *badgeGlobalModerator;

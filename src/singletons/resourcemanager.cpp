@@ -1,6 +1,7 @@
 #include "resourcemanager.hpp"
 #include "util/urlfetch.hpp"
 
+#include <QIcon>
 #include <QPixmap>
 
 namespace chatterino {
@@ -288,6 +289,11 @@ ResourceManager::ResourceManager()
     , buttonBan(lli(":/images/button_ban.png", 0.25))
     , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
 {
+    this->split.left = QIcon(":/images/split/splitleft.png");
+    this->split.right = QIcon(":/images/split/splitright.png");
+    this->split.up = QIcon(":/images/split/splitup.png");
+    this->split.down = QIcon(":/images/split/splitdown.png");
+    this->split.move = QIcon(":/images/split/splitmove.png");
     qDebug() << "init ResourceManager";
 }
 

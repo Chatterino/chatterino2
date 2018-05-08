@@ -13,6 +13,7 @@
 #include "widgets/helper/debugpopup.hpp"
 #include "widgets/helper/searchpopup.hpp"
 #include "widgets/helper/shortcut.hpp"
+#include "widgets/helper/splitoverlay.hpp"
 #include "widgets/qualitypopup.hpp"
 #include "widgets/selectchanneldialog.hpp"
 #include "widgets/splitcontainer.hpp"
@@ -38,6 +39,9 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
+pajlada::Signals::Signal<bool> Split::altPressedStatusChanged;
+bool Split::altPressesStatus = false;
+
 Split::Split(SplitContainer *parent)
     : Split((QWidget *)parent)
 {
@@ -52,6 +56,7 @@ Split::Split(QWidget *parent)
     , header(this)
     , view(this)
     , input(this)
+    , overlay(new SplitOverlay(this))
 {
     auto app = getApp();
 
@@ -119,8 +124,17 @@ Split::Split(QWidget *parent)
         this->managedConnections);
 
     this->header.updateModerationModeIcon();
+    this->overlay->hide();
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+    this->managedConnect(altPressedStatusChanged, [this](bool status) {
+        if (status && this->isMouseOver) {
+            this->overlay->show();
+        } else {
+            this->overlay->hide();
+        }
+    });
 }
 
 Split::~Split()
@@ -287,15 +301,39 @@ void Split::keyReleaseEvent(QKeyEvent *event)
     this->handleModifiers(event, event->modifiers());
 }
 
+void Split::resizeEvent(QResizeEvent *event)
+{
+    BaseWidget::resizeEvent(event);
+
+    this->overlay->setGeometry(this->rect());
+}
+
+void Split::enterEvent(QEvent *event)
+{
+    this->isMouseOver = true;
+    if (altPressesStatus) {
+        this->overlay->show();
+    }
+}
+
+void Split::leaveEvent(QEvent *event)
+{
+    this->isMouseOver = false;
+    this->overlay->hide();
+}
+
 void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
 {
     if (modifiers == Qt::AltModifier) {
-        this->setCursor(Qt::SizeAllCursor);
-        event->accept();
-        //    } else if (modifiers == Qt::ControlModifier) {
-        //        this->setCursor(Qt::SplitHCursor);
-        //        event->accept();
+        if (!altPressesStatus) {
+            altPressesStatus = true;
+            altPressedStatusChanged.invoke(true);
+        }
     } else {
+        if (altPressesStatus) {
+            altPressesStatus = false;
+            altPressedStatusChanged.invoke(false);
+        }
         this->setCursor(Qt::ArrowCursor);
     }
 }

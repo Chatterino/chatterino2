@@ -194,7 +194,8 @@ SOURCES += \
     src/widgets/helper/editablemodelview.cpp \
     src/controllers/accounts/accountcontroller.cpp \
     src/controllers/accounts/accountmodel.cpp \
-    src/controllers/accounts/account.cpp
+    src/controllers/accounts/account.cpp \
+    src/widgets/helper/splitoverlay.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -336,7 +337,8 @@ HEADERS  += \
     src/controllers/accounts/accountcontroller.hpp \
     src/controllers/accounts/accountmodel.hpp \
     src/controllers/accounts/account.hpp \
-    src/util/sharedptrelementless.hpp
+    src/util/sharedptrelementless.hpp \
+    src/widgets/helper/splitoverlay.hpp
 
 RESOURCES += \
     resources/resources.qrc

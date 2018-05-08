@@ -21,6 +21,7 @@ namespace chatterino {
 namespace widgets {
 
 class SplitContainer;
+class SplitOverlay;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
 // ChatWidgetHeader
@@ -32,11 +33,14 @@ class SplitContainer;
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class Split : public BaseWidget
+class Split : public BaseWidget, pajlada::Signals::SignalHolder
 {
     friend class SplitInput;
 
     Q_OBJECT
+
+    static pajlada::Signals::Signal<bool> altPressedStatusChanged;
+    static bool altPressesStatus;
 
 public:
     explicit Split(SplitContainer *parent);
@@ -81,6 +85,9 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
 
 private:
     SplitContainer *container;
@@ -90,10 +97,14 @@ private:
     SplitHeader header;
     ChannelView view;
     SplitInput input;
+    SplitOverlay *overlay;
+
     double flexSizeX = 1;
     double flexSizeY = 1;
 
     bool moderationMode = false;
+
+    bool isMouseOver = false;
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
