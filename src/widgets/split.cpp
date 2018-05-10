@@ -39,8 +39,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-pajlada::Signals::Signal<bool> Split::altPressedStatusChanged;
-bool Split::altPressesStatus = false;
+pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
+Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
 Split::Split(SplitContainer *parent)
     : Split((QWidget *)parent)
@@ -128,15 +128,14 @@ Split::Split(QWidget *parent)
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    this->managedConnect(altPressedStatusChanged, [this](bool status) {
-        //        if (status && this->isMouseOver) {
-        //            this->overlay->show();
-        //        } else {
-        //            this->overlay->hide();
-        //        }
+    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
+        if ((status == Qt::AltModifier || status == (Qt::AltModifier | Qt::ControlModifier)) &&
+            this->isMouseOver) {
+            this->overlay->show();
+        } else {
+            this->overlay->hide();
+        }
     });
-
-    this->setAcceptDrops(true);
 }
 
 Split::~Split()
@@ -159,6 +158,11 @@ SplitContainer *Split::getContainer()
 bool Split::isInContainer() const
 {
     return this->container != nullptr;
+}
+
+void Split::setContainer(SplitContainer *_container)
+{
+    this->container = _container;
 }
 
 IndirectChannel Split::getIndirectChannel()
@@ -299,7 +303,11 @@ void Split::resizeEvent(QResizeEvent *event)
 void Split::enterEvent(QEvent *event)
 {
     this->isMouseOver = true;
-    if (altPressesStatus) {
+
+    auto a = modifierStatus;
+
+    if (modifierStatus == Qt::AltModifier ||
+        modifierStatus == (Qt::AltModifier | Qt::ControlModifier)) {
         this->overlay->show();
     }
 }
@@ -312,18 +320,23 @@ void Split::leaveEvent(QEvent *event)
 
 void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
 {
-    if (modifiers == Qt::AltModifier) {
-        if (!altPressesStatus) {
-            altPressesStatus = true;
-            altPressedStatusChanged.invoke(true);
-        }
-    } else {
-        if (altPressesStatus) {
-            altPressesStatus = false;
-            altPressedStatusChanged.invoke(false);
-        }
-        this->setCursor(Qt::ArrowCursor);
+    if (modifierStatus != modifiers) {
+        modifierStatus = modifiers;
+        modifierStatusChanged.invoke(modifiers);
     }
+
+    //    if (modifiers == Qt::AltModifier) {
+    //        if (!modifierStatus) {
+    //            modifierStatus = true;
+    //            modifierStatusChanged.invoke(true);
+    //        }
+    //    } else {
+    //        if (modifierStatus) {
+    //            modifierStatus = false;
+    //            modifierStatusChanged.invoke(false);
+    //        }
+    //        this->setCursor(Qt::ArrowCursor);
+    //    }
 }
 
 void Split::dragEnterEvent(QDragEnterEvent *event)

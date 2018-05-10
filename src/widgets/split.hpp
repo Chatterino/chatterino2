@@ -69,8 +69,10 @@ public:
 
     bool isInContainer() const;
 
-    static pajlada::Signals::Signal<bool> altPressedStatusChanged;
-    static bool altPressesStatus;
+    void setContainer(SplitContainer *container);
+
+    static pajlada::Signals::Signal<Qt::KeyboardModifiers> modifierStatusChanged;
+    static Qt::KeyboardModifiers modifierStatus;
 
 protected:
     void paintEvent(QPaintEvent *event) override;

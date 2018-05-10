@@ -16,7 +16,12 @@
 #include <functional>
 #include <vector>
 
+#include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+
+// remove
+#include "application.hpp"
+#include "singletons/thememanager.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -285,7 +290,7 @@ public:
             }
         }
 
-        void layout(bool addSpacing, std::vector<DropRect> &dropRects)
+        void layout(bool addSpacing, float _scale, std::vector<DropRect> &dropRects)
         {
             switch (this->type) {
                 case Node::_Split: {
@@ -303,7 +308,8 @@ public:
                     qreal childWidth = this->geometry.width();
 
                     if (addSpacing) {
-                        qreal offset = this->geometry.width() * 0.1;
+                        qreal offset = std::min<qreal>(this->geometry.width() * 0.1, _scale * 24);
+
                         dropRects.emplace_back(
                             QRect(childX, this->geometry.top(), offset, this->geometry.height()),
                             Position(this, Direction::Left));
@@ -323,7 +329,7 @@ public:
                         child->geometry =
                             QRectF(childX, y, childWidth, child->geometry.height() * scaleFactor);
 
-                        child->layout(addSpacing, dropRects);
+                        child->layout(addSpacing, _scale, dropRects);
                         y += child->geometry.height();
                     }
                 } break;
@@ -338,7 +344,7 @@ public:
                     qreal childHeight = this->geometry.height();
 
                     if (addSpacing) {
-                        qreal offset = this->geometry.height() * 0.1;
+                        qreal offset = std::min<qreal>(this->geometry.height() * 0.1, _scale * 24);
                         dropRects.emplace_back(
                             QRect(this->geometry.left(), childY, this->geometry.width(), offset),
                             Position(this, Direction::Above));
@@ -347,8 +353,8 @@ public:
                                   this->geometry.width(), offset),
                             Position(this, Direction::Below));
 
-                        childY += this->geometry.height() * 0.1;
-                        childHeight -= this->geometry.height() * 0.2;
+                        childY += offset;
+                        childHeight -= offset * 2;
                     }
 
                     qreal scaleFactor = this->geometry.width() / totalWidth;
@@ -358,7 +364,7 @@ public:
                         child->geometry =
                             QRectF(x, childY, child->geometry.width() * scaleFactor, childHeight);
 
-                        child->layout(addSpacing, dropRects);
+                        child->layout(addSpacing, _scale, dropRects);
                         x += child->geometry.width();
                     }
                 } break;
@@ -372,6 +378,105 @@ public:
         }
 
         friend class SplitContainer;
+    };
+
+    class DropOverlay : public QWidget
+    {
+    public:
+        DropOverlay(SplitContainer *_parent = nullptr)
+            : QWidget(_parent)
+            , parent(_parent)
+            , mouseOverPoint(-10000, -10000)
+        {
+            this->setMouseTracking(true);
+            this->setAcceptDrops(true);
+        }
+
+        void setRects(std::vector<SplitContainer::DropRect> _rects)
+        {
+            this->rects = std::move(_rects);
+        }
+
+        pajlada::Signals::NoArgSignal dragEnded;
+
+    protected:
+        void paintEvent(QPaintEvent *event) override
+        {
+            QPainter painter(this);
+
+            //            painter.fillRect(this->rect(), QColor("#334"));
+
+            bool foundMover = false;
+
+            for (DropRect &rect : this->rects) {
+                if (!foundMover && rect.rect.contains(this->mouseOverPoint)) {
+                    painter.setBrush(getApp()->themes->splits.dropPreview);
+                    painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+                    foundMover = true;
+                } else {
+                    painter.setBrush(QColor(0, 0, 0, 0));
+                    painter.setPen(QColor(0, 0, 0, 0));
+                    // painter.setPen(getApp()->themes->splits.dropPreviewBorder);
+                }
+
+                painter.drawRect(rect.rect);
+            }
+        }
+
+        void mouseMoveEvent(QMouseEvent *event)
+        {
+            this->mouseOverPoint = event->pos();
+        }
+
+        void leaveEvent(QEvent *event)
+        {
+            this->mouseOverPoint = QPoint(-10000, -10000);
+        }
+
+        void dragEnterEvent(QDragEnterEvent *event)
+        {
+            event->acceptProposedAction();
+        }
+
+        void dragMoveEvent(QDragMoveEvent *event)
+        {
+            event->acceptProposedAction();
+
+            this->mouseOverPoint = event->pos();
+            this->update();
+        }
+
+        void dragLeaveEvent(QDragLeaveEvent *event)
+        {
+            this->mouseOverPoint = QPoint(-10000, -10000);
+            this->close();
+            this->dragEnded.invoke();
+        }
+
+        void dropEvent(QDropEvent *event)
+        {
+            Position *position = nullptr;
+            for (DropRect &rect : this->rects) {
+                if (rect.rect.contains(this->mouseOverPoint)) {
+                    position = &rect.position;
+                    break;
+                }
+            }
+
+            if (position != nullptr) {
+                this->parent->insertSplit(SplitContainer::draggingSplit, *position);
+                event->acceptProposedAction();
+            }
+
+            this->mouseOverPoint = QPoint(-10000, -10000);
+            this->close();
+            this->dragEnded.invoke();
+        }
+
+    private:
+        std::vector<DropRect> rects;
+        QPoint mouseOverPoint;
+        SplitContainer *parent;
     };
 
     SplitContainer(Notebook *parent, NotebookTab *_tab);
@@ -402,31 +507,6 @@ public:
         return &this->baseNode;
     }
 
-    //    std::pair<int, int> removeFromLayout(Split *widget);
-    //    void addToLayout(Split *widget, std::pair<int, int> position = std::pair<int, int>(-1,
-    //    -1));
-
-    //    const std::vector<Split *> &getSplits() const;
-    //    std::vector<std::vector<Split *>> getColumns() const;
-
-    //    void addChat(bool openChannelNameDialog = false);
-
-    //    static std::pair<int, int> dropPosition;
-
-    //    int currentX = 0;
-    //    int currentY = 0;
-    //    std::map<int, int> lastRequestedY;
-
-    //    void refreshCurrentFocusCoordinates(bool alsoSetLastRequested = false);
-    //    void requestFocus(int x, int y);
-
-    //    void updateFlexValues();
-    //    int splitCount() const;
-
-    //    void loadSplits();
-
-    //    void save();
-
     static bool isDraggingSplit;
     static Split *draggingSplit;
     //    static Position dragOriginalPosition;
@@ -438,7 +518,8 @@ protected:
     //    void showEvent(QShowEvent *event) override;
 
     //    void enterEvent(QEvent *event) override;
-    //    void leaveEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -463,6 +544,8 @@ private:
     std::vector<DropRect> dropRects;
     std::vector<DropRegion> dropRegions;
     NotebookPageDropPreview dropPreview;
+    DropOverlay overlay;
+    QPoint mouseOverPoint;
 
     void layout();
 

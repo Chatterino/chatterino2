@@ -19,6 +19,7 @@ SplitOverlay::SplitOverlay(Split *parent)
     , split(parent)
 {
     QGridLayout *layout = new QGridLayout(this);
+    this->_layout = layout;
     layout->setMargin(1);
     layout->setSpacing(1);
 
@@ -28,10 +29,11 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(3, 1);
 
     QPushButton *move = new QPushButton(getApp()->resources->split.move, QString());
-    QPushButton *left = new QPushButton(getApp()->resources->split.left, QString());
-    QPushButton *right = new QPushButton(getApp()->resources->split.right, QString());
-    QPushButton *up = new QPushButton(getApp()->resources->split.up, QString());
-    QPushButton *down = new QPushButton(getApp()->resources->split.down, QString());
+    QPushButton *left = this->_left = new QPushButton(getApp()->resources->split.left, QString());
+    QPushButton *right = this->_right =
+        new QPushButton(getApp()->resources->split.right, QString());
+    QPushButton *up = this->_up = new QPushButton(getApp()->resources->split.up, QString());
+    QPushButton *down = this->_down = new QPushButton(getApp()->resources->split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));
@@ -106,6 +108,18 @@ void SplitOverlay::paintEvent(QPaintEvent *event)
         painter.setBrush(getApp()->themes->splits.dropPreview);
         painter.drawRect(rect);
     }
+}
+
+void SplitOverlay::resizeEvent(QResizeEvent *event)
+{
+    float scale = this->getScale();
+    bool wideEnough = event->size().width() > 150 * scale;
+    bool highEnough = event->size().height() > 150 * scale;
+
+    this->_left->setVisible(wideEnough);
+    this->_right->setVisible(wideEnough);
+    this->_up->setVisible(highEnough);
+    this->_down->setVisible(highEnough);
 }
 
 SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent, HoveredElement _element)

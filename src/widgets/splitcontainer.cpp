@@ -1,4 +1,5 @@
 #include "widgets/splitcontainer.hpp"
+#include "application.hpp"
 #include "common.hpp"
 #include "singletons/thememanager.hpp"
 #include "util/helpers.hpp"
@@ -30,25 +31,29 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab)
     : BaseWidget(parent)
     , tab(_tab)
     , dropPreview(this)
+    , mouseOverPoint(-10000, -10000)
+    , overlay(this)
 {
     this->tab->page = this;
 
-    //    this->setLayout(&this->ui.parentLayout);
-
-    //    this->setHidden(true);
-    //    this->setAcceptDrops(true);
-
-    //    this->ui.parentLayout.addSpacing(1);
-    //    this->ui.parentLayout.addLayout(&this->ui.hbox);
-    //    this->ui.parentLayout.setMargin(0);
-
-    //    this->ui.hbox.setSpacing(1);
-    //    this->ui.hbox.setMargin(0);
-
     this->refreshTabTitle();
 
-    this->managedConnect(Split::altPressedStatusChanged, [this](auto) { this->layout(); });
+    this->managedConnect(Split::modifierStatusChanged, [this](auto) {
+        // fourtf: maybe optimize
+        this->layout();
+    });
 
+    this->setCursor(Qt::PointingHandCursor);
+    this->setAcceptDrops(true);
+
+    this->managedConnect(this->overlay.dragEnded, [this]() {
+        this->isDragging = false;
+        this->layout();
+    });
+
+    this->overlay.hide();
+
+    this->setMouseTracking(true);
     this->setAcceptDrops(true);
 }
 
@@ -91,6 +96,8 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Split *relat
 
 void SplitContainer::insertSplit(Split *split, Direction direction, Node *relativeTo)
 {
+    split->setContainer(this);
+
     if (relativeTo == nullptr) {
         if (this->baseNode.type == Node::EmptyRoot) {
             this->baseNode.setSplit(split);
@@ -107,7 +114,10 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
 
     split->setParent(this);
     split->show();
+    split->giveFocus(Qt::MouseFocusReason);
     this->splits.push_back(split);
+
+    //    this->setAcceptDrops(false);
 
     this->layout();
 }
@@ -121,6 +131,14 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     split->setParent(nullptr);
     Position position = node->releaseSplit();
     this->layout();
+    if (splits.size() != 0) {
+        this->splits.front()->giveFocus(Qt::MouseFocusReason);
+    }
+
+    //    if (this->splits.empty()) {
+    //        this->setAcceptDrops(true);
+    //    }
+
     return position;
 }
 
@@ -137,11 +155,41 @@ void SplitContainer::layout()
     this->baseNode.geometry = this->rect();
 
     std::vector<DropRect> _dropRects;
-    this->baseNode.layout(Split::altPressesStatus | this->isDragging, _dropRects);
+    this->baseNode.layout(
+        Split::modifierStatus == (Qt::AltModifier | Qt::ControlModifier) || this->isDragging,
+        this->getScale(), _dropRects);
     _dropRects.clear();
-    this->baseNode.layout(Split::altPressesStatus | this->isDragging, _dropRects);
+    this->baseNode.layout(
+        Split::modifierStatus == (Qt::AltModifier | Qt::ControlModifier) || this->isDragging,
+        this->getScale(), _dropRects);
 
-    this->dropRects = std::move(_dropRects);
+    this->dropRects = _dropRects;
+
+    for (Split *split : this->splits) {
+        const QRect &g = split->geometry();
+
+        Node *node = this->baseNode.findNodeContainingSplit(split);
+
+        _dropRects.push_back(DropRect(QRect(g.left(), g.top(), g.width() / 4, g.height()),
+                                      Position(node, Direction::Left)));
+        _dropRects.push_back(
+            DropRect(QRect(g.left() + g.width() / 4 * 3, g.top(), g.width() / 4, g.height()),
+                     Position(node, Direction::Right)));
+
+        _dropRects.push_back(DropRect(QRect(g.left(), g.top(), g.width(), g.height() / 2),
+                                      Position(node, Direction::Above)));
+        _dropRects.push_back(
+            DropRect(QRect(g.left(), g.top() + g.height() / 2, g.width(), g.height() / 2),
+                     Position(node, Direction::Below)));
+    }
+
+    if (this->splits.empty()) {
+        QRect g = this->rect();
+        _dropRects.push_back(DropRect(QRect(g.left(), g.top(), g.width(), g.height()),
+                                      Position(nullptr, Direction::Below)));
+    }
+
+    this->overlay.setRects(std::move(_dropRects));
     this->update();
 }
 
@@ -160,7 +208,7 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
             // "Add Chat" was clicked
             this->appendNewSplit(true);
 
-            this->setCursor(QCursor(Qt::ArrowCursor));
+            //            this->setCursor(QCursor(Qt::ArrowCursor));
         } else {
             auto it =
                 std::find_if(this->dropRects.begin(), this->dropRects.end(),
@@ -198,8 +246,16 @@ void SplitContainer::paintEvent(QPaintEvent *)
     }
 
     for (DropRect &dropRect : this->dropRects) {
-        painter.setPen("#774");
-        painter.setBrush(QBrush("#553"));
+        QColor border = getApp()->themes->splits.dropPreviewBorder;
+        QColor background = getApp()->themes->splits.dropPreview;
+
+        if (!dropRect.rect.contains(this->mouseOverPoint)) {
+            //            border.setAlphaF(0.1);
+            background.setAlphaF(0.1);
+        }
+
+        painter.setPen(border);
+        painter.setBrush(background);
 
         painter.drawRect(dropRect.rect.marginsRemoved(QMargins(2, 2, 2, 2)));
     }
@@ -213,309 +269,56 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
 void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (!event->mimeData()->hasFormat("chatterino/split"))
-        return;
+    //    if (!event->mimeData()->hasFormat("chatterino/split"))
+    //        return;
 
-    if (!SplitContainer::isDraggingSplit) {
-        return;
-    }
+    //    if (!SplitContainer::isDraggingSplit) {
+    //        return;
+    //    }
 
     this->isDragging = true;
     this->layout();
 
-    event->acceptProposedAction();
-
-    //    this->dropRegions.clear();
-
-    //    if (this->ui.hbox.count() == 0) {
-    //        this->dropRegions.push_back(DropRegion(rect(), std::pair<int, int>(-1, -1)));
-    //    } else {
-    //        for (int i = 0; i < this->ui.hbox.count() + 1; ++i) {
-    //            this->dropRegions.push_back(
-    //                DropRegion(QRect(((i * 4 - 1) * width() / this->ui.hbox.count()) / 4, 0,
-    //                                 width() / this->ui.hbox.count() / 2 + 1, height() + 1),
-    //                           std::pair<int, int>(i, -1)));
-    //        }
-
-    //        for (int i = 0; i < this->ui.hbox.count(); ++i) {
-    //            auto vbox = static_cast<QVBoxLayout *>(this->ui.hbox.itemAt(i));
-
-    //            for (int j = 0; j < vbox->count() + 1; ++j) {
-    //                this->dropRegions.push_back(DropRegion(
-    //                    QRect(i * width() / this->ui.hbox.count(),
-    //                          ((j * 2 - 1) * height() / vbox->count()) / 2,
-    //                          width() / this->ui.hbox.count() + 1, height() / vbox->count() + 1),
-
-    //                    std::pair<int, int>(i, j)));
-    //            }
-    //        }
+    //    if (this->splits.empty()) {
+    //        event->acceptProposedAction();
     //    }
 
-    //    setPreviewRect(event->pos());
-
-    //    event->acceptProposedAction();
+    this->overlay.setGeometry(this->rect());
+    this->overlay.show();
+    this->overlay.raise();
 }
 
 void SplitContainer::dragMoveEvent(QDragMoveEvent *event)
 {
-    //    setPreviewRect(event->pos());
+    //    if (this->splits.empty()) {
+    //        event->acceptProposedAction();
+    //    }
 
-    for (auto &dropRect : this->dropRects) {
-        if (dropRect.rect.contains(event->pos())) {
-            event->acceptProposedAction();
-            return;
-        }
-    }
-    event->setAccepted(false);
+    //    for (auto &dropRect : this->dropRects) {
+    //        if (dropRect.rect.contains(event->pos())) {
+    //            event->acceptProposedAction();
+    //            return;
+    //        }
+    //    }
+    //    event->setAccepted(false);
 }
 
 void SplitContainer::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    this->isDragging = false;
-    this->layout();
-
-    //    this->dropPreview.hide();
+    //    this->isDragging = false;
+    //    this->layout();
 }
 
 void SplitContainer::dropEvent(QDropEvent *event)
 {
-    //    if (isDraggingSplit) {
+    //    if (this->splits.empty()) {
+    //        this->insertSplit(SplitContainer::draggingSplit, Direction::Above);
     //        event->acceptProposedAction();
-
-    //        SplitContainer::draggingSplit->setParent(this);
-
-    //        addToLayout(SplitContainer::draggingSplit, dropPosition);
     //    }
 
-    //    this->dropPreview.hide();
-
-    for (auto &dropRect : this->dropRects) {
-        if (dropRect.rect.contains(event->pos())) {
-            this->insertSplit(SplitContainer::draggingSplit, dropRect.position);
-            event->acceptProposedAction();
-            break;
-        }
-    }
-
-    this->isDragging = false;
-    this->layout();
+    //    this->isDragging = false;
+    //    this->layout();
 }
-
-// void SplitContainer::updateFlexValues()
-//{
-//    for (int i = 0; i < this->ui.hbox.count(); i++) {
-//        QVBoxLayout *vbox = (QVBoxLayout *)ui.hbox.itemAt(i)->layout();
-
-//        if (vbox->count() != 0) {
-//            ui.hbox.setStretch(i, (int)(1000 * ((Split *)vbox->itemAt(0))->getFlexSizeX()));
-//        }
-//    }
-//}
-
-// int SplitContainer::splitCount() const
-//{
-//    return this->splits.size();
-//}
-
-// std::pair<int, int> SplitContainer::removeFromLayout(Split *widget)
-//{
-//    widget->getChannelView().tabHighlightRequested.disconnectAll();
-
-//    // remove reference to chat widget from chatWidgets vector
-//    auto it = std::find(std::begin(this->splits), std::end(this->splits), widget);
-//    if (it != std::end(this->splits)) {
-//        this->splits.erase(it);
-
-//        this->refreshTitle();
-//    }
-
-//    Split *neighbouringSplit = nullptr;
-
-//    // Position the split was found at
-//    int positionX = -1, positionY = -1;
-
-//    bool removed = false;
-
-//    QVBoxLayout *layoutToRemove = nullptr;
-
-//    // Find widget in box, remove it, return its position
-//    for (int i = 0; i < this->ui.hbox.count(); ++i) {
-//        auto vbox = static_cast<QVBoxLayout *>(this->ui.hbox.itemAt(i));
-
-//        auto vboxCount = vbox->count();
-
-//        for (int j = 0; j < vboxCount; ++j) {
-//            if (vbox->itemAt(j)->widget() != widget) {
-//                neighbouringSplit = dynamic_cast<Split *>(vbox->itemAt(j)->widget());
-
-//                if (removed && neighbouringSplit != nullptr) {
-//                    // The widget we searched for has been found, and we have a split to switch
-//                    // focus to
-//                    break;
-//                }
-
-//                continue;
-//            }
-
-//            removed = true;
-//            positionX = i;
-
-//            // Remove split from box
-//            widget->setParent(nullptr);
-
-//            if (vbox->count() == 0) {
-//                // The split was the last item remaining in the vbox
-//                // Remove the vbox once all iteration is done
-//                layoutToRemove = vbox;
-//                positionY = -1;
-//                break;
-//            }
-
-//            // Don't break here yet, we want to keep iterating this vbox if possible to find the
-//            // closest still-alive neighbour that we can switch focus to
-//            positionY = j;
-
-//            --j;
-//            --vboxCount;
-//        }
-
-//        if (removed && neighbouringSplit != nullptr) {
-//            // The widget we searched for has been found, and we have a split to switch focus to
-//            break;
-//        }
-//    }
-
-//    if (removed) {
-//        if (layoutToRemove != nullptr) {
-//            // The split we removed was the last split in its box. Remove the box
-//            // We delay the removing of the box so we can keep iterating over hbox safely
-//            this->ui.hbox.removeItem(layoutToRemove);
-//            delete layoutToRemove;
-//        }
-
-//        if (neighbouringSplit != nullptr) {
-//            // We found a neighbour split we can switch focus to
-//            neighbouringSplit->giveFocus(Qt::MouseFocusReason);
-//        }
-//    }
-
-//    return std::make_pair(positionX, positionY);
-//}
-
-// void SplitContainer::addToLayout(Split *widget, std::pair<int, int> position)
-//{
-//    this->splits.push_back(widget);
-//    widget->getChannelView().tabHighlightRequested.connect(
-//        [this](HighlightState state) { this->tab->setHighlightState(state); });
-
-//    this->refreshTitle();
-
-//    widget->giveFocus(Qt::MouseFocusReason);
-
-//    // add vbox at the end
-//    if (position.first < 0 || position.first >= this->ui.hbox.count()) {
-//        auto vbox = new QVBoxLayout();
-//        vbox->addWidget(widget);
-
-//        this->ui.hbox.addLayout(vbox, 1);
-
-//        this->refreshCurrentFocusCoordinates();
-//        return;
-//    }
-
-//    // insert vbox
-//    if (position.second == -1) {
-//        auto vbox = new QVBoxLayout();
-//        vbox->addWidget(widget);
-
-//        this->ui.hbox.insertLayout(position.first, vbox, 1);
-//        this->refreshCurrentFocusCoordinates();
-//        return;
-//    }
-
-//    // add to existing vbox
-//    auto vbox = static_cast<QVBoxLayout *>(this->ui.hbox.itemAt(position.first));
-
-//    vbox->insertWidget(std::max(0, std::min(vbox->count(), position.second)), widget);
-
-//    this->refreshCurrentFocusCoordinates();
-//}
-
-// const std::vector<Split *> &SplitContainer::getSplits() const
-//{
-//    return this->splits;
-//}
-
-// std::vector<std::vector<Split *>> SplitContainer::getColumns() const
-//{
-//    std::vector<std::vector<Split *>> columns;
-
-//    for (int i = 0; i < this->ui.hbox.count(); i++) {
-//        std::vector<Split *> cells;
-
-//        QLayout *vbox = this->ui.hbox.itemAt(i)->layout();
-//        for (int j = 0; j < vbox->count(); j++) {
-//            cells.push_back(dynamic_cast<Split *>(vbox->itemAt(j)->widget()));
-//        }
-
-//        columns.push_back(cells);
-//    }
-
-//    return columns;
-//}
-
-// void SplitContainer::refreshCurrentFocusCoordinates(bool alsoSetLastRequested)
-//{
-//    int setX = -1;
-//    int setY = -1;
-//    bool doBreak = false;
-//    for (int x = 0; x < this->ui.hbox.count(); ++x) {
-//        QLayoutItem *item = this->ui.hbox.itemAt(x);
-//        if (item->isEmpty()) {
-//            setX = x;
-//            break;
-//        }
-//        QVBoxLayout *vbox = static_cast<QVBoxLayout *>(item->layout());
-
-//        for (int y = 0; y < vbox->count(); ++y) {
-//            QLayoutItem *innerItem = vbox->itemAt(y);
-
-//            if (innerItem->isEmpty()) {
-//                setX = x;
-//                setY = y;
-//                doBreak = true;
-//                break;
-//            }
-
-//            QWidget *w = innerItem->widget();
-//            if (w) {
-//                Split *chatWidget = static_cast<Split *>(w);
-//                if (chatWidget->hasFocus()) {
-//                    setX = x;
-//                    setY = y;
-//                    doBreak = true;
-//                    break;
-//                }
-//            }
-//        }
-
-//        if (doBreak) {
-//            break;
-//        }
-//    }
-
-//    if (setX != -1) {
-//        this->currentX = setX;
-
-//        if (setY != -1) {
-//            this->currentY = setY;
-
-//            if (alsoSetLastRequested) {
-//                this->lastRequestedY[setX] = setY;
-//            }
-//        }
-//    }
-//}
 
 // void SplitContainer::requestFocus(int requestedX, int requestedY)
 //{
@@ -561,7 +364,7 @@ void SplitContainer::dropEvent(QDropEvent *event)
 //    }
 //}
 
-// void SplitContainer::enterEvent(QEvent *)
+// void SplitContainer::enterEvent(QEvent *event)
 //{
 //    if (this->ui.hbox.count() == 0) {
 //        this->setCursor(QCursor(Qt::PointingHandCursor));
@@ -570,9 +373,17 @@ void SplitContainer::dropEvent(QDropEvent *event)
 //    }
 //}
 
-// void SplitContainer::leaveEvent(QEvent *)
-//{
-//}
+void SplitContainer::mouseMoveEvent(QMouseEvent *event)
+{
+    this->mouseOverPoint = event->pos();
+    this->update();
+}
+
+void SplitContainer::leaveEvent(QEvent *event)
+{
+    this->mouseOverPoint = QPoint(-1000, -10000);
+    this->update();
+}
 
 // void SplitContainer::setPreviewRect(QPoint mousePos)
 //{
