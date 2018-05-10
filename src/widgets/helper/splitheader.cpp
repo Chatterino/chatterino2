@@ -241,13 +241,13 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->show();
     }
 
-    if (this->dragging) {
-        if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
-            std::abs(this->dragStart.y() - event->pos().y()) > 12) {
-            this->split->drag();
-            this->dragging = false;
-        }
-    }
+    //    if (this->dragging) {
+    //        if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
+    //            std::abs(this->dragStart.y() - event->pos().y()) > 12) {
+    //            this->split->drag();
+    //            this->dragging = false;
+    //        }
+    //    }
 }
 
 void SplitHeader::leaveEvent(QEvent *event)

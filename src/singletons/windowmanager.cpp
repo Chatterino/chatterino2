@@ -209,7 +209,7 @@ void WindowManager::initialize()
                     QJsonObject split_obj = split_val.toObject();
                     split->setChannel(this->decodeChannel(split_obj));
 
-                    tab->addToLayout(split, std::make_pair(colNr, 10000000));
+                    //                    tab->addToLayout(split, std::make_pair(colNr, 10000000));
                 }
                 colNr++;
             }
@@ -271,20 +271,20 @@ void WindowManager::save()
 
             // splits
             QJsonArray columns_arr;
-            std::vector<std::vector<widgets::Split *>> columns = tab->getColumns();
+            //            std::vector<std::vector<widgets::Split *>> columns = tab->getColumns();
 
-            for (std::vector<widgets::Split *> &cells : columns) {
-                QJsonArray cells_arr;
+            //            for (std::vector<widgets::Split *> &cells : columns) {
+            //                QJsonArray cells_arr;
 
-                for (widgets::Split *cell : cells) {
-                    QJsonObject cell_obj;
+            //                for (widgets::Split *cell : cells) {
+            //                    QJsonObject cell_obj;
 
-                    this->encodeChannel(cell->getIndirectChannel(), cell_obj);
+            //                    this->encodeChannel(cell->getIndirectChannel(), cell_obj);
 
-                    cells_arr.append(cell_obj);
-                }
-                columns_arr.append(cells_arr);
-            }
+            //                    cells_arr.append(cell_obj);
+            //                }
+            //                columns_arr.append(cells_arr);
+            //            }
 
             tab_obj.insert("splits", columns_arr);
             tabs_arr.append(tab_obj);

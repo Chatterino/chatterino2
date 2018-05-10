@@ -139,10 +139,10 @@ void NotebookButton::dropEvent(QDropEvent *event)
         Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
 
         if (notebook != nuuls) {
-            SplitContainer *tab = notebook->addNewPage();
+            SplitContainer *page = notebook->addNewPage();
 
-            SplitContainer::draggingSplit->setParent(tab);
-            tab->addToLayout(SplitContainer::draggingSplit);
+            SplitContainer::draggingSplit->setParent(page);
+            page->appendSplit(SplitContainer::draggingSplit);
         }
     }
 }

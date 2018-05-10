@@ -39,9 +39,6 @@ class Split : public BaseWidget, pajlada::Signals::SignalHolder
 
     Q_OBJECT
 
-    static pajlada::Signals::Signal<bool> altPressedStatusChanged;
-    static bool altPressesStatus;
-
 public:
     explicit Split(SplitContainer *parent);
     explicit Split(QWidget *parent);
@@ -50,19 +47,12 @@ public:
 
     pajlada::Signals::NoArgSignal channelChanged;
 
-    ChannelView &getChannelView()
-    {
-        return this->view;
-    }
+    ChannelView &getChannelView();
+    SplitContainer *getContainer();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
-
-    void setFlexSizeX(double x);
-    double getFlexSizeX();
-    void setFlexSizeY(double y);
-    double getFlexSizeY();
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
@@ -79,6 +69,9 @@ public:
 
     bool isInContainer() const;
 
+    static pajlada::Signals::Signal<bool> altPressedStatusChanged;
+    static bool altPressesStatus;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -88,6 +81,11 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
+
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private:
     SplitContainer *container;
@@ -99,12 +97,10 @@ private:
     SplitInput input;
     SplitOverlay *overlay;
 
-    double flexSizeX = 1;
-    double flexSizeY = 1;
-
     bool moderationMode = false;
 
     bool isMouseOver = false;
+    bool isDragging = false;
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
@@ -151,11 +147,6 @@ public slots:
 
     // Open viewer list of the channel
     void doOpenViewerList();
-
-    void doIncFlexX();
-    void doDecFlexX();
-    void doIncFlexY();
-    void doDecFlexY();
 };
 
 }  // namespace widgets

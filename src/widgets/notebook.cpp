@@ -391,13 +391,13 @@ Notebook::Notebook(Window *parent, bool _showButtons)
 
     // Window-wide hotkeys
     // CTRL+T: Create new split in selected notebook page
-    CreateWindowShortcut(this, "CTRL+T", [this]() {
-        if (this->selectedPage == nullptr) {
-            return;
-        }
+    //    CreateWindowShortcut(this, "CTRL+T", [this]() {
+    //        if (this->selectedPage == nullptr) {
+    //            return;
+    //        }
 
-        this->selectedPage->addChat(true);
-    });
+    //        this->selectedPage->addChat(true);
+    //    });
 }
 
 SplitContainer *Notebook::addNewPage(bool select)
@@ -420,7 +420,7 @@ SplitContainer *Notebook::addNewPage(bool select)
 
 void Notebook::removePage(SplitContainer *page)
 {
-    if (page->splitCount() > 0 && closeConfirmDialog.exec() != QMessageBox::Yes) {
+    if (page->getSplitCount() > 0 && closeConfirmDialog.exec() != QMessageBox::Yes) {
         return;
     }
 
@@ -484,7 +484,8 @@ void Notebook::select(SplitContainer *page)
     if (this->selectedPage != nullptr) {
         this->selectedPage->setHidden(true);
         this->selectedPage->getTab()->setSelected(false);
-        for (auto split : this->selectedPage->getSplits()) {
+
+        for (Split *split : this->selectedPage->getSplits()) {
             split->updateLastReadMessage();
         }
     }
@@ -663,8 +664,7 @@ void Notebook::settingsButtonClicked()
 void Notebook::usersButtonClicked()
 {
     auto app = getApp();
-    app->windows->showAccountSelectPopup(
-        this->mapToGlobal(this->userButton.rect().bottomRight()));
+    app->windows->showAccountSelectPopup(this->mapToGlobal(this->userButton.rect().bottomRight()));
 }
 
 void Notebook::addPageButtonClicked()

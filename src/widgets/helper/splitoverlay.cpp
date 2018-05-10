@@ -9,6 +9,7 @@
 #include "application.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "widgets/split.hpp"
+#include "widgets/splitcontainer.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -146,6 +147,17 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                     this->parent->split->drag();
                 }
                 return true;
+            } else {
+                SplitContainer *container = this->parent->split->getContainer();
+
+                if (container != nullptr) {
+                    auto *_split = new Split(container);
+                    container->insertSplit(
+                        _split,
+                        (SplitContainer::Direction)(this->hoveredElement + SplitContainer::Left -
+                                                    SplitLeft),
+                        this->parent->split);
+                }
             }
         } break;
     }

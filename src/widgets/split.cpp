@@ -135,6 +135,8 @@ Split::Split(QWidget *parent)
         //            this->overlay->hide();
         //        }
     });
+
+    this->setAcceptDrops(true);
 }
 
 Split::~Split()
@@ -142,6 +144,16 @@ Split::~Split()
     this->usermodeChangedConnection.disconnect();
     this->channelIDChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
+}
+
+ChannelView &Split::getChannelView()
+{
+    return this->view;
+}
+
+SplitContainer *Split::getContainer()
+{
+    return this->container;
 }
 
 bool Split::isInContainer() const
@@ -185,30 +197,6 @@ void Split::setChannel(IndirectChannel newChannel)
     this->channelChanged.invoke();
 }
 
-void Split::setFlexSizeX(double x)
-{
-    //    this->flexSizeX = x;
-    //    this->parentPage->updateFlexValues();
-}
-
-double Split::getFlexSizeX()
-{
-    //    return this->flexSizeX;
-    return 1;
-}
-
-void Split::setFlexSizeY(double y)
-{
-    //    this->flexSizeY = y;
-    //    this->parentPage.updateFlexValues();
-}
-
-double Split::getFlexSizeY()
-{
-    //    return this->flexSizeY;
-    return 1;
-}
-
 void Split::setModerationMode(bool value)
 {
     if (value != this->moderationMode) {
@@ -236,7 +224,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         if (dialog->hasSeletedChannel()) {
             this->setChannel(dialog->getSelectedChannel());
             if (this->isInContainer()) {
-                this->container->refreshTitle();
+                this->container->refreshTabTitle();
             }
         }
 
@@ -284,9 +272,9 @@ void Split::mouseMoveEvent(QMouseEvent *event)
 
 void Split::mousePressEvent(QMouseEvent *event)
 {
-    if (event->buttons() == Qt::LeftButton && event->modifiers() & Qt::AltModifier) {
-        this->drag();
-    }
+    //    if (event->buttons() == Qt::LeftButton && event->modifiers() & Qt::AltModifier) {
+    //        this->drag();
+    //    }
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
@@ -338,19 +326,40 @@ void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
     }
 }
 
+void Split::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+    this->isDragging = true;
+    QTimer::singleShot(1, [this] { this->overlay->show(); });
+}
+
+void Split::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    this->overlay->hide();
+    this->isDragging = false;
+}
+
+void Split::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void Split::dropEvent(QDropEvent *event)
+{
+}
+
 /// Slots
 void Split::doAddSplit()
 {
     if (this->container) {
-        this->container->addChat(true);
+        this->container->appendNewSplit(true);
     }
 }
 
 void Split::doCloseSplit()
 {
     if (this->container) {
-        this->container->removeFromLayout(this);
-        deleteLater();
+        this->container->deleteSplit(this);
     }
 }
 
@@ -373,7 +382,7 @@ void Split::doPopup()
         new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));
 
     split->setChannel(this->getIndirectChannel());
-    window.getNotebook().getOrAddSelectedPage()->addToLayout(split);
+    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
 
     window.show();
 }
@@ -536,26 +545,6 @@ static Iter select_randomly(Iter start, Iter end)
     return select_randomly(start, end, gen);
 }
 
-void Split::doIncFlexX()
-{
-    this->setFlexSizeX(this->getFlexSizeX() * 1.2);
-}
-
-void Split::doDecFlexX()
-{
-    this->setFlexSizeX(this->getFlexSizeX() * (1 / 1.2));
-}
-
-void Split::doIncFlexY()
-{
-    this->setFlexSizeY(this->getFlexSizeY() * 1.2);
-}
-
-void Split::doDecFlexY()
-{
-    this->setFlexSizeY(this->getFlexSizeY() * (1 / 1.2));
-}
-
 void Split::drag()
 {
     auto container = dynamic_cast<SplitContainer *>(this->parentWidget());
@@ -564,7 +553,7 @@ void Split::drag()
         SplitContainer::isDraggingSplit = true;
         SplitContainer::draggingSplit = this;
 
-        auto originalLocation = container->removeFromLayout(this);
+        auto originalLocation = container->releaseSplit(this);
 
         QDrag *drag = new QDrag(this);
         QMimeData *mimeData = new QMimeData;
@@ -576,7 +565,8 @@ void Split::drag()
         Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
 
         if (dropAction == Qt::IgnoreAction) {
-            container->addToLayout(this, originalLocation);
+            container->insertSplit(this,
+                                   originalLocation);  // SplitContainer::dragOriginalPosition);
         }
 
         SplitContainer::isDraggingSplit = false;

@@ -17,7 +17,8 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    enum HoveredElement { None, SplitMove, SplitLeft, SplitRight, SplitUp, SplitDown };
+    // fourtf: !!! preserve the order of left, up, right and down
+    enum HoveredElement { None, SplitMove, SplitLeft, SplitUp, SplitRight, SplitDown };
     HoveredElement hoveredElement = None;
     Split *split;
 

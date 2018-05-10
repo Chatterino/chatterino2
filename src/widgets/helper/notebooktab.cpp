@@ -429,7 +429,7 @@ NotebookTab::NotebookTab(Notebook *_notebook)
             QString newTitle = d.getText();
             if (newTitle.isEmpty()) {
                 this->useDefaultTitle = true;
-                this->page->refreshTitle();
+                this->page->refreshTabTitle();
             } else {
                 this->useDefaultTitle = false;
                 this->setTitle(newTitle);
