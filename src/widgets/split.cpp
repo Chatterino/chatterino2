@@ -129,11 +129,11 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     this->managedConnect(altPressedStatusChanged, [this](bool status) {
-        if (status && this->isMouseOver) {
-            this->overlay->show();
-        } else {
-            this->overlay->hide();
-        }
+        //        if (status && this->isMouseOver) {
+        //            this->overlay->show();
+        //        } else {
+        //            this->overlay->hide();
+        //        }
     });
 }
 

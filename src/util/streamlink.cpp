@@ -150,14 +150,7 @@ void OpenStreamlink(const QString &channelURL, const QString &quality, QStringLi
         arguments << quality;
     }
 
-    /*
-    // This only works in Qt 5.10 and above
-    auto p = createStreamlinkProcess();
-    p->setArguments(arguments);
-    bool res = p->startDetached();
-    */
-
-    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+    bool res = QProcess::startDetached(getStreamlinkProgram() + " " + QString(arguments.join(' ')));
 
     if (!res) {
         showStreamlinkNotFoundError();
