@@ -197,7 +197,9 @@ SOURCES += \
     src/controllers/accounts/accountcontroller.cpp \
     src/controllers/accounts/accountmodel.cpp \
     src/controllers/accounts/account.cpp \
-    src/widgets/helper/splitoverlay.cpp
+    src/widgets/helper/splitoverlay.cpp \
+    src/widgets/helper/dropoverlay.cpp \
+    src/widgets/helper/splitnode.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -343,7 +345,9 @@ HEADERS  += \
     src/controllers/accounts/accountmodel.hpp \
     src/controllers/accounts/account.hpp \
     src/util/sharedptrelementless.hpp \
-    src/widgets/helper/splitoverlay.hpp
+    src/widgets/helper/splitoverlay.hpp \
+    src/widgets/helper/dropoverlay.hpp \
+    src/widgets/helper/splitnode.hpp
 
 RESOURCES += \
     resources/resources.qrc

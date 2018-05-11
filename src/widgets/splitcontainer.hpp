@@ -189,22 +189,11 @@ public:
         {
             auto &siblings = this->parent->children;
 
-            qreal size =
-                //                std::accumulate(this->parent->children.begin(),
-                //                this->parent->children.end(), 0,
-                //                                [_direction](qreal val, Node *node) {
-                //                                    if (toContainerType(_direction) ==
-                //                                    Type::VerticalContainer) {
-                //                                        return val + node->geometry.height();
-                //                                    } else {
-                //                                        return val + node->geometry.width();
-                //                                    }
-                //                                });
-
-                this->parent->geometry.width() / siblings.size();
+            qreal width = this->parent->geometry.width() / siblings.size();
+            qreal height = this->parent->geometry.height() / siblings.size();
 
             if (siblings.size() == 1) {
-                this->geometry = QRect(0, 0, size, size);
+                this->geometry = QRect(0, 0, width, height);
             }
 
             auto it = std::find_if(siblings.begin(), siblings.end(),
@@ -216,7 +205,7 @@ public:
             }
 
             Node *node = new Node(_split, this->parent);
-            node->geometry = QRectF(0, 0, size, size);
+            node->geometry = QRectF(0, 0, width, height);
             siblings.insert(it, std::unique_ptr<Node>(node));
         }
 
