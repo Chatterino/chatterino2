@@ -151,26 +151,15 @@ public:
     }
 
     void setRawHeader(const char *headerName, const char *value)
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
-=======
     {
         this->data.request.setRawHeader(headerName, value);
     }
 
     void setRawHeader(const char *headerName, const QByteArray &value)
->>>>>>> Implement /ignore and /unignore commands
     {
         this->data.request.setRawHeader(headerName, value);
     }
 
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
-    void setRawHeader(const char *headerName, const QByteArray &value)
-    {
-        this->data.request.setRawHeader(headerName, value);
-    }
-
-=======
->>>>>>> Implement /ignore and /unignore commands
     void setRawHeader(const char *headerName, const QString &value)
     {
         this->data.request.setRawHeader(headerName, value.toUtf8());
@@ -313,28 +302,17 @@ public:
     void execute()
     {
         switch (this->data.requestType) {
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
             case GetRequest: {
+                debug::Log("Call GET request!");
                 this->executeGet();
             } break;
 
             case PutRequest: {
-=======
-            case GET: {
-                this->executeGet();
-            } break;
-
-            case PUT: {
->>>>>>> Implement /ignore and /unignore commands
                 debug::Log("Call PUT request!");
                 this->executePut();
             } break;
 
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
             case DeleteRequest: {
-=======
-            case DELETE: {
->>>>>>> Implement /ignore and /unignore commands
                 debug::Log("Call DELETE request!");
                 this->executeDelete();
             } break;
@@ -343,7 +321,7 @@ public:
                 debug::Log("Unhandled request type {}", (int)this->data.requestType);
             } break;
         }
-    }
+    }  // namespace util
 
 private:
     void useCache()
@@ -392,7 +370,6 @@ private:
         worker->moveToThread(&NetworkManager::workerThread);
 
         if (this->data.caller != nullptr) {
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
             QObject::connect(worker, &NetworkWorker::doneUrl,
                              this->data.caller, [data = this->data](auto reply) mutable {
                                  auto &dat = data;
@@ -401,12 +378,6 @@ private:
                                      if (data.onError) {
                                          data.onError(reply->error());
                                      }
-=======
-            QObject::connect(worker, &NetworkWorker::doneUrl,
-                             this->data.caller, [data = this->data](auto reply) mutable {
-                                 if (reply->error() != QNetworkReply::NetworkError::NoError) {
-                                     // TODO: We might want to call an onError callback here
->>>>>>> Implement /ignore and /unignore commands
                                      return;
                                  }
 
@@ -418,85 +389,67 @@ private:
 
                                  reply->deleteLater();
                              });
-        }
+        }  // namespace chatterino
 
         if (timer != nullptr) {
             timer->start(this->data.timeoutMS);
         }
 
-        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
-                         [ timer, data = std::move(this->data), worker ]() {
-                             QNetworkReply *reply;
-                             switch (data.requestType) {
-                                 case GetRequest: {
-                                     reply = NetworkManager::NaM.get(data.request);
-                                 } break;
+        QObject::connect(
+            &requester, &NetworkRequester::requestUrl, worker,
+            [ timer, data = std::move(this->data), worker ]() {
+                QNetworkReply *reply;
+                switch (data.requestType) {
+                    case GetRequest: {
+                        reply = NetworkManager::NaM.get(data.request);
+                    } break;
 
-                                 case PutRequest: {
-                                     reply = NetworkManager::NaM.put(data.request, data.payload);
-                                 } break;
+                    case PutRequest: {
+                        reply = NetworkManager::NaM.put(data.request, data.payload);
+                    } break;
 
-                                 case DeleteRequest: {
-=======
-                         [ timer, data = std::move(this->data), worker ]() {
-                             QNetworkReply *reply;
-                             switch (data.requestType) {
-                                 case GET: {
-                                     reply = NetworkManager::NaM.get(data.request);
-                                 } break;
+                    case DeleteRequest: {
+                        reply = NetworkManager::NaM.deleteResource(data.request);
+                    } break;
+                }  // namespace chatterino
 
-                                 case PUT: {
-                                     reply = NetworkManager::NaM.put(data.request, data.payload);
-                                 } break;
+                if (reply == nullptr) {
+                    debug::Log("Unhandled request type {}", (int)data.requestType);
+                    return;
+                }
 
-                                 case DELETE: {
->>>>>>> Implement /ignore and /unignore commands
-                                     reply = NetworkManager::NaM.deleteResource(data.request);
-                                 } break;
-                             }
+                if (timer != nullptr) {
+                    QObject::connect(timer, &QTimer::timeout, worker, [reply, timer, data]() {
+                        debug::Log("Aborted!");
+                        reply->abort();
+                        timer->deleteLater();
+                        data.onError(-2);
+                    });
+                }
 
-                             if (reply == nullptr) {
-                                 debug::Log("Unhandled request type {}", (int)data.requestType);
-                                 return;
-                             }
+                if (data.onReplyCreated) {
+                    data.onReplyCreated(reply);
+                }
 
-                             if (timer != nullptr) {
-                                 QObject::connect(timer, &QTimer::timeout, worker,
-                                                  [reply, timer, data]() {
-                                                      debug::Log("Aborted!");
-                                                      reply->abort();
-                                                      timer->deleteLater();
-                                                      data.onError(-2);
-                                                  });
-                             }
+                QObject::connect(reply, &QNetworkReply::finished, worker,
+                                 [ data = std::move(data), worker, reply ]() mutable {
+                                     if (data.caller == nullptr) {
+                                         QByteArray bytes = reply->readAll();
+                                         data.writeToCache(bytes);
+                                         data.onSuccess(parseJSONFromData2(bytes));
 
-                             if (data.onReplyCreated) {
-                                 data.onReplyCreated(reply);
-                             }
+                                         reply->deleteLater();
+                                     } else {
+                                         emit worker->doneUrl(reply);
+                                     }
 
-                             QObject::connect(reply, &QNetworkReply::finished, worker,
-<<<<<<< 5b26cdaa0777562a0b3c663a203528eca56bd5df
-                                              [ data = std::move(data), worker, reply ]() mutable {
-=======
-                                              [ data = std::move(data), worker, reply ]() mutable {
->>>>>>> Implement /ignore and /unignore commands
-                                                  if (data.caller == nullptr) {
-                                                      QByteArray bytes = reply->readAll();
-                                                      data.writeToCache(bytes);
-                                                      data.onSuccess(parseJSONFromData2(bytes));
-
-                                                      reply->deleteLater();
-                                                  } else {
-                                                      emit worker->doneUrl(reply);
-                                                  }
-
-                                                  delete worker;
-                                              });
-                         });
+                                     delete worker;
+                                 });
+            }  // namespace util
+            );
 
         emit requester.requestUrl();
-    }
+    }  // namespace chatterino
 
     void executeGet()
     {
@@ -514,7 +467,7 @@ private:
     {
         this->doRequest();
     }
-};
+};  // namespace util
 
 }  // namespace util
 }  // namespace chatterino
