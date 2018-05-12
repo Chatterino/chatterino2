@@ -76,6 +76,17 @@ bool TwitchMessageBuilder::isIgnored() const
         }
     }
 
+    if (this->tags.contains("user-id")) {
+        auto sourceUserID = this->tags.value("user-id").toString();
+
+        for (const auto &user : app->accounts->Twitch.getCurrent()->getIgnores()) {
+            if (sourceUserID == user.id) {
+                debug::Log("Blocking message because it's from blocked user {}", user.name);
+                return true;
+            }
+        }
+    }
+
     return false;
 }
 
