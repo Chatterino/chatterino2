@@ -76,7 +76,7 @@ bool TwitchMessageBuilder::isIgnored() const
         }
     }
 
-    if (this->tags.contains("user-id")) {
+    if (app->settings->enableTwitchIgnoredUsers && this->tags.contains("user-id")) {
         auto sourceUserID = this->tags.value("user-id").toString();
 
         for (const auto &user : app->accounts->Twitch.getCurrent()->getIgnores()) {
