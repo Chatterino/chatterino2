@@ -64,10 +64,10 @@ class NetworkRequest
 {
 public:
     enum RequestType {
-        GET,
-        POST,
-        PUT,
-        DELETE,
+        GetRequest,
+        PostRequest,
+        PutRequest,
+        DeleteRequest,
     };
 
 private:
@@ -302,16 +302,16 @@ public:
     void execute()
     {
         switch (this->data.requestType) {
-            case GET: {
+            case GetRequest: {
                 this->executeGet();
             } break;
 
-            case PUT: {
+            case PutRequest: {
                 debug::Log("Call PUT request!");
                 this->executePut();
             } break;
 
-            case DELETE: {
+            case DeleteRequest: {
                 debug::Log("Call DELETE request!");
                 this->executeDelete();
             } break;
@@ -394,15 +394,15 @@ private:
                          [timer, data = std::move(this->data), worker]() {
                              QNetworkReply *reply;
                              switch (data.requestType) {
-                                 case GET: {
+                                 case GetRequest: {
                                      reply = NetworkManager::NaM.get(data.request);
                                  } break;
 
-                                 case PUT: {
+                                 case PutRequest: {
                                      reply = NetworkManager::NaM.put(data.request, data.payload);
                                  } break;
 
-                                 case DELETE: {
+                                 case DeleteRequest: {
                                      reply = NetworkManager::NaM.deleteResource(data.request);
                                  } break;
                              }

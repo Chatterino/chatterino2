@@ -77,7 +77,7 @@ void TwitchAccount::loadIgnores()
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks");
 
     util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::GET);
+    req.setRequestType(util::NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
     req.onSuccess([=](const rapidjson::Document &document) {
@@ -125,7 +125,7 @@ void TwitchAccount::ignore(const QString &targetName,
                     targetUserID);
 
         util::NetworkRequest req(url);
-        req.setRequestType(util::NetworkRequest::PUT);
+        req.setRequestType(util::NetworkRequest::PutRequest);
         req.setCaller(QThread::currentThread());
         req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -177,7 +177,7 @@ void TwitchAccount::unignore(const QString &targetName,
                     targetUserID);
 
         util::NetworkRequest req(url);
-        req.setRequestType(util::NetworkRequest::DELETE);
+        req.setRequestType(util::NetworkRequest::DeleteRequest);
         req.setCaller(QThread::currentThread());
         req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
