@@ -55,7 +55,6 @@ public:
     bool isAnon() const;
 
     void loadIgnores();
-
     void ignore(const QString &targetName,
                 std::function<void(IgnoreResult, const QString &)> onFinished);
     void ignoreByID(const QString &targetUserID, const QString &targetName,
