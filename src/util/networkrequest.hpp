@@ -62,12 +62,28 @@ static rapidjson::Document parseJSONFromReply2(QNetworkReply *reply)
 
 class NetworkRequest
 {
+public:
+    enum RequestType {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+    };
+
+private:
     struct Data {
         QNetworkRequest request;
         const QObject *caller = nullptr;
         std::function<void(QNetworkReply *)> onReplyCreated;
         int timeoutMS = -1;
         bool useQuickLoadCache = false;
+
+        std::function<bool(int)> onError;
+        std::function<bool(const rapidjson::Document &)> onSuccess;
+
+        NetworkRequest::RequestType requestType;
+
+        QByteArray payload;
 
         QString getHash()
         {
@@ -100,6 +116,28 @@ public:
     explicit NetworkRequest(const std::string &url);
     explicit NetworkRequest(const QString &url);
 
+    void setRequestType(RequestType newRequestType)
+    {
+        this->data.requestType = newRequestType;
+    }
+
+    template <typename Func>
+    void onError(Func cb)
+    {
+        this->data.onError = cb;
+    }
+
+    template <typename Func>
+    void onSuccess(Func cb)
+    {
+        this->data.onSuccess = cb;
+    }
+
+    void setPayload(const QByteArray &payload)
+    {
+        this->data.payload = payload;
+    }
+
     void setUseQuickLoadCache(bool value);
 
     void setCaller(const QObject *_caller)
@@ -112,14 +150,31 @@ public:
         this->data.onReplyCreated = f;
     }
 
-    void setRawHeader(const QByteArray &headerName, const QByteArray &value)
+    void setRawHeader(const char *headerName, const char *value)
     {
         this->data.request.setRawHeader(headerName, value);
+    }
+
+    void setRawHeader(const char *headerName, const QByteArray &value)
+    {
+        this->data.request.setRawHeader(headerName, value);
+    }
+
+    void setRawHeader(const char *headerName, const QString &value)
+    {
+        this->data.request.setRawHeader(headerName, value.toUtf8());
     }
 
     void setTimeout(int ms)
     {
         this->data.timeoutMS = ms;
+    }
+
+    void makeAuthorizedV5(const QString &clientID, const QString &oauthToken)
+    {
+        this->setRawHeader("Client-ID", clientID);
+        this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+        this->setRawHeader("Authorization", "OAuth " + oauthToken);
     }
 
     template <typename FinishedCallback>
@@ -242,6 +297,169 @@ public:
             // return value
             return true;
         });
+    }
+
+    void execute()
+    {
+        switch (this->data.requestType) {
+            case GET: {
+                this->executeGet();
+            } break;
+
+            case PUT: {
+                debug::Log("Call PUT request!");
+                this->executePut();
+            } break;
+
+            case DELETE: {
+                debug::Log("Call DELETE request!");
+                this->executeDelete();
+            } break;
+
+            default: {
+                debug::Log("Unhandled request type {}", (int)this->data.requestType);
+            } break;
+        }
+    }
+
+private:
+    void useCache()
+    {
+        if (this->data.useQuickLoadCache) {
+            auto app = getApp();
+
+            QFile cachedFile(app->paths->cacheFolderPath + "/" + this->data.getHash());
+
+            if (cachedFile.exists()) {
+                if (cachedFile.open(QIODevice::ReadOnly)) {
+                    QByteArray bytes = cachedFile.readAll();
+
+                    // qDebug() << "Loaded cached resource" << this->data.request.url();
+
+                    auto document = parseJSONFromData2(bytes);
+
+                    bool success = false;
+
+                    if (!document.IsNull()) {
+                        success = this->data.onSuccess(document);
+                    }
+
+                    cachedFile.close();
+
+                    if (!success) {
+                        // The images were not successfully loaded from the file
+                        // XXX: Invalidate the cache file so we don't attempt to load it again next
+                        // time
+                    }
+                }
+            }
+        }
+    }
+
+    void doRequest()
+    {
+        QTimer *timer = nullptr;
+        if (this->data.timeoutMS > 0) {
+            timer = new QTimer;
+        }
+
+        NetworkRequester requester;
+        NetworkWorker *worker = new NetworkWorker;
+
+        worker->moveToThread(&NetworkManager::workerThread);
+
+        if (this->data.caller != nullptr) {
+            QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
+                             [data = this->data](auto reply) mutable {
+                                 if (reply->error() != QNetworkReply::NetworkError::NoError) {
+                                     // TODO: We might want to call an onError callback here
+                                     return;
+                                 }
+
+                                 QByteArray readBytes = reply->readAll();
+                                 QByteArray bytes;
+                                 bytes.setRawData(readBytes.data(), readBytes.size());
+                                 data.writeToCache(bytes);
+                                 data.onSuccess(parseJSONFromData2(bytes));
+
+                                 reply->deleteLater();
+                             });
+        }
+
+        if (timer != nullptr) {
+            timer->start(this->data.timeoutMS);
+        }
+
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                         [timer, data = std::move(this->data), worker]() {
+                             QNetworkReply *reply;
+                             switch (data.requestType) {
+                                 case GET: {
+                                     reply = NetworkManager::NaM.get(data.request);
+                                 } break;
+
+                                 case PUT: {
+                                     reply = NetworkManager::NaM.put(data.request, data.payload);
+                                 } break;
+
+                                 case DELETE: {
+                                     reply = NetworkManager::NaM.deleteResource(data.request);
+                                 } break;
+                             }
+
+                             if (reply == nullptr) {
+                                 debug::Log("Unhandled request type {}", (int)data.requestType);
+                                 return;
+                             }
+
+                             if (timer != nullptr) {
+                                 QObject::connect(timer, &QTimer::timeout, worker,
+                                                  [reply, timer, data]() {
+                                                      debug::Log("Aborted!");
+                                                      reply->abort();
+                                                      timer->deleteLater();
+                                                      data.onError(-2);
+                                                  });
+                             }
+
+                             if (data.onReplyCreated) {
+                                 data.onReplyCreated(reply);
+                             }
+
+                             QObject::connect(reply, &QNetworkReply::finished, worker,
+                                              [data = std::move(data), worker, reply]() mutable {
+                                                  if (data.caller == nullptr) {
+                                                      QByteArray bytes = reply->readAll();
+                                                      data.writeToCache(bytes);
+                                                      data.onSuccess(parseJSONFromData2(bytes));
+
+                                                      reply->deleteLater();
+                                                  } else {
+                                                      emit worker->doneUrl(reply);
+                                                  }
+
+                                                  delete worker;
+                                              });
+                         });
+
+        emit requester.requestUrl();
+    }
+
+    void executeGet()
+    {
+        this->useCache();
+
+        this->doRequest();
+    }
+
+    void executePut()
+    {
+        this->doRequest();
+    }
+
+    void executeDelete()
+    {
+        this->doRequest();
     }
 };
 

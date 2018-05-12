@@ -1,6 +1,7 @@
 #include "ignoreuserspage.hpp"
 
 #include "application.hpp"
+#include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 
@@ -53,8 +54,7 @@ IgnoreUsersPage::IgnoreUsersPage()
             addremove->addStretch(1);
         }
 
-        auto userList = users.emplace<QListView>();
-        UNUSED(userList);  // TODO: Fill this list in with ignored users
+        users.emplace<QListView>()->setModel(&this->userListModel);
     }
 
     // messages
@@ -66,6 +66,23 @@ IgnoreUsersPage::IgnoreUsersPage()
     auto label = layout.emplace<QLabel>(INFO);
     label->setWordWrap(true);
     label->setStyleSheet("color: #BBB");
+}
+
+void IgnoreUsersPage::onShow()
+{
+    auto app = getApp();
+
+    auto user = app->accounts->Twitch.getCurrent();
+
+    if (user->isAnon()) {
+        return;
+    }
+
+    QStringList users;
+    for (const auto &ignoredUser : user->getIgnores()) {
+        users << ignoredUser.name;
+    }
+    this->userListModel.setStringList(users);
 }
 
 }  // namespace settingspages

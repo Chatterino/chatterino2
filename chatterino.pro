@@ -179,6 +179,7 @@ SOURCES += \
     src/util/rapidjson-helpers.cpp \
     src/providers/twitch/pubsubhelpers.cpp \
     src/providers/twitch/pubsubactions.cpp \
+    src/providers/twitch/twitchuser.cpp \
     src/widgets/selectchanneldialog.cpp \
     src/singletons/updatemanager.cpp \
     src/widgets/lastruncrashdialog.cpp \
@@ -316,6 +317,7 @@ HEADERS  += \
     src/util/rapidjson-helpers.hpp \
     src/providers/twitch/pubsubhelpers.hpp \
     src/providers/twitch/pubsubactions.hpp \
+    src/providers/twitch/twitchuser.hpp \
     src/widgets/selectchanneldialog.hpp \
     src/singletons/updatemanager.hpp \
     src/widgets/lastruncrashdialog.hpp \

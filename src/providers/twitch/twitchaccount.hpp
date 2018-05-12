@@ -1,9 +1,12 @@
 #pragma once
 
+#include "controllers/accounts/account.hpp"
+#include "providers/twitch/twitchuser.hpp"
+
 #include <QColor>
 #include <QString>
 
-#include "controllers/accounts/account.hpp"
+#include <set>
 
 namespace chatterino {
 namespace providers {
@@ -33,6 +36,12 @@ public:
 
     bool isAnon() const;
 
+    void loadIgnores();
+    void ignore(const QString &targetName, std::function<void(const QString &)> onFinished);
+    void unignore(const QString &targetName, std::function<void(const QString &)> onFinished);
+
+    std::set<TwitchUser> getIgnores() const;
+
     QColor color;
 
 private:
@@ -41,6 +50,9 @@ private:
     QString userName;
     QString userId;
     const bool _isAnon;
+
+    mutable std::mutex ignoresMutex;
+    std::set<TwitchUser> ignores;
 };
 
 }  // namespace twitch

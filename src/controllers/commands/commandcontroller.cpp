@@ -119,26 +119,38 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 return "";
             } else if (commandName == "/ignore" && words.size() >= 2) {
-                // fourtf: ignore user
-                //                QString messageText;
+                auto app = getApp();
 
-                //                if (IrcManager::getInstance().tryAddIgnoredUser(words.at(1),
-                //                messageText)) {
-                //                    messageText = "Ignored user \"" + words.at(1) + "\".";
-                //                }
+                auto user = app->accounts->Twitch.getCurrent();
+                auto target = words.at(1);
 
-                //                channel->addMessage(messages::Message::createSystemMessage(messageText));
+                if (user->isAnon()) {
+                    channel->addMessage(messages::Message::createSystemMessage(
+                        "You must be logged in to ignore someone"));
+                    return "";
+                }
+
+                user->ignore(target, [channel](const QString &message) {
+                    channel->addMessage(messages::Message::createSystemMessage(message));
+                });
+
                 return "";
-            } else if (commandName == "/unignore") {
-                // fourtf: ignore user
-                //                QString messageText;
+            } else if (commandName == "/unignore" && words.size() >= 2) {
+                auto app = getApp();
 
-                //                if (IrcManager::getInstance().tryRemoveIgnoredUser(words.at(1),
-                //                messageText)) {
-                //                    messageText = "Ignored user \"" + words.at(1) + "\".";
-                //                }
+                auto user = app->accounts->Twitch.getCurrent();
+                auto target = words.at(1);
 
-                //                channel->addMessage(messages::Message::createSystemMessage(messageText));
+                if (user->isAnon()) {
+                    channel->addMessage(messages::Message::createSystemMessage(
+                        "You must be logged in to ignore someone"));
+                    return "";
+                }
+
+                user->unignore(target, [channel](const QString &message) {
+                    channel->addMessage(messages::Message::createSystemMessage(message));
+                });
+
                 return "";
             } else if (commandName == "/w") {
                 if (words.length() <= 2) {

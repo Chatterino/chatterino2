@@ -153,6 +153,10 @@ void SettingsDialog::refresh()
     //    this->ui.accountSwitchWidget->refresh();
 
     getApp()->settings->saveSnapshot();
+
+    for (auto *tab : this->tabs) {
+        tab->getSettingsPage()->onShow();
+    }
 }
 
 void SettingsDialog::scaleChangedEvent(float newDpi)

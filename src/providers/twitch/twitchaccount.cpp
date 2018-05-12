@@ -1,5 +1,9 @@
 #include "providers/twitch/twitchaccount.hpp"
+
 #include "const.hpp"
+#include "debug/log.hpp"
+#include "util/networkrequest.hpp"
+#include "util/urlfetch.hpp"
 
 namespace chatterino {
 namespace providers {
@@ -66,6 +70,146 @@ bool TwitchAccount::setOAuthToken(const QString &newOAuthToken)
 bool TwitchAccount::isAnon() const
 {
     return this->_isAnon;
+}
+
+void TwitchAccount::loadIgnores()
+{
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks");
+
+    util::NetworkRequest req(url);
+    req.setRequestType(util::NetworkRequest::GET);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+    req.onSuccess([=](const rapidjson::Document &document) {
+        if (!document.IsObject()) {
+            return false;
+        }
+
+        auto blocksIt = document.FindMember("blocks");
+        if (blocksIt == document.MemberEnd()) {
+            return false;
+        }
+        const auto &blocks = blocksIt->value;
+
+        if (!blocks.IsArray()) {
+            return false;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(this->ignoresMutex);
+            this->ignores.clear();
+
+            for (const auto &block : blocks.GetArray()) {
+                if (!block.IsObject()) {
+                    continue;
+                }
+                auto userIt = block.FindMember("user");
+                if (userIt == block.MemberEnd()) {
+                    continue;
+                }
+                this->ignores.insert(TwitchUser::fromJSON(userIt->value));
+            }
+        }
+
+        return true;
+    });
+
+    req.execute();
+}
+
+void TwitchAccount::ignore(const QString &targetName,
+                           std::function<void(const QString &message)> onFinished)
+{
+    util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+        QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
+                    targetUserID);
+
+        util::NetworkRequest req(url);
+        req.setRequestType(util::NetworkRequest::PUT);
+        req.setCaller(QThread::currentThread());
+        req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+        req.onError([=](int errorCode) {
+            onFinished("An unknown error occured while trying to ignore user " + targetName + " (" +
+                       QString::number(errorCode) + ")");
+
+            return true;
+        });
+
+        req.onSuccess([=](const rapidjson::Document &document) {
+            if (!document.IsObject()) {
+                onFinished("Bad JSON data while ignoring user " + targetName);
+                return false;
+            }
+
+            auto userIt = document.FindMember("user");
+            if (userIt == document.MemberEnd()) {
+                onFinished("Bad JSON data while ignoring user (missing user) " + targetName);
+                return false;
+            }
+
+            auto ignoredUser = TwitchUser::fromJSON(userIt->value);
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex);
+
+                auto res = this->ignores.insert(ignoredUser);
+                if (!res.second) {
+                    const TwitchUser &existingUser = *(res.first);
+                    existingUser.update(ignoredUser);
+                    onFinished("User " + targetName + " is already ignored");
+                    return false;
+                }
+            }
+            onFinished("Successfully ignored user " + targetName);
+
+            return true;
+        });
+
+        req.execute();
+    });
+}
+
+void TwitchAccount::unignore(const QString &targetName,
+                             std::function<void(const QString &message)> onFinished)
+{
+    util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+        QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
+                    targetUserID);
+
+        util::NetworkRequest req(url);
+        req.setRequestType(util::NetworkRequest::DELETE);
+        req.setCaller(QThread::currentThread());
+        req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+        req.onError([=](int errorCode) {
+            onFinished("An unknown error occured while trying to unignore user " + targetName +
+                       " (" + QString::number(errorCode) + ")");
+
+            return true;
+        });
+
+        req.onSuccess([=](const rapidjson::Document &document) {
+            TwitchUser ignoredUser;
+            ignoredUser.id = targetUserID;
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex);
+
+                this->ignores.erase(ignoredUser);
+            }
+            onFinished("Successfully unignored user " + targetName);
+
+            return true;
+        });
+
+        req.execute();
+    });
+}
+
+std::set<TwitchUser> TwitchAccount::getIgnores() const
+{
+    std::lock_guard<std::mutex> lock(this->ignoresMutex);
+
+    return this->ignores;
 }
 
 }  // namespace twitch

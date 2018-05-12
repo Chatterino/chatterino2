@@ -11,6 +11,10 @@ namespace twitch {
 TwitchAccountManager::TwitchAccountManager()
     : anonymousUser(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
+    this->currentUserChanged.connect([this] {
+        auto currentUser = this->getCurrent();
+        currentUser->loadIgnores();
+    });
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
