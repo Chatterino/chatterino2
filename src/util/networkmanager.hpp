@@ -54,11 +54,11 @@ public:
             [worker, onFinished = std::move(onFinished), request = std::move(request)]() {
                 QNetworkReply *reply = NetworkManager::NaM.get(request);
 
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [worker, reply, onFinished = std::move(onFinished)]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
+                reply->connect(reply, &QNetworkReply::finished,
+                               [worker, reply, onFinished = std::move(onFinished)]() {
+                                   onFinished(reply);
+                                   delete worker;
+                               });
             });
 
         emit requester.requestUrl();
@@ -84,8 +84,8 @@ public:
 
             onReplyCreated(reply);
 
-            QObject::connect(reply, &QNetworkReply::finished, worker,
-                             [=]() { emit worker->doneUrl(reply); });
+            reply->connect(reply, &QNetworkReply::finished, worker,
+                           [=]() { emit worker->doneUrl(reply); });
         });
 
         QObject::connect(worker, &NetworkWorker::doneUrl, caller, [=](QNetworkReply *reply) {
@@ -114,11 +114,11 @@ public:
             [worker, data, onFinished = std::move(onFinished), request = std::move(request)]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
 
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [worker, reply, onFinished = std::move(onFinished)]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
+                reply->connect(reply, &QNetworkReply::finished,
+                               [worker, reply, onFinished = std::move(onFinished)]() {
+                                   onFinished(reply);
+                                   delete worker;
+                               });
             });
 
         emit requester.requestUrl();
@@ -136,11 +136,11 @@ public:
             [onFinished = std::move(onFinished), request = std::move(request), worker]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, "");
 
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [onFinished = std::move(onFinished), reply, worker]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
+                reply->connect(reply, &QNetworkReply::finished,
+                               [onFinished = std::move(onFinished), reply, worker]() {
+                                   onFinished(reply);
+                                   delete worker;
+                               });
             });
 
         emit requester.requestUrl();
@@ -158,11 +158,11 @@ public:
             [onFinished = std::move(onFinished), request = std::move(request), worker]() {
                 QNetworkReply *reply = NetworkManager::NaM.deleteResource(request);
 
-                QObject::connect(reply, &QNetworkReply::finished,
-                                 [onFinished = std::move(onFinished), reply, worker]() {
-                                     onFinished(reply);
-                                     delete worker;
-                                 });
+                reply->connect(reply, &QNetworkReply::finished,
+                               [onFinished = std::move(onFinished), reply, worker]() {
+                                   onFinished(reply);
+                                   delete worker;
+                               });
             });
 
         emit requester.requestUrl();
