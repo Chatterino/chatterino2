@@ -159,6 +159,9 @@ void SplitInput::installKeyPressedEvent()
             }
             this->prevIndex = this->prevMsg.size();
         } else if (event->key() == Qt::Key_Up) {
+            if ((event->modifiers() & Qt::ShiftModifier) != 0) {
+                return;
+            }
             if (event->modifiers() == Qt::AltModifier) {
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
@@ -184,6 +187,9 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         } else if (event->key() == Qt::Key_Down) {
+            if ((event->modifiers() & Qt::ShiftModifier) != 0) {
+                return;
+            }
             if (event->modifiers() == Qt::AltModifier) {
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
