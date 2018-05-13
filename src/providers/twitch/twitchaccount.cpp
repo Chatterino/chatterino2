@@ -176,7 +176,7 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
     });
 
     req.execute();
-}  // namespace twitch
+}
 
 void TwitchAccount::unignore(const QString &targetName,
                              std::function<void(UnignoreResult, const QString &message)> onFinished)
