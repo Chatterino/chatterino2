@@ -6,6 +6,7 @@
 #include <pajlada/settings/serialize.hpp>
 
 #include <cassert>
+#include <string>
 
 namespace chatterino {
 namespace rj {
@@ -92,6 +93,8 @@ bool getSafe(const rapidjson::Value &value, Type &out)
 
     return true;
 }
+
+std::string stringify(const rapidjson::Value &value);
 
 }  // namespace rj
 }  // namespace chatterino

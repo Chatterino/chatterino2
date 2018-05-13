@@ -21,8 +21,6 @@ bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
 
 bool getTargetUser(const rapidjson::Value &data, ActionUser &user);
 
-std::string stringify(const rapidjson::Value &v);
-
 rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVec,
                                         std::shared_ptr<providers::twitch::TwitchAccount> account);
 rapidjson::Document createUnlistenMessage(const std::vector<std::string> &topicsVec);

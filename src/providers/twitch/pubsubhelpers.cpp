@@ -34,11 +34,6 @@ bool getTargetUser(const rapidjson::Value &data, ActionUser &user)
     return rj::getSafe(data, "target_user_id", user.id);
 }
 
-std::string stringify(const rapidjson::Value &v)
-{
-    return pajlada::Settings::SettingManager::stringify(v);
-}
-
 rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVec,
                                         std::shared_ptr<providers::twitch::TwitchAccount> account)
 {

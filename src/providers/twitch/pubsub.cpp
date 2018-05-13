@@ -68,7 +68,7 @@ bool PubSubClient::listen(rapidjson::Document &message)
 
     rj::set(message, "nonce", uuid);
 
-    std::string payload = stringify(message);
+    std::string payload = rj::stringify(message);
     sentMessages[uuid.toStdString()] = payload;
 
     this->send(payload.c_str());
@@ -100,7 +100,7 @@ void PubSubClient::unlistenPrefix(const std::string &prefix)
 
     rj::set(message, "nonce", CreateUUID());
 
-    std::string payload = stringify(message);
+    std::string payload = rj::stringify(message);
     sentMessages[uuid.toStdString()] = payload;
 
     this->send(payload.c_str());
@@ -747,7 +747,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         std::string moderationAction;
 
         if (!rj::getSafe(data, "moderation_action", moderationAction)) {
-            debug::Log("Missing moderation action in data: {}", stringify(data));
+            debug::Log("Missing moderation action in data: {}", rj::stringify(data));
             return;
         }
 
