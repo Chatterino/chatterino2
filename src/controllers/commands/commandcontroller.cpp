@@ -130,7 +130,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                     return "";
                 }
 
-                user->ignore(target, [channel](const QString &message) {
+                user->ignore(target, [channel](auto resultCode, const QString &message) {
                     channel->addMessage(messages::Message::createSystemMessage(message));
                 });
 
@@ -147,7 +147,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                     return "";
                 }
 
-                user->unignore(target, [channel](const QString &message) {
+                user->unignore(target, [channel](auto resultCode, const QString &message) {
                     channel->addMessage(messages::Message::createSystemMessage(message));
                 });
 
