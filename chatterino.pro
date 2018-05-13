@@ -191,6 +191,8 @@ SOURCES += \
     src/controllers/commands/commandcontroller.cpp \
     src/controllers/highlights/highlightcontroller.cpp \
     src/controllers/highlights/highlightmodel.cpp \
+    src/controllers/ignores/ignorecontroller.cpp \
+    src/controllers/ignores/ignoremodel.cpp \
     src/widgets/helper/editablemodelview.cpp \
     src/controllers/accounts/accountcontroller.cpp \
     src/controllers/accounts/accountmodel.cpp \
@@ -333,6 +335,9 @@ HEADERS  += \
     src/controllers/highlights/highlightcontroller.hpp \
     src/controllers/highlights/highlightphrase.hpp \
     src/controllers/highlights/highlightmodel.hpp \
+    src/controllers/ignores/ignorecontroller.hpp \
+    src/controllers/ignores/ignorephrase.hpp \
+    src/controllers/ignores/ignoremodel.hpp \
     src/widgets/helper/editablemodelview.hpp \
     src/controllers/accounts/accountcontroller.hpp \
     src/controllers/accounts/accountmodel.hpp \

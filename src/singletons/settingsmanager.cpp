@@ -19,7 +19,6 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
 }
 
 SettingManager::SettingManager()
-    : _ignoredKeywords(new std::vector<QString>)
 {
     qDebug() << "init SettingManager";
 
@@ -37,7 +36,6 @@ SettingManager::SettingManager()
 void SettingManager::initialize()
 {
     this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
-    this->ignoredKeywords.connect([this](auto, auto) { this->updateIgnoredKeywords(); });
 
     this->timestampFormat.connect([](auto, auto) {
         auto app = getApp();
@@ -151,11 +149,6 @@ std::vector<ModerationAction> SettingManager::getModerationActions() const
     return this->_moderationActions;
 }
 
-const std::shared_ptr<std::vector<QString>> SettingManager::getIgnoredKeywords() const
-{
-    return this->_ignoredKeywords;
-}
-
 void SettingManager::updateModerationActions()
 {
     auto app = getApp();
@@ -224,21 +217,5 @@ void SettingManager::updateModerationActions()
     }
 }
 
-void SettingManager::updateIgnoredKeywords()
-{
-    static QRegularExpression newLineRegex("(\r\n?|\n)+");
-
-    auto items = new std::vector<QString>();
-
-    for (const QString &line : this->ignoredKeywords.getValue().split(newLineRegex)) {
-        QString line2 = line.trimmed();
-
-        if (!line2.isEmpty()) {
-            items->push_back(line2);
-        }
-    }
-
-    this->_ignoredKeywords = std::shared_ptr<std::vector<QString>>(items);
-}
 }  // namespace singletons
 }  // namespace chatterino
