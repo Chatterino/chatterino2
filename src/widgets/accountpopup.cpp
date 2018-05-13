@@ -98,51 +98,32 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
                         "/follows/channels/" + this->popupWidgetUser.userID);
 
         this->ui->follow->setEnabled(false);
-        if (!this->relationship.isFollowing()) {
+        if (!this->relationship.following) {
             util::twitch::put(requestUrl, [this](QJsonObject obj) {
                 qDebug() << "follows channel: " << obj;
-                this->relationship.setFollowing(true);
+                this->relationship.following = true;
                 emit refreshButtons();
             });
         } else {
             util::twitch::sendDelete(requestUrl, [this] {
-                this->relationship.setFollowing(false);
+                this->relationship.following = false;
                 emit refreshButtons();
             });
         }
     });
 
     QObject::connect(this->ui->ignore, &QPushButton::clicked, this, [=]() {
-        auto currentUser = getApp()->accounts->Twitch.getCurrent();
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->loggedInUser.userID +
+                        "/blocks/" + this->popupWidgetUser.userID);
 
-        if (!this->relationship.isIgnoring()) {
-            currentUser->ignoreByID(this->popupWidgetUser.userID, this->popupWidgetUser.username,
-                                    [=](auto result, const auto &message) {
-                                        switch (result) {
-                                            case IgnoreResult_Success: {
-                                                this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
-                                            } break;
-                                            case IgnoreResult_AlreadyIgnored: {
-                                                this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
-                                            } break;
-                                            case IgnoreResult_Failed: {
-                                            } break;
-                                        }
-                                    });
+        if (!this->relationship.ignoring) {
+            util::twitch::put(requestUrl, [this](auto) {
+                this->relationship.ignoring = true;  //
+            });
         } else {
-            currentUser->unignoreByID(this->popupWidgetUser.userID, this->popupWidgetUser.username,
-                                      [=](auto result, const auto &message) {
-                                          switch (result) {
-                                              case UnignoreResult_Success: {
-                                                  this->relationship.setIgnoring(false);
-                                                  emit refreshButtons();
-                                              } break;
-                                              case UnignoreResult_Failed: {
-                                              } break;
-                                          }
-                                      });
+            util::twitch::sendDelete(requestUrl, [this] {
+                this->relationship.ignoring = false;  //
+            });
         }
     });
 
@@ -177,7 +158,8 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
 
 void AccountPopupWidget::setName(const QString &name)
 {
-    this->relationship.reset();
+    this->relationship.following = false;
+    this->relationship.ignoring = false;
 
     this->popupWidgetUser.username = name;
     this->ui->lblUsername->setText(name);
@@ -224,24 +206,17 @@ void AccountPopupWidget::getUserData()
             this->loadAvatar(QUrl(obj.value("logo").toString()));
         });
 
-    auto app = getApp();
-    auto currentUser = app->accounts->Twitch.getCurrent();
+    util::twitch::get("https://api.twitch.tv/kraken/users/" + this->loggedInUser.userID +
+                          "/follows/channels/" + this->popupWidgetUser.userID,
+                      this, [=](const QJsonObject &obj) {
+                          this->ui->follow->setEnabled(true);
+                          this->relationship.following = obj.contains("channel");
 
-    currentUser->checkFollow(this->popupWidgetUser.userID, [=](auto result) {
-        this->relationship.setFollowing(result == FollowResult_Following);
+                          emit refreshButtons();
+                      });
 
-        emit refreshButtons();
-    });
-
-    bool isIgnoring = false;
-    for (const auto &ignoredUser : currentUser->getIgnores()) {
-        if (this->popupWidgetUser.userID == ignoredUser.id) {
-            isIgnoring = true;
-            break;
-        }
-    }
-    this->relationship.setIgnoring(isIgnoring);
-    emit refreshButtons();
+    // TODO: Get ignore relationship between logged in user and popup widget user and update
+    // relationship.ignoring
 }
 
 void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
@@ -352,24 +327,28 @@ void AccountPopupWidget::refreshLayouts()
 
 void AccountPopupWidget::actuallyRefreshButtons()
 {
-    if (this->relationship.isFollowingSet()) {
-        if (this->relationship.isFollowing()) {
+    if (this->relationship.following) {
+        if (this->ui->follow->text() != "Unfollow") {
             this->ui->follow->setText("Unfollow");
-        } else {
-            this->ui->follow->setText("Follow");
+            this->ui->follow->setEnabled(true);
         }
-
-        this->ui->follow->setEnabled(true);
+    } else {
+        if (this->ui->follow->text() != "Follow") {
+            this->ui->follow->setText("Follow");
+            this->ui->follow->setEnabled(true);
+        }
     }
 
-    if (this->relationship.isIgnoringSet()) {
-        if (this->relationship.isIgnoring()) {
+    if (this->relationship.ignoring) {
+        if (this->ui->ignore->text() != "Unignore") {
             this->ui->ignore->setText("Unignore");
-        } else {
-            this->ui->ignore->setText("Ignore");
+            this->ui->ignore->setEnabled(true);
         }
-
-        this->ui->ignore->setEnabled(true);
+    } else {
+        if (this->ui->ignore->text() != "Ignore") {
+            this->ui->ignore->setText("Ignore");
+            this->ui->ignore->setEnabled(true);
+        }
     }
 }
 
@@ -389,7 +368,8 @@ void AccountPopupWidget::showEvent(QShowEvent *)
     this->popupWidgetUser.refreshUserType(this->channel, false);
 
     this->ui->follow->setEnabled(false);
-    this->ui->ignore->setEnabled(false);
+    // XXX: Uncomment when ignore/unignore is fully implemented
+    // this->ui->ignore->setEnabled(false);
 
     this->refreshButtons();
 

@@ -9,24 +9,6 @@
 #include <set>
 
 namespace chatterino {
-
-enum IgnoreResult {
-    IgnoreResult_Success,
-    IgnoreResult_AlreadyIgnored,
-    IgnoreResult_Failed,
-};
-
-enum UnignoreResult {
-    UnignoreResult_Success,
-    UnignoreResult_Failed,
-};
-
-enum FollowResult {
-    FollowResult_Following,
-    FollowResult_NotFollowing,
-    FollowResult_Failed,
-};
-
 namespace providers {
 namespace twitch {
 
@@ -55,17 +37,8 @@ public:
     bool isAnon() const;
 
     void loadIgnores();
-
-    void ignore(const QString &targetName,
-                std::function<void(IgnoreResult, const QString &)> onFinished);
-    void ignoreByID(const QString &targetUserID, const QString &targetName,
-                    std::function<void(IgnoreResult, const QString &)> onFinished);
-    void unignore(const QString &targetName,
-                  std::function<void(UnignoreResult, const QString &)> onFinished);
-    void unignoreByID(const QString &targetUserID, const QString &targetName,
-                      std::function<void(UnignoreResult, const QString &message)> onFinished);
-
-    void checkFollow(const QString targetUserID, std::function<void(FollowResult)> onFinished);
+    void ignore(const QString &targetName, std::function<void(const QString &)> onFinished);
+    void unignore(const QString &targetName, std::function<void(const QString &)> onFinished);
 
     std::set<TwitchUser> getIgnores() const;
 
