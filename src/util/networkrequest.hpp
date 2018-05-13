@@ -372,9 +372,7 @@ private:
             QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
                              [data = this->data](auto reply) mutable {
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
-                                     if (data.onError) {
-                                         data.onError(reply->error());
-                                     }
+                                     data.onError(reply->error());
                                      return;
                                  }
 
