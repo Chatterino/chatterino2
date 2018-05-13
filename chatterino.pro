@@ -385,6 +385,8 @@ win32-msvc* {
 
     equals(QMAKE_CXX, "clang++") {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
+    } else {
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
     }
 }
 
