@@ -154,7 +154,6 @@ SOURCES += \
     src/widgets/settingspages/commandpage.cpp \
     src/widgets/settingspages/emotespage.cpp \
     src/widgets/settingspages/highlightingpage.cpp \
-    src/widgets/settingspages/ignoremessagespage.cpp \
     src/widgets/settingspages/ignoreuserspage.cpp \
     src/widgets/settingspages/keyboardsettingspage.cpp \
     src/widgets/settingspages/logspage.cpp \
@@ -289,7 +288,6 @@ HEADERS  += \
     src/widgets/settingspages/commandpage.hpp \
     src/widgets/settingspages/emotespage.hpp \
     src/widgets/settingspages/highlightingpage.hpp \
-    src/widgets/settingspages/ignoremessagespage.hpp \
     src/widgets/settingspages/ignoreuserspage.hpp \
     src/widgets/settingspages/keyboardsettingspage.hpp \
     src/widgets/settingspages/logspage.hpp \
