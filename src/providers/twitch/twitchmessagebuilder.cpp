@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
+#include "controllers/ignores/ignorecontroller.hpp"
 #include "debug/log.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "singletons/accountmanager.hpp"
@@ -54,10 +55,12 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 bool TwitchMessageBuilder::isIgnored() const
 {
     auto app = getApp();
-    std::shared_ptr<std::vector<QString>> ignoredKeywords = app->settings->getIgnoredKeywords();
 
-    for (const QString &keyword : *ignoredKeywords) {
-        if (this->originalMessage.contains(keyword, Qt::CaseInsensitive)) {
+    // TODO(pajlada): Do we need to check if the phrase is valid first?
+    for (const auto &phrase : app->ignores->phrases.getVector()) {
+        if (phrase.isMatch(this->originalMessage)) {
+            debug::Log("Blocking message because it contains ignored phrase {}",
+                       phrase.getPattern());
             return true;
         }
     }

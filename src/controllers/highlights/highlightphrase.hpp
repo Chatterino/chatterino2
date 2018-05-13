@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/rapidjson-helpers.hpp"
 #include "util/serialize-custom.hpp"
 
 #include <QRegularExpression>
@@ -101,36 +102,14 @@ struct Deserialize<chatterino::controllers::highlights::HighlightPhrase> {
         }
 
         QString _pattern;
-        if (value.HasMember("pattern")) {
-            const rapidjson::Value &key = value["pattern"];
-            if (key.IsString()) {
-                _pattern = key.GetString();
-            }
-        }
-
         bool _alert = true;
-        if (value.HasMember("alert")) {
-            const rapidjson::Value &alert = value["alert"];
-            if (alert.IsBool()) {
-                _alert = alert.GetBool();
-            }
-        }
-
         bool _sound = false;
-        if (value.HasMember("sound")) {
-            const rapidjson::Value &sound = value["sound"];
-            if (sound.IsBool()) {
-                _sound = sound.GetBool();
-            }
-        }
-
         bool _isRegex = false;
-        if (value.HasMember("regex")) {
-            const rapidjson::Value &regex = value["regex"];
-            if (regex.IsBool()) {
-                _isRegex = regex.GetBool();
-            }
-        }
+
+        chatterino::rj::getSafe(value, "pattern", _pattern);
+        chatterino::rj::getSafe(value, "alert", _alert);
+        chatterino::rj::getSafe(value, "sound", _sound);
+        chatterino::rj::getSafe(value, "regex", _isRegex);
 
         return chatterino::controllers::highlights::HighlightPhrase(_pattern, _alert, _sound,
                                                                     _isRegex);

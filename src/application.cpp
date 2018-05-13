@@ -2,6 +2,7 @@
 
 #include "controllers/commands/commandcontroller.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
+#include "controllers/ignores/ignorecontroller.hpp"
 #include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/accountmanager.hpp"
@@ -66,6 +67,7 @@ void Application::construct()
     this->logging = new singletons::LoggingManager;
     this->commands = new controllers::commands::CommandController;
     this->highlights = new controllers::highlights::HighlightController;
+    this->ignores = new controllers::ignores::IgnoreController;
     this->accounts = new singletons::AccountManager;
     this->emotes = new singletons::EmoteManager;
     this->settings = new singletons::SettingManager;
@@ -100,6 +102,7 @@ void Application::initialize()
     this->resources->initialize();
 
     this->highlights->initialize();
+    this->ignores->initialize();
 
     this->emotes->initialize();
 

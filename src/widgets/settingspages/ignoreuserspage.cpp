@@ -1,15 +1,19 @@
 #include "ignoreuserspage.hpp"
 
 #include "application.hpp"
+#include "controllers/ignores/ignorecontroller.hpp"
+#include "controllers/ignores/ignoremodel.hpp"
 #include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
+#include "widgets/helper/editablemodelview.hpp"
 
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QLabel>
 #include <QListView>
 #include <QPushButton>
+#include <QTableView>
 #include <QVBoxLayout>
 
 // clang-format off
@@ -60,7 +64,22 @@ IgnoreUsersPage::IgnoreUsersPage()
     // messages
     auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
     {
-        messages.emplace<QLabel>("wip");
+        helper::EditableModelView *view =
+            *messages.emplace<helper::EditableModelView>(app->ignores->createModel(nullptr));
+        view->setTitles({"Pattern", "Regex"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+        // fourtf: make class extrend BaseWidget and add this to dpiChanged
+        QTimer::singleShot(1, [view] {
+            view->getTableView()->resizeColumnsToContents();
+            view->getTableView()->setColumnWidth(0, 200);
+        });
+
+        view->addButtonPressed.connect([] {
+            getApp()->ignores->phrases.appendItem(
+                controllers::ignores::IgnorePhrase{"my phrase", false});
+        });
     }
 
     auto label = layout.emplace<QLabel>(INFO);
