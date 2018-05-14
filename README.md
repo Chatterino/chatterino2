@@ -91,12 +91,12 @@ install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) f
 5. `brew install boost openssl rapidjson`
 6. build the project using Qt Creator
 
-If the Project does not build at this point, you might need to ad additional Paths/Libs, because brew does not install openssl and boost in the common path. You can get their path using
+If the Project does not build at this point, you might need to add additional Paths/Libs, because brew does not install openssl and boost in the common path. You can get their path using
 
 `brew info openssl`
 `brew info boost`
 
-The lines which you need to ad to your project file, should look similar to this
+The lines which you need to add to your project file should look similar to this
 
 ```
 INCLUDEPATH += /usr/local/opt/openssl/include
