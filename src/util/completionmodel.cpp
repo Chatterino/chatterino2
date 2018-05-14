@@ -92,23 +92,28 @@ void CompletionModel::addString(const QString &str, TaggedString::Type type)
     this->emotes.insert({str + " ", type});
 }
 
-void CompletionModel::addUser(const QString &str)
+void CompletionModel::addUser(const QString &username)
 {
-    auto ts = this->createUser(str + " ");
-    // Always add a space at the end of completions
-    std::pair<std::set<TaggedString>::iterator, bool> p = this->emotes.insert(ts);
-    if (!p.second) {
-        // No inseration was made, figure out if we need to replace the username.
+    auto add = [this](const QString &str) {
+        auto ts = this->createUser(str + " ");
+        // Always add a space at the end of completions
+        std::pair<std::set<TaggedString>::iterator, bool> p = this->emotes.insert(ts);
+        if (!p.second) {
+            // No inseration was made, figure out if we need to replace the username.
 
-        if (p.first->str > ts.str) {
-            // Replace lowercase version of name with mixed-case version
-            this->emotes.erase(p.first);
-            auto result2 = this->emotes.insert(ts);
-            assert(result2.second);
-        } else {
-            p.first->timeAdded = std::chrono::steady_clock::now();
+            if (p.first->str > ts.str) {
+                // Replace lowercase version of name with mixed-case version
+                this->emotes.erase(p.first);
+                auto result2 = this->emotes.insert(ts);
+                assert(result2.second);
+            } else {
+                p.first->timeAdded = std::chrono::steady_clock::now();
+            }
         }
-    }
+    };
+
+    add(username);
+    add("@" + username);
 }
 
 void CompletionModel::ClearExpiredStrings()
