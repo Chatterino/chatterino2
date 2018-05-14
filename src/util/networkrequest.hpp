@@ -374,9 +374,13 @@ private:
                                  auto &dat = data;
 
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
+
+                                     // TODO: We might want to call an onError callback here
+
                                      if (data.onError) {
                                          data.onError(reply->error());
                                      }
+
                                      return;
                                  }
 

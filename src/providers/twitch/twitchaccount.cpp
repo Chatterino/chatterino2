@@ -3,7 +3,6 @@
 #include "const.hpp"
 #include "debug/log.hpp"
 #include "util/networkrequest.hpp"
-#include "util/rapidjson-helpers.hpp"
 #include "util/urlfetch.hpp"
 
 namespace chatterino {
@@ -119,136 +118,91 @@ void TwitchAccount::loadIgnores()
 }
 
 void TwitchAccount::ignore(const QString &targetName,
-                           std::function<void(IgnoreResult, const QString &)> onFinished)
+                           std::function<void(const QString &message)> onFinished)
 {
     util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
-        this->ignoreByID(targetUserID, targetName, onFinished);  //
-    });
-}
+        QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
+                    targetUserID);
 
-void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targetName,
-                               std::function<void(IgnoreResult, const QString &)> onFinished)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
-                targetUserID);
+        util::NetworkRequest req(url);
+        req.setRequestType(util::NetworkRequest::PutRequest);
+        req.setCaller(QThread::currentThread());
+        req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::PutRequest);
-    req.setCaller(QThread::currentThread());
-    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+        req.onError([=](int errorCode) {
+            onFinished("An unknown error occured while trying to ignore user " + targetName + " (" +
+                       QString::number(errorCode) + ")");
 
-    req.onError([=](int errorCode) {
-        onFinished(IgnoreResult_Failed, "An unknown error occured while trying to ignore user " +
-                                            targetName + " (" + QString::number(errorCode) + ")");
+            return true;
+        });
 
-        return true;
-    });
-
-    req.onSuccess([=](const rapidjson::Document &document) {
-        if (!document.IsObject()) {
-            onFinished(IgnoreResult_Failed, "Bad JSON data while ignoring user " + targetName);
-            return false;
-        }
-
-        auto userIt = document.FindMember("user");
-        if (userIt == document.MemberEnd()) {
-            onFinished(IgnoreResult_Failed,
-                       "Bad JSON data while ignoring user (missing user) " + targetName);
-            return false;
-        }
-
-        auto ignoredUser = TwitchUser::fromJSON(userIt->value);
-        {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex);
-
-            auto res = this->ignores.insert(ignoredUser);
-            if (!res.second) {
-                const TwitchUser &existingUser = *(res.first);
-                existingUser.update(ignoredUser);
-                onFinished(IgnoreResult_AlreadyIgnored,
-                           "User " + targetName + " is already ignored");
+        req.onSuccess([=](const rapidjson::Document &document) {
+            if (!document.IsObject()) {
+                onFinished("Bad JSON data while ignoring user " + targetName);
                 return false;
             }
-        }
-        onFinished(IgnoreResult_Success, "Successfully ignored user " + targetName);
 
-        return true;
+            auto userIt = document.FindMember("user");
+            if (userIt == document.MemberEnd()) {
+                onFinished("Bad JSON data while ignoring user (missing user) " + targetName);
+                return false;
+            }
+
+            auto ignoredUser = TwitchUser::fromJSON(userIt->value);
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex);
+
+                auto res = this->ignores.insert(ignoredUser);
+                if (!res.second) {
+                    const TwitchUser &existingUser = *(res.first);
+                    existingUser.update(ignoredUser);
+                    onFinished("User " + targetName + " is already ignored");
+                    return false;
+                }
+            }
+            onFinished("Successfully ignored user " + targetName);
+
+            return true;
+        });
+
+        req.execute();
     });
-
-    req.execute();
 }
 
 void TwitchAccount::unignore(const QString &targetName,
-                             std::function<void(UnignoreResult, const QString &message)> onFinished)
+                             std::function<void(const QString &message)> onFinished)
 {
     util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
-        this->unignoreByID(targetUserID, targetName, onFinished);  //
+        QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
+                    targetUserID);
+
+        util::NetworkRequest req(url);
+        req.setRequestType(util::NetworkRequest::DeleteRequest);
+        req.setCaller(QThread::currentThread());
+        req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+        req.onError([=](int errorCode) {
+            onFinished("An unknown error occured while trying to unignore user " + targetName +
+                       " (" + QString::number(errorCode) + ")");
+
+            return true;
+        });
+
+        req.onSuccess([=](const rapidjson::Document &document) {
+            TwitchUser ignoredUser;
+            ignoredUser.id = targetUserID;
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex);
+
+                this->ignores.erase(ignoredUser);
+            }
+            onFinished("Successfully unignored user " + targetName);
+
+            return true;
+        });
+
+        req.execute();
     });
-}
-
-void TwitchAccount::unignoreByID(
-    const QString &targetUserID, const QString &targetName,
-    std::function<void(UnignoreResult, const QString &message)> onFinished)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
-                targetUserID);
-
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::DeleteRequest);
-    req.setCaller(QThread::currentThread());
-    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
-
-    req.onError([=](int errorCode) {
-        onFinished(UnignoreResult_Failed,
-                   "An unknown error occured while trying to unignore user " + targetName + " (" +
-                       QString::number(errorCode) + ")");
-
-        return true;
-    });
-
-    req.onSuccess([=](const rapidjson::Document &document) {
-        TwitchUser ignoredUser;
-        ignoredUser.id = targetUserID;
-        {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex);
-
-            this->ignores.erase(ignoredUser);
-        }
-        onFinished(UnignoreResult_Success, "Successfully unignored user " + targetName);
-
-        return true;
-    });
-
-    req.execute();
-}
-
-void TwitchAccount::checkFollow(const QString targetUserID,
-                                std::function<void(FollowResult)> onFinished)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/follows/channels/" +
-                targetUserID);
-
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::GetRequest);
-    req.setCaller(QThread::currentThread());
-    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
-
-    req.onError([=](int errorCode) {
-        if (errorCode == 203) {
-            onFinished(FollowResult_NotFollowing);
-        } else {
-            onFinished(FollowResult_Failed);
-        }
-
-        return true;
-    });
-
-    req.onSuccess([=](const rapidjson::Document &document) {
-        onFinished(FollowResult_Following);
-        return true;
-    });
-
-    req.execute();
 }
 
 std::set<TwitchUser> TwitchAccount::getIgnores() const

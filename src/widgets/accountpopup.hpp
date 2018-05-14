@@ -71,53 +71,8 @@ private:
     User popupWidgetUser;
 
     struct {
-        void reset()
-        {
-            this->following = -1;
-            this->ignoring = -1;
-        }
-
-        bool isFollowing() const
-        {
-            return this->following == 1;
-        }
-
-        bool isFollowingSet() const
-        {
-            return this->following != -1;
-        }
-
-        void setFollowing(bool newVal)
-        {
-            if (newVal) {
-                this->following = 1;
-            } else {
-                this->following = 0;
-            }
-        }
-
-        bool isIgnoring() const
-        {
-            return this->ignoring == 1;
-        }
-
-        bool isIgnoringSet() const
-        {
-            return this->ignoring != -1;
-        }
-
-        void setIgnoring(bool newVal)
-        {
-            if (newVal) {
-                this->ignoring = 1;
-            } else {
-                this->ignoring = 0;
-            }
-        }
-
-    private:
-        int following = -1;
-        int ignoring = -1;
+        bool following = false;
+        bool ignoring = false;
     } relationship;
 
 protected:
