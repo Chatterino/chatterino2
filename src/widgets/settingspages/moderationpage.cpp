@@ -53,41 +53,39 @@ ModerationPage::ModerationPage()
 
         layout->addStretch(1);
 
-        auto selectDir = layout.emplace<QPushButton>("Logs");
+        auto selectDir = layout.emplace<QPushButton>("Set custom logpath");
 
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this,
-            [ this, created, app, dirMemory = QString{app->settings->logPath} ]() mutable {
-                auto dirName = QFileDialog::getExistingDirectory();
+        // Setting custom logpath
+        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this, [
+            this, created, app, dirMemory = QString{app->settings->logPath}
+        ]() mutable {
+            auto dirName = QFileDialog::getExistingDirectory(this);
+            created->setText("Logs are saved to " + CreateLink(dirName, true));
 
+            if (dirName == "" && dirMemory == "") {
+                created->setText(
+                    "Logs are saved to " +
+                    CreateLink(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+                               true));
+            } else if (dirName == "") {
+                dirName = dirMemory;
                 created->setText("Logs are saved to " + CreateLink(dirName, true));
-                app->settings->customLogPath = true;
-                if (dirName == "" && dirMemory == "") {
-                    created->setText("Logs are saved to " +
-                                     CreateLink(QCoreApplication::applicationDirPath(), true));
-                    app->settings->customLogPath = false;
-                } else if (dirName == "") {
-                    dirName = dirMemory;
-                    created->setText("Logs are saved to " + CreateLink(dirName, true));
-                }
-                app->settings->logPath = dirName;
+            }
 
-                qDebug() << "dirMemory" << dirMemory;
-                qDebug() << "dirName" << dirName;
-                qDebug() << app->settings->logPath.getValue();
-                qDebug() << app->settings->customLogPath.getValue();
+            app->settings->logPath = dirName;
+            dirMemory = dirName;
+            app->logging->refreshLoggingPath();
 
-                dirMemory = dirName;
-                app->logging->refreshLoggingPath();
-
-            });
+        });
+        // Reset custom logpath
         auto resetDir = layout.emplace<QPushButton>("Reset logpath");
         QObject::connect(
             resetDir.getElement(), &QPushButton::clicked, this, [this, created, app]() mutable {
                 app->settings->logPath = "";
-                created->setText("Logs are saved to " +
-                                 CreateLink(QCoreApplication::applicationDirPath(), true));
-                app->settings->customLogPath = false;
+                created->setText(
+                    "Logs are saved to " +
+                    CreateLink(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+                               true));
                 app->logging->refreshLoggingPath();
             });
 
