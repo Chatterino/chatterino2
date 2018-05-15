@@ -39,11 +39,26 @@ void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr
 
 QString LoggingManager::getDirectoryForChannel(const QString &channelName)
 {
+    auto customPath = getApp()->settings->logPath;
+
     if (channelName.startsWith("/whispers")) {
+        if (customPath != "")
+            return customPath + "/Whispers";
         return this->pathManager->whispersLogsFolderPath;
     } else if (channelName.startsWith("/mentions")) {
+        if (customPath != "")
+            return customPath + "/Mentions";
         return this->pathManager->mentionsLogsFolderPath;
     } else {
+        if (customPath != "") {
+            QString logPath(customPath + QDir::separator() + channelName);
+
+            if (!this->pathManager->createFolder(logPath)) {
+                debug::Log("Error creating channel logs folder for channel {}", channelName);
+            }
+
+            return logPath;
+        }
         QString logPath(this->pathManager->channelsLogsFolderPath + QDir::separator() +
                         channelName);
 
@@ -53,6 +68,13 @@ QString LoggingManager::getDirectoryForChannel(const QString &channelName)
 
         return logPath;
     }
+}
+
+void LoggingManager::refreshLoggingPath()
+{
+    // if (app->settings->logPath == "") {
+
+    //}
 }
 
 }  // namespace singletons
