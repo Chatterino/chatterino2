@@ -33,9 +33,9 @@ class SplitContainer : public BaseWidget, pajlada::Signals::SignalHolder
 {
     Q_OBJECT
 
+public:
     struct Node;
 
-public:
     // fourtf: !!! preserve the order of left, up, right and down
     enum Direction { Left, Above, Right, Below };
 

@@ -121,11 +121,11 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
                                         switch (result) {
                                             case IgnoreResult_Success: {
                                                 this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
+                                                emit this->refreshButtons();
                                             } break;
                                             case IgnoreResult_AlreadyIgnored: {
                                                 this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
+                                                emit this->refreshButtons();
                                             } break;
                                             case IgnoreResult_Failed: {
                                             } break;
@@ -137,7 +137,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
                                           switch (result) {
                                               case UnignoreResult_Success: {
                                                   this->relationship.setIgnoring(false);
-                                                  emit refreshButtons();
+                                                  emit this->refreshButtons();
                                               } break;
                                               case UnignoreResult_Failed: {
                                               } break;
@@ -230,7 +230,7 @@ void AccountPopupWidget::getUserData()
     currentUser->checkFollow(this->popupWidgetUser.userID, [=](auto result) {
         this->relationship.setFollowing(result == FollowResult_Following);
 
-        emit refreshButtons();
+        emit this->refreshButtons();
     });
 
     bool isIgnoring = false;

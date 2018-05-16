@@ -45,6 +45,10 @@ exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
     DEFINES += "USEWEBENGINE"
 }
 
+linux {
+    LIBS += -lrt
+}
+
 win32 {
     LIBS += -luser32
 }
