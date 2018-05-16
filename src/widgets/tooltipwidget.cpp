@@ -43,6 +43,11 @@ TooltipWidget::~TooltipWidget()
     this->fontChangedConnection.disconnect();
 }
 
+void TooltipWidget::themeRefreshEvent()
+{
+    this->setStyleSheet("color: #fff; background: #000");
+}
+
 void TooltipWidget::scaleChangedEvent(float)
 {
     this->updateFont();

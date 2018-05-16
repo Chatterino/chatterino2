@@ -3,6 +3,9 @@
 #include "widgets/window.hpp"
 
 namespace chatterino {
+namespace widgets {
+class SplitContainer::Node;
+}
 namespace singletons {
 
 class WindowManager
@@ -42,8 +45,13 @@ private:
     widgets::Window *mainWindow = nullptr;
     widgets::Window *selectedWindow = nullptr;
 
-    void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    IndirectChannel decodeChannel(const QJsonObject &obj);
+    void encodeNodeRecusively(widgets::SplitContainer::Node *node, QJsonObject &obj);
+    void decodeNodeRecusively(widgets::SplitContainer *container,
+                              widgets::SplitContainer::Node *node, QJsonObject &obj, bool vertical);
+
+public:
+    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    static IndirectChannel decodeChannel(const QJsonObject &obj);
 };
 
 }  // namespace singletons

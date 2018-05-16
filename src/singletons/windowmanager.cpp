@@ -10,6 +10,7 @@
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/settingsdialog.hpp"
 
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -19,6 +20,9 @@
 
 namespace chatterino {
 namespace singletons {
+
+using SplitNode = widgets::SplitContainer::Node;
+using SplitDirection = widgets::SplitContainer::Direction;
 
 void WindowManager::showSettingsDialog()
 {
@@ -201,15 +205,24 @@ void WindowManager::initialize()
             }
 
             // load splits
+            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+            if (!splitRoot.isEmpty()) {
+                tab->decodeFromJson(splitRoot);
+
+                continue;
+            }
+
+            // fallback load splits (old)
             int colNr = 0;
             for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
                 for (QJsonValue split_val : column_val.toArray()) {
                     widgets::Split *split = new widgets::Split(tab);
 
                     QJsonObject split_obj = split_val.toObject();
-                    split->setChannel(this->decodeChannel(split_obj));
+                    split->setChannel(decodeChannel(split_obj));
 
-                    //                    tab->addToLayout(split, std::make_pair(colNr, 10000000));
+                    tab->appendSplit(split);
                 }
                 colNr++;
             }
@@ -270,23 +283,11 @@ void WindowManager::save()
             }
 
             // splits
-            QJsonArray columns_arr;
-            //            std::vector<std::vector<widgets::Split *>> columns = tab->getColumns();
+            QJsonObject splits;
 
-            //            for (std::vector<widgets::Split *> &cells : columns) {
-            //                QJsonArray cells_arr;
+            this->encodeNodeRecusively(tab->getBaseNode(), splits);
 
-            //                for (widgets::Split *cell : cells) {
-            //                    QJsonObject cell_obj;
-
-            //                    this->encodeChannel(cell->getIndirectChannel(), cell_obj);
-
-            //                    cells_arr.append(cell_obj);
-            //                }
-            //                columns_arr.append(cells_arr);
-            //            }
-
-            tab_obj.insert("splits", columns_arr);
+            tab_obj.insert("splits2", splits);
             tabs_arr.append(tab_obj);
         }
 
@@ -302,8 +303,44 @@ void WindowManager::save()
     QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.write(document.toJson());
+
+    QJsonDocument::JsonFormat format =
+#ifdef _DEBUG
+        QJsonDocument::JsonFormat::Compact
+#else
+        (QJsonDocument::JsonFormat)0
+#endif
+        ;
+
+    file.write(document.toJson(format));
     file.flush();
+}
+
+void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
+{
+    switch (node->getType()) {
+        case SplitNode::_Split: {
+            obj.insert("type", "split");
+            QJsonObject split;
+            encodeChannel(node->getSplit()->getIndirectChannel(), split);
+            obj.insert("data", split);
+            obj.insert("flexh", node->getHorizontalFlex());
+            obj.insert("flexv", node->getVerticalFlex());
+        } break;
+        case SplitNode::HorizontalContainer:
+        case SplitNode::VerticalContainer: {
+            obj.insert("type", node->getType() == SplitNode::HorizontalContainer ? "horizontal"
+                                                                                 : "vertical");
+
+            QJsonArray items_arr;
+            for (const std::unique_ptr<SplitNode> &n : node->getChildren()) {
+                QJsonObject subObj;
+                this->encodeNodeRecusively(n.get(), subObj);
+                items_arr.append(subObj);
+            }
+            obj.insert("items", items_arr);
+        } break;
+    }
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)

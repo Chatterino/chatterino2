@@ -227,9 +227,47 @@ void SplitHeader::paintEvent(QPaintEvent *)
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
-    this->dragging = true;
+    if (event->button() == Qt::LeftButton) {
+        this->dragging = true;
 
-    this->dragStart = event->pos();
+        this->dragStart = event->pos();
+    }
+
+    this->doubleClicked = false;
+}
+
+void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (this->dragging && event->button() == Qt::LeftButton) {
+        QPoint pos = event->globalPos();
+
+        if (!showingHelpTooltip) {
+            this->showingHelpTooltip = true;
+
+            QTimer::singleShot(400, this, [this, pos] {
+                if (this->doubleClicked) {
+                    this->doubleClicked = false;
+                    this->showingHelpTooltip = false;
+                    return;
+                }
+
+                TooltipWidget *widget = new TooltipWidget();
+
+                widget->setText("Double click or press <ctrl+r> to change the channel.\nClick and "
+                                "drag to move the split.");
+                widget->setAttribute(Qt::WA_DeleteOnClose);
+                widget->move(pos);
+                widget->show();
+
+                QTimer::singleShot(3000, widget, [this, widget] {
+                    widget->close();
+                    this->showingHelpTooltip = false;
+                });
+            });
+        }
+    }
+
+    this->dragging = false;
 }
 
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
@@ -242,18 +280,12 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
     }
 
     if (this->dragging) {
-        if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
-            std::abs(this->dragStart.y() - event->pos().y()) > 12) {
+        if (std::abs(this->dragStart.x() - event->pos().x()) > (int)(12 * this->getScale()) ||
+            std::abs(this->dragStart.y() - event->pos().y()) > (int)(12 * this->getScale())) {
             this->split->drag();
             this->dragging = false;
         }
     }
-}
-
-void SplitHeader::leaveEvent(QEvent *event)
-{
-    TooltipWidget::getInstance()->hide();
-    BaseWidget::leaveEvent(event);
 }
 
 void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
@@ -261,8 +293,14 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         this->split->doChangeChannel();
     }
+    this->doubleClicked = true;
 }
 
+void SplitHeader::leaveEvent(QEvent *event)
+{
+    TooltipWidget::getInstance()->hide();
+    BaseWidget::leaveEvent(event);
+}
 void SplitHeader::rightButtonClicked()
 {
 }
