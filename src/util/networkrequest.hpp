@@ -321,7 +321,7 @@ public:
                 debug::Log("Unhandled request type {}", (int)this->data.requestType);
             } break;
         }
-    }  // namespace util
+    }
 
 private:
     void useCache()
@@ -372,8 +372,6 @@ private:
         if (this->data.caller != nullptr) {
             QObject::connect(worker, &NetworkWorker::doneUrl,
                              this->data.caller, [data = this->data](auto reply) mutable {
-                                 auto &dat = data;
-
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
                                      if (data.onError) {
                                          data.onError(reply->error());
@@ -389,67 +387,66 @@ private:
 
                                  reply->deleteLater();
                              });
-        }  // namespace chatterino
+        }
 
         if (timer != nullptr) {
             timer->start(this->data.timeoutMS);
         }
 
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [ timer, data = std::move(this->data), worker ]() {
-                QNetworkReply *reply;
-                switch (data.requestType) {
-                    case GetRequest: {
-                        reply = NetworkManager::NaM.get(data.request);
-                    } break;
+        QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                         [ timer, data = std::move(this->data), worker ]() {
+                             QNetworkReply *reply = nullptr;
+                             switch (data.requestType) {
+                                 case GetRequest: {
+                                     reply = NetworkManager::NaM.get(data.request);
+                                 } break;
 
-                    case PutRequest: {
-                        reply = NetworkManager::NaM.put(data.request, data.payload);
-                    } break;
+                                 case PutRequest: {
+                                     reply = NetworkManager::NaM.put(data.request, data.payload);
+                                 } break;
 
-                    case DeleteRequest: {
-                        reply = NetworkManager::NaM.deleteResource(data.request);
-                    } break;
-                }  // namespace chatterino
+                                 case DeleteRequest: {
+                                     reply = NetworkManager::NaM.deleteResource(data.request);
+                                 } break;
+                             }
 
-                if (reply == nullptr) {
-                    debug::Log("Unhandled request type {}", (int)data.requestType);
-                    return;
-                }
+                             if (reply == nullptr) {
+                                 debug::Log("Unhandled request type {}", (int)data.requestType);
+                                 return;
+                             }
 
-                if (timer != nullptr) {
-                    QObject::connect(timer, &QTimer::timeout, worker, [reply, timer, data]() {
-                        debug::Log("Aborted!");
-                        reply->abort();
-                        timer->deleteLater();
-                        data.onError(-2);
-                    });
-                }
+                             if (timer != nullptr) {
+                                 QObject::connect(timer, &QTimer::timeout, worker,
+                                                  [reply, timer, data]() {
+                                                      debug::Log("Aborted!");
+                                                      reply->abort();
+                                                      timer->deleteLater();
+                                                      data.onError(-2);
+                                                  });
+                             }
 
-                if (data.onReplyCreated) {
-                    data.onReplyCreated(reply);
-                }
+                             if (data.onReplyCreated) {
+                                 data.onReplyCreated(reply);
+                             }
 
-                QObject::connect(reply, &QNetworkReply::finished, worker,
-                                 [ data = std::move(data), worker, reply ]() mutable {
-                                     if (data.caller == nullptr) {
-                                         QByteArray bytes = reply->readAll();
-                                         data.writeToCache(bytes);
-                                         data.onSuccess(parseJSONFromData2(bytes));
+                             QObject::connect(reply, &QNetworkReply::finished, worker,
+                                              [ data = std::move(data), worker, reply ]() mutable {
+                                                  if (data.caller == nullptr) {
+                                                      QByteArray bytes = reply->readAll();
+                                                      data.writeToCache(bytes);
+                                                      data.onSuccess(parseJSONFromData2(bytes));
 
-                                         reply->deleteLater();
-                                     } else {
-                                         emit worker->doneUrl(reply);
-                                     }
+                                                      reply->deleteLater();
+                                                  } else {
+                                                      emit worker->doneUrl(reply);
+                                                  }
 
-                                     delete worker;
-                                 });
-            }  // namespace util
-            );
+                                                  delete worker;
+                                              });
+                         });
 
         emit requester.requestUrl();
-    }  // namespace chatterino
+    }
 
     void executeGet()
     {
@@ -467,7 +464,7 @@ private:
     {
         this->doRequest();
     }
-};  // namespace util
+};
 
 }  // namespace util
 }  // namespace chatterino

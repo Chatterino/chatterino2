@@ -137,7 +137,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                 dynamic_cast<QGraphicsOpacityEffect *>(((QWidget *)watched)->graphicsEffect());
 
             if (effect != nullptr) {
-                effect->setOpacity(1);
+                effect->setOpacity(0.99);
             }
 
             this->parent->hoveredElement = this->hoveredElement;
