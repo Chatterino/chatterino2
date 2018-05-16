@@ -23,6 +23,9 @@ struct EmoteData {
     messages::Image *image1x = nullptr;
     messages::Image *image2x = nullptr;
     messages::Image *image3x = nullptr;
+
+    // Link to the emote page i.e. https://www.frankerfacez.com/emoticon/144722-pajaCringe
+    QString pageLink;
 };
 
 using EmoteMap = ConcurrentMap<QString, EmoteData>;

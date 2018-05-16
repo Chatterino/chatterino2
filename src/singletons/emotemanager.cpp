@@ -135,8 +135,12 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
 
             link = link.replace("{{id}}", id).replace("{{image}}", "1x");
 
-            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&code, &link] {
-                return util::EmoteData(new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
+            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&id, &code, &link] {
+                util::EmoteData emoteData(
+                    new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
+                emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
+
+                return emoteData;
             });
 
             this->bttvChannelEmotes.insert(code, emote);
@@ -182,9 +186,11 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
 
                 QJsonObject urls = emoteObject.value("urls").toObject();
 
-                auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [&code, &urls] {
+                auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [id, &code, &urls] {
                     util::EmoteData emoteData;
                     FillInFFZEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
+                    emoteData.pageLink =
+                        QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
 
                     return emoteData;
                 });
@@ -483,6 +489,7 @@ void EmoteManager::loadBTTVEmotes()
                                           code + "<br />Global BTTV Emote");
             emoteData.image3x = new Image(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25, code,
                                           code + "<br />Global BTTV Emote");
+            emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
             this->bttvGlobalEmotes.insert(code, emoteData);
             codes.push_back(code.toStdString());
@@ -510,10 +517,13 @@ void EmoteManager::loadFFZEmotes()
                 QJsonObject object = emote.toObject();
 
                 QString code = object.value("name").toString();
+                int id = object.value("id").toInt();
                 QJsonObject urls = object.value("urls").toObject();
 
                 util::EmoteData emoteData;
                 FillInFFZEmoteData(urls, code, code + "<br/>Global FFZ Emote", emoteData);
+                emoteData.pageLink =
+                    QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
 
                 this->ffzGlobalEmotes.insert(code, emoteData);
                 codes.push_back(code.toStdString());

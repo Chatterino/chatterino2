@@ -883,6 +883,56 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
+    const auto &creator = hoverLayoutElement->getCreator();
+    auto creatorFlags = creator.getFlags();
+
+    if ((creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) !=
+        0) {
+        if (event->button() == Qt::RightButton) {
+            static QMenu *menu = new QMenu;
+            menu->clear();
+
+            const auto &emoteElement = static_cast<const messages::EmoteElement &>(creator);
+
+            // TODO: We might want to add direct "Open image" variants alongside the Copy actions
+
+            if (emoteElement.data.image1x != nullptr) {
+                menu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
+                    QApplication::clipboard()->setText(url);  //
+                });
+            }
+            if (emoteElement.data.image2x != nullptr) {
+                menu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
+                    QApplication::clipboard()->setText(url);  //
+                });
+            }
+            if (emoteElement.data.image3x != nullptr) {
+                menu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
+                    QApplication::clipboard()->setText(url);  //
+                });
+            }
+
+            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
+                menu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                menu->addAction("Copy BTTV emote link", [emotePageLink] {
+                    QApplication::clipboard()->setText(emotePageLink);  //
+                });
+            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
+                menu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                menu->addAction("Copy FFZ emote link", [emotePageLink] {
+                    QApplication::clipboard()->setText(emotePageLink);  //
+                });
+            }
+
+            menu->move(QCursor::pos());
+            menu->show();
+
+            return;
+        }
+    }
+
     auto &link = hoverLayoutElement->getLink();
     if (event->button() != Qt::LeftButton || !app->settings->linksDoubleClickOnly) {
         this->handleLinkClick(event, link, layout.get());
