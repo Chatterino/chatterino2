@@ -60,80 +60,52 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    return;
-    //    // check parameter count
-    //    if (message->parameters().length() < 1) {
-    //        return;
-    //    }
+    // check parameter count
+    if (message->parameters().length() < 1) {
+        return;
+    }
 
-    //    QString chanName;
-    //    if (!TrimChannelName(message->parameter(0), chanName)) {
-    //        return;
-    //    }
+    QString chanName;
+    if (!TrimChannelName(message->parameter(0), chanName)) {
+        return;
+    }
 
-    //    auto app = getApp();
+    auto app = getApp();
 
-    //    // get channel
-    //    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    // get channel
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
-    //    if (chan->isEmpty()) {
-    //        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
-    //                   chanName);
-    //        return;
-    //    }
+    if (chan->isEmpty()) {
+        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
+                   chanName);
+        return;
+    }
 
-    //    // check if the chat has been cleared by a moderator
-    //    if (message->parameters().length() == 1) {
-    //        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a
-    //        moderator."));
+    // check if the chat has been cleared by a moderator
+    if (message->parameters().length() == 1) {
+        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
-    //        return;
-    //    }
+        return;
+    }
 
-    //    // get username, duration and message of the timed out user
-    //    QString username = message->parameter(1);
-    //    QString durationInSeconds, reason;
-    //    QVariant v = message->tag("ban-duration");
-    //    if (v.isValid()) {
-    //        durationInSeconds = v.toString();
-    //    }
+    // get username, duration and message of the timed out user
+    QString username = message->parameter(1);
+    QString durationInSeconds, reason;
+    QVariant v = message->tag("ban-duration");
+    if (v.isValid()) {
+        durationInSeconds = v.toString();
+    }
 
-    //    v = message->tag("ban-reason");
-    //    if (v.isValid()) {
-    //        reason = v.toString();
-    //    }
+    v = message->tag("ban-reason");
+    if (v.isValid()) {
+        reason = v.toString();
+    }
 
-    //    // add the notice that the user has been timed out
-    //    LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
-    //    bool addMessage = true;
-    //    int snapshotLength = snapshot.getLength();
+    auto timeoutMsg = Message::createTimeoutMessage(username, durationInSeconds, reason, false);
+    chan->addOrReplaceTimeout(timeoutMsg);
 
-    //    for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
-    //        auto &s = snapshot[i];
-    //        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == username) {
-    //            MessagePtr replacement(
-    //                Message::createTimeoutMessage(username, durationInSeconds, reason, true));
-    //            chan->replaceMessage(s, replacement);
-    //            addMessage = false;
-    //            break;
-    //        }
-    //    }
-
-    //    if (addMessage) {
-    //        chan->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason,
-    //        false));
-    //    }
-
-    //    // disable the messages from the user
-    //    for (int i = 0; i < snapshotLength; i++) {
-    //        auto &s = snapshot[i];
-    //        if (!(s->flags & Message::Timeout) && s->loginName == username) {
-    //            s->flags.EnableFlag(Message::Disabled);
-    //        }
-    //    }
-
-    //    // refresh all
-    //    app->windows->repaintVisibleChatWidgets(chan.get());
+    // refresh all
+    app->windows->repaintVisibleChatWidgets(chan.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)

@@ -182,8 +182,9 @@ void Application::initialize()
         }
 
         auto msg = messages::Message::createTimeoutMessage(action);
+        msg->flags |= messages::Message::PubSub;
 
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        util::postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {

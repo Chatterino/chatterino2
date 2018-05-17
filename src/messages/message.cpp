@@ -89,7 +89,6 @@ MessagePtr Message::createTimeoutMessage(const providers::twitch::BanAction &act
 
     msg->timeoutUser = action.target.name;
     msg->count = count;
-    msg->banAction.reset(new providers::twitch::BanAction(action));
 
     QString text;
 

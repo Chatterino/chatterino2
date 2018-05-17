@@ -48,6 +48,7 @@ public:
 
     void addMessage(messages::MessagePtr message);
     void addMessagesAtStart(std::vector<messages::MessagePtr> &messages);
+    void addOrReplaceTimeout(messages::MessagePtr message);
     void replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement);
     virtual void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
