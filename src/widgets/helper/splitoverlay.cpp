@@ -81,6 +81,8 @@ SplitOverlay::SplitOverlay(Split *parent)
         up->setIconSize(size);
         down->setIconSize(size);
     });
+
+    this->setMouseTracking(true);
 }
 
 void SplitOverlay::paintEvent(QPaintEvent *event)
@@ -120,6 +122,13 @@ void SplitOverlay::resizeEvent(QResizeEvent *event)
     this->_right->setVisible(wideEnough);
     this->_up->setVisible(highEnough);
     this->_down->setVisible(highEnough);
+}
+
+void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
+{
+    if ((event->modifiers() & Qt::AltModifier) == 0) {
+        this->hide();
+    }
 }
 
 SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent, HoveredElement _element)
