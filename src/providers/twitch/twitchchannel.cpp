@@ -104,9 +104,9 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
     this->chattersListTimer->start(5 * 60 * 1000);
 
-    for (int i = 0; i < 1000; i++) {
-        this->addMessage(messages::Message::createSystemMessage("asdf"));
-    }
+    //    for (int i = 0; i < 1000; i++) {
+    //        this->addMessage(messages::Message::createSystemMessage("asdf"));
+    //    }
 }
 
 TwitchChannel::~TwitchChannel()
