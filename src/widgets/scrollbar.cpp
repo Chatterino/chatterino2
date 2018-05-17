@@ -109,14 +109,14 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
             //            }
             this->currentValueAnimation.setEndValue(value);
             this->smoothScrollingOffset = 0;
-            this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.01;
+            this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.0001;
             this->currentValueAnimation.start();
         } else {
             if (this->currentValueAnimation.state() != QPropertyAnimation::Running) {
                 this->smoothScrollingOffset = 0;
                 this->desiredValue = value;
                 this->currentValueAnimation.stop();
-                this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.01;
+                this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.0001;
                 setCurrentValue(value);
             }
         }

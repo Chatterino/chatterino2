@@ -253,7 +253,7 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
 
                 TooltipWidget *widget = new TooltipWidget();
 
-                widget->setText("Double click or press <ctrl+r> to change the channel.\nClick and "
+                widget->setText("Double click or press <Ctrl+R> to change the channel.\nClick and "
                                 "drag to move the split.");
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->move(pos);

@@ -45,7 +45,8 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->refreshLiveStatus();  //
     });
 
-    this->managedConnect(app->accounts->Twitch.currentUserChanged, [this]() { this->setMod(false); });
+    this->managedConnect(app->accounts->Twitch.currentUserChanged,
+                         [this]() { this->setMod(false); });
 
     auto refreshPubSubState = [=]() {
         if (!this->hasModRights()) {
@@ -102,6 +103,10 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     this->chattersListTimer = new QTimer;
     QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
     this->chattersListTimer->start(5 * 60 * 1000);
+
+    for (int i = 0; i < 1000; i++) {
+        this->addMessage(messages::Message::createSystemMessage("asdf"));
+    }
 }
 
 TwitchChannel::~TwitchChannel()

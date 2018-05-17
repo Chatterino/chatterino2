@@ -28,6 +28,8 @@
 #include <memory>
 
 #define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
+#define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
+#define CHAT_HOVER_PAUSE_DURATION 300
 
 using namespace chatterino::messages;
 using namespace chatterino::providers::twitch;
@@ -42,9 +44,6 @@ ChannelView::ChannelView(BaseWidget *parent)
 {
     auto app = getApp();
 
-#ifndef Q_OS_MAC
-//    this->setAttribute(Qt::WA_OpaquePaintEvent);
-#endif
     this->setMouseTracking(true);
 
     this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([=] {
@@ -56,7 +55,8 @@ ChannelView::ChannelView(BaseWidget *parent)
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->actuallyLayoutMessages(true);
         this->goToBottom->setVisible(this->enableScrollingToBottom && this->scrollBar.isVisible() &&
-                                     !this->scrollBar.isAtBottom());
+                                     !this->scrollBar.isAtBottom() &&
+                                     !this->scrollToBottomAfterTemporaryPause);
 
         this->queueUpdate();
     });
@@ -97,12 +97,21 @@ ChannelView::ChannelView(BaseWidget *parent)
     //    });
 
     this->pauseTimeout.setSingleShot(true);
+    QObject::connect(&this->pauseTimeout, &QTimer::timeout, [this] {
+
+        this->pausedTemporarily = false;
+        if (!this->isPaused() && this->scrollToBottomAfterTemporaryPause) {
+            this->scrollBar.scrollToBottom();
+        }
+
+        this->scrollToBottomAfterTemporaryPause = false;
+    });
 
     //    auto e = new QResizeEvent(this->size(), this->size());
     //    this->resizeEvent(e);
     //    delete e;
 
-    this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
+    //    this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
 
     app->settings->showLastMessageIndicator.connect(
         [this](auto, auto) {
@@ -119,6 +128,11 @@ ChannelView::ChannelView(BaseWidget *parent)
             this->layoutMessages();
             this->layoutQueued = false;
         }
+    });
+
+    QTimer::singleShot(1, this, [this] {
+        this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0,
+                                    this->scrollBar.width(), this->height());
     });
 }
 
@@ -336,10 +350,11 @@ const boost::optional<messages::MessageElement::Flags> &ChannelView::getOverride
 
 messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
-    if (!this->paused) {
-        this->snapshot = this->messages.getSnapshot();
-    }
+    //    if (!this->isPaused()) {
+    this->snapshot = this->messages.getSnapshot();
+    //    }
 
+    //    return this->snapshot;
     return this->snapshot;
 }
 
@@ -363,14 +378,18 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             }
             this->lastMessageHasAlternateBackground = !this->lastMessageHasAlternateBackground;
 
+            if (this->isPaused()) {
+                this->messagesAddedSinceSelectionPause++;
+            }
+
             if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted)) {
-                if (!this->paused) {
-                    if (this->scrollBar.isAtBottom()) {
-                        this->scrollBar.scrollToBottom();
-                    } else {
-                        this->scrollBar.offset(-1);
-                    }
+                //                if (!this->isPaused()) {
+                if (this->scrollBar.isAtBottom()) {
+                    this->scrollBar.scrollToBottom();
+                } else {
+                    this->scrollBar.offset(-1);
                 }
+                //                }
             }
 
             if (!(message->flags & Message::DoNotTriggerNotification)) {
@@ -395,7 +414,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
             }
 
-            if (!this->paused) {
+            if (!this->isPaused()) {
                 if (this->messages.pushFront(messageRefs).size() > 0) {
                     if (this->scrollBar.isAtBottom()) {
                         this->scrollBar.scrollToBottom();
@@ -474,7 +493,15 @@ void ChannelView::detachChannel()
 
 void ChannelView::pause(int msecTimeout)
 {
-    this->paused = true;
+    if (!this->pauseTimeout.isActive()) {
+        this->scrollToBottomAfterTemporaryPause = this->scrollBar.isAtBottom();
+    }
+
+    this->beginPause();
+
+    //    this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.01);
+
+    this->pausedTemporarily = true;
 
     this->pauseTimeout.start(msecTimeout);
 }
@@ -492,8 +519,8 @@ void ChannelView::updateLastReadMessage()
 
 void ChannelView::resizeEvent(QResizeEvent *)
 {
-    this->scrollBar.resize(this->scrollBar.width(), this->height());
-    this->scrollBar.move(this->width() - this->scrollBar.width(), 0);
+    this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0, this->scrollBar.width(),
+                                this->height());
 
     this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
 
@@ -507,6 +534,15 @@ void ChannelView::resizeEvent(QResizeEvent *)
 void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &end)
 {
     // selections
+    if (!this->selecting && start != end) {
+        this->messagesAddedSinceSelectionPause =
+            (this->scrollToBottomAfterTemporaryPause || this->scrollBar.isAtBottom()) ? 0 : 100;
+
+        this->beginPause();
+        this->selecting = true;
+        this->pausedBySelection = true;
+    }
+
     this->selection = Selection(start, end);
 
     this->selectionChanged.invoke();
@@ -534,6 +570,23 @@ messages::MessageElement::Flags ChannelView::getFlags() const
     }
 
     return flags;
+}
+
+bool ChannelView::isPaused()
+{
+    return this->pausedTemporarily || this->pausedBySelection;
+}
+
+void ChannelView::beginPause()
+{
+    if (this->scrollBar.isAtBottom()) {
+        this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.001);
+        this->layoutMessages();
+    }
+}
+
+void ChannelView::endPause()
+{
 }
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
@@ -691,7 +744,7 @@ void ChannelView::enterEvent(QEvent *)
 
 void ChannelView::leaveEvent(QEvent *)
 {
-    this->paused = false;
+    this->pausedTemporarily = false;
 }
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
@@ -706,7 +759,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     auto app = getApp();
 
     if (app->settings->pauseChatHover.getValue()) {
-        this->pause(300);
+        this->pause(CHAT_HOVER_PAUSE_DURATION);
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();
@@ -722,8 +775,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // is selecting
-    if (this->selecting) {
-        this->pause(500);
+    if (this->isMouseDown) {
+        this->pause(300);
         int index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection.start, SelectionItem(messageIndex, index));
@@ -804,7 +857,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
         SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
         this->setSelection(selectionItem, selectionItem);
-        this->selecting = true;
 
         return;
     }
@@ -818,7 +870,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
     auto selectionItem = SelectionItem(messageIndex, index);
     this->setSelection(selectionItem, selectionItem);
-    this->selecting = true;
 
     this->repaint();
 }
@@ -841,11 +892,23 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     auto app = getApp();
 
     if (this->selecting) {
-        this->paused = false;
+        if (this->messagesAddedSinceSelectionPause <= SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
+            // don't scroll
+            this->scrollBar.scrollToBottom(false);
+            //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() -
+            //                                            this->messagesAddedSinceSelectionPause);
+        }
+
+        this->scrollToBottomAfterTemporaryPause = false;
+        this->pausedBySelection = false;
+        this->selecting = false;
+        this->pauseTimeout.stop();
+        this->pausedTemporarily = false;
+
+        this->layoutMessages();
     }
 
     this->isMouseDown = false;
-    this->selecting = false;
 
     float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
 

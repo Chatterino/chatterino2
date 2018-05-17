@@ -86,7 +86,7 @@ SplitOverlay::SplitOverlay(Split *parent)
 void SplitOverlay::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.fillRect(this->rect(), QColor(0, 0, 0, 90));
+    painter.fillRect(this->rect(), QColor(0, 0, 0, 150));
 
     QRect rect;
     switch (this->hoveredElement) {
