@@ -17,6 +17,7 @@ public:
     explicit SplitOverlay(Split *parent = nullptr);
 
 protected:
+    //    bool event(QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;

@@ -129,10 +129,15 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
+
+        qDebug() << "xD" << status;
+
         if ((status == Qt::AltModifier || status == (Qt::AltModifier | Qt::ControlModifier)) &&
             this->isMouseOver) {
+            qDebug() << "show";
             this->overlay->show();
         } else {
+            qDebug() << "hide";
             this->overlay->hide();
         }
     });
@@ -271,26 +276,19 @@ void Split::paintEvent(QPaintEvent *)
 
 void Split::mouseMoveEvent(QMouseEvent *event)
 {
-    this->handleModifiers(event, event->modifiers());
-}
-
-void Split::mousePressEvent(QMouseEvent *event)
-{
-    //    if (event->buttons() == Qt::LeftButton && event->modifiers() & Qt::AltModifier) {
-    //        this->drag();
-    //    }
+    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, event->modifiers());
+    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, event->modifiers());
+    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::resizeEvent(QResizeEvent *event)
@@ -304,7 +302,7 @@ void Split::enterEvent(QEvent *event)
 {
     this->isMouseOver = true;
 
-    auto a = modifierStatus;
+    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
 
     if (modifierStatus == Qt::AltModifier ||
         modifierStatus == (Qt::AltModifier | Qt::ControlModifier)) {
@@ -315,7 +313,10 @@ void Split::enterEvent(QEvent *event)
 void Split::leaveEvent(QEvent *event)
 {
     this->isMouseOver = false;
+
     this->overlay->hide();
+
+    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
@@ -324,41 +325,6 @@ void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
         modifierStatus = modifiers;
         modifierStatusChanged.invoke(modifiers);
     }
-
-    //    if (modifiers == Qt::AltModifier) {
-    //        if (!modifierStatus) {
-    //            modifierStatus = true;
-    //            modifierStatusChanged.invoke(true);
-    //        }
-    //    } else {
-    //        if (modifierStatus) {
-    //            modifierStatus = false;
-    //            modifierStatusChanged.invoke(false);
-    //        }
-    //        this->setCursor(Qt::ArrowCursor);
-    //    }
-}
-
-void Split::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-    this->isDragging = true;
-    QTimer::singleShot(1, [this] { this->overlay->show(); });
-}
-
-void Split::dragLeaveEvent(QDragLeaveEvent *event)
-{
-    this->overlay->hide();
-    this->isDragging = false;
-}
-
-void Split::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->acceptProposedAction();
-}
-
-void Split::dropEvent(QDropEvent *event)
-{
 }
 
 /// Slots

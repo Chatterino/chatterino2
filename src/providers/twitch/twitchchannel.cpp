@@ -191,6 +191,8 @@ bool TwitchChannel::isBroadcaster()
 {
     auto app = getApp();
 
+    qDebug() << "ASD" << (this->name == app->accounts->Twitch.getCurrent()->getUserName());
+
     return this->name == app->accounts->Twitch.getCurrent()->getUserName();
 }
 

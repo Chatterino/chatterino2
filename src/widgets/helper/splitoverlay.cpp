@@ -126,9 +126,13 @@ void SplitOverlay::resizeEvent(QResizeEvent *event)
 
 void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->modifiers() & Qt::AltModifier) == 0) {
-        this->hide();
-    }
+    BaseWidget::mouseMoveEvent(event);
+
+    //    qDebug() << QGuiApplication::queryKeyboardModifiers();
+
+    //    if ((QGuiApplication::queryKeyboardModifiers() & Qt::AltModifier) == Qt::AltModifier) {
+    //        this->hide();
+    //    }
 }
 
 SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent, HoveredElement _element)
