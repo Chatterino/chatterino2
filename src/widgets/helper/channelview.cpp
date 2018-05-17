@@ -54,9 +54,12 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->actuallyLayoutMessages(true);
-        this->goToBottom->setVisible(this->enableScrollingToBottom && this->scrollBar.isVisible() &&
-                                     !this->scrollBar.isAtBottom() &&
-                                     !this->scrollToBottomAfterTemporaryPause);
+
+        if (!this->isPaused()) {
+            this->goToBottom->setVisible(this->enableScrollingToBottom &&
+                                         this->scrollBar.isVisible() &&
+                                         !this->scrollBar.isAtBottom());
+        }
 
         this->queueUpdate();
     });
@@ -98,20 +101,9 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->pauseTimeout.setSingleShot(true);
     QObject::connect(&this->pauseTimeout, &QTimer::timeout, [this] {
-
         this->pausedTemporarily = false;
-        if (!this->isPaused() && this->scrollToBottomAfterTemporaryPause) {
-            this->scrollBar.scrollToBottom();
-        }
-
-        this->scrollToBottomAfterTemporaryPause = false;
+        this->layoutMessages();
     });
-
-    //    auto e = new QResizeEvent(this->size(), this->size());
-    //    this->resizeEvent(e);
-    //    delete e;
-
-    //    this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
 
     app->settings->showLastMessageIndicator.connect(
         [this](auto, auto) {
@@ -134,7 +126,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0,
                                     this->scrollBar.width(), this->height());
     });
-}
+}  // namespace widgets
 
 ChannelView::~ChannelView()
 {
@@ -260,8 +252,11 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
     // seconds or something
     if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
-        this->scrollBar.scrollToBottom(this->messageWasAdded &&
-                                       app->settings->enableSmoothScrollingNewMessages.getValue());
+        if (!this->isPaused()) {
+            this->scrollBar.scrollToBottom(
+                this->messageWasAdded &&
+                app->settings->enableSmoothScrollingNewMessages.getValue());
+        }
         this->messageWasAdded = false;
     }
 
@@ -493,14 +488,6 @@ void ChannelView::detachChannel()
 
 void ChannelView::pause(int msecTimeout)
 {
-    if (!this->pauseTimeout.isActive()) {
-        this->scrollToBottomAfterTemporaryPause = this->scrollBar.isAtBottom();
-    }
-
-    this->beginPause();
-
-    //    this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.01);
-
     this->pausedTemporarily = true;
 
     this->pauseTimeout.start(msecTimeout);
@@ -535,10 +522,8 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
 {
     // selections
     if (!this->selecting && start != end) {
-        this->messagesAddedSinceSelectionPause =
-            (this->scrollToBottomAfterTemporaryPause || this->scrollBar.isAtBottom()) ? 0 : 100;
+        this->messagesAddedSinceSelectionPause = 0;
 
-        this->beginPause();
         this->selecting = true;
         this->pausedBySelection = true;
     }
@@ -577,17 +562,17 @@ bool ChannelView::isPaused()
     return this->pausedTemporarily || this->pausedBySelection;
 }
 
-void ChannelView::beginPause()
-{
-    if (this->scrollBar.isAtBottom()) {
-        this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.001);
-        this->layoutMessages();
-    }
-}
+// void ChannelView::beginPause()
+//{
+//    if (this->scrollBar.isAtBottom()) {
+//        this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.001);
+//        this->layoutMessages();
+//    }
+//}
 
-void ChannelView::endPause()
-{
-}
+// void ChannelView::endPause()
+//{
+//}
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
@@ -675,6 +660,9 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
+    this->pausedBySelection = false;
+    this->pausedTemporarily = false;
+
     if (this->scrollBar.isVisible()) {
         auto app = getApp();
 
@@ -745,6 +733,7 @@ void ChannelView::enterEvent(QEvent *)
 void ChannelView::leaveEvent(QEvent *)
 {
     this->pausedTemporarily = false;
+    this->layoutMessages();
 }
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
@@ -892,14 +881,10 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     auto app = getApp();
 
     if (this->selecting) {
-        if (this->messagesAddedSinceSelectionPause <= SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
-            // don't scroll
-            this->scrollBar.scrollToBottom(false);
-            //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() -
-            //                                            this->messagesAddedSinceSelectionPause);
+        if (this->messagesAddedSinceSelectionPause > SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
+            this->showingLatestMessages = false;
         }
 
-        this->scrollToBottomAfterTemporaryPause = false;
         this->pausedBySelection = false;
         this->selecting = false;
         this->pauseTimeout.stop();

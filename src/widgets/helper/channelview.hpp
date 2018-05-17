@@ -86,10 +86,11 @@ private:
     bool updateQueued = false;
     bool messageWasAdded = false;
     bool lastMessageHasAlternateBackground = false;
+
     bool pausedTemporarily = false;
     bool pausedBySelection = false;
-    bool scrollToBottomAfterTemporaryPause = false;
     int messagesAddedSinceSelectionPause = 0;
+
     QTimer pauseTimeout;
     boost::optional<messages::MessageElement::Flags> overrideFlags;
     messages::MessageLayoutPtr lastReadMessage;
@@ -104,8 +105,8 @@ private:
     messages::MessageElement::Flags getFlags() const;
     bool isPaused();
 
-    void beginPause();
-    void endPause();
+    //    void beginPause();
+    //    void endPause();
 
     ChannelPtr channel;
 
