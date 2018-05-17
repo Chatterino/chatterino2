@@ -39,11 +39,11 @@ include(dependencies/openssl.pri)
 include(dependencies/boost.pri)
 
 # Optional feature: QtWebEngine
-exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
-    message(Using QWebEngine)
-    QT += webenginewidgets
-    DEFINES += "USEWEBENGINE"
-}
+#exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
+#    message(Using QWebEngine)
+#    QT += webenginewidgets
+#    DEFINES += "USEWEBENGINE"
+#}
 
 linux {
     LIBS += -lrt
