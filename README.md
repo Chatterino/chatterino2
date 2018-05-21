@@ -72,7 +72,7 @@ You can also add `-o2` to optimize the final binary size but increase compilatio
 
 #### Ubuntu 18.04
 *most likely works the same for other Debian-like distros*
-1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev`
+1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev`
 2. Install rapidjson to `/usr/local/` like this: From the Chatterino2 root folder: `sudo cp -r lib/rapidjson/include/rapidjson /usr/local/include`. If you want to install it to another place, you have to make sure it's in the chatterino.pro include path
 3. open `chatterino.pro` with QT Creator and build
 
