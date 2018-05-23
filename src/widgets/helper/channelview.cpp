@@ -258,7 +258,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
         if (!this->isPaused()) {
             this->scrollBar.scrollToBottom(
-                this->messageWasAdded &&
+                //                this->messageWasAdded &&
                 app->settings->enableSmoothScrollingNewMessages.getValue());
         }
         this->messageWasAdded = false;
