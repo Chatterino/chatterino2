@@ -321,9 +321,8 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
     if (!event->mimeData()->hasFormat("chatterino/split"))
         return;
 
-    if (!SplitContainer::isDraggingSplit) {
+    if (!SplitContainer::isDraggingSplit)
         return;
-    }
 
     this->isDragging = true;
     this->layout();

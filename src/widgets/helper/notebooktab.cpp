@@ -354,8 +354,14 @@ void NotebookTab::leaveEvent(QEvent *)
     this->update();
 }
 
-void NotebookTab::dragEnterEvent(QDragEnterEvent *)
+void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 {
+    if (!event->mimeData()->hasFormat("chatterino/split"))
+        return;
+
+    if (!SplitContainer::isDraggingSplit)
+        return;
+
     if (this->notebook->getAllowUserTabManagement()) {
         this->notebook->select(this->page);
     }
