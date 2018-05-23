@@ -938,12 +938,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     const auto &creator = hoverLayoutElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    if ((creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) !=
-        0) {
-        if (event->button() == Qt::RightButton) {
-            static QMenu *menu = new QMenu;
-            menu->clear();
+    if (event->button() == Qt::RightButton) {
+        static QMenu *menu = new QMenu;
+        menu->clear();
 
+        // Emote actions
+        if ((creatorFlags &
+             (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) != 0) {
             const auto &emoteElement = static_cast<const messages::EmoteElement &>(creator);
 
             // TODO: We might want to add direct "Open image" variants alongside the Copy actions
@@ -977,12 +978,30 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                     QApplication::clipboard()->setText(emotePageLink);  //
                 });
             }
-
-            menu->move(QCursor::pos());
-            menu->show();
-
-            return;
         }
+
+        // add seperator
+        if (!menu->actions().empty())
+            menu->addSeparator();
+
+        // Message actions
+        menu->addAction("Copy message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString);
+
+            QGuiApplication::clipboard()->setText(copyString);
+        });
+        //        menu->addAction("Quote message", [layout] {
+        //            QString copyString;
+        //            layout->addSelectionText(copyString);
+
+        //            // insert into input
+        //        });
+
+        menu->move(QCursor::pos());
+        menu->show();
+
+        return;
     }
 
     auto &link = hoverLayoutElement->getLink();
