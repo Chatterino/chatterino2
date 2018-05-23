@@ -53,6 +53,7 @@ protected:
     virtual void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
+    NotebookButton *addCustomButton();
 
 private:
     struct Item {
@@ -64,6 +65,7 @@ private:
     QWidget *selectedPage = nullptr;
 
     NotebookButton addButton;
+    std::vector<NotebookButton *> customButtons;
 
     bool allowUserTabManagement = false;
     bool showAddButton = false;
@@ -75,7 +77,7 @@ private:
 class SplitNotebook : public Notebook
 {
 public:
-    SplitNotebook(QWidget *parent);
+    SplitNotebook(Window *parent);
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();

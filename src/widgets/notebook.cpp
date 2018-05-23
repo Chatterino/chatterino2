@@ -251,8 +251,6 @@ void Notebook::scaleChangedEvent(float scale)
 {
     float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
 
-    //    this->settingsButton.setFixedSize(h, h);
-    //    this->userButton.setFixedSize(h, h);
     this->addButton.setFixedSize(h, h);
 
     for (auto &i : this->items) {
@@ -296,6 +294,14 @@ void Notebook::performLayout(bool animated)
     //        (app->settings->hideUserButton && app->settings->hidePreferencesButton)) {
     //        x += (int)(scale * 2);
     //    }
+
+    float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
+
+    for (auto *btn : this->customButtons) {
+        btn->setFixedSize(h, h);
+        btn->move(x, 0);
+        x += h;
+    }
 
     int tabHeight = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
     bool first = true;
@@ -361,6 +367,16 @@ NotebookButton *Notebook::getAddButton()
     return &this->addButton;
 }
 
+NotebookButton *Notebook::addCustomButton()
+{
+    NotebookButton *btn = new NotebookButton(this);
+
+    this->customButtons.push_back(btn);
+
+    this->performLayout();
+    return btn;
+}
+
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
 {
     for (auto &it : this->items) {
@@ -372,11 +388,34 @@ NotebookTab *Notebook::getTabFromPage(QWidget *page)
     return nullptr;
 }
 
-SplitNotebook::SplitNotebook(QWidget *parent)
+SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
     this->connect(this->getAddButton(), &NotebookButton::clicked,
                   [this]() { QTimer::singleShot(80, this, [this] { this->addPage(true); }); });
+
+    bool customFrame = parent->hasCustomWindowFrame();
+
+    if (!customFrame) {
+        auto *settingsBtn = this->addCustomButton();
+        auto *userBtn = this->addCustomButton();
+
+        //        app->settings->hidePreferencesButton.connectSimple(
+        //            [this](bool hide) { this->performLayout(); });
+        //        app->settings->hideUserButton.connectSimple([this](auto) { this->performLayout();
+        //        });
+
+        settingsBtn->icon = NotebookButton::IconSettings;
+        userBtn->icon = NotebookButton::IconUser;
+
+        QObject::connect(settingsBtn, &NotebookButton::clicked,
+                         [this] { getApp()->windows->showSettingsDialog(); });
+
+        QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
+            getApp()->windows->showAccountSelectPopup(
+                this->mapToGlobal(userBtn->rect().bottomRight()));
+        });
+    }
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)
