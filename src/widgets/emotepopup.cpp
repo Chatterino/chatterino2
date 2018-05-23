@@ -7,6 +7,7 @@
 #include "widgets/notebook.hpp"
 
 #include <QHBoxLayout>
+#include <QShortcut>
 #include <QTabWidget>
 
 using namespace chatterino::providers::twitch;

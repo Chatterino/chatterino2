@@ -126,7 +126,11 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0,
                                     this->scrollBar.width(), this->height());
     });
-}  // namespace widgets
+
+    QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+                     [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
+}
 
 ChannelView::~ChannelView()
 {
