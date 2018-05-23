@@ -302,10 +302,18 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
                     ncp->lppos->flags |= SWP_NOREDRAW;
                     RECT *clientRect = &ncp->rgrc[0];
-                    clientRect->left += cx;
-                    clientRect->top += 0;
-                    clientRect->right -= cx;
-                    clientRect->bottom -= cy;
+
+                    if (IsWindows10OrGreater()) {
+                        clientRect->left += cx;
+                        clientRect->top += 0;
+                        clientRect->right -= cx;
+                        clientRect->bottom -= cy;
+                    } else {
+                        clientRect->left += 1;
+                        clientRect->top += 0;
+                        clientRect->right -= 1;
+                        clientRect->bottom -= 1;
+                    }
                 }
 
                 *result = 0;
