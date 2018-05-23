@@ -27,7 +27,7 @@ Window::Window(WindowType _type)
     : BaseWindow(nullptr, true)
     , type(_type)
     , dpi(this->getScale())
-    , notebook(this, !this->hasCustomWindowFrame())
+    , notebook(this)
 {
     auto app = getApp();
 
@@ -81,7 +81,7 @@ Window::Window(WindowType _type)
     CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
 
     // CTRL+SHIFT+T: New tab
-    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addNewPage(true); });
+    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addPage(true); });
 
     // CTRL+SHIFT+W: Close current tab
     CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
@@ -106,6 +106,9 @@ Window::Window(WindowType _type)
     //    });
 
     this->setWindowTitle("Chatterino 2 Development Build");
+
+    this->notebook.setAllowUserTabManagement(true);
+    this->notebook.setShowAddButton(true);
 }
 
 Window::WindowType Window::getType()
@@ -128,7 +131,7 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
     }
 }
 
-Notebook &Window::getNotebook()
+SplitNotebook &Window::getNotebook()
 {
     return this->notebook;
 }

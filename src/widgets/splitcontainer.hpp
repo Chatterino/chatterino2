@@ -165,7 +165,7 @@ private:
     };
 
 public:
-    SplitContainer(Notebook *parent, NotebookTab *_tab);
+    SplitContainer(Notebook2 *parent);
 
     void appendNewSplit(bool openChannelNameDialog);
     void appendSplit(Split *split);
@@ -189,11 +189,13 @@ public:
 
     void refreshTabTitle();
 
-    NotebookTab *getTab() const;
+    NotebookTab2 *getTab() const;
     Node *getBaseNode()
     {
         return &this->baseNode;
     }
+
+    void setTab(NotebookTab2 *tab);
 
     static bool isDraggingSplit;
     static Split *draggingSplit;
@@ -232,7 +234,7 @@ private:
 
     Node baseNode;
 
-    NotebookTab *tab;
+    NotebookTab2 *tab;
     std::vector<Split *> splits;
 
     bool isDragging = false;

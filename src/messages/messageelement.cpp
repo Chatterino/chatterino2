@@ -139,7 +139,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
     auto app = getApp();
 
     if (_flags & this->getFlags()) {
-        QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, container.getScale());
+        QFontMetrics metrics = app->fonts->getFontMetrics(this->style, container.getScale());
 
         for (Word &word : this->words) {
             auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
@@ -242,7 +242,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getApp()->settings->timestampFormat);
 
-    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
+    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::ChatMedium);
 }
 
 // TWITCH MODERATION

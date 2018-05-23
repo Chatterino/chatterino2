@@ -52,7 +52,6 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     isLight = multiplier > 0;
     bool lightWin = isLight;
 
-    QColor none(0, 0, 0, 0);
     QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
@@ -69,7 +68,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 #ifdef Q_OS_LINUX
             this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
 #else
-            this->window.background = lightWin ? "#fff" : "#444";
+            this->window.background = lightWin ? "#fff" : "#111";
 #endif
 
         QColor fg = this->window.text = lightWin ? "#000" : "#eee";
@@ -89,26 +88,47 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
         /// TABS
         if (lightWin) {
-            this->tabs.regular = {fg, {bg, QColor("#ccc"), bg}};
+            this->tabs.regular = {QColor("#444"),
+                                  {QColor("#fff"), QColor("#fff"), QColor("#fff")},
+                                  {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
             this->tabs.newMessage = {
-                fg,
-                {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
-                 QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
-                 QBrush(blendColors(themeColorNoSat, "#ccc", 0.9), Qt::FDiagPattern)}};
-            this->tabs.highlighted = {fg, {QColor("#ccc"), QColor("#ccc"), QColor("#bbb")}};
-            this->tabs.selected = {QColor("#fff"),
-                                   {QColor("#777"), QColor("#777"), QColor("#888")}};
-        } else {
-            this->tabs.regular = {fg, {bg, QColor("#555"), bg}};
-            this->tabs.newMessage = {
-                fg,
-                {QBrush(blendColors(themeColor, "#666", 0.7), Qt::FDiagPattern),
-                 QBrush(blendColors(themeColor, "#666", 0.5), Qt::FDiagPattern),
-                 QBrush(blendColors(themeColorNoSat, "#666", 0.7), Qt::FDiagPattern)}};
-            this->tabs.highlighted = {fg, {QColor("#777"), QColor("#777"), QColor("#666")}};
+                fg, {bg, QColor("#ccc"), bg}, {QColor("#aaa"), QColor("#aaa"), QColor("#aaa")}};
+            this->tabs.highlighted = {fg,
+                                      {bg, QColor("#ccc"), bg},
+                                      {QColor("#b60505"), QColor("#b60505"), QColor("#b60505")}};
             this->tabs.selected = {QColor("#000"),
-                                   {QColor("#999"), QColor("#999"), QColor("#888")}};
+                                   {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
+                                   {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+        } else {
+            this->tabs.regular = {QColor("#aaa"),
+                                  {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                                  {QColor("#444"), QColor("#444"), QColor("#444")}};
+            this->tabs.newMessage = {fg,
+                                     {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                                     {QColor("#888"), QColor("#888"), QColor("#888")}};
+            this->tabs.highlighted = {fg,
+                                      {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                                      {QColor("#ee6166"), QColor("#ee6166"), QColor("#ee6166")}};
+
+            this->tabs.selected = {QColor("#fff"),
+                                   {QColor("#555555"), QColor("#555555"), QColor("#555555")},
+                                   {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
         }
+
+        // this->tabs.newMessage = {
+        //     fg,
+        //     {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
+        //      QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
+        //      QBrush(blendColors(themeColorNoSat, "#ccc", 0.9), Qt::FDiagPattern)}};
+
+        //         this->tabs.newMessage = {
+        //                fg,
+        //                {QBrush(blendColors(themeColor, "#666", 0.7), Qt::FDiagPattern),
+        //                 QBrush(blendColors(themeColor, "#666", 0.5), Qt::FDiagPattern),
+        //                 QBrush(blendColors(themeColorNoSat, "#666", 0.7),
+        //                 Qt::FDiagPattern)}};
+        //            this->tabs.highlighted = {fg, {QColor("#777"), QColor("#777"),
+        //            QColor("#666")}};
 
         this->tabs.bottomLine = this->tabs.selected.backgrounds.regular.color();
     }
@@ -163,7 +183,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     this->updated.invoke();
-}
+}  // namespace singletons
 
 QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
 {

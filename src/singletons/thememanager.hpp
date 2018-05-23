@@ -25,11 +25,16 @@ public:
 
     struct TabColors {
         QColor text;
-        struct Backgrounds {
+        struct {
             QBrush regular;
             QBrush hover;
             QBrush unfocused;
         } backgrounds;
+        struct {
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
+        } line;
     };
 
     /// WINDOW
@@ -43,9 +48,9 @@ public:
     /// TABS
     struct {
         TabColors regular;
-        TabColors selected;
-        TabColors highlighted;
         TabColors newMessage;
+        TabColors highlighted;
+        TabColors selected;
         QColor border;
         QColor bottomLine;
     } tabs;

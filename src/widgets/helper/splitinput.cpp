@@ -65,11 +65,11 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui.textEdit->setFont(
-        app->fonts->getFont(singletons::FontManager::Type::Medium, this->getScale()));
+        app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
 
     this->managedConnections.emplace_back(app->fonts->fontChanged.connect([=]() {
         this->ui.textEdit->setFont(
-            app->fonts->getFont(singletons::FontManager::Type::Medium, this->getScale()));
+            app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
@@ -244,18 +244,18 @@ void SplitInput::installKeyPressedEvent()
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
-                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+                Notebook2 *notebook = static_cast<Notebook2 *>(page->parentWidget());
 
-                notebook->nextTab();
+                notebook->selectNextTab();
             }
         } else if (event->key() == Qt::Key_Backtab) {
             if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) {
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
-                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+                Notebook2 *notebook = static_cast<Notebook2 *>(page->parentWidget());
 
-                notebook->previousTab();
+                notebook->selectPreviousTab();
             }
         } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
             if (this->chatWidget->view.hasSelection()) {
@@ -316,14 +316,23 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager->splits.input.background);
-
-    QPen pen(this->themeManager->splits.input.border);
     if (this->themeManager->isLightTheme()) {
-        pen.setWidth((int)(6 * this->getScale()));
+        int s = (int)(3 * this->getScale());
+        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+
+        painter.fillRect(rect, this->themeManager->splits.input.background);
+
+        painter.setPen(QColor("#ccc"));
+        painter.drawRect(rect);
+    } else {
+        int s = (int)(1 * this->getScale());
+        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+
+        painter.fillRect(rect, this->themeManager->splits.input.background);
+
+        painter.setPen(QColor("#333"));
+        painter.drawRect(rect);
     }
-    painter.setPen(pen);
-    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
 void SplitInput::resizeEvent(QResizeEvent *)

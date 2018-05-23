@@ -158,7 +158,7 @@ class TextElement : public MessageElement
 public:
     TextElement(const QString &text, MessageElement::Flags flags,
                 const MessageColor &color = MessageColor::Text,
-                FontStyle style = FontStyle::Medium);
+                FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;

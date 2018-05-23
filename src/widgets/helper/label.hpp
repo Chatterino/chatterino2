@@ -27,7 +27,7 @@ protected:
 private:
     QSize preferedSize;
     QString text;
-    FontStyle fontStyle = FontStyle::Medium;
+    FontStyle fontStyle = FontStyle::ChatMedium;
 };
 
 }  // namespace widgets

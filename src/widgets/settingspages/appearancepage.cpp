@@ -165,12 +165,12 @@ QLayout *AppearancePage::createFontChanger()
     layout->addWidget(label);
 
     auto updateFontFamilyLabel = [=](auto) {
-        label->setText(QString::fromStdString(app->fonts->currentFontFamily.getValue()) + ", " +
-                       QString::number(app->fonts->currentFontSize) + "pt");
+        label->setText(QString::fromStdString(app->fonts->chatFontFamily.getValue()) + ", " +
+                       QString::number(app->fonts->chatFontSize) + "pt");
     };
 
-    app->fonts->currentFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
-    app->fonts->currentFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");
@@ -178,11 +178,11 @@ QLayout *AppearancePage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::Medium, 1.));
+        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::ChatMedium, 1.));
 
         dialog.connect(&dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
-            app->fonts->currentFontFamily = font.family().toStdString();
-            app->fonts->currentFontSize = font.pointSize();
+            app->fonts->chatFontFamily = font.family().toStdString();
+            app->fonts->chatFontSize = font.pointSize();
         });
 
         dialog.show();

@@ -29,7 +29,7 @@ public:
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
-    Notebook &getNotebook();
+    SplitNotebook &getNotebook();
 
     void refreshWindowTitle(const QString &username);
 
@@ -47,9 +47,9 @@ private:
 
     void loadGeometry();
 
-    Notebook notebook;
+    SplitNotebook notebook;
 
-    friend class Notebook;
+    friend class Notebook2;
 
 public:
     void save();

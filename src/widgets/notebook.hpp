@@ -32,6 +32,7 @@ public:
     void selectPreviousTab();
 
     int getPageCount() const;
+    QWidget *getPageAt(int index) const;
     int getSelectedIndex() const;
     QWidget *getSelectedPage() const;
 
@@ -44,10 +45,14 @@ public:
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
+    void performLayout(bool animate = true);
+
 protected:
     virtual void scaleChangedEvent(float scale) override;
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void paintEvent(QPaintEvent *) override;
+
+    NotebookButton *getAddButton();
 
 private:
     struct Item {
@@ -64,63 +69,16 @@ private:
     bool showAddButton = false;
     int lineY = 20;
 
-    void performLayout(bool animate = true);
-
     NotebookTab2 *getTabFromPage(QWidget *page);
 };
 
-class Notebook : public BaseWidget
+class SplitNotebook : public Notebook2
 {
-    Q_OBJECT
-
 public:
-    explicit Notebook(Window *parent, bool _showButtons);
+    SplitNotebook(QWidget *parent);
 
-    SplitContainer *addNewPage(bool select = false);
-
-    void removePage(SplitContainer *page);
-    void removeCurrentPage();
-    void select(SplitContainer *page);
-    void selectIndex(int index);
-
+    SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
-    SplitContainer *getSelectedPage();
-
-    void performLayout(bool animate = true);
-
-    int tabCount();
-    SplitContainer *tabAt(QPoint point, int &index, int maxWidth = 2000000000);
-    SplitContainer *tabAt(int index);
-    void rearrangePage(SplitContainer *page, int index);
-
-    void nextTab();
-    void previousTab();
-
-protected:
-    void scaleChangedEvent(float scale);
-    void resizeEvent(QResizeEvent *);
-
-    void settingsButtonMouseReleased(QMouseEvent *event);
-
-public slots:
-    void settingsButtonClicked();
-    void usersButtonClicked();
-    void addPageButtonClicked();
-
-private:
-    Window *parentWindow;
-
-    QList<SplitContainer *> pages;
-
-    NotebookButton addButton;
-    NotebookButton settingsButton;
-    NotebookButton userButton;
-
-    SplitContainer *selectedPage = nullptr;
-
-    bool showButtons;
-
-    QMessageBox closeConfirmDialog;
 };
 
 }  // namespace widgets

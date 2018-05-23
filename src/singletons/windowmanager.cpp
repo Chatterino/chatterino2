@@ -188,27 +188,27 @@ void WindowManager::initialize()
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
         for (QJsonValue tab_val : tabs) {
-            widgets::SplitContainer *tab = window.getNotebook().addNewPage();
+            widgets::SplitContainer *page = window.getNotebook().addPage(false);
 
             QJsonObject tab_obj = tab_val.toObject();
 
             // set custom title
             QJsonValue title_val = tab_obj.value("title");
             if (title_val.isString()) {
-                tab->getTab()->setTitle(title_val.toString());
-                tab->getTab()->useDefaultTitle = false;
+                page->getTab()->setTitle(title_val.toString());
+                page->getTab()->useDefaultTitle = false;
             }
 
             // selected
             if (tab_obj.value("selected").toBool(false)) {
-                window.getNotebook().select(tab);
+                window.getNotebook().select(page);
             }
 
             // load splits
             QJsonObject splitRoot = tab_obj.value("splits2").toObject();
 
             if (!splitRoot.isEmpty()) {
-                tab->decodeFromJson(splitRoot);
+                page->decodeFromJson(splitRoot);
 
                 continue;
             }
@@ -217,12 +217,12 @@ void WindowManager::initialize()
             int colNr = 0;
             for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
                 for (QJsonValue split_val : column_val.toArray()) {
-                    widgets::Split *split = new widgets::Split(tab);
+                    widgets::Split *split = new widgets::Split(page);
 
                     QJsonObject split_obj = split_val.toObject();
                     split->setChannel(decodeChannel(split_obj));
 
-                    tab->appendSplit(split);
+                    page->appendSplit(split);
                 }
                 colNr++;
             }
@@ -231,7 +231,7 @@ void WindowManager::initialize()
 
     if (mainWindow == nullptr) {
         mainWindow = &createWindow(widgets::Window::Main);
-        mainWindow->getNotebook().addNewPage(true);
+        mainWindow->getNotebook().addPage(true);
     }
 
     this->initialized = true;
@@ -268,9 +268,11 @@ void WindowManager::save()
         // window tabs
         QJsonArray tabs_arr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().tabCount(); tab_i++) {
+        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount(); tab_i++) {
             QJsonObject tab_obj;
-            widgets::SplitContainer *tab = window->getNotebook().tabAt(tab_i);
+            widgets::SplitContainer *tab =
+                dynamic_cast<widgets::SplitContainer *>(window->getNotebook().getPageAt(tab_i));
+            assert(tab != nullptr);
 
             // custom tab title
             if (!tab->getTab()->useDefaultTitle) {

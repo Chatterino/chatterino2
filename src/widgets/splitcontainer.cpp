@@ -29,15 +29,13 @@ namespace widgets {
 bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
 
-SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab)
+SplitContainer::SplitContainer(Notebook2 *parent)
     : BaseWidget(parent)
-    , tab(_tab)
+    , tab(nullptr)
     , dropPreview(this)
     , mouseOverPoint(-10000, -10000)
     , overlay(this)
 {
-    this->tab->page = this;
-
     this->refreshTabTitle();
 
     this->managedConnect(Split::modifierStatusChanged, [this](auto modifiers) {
@@ -69,9 +67,18 @@ SplitContainer::SplitContainer(Notebook *parent, NotebookTab *_tab)
     this->setAcceptDrops(true);
 }
 
-NotebookTab *SplitContainer::getTab() const
+NotebookTab2 *SplitContainer::getTab() const
 {
     return this->tab;
+}
+
+void SplitContainer::setTab(NotebookTab2 *_tab)
+{
+    this->tab = _tab;
+
+    this->tab->page = this;
+
+    this->refreshTabTitle();
 }
 
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
@@ -131,6 +138,12 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
 
     this->refreshTabTitle();
 
+    split->getChannelView().tabHighlightRequested.connect([this](HighlightState state) {
+        if (this->tab != nullptr) {
+            this->tab->setHighlightState(state);
+        }
+    });
+
     this->layout();
 }
 
@@ -148,6 +161,8 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     }
 
     this->refreshTabTitle();
+
+    split->getChannelView().tabHighlightRequested.disconnectAll();
 
     return position;
 }
@@ -265,10 +280,10 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         QString text = "Click to add a split";
 
-        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
+        Notebook2 *notebook = dynamic_cast<Notebook2 *>(this->parentWidget());
 
         if (notebook != nullptr) {
-            if (notebook->tabCount() > 1) {
+            if (notebook->getPageCount() > 1) {
                 text += "\n\nTip: After adding a split you can hold <Alt> to move it or split it "
                         "further.";
             }
@@ -276,7 +291,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         painter.drawText(rect(), text, QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), this->themeManager->splits.messageSeperator);
+        painter.fillRect(rect(), QColor("#555"));
     }
 
     for (DropRect &dropRect : this->dropRects) {
@@ -326,13 +341,15 @@ void SplitContainer::mouseMoveEvent(QMouseEvent *event)
 
 void SplitContainer::leaveEvent(QEvent *event)
 {
-    this->mouseOverPoint = QPoint(-1000, -10000);
+    this->mouseOverPoint = QPoint(-10000, -10000);
     this->update();
 }
 
 void SplitContainer::refreshTabTitle()
 {
-    assert(this->tab != nullptr);
+    if (this->tab == nullptr) {
+        return;
+    }
 
     if (!this->tab->useDefaultTitle) {
         return;

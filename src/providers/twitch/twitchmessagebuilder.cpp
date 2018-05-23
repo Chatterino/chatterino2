@@ -361,14 +361,14 @@ void TwitchMessageBuilder::appendUsername()
     } else if (this->args.isReceivedWhisper) {
         // Sender username
         this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
-                                   FontStyle::MediumBold)
+                                   FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
 
         auto currentUser = app->accounts->Twitch.getCurrent();
 
         // Separator
         this->emplace<TextElement>("->", MessageElement::Text,
-                                   app->themes->messages.textColors.system, FontStyle::Medium);
+                                   app->themes->messages.textColors.system, FontStyle::ChatMedium);
 
         QColor selfColor = currentUser->color;
         if (!selfColor.isValid()) {
@@ -377,14 +377,14 @@ void TwitchMessageBuilder::appendUsername()
 
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":", MessageElement::Text,
-                                   selfColor, FontStyle::MediumBold);
+                                   selfColor, FontStyle::ChatMediumBold);
     } else {
         if (!this->action) {
             usernameText += ":";
         }
 
         this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
-                                   FontStyle::MediumBold)
+                                   FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
     }
 }
