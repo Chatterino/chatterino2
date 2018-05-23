@@ -17,7 +17,7 @@ namespace chatterino {
 namespace widgets {
 
 EmotePopup::EmotePopup()
-    : BaseWindow(nullptr, true)
+    : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
 {
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();

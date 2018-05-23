@@ -24,7 +24,7 @@ namespace chatterino {
 namespace widgets {
 
 Window::Window(WindowType _type)
-    : BaseWindow(nullptr, true)
+    : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
     , type(_type)
     , dpi(this->getScale())
     , notebook(this)

@@ -203,7 +203,8 @@ SOURCES += \
     src/controllers/accounts/account.cpp \
     src/widgets/helper/splitoverlay.cpp \
     src/widgets/helper/dropoverlay.cpp \
-    src/widgets/helper/splitnode.cpp
+    src/widgets/helper/splitnode.cpp \
+    src/widgets/notificationpopup.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -351,7 +352,8 @@ HEADERS  += \
     src/util/sharedptrelementless.hpp \
     src/widgets/helper/splitoverlay.hpp \
     src/widgets/helper/dropoverlay.hpp \
-    src/widgets/helper/splitnode.hpp
+    src/widgets/helper/splitnode.hpp \
+    src/widgets/notificationpopup.hpp
 
 RESOURCES += \
     resources/resources.qrc

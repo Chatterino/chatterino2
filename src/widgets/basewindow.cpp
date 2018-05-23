@@ -32,10 +32,16 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWindow::BaseWindow(QWidget *parent, bool _enableCustomFrame)
+BaseWindow::BaseWindow(QWidget *parent, Flags flags)
     : BaseWidget(parent, Qt::Window)
-    , enableCustomFrame(_enableCustomFrame)
+    , enableCustomFrame(flags & EnableCustomFrame)
+    , frameless(flags & FrameLess)
 {
+    if (this->frameless) {
+        this->enableCustomFrame = false;
+        this->setWindowFlag(Qt::FramelessWindowHint);
+    }
+
     this->init();
 }
 
@@ -53,55 +59,57 @@ void BaseWindow::init()
         layout->setSpacing(0);
         this->setLayout(layout);
         {
-            QHBoxLayout *buttonLayout = this->ui.titlebarBox = new QHBoxLayout();
-            buttonLayout->setMargin(0);
-            layout->addLayout(buttonLayout);
+            if (!this->frameless) {
+                QHBoxLayout *buttonLayout = this->ui.titlebarBox = new QHBoxLayout();
+                buttonLayout->setMargin(0);
+                layout->addLayout(buttonLayout);
 
-            // title
-            QLabel *title = new QLabel("   Chatterino");
-            QObject::connect(this, &QWidget::windowTitleChanged,
-                             [title](const QString &text) { title->setText("   " + text); });
+                // title
+                QLabel *title = new QLabel("   Chatterino");
+                QObject::connect(this, &QWidget::windowTitleChanged,
+                                 [title](const QString &text) { title->setText("   " + text); });
 
-            QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-            policy.setHorizontalStretch(1);
-            //            title->setBaseSize(0, 0);
-            title->setScaledContents(true);
-            title->setSizePolicy(policy);
-            buttonLayout->addWidget(title);
-            this->ui.titleLabel = title;
+                QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+                policy.setHorizontalStretch(1);
+                //            title->setBaseSize(0, 0);
+                title->setScaledContents(true);
+                title->setSizePolicy(policy);
+                buttonLayout->addWidget(title);
+                this->ui.titleLabel = title;
 
-            // buttons
-            TitleBarButton *_minButton = new TitleBarButton;
-            _minButton->setButtonStyle(TitleBarButton::Minimize);
-            TitleBarButton *_maxButton = new TitleBarButton;
-            _maxButton->setButtonStyle(TitleBarButton::Maximize);
-            TitleBarButton *_exitButton = new TitleBarButton;
-            _exitButton->setButtonStyle(TitleBarButton::Close);
+                // buttons
+                TitleBarButton *_minButton = new TitleBarButton;
+                _minButton->setButtonStyle(TitleBarButton::Minimize);
+                TitleBarButton *_maxButton = new TitleBarButton;
+                _maxButton->setButtonStyle(TitleBarButton::Maximize);
+                TitleBarButton *_exitButton = new TitleBarButton;
+                _exitButton->setButtonStyle(TitleBarButton::Close);
 
-            QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
-                this->setWindowState(Qt::WindowMinimized | this->windowState());
-            });
-            QObject::connect(_maxButton, &TitleBarButton::clicked, this, [this] {
-                this->setWindowState(this->windowState() == Qt::WindowMaximized
-                                         ? Qt::WindowActive
-                                         : Qt::WindowMaximized);
-            });
-            QObject::connect(_exitButton, &TitleBarButton::clicked, this,
-                             [this] { this->close(); });
+                QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
+                    this->setWindowState(Qt::WindowMinimized | this->windowState());
+                });
+                QObject::connect(_maxButton, &TitleBarButton::clicked, this, [this] {
+                    this->setWindowState(this->windowState() == Qt::WindowMaximized
+                                             ? Qt::WindowActive
+                                             : Qt::WindowMaximized);
+                });
+                QObject::connect(_exitButton, &TitleBarButton::clicked, this,
+                                 [this] { this->close(); });
 
-            this->ui.minButton = _minButton;
-            this->ui.maxButton = _maxButton;
-            this->ui.exitButton = _exitButton;
+                this->ui.minButton = _minButton;
+                this->ui.maxButton = _maxButton;
+                this->ui.exitButton = _exitButton;
 
-            this->ui.buttons.push_back(_minButton);
-            this->ui.buttons.push_back(_maxButton);
-            this->ui.buttons.push_back(_exitButton);
+                this->ui.buttons.push_back(_minButton);
+                this->ui.buttons.push_back(_maxButton);
+                this->ui.buttons.push_back(_exitButton);
 
-            //            buttonLayout->addStretch(1);
-            buttonLayout->addWidget(_minButton);
-            buttonLayout->addWidget(_maxButton);
-            buttonLayout->addWidget(_exitButton);
-            buttonLayout->setSpacing(0);
+                //            buttonLayout->addStretch(1);
+                buttonLayout->addWidget(_minButton);
+                buttonLayout->addWidget(_maxButton);
+                buttonLayout->addWidget(_exitButton);
+                buttonLayout->setSpacing(0);
+            }
         }
         this->ui.layoutBase = new BaseWidget(this);
         layout->addWidget(this->ui.layoutBase);
@@ -165,10 +173,12 @@ void BaseWindow::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
 
-        QPalette palette_title;
-        palette_title.setColor(QPalette::Foreground,
-                               this->themeManager->isLightTheme() ? "#333" : "#ccc");
-        this->ui.titleLabel->setPalette(palette_title);
+        if (this->ui.titleLabel) {
+            QPalette palette_title;
+            palette_title.setColor(QPalette::Foreground,
+                                   this->themeManager->isLightTheme() ? "#333" : "#ccc");
+            this->ui.titleLabel->setPalette(palette_title);
+        }
 
         for (RippleEffectButton *button : this->ui.buttons) {
             button->setMouseEffectColor(this->themeManager->window.text);
@@ -212,7 +222,7 @@ void BaseWindow::changeEvent(QEvent *)
     TooltipWidget::getInstance()->hide();
 
 #ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
+    if (this->ui.maxButton) {
         this->ui.maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
                                                ? TitleBarButton::Unmaximize
                                                : TitleBarButton::Maximize);
@@ -449,13 +459,19 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
     if ((this->width() / this->getScale()) < 300) {
-        this->ui.minButton->setScaleIndependantSize(30, 30);
-        this->ui.maxButton->setScaleIndependantSize(30, 30);
-        this->ui.exitButton->setScaleIndependantSize(30, 30);
+        if (this->ui.minButton)
+            this->ui.minButton->setScaleIndependantSize(30, 30);
+        if (this->ui.maxButton)
+            this->ui.maxButton->setScaleIndependantSize(30, 30);
+        if (this->ui.exitButton)
+            this->ui.exitButton->setScaleIndependantSize(30, 30);
     } else {
-        this->ui.minButton->setScaleIndependantSize(46, 30);
-        this->ui.maxButton->setScaleIndependantSize(46, 30);
-        this->ui.exitButton->setScaleIndependantSize(46, 30);
+        if (this->ui.minButton)
+            this->ui.minButton->setScaleIndependantSize(46, 30);
+        if (this->ui.maxButton)
+            this->ui.maxButton->setScaleIndependantSize(46, 30);
+        if (this->ui.exitButton)
+            this->ui.exitButton->setScaleIndependantSize(46, 30);
     }
 }
 }  // namespace widgets

@@ -1,6 +1,7 @@
 #include "twitchserver.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "providers/twitch/ircmessagehandler.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchhelpers.hpp"
@@ -93,12 +94,13 @@ void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
     TwitchMessageBuilder builder(chan.get(), message, args);
 
     if (!builder.isIgnored()) {
-        messages::MessagePtr _message = builder.build();
-        if (_message->flags & messages::Message::Highlighted) {
-            this->mentionsChannel->addMessage(_message);
+        messages::MessagePtr msg = builder.build();
+        if (msg->flags & messages::Message::Highlighted) {
+            this->mentionsChannel->addMessage(msg);
+            getApp()->highlights->addHighlight(msg);
         }
 
-        chan->addMessage(_message);
+        chan->addMessage(msg);
     }
 }
 

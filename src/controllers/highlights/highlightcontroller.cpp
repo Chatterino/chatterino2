@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "controllers/highlights/highlightmodel.hpp"
+#include "widgets/notificationpopup.hpp"
 
 namespace chatterino {
 namespace controllers {
@@ -32,6 +33,15 @@ HighlightModel *HighlightController::createModel(QObject *parent)
     model->init(&this->phrases);
 
     return model;
+}
+
+void HighlightController::addHighlight(const messages::MessagePtr &msg)
+{
+    //    static widgets::NotificationPopup popup;
+
+    //    popup.updatePosition();
+    //    popup.addMessage(msg);
+    //    popup.show();
 }
 
 }  // namespace highlights

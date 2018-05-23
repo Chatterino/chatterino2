@@ -26,7 +26,7 @@ public:
     QSize getScaleIndependantSize() const;
     int getScaleIndependantWidth() const;
     int getScaleIndependantHeight() const;
-    void setScaleIndependantSize(int width, int yOffset);
+    void setScaleIndependantSize(int width, int height);
     void setScaleIndependantSize(QSize);
     void setScaleIndependantWidth(int value);
     void setScaleIndependantHeight(int value);

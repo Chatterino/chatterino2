@@ -19,7 +19,9 @@ class BaseWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    explicit BaseWindow(QWidget *parent = nullptr, bool enableCustomFrame = false);
+    enum Flags { None = 0, EnableCustomFrame = 1, FrameLess = 2 };
+
+    explicit BaseWindow(QWidget *parent = nullptr, Flags flags = None);
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
@@ -51,16 +53,17 @@ private:
     void calcButtonsSizes();
 
     bool enableCustomFrame;
+    bool frameless;
     bool stayInScreenRect = false;
     bool shown = false;
 
     struct {
-        QHBoxLayout *titlebarBox;
-        QWidget *titleLabel;
+        QHBoxLayout *titlebarBox = nullptr;
+        QWidget *titleLabel = nullptr;
         TitleBarButton *minButton = nullptr;
         TitleBarButton *maxButton = nullptr;
         TitleBarButton *exitButton = nullptr;
-        QWidget *layoutBase;
+        QWidget *layoutBase = nullptr;
         std::vector<RippleEffectButton *> buttons;
     } ui;
 };
