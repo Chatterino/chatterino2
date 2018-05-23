@@ -541,6 +541,19 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
 
+    static QMap<QString, QString> emoteNameReplacements{
+        {"[oO](_|\\.)[oO]", "o_O"}, {"\\&gt\\;\\(", ">("}, {"\\&lt\\;3", "<3"},
+        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},  {"\\:-?[\\\\/]", ":/"},
+        {"\\:-?[z|Z|\\|]", ":z"},   {"\\:-?\\(", ":("},    {"\\:-?\\)", ":)"},
+        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},  {"\\;-?\\)", ";)"},
+        {"R-?\\)", "R-)"},
+    };
+
+    auto it = emoteNameReplacements.find(_emoteName);
+    if (it != emoteNameReplacements.end()) {
+        _emoteName = it.value();
+    }
+
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
         newEmoteData.image1x = new Image(GetTwitchEmoteLink(id, "1.0"), 1, emoteName,
