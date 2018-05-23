@@ -240,7 +240,7 @@ int Image::getWidth() const
 
 int Image::getScaledWidth() const
 {
-    return static_cast<int>(this->getWidth() * this->scale *
+    return static_cast<int>((float)this->getWidth() * this->scale *
                             getApp()->settings->emoteScale.getValue());
 }
 
@@ -254,7 +254,7 @@ int Image::getHeight() const
 
 int Image::getScaledHeight() const
 {
-    return static_cast<int>(this->getHeight() * this->scale *
+    return static_cast<int>((float)this->getHeight() * this->scale *
                             getApp()->settings->emoteScale.getValue());
 }
 
