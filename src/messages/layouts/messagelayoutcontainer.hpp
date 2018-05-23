@@ -100,6 +100,7 @@ private:
     size_t lineStart = 0;
     int lineHeight = 0;
     int spaceWidth = 4;
+    int textLineHeight = 0;
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements;
     std::vector<Line> lines;

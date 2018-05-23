@@ -70,8 +70,8 @@ ImageElement::ImageElement(Image *_image, MessageElement::Flags flags)
 void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        QSize size(this->image->getWidth() * this->image->getScale() * container.getScale(),
-                   this->image->getHeight() * this->image->getScale() * container.getScale());
+        QSize size(this->image->getScaledWidth() * this->image->getScale() * container.getScale(),
+                   this->image->getScaledHeight() * this->image->getScale() * container.getScale());
 
         container.addElement(
             (new ImageLayoutElement(*this, this->image, size))->setLink(this->getLink()));

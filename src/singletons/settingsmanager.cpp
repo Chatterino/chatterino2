@@ -41,6 +41,8 @@ void SettingManager::initialize()
         auto app = getApp();
         app->windows->layoutVisibleChatWidgets();
     });
+
+    this->emoteScale.connect([](auto, auto) { getApp()->windows->layoutVisibleChatWidgets(); });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()

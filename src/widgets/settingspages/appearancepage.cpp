@@ -110,6 +110,29 @@ AppearancePage::AppearancePage()
         emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
         emotes.append(
             this->createCheckBox("Enable animations", app->settings->enableGifAnimations));
+
+        auto scaleBox = emotes.emplace<QHBoxLayout>();
+        {
+            scaleBox.emplace<QLabel>("Emote scale:");
+
+            auto emoteScale = scaleBox.emplace<QSlider>(Qt::Horizontal);
+            emoteScale->setMinimum(5);
+            emoteScale->setMaximum(50);
+
+            auto scaleLabel = scaleBox.emplace<QLabel>("1.0");
+            scaleLabel->setFixedWidth(100);
+            QObject::connect(*emoteScale, &QSlider::valueChanged, [scaleLabel](int value) mutable {
+                float f = (float)value / 10.f;
+                scaleLabel->setText(QString::number(f));
+
+                getApp()->settings->emoteScale.setValue(f);
+            });
+
+            emoteScale->setValue(std::max<int>(
+                5, std::min<int>(50, (int)(app->settings->emoteScale.getValue() * 10.f))));
+
+            scaleLabel->setText(QString::number(app->settings->emoteScale.getValue()));
+        }
     }
 
     layout->addStretch(1);

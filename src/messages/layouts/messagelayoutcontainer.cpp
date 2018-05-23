@@ -36,6 +36,9 @@ void MessageLayoutContainer::begin(int _width, float _scale, Message::MessageFla
     this->width = _width;
     this->scale = _scale;
     this->flags = _flags;
+    auto mediumFontMetrics = getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, _scale);
+    this->textLineHeight = mediumFontMetrics.height();
+    this->spaceWidth = mediumFontMetrics.width(' ');
 }
 
 void MessageLayoutContainer::clear()
@@ -129,6 +132,11 @@ void MessageLayoutContainer::breakLine()
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale;
         }
 
+        //        if (element->getCreator().getFlags() & MessageElement::Badges) {
+        if (element->getRect().height() < this->textLineHeight) {
+            yExtra -= (this->textLineHeight - element->getRect().height()) / 2;
+        }
+
         element->setPosition(QPoint(element->getRect().x() + xOffset + this->margin.left,
                                     element->getRect().y() + this->lineHeight + yExtra));
     }
@@ -151,7 +159,7 @@ void MessageLayoutContainer::breakLine()
     this->height = this->currentY + (this->margin.bottom * this->scale);
     this->lineHeight = 0;
     this->line++;
-}
+}  // namespace layouts
 
 bool MessageLayoutContainer::atStartOfLine()
 {
