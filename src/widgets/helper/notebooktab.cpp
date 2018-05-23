@@ -324,15 +324,25 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
     this->mouseDown = false;
 
+    auto removeThisPage = [this] {
+        auto reply = QMessageBox::question(this, "Remove this tab",
+                                           "Are you sure that you want to remove this tab?",
+                                           QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes) {
+            this->notebook->removePage(this->page);
+        }
+    };
+
     if (event->button() == Qt::MiddleButton) {
         if (this->rect().contains(event->pos())) {
-            this->notebook->removePage(this->page);
+            removeThisPage();
         }
     } else {
         if (this->hasXButton() && this->mouseDownX && this->getXRect().contains(event->pos())) {
             this->mouseDownX = false;
 
-            this->notebook->removePage(this->page);
+            removeThisPage();
         } else {
             this->update();
         }
