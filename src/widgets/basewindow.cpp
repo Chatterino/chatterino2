@@ -115,9 +115,16 @@ void BaseWindow::init()
     }
 #endif
 
+#ifdef USEWINSDK
+    app->settings->windowTopMost.connect([this](bool topMost, auto) {
+        ::SetWindowPos((HWND)this->winId(), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
+                       SWP_NOMOVE | SWP_NOSIZE);
+    });
+#else
     if (app->settings->windowTopMost.getValue()) {
         this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
     }
+#endif
 }
 
 void BaseWindow::setStayInScreenRect(bool value)

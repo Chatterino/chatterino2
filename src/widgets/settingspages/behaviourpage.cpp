@@ -8,7 +8,11 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
+#ifdef USEWINSDK
+#define WINDOW_TOPMOST "Window always on top"
+#else
 #define WINDOW_TOPMOST "Window always on top (requires restart)"
+#endif
 #define INPUT_EMPTY "Hide input box when empty"
 #define PAUSE_HOVERING "When hovering"
 
