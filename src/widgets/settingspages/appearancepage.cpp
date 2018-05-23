@@ -52,7 +52,7 @@ AppearancePage::AppearancePage()
 
         // clang-format off
             form->addRow("Theme:",       this->createComboBox({THEME_ITEMS}, app->themes->themeName));
-            form->addRow("Theme color:", this->createThemeColorChanger());
+            // form->addRow("Theme color:", this->createThemeColorChanger());
             form->addRow("Font:",        this->createFontChanger());
 
             form->addRow("Tabs:",        this->createCheckBox(TAB_X, app->settings->showTabCloseButton));

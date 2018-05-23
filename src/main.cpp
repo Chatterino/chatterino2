@@ -30,6 +30,10 @@ int main(int argc, char *argv[])
 
     // TODO: can be any argument
     if (args.size() > 0 && args[0].startsWith("chrome-extension://")) {
+        chatterino::Application::instantiate(argc, argv);
+        auto app = chatterino::getApp();
+        app->construct();
+
         chatterino::Application::runNativeMessagingHost();
         return 0;
     }
