@@ -66,8 +66,12 @@ Window::Window(WindowType _type)
     layout->setMargin(0);
 
     /// Initialize program-wide hotkeys
-    // CTRL+P: Open Settings Dialog
+    // CTRL+P: Open settings dialog
     CreateWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
+
+    // CTRL+T: Create new split
+    CreateWindowShortcut(this, "CTRL+T",
+                         [this] { this->notebook.getOrAddSelectedPage()->appendNewSplit(true); });
 
     // CTRL+Number: Switch to n'th tab
     CreateWindowShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
