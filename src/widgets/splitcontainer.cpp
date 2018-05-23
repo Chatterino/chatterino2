@@ -29,7 +29,7 @@ namespace widgets {
 bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
 
-SplitContainer::SplitContainer(Notebook2 *parent)
+SplitContainer::SplitContainer(Notebook *parent)
     : BaseWidget(parent)
     , tab(nullptr)
     , dropPreview(this)
@@ -67,12 +67,12 @@ SplitContainer::SplitContainer(Notebook2 *parent)
     this->setAcceptDrops(true);
 }
 
-NotebookTab2 *SplitContainer::getTab() const
+NotebookTab *SplitContainer::getTab() const
 {
     return this->tab;
 }
 
-void SplitContainer::setTab(NotebookTab2 *_tab)
+void SplitContainer::setTab(NotebookTab *_tab)
 {
     this->tab = _tab;
 
@@ -280,7 +280,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         QString text = "Click to add a split";
 
-        Notebook2 *notebook = dynamic_cast<Notebook2 *>(this->parentWidget());
+        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
 
         if (notebook != nullptr) {
             if (notebook->getPageCount() > 1) {

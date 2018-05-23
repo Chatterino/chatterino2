@@ -244,7 +244,7 @@ void SplitInput::installKeyPressedEvent()
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
-                Notebook2 *notebook = static_cast<Notebook2 *>(page->parentWidget());
+                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
 
                 notebook->selectNextTab();
             }
@@ -253,7 +253,7 @@ void SplitInput::installKeyPressedEvent()
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
 
-                Notebook2 *notebook = static_cast<Notebook2 *>(page->parentWidget());
+                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
 
                 notebook->selectPreviousTab();
             }

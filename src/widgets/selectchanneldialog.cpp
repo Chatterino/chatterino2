@@ -26,7 +26,7 @@ SelectChannelDialog::SelectChannelDialog()
 
     util::LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
-    auto notebook = layout.emplace<Notebook2>(this).assign(&this->ui.notebook);
+    auto notebook = layout.emplace<Notebook>(this).assign(&this->ui.notebook);
 
     // twitch
     {
@@ -99,7 +99,7 @@ SelectChannelDialog::SelectChannelDialog()
         QWidget::setTabOrder(*watching_btn, *channel_btn);
 
         // tab
-        NotebookTab2 *tab = notebook->addPage(obj.getElement());
+        NotebookTab *tab = notebook->addPage(obj.getElement());
         tab->setTitle("Twitch");
     }
 

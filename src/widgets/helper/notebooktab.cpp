@@ -19,7 +19,7 @@
 namespace chatterino {
 namespace widgets {
 
-NotebookTab2::NotebookTab2(Notebook2 *_notebook)
+NotebookTab::NotebookTab(Notebook *_notebook)
     : BaseWidget(_notebook)
     , positionChangedAnimation(this, "pos")
     , notebook(_notebook)
@@ -31,7 +31,7 @@ NotebookTab2::NotebookTab2(Notebook2 *_notebook)
 
     this->positionChangedAnimation.setEasingCurve(QEasingCurve(QEasingCurve::InCubic));
 
-    app->settings->showTabCloseButton.connect(boost::bind(&NotebookTab2::hideTabXChanged, this, _1),
+    app->settings->showTabCloseButton.connect(boost::bind(&NotebookTab::hideTabXChanged, this, _1),
                                               this->managedConnections);
 
     this->setMouseTracking(true);
@@ -75,12 +75,12 @@ NotebookTab2::NotebookTab2(Notebook2 *_notebook)
     //    });
 }
 
-void NotebookTab2::themeRefreshEvent()
+void NotebookTab::themeRefreshEvent()
 {
     this->update();
 }
 
-void NotebookTab2::updateSize()
+void NotebookTab::updateSize()
 {
     auto app = getApp();
     float scale = getScale();
@@ -106,12 +106,12 @@ void NotebookTab2::updateSize()
     //    }
 }
 
-const QString &NotebookTab2::getTitle() const
+const QString &NotebookTab::getTitle() const
 {
     return this->title;
 }
 
-void NotebookTab2::setTitle(const QString &newTitle)
+void NotebookTab::setTitle(const QString &newTitle)
 {
     if (this->title != newTitle) {
         this->title = newTitle;
@@ -120,12 +120,12 @@ void NotebookTab2::setTitle(const QString &newTitle)
     }
 }
 
-bool NotebookTab2::isSelected() const
+bool NotebookTab::isSelected() const
 {
     return this->selected;
 }
 
-void NotebookTab2::setSelected(bool value)
+void NotebookTab::setSelected(bool value)
 {
     this->selected = value;
 
@@ -134,7 +134,7 @@ void NotebookTab2::setSelected(bool value)
     this->update();
 }
 
-void NotebookTab2::setHighlightState(HighlightState newHighlightStyle)
+void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected()) {
         return;
@@ -147,18 +147,18 @@ void NotebookTab2::setHighlightState(HighlightState newHighlightStyle)
     }
 }
 
-QRect NotebookTab2::getDesiredRect() const
+QRect NotebookTab::getDesiredRect() const
 {
     return QRect(positionAnimationDesiredPoint, size());
 }
 
-void NotebookTab2::hideTabXChanged(bool)
+void NotebookTab::hideTabXChanged(bool)
 {
     this->updateSize();
     this->update();
 }
 
-void NotebookTab2::moveAnimated(QPoint pos, bool animated)
+void NotebookTab::moveAnimated(QPoint pos, bool animated)
 {
     this->positionAnimationDesiredPoint = pos;
 
@@ -182,7 +182,7 @@ void NotebookTab2::moveAnimated(QPoint pos, bool animated)
     this->positionChangedAnimation.start();
 }
 
-void NotebookTab2::paintEvent(QPaintEvent *)
+void NotebookTab::paintEvent(QPaintEvent *)
 {
     auto app = getApp();
     QPainter painter(this);
@@ -292,17 +292,17 @@ void NotebookTab2::paintEvent(QPaintEvent *)
     }
 }
 
-bool NotebookTab2::hasXButton()
+bool NotebookTab::hasXButton()
 {
     return getApp()->settings->showTabCloseButton && this->notebook->getAllowUserTabManagement();
 }
 
-bool NotebookTab2::shouldDrawXButton()
+bool NotebookTab::shouldDrawXButton()
 {
     return this->hasXButton() && (mouseOver || selected);
 }
 
-void NotebookTab2::mousePressEvent(QMouseEvent *event)
+void NotebookTab::mousePressEvent(QMouseEvent *event)
 {
     this->mouseDown = true;
     this->mouseDownX = this->getXRect().contains(event->pos());
@@ -320,7 +320,7 @@ void NotebookTab2::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void NotebookTab2::mouseReleaseEvent(QMouseEvent *event)
+void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
 {
     this->mouseDown = false;
 
@@ -339,14 +339,14 @@ void NotebookTab2::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void NotebookTab2::enterEvent(QEvent *)
+void NotebookTab::enterEvent(QEvent *)
 {
     this->mouseOver = true;
 
     this->update();
 }
 
-void NotebookTab2::leaveEvent(QEvent *)
+void NotebookTab::leaveEvent(QEvent *)
 {
     this->mouseOverX = false;
     this->mouseOver = false;
@@ -354,14 +354,14 @@ void NotebookTab2::leaveEvent(QEvent *)
     this->update();
 }
 
-void NotebookTab2::dragEnterEvent(QDragEnterEvent *)
+void NotebookTab::dragEnterEvent(QDragEnterEvent *)
 {
     if (this->notebook->getAllowUserTabManagement()) {
         this->notebook->select(this->page);
     }
 }
 
-void NotebookTab2::mouseMoveEvent(QMouseEvent *event)
+void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
     auto app = getApp();
 
@@ -393,7 +393,7 @@ void NotebookTab2::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-QRect NotebookTab2::getXRect()
+QRect NotebookTab::getXRect()
 {
     //    if (!this->notebook->getAllowUserTabManagement()) {
     //        return QRect();

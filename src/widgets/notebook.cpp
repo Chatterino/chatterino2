@@ -25,7 +25,7 @@
 namespace chatterino {
 namespace widgets {
 
-Notebook2::Notebook2(QWidget *parent)
+Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
     , addButton(this)
 {
@@ -38,9 +38,9 @@ Notebook2::Notebook2(QWidget *parent)
     QObject::connect(shortcut_prev, &QShortcut::activated, [this] { this->selectPreviousTab(); });
 }
 
-NotebookTab2 *Notebook2::addPage(QWidget *page, QString title, bool select)
+NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 {
-    auto *tab = new NotebookTab2(this);
+    auto *tab = new NotebookTab(this);
     tab->page = page;
 
     if (!title.isEmpty()) {
@@ -66,7 +66,7 @@ NotebookTab2 *Notebook2::addPage(QWidget *page, QString title, bool select)
     return tab;
 }
 
-void Notebook2::removePage(QWidget *page)
+void Notebook::removePage(QWidget *page)
 {
     for (int i = 0; i < this->items.count(); i++) {
         if (this->items[i].page == page) {
@@ -93,14 +93,14 @@ void Notebook2::removePage(QWidget *page)
     this->performLayout();
 }
 
-void Notebook2::removeCurrentPage()
+void Notebook::removeCurrentPage()
 {
     if (this->selectedPage != nullptr) {
         this->removePage(this->selectedPage);
     }
 }
 
-int Notebook2::indexOf(QWidget *page) const
+int Notebook::indexOf(QWidget *page) const
 {
     for (int i = 0; i < this->items.count(); i++) {
         if (this->items[i].page == page) {
@@ -111,7 +111,7 @@ int Notebook2::indexOf(QWidget *page) const
     return -1;
 }
 
-void Notebook2::select(QWidget *page)
+void Notebook::select(QWidget *page)
 {
     if (page == this->selectedPage) {
         return;
@@ -120,7 +120,7 @@ void Notebook2::select(QWidget *page)
     if (page != nullptr) {
         page->setHidden(false);
 
-        NotebookTab2 *tab = this->getTabFromPage(page);
+        NotebookTab *tab = this->getTabFromPage(page);
         tab->setSelected(true);
         tab->raise();
     }
@@ -128,7 +128,7 @@ void Notebook2::select(QWidget *page)
     if (this->selectedPage != nullptr) {
         this->selectedPage->setHidden(true);
 
-        NotebookTab2 *tab = this->getTabFromPage(selectedPage);
+        NotebookTab *tab = this->getTabFromPage(selectedPage);
         tab->setSelected(false);
 
         //        for (auto split : this->selectedPage->getSplits()) {
@@ -141,7 +141,7 @@ void Notebook2::select(QWidget *page)
     this->performLayout();
 }
 
-void Notebook2::selectIndex(int index)
+void Notebook::selectIndex(int index)
 {
     if (index < 0 || this->items.count() <= index) {
         return;
@@ -150,7 +150,7 @@ void Notebook2::selectIndex(int index)
     this->select(this->items[index].page);
 }
 
-void Notebook2::selectNextTab()
+void Notebook::selectNextTab()
 {
     if (this->items.size() <= 1) {
         return;
@@ -161,7 +161,7 @@ void Notebook2::selectNextTab()
     this->select(this->items[index].page);
 }
 
-void Notebook2::selectPreviousTab()
+void Notebook::selectPreviousTab()
 {
     if (this->items.size() <= 1) {
         return;
@@ -176,27 +176,27 @@ void Notebook2::selectPreviousTab()
     this->select(this->items[index].page);
 }
 
-int Notebook2::getPageCount() const
+int Notebook::getPageCount() const
 {
     return this->items.count();
 }
 
-QWidget *Notebook2::getPageAt(int index) const
+QWidget *Notebook::getPageAt(int index) const
 {
     return this->items[index].page;
 }
 
-int Notebook2::getSelectedIndex() const
+int Notebook::getSelectedIndex() const
 {
     return this->indexOf(this->selectedPage);
 }
 
-QWidget *Notebook2::getSelectedPage() const
+QWidget *Notebook::getSelectedPage() const
 {
     return this->selectedPage;
 }
 
-QWidget *Notebook2::tabAt(QPoint point, int &index, int maxWidth)
+QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 {
     int i = 0;
 
@@ -218,36 +218,36 @@ QWidget *Notebook2::tabAt(QPoint point, int &index, int maxWidth)
     return nullptr;
 }
 
-void Notebook2::rearrangePage(QWidget *page, int index)
+void Notebook::rearrangePage(QWidget *page, int index)
 {
     this->items.move(this->indexOf(page), index);
 
     this->performLayout();
 }
 
-bool Notebook2::getAllowUserTabManagement() const
+bool Notebook::getAllowUserTabManagement() const
 {
     return this->allowUserTabManagement;
 }
 
-void Notebook2::setAllowUserTabManagement(bool value)
+void Notebook::setAllowUserTabManagement(bool value)
 {
     this->allowUserTabManagement = value;
 }
 
-bool Notebook2::getShowAddButton() const
+bool Notebook::getShowAddButton() const
 {
     return this->showAddButton;
 }
 
-void Notebook2::setShowAddButton(bool value)
+void Notebook::setShowAddButton(bool value)
 {
     this->showAddButton = value;
 
     this->addButton.setHidden(!value);
 }
 
-void Notebook2::scaleChangedEvent(float scale)
+void Notebook::scaleChangedEvent(float scale)
 {
     float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
 
@@ -260,12 +260,12 @@ void Notebook2::scaleChangedEvent(float scale)
     }
 }
 
-void Notebook2::resizeEvent(QResizeEvent *)
+void Notebook::resizeEvent(QResizeEvent *)
 {
     this->performLayout();
 }
 
-void Notebook2::performLayout(bool animated)
+void Notebook::performLayout(bool animated)
 {
     auto app = getApp();
 
@@ -347,7 +347,7 @@ void Notebook2::performLayout(bool animated)
     }
 }
 
-void Notebook2::paintEvent(QPaintEvent *event)
+void Notebook::paintEvent(QPaintEvent *event)
 {
     BaseWidget::paintEvent(event);
 
@@ -356,12 +356,12 @@ void Notebook2::paintEvent(QPaintEvent *event)
                      this->themeManager->tabs.bottomLine);
 }
 
-NotebookButton *Notebook2::getAddButton()
+NotebookButton *Notebook::getAddButton()
 {
     return &this->addButton;
 }
 
-NotebookTab2 *Notebook2::getTabFromPage(QWidget *page)
+NotebookTab *Notebook::getTabFromPage(QWidget *page)
 {
     for (auto &it : this->items) {
         if (it.page == page) {
@@ -373,7 +373,7 @@ NotebookTab2 *Notebook2::getTabFromPage(QWidget *page)
 }
 
 SplitNotebook::SplitNotebook(QWidget *parent)
-    : Notebook2(parent)
+    : Notebook(parent)
 {
     this->connect(this->getAddButton(), &NotebookButton::clicked,
                   [this]() { QTimer::singleShot(80, this, [this] { this->addPage(true); }); });
@@ -382,7 +382,7 @@ SplitNotebook::SplitNotebook(QWidget *parent)
 SplitContainer *SplitNotebook::addPage(bool select)
 {
     SplitContainer *container = new SplitContainer(this);
-    auto *tab = Notebook2::addPage(container, QString(), select);
+    auto *tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
     tab->show();

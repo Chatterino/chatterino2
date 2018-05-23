@@ -14,14 +14,14 @@ namespace widgets {
 
 class Window;
 
-class Notebook2 : public BaseWidget
+class Notebook : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit Notebook2(QWidget *parent);
+    explicit Notebook(QWidget *parent);
 
-    NotebookTab2 *addPage(QWidget *page, QString title = QString(), bool select = false);
+    NotebookTab *addPage(QWidget *page, QString title = QString(), bool select = false);
     void removePage(QWidget *page);
     void removeCurrentPage();
 
@@ -56,7 +56,7 @@ protected:
 
 private:
     struct Item {
-        NotebookTab2 *tab;
+        NotebookTab *tab;
         QWidget *page;
     };
 
@@ -69,10 +69,10 @@ private:
     bool showAddButton = false;
     int lineY = 20;
 
-    NotebookTab2 *getTabFromPage(QWidget *page);
+    NotebookTab *getTabFromPage(QWidget *page);
 };
 
-class SplitNotebook : public Notebook2
+class SplitNotebook : public Notebook
 {
 public:
     SplitNotebook(QWidget *parent);

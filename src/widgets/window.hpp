@@ -49,7 +49,7 @@ private:
 
     SplitNotebook notebook;
 
-    friend class Notebook2;
+    friend class Notebook;
 
 public:
     void save();

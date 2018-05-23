@@ -136,7 +136,7 @@ void NotebookButton::dropEvent(QDropEvent *event)
     if (SplitContainer::isDraggingSplit) {
         event->acceptProposedAction();
 
-        Notebook2 *notebook = dynamic_cast<Notebook2 *>(this->parentWidget());
+        Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
 
         if (notebook != nuuls) {
             SplitContainer *page = new SplitContainer(notebook);

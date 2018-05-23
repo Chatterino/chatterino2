@@ -32,7 +32,7 @@ EmotePopup::EmotePopup()
     auto *layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
-    Notebook2 *notebook = new Notebook2(this);
+    Notebook *notebook = new Notebook(this);
     layout->addWidget(notebook);
     layout->setMargin(0);
 

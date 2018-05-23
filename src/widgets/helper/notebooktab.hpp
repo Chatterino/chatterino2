@@ -14,15 +14,15 @@ namespace widgets {
 #define NOTEBOOK_TAB_HEIGHT 28
 
 // class Notebook;
-class Notebook2;
+class Notebook;
 class SplitContainer;
 
-class NotebookTab2 : public BaseWidget
+class NotebookTab : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit NotebookTab2(Notebook2 *_notebook);
+    explicit NotebookTab(Notebook *_notebook);
 
     void updateSize();
 
@@ -61,7 +61,7 @@ private:
     bool positionChangedAnimationRunning = false;
     QPoint positionAnimationDesiredPoint;
 
-    Notebook2 *notebook;
+    Notebook *notebook;
 
     QString title;
 
