@@ -984,6 +984,17 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (!menu->actions().empty())
             menu->addSeparator();
 
+        // Link copy
+        if (hoverLayoutElement->getLink().type == Link::Url) {
+            QString url = hoverLayoutElement->getLink().value;
+
+            menu->addAction("Open link in browser",
+                            [url] { QDesktopServices::openUrl(QUrl(url)); });
+            menu->addAction("Copy link", [url] { QApplication::clipboard()->setText(url); });
+
+            menu->addSeparator();
+        }
+
         // Message actions
         menu->addAction("Copy message", [layout] {
             QString copyString;
@@ -1054,6 +1065,10 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,
                                   messages::MessageLayout *layout)
 {
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
+
     switch (link.type) {
         case messages::Link::UserInfo: {
             auto user = link.value;
@@ -1066,24 +1081,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             break;
         }
         case messages::Link::Url: {
-            if (event->button() == Qt::RightButton) {
-                static QMenu *menu = nullptr;
-                static QString url;
-
-                if (menu == nullptr) {
-                    menu = new QMenu;
-                    menu->addAction("Open in browser",
-                                    [] { QDesktopServices::openUrl(QUrl(url)); });
-                    menu->addAction("Copy to clipboard",
-                                    [] { QApplication::clipboard()->setText(url); });
-                }
-
-                url = link.value;
-                menu->move(QCursor::pos());
-                menu->show();
-            } else {
-                QDesktopServices::openUrl(QUrl(link.value));
-            }
+            QDesktopServices::openUrl(QUrl(link.value));
             break;
         }
         case messages::Link::UserAction: {
