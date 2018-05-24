@@ -31,10 +31,10 @@ Split *SplitContainer::draggingSplit = nullptr;
 
 SplitContainer::SplitContainer(Notebook *parent)
     : BaseWidget(parent)
-    , tab(nullptr)
     , dropPreview(this)
-    , mouseOverPoint(-10000, -10000)
     , overlay(this)
+    , mouseOverPoint(-10000, -10000)
+    , tab(nullptr)
 {
     this->refreshTabTitle();
 
@@ -102,7 +102,7 @@ void SplitContainer::appendSplit(Split *split)
 
 void SplitContainer::insertSplit(Split *split, const Position &position)
 {
-    this->insertSplit(split, position.direction, (Node *)position.relativeNode);
+    this->insertSplit(split, position.direction, reinterpret_cast<Node *>(position.relativeNode));
 }
 
 void SplitContainer::insertSplit(Split *split, Direction direction, Split *relativeTo)
@@ -677,7 +677,7 @@ qreal SplitContainer::Node::getSize(bool isVertical)
 qreal SplitContainer::Node::getChildrensTotalFlex(bool isVertical)
 {
     return std::accumulate(
-        this->children.begin(), this->children.end(), (qreal)0,
+        this->children.begin(), this->children.end(), qreal(0),
         [=](qreal val, std::unique_ptr<Node> &node) { return val + node->getFlex(isVertical); });
 }
 
@@ -701,11 +701,11 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
             bool isVertical = this->type == Node::VerticalContainer;
 
             // vars
-            qreal minSize = 48 * _scale;
+            qreal minSize = qreal(48 * _scale);
 
             qreal totalFlex = this->getChildrensTotalFlex(isVertical);
             qreal totalSize = std::accumulate(
-                this->children.begin(), this->children.end(), (qreal)0,
+                this->children.begin(), this->children.end(), qreal(0),
                 [=](int val, std::unique_ptr<Node> &node) {
                     return val + std::max<qreal>(this->getSize(isVertical) / totalFlex *
                                                      node->getFlex(isVertical),
@@ -717,25 +717,29 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
 
             // add spacing if reqested
             if (addSpacing) {
-                qreal offset = std::min<qreal>(this->getSize(!isVertical) * 0.1, _scale * 24);
+                qreal offset =
+                    std::min<qreal>(this->getSize(!isVertical) * 0.1, qreal(_scale * 24));
 
                 // droprect left / above
                 dropRects.emplace_back(
-                    QRect(this->geometry.left(), this->geometry.top(),
-                          isVertical ? offset : this->geometry.width(),
-                          isVertical ? this->geometry.height() : offset),
+                    QRectF(this->geometry.left(), this->geometry.top(),
+                           isVertical ? offset : this->geometry.width(),
+                           isVertical ? this->geometry.height() : offset)
+                        .toRect(),
                     Position(this, isVertical ? Direction::Left : Direction::Above));
 
                 // droprect right / below
                 if (isVertical) {
                     dropRects.emplace_back(
-                        QRect(this->geometry.right() - offset, this->geometry.top(), offset,
-                              this->geometry.height()),
+                        QRectF(this->geometry.right() - offset, this->geometry.top(), offset,
+                               this->geometry.height())
+                            .toRect(),
                         Position(this, Direction::Right));
                 } else {
                     dropRects.emplace_back(
-                        QRect(this->geometry.left(), this->geometry.bottom() - offset,
-                              this->geometry.width(), offset),
+                        QRectF(this->geometry.left(), this->geometry.bottom() - offset,
+                               this->geometry.width(), offset)
+                            .toRect(),
                         Position(this, Direction::Below));
                 }
 
@@ -774,11 +778,11 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
 
                 // add resize rect
                 if (child != this->children.front()) {
-                    QRect r = isVertical ? QRect(this->geometry.left(), child->geometry.top() - 4,
-                                                 this->geometry.width(), 8)
-                                         : QRect(child->geometry.left() - 4, this->geometry.top(),
-                                                 8, this->geometry.height());
-                    resizeRects.push_back(ResizeRect(r, child.get(), isVertical));
+                    QRectF r = isVertical ? QRectF(this->geometry.left(), child->geometry.top() - 4,
+                                                   this->geometry.width(), 8)
+                                          : QRectF(child->geometry.left() - 4, this->geometry.top(),
+                                                   8, this->geometry.height());
+                    resizeRects.push_back(ResizeRect(r.toRect(), child.get(), isVertical));
                 }
 
                 // normalize flex
@@ -856,7 +860,7 @@ void SplitContainer::DropOverlay::dragMoveEvent(QDragMoveEvent *event)
     this->update();
 }
 
-void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent *event)
+void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent *)
 {
     this->mouseOverPoint = QPoint(-10000, -10000);
     this->close();
@@ -900,19 +904,19 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
     this->setMouseTracking(true);
 }
 
-void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *event)
+void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
     painter.fillRect(this->rect(), "#999");
 }
 
-void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *event)
+void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *)
 {
     this->isMouseDown = true;
 }
 
-void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent *event)
+void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent *)
 {
     this->isMouseDown = false;
 }
@@ -955,7 +959,7 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
         this->parent->layout();
 
         // move handle
-        this->move(this->x(), (int)before->geometry.bottom() - 4);
+        this->move(this->x(), int(before->geometry.bottom() - 4));
     } else {
         qreal totalFlexH = this->node->flexH + before->flexH;
         before->flexH =
@@ -965,7 +969,7 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
         this->parent->layout();
 
         // move handle
-        this->move((int)before->geometry.right() - 4, this->y());
+        this->move(int(before->geometry.right() - 4), this->y());
     }
 }
 
