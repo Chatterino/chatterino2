@@ -9,11 +9,15 @@
 #include <QStyle>
 #include <QVBoxLayout>
 
+#ifdef USEWINSDK
+#include <Windows.h>
+#endif
+
 namespace chatterino {
 namespace widgets {
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
-    : BaseWindow(parent)
+    : BaseWindow(parent, BaseWindow::TopMost)
     , displayText(new QLabel())
 {
     auto app = getApp();
@@ -24,9 +28,8 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint |
-                         Qt::X11BypassWindowManagerHint | Qt::BypassWindowManagerHint |
-                         Qt::SubWindow);
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+                         Qt::BypassWindowManagerHint);
 
     displayText->setAlignment(Qt::AlignHCenter);
     displayText->setText("tooltip text");
@@ -42,6 +45,14 @@ TooltipWidget::~TooltipWidget()
 {
     this->fontChangedConnection.disconnect();
 }
+
+#ifdef USEWINSDK
+void TooltipWidget::raise()
+{
+    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+}
+#endif
 
 void TooltipWidget::themeRefreshEvent()
 {

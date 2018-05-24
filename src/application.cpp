@@ -61,6 +61,7 @@ void Application::construct()
     isAppConstructed = true;
 
     // 1. Instantiate all classes
+    this->settings = new singletons::SettingManager;
     this->paths = new singletons::PathManager(this->argc, this->argv);
     this->themes = new singletons::ThemeManager;
     this->windows = new singletons::WindowManager;
@@ -70,7 +71,6 @@ void Application::construct()
     this->ignores = new controllers::ignores::IgnoreController;
     this->accounts = new singletons::AccountManager;
     this->emotes = new singletons::EmoteManager;
-    this->settings = new singletons::SettingManager;
     this->fonts = new singletons::FontManager;
     this->resources = new singletons::ResourceManager;
 
@@ -92,12 +92,12 @@ void Application::initialize()
 
     // 2. Initialize/load classes
     this->settings->initialize();
-    this->windows->initialize();
 
     this->nativeMessaging->registerHost();
 
     this->settings->load();
     this->commands->load();
+    this->windows->initialize();
 
     this->resources->initialize();
 

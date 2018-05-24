@@ -254,15 +254,18 @@ void SplitHeader::updateModes()
         text = text.mid(0, text.size() - 2);
     }
 
-    qDebug() << text;
+    if (text.isEmpty()) {
+        this->modeButton->hide();
+    } else {
+        static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
+        QRegularExpressionMatch match = commaReplacement.match(text);
+        if (match.hasMatch()) {
+            text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+        }
 
-    static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
-    QRegularExpressionMatch match = commaReplacement.match(text);
-    if (match.hasMatch()) {
-        text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+        this->modeButton->getLabel().setText(text);
+        this->modeButton->show();
     }
-
-    this->modeButton->getLabel().setText(text);
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)
@@ -326,6 +329,7 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
         tooltipWidget->show();
+        tooltipWidget->raise();
     }
 
     if (this->dragging) {

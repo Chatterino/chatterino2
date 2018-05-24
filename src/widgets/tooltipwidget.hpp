@@ -28,6 +28,10 @@ public:
         return tooltipWidget;
     }
 
+#ifdef USEWINSDK
+    void raise();
+#endif
+
 protected:
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;

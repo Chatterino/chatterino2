@@ -29,7 +29,7 @@
 
 #define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
-#define CHAT_HOVER_PAUSE_DURATION 300
+#define CHAT_HOVER_PAUSE_DURATION 400
 
 using namespace chatterino::messages;
 using namespace chatterino::providers::twitch;
@@ -800,6 +800,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
         tooltipWidget->show();
+        tooltipWidget->raise();
     }
 
     // check if word has a link

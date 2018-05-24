@@ -32,10 +32,12 @@
 namespace chatterino {
 namespace widgets {
 
-BaseWindow::BaseWindow(QWidget *parent, Flags flags)
-    : BaseWidget(parent, Qt::Window)
-    , enableCustomFrame(flags & EnableCustomFrame)
-    , frameless(flags & FrameLess)
+BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
+    : BaseWidget(parent,
+                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : (Qt::WindowFlags)0))
+    , enableCustomFrame(_flags & EnableCustomFrame)
+    , frameless(_flags & FrameLess)
+    , flags(_flags)
 {
     if (this->frameless) {
         this->enableCustomFrame = false;
@@ -43,6 +45,11 @@ BaseWindow::BaseWindow(QWidget *parent, Flags flags)
     }
 
     this->init();
+}
+
+BaseWindow::Flags BaseWindow::getFlags()
+{
+    return this->flags;
 }
 
 void BaseWindow::init()
@@ -124,14 +131,19 @@ void BaseWindow::init()
 #endif
 
 #ifdef USEWINSDK
-    app->settings->windowTopMost.connect([this](bool topMost, auto) {
-        ::SetWindowPos((HWND)this->winId(), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0,
-                       SWP_NOMOVE | SWP_NOSIZE);
+    // fourtf: don't ask me why we need to delay this
+    QTimer::singleShot(1, this, [this] {
+        if (!(this->flags & Flags::TopMost)) {
+            getApp()->settings->windowTopMost.connect([this](bool topMost, auto) {
+                ::SetWindowPos((HWND)this->winId(), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
+                               0, 0, SWP_NOMOVE | SWP_NOSIZE);
+            });
+        }
     });
 #else
-    if (app->settings->windowTopMost.getValue()) {
-        this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
-    }
+//    if (getApp()->settings->windowTopMost.getValue()) {
+//        this->setWindowFlag(Qt::WindowStaysOnTopHint);
+//    }
 #endif
 }
 
@@ -425,8 +437,9 @@ void BaseWindow::showEvent(QShowEvent *event)
 {
     if (!this->shown && this->isVisible() && this->hasCustomWindowFrame()) {
         this->shown = true;
-        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
-                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX);
+        //        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
+        //                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX |
+        //                         WS_MINIMIZEBOX);
 
         const MARGINS shadow = {8, 8, 8, 8};
         DwmExtendFrameIntoClientArea((HWND)this->winId(), &shadow);

@@ -19,7 +19,7 @@ class BaseWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    enum Flags { None = 0, EnableCustomFrame = 1, FrameLess = 2 };
+    enum Flags { None = 0, EnableCustomFrame = 1, FrameLess = 2, TopMost = 4 };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags = None);
 
@@ -32,6 +32,8 @@ public:
     bool getStayInScreenRect() const;
 
     void moveTo(QWidget *widget, QPoint point);
+
+    Flags getFlags();
 
 protected:
 #ifdef USEWINSDK
@@ -56,6 +58,7 @@ private:
     bool frameless;
     bool stayInScreenRect = false;
     bool shown = false;
+    Flags flags;
 
     struct {
         QHBoxLayout *titlebarBox = nullptr;
