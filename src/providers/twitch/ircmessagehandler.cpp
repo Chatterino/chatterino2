@@ -27,34 +27,48 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
-    auto iterator = tags.find("room-id");
+    auto app = getApp();
 
-    if (iterator != tags.end()) {
-        auto roomID = iterator.value().toString();
+    // get twitch channel
+    QString chanName;
+    if (!trimChannelName(message->parameter(0), chanName)) {
+        return;
+    }
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(chan.get());
 
-        QStringList words = QString(message->toData()).split("#");
+    if (twitchChannel) {
+        // room-id
+        decltype(tags.find("xD")) it;
 
-        // ensure the format is valid
-        if (words.length() < 2) {
-            return;
-        }
+        if ((it = tags.find("room-id")) != tags.end()) {
+            auto roomID = it.value().toString();
 
-        auto app = getApp();
-
-        QString channelName = words.at(1);
-
-        auto channel = app->twitch.server->getChannelOrEmpty(channelName);
-
-        if (channel->isEmpty()) {
-            return;
-        }
-
-        if (auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get())) {
-            // set the room id of the channel
             twitchChannel->setRoomID(roomID);
+
+            app->resources->loadChannelData(roomID);
         }
 
-        app->resources->loadChannelData(roomID);
+        // Room modes
+        TwitchChannel::RoomModes roomModes = twitchChannel->getRoomModes();
+
+        if ((it = tags.find("emote-only")) != tags.end()) {
+            roomModes.emoteOnly = it.value() == "1";
+        }
+        if ((it = tags.find("subs-only")) != tags.end()) {
+            roomModes.submode = it.value() == "1";
+        }
+        if ((it = tags.find("slow")) != tags.end()) {
+            roomModes.slowMode = it.value().toInt();
+        }
+        if ((it = tags.find("r9k")) != tags.end()) {
+            roomModes.r9k = it.value() == "1";
+        }
+        if ((it = tags.find("broadcaster-lang")) != tags.end()) {
+            roomModes.broadcasterLang = it.value().toString();
+        }
+
+        twitchChannel->setRoomModes(roomModes);
     }
 }
 
@@ -66,7 +80,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     QString chanName;
-    if (!TrimChannelName(message->parameter(0), chanName)) {
+    if (!trimChannelName(message->parameter(0), chanName)) {
         return;
     }
 
@@ -116,7 +130,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         auto app = getApp();
 
         QString channelName;
-        if (!TrimChannelName(message->parameter(0), channelName)) {
+        if (!trimChannelName(message->parameter(0), channelName)) {
             return;
         }
 
@@ -203,7 +217,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     //    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     //    if (channel->isEmpty()) {
-    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
+    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel
+    //        manager",
     //                   channelName);
     //        return;
     //    }

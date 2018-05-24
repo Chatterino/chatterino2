@@ -129,15 +129,10 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
-
-        qDebug() << "xD" << status;
-
         if ((status == Qt::AltModifier || status == (Qt::AltModifier | Qt::ControlModifier)) &&
             this->isMouseOver) {
-            qDebug() << "show";
             this->overlay->show();
         } else {
-            qDebug() << "hide";
             this->overlay->hide();
         }
     });
@@ -187,6 +182,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->view.setChannel(newChannel.get());
 
     this->usermodeChangedConnection.disconnect();
+    this->roomModeChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
 
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
@@ -194,6 +190,9 @@ void Split::setChannel(IndirectChannel newChannel)
     if (tc != nullptr) {
         this->usermodeChangedConnection =
             tc->userStateChanged.connect([this] { this->header.updateModerationModeIcon(); });
+
+        this->roomModeChangedConnection =
+            tc->roomModesChanged.connect([this] { this->header.updateModes(); });
     }
 
     this->indirectChannelChangedConnection = newChannel.getChannelChanged().connect([this] {  //
@@ -202,6 +201,7 @@ void Split::setChannel(IndirectChannel newChannel)
 
     this->header.updateModerationModeIcon();
     this->header.updateChannelText();
+    this->header.updateModes();
 
     this->channelChanged.invoke();
 }

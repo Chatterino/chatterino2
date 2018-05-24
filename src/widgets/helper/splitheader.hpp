@@ -34,6 +34,7 @@ public:
     // Update channel text from chat widget
     void updateChannelText();
     void updateModerationModeIcon();
+    void updateModes();
 
 protected:
     virtual void scaleChangedEvent(float) override;
@@ -59,6 +60,7 @@ private:
     RippleEffectButton *dropdownButton;
     //    Label *titleLabel;
     SignalLabel *titleLabel;
+    RippleEffectLabel *modeButton;
     RippleEffectButton *moderationButton;
 
     QMenu dropdownMenu;

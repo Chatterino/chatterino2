@@ -86,7 +86,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     };
 
     auto doRefreshChatters = [=]() {
-        const auto streamStatus = this->GetStreamStatus();
+        const auto streamStatus = this->getStreamStatus();
 
         if (app->settings->onlyFetchChattersForSmallerStreamers) {
             if (streamStatus.live && streamStatus.viewerCount > app->settings->smallStreamerLimit) {
@@ -211,6 +211,35 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
     this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
 
     this->completionModel.addUser(message->displayName);
+}
+
+TwitchChannel::RoomModes TwitchChannel::getRoomModes()
+{
+    std::lock_guard<std::mutex> lock(this->roomModeMutex);
+
+    return this->roomModes;
+}
+
+void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
+{
+    {
+        std::lock_guard<std::mutex> lock(this->roomModeMutex);
+        this->roomModes = _roomModes;
+    }
+
+    this->roomModesChanged.invoke();
+}
+
+bool TwitchChannel::isLive() const
+{
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+    return this->streamStatus.live;
+}
+
+TwitchChannel::StreamStatus TwitchChannel::getStreamStatus() const
+{
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+    return this->streamStatus;
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)

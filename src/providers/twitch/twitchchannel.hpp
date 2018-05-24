@@ -38,6 +38,15 @@ public:
         bool broadcaster;
     };
 
+    struct RoomModes {
+        bool submode = false;
+        bool r9k = false;
+        bool emoteOnly = false;
+        //        int folowerOnly = 0;
+        int slowMode = 0;
+        QString broadcasterLang;
+    };
+
     ~TwitchChannel() final;
 
     void reloadChannelEmotes();
@@ -66,25 +75,20 @@ public:
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
     pajlada::Signals::NoArgSignal userStateChanged;
+    pajlada::Signals::NoArgSignal roomModesChanged;
 
     QString roomID;
+    RoomModes getRoomModes();
+    void setRoomModes(const RoomModes &roomModes);
 
-    StreamStatus GetStreamStatus() const
-    {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        return this->streamStatus;
-    }
+    StreamStatus getStreamStatus() const;
 
     struct NameOptions {
         QString displayName;
         QString localizedName;
     };
 
-    bool IsLive() const
-    {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        return this->streamStatus.live;
-    }
+    bool isLive() const;
 
 private:
     explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
@@ -103,6 +107,8 @@ private:
     bool mod;
     QByteArray messageSuffix;
     QString lastSentMessage;
+    RoomModes roomModes;
+    std::mutex roomModeMutex;
 
     Communi::IrcConnection *readConnection;
 

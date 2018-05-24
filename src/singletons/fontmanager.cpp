@@ -83,7 +83,6 @@ FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
     if (it != map.end()) {
         // return if found
 
-        qDebug() << it->second.font;
         return it->second;
     }
 

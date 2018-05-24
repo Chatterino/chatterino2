@@ -100,6 +100,8 @@ private:
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
+    pajlada::Signals::Connection roomModeChangedConnection;
+
     pajlada::Signals::Connection indirectChannelChangedConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;

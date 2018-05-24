@@ -63,6 +63,16 @@ SplitHeader::SplitHeader(Split *_split)
 
         layout->addStretch(1);
 
+        // mode button
+        auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
+
+        mode->getLabel().setText("dank\nmemes");
+
+        //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
+        //        {
+        //            //
+        //        });
+
         // moderation mode
         auto moderator = layout.emplace<RippleEffectButton>(this).assign(&this->moderationButton);
 
@@ -167,7 +177,7 @@ void SplitHeader::updateChannelText()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel != nullptr) {
-        const auto &streamStatus = twitchChannel->GetStreamStatus();
+        const auto &streamStatus = twitchChannel->getStreamStatus();
 
         if (streamStatus.live) {
             this->isLive = true;
@@ -214,6 +224,45 @@ void SplitHeader::updateModerationModeIcon()
     }
 
     this->moderationButton->setVisible(modButtonVisible);
+}
+
+void SplitHeader::updateModes()
+{
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(this->split->getChannel().get());
+    if (tc == nullptr) {
+        return;
+    }
+
+    TwitchChannel::RoomModes roomModes = tc->getRoomModes();
+
+    QString text;
+
+    if (roomModes.r9k) {
+        text += "r9k, ";
+    }
+    if (roomModes.slowMode) {
+        text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
+    }
+    if (roomModes.emoteOnly) {
+        text += "emote, ";
+    }
+    if (roomModes.submode) {
+        text += "sub, ";
+    }
+
+    if (text.length() > 2) {
+        text = text.mid(0, text.size() - 2);
+    }
+
+    qDebug() << text;
+
+    static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
+    QRegularExpressionMatch match = commaReplacement.match(text);
+    if (match.hasMatch()) {
+        text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+    }
+
+    this->modeButton->getLabel().setText(text);
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)

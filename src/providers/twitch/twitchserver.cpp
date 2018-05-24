@@ -78,7 +78,7 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 {
     QString channelName;
-    if (!TrimChannelName(message->target(), channelName)) {
+    if (!trimChannelName(message->target(), channelName)) {
         return;
     }
 

@@ -5,7 +5,7 @@ namespace chatterino {
 namespace providers {
 namespace twitch {
 
-bool TrimChannelName(const QString &channelName, QString &outChannelName)
+bool trimChannelName(const QString &channelName, QString &outChannelName)
 {
     if (channelName.length() < 3) {
         debug::Log("channel name length below 3");
