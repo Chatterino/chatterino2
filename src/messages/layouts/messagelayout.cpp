@@ -3,6 +3,7 @@
 #include "application.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "util/benchmark.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -47,6 +48,8 @@ int MessageLayout::getHeight() const
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 {
+    BenchmarkGuard benchmark("MessageLayout::layout()");
+
     auto app = getApp();
 
     bool layoutRequired = false;
@@ -120,6 +123,8 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
     this->container.begin(width, this->scale, messageFlags);
 
     for (const std::unique_ptr<MessageElement> &element : this->message->getElements()) {
+        BenchmarkGuard guard("addelement");
+
         element->addToContainer(this->container, _flags);
     }
 

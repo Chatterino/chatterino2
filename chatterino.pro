@@ -26,6 +26,11 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
+
+macx {
+    LIBS += -L/usr/local/lib
+}
+
 # Submodules
 include(dependencies/rapidjson.pri)
 include(dependencies/settings.pri)
