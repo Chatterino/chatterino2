@@ -131,6 +131,11 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
         relativeTo->insertSplitRelative(split, direction);
     }
 
+    this->addSplit(split);
+}
+
+void SplitContainer::addSplit(Split *split)
+{
     split->setParent(this);
     split->show();
     split->giveFocus(Qt::MouseFocusReason);
@@ -223,7 +228,7 @@ void SplitContainer::layout()
     }
 
     {
-        int i = 0;
+        size_t i = 0;
         for (ResizeRect &resizeRect : _resizeRects) {
             ResizeHandle *handle = this->resizeHandles[i].get();
             handle->setGeometry(resizeRect.rect);
@@ -338,7 +343,7 @@ void SplitContainer::mouseMoveEvent(QMouseEvent *event)
     this->update();
 }
 
-void SplitContainer::leaveEvent(QEvent *event)
+void SplitContainer::leaveEvent(QEvent *)
 {
     this->mouseOverPoint = QPoint(-10000, -10000);
     this->update();
@@ -410,12 +415,16 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 split->setChannel(
                     singletons::WindowManager::decodeChannel(_obj.value("data").toObject()));
 
-                this->insertSplit(split, direction, node);
+                Node *_node = new Node();
+                _node->parent = node;
+                _node->split = split;
+                _node->type = Node::_Split;
 
-                this->baseNode.findNodeContainingSplit(split)->flexH =
-                    _obj.value("flexh").toDouble(1.0);
-                this->baseNode.findNodeContainingSplit(split)->flexV =
-                    _obj.value("flexv").toDouble(1.0);
+                _node->flexH = _obj.value("flexh").toDouble(1.0);
+                _node->flexV = _obj.value("flexv").toDouble(1.0);
+                node->children.emplace_back(_node);
+
+                this->addSplit(split);
             } else {
                 Node *_node = new Node();
                 _node->parent = node;
@@ -571,7 +580,7 @@ void SplitContainer::Node::_insertNextToThis(Split *_split, Direction _direction
     qreal height = this->parent->geometry.height() / siblings.size();
 
     if (siblings.size() == 1) {
-        this->geometry = QRect(0, 0, width, height);
+        this->geometry = QRect(0, 0, int(width), int(height));
     }
 
     auto it = std::find_if(siblings.begin(), siblings.end(),
@@ -797,8 +806,8 @@ SplitContainer::Node::Type SplitContainer::Node::toContainerType(Direction _dir)
 
 SplitContainer::DropOverlay::DropOverlay(SplitContainer *_parent)
     : QWidget(_parent)
-    , parent(_parent)
     , mouseOverPoint(-10000, -10000)
+    , parent(_parent)
 {
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -811,7 +820,7 @@ void SplitContainer::DropOverlay::setRects(std::vector<SplitContainer::DropRect>
 
 // pajlada::Signals::NoArgSignal dragEnded;
 
-void SplitContainer::DropOverlay::paintEvent(QPaintEvent *event)
+void SplitContainer::DropOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 

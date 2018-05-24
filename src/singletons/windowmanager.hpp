@@ -4,7 +4,7 @@
 
 namespace chatterino {
 namespace widgets {
-class SplitContainer::Node;
+struct SplitContainer::Node;
 }
 namespace singletons {
 
@@ -46,8 +46,6 @@ private:
     widgets::Window *selectedWindow = nullptr;
 
     void encodeNodeRecusively(widgets::SplitContainer::Node *node, QJsonObject &obj);
-    void decodeNodeRecusively(widgets::SplitContainer *container,
-                              widgets::SplitContainer::Node *node, QJsonObject &obj, bool vertical);
 
 public:
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);

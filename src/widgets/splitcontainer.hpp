@@ -39,7 +39,7 @@ public:
     // fourtf: !!! preserve the order of left, up, right and down
     enum Direction { Left, Above, Right, Below };
 
-    struct Position {
+    struct Position final {
     private:
         Position() = default;
         Position(Node *_relativeNode, Direction _direcion)
@@ -56,7 +56,7 @@ public:
     };
 
 private:
-    struct DropRect {
+    struct DropRect final {
         QRect rect;
         Position position;
 
@@ -67,7 +67,7 @@ private:
         }
     };
 
-    struct ResizeRect {
+    struct ResizeRect final {
         QRect rect;
         Node *node;
         bool vertical;
@@ -122,7 +122,7 @@ public:
     };
 
 private:
-    class DropOverlay : public QWidget
+    class DropOverlay final : public QWidget
     {
     public:
         DropOverlay(SplitContainer *_parent = nullptr);
@@ -133,10 +133,10 @@ private:
 
     protected:
         void paintEvent(QPaintEvent *event) override;
-        void dragEnterEvent(QDragEnterEvent *event);
-        void dragMoveEvent(QDragMoveEvent *event);
-        void dragLeaveEvent(QDragLeaveEvent *event);
-        void dropEvent(QDropEvent *event);
+        void dragEnterEvent(QDragEnterEvent *event) override;
+        void dragMoveEvent(QDragMoveEvent *event) override;
+        void dragLeaveEvent(QDragLeaveEvent *event) override;
+        void dropEvent(QDropEvent *event) override;
 
     private:
         std::vector<DropRect> rects;
@@ -144,7 +144,7 @@ private:
         SplitContainer *parent;
     };
 
-    class ResizeHandle : public QWidget
+    class ResizeHandle final : public QWidget
     {
     public:
         SplitContainer *parent;
@@ -222,6 +222,8 @@ private:
             this->position = position;
         }
     };
+
+    void addSplit(Split *split);
 
     std::vector<DropRect> dropRects;
     std::vector<DropRegion> dropRegions;
