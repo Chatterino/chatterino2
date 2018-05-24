@@ -9,6 +9,7 @@
 #include <QPainter>
 
 #define COMPACT_EMOTES_OFFSET 6
+#define MAX_UNCOLLAPSED_LINES 3
 
 namespace chatterino {
 namespace messages {
@@ -39,6 +40,9 @@ void MessageLayoutContainer::begin(int _width, float _scale, Message::MessageFla
     auto mediumFontMetrics = getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, _scale);
     this->textLineHeight = mediumFontMetrics.height();
     this->spaceWidth = mediumFontMetrics.width(' ');
+    this->dotdotdotWidth = mediumFontMetrics.width("...");
+    this->_canAddMessages = true;
+    this->_isCollapsed = false;
 }
 
 void MessageLayoutContainer::clear()
@@ -71,12 +75,12 @@ void MessageLayoutContainer::addElementNoLineBreak(MessageLayoutElement *element
 
 bool MessageLayoutContainer::canAddElements()
 {
-    return !(this->flags & Message::MessageFlags::Collapsed && line >= 3);
+    return this->_canAddMessages;
 }
 
-void MessageLayoutContainer::_addElement(MessageLayoutElement *element)
+void MessageLayoutContainer::_addElement(MessageLayoutElement *element, bool forceAdd)
 {
-    if (!this->canAddElements()) {
+    if (!this->canAddElements() && !forceAdd) {
         delete element;
         return;
     }
@@ -154,12 +158,18 @@ void MessageLayoutContainer::breakLine()
 
     this->lineStart = this->elements.size();
     //    this->currentX = (int)(this->scale * 8);
+
+    if (this->canCollapse() && line + 1 >= MAX_UNCOLLAPSED_LINES) {
+        this->_canAddMessages = false;
+        return;
+    }
+
     this->currentX = 0;
     this->currentY += this->lineHeight;
     this->height = this->currentY + (this->margin.bottom * this->scale);
     this->lineHeight = 0;
     this->line++;
-}  // namespace layouts
+}
 
 bool MessageLayoutContainer::atStartOfLine()
 {
@@ -168,14 +178,31 @@ bool MessageLayoutContainer::atStartOfLine()
 
 bool MessageLayoutContainer::fitsInLine(int _width)
 {
-    return this->currentX + _width <= this->width - this->margin.left - this->margin.right;
+    return this->currentX + _width <=
+           (this->width - this->margin.left - this->margin.right -
+            (this->line + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth : 0));
 }
 
 void MessageLayoutContainer::end()
 {
+    if (!this->canAddElements()) {
+        static TextElement dotdotdot("...", MessageElement::Collapsed, MessageColor::Link);
+        static QString dotdotdotText("...");
+
+        auto *element = new TextLayoutElement(
+            dotdotdot, dotdotdotText, QSize(this->dotdotdotWidth, this->textLineHeight),
+            QColor("#00D80A"), FontStyle::ChatMediumBold, this->scale);
+
+        // getApp()->themes->messages.textColors.system
+        this->_addElement(element, true);
+        this->_isCollapsed = true;
+    }
+
     if (!this->atStartOfLine()) {
         this->breakLine();
     }
+
+    this->height += this->lineHeight;
 
     if (this->lines.size() != 0) {
         this->lines[0].rect.setTop(-100000);
@@ -183,6 +210,17 @@ void MessageLayoutContainer::end()
         this->lines.back().endIndex = this->elements.size();
         this->lines.back().endCharIndex = this->charIndex;
     }
+}
+
+bool MessageLayoutContainer::canCollapse()
+{
+    return getApp()->settings->collapseLongMessages.getValue() &&
+           this->flags & Message::MessageFlags::Collapsed;
+}
+
+bool MessageLayoutContainer::isCollapsed()
+{
+    return this->_isCollapsed;
 }
 
 MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)

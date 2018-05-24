@@ -97,12 +97,14 @@ MessagePtr TwitchMessageBuilder::build()
     // PARSING
     this->parseUsername();
 
-#ifdef XD
-    if (this->originalMessage.length() > 100) {
-        this->message->flags |= Message::Collapsed;
-        this->emplace<EmoteElement>(getApp()->resources->badgeCollapsed, MessageElement::Collapsed);
-    }
-#endif
+    //#ifdef XD
+    //    if (this->originalMessage.length() > 100) {
+    //        this->message->flags |= Message::Collapsed;
+    //        this->emplace<EmoteElement>(getApp()->resources->badgeCollapsed,
+    //        MessageElement::Collapsed);
+    //    }
+    //#endif
+    this->message->flags |= Message::Collapsed;
 
     // PARSING
     this->parseMessageID();

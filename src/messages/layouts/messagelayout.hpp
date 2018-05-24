@@ -22,7 +22,9 @@ public:
     enum Flags : uint8_t {
         RequiresBufferUpdate = 1 << 1,
         RequiresLayout = 1 << 2,
-        AlternateBackground = 1 << 3
+        AlternateBackground = 1 << 3,
+        Collapsed = 1 << 4,
+        Expanded = 1 << 5,
     };
 
     MessageLayout(MessagePtr message);

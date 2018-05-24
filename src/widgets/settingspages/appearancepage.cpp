@@ -77,6 +77,12 @@ AppearancePage::AppearancePage()
         }
 
         messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
+
+        auto *collapseMessages = this->createCheckBox("Collapse large messages (3+ lines)",
+                                                      app->settings->collapseLongMessages);
+        QObject::connect(collapseMessages, &QCheckBox::toggled,
+                         [] { getApp()->windows->layoutVisibleChatWidgets(); });
+        messages.append(collapseMessages);
         {
             auto checkbox =
                 this->createCheckBox("Seperate messages", app->settings->seperateMessages);

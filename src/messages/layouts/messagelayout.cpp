@@ -107,12 +107,20 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     return true;
 }
 
-void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
+void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
 {
-    this->container.begin(width, this->scale, this->message->flags.value);
+    auto messageFlags = this->message->flags.value;
+
+    if (this->flags & MessageLayout::Expanded ||
+        (_flags & MessageElement::ModeratorTools &&
+         !(this->message->flags & Message::MessageFlags::Disabled))) {
+        messageFlags = (Message::MessageFlags)(messageFlags & ~Message::MessageFlags::Collapsed);
+    }
+
+    this->container.begin(width, this->scale, messageFlags);
 
     for (const std::unique_ptr<MessageElement> &element : this->message->getElements()) {
-        element->addToContainer(this->container, flags);
+        element->addToContainer(this->container, _flags);
     }
 
     if (this->height != this->container.getHeight()) {
@@ -121,6 +129,12 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags flags)
 
     this->container.end();
     this->height = this->container.getHeight();
+
+    // collapsed state
+    this->flags &= ~Flags::Collapsed;
+    if (this->container.isCollapsed()) {
+        this->flags |= Flags::Collapsed;
+    }
 }
 
 // Painting

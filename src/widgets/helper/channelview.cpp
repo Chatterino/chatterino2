@@ -778,7 +778,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->getMessage()->flags & Message::Collapsed) {
+    if (layout->flags & MessageLayout::Collapsed) {
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
@@ -856,7 +856,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     }
 
     // check if message is collapsed
-    if (layout->getMessage()->flags & Message::Collapsed) {
+    if (layout->flags & MessageLayout::Collapsed) {
         return;
     }
 
@@ -923,8 +923,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->getMessage()->flags & Message::MessageFlags::Collapsed) {
-        layout->getMessage()->flags &= ~Message::MessageFlags::Collapsed;
+    if (layout->flags & MessageLayout::Collapsed) {
+        layout->flags |= MessageLayout::Expanded;
 
         this->layoutMessages();
         return;
@@ -1038,7 +1038,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
         // message under cursor is collapsed
-        if (layout->getMessage()->flags & Message::Collapsed) {
+        if (layout->flags & MessageLayout::Collapsed) {
             return;
         }
 
