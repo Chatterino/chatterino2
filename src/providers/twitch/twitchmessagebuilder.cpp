@@ -577,12 +577,13 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
             QString cheerAmountQS = badge.mid(5);
             std::string versionKey = cheerAmountQS.toStdString();
+            QString tooltip = QString("Twitch Bits (") + cheerAmountQS + ")";
 
             // Try to fetch channel-specific bit badge
             try {
                 const auto &badge = channelResources.badgeSets.at("bits").versions.at(versionKey);
                 this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
-                    ->setTooltip(QString("Twitch Bits (") + cheerAmountQS + ")");
+                    ->setTooltip(tooltip);
                 continue;
             } catch (const std::out_of_range &) {
                 // Channel does not contain a special bit badge for this version
@@ -591,7 +592,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
             // Use default bit badge
             try {
                 const auto &badge = app->resources->badgeSets.at("bits").versions.at(versionKey);
-                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity);
+                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
+                    ->setTooltip(tooltip);
             } catch (const std::out_of_range &) {
                 debug::Log("No default bit badge for version {} found", versionKey);
                 continue;
