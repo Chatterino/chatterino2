@@ -1,11 +1,12 @@
 #pragma once
 
 #include "widgets/window.hpp"
+#include "widgets/splitcontainer.hpp"
 
 namespace chatterino {
-namespace widgets {
-struct SplitContainer::Node;
-}
+//namespace widgets {
+//struct SplitContainer::Node;
+//}
 namespace singletons {
 
 class WindowManager
