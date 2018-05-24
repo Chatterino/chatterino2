@@ -154,15 +154,8 @@ MessagePtr TwitchMessageBuilder::build()
             this->appendTwitchEmote(ircMessage, emote, twitchEmotes);
         }
 
-        struct {
-            bool operator()(const std::pair<long, util::EmoteData> &lhs,
-                            const std::pair<long, util::EmoteData> &rhs)
-            {
-                return lhs.first < rhs.first;
-            }
-        } customLess;
-
-        std::sort(twitchEmotes.begin(), twitchEmotes.end(), customLess);
+        std::sort(twitchEmotes.begin(), twitchEmotes.end(),
+                  [](const auto &a, const auto &b) { return a.first < b.first; });
     }
 
     auto currentTwitchEmote = twitchEmotes.begin();
@@ -588,7 +581,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
             // Try to fetch channel-specific bit badge
             try {
                 const auto &badge = channelResources.badgeSets.at("bits").versions.at(versionKey);
-                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity);
+                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
+                    ->setTooltip(QString("Twitch Bits (") + cheerAmountQS + ")");
                 continue;
             } catch (const std::out_of_range &) {
                 // Channel does not contain a special bit badge for this version

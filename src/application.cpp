@@ -34,7 +34,7 @@ namespace {
 bool isBigEndian()
 {
     int test = 1;
-    char *p = (char *)&test;
+    char *p = reinterpret_cast<char *>(&test);
 
     return p[0] == 0;
 }
@@ -268,11 +268,11 @@ void Application::runNativeMessagingHost()
         }
 #endif
 
-        char *b = (char *)malloc(size + 1);
+        char *b = reinterpret_cast<char *>(malloc(size + 1));
         std::cin.read(b, size);
         *(b + size) = '\0';
 
-        app->nativeMessaging->sendToGuiProcess(QByteArray(b, size));
+        app->nativeMessaging->sendToGuiProcess(QByteArray(b, static_cast<int32_t>(size)));
 
         free(b);
     }

@@ -2,6 +2,7 @@
 
 #include "util/emotemap.hpp"
 
+#include <QIcon>
 #include <QRegularExpression>
 
 #include <map>
