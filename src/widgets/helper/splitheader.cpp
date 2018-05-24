@@ -66,7 +66,7 @@ SplitHeader::SplitHeader(Split *_split)
         // mode button
         auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
 
-        mode->getLabel().setText("dank\nmemes");
+        mode->hide();
 
         //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
         //        {
@@ -230,6 +230,7 @@ void SplitHeader::updateModes()
 {
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(this->split->getChannel().get());
     if (tc == nullptr) {
+        this->modeButton->hide();
         return;
     }
 
@@ -310,6 +311,7 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->move(pos);
                 widget->show();
+                widget->raise();
 
                 QTimer::singleShot(3000, widget, [this, widget] {
                     widget->close();
