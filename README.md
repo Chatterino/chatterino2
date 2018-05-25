@@ -7,12 +7,24 @@ Chatterino 2 is the second installment of the Twitch chat client series "Chatter
 ## Building
 Before building run `git submodule update --init --recursive` to get required submodules.
 
-[Building on windows](../blob/master/BUILDING_ON_WINDOWS.md)
-[Building on Linux](../blob/master/BUILDING_ON_LINUX.md)
-[Building on Mac](../blob/master/BUILDING_ON_MAC.md)
+[Building on Windows](../master/BUILDING_ON_WINDOWS.md)
+
+[Building on Linux](../master/BUILDING_ON_LINUX.md)
+
+[Building on Mac](../master/BUILDING_ON_MAC.md)
 
 ## Code style
-The code is normally formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
+The code is formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
 
 To setup automatic code formating with QT Creator, see [this guide](https://gist.github.com/pajlada/0296454198eb8f8789fd6fe7ea660c5b).
 
+### Get it automated with QT Creator + Beautifier + Clang Format
+1. Download LLVM: http://releases.llvm.org/5.0.1/LLVM-5.0.1-win64.exe
+2. During the installation, make sure to add it to your path
+3. In QT Creator, select `Help` > `About Plugins` > `C++` > `Beautifier` to enable the plugin
+4. Restart QT Creator
+5. Select `Tools` > `Options` > `Beautifier`
+6. Under `General` select `Tool: ClangFormat` and enable `Automatic Formatting on File Save`
+7. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
+
+Qt creator should now format the documents when saving it.
