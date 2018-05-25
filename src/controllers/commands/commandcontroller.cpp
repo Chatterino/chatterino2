@@ -169,7 +169,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 QString rest = "";
 
                 for (int i = 2; i < words.length(); i++) {
-                    rest += words[i];
+                    rest += words[i] + " ";
                 }
 
                 b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
