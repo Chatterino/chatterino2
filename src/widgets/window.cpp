@@ -31,11 +31,17 @@ Window::Window(WindowType _type)
 {
     auto app = getApp();
 
-    app->accounts->Twitch.currentUsername.connect([this](const std::string &newUsername, auto) {
-        if (newUsername.empty()) {
+    app->accounts->Twitch.currentUserChanged.connect([this] {
+        auto user = getApp()->accounts->Twitch.getCurrent();
+
+        if (user->isAnon()) {
             this->refreshWindowTitle("Not logged in");
+
+            this->userLabel->getLabel().setText("anonymous");
         } else {
-            this->refreshWindowTitle(QString::fromStdString(newUsername));
+            this->refreshWindowTitle(user->getUserName());
+
+            this->userLabel->getLabel().setText(user->getUserName());
         }
     });
 
@@ -47,10 +53,6 @@ Window::Window(WindowType _type)
         this->userLabel = this->addTitleBarLabel([this, app] {
             app->windows->showAccountSelectPopup(
                 this->userLabel->mapToGlobal(this->userLabel->rect().bottomLeft()));  //
-        });
-
-        app->accounts->Twitch.currentUserChanged.connect([=] {
-            this->userLabel->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName());
         });
     }
 
