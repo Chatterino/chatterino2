@@ -86,7 +86,7 @@ void NotebookTab::updateSize()
     float scale = getScale();
 
     int width;
-    QFontMetrics metrics = getApp()->fonts->getFontMetrics(FontStyle::UiTabs, this->getScale());
+    QFontMetrics metrics = getApp()->fonts->getFontMetrics(FontStyle::UiTabs, this->getScale() * this->devicePixelRatioF());
 
     if (this->hasXButton()) {
         width = (int)((metrics.width(this->title) + 32) * scale);
@@ -188,7 +188,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->getScale();
 
-    painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale));
+    painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale * this->devicePixelRatioF()));
 
     int height = (int)(scale * NOTEBOOK_TAB_HEIGHT);
     //    int fullHeight = (int)(scale * 48);
@@ -248,13 +248,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     if (true) {  // legacy
         //    painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
         int offset = (int)(scale * 8);
-        QRect textRect(offset, this->selected ? 0 : 1, this->width() - offset - offset, height);
+        QRect textRect(offset, this->selected ? 1 : 2, this->width() - offset - offset, height);
 
         if (this->shouldDrawXButton()) {
             textRect.setRight(textRect.right() - this->height() / 2);
         }
 
-        QTextOption option(Qt::AlignLeft | Qt::AlignVCenter);
+        QTextOption option(Qt::AlignHCenter | Qt::AlignVCenter);
         option.setWrapMode(QTextOption::NoWrap);
         painter.drawText(textRect, this->getTitle(), option);
     } else {

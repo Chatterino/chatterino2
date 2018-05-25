@@ -3,6 +3,7 @@
 #include "application.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "util/benchmark.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -47,6 +48,8 @@ int MessageLayout::getHeight() const
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 {
+    BenchmarkGuard benchmark("MessageLayout::layout()");
+
     auto app = getApp();
 
     bool layoutRequired = false;
@@ -73,6 +76,7 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
     // check if timestamp format changed
     bool timestampFormatChanged = this->timestampFormat != app->settings->timestampFormat;
+    this->timestampFormat = app->settings->timestampFormat.getValue();
 
     layoutRequired |= timestampFormatChanged;
 
@@ -82,6 +86,8 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->scale = scale;
     imagesChanged |= scaleChanged;
     textChanged |= scaleChanged;
+
+//    assert(layoutRequired);
 
     // update word sizes if needed
     if (imagesChanged) {
@@ -97,6 +103,8 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     }
 
     // return if no layout is required
+    qDebug() << layoutRequired;
+
     if (!layoutRequired) {
         return false;
     }

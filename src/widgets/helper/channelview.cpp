@@ -177,7 +177,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
     auto app = getApp();
 
-    // BENCH(timer)
+    BENCH(timer)
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     if (messagesSnapshot.getLength() == 0) {
@@ -264,7 +264,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         this->messageWasAdded = false;
     }
 
-    // MARK(timer);
+     MARK(timer);
 
     if (redrawRequired) {
         this->queueUpdate();
@@ -580,7 +580,7 @@ bool ChannelView::isPaused()
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
-    //    BENCH(timer);
+        BENCH(timer);
 
     QPainter painter(this);
 
@@ -589,7 +589,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // draw messages
     this->drawMessages(painter);
 
-    //    MARK(timer);
+        MARK(timer);
 }
 
 // if overlays is false then it draws the message, if true then it draws things such as the grey

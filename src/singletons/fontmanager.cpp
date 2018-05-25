@@ -115,10 +115,16 @@ FontManager::FontData FontManager::createFontData(Type type, float scale)
 
     // normal Ui font (use pt size)
     {
+#ifdef Q_OS_MAC
+        constexpr float multiplier = 0.8f;
+#else
+        constexpr float multiplier = 1.f;
+#endif
+
         static std::unordered_map<Type, UiFontData> defaultSize{
             {Tiny, {8, "Monospace", false, QFont::Normal}},
-            {UiMedium, {12, DEFAULT_FONT_FAMILY, false, QFont::Normal}},
-            {UiTabs, {9, "Segoe UI", false, QFont::Normal}},
+            {UiMedium, {int(12 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {UiTabs, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
         };
 
         UiFontData &data = defaultSize[type];
