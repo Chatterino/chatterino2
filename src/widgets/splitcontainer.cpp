@@ -1017,8 +1017,15 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
 void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+    painter.setPen(QPen(getApp()->themes->splits.dropPreviewBorder, 2));
 
-    painter.fillRect(this->rect(), "#999");
+    painter.fillRect(this->rect(), getApp()->themes->splits.dropPreview);
+
+    if (this->vertical) {
+        painter.drawLine(0, this->height() / 2, this->width(), this->height() / 2);
+    } else {
+        painter.drawLine(this->width() / 2, 0, this->width() / 2, this->height());
+    }
 }
 
 void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *)
