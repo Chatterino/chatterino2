@@ -577,7 +577,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
             QString cheerAmountQS = badge.mid(5);
             std::string versionKey = cheerAmountQS.toStdString();
-            QString tooltip = QString("cheer ") + cheerAmountQS;
+            QString tooltip = QString("Twitch cheer ") + cheerAmountQS;
 
             // Try to fetch channel-specific bit badge
             try {
