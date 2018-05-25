@@ -11,24 +11,27 @@
 
 #define MARK(x)                                    \
     qDebug() << BOOST_CURRENT_FUNCTION << __LINE__ \
-             << static_cast<float>(x.nsecsElapsed()) / 100000.0 << "ms";
+             << static_cast<float>(x.nsecsElapsed()) / 1000000.0 << "ms";
 
-class BenchmarkGuard : boost::noncopyable {
+class BenchmarkGuard : boost::noncopyable
+{
     QElapsedTimer timer;
     QString name;
 
 public:
     BenchmarkGuard(const QString &_name)
-        :name(_name)
+        : name(_name)
     {
         timer.start();
     }
 
-    ~BenchmarkGuard() {
-        qDebug() << this->name << float(timer.nsecsElapsed()) / 100000.0 << "ms";
+    ~BenchmarkGuard()
+    {
+        qDebug() << this->name << float(timer.nsecsElapsed()) / 1000000.0f << "ms";
     }
 
-    qreal getElapsedMs() {
-        return qreal(timer.nsecsElapsed()) / 100000.0;
+    qreal getElapsedMs()
+    {
+        return qreal(timer.nsecsElapsed()) / 1000000.0;
     }
 };

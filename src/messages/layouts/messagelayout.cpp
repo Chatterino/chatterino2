@@ -80,6 +80,10 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
     layoutRequired |= timestampFormatChanged;
 
+    // check if layout was requested manually
+    layoutRequired |= bool(this->flags & RequiresLayout);
+    this->flags &= ~RequiresLayout;
+
     // check if dpi changed
     bool scaleChanged = this->scale != scale;
     layoutRequired |= scaleChanged;
@@ -87,7 +91,7 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     imagesChanged |= scaleChanged;
     textChanged |= scaleChanged;
 
-//    assert(layoutRequired);
+    //    assert(layoutRequired);
 
     // update word sizes if needed
     if (imagesChanged) {
@@ -122,7 +126,7 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
     if (this->flags & MessageLayout::Expanded ||
         (_flags & MessageElement::ModeratorTools &&
          !(this->message->flags & Message::MessageFlags::Disabled))) {
-        messageFlags = (Message::MessageFlags)(messageFlags & ~Message::MessageFlags::Collapsed);
+        messageFlags = Message::MessageFlags(messageFlags & ~Message::MessageFlags::Collapsed);
     }
 
     this->container.begin(width, this->scale, messageFlags);
@@ -209,7 +213,7 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     this->bufferValid = true;
 }
 
-void MessageLayout::updateBuffer(QPixmap *buffer, int messageIndex, Selection &selection)
+void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/, Selection & /*selection*/)
 {
     auto app = getApp();
 

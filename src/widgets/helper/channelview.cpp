@@ -175,9 +175,10 @@ void ChannelView::layoutMessages()
 
 void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
+    BenchmarkGuard benchmark("layout messages");
+
     auto app = getApp();
 
-    BENCH(timer)
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     if (messagesSnapshot.getLength() == 0) {
@@ -263,8 +264,6 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         }
         this->messageWasAdded = false;
     }
-
-     MARK(timer);
 
     if (redrawRequired) {
         this->queueUpdate();
@@ -580,7 +579,7 @@ bool ChannelView::isPaused()
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
-        BENCH(timer);
+    BenchmarkGuard benchmark("paint event");
 
     QPainter painter(this);
 
@@ -588,8 +587,6 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw messages
     this->drawMessages(painter);
-
-        MARK(timer);
 }
 
 // if overlays is false then it draws the message, if true then it draws things such as the grey
@@ -600,14 +597,14 @@ void ChannelView::drawMessages(QPainter &painter)
 
     auto messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar.getCurrentValue();
+    size_t start = size_t(this->scrollBar.getCurrentValue());
 
     if (start >= messagesSnapshot.getLength()) {
         return;
     }
 
-    int y = -(messagesSnapshot[start].get()->getHeight() *
-              (fmod(this->scrollBar.getCurrentValue(), 1)));
+    int y = int(-(messagesSnapshot[start].get()->getHeight() *
+                  (fmod(this->scrollBar.getCurrentValue(), 1))));
 
     messages::MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -925,6 +922,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // message under cursor is collapsed
     if (layout->flags & MessageLayout::Collapsed) {
         layout->flags |= MessageLayout::Expanded;
+        layout->flags |= MessageLayout::RequiresLayout;
 
         this->layoutMessages();
         return;
