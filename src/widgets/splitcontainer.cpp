@@ -1012,6 +1012,7 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
     , parent(_parent)
 {
     this->setMouseTracking(true);
+    this->hide();
 }
 
 void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
