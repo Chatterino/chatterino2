@@ -187,6 +187,7 @@ public:
     Node *getBaseNode();
 
     void setTab(NotebookTab *tab);
+    void hideResizeHandles();
 
     static bool isDraggingSplit;
     static Split *draggingSplit;

@@ -82,6 +82,15 @@ void SplitContainer::setTab(NotebookTab *_tab)
     this->refreshTabTitle();
 }
 
+void SplitContainer::hideResizeHandles()
+{
+    this->overlay.hide();
+
+    for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
+        handle->hide();
+    }
+}
+
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
     util::assertInGuiThread();
@@ -155,6 +164,7 @@ void SplitContainer::addSplit(Split *split)
             this->tab->setHighlightState(state);
         }
     });
+
     split->focused.connect([this, split] { this->setSelected(split); });
 
     this->layout();
@@ -196,6 +206,10 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     }
 
     this->refreshTabTitle();
+
+    // fourtf: really bad
+    split->getChannelView().tabHighlightRequested.disconnectAll();
+    split->focused.disconnectAll();
 
     split->getChannelView().tabHighlightRequested.disconnectAll();
 

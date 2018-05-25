@@ -65,14 +65,14 @@ SplitOverlay::SplitOverlay(Split *parent)
     up->setFocusPolicy(Qt::NoFocus);
     down->setFocusPolicy(Qt::NoFocus);
 
-    move->setCursor(Qt::PointingHandCursor);
+    move->setCursor(Qt::SizeAllCursor);
     left->setCursor(Qt::PointingHandCursor);
     right->setCursor(Qt::PointingHandCursor);
     up->setCursor(Qt::PointingHandCursor);
     down->setCursor(Qt::PointingHandCursor);
 
     this->managedConnect(this->scaleChanged, [=](float _scale) {
-        int a = _scale * 40;
+        int a = int(_scale * 30);
         QSize size(a, a);
 
         move->setIconSize(size);
@@ -83,9 +83,11 @@ SplitOverlay::SplitOverlay(Split *parent)
     });
 
     this->setMouseTracking(true);
+
+    this->setCursor(Qt::ArrowCursor);
 }
 
-void SplitOverlay::paintEvent(QPaintEvent *event)
+void SplitOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     painter.fillRect(this->rect(), QColor(0, 0, 0, 150));
@@ -95,16 +97,22 @@ void SplitOverlay::paintEvent(QPaintEvent *event)
         case SplitLeft: {
             rect = QRect(0, 0, this->width() / 2, this->height());
         } break;
+
         case SplitRight: {
             rect = QRect(this->width() / 2, 0, this->width() / 2, this->height());
         } break;
+
         case SplitUp: {
             rect = QRect(0, 0, this->width(), this->height() / 2);
         } break;
+
         case SplitDown: {
             rect = QRect(0, this->height() / 2, this->width(), this->height() / 2);
         } break;
+
+        default:;
     }
+
     if (!rect.isNull()) {
         painter.setPen(getApp()->themes->splits.dropPreviewBorder);
         painter.setBrush(getApp()->themes->splits.dropPreview);
@@ -174,19 +182,22 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                     this->parent->split->drag();
                 }
                 return true;
-            } else {
+            }
+        } break;
+        case QEvent::MouseButtonRelease: {
+            if (this->hoveredElement != HoveredElement::SplitMove) {
                 SplitContainer *container = this->parent->split->getContainer();
 
                 if (container != nullptr) {
                     auto *_split = new Split(container);
-                    container->insertSplit(
-                        _split,
-                        (SplitContainer::Direction)(this->hoveredElement + SplitContainer::Left -
-                                                    SplitLeft),
-                        this->parent->split);
+                    auto dir = SplitContainer::Direction(this->hoveredElement +
+                                                         SplitContainer::Left - SplitLeft);
+                    container->insertSplit(_split, dir, this->parent->split);
+                    this->parent->hide();
                 }
             }
         } break;
+        default:;
     }
     return QObject::eventFilter(watched, event);
 }

@@ -164,6 +164,10 @@ bool Window::event(QEvent *event)
                     split->updateLastReadMessage();
                 }
             }
+
+            if (SplitContainer *container = dynamic_cast<SplitContainer *>(page)) {
+                container->hideResizeHandles();
+            }
         } break;
 
         default:;
