@@ -109,6 +109,7 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
 //    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
     this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
+    this->dropdownMenu.addAction("Search in messages", this->split, &Split::doSearch, QKeySequence(tr("Ctrl+F")));
     this->dropdownMenu.addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
