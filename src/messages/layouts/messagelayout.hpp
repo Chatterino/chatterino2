@@ -27,7 +27,7 @@ public:
         Expanded = 1 << 5,
     };
 
-    MessageLayout(MessagePtr message);
+    MessageLayout(MessagePtr m_message);
     ~MessageLayout();
 
     Message *getMessage();
@@ -39,7 +39,7 @@ public:
     util::FlagsEnum<Flags> flags;
 
     // Layout
-    bool layout(int width, float scale, MessageElement::Flags flags);
+    bool layout(int width, float m_scale, MessageElement::Flags flags);
 
     // Painting
     void paint(QPainter &painter, int y, int messageIndex, Selection &selection,
@@ -59,23 +59,23 @@ public:
 
 private:
     // variables
-    MessagePtr message;
-    MessageLayoutContainer container;
-    std::shared_ptr<QPixmap> buffer = nullptr;
-    bool bufferValid = false;
+    MessagePtr m_message;
+    MessageLayoutContainer m_container;
+    std::shared_ptr<QPixmap> m_buffer = nullptr;
+    bool m_bufferValid = false;
 
-    int height = 0;
+    int m_height = 0;
 
-    int currentLayoutWidth = -1;
-    int fontGeneration = -1;
-    int emoteGeneration = -1;
-    QString timestampFormat;
-    float scale = -1;
-    unsigned int bufferUpdatedCount = 0;
+    int m_currentLayoutWidth = -1;
+    int m_fontGeneration = -1;
+    int m_emoteGeneration = -1;
+    QString m_timestampFormat;
+    float m_scale = -1;
+    unsigned int m_bufferUpdatedCount = 0;
 
-    MessageElement::Flags currentWordFlags = MessageElement::None;
+    MessageElement::Flags m_currentWordFlags = MessageElement::None;
 
-    int collapsedHeight = 32;
+    int m_collapsedHeight = 32;
 
     // methods
     void actuallyLayout(int width, MessageElement::Flags flags);

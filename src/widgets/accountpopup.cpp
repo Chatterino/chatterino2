@@ -273,9 +273,9 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 void AccountPopupWidget::scaleChangedEvent(float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
-                            .replace("<font-size>", QString::number((int)(12 * newDpi))));
+                            .replace("<font-size>", QString::number(int(12 * newDpi))));
 
-    this->ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
+    this->ui->lblAvatar->setFixedSize(int(100 * newDpi), int(100 * newDpi));
 }
 
 void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
