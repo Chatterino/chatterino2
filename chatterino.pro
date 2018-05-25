@@ -358,7 +358,8 @@ HEADERS  += \
     src/widgets/helper/splitoverlay.hpp \
     src/widgets/helper/dropoverlay.hpp \
     src/widgets/helper/splitnode.hpp \
-    src/widgets/notificationpopup.hpp
+    src/widgets/notificationpopup.hpp \
+    src/util/mutexvalue.h
 
 RESOURCES += \
     resources/resources.qrc

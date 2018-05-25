@@ -7,6 +7,7 @@
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
+#include "util/mutexvalue.h"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -78,6 +79,7 @@ public:
     pajlada::Signals::NoArgSignal roomModesChanged;
 
     QString roomID;
+
     RoomModes getRoomModes();
     void setRoomModes(const RoomModes &roomModes);
 

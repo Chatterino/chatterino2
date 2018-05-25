@@ -166,6 +166,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
+        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
+
         c->addMessage(_message);
 
         if (app->settings->inlineWhispers) {

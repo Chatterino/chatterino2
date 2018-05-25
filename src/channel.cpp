@@ -45,6 +45,11 @@ Channel::Type Channel::getType() const
     return this->type;
 }
 
+bool Channel::isTwitchChannel() const
+{
+    return this->type >= Twitch && this->type < TwitchEnd;
+}
+
 bool Channel::isEmpty() const
 {
     return this->name.isEmpty();

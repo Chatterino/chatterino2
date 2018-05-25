@@ -197,6 +197,20 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &chan
     return Channel::getEmpty();
 }
 
+// QString TwitchServer::getLastWhisperedPerson() const
+//{
+//    std::lock_guard<std::mutex> guard(this->lastWhisperedPersonMutex);
+
+//    return this->lastWhisperedPerson;
+//}
+
+// void TwitchServer::setLastWhisperedPerson(const QString &person)
+//{
+//    std::lock_guard<std::mutex> guard(this->lastWhisperedPersonMutex);
+
+//    this->lastWhisperedPerson = person;
+//}
+
 QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
 {
     return dirtyChannelName.toLower();

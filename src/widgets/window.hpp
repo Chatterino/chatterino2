@@ -42,6 +42,8 @@ protected:
     bool event(QEvent *event) override;
 
 private:
+    RippleEffectLabel *userLabel;
+
     WindowType type;
     float dpi;
 

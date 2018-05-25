@@ -40,7 +40,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    Split *const chatWidget;
+    Split *const split;
     std::unique_ptr<EmotePopup> emotePopup;
 
     struct {

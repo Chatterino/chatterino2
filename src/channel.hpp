@@ -29,6 +29,7 @@ public:
         TwitchWhispers,
         TwitchWatching,
         TwitchMentions,
+        TwitchEnd,
     };
 
     explicit Channel(const QString &_name, Type type);
@@ -43,6 +44,7 @@ public:
     pajlada::Signals::NoArgSignal destroyed;
 
     Type getType() const;
+    bool isTwitchChannel() const;
     virtual bool isEmpty() const;
     messages::LimitedQueueSnapshot<messages::MessagePtr> getMessageSnapshot();
 

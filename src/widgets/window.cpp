@@ -43,18 +43,21 @@ Window::Window(WindowType _type)
         this->addTitleBarButton(TitleBarButton::Settings, [app] {
             app->windows->showSettingsDialog();  //
         });
-        auto user = this->addTitleBarLabel([app] {
-            app->windows->showAccountSelectPopup(QCursor::pos());  //
+
+        this->userLabel = this->addTitleBarLabel([this, app] {
+            app->windows->showAccountSelectPopup(
+                this->userLabel->mapToGlobal(this->userLabel->rect().bottomLeft()));  //
         });
 
-        app->accounts->Twitch.currentUserChanged.connect(
-            [=] { user->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName()); });
+        app->accounts->Twitch.currentUserChanged.connect([=] {
+            this->userLabel->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName());
+        });
     }
 
     if (_type == Window::Main) {
-        this->resize((int)(600 * this->getScale()), (int)(500 * this->getScale()));
+        this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
     } else {
-        this->resize((int)(300 * this->getScale()), (int)(500 * this->getScale()));
+        this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
     }
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -162,11 +165,13 @@ bool Window::event(QEvent *event)
                 }
             }
         } break;
+
+        default:;
     };
     return BaseWindow::event(event);
 }
 
-void Window::closeEvent(QCloseEvent *event)
+void Window::closeEvent(QCloseEvent *)
 {
     if (this->type == Window::Main) {
         auto app = getApp();

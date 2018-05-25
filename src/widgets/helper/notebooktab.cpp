@@ -86,7 +86,8 @@ void NotebookTab::updateSize()
     float scale = getScale();
 
     int width;
-    QFontMetrics metrics = getApp()->fonts->getFontMetrics(FontStyle::UiTabs, this->getScale() * this->devicePixelRatioF());
+    QFontMetrics metrics = getApp()->fonts->getFontMetrics(
+        FontStyle::UiTabs, this->getScale() * this->devicePixelRatioF());
 
     if (this->hasXButton()) {
         width = (int)((metrics.width(this->title) + 32) * scale);
@@ -189,8 +190,10 @@ void NotebookTab::paintEvent(QPaintEvent *)
     float scale = this->getScale();
 
     painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale * this->devicePixelRatioF()));
+    QFontMetrics metrics =
+        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * this->devicePixelRatioF());
 
-    int height = (int)(scale * NOTEBOOK_TAB_HEIGHT);
+    int height = int(scale * NOTEBOOK_TAB_HEIGHT);
     //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
@@ -241,20 +244,24 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (!app->settings->showTabCloseButton ? 0 : static_cast<int>(16) * scale);
+    int rectW = (!app->settings->showTabCloseButton ? 0 : int(16 * scale));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
     if (true) {  // legacy
         //    painter.drawText(rect, this->getTitle(), QTextOption(Qt::AlignCenter));
-        int offset = (int)(scale * 8);
+        int offset = int(scale * 8);
         QRect textRect(offset, this->selected ? 1 : 2, this->width() - offset - offset, height);
 
         if (this->shouldDrawXButton()) {
             textRect.setRight(textRect.right() - this->height() / 2);
         }
 
-        QTextOption option(Qt::AlignHCenter | Qt::AlignVCenter);
+        int width = metrics.width(this->getTitle());
+        Qt::Alignment alignment = width > textRect.width() ? Qt::AlignLeft | Qt::AlignVCenter
+                                                           : Qt::AlignHCenter | Qt::AlignVCenter;
+
+        QTextOption option(alignment);
         option.setWrapMode(QTextOption::NoWrap);
         painter.drawText(textRect, this->getTitle(), option);
     } else {
