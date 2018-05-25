@@ -155,6 +155,7 @@ void SplitContainer::addSplit(Split *split)
     split->setParent(this);
     split->show();
     split->giveFocus(Qt::MouseFocusReason);
+    this->unsetCursor();
     this->splits.push_back(split);
 
     this->refreshTabTitle();
@@ -201,6 +202,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     this->layout();
     if (splits.size() == 0) {
         this->setSelected(nullptr);
+        this->setCursor(Qt::PointingHandCursor);
     } else {
         this->splits.front()->giveFocus(Qt::MouseFocusReason);
     }
@@ -209,7 +211,6 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
     // fourtf: really bad
     split->getChannelView().tabHighlightRequested.disconnectAll();
-    split->focused.disconnectAll();
 
     split->getChannelView().tabHighlightRequested.disconnectAll();
 
