@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/assertinguithread.hpp"
 #include "util/helpers.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/helper/notebooktab.hpp"
@@ -83,6 +84,8 @@ void SplitContainer::setTab(NotebookTab *_tab)
 
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
+    util::assertInGuiThread();
+
     Split *split = new Split(this);
     this->appendSplit(split);
 
@@ -115,6 +118,8 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Split *relat
 
 void SplitContainer::insertSplit(Split *split, Direction direction, Node *relativeTo)
 {
+    util::assertInGuiThread();
+
     split->setContainer(this);
 
     if (relativeTo == nullptr) {
@@ -136,6 +141,8 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
 
 void SplitContainer::addSplit(Split *split)
 {
+    util::assertInGuiThread();
+
     split->setParent(this);
     split->show();
     split->giveFocus(Qt::MouseFocusReason);
@@ -148,12 +155,33 @@ void SplitContainer::addSplit(Split *split)
             this->tab->setHighlightState(state);
         }
     });
+    split->focused.connect([this, split] { this->setSelected(split); });
 
     this->layout();
 }
 
+void SplitContainer::setSelected(Split *split)
+{
+    this->selected = split;
+
+    if (Node *node = this->baseNode.findNodeContainingSplit(split)) {
+        this->setPreferedTargetRecursive(node);
+    }
+}
+
+void SplitContainer::setPreferedTargetRecursive(Node *node)
+{
+    if (node->parent != nullptr) {
+        node->parent->preferedFocusTarget = node;
+
+        this->setPreferedTargetRecursive(node->parent);
+    }
+}
+
 SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 {
+    util::assertInGuiThread();
+
     Node *node = this->baseNode.findNodeContainingSplit(split);
     assert(node != nullptr);
 
@@ -161,7 +189,9 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
     split->setParent(nullptr);
     Position position = node->releaseSplit();
     this->layout();
-    if (splits.size() != 0) {
+    if (splits.size() == 0) {
+        this->setSelected(nullptr);
+    } else {
         this->splits.front()->giveFocus(Qt::MouseFocusReason);
     }
 
@@ -174,10 +204,75 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
 SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 {
+    util::assertInGuiThread();
     assert(split != nullptr);
 
     split->deleteLater();
     return releaseSplit(split);
+}
+
+void SplitContainer::selectNextSplit(Direction direction)
+{
+    util::assertInGuiThread();
+
+    if (Node *node = this->baseNode.findNodeContainingSplit(this->selected)) {
+        this->selectSplitRecursive(node, direction);
+    }
+}
+
+void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
+{
+    if (node->parent != nullptr) {
+        if (node->parent->type == Node::toContainerType(direction)) {
+            auto &siblings = node->parent->children;
+
+            auto it = std::find_if(siblings.begin(), siblings.end(),
+                                   [node](const auto &other) { return other.get() == node; });
+            assert(it != siblings.end());
+
+            if (direction == Direction::Left || direction == Direction::Above) {
+                if (it == siblings.begin()) {
+                    this->selectSplitRecursive(node->parent, direction);
+                } else {
+                    this->focusSplitRecursive(siblings[it - siblings.begin() - 1].get(), direction);
+                }
+            } else {
+                if (it->get() == siblings.back().get()) {
+                    this->selectSplitRecursive(node->parent, direction);
+                } else {
+                    this->focusSplitRecursive(siblings[it - siblings.begin() + 1].get(), direction);
+                }
+            }
+        } else {
+            this->selectSplitRecursive(node->parent, direction);
+        }
+    }
+}
+
+void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
+{
+    switch (node->type) {
+        case Node::_Split: {
+            node->split->giveFocus(Qt::OtherFocusReason);
+        } break;
+
+        case Node::HorizontalContainer:
+        case Node::VerticalContainer: {
+            auto &children = node->children;
+
+            auto it = std::find_if(children.begin(), children.end(), [node](const auto &other) {
+                return node->preferedFocusTarget == other.get();
+            });
+
+            if (it != children.end()) {
+                this->focusSplitRecursive(it->get(), direction);
+            } else {
+                this->focusSplitRecursive(node->children.front().get(), direction);
+            }
+        } break;
+
+        default:;
+    }
 }
 
 void SplitContainer::layout()
@@ -381,6 +476,21 @@ void SplitContainer::refreshTabTitle()
     }
 
     this->tab->setTitle(newTitle);
+}
+
+int SplitContainer::getSplitCount()
+{
+    return 0;
+}
+
+const std::vector<Split *> SplitContainer::getSplits() const
+{
+    return this->splits;
+}
+
+SplitContainer::Node *SplitContainer::getBaseNode()
+{
+    return &this->baseNode;
 }
 
 void SplitContainer::decodeFromJson(QJsonObject &obj)

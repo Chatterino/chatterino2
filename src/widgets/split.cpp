@@ -136,6 +136,8 @@ Split::Split(QWidget *parent)
             this->overlay->hide();
         }
     });
+
+    this->input.ui.textEdit->focused.connect([this] { this->focused.invoke(); });
 }
 
 Split::~Split()

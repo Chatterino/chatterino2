@@ -94,6 +94,7 @@ public:
     private:
         Type type;
         Split *split;
+        Node *preferedFocusTarget;
         Node *parent;
         QRectF geometry;
         qreal flexH = 1;
@@ -175,25 +176,15 @@ public:
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
+    void selectNextSplit(Direction direction);
+
     void decodeFromJson(QJsonObject &obj);
 
-    int getSplitCount()
-    {
-        return 0;
-    }
-
-    const std::vector<Split *> getSplits() const
-    {
-        return this->splits;
-    }
-
+    int getSplitCount();
+    const std::vector<Split *> getSplits() const;
     void refreshTabTitle();
-
     NotebookTab *getTab() const;
-    Node *getBaseNode()
-    {
-        return &this->baseNode;
-    }
+    Node *getBaseNode();
 
     void setTab(NotebookTab *tab);
 
@@ -235,6 +226,11 @@ private:
     void layout();
 
     Node baseNode;
+    Split *selected;
+    void setSelected(Split *selected);
+    void selectSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node, Direction direction);
+    void setPreferedTargetRecursive(Node *node);
 
     NotebookTab *tab;
     std::vector<Split *> splits;

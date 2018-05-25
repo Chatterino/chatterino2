@@ -52,12 +52,6 @@ private:
     } ui;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-    //    QHBoxLayout hbox;
-    //    QVBoxLayout vbox;
-    //    QHBoxLayout editContainer;
-    //    ResizingTextEdit textInput;
-    //    QLabel textLengthLabel;
-    //    RippleEffectLabel emotesLabel;
     QStringList prevMsg;
     QString currMsg;
     int prevIndex = 0;

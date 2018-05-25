@@ -46,6 +46,7 @@ public:
     ~Split() override;
 
     pajlada::Signals::NoArgSignal channelChanged;
+    pajlada::Signals::NoArgSignal focused;
 
     ChannelView &getChannelView();
     SplitContainer *getContainer();

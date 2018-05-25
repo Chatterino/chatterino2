@@ -165,16 +165,11 @@ void SplitInput::installKeyPressedEvent()
                 return;
             }
             if (event->modifiers() == Qt::AltModifier) {
-                // SplitContainer *page =
-                //     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
+                SplitContainer *page = this->split->getContainer();
 
-                // page->requestFocus();
-                // int reqX = page->currentX;
-                // int reqY = page->lastRequestedY[reqX] - 1;
-
-                // qDebug() << "Alt+Down to" << reqX << "/" << reqY;
-
-                // page->requestFocus(reqX, reqY);
+                if (page != nullptr) {
+                    page->selectNextSplit(SplitContainer::Above);
+                }
             } else {
                 if (this->prevMsg.size() && this->prevIndex) {
                     if (this->prevIndex == (this->prevMsg.size())) {
@@ -194,15 +189,11 @@ void SplitInput::installKeyPressedEvent()
                 return;
             }
             if (event->modifiers() == Qt::AltModifier) {
-                // SplitContainer *page =
-                //     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
+                SplitContainer *page = this->split->getContainer();
 
-                // int reqX = page->currentX;
-                // int reqY = page->lastRequestedY[reqX] + 1;
-
-                // qDebug() << "Alt+Down to" << reqX << "/" << reqY;
-
-                // page->requestFocus(reqX, reqY);
+                if (page != nullptr) {
+                    page->selectNextSplit(SplitContainer::Below);
+                }
             } else {
                 if (this->prevIndex != (this->prevMsg.size() - 1) &&
                     this->prevIndex != this->prevMsg.size()) {
@@ -219,27 +210,19 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_Left) {
             if (event->modifiers() == Qt::AltModifier) {
-                // SplitContainer *page =
-                //     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
+                SplitContainer *page = this->split->getContainer();
 
-                // int reqX = page->currentX - 1;
-                // int reqY = page->lastRequestedY[reqX];
-
-                // qDebug() << "Alt+Left to" << reqX << "/" << reqY;
-
-                // page->requestFocus(reqX, reqY);
+                if (page != nullptr) {
+                    page->selectNextSplit(SplitContainer::Left);
+                }
             }
         } else if (event->key() == Qt::Key_Right) {
             if (event->modifiers() == Qt::AltModifier) {
-                // SplitContainer *page =
-                //     static_cast<SplitContainer *>(this->chatWidget->parentWidget());
+                SplitContainer *page = this->split->getContainer();
 
-                // int reqX = page->currentX + 1;
-                // int reqY = page->lastRequestedY[reqX];
-
-                // qDebug() << "Alt+Right to" << reqX << "/" << reqY;
-
-                // page->requestFocus(reqX, reqY);
+                if (page != nullptr) {
+                    page->selectNextSplit(SplitContainer::Right);
+                }
             }
         } else if (event->key() == Qt::Key_Tab) {
             if (event->modifiers() == Qt::ControlModifier) {
