@@ -3,7 +3,6 @@
 #include "debug/log.hpp"
 #include "providers/twitch/pubsubactions.hpp"
 #include "providers/twitch/pubsubhelpers.hpp"
-#include "singletons/accountmanager.hpp"
 #include "util/rapidjson-helpers.hpp"
 
 #include <rapidjson/error/en.h>

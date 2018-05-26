@@ -2,7 +2,7 @@
 
 #include "application.hpp"
 #include "const.hpp"
-#include "singletons/accountmanager.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 
 namespace chatterino {
 namespace widgets {

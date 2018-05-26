@@ -1,12 +1,12 @@
 #include "twitchserver.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
 #include "providers/twitch/ircmessagehandler.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchhelpers.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/accountmanager.hpp"
 #include "util/posttothread.hpp"
 
 #include <cassert>

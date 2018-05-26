@@ -15,7 +15,8 @@ HighlightModel::HighlightModel(QObject *parent)
 }
 
 // turn a vector item into a model row
-HighlightPhrase HighlightModel::getItemFromRow(std::vector<QStandardItem *> &row)
+HighlightPhrase HighlightModel::getItemFromRow(std::vector<QStandardItem *> &row,
+                                               const HighlightPhrase &original)
 {
     // key, alert, sound, regex
 

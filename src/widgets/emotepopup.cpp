@@ -1,9 +1,9 @@
 #include "emotepopup.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
-#include "singletons/accountmanager.hpp"
 #include "widgets/notebook.hpp"
 
 #include <QHBoxLayout>

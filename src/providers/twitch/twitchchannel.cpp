@@ -5,7 +5,6 @@
 #include "messages/message.hpp"
 #include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"

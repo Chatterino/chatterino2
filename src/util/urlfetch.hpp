@@ -1,8 +1,8 @@
 #pragma once
 
+#include "controllers/accounts/accountcontroller.hpp"
 #include "credentials.hpp"
 #include "debug/log.hpp"
-#include "singletons/accountmanager.hpp"
 #include "util/networkmanager.hpp"
 #include "util/networkrequest.hpp"
 

@@ -1,11 +1,12 @@
 #include "application.hpp"
 
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/commands/commandcontroller.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
 #include "controllers/ignores/ignorecontroller.hpp"
+#include "controllers/taggedusers/taggeduserscontroller.hpp"
 #include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/loggingmanager.hpp"
@@ -69,7 +70,8 @@ void Application::construct()
     this->commands = new controllers::commands::CommandController;
     this->highlights = new controllers::highlights::HighlightController;
     this->ignores = new controllers::ignores::IgnoreController;
-    this->accounts = new singletons::AccountManager;
+    this->taggedUsers = new controllers::taggedusers::TaggedUsersController;
+    this->accounts = new controllers::accounts::AccountController;
     this->emotes = new singletons::EmoteManager;
     this->fonts = new singletons::FontManager;
     this->resources = new singletons::ResourceManager;

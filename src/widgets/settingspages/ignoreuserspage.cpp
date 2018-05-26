@@ -1,9 +1,9 @@
 #include "ignoreuserspage.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/ignores/ignorecontroller.hpp"
 #include "controllers/ignores/ignoremodel.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/helper/editablemodelview.hpp"

@@ -1,11 +1,11 @@
 #include "providers/twitch/twitchmessagebuilder.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
 #include "controllers/ignores/ignorecontroller.hpp"
 #include "debug/log.hpp"
 #include "providers/twitch/twitchchannel.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/resourcemanager.hpp"

@@ -10,6 +10,11 @@ AccountController::AccountController()
 {
 }
 
+void AccountController::load()
+{
+    this->Twitch.load();
+}
+
 AccountModel *AccountController::createModel(QObject *parent)
 {
     AccountModel *model = new AccountModel(parent);

@@ -114,7 +114,6 @@ SOURCES += \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
     src/providers/twitch/pubsub.cpp \
-    src/singletons/accountmanager.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -209,7 +208,10 @@ SOURCES += \
     src/widgets/helper/splitoverlay.cpp \
     src/widgets/helper/dropoverlay.cpp \
     src/widgets/helper/splitnode.cpp \
-    src/widgets/notificationpopup.cpp
+    src/widgets/notificationpopup.cpp \
+    src/controllers/taggedusers/taggeduserscontroller.cpp \
+    src/controllers/taggedusers/taggeduser.cpp \
+    src/controllers/taggedusers/taggedusersmodel.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -238,7 +240,6 @@ HEADERS  += \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
     src/providers/twitch/pubsub.hpp \
-    src/singletons/accountmanager.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
@@ -359,7 +360,11 @@ HEADERS  += \
     src/widgets/helper/dropoverlay.hpp \
     src/widgets/helper/splitnode.hpp \
     src/widgets/notificationpopup.hpp \
-    src/util/mutexvalue.h
+    src/util/mutexvalue.h \
+    src/controllers/taggedusers/taggeduserscontroller.hpp \
+    src/controllers/taggedusers/taggeduser.hpp \
+    src/providerid.hpp \
+    src/controllers/taggedusers/taggedusersmodel.hpp
 
 RESOURCES += \
     resources/resources.qrc

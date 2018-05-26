@@ -1,12 +1,12 @@
 #include "commandcontroller.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/commands/command.hpp"
 #include "controllers/commands/commandmodel.hpp"
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "util/signalvector2.hpp"
 

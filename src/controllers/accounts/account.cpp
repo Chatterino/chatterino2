@@ -1,10 +1,13 @@
 #include "account.hpp"
 
+#include <tuple>
+
 namespace chatterino {
 namespace controllers {
 namespace accounts {
 
-Account::Account(const QString &category)
+Account::Account(const QString &_category)
+    : category(_category)
 {
 }
 
@@ -15,14 +18,10 @@ const QString &Account::getCategory() const
 
 bool Account::operator<(const Account &other) const
 {
-    if (this->category < other.category) {
-        return true;
-    } else if (this->category == other.category) {
-        if (this->toString() < other.toString()) {
-            return true;
-        }
-    }
-    return false;
+    QString a = this->toString();
+    QString b = other.toString();
+
+    return std::tie(this->category, a) < std::tie(other.category, b);
 }
 
 }  // namespace accounts

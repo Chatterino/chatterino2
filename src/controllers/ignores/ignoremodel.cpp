@@ -15,7 +15,8 @@ IgnoreModel::IgnoreModel(QObject *parent)
 }
 
 // turn a vector item into a model row
-IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row)
+IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row,
+                                         const IgnorePhrase &original)
 {
     // key, regex
 

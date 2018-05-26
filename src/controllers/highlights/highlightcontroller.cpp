@@ -22,7 +22,6 @@ void HighlightController::initialize()
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //
-        int xd = this->phrases.getVector().size();
         this->highlightsSetting.setValue(this->phrases.getVector());
     });
 }

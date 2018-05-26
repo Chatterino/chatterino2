@@ -1,7 +1,7 @@
 #include "widgets/window.hpp"
 
 #include "application.hpp"
-#include "singletons/accountmanager.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"

@@ -2,6 +2,7 @@
 
 #include <QAbstractTableModel>
 #include <QStandardItem>
+#include <boost/optional.hpp>
 #include <util/signalvector2.hpp>
 
 #include <pajlada/signals/signalholder.hpp>
@@ -43,7 +44,7 @@ public:
             index = this->beforeInsert(args.item, row, index);
 
             this->beginInsertRows(QModelIndex(), index, index);
-            this->rows.insert(this->rows.begin() + index, Row(row));
+            this->rows.insert(this->rows.begin() + index, Row(row, args.item));
             this->endInsertRows();
         };
 
@@ -117,7 +118,10 @@ public:
         } else {
             int vecRow = this->getVectorIndexFromModelIndex(row);
             this->vector->removeItem(vecRow, this);
-            TVectorItem item = this->getItemFromRow(this->rows[row].items);
+
+            assert(this->rows[row].original);
+            TVectorItem item =
+                this->getItemFromRow(this->rows[row].items, this->rows[row].original.get());
             this->vector->insertItem(item, vecRow, this);
         }
 
@@ -192,7 +196,8 @@ protected:
     }
 
     // turn a vector item into a model row
-    virtual TVectorItem getItemFromRow(std::vector<QStandardItem *> &row) = 0;
+    virtual TVectorItem getItemFromRow(std::vector<QStandardItem *> &row,
+                                       const TVectorItem &original) = 0;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const TVectorItem &item, std::vector<QStandardItem *> &row) = 0;
@@ -232,10 +237,19 @@ protected:
 
     struct Row {
         std::vector<QStandardItem *> items;
+        boost::optional<TVectorItem> original;
         bool isCustomRow;
 
         Row(std::vector<QStandardItem *> _items, bool _isCustomRow = false)
             : items(std::move(_items))
+            , isCustomRow(_isCustomRow)
+        {
+        }
+
+        Row(std::vector<QStandardItem *> _items, const TVectorItem &_original,
+            bool _isCustomRow = false)
+            : items(std::move(_items))
+            , original(_original)
             , isCustomRow(_isCustomRow)
         {
         }
