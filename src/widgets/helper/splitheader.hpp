@@ -15,6 +15,7 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace widgets {
 
 class Split;
 
-class SplitHeader : public BaseWidget
+class SplitHeader : public BaseWidget, pajlada::Signals::SignalHolder
 {
     Q_OBJECT
 
