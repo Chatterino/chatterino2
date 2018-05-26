@@ -32,6 +32,7 @@ public:
         QString title;
         QString game;
         QString uptime;
+        QString streamType;
     };
 
     struct UserState {

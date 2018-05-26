@@ -253,8 +253,8 @@ void BaseWindow::leaveEvent(QEvent *)
 
 void BaseWindow::moveTo(QWidget *parent, QPoint point)
 {
-    point.rx() += 16;
-    point.ry() += 16;
+    //    point.rx() += 16;
+    //    point.ry() += 16;
 
     this->move(point);
     this->moveIntoDesktopRect(parent);

@@ -48,7 +48,7 @@ int MessageLayout::getHeight() const
 // return true if redraw is required
 bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 {
-    BenchmarkGuard benchmark("MessageLayout::layout()");
+    //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
     auto app = getApp();
 
@@ -107,7 +107,6 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     }
 
     // return if no layout is required
-    qDebug() << layoutRequired;
 
     if (!layoutRequired) {
         return false;

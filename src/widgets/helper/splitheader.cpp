@@ -31,7 +31,6 @@ SplitHeader::SplitHeader(Split *_split)
     , split(_split)
 {
     auto app = getApp();
-    this->setMouseTracking(true);
 
     util::LayoutCreator<SplitHeader> layoutCreator(this);
     auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
@@ -53,13 +52,13 @@ SplitHeader::SplitHeader(Split *_split)
 
         // channel name label
         //        auto title = layout.emplace<Label>(this).assign(&this->titleLabel);
-        auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
+        auto title = layout.emplace<QLabel>().assign(&this->titleLabel);
         title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        title->setMouseTracking(true);
-        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
-                         &SplitHeader::mouseDoubleClickEvent);
-        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
-                         &SplitHeader::mouseMoveEvent);
+        //        title->setMouseTracking(true);
+        //        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
+        //                         &SplitHeader::mouseDoubleClickEvent);
+        //        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
+        //                         &SplitHeader::mouseMoveEvent);
 
         layout->addStretch(1);
 
@@ -94,6 +93,8 @@ SplitHeader::SplitHeader(Split *_split)
     this->split->channelChanged.connect([this]() {
         this->initializeChannelSignals();  //
     });
+
+    this->setMouseTracking(true);
 }
 
 SplitHeader::~SplitHeader()
@@ -101,7 +102,7 @@ SplitHeader::~SplitHeader()
     this->onlineStatusChangedConnection.disconnect();
 }
 
-void SplitHeader::addDropdownItems(RippleEffectButton *label)
+void SplitHeader::addDropdownItems(RippleEffectButton *)
 {
     // clang-format off
     this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
@@ -178,7 +179,7 @@ void SplitHeader::updateChannelText()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel != nullptr) {
-        const auto &streamStatus = twitchChannel->getStreamStatus();
+        const auto streamStatus = twitchChannel->getStreamStatus();
 
         if (streamStatus.live) {
             this->isLive = true;
@@ -192,9 +193,13 @@ void SplitHeader::updateChannelText()
                             "</p>";
             if (streamStatus.rerun) {
                 title += " (rerun)";
+            } else if (streamStatus.streamType.isEmpty()) {
+                title += " (" + streamStatus.streamType + ")";
             } else {
                 title += " (live)";
             }
+        } else {
+            this->tooltip = QString();
         }
     }
 
@@ -327,17 +332,9 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
 
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!this->dragging && this->isLive) {
-        auto tooltipWidget = TooltipWidget::getInstance();
-        tooltipWidget->moveTo(this, event->globalPos());
-        tooltipWidget->setText(tooltip);
-        tooltipWidget->show();
-        tooltipWidget->raise();
-    }
-
     if (this->dragging) {
-        if (std::abs(this->dragStart.x() - event->pos().x()) > (int)(12 * this->getScale()) ||
-            std::abs(this->dragStart.y() - event->pos().y()) > (int)(12 * this->getScale())) {
+        if (std::abs(this->dragStart.x() - event->pos().x()) > int(12 * this->getScale()) ||
+            std::abs(this->dragStart.y() - event->pos().y()) > int(12 * this->getScale())) {
             this->split->drag();
             this->dragging = false;
         }
@@ -352,11 +349,26 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked = true;
 }
 
+void SplitHeader::enterEvent(QEvent *event)
+{
+    if (!this->tooltip.isEmpty()) {
+        auto tooltipWidget = TooltipWidget::getInstance();
+        tooltipWidget->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()));
+        tooltipWidget->setText(this->tooltip);
+        tooltipWidget->show();
+        tooltipWidget->raise();
+    }
+
+    BaseWidget::enterEvent(event);
+}
+
 void SplitHeader::leaveEvent(QEvent *event)
 {
     TooltipWidget::getInstance()->hide();
+
     BaseWidget::leaveEvent(event);
 }
+
 void SplitHeader::rightButtonClicked()
 {
 }

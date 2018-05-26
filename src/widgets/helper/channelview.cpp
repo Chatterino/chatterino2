@@ -175,7 +175,7 @@ void ChannelView::layoutMessages()
 
 void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
-    BenchmarkGuard benchmark("layout messages");
+    //    BenchmarkGuard benchmark("layout messages");
 
     auto app = getApp();
 
@@ -579,7 +579,7 @@ bool ChannelView::isPaused()
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
-    BenchmarkGuard benchmark("paint event");
+    //    BenchmarkGuard benchmark("paint event");
 
     QPainter painter(this);
 

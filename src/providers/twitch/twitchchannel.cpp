@@ -325,6 +325,11 @@ void TwitchChannel::refreshLiveStatus()
                 QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
 
             channel->streamStatus.rerun = false;
+            if (stream.HasMember("stream_type")) {
+                channel->streamStatus.streamType = stream["stream_type"].GetString();
+            } else {
+                channel->streamStatus.streamType = QString();
+            }
 
             if (stream.HasMember("broadcast_platform")) {
                 const auto &broadcastPlatformValue = stream["broadcast_platform"];

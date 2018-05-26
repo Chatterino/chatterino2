@@ -29,7 +29,7 @@ class SplitHeader : public BaseWidget
 
 public:
     explicit SplitHeader(Split *_chatWidget);
-    virtual ~SplitHeader();
+    virtual ~SplitHeader() override;
 
     // Update channel text from chat widget
     void updateChannelText();
@@ -44,6 +44,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void enterEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
@@ -59,7 +60,7 @@ private:
 
     RippleEffectButton *dropdownButton;
     //    Label *titleLabel;
-    SignalLabel *titleLabel;
+    QLabel *titleLabel;
     RippleEffectLabel *modeButton;
     RippleEffectButton *moderationButton;
 

@@ -18,7 +18,7 @@ class BaseWidget : public QWidget
 
 public:
     explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
-    virtual ~BaseWidget();
+    virtual ~BaseWidget() override;
 
     float getScale() const;
     pajlada::Signals::Signal<float> scaleChanged;
