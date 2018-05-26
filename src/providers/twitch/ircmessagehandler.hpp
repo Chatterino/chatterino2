@@ -21,6 +21,9 @@ public:
     void handleModeMessage(Communi::IrcMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
     void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
+
+    void handleJoinMessage(Communi::IrcMessage *message);
+    void handlePartMessage(Communi::IrcMessage *message);
 };
 
 }  // namespace twitch

@@ -114,21 +114,26 @@ void TwitchServer::messageReceived(IrcMessage *message)
 
     const QString &command = message->command();
 
+    auto &handler = IrcMessageHandler::getInstance();
+
     if (command == "ROOMSTATE") {
-        IrcMessageHandler::getInstance().handleRoomStateMessage(message);
+        handler.handleRoomStateMessage(message);
     } else if (command == "CLEARCHAT") {
-        IrcMessageHandler::getInstance().handleClearChatMessage(message);
+        handler.handleClearChatMessage(message);
     } else if (command == "USERSTATE") {
-        IrcMessageHandler::getInstance().handleUserStateMessage(message);
+        handler.handleUserStateMessage(message);
     } else if (command == "WHISPER") {
-        IrcMessageHandler::getInstance().handleWhisperMessage(message);
+        handler.handleWhisperMessage(message);
     } else if (command == "USERNOTICE") {
-        IrcMessageHandler::getInstance().handleUserNoticeMessage(message);
+        handler.handleUserNoticeMessage(message);
     } else if (command == "MODE") {
-        IrcMessageHandler::getInstance().handleModeMessage(message);
+        handler.handleModeMessage(message);
     } else if (command == "NOTICE") {
-        IrcMessageHandler::getInstance().handleNoticeMessage(
-            static_cast<IrcNoticeMessage *>(message));
+        handler.handleNoticeMessage(static_cast<IrcNoticeMessage *>(message));
+    } else if (command == "JOIN") {
+        handler.handleJoinMessage(message);
+    } else if (command == "PART") {
+        handler.handlePartMessage(message);
     }
 }
 

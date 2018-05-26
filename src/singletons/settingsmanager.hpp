@@ -55,6 +55,8 @@ public:
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
+    BoolSetting showJoins = {"/behaviour/showJoins", false};
+    BoolSetting showParts = {"/behaviour/showParts", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
 
     // Auto-completion

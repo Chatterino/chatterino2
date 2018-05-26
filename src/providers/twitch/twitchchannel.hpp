@@ -63,6 +63,8 @@ public:
     bool hasModRights();
 
     void addRecentChatter(const std::shared_ptr<messages::Message> &message) final;
+    void addJoinedUser(const QString &user);
+    void addPartedUser(const QString &user);
 
     const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
     const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
@@ -112,6 +114,14 @@ private:
     QString lastSentMessage;
     RoomModes roomModes;
     std::mutex roomModeMutex;
+
+    QObject object;
+    std::mutex joinedUserMutex;
+    QStringList joinedUsers;
+    bool joinedUsersMergeQueued = false;
+    std::mutex partedUserMutex;
+    QStringList partedUsers;
+    bool partedUsersMergeQueued = false;
 
     Communi::IrcConnection *readConnection;
 

@@ -213,6 +213,58 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
     this->completionModel.addUser(message->displayName);
 }
 
+void TwitchChannel::addJoinedUser(const QString &user)
+{
+    auto *app = getApp();
+    if (user == app->accounts->Twitch.getCurrent()->getUserName() ||
+        !app->settings->showJoins.getValue()) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+
+    joinedUsers << user;
+
+    if (!this->joinedUsersMergeQueued) {
+        this->joinedUsersMergeQueued = true;
+
+        QTimer::singleShot(500, &this->object, [this] {
+            std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+
+            this->addMessage(messages::Message::createSystemMessage("Users joined: " +
+                                                                    this->joinedUsers.join(", ")));
+            this->joinedUsersMergeQueued = false;
+        });
+    }
+}
+
+void TwitchChannel::addPartedUser(const QString &user)
+{
+    auto *app = getApp();
+
+    if (user == app->accounts->Twitch.getCurrent()->getUserName() ||
+        !app->settings->showJoins.getValue()) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(this->partedUserMutex);
+
+    partedUsers << user;
+
+    if (!this->partedUsersMergeQueued) {
+        this->partedUsersMergeQueued = true;
+
+        QTimer::singleShot(500, &this->object, [this] {
+            std::lock_guard<std::mutex> guard(this->partedUserMutex);
+
+            this->addMessage(messages::Message::createSystemMessage("Users parted: " +
+                                                                    this->partedUsers.join(", ")));
+
+            this->partedUsersMergeQueued = false;
+        });
+    }
+}
+
 TwitchChannel::RoomModes TwitchChannel::getRoomModes()
 {
     std::lock_guard<std::mutex> lock(this->roomModeMutex);

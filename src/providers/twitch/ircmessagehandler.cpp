@@ -246,6 +246,26 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
     this->handleNoticeMessage(message);
 }
 
+void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
+{
+    auto app = getApp();
+    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+
+    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        twitchChannel->addJoinedUser(message->nick());
+    }
+}
+
+void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
+{
+    auto app = getApp();
+    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+
+    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        twitchChannel->addPartedUser(message->nick());
+    }
+}
+
 }  // namespace twitch
 }  // namespace providers
 }  // namespace chatterino

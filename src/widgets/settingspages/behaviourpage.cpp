@@ -34,6 +34,10 @@ BehaviourPage::BehaviourPage()
     {
         form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, app->settings->windowTopMost));
         form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, app->settings->hideEmptyInput));
+        form->addRow("", this->createCheckBox("Show which users joined the channel",
+                                              app->settings->showJoins));
+        form->addRow("", this->createCheckBox("Show which users parted the channel",
+                                              app->settings->showParts));
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
 
