@@ -44,7 +44,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->refreshLiveStatus();  //
     });
 
-    this->managedConnect(app->accounts->Twitch.currentUserChanged,
+    this->managedConnect(app->accounts->twitch.currentUserChanged,
                          [this]() { this->setMod(false); });
 
     auto refreshPubSubState = [=]() {
@@ -56,7 +56,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             return;
         }
 
-        auto account = app->accounts->Twitch.getCurrent();
+        auto account = app->accounts->twitch.getCurrent();
         if (account && !account->getUserId().isEmpty()) {
             app->twitch.pubsub->listenToChannelModerationActions(this->roomID, account);
         }
@@ -64,7 +64,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
     this->userStateChanged.connect(refreshPubSubState);
     this->roomIDchanged.connect(refreshPubSubState);
-    this->managedConnect(app->accounts->Twitch.currentUserChanged, refreshPubSubState);
+    this->managedConnect(app->accounts->twitch.currentUserChanged, refreshPubSubState);
     refreshPubSubState();
 
     this->fetchMessages.connect([this] {
@@ -190,9 +190,9 @@ bool TwitchChannel::isBroadcaster()
 {
     auto app = getApp();
 
-    qDebug() << "ASD" << (this->name == app->accounts->Twitch.getCurrent()->getUserName());
+    qDebug() << "ASD" << (this->name == app->accounts->twitch.getCurrent()->getUserName());
 
-    return this->name == app->accounts->Twitch.getCurrent()->getUserName();
+    return this->name == app->accounts->twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasModRights()
@@ -215,7 +215,7 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
 void TwitchChannel::addJoinedUser(const QString &user)
 {
     auto *app = getApp();
-    if (user == app->accounts->Twitch.getCurrent()->getUserName() ||
+    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
         !app->settings->showJoins.getValue()) {
         return;
     }
@@ -241,7 +241,7 @@ void TwitchChannel::addPartedUser(const QString &user)
 {
     auto *app = getApp();
 
-    if (user == app->accounts->Twitch.getCurrent()->getUserName() ||
+    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
         !app->settings->showJoins.getValue()) {
         return;
     }

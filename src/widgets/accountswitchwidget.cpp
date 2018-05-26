@@ -14,18 +14,18 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
     this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-    for (const auto &userName : app->accounts->Twitch.getUsernames()) {
+    for (const auto &userName : app->accounts->twitch.getUsernames()) {
         this->addItem(userName);
     }
 
-    app->accounts->Twitch.userListUpdated.connect([=]() {
+    app->accounts->twitch.userListUpdated.connect([=]() {
         this->blockSignals(true);
 
         this->clear();
 
         this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-        for (const auto &userName : app->accounts->Twitch.getUsernames()) {
+        for (const auto &userName : app->accounts->twitch.getUsernames()) {
             this->addItem(userName);
         }
 
@@ -40,9 +40,9 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
         if (!this->selectedItems().isEmpty()) {
             QString newUsername = this->currentItem()->text();
             if (newUsername.compare(ANONYMOUS_USERNAME_LABEL, Qt::CaseInsensitive) == 0) {
-                app->accounts->Twitch.currentUsername = "";
+                app->accounts->twitch.currentUsername = "";
             } else {
-                app->accounts->Twitch.currentUsername = newUsername.toStdString();
+                app->accounts->twitch.currentUsername = newUsername.toStdString();
             }
         }
     });
@@ -61,7 +61,7 @@ void AccountSwitchWidget::refreshSelection()
     if (this->count() > 0) {
         auto app = getApp();
 
-        auto currentUser = app->accounts->Twitch.getCurrent();
+        auto currentUser = app->accounts->twitch.getCurrent();
 
         if (currentUser->isAnon()) {
             this->setCurrentRow(0);

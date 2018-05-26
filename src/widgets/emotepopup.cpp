@@ -84,7 +84,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     auto app = getApp();
 
-    QString userID = app->accounts->Twitch.getCurrent()->getUserId();
+    QString userID = app->accounts->twitch.getCurrent()->getUserId();
 
     addEmotes(app->emotes->twitchAccountEmotes[userID.toStdString()].emotes,
               "Twitch Account Emotes", "Twitch Account Emote");

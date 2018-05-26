@@ -22,7 +22,7 @@ public:
 
     void load();
 
-    providers::twitch::TwitchAccountManager Twitch;
+    providers::twitch::TwitchAccountManager twitch;
 
 private:
     util::SortedSignalVector<std::shared_ptr<Account>, util::SharedPtrElementLess<Account>>

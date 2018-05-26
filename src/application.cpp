@@ -208,10 +208,10 @@ void Application::initialize()
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
         // this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch.pubsub->listenToWhispers(this->accounts->Twitch.getCurrent());  //
+        this->twitch.pubsub->listenToWhispers(this->accounts->twitch.getCurrent());  //
     };
 
-    this->accounts->Twitch.currentUserChanged.connect(RequestModerationActions);
+    this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
 }

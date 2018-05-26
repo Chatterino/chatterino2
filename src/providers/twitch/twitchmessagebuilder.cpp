@@ -68,7 +68,7 @@ bool TwitchMessageBuilder::isIgnored() const
     if (app->settings->enableTwitchIgnoredUsers && this->tags.contains("user-id")) {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user : app->accounts->Twitch.getCurrent()->getIgnores()) {
+        for (const auto &user : app->accounts->twitch.getCurrent()->getIgnores()) {
             if (sourceUserID == user.id) {
                 debug::Log("Blocking message because it's from blocked user {}", user.name);
                 return true;
@@ -79,7 +79,7 @@ bool TwitchMessageBuilder::isIgnored() const
     if (app->settings->enableTwitchIgnoredUsers && this->tags.contains("user-id")) {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user : app->accounts->Twitch.getCurrent()->getIgnores()) {
+        for (const auto &user : app->accounts->twitch.getCurrent()->getIgnores()) {
             if (sourceUserID == user.id) {
                 debug::Log("Blocking message because it's from blocked user {}", user.name);
                 return true;
@@ -359,7 +359,7 @@ void TwitchMessageBuilder::appendUsername()
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
 
-        auto currentUser = app->accounts->Twitch.getCurrent();
+        auto currentUser = app->accounts->twitch.getCurrent();
 
         // Separator
         this->emplace<TextElement>("->", MessageElement::Text,
@@ -391,7 +391,7 @@ void TwitchMessageBuilder::parseHighlights()
 
     auto app = getApp();
 
-    auto currentUser = app->accounts->Twitch.getCurrent();
+    auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
 

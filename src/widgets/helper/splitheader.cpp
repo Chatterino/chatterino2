@@ -94,7 +94,7 @@ SplitHeader::SplitHeader(Split *_split)
         this->initializeChannelSignals();  //
     });
 
-    this->managedConnect(app->accounts->Twitch.currentUserChanged,
+    this->managedConnect(app->accounts->twitch.currentUserChanged,
                          [this] { this->updateModerationModeIcon(); });
 
     this->setMouseTracking(true);

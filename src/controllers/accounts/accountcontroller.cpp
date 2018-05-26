@@ -12,7 +12,7 @@ AccountController::AccountController()
 
 void AccountController::load()
 {
-    this->Twitch.load();
+    this->twitch.load();
 }
 
 AccountModel *AccountController::createModel(QObject *parent)

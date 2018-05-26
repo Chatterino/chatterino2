@@ -39,8 +39,8 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     connect(this, &AccountPopupWidget::refreshButtons, this,
             &AccountPopupWidget::actuallyRefreshButtons, Qt::QueuedConnection);
 
-    app->accounts->Twitch.currentUserChanged.connect([this] {
-        auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
+    app->accounts->twitch.currentUserChanged.connect([this] {
+        auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
         if (!currentTwitchUser) {
             // No twitch user set (should never happen)
             return;
@@ -112,7 +112,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     });
 
     QObject::connect(this->ui->ignore, &QPushButton::clicked, this, [=]() {
-        auto currentUser = getApp()->accounts->Twitch.getCurrent();
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         if (!this->relationship.isIgnoring()) {
             currentUser->ignoreByID(this->popupWidgetUser.userID, this->popupWidgetUser.username,
@@ -224,7 +224,7 @@ void AccountPopupWidget::getUserData()
         });
 
     auto app = getApp();
-    auto currentUser = app->accounts->Twitch.getCurrent();
+    auto currentUser = app->accounts->twitch.getCurrent();
 
     currentUser->checkFollow(this->popupWidgetUser.userID, [=](auto result) {
         this->relationship.setFollowing(result == FollowResult_Following);
@@ -301,7 +301,7 @@ void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
 
 void AccountPopupWidget::refreshLayouts()
 {
-    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     if (!currentTwitchUser) {
         // No twitch user set (should never happen)
         return;

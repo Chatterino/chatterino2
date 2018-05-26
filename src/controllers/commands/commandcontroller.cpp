@@ -121,7 +121,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/ignore" && words.size() >= 2) {
                 auto app = getApp();
 
-                auto user = app->accounts->Twitch.getCurrent();
+                auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
@@ -138,7 +138,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/unignore" && words.size() >= 2) {
                 auto app = getApp();
 
-                auto user = app->accounts->Twitch.getCurrent();
+                auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
@@ -161,7 +161,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 messages::MessageBuilder b;
 
-                b.emplace<messages::TextElement>(app->accounts->Twitch.getCurrent()->getUserName(),
+                b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
                                                  messages::MessageElement::Text);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
                 b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);

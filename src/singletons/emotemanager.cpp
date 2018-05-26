@@ -86,8 +86,8 @@ EmoteManager::EmoteManager()
 
 void EmoteManager::initialize()
 {
-    getApp()->accounts->Twitch.currentUserChanged.connect([this] {
-        auto currentUser = getApp()->accounts->Twitch.getCurrent();
+    getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
         assert(currentUser);
         this->refreshTwitchEmotes(currentUser);
     });

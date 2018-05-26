@@ -31,12 +31,12 @@ Window::Window(WindowType _type)
 {
     auto app = getApp();
 
-    app->accounts->Twitch.currentUserChanged.connect([this] {
+    app->accounts->twitch.currentUserChanged.connect([this] {
         if (this->userLabel == nullptr) {
             return;
         }
 
-        auto user = getApp()->accounts->Twitch.getCurrent();
+        auto user = getApp()->accounts->twitch.getCurrent();
 
         if (user->isAnon()) {
             this->refreshWindowTitle("Not logged in");

@@ -91,7 +91,7 @@ void IgnoreUsersPage::onShow()
 {
     auto app = getApp();
 
-    auto user = app->accounts->Twitch.getCurrent();
+    auto user = app->accounts->twitch.getCurrent();
 
     if (user->isAnon()) {
         return;

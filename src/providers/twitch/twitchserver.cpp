@@ -28,13 +28,13 @@ TwitchServer::TwitchServer()
 
 void TwitchServer::initialize()
 {
-    getApp()->accounts->Twitch.currentUserChanged.connect(
+    getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
-    std::shared_ptr<TwitchAccount> account = getApp()->accounts->Twitch.getCurrent();
+    std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();
 
