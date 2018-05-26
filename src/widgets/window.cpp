@@ -32,6 +32,10 @@ Window::Window(WindowType _type)
     auto app = getApp();
 
     app->accounts->Twitch.currentUserChanged.connect([this] {
+        if (this->userLabel == nullptr) {
+            return;
+        }
+
         auto user = getApp()->accounts->Twitch.getCurrent();
 
         if (user->isAnon()) {
