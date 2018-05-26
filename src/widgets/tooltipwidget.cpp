@@ -16,6 +16,15 @@
 namespace chatterino {
 namespace widgets {
 
+TooltipWidget *TooltipWidget::getInstance()
+{
+    static TooltipWidget *tooltipWidget = nullptr;
+    if (tooltipWidget == nullptr) {
+        tooltipWidget = new TooltipWidget();
+    }
+    return tooltipWidget;
+}
+
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow(parent, BaseWindow::TopMost)
     , displayText(new QLabel())
@@ -49,7 +58,7 @@ TooltipWidget::~TooltipWidget()
 #ifdef USEWINSDK
 void TooltipWidget::raise()
 {
-    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0,
+    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 #endif

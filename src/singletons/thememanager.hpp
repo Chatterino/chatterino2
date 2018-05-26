@@ -109,8 +109,9 @@ public:
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-        // const int highlightsCount = 3;
-        // QColor highlights[3];
+        struct {
+            QColor highlight;
+        } highlights;
     } scrollbars;
 
     /// TOOLTIP

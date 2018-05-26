@@ -31,7 +31,7 @@ public:
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;
 
-    void moveTo(QWidget *widget, QPoint point);
+    void moveTo(QWidget *widget, QPoint point, bool offset = true);
 
     Flags getFlags();
 

@@ -14,19 +14,12 @@ class TooltipWidget : public BaseWindow
     Q_OBJECT
 
 public:
+    static TooltipWidget *getInstance();
+
     TooltipWidget(BaseWidget *parent = nullptr);
-    ~TooltipWidget();
+    virtual ~TooltipWidget() override;
 
     void setText(QString text);
-
-    static TooltipWidget *getInstance()
-    {
-        static TooltipWidget *tooltipWidget = nullptr;
-        if (tooltipWidget == nullptr) {
-            tooltipWidget = new TooltipWidget();
-        }
-        return tooltipWidget;
-    }
 
 #ifdef USEWINSDK
     void raise();

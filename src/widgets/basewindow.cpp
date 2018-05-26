@@ -54,8 +54,6 @@ BaseWindow::Flags BaseWindow::getFlags()
 
 void BaseWindow::init()
 {
-    auto app = getApp();
-
     this->setWindowIcon(QIcon(":/images/icon.png"));
 
 #ifdef USEWINSDK
@@ -132,14 +130,14 @@ void BaseWindow::init()
 
 #ifdef USEWINSDK
     // fourtf: don't ask me why we need to delay this
-    QTimer::singleShot(1, this, [this] {
-        if (!(this->flags & Flags::TopMost)) {
+    if (!(this->flags & Flags::TopMost)) {
+        QTimer::singleShot(1, this, [this] {
             getApp()->settings->windowTopMost.connect([this](bool topMost, auto) {
-                ::SetWindowPos((HWND)this->winId(), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
-                               0, 0, SWP_NOMOVE | SWP_NOSIZE);
+                ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
+                               0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
             });
-        }
-    });
+        });
+    }
 #else
 //    if (getApp()->settings->windowTopMost.getValue()) {
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
@@ -251,10 +249,12 @@ void BaseWindow::leaveEvent(QEvent *)
     TooltipWidget::getInstance()->hide();
 }
 
-void BaseWindow::moveTo(QWidget *parent, QPoint point)
+void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
 {
-    //    point.rx() += 16;
-    //    point.ry() += 16;
+    if (offset) {
+        point.rx() += 16;
+        point.ry() += 16;
+    }
 
     this->move(point);
     this->moveIntoDesktopRect(parent);
@@ -343,14 +343,13 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             } else {
                 return QWidget::nativeEvent(eventType, message, result);
             }
-            break;
-        }
+        } break;
         case WM_NCHITTEST: {
             if (this->hasCustomWindowFrame()) {
                 *result = 0;
                 const LONG border_width = 8;  // in pixels
                 RECT winrect;
-                GetWindowRect((HWND)winId(), &winrect);
+                GetWindowRect(HWND(winId()), &winrect);
 
                 long x = GET_X_LPARAM(msg->lParam);
                 long y = GET_Y_LPARAM(msg->lParam);
@@ -442,13 +441,13 @@ void BaseWindow::showEvent(QShowEvent *event)
         //                         WS_MINIMIZEBOX);
 
         const MARGINS shadow = {8, 8, 8, 8};
-        DwmExtendFrameIntoClientArea((HWND)this->winId(), &shadow);
+        DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
     }
 
     BaseWidget::showEvent(event);
 }
 
-void BaseWindow::paintEvent(QPaintEvent *event)
+void BaseWindow::paintEvent(QPaintEvent *)
 {
     if (this->hasCustomWindowFrame()) {
         QPainter painter(this);

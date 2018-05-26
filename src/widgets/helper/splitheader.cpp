@@ -353,7 +353,7 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltip.isEmpty()) {
         auto tooltipWidget = TooltipWidget::getInstance();
-        tooltipWidget->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()));
+        tooltipWidget->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()), false);
         tooltipWidget->setText(this->tooltip);
         tooltipWidget->show();
         tooltipWidget->raise();

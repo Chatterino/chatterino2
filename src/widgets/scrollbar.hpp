@@ -21,7 +21,7 @@ class Scrollbar : public BaseWidget
     Q_OBJECT
 
 public:
-    Scrollbar(ChannelView *parent = 0);
+    Scrollbar(ChannelView *parent = nullptr);
 
     void addHighlight(ScrollbarHighlight highlight);
     void addHighlightsAtStart(const std::vector<ScrollbarHighlight> &highlights);

@@ -115,6 +115,9 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
                                    {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
         }
 
+        // scrollbar
+        this->scrollbars.highlights.highlight = QColor("#ee6166");
+
         // this->tabs.newMessage = {
         //     fg,
         //     {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
