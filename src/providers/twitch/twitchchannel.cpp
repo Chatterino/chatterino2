@@ -232,6 +232,7 @@ void TwitchChannel::addJoinedUser(const QString &user)
 
             this->addMessage(messages::Message::createSystemMessage("Users joined: " +
                                                                     this->joinedUsers.join(", ")));
+            this->joinedUsers.clear();
             this->joinedUsersMergeQueued = false;
         });
     }
@@ -258,6 +259,7 @@ void TwitchChannel::addPartedUser(const QString &user)
 
             this->addMessage(messages::Message::createSystemMessage("Users parted: " +
                                                                     this->partedUsers.join(", ")));
+            this->partedUsers.clear();
 
             this->partedUsersMergeQueued = false;
         });
