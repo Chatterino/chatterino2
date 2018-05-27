@@ -33,7 +33,10 @@ AccountsPage::AccountsPage()
     view->setTitles({"Name"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
-    view->addButtonPressed.connect([] {});
+    view->addButtonPressed.connect([] {
+        static auto loginWidget = new LoginWidget();
+        loginWidget->show();
+    });
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {

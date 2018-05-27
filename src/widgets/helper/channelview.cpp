@@ -579,7 +579,7 @@ bool ChannelView::isPaused()
 
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
-    //    BenchmarkGuard benchmark("paint event");
+    BenchmarkGuard benchmark("paint event");
 
     QPainter painter(this);
 

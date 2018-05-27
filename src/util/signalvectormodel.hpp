@@ -27,7 +27,7 @@ public:
     {
         this->vector = vec;
 
-        auto insert = [this](const typename BaseSignalVector<TVectorItem>::ItemArgs &args) {
+        auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
             if (args.caller == this) {
                 return;
             }
@@ -50,7 +50,7 @@ public:
 
         int i = 0;
         for (const TVectorItem &item : vec->getVector()) {
-            typename BaseSignalVector<TVectorItem>::ItemArgs args{item, i++, 0};
+            SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
 
             insert(args);
         }

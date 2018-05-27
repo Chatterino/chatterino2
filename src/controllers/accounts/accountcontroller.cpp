@@ -8,6 +8,9 @@ namespace accounts {
 
 AccountController::AccountController()
 {
+    this->twitch.accounts.itemInserted.connect([this](const auto &args) {
+        accounts.insertItem(std::dynamic_pointer_cast<Account>(args.item));
+    });
 }
 
 void AccountController::load()
