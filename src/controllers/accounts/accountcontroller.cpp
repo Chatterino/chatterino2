@@ -43,17 +43,6 @@ void AccountController::load()
 AccountModel *AccountController::createModel(QObject *parent)
 {
     AccountModel *model = new AccountModel(parent);
-    //    model->accountRemoved.connect([this](const auto &account) {
-    //        switch (account->getProviderId()) {
-    //            case ProviderId::Twitch: {
-    //                auto &accs = this->twitch.accounts.getVector();
-    //                auto it = std::find(accs.begin(), accs.end(), account);
-    //                assert(it != accs.end());
-
-    //                this->twitch.accounts.removeItem(it - accs.begin());
-    //            } break;
-    //        }
-    //    });
 
     model->init(&this->accounts);
     return model;

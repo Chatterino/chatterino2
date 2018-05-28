@@ -15,6 +15,9 @@ TwitchAccountManager::TwitchAccountManager()
         auto currentUser = this->getCurrent();
         currentUser->loadIgnores();
     });
+
+    this->accounts.itemRemoved.connect(
+        [this](const auto &acc) { this->removeUser(acc.item.get()); });
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
@@ -134,35 +137,16 @@ void TwitchAccountManager::load()
     });
 }
 
-bool TwitchAccountManager::removeUser(const QString &username)
+bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
-    if (!this->userExists(username)) {
-        return false;
+    const auto &accs = this->accounts.getVector();
+
+    std::string userID(account->getUserId().toStdString());
+    if (!userID.empty()) {
+        pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
     }
 
-    {
-        std::lock_guard<std::mutex> guard(this->mutex);
-
-        const auto &accs = this->accounts.getVector();
-
-        while (true) {
-            auto it = std::find_if(accs.begin(), accs.end(),
-                                   [&](const auto &acc) { return acc->getUserName() == username; });
-
-            if (it == accs.end()) {
-                break;
-            }
-
-            std::string userID(it->get()->getUserId().toStdString());
-            if (!userID.empty()) {
-                pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
-            }
-
-            this->accounts.removeItem(int(it - accs.begin()));
-        }
-    }
-
-    if (username == qS(this->currentUsername.getValue())) {
+    if (account->getUserName() == qS(this->currentUsername.getValue())) {
         // The user that was removed is the current user, log into the anonymous user
         this->currentUsername = "";
     }
@@ -197,7 +181,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
     auto newUser = std::make_shared<TwitchAccount>(userData.username, userData.oauthToken,
                                                    userData.clientID, userData.userID);
 
-    std::lock_guard<std::mutex> lock(this->mutex);
+    //    std::lock_guard<std::mutex> lock(this->mutex);
 
     this->accounts.insertItem(newUser);
 
