@@ -149,6 +149,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
 
+#ifdef USEWINSDK
         widgets::AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
@@ -160,6 +161,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
             attach = false;
             return;
         }
+#endif
 
         if (_type == "twitch") {
             util::postToThread([=] {
