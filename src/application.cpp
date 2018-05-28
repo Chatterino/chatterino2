@@ -20,12 +20,6 @@
 
 #include <atomic>
 
-#ifdef Q_OS_WIN
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#endif
-
 using namespace chatterino::singletons;
 
 namespace chatterino {
@@ -232,52 +226,6 @@ void Application::save()
     this->windows->save();
 
     this->commands->save();
-}
-
-void Application::runNativeMessagingHost()
-{
-    auto app = getApp();
-
-    app->nativeMessaging = new singletons::NativeMessagingManager;
-
-#ifdef Q_OS_WIN
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif
-
-#if 0
-    bool bigEndian = isBigEndian();
-#endif
-
-    while (true) {
-        char size_c[4];
-        std::cin.read(size_c, 4);
-
-        if (std::cin.eof()) {
-            break;
-        }
-
-        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
-#if 0
-        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
-        uint32_t size = 0;
-        if (bigEndian) {
-            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
-                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
-        } else {
-            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
-                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
-        }
-#endif
-
-        char *b = reinterpret_cast<char *>(malloc(size + 1));
-        std::cin.read(b, size);
-        *(b + size) = '\0';
-
-        app->nativeMessaging->sendToGuiProcess(QByteArray(b, static_cast<int32_t>(size)));
-
-        free(b);
-    }
 }
 
 Application *getApp()

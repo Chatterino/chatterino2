@@ -28,6 +28,10 @@ public:
     QString appPathHash;
 
     bool createFolder(const QString &folderPath);
+    bool isPortable();
+
+private:
+    bool portable;
 };
 
 }  // namespace singletons

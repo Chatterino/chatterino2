@@ -50,6 +50,10 @@ void NativeMessagingManager::registerHost()
 {
     auto app = getApp();
 
+    if (app->paths->isPortable()) {
+        return;
+    }
+
     // create manifest
     QJsonDocument document;
     QJsonObject root_obj;
@@ -144,26 +148,33 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         QString _type = root.value("type").toString();
         bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
-        QString winId = root.value("winId").toString();
-        int yOffset = root.value("yOffset").toInt(-1);
 
-        if (_type.isNull() || name.isNull() || winId.isNull()) {
+        widgets::AttachedWindow::GetArgs args;
+        args.winId = root.value("winId").toString();
+        args.yOffset = root.value("yOffset").toInt(-1);
+        args.width = root.value("size").toObject().value("width").toInt(-1);
+        args.height = root.value("size").toObject().value("height").toInt(-1);
+
+        if (_type.isNull() || args.winId.isNull()) {
             qDebug() << "NM type, name or winId missing";
             attach = false;
             return;
         }
 
         if (_type == "twitch") {
-            util::postToThread([name, attach, winId, yOffset, app] {
-                app->twitch.server->watchingChannel.update(
-                    app->twitch.server->getOrAddChannel(name));
+            util::postToThread([=] {
+                if (!name.isEmpty()) {
+                    app->twitch.server->watchingChannel.update(
+                        app->twitch.server->getOrAddChannel(name));
+                }
 
                 if (attach) {
 #ifdef USEWINSDK
-                    auto *window =
-                        widgets::AttachedWindow::get(::GetForegroundWindow(), winId, yOffset);
-                    window->setChannel(app->twitch.server->getOrAddChannel(name));
-                    window->show();
+                    auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
+                    if (!name.isEmpty()) {
+                        window->setChannel(app->twitch.server->getOrAddChannel(name));
+                    }
+//                    window->show();
 #endif
                 }
             });
@@ -185,7 +196,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
     } else {
         qDebug() << "NM unknown action " + action;
     }
-}
+}  // namespace singletons
 
 }  // namespace singletons
 }  // namespace chatterino

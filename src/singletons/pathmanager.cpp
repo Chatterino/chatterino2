@@ -19,21 +19,21 @@ PathManager::PathManager(int argc, char **argv)
                             .replace("/", "x");
 
     // Options
-    bool portable = false;
+    this->portable = false;
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "portable") == 0) {
-            portable = true;
+            this->portable = true;
         }
     }
 
-    if (QFileInfo::exists(QCoreApplication::applicationDirPath() + "/portable")) {
-        portable = true;
+    if (QFileInfo::exists(QCoreApplication::applicationDirPath() + "/this->portable")) {
+        this->portable = true;
     }
 
     // Root path = %APPDATA%/Chatterino or the folder that the executable resides in
     QString rootPath;
-    if (portable) {
+    if (this->portable) {
         rootPath.append(QCoreApplication::applicationDirPath());
     } else {
         // Get settings path
@@ -89,6 +89,11 @@ PathManager::PathManager(int argc, char **argv)
 bool PathManager::createFolder(const QString &folderPath)
 {
     return QDir().mkpath(folderPath);
+}
+
+bool PathManager::isPortable()
+{
+    return this->portable;
 }
 
 }  // namespace singletons

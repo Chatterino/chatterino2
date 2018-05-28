@@ -22,9 +22,8 @@ std::shared_ptr<Account> AccountModel::getItemFromRow(std::vector<QStandardItem 
 void AccountModel::getRowFromItem(const std::shared_ptr<Account> &item,
                                   std::vector<QStandardItem *> &row)
 {
-    row[0]->setData(item->toString(), Qt::DisplayRole);
+    util::setStringItem(row[0], item->toString(), false);
     row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
-    //    row[0]->setData(QColor(255, 255, 255), Qt::BackgroundRole);
 }
 
 int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
@@ -34,8 +33,6 @@ int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
         auto row = this->createRow();
 
         util::setStringItem(row[0], item->getCategory(), false, false);
-        //        row[0]->setData(QColor(142, 36, 170), Qt::ForegroundRole);
-        //        row[0]->setData(QColor(255, 255, 255), Qt::BackgroundRole);
         row[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
 
         this->insertCustomRow(std::move(row), proposedIndex);

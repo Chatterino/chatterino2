@@ -18,7 +18,14 @@
 #include <fstream>
 #include <iostream>
 
+#ifdef Q_OS_WIN
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#endif
+
 int runGui(int argc, char *argv[]);
+void runNativeMessagingHost();
 
 int main(int argc, char *argv[])
 {
@@ -31,11 +38,7 @@ int main(int argc, char *argv[])
 
     // TODO: can be any argument
     if (args.size() > 0 && args[0].startsWith("chrome-extension://")) {
-        chatterino::Application::instantiate(argc, argv);
-        auto app = chatterino::getApp();
-        app->construct();
-
-        chatterino::Application::runNativeMessagingHost();
+        runNativeMessagingHost();
         return 0;
     }
 
@@ -131,4 +134,46 @@ int runGui(int argc, char *argv[])
     chatterino::util::NetworkManager::deinit();
 
     _exit(0);
+}
+
+void runNativeMessagingHost()
+{
+    auto *nm = new chatterino::singletons::NativeMessagingManager;
+
+#ifdef Q_OS_WIN
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
+#if 0
+    bool bigEndian = isBigEndian();
+#endif
+
+    while (true) {
+        char size_c[4];
+        std::cin.read(size_c, 4);
+
+        if (std::cin.eof()) {
+            break;
+        }
+
+        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+#if 0
+        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
+        uint32_t size = 0;
+        if (bigEndian) {
+            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
+                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
+        } else {
+            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
+                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
+        }
+#endif
+
+        std::unique_ptr<char[]> b(new char[size + 1]);
+        std::cin.read(b.get(), size);
+        *(b.get() + size) = '\0';
+
+        nm->sendToGuiProcess(QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
+    }
 }

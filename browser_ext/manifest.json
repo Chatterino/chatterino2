@@ -3,7 +3,8 @@
   "version": "1.0",
   "description": "xd",
   "permissions": [
-    "tabs", "nativeMessaging"
+    "tabs",
+    "nativeMessaging"
   ],
   "icons": {
     "256": "icon.png"
@@ -17,5 +18,16 @@
   },
   "browser_action": {
     "default_popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "js": [
+        "inject.js"
+      ]
+    }
+  ]
 }

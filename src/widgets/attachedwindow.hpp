@@ -13,9 +13,16 @@ class AttachedWindow : public QWidget
     AttachedWindow(void *target, int asdf);
 
 public:
+    struct GetArgs {
+        QString winId;
+        int yOffset = -1;
+        int width = -1;
+        int height = -1;
+    };
+
     ~AttachedWindow();
 
-    static AttachedWindow *get(void *target, const QString &winId, int yOffset);
+    static AttachedWindow *get(void *target, const GetArgs &args);
     static void detach(const QString &winId);
 
     void setChannel(ChannelPtr channel);
@@ -28,6 +35,9 @@ protected:
 private:
     void *target;
     int yOffset;
+    int currentYOffset;
+    int _width = 360;
+    int _height = -1;
 
     struct {
         Split *split;
