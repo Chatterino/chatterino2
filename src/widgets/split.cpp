@@ -143,6 +143,7 @@ Split::Split(QWidget *parent)
 Split::~Split()
 {
     this->usermodeChangedConnection.disconnect();
+    this->roomModeChangedConnection.disconnect();
     this->channelIDChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
 }
