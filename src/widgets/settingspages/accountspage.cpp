@@ -30,13 +30,16 @@ AccountsPage::AccountsPage()
     helper::EditableModelView *view =
         *layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr));
 
-    view->setTitles({"Name"});
+    view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     view->addButtonPressed.connect([] {
         static auto loginWidget = new LoginWidget();
+
         loginWidget->show();
     });
+
+    view->getTableView()->setStyleSheet("background: #333");
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {

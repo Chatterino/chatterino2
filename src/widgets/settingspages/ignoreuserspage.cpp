@@ -34,7 +34,7 @@ IgnoreUsersPage::IgnoreUsersPage()
 
     //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
     auto tabs = layout.emplace<QTabWidget>();
-    tabs->setStyleSheet("color: #000");
+    //    tabs->setStyleSheet("color: #000");
 
     // users
     auto users = tabs.appendTab(new QVBoxLayout, "Users");

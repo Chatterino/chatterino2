@@ -32,7 +32,7 @@ std::vector<QString> TwitchAccountManager::getUsernames() const
 
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    for (const auto &user : this->users) {
+    for (const auto &user : this->accounts.getVector()) {
         userNames.push_back(user->getUserName());
     }
 
@@ -44,7 +44,7 @@ std::shared_ptr<TwitchAccount> TwitchAccountManager::findUserByUsername(
 {
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    for (const auto &user : this->users) {
+    for (const auto &user : this->accounts.getVector()) {
         if (username.compare(user->getUserName(), Qt::CaseInsensitive) == 0) {
             return user;
         }
@@ -140,17 +140,27 @@ bool TwitchAccountManager::removeUser(const QString &username)
         return false;
     }
 
-    this->mutex.lock();
-    this->users.erase(std::remove_if(this->users.begin(), this->users.end(), [username](auto user) {
-        if (user->getUserName() == username) {
-            std::string userID(user->getUserId().toStdString());
-            assert(!userID.empty());
-            pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
-            return true;
+    {
+        std::lock_guard<std::mutex> guard(this->mutex);
+
+        const auto &accs = this->accounts.getVector();
+
+        while (true) {
+            auto it = std::find_if(accs.begin(), accs.end(),
+                                   [&](const auto &acc) { return acc->getUserName() == username; });
+
+            if (it == accs.end()) {
+                break;
+            }
+
+            std::string userID(it->get()->getUserId().toStdString());
+            if (!userID.empty()) {
+                pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
+            }
+
+            this->accounts.removeItem(int(it - accs.begin()));
         }
-        return false;
-    }));
-    this->mutex.unlock();
+    }
 
     if (username == qS(this->currentUsername.getValue())) {
         // The user that was removed is the current user, log into the anonymous user
@@ -189,7 +199,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    this->users.push_back(newUser);
+    this->accounts.insertItem(newUser);
 
     return AddUserResponse::UserAdded;
 }

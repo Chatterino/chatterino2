@@ -3,7 +3,7 @@
 #include "providers/irc/abstractircserver.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchchannel.hpp"
-#include "util/mutexvalue.h"
+#include "util/mutexvalue.hpp"
 
 #include <memory>
 

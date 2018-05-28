@@ -58,12 +58,12 @@ int runGui(int argc, char *argv[])
     // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
     QPalette darkPalette = a.palette();
 
-    darkPalette.setColor(QPalette::Window, QColor(33, 33, 33));
+    darkPalette.setColor(QPalette::Window, QColor(22, 22, 22));
     darkPalette.setColor(QPalette::WindowText, Qt::white);
     darkPalette.setColor(QPalette::Text, Qt::white);
     darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Base, QColor(90, 90, 90));
-    darkPalette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+    darkPalette.setColor(QPalette::Base, QColor("#333"));
+    darkPalette.setColor(QPalette::AlternateBase, QColor("#444"));
     darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
     darkPalette.setColor(QPalette::ToolTipText, Qt::white);
     darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));

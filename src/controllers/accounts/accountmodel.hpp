@@ -1,7 +1,10 @@
 #pragma once
 
 #include "controllers/accounts/account.hpp"
+#include "util/qstringhash.hpp"
 #include "util/signalvectormodel.hpp"
+
+#include <unordered_map>
 
 namespace chatterino {
 namespace controllers {
@@ -23,7 +26,16 @@ protected:
     virtual void getRowFromItem(const std::shared_ptr<Account> &item,
                                 std::vector<QStandardItem *> &row) override;
 
+    virtual int beforeInsert(const std::shared_ptr<Account> &item,
+                             std::vector<QStandardItem *> &row, int proposedIndex) override;
+
+    virtual void afterRemoved(const std::shared_ptr<Account> &item,
+                              std::vector<QStandardItem *> &row, int index) override;
+
     friend class AccountController;
+
+private:
+    std::unordered_map<QString, int> categoryCount;
 };
 
 }  // namespace accounts

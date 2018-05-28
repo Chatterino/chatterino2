@@ -68,7 +68,7 @@ private:
     std::shared_ptr<TwitchAccount> currentUser;
 
     std::shared_ptr<TwitchAccount> anonymousUser;
-    std::vector<std::shared_ptr<TwitchAccount>> users;
+    //    std::vector<std::shared_ptr<TwitchAccount>> users;
     mutable std::mutex mutex;
 
     friend class chatterino::controllers::accounts::AccountController;

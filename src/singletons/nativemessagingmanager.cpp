@@ -113,13 +113,14 @@ void NativeMessagingManager::ReceiverThread::run()
 
     while (true) {
         try {
-            char *buf = (char *)malloc(MESSAGE_SIZE);
+            std::unique_ptr<char> buf(static_cast<char *>(malloc(MESSAGE_SIZE)));
             ipc::message_queue::size_type retSize;
             unsigned int priority;
 
-            messageQueue.receive(buf, MESSAGE_SIZE, retSize, priority);
+            messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document = QJsonDocument::fromJson(QByteArray(buf, retSize));
+            QJsonDocument document =
+                QJsonDocument::fromJson(QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());
         } catch (ipc::interprocess_exception &ex) {

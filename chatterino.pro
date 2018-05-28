@@ -193,7 +193,6 @@ SOURCES += \
     src/widgets/attachedwindow.cpp \
     src/widgets/settingspages/externaltoolspage.cpp \
     src/widgets/helper/comboboxitemdelegate.cpp \
-    src/util/signalvectormodel.cpp \
     src/controllers/commands/command.cpp \
     src/controllers/commands/commandmodel.cpp \
     src/controllers/commands/commandcontroller.cpp \
@@ -360,11 +359,12 @@ HEADERS  += \
     src/widgets/helper/dropoverlay.hpp \
     src/widgets/helper/splitnode.hpp \
     src/widgets/notificationpopup.hpp \
-    src/util/mutexvalue.h \
     src/controllers/taggedusers/taggeduserscontroller.hpp \
     src/controllers/taggedusers/taggeduser.hpp \
     src/providerid.hpp \
-    src/controllers/taggedusers/taggedusersmodel.hpp
+    src/controllers/taggedusers/taggedusersmodel.hpp \
+    src/util/qstringhash.hpp \
+    src/util/mutexvalue.hpp
 
 RESOURCES += \
     resources/resources.qrc

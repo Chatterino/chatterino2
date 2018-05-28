@@ -7,7 +7,7 @@
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
-#include "util/mutexvalue.h"
+#include "util/mutexvalue.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 

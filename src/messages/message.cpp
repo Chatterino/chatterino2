@@ -32,7 +32,8 @@ MessagePtr Message::createSystemMessage(const QString &text)
 
     message->addElement(new TimestampElement(QTime::currentTime()));
     message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
-    message->flags.EnableFlag(MessageFlags::System);
+    message->flags |= MessageFlags::System;
+    message->flags |= MessageFlags::DoNotTriggerNotification;
     message->searchText = text;
 
     return message;

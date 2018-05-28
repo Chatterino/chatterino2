@@ -28,10 +28,6 @@ public:
         this->vector = vec;
 
         auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
-            if (args.caller == this) {
-                return;
-            }
-
             // get row index
             int index = this->getModelIndexFromVectorIndex(args.index);
             assert(index >= 0 && index <= this->rows.size());
@@ -58,20 +54,21 @@ public:
         this->managedConnect(vec->itemInserted, insert);
 
         this->managedConnect(vec->itemRemoved, [this](auto args) {
-            if (args.caller == this) {
-                return;
-            }
-
             int row = this->getModelIndexFromVectorIndex(args.index);
             assert(row >= 0 && row <= this->rows.size());
 
             // remove row
+            std::vector<QStandardItem *> items = std::move(this->rows[row].items);
+
             this->beginRemoveRows(QModelIndex(), row, row);
-            for (QStandardItem *item : this->rows[row].items) {
-                delete item;
-            }
             this->rows.erase(this->rows.begin() + row);
             this->endRemoveRows();
+
+            this->afterRemoved(args.item, items, row);
+
+            for (QStandardItem *item : items) {
+                delete item;
+            }
         });
 
         this->afterInit();
@@ -185,7 +182,7 @@ public:
         assert(row >= 0 && row < this->rows.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(signalVectorRow);
+        this->vector->removeItem(signalVectorRow, this);
 
         return true;
     }
@@ -224,6 +221,16 @@ protected:
         this->beginInsertRows(QModelIndex(), index, index);
         this->rows.insert(this->rows.begin() + index, Row(std::move(row), true));
         this->endInsertRows();
+    }
+
+    void removeCustomRow(int index)
+    {
+        assert(index >= 0 && index <= this->rows.size());
+        assert(this->rows[index].isCustomRow);
+
+        this->beginRemoveRows(QModelIndex(), index, index);
+        this->rows.erase(this->rows.begin() + index);
+        this->endRemoveRows();
     }
 
     std::vector<QStandardItem *> createRow()

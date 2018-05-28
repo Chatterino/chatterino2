@@ -12,7 +12,7 @@ namespace twitch {
 
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
                              const QString &_oauthClient, const QString &_userID)
-    : controllers::accounts::Account("Twitch")
+    : controllers::accounts::Account(ProviderId::Twitch)
     , oauthClient(_oauthClient)
     , oauthToken(_oauthToken)
     , userName(_username)

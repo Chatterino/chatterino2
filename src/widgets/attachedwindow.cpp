@@ -78,8 +78,8 @@ void AttachedWindow::attachToHwnd(void *_hwnd)
     QTimer *timer = new QTimer(this);
     timer->setInterval(1);
 
-    HWND hwnd = (HWND)this->winId();
-    HWND attached = (HWND)_hwnd;
+    HWND hwnd = HWND(this->winId());
+    HWND attached = HWND(_hwnd);
     QObject::connect(timer, &QTimer::timeout, [this, hwnd, attached, timer] {
         ::SetLastError(0);
         RECT xD;
@@ -93,7 +93,8 @@ void AttachedWindow::attachToHwnd(void *_hwnd)
 
         HWND next = ::GetNextWindow(attached, GW_HWNDPREV);
 
-        ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
+                       SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         ::MoveWindow(hwnd, xD.right - 360, xD.top + this->yOffset - 8, 360 - 8,
                      xD.bottom - xD.top - this->yOffset, false);
         //        ::MoveWindow(hwnd, xD.right - 360, xD.top + 82, 360 - 8, xD.bottom - xD.top - 82 -
