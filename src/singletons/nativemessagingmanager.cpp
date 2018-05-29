@@ -172,9 +172,11 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 
                 if (attach) {
 #ifdef USEWINSDK
-                    auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
-                    if (!name.isEmpty()) {
-                        window->setChannel(app->twitch.server->getOrAddChannel(name));
+                    if (args.height != -1) {
+                        auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
+                        if (!name.isEmpty()) {
+                            window->setChannel(app->twitch.server->getOrAddChannel(name));
+                        }
                     }
 //                    window->show();
 #endif

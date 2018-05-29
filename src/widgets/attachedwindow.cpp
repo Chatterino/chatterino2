@@ -80,7 +80,7 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
 
     if (show) {
         window->show();
-        window->resize(size);
+        // window->resize(size);
     }
 
     return window;
@@ -156,8 +156,9 @@ void AttachedWindow::attachToHwnd(void *_hwnd)
                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
         if (this->_height == -1) {
-            ::MoveWindow(hwnd, rect.right - this->_width - 8, rect.top + this->yOffset - 8,
-                         this->_width, rect.bottom - rect.top - this->yOffset, false);
+            //            ::MoveWindow(hwnd, rect.right - this->_width - 8, rect.top + this->yOffset
+            //            - 8,
+            //                         this->_width, rect.bottom - rect.top - this->yOffset, false);
         } else {
             ::MoveWindow(hwnd, rect.right - this->_width - 8, rect.bottom - this->_height - 8,
                          this->_width, this->_height, false);

@@ -8,6 +8,22 @@ const ignoredPages = {
   "directory": true,
 };
 
+/// return channel name if it should contain a chat
+function matchChannelName(url) {
+  if (!url)
+    return undefined;
+
+  const match = url.match(/^https?:\/\/(www\.)?twitch.tv\/([a-zA-Z0-9_]+)\/?$/);
+
+  let channelName;
+  if (match && (channelName = match[2], !ignoredPages[channelName])) {
+    return channelName;
+  }
+
+  return undefined;
+}
+
+
 const appName = "com.chatterino.chatterino";
 let port = null;
 
@@ -41,15 +57,11 @@ function connectPort() {
 
 // tab activated
 chrome.tabs.onActivated.addListener((activeInfo) => {
-  console.log(0)
   chrome.tabs.get(activeInfo.tabId, (tab) => {
-    console.log(1)
     if (!tab || !tab.url) return;
 
-    console.log(2)
     chrome.windows.get(tab.windowId, {}, (window) => {
       if (!window.focused) return;
-      console.log(3)
 
       onTabSelected(tab.url, tab);
     });
@@ -76,8 +88,12 @@ chrome.windows.onRemoved.addListener((windowId) => {
 
 // window selected
 chrome.windows.onFocusChanged.addListener((windowId) => {
-  chrome.tabs.query({windowId: windowId, highlighted: true}, (tabs) => {
-    if (tabs.length >= 1) {
+  console.log(windowId);
+  if (windowId == -1) return;
+
+  // this returns all tabs when the query fails
+  chrome.tabs.query({ windowId: windowId, highlighted: true }, (tabs) => {
+    if (tabs.length === 1) {
       let tab = tabs[0];
 
       onTabSelected(tab.url, tab);
@@ -86,33 +102,19 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 });
 
 
-/// return channel name if it should contain a chat
-function matchChannelName(url) {
-  if (!url)
-    return undefined;
-
-  const match = url.match(/^https?:\/\/(www\.)?twitch.tv\/([a-zA-Z0-9_]+)\/?$/);
-
-  let channelName;
-  if (match && (channelName = match[2], !ignoredPages[channelName])) {
-    return channelName;
-  }
-
-  return undefined;
-}
 
 // attach or detach from tab
 function onTabSelected(url, tab) {
   let channelName = matchChannelName(url);
 
   if (channelName) {
-    chrome.windows.get(tab.windowId, {}, (window) => {
-      // attach to window
-      tryAttach(tab.windowId, {
-        name: channelName,
-        yOffset: window.height - tab.height,
-      });
-    });
+    // chrome.windows.get(tab.windowId, {}, (window) => {
+    //   // attach to window
+    //   tryAttach(tab.windowId, {
+    //     name: channelName,
+    //     yOffset: window.height - tab.height,
+    //   });
+    // });
   } else {
     // detach from window
     tryDetach(tab.windowId);
@@ -120,42 +122,34 @@ function onTabSelected(url, tab) {
 }
 
 // receiving messages from the inject script
-function registerTheGarbage() {
-  chrome.runtime.onMessage.addListener((message, sender, callback) => {
-    // is tab highlighted
-    if (!sender.tab.highlighted) return;
+chrome.runtime.onMessage.addListener((message, sender, callback) => {
+  console.log(message);
 
-    // is window focused
-    chrome.windows.get(sender.tab.windowId, {}, (window) => {
-      if (!window.focused) return;
+  // is tab highlighted
+  if (!sender.tab.highlighted) return;
 
-      // get zoom value
-      chrome.tabs.getZoom(sender.tab.id, (zoom) => {
-        let size = {
-          width: message.rect.width * zoom,
-          height: message.rect.height * zoom,
-        };
+  // is window focused
+  chrome.windows.get(sender.tab.windowId, {}, (window) => {
+    if (!window.focused) return;
 
-        // attach to window
-        tryAttach(sender.tab.windowId, {
-          name: matchChannelName(sender.tab.url),
-          size: size,
-        })
+    // get zoom value
+    chrome.tabs.getZoom(sender.tab.id, (zoom) => {
+      let size = {
+        width: Math.floor(message.rect.width * zoom),
+        height: Math.floor(message.rect.height * zoom),
+      };
+
+      console.log(zoom);
+
+      // attach to window
+      tryAttach(sender.tab.windowId, {
+        name: matchChannelName(sender.tab.url),
+        size: size,
       });
     });
   });
-}
+});
 
-function registerLoop() {
-  // loop until the runtime objects exists because I can't be arsed to figure out the proper way to do this
-  if (chrome.runtime === undefined) {
-    setTimeout(registerLoop(), 100);
-    return;
-  }
-
-  registerTheGarbage();
-}
-registerLoop();
 
 // attach chatterino to a chrome window
 function tryAttach(windowId, data) {
