@@ -93,10 +93,10 @@ SelectChannelDialog::SelectChannelDialog()
         vbox->addStretch(1);
 
         // tabbing order
+        QWidget::setTabOrder(*watching_btn, *channel_btn);
         QWidget::setTabOrder(*channel_btn, *whispers_btn);
         QWidget::setTabOrder(*whispers_btn, *mentions_btn);
         QWidget::setTabOrder(*mentions_btn, *watching_btn);
-        QWidget::setTabOrder(*watching_btn, *channel_btn);
 
         // tab
         NotebookTab *tab = notebook->addPage(obj.getElement());
