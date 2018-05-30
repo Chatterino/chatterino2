@@ -73,12 +73,21 @@
     }
 
     // nav bar
-    if (rightCollapseButton && !installedObjects.topNav) {
-      let x = findRightCollapse();
+    if (!installedObjects.topNav) {
+      if (rightCollapseButton) {
+        let x = findNavBar();
 
-      installedObjects.topNav = true;
-    } else {
-      retry = true;
+        x.addEventListener("mouseup", () => {
+          if (!isCollapsed) {
+            let collapse = findRightCollapse();
+            collapse.click();
+          }
+        });
+
+        installedObjects.topNav = true;
+      } else {
+        retry = true;
+      }
     }
 
     // retry if needed

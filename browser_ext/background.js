@@ -8,9 +8,6 @@ const ignoredPages = {
   "directory": true,
 };
 
-let popup = chrome.extension.getViews({type: "popup"})[0];
-popup.window.getElementById("status").innerHTML = "NaM";
-
 /// return channel name if it should contain a chat
 function matchChannelName(url) {
   if (!url)
