@@ -41,7 +41,7 @@
       if (x != undefined) {
         rightCollapseButton = x;
 
-        x.addEventListener("mouseup", () => {
+        x.addEventListener("click", () => {
           let y = findChatDiv();
 
           if (parseInt(y.style.width) == 0) {
@@ -78,6 +78,8 @@
         let x = findNavBar();
 
         x.addEventListener("mouseup", () => {
+          console.log(isCollapsed)
+
           if (!isCollapsed) {
             let collapse = findRightCollapse();
             collapse.click();
