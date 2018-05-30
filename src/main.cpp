@@ -84,10 +84,10 @@ int runGui(int argc, char *argv[])
 
     qApp->setPalette(darkPalette);
 
-// Install native event handler for hidpi on windows
-#ifdef USEWINSDK
-    a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
-#endif
+    // Install native event handler for hidpi on windows
+    //#ifdef USEWINSDK
+    //    a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
+    //#endif
 
     // Initialize NetworkManager
     chatterino::util::NetworkManager::init();
@@ -148,6 +148,17 @@ void runNativeMessagingHost()
 #if 0
     bool bigEndian = isBigEndian();
 #endif
+
+    std::atomic<bool> ping(false);
+
+    QTimer timer;
+    QObject::connect(&timer, &QTimer::timeout, [&ping] {
+        if (!ping.exchange(false)) {
+            _exit(0);
+        }
+    });
+    timer.setInterval(11000);
+    timer.start();
 
     while (true) {
         char size_c[4];

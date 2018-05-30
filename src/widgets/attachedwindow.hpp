@@ -10,7 +10,7 @@ namespace widgets {
 
 class AttachedWindow : public QWidget
 {
-    AttachedWindow(void *target, int asdf);
+    AttachedWindow(void *target_, int asdf);
 
 public:
     struct GetArgs {
@@ -20,9 +20,9 @@ public:
         int height = -1;
     };
 
-    ~AttachedWindow();
+    virtual ~AttachedWindow() override;
 
-    static AttachedWindow *get(void *target, const GetArgs &args);
+    static AttachedWindow *get(void *target_, const GetArgs &args);
     static void detach(const QString &winId);
 
     void setChannel(ChannelPtr channel);
@@ -33,17 +33,21 @@ protected:
     //    override;
 
 private:
-    void *target;
-    int yOffset;
-    int currentYOffset;
-    int _width = 360;
-    int _height = -1;
+    void *target_;
+    int yOffset_;
+    int currentYOffset_;
+    int width_ = 360;
+    int height_ = -1;
+    bool validProcessName_ = false;
+    bool attached_ = false;
+    QTimer timer_;
 
     struct {
         Split *split;
-    } ui;
+    } ui_;
 
-    void attachToHwnd(void *hwnd);
+    void attachToHwnd_(void *attached);
+    void updateWindowRect_(void *attached);
 
     struct Item {
         void *hwnd;

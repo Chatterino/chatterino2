@@ -1,15 +1,15 @@
 #include "attachedwindow.hpp"
 
 #include "application.hpp"
+#include "util/debugcount.hpp"
+#include "widgets/split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include "widgets/split.hpp"
-
 #ifdef USEWINSDK
 #include "Windows.h"
-
+// don't even think about reordering these
 #include "Psapi.h"
 #pragma comment(lib, "Dwmapi.lib")
 #endif
@@ -19,17 +19,19 @@ namespace widgets {
 
 AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
-    , target(_target)
-    , yOffset(_yOffset)
+    , target_(_target)
+    , yOffset_(_yOffset)
 {
     QLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     this->setLayout(layout);
 
     auto *split = new Split(this);
-    this->ui.split = split;
+    this->ui_.split = split;
     split->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout->addWidget(split);
+
+    util::DebugCount::increase("attached window");
 }
 
 AttachedWindow::~AttachedWindow()
@@ -40,6 +42,8 @@ AttachedWindow::~AttachedWindow()
             break;
         }
     }
+
+    util::DebugCount::decrease("attached window");
 }
 
 AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
@@ -64,7 +68,7 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
             window->hide();
             show = false;
         } else {
-            window->_height = args.height;
+            window->height_ = args.height;
             size.setHeight(args.height);
         }
     }
@@ -73,14 +77,14 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
             window->hide();
             show = false;
         } else {
-            window->_width = args.width;
+            window->width_ = args.width;
             size.setWidth(args.width);
         }
     }
 
     if (show) {
+        window->updateWindowRect_(window->target_);
         window->show();
-        // window->resize(size);
     }
 
     return window;
@@ -97,78 +101,91 @@ void AttachedWindow::detach(const QString &winId)
 
 void AttachedWindow::setChannel(ChannelPtr channel)
 {
-    this->ui.split->setChannel(channel);
+    this->ui_.split->setChannel(channel);
 }
 
 void AttachedWindow::showEvent(QShowEvent *)
 {
-    attachToHwnd(this->target);
+    attachToHwnd_(this->target_);
 }
 
-void AttachedWindow::attachToHwnd(void *_hwnd)
+void AttachedWindow::attachToHwnd_(void *_attachedPtr)
 {
 #ifdef USEWINSDK
-    QTimer *timer = new QTimer(this);
-    timer->setInterval(1);
+    if (this->attached_) {
+        return;
+    }
 
-    HWND hwnd = HWND(this->winId());
-    HWND attached = HWND(_hwnd);
+    this->attached_ = true;
+    this->timer_.setInterval(1);
 
-    QObject::connect(timer, &QTimer::timeout, [this, hwnd, attached, timer] {
+    auto hwnd = HWND(this->winId());
+    auto attached = HWND(_attachedPtr);
 
+    QObject::connect(&this->timer_, &QTimer::timeout, [this, hwnd, attached] {
         // check process id
-        DWORD processId;
-        ::GetWindowThreadProcessId(attached, &processId);
+        if (!this->validProcessName_) {
+            DWORD processId;
+            ::GetWindowThreadProcessId(attached, &processId);
 
-        HANDLE process =
-            ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+            HANDLE process =
+                ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
 
-        std::unique_ptr<TCHAR[]> filename(new TCHAR[512]);
-        DWORD filenameLength = ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
-        QString qfilename = QString::fromWCharArray(filename.get(), filenameLength);
+            std::unique_ptr<TCHAR[]> filename(new TCHAR[512]);
+            DWORD filenameLength = ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
+            QString qfilename = QString::fromWCharArray(filename.get(), filenameLength);
 
-        if (!qfilename.endsWith("chrome.exe")) {
-            qDebug() << "NM Illegal callee" << qfilename;
-            timer->stop();
-            timer->deleteLater();
-            this->deleteLater();
-            return;
+            if (!qfilename.endsWith("chrome.exe")) {
+                qDebug() << "NM Illegal caller" << qfilename;
+                this->timer_.stop();
+                this->deleteLater();
+                return;
+            }
+            this->validProcessName_ = true;
         }
 
-        // We get the window rect first so we can close this window when it returns an error.
-        // If we query the process first and check the filename then it will return and empty string
-        // that doens't match.
-        ::SetLastError(0);
-        RECT rect;
-        ::GetWindowRect(attached, &rect);
-
-        if (::GetLastError() != 0) {
-            timer->stop();
-            timer->deleteLater();
-            this->deleteLater();
-            return;
-        }
-
-        // set the correct z-order
-        HWND next = ::GetNextWindow(attached, GW_HWNDPREV);
-
-        ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
-                       SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-
-        if (this->_height == -1) {
-            //            ::MoveWindow(hwnd, rect.right - this->_width - 8, rect.top + this->yOffset
-            //            - 8,
-            //                         this->_width, rect.bottom - rect.top - this->yOffset, false);
-        } else {
-            ::MoveWindow(hwnd, rect.right - this->_width - 8, rect.bottom - this->_height - 8,
-                         this->_width, this->_height, false);
-        }
-
-        //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
-        //        rect.top - 82 - 8, false);
+        this->updateWindowRect_(attached);
     });
-    timer->start();
+    this->timer_.start();
 #endif
+}
+
+void AttachedWindow::updateWindowRect_(void *_attachedPtr)
+{
+    auto hwnd = HWND(this->winId());
+    auto attached = HWND(_attachedPtr);
+
+    // We get the window rect first so we can close this window when it returns an error.
+    // If we query the process first and check the filename then it will return and empty string
+    // that doens't match.
+    ::SetLastError(0);
+    RECT rect;
+    ::GetWindowRect(attached, &rect);
+
+    if (::GetLastError() != 0) {
+        qDebug() << "NM GetLastError()" << ::GetLastError();
+
+        this->timer_.stop();
+        this->deleteLater();
+        return;
+    }
+
+    // set the correct z-order
+    HWND next = ::GetNextWindow(attached, GW_HWNDPREV);
+
+    ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+    if (this->height_ == -1) {
+        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
+        //              this->width_, rect.bottom - rect.top - this->yOffset_, false);
+    } else {
+        ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.bottom - this->height_ - 8,
+                     this->width_, this->height_, false);
+    }
+
+    //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
+    //        rect.top - 82 - 8, false);
 }
 
 // void AttachedWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)

@@ -195,7 +195,10 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         }
 
 #ifdef USEWINSDK
-        util::postToThread([winId] { widgets::AttachedWindow::detach(winId); });
+        util::postToThread([winId] {
+            qDebug() << "NW detach";
+            widgets::AttachedWindow::detach(winId);
+        });
 #endif
     } else {
         qDebug() << "NM unknown action " + action;

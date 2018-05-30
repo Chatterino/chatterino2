@@ -8,6 +8,9 @@ const ignoredPages = {
   "directory": true,
 };
 
+let popup = chrome.extension.getViews({type: "popup"})[0];
+popup.window.getElementById("status").innerHTML = "NaM";
+
 /// return channel name if it should contain a chat
 function matchChannelName(url) {
   if (!url)
@@ -43,6 +46,7 @@ function getPort() {
 function connectPort() {
   port = chrome.runtime.connectNative(appName);
   console.log("port connected");
+  let connected = true;
 
   port.onMessage.addListener(function (msg) {
     console.log(msg);
@@ -52,6 +56,14 @@ function connectPort() {
 
     port = null;
   });
+
+  let sendPing = () => {
+    if (connected) {
+      port.postMessage({ ping: true });
+    } else {
+      setTimeout(sendPing, 5000);
+    }
+  }
 }
 
 
@@ -63,6 +75,12 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
     chrome.windows.get(tab.windowId, {}, (window) => {
       if (!window.focused) return;
 
+      if (window.state == "fullscreen") {
+        tryDetach(tab.windowId);
+        return;
+      }
+
+      console.log("onActivated");
       onTabSelected(tab.url, tab);
     });
   });
@@ -73,16 +91,27 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (!tab.highlighted)
     return;
 
-  onTabSelected(changeInfo.url, tab);
+  chrome.windows.get(tab.windowId, {}, (window) => {
+    if (!window.focused) return;
+    if (window.state == "fullscreen") {
+      tryDetach(tab.windowId);
+      return;
+    }
+
+    console.log("onUpdated");
+    onTabSelected(tab.url, tab);
+  });
 });
 
 // tab detached
 chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
+  console.log("onDetached");
   tryDetach(detachInfo.oldWindowId);
 });
 
 // tab closed
 chrome.windows.onRemoved.addListener((windowId) => {
+  console.log("onRemoved");
   tryDetach(windowId);
 });
 
@@ -96,11 +125,18 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
     if (tabs.length === 1) {
       let tab = tabs[0];
 
-      onTabSelected(tab.url, tab);
+      chrome.windows.get(tab.windowId, (window) => {
+        if (window.state == "fullscreen") {
+          tryDetach(tab.windowId);
+          return;
+        }
+
+        console.log("onFocusChanged");
+        onTabSelected(tab.url, tab);
+      });
     }
   });
 });
-
 
 
 // attach or detach from tab
@@ -131,6 +167,10 @@ chrome.runtime.onMessage.addListener((message, sender, callback) => {
   // is window focused
   chrome.windows.get(sender.tab.windowId, {}, (window) => {
     if (!window.focused) return;
+    if (window.state == "fullscreen") {
+      tryDetach(sender.tab.windowId);
+      return;
+    }
 
     // get zoom value
     chrome.tabs.getZoom(sender.tab.id, (zoom) => {
@@ -168,6 +208,8 @@ function tryAttach(windowId, data) {
 // detach chatterino from a chrome window
 function tryDetach(windowId) {
   let port = getPort();
+
+  console.log("tryDetach");
 
   if (port) {
     port.postMessage({
