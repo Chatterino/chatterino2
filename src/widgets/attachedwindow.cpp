@@ -152,6 +152,7 @@ void AttachedWindow::attachToHwnd_(void *_attachedPtr)
 
 void AttachedWindow::updateWindowRect_(void *_attachedPtr)
 {
+#ifdef USEWINSDK
     auto hwnd = HWND(this->winId());
     auto attached = HWND(_attachedPtr);
 
@@ -186,6 +187,7 @@ void AttachedWindow::updateWindowRect_(void *_attachedPtr)
 
     //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
     //        rect.top - 82 - 8, false);
+#endif
 }
 
 // void AttachedWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
