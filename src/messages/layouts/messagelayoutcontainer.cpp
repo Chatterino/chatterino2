@@ -475,8 +475,6 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
     for (std::unique_ptr<MessageLayoutElement> &ele : this->elements) {
         int c = ele->getSelectionIndexCount();
 
-        qDebug() << c;
-
         if (first) {
             if (index + c > from) {
                 ele->addCopyTextToString(str, from - index, to - index);
