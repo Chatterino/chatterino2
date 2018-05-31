@@ -442,6 +442,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
         [=, &emoteData](const QJsonObject &root) {
             emoteData.emoteSets.clear();
             emoteData.emoteCodes.clear();
+
             auto emoticonSets = root.value("emoticon_sets").toObject();
             for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
                 std::string emoteSetString = it.key().toStdString();

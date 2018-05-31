@@ -22,9 +22,9 @@ EmotePopup::EmotePopup()
     this->viewEmotes = new ChannelView();
     this->viewEmojis = new ChannelView();
 
-    this->viewEmotes->setOverrideFlags((MessageElement::Flags)(
+    this->viewEmotes->setOverrideFlags(MessageElement::Flags(
         MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
-    this->viewEmojis->setOverrideFlags((MessageElement::Flags)(
+    this->viewEmojis->setOverrideFlags(MessageElement::Flags(
         MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
 
     this->viewEmotes->setEnableScrollingToBottom(false);
@@ -86,8 +86,34 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     QString userID = app->accounts->twitch.getCurrent()->getUserId();
 
-    addEmotes(app->emotes->twitchAccountEmotes[userID.toStdString()].emotes,
-              "Twitch Account Emotes", "Twitch Account Emote");
+    // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
+    // fix this pile of garbage
+    for (const auto &set : app->emotes->twitchAccountEmotes[userID.toStdString()].emoteSets) {
+        // TITLE
+        messages::MessageBuilder builder1;
+
+        builder1.append(new TextElement("Twitch Account Emotes", MessageElement::Text));
+
+        builder1.getMessage()->flags |= Message::Centered;
+        emoteChannel->addMessage(builder1.getMessage());
+
+        // EMOTES
+        messages::MessageBuilder builder2;
+        builder2.getMessage()->flags |= Message::Centered;
+        builder2.getMessage()->flags |= Message::DisableCompactEmotes;
+
+        for (const auto &emote : set.second) {
+            [&](const QString &key, const util::EmoteData &value) {
+                builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
+                                    ->setLink(Link(Link::InsertText, key)));
+            }(QString::fromStdString(emote.code),
+              app->emotes->getTwitchEmoteById(QString::fromStdString(emote.id).toLong(),
+                                              QString::fromStdString(emote.code)));
+        }
+
+        emoteChannel->addMessage(builder2.getMessage());
+    }
+
     addEmotes(app->emotes->bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");
