@@ -149,8 +149,8 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
 }
 
 // Painting
-void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection &selection,
-                          bool isLastReadMessage, bool isWindowFocused)
+void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
+                          Selection &selection, bool isLastReadMessage, bool isWindowFocused)
 {
     auto app = getApp();
     QPixmap *pixmap = this->m_buffer.get();
@@ -158,13 +158,11 @@ void MessageLayout::paint(QPainter &painter, int y, int messageIndex, Selection 
     // create new buffer if required
     if (!pixmap) {
 #ifdef Q_OS_MACOS
-        pixmap =
-            new QPixmap(int(this->m_container.getWidth() * painter.device()->devicePixelRatioF()),
-                        int(this->m_container.getHeight() * painter.device()->devicePixelRatioF()));
+        pixmap = new QPixmap(int(width * painter.device()->devicePixelRatioF()),
+                             int(width * painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
-        pixmap =
-            new QPixmap(this->m_container.getWidth(), std::max(16, this->m_container.getHeight()));
+        pixmap = new QPixmap(width, std::max(16, this->m_container.getHeight()));
 #endif
 
         this->m_buffer = std::shared_ptr<QPixmap>(pixmap);

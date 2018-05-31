@@ -174,7 +174,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     // this->messages.seperatorInner =
 
     // Scrollbar
-    this->scrollbars.background = getColor(0, sat, 0.94);
+    this->scrollbars.background = splits.background;
+    this->scrollbars.background.setAlphaF(qreal(0.4));
     this->scrollbars.thumb = getColor(0, sat, 0.80);
     this->scrollbars.thumbSelected = getColor(0, sat, 0.7);
 

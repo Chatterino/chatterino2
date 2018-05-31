@@ -42,7 +42,7 @@ public:
     bool layout(int width, float m_scale, MessageElement::Flags flags);
 
     // Painting
-    void paint(QPainter &painter, int y, int messageIndex, Selection &selection,
+    void paint(QPainter &painter, int width, int y, int messageIndex, Selection &selection,
                bool isLastReadMessage, bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();

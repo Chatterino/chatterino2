@@ -27,7 +27,8 @@
 #include <functional>
 #include <memory>
 
-#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
+#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 2) * this->getScale())
+#define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 400
 
@@ -617,7 +618,7 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage.get() == layout;
         }
 
-        layout->paint(painter, y, i, this->selection, isLastMessage, windowFocused);
+        layout->paint(painter, DRAW_WIDTH, y, i, this->selection, isLastMessage, windowFocused);
 
         y += layout->getHeight();
 

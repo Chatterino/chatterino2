@@ -202,7 +202,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int xOffset = mouseOver ? 0 : width() - int(4 * this->getScale());
 
     QPainter painter(this);
-    //    painter.fillRect(rect(), this->themeManager->ScrollbarBG);
+    painter.fillRect(rect(), this->themeManager->scrollbars.background);
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
