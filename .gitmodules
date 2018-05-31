@@ -17,3 +17,6 @@
 	path = lib/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
 	branch = develop
+[submodule "lib/qBreakpad"]
+	path = lib/qBreakpad
+	url = https://github.com/jiakuan/qBreakpad.git
