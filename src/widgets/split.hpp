@@ -83,6 +83,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
+    void focusInEvent(QFocusEvent *event) override;
 
 private:
     SplitContainer *container;
@@ -109,7 +110,7 @@ private:
 
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);
-    void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);
+    void handleModifiers(Qt::KeyboardModifiers modifiers);
 
 public slots:
     // Add new split to the notebook page that this chat widget is in

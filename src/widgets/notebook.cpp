@@ -120,25 +120,65 @@ void Notebook::select(QWidget *page)
     if (page != nullptr) {
         page->setHidden(false);
 
-        NotebookTab *tab = this->getTabFromPage(page);
-        tab->setSelected(true);
-        tab->raise();
+        assert(this->containsPage(page));
+        Item &item = this->findItem(page);
+
+        item.tab->setSelected(true);
+        item.tab->raise();
+
+        if (item.selectedWidget == nullptr) {
+            item.page->setFocus();
+        } else {
+            if (containsChild(page, item.selectedWidget)) {
+                qDebug() << item.selectedWidget;
+                item.selectedWidget->setFocus(Qt::MouseFocusReason);
+            } else {
+                qDebug() << "Notebook: selected child of page doesn't exist anymore";
+            }
+        }
     }
 
     if (this->selectedPage != nullptr) {
         this->selectedPage->setHidden(true);
 
-        NotebookTab *tab = this->getTabFromPage(selectedPage);
-        tab->setSelected(false);
+        Item &item = this->findItem(selectedPage);
+        item.tab->setSelected(false);
 
         //        for (auto split : this->selectedPage->getSplits()) {
         //            split->updateLastReadMessage();
         //        }
+
+        item.selectedWidget = this->selectedPage->focusWidget();
     }
 
     this->selectedPage = page;
 
     this->performLayout();
+}
+
+bool Notebook::containsPage(QWidget *page)
+{
+    return std::any_of(this->items.begin(), this->items.end(),
+                       [page](const auto &item) { return item.page == page; });
+}
+
+Notebook::Item &Notebook::findItem(QWidget *page)
+{
+    auto it = std::find_if(this->items.begin(), this->items.end(),
+                           [page](const auto &item) { return page == item.page; });
+    assert(it != this->items.end());
+    return *it;
+}
+
+bool Notebook::containsChild(const QObject *obj, const QObject *child)
+{
+    return std::any_of(obj->children().begin(), obj->children().end(), [child](const QObject *o) {
+        if (o == child) {
+            return true;
+        }
+
+        return containsChild(o, child);
+    });
 }
 
 void Notebook::selectIndex(int index)

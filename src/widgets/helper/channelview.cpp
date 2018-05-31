@@ -123,7 +123,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         }
     });
 
-    QTimer::singleShot(1, this, [this] {
+    QTimer::singleShot(1000, this, [this] {
         this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0,
                                     this->scrollBar.width(), this->height());
     });

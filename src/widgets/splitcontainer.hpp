@@ -195,6 +195,7 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
 
+    void focusInEvent(QFocusEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;

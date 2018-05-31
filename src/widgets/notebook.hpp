@@ -59,10 +59,16 @@ private:
     struct Item {
         NotebookTab *tab;
         QWidget *page;
+        QWidget *selectedWidget = nullptr;
     };
 
     QList<Item> items;
     QWidget *selectedPage = nullptr;
+
+    bool containsPage(QWidget *page);
+    Item &findItem(QWidget *page);
+
+    static bool containsChild(const QObject *obj, const QObject *child);
 
     NotebookButton addButton;
     std::vector<NotebookButton *> customButtons;

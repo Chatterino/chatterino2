@@ -459,6 +459,18 @@ void SplitContainer::leaveEvent(QEvent *)
     this->update();
 }
 
+void SplitContainer::focusInEvent(QFocusEvent *)
+{
+    if (this->baseNode.findNodeContainingSplit(this->selected) != nullptr) {
+        this->selected->setFocus();
+        return;
+    }
+
+    if (this->splits.size() != 0) {
+        this->splits.front()->setFocus();
+    }
+}
+
 void SplitContainer::refreshTabTitle()
 {
     if (this->tab == nullptr) {

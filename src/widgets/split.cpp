@@ -279,19 +279,19 @@ void Split::paintEvent(QPaintEvent *)
 
 void Split::mouseMoveEvent(QMouseEvent *event)
 {
-    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::resizeEvent(QResizeEvent *event)
@@ -305,7 +305,7 @@ void Split::enterEvent(QEvent *event)
 {
     this->isMouseOver = true;
 
-    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 
     if (modifierStatus == Qt::AltModifier ||
         modifierStatus == (Qt::AltModifier | Qt::ControlModifier)) {
@@ -319,10 +319,15 @@ void Split::leaveEvent(QEvent *event)
 
     this->overlay->hide();
 
-    this->handleModifiers(event, QGuiApplication::queryKeyboardModifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
-void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
+void Split::focusInEvent(QFocusEvent *event)
+{
+    this->giveFocus(event->reason());
+}
+
+void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
 {
     if (modifierStatus != modifiers) {
         modifierStatus = modifiers;

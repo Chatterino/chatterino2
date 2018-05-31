@@ -93,6 +93,7 @@ void Application::initialize()
 
     this->settings->load();
     this->commands->load();
+    this->logging->initialize();
     this->windows->initialize();
 
     this->resources->initialize();
@@ -105,7 +106,6 @@ void Application::initialize()
     this->accounts->load();
 
     this->twitch.server->initialize();
-    this->logging->initialize();
 
     // XXX
     this->settings->updateWordTypeMask();

@@ -228,8 +228,10 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->joinedUserMutex);
 
-            this->addMessage(messages::Message::createSystemMessage("Users joined: " +
-                                                                    this->joinedUsers.join(", ")));
+            auto message = messages::Message::createSystemMessage("Users joined: " +
+                                                                  this->joinedUsers.join(", "));
+            message->flags |= messages::Message::Collapsed;
+            this->addMessage(message);
             this->joinedUsers.clear();
             this->joinedUsersMergeQueued = false;
         });
@@ -255,8 +257,10 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->partedUserMutex);
 
-            this->addMessage(messages::Message::createSystemMessage("Users parted: " +
-                                                                    this->partedUsers.join(", ")));
+            auto message = messages::Message::createSystemMessage("Users parted: " +
+                                                                  this->partedUsers.join(", "));
+            message->flags |= messages::Message::Collapsed;
+            this->addMessage(message);
             this->partedUsers.clear();
 
             this->partedUsersMergeQueued = false;
