@@ -8,6 +8,7 @@ namespace singletons {
 class NativeMessagingManager
 {
 public:
+    // fourtf: don't add this class to the application class
     NativeMessagingManager();
 
     ~NativeMessagingManager() = delete;

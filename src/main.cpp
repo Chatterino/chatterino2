@@ -1,6 +1,7 @@
 #include "application.hpp"
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
+#include "singletons/updatemanager.hpp"
 #include "util/networkmanager.hpp"
 #include "widgets/lastruncrashdialog.hpp"
 
@@ -26,6 +27,7 @@
 
 int runGui(int argc, char *argv[]);
 void runNativeMessagingHost();
+void installCustomPalette();
 
 int main(int argc, char *argv[])
 {
@@ -57,40 +59,13 @@ int runGui(int argc, char *argv[])
 
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
-    // borrowed from
-    // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
-    QPalette darkPalette = a.palette();
-
-    darkPalette.setColor(QPalette::Window, QColor(22, 22, 22));
-    darkPalette.setColor(QPalette::WindowText, Qt::white);
-    darkPalette.setColor(QPalette::Text, Qt::white);
-    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Base, QColor("#333"));
-    darkPalette.setColor(QPalette::AlternateBase, QColor("#444"));
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-    darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
-    darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
-    darkPalette.setColor(QPalette::Button, QColor(70, 70, 70));
-    darkPalette.setColor(QPalette::ButtonText, Qt::white);
-    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
-    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
-
-    qApp->setPalette(darkPalette);
-
-    // Install native event handler for hidpi on windows
-    //#ifdef USEWINSDK
-    //    a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
-    //#endif
+    installCustomPalette();
 
     // Initialize NetworkManager
     chatterino::util::NetworkManager::init();
+
+    // Check for upates
+    chatterino::singletons::UpdateManager::getInstance().checkForUpdates();
 
     // Initialize application
     chatterino::Application::instantiate(argc, argv);
@@ -105,7 +80,14 @@ int runGui(int argc, char *argv[])
     if (QFile::exists(runningPath)) {
 #ifndef DISABLE_CRASH_DIALOG
         chatterino::widgets::LastRunCrashDialog dialog;
-        dialog.exec();
+
+        switch (dialog.exec()) {
+            case QDialog::Accepted: {
+            }; break;
+            default: {
+                _exit(0);
+            }
+        }
 #endif
     } else {
         QFile runningFile(runningPath);
@@ -187,4 +169,34 @@ void runNativeMessagingHost()
 
         nm->sendToGuiProcess(QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
     }
+}
+
+void installCustomPalette()
+{
+    // borrowed from
+    // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
+    QPalette darkPalette = qApp->palette();
+
+    darkPalette.setColor(QPalette::Window, QColor(22, 22, 22));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Base, QColor("#333"));
+    darkPalette.setColor(QPalette::AlternateBase, QColor("#444"));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+    darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+    darkPalette.setColor(QPalette::Button, QColor(70, 70, 70));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+
+    qApp->setPalette(darkPalette);
 }

@@ -277,6 +277,7 @@ public:
     void getJSON(FinishedCallback onFinished)
     {
         this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes)->bool {
+
             auto object = parseJSONFromData(bytes);
             onFinished(object);
 

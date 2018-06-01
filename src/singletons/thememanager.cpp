@@ -142,7 +142,12 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
-    this->splits.dropPreviewBorder = QColor(0, 148, 255, 0x70);
+    this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
+    this->splits.dropTargetRect = QColor(0, 148, 255, 0x00);
+    this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
+    this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
+    this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
+
     // this->splits.border
     // this->splits.borderFocused
 
@@ -191,9 +196,9 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
 QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
 {
-    int r = color1.red() * (1 - ratio) + color2.red() * ratio;
-    int g = color1.green() * (1 - ratio) + color2.green() * ratio;
-    int b = color1.blue() * (1 - ratio) + color2.blue() * ratio;
+    int r = int(color1.red() * (1 - ratio) + color2.red() * ratio);
+    int g = int(color1.green() * (1 - ratio) + color2.green() * ratio);
+    int b = int(color1.blue() * (1 - ratio) + color2.blue() * ratio);
 
     return QColor(r, g, b, 255);
 }
@@ -201,22 +206,22 @@ QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qre
 void ThemeManager::normalizeColor(QColor &color)
 {
     if (this->isLight) {
-        if (color.lightnessF() > 0.5f) {
-            color.setHslF(color.hueF(), color.saturationF(), 0.5f);
+        if (color.lightnessF() > 0.5) {
+            color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
-        if (color.lightnessF() > 0.4f && color.hueF() > 0.1 && color.hueF() < 0.33333) {
+        if (color.lightnessF() > 0.4 && color.hueF() > 0.1 && color.hueF() < 0.33333) {
             color.setHslF(
                 color.hueF(), color.saturationF(),
                 color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
                                          color.saturationF() * 0.2);
         }
     } else {
-        if (color.lightnessF() < 0.5f) {
-            color.setHslF(color.hueF(), color.saturationF(), 0.5f);
+        if (color.lightnessF() < 0.5) {
+            color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
-        if (color.lightnessF() < 0.6f && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
+        if (color.lightnessF() < 0.6 && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
             color.setHslF(
                 color.hueF(), color.saturationF(),
                 color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *

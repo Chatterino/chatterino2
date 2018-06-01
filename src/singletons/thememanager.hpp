@@ -63,6 +63,10 @@ public:
         QColor borderFocused;
         QColor dropPreview;
         QColor dropPreviewBorder;
+        QColor dropTargetRect;
+        QColor dropTargetRectBorder;
+        QColor resizeHandle;
+        QColor resizeHandleBackground;
 
         struct {
             QColor border;

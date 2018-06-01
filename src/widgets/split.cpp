@@ -1,6 +1,7 @@
 #include "widgets/split.hpp"
 
 #include "application.hpp"
+#include "common.hpp"
 #include "providers/twitch/emotevalue.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
@@ -129,7 +130,7 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
-        if ((status == Qt::AltModifier || status == (Qt::AltModifier | Qt::ControlModifier)) &&
+        if ((status == showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
             this->isMouseOver) {
             this->overlay->show();
         } else {
@@ -307,8 +308,7 @@ void Split::enterEvent(QEvent *event)
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 
-    if (modifierStatus == Qt::AltModifier ||
-        modifierStatus == (Qt::AltModifier | Qt::ControlModifier)) {
+    if (modifierStatus == showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/) {
         this->overlay->show();
     }
 }

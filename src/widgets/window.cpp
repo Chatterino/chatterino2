@@ -6,6 +6,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "version.hpp"
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/notebook.hpp"
@@ -118,7 +119,7 @@ Window::Window(WindowType _type)
     //        ircManager.addFakeMessage(cheerMessages[index++ % cheerMessages.size()]);
     //    });
 
-    this->setWindowTitle("Chatterino 2 Development Build");
+    this->refreshWindowTitle("");
 
     this->notebook.setAllowUserTabManagement(true);
     this->notebook.setShowAddButton(true);
@@ -151,7 +152,7 @@ SplitNotebook &Window::getNotebook()
 
 void Window::refreshWindowTitle(const QString &username)
 {
-    this->setWindowTitle(username + " - Chatterino for Twitch");
+    this->setWindowTitle(username + " - Chatterino Beta " CHATTERINO_VERSION);
 }
 
 bool Window::event(QEvent *event)
