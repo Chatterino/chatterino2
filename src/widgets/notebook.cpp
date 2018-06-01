@@ -43,10 +43,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
-    if (!title.isEmpty()) {
-        tab->setTitle(title);
-        tab->useDefaultTitle = false;
-    }
+    tab->setCustomTitle(title);
 
     Item item;
     item.page = page;

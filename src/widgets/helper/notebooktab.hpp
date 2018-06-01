@@ -28,8 +28,14 @@ public:
 
     QWidget *page;
 
+    void setCustomTitle(const QString &title);
+    void resetCustomTitle();
+    bool hasCustomTitle() const;
+    const QString &getCustomTitle() const;
+    void setDefaultTitle(const QString &title);
+    const QString &getDefaultTitle() const;
     const QString &getTitle() const;
-    void setTitle(const QString &newTitle);
+
     bool isSelected() const;
     void setSelected(bool value);
 
@@ -63,12 +69,9 @@ private:
 
     Notebook *notebook_;
 
-    QString title_;
+    QString customTitle_;
+    QString defaultTitle_;
 
-public:
-    bool useDefaultTitle = true;
-
-private:
     bool selected_ = false;
     bool mouseOver_ = false;
     bool mouseDown_ = false;
@@ -83,6 +86,7 @@ private:
     QMenu menu_;
 
     QRect getXRect();
+    void titleUpdated();
 };
 
 }  // namespace widgets

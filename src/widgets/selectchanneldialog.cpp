@@ -100,7 +100,7 @@ SelectChannelDialog::SelectChannelDialog()
 
         // tab
         NotebookTab *tab = notebook->addPage(obj.getElement());
-        tab->setTitle("Twitch");
+        tab->setCustomTitle("Twitch");
     }
 
     // irc

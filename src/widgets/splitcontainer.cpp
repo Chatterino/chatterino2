@@ -506,10 +506,6 @@ void SplitContainer::refreshTabTitle()
         return;
     }
 
-    if (!this->tab->useDefaultTitle) {
-        return;
-    }
-
     QString newTitle = "";
     bool first = true;
 
@@ -531,7 +527,7 @@ void SplitContainer::refreshTabTitle()
         newTitle = "empty";
     }
 
-    this->tab->setTitle(newTitle);
+    this->tab->setDefaultTitle(newTitle);
 }
 
 int SplitContainer::getSplitCount()

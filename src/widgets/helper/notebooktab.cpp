@@ -41,24 +41,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
         TextInputDialog d(this);
 
         d.setWindowTitle("Change tab title (Leave empty for default behaviour)");
-        if (this->useDefaultTitle) {
-            d.setText("");
-        } else {
-            d.setText(this->getTitle());
-            d.highlightText();
-        }
+        d.setText(this->getCustomTitle());
+        d.highlightText();
 
         if (d.exec() == QDialog::Accepted) {
             QString newTitle = d.getText();
-            if (newTitle.isEmpty()) {
-                this->useDefaultTitle = true;
-
-                // fourtf: xD
-                //                this->page->refreshTitle();
-            } else {
-                this->useDefaultTitle = false;
-                this->setTitle(newTitle);
-            }
+            this->setCustomTitle(newTitle);
         }
     });
 
@@ -90,9 +78,9 @@ void NotebookTab::updateSize()
         FontStyle::UiTabs, float(qreal(this->getScale()) * this->devicePixelRatioF()));
 
     if (this->hasXButton()) {
-        width = int((metrics.width(this->title_) + 32) * scale);
+        width = int((metrics.width(this->getTitle()) + 32) * scale);
     } else {
-        width = int((metrics.width(this->title_) + 16) * scale);
+        width = int((metrics.width(this->getTitle()) + 16) * scale);
     }
 
     width = std::max<int>(this->height(), std::min(int(150 * scale), width));
@@ -103,18 +91,54 @@ void NotebookTab::updateSize()
     }
 }
 
-const QString &NotebookTab::getTitle() const
+const QString &NotebookTab::getCustomTitle() const
 {
-    return this->title_;
+    return this->customTitle_;
 }
 
-void NotebookTab::setTitle(const QString &newTitle)
+void NotebookTab::setCustomTitle(const QString &newTitle)
 {
-    if (this->title_ != newTitle) {
-        this->title_ = newTitle;
-        this->updateSize();
-        this->update();
+    if (this->customTitle_ != newTitle) {
+        this->customTitle_ = newTitle;
+        this->titleUpdated();
     }
+}
+
+void NotebookTab::resetCustomTitle()
+{
+    this->setCustomTitle(QString());
+}
+
+bool NotebookTab::hasCustomTitle() const
+{
+    return !this->customTitle_.isEmpty();
+}
+
+void NotebookTab::setDefaultTitle(const QString &title)
+{
+    if (this->defaultTitle_ != title) {
+        this->defaultTitle_ = title;
+
+        if (this->customTitle_.isEmpty()) {
+            this->titleUpdated();
+        }
+    }
+}
+
+const QString &NotebookTab::getDefaultTitle() const
+{
+    return this->defaultTitle_;
+}
+
+const QString &NotebookTab::getTitle() const
+{
+    return this->customTitle_.isEmpty() ? this->defaultTitle_ : this->customTitle_;
+}
+
+void NotebookTab::titleUpdated()
+{
+    this->updateSize();
+    this->update();
 }
 
 bool NotebookTab::isSelected() const
