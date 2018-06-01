@@ -82,29 +82,24 @@ void NotebookTab::themeRefreshEvent()
 
 void NotebookTab::updateSize()
 {
-    auto app = getApp();
     float scale = getScale();
 
     int width;
     QFontMetrics metrics = getApp()->fonts->getFontMetrics(
-        FontStyle::UiTabs, this->getScale() * this->devicePixelRatioF());
+        FontStyle::UiTabs, float(this->getScale() * this->devicePixelRatioF()));
 
     if (this->hasXButton()) {
-        width = (int)((metrics.width(this->title) + 32) * scale);
+        width = int((metrics.width(this->title) + 32) * scale);
     } else {
-        width = (int)((metrics.width(this->title) + 16) * scale);
+        width = int((metrics.width(this->title) + 16) * scale);
     }
 
-    width = std::min((int)(150 * scale), width);
+    width = std::max<int>(this->height(), std::min(int(150 * scale), width));
 
     if (this->width() != width) {
-        this->resize(width, (int)(NOTEBOOK_TAB_HEIGHT * scale));
+        this->resize(width, int(NOTEBOOK_TAB_HEIGHT * scale));
         this->notebook->performLayout();
     }
-
-    //    if (this->parent() != nullptr) {
-    //        (static_cast<Notebook2 *>(this->parent()))->performLayout(true);
-    //    }
 }
 
 const QString &NotebookTab::getTitle() const
