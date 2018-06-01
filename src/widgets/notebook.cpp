@@ -90,7 +90,7 @@ void Notebook::removePage(QWidget *page)
         }
     }
 
-    this->performLayout();
+    this->performLayout(true);
 }
 
 void Notebook::removeCurrentPage()
@@ -262,7 +262,7 @@ void Notebook::rearrangePage(QWidget *page, int index)
 {
     this->items.move(this->indexOf(page), index);
 
-    this->performLayout();
+    this->performLayout(true);
 }
 
 bool Notebook::getAllowUserTabManagement() const
@@ -307,7 +307,7 @@ void Notebook::performLayout(bool animated)
 {
     auto app = getApp();
 
-    int xStart = (int)(2 * this->getScale());
+    int xStart = int(2 * this->getScale());
 
     int x = xStart, y = 0;
     float scale = this->getScale();
@@ -349,12 +349,12 @@ void Notebook::performLayout(bool animated)
     for (auto i = this->items.begin(); i != this->items.end(); i++) {
         //        int yOffset = i->tab->isSelected() ? 0 : 1;
 
-        if (!first &&
-            (i == this->items.end() && this->showAddButton ? tabHeight : 0) + x + i->tab->width() >
-                width())  //
-        {
+        bool wrap =
+            !first && (((i + 1 == this->items.end() && this->showAddButton) ? tabHeight : 0) + x +
+                       i->tab->width()) > width();
+
+        if (wrap) {
             y += i->tab->height();
-            //            y += 20;
             i->tab->moveAnimated(QPoint(xStart, y), animated);
             x = i->tab->width() + xStart;
         } else {
@@ -376,7 +376,7 @@ void Notebook::performLayout(bool animated)
         this->update();
     }
 
-    y += (int)(3 * scale);
+    y += int(3 * scale);
 
     for (auto &i : this->items) {
         i.tab->raise();

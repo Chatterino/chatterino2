@@ -97,6 +97,12 @@ void SplitContainer::hideResizeHandles()
     }
 }
 
+void SplitContainer::resetMouseStatus()
+{
+    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->update();
+}
+
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
     util::assertInGuiThread();
@@ -468,6 +474,10 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 
 void SplitContainer::mouseMoveEvent(QMouseEvent *event)
 {
+    if (Split::modifierStatus == showSplitOverlayModifiers) {
+        this->setCursor(Qt::PointingHandCursor);
+    }
+
     this->mouseOverPoint = event->pos();
     this->update();
 }

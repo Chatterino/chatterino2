@@ -311,6 +311,10 @@ void Split::enterEvent(QEvent *event)
     if (modifierStatus == showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/) {
         this->overlay->show();
     }
+
+    if (this->container != nullptr) {
+        this->container->resetMouseStatus();
+    }
 }
 
 void Split::leaveEvent(QEvent *event)

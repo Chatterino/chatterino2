@@ -45,7 +45,7 @@ public:
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
-    void performLayout(bool animate = true);
+    void performLayout(bool animate = false);
 
 protected:
     virtual void scaleChangedEvent(float scale) override;

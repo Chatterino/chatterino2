@@ -188,6 +188,7 @@ public:
 
     void setTab(NotebookTab *tab);
     void hideResizeHandles();
+    void resetMouseStatus();
 
     static bool isDraggingSplit;
     static Split *draggingSplit;

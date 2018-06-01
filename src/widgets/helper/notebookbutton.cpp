@@ -45,12 +45,20 @@ void NotebookButton::paintEvent(QPaintEvent *)
     float h = height(), w = width();
 
     if (icon == IconPlus) {
-        painter.fillRect(
-            QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1, w - ((h / 12) * 5), (h / 12) * 1),
-            foreground);
-        painter.fillRect(
-            QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1, (h / 12) * 1, w - ((h / 12) * 5)),
-            foreground);
+        painter.setPen([&] {
+            QColor tmp = foreground;
+            if (!this->mouseOver) {
+                tmp.setAlpha(180);
+            }
+            return tmp;
+        }());
+        QRect rect = this->rect();
+        int s = h * 4 / 9;
+
+        painter.drawLine(rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
+                         rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
+        painter.drawLine(rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
+                         rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
     } else if (icon == IconUser) {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
