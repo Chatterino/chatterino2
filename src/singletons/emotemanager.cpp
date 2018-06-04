@@ -130,15 +130,18 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
             QString code = emoteObject.value("code").toString();
             // emoteObject.value("imageType").toString();
 
-            QString link = linkTemplate;
-            link.detach();
-
             auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&] {
                 util::EmoteData emoteData;
+                QString link = linkTemplate;
+                link.detach();
                 emoteData.image1x = new Image(link.replace("{{id}}", id).replace("{{image}}", "1x"),
                                               1, code, code + "<br />Channel BTTV Emote");
+                link = linkTemplate;
+                link.detach();
                 emoteData.image2x = new Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
                                               0.5, code, code + "<br />Channel BTTV Emote");
+                link = linkTemplate;
+                link.detach();
                 emoteData.image3x = new Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
                                               0.25, code, code + "<br />Channel BTTV Emote");
                 emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
