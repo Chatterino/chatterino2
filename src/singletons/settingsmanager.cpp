@@ -42,7 +42,10 @@ void SettingManager::initialize()
         app->windows->layoutVisibleChatWidgets();
     });
 
-    this->emoteScale.connect([](auto, auto) { getApp()->windows->layoutVisibleChatWidgets(); });
+    this->emoteScale.connect([](auto, auto) {
+        getApp()->fonts->incGeneration();
+        getApp()->windows->layoutVisibleChatWidgets();
+    });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()

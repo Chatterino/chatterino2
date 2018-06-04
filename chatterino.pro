@@ -210,7 +210,8 @@ SOURCES += \
     src/widgets/notificationpopup.cpp \
     src/controllers/taggedusers/taggeduserscontroller.cpp \
     src/controllers/taggedusers/taggeduser.cpp \
-    src/controllers/taggedusers/taggedusersmodel.cpp
+    src/controllers/taggedusers/taggedusersmodel.cpp \
+    src/util/emotemap.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \

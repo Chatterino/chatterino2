@@ -97,19 +97,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
                 return;
             }
 
-            int quality = getApp()->settings->preferredEmoteQuality;
+            Image *_image = this->data.getImage(container.getScale());
 
-            Image *_image;
-            if (quality == 3 && this->data.image3x != nullptr) {
-                _image = this->data.image3x;
-            } else if (quality >= 2 && this->data.image2x != nullptr) {
-                _image = this->data.image2x;
-            } else {
-                _image = this->data.image1x;
-            }
-
-            QSize size((int)(container.getScale() * _image->getScaledWidth()),
-                       (int)(container.getScale() * _image->getScaledHeight()));
+            QSize size(int(container.getScale() * _image->getScaledWidth()),
+                       int(container.getScale() * _image->getScaledHeight()));
 
             container.addElement(
                 (new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));

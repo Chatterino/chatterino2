@@ -78,10 +78,10 @@ public:
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    // 0 = Smallest size
-    // 1 = One size above 0 (usually size of 0 * 2)
-    // 2 = One size above 1 (usually size of 1 * 2)
-    // etc...
+    // 0 = No preference
+    // 1 = 1x
+    // 2 = 2x
+    // 3 = 3x
     IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
 
     /// Links
