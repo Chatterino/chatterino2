@@ -60,6 +60,8 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 
     this->performLayout();
 
+    tab->show();
+
     return tab;
 }
 
