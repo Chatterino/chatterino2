@@ -95,7 +95,10 @@ Split::Split(QWidget *parent)
 
     this->input.ui.textEdit->installEventFilter(parent);
 
-    this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
+    this->view.mouseDown.connect([this](QMouseEvent *) {
+        //
+        this->giveFocus(Qt::MouseFocusReason);
+    });
     this->view.selectionChanged.connect([this]() {
         if (view.hasSelection()) {
             this->input.clearSelection();

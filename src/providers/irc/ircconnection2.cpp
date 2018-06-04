@@ -7,7 +7,7 @@ namespace irc {
 IrcConnection::IrcConnection(QObject *parent)
     : Communi::IrcConnection(parent)
 {
-    this->pingTimer_.setInterval(10000);
+    this->pingTimer_.setInterval(5000);
     this->pingTimer_.start();
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
         if (!this->recentlyReceivedMessage_.load()) {
@@ -17,23 +17,18 @@ IrcConnection::IrcConnection(QObject *parent)
         this->recentlyReceivedMessage_ = false;
     });
 
-    this->reconnectTimer_.setInterval(10000);
+    this->reconnectTimer_.setInterval(5000);
     this->reconnectTimer_.setSingleShot(true);
     QObject::connect(&this->reconnectTimer_, &QTimer::timeout,
                      [this] { reconnectRequested.invoke(); });
 
-    QObject::connect(this, &Communi::IrcConnection::messageReceived,
-                     [this](Communi::IrcMessage *message) {
-                         if (message->command() == "PONG") {
-                             qDebug() << "PONG";
-                         }
-                         this->recentlyReceivedMessage_ = true;
+    QObject::connect(this, &Communi::IrcConnection::messageReceived, [this](Communi::IrcMessage *) {
+        this->recentlyReceivedMessage_ = true;
 
-                         if (this->reconnectTimer_.isActive()) {
-                             this->reconnectTimer_.stop();
-                             qDebug() << "reconnect stopped";
-                         }
-                     });
+        if (this->reconnectTimer_.isActive()) {
+            this->reconnectTimer_.stop();
+        }
+    });
 }
 
 }  // namespace irc

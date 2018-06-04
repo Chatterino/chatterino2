@@ -813,6 +813,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 {
     auto app = getApp();
 
+    this->mouseDown.invoke(event);
+
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -856,8 +858,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
             auto selectionItem = SelectionItem(messageIndex, index);
             this->setSelection(selectionItem, selectionItem);
-
-            this->mouseDown.invoke(event);
         } break;
 
         case Qt::RightButton: {
