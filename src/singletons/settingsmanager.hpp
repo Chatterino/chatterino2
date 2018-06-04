@@ -40,7 +40,8 @@ public:
     BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting seperateMessages = {"/appearance/messages/separateMessages", false};
-    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
+    //    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
+    IntSetting collpseMessagesMinLines = {"/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
                                               false};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};

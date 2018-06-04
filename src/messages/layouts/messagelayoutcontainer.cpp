@@ -9,7 +9,7 @@
 #include <QPainter>
 
 #define COMPACT_EMOTES_OFFSET 6
-#define MAX_UNCOLLAPSED_LINES 3
+#define MAX_UNCOLLAPSED_LINES (getApp()->settings->collpseMessagesMinLines.getValue())
 
 namespace chatterino {
 namespace messages {
@@ -214,7 +214,7 @@ void MessageLayoutContainer::end()
 
 bool MessageLayoutContainer::canCollapse()
 {
-    return getApp()->settings->collapseLongMessages.getValue() &&
+    return getApp()->settings->collpseMessagesMinLines.getValue() > 0 &&
            this->flags & Message::MessageFlags::Collapsed;
 }
 

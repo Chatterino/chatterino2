@@ -49,7 +49,7 @@ void SettingManager::initialize()
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
     this->seperateMessages.connect(
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-    this->collapseLongMessages.connect(
+    this->collpseMessagesMinLines.connect(
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
 }
 

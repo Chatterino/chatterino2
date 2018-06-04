@@ -82,8 +82,21 @@ AppearancePage::AppearancePage()
 
         messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
 
-        messages.append(this->createCheckBox("Collapse large messages (3+ lines)",
-                                             app->settings->collapseLongMessages));
+        {
+            auto *combo = new QComboBox(this);
+            combo->addItems({"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                             "13", "14", "15"});
+
+            QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
+                getApp()->settings->collpseMessagesMinLines = str.toInt();
+            });
+
+            auto hbox = messages.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Collapse messages longer than");
+            hbox.append(combo);
+            hbox.emplace<QLabel>("lines");
+        }
+
         messages.append(this->createCheckBox("Seperate messages", app->settings->seperateMessages));
         messages.append(this->createCheckBox("Alternate message background color",
                                              app->settings->alternateMessageBackground));
@@ -130,7 +143,7 @@ AppearancePage::AppearancePage()
     }
 
     layout->addStretch(1);
-}
+}  // namespace settingspages
 
 QLayout *AppearancePage::createThemeColorChanger()
 {
