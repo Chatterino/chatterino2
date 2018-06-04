@@ -547,13 +547,14 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
 {
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
+    _emoteName.replace(">", "&gt;");
 
     static QMap<QString, QString> emoteNameReplacements{
-        {"[oO](_|\\.)[oO]", "o_O"}, {"\\&gt\\;\\(", ">("}, {"\\&lt\\;3", "<3"},
-        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},  {"\\:-?[\\\\/]", ":/"},
-        {"\\:-?[z|Z|\\|]", ":z"},   {"\\:-?\\(", ":("},    {"\\:-?\\)", ":)"},
-        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},  {"\\;-?\\)", ";)"},
-        {"R-?\\)", "R-)"},
+        {"\\:-?\\)", ":-)"},        {"\\:-?\\(", ":-("},        {"\\:-?D", ":-D"},
+        {"\\&gt\\;\\(", "&gt;("},   {"\\:-?[z|Z|\\|]", ":-Z"},  {"[oO](_|\\.)[oO]", "O_o"},
+        {"B-?\\)", "B-)"},          {"\\:-?(o|O)", ":-O"},      {"\\&lt\\;3", "&lt;3"},
+        {"\\:-?[\\\\/]", ":-/"},    {"\\;-?\\)", ";-)"},        {"\\:-?(p|P)", ":-P"},
+        {"\\;-?(p|P)", ";-P"},      {"R-?\\)", "R-)"},
     };
 
     auto it = emoteNameReplacements.find(_emoteName);
