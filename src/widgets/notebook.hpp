@@ -1,5 +1,6 @@
 #pragma once
 
+#include "pajlada/signals/signal.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
@@ -80,13 +81,16 @@ private:
     NotebookTab *getTabFromPage(QWidget *page);
 };
 
-class SplitNotebook : public Notebook
+class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder
 {
 public:
     SplitNotebook(Window *parent);
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
+
+private:
+    std::vector<pajlada::Signals::ScopedConnection> uniqueConnections;
 };
 
 }  // namespace widgets
