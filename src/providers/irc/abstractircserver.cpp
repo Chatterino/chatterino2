@@ -33,6 +33,10 @@ AbstractIrcServer::AbstractIrcServer()
                      [this] { this->onConnected(); });
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
+
+    // listen to reconnect request
+    this->readConnection->reconnectRequested.connect([this] { this->connect(); });
+    //    this->writeConnection->reconnectRequested.connect([this] { this->connect(); });
 }
 
 IrcConnection *AbstractIrcServer::getReadConnection() const
