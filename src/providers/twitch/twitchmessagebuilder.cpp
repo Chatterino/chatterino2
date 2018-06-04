@@ -292,6 +292,21 @@ void TwitchMessageBuilder::parseUsername()
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
 
+    if (this->args.trimSubscriberUsername) {
+        static QRegularExpression fixName("^tmi.twitch.tv\\((\\w+)\\)$");
+
+        auto match = fixName.match(this->userName);
+        if (match.hasMatch()) {
+            this->userName = match.captured(1);
+        }
+    }
+
+    // display name
+    //    auto displayNameVariant = this->tags.value("display-name");
+    //    if (displayNameVariant.isValid()) {
+    //        this->userName = displayNameVariant.toString() + " (" + this->userName + ")";
+    //    }
+
     this->message->loginName = this->userName;
 }
 

@@ -41,6 +41,7 @@ struct Message {
         DisconnectedMessage = (1 << 8),
         Untimeout = (1 << 9),
         PubSub = (1 << 10),
+        Subscription = (1 << 11),
     };
 
     util::FlagsEnum<MessageFlags> flags;
@@ -66,6 +67,7 @@ private:
 
 public:
     static std::shared_ptr<Message> createSystemMessage(const QString &text);
+    static std::shared_ptr<Message> createMessage(const QString &text);
 
     static std::shared_ptr<Message> createTimeoutMessage(const QString &username,
                                                          const QString &durationInSeconds,

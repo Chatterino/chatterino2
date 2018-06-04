@@ -117,6 +117,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
         // scrollbar
         this->scrollbars.highlights.highlight = QColor("#ee6166");
+        this->scrollbars.highlights.subscription = QColor("#C466FF");
 
         // this->tabs.newMessage = {
         //     fg,
@@ -171,7 +172,10 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
     this->messages.backgrounds.highlighted =
-        blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
+        blendColors(themeColor, this->messages.backgrounds.regular, 0.6);
+    this->messages.backgrounds.subscription =
+        blendColors(QColor("#C466FF"), this->messages.backgrounds.regular, 0.7);
+
     // this->messages.backgrounds.resub
     // this->messages.backgrounds.whisper
     this->messages.disabled = getColor(0, sat, 1, 0.6);
@@ -180,7 +184,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     // Scrollbar
     this->scrollbars.background = splits.background;
-    this->scrollbars.background.setAlphaF(qreal(0.4));
+    this->scrollbars.background.setAlphaF(qreal(0.2));
     this->scrollbars.thumb = getColor(0, sat, 0.80);
     this->scrollbars.thumbSelected = getColor(0, sat, 0.7);
 

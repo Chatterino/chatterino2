@@ -33,7 +33,7 @@ public:
     // signals
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
-    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
+    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
     void addFakeMessage(const QString &data);
 

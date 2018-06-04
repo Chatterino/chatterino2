@@ -21,6 +21,8 @@ SBHighlight Message::getScrollBarHighlight() const
 {
     if (this->flags & Message::Highlighted) {
         return SBHighlight(SBHighlight::Highlight);
+    } else if (this->flags & Message::Subscription) {
+        return SBHighlight(SBHighlight::Subscription);
     }
     return SBHighlight();
 }
@@ -34,6 +36,17 @@ MessagePtr Message::createSystemMessage(const QString &text)
     message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
     message->flags |= MessageFlags::System;
     message->flags |= MessageFlags::DoNotTriggerNotification;
+    message->searchText = text;
+
+    return message;
+}
+
+MessagePtr Message::createMessage(const QString &text)
+{
+    MessagePtr message(new Message);
+
+    message->addElement(new TimestampElement(QTime::currentTime()));
+    message->addElement(new TextElement(text, MessageElement::Text, MessageColor::Text));
     message->searchText = text;
 
     return message;
@@ -64,7 +77,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
 
     if (reason.length() > 0) {
         text.append(": \"");
-        text.append(util::ParseTagString(reason));
+        text.append(util::parseTagString(reason));
         text.append("\"");
     }
     text.append(".");

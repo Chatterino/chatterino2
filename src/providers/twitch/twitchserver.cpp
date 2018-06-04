@@ -77,31 +77,7 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 
 void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
 {
-    QString channelName;
-    if (!trimChannelName(message->target(), channelName)) {
-        return;
-    }
-
-    this->onPrivateMessage.invoke(message);
-    auto chan = this->getChannelOrEmpty(channelName);
-
-    if (chan->isEmpty()) {
-        return;
-    }
-
-    messages::MessageParseArgs args;
-
-    TwitchMessageBuilder builder(chan.get(), message, args);
-
-    if (!builder.isIgnored()) {
-        messages::MessagePtr msg = builder.build();
-        if (msg->flags & messages::Message::Highlighted) {
-            this->mentionsChannel->addMessage(msg);
-            getApp()->highlights->addHighlight(msg);
-        }
-
-        chan->addMessage(msg);
-    }
+    IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
 }
 
 void TwitchServer::messageReceived(IrcMessage *message)
@@ -125,7 +101,7 @@ void TwitchServer::messageReceived(IrcMessage *message)
     } else if (command == "WHISPER") {
         handler.handleWhisperMessage(message);
     } else if (command == "USERNOTICE") {
-        handler.handleUserNoticeMessage(message);
+        handler.handleUserNoticeMessage(message, *this);
     } else if (command == "MODE") {
         handler.handleModeMessage(message);
     } else if (command == "NOTICE") {

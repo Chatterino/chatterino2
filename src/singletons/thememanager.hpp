@@ -98,7 +98,7 @@ public:
             QColor regular;
             QColor alternate;
             QColor highlighted;
-            // QColor resub;
+            QColor subscription;
             // QColor whisper;
         } backgrounds;
 
@@ -115,6 +115,7 @@ public:
         QColor thumbSelected;
         struct {
             QColor highlight;
+            QColor subscription;
         } highlights;
     } scrollbars;
 

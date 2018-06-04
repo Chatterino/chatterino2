@@ -1,6 +1,7 @@
 #include "ircmessagehandler.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
@@ -10,6 +11,9 @@
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/irchelpers.hpp"
+
+#include <IrcMessage>
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -22,6 +26,49 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
 {
     static IrcMessageHandler instance;
     return instance;
+}
+
+void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server)
+{
+    this->addMessage(message, message->target(), message->content(), server, false);
+}
+
+void IrcMessageHandler::addMessage(Communi::IrcMessage *message, const QString &target,
+                                   const QString &content, TwitchServer &server, bool isSub)
+{
+    QString channelName;
+    if (!trimChannelName(target, channelName)) {
+        return;
+    }
+
+    auto chan = server.getChannelOrEmpty(channelName);
+
+    if (chan->isEmpty()) {
+        return;
+    }
+
+    messages::MessageParseArgs args;
+    if (isSub) {
+        args.trimSubscriberUsername = true;
+    }
+
+    TwitchMessageBuilder builder(chan.get(), message, content, args);
+
+    if (isSub || !builder.isIgnored()) {
+        messages::MessagePtr msg = builder.build();
+
+        if (isSub) {
+            msg->flags |= messages::Message::Subscription;
+            msg->flags &= ~messages::Message::Highlighted;
+        } else {
+            if (msg->flags & messages::Message::Subscription) {
+                server.mentionsChannel->addMessage(msg);
+                getApp()->highlights->addHighlight(msg);
+            }
+        }
+
+        chan->addMessage(msg);
+    }
 }
 
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
@@ -178,9 +225,43 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
+void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server)
 {
-    // do nothing
+    auto data = message->toData();
+    static QRegularExpression findMessage(" USERNOTICE (#\\w+) :(.+)$");
+
+    auto match = findMessage.match(data);
+    auto target = match.captured(1);
+
+    if (match.hasMatch()) {
+        this->addMessage(message, target, match.captured(2), server, true);
+    }
+
+    auto tags = message->tags();
+    auto it = tags.find("system-msg");
+
+    if (it != tags.end()) {
+        auto newMessage =
+            messages::Message::createSystemMessage(util::parseTagString(it.value().toString()));
+
+        newMessage->flags |= messages::Message::Subscription;
+
+        QString channelName;
+
+        if (message->parameters().size() < 1) {
+            return;
+        }
+
+        if (!trimChannelName(message->parameter(0), channelName)) {
+            return;
+        }
+
+        auto chan = server.getChannelOrEmpty(channelName);
+
+        if (!chan->isEmpty()) {
+            chan->addMessage(newMessage);
+        }
+    }
 }
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
