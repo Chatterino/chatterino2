@@ -58,9 +58,15 @@ WindowManager::WindowManager()
     qDebug() << "init WindowManager";
 }
 
-void WindowManager::layoutVisibleChatWidgets(Channel *channel)
+void WindowManager::layoutChannelViews(Channel *channel)
 {
     this->layout.invoke(channel);
+}
+
+void WindowManager::forceLayoutChannelViews()
+{
+    this->incGeneration();
+    this->layoutChannelViews(nullptr);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -392,6 +398,16 @@ void WindowManager::closeAll()
     for (widgets::Window *window : windows) {
         window->close();
     }
+}
+
+int WindowManager::getGeneration() const
+{
+    return this->generation;
+}
+
+void WindowManager::incGeneration()
+{
+    this->generation++;
 }
 
 }  // namespace singletons

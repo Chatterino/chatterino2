@@ -46,16 +46,6 @@ public:
 
     util::EmoteData getTwitchEmoteById(long int id, const QString &emoteName);
 
-    int getGeneration()
-    {
-        return _generation;
-    }
-
-    void incGeneration()
-    {
-        _generation++;
-    }
-
     pajlada::Signals::NoArgSignal &getGifUpdateSignal();
 
     // Bit badge/emotes?
@@ -145,8 +135,6 @@ private:
     pajlada::Signals::NoArgSignal gifUpdateTimerSignal;
     QTimer gifUpdateTimer;
     bool gifUpdateTimerInitiated = false;
-
-    int _generation = 0;
 };
 
 }  // namespace singletons

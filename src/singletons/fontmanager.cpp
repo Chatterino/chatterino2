@@ -3,7 +3,9 @@
 #include <QDebug>
 #include <QtGlobal>
 
+#include "application.hpp"
 #include "util/assertinguithread.hpp"
+#include "windowmanager.hpp"
 
 #ifdef Q_OS_WIN32
 #define DEFAULT_FONT_FAMILY "Segoe UI"
@@ -27,27 +29,33 @@ FontManager::FontManager()
 {
     qDebug() << "init FontManager";
 
-    this->chatFontFamily.connect([this](const std::string &newValue, auto) {
+    this->chatFontFamily.connect([this](const std::string &, auto) {
         util::assertInGuiThread();
 
-        this->incGeneration();
+        if (getApp()->windows) {
+            getApp()->windows->incGeneration();
+        }
+
         for (auto &map : this->fontsByType) {
             map.clear();
         }
         this->fontChanged.invoke();
     });
 
-    this->chatFontSize.connect([this](const int &newValue, auto) {
+    this->chatFontSize.connect([this](const int &, auto) {
         util::assertInGuiThread();
 
-        this->incGeneration();
+        if (getApp()->windows) {
+            getApp()->windows->incGeneration();
+        }
+
         for (auto &map : this->fontsByType) {
             map.clear();
         }
         this->fontChanged.invoke();
     });
 
-    this->fontsByType.resize((size_t)EndType);
+    this->fontsByType.resize(size_t(EndType));
 }
 
 QFont FontManager::getFont(FontManager::Type type, float scale)
@@ -60,23 +68,13 @@ QFontMetrics FontManager::getFontMetrics(FontManager::Type type, float scale)
     return this->getOrCreateFontData(type, scale).metrics;
 }
 
-int FontManager::getGeneration() const
-{
-    return this->generation;
-}
-
-void FontManager::incGeneration()
-{
-    this->generation++;
-}
-
 FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
 {
     util::assertInGuiThread();
 
     assert(type >= 0 && type < EndType);
 
-    auto &map = this->fontsByType[(size_t)type];
+    auto &map = this->fontsByType[size_t(type)];
 
     // find element
     auto it = map.find(scale);
@@ -109,7 +107,7 @@ FontManager::FontData FontManager::createFontData(Type type, float scale)
 
         auto data = sizeScale[type];
         return FontData(QFont(QString::fromStdString(this->chatFontFamily.getValue()),
-                              this->chatFontSize.getValue() * data.scale * scale, data.weight,
+                              int(this->chatFontSize.getValue() * data.scale * scale), data.weight,
                               data.italic));
     }
 
@@ -128,7 +126,7 @@ FontManager::FontData FontManager::createFontData(Type type, float scale)
         };
 
         UiFontData &data = defaultSize[type];
-        QFont font(data.name, data.size * scale, data.weight, data.italic);
+        QFont font(data.name, int(data.size * scale), data.weight, data.italic);
         return FontData(font);
     }
 }

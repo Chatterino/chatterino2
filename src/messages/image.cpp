@@ -147,10 +147,10 @@ void Image::loadImage()
             loadedEventQueued = true;
 
             QTimer::singleShot(500, [] {
-                getApp()->emotes->incGeneration();
+                getApp()->windows->incGeneration();
 
                 auto app = getApp();
-                app->windows->layoutVisibleChatWidgets();
+                app->windows->layoutChannelViews();
                 loadedEventQueued = false;
             });
         }

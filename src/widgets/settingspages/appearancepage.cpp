@@ -51,25 +51,23 @@ AppearancePage::AppearancePage()
         auto form = application.emplace<QFormLayout>();
 
         auto *theme = this->createComboBox({THEME_ITEMS}, app->themes->themeName);
-        QObject::connect(theme, &QComboBox::currentTextChanged, [](const QString &) {
-            getApp()->fonts->incGeneration();
-            getApp()->windows->repaintVisibleChatWidgets();
-        });
+        QObject::connect(theme, &QComboBox::currentTextChanged,
+                         [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
 
-        // clang-format off
-            form->addRow("Theme:",       theme);
-            // form->addRow("Theme color:", this->createThemeColorChanger());
-            form->addRow("Font:",        this->createFontChanger());
+        form->addRow("Theme:", theme);
+        // form->addRow("Theme color:", this->createThemeColorChanger());
+        form->addRow("Font:", this->createFontChanger());
 
-            form->addRow("Tabs:",        this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
-    #ifndef USEWINSDK
-            form->addRow("",             this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
-            form->addRow("",             this->createCheckBox(TAB_USER, app->settings->hideUserButton));
-    #endif
+        form->addRow("Tabs:", this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
+#ifndef USEWINSDK
+        form->addRow("", this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
+        form->addRow("", this->createCheckBox(TAB_USER, app->settings->hideUserButton));
+#endif
 
-            form->addRow("Scrolling:",   this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
-            form->addRow("",			 this->createCheckBox(SCROLL_NEWMSG, app->settings->enableSmoothScrollingNewMessages));
-        // clang-format on
+        form->addRow("Scrolling:",
+                     this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
+        form->addRow("", this->createCheckBox(SCROLL_NEWMSG,
+                                              app->settings->enableSmoothScrollingNewMessages));
     }
 
     auto messages = layout.emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
@@ -84,27 +82,11 @@ AppearancePage::AppearancePage()
 
         messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
 
-        auto *collapseMessages = this->createCheckBox("Collapse large messages (3+ lines)",
-                                                      app->settings->collapseLongMessages);
-        QObject::connect(collapseMessages, &QCheckBox::toggled,
-                         [] { getApp()->windows->layoutVisibleChatWidgets(); });
-        messages.append(collapseMessages);
-        {
-            auto checkbox =
-                this->createCheckBox("Seperate messages", app->settings->seperateMessages);
-            messages.append(checkbox);
-            QObject::connect(checkbox, &QCheckBox::toggled,
-                             [](bool) { getApp()->windows->repaintVisibleChatWidgets(); });
-        }
-        {
-            auto checkbox = this->createCheckBox("Alternate message background color",
-                                                 app->settings->alternateMessageBackground);
-            messages.append(checkbox);
-            QObject::connect(checkbox, &QCheckBox::toggled, [](bool) {
-                getApp()->fonts->incGeneration();  // fourtf: hacky solution
-                getApp()->windows->repaintVisibleChatWidgets();
-            });
-        }
+        messages.append(this->createCheckBox("Collapse large messages (3+ lines)",
+                                             app->settings->collapseLongMessages));
+        messages.append(this->createCheckBox("Seperate messages", app->settings->seperateMessages));
+        messages.append(this->createCheckBox("Alternate message background color",
+                                             app->settings->alternateMessageBackground));
         messages.append(this->createCheckBox("Show message length while typing",
                                              app->settings->showMessageLength));
 
@@ -160,7 +142,7 @@ QLayout *AppearancePage::createThemeColorChanger()
     // SLIDER
     QSlider *slider = new QSlider(Qt::Horizontal);
     layout->addWidget(slider);
-    slider->setValue(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100);
+    slider->setValue(int(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100));
 
     // BUTTON
     QPushButton *button = new QPushButton;

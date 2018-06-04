@@ -39,13 +39,18 @@ void SettingManager::initialize()
 
     this->timestampFormat.connect([](auto, auto) {
         auto app = getApp();
-        app->windows->layoutVisibleChatWidgets();
+        app->windows->layoutChannelViews();
     });
 
-    this->emoteScale.connect([](auto, auto) {
-        getApp()->fonts->incGeneration();
-        getApp()->windows->layoutVisibleChatWidgets();
-    });
+    this->emoteScale.connect([](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
+
+    this->timestampFormat.connect([](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
+    this->alternateMessageBackground.connect(
+        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
+    this->seperateMessages.connect(
+        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
+    this->collapseLongMessages.connect(
+        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
 }
 
 MessageElement::Flags SettingManager::getWordFlags()
