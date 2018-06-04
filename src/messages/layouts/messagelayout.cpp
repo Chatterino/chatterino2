@@ -179,8 +179,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
         QBrush brush(color, Qt::VerPattern);
 
-        painter.fillRect(0, y + this->container_.getHeight() - 1, this->container_.getWidth(), 1,
-                         brush);
+        painter.fillRect(0, y + this->container_.getHeight() - 1, pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;

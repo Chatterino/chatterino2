@@ -108,6 +108,7 @@ AppearancePage::AppearancePage()
 
     auto emotes = layout.emplace<QGroupBox>("Emotes").setLayoutType<QVBoxLayout>();
     {
+        /*
         emotes.append(
             this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
         emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
@@ -115,6 +116,7 @@ AppearancePage::AppearancePage()
         emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
                                            app->settings->enableFfzEmotes));
         emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
+        */
         emotes.append(
             this->createCheckBox("Enable animations", app->settings->enableGifAnimations));
 
