@@ -284,8 +284,8 @@ void EmoteManager::loadEmojis()
 
         QString unicodeString = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
 
-        QString url = "https://cdnjs.cloudflare.com/ajax/libs/"
-                      "emojione/2.2.6/assets/png/" +
+        QString url = "https://cdn.jsdelivr.net/"
+                      "emojione/assets/3.1/png/64/" +
                       code + ".png";
 
         EmojiData emojiData{
