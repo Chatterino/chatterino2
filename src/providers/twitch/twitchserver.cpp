@@ -9,9 +9,10 @@
 #include "providers/twitch/twitchmessagebuilder.hpp"
 #include "util/posttothread.hpp"
 
+#include <IrcCommand>
 #include <cassert>
 
-using namespace Communi;
+// using namespace Communi;
 using namespace chatterino::singletons;
 
 namespace chatterino {
@@ -32,7 +33,8 @@ void TwitchServer::initialize()
         [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
+void TwitchServer::initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
+                                        bool isWrite)
 {
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 
@@ -57,9 +59,9 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
         //        this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/membership"));
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6667);
@@ -75,15 +77,15 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
     return std::shared_ptr<Channel>(channel);
 }
 
-void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
+void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
 }
 
-void TwitchServer::messageReceived(IrcMessage *message)
+void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
     //    this->readConnection
-    if (message->type() == IrcMessage::Type::Private) {
+    if (message->type() == Communi::IrcMessage::Type::Private) {
         // We already have a handler for private messages
         return;
     }
@@ -105,7 +107,7 @@ void TwitchServer::messageReceived(IrcMessage *message)
     } else if (command == "MODE") {
         handler.handleModeMessage(message);
     } else if (command == "NOTICE") {
-        handler.handleNoticeMessage(static_cast<IrcNoticeMessage *>(message));
+        handler.handleNoticeMessage(static_cast<Communi::IrcNoticeMessage *>(message));
     } else if (command == "JOIN") {
         handler.handleJoinMessage(message);
     } else if (command == "PART") {
@@ -113,13 +115,15 @@ void TwitchServer::messageReceived(IrcMessage *message)
     }
 }
 
-void TwitchServer::writeConnectionMessageReceived(IrcMessage *message)
+void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 {
     switch (message->type()) {
-        case IrcMessage::Type::Notice: {
+        case Communi::IrcMessage::Type::Notice: {
             IrcMessageHandler::getInstance().handleWriteConnectionNoticeMessage(
-                static_cast<IrcNoticeMessage *>(message));
+                static_cast<Communi::IrcNoticeMessage *>(message));
         } break;
+
+        default:;
     }
 }
 
@@ -177,20 +181,6 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &chan
 
     return Channel::getEmpty();
 }
-
-// QString TwitchServer::getLastWhisperedPerson() const
-//{
-//    std::lock_guard<std::mutex> guard(this->lastWhisperedPersonMutex);
-
-//    return this->lastWhisperedPerson;
-//}
-
-// void TwitchServer::setLastWhisperedPerson(const QString &person)
-//{
-//    std::lock_guard<std::mutex> guard(this->lastWhisperedPersonMutex);
-
-//    this->lastWhisperedPerson = person;
-//}
 
 QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
 {

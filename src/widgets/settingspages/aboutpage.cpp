@@ -36,31 +36,35 @@ AboutPage::AboutPage()
         //        palette.setColor(QPalette::Link, "#a5cdff");
         //        palette.setColor(QPalette::LinkVisited, "#a5cdff");
 
-        auto created = layout.emplace<QLabel>();
+        /*auto xd = layout.emplace<QGroupBox>("Created by...");
         {
-            created->setText(
-                "Twitch Chat Client created by <a href=\"https://github.com/fourtf\">fourtf</a>");
-            created->setTextFormat(Qt::RichText);
-            created->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                             Qt::LinksAccessibleByKeyboard |
-                                             Qt::LinksAccessibleByKeyboard);
-            created->setOpenExternalLinks(true);
-            //        created->setPalette(palette);
-        }
+            auto created = xd.emplace<QLabel>();
+            {
+                created->setText("Created by <a href=\"https://github.com/fourtf\">fourtf</a><br>"
+                                 "with big help from pajlada.");
+                created->setTextFormat(Qt::RichText);
+                created->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                                 Qt::LinksAccessibleByKeyboard |
+                                                 Qt::LinksAccessibleByKeyboard);
+                created->setOpenExternalLinks(true);
+                //        created->setPalette(palette);
+            }
 
-        auto github = layout.emplace<QLabel>();
-        {
-            github->setText(
-                "<a href=\"https://github.com/fourtf/chatterino2\">Chatterino on Github</a>");
-            github->setTextFormat(Qt::RichText);
-            github->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                            Qt::LinksAccessibleByKeyboard |
-                                            Qt::LinksAccessibleByKeyboard);
-            github->setOpenExternalLinks(true);
-            //        github->setPalette(palette);
-        }
+            //            auto github = xd.emplace<QLabel>();
+            //            {
+            //                github->setText(
+            //                    "<a href=\"https://github.com/fourtf/chatterino2\">Chatterino on
+            //                    Github</a>");
+            //                github->setTextFormat(Qt::RichText);
+            //                github->setTextInteractionFlags(Qt::TextBrowserInteraction |
+            //                                                Qt::LinksAccessibleByKeyboard |
+            //                                                Qt::LinksAccessibleByKeyboard);
+            //                github->setOpenExternalLinks(true);
+            //                //        github->setPalette(palette);
+            //            }
+        }*/
 
-        auto licenses = layout.emplace<QGroupBox>("Open source software used");
+        auto licenses = layout.emplace<QGroupBox>("Open source software used...");
         {
             auto form = licenses.emplace<QFormLayout>();
 
@@ -90,6 +94,7 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name, const QString
     a->setOpenExternalLinks(true);
     auto *b = new SignalLabel();
     b->setText("<a href=\"" + licenseLink + "\">show license</a>");
+    b->setCursor(Qt::PointingHandCursor);
     QObject::connect(b, &SignalLabel::mouseUp, [licenseLink] {
         auto *edit = new QTextEdit;
 

@@ -4,6 +4,8 @@
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 
+#include <QCoreApplication>
+
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -13,14 +15,14 @@ namespace irc {
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
-    this->writeConnection.reset(new Communi::IrcConnection);
+    this->writeConnection.reset(new IrcConnection);
     this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
 
     QObject::connect(this->writeConnection.get(), &Communi::IrcConnection::messageReceived,
                      [this](auto msg) { this->writeConnectionMessageReceived(msg); });
 
     // Listen to read connection message signals
-    this->readConnection.reset(new Communi::IrcConnection);
+    this->readConnection.reset(new IrcConnection);
     this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::messageReceived,
@@ -33,7 +35,7 @@ AbstractIrcServer::AbstractIrcServer()
                      [this] { this->onDisconnected(); });
 }
 
-Communi::IrcConnection *AbstractIrcServer::getReadConnection() const
+IrcConnection *AbstractIrcServer::getReadConnection() const
 {
     return this->readConnection.get();
 }

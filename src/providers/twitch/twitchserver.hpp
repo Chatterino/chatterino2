@@ -33,7 +33,7 @@ public:
     IndirectChannel watchingChannel;
 
 protected:
-    void initializeConnection(Communi::IrcConnection *connection, bool isRead,
+    void initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
                               bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 

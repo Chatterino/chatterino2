@@ -211,7 +211,8 @@ SOURCES += \
     src/controllers/taggedusers/taggeduserscontroller.cpp \
     src/controllers/taggedusers/taggeduser.cpp \
     src/controllers/taggedusers/taggedusersmodel.cpp \
-    src/util/emotemap.cpp
+    src/util/emotemap.cpp \
+    src/providers/irc/ircconnection2.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -365,7 +366,8 @@ HEADERS  += \
     src/providerid.hpp \
     src/controllers/taggedusers/taggedusersmodel.hpp \
     src/util/qstringhash.hpp \
-    src/util/mutexvalue.hpp
+    src/util/mutexvalue.hpp \
+    src/providers/irc/ircconnection2.hpp
 
 RESOURCES += \
     resources/resources.qrc
