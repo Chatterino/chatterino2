@@ -61,7 +61,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message, const QString &
             msg->flags |= messages::Message::Subscription;
             msg->flags &= ~messages::Message::Highlighted;
         } else {
-            if (msg->flags & messages::Message::Subscription) {
+            if (msg->flags & messages::Message::Highlighted) {
                 server.mentionsChannel->addMessage(msg);
                 getApp()->highlights->addHighlight(msg);
             }
