@@ -435,7 +435,7 @@ private:
                                                   if (data.caller == nullptr) {
                                                       QByteArray bytes = reply->readAll();
                                                       data.writeToCache(bytes);
-                                                      data.onSuccess(parseJSONFromData2(bytes));
+//                                                      data.onSuccess(parseJSONFromData2(bytes));
 
                                                       reply->deleteLater();
                                                   } else {

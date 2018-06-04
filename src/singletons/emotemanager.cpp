@@ -450,7 +450,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
 
                 for (QJsonValue emoteValue : emoteSetList) {
                     QJsonObject emoticon = emoteValue.toObject();
-                    std::string id = emoticon["id"].toString().toStdString();
+                    std::string id = QString::number(emoticon["id"].toInt()).toStdString();
                     std::string code = emoticon["code"].toString().toStdString();
                     emoteData.emoteSets[emoteSetString].push_back({id, code});
                     emoteData.emoteCodes.push_back(code);
