@@ -105,6 +105,12 @@ private:
     messages::MessageElement::Flags getFlags() const;
     bool isPaused();
 
+    void handleMouseClick(QMouseEvent *event,
+                          const messages::MessageLayoutElement *hoverLayoutElement,
+                          messages::MessageLayout *layout);
+    void addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
+                             messages::MessageLayout *layout);
+
     //    void beginPause();
     //    void endPause();
 
@@ -123,7 +129,9 @@ private:
 
     // Mouse event variables
     bool isMouseDown = false;
+    bool isRightMouseDown = false;
     QPointF lastPressPosition;
+    QPointF lastRightPressPosition;
 
     messages::Selection selection;
     bool selecting = false;

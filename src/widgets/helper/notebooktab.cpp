@@ -237,12 +237,16 @@ void NotebookTab::paintEvent(QPaintEvent *)
                                             : (windowFocused ? colors.backgrounds.regular
                                                              : colors.backgrounds.unfocused);
 
-    painter.fillRect(rect(), this->mouseOver_ ? regular.backgrounds.hover
-                                              : (windowFocused ? regular.backgrounds.regular
-                                                               : regular.backgrounds.unfocused));
+    //    painter.fillRect(rect(), this->mouseOver_ ? regular.backgrounds.hover
+    //                                              : (windowFocused ? regular.backgrounds.regular
+    //                                                               :
+    //                                                               regular.backgrounds.unfocused));
 
     // fill the tab background
-    painter.fillRect(rect(), tabBackground);
+    auto bgRect = rect();
+    bgRect.setTop(bgRect.top() + 2);
+
+    painter.fillRect(bgRect, tabBackground);
 
     // draw border
     //    painter.setPen(QPen("#fff"));

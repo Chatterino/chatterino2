@@ -50,8 +50,14 @@ AppearancePage::AppearancePage()
     {
         auto form = application.emplace<QFormLayout>();
 
+        auto *theme = this->createComboBox({THEME_ITEMS}, app->themes->themeName);
+        QObject::connect(theme, &QComboBox::currentTextChanged, [](const QString &) {
+            getApp()->fonts->incGeneration();
+            getApp()->windows->repaintVisibleChatWidgets();
+        });
+
         // clang-format off
-            form->addRow("Theme:",       this->createComboBox({THEME_ITEMS}, app->themes->themeName));
+            form->addRow("Theme:",       theme);
             // form->addRow("Theme color:", this->createThemeColorChanger());
             form->addRow("Font:",        this->createFontChanger());
 
