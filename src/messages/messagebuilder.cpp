@@ -46,7 +46,7 @@ QString MessageBuilder::matchLink(const QString &string)
 {
     const QString urlRegExp = "^"
     // protocol identifier
-    "(?:(?:https?|ftp)://)"
+    "(?:(?:https?|ftp)://)?"
     // user:pass authentication
     "(?:\\S+(?::\\S*)?@)?"
     "(?:"
