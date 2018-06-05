@@ -117,6 +117,7 @@ SOURCES += \
     src/providers/twitch/twitchemotes.cpp \
     src/providers/bttv/bttvemotes.cpp \
     src/providers/ffz/ffzemotes.cpp \
+    src/providers/emoji/emojis.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -223,7 +224,6 @@ HEADERS  += \
     src/channel.hpp \
     src/const.hpp \
     src/debug/log.hpp \
-    src/emojis.hpp \
     src/messages/image.hpp \
     src/messages/layouts/messagelayout.hpp \
     src/messages/layouts/messagelayoutcontainer.hpp \
@@ -248,6 +248,7 @@ HEADERS  += \
     src/providers/twitch/twitchemotes.hpp \
     src/providers/bttv/bttvemotes.hpp \
     src/providers/ffz/ffzemotes.hpp \
+    src/providers/emoji/emojis.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \

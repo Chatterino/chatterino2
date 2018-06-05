@@ -58,7 +58,7 @@ void CompletionModel::refresh()
     }
 
     // Global: Emojis
-    const auto &emojiShortCodes = app->emotes->emojiShortCodes;
+    const auto &emojiShortCodes = app->emotes->emojis.shortCodes;
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":", TaggedString::Type::Emoji);
     }
