@@ -1,10 +1,7 @@
 #include "singletons/emotemanager.hpp"
 
 #include "application.hpp"
-#include "common.hpp"
 #include "controllers/accounts/accountcontroller.hpp"
-
-#include <QFile>
 
 using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
@@ -25,12 +22,6 @@ void EmoteManager::initialize()
     this->ffz.loadGlobalEmotes();
 
     this->gifTimer.initialize();
-}
-
-util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
-{
-    // TODO: fix this xD
-    return util::EmoteData();
 }
 
 }  // namespace singletons
