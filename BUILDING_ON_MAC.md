@@ -1,4 +1,5 @@
 # Building on macOS
+#### Note - If you want to develop Chatterino 2 you will also need to install Qt Creator
 1. Install Xcode and Xcode Command Line Utilites
 2. Start Xcode, settings -> Locations, activate your Command Line Tools
 3. Install brew https://brew.sh/
