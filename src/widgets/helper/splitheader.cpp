@@ -212,7 +212,6 @@ void SplitHeader::updateChannelText()
 
     this->isLive = false;
     this->titleLabel->setText(title);
-    this->tooltip = "";
 }
 
 void SplitHeader::updateModerationModeIcon()
