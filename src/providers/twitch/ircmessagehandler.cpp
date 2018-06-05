@@ -228,16 +228,24 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server)
 {
     auto data = message->toData();
-    static QRegularExpression findMessage(" USERNOTICE (#\\w+) :(.+)$");
-
-    auto match = findMessage.match(data);
-    auto target = match.captured(1);
-
-    if (match.hasMatch()) {
-        this->addMessage(message, target, match.captured(2), server, true);
-    }
 
     auto tags = message->tags();
+    auto parameters = message->parameters();
+
+    auto target = parameters[0];
+    QString msgType = tags.value("msg-id", "").toString();
+    QString content;
+    if (parameters.size() >= 2) {
+        content = parameters[1];
+    }
+
+    if (msgType == "sub" || msgType == "resub" || msgType == "subgift") {
+        // Sub-specific message. I think it's only allowed for "resub" messages atm
+        if (!content.isEmpty()) {
+            this->addMessage(message, target, content, server, true);
+        }
+    }
+
     auto it = tags.find("system-msg");
 
     if (it != tags.end()) {

@@ -288,17 +288,8 @@ void TwitchMessageBuilder::parseUsername()
     // username
     this->userName = this->ircMessage->nick();
 
-    if (this->userName.isEmpty()) {
+    if (this->userName.isEmpty() || this->args.trimSubscriberUsername) {
         this->userName = this->tags.value(QLatin1String("login")).toString();
-    }
-
-    if (this->args.trimSubscriberUsername) {
-        static QRegularExpression fixName("^tmi.twitch.tv\\((\\w+)\\)$");
-
-        auto match = fixName.match(this->userName);
-        if (match.hasMatch()) {
-            this->userName = match.captured(1);
-        }
     }
 
     // display name
