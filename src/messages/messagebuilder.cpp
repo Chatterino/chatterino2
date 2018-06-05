@@ -50,11 +50,6 @@ QString MessageBuilder::matchLink(const QString &string)
     // user:pass authentication
     "(?:\\S+(?::\\S*)?@)?"
     "(?:"
-    // IP address exclusion
-    // private & local networks
-    "(?!(?:10|127)(?:\\.\\d{1,3}){3})"
-    "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})"
-    "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})"
     // IP address dotted notation octets
     // excludes loopback network 0.0.0.0
     // excludes reserved space >= 224.0.0.0
@@ -80,6 +75,7 @@ QString MessageBuilder::matchLink(const QString &string)
 
     static QRegularExpression linkRegex(urlRegExp, QRegularExpression::CaseInsensitiveOption);
     static QRegularExpression httpRegex("\\bhttps?://");
+    static QRegularExpression ftpRegex("\\bftp?://");
     auto match = linkRegex.match(string);
 
     if (!match.hasMatch()) {
@@ -88,8 +84,10 @@ QString MessageBuilder::matchLink(const QString &string)
 
     QString captured = match.captured();
 
-    if (!captured.contains(httpRegex)) {   
-        captured.insert(0, "http://"); 
+    if (!captured.contains(httpRegex)) { 
+        if (!captured.contains(ftpRegex)) {   
+            captured.insert(0, "http://");
+        }   
     }
     
     return captured;
