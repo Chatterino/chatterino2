@@ -34,7 +34,7 @@ namespace widgets {
 
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
-                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : (Qt::WindowFlags)0))
+                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags(0)))
     , enableCustomFrame(_flags & EnableCustomFrame)
     , frameless(_flags & FrameLess)
     , flags(_flags)
