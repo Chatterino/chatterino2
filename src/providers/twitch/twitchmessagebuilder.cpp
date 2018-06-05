@@ -185,7 +185,7 @@ MessagePtr TwitchMessageBuilder::build()
         std::vector<std::tuple<util::EmoteData, QString>> parsed;
 
         // Parse emojis and take all non-emojis and put them in parsed as full text-words
-        app->emotes->parseEmojis(parsed, split);
+        app->emotes->emojis.parse(parsed, split);
 
         for (const auto &tuple : parsed) {
             const util::EmoteData &emoteData = std::get<0>(tuple);

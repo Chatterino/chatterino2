@@ -127,7 +127,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
 void EmotePopup::loadEmojis()
 {
-    auto &emojis = getApp()->emotes->getEmojis();
+    auto &emojis = getApp()->emotes->emojis.emojis;
 
     ChannelPtr emojiChannel(new Channel("", Channel::None));
 
