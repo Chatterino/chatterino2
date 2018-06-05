@@ -117,7 +117,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     addEmotes(app->emotes->bttv.globalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");
-    addEmotes(app->emotes->ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
+    addEmotes(app->emotes->ffz.globalEmotes, "FrankerFaceZ Global Emotes",
               "FrankerFaceZ Global Emote");
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
