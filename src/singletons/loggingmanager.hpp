@@ -7,7 +7,6 @@
 
 namespace chatterino {
 namespace singletons {
-
 class PathManager;
 
 class LoggingManager
@@ -22,6 +21,8 @@ public:
     void initialize();
 
     void addMessage(const QString &channelName, messages::MessagePtr message);
+
+    void refreshLoggingPath();
 
 private:
     std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels;
