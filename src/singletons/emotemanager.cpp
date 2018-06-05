@@ -211,11 +211,6 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
     });
 }
 
-util::ConcurrentMap<QString, providers::twitch::EmoteValue *> &EmoteManager::getTwitchEmotes()
-{
-    return _twitchEmotes;
-}
-
 util::EmoteMap &EmoteManager::getFFZEmotes()
 {
     return ffzGlobalEmotes;
@@ -239,11 +234,6 @@ util::EmojiMap &EmoteManager::getEmojis()
 util::ConcurrentMap<int, util::EmoteData> &EmoteManager::getFFZChannelEmoteFromCaches()
 {
     return _ffzChannelEmoteFromCaches;
-}
-
-util::ConcurrentMap<long, util::EmoteData> &EmoteManager::getTwitchEmoteFromCache()
-{
-    return _twitchEmoteFromCache;
 }
 
 void EmoteManager::loadEmojis()
@@ -549,6 +539,7 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
     _emoteName.replace("<", "&lt;");
     _emoteName.replace(">", "&gt;");
 
+    // clang-format off
     static QMap<QString, QString> emoteNameReplacements{
         {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},   {"\\&lt\\;3", "&lt;3"},
         {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
@@ -556,6 +547,7 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
         {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
         {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
     };
+    // clang-format on
 
     auto it = emoteNameReplacements.find(_emoteName);
     if (it != emoteNameReplacements.end()) {

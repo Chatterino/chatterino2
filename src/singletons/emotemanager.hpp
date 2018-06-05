@@ -34,13 +34,11 @@ public:
     void reloadFFZChannelEmotes(const QString &channelName,
                                 std::weak_ptr<util::EmoteMap> channelEmoteMap);
 
-    util::ConcurrentMap<QString, providers::twitch::EmoteValue *> &getTwitchEmotes();
     util::EmoteMap &getFFZEmotes();
     util::EmoteMap &getChatterinoEmotes();
     util::EmoteMap &getBTTVChannelEmoteFromCaches();
     util::EmojiMap &getEmojis();
     util::ConcurrentMap<int, util::EmoteData> &getFFZChannelEmoteFromCaches();
-    util::ConcurrentMap<long, util::EmoteData> &getTwitchEmoteFromCache();
 
     util::EmoteData getCheerImage(long long int amount, bool animated);
 
