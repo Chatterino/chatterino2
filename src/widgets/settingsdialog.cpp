@@ -92,7 +92,7 @@ void SettingsDialog::addTabs()
 
     this->ui.tabContainer->addSpacing(16);
 
-    //    this->addTab(new settingspages::KeyboardSettingsPage);
+    this->addTab(new settingspages::KeyboardSettingsPage);
     //    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
     //    this->addTab(new settingspages::SpecialChannelsPage);
