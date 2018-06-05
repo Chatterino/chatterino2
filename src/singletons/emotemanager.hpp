@@ -30,17 +30,11 @@ public:
 
     void initialize();
 
-    util::EmoteMap &getChatterinoEmotes();
-
     util::EmoteData getCheerImage(long long int amount, bool animated);
 
     // Bit badge/emotes?
     // TODO: Move to twitch emote provider
     util::ConcurrentMap<QString, messages::Image *> miscImageCache;
-
-private:
-    /// Chatterino emotes
-    util::EmoteMap _chatterinoEmotes;
 };
 
 }  // namespace singletons
