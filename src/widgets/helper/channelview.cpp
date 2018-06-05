@@ -835,9 +835,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
             SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
             this->setSelection(selectionItem, selectionItem);
-
-            return;
         }
+
+        return;
     }
 
     // check if message is collapsed
