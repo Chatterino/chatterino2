@@ -24,7 +24,7 @@ void CompletionModel::refresh()
 
     // User-specific: Twitch Emotes
     // TODO: Fix this so it properly updates with the proper api. oauth token needs proper scope
-    for (const auto &m : app->emotes->twitchAccountEmotes) {
+    for (const auto &m : app->emotes->twitch.emotes) {
         for (const auto &emoteName : m.second.emoteCodes) {
             // XXX: No way to discern between a twitch global emote and sub emote right now
             this->addString(emoteName, TaggedString::Type::TwitchGlobalEmote);

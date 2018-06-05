@@ -114,6 +114,7 @@ SOURCES += \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
     src/providers/twitch/pubsub.cpp \
+    src/providers/twitch/twitchemotes.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -241,6 +242,7 @@ HEADERS  += \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
     src/providers/twitch/pubsub.hpp \
+    src/providers/twitch/twitchemotes.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \

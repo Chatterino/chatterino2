@@ -4,8 +4,7 @@
 
 #include "emojis.hpp"
 #include "messages/image.hpp"
-#include "providers/twitch/emotevalue.hpp"
-#include "providers/twitch/twitchaccount.hpp"
+#include "providers/twitch/twitchemotes.hpp"
 #include "signalvector.hpp"
 #include "util/concurrentmap.hpp"
 #include "util/emotemap.hpp"
@@ -27,6 +26,8 @@ public:
 
     ~EmoteManager() = delete;
 
+    providers::twitch::TwitchEmotes twitch;
+
     void initialize();
 
     void reloadBTTVChannelEmotes(const QString &channelName,
@@ -41,8 +42,6 @@ public:
     util::ConcurrentMap<int, util::EmoteData> &getFFZChannelEmoteFromCaches();
 
     util::EmoteData getCheerImage(long long int amount, bool animated);
-
-    util::EmoteData getTwitchEmoteById(long int id, const QString &emoteName);
 
     pajlada::Signals::NoArgSignal &getGifUpdateSignal();
 
@@ -70,34 +69,6 @@ public:
     QString replaceShortCodes(const QString &text);
 
     std::vector<std::string> emojiShortCodes;
-
-    /// Twitch emotes
-    void refreshTwitchEmotes(const std::shared_ptr<providers::twitch::TwitchAccount> &user);
-
-    struct TwitchAccountEmoteData {
-        struct TwitchEmote {
-            std::string id;
-            std::string code;
-        };
-
-        //       emote set
-        std::map<std::string, std::vector<TwitchEmote>> emoteSets;
-
-        std::vector<std::string> emoteCodes;
-
-        util::EmoteMap emotes;
-
-        bool filled = false;
-    };
-
-    std::map<std::string, TwitchAccountEmoteData> twitchAccountEmotes;
-
-private:
-    //            emote code
-    util::ConcurrentMap<QString, providers::twitch::EmoteValue *> _twitchEmotes;
-
-    //        emote id
-    util::ConcurrentMap<long, util::EmoteData> _twitchEmoteFromCache;
 
     /// BTTV emotes
     util::EmoteMap bttvChannelEmotes;
