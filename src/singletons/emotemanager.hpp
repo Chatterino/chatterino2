@@ -4,6 +4,7 @@
 
 #include "emojis.hpp"
 #include "messages/image.hpp"
+#include "providers/bttv/bttvemotes.hpp"
 #include "providers/twitch/twitchemotes.hpp"
 #include "signalvector.hpp"
 #include "util/concurrentmap.hpp"
@@ -27,17 +28,15 @@ public:
     ~EmoteManager() = delete;
 
     providers::twitch::TwitchEmotes twitch;
+    providers::bttv::BTTVEmotes bttv;
 
     void initialize();
 
-    void reloadBTTVChannelEmotes(const QString &channelName,
-                                 std::weak_ptr<util::EmoteMap> channelEmoteMap);
     void reloadFFZChannelEmotes(const QString &channelName,
                                 std::weak_ptr<util::EmoteMap> channelEmoteMap);
 
     util::EmoteMap &getFFZEmotes();
     util::EmoteMap &getChatterinoEmotes();
-    util::EmoteMap &getBTTVChannelEmoteFromCaches();
     util::EmojiMap &getEmojis();
     util::ConcurrentMap<int, util::EmoteData> &getFFZChannelEmoteFromCaches();
 
@@ -69,20 +68,6 @@ public:
     QString replaceShortCodes(const QString &text);
 
     std::vector<std::string> emojiShortCodes;
-
-    /// BTTV emotes
-    util::EmoteMap bttvChannelEmotes;
-
-public:
-    util::ConcurrentMap<QString, util::EmoteMap> bttvChannels;
-    util::EmoteMap bttvGlobalEmotes;
-    SignalVector<std::string> bttvGlobalEmoteCodes;
-    //       roomID
-    std::map<std::string, SignalVector<std::string>> bttvChannelEmoteCodes;
-    util::EmoteMap _bttvChannelEmoteFromCaches;
-
-private:
-    void loadBTTVEmotes();
 
     /// FFZ emotes
     util::EmoteMap ffzChannelEmotes;

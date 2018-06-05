@@ -32,7 +32,7 @@ void CompletionModel::refresh()
     }
 
     // Global: BTTV Global Emotes
-    std::vector<std::string> &bttvGlobalEmoteCodes = app->emotes->bttvGlobalEmoteCodes;
+    std::vector<std::string> &bttvGlobalEmoteCodes = app->emotes->bttv.globalEmoteCodes;
     for (const auto &m : bttvGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVGlobalEmote);
     }
@@ -45,7 +45,7 @@ void CompletionModel::refresh()
 
     // Channel-specific: BTTV Channel Emotes
     std::vector<std::string> &bttvChannelEmoteCodes =
-        app->emotes->bttvChannelEmoteCodes[this->channelName.toStdString()];
+        app->emotes->bttv.channelEmoteCodes[this->channelName.toStdString()];
     for (const auto &m : bttvChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVChannelEmote);
     }
