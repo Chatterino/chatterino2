@@ -392,6 +392,12 @@ void SplitHeader::menuMoveSplit()
 
 void SplitHeader::menuReloadChannelEmotes()
 {
+    auto channel = this->split->getChannel();
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel) {
+        twitchChannel->reloadChannelEmotes();
+    }
 }
 
 void SplitHeader::menuManualReconnect()
