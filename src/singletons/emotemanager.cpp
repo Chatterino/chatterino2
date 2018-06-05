@@ -27,11 +27,6 @@ void EmoteManager::initialize()
     this->gifTimer.initialize();
 }
 
-util::EmoteMap &EmoteManager::getChatterinoEmotes()
-{
-    return _chatterinoEmotes;
-}
-
 util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
 {
     // TODO: fix this xD

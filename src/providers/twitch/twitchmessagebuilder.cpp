@@ -545,9 +545,6 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
                this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
         return appendEmote(MessageElement::FfzEmote);
-    } else if (app->emotes->getChatterinoEmotes().tryGet(emoteString, emoteData)) {
-        // Chatterino Emote
-        return appendEmote(MessageElement::Misc);
     }
 
     return false;
