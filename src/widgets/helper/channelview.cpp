@@ -836,23 +836,22 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
             this->setSelection(selectionItem, selectionItem);
         }
-
         return;
     }
 
     // check if message is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
-        return;
-    }
-
     switch (event->button()) {
         case Qt::LeftButton: {
+            this->lastPressPosition = event->screenPos();
+            this->isMouseDown = true;
+
+            if (layout->flags & MessageLayout::Collapsed) {
+                return;
+            }
+
             if (app->settings->linksDoubleClickOnly.getValue()) {
                 this->pause(200);
             }
-
-            this->lastPressPosition = event->screenPos();
-            this->isMouseDown = true;
 
             int index = layout->getSelectionIndex(relativePos);
 
