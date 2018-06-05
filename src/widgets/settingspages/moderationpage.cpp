@@ -60,43 +60,44 @@ ModerationPage::ModerationPage()
         logs.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
         logs->addStretch(1);
+        /*
+auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
 
-        auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
+// Setting custom logpath
+QObject::connect(
+    selectDir.getElement(), &QPushButton::clicked, this,
+    [this, created, app, dirMemory = QString{app->settings->logPath}]() mutable {
+        auto dirName = QFileDialog::getExistingDirectory(this);
+        created->setText("Logs are saved to " + CreateLink(dirName, true));
 
-        // Setting custom logpath
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this,
-            [this, created, app, dirMemory = QString{app->settings->logPath}]() mutable {
-                auto dirName = QFileDialog::getExistingDirectory(this);
-                created->setText("Logs are saved to " + CreateLink(dirName, true));
+        if (dirName == "" && dirMemory == "") {
+            created->setText("Logs are saved to " +
+                             CreateLink(QStandardPaths::writableLocation(
+                                            QStandardPaths::AppDataLocation),
+                                        true));
+        } else if (dirName == "") {
+            dirName = dirMemory;
+            created->setText("Logs are saved to " + CreateLink(dirName, true));
+        }
 
-                if (dirName == "" && dirMemory == "") {
-                    created->setText("Logs are saved to " +
-                                     CreateLink(QStandardPaths::writableLocation(
-                                                    QStandardPaths::AppDataLocation),
-                                                true));
-                } else if (dirName == "") {
-                    dirName = dirMemory;
-                    created->setText("Logs are saved to " + CreateLink(dirName, true));
-                }
+        app->settings->logPath = dirName;
+        dirMemory = dirName;
+        app->logging->refreshLoggingPath();
+    });
+// Reset custom logpath
+auto resetDir = logs.emplace<QPushButton>("Reset logpath");
+QObject::connect(
+    resetDir.getElement(), &QPushButton::clicked, this, [this, created, app]() mutable {
+        app->settings->logPath = "";
+        created->setText(
+            "Logs are saved to " +
+            CreateLink(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+                       true));
+        app->logging->refreshLoggingPath();
+    });
 
-                app->settings->logPath = dirName;
-                dirMemory = dirName;
-                app->logging->refreshLoggingPath();
-            });
-        // Reset custom logpath
-        auto resetDir = logs.emplace<QPushButton>("Reset logpath");
-        QObject::connect(
-            resetDir.getElement(), &QPushButton::clicked, this, [this, created, app]() mutable {
-                app->settings->logPath = "";
-                created->setText(
-                    "Logs are saved to " +
-                    CreateLink(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
-                               true));
-                app->logging->refreshLoggingPath();
-            });
-
-        // Logs end
+// Logs end
+*/
     }
 
     auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation mode");

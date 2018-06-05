@@ -39,7 +39,8 @@ void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr
 
 QString LoggingManager::getDirectoryForChannel(const QString &channelName)
 {
-    auto customPath = getApp()->settings->logPath;
+    //    auto customPath = getApp()->settings->logPath;
+    auto customPath = QString("");
 
     if (channelName.startsWith("/whispers")) {
         if (customPath != "")
