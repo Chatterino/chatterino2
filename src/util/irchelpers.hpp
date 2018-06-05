@@ -10,46 +10,41 @@ inline QString parseTagString(const QString &input)
     QString output = input;
     output.detach();
 
-    bool changed = false;
+    auto length = output.length();
 
-    for (int i = 0; i < output.length() - 1; i++) {
+    for (int i = 0; i < length - 1; i++) {
         if (output[i] == '\\') {
             QChar c = output[i + 1];
 
             switch (c.cell()) {
                 case 'n': {
-                    output[i] = '\n';
+                    output.replace(i, 2, '\n');
                 } break;
 
                 case 'r': {
-                    output[i] = '\r';
+                    output.replace(i, 2, '\r');
                 } break;
 
                 case 's': {
-                    output[i] = ' ';
+                    output.replace(i, 2, ' ');
                 } break;
 
                 case '\\': {
-                    output[i] = '\\';
+                    output.replace(i, 2, '\\');
                 } break;
 
                 case ':': {
-                    output[i] = ';';
+                    output.replace(i, 2, ';');
                 } break;
 
                 default: {
-                    output[i] = output[i + 1];
+                    output.remove(i, 1);
                 } break;
             }
 
-            output[i + 1] = '\0';
-            changed = true;
             i++;
+            length--;
         }
-    }
-
-    if (changed) {
-        return output.replace("\0", "");
     }
 
     return output;
