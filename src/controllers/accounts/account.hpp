@@ -1,5 +1,7 @@
 #pragma once
 
+#include "providerid.hpp"
+
 #include <QString>
 
 namespace chatterino {
@@ -9,14 +11,17 @@ namespace accounts {
 class Account
 {
 public:
-    Account(const QString &category);
+    Account(ProviderId providerId);
+    virtual ~Account() = default;
 
     virtual QString toString() const = 0;
     const QString &getCategory() const;
+    ProviderId getProviderId() const;
 
     bool operator<(const Account &other) const;
 
 private:
+    ProviderId providerId;
     QString category;
 };
 

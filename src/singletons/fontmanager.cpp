@@ -3,6 +3,10 @@
 #include <QDebug>
 #include <QtGlobal>
 
+#include "application.hpp"
+#include "util/assertinguithread.hpp"
+#include "windowmanager.hpp"
+
 #ifdef Q_OS_WIN32
 #define DEFAULT_FONT_FAMILY "Segoe UI"
 #define DEFAULT_FONT_SIZE 10
@@ -20,86 +24,111 @@ namespace chatterino {
 namespace singletons {
 
 FontManager::FontManager()
-    : currentFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
-    , currentFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
-//    , currentFont(this->currentFontFamily.getValue().c_str(), currentFontSize.getValue())
+    : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
+    , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 {
     qDebug() << "init FontManager";
 
-    this->currentFontFamily.connect([this](const std::string &newValue, auto) {
-        this->incGeneration();
-        //        this->currentFont.setFamily(newValue.c_str());
-        this->currentFontByScale.clear();
-        this->fontChanged.invoke();
-    });
+    this->chatFontFamily.connect([this](const std::string &, auto) {
+        util::assertInGuiThread();
 
-    this->currentFontSize.connect([this](const int &newValue, auto) {
-        this->incGeneration();
-        //        this->currentFont.setSize(newValue);
-        this->currentFontByScale.clear();
-        this->fontChanged.invoke();
-    });
-}
-
-QFont &FontManager::getFont(FontManager::Type type, float scale)
-{
-    //    return this->currentFont.getFont(type);
-    return this->getCurrentFont(scale).getFont(type);
-}
-
-QFontMetrics &FontManager::getFontMetrics(FontManager::Type type, float scale)
-{
-    //    return this->currentFont.getFontMetrics(type);
-    return this->getCurrentFont(scale).getFontMetrics(type);
-}
-
-FontManager::FontData &FontManager::Font::getFontData(FontManager::Type type)
-{
-    switch (type) {
-        case Tiny:
-            return this->tiny;
-        case Small:
-            return this->small;
-        case MediumSmall:
-            return this->mediumSmall;
-        case Medium:
-            return this->medium;
-        case MediumBold:
-            return this->mediumBold;
-        case MediumItalic:
-            return this->mediumItalic;
-        case Large:
-            return this->large;
-        case VeryLarge:
-            return this->veryLarge;
-        default:
-            qDebug() << "Unknown font type:" << type << ", defaulting to medium";
-            return this->medium;
-    }
-}
-
-QFont &FontManager::Font::getFont(Type type)
-{
-    return this->getFontData(type).font;
-}
-
-QFontMetrics &FontManager::Font::getFontMetrics(Type type)
-{
-    return this->getFontData(type).metrics;
-}
-
-FontManager::Font &FontManager::getCurrentFont(float scale)
-{
-    for (auto it = this->currentFontByScale.begin(); it != this->currentFontByScale.end(); it++) {
-        if (it->first == scale) {
-            return it->second;
+        if (getApp()->windows) {
+            getApp()->windows->incGeneration();
         }
-    }
-    this->currentFontByScale.push_back(
-        std::make_pair(scale, Font(this->currentFontFamily.getValue().c_str(),
-                                   this->currentFontSize.getValue() * scale)));
 
-    return this->currentFontByScale.back().second;
+        for (auto &map : this->fontsByType) {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
+
+    this->chatFontSize.connect([this](const int &, auto) {
+        util::assertInGuiThread();
+
+        if (getApp()->windows) {
+            getApp()->windows->incGeneration();
+        }
+
+        for (auto &map : this->fontsByType) {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
+
+    this->fontsByType.resize(size_t(EndType));
+}
+
+QFont FontManager::getFont(FontManager::Type type, float scale)
+{
+    return this->getOrCreateFontData(type, scale).font;
+}
+
+QFontMetrics FontManager::getFontMetrics(FontManager::Type type, float scale)
+{
+    return this->getOrCreateFontData(type, scale).metrics;
+}
+
+FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
+{
+    util::assertInGuiThread();
+
+    assert(type >= 0 && type < EndType);
+
+    auto &map = this->fontsByType[size_t(type)];
+
+    // find element
+    auto it = map.find(scale);
+    if (it != map.end()) {
+        // return if found
+
+        return it->second;
+    }
+
+    // emplace new element
+    auto result = map.emplace(scale, this->createFontData(type, scale));
+    assert(result.second);
+
+    return result.first->second;
+}
+
+FontManager::FontData FontManager::createFontData(Type type, float scale)
+{
+    // check if it's a chat (scale the setting)
+    if (type >= ChatStart && type <= ChatEnd) {
+        static std::unordered_map<Type, ChatFontData> sizeScale{
+            {ChatSmall, {0.6f, false, QFont::Normal}},
+            {ChatMediumSmall, {0.8f, false, QFont::Normal}},
+            {ChatMedium, {1, false, QFont::Normal}},
+            {ChatMediumBold, {1, false, QFont::Medium}},
+            {ChatMediumItalic, {1, true, QFont::Normal}},
+            {ChatLarge, {1.2f, false, QFont::Normal}},
+            {ChatVeryLarge, {1.4f, false, QFont::Normal}},
+        };
+
+        auto data = sizeScale[type];
+        return FontData(QFont(QString::fromStdString(this->chatFontFamily.getValue()),
+                              int(this->chatFontSize.getValue() * data.scale * scale), data.weight,
+                              data.italic));
+    }
+
+    // normal Ui font (use pt size)
+    {
+#ifdef Q_OS_MAC
+        constexpr float multiplier = 0.8f;
+#else
+        constexpr float multiplier = 1.f;
+#endif
+
+        static std::unordered_map<Type, UiFontData> defaultSize{
+            {Tiny, {8, "Monospace", false, QFont::Normal}},
+            {UiMedium, {int(12 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {UiTabs, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+        };
+
+        UiFontData &data = defaultSize[type];
+        QFont font(data.name, int(data.size * scale), data.weight, data.italic);
+        return FontData(font);
+    }
 }
 
 }  // namespace singletons

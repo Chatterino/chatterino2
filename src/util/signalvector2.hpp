@@ -12,6 +12,13 @@ namespace chatterino {
 namespace util {
 
 template <typename TVectorItem>
+struct SignalVectorItemArgs {
+    const TVectorItem &item;
+    int index;
+    void *caller;
+};
+
+template <typename TVectorItem>
 class ReadOnlySignalVector : boost::noncopyable
 {
 public:
@@ -24,14 +31,8 @@ public:
     }
     virtual ~ReadOnlySignalVector() = default;
 
-    struct ItemArgs {
-        const TVectorItem &item;
-        int index;
-        void *caller;
-    };
-
-    pajlada::Signals::Signal<ItemArgs> itemInserted;
-    pajlada::Signals::Signal<ItemArgs> itemRemoved;
+    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemInserted;
+    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemRemoved;
     pajlada::Signals::NoArgSignal delayedItemsChanged;
 
     const std::vector<TVectorItem> &getVector() const
@@ -69,7 +70,7 @@ public:
 
         TVectorItem item = this->vector[index];
         this->vector.erase(this->vector.begin() + index);
-        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
+        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemRemoved.invoke(args);
 
         this->invokeDelayedItemsChanged();
@@ -96,7 +97,7 @@ public:
 
         this->vector.insert(this->vector.begin() + index, item);
 
-        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
+        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();
         return index;
@@ -107,16 +108,15 @@ template <typename TVectorItem, typename Compare>
 class SortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1,
-                           void *caller = 0) override
+    virtual int insertItem(const TVectorItem &item, int = -1, void *caller = nullptr) override
     {
         util::assertInGuiThread();
 
-        int index =
-            this->vector.insert(
-                std::lower_bound(this->vector.begin(), this->vector.end(), item, Compare{}), item) -
-            this->vector.begin();
-        typename ReadOnlySignalVector<TVectorItem>::ItemArgs args{item, index, caller};
+        auto it = std::lower_bound(this->vector.begin(), this->vector.end(), item, Compare{});
+        int index = it - this->vector.begin();
+        this->vector.insert(it, item);
+
+        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();
         return index;

@@ -26,6 +26,12 @@ class HighlightController;
 namespace ignores {
 class IgnoreController;
 }
+namespace taggedusers {
+class TaggedUsersController;
+}
+namespace accounts {
+class AccountController;
+}
 }  // namespace controllers
 
 namespace singletons {
@@ -67,7 +73,8 @@ public:
     controllers::commands::CommandController *commands = nullptr;
     controllers::highlights::HighlightController *highlights = nullptr;
     controllers::ignores::IgnoreController *ignores = nullptr;
-    singletons::AccountManager *accounts = nullptr;
+    controllers::taggedusers::TaggedUsersController *taggedUsers = nullptr;
+    controllers::accounts::AccountController *accounts = nullptr;
     singletons::EmoteManager *emotes = nullptr;
     singletons::NativeMessagingManager *nativeMessaging = nullptr;
     singletons::SettingManager *settings = nullptr;

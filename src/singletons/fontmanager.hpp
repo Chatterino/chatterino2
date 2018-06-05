@@ -3,138 +3,79 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QFontMetrics>
+#include <array>
+#include <boost/noncopyable.hpp>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <unordered_map>
 
 namespace chatterino {
 namespace singletons {
 
-class FontManager
+class FontManager : boost::noncopyable
 {
 public:
     FontManager();
 
-    FontManager(const FontManager &) = delete;
-    FontManager(FontManager &&) = delete;
-    ~FontManager() = delete;
-
+    // font data gets set in createFontData(...)
     enum Type : uint8_t {
         Tiny,
-        Small,
-        MediumSmall,
-        Medium,
-        MediumBold,
-        MediumItalic,
-        Large,
-        VeryLarge,
+        ChatSmall,
+        ChatMediumSmall,
+        ChatMedium,
+        ChatMediumBold,
+        ChatMediumItalic,
+        ChatLarge,
+        ChatVeryLarge,
+
+        UiMedium,
+        UiTabs,
+
+        // don't remove this value
+        EndType,
+
+        // make sure to update these values accordingly!
+        ChatStart = ChatSmall,
+        ChatEnd = ChatVeryLarge,
     };
 
-    QFont &getFont(Type type, float scale);
-    QFontMetrics &getFontMetrics(Type type, float scale);
+    QFont getFont(Type type, float scale);
+    QFontMetrics getFontMetrics(Type type, float scale);
 
-    int getGeneration() const
-    {
-        return this->generation;
-    }
-
-    void incGeneration()
-    {
-        this->generation++;
-    }
-
-    pajlada::Settings::Setting<std::string> currentFontFamily;
-    pajlada::Settings::Setting<int> currentFontSize;
+    pajlada::Settings::Setting<std::string> chatFontFamily;
+    pajlada::Settings::Setting<int> chatFontSize;
 
     pajlada::Signals::NoArgSignal fontChanged;
 
 private:
     struct FontData {
-        FontData(QFont &&_font)
+        FontData(const QFont &_font)
             : font(_font)
-            , metrics(this->font)
+            , metrics(_font)
         {
         }
 
-        QFont font;
-        QFontMetrics metrics;
+        const QFont font;
+        const QFontMetrics metrics;
     };
 
-    struct Font {
-        Font() = delete;
-
-        Font(const char *fontFamilyName, int mediumSize)
-            : tiny(QFont("Monospace", 8))
-            , small(QFont(fontFamilyName, mediumSize - 4))
-            , mediumSmall(QFont(fontFamilyName, mediumSize - 2))
-            , medium(QFont(fontFamilyName, mediumSize))
-            , mediumBold(QFont(fontFamilyName, mediumSize, QFont::DemiBold))
-            , mediumItalic(QFont(fontFamilyName, mediumSize, -1, true))
-            , large(QFont(fontFamilyName, mediumSize))
-            , veryLarge(QFont(fontFamilyName, mediumSize))
-        {
-            tiny.font.setStyleHint(QFont::TypeWriter);
-        }
-
-        void setFamily(const char *newFamily)
-        {
-            this->small.font.setFamily(newFamily);
-            this->mediumSmall.font.setFamily(newFamily);
-            this->medium.font.setFamily(newFamily);
-            this->mediumBold.font.setFamily(newFamily);
-            this->mediumItalic.font.setFamily(newFamily);
-            this->large.font.setFamily(newFamily);
-            this->veryLarge.font.setFamily(newFamily);
-
-            this->updateMetrics();
-        }
-
-        void setSize(int newMediumSize)
-        {
-            this->small.font.setPointSize(newMediumSize - 4);
-            this->mediumSmall.font.setPointSize(newMediumSize - 2);
-            this->medium.font.setPointSize(newMediumSize);
-            this->mediumBold.font.setPointSize(newMediumSize);
-            this->mediumItalic.font.setPointSize(newMediumSize);
-            this->large.font.setPointSize(newMediumSize + 2);
-            this->veryLarge.font.setPointSize(newMediumSize + 4);
-
-            this->updateMetrics();
-        }
-
-        void updateMetrics()
-        {
-            this->small.metrics = QFontMetrics(this->small.font);
-            this->mediumSmall.metrics = QFontMetrics(this->mediumSmall.font);
-            this->medium.metrics = QFontMetrics(this->medium.font);
-            this->mediumBold.metrics = QFontMetrics(this->mediumBold.font);
-            this->mediumItalic.metrics = QFontMetrics(this->mediumItalic.font);
-            this->large.metrics = QFontMetrics(this->large.font);
-            this->veryLarge.metrics = QFontMetrics(this->veryLarge.font);
-        }
-
-        FontData &getFontData(Type type);
-
-        QFont &getFont(Type type);
-        QFontMetrics &getFontMetrics(Type type);
-
-        FontData tiny;
-        FontData small;
-        FontData mediumSmall;
-        FontData medium;
-        FontData mediumBold;
-        FontData mediumItalic;
-        FontData large;
-        FontData veryLarge;
+    struct ChatFontData {
+        float scale;
+        bool italic;
+        QFont::Weight weight;
     };
 
-    Font &getCurrentFont(float scale);
+    struct UiFontData {
+        float size;
+        const char *name;
+        bool italic;
+        QFont::Weight weight;
+    };
 
-    // Future plans:
-    // Could have multiple fonts in here, such as "Menu font", "Application font", "Chat font"
+    FontData &getOrCreateFontData(Type type, float scale);
+    FontData createFontData(Type type, float scale);
 
-    std::list<std::pair<float, Font>> currentFontByScale;
-
-    int generation = 0;
+    std::vector<std::unordered_map<float, FontData>> fontsByType;
 };
 
 }  // namespace singletons

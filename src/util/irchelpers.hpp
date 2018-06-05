@@ -5,7 +5,7 @@
 namespace chatterino {
 namespace util {
 
-inline QString ParseTagString(const QString &input)
+inline QString parseTagString(const QString &input)
 {
     QString output = input;
     output.detach();

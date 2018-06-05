@@ -10,6 +10,7 @@
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/settingsdialog.hpp"
 
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -19,6 +20,9 @@
 
 namespace chatterino {
 namespace singletons {
+
+using SplitNode = widgets::SplitContainer::Node;
+using SplitDirection = widgets::SplitContainer::Direction;
 
 void WindowManager::showSettingsDialog()
 {
@@ -54,9 +58,15 @@ WindowManager::WindowManager()
     qDebug() << "init WindowManager";
 }
 
-void WindowManager::layoutVisibleChatWidgets(Channel *channel)
+void WindowManager::layoutChannelViews(Channel *channel)
 {
     this->layout.invoke(channel);
+}
+
+void WindowManager::forceLayoutChannelViews()
+{
+    this->incGeneration();
+    this->layoutChannelViews(nullptr);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -184,32 +194,40 @@ void WindowManager::initialize()
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
         for (QJsonValue tab_val : tabs) {
-            widgets::SplitContainer *tab = window.getNotebook().addNewPage();
+            widgets::SplitContainer *page = window.getNotebook().addPage(false);
 
             QJsonObject tab_obj = tab_val.toObject();
 
             // set custom title
             QJsonValue title_val = tab_obj.value("title");
             if (title_val.isString()) {
-                tab->getTab()->setTitle(title_val.toString());
-                tab->getTab()->useDefaultTitle = false;
+                page->getTab()->setCustomTitle(title_val.toString());
             }
 
             // selected
             if (tab_obj.value("selected").toBool(false)) {
-                window.getNotebook().select(tab);
+                window.getNotebook().select(page);
             }
 
             // load splits
+            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+            if (!splitRoot.isEmpty()) {
+                page->decodeFromJson(splitRoot);
+
+                continue;
+            }
+
+            // fallback load splits (old)
             int colNr = 0;
             for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
                 for (QJsonValue split_val : column_val.toArray()) {
-                    widgets::Split *split = new widgets::Split(tab);
+                    widgets::Split *split = new widgets::Split(page);
 
                     QJsonObject split_obj = split_val.toObject();
-                    split->setChannel(this->decodeChannel(split_obj));
+                    split->setChannel(decodeChannel(split_obj));
 
-                    tab->addToLayout(split, std::make_pair(colNr, 10000000));
+                    page->appendSplit(split);
                 }
                 colNr++;
             }
@@ -218,7 +236,7 @@ void WindowManager::initialize()
 
     if (mainWindow == nullptr) {
         mainWindow = &createWindow(widgets::Window::Main);
-        mainWindow->getNotebook().addNewPage(true);
+        mainWindow->getNotebook().addPage(true);
     }
 
     this->initialized = true;
@@ -255,13 +273,15 @@ void WindowManager::save()
         // window tabs
         QJsonArray tabs_arr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().tabCount(); tab_i++) {
+        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount(); tab_i++) {
             QJsonObject tab_obj;
-            widgets::SplitContainer *tab = window->getNotebook().tabAt(tab_i);
+            widgets::SplitContainer *tab =
+                dynamic_cast<widgets::SplitContainer *>(window->getNotebook().getPageAt(tab_i));
+            assert(tab != nullptr);
 
             // custom tab title
-            if (!tab->getTab()->useDefaultTitle) {
-                tab_obj.insert("title", tab->getTab()->getTitle());
+            if (tab->getTab()->hasCustomTitle()) {
+                tab_obj.insert("title", tab->getTab()->getCustomTitle());
             }
 
             // selected
@@ -270,23 +290,11 @@ void WindowManager::save()
             }
 
             // splits
-            QJsonArray columns_arr;
-            std::vector<std::vector<widgets::Split *>> columns = tab->getColumns();
+            QJsonObject splits;
 
-            for (std::vector<widgets::Split *> &cells : columns) {
-                QJsonArray cells_arr;
+            this->encodeNodeRecusively(tab->getBaseNode(), splits);
 
-                for (widgets::Split *cell : cells) {
-                    QJsonObject cell_obj;
-
-                    this->encodeChannel(cell->getIndirectChannel(), cell_obj);
-
-                    cells_arr.append(cell_obj);
-                }
-                columns_arr.append(cells_arr);
-            }
-
-            tab_obj.insert("splits", columns_arr);
+            tab_obj.insert("splits2", splits);
             tabs_arr.append(tab_obj);
         }
 
@@ -302,8 +310,44 @@ void WindowManager::save()
     QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.write(document.toJson());
+
+    QJsonDocument::JsonFormat format =
+#ifdef _DEBUG
+        QJsonDocument::JsonFormat::Compact
+#else
+        (QJsonDocument::JsonFormat)0
+#endif
+        ;
+
+    file.write(document.toJson(format));
     file.flush();
+}
+
+void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
+{
+    switch (node->getType()) {
+        case SplitNode::_Split: {
+            obj.insert("type", "split");
+            QJsonObject split;
+            encodeChannel(node->getSplit()->getIndirectChannel(), split);
+            obj.insert("data", split);
+            obj.insert("flexh", node->getHorizontalFlex());
+            obj.insert("flexv", node->getVerticalFlex());
+        } break;
+        case SplitNode::HorizontalContainer:
+        case SplitNode::VerticalContainer: {
+            obj.insert("type", node->getType() == SplitNode::HorizontalContainer ? "horizontal"
+                                                                                 : "vertical");
+
+            QJsonArray items_arr;
+            for (const std::unique_ptr<SplitNode> &n : node->getChildren()) {
+                QJsonObject subObj;
+                this->encodeNodeRecusively(n.get(), subObj);
+                items_arr.append(subObj);
+            }
+            obj.insert("items", items_arr);
+        } break;
+    }
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
@@ -354,6 +398,16 @@ void WindowManager::closeAll()
     for (widgets::Window *window : windows) {
         window->close();
     }
+}
+
+int WindowManager::getGeneration() const
+{
+    return this->generation;
+}
+
+void WindowManager::incGeneration()
+{
+    this->generation++;
 }
 
 }  // namespace singletons

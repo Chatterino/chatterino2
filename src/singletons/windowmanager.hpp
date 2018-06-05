@@ -1,8 +1,12 @@
 #pragma once
 
+#include "widgets/splitcontainer.hpp"
 #include "widgets/window.hpp"
 
 namespace chatterino {
+// namespace widgets {
+// struct SplitContainer::Node;
+//}
 namespace singletons {
 
 class WindowManager
@@ -15,7 +19,8 @@ public:
     void showSettingsDialog();
     void showAccountSelectPopup(QPoint point);
 
-    void layoutVisibleChatWidgets(Channel *channel = nullptr);
+    void layoutChannelViews(Channel *channel = nullptr);
+    void forceLayoutChannelViews();
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
     // void updateAll();
@@ -31,19 +36,27 @@ public:
     void initialize();
     void closeAll();
 
+    int getGeneration() const;
+    void incGeneration();
+
     pajlada::Signals::NoArgSignal repaintGifs;
     pajlada::Signals::Signal<Channel *> layout;
 
 private:
     bool initialized = false;
 
+    std::atomic<int> generation{0};
+
     std::vector<widgets::Window *> windows;
 
     widgets::Window *mainWindow = nullptr;
     widgets::Window *selectedWindow = nullptr;
 
-    void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    IndirectChannel decodeChannel(const QJsonObject &obj);
+    void encodeNodeRecusively(widgets::SplitContainer::Node *node, QJsonObject &obj);
+
+public:
+    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    static IndirectChannel decodeChannel(const QJsonObject &obj);
 };
 
 }  // namespace singletons

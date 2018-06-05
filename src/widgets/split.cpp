@@ -1,6 +1,7 @@
 #include "widgets/split.hpp"
 
 #include "application.hpp"
+#include "common.hpp"
 #include "providers/twitch/emotevalue.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
@@ -39,8 +40,8 @@ using namespace chatterino::messages;
 namespace chatterino {
 namespace widgets {
 
-pajlada::Signals::Signal<bool> Split::altPressedStatusChanged;
-bool Split::altPressesStatus = false;
+pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
+Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
 Split::Split(SplitContainer *parent)
     : Split((QWidget *)parent)
@@ -94,7 +95,10 @@ Split::Split(QWidget *parent)
 
     this->input.ui.textEdit->installEventFilter(parent);
 
-    this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
+    this->view.mouseDown.connect([this](QMouseEvent *) {
+        //
+        this->giveFocus(Qt::MouseFocusReason);
+    });
     this->view.selectionChanged.connect([this]() {
         if (view.hasSelection()) {
             this->input.clearSelection();
@@ -128,25 +132,44 @@ Split::Split(QWidget *parent)
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    this->managedConnect(altPressedStatusChanged, [this](bool status) {
-        //        if (status && this->isMouseOver) {
-        //            this->overlay->show();
-        //        } else {
-        //            this->overlay->hide();
-        //        }
+    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
+        if ((status == showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
+            this->isMouseOver) {
+            this->overlay->show();
+        } else {
+            this->overlay->hide();
+        }
     });
+
+    this->input.ui.textEdit->focused.connect([this] { this->focused.invoke(); });
 }
 
 Split::~Split()
 {
     this->usermodeChangedConnection.disconnect();
+    this->roomModeChangedConnection.disconnect();
     this->channelIDChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
+}
+
+ChannelView &Split::getChannelView()
+{
+    return this->view;
+}
+
+SplitContainer *Split::getContainer()
+{
+    return this->container;
 }
 
 bool Split::isInContainer() const
 {
     return this->container != nullptr;
+}
+
+void Split::setContainer(SplitContainer *_container)
+{
+    this->container = _container;
 }
 
 IndirectChannel Split::getIndirectChannel()
@@ -166,6 +189,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->view.setChannel(newChannel.get());
 
     this->usermodeChangedConnection.disconnect();
+    this->roomModeChangedConnection.disconnect();
     this->indirectChannelChangedConnection.disconnect();
 
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
@@ -173,6 +197,9 @@ void Split::setChannel(IndirectChannel newChannel)
     if (tc != nullptr) {
         this->usermodeChangedConnection =
             tc->userStateChanged.connect([this] { this->header.updateModerationModeIcon(); });
+
+        this->roomModeChangedConnection =
+            tc->roomModesChanged.connect([this] { this->header.updateModes(); });
     }
 
     this->indirectChannelChangedConnection = newChannel.getChannelChanged().connect([this] {  //
@@ -181,32 +208,9 @@ void Split::setChannel(IndirectChannel newChannel)
 
     this->header.updateModerationModeIcon();
     this->header.updateChannelText();
+    this->header.updateModes();
 
     this->channelChanged.invoke();
-}
-
-void Split::setFlexSizeX(double x)
-{
-    //    this->flexSizeX = x;
-    //    this->parentPage->updateFlexValues();
-}
-
-double Split::getFlexSizeX()
-{
-    //    return this->flexSizeX;
-    return 1;
-}
-
-void Split::setFlexSizeY(double y)
-{
-    //    this->flexSizeY = y;
-    //    this->parentPage.updateFlexValues();
-}
-
-double Split::getFlexSizeY()
-{
-    //    return this->flexSizeY;
-    return 1;
 }
 
 void Split::setModerationMode(bool value)
@@ -236,7 +240,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         if (dialog->hasSeletedChannel()) {
             this->setChannel(dialog->getSelectedChannel());
             if (this->isInContainer()) {
-                this->container->refreshTitle();
+                this->container->refreshTabTitle();
             }
         }
 
@@ -279,26 +283,19 @@ void Split::paintEvent(QPaintEvent *)
 
 void Split::mouseMoveEvent(QMouseEvent *event)
 {
-    this->handleModifiers(event, event->modifiers());
-}
-
-void Split::mousePressEvent(QMouseEvent *event)
-{
-    if (event->buttons() == Qt::LeftButton && event->modifiers() & Qt::AltModifier) {
-        this->drag();
-    }
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, event->modifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
     this->view.unsetCursor();
-    this->handleModifiers(event, event->modifiers());
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::resizeEvent(QResizeEvent *event)
@@ -311,30 +308,37 @@ void Split::resizeEvent(QResizeEvent *event)
 void Split::enterEvent(QEvent *event)
 {
     this->isMouseOver = true;
-    if (altPressesStatus) {
+
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
+
+    if (modifierStatus == showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/) {
         this->overlay->show();
+    }
+
+    if (this->container != nullptr) {
+        this->container->resetMouseStatus();
     }
 }
 
 void Split::leaveEvent(QEvent *event)
 {
     this->isMouseOver = false;
+
     this->overlay->hide();
+
+    this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
-void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
+void Split::focusInEvent(QFocusEvent *event)
 {
-    if (modifiers == Qt::AltModifier) {
-        if (!altPressesStatus) {
-            altPressesStatus = true;
-            altPressedStatusChanged.invoke(true);
-        }
-    } else {
-        if (altPressesStatus) {
-            altPressesStatus = false;
-            altPressedStatusChanged.invoke(false);
-        }
-        this->setCursor(Qt::ArrowCursor);
+    this->giveFocus(event->reason());
+}
+
+void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
+{
+    if (modifierStatus != modifiers) {
+        modifierStatus = modifiers;
+        modifierStatusChanged.invoke(modifiers);
     }
 }
 
@@ -342,15 +346,14 @@ void Split::handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers)
 void Split::doAddSplit()
 {
     if (this->container) {
-        this->container->addChat(true);
+        this->container->appendNewSplit(true);
     }
 }
 
 void Split::doCloseSplit()
 {
     if (this->container) {
-        this->container->removeFromLayout(this);
-        deleteLater();
+        this->container->deleteSplit(this);
     }
 }
 
@@ -373,7 +376,7 @@ void Split::doPopup()
         new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));
 
     split->setChannel(this->getIndirectChannel());
-    window.getNotebook().getOrAddSelectedPage()->addToLayout(split);
+    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
 
     window.show();
 }
@@ -536,26 +539,6 @@ static Iter select_randomly(Iter start, Iter end)
     return select_randomly(start, end, gen);
 }
 
-void Split::doIncFlexX()
-{
-    this->setFlexSizeX(this->getFlexSizeX() * 1.2);
-}
-
-void Split::doDecFlexX()
-{
-    this->setFlexSizeX(this->getFlexSizeX() * (1 / 1.2));
-}
-
-void Split::doIncFlexY()
-{
-    this->setFlexSizeY(this->getFlexSizeY() * 1.2);
-}
-
-void Split::doDecFlexY()
-{
-    this->setFlexSizeY(this->getFlexSizeY() * (1 / 1.2));
-}
-
 void Split::drag()
 {
     auto container = dynamic_cast<SplitContainer *>(this->parentWidget());
@@ -564,7 +547,7 @@ void Split::drag()
         SplitContainer::isDraggingSplit = true;
         SplitContainer::draggingSplit = this;
 
-        auto originalLocation = container->removeFromLayout(this);
+        auto originalLocation = container->releaseSplit(this);
 
         QDrag *drag = new QDrag(this);
         QMimeData *mimeData = new QMimeData;
@@ -576,7 +559,8 @@ void Split::drag()
         Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
 
         if (dropAction == Qt::IgnoreAction) {
-            container->addToLayout(this, originalLocation);
+            container->insertSplit(this,
+                                   originalLocation);  // SplitContainer::dragOriginalPosition);
         }
 
         SplitContainer::isDraggingSplit = false;

@@ -19,9 +19,10 @@ class Channel;
 
 namespace widgets {
 
-class AccountPopupWidget : public BaseWindow
+class AccountPopupWidget final : public BaseWindow
 {
     Q_OBJECT
+
 public:
     AccountPopupWidget(ChannelPtr _channel);
 

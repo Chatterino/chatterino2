@@ -1,8 +1,8 @@
 #pragma once
 
+#include "controllers/accounts/accountcontroller.hpp"
 #include "credentials.hpp"
 #include "debug/log.hpp"
-#include "singletons/accountmanager.hpp"
 #include "util/networkmanager.hpp"
 #include "util/networkrequest.hpp"
 
@@ -100,7 +100,7 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
 {
     QNetworkRequest request(url);
 
-    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     QByteArray oauthToken;
     if (currentTwitchUser) {
         oauthToken = currentTwitchUser->getOAuthToken().toUtf8();
@@ -130,7 +130,7 @@ static void sendDelete(QUrl url, std::function<void()> successCallback)
 {
     QNetworkRequest request(url);
 
-    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     QByteArray oauthToken;
     if (currentTwitchUser) {
         oauthToken = currentTwitchUser->getOAuthToken().toUtf8();

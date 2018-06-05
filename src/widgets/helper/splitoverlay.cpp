@@ -9,6 +9,7 @@
 #include "application.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "widgets/split.hpp"
+#include "widgets/splitcontainer.hpp"
 
 namespace chatterino {
 namespace widgets {
@@ -18,6 +19,7 @@ SplitOverlay::SplitOverlay(Split *parent)
     , split(parent)
 {
     QGridLayout *layout = new QGridLayout(this);
+    this->_layout = layout;
     layout->setMargin(1);
     layout->setSpacing(1);
 
@@ -27,10 +29,11 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(3, 1);
 
     QPushButton *move = new QPushButton(getApp()->resources->split.move, QString());
-    QPushButton *left = new QPushButton(getApp()->resources->split.left, QString());
-    QPushButton *right = new QPushButton(getApp()->resources->split.right, QString());
-    QPushButton *up = new QPushButton(getApp()->resources->split.up, QString());
-    QPushButton *down = new QPushButton(getApp()->resources->split.down, QString());
+    QPushButton *left = this->_left = new QPushButton(getApp()->resources->split.left, QString());
+    QPushButton *right = this->_right =
+        new QPushButton(getApp()->resources->split.right, QString());
+    QPushButton *up = this->_up = new QPushButton(getApp()->resources->split.up, QString());
+    QPushButton *down = this->_down = new QPushButton(getApp()->resources->split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));
@@ -62,14 +65,14 @@ SplitOverlay::SplitOverlay(Split *parent)
     up->setFocusPolicy(Qt::NoFocus);
     down->setFocusPolicy(Qt::NoFocus);
 
-    move->setCursor(Qt::PointingHandCursor);
+    move->setCursor(Qt::SizeAllCursor);
     left->setCursor(Qt::PointingHandCursor);
     right->setCursor(Qt::PointingHandCursor);
     up->setCursor(Qt::PointingHandCursor);
     down->setCursor(Qt::PointingHandCursor);
 
     this->managedConnect(this->scaleChanged, [=](float _scale) {
-        int a = _scale * 40;
+        int a = int(_scale * 30);
         QSize size(a, a);
 
         move->setIconSize(size);
@@ -78,33 +81,69 @@ SplitOverlay::SplitOverlay(Split *parent)
         up->setIconSize(size);
         down->setIconSize(size);
     });
+
+    this->setMouseTracking(true);
+
+    this->setCursor(Qt::ArrowCursor);
 }
 
-void SplitOverlay::paintEvent(QPaintEvent *event)
+void SplitOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.fillRect(this->rect(), QColor(0, 0, 0, 90));
+    painter.fillRect(this->rect(), QColor(0, 0, 0, 150));
 
     QRect rect;
     switch (this->hoveredElement) {
         case SplitLeft: {
             rect = QRect(0, 0, this->width() / 2, this->height());
         } break;
+
         case SplitRight: {
             rect = QRect(this->width() / 2, 0, this->width() / 2, this->height());
         } break;
+
         case SplitUp: {
             rect = QRect(0, 0, this->width(), this->height() / 2);
         } break;
+
         case SplitDown: {
             rect = QRect(0, this->height() / 2, this->width(), this->height() / 2);
         } break;
+
+        default:;
     }
+
+    rect.setRight(rect.right() - 1);
+    rect.setBottom(rect.bottom() - 1);
+
     if (!rect.isNull()) {
         painter.setPen(getApp()->themes->splits.dropPreviewBorder);
         painter.setBrush(getApp()->themes->splits.dropPreview);
         painter.drawRect(rect);
     }
+}
+
+void SplitOverlay::resizeEvent(QResizeEvent *event)
+{
+    float _scale = this->getScale();
+    bool wideEnough = event->size().width() > 150 * _scale;
+    bool highEnough = event->size().height() > 150 * _scale;
+
+    this->_left->setVisible(wideEnough);
+    this->_right->setVisible(wideEnough);
+    this->_up->setVisible(highEnough);
+    this->_down->setVisible(highEnough);
+}
+
+void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
+{
+    BaseWidget::mouseMoveEvent(event);
+
+    //    qDebug() << QGuiApplication::queryKeyboardModifiers();
+
+    //    if ((QGuiApplication::queryKeyboardModifiers() & Qt::AltModifier) == Qt::AltModifier) {
+    //        this->hide();
+    //    }
 }
 
 SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent, HoveredElement _element)
@@ -122,7 +161,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                 dynamic_cast<QGraphicsOpacityEffect *>(((QWidget *)watched)->graphicsEffect());
 
             if (effect != nullptr) {
-                effect->setOpacity(1);
+                effect->setOpacity(0.99);
             }
 
             this->parent->hoveredElement = this->hoveredElement;
@@ -148,6 +187,20 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                 return true;
             }
         } break;
+        case QEvent::MouseButtonRelease: {
+            if (this->hoveredElement != HoveredElement::SplitMove) {
+                SplitContainer *container = this->parent->split->getContainer();
+
+                if (container != nullptr) {
+                    auto *_split = new Split(container);
+                    auto dir = SplitContainer::Direction(this->hoveredElement +
+                                                         SplitContainer::Left - SplitLeft);
+                    container->insertSplit(_split, dir, this->parent->split);
+                    this->parent->hide();
+                }
+            }
+        } break;
+        default:;
     }
     return QObject::eventFilter(watched, event);
 }

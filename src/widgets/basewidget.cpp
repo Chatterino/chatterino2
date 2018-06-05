@@ -27,7 +27,6 @@ BaseWidget::~BaseWidget()
 
 float BaseWidget::getScale() const
 {
-    //    return 1.f;
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
 
     if (baseWidget == nullptr) {

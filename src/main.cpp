@@ -1,6 +1,7 @@
 #include "application.hpp"
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
+#include "singletons/updatemanager.hpp"
 #include "util/networkmanager.hpp"
 #include "widgets/lastruncrashdialog.hpp"
 
@@ -9,6 +10,7 @@
 #include <QFile>
 #include <QLibrary>
 #include <QStringList>
+#include <QStyleFactory>
 
 #ifdef USEWINSDK
 #include "util/nativeeventhelper.hpp"
@@ -17,7 +19,15 @@
 #include <fstream>
 #include <iostream>
 
+#ifdef Q_OS_WIN
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#endif
+
 int runGui(int argc, char *argv[]);
+void runNativeMessagingHost();
+void installCustomPalette();
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +40,7 @@ int main(int argc, char *argv[])
 
     // TODO: can be any argument
     if (args.size() > 0 && args[0].startsWith("chrome-extension://")) {
-        chatterino::Application::runNativeMessagingHost();
+        runNativeMessagingHost();
         return 0;
     }
 
@@ -47,13 +57,15 @@ int runGui(int argc, char *argv[])
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
-// Install native event handler for hidpi on windows
-#ifdef USEWINSDK
-    a.installNativeEventFilter(new chatterino::util::DpiNativeEventFilter);
-#endif
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+    installCustomPalette();
 
     // Initialize NetworkManager
     chatterino::util::NetworkManager::init();
+
+    // Check for upates
+    chatterino::singletons::UpdateManager::getInstance().checkForUpdates();
 
     // Initialize application
     chatterino::Application::instantiate(argc, argv);
@@ -68,7 +80,14 @@ int runGui(int argc, char *argv[])
     if (QFile::exists(runningPath)) {
 #ifndef DISABLE_CRASH_DIALOG
         chatterino::widgets::LastRunCrashDialog dialog;
-        dialog.exec();
+
+        switch (dialog.exec()) {
+            case QDialog::Accepted: {
+            }; break;
+            default: {
+                _exit(0);
+            }
+        }
 #endif
     } else {
         QFile runningFile(runningPath);
@@ -97,4 +116,87 @@ int runGui(int argc, char *argv[])
     chatterino::util::NetworkManager::deinit();
 
     _exit(0);
+}
+
+void runNativeMessagingHost()
+{
+    auto *nm = new chatterino::singletons::NativeMessagingManager;
+
+#ifdef Q_OS_WIN
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
+
+#if 0
+    bool bigEndian = isBigEndian();
+#endif
+
+    std::atomic<bool> ping(false);
+
+    QTimer timer;
+    QObject::connect(&timer, &QTimer::timeout, [&ping] {
+        if (!ping.exchange(false)) {
+            _exit(0);
+        }
+    });
+    timer.setInterval(11000);
+    timer.start();
+
+    while (true) {
+        char size_c[4];
+        std::cin.read(size_c, 4);
+
+        if (std::cin.eof()) {
+            break;
+        }
+
+        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+#if 0
+        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
+        uint32_t size = 0;
+        if (bigEndian) {
+            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
+                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
+        } else {
+            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
+                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
+        }
+#endif
+
+        std::unique_ptr<char[]> b(new char[size + 1]);
+        std::cin.read(b.get(), size);
+        *(b.get() + size) = '\0';
+
+        nm->sendToGuiProcess(QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
+    }
+}
+
+void installCustomPalette()
+{
+    // borrowed from
+    // https://stackoverflow.com/questions/15035767/is-the-qt-5-dark-fusion-theme-available-for-windows
+    QPalette darkPalette = qApp->palette();
+
+    darkPalette.setColor(QPalette::Window, QColor(22, 22, 22));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Base, QColor("#333"));
+    darkPalette.setColor(QPalette::AlternateBase, QColor("#444"));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::Dark, QColor(35, 35, 35));
+    darkPalette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+    darkPalette.setColor(QPalette::Button, QColor(70, 70, 70));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
+    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+
+    qApp->setPalette(darkPalette);
 }

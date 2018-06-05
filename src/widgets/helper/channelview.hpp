@@ -86,7 +86,11 @@ private:
     bool updateQueued = false;
     bool messageWasAdded = false;
     bool lastMessageHasAlternateBackground = false;
-    bool paused = false;
+
+    bool pausedTemporarily = false;
+    bool pausedBySelection = false;
+    int messagesAddedSinceSelectionPause = 0;
+
     QTimer pauseTimeout;
     boost::optional<messages::MessageElement::Flags> overrideFlags;
     messages::MessageLayoutPtr lastReadMessage;
@@ -99,6 +103,16 @@ private:
     void drawMessages(QPainter &painter);
     void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
     messages::MessageElement::Flags getFlags() const;
+    bool isPaused();
+
+    void handleMouseClick(QMouseEvent *event,
+                          const messages::MessageLayoutElement *hoverLayoutElement,
+                          messages::MessageLayout *layout);
+    void addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
+                             messages::MessageLayout *layout);
+
+    //    void beginPause();
+    //    void endPause();
 
     ChannelPtr channel;
 
@@ -115,7 +129,9 @@ private:
 
     // Mouse event variables
     bool isMouseDown = false;
+    bool isRightMouseDown = false;
     QPointF lastPressPosition;
+    QPointF lastRightPressPosition;
 
     messages::Selection selection;
     bool selecting = false;

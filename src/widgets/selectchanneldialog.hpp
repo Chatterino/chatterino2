@@ -38,7 +38,7 @@ private:
     };
 
     struct {
-        Notebook2 *notebook;
+        Notebook *notebook;
         struct {
             QRadioButton *channel;
             QLineEdit *channelName;

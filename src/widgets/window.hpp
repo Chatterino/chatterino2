@@ -29,7 +29,7 @@ public:
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
-    Notebook &getNotebook();
+    SplitNotebook &getNotebook();
 
     void refreshWindowTitle(const QString &username);
 
@@ -42,12 +42,14 @@ protected:
     bool event(QEvent *event) override;
 
 private:
+    RippleEffectLabel *userLabel = nullptr;
+
     WindowType type;
     float dpi;
 
     void loadGeometry();
 
-    Notebook notebook;
+    SplitNotebook notebook;
 
     friend class Notebook;
 

@@ -216,7 +216,7 @@ public:
 
         if (this->data.caller != nullptr) {
             QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
-                             [ onFinished, data = this->data ](auto reply) mutable {
+                             [onFinished, data = this->data](auto reply) mutable {
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
                                      // TODO: We might want to call an onError callback here
                                      return;
@@ -238,7 +238,7 @@ public:
 
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [ timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)} ]() {
+            [timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)}]() {
                 QNetworkReply *reply = NetworkManager::NaM.get(data.request);
 
                 if (timer != nullptr) {
@@ -253,21 +253,21 @@ public:
                     data.onReplyCreated(reply);
                 }
 
-                QObject::connect(reply, &QNetworkReply::finished, worker, [
-                    data = std::move(data), worker, reply, onFinished = std::move(onFinished)
-                ]() mutable {
-                    if (data.caller == nullptr) {
-                        QByteArray bytes = reply->readAll();
-                        data.writeToCache(bytes);
-                        onFinished(bytes);
+                QObject::connect(reply, &QNetworkReply::finished, worker,
+                                 [data = std::move(data), worker, reply,
+                                  onFinished = std::move(onFinished)]() mutable {
+                                     if (data.caller == nullptr) {
+                                         QByteArray bytes = reply->readAll();
+                                         data.writeToCache(bytes);
+                                         onFinished(bytes);
 
-                        reply->deleteLater();
-                    } else {
-                        emit worker->doneUrl(reply);
-                    }
+                                         reply->deleteLater();
+                                     } else {
+                                         emit worker->doneUrl(reply);
+                                     }
 
-                    delete worker;
-                });
+                                     delete worker;
+                                 });
             });
 
         emit requester.requestUrl();
@@ -276,7 +276,7 @@ public:
     template <typename FinishedCallback>
     void getJSON(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes)->bool {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData(bytes);
             onFinished(object);
 
@@ -289,7 +289,7 @@ public:
     template <typename FinishedCallback>
     void getJSON2(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes)->bool {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData2(bytes);
             onFinished(object);
 
@@ -303,6 +303,7 @@ public:
     {
         switch (this->data.requestType) {
             case GetRequest: {
+                debug::Log("Call GET request!");
                 this->executeGet();
             } break;
 
@@ -369,10 +370,8 @@ private:
         worker->moveToThread(&NetworkManager::workerThread);
 
         if (this->data.caller != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl,
-                             this->data.caller, [data = this->data](auto reply) mutable {
-                                 auto &dat = data;
-
+            QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
+                             [data = this->data](auto reply) mutable {
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
                                      if (data.onError) {
                                          data.onError(reply->error());
@@ -395,8 +394,8 @@ private:
         }
 
         QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-                         [ timer, data = std::move(this->data), worker ]() {
-                             QNetworkReply *reply;
+                         [timer, data = std::move(this->data), worker]() {
+                             QNetworkReply *reply = nullptr;
                              switch (data.requestType) {
                                  case GetRequest: {
                                      reply = NetworkManager::NaM.get(data.request);
@@ -431,11 +430,16 @@ private:
                              }
 
                              QObject::connect(reply, &QNetworkReply::finished, worker,
-                                              [ data = std::move(data), worker, reply ]() mutable {
+                                              [data = std::move(data), worker, reply]() mutable {
                                                   if (data.caller == nullptr) {
                                                       QByteArray bytes = reply->readAll();
                                                       data.writeToCache(bytes);
-                                                      data.onSuccess(parseJSONFromData2(bytes));
+
+                                                      if (data.onSuccess) {
+                                                          data.onSuccess(parseJSONFromData2(bytes));
+                                                      } else {
+                                                          qWarning() << "data.onSuccess not found";
+                                                      }
 
                                                       reply->deleteLater();
                                                   } else {

@@ -1,11 +1,13 @@
 #include "widgets/window.hpp"
 
 #include "application.hpp"
-#include "singletons/accountmanager.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
+#include "providers/twitch/twitchserver.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "version.hpp"
 #include "widgets/accountswitchpopupwidget.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/notebook.hpp"
@@ -24,18 +26,28 @@ namespace chatterino {
 namespace widgets {
 
 Window::Window(WindowType _type)
-    : BaseWindow(nullptr, true)
+    : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
     , type(_type)
     , dpi(this->getScale())
-    , notebook(this, !this->hasCustomWindowFrame())
+    , notebook(this)
 {
     auto app = getApp();
 
-    app->accounts->Twitch.currentUsername.connect([this](const std::string &newUsername, auto) {
-        if (newUsername.empty()) {
+    app->accounts->twitch.currentUserChanged.connect([this] {
+        if (this->userLabel == nullptr) {
+            return;
+        }
+
+        auto user = getApp()->accounts->twitch.getCurrent();
+
+        if (user->isAnon()) {
             this->refreshWindowTitle("Not logged in");
+
+            this->userLabel->getLabel().setText("anonymous");
         } else {
-            this->refreshWindowTitle(QString::fromStdString(newUsername));
+            this->refreshWindowTitle(user->getUserName());
+
+            this->userLabel->getLabel().setText(user->getUserName());
         }
     });
 
@@ -43,18 +55,17 @@ Window::Window(WindowType _type)
         this->addTitleBarButton(TitleBarButton::Settings, [app] {
             app->windows->showSettingsDialog();  //
         });
-        auto user = this->addTitleBarLabel([app] {
-            app->windows->showAccountSelectPopup(QCursor::pos());  //
-        });
 
-        app->accounts->Twitch.currentUserChanged.connect(
-            [=] { user->getLabel().setText(app->accounts->Twitch.getCurrent()->getUserName()); });
+        this->userLabel = this->addTitleBarLabel([this, app] {
+            app->windows->showAccountSelectPopup(
+                this->userLabel->mapToGlobal(this->userLabel->rect().bottomLeft()));  //
+        });
     }
 
     if (_type == Window::Main) {
-        this->resize((int)(600 * this->getScale()), (int)(500 * this->getScale()));
+        this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
     } else {
-        this->resize((int)(300 * this->getScale()), (int)(500 * this->getScale()));
+        this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
     }
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -66,8 +77,12 @@ Window::Window(WindowType _type)
     layout->setMargin(0);
 
     /// Initialize program-wide hotkeys
-    // CTRL+P: Open Settings Dialog
+    // CTRL+P: Open settings dialog
     CreateWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
+
+    // CTRL+T: Create new split
+    CreateWindowShortcut(this, "CTRL+T",
+                         [this] { this->notebook.getOrAddSelectedPage()->appendNewSplit(true); });
 
     // CTRL+Number: Switch to n'th tab
     CreateWindowShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
@@ -81,12 +96,13 @@ Window::Window(WindowType _type)
     CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
 
     // CTRL+SHIFT+T: New tab
-    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addNewPage(true); });
+    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addPage(true); });
 
     // CTRL+SHIFT+W: Close current tab
     CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
 
-    std::vector<QString> cheerMessages;
+#ifdef QT_DEBUG
+    std::vector<QString> cheerMessages, subMessages;
     // clang-format off
     cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=2000;color=#B22222;display-name=arzenhuz;emotes=185989:33-37;id=1ae336ac-8e1a-4d6b-8b00-9fcee26e8337;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783470139;turbo=0;user-id=111553331;user-type= :arzenhuz!arzenhuz@arzenhuz.tmi.twitch.tv PRIVMSG #pajlada :pajacheer2000 Buy pizza for both pajaH)");
     cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=37;color=#3FBF72;display-name=VADIKUS007;emotes=;id=eedd95fd-2a17-4da1-879c-a1e76ffce582;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783184352;turbo=0;user-id=72256775;user-type= :vadikus007!vadikus007@vadikus007.tmi.twitch.tv PRIVMSG #pajlada :cheer37)");
@@ -97,15 +113,45 @@ Window::Window(WindowType _type)
     cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=1;color=#3FBF72;display-name=VADIKUS007;emotes=;id=c4c5061b-f5c6-464b-8bff-7f1ac816caa7;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515782817171;turbo=0;user-id=72256775;user-type= :vadikus007!vadikus007@vadikus007.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
     cheerMessages.emplace_back(R"(@badges=;bits=1;color=#FF0000;display-name=?????;emotes=;id=979b6b4f-be9a-42fb-a54c-88fcb0aca18d;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1515782819084;turbo=0;user-id=70656218;user-type= :stels_tv!stels_tv@stels_tv.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
     cheerMessages.emplace_back(R"(@badges=subscriber/3,premium/1;bits=1;color=#FF0000;display-name=kalvarenga;emotes=;id=4744d6f0-de1d-475d-a3ff-38647113265a;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515782860740;turbo=0;user-id=108393131;user-type= :kalvarenga!kalvarenga@kalvarenga.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
+
+    subMessages.emplace_back(R"(@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=1337;subscriber=1;system-msg=ronni\shas\ssubscribed\sfor\s6\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!)");
+    subMessages.emplace_back(R"(@badges=staff/1,premium/1;color=#0000FF;display-name=TWW2;emotes=;id=e9176cd8-5e22-4684-ad40-ce53c2561c5e;login=tww2;mod=0;msg-id=subgift;msg-param-months=1;msg-param-recipient-display-name=Mr_Woodchuck;msg-param-recipient-id=89614178;msg-param-recipient-name=mr_woodchuck;msg-param-sub-plan-name=House\sof\sNyoro~n;msg-param-sub-plan=1000;room-id=19571752;subscriber=0;system-msg=TWW2\sgifted\sa\sTier\s1\ssub\sto\sMr_Woodchuck!;tmi-sent-ts=1521159445153;turbo=0;user-id=13405587;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // hyperbolicxd gifted a sub to quote_if_nam
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=#00FF7F;display-name=hyperbolicxd;emotes=;id=b20ef4fe-cba8-41d0-a371-6327651dc9cc;login=hyperbolicxd;mod=0;msg-id=subgift;msg-param-months=1;msg-param-recipient-display-name=quote_if_nam;msg-param-recipient-id=217259245;msg-param-recipient-user-name=quote_if_nam;msg-param-sender-count=1;msg-param-sub-plan-name=Channel\sSubscription\s(nymn_hs);msg-param-sub-plan=1000;room-id=62300805;subscriber=1;system-msg=hyperbolicxd\sgifted\sa\sTier\s1\ssub\sto\squote_if_nam!\sThis\sis\stheir\sfirst\sGift\sSub\sin\sthe\schannel!;tmi-sent-ts=1528190938558;turbo=0;user-id=111534250;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // first time sub
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=#0000FF;display-name=byebyeheart;emotes=;id=fe390424-ab89-4c33-bb5a-53c6e5214b9f;login=byebyeheart;mod=0;msg-id=sub;msg-param-months=0;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=Prime;room-id=39298218;subscriber=0;system-msg=byebyeheart\sjust\ssubscribed\swith\sTwitch\sPrime!;tmi-sent-ts=1528190963670;turbo=0;user-id=131956000;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // first time sub
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=;display-name=vJoeyzz;emotes=;id=b2476df5-fffe-4338-837b-380c5dd90051;login=vjoeyzz;mod=0;msg-id=sub;msg-param-months=0;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=Prime;room-id=39298218;subscriber=0;system-msg=vJoeyzz\sjust\ssubscribed\swith\sTwitch\sPrime!;tmi-sent-ts=1528190995089;turbo=0;user-id=78945903;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // first time sub
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=;display-name=Lennydog3;emotes=;id=44feb1eb-df60-45f6-904b-7bf0d5375a41;login=lennydog3;mod=0;msg-id=sub;msg-param-months=0;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=Prime;room-id=39298218;subscriber=0;system-msg=Lennydog3\sjust\ssubscribed\swith\sTwitch\sPrime!;tmi-sent-ts=1528191098733;turbo=0;user-id=175759335;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // resub with message
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=#1E90FF;display-name=OscarLord;emotes=;id=376529fd-31a8-4da9-9c0d-92a9470da2cd;login=oscarlord;mod=0;msg-id=resub;msg-param-months=2;msg-param-sub-plan-name=Dakotaz;msg-param-sub-plan=1000;room-id=39298218;subscriber=1;system-msg=OscarLord\sjust\ssubscribed\swith\sa\sTier\s1\ssub.\sOscarLord\ssubscribed\sfor\s2\smonths\sin\sa\srow!;tmi-sent-ts=1528191154801;turbo=0;user-id=162607810;user-type= :tmi.twitch.tv USERNOTICE #pajlada :Hey dk love to watch your streams keep up the good work)");
+
+    // resub with message
+    subMessages.emplace_back(R"(@badges=subscriber/0,premium/1;color=;display-name=samewl;emotes=9:22-23;id=599fda87-ca1e-41f2-9af7-6a28208daf1c;login=samewl;mod=0;msg-id=resub;msg-param-months=5;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol);msg-param-sub-plan=Prime;room-id=22484632;subscriber=1;system-msg=samewl\sjust\ssubscribed\swith\sTwitch\sPrime.\ssamewl\ssubscribed\sfor\s5\smonths\sin\sa\srow!;tmi-sent-ts=1528191317948;turbo=0;user-id=70273207;user-type= :tmi.twitch.tv USERNOTICE #pajlada :lot of love sebastian <3)");
+
+    // resub without message
+    subMessages.emplace_back(R"(@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol):\s$9.99\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\sjust\ssubscribed\swith\sa\sTier\s2\ssub.\scspice\ssubscribed\sfor\s12\smonths\sin\sa\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
     // clang-format on
 
-    //    CreateWindowShortcut(this, "F5", [cheerMessages] {
-    //        auto &ircManager = singletons::IrcManager::getInstance();
-    //        static int index = 0;
-    //        ircManager.addFakeMessage(cheerMessages[index++ % cheerMessages.size()]);
-    //    });
+    CreateWindowShortcut(this, "F5", [=] {
+        const auto &messages = subMessages;
+        static int index = 0;
+        auto app = getApp();
+        const auto &msg = messages[index++ % messages.size()];
+        app->twitch.server->addFakeMessage(msg);
+    });
+#endif
 
-    this->setWindowTitle("Chatterino 2 Development Build");
+    this->refreshWindowTitle("");
+
+    this->notebook.setAllowUserTabManagement(true);
+    this->notebook.setShowAddButton(true);
 }
 
 Window::WindowType Window::getType()
@@ -128,14 +174,14 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
     }
 }
 
-Notebook &Window::getNotebook()
+SplitNotebook &Window::getNotebook()
 {
     return this->notebook;
 }
 
 void Window::refreshWindowTitle(const QString &username)
 {
-    this->setWindowTitle(username + " - Chatterino for Twitch");
+    this->setWindowTitle(username + " - Chatterino Beta " CHATTERINO_VERSION);
 }
 
 bool Window::event(QEvent *event)
@@ -154,12 +200,18 @@ bool Window::event(QEvent *event)
                     split->updateLastReadMessage();
                 }
             }
+
+            if (SplitContainer *container = dynamic_cast<SplitContainer *>(page)) {
+                container->hideResizeHandles();
+            }
         } break;
+
+        default:;
     };
     return BaseWindow::event(event);
 }
 
-void Window::closeEvent(QCloseEvent *event)
+void Window::closeEvent(QCloseEvent *)
 {
     if (this->type == Window::Main) {
         auto app = getApp();

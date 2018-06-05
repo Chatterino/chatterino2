@@ -1,16 +1,18 @@
 #include "twitchserver.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "providers/twitch/ircmessagehandler.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchhelpers.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/accountmanager.hpp"
 #include "util/posttothread.hpp"
 
+#include <IrcCommand>
 #include <cassert>
 
-using namespace Communi;
+// using namespace Communi;
 using namespace chatterino::singletons;
 
 namespace chatterino {
@@ -27,13 +29,14 @@ TwitchServer::TwitchServer()
 
 void TwitchServer::initialize()
 {
-    getApp()->accounts->Twitch.currentUserChanged.connect(
+    getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { util::postToThread([this] { this->connect(); }); });
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
+void TwitchServer::initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
+                                        bool isWrite)
 {
-    std::shared_ptr<TwitchAccount> account = getApp()->accounts->Twitch.getCurrent();
+    std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();
 
@@ -56,9 +59,9 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
         //        this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/membership"));
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    connection->sendCommand(IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
+    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6667);
@@ -74,69 +77,53 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
     return std::shared_ptr<Channel>(channel);
 }
 
-void TwitchServer::privateMessageReceived(IrcPrivateMessage *message)
+void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
-    QString channelName;
-    if (!TrimChannelName(message->target(), channelName)) {
-        return;
-    }
-
-    this->onPrivateMessage.invoke(message);
-    auto chan = this->getChannelOrEmpty(channelName);
-
-    if (chan->isEmpty()) {
-        return;
-    }
-
-    messages::MessageParseArgs args;
-
-    TwitchMessageBuilder builder(chan.get(), message, args);
-
-    if (!builder.isIgnored()) {
-        messages::MessagePtr _message = builder.build();
-        if (_message->flags & messages::Message::Highlighted) {
-            this->mentionsChannel->addMessage(_message);
-        }
-
-        chan->addMessage(_message);
-    }
+    IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
 }
 
-void TwitchServer::messageReceived(IrcMessage *message)
+void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
     //    this->readConnection
-    if (message->type() == IrcMessage::Type::Private) {
+    if (message->type() == Communi::IrcMessage::Type::Private) {
         // We already have a handler for private messages
         return;
     }
 
     const QString &command = message->command();
 
+    auto &handler = IrcMessageHandler::getInstance();
+
     if (command == "ROOMSTATE") {
-        IrcMessageHandler::getInstance().handleRoomStateMessage(message);
+        handler.handleRoomStateMessage(message);
     } else if (command == "CLEARCHAT") {
-        IrcMessageHandler::getInstance().handleClearChatMessage(message);
+        handler.handleClearChatMessage(message);
     } else if (command == "USERSTATE") {
-        IrcMessageHandler::getInstance().handleUserStateMessage(message);
+        handler.handleUserStateMessage(message);
     } else if (command == "WHISPER") {
-        IrcMessageHandler::getInstance().handleWhisperMessage(message);
+        handler.handleWhisperMessage(message);
     } else if (command == "USERNOTICE") {
-        IrcMessageHandler::getInstance().handleUserNoticeMessage(message);
+        handler.handleUserNoticeMessage(message, *this);
     } else if (command == "MODE") {
-        IrcMessageHandler::getInstance().handleModeMessage(message);
+        handler.handleModeMessage(message);
     } else if (command == "NOTICE") {
-        IrcMessageHandler::getInstance().handleNoticeMessage(
-            static_cast<IrcNoticeMessage *>(message));
+        handler.handleNoticeMessage(static_cast<Communi::IrcNoticeMessage *>(message));
+    } else if (command == "JOIN") {
+        handler.handleJoinMessage(message);
+    } else if (command == "PART") {
+        handler.handlePartMessage(message);
     }
 }
 
-void TwitchServer::writeConnectionMessageReceived(IrcMessage *message)
+void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 {
     switch (message->type()) {
-        case IrcMessage::Type::Notice: {
+        case Communi::IrcMessage::Type::Notice: {
             IrcMessageHandler::getInstance().handleWriteConnectionNoticeMessage(
-                static_cast<IrcNoticeMessage *>(message));
+                static_cast<Communi::IrcNoticeMessage *>(message));
         } break;
+
+        default:;
     }
 }
 

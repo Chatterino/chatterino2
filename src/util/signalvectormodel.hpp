@@ -2,6 +2,7 @@
 
 #include <QAbstractTableModel>
 #include <QStandardItem>
+#include <boost/optional.hpp>
 #include <util/signalvector2.hpp>
 
 #include <pajlada/signals/signalholder.hpp>
@@ -26,11 +27,7 @@ public:
     {
         this->vector = vec;
 
-        auto insert = [this](const typename BaseSignalVector<TVectorItem>::ItemArgs &args) {
-            if (args.caller == this) {
-                return;
-            }
-
+        auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
             // get row index
             int index = this->getModelIndexFromVectorIndex(args.index);
             assert(index >= 0 && index <= this->rows.size());
@@ -43,13 +40,13 @@ public:
             index = this->beforeInsert(args.item, row, index);
 
             this->beginInsertRows(QModelIndex(), index, index);
-            this->rows.insert(this->rows.begin() + index, Row(row));
+            this->rows.insert(this->rows.begin() + index, Row(row, args.item));
             this->endInsertRows();
         };
 
         int i = 0;
         for (const TVectorItem &item : vec->getVector()) {
-            typename BaseSignalVector<TVectorItem>::ItemArgs args{item, i++, 0};
+            SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
 
             insert(args);
         }
@@ -57,20 +54,21 @@ public:
         this->managedConnect(vec->itemInserted, insert);
 
         this->managedConnect(vec->itemRemoved, [this](auto args) {
-            if (args.caller == this) {
-                return;
-            }
-
             int row = this->getModelIndexFromVectorIndex(args.index);
             assert(row >= 0 && row <= this->rows.size());
 
             // remove row
+            std::vector<QStandardItem *> items = std::move(this->rows[row].items);
+
             this->beginRemoveRows(QModelIndex(), row, row);
-            for (QStandardItem *item : this->rows[row].items) {
-                delete item;
-            }
             this->rows.erase(this->rows.begin() + row);
             this->endRemoveRows();
+
+            this->afterRemoved(args.item, items, row);
+
+            for (QStandardItem *item : items) {
+                delete item;
+            }
         });
 
         this->afterInit();
@@ -117,7 +115,10 @@ public:
         } else {
             int vecRow = this->getVectorIndexFromModelIndex(row);
             this->vector->removeItem(vecRow, this);
-            TVectorItem item = this->getItemFromRow(this->rows[row].items);
+
+            assert(this->rows[row].original);
+            TVectorItem item =
+                this->getItemFromRow(this->rows[row].items, this->rows[row].original.get());
             this->vector->insertItem(item, vecRow, this);
         }
 
@@ -181,7 +182,7 @@ public:
         assert(row >= 0 && row < this->rows.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(signalVectorRow);
+        this->vector->removeItem(signalVectorRow, this);
 
         return true;
     }
@@ -192,7 +193,8 @@ protected:
     }
 
     // turn a vector item into a model row
-    virtual TVectorItem getItemFromRow(std::vector<QStandardItem *> &row) = 0;
+    virtual TVectorItem getItemFromRow(std::vector<QStandardItem *> &row,
+                                       const TVectorItem &original) = 0;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const TVectorItem &item, std::vector<QStandardItem *> &row) = 0;
@@ -221,6 +223,16 @@ protected:
         this->endInsertRows();
     }
 
+    void removeCustomRow(int index)
+    {
+        assert(index >= 0 && index <= this->rows.size());
+        assert(this->rows[index].isCustomRow);
+
+        this->beginRemoveRows(QModelIndex(), index, index);
+        this->rows.erase(this->rows.begin() + index);
+        this->endRemoveRows();
+    }
+
     std::vector<QStandardItem *> createRow()
     {
         std::vector<QStandardItem *> row;
@@ -232,10 +244,19 @@ protected:
 
     struct Row {
         std::vector<QStandardItem *> items;
+        boost::optional<TVectorItem> original;
         bool isCustomRow;
 
         Row(std::vector<QStandardItem *> _items, bool _isCustomRow = false)
             : items(std::move(_items))
+            , isCustomRow(_isCustomRow)
+        {
+        }
+
+        Row(std::vector<QStandardItem *> _items, const TVectorItem &_original,
+            bool _isCustomRow = false)
+            : items(std::move(_items))
+            , original(_original)
             , isCustomRow(_isCustomRow)
         {
         }

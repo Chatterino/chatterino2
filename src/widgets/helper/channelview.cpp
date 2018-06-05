@@ -27,7 +27,10 @@
 #include <functional>
 #include <memory>
 
-#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 4) * this->getScale())
+#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 2) * this->getScale())
+#define DRAW_WIDTH (this->width())
+#define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
+#define CHAT_HOVER_PAUSE_DURATION 400
 
 using namespace chatterino::messages;
 using namespace chatterino::providers::twitch;
@@ -42,9 +45,6 @@ ChannelView::ChannelView(BaseWidget *parent)
 {
     auto app = getApp();
 
-#ifndef Q_OS_MAC
-//    this->setAttribute(Qt::WA_OpaquePaintEvent);
-#endif
     this->setMouseTracking(true);
 
     this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([=] {
@@ -55,8 +55,12 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->scrollBar.getCurrentValueChanged().connect([this] {
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->actuallyLayoutMessages(true);
-        this->goToBottom->setVisible(this->enableScrollingToBottom && this->scrollBar.isVisible() &&
-                                     !this->scrollBar.isAtBottom());
+
+        if (!this->isPaused()) {
+            this->goToBottom->setVisible(this->enableScrollingToBottom &&
+                                         this->scrollBar.isVisible() &&
+                                         !this->scrollBar.isAtBottom());
+        }
 
         this->queueUpdate();
     });
@@ -97,12 +101,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     //    });
 
     this->pauseTimeout.setSingleShot(true);
-
-    //    auto e = new QResizeEvent(this->size(), this->size());
-    //    this->resizeEvent(e);
-    //    delete e;
-
-    this->scrollBar.resize(this->scrollBar.width(), this->height() + 1);
+    QObject::connect(&this->pauseTimeout, &QTimer::timeout, [this] {
+        this->pausedTemporarily = false;
+        this->layoutMessages();
+    });
 
     app->settings->showLastMessageIndicator.connect(
         [this](auto, auto) {
@@ -120,6 +122,15 @@ ChannelView::ChannelView(BaseWidget *parent)
             this->layoutQueued = false;
         }
     });
+
+    QTimer::singleShot(1000, this, [this] {
+        this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0,
+                                    this->scrollBar.width(), this->height());
+    });
+
+    QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    QObject::connect(shortcut, &QShortcut::activated,
+                     [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
 }
 
 ChannelView::~ChannelView()
@@ -165,9 +176,10 @@ void ChannelView::layoutMessages()
 
 void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
+    //    BenchmarkGuard benchmark("layout messages");
+
     auto app = getApp();
 
-    // BENCH(timer)
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     if (messagesSnapshot.getLength() == 0) {
@@ -246,12 +258,13 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     // Perhaps also if the user scrolled with the scrollwheel in this ChatWidget in the last 0.2
     // seconds or something
     if (this->enableScrollingToBottom && this->showingLatestMessages && showScrollbar) {
-        this->scrollBar.scrollToBottom(this->messageWasAdded &&
-                                       app->settings->enableSmoothScrollingNewMessages.getValue());
+        if (!this->isPaused()) {
+            this->scrollBar.scrollToBottom(
+                //                this->messageWasAdded &&
+                app->settings->enableSmoothScrollingNewMessages.getValue());
+        }
         this->messageWasAdded = false;
     }
-
-    // MARK(timer);
 
     if (redrawRequired) {
         this->queueUpdate();
@@ -336,10 +349,11 @@ const boost::optional<messages::MessageElement::Flags> &ChannelView::getOverride
 
 messages::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
-    if (!this->paused) {
-        this->snapshot = this->messages.getSnapshot();
-    }
+    //    if (!this->isPaused()) {
+    this->snapshot = this->messages.getSnapshot();
+    //    }
 
+    //    return this->snapshot;
     return this->snapshot;
 }
 
@@ -363,14 +377,18 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             }
             this->lastMessageHasAlternateBackground = !this->lastMessageHasAlternateBackground;
 
+            if (this->isPaused()) {
+                this->messagesAddedSinceSelectionPause++;
+            }
+
             if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted)) {
-                if (!this->paused) {
-                    if (this->scrollBar.isAtBottom()) {
-                        this->scrollBar.scrollToBottom();
-                    } else {
-                        this->scrollBar.offset(-1);
-                    }
+                //                if (!this->isPaused()) {
+                if (this->scrollBar.isAtBottom()) {
+                    this->scrollBar.scrollToBottom();
+                } else {
+                    this->scrollBar.offset(-1);
                 }
+                //                }
             }
 
             if (!(message->flags & Message::DoNotTriggerNotification)) {
@@ -395,7 +413,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
             }
 
-            if (!this->paused) {
+            if (!this->isPaused()) {
                 if (this->messages.pushFront(messageRefs).size() > 0) {
                     if (this->scrollBar.isAtBottom()) {
                         this->scrollBar.scrollToBottom();
@@ -474,7 +492,7 @@ void ChannelView::detachChannel()
 
 void ChannelView::pause(int msecTimeout)
 {
-    this->paused = true;
+    this->pausedTemporarily = true;
 
     this->pauseTimeout.start(msecTimeout);
 }
@@ -492,8 +510,8 @@ void ChannelView::updateLastReadMessage()
 
 void ChannelView::resizeEvent(QResizeEvent *)
 {
-    this->scrollBar.resize(this->scrollBar.width(), this->height());
-    this->scrollBar.move(this->width() - this->scrollBar.width(), 0);
+    this->scrollBar.setGeometry(this->width() - this->scrollBar.width(), 0, this->scrollBar.width(),
+                                this->height());
 
     this->goToBottom->setGeometry(0, this->height() - 32, this->width(), 32);
 
@@ -507,6 +525,13 @@ void ChannelView::resizeEvent(QResizeEvent *)
 void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &end)
 {
     // selections
+    if (!this->selecting && start != end) {
+        this->messagesAddedSinceSelectionPause = 0;
+
+        this->selecting = true;
+        this->pausedBySelection = true;
+    }
+
     this->selection = Selection(start, end);
 
     this->selectionChanged.invoke();
@@ -536,9 +561,26 @@ messages::MessageElement::Flags ChannelView::getFlags() const
     return flags;
 }
 
+bool ChannelView::isPaused()
+{
+    return this->pausedTemporarily || this->pausedBySelection;
+}
+
+// void ChannelView::beginPause()
+//{
+//    if (this->scrollBar.isAtBottom()) {
+//        this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue() - 0.001);
+//        this->layoutMessages();
+//    }
+//}
+
+// void ChannelView::endPause()
+//{
+//}
+
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
-    //    BENCH(timer);
+    //    BenchmarkGuard benchmark("paint event");
 
     QPainter painter(this);
 
@@ -546,8 +588,6 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw messages
     this->drawMessages(painter);
-
-    //    MARK(timer);
 }
 
 // if overlays is false then it draws the message, if true then it draws things such as the grey
@@ -558,14 +598,14 @@ void ChannelView::drawMessages(QPainter &painter)
 
     auto messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar.getCurrentValue();
+    size_t start = size_t(this->scrollBar.getCurrentValue());
 
     if (start >= messagesSnapshot.getLength()) {
         return;
     }
 
-    int y = -(messagesSnapshot[start].get()->getHeight() *
-              (fmod(this->scrollBar.getCurrentValue(), 1)));
+    int y = int(-(messagesSnapshot[start].get()->getHeight() *
+                  (fmod(this->scrollBar.getCurrentValue(), 1))));
 
     messages::MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -578,7 +618,7 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage.get() == layout;
         }
 
-        layout->paint(painter, y, i, this->selection, isLastMessage, windowFocused);
+        layout->paint(painter, DRAW_WIDTH, y, i, this->selection, isLastMessage, windowFocused);
 
         y += layout->getHeight();
 
@@ -622,6 +662,9 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
+    this->pausedBySelection = false;
+    this->pausedTemporarily = false;
+
     if (this->scrollBar.isVisible()) {
         auto app = getApp();
 
@@ -691,7 +734,8 @@ void ChannelView::enterEvent(QEvent *)
 
 void ChannelView::leaveEvent(QEvent *)
 {
-    this->paused = false;
+    this->pausedTemporarily = false;
+    this->layoutMessages();
 }
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
@@ -706,7 +750,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     auto app = getApp();
 
     if (app->settings->pauseChatHover.getValue()) {
-        this->pause(300);
+        this->pause(CHAT_HOVER_PAUSE_DURATION);
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();
@@ -722,8 +766,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // is selecting
-    if (this->selecting) {
-        this->pause(500);
+    if (this->isMouseDown) {
+        this->pause(300);
         int index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection.start, SelectionItem(messageIndex, index));
@@ -732,7 +776,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->getMessage()->flags & Message::Collapsed) {
+    if (layout->flags & MessageLayout::Collapsed) {
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
@@ -754,6 +798,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
         tooltipWidget->show();
+        tooltipWidget->raise();
     }
 
     // check if word has a link
@@ -766,28 +811,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
 void ChannelView::mousePressEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
-        this->unsetCursor();
-
-        event->ignore();
-        return;
-    }
-
     auto app = getApp();
 
-    if (app->settings->linksDoubleClickOnly.getValue()) {
-        this->pause(200);
-    }
-
-    this->isMouseDown = true;
-
-    this->lastPressPosition = event->screenPos();
+    this->mouseDown.invoke(event);
 
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
-
-    this->mouseDown.invoke(event);
 
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
@@ -798,71 +828,87 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         }
 
         // Start selection at the last message at its last index
-        auto lastMessageIndex = messagesSnapshot.getLength() - 1;
-        auto lastMessage = messagesSnapshot[lastMessageIndex];
-        auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
+        if (event->button() == Qt::LeftButton) {
+            auto lastMessageIndex = messagesSnapshot.getLength() - 1;
+            auto lastMessage = messagesSnapshot[lastMessageIndex];
+            auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
 
-        SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
-        this->setSelection(selectionItem, selectionItem);
-        this->selecting = true;
+            SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
+            this->setSelection(selectionItem, selectionItem);
+        }
 
         return;
     }
 
     // check if message is collapsed
-    if (layout->getMessage()->flags & Message::Collapsed) {
+    if (layout->flags & MessageLayout::Collapsed) {
         return;
     }
 
-    int index = layout->getSelectionIndex(relativePos);
+    switch (event->button()) {
+        case Qt::LeftButton: {
+            if (app->settings->linksDoubleClickOnly.getValue()) {
+                this->pause(200);
+            }
 
-    auto selectionItem = SelectionItem(messageIndex, index);
-    this->setSelection(selectionItem, selectionItem);
-    this->selecting = true;
+            this->lastPressPosition = event->screenPos();
+            this->isMouseDown = true;
 
-    this->repaint();
+            int index = layout->getSelectionIndex(relativePos);
+
+            auto selectionItem = SelectionItem(messageIndex, index);
+            this->setSelection(selectionItem, selectionItem);
+        } break;
+
+        case Qt::RightButton: {
+            this->lastRightPressPosition = event->screenPos();
+            this->isRightMouseDown = true;
+        } break;
+
+        default:;
+    }
+
+    this->update();
 }
 
 void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
-        this->unsetCursor();
+    // check if mouse was pressed
+    if (event->button() == Qt::LeftButton) {
+        if (this->isMouseDown) {
+            this->isMouseDown = false;
 
-        event->ignore();
+            if (fabsf(util::distanceBetweenPoints(this->lastPressPosition, event->screenPos())) >
+                15.f) {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else if (event->button() == Qt::RightButton) {
+        if (this->isRightMouseDown) {
+            this->isRightMouseDown = false;
+
+            if (fabsf(util::distanceBetweenPoints(this->lastRightPressPosition,
+                                                  event->screenPos())) > 15.f) {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else {
+        // not left or right button
         return;
     }
 
-    if (!this->isMouseDown) {
-        // We didn't grab the mouse press, so we shouldn't be handling the mouse
-        // release
-        return;
-    }
-
-    auto app = getApp();
-
-    if (this->selecting) {
-        this->paused = false;
-    }
-
-    this->isMouseDown = false;
-    this->selecting = false;
-
-    float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
-
-    if (fabsf(distance) > 15.f) {
-        // It wasn't a proper click, so we don't care about that here
-        return;
-    }
-
-    // If you clicked and released less than  X pixels away, it counts
-    // as a click!
-
+    // find message
     this->layoutMessages();
 
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
 
+    // no message found
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         // No message at clicked position
         this->userPopupWidget.hide();
@@ -870,8 +916,9 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->getMessage()->flags & Message::MessageFlags::Collapsed) {
-        layout->getMessage()->flags &= ~Message::MessageFlags::Collapsed;
+    if (layout->flags & MessageLayout::Collapsed) {
+        layout->flags |= MessageLayout::Expanded;
+        layout->flags |= MessageLayout::RequiresLayout;
 
         this->layoutMessages();
         return;
@@ -883,12 +930,130 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    auto &link = hoverLayoutElement->getLink();
-    if (event->button() != Qt::LeftButton || !app->settings->linksDoubleClickOnly) {
-        this->handleLinkClick(event, link, layout.get());
+    // handle the click
+    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+}
+
+void ChannelView::handleMouseClick(QMouseEvent *event,
+                                   const messages::MessageLayoutElement *hoveredElement,
+                                   messages::MessageLayout *layout)
+{
+    switch (event->button()) {
+        case Qt::LeftButton: {
+            if (this->selecting) {
+                if (this->messagesAddedSinceSelectionPause >
+                    SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
+                    this->showingLatestMessages = false;
+                }
+
+                this->pausedBySelection = false;
+                this->selecting = false;
+                this->pauseTimeout.stop();
+                this->pausedTemporarily = false;
+
+                this->layoutMessages();
+            }
+
+            auto &link = hoveredElement->getLink();
+            if (!getApp()->settings->linksDoubleClickOnly) {
+                this->handleLinkClick(event, link, layout);
+
+                this->linkClicked.invoke(link);
+            }
+        } break;
+        case Qt::RightButton: {
+            this->addContextMenuItems(hoveredElement, layout);
+        } break;
+        default:;
+    }
+}
+
+void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
+                                      messages::MessageLayout *layout)
+{
+    const auto &creator = hoveredElement->getCreator();
+    auto creatorFlags = creator.getFlags();
+
+    static QMenu *menu = new QMenu;
+    menu->clear();
+
+    // Emote actions
+    if (creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) {
+        const auto &emoteElement = static_cast<const messages::EmoteElement &>(creator);
+
+        // TODO: We might want to add direct "Open image" variants alongside the Copy
+        // actions
+
+        if (emoteElement.data.image1x != nullptr) {
+            menu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
+        }
+        if (emoteElement.data.image2x != nullptr) {
+            menu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
+        }
+        if (emoteElement.data.image3x != nullptr) {
+            menu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
+        }
+
+        if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
+            menu->addSeparator();
+            QString emotePageLink = emoteElement.data.pageLink;
+            menu->addAction("Copy BTTV emote link", [emotePageLink] {
+                QApplication::clipboard()->setText(emotePageLink);  //
+            });
+        } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
+            menu->addSeparator();
+            QString emotePageLink = emoteElement.data.pageLink;
+            menu->addAction("Copy FFZ emote link", [emotePageLink] {
+                QApplication::clipboard()->setText(emotePageLink);  //
+            });
+        }
     }
 
-    this->linkClicked.invoke(link);
+    // add seperator
+    if (!menu->actions().empty()) {
+        menu->addSeparator();
+    }
+
+    // Link copy
+    if (hoveredElement->getLink().type == Link::Url) {
+        QString url = hoveredElement->getLink().value;
+
+        menu->addAction("Open link in browser", [url] { QDesktopServices::openUrl(QUrl(url)); });
+        menu->addAction("Copy link", [url] { QApplication::clipboard()->setText(url); });
+
+        menu->addSeparator();
+    }
+
+    // Copy actions
+    menu->addAction("Copy selection",
+                    [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
+
+    if (!this->selection.isEmpty()) {
+        menu->addAction("Copy message", [layout] {
+            QString copyString;
+            layout->addSelectionText(copyString);
+
+            QGuiApplication::clipboard()->setText(copyString);
+        });
+    }
+
+    //        menu->addAction("Quote message", [layout] {
+    //            QString copyString;
+    //            layout->addSelectionText(copyString);
+
+    //            // insert into input
+    //        });
+
+    menu->move(QCursor::pos());
+    menu->show();
+
+    return;
 }
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
@@ -905,7 +1070,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
         // message under cursor is collapsed
-        if (layout->getMessage()->flags & Message::Collapsed) {
+        if (layout->flags & MessageLayout::Collapsed) {
             return;
         }
 
@@ -933,6 +1098,10 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link,
                                   messages::MessageLayout *layout)
 {
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
+
     switch (link.type) {
         case messages::Link::UserInfo: {
             auto user = link.value;
@@ -945,24 +1114,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             break;
         }
         case messages::Link::Url: {
-            if (event->button() == Qt::RightButton) {
-                static QMenu *menu = nullptr;
-                static QString url;
-
-                if (menu == nullptr) {
-                    menu = new QMenu;
-                    menu->addAction("Open in browser",
-                                    [] { QDesktopServices::openUrl(QUrl(url)); });
-                    menu->addAction("Copy to clipboard",
-                                    [] { QApplication::clipboard()->setText(url); });
-                }
-
-                url = link.value;
-                menu->move(QCursor::pos());
-                menu->show();
-            } else {
-                QDesktopServices::openUrl(QUrl(link.value));
-            }
+            QDesktopServices::openUrl(QUrl(link.value));
             break;
         }
         case messages::Link::UserAction: {

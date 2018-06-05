@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QGridLayout>
+#include <QPushButton>
+
 #include "pajlada/signals/signalholder.hpp"
 #include "widgets/basewidget.hpp"
 
@@ -14,17 +17,26 @@ public:
     explicit SplitOverlay(Split *parent = nullptr);
 
 protected:
+    //    bool event(QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    enum HoveredElement { None, SplitMove, SplitLeft, SplitRight, SplitUp, SplitDown };
+    // fourtf: !!! preserve the order of left, up, right and down
+    enum HoveredElement { None, SplitMove, SplitLeft, SplitUp, SplitRight, SplitDown };
     HoveredElement hoveredElement = None;
     Split *split;
+    QGridLayout *_layout;
+    QPushButton *_left;
+    QPushButton *_up;
+    QPushButton *_right;
+    QPushButton *_down;
 
     class ButtonEventFilter : public QObject
     {
-        HoveredElement hoveredElement;
         SplitOverlay *parent;
+        HoveredElement hoveredElement;
 
     public:
         ButtonEventFilter(SplitOverlay *parent, HoveredElement hoveredElement);

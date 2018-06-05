@@ -51,6 +51,15 @@
         <file>images/split/splitright.png</file>
         <file>images/split/splitup.png</file>
         <file>images/split/splitmove.png</file>
+        <file>licenses/boost_boost.txt</file>
+        <file>licenses/fmt_bsd2.txt</file>
+        <file>licenses/libcommuni_BSD3.txt</file>
+        <file>licenses/openssl.txt</file>
+        <file>licenses/pajlada_settings.txt</file>
+        <file>licenses/pajlada_signals.txt</file>
+        <file>licenses/qt_lgpl-3.0.txt</file>
+        <file>licenses/rapidjson.txt</file>
+        <file>licenses/websocketpp.txt</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

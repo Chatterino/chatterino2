@@ -3,6 +3,7 @@
 #include "providers/irc/abstractircserver.hpp"
 #include "providers/twitch/twitchaccount.hpp"
 #include "providers/twitch/twitchchannel.hpp"
+#include "util/mutexvalue.hpp"
 
 #include <memory>
 
@@ -22,12 +23,17 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
+    util::MutexValue<QString> lastUserThatWhisperedMe;
+
+    //    QString getLastWhisperedPerson() const;
+    //    void setLastWhisperedPerson(const QString &person);
+
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     IndirectChannel watchingChannel;
 
 protected:
-    void initializeConnection(Communi::IrcConnection *connection, bool isRead,
+    void initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
                               bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
@@ -38,6 +44,10 @@ protected:
     std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
 
     QString cleanChannelName(const QString &dirtyChannelName) override;
+
+private:
+    //    mutable std::mutex lastWhisperedPersonMutex;
+    //    QString lastWhisperedPerson;
 };
 
 }  // namespace twitch

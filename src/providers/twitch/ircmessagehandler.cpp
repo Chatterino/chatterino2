@@ -1,6 +1,7 @@
 #include "ircmessagehandler.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
@@ -10,6 +11,9 @@
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/irchelpers.hpp"
+
+#include <IrcMessage>
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -24,116 +28,145 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
     return instance;
 }
 
+void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server)
+{
+    this->addMessage(message, message->target(), message->content(), server, false);
+}
+
+void IrcMessageHandler::addMessage(Communi::IrcMessage *message, const QString &target,
+                                   const QString &content, TwitchServer &server, bool isSub)
+{
+    QString channelName;
+    if (!trimChannelName(target, channelName)) {
+        return;
+    }
+
+    auto chan = server.getChannelOrEmpty(channelName);
+
+    if (chan->isEmpty()) {
+        return;
+    }
+
+    messages::MessageParseArgs args;
+    if (isSub) {
+        args.trimSubscriberUsername = true;
+    }
+
+    TwitchMessageBuilder builder(chan.get(), message, content, args);
+
+    if (isSub || !builder.isIgnored()) {
+        messages::MessagePtr msg = builder.build();
+
+        if (isSub) {
+            msg->flags |= messages::Message::Subscription;
+            msg->flags &= ~messages::Message::Highlighted;
+        } else {
+            if (msg->flags & messages::Message::Highlighted) {
+                server.mentionsChannel->addMessage(msg);
+                getApp()->highlights->addHighlight(msg);
+            }
+        }
+
+        chan->addMessage(msg);
+    }
+}
+
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
-    auto iterator = tags.find("room-id");
+    auto app = getApp();
 
-    if (iterator != tags.end()) {
-        auto roomID = iterator.value().toString();
+    // get twitch channel
+    QString chanName;
+    if (!trimChannelName(message->parameter(0), chanName)) {
+        return;
+    }
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(chan.get());
 
-        QStringList words = QString(message->toData()).split("#");
+    if (twitchChannel) {
+        // room-id
+        decltype(tags.find("xD")) it;
 
-        // ensure the format is valid
-        if (words.length() < 2) {
-            return;
-        }
+        if ((it = tags.find("room-id")) != tags.end()) {
+            auto roomID = it.value().toString();
 
-        auto app = getApp();
-
-        QString channelName = words.at(1);
-
-        auto channel = app->twitch.server->getChannelOrEmpty(channelName);
-
-        if (channel->isEmpty()) {
-            return;
-        }
-
-        if (auto twitchChannel = dynamic_cast<twitch::TwitchChannel *>(channel.get())) {
-            // set the room id of the channel
             twitchChannel->setRoomID(roomID);
+
+            app->resources->loadChannelData(roomID);
         }
 
-        app->resources->loadChannelData(roomID);
+        // Room modes
+        TwitchChannel::RoomModes roomModes = twitchChannel->getRoomModes();
+
+        if ((it = tags.find("emote-only")) != tags.end()) {
+            roomModes.emoteOnly = it.value() == "1";
+        }
+        if ((it = tags.find("subs-only")) != tags.end()) {
+            roomModes.submode = it.value() == "1";
+        }
+        if ((it = tags.find("slow")) != tags.end()) {
+            roomModes.slowMode = it.value().toInt();
+        }
+        if ((it = tags.find("r9k")) != tags.end()) {
+            roomModes.r9k = it.value() == "1";
+        }
+        if ((it = tags.find("broadcaster-lang")) != tags.end()) {
+            roomModes.broadcasterLang = it.value().toString();
+        }
+
+        twitchChannel->setRoomModes(roomModes);
     }
 }
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 {
-    return;
-    //    // check parameter count
-    //    if (message->parameters().length() < 1) {
-    //        return;
-    //    }
+    // check parameter count
+    if (message->parameters().length() < 1) {
+        return;
+    }
 
-    //    QString chanName;
-    //    if (!TrimChannelName(message->parameter(0), chanName)) {
-    //        return;
-    //    }
+    QString chanName;
+    if (!trimChannelName(message->parameter(0), chanName)) {
+        return;
+    }
 
-    //    auto app = getApp();
+    auto app = getApp();
 
-    //    // get channel
-    //    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    // get channel
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
-    //    if (chan->isEmpty()) {
-    //        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
-    //                   chanName);
-    //        return;
-    //    }
+    if (chan->isEmpty()) {
+        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
+                   chanName);
+        return;
+    }
 
-    //    // check if the chat has been cleared by a moderator
-    //    if (message->parameters().length() == 1) {
-    //        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a
-    //        moderator."));
+    // check if the chat has been cleared by a moderator
+    if (message->parameters().length() == 1) {
+        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
-    //        return;
-    //    }
+        return;
+    }
 
-    //    // get username, duration and message of the timed out user
-    //    QString username = message->parameter(1);
-    //    QString durationInSeconds, reason;
-    //    QVariant v = message->tag("ban-duration");
-    //    if (v.isValid()) {
-    //        durationInSeconds = v.toString();
-    //    }
+    // get username, duration and message of the timed out user
+    QString username = message->parameter(1);
+    QString durationInSeconds, reason;
+    QVariant v = message->tag("ban-duration");
+    if (v.isValid()) {
+        durationInSeconds = v.toString();
+    }
 
-    //    v = message->tag("ban-reason");
-    //    if (v.isValid()) {
-    //        reason = v.toString();
-    //    }
+    v = message->tag("ban-reason");
+    if (v.isValid()) {
+        reason = v.toString();
+    }
 
-    //    // add the notice that the user has been timed out
-    //    LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
-    //    bool addMessage = true;
-    //    int snapshotLength = snapshot.getLength();
+    auto timeoutMsg = Message::createTimeoutMessage(username, durationInSeconds, reason, false);
+    chan->addOrReplaceTimeout(timeoutMsg);
 
-    //    for (int i = std::max(0, snapshotLength - 20); i < snapshotLength; i++) {
-    //        auto &s = snapshot[i];
-    //        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == username) {
-    //            MessagePtr replacement(
-    //                Message::createTimeoutMessage(username, durationInSeconds, reason, true));
-    //            chan->replaceMessage(s, replacement);
-    //            addMessage = false;
-    //            break;
-    //        }
-    //    }
-
-    //    if (addMessage) {
-    //        chan->addMessage(Message::createTimeoutMessage(username, durationInSeconds, reason,
-    //        false));
-    //    }
-
-    //    // disable the messages from the user
-    //    for (int i = 0; i < snapshotLength; i++) {
-    //        auto &s = snapshot[i];
-    //        if (!(s->flags & Message::Timeout) && s->loginName == username) {
-    //            s->flags.EnableFlag(Message::Disabled);
-    //        }
-    //    }
-
-    //    // refresh all
-    //    app->windows->repaintVisibleChatWidgets(chan.get());
+    // refresh all
+    app->windows->repaintVisibleChatWidgets(chan.get());
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
@@ -144,7 +177,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         auto app = getApp();
 
         QString channelName;
-        if (!TrimChannelName(message->parameter(0), channelName)) {
+        if (!trimChannelName(message->parameter(0), channelName)) {
             return;
         }
 
@@ -180,6 +213,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
+        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
+
         c->addMessage(_message);
 
         if (app->settings->inlineWhispers) {
@@ -190,9 +225,51 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
+void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server)
 {
-    // do nothing
+    auto data = message->toData();
+
+    auto tags = message->tags();
+    auto parameters = message->parameters();
+
+    auto target = parameters[0];
+    QString msgType = tags.value("msg-id", "").toString();
+    QString content;
+    if (parameters.size() >= 2) {
+        content = parameters[1];
+    }
+
+    if (msgType == "sub" || msgType == "resub" || msgType == "subgift") {
+        // Sub-specific message. I think it's only allowed for "resub" messages atm
+        if (!content.isEmpty()) {
+            this->addMessage(message, target, content, server, true);
+        }
+    }
+
+    auto it = tags.find("system-msg");
+
+    if (it != tags.end()) {
+        auto newMessage =
+            messages::Message::createSystemMessage(util::parseTagString(it.value().toString()));
+
+        newMessage->flags |= messages::Message::Subscription;
+
+        QString channelName;
+
+        if (message->parameters().size() < 1) {
+            return;
+        }
+
+        if (!trimChannelName(message->parameter(0), channelName)) {
+            return;
+        }
+
+        auto chan = server.getChannelOrEmpty(channelName);
+
+        if (!chan->isEmpty()) {
+            chan->addMessage(newMessage);
+        }
+    }
 }
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
@@ -231,7 +308,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     //    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     //    if (channel->isEmpty()) {
-    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager",
+    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel
+    //        manager",
     //                   channelName);
     //        return;
     //    }
@@ -255,6 +333,26 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
     }
 
     this->handleNoticeMessage(message);
+}
+
+void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
+{
+    auto app = getApp();
+    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+
+    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        twitchChannel->addJoinedUser(message->nick());
+    }
+}
+
+void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
+{
+    auto app = getApp();
+    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+
+    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        twitchChannel->addPartedUser(message->nick());
+    }
 }
 
 }  // namespace twitch

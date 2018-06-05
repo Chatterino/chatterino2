@@ -8,7 +8,11 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
+#ifdef USEWINSDK
+#define WINDOW_TOPMOST "Window always on top"
+#else
 #define WINDOW_TOPMOST "Window always on top (requires restart)"
+#endif
 #define INPUT_EMPTY "Hide input box when empty"
 #define PAUSE_HOVERING "When hovering"
 
@@ -30,6 +34,12 @@ BehaviourPage::BehaviourPage()
     {
         form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, app->settings->windowTopMost));
         form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, app->settings->hideEmptyInput));
+        form->addRow(
+            "", this->createCheckBox("Show which users joined the channel (up to 1000 chatters)",
+                                     app->settings->showJoins));
+        form->addRow(
+            "", this->createCheckBox("Show which users parted the channel (up to 1000 chatters)",
+                                     app->settings->showParts));
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
 

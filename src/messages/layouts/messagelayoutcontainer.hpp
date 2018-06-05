@@ -76,6 +76,8 @@ struct MessageLayoutContainer {
     int getLastCharacterIndex() const;
     void addSelectionText(QString &str, int from, int to);
 
+    bool isCollapsed();
+
 private:
     struct Line {
         int startIndex;
@@ -86,7 +88,7 @@ private:
     };
 
     // helpers
-    void _addElement(MessageLayoutElement *element);
+    void _addElement(MessageLayoutElement *element, bool forceAdd = false);
 
     // variables
     float scale = 1.f;
@@ -100,6 +102,12 @@ private:
     size_t lineStart = 0;
     int lineHeight = 0;
     int spaceWidth = 4;
+    int textLineHeight = 0;
+    int dotdotdotWidth = 0;
+    bool _canAddMessages = true;
+    bool _isCollapsed = false;
+
+    bool canCollapse();
 
     std::vector<std::unique_ptr<MessageLayoutElement>> elements;
     std::vector<Line> lines;

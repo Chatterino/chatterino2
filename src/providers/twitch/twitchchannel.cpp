@@ -5,7 +5,6 @@
 #include "messages/message.hpp"
 #include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/settingsmanager.hpp"
@@ -45,7 +44,8 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->refreshLiveStatus();  //
     });
 
-    this->managedConnect(app->accounts->Twitch.currentUserChanged, [this]() { this->setMod(false); });
+    this->managedConnect(app->accounts->twitch.currentUserChanged,
+                         [this]() { this->setMod(false); });
 
     auto refreshPubSubState = [=]() {
         if (!this->hasModRights()) {
@@ -56,7 +56,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             return;
         }
 
-        auto account = app->accounts->Twitch.getCurrent();
+        auto account = app->accounts->twitch.getCurrent();
         if (account && !account->getUserId().isEmpty()) {
             app->twitch.pubsub->listenToChannelModerationActions(this->roomID, account);
         }
@@ -64,7 +64,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
     this->userStateChanged.connect(refreshPubSubState);
     this->roomIDchanged.connect(refreshPubSubState);
-    this->managedConnect(app->accounts->Twitch.currentUserChanged, refreshPubSubState);
+    this->managedConnect(app->accounts->twitch.currentUserChanged, refreshPubSubState);
     refreshPubSubState();
 
     this->fetchMessages.connect([this] {
@@ -85,7 +85,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     };
 
     auto doRefreshChatters = [=]() {
-        const auto streamStatus = this->GetStreamStatus();
+        const auto streamStatus = this->getStreamStatus();
 
         if (app->settings->onlyFetchChattersForSmallerStreamers) {
             if (streamStatus.live && streamStatus.viewerCount > app->settings->smallStreamerLimit) {
@@ -102,6 +102,10 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     this->chattersListTimer = new QTimer;
     QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
     this->chattersListTimer->start(5 * 60 * 1000);
+
+    //    for (int i = 0; i < 1000; i++) {
+    //        this->addMessage(messages::Message::createSystemMessage("asdf"));
+    //    }
 }
 
 TwitchChannel::~TwitchChannel()
@@ -186,7 +190,7 @@ bool TwitchChannel::isBroadcaster()
 {
     auto app = getApp();
 
-    return this->name == app->accounts->Twitch.getCurrent()->getUserName();
+    return this->name == app->accounts->twitch.getCurrent()->getUserName();
 }
 
 bool TwitchChannel::hasModRights()
@@ -204,6 +208,93 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &m
     this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
 
     this->completionModel.addUser(message->displayName);
+}
+
+void TwitchChannel::addJoinedUser(const QString &user)
+{
+    auto *app = getApp();
+    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
+        !app->settings->showJoins.getValue()) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+
+    joinedUsers << user;
+
+    if (!this->joinedUsersMergeQueued) {
+        this->joinedUsersMergeQueued = true;
+
+        QTimer::singleShot(500, &this->object, [this] {
+            std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+
+            auto message = messages::Message::createSystemMessage("Users joined: " +
+                                                                  this->joinedUsers.join(", "));
+            message->flags |= messages::Message::Collapsed;
+            this->addMessage(message);
+            this->joinedUsers.clear();
+            this->joinedUsersMergeQueued = false;
+        });
+    }
+}
+
+void TwitchChannel::addPartedUser(const QString &user)
+{
+    auto *app = getApp();
+
+    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
+        !app->settings->showJoins.getValue()) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(this->partedUserMutex);
+
+    partedUsers << user;
+
+    if (!this->partedUsersMergeQueued) {
+        this->partedUsersMergeQueued = true;
+
+        QTimer::singleShot(500, &this->object, [this] {
+            std::lock_guard<std::mutex> guard(this->partedUserMutex);
+
+            auto message = messages::Message::createSystemMessage("Users parted: " +
+                                                                  this->partedUsers.join(", "));
+            message->flags |= messages::Message::Collapsed;
+            this->addMessage(message);
+            this->partedUsers.clear();
+
+            this->partedUsersMergeQueued = false;
+        });
+    }
+}
+
+TwitchChannel::RoomModes TwitchChannel::getRoomModes()
+{
+    std::lock_guard<std::mutex> lock(this->roomModeMutex);
+
+    return this->roomModes;
+}
+
+void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
+{
+    {
+        std::lock_guard<std::mutex> lock(this->roomModeMutex);
+        this->roomModes = _roomModes;
+    }
+
+    this->roomModesChanged.invoke();
+}
+
+bool TwitchChannel::isLive() const
+{
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+    return this->streamStatus.live;
+}
+
+TwitchChannel::StreamStatus TwitchChannel::getStreamStatus() const
+{
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
+    return this->streamStatus;
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
@@ -289,6 +380,11 @@ void TwitchChannel::refreshLiveStatus()
                 QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
 
             channel->streamStatus.rerun = false;
+            if (stream.HasMember("stream_type")) {
+                channel->streamStatus.streamType = stream["stream_type"].GetString();
+            } else {
+                channel->streamStatus.streamType = QString();
+            }
 
             if (stream.HasMember("broadcast_platform")) {
                 const auto &broadcastPlatformValue = stream["broadcast_platform"];

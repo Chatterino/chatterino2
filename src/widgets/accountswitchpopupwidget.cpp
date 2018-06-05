@@ -36,6 +36,8 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     });
 
     this->setLayout(vbox);
+
+    //    this->setStyleSheet("background: #333");
 }
 
 void AccountSwitchPopupWidget::refresh()
@@ -48,11 +50,12 @@ void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent *)
     this->hide();
 }
 
-void AccountSwitchPopupWidget::paintEvent(QPaintEvent *event)
+void AccountSwitchPopupWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), QColor(255, 255, 255));
+    painter.setPen(QColor("#999"));
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
 }  // namespace widgets

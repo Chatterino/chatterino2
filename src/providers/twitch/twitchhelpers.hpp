@@ -6,7 +6,7 @@ namespace chatterino {
 namespace providers {
 namespace twitch {
 
-bool TrimChannelName(const QString &channelName, QString &outChannelName);
+bool trimChannelName(const QString &channelName, QString &outChannelName);
 
 }  // namespace twitch
 }  // namespace providers

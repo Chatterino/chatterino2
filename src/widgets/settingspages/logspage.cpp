@@ -1,48 +1,49 @@
-#include "logspage.hpp"
+//#include "logspage.hpp"
 
-#include "application.hpp"
-#include "singletons/pathmanager.hpp"
+//#include "application.hpp"
+//#include "singletons/pathmanager.hpp"
 
-#include <QFormLayout>
-#include <QVBoxLayout>
+//#include <QFormLayout>
+//#include <QVBoxLayout>
 
-#include "util/layoutcreator.hpp"
+//#include "util/layoutcreator.hpp"
 
-namespace chatterino {
-namespace widgets {
-namespace settingspages {
+// namespace chatterino {
+// namespace widgets {
+// namespace settingspages {
 
-inline QString CreateLink(const QString &url, bool file = false)
-{
-    if (file) {
-        return QString("<a href=\"file:///" + url + "\"><span style=\"color: white;\">" + url +
-                       "</span></a>");
-    }
+// inline QString CreateLink(const QString &url, bool file = false)
+//{
+//    if (file) {
+//        return QString("<a href=\"file:///" + url + "\"><span style=\"color: white;\">" + url +
+//                       "</span></a>");
+//    }
 
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" + url + "</span></a>");
-}
+//    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" + url +
+//    "</span></a>");
+//}
 
-LogsPage::LogsPage()
-    : SettingsPage("Logs", "")
-{
-    auto app = getApp();
+// LogsPage::LogsPage()
+//    : SettingsPage("Logs", "")
+//{
+//    auto app = getApp();
 
-    util::LayoutCreator<LogsPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+//    util::LayoutCreator<LogsPage> layoutCreator(this);
+//    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    auto logPath = app->paths->logsFolderPath;
+//    auto logPath = app->paths->logsFolderPath;
 
-    auto created = layout.emplace<QLabel>();
-    created->setText("Logs are saved to " + CreateLink(logPath, true));
-    created->setTextFormat(Qt::RichText);
-    created->setTextInteractionFlags(Qt::TextBrowserInteraction | Qt::LinksAccessibleByKeyboard |
-                                     Qt::LinksAccessibleByKeyboard);
-    created->setOpenExternalLinks(true);
-    layout.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
+//    auto created = layout.emplace<QLabel>();
+//    created->setText("Logs are saved to " + CreateLink(logPath, true));
+//    created->setTextFormat(Qt::RichText);
+//    created->setTextInteractionFlags(Qt::TextBrowserInteraction | Qt::LinksAccessibleByKeyboard |
+//                                     Qt::LinksAccessibleByKeyboard);
+//    created->setOpenExternalLinks(true);
+//    layout.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
-    layout->addStretch(1);
-}
+//    layout->addStretch(1);
+//}
 
-}  // namespace settingspages
-}  // namespace widgets
-}  // namespace chatterino
+//}  // namespace settingspages
+//}  // namespace widgets
+//}  // namespace chatterino

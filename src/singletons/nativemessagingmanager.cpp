@@ -31,6 +31,7 @@ namespace ipc = boost::interprocess;
 namespace chatterino {
 namespace singletons {
 
+// fourtf: don't add this class to the application class
 NativeMessagingManager::NativeMessagingManager()
 {
     qDebug() << "init NativeMessagingManager";
@@ -49,6 +50,10 @@ void NativeMessagingManager::writeByteArray(QByteArray a)
 void NativeMessagingManager::registerHost()
 {
     auto app = getApp();
+
+    if (app->paths->isPortable()) {
+        return;
+    }
 
     // create manifest
     QJsonDocument document;
@@ -113,13 +118,14 @@ void NativeMessagingManager::ReceiverThread::run()
 
     while (true) {
         try {
-            char *buf = (char *)malloc(MESSAGE_SIZE);
+            std::unique_ptr<char> buf(static_cast<char *>(malloc(MESSAGE_SIZE)));
             ipc::message_queue::size_type retSize;
             unsigned int priority;
 
-            messageQueue.receive(buf, MESSAGE_SIZE, retSize, priority);
+            messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document = QJsonDocument::fromJson(QByteArray(buf, retSize));
+            QJsonDocument document =
+                QJsonDocument::fromJson(QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());
         } catch (ipc::interprocess_exception &ex) {
@@ -143,26 +149,37 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         QString _type = root.value("type").toString();
         bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
-        QString winId = root.value("winId").toString();
-        int yOffset = root.value("yOffset").toInt(-1);
 
-        if (_type.isNull() || name.isNull() || winId.isNull()) {
+#ifdef USEWINSDK
+        widgets::AttachedWindow::GetArgs args;
+        args.winId = root.value("winId").toString();
+        args.yOffset = root.value("yOffset").toInt(-1);
+        args.width = root.value("size").toObject().value("width").toInt(-1);
+        args.height = root.value("size").toObject().value("height").toInt(-1);
+
+        if (_type.isNull() || args.winId.isNull()) {
             qDebug() << "NM type, name or winId missing";
             attach = false;
             return;
         }
+#endif
 
         if (_type == "twitch") {
-            util::postToThread([name, attach, winId, yOffset, app] {
-                app->twitch.server->watchingChannel.update(
-                    app->twitch.server->getOrAddChannel(name));
+            util::postToThread([=] {
+                if (!name.isEmpty()) {
+                    app->twitch.server->watchingChannel.update(
+                        app->twitch.server->getOrAddChannel(name));
+                }
 
                 if (attach) {
 #ifdef USEWINSDK
-                    auto *window =
-                        widgets::AttachedWindow::get(::GetForegroundWindow(), winId, yOffset);
-                    window->setChannel(app->twitch.server->getOrAddChannel(name));
-                    window->show();
+                    if (args.height != -1) {
+                        auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
+                        if (!name.isEmpty()) {
+                            window->setChannel(app->twitch.server->getOrAddChannel(name));
+                        }
+                    }
+//                    window->show();
 #endif
                 }
             });
@@ -179,12 +196,15 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         }
 
 #ifdef USEWINSDK
-        util::postToThread([winId] { widgets::AttachedWindow::detach(winId); });
+        util::postToThread([winId] {
+            qDebug() << "NW detach";
+            widgets::AttachedWindow::detach(winId);
+        });
 #endif
     } else {
         qDebug() << "NM unknown action " + action;
     }
-}
+}  // namespace singletons
 
 }  // namespace singletons
 }  // namespace chatterino

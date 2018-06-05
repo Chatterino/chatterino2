@@ -137,10 +137,19 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void ResizingTextEdit::focusInEvent(QFocusEvent *event)
+{
+    QTextEdit::focusInEvent(event);
+
+    if (event->gotFocus()) {
+        this->focused.invoke();
+    }
+}
+
 void ResizingTextEdit::setCompleter(QCompleter *c)
 {
     if (this->completer) {
-        QObject::disconnect(this->completer, 0, this, 0);
+        QObject::disconnect(this->completer, nullptr, this, nullptr);
     }
 
     this->completer = c;

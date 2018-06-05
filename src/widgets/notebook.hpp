@@ -1,5 +1,6 @@
 #pragma once
 
+#include "pajlada/signals/signal.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/notebookbutton.hpp"
 #include "widgets/helper/notebooktab.hpp"
@@ -14,14 +15,14 @@ namespace widgets {
 
 class Window;
 
-class Notebook2 : public BaseWidget
+class Notebook : public BaseWidget
 {
     Q_OBJECT
 
 public:
-    explicit Notebook2(QWidget *parent);
+    explicit Notebook(QWidget *parent);
 
-    NotebookTab2 *addPage(QWidget *page, QString title = QString(), bool select = false);
+    NotebookTab *addPage(QWidget *page, QString title = QString(), bool select = false);
     void removePage(QWidget *page);
     void removeCurrentPage();
 
@@ -32,6 +33,7 @@ public:
     void selectPreviousTab();
 
     int getPageCount() const;
+    QWidget *getPageAt(int index) const;
     int getSelectedIndex() const;
     QWidget *getSelectedPage() const;
 
@@ -44,83 +46,51 @@ public:
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
+    void performLayout(bool animate = false);
+
 protected:
     virtual void scaleChangedEvent(float scale) override;
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void paintEvent(QPaintEvent *) override;
 
+    NotebookButton *getAddButton();
+    NotebookButton *addCustomButton();
+
 private:
     struct Item {
-        NotebookTab2 *tab;
+        NotebookTab *tab;
         QWidget *page;
+        QWidget *selectedWidget = nullptr;
     };
 
     QList<Item> items;
     QWidget *selectedPage = nullptr;
 
+    bool containsPage(QWidget *page);
+    Item &findItem(QWidget *page);
+
+    static bool containsChild(const QObject *obj, const QObject *child);
+
     NotebookButton addButton;
+    std::vector<NotebookButton *> customButtons;
 
     bool allowUserTabManagement = false;
     bool showAddButton = false;
     int lineY = 20;
 
-    void performLayout(bool animate = true);
-
-    NotebookTab2 *getTabFromPage(QWidget *page);
+    NotebookTab *getTabFromPage(QWidget *page);
 };
 
-class Notebook : public BaseWidget
+class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder
 {
-    Q_OBJECT
-
 public:
-    explicit Notebook(Window *parent, bool _showButtons);
+    SplitNotebook(Window *parent);
 
-    SplitContainer *addNewPage(bool select = false);
-
-    void removePage(SplitContainer *page);
-    void removeCurrentPage();
-    void select(SplitContainer *page);
-    void selectIndex(int index);
-
+    SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
-    SplitContainer *getSelectedPage();
-
-    void performLayout(bool animate = true);
-
-    int tabCount();
-    SplitContainer *tabAt(QPoint point, int &index, int maxWidth = 2000000000);
-    SplitContainer *tabAt(int index);
-    void rearrangePage(SplitContainer *page, int index);
-
-    void nextTab();
-    void previousTab();
-
-protected:
-    void scaleChangedEvent(float scale);
-    void resizeEvent(QResizeEvent *);
-
-    void settingsButtonMouseReleased(QMouseEvent *event);
-
-public slots:
-    void settingsButtonClicked();
-    void usersButtonClicked();
-    void addPageButtonClicked();
 
 private:
-    Window *parentWindow;
-
-    QList<SplitContainer *> pages;
-
-    NotebookButton addButton;
-    NotebookButton settingsButton;
-    NotebookButton userButton;
-
-    SplitContainer *selectedPage = nullptr;
-
-    bool showButtons;
-
-    QMessageBox closeConfirmDialog;
+    std::vector<pajlada::Signals::ScopedConnection> uniqueConnections;
 };
 
 }  // namespace widgets

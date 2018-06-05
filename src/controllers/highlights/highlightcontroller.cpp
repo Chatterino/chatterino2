@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "controllers/highlights/highlightmodel.hpp"
+#include "widgets/notificationpopup.hpp"
 
 namespace chatterino {
 namespace controllers {
@@ -21,7 +22,6 @@ void HighlightController::initialize()
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //
-        int xd = this->phrases.getVector().size();
         this->highlightsSetting.setValue(this->phrases.getVector());
     });
 }
@@ -32,6 +32,15 @@ HighlightModel *HighlightController::createModel(QObject *parent)
     model->init(&this->phrases);
 
     return model;
+}
+
+void HighlightController::addHighlight(const messages::MessagePtr &msg)
+{
+    //    static widgets::NotificationPopup popup;
+
+    //    popup.updatePosition();
+    //    popup.addMessage(msg);
+    //    popup.show();
 }
 
 }  // namespace highlights

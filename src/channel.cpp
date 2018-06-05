@@ -45,6 +45,11 @@ Channel::Type Channel::getType() const
     return this->type;
 }
 
+bool Channel::isTwitchChannel() const
+{
+    return this->type >= Twitch && this->type < TwitchEnd;
+}
+
 bool Channel::isEmpty() const
 {
     return this->name.isEmpty();
@@ -60,62 +65,86 @@ void Channel::addMessage(MessagePtr message)
     auto app = getApp();
     MessagePtr deleted;
 
-    bool isTimeout = (message->flags & Message::Timeout) != 0;
-
-    if (!isTimeout) {
-        const QString &username = message->loginName;
-        if (!username.isEmpty()) {
-            // TODO: Add recent chatters display name. This should maybe be a setting
-            this->addRecentChatter(message);
-        }
+    const QString &username = message->loginName;
+    if (!username.isEmpty()) {
+        // TODO: Add recent chatters display name. This should maybe be a setting
+        this->addRecentChatter(message);
     }
 
     app->logging->addMessage(this->name, message);
-
-    if (isTimeout) {
-        LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-        bool addMessage = true;
-        int snapshotLength = snapshot.getLength();
-
-        int end = std::max(0, snapshotLength - 20);
-
-        for (int i = snapshotLength - 1; i >= end; --i) {
-            auto &s = snapshot[i];
-            if (s->flags.HasFlag(Message::Untimeout) && s->timeoutUser == message->timeoutUser) {
-                break;
-            }
-
-            if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == message->timeoutUser) {
-                assert(message->banAction != nullptr);
-                MessagePtr replacement(
-                    Message::createTimeoutMessage(*(message->banAction), s->count + 1));
-                this->replaceMessage(s, replacement);
-                addMessage = false;
-            }
-        }
-
-        // disable the messages from the user
-        for (int i = 0; i < snapshotLength; i++) {
-            auto &s = snapshot[i];
-            if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
-                s->loginName == message->timeoutUser) {
-                s->flags.EnableFlag(Message::Disabled);
-            }
-        }
-
-        // XXX: Might need the following line
-        // WindowManager::getInstance().repaintVisibleChatWidgets(this);
-
-        if (!addMessage) {
-            return;
-        }
-    }
 
     if (this->messages.pushBack(message, deleted)) {
         this->messageRemovedFromStart.invoke(deleted);
     }
 
     this->messageAppended.invoke(message);
+}
+
+void Channel::addOrReplaceTimeout(messages::MessagePtr message)
+{
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    int snapshotLength = snapshot.getLength();
+
+    int end = std::max(0, snapshotLength - 20);
+
+    bool addMessage = true;
+
+    QTime minimumTime = QTime::currentTime().addSecs(-5);
+
+    for (int i = snapshotLength - 1; i >= end; --i) {
+        auto &s = snapshot[i];
+
+        qDebug() << s->parseTime << minimumTime;
+
+        if (s->parseTime < minimumTime) {
+            break;
+        }
+
+        if (s->flags.HasFlag(Message::Untimeout) && s->timeoutUser == message->timeoutUser) {
+            break;
+        }
+
+        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == message->timeoutUser) {
+            if (message->flags.HasFlag(Message::PubSub) && !s->flags.HasFlag(Message::PubSub)) {
+                this->replaceMessage(s, message);
+                addMessage = false;
+                break;
+            }
+            if (!message->flags.HasFlag(Message::PubSub) && s->flags.HasFlag(Message::PubSub)) {
+                addMessage = false;
+                break;
+            }
+
+            int count = s->count + 1;
+
+            messages::MessagePtr replacement(Message::createSystemMessage(
+                message->searchText + QString("(") + QString::number(count) + " times)"));
+
+            replacement->timeoutUser = message->timeoutUser;
+            replacement->count = count;
+            replacement->flags = message->flags;
+
+            this->replaceMessage(s, replacement);
+
+            return;
+        }
+    }
+
+    // disable the messages from the user
+    for (int i = 0; i < snapshotLength; i++) {
+        auto &s = snapshot[i];
+        if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
+            s->loginName == message->timeoutUser) {
+            s->flags.EnableFlag(Message::Disabled);
+        }
+    }
+
+    if (addMessage) {
+        this->addMessage(message);
+    }
+
+    // XXX: Might need the following line
+    // WindowManager::getInstance().repaintVisibleChatWidgets(this);
 }
 
 void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)

@@ -3,7 +3,6 @@
 #include "application.hpp"
 #include "channel.hpp"
 #include "credentials.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "ui_accountpopupform.h"
 #include "util/urlfetch.hpp"
@@ -40,8 +39,8 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     connect(this, &AccountPopupWidget::refreshButtons, this,
             &AccountPopupWidget::actuallyRefreshButtons, Qt::QueuedConnection);
 
-    app->accounts->Twitch.currentUserChanged.connect([=] {
-        auto currentTwitchUser = app->accounts->Twitch.getCurrent();
+    app->accounts->twitch.currentUserChanged.connect([this] {
+        auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
         if (!currentTwitchUser) {
             // No twitch user set (should never happen)
             return;
@@ -113,7 +112,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
     });
 
     QObject::connect(this->ui->ignore, &QPushButton::clicked, this, [=]() {
-        auto currentUser = getApp()->accounts->Twitch.getCurrent();
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         if (!this->relationship.isIgnoring()) {
             currentUser->ignoreByID(this->popupWidgetUser.userID, this->popupWidgetUser.username,
@@ -121,11 +120,11 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
                                         switch (result) {
                                             case IgnoreResult_Success: {
                                                 this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
+                                                emit this->refreshButtons();
                                             } break;
                                             case IgnoreResult_AlreadyIgnored: {
                                                 this->relationship.setIgnoring(true);
-                                                emit refreshButtons();
+                                                emit this->refreshButtons();
                                             } break;
                                             case IgnoreResult_Failed: {
                                             } break;
@@ -137,7 +136,7 @@ AccountPopupWidget::AccountPopupWidget(ChannelPtr _channel)
                                           switch (result) {
                                               case UnignoreResult_Success: {
                                                   this->relationship.setIgnoring(false);
-                                                  emit refreshButtons();
+                                                  emit this->refreshButtons();
                                               } break;
                                               case UnignoreResult_Failed: {
                                               } break;
@@ -225,12 +224,12 @@ void AccountPopupWidget::getUserData()
         });
 
     auto app = getApp();
-    auto currentUser = app->accounts->Twitch.getCurrent();
+    auto currentUser = app->accounts->twitch.getCurrent();
 
     currentUser->checkFollow(this->popupWidgetUser.userID, [=](auto result) {
         this->relationship.setFollowing(result == FollowResult_Following);
 
-        emit refreshButtons();
+        emit this->refreshButtons();
     });
 
     bool isIgnoring = false;
@@ -273,9 +272,9 @@ void AccountPopupWidget::loadAvatar(const QUrl &avatarUrl)
 void AccountPopupWidget::scaleChangedEvent(float newDpi)
 {
     this->setStyleSheet(QString("* { font-size: <font-size>px; }")
-                            .replace("<font-size>", QString::number((int)(12 * newDpi))));
+                            .replace("<font-size>", QString::number(int(12 * newDpi))));
 
-    this->ui->lblAvatar->setFixedSize((int)(100 * newDpi), (int)(100 * newDpi));
+    this->ui->lblAvatar->setFixedSize(int(100 * newDpi), int(100 * newDpi));
 }
 
 void AccountPopupWidget::updateButtons(QWidget *layout, bool state)
@@ -302,7 +301,7 @@ void AccountPopupWidget::sendCommand(QPushButton *button, QString command)
 
 void AccountPopupWidget::refreshLayouts()
 {
-    auto currentTwitchUser = getApp()->accounts->Twitch.getCurrent();
+    auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     if (!currentTwitchUser) {
         // No twitch user set (should never happen)
         return;

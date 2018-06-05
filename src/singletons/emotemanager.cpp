@@ -86,8 +86,8 @@ EmoteManager::EmoteManager()
 
 void EmoteManager::initialize()
 {
-    getApp()->accounts->Twitch.currentUserChanged.connect([this] {
-        auto currentUser = getApp()->accounts->Twitch.getCurrent();
+    getApp()->accounts->twitch.currentUserChanged.connect([this] {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
         assert(currentUser);
         this->refreshTwitchEmotes(currentUser);
     });
@@ -130,13 +130,23 @@ void EmoteManager::reloadBTTVChannelEmotes(const QString &channelName,
             QString code = emoteObject.value("code").toString();
             // emoteObject.value("imageType").toString();
 
-            QString link = linkTemplate;
-            link.detach();
+            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&] {
+                util::EmoteData emoteData;
+                QString link = linkTemplate;
+                link.detach();
+                emoteData.image1x = new Image(link.replace("{{id}}", id).replace("{{image}}", "1x"),
+                                              1, code, code + "<br />Channel BTTV Emote");
+                link = linkTemplate;
+                link.detach();
+                emoteData.image2x = new Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
+                                              0.5, code, code + "<br />Channel BTTV Emote");
+                link = linkTemplate;
+                link.detach();
+                emoteData.image3x = new Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
+                                              0.25, code, code + "<br />Channel BTTV Emote");
+                emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
-            link = link.replace("{{id}}", id).replace("{{image}}", "1x");
-
-            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&code, &link] {
-                return util::EmoteData(new Image(link, 1, code, code + "<br/>Channel BTTV Emote"));
+                return emoteData;
             });
 
             this->bttvChannelEmotes.insert(code, emote);
@@ -182,9 +192,11 @@ void EmoteManager::reloadFFZChannelEmotes(const QString &channelName,
 
                 QJsonObject urls = emoteObject.value("urls").toObject();
 
-                auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [&code, &urls] {
+                auto emote = this->getFFZChannelEmoteFromCaches().getOrAdd(id, [id, &code, &urls] {
                     util::EmoteData emoteData;
                     FillInFFZEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
+                    emoteData.pageLink =
+                        QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
 
                     return emoteData;
                 });
@@ -436,6 +448,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
         [=, &emoteData](const QJsonObject &root) {
             emoteData.emoteSets.clear();
             emoteData.emoteCodes.clear();
+
             auto emoticonSets = root.value("emoticon_sets").toObject();
             for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
                 std::string emoteSetString = it.key().toStdString();
@@ -443,7 +456,7 @@ void EmoteManager::refreshTwitchEmotes(const std::shared_ptr<TwitchAccount> &use
 
                 for (QJsonValue emoteValue : emoteSetList) {
                     QJsonObject emoticon = emoteValue.toObject();
-                    std::string id = emoticon["id"].toString().toStdString();
+                    std::string id = QString::number(emoticon["id"].toInt()).toStdString();
                     std::string code = emoticon["code"].toString().toStdString();
                     emoteData.emoteSets[emoteSetString].push_back({id, code});
                     emoteData.emoteCodes.push_back(code);
@@ -483,6 +496,7 @@ void EmoteManager::loadBTTVEmotes()
                                           code + "<br />Global BTTV Emote");
             emoteData.image3x = new Image(GetBTTVEmoteLink(urlTemplate, id, "3x"), 0.25, code,
                                           code + "<br />Global BTTV Emote");
+            emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
             this->bttvGlobalEmotes.insert(code, emoteData);
             codes.push_back(code.toStdString());
@@ -510,10 +524,13 @@ void EmoteManager::loadFFZEmotes()
                 QJsonObject object = emote.toObject();
 
                 QString code = object.value("name").toString();
+                int id = object.value("id").toInt();
                 QJsonObject urls = object.value("urls").toObject();
 
                 util::EmoteData emoteData;
                 FillInFFZEmoteData(urls, code, code + "<br/>Global FFZ Emote", emoteData);
+                emoteData.pageLink =
+                    QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
 
                 this->ffzGlobalEmotes.insert(code, emoteData);
                 codes.push_back(code.toStdString());
@@ -530,6 +547,20 @@ util::EmoteData EmoteManager::getTwitchEmoteById(long id, const QString &emoteNa
 {
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
+    _emoteName.replace(">", "&gt;");
+
+    static QMap<QString, QString> emoteNameReplacements{
+        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},   {"\\&lt\\;3", "&lt;3"},
+        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
+        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},         {"\\:-?\\)", ":)"},
+        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
+        {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
+    };
+
+    auto it = emoteNameReplacements.find(_emoteName);
+    if (it != emoteNameReplacements.end()) {
+        _emoteName = it.value();
+    }
 
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;

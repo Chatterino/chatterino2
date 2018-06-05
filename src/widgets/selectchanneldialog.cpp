@@ -17,7 +17,7 @@ namespace chatterino {
 namespace widgets {
 
 SelectChannelDialog::SelectChannelDialog()
-    : BaseWindow((QWidget *)nullptr, true)
+    : BaseWindow((QWidget *)nullptr, BaseWindow::EnableCustomFrame)
     , selectedChannel(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -26,7 +26,7 @@ SelectChannelDialog::SelectChannelDialog()
 
     util::LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
-    auto notebook = layout.emplace<Notebook2>(this).assign(&this->ui.notebook);
+    auto notebook = layout.emplace<Notebook>(this).assign(&this->ui.notebook);
 
     // twitch
     {
@@ -35,7 +35,7 @@ SelectChannelDialog::SelectChannelDialog()
 
         // channel_btn
         auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(&this->ui.twitch.channel);
-        auto channel_lbl = vbox.emplace<QLabel>("Join a twitch channel by it's name.").hidden();
+        auto channel_lbl = vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(&this->ui.twitch.channelName);
 
@@ -93,14 +93,14 @@ SelectChannelDialog::SelectChannelDialog()
         vbox->addStretch(1);
 
         // tabbing order
+        QWidget::setTabOrder(*watching_btn, *channel_btn);
         QWidget::setTabOrder(*channel_btn, *whispers_btn);
         QWidget::setTabOrder(*whispers_btn, *mentions_btn);
         QWidget::setTabOrder(*mentions_btn, *watching_btn);
-        QWidget::setTabOrder(*watching_btn, *channel_btn);
 
         // tab
-        NotebookTab2 *tab = notebook->addPage(obj.getElement());
-        tab->setTitle("Twitch");
+        NotebookTab *tab = notebook->addPage(obj.getElement());
+        tab->setCustomTitle("Twitch");
     }
 
     // irc

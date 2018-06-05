@@ -18,6 +18,7 @@ namespace messages {
 
 struct Message {
     Message()
+        : parseTime(QTime::currentTime())
     {
         util::DebugCount::increase("messages");
     }
@@ -39,6 +40,8 @@ struct Message {
         Collapsed = (1 << 7),
         DisconnectedMessage = (1 << 8),
         Untimeout = (1 << 9),
+        PubSub = (1 << 10),
+        Subscription = (1 << 11),
     };
 
     util::FlagsEnum<MessageFlags> flags;
@@ -50,7 +53,6 @@ struct Message {
     QString localizedName;
     QString timeoutUser;
 
-    std::unique_ptr<providers::twitch::BanAction> banAction;
     uint32_t count = 1;
 
     // Messages should not be added after the message is done initializing.
@@ -65,6 +67,7 @@ private:
 
 public:
     static std::shared_ptr<Message> createSystemMessage(const QString &text);
+    static std::shared_ptr<Message> createMessage(const QString &text);
 
     static std::shared_ptr<Message> createTimeoutMessage(const QString &username,
                                                          const QString &durationInSeconds,

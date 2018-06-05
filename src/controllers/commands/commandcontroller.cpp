@@ -1,12 +1,12 @@
 #include "commandcontroller.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/commands/command.hpp"
 #include "controllers/commands/commandmodel.hpp"
 #include "messages/messagebuilder.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "util/signalvector2.hpp"
 
@@ -110,7 +110,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 return "";
             } else if (commandName == "/uptime") {
-                const auto &streamStatus = twitchChannel->GetStreamStatus();
+                const auto &streamStatus = twitchChannel->getStreamStatus();
 
                 QString messageText =
                     streamStatus.live ? streamStatus.uptime : "Channel is not live.";
@@ -121,7 +121,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/ignore" && words.size() >= 2) {
                 auto app = getApp();
 
-                auto user = app->accounts->Twitch.getCurrent();
+                auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
@@ -138,7 +138,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/unignore" && words.size() >= 2) {
                 auto app = getApp();
 
-                auto user = app->accounts->Twitch.getCurrent();
+                auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
@@ -161,7 +161,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 messages::MessageBuilder b;
 
-                b.emplace<messages::TextElement>(app->accounts->Twitch.getCurrent()->getUserName(),
+                b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
                                                  messages::MessageElement::Text);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
                 b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
@@ -169,7 +169,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 QString rest = "";
 
                 for (int i = 2; i < words.length(); i++) {
-                    rest += words[i];
+                    rest += words[i] + " ";
                 }
 
                 b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);

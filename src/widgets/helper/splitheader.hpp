@@ -15,6 +15,7 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 #include <vector>
 
@@ -23,17 +24,18 @@ namespace widgets {
 
 class Split;
 
-class SplitHeader : public BaseWidget
+class SplitHeader : public BaseWidget, pajlada::Signals::SignalHolder
 {
     Q_OBJECT
 
 public:
     explicit SplitHeader(Split *_chatWidget);
-    virtual ~SplitHeader();
+    virtual ~SplitHeader() override;
 
     // Update channel text from chat widget
     void updateChannelText();
     void updateModerationModeIcon();
+    void updateModes();
 
 protected:
     virtual void scaleChangedEvent(float) override;
@@ -41,7 +43,9 @@ protected:
 
     virtual void paintEvent(QPaintEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void enterEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
@@ -50,12 +54,15 @@ private:
 
     QPoint dragStart;
     bool dragging = false;
+    bool doubleClicked = false;
+    bool showingHelpTooltip = false;
 
     pajlada::Signals::Connection onlineStatusChangedConnection;
 
     RippleEffectButton *dropdownButton;
     //    Label *titleLabel;
-    SignalLabel *titleLabel;
+    QLabel *titleLabel;
+    RippleEffectLabel *modeButton;
     RippleEffectButton *moderationButton;
 
     QMenu dropdownMenu;

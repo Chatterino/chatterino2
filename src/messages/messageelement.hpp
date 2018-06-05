@@ -158,7 +158,7 @@ class TextElement : public MessageElement
 public:
     TextElement(const QString &text, MessageElement::Flags flags,
                 const MessageColor &color = MessageColor::Text,
-                FontStyle style = FontStyle::Medium);
+                FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
@@ -169,7 +169,6 @@ public:
 //   b) which size it wants
 class EmoteElement : public MessageElement
 {
-    const util::EmoteData data;
     std::unique_ptr<TextElement> textElement;
 
 public:
@@ -177,6 +176,8 @@ public:
     ~EmoteElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+
+    const util::EmoteData data;
 };
 
 // contains a text, formated depending on the preferences

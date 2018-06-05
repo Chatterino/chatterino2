@@ -25,11 +25,16 @@ public:
 
     struct TabColors {
         QColor text;
-        struct Backgrounds {
+        struct {
             QBrush regular;
             QBrush hover;
             QBrush unfocused;
         } backgrounds;
+        struct {
+            QColor regular;
+            QColor hover;
+            QColor unfocused;
+        } line;
     };
 
     /// WINDOW
@@ -43,9 +48,9 @@ public:
     /// TABS
     struct {
         TabColors regular;
-        TabColors selected;
-        TabColors highlighted;
         TabColors newMessage;
+        TabColors highlighted;
+        TabColors selected;
         QColor border;
         QColor bottomLine;
     } tabs;
@@ -58,6 +63,10 @@ public:
         QColor borderFocused;
         QColor dropPreview;
         QColor dropPreviewBorder;
+        QColor dropTargetRect;
+        QColor dropTargetRectBorder;
+        QColor resizeHandle;
+        QColor resizeHandleBackground;
 
         struct {
             QColor border;
@@ -89,7 +98,7 @@ public:
             QColor regular;
             QColor alternate;
             QColor highlighted;
-            // QColor resub;
+            QColor subscription;
             // QColor whisper;
         } backgrounds;
 
@@ -104,8 +113,10 @@ public:
         QColor background;
         QColor thumb;
         QColor thumbSelected;
-        // const int highlightsCount = 3;
-        // QColor highlights[3];
+        struct {
+            QColor highlight;
+            QColor subscription;
+        } highlights;
     } scrollbars;
 
     /// TOOLTIP

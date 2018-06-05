@@ -70,8 +70,8 @@ ImageElement::ImageElement(Image *_image, MessageElement::Flags flags)
 void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags _flags)
 {
     if (_flags & this->getFlags()) {
-        QSize size(this->image->getWidth() * this->image->getScale() * container.getScale(),
-                   this->image->getHeight() * this->image->getScale() * container.getScale());
+        QSize size(this->image->getScaledWidth() * container.getScale(),
+                   this->image->getScaledHeight() * container.getScale());
 
         container.addElement(
             (new ImageLayoutElement(*this, this->image, size))->setLink(this->getLink()));
@@ -97,19 +97,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
                 return;
             }
 
-            int quality = getApp()->settings->preferredEmoteQuality;
+            Image *_image = this->data.getImage(container.getScale());
 
-            Image *_image;
-            if (quality == 3 && this->data.image3x != nullptr) {
-                _image = this->data.image3x;
-            } else if (quality >= 2 && this->data.image2x != nullptr) {
-                _image = this->data.image2x;
-            } else {
-                _image = this->data.image1x;
-            }
-
-            QSize size((int)(container.getScale() * _image->getScaledWidth()),
-                       (int)(container.getScale() * _image->getScaledHeight()));
+            QSize size(int(container.getScale() * _image->getScaledWidth()),
+                       int(container.getScale() * _image->getScaledHeight()));
 
             container.addElement(
                 (new ImageLayoutElement(*this, _image, size))->setLink(this->getLink()));
@@ -139,7 +130,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
     auto app = getApp();
 
     if (_flags & this->getFlags()) {
-        QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, container.getScale());
+        QFontMetrics metrics = app->fonts->getFontMetrics(this->style, container.getScale());
 
         for (Word &word : this->words) {
             auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
@@ -242,7 +233,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getApp()->settings->timestampFormat);
 
-    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::Medium);
+    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::ChatMedium);
 }
 
 // TWITCH MODERATION

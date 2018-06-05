@@ -22,10 +22,12 @@ public:
     enum Flags : uint8_t {
         RequiresBufferUpdate = 1 << 1,
         RequiresLayout = 1 << 2,
-        AlternateBackground = 1 << 3
+        AlternateBackground = 1 << 3,
+        Collapsed = 1 << 4,
+        Expanded = 1 << 5,
     };
 
-    MessageLayout(MessagePtr message);
+    MessageLayout(MessagePtr message_);
     ~MessageLayout();
 
     Message *getMessage();
@@ -37,10 +39,10 @@ public:
     util::FlagsEnum<Flags> flags;
 
     // Layout
-    bool layout(int width, float scale, MessageElement::Flags flags);
+    bool layout(int width, float scale_, MessageElement::Flags flags);
 
     // Painting
-    void paint(QPainter &painter, int y, int messageIndex, Selection &selection,
+    void paint(QPainter &painter, int width, int y, int messageIndex, Selection &selection,
                bool isLastReadMessage, bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();
@@ -50,30 +52,28 @@ public:
     const MessageLayoutElement *getElementAt(QPoint point);
     int getLastCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from, int to);
+    void addSelectionText(QString &str, int from = 0, int to = INT_MAX);
 
     // Misc
     bool isDisabled() const;
 
 private:
     // variables
-    MessagePtr message;
-    MessageLayoutContainer container;
-    std::shared_ptr<QPixmap> buffer = nullptr;
-    bool bufferValid = false;
+    MessagePtr message_;
+    MessageLayoutContainer container_;
+    std::shared_ptr<QPixmap> buffer_ = nullptr;
+    bool bufferValid_ = false;
 
-    int height = 0;
+    int height_ = 0;
 
-    int currentLayoutWidth = -1;
-    int fontGeneration = -1;
-    int emoteGeneration = -1;
-    QString timestampFormat;
-    float scale = -1;
-    unsigned int bufferUpdatedCount = 0;
+    int currentLayoutWidth_ = -1;
+    int layoutState_ = -1;
+    float scale_ = -1;
+    unsigned int bufferUpdatedCount_ = 0;
 
-    MessageElement::Flags currentWordFlags = MessageElement::None;
+    MessageElement::Flags currentWordFlags_ = MessageElement::None;
 
-    int collapsedHeight = 32;
+    int collapsedHeight_ = 32;
 
     // methods
     void actuallyLayout(int width, MessageElement::Flags flags);

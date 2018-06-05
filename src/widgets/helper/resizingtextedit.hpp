@@ -15,6 +15,7 @@ public:
     bool hasHeightForWidth() const override;
 
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
+    pajlada::Signals::NoArgSignal focused;
 
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
@@ -22,6 +23,8 @@ public:
 protected:
     int heightForWidth(int) const override;
     void keyPressEvent(QKeyEvent *event) override;
+
+    void focusInEvent(QFocusEvent *event) override;
 
 private:
     QCompleter *completer = nullptr;

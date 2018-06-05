@@ -15,10 +15,11 @@
 //
 
 namespace chatterino {
-
-namespace singletons {
-class AccountManager;
-}  // namespace singletons
+namespace controllers {
+namespace accounts {
+class AccountController;
+}
+}  // namespace controllers
 
 namespace providers {
 namespace twitch {
@@ -46,8 +47,6 @@ public:
     void reloadUsers();
     void load();
 
-    bool removeUser(const QString &username);
-
     pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
@@ -63,14 +62,14 @@ private:
         UserAdded,
     };
     AddUserResponse addUser(const UserData &data);
+    bool removeUser(TwitchAccount *account);
 
     std::shared_ptr<TwitchAccount> currentUser;
 
     std::shared_ptr<TwitchAccount> anonymousUser;
-    std::vector<std::shared_ptr<TwitchAccount>> users;
     mutable std::mutex mutex;
 
-    friend class chatterino::singletons::AccountManager;
+    friend class chatterino::controllers::accounts::AccountController;
 };
 
 }  // namespace twitch

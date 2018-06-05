@@ -1,9 +1,9 @@
 #include "ignoreuserspage.hpp"
 
 #include "application.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/ignores/ignorecontroller.hpp"
 #include "controllers/ignores/ignoremodel.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "widgets/helper/editablemodelview.hpp"
@@ -34,7 +34,7 @@ IgnoreUsersPage::IgnoreUsersPage()
 
     //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
     auto tabs = layout.emplace<QTabWidget>();
-    tabs->setStyleSheet("color: #000");
+    //    tabs->setStyleSheet("color: #000");
 
     // users
     auto users = tabs.appendTab(new QVBoxLayout, "Users");
@@ -91,7 +91,7 @@ void IgnoreUsersPage::onShow()
 {
     auto app = getApp();
 
-    auto user = app->accounts->Twitch.getCurrent();
+    auto user = app->accounts->twitch.getCurrent();
 
     if (user->isAnon()) {
         return;

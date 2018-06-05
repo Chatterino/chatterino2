@@ -50,20 +50,24 @@ AppearancePage::AppearancePage()
     {
         auto form = application.emplace<QFormLayout>();
 
-        // clang-format off
-            form->addRow("Theme:",       this->createComboBox({THEME_ITEMS}, app->themes->themeName));
-            form->addRow("Theme color:", this->createThemeColorChanger());
-            form->addRow("Font:",        this->createFontChanger());
+        auto *theme = this->createComboBox({THEME_ITEMS}, app->themes->themeName);
+        QObject::connect(theme, &QComboBox::currentTextChanged,
+                         [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
 
-            form->addRow("Tabs:",        this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
-    #ifndef USEWINSDK
-            form->addRow("",             this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
-            form->addRow("",             this->createCheckBox(TAB_USER, app->settings->hideUserButton));
-    #endif
+        form->addRow("Theme:", theme);
+        // form->addRow("Theme color:", this->createThemeColorChanger());
+        form->addRow("Font:", this->createFontChanger());
 
-            form->addRow("Scrolling:",   this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
-            form->addRow("",			 this->createCheckBox(SCROLL_NEWMSG, app->settings->enableSmoothScrollingNewMessages));
-        // clang-format on
+        form->addRow("Tabs:", this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
+#ifndef USEWINSDK
+        form->addRow("", this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
+        form->addRow("", this->createCheckBox(TAB_USER, app->settings->hideUserButton));
+#endif
+
+        form->addRow("Scrolling:",
+                     this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
+        form->addRow("", this->createCheckBox(SCROLL_NEWMSG,
+                                              app->settings->enableSmoothScrollingNewMessages));
     }
 
     auto messages = layout.emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
@@ -77,22 +81,25 @@ AppearancePage::AppearancePage()
         }
 
         messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
+
         {
-            auto checkbox =
-                this->createCheckBox("Seperate messages", app->settings->seperateMessages);
-            messages.append(checkbox);
-            QObject::connect(checkbox, &QCheckBox::toggled,
-                             [](bool) { getApp()->windows->repaintVisibleChatWidgets(); });
-        }
-        {
-            auto checkbox = this->createCheckBox("Alternate message background color",
-                                                 app->settings->alternateMessageBackground);
-            messages.append(checkbox);
-            QObject::connect(checkbox, &QCheckBox::toggled, [](bool) {
-                getApp()->fonts->incGeneration();  // fourtf: hacky solution
-                getApp()->windows->repaintVisibleChatWidgets();
+            auto *combo = new QComboBox(this);
+            combo->addItems({"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                             "13", "14", "15"});
+
+            QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
+                getApp()->settings->collpseMessagesMinLines = str.toInt();
             });
+
+            auto hbox = messages.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Collapse messages longer than");
+            hbox.append(combo);
+            hbox.emplace<QLabel>("lines");
         }
+
+        messages.append(this->createCheckBox("Seperate messages", app->settings->seperateMessages));
+        messages.append(this->createCheckBox("Alternate message background color",
+                                             app->settings->alternateMessageBackground));
         messages.append(this->createCheckBox("Show message length while typing",
                                              app->settings->showMessageLength));
 
@@ -101,6 +108,7 @@ AppearancePage::AppearancePage()
 
     auto emotes = layout.emplace<QGroupBox>("Emotes").setLayoutType<QVBoxLayout>();
     {
+        /*
         emotes.append(
             this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
         emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
@@ -108,12 +116,36 @@ AppearancePage::AppearancePage()
         emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
                                            app->settings->enableFfzEmotes));
         emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
+        */
         emotes.append(
             this->createCheckBox("Enable animations", app->settings->enableGifAnimations));
+
+        auto scaleBox = emotes.emplace<QHBoxLayout>();
+        {
+            scaleBox.emplace<QLabel>("Emote scale:");
+
+            auto emoteScale = scaleBox.emplace<QSlider>(Qt::Horizontal);
+            emoteScale->setMinimum(5);
+            emoteScale->setMaximum(50);
+
+            auto scaleLabel = scaleBox.emplace<QLabel>("1.0");
+            scaleLabel->setFixedWidth(100);
+            QObject::connect(*emoteScale, &QSlider::valueChanged, [scaleLabel](int value) mutable {
+                float f = (float)value / 10.f;
+                scaleLabel->setText(QString::number(f));
+
+                getApp()->settings->emoteScale.setValue(f);
+            });
+
+            emoteScale->setValue(std::max<int>(
+                5, std::min<int>(50, (int)(app->settings->emoteScale.getValue() * 10.f))));
+
+            scaleLabel->setText(QString::number(app->settings->emoteScale.getValue()));
+        }
     }
 
     layout->addStretch(1);
-}
+}  // namespace settingspages
 
 QLayout *AppearancePage::createThemeColorChanger()
 {
@@ -125,7 +157,7 @@ QLayout *AppearancePage::createThemeColorChanger()
     // SLIDER
     QSlider *slider = new QSlider(Qt::Horizontal);
     layout->addWidget(slider);
-    slider->setValue(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100);
+    slider->setValue(int(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100));
 
     // BUTTON
     QPushButton *button = new QPushButton;
@@ -165,12 +197,12 @@ QLayout *AppearancePage::createFontChanger()
     layout->addWidget(label);
 
     auto updateFontFamilyLabel = [=](auto) {
-        label->setText(QString::fromStdString(app->fonts->currentFontFamily.getValue()) + ", " +
-                       QString::number(app->fonts->currentFontSize) + "pt");
+        label->setText(QString::fromStdString(app->fonts->chatFontFamily.getValue()) + ", " +
+                       QString::number(app->fonts->chatFontSize) + "pt");
     };
 
-    app->fonts->currentFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
-    app->fonts->currentFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");
@@ -178,11 +210,11 @@ QLayout *AppearancePage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::Medium, 1.));
+        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::ChatMedium, 1.));
 
         dialog.connect(&dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
-            app->fonts->currentFontFamily = font.family().toStdString();
-            app->fonts->currentFontSize = font.pointSize();
+            app->fonts->chatFontFamily = font.family().toStdString();
+            app->fonts->chatFontSize = font.pointSize();
         });
 
         dialog.show();

@@ -147,10 +147,10 @@ void Image::loadImage()
             loadedEventQueued = true;
 
             QTimer::singleShot(500, [] {
-                getApp()->emotes->incGeneration();
+                getApp()->windows->incGeneration();
 
                 auto app = getApp();
-                app->windows->layoutVisibleChatWidgets();
+                app->windows->layoutChannelViews();
                 loadedEventQueued = false;
             });
         }
@@ -240,7 +240,8 @@ int Image::getWidth() const
 
 int Image::getScaledWidth() const
 {
-    return static_cast<int>(this->getWidth() * this->scale);
+    return static_cast<int>((float)this->getWidth() * this->scale *
+                            getApp()->settings->emoteScale.getValue());
 }
 
 int Image::getHeight() const
@@ -253,7 +254,8 @@ int Image::getHeight() const
 
 int Image::getScaledHeight() const
 {
-    return static_cast<int>(this->getHeight() * this->scale);
+    return static_cast<int>((float)this->getHeight() * this->scale *
+                            getApp()->settings->emoteScale.getValue());
 }
 
 }  // namespace messages

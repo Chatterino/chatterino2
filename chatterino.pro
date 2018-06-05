@@ -26,6 +26,11 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
+
+macx {
+    LIBS += -L/usr/local/lib
+}
+
 # Submodules
 include(dependencies/rapidjson.pri)
 include(dependencies/settings.pri)
@@ -39,10 +44,14 @@ include(dependencies/openssl.pri)
 include(dependencies/boost.pri)
 
 # Optional feature: QtWebEngine
-exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
-    message(Using QWebEngine)
-    QT += webenginewidgets
-    DEFINES += "USEWEBENGINE"
+#exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
+#    message(Using QWebEngine)
+#    QT += webenginewidgets
+#    DEFINES += "USEWEBENGINE"
+#}
+
+linux {
+    LIBS += -lrt
 }
 
 win32 {
@@ -105,7 +114,6 @@ SOURCES += \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
     src/providers/twitch/pubsub.cpp \
-    src/singletons/accountmanager.cpp \
     src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
@@ -185,7 +193,6 @@ SOURCES += \
     src/widgets/attachedwindow.cpp \
     src/widgets/settingspages/externaltoolspage.cpp \
     src/widgets/helper/comboboxitemdelegate.cpp \
-    src/util/signalvectormodel.cpp \
     src/controllers/commands/command.cpp \
     src/controllers/commands/commandmodel.cpp \
     src/controllers/commands/commandcontroller.cpp \
@@ -197,7 +204,15 @@ SOURCES += \
     src/controllers/accounts/accountcontroller.cpp \
     src/controllers/accounts/accountmodel.cpp \
     src/controllers/accounts/account.cpp \
-    src/widgets/helper/splitoverlay.cpp
+    src/widgets/helper/splitoverlay.cpp \
+    src/widgets/helper/dropoverlay.cpp \
+    src/widgets/helper/splitnode.cpp \
+    src/widgets/notificationpopup.cpp \
+    src/controllers/taggedusers/taggeduserscontroller.cpp \
+    src/controllers/taggedusers/taggeduser.cpp \
+    src/controllers/taggedusers/taggedusersmodel.cpp \
+    src/util/emotemap.cpp \
+    src/providers/irc/ircconnection2.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -226,7 +241,6 @@ HEADERS  += \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
     src/providers/twitch/pubsub.hpp \
-    src/singletons/accountmanager.hpp \
     src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
@@ -343,7 +357,17 @@ HEADERS  += \
     src/controllers/accounts/accountmodel.hpp \
     src/controllers/accounts/account.hpp \
     src/util/sharedptrelementless.hpp \
-    src/widgets/helper/splitoverlay.hpp
+    src/widgets/helper/splitoverlay.hpp \
+    src/widgets/helper/dropoverlay.hpp \
+    src/widgets/helper/splitnode.hpp \
+    src/widgets/notificationpopup.hpp \
+    src/controllers/taggedusers/taggeduserscontroller.hpp \
+    src/controllers/taggedusers/taggeduser.hpp \
+    src/providerid.hpp \
+    src/controllers/taggedusers/taggedusersmodel.hpp \
+    src/util/qstringhash.hpp \
+    src/util/mutexvalue.hpp \
+    src/providers/irc/ircconnection2.hpp
 
 RESOURCES += \
     resources/resources.qrc

@@ -20,7 +20,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation(this, "currentValue")
 {
-    resize((int)(16 * this->getScale()), 100);
+    resize(int(16 * this->getScale()), 100);
     this->currentValueAnimation.setDuration(150);
     this->currentValueAnimation.setEasingCurve(QEasingCurve(QEasingCurve::OutCubic));
 
@@ -31,7 +31,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     timer->setSingleShot(true);
 
     connect(timer, &QTimer::timeout, [=]() {
-        resize((int)(16 * this->getScale()), 100);
+        resize(int(16 * this->getScale()), 100);
         timer->deleteLater();
     });
 
@@ -98,7 +98,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
     animated &= app->settings->enableSmoothScrolling.getValue();
     value = std::max(this->minimum, std::min(this->maximum - this->largeChange, value));
 
-    if (this->desiredValue + this->smoothScrollingOffset != value) {
+    if (std::abs(this->desiredValue + this->smoothScrollingOffset - value) > 0.0001) {
         if (animated) {
             this->currentValueAnimation.stop();
             this->currentValueAnimation.setStartValue(this->currentValue +
@@ -109,14 +109,14 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
             //            }
             this->currentValueAnimation.setEndValue(value);
             this->smoothScrollingOffset = 0;
-            this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.01;
+            this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.0001;
             this->currentValueAnimation.start();
         } else {
             if (this->currentValueAnimation.state() != QPropertyAnimation::Running) {
                 this->smoothScrollingOffset = 0;
                 this->desiredValue = value;
                 this->currentValueAnimation.stop();
-                this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.01;
+                this->atBottom = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.0001;
                 setCurrentValue(value);
             }
         }
@@ -196,11 +196,13 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 
 void Scrollbar::paintEvent(QPaintEvent *)
 {
+    auto *app = getApp();
+
     bool mouseOver = this->mouseOverIndex != -1;
-    int xOffset = mouseOver ? 0 : width() - (int)(4 * this->getScale());
+    int xOffset = mouseOver ? 0 : width() - int(4 * this->getScale());
 
     QPainter painter(this);
-    //    painter.fillRect(rect(), this->themeManager->ScrollbarBG);
+    painter.fillRect(rect(), this->themeManager->scrollbars.background);
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
@@ -221,7 +223,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     // draw highlights
     auto snapshot = this->highlights.getSnapshot();
-    int snapshotLength = (int)snapshot.getLength();
+    size_t snapshotLength = snapshot.getLength();
 
     if (snapshotLength == 0) {
         return;
@@ -229,19 +231,33 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     int w = this->width();
     float y = 0;
-    float dY = (float)(this->height()) / (float)snapshotLength;
-    int highlightHeight = std::ceil(dY);
+    float dY = float(this->height()) / float(snapshotLength);
+    int highlightHeight = int(std::ceil(dY));
 
-    for (int i = 0; i < snapshotLength; i++) {
+    for (size_t i = 0; i < snapshotLength; i++) {
         ScrollbarHighlight const &highlight = snapshot[i];
 
         if (!highlight.isNull()) {
-            if (highlight.getStyle() == ScrollbarHighlight::Default) {
-                painter.fillRect(w / 8 * 3, (int)y, w / 4, highlightHeight,
-                                 this->themeManager->tabs.selected.backgrounds.regular.color());
-            } else {
-                painter.fillRect(0, (int)y, w, 1,
-                                 this->themeManager->tabs.selected.backgrounds.regular.color());
+            QColor color = [&] {
+                switch (highlight.getColor()) {
+                    case ScrollbarHighlight::Highlight:
+                        return app->themes->scrollbars.highlights.highlight;
+                    case ScrollbarHighlight::Subscription:
+                        return app->themes->scrollbars.highlights.subscription;
+                }
+                return QColor();
+            }();
+
+            switch (highlight.getStyle()) {
+                case ScrollbarHighlight::Default: {
+                    painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight, color);
+                } break;
+
+                case ScrollbarHighlight::Line: {
+                    painter.fillRect(0, int(y), w, 1, color);
+                } break;
+
+                case ScrollbarHighlight::None:;
             }
         }
 
@@ -251,7 +267,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
 void Scrollbar::resizeEvent(QResizeEvent *)
 {
-    this->resize((int)(16 * this->getScale()), this->height());
+    this->resize(int(16 * this->getScale()), this->height());
 }
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)
@@ -279,7 +295,7 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
     } else if (this->mouseDownIndex == 2) {
         int delta = event->pos().y() - this->lastMousePosition.y();
 
-        setDesiredValue(this->desiredValue + (qreal)delta / this->trackHeight * this->maximum);
+        setDesiredValue(this->desiredValue + qreal(delta) / this->trackHeight * this->maximum);
     }
 
     this->lastMousePosition = event->pos();
@@ -342,8 +358,8 @@ void Scrollbar::updateScroll()
     this->trackHeight = height() - this->buttonHeight - this->buttonHeight - MIN_THUMB_HEIGHT - 1;
 
     this->thumbRect = QRect(
-        0, (int)(this->currentValue / this->maximum * this->trackHeight) + 1 + this->buttonHeight,
-        width(), (int)(this->largeChange / this->maximum * this->trackHeight) + MIN_THUMB_HEIGHT);
+        0, int(this->currentValue / this->maximum * this->trackHeight) + 1 + this->buttonHeight,
+        width(), int(this->largeChange / this->maximum * this->trackHeight) + MIN_THUMB_HEIGHT);
 
     update();
 }

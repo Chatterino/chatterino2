@@ -7,6 +7,7 @@
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "util/concurrentmap.hpp"
+#include "util/mutexvalue.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
@@ -31,11 +32,21 @@ public:
         QString title;
         QString game;
         QString uptime;
+        QString streamType;
     };
 
     struct UserState {
         bool mod;
         bool broadcaster;
+    };
+
+    struct RoomModes {
+        bool submode = false;
+        bool r9k = false;
+        bool emoteOnly = false;
+        //        int folowerOnly = 0;
+        int slowMode = 0;
+        QString broadcasterLang;
     };
 
     ~TwitchChannel() final;
@@ -52,6 +63,8 @@ public:
     bool hasModRights();
 
     void addRecentChatter(const std::shared_ptr<messages::Message> &message) final;
+    void addJoinedUser(const QString &user);
+    void addPartedUser(const QString &user);
 
     const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
     const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
@@ -66,25 +79,21 @@ public:
 
     pajlada::Signals::NoArgBoltSignal fetchMessages;
     pajlada::Signals::NoArgSignal userStateChanged;
+    pajlada::Signals::NoArgSignal roomModesChanged;
 
     QString roomID;
 
-    StreamStatus GetStreamStatus() const
-    {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        return this->streamStatus;
-    }
+    RoomModes getRoomModes();
+    void setRoomModes(const RoomModes &roomModes);
+
+    StreamStatus getStreamStatus() const;
 
     struct NameOptions {
         QString displayName;
         QString localizedName;
     };
 
-    bool IsLive() const
-    {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        return this->streamStatus.live;
-    }
+    bool isLive() const;
 
 private:
     explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
@@ -103,6 +112,16 @@ private:
     bool mod;
     QByteArray messageSuffix;
     QString lastSentMessage;
+    RoomModes roomModes;
+    std::mutex roomModeMutex;
+
+    QObject object;
+    std::mutex joinedUserMutex;
+    QStringList joinedUsers;
+    bool joinedUsersMergeQueued = false;
+    std::mutex partedUserMutex;
+    QStringList partedUsers;
+    bool partedUsersMergeQueued = false;
 
     Communi::IrcConnection *readConnection;
 

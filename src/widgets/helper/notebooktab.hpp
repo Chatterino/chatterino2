@@ -11,74 +11,11 @@
 namespace chatterino {
 namespace widgets {
 
+#define NOTEBOOK_TAB_HEIGHT 28
+
+// class Notebook;
 class Notebook;
-class Notebook2;
 class SplitContainer;
-
-class NotebookTab2 : public BaseWidget
-{
-    Q_OBJECT
-
-public:
-    explicit NotebookTab2(Notebook2 *_notebook);
-
-    void updateSize();
-
-    QWidget *page;
-
-    const QString &getTitle() const;
-    void setTitle(const QString &newTitle);
-    bool isSelected() const;
-    void setSelected(bool value);
-
-    void setHighlightState(HighlightState style);
-
-    void moveAnimated(QPoint pos, bool animated = true);
-
-    QRect getDesiredRect() const;
-    void hideTabXChanged(bool);
-
-protected:
-    virtual void themeRefreshEvent() override;
-
-    virtual void paintEvent(QPaintEvent *) override;
-
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
-    virtual void enterEvent(QEvent *) override;
-    virtual void leaveEvent(QEvent *) override;
-
-    virtual void dragEnterEvent(QDragEnterEvent *event) override;
-
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-
-private:
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-
-    QPropertyAnimation positionChangedAnimation;
-    bool positionChangedAnimationRunning = false;
-    QPoint positionAnimationDesiredPoint;
-
-    Notebook2 *notebook;
-
-    QString title;
-
-public:
-    bool useDefaultTitle = true;
-
-private:
-    bool selected = false;
-    bool mouseOver = false;
-    bool mouseDown = false;
-    bool mouseOverX = false;
-    bool mouseDownX = false;
-
-    HighlightState highlightState = HighlightState::None;
-
-    QMenu menu;
-
-    QRect getXRect();
-};
 
 class NotebookTab : public BaseWidget
 {
@@ -89,10 +26,16 @@ public:
 
     void updateSize();
 
-    SplitContainer *page;
+    QWidget *page;
 
+    void setCustomTitle(const QString &title);
+    void resetCustomTitle();
+    bool hasCustomTitle() const;
+    const QString &getCustomTitle() const;
+    void setDefaultTitle(const QString &title);
+    const QString &getDefaultTitle() const;
     const QString &getTitle() const;
-    void setTitle(const QString &newTitle);
+
     bool isSelected() const;
     void setSelected(bool value);
 
@@ -118,36 +61,32 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
-    QPropertyAnimation positionChangedAnimation;
-    bool positionChangedAnimationRunning = false;
-    QPoint positionAnimationDesiredPoint;
+    QPropertyAnimation positionChangedAnimation_;
+    bool positionChangedAnimationRunning_ = false;
+    QPoint positionAnimationDesiredPoint_;
 
-    Notebook *notebook;
+    Notebook *notebook_;
 
-    QString title;
+    QString customTitle_;
+    QString defaultTitle_;
 
-public:
-    bool useDefaultTitle = true;
+    bool selected_ = false;
+    bool mouseOver_ = false;
+    bool mouseDown_ = false;
+    bool mouseOverX_ = false;
+    bool mouseDownX_ = false;
 
-private:
-    bool selected = false;
-    bool mouseOver = false;
-    bool mouseDown = false;
-    bool mouseOverX = false;
-    bool mouseDownX = false;
+    bool hasXButton();
+    bool shouldDrawXButton();
 
-    HighlightState highlightState = HighlightState::None;
+    HighlightState highlightState_ = HighlightState::None;
 
-    QMenu menu;
+    QMenu menu_;
 
-    QRect getXRect()
-    {
-        float s = this->getScale();
-        return QRect(this->width() - static_cast<int>(20 * s), static_cast<int>(4 * s),
-                     static_cast<int>(16 * s), static_cast<int>(16 * s));
-    }
+    QRect getXRect();
+    void titleUpdated();
 };
 
 }  // namespace widgets

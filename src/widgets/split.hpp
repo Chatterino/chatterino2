@@ -39,9 +39,6 @@ class Split : public BaseWidget, pajlada::Signals::SignalHolder
 
     Q_OBJECT
 
-    static pajlada::Signals::Signal<bool> altPressedStatusChanged;
-    static bool altPressesStatus;
-
 public:
     explicit Split(SplitContainer *parent);
     explicit Split(QWidget *parent);
@@ -49,20 +46,14 @@ public:
     ~Split() override;
 
     pajlada::Signals::NoArgSignal channelChanged;
+    pajlada::Signals::NoArgSignal focused;
 
-    ChannelView &getChannelView()
-    {
-        return this->view;
-    }
+    ChannelView &getChannelView();
+    SplitContainer *getContainer();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
-
-    void setFlexSizeX(double x);
-    double getFlexSizeX();
-    void setFlexSizeY(double y);
-    double getFlexSizeY();
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
@@ -79,15 +70,20 @@ public:
 
     bool isInContainer() const;
 
+    void setContainer(SplitContainer *container);
+
+    static pajlada::Signals::Signal<Qt::KeyboardModifiers> modifierStatusChanged;
+    static Qt::KeyboardModifiers modifierStatus;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
+    void focusInEvent(QFocusEvent *event) override;
 
 private:
     SplitContainer *container;
@@ -99,22 +95,22 @@ private:
     SplitInput input;
     SplitOverlay *overlay;
 
-    double flexSizeX = 1;
-    double flexSizeY = 1;
-
     bool moderationMode = false;
 
     bool isMouseOver = false;
+    bool isDragging = false;
 
     pajlada::Signals::Connection channelIDChangedConnection;
     pajlada::Signals::Connection usermodeChangedConnection;
+    pajlada::Signals::Connection roomModeChangedConnection;
+
     pajlada::Signals::Connection indirectChannelChangedConnection;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
     void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
     void channelNameUpdated(const QString &newChannelName);
-    void handleModifiers(QEvent *event, Qt::KeyboardModifiers modifiers);
+    void handleModifiers(Qt::KeyboardModifiers modifiers);
 
 public slots:
     // Add new split to the notebook page that this chat widget is in
@@ -151,11 +147,6 @@ public slots:
 
     // Open viewer list of the channel
     void doOpenViewerList();
-
-    void doIncFlexX();
-    void doDecFlexX();
-    void doIncFlexY();
-    void doDecFlexY();
 };
 
 }  // namespace widgets

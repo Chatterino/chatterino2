@@ -188,7 +188,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs)
 
     auto app = getApp();
 
-    QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, this->scale);
+    QFontMetrics metrics = app->fonts->getFontMetrics(this->style, this->scale);
 
     int x = this->getRect().left();
 
@@ -209,7 +209,7 @@ int TextLayoutElement::getXFromIndex(int index)
 {
     auto app = getApp();
 
-    QFontMetrics &metrics = app->fonts->getFontMetrics(this->style, this->scale);
+    QFontMetrics metrics = app->fonts->getFontMetrics(this->style, this->scale);
 
     if (index <= 0) {
         return this->getRect().left();

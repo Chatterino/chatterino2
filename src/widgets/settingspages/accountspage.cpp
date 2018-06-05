@@ -2,11 +2,17 @@
 
 #include "application.hpp"
 #include "const.hpp"
-#include "singletons/accountmanager.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
+#include "controllers/accounts/accountmodel.hpp"
 #include "util/layoutcreator.hpp"
+#include "widgets/helper/editablemodelview.hpp"
 #include "widgets/logindialog.hpp"
 
+#include <algorithm>
+
 #include <QDialogButtonBox>
+#include <QHeaderView>
+#include <QTableView>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -16,32 +22,48 @@ namespace settingspages {
 AccountsPage::AccountsPage()
     : SettingsPage("Accounts", ":/images/accounts.svg")
 {
+    auto *app = getApp();
+
     util::LayoutCreator<AccountsPage> layoutCreator(this);
-
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
-    auto buttons = layout.emplace<QDialogButtonBox>();
-    {
-        this->addButton = buttons->addButton("Add", QDialogButtonBox::YesRole);
-        this->removeButton = buttons->addButton("Remove", QDialogButtonBox::NoRole);
-    }
 
-    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
+    helper::EditableModelView *view =
+        *layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr));
 
-    // ----
-    QObject::connect(this->addButton, &QPushButton::clicked, []() {
+    view->getTableView()->horizontalHeader()->setVisible(false);
+    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+
+    view->addButtonPressed.connect([] {
         static auto loginWidget = new LoginWidget();
+
         loginWidget->show();
     });
 
-    QObject::connect(this->removeButton, &QPushButton::clicked, [this] {
-        auto selectedUser = this->accSwitchWidget->currentItem()->text();
-        if (selectedUser == ANONYMOUS_USERNAME_LABEL) {
-            // Do nothing
-            return;
-        }
+    view->getTableView()->setStyleSheet("background: #333");
 
-        getApp()->accounts->Twitch.removeUser(selectedUser);
-    });
+    //    auto buttons = layout.emplace<QDialogButtonBox>();
+    //    {
+    //        this->addButton = buttons->addButton("Add", QDialogButtonBox::YesRole);
+    //        this->removeButton = buttons->addButton("Remove", QDialogButtonBox::NoRole);
+    //    }
+
+    //    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
+
+    // ----
+    //    QObject::connect(this->addButton, &QPushButton::clicked, []() {
+    //        static auto loginWidget = new LoginWidget();
+    //        loginWidget->show();
+    //    });
+
+    //    QObject::connect(this->removeButton, &QPushButton::clicked, [this] {
+    //        auto selectedUser = this->accSwitchWidget->currentItem()->text();
+    //        if (selectedUser == ANONYMOUS_USERNAME_LABEL) {
+    //            // Do nothing
+    //            return;
+    //        }
+
+    //        getApp()->accounts->Twitch.removeUser(selectedUser);
+    //    });
 }
 
 }  // namespace settingspages

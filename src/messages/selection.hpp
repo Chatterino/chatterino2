@@ -42,6 +42,11 @@ struct SelectionItem {
     {
         return this->messageIndex == b.messageIndex && this->charIndex == b.charIndex;
     }
+
+    bool operator!=(const SelectionItem &b) const
+    {
+        return this->operator==(b);
+    }
 };
 
 struct Selection {

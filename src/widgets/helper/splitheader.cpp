@@ -31,7 +31,6 @@ SplitHeader::SplitHeader(Split *_split)
     , split(_split)
 {
     auto app = getApp();
-    this->setMouseTracking(true);
 
     util::LayoutCreator<SplitHeader> layoutCreator(this);
     auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
@@ -53,15 +52,25 @@ SplitHeader::SplitHeader(Split *_split)
 
         // channel name label
         //        auto title = layout.emplace<Label>(this).assign(&this->titleLabel);
-        auto title = layout.emplace<SignalLabel>().assign(&this->titleLabel);
+        auto title = layout.emplace<QLabel>().assign(&this->titleLabel);
         title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        title->setMouseTracking(true);
-        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
-                         &SplitHeader::mouseDoubleClickEvent);
-        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
-                         &SplitHeader::mouseMoveEvent);
+        //        title->setMouseTracking(true);
+        //        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
+        //                         &SplitHeader::mouseDoubleClickEvent);
+        //        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
+        //                         &SplitHeader::mouseMoveEvent);
 
         layout->addStretch(1);
+
+        // mode button
+        auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
+
+        mode->hide();
+
+        //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
+        //        {
+        //            //
+        //        });
 
         // moderation mode
         auto moderator = layout.emplace<RippleEffectButton>(this).assign(&this->moderationButton);
@@ -84,6 +93,11 @@ SplitHeader::SplitHeader(Split *_split)
     this->split->channelChanged.connect([this]() {
         this->initializeChannelSignals();  //
     });
+
+    this->managedConnect(app->accounts->twitch.currentUserChanged,
+                         [this] { this->updateModerationModeIcon(); });
+
+    this->setMouseTracking(true);
 }
 
 SplitHeader::~SplitHeader()
@@ -91,7 +105,7 @@ SplitHeader::~SplitHeader()
     this->onlineStatusChangedConnection.disconnect();
 }
 
-void SplitHeader::addDropdownItems(RippleEffectButton *label)
+void SplitHeader::addDropdownItems(RippleEffectButton *)
 {
     // clang-format off
     this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
@@ -99,6 +113,7 @@ void SplitHeader::addDropdownItems(RippleEffectButton *label)
 //    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
     this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
     this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
+    this->dropdownMenu.addAction("Search in messages", this->split, &Split::doSearch, QKeySequence(tr("Ctrl+F")));
     this->dropdownMenu.addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
@@ -167,7 +182,7 @@ void SplitHeader::updateChannelText()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel != nullptr) {
-        const auto &streamStatus = twitchChannel->GetStreamStatus();
+        const auto streamStatus = twitchChannel->getStreamStatus();
 
         if (streamStatus.live) {
             this->isLive = true;
@@ -181,9 +196,13 @@ void SplitHeader::updateChannelText()
                             "</p>";
             if (streamStatus.rerun) {
                 title += " (rerun)";
+            } else if (streamStatus.streamType.isEmpty()) {
+                title += " (" + streamStatus.streamType + ")";
             } else {
                 title += " (live)";
             }
+        } else {
+            this->tooltip = QString();
         }
     }
 
@@ -216,6 +235,49 @@ void SplitHeader::updateModerationModeIcon()
     this->moderationButton->setVisible(modButtonVisible);
 }
 
+void SplitHeader::updateModes()
+{
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(this->split->getChannel().get());
+    if (tc == nullptr) {
+        this->modeButton->hide();
+        return;
+    }
+
+    TwitchChannel::RoomModes roomModes = tc->getRoomModes();
+
+    QString text;
+
+    if (roomModes.r9k) {
+        text += "r9k, ";
+    }
+    if (roomModes.slowMode) {
+        text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
+    }
+    if (roomModes.emoteOnly) {
+        text += "emote, ";
+    }
+    if (roomModes.submode) {
+        text += "sub, ";
+    }
+
+    if (text.length() > 2) {
+        text = text.mid(0, text.size() - 2);
+    }
+
+    if (text.isEmpty()) {
+        this->modeButton->hide();
+    } else {
+        static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
+        QRegularExpressionMatch match = commaReplacement.match(text);
+        if (match.hasMatch()) {
+            text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+        }
+
+        this->modeButton->getLabel().setText(text);
+        this->modeButton->show();
+    }
+}
+
 void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -227,33 +289,59 @@ void SplitHeader::paintEvent(QPaintEvent *)
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
-    this->dragging = true;
+    if (event->button() == Qt::LeftButton) {
+        this->dragging = true;
 
-    this->dragStart = event->pos();
+        this->dragStart = event->pos();
+    }
+
+    this->doubleClicked = false;
+}
+
+void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (this->dragging && event->button() == Qt::LeftButton) {
+        QPoint pos = event->globalPos();
+
+        if (!showingHelpTooltip) {
+            this->showingHelpTooltip = true;
+
+            QTimer::singleShot(400, this, [this, pos] {
+                if (this->doubleClicked) {
+                    this->doubleClicked = false;
+                    this->showingHelpTooltip = false;
+                    return;
+                }
+
+                TooltipWidget *widget = new TooltipWidget();
+
+                widget->setText("Double click or press <Ctrl+R> to change the channel.\nClick and "
+                                "drag to move the split.");
+                widget->setAttribute(Qt::WA_DeleteOnClose);
+                widget->move(pos);
+                widget->show();
+                widget->raise();
+
+                QTimer::singleShot(3000, widget, [this, widget] {
+                    widget->close();
+                    this->showingHelpTooltip = false;
+                });
+            });
+        }
+    }
+
+    this->dragging = false;
 }
 
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!this->dragging && this->isLive) {
-        auto tooltipWidget = TooltipWidget::getInstance();
-        tooltipWidget->moveTo(this, event->globalPos());
-        tooltipWidget->setText(tooltip);
-        tooltipWidget->show();
-    }
-
     if (this->dragging) {
-        if (std::abs(this->dragStart.x() - event->pos().x()) > 12 ||
-            std::abs(this->dragStart.y() - event->pos().y()) > 12) {
+        if (std::abs(this->dragStart.x() - event->pos().x()) > int(12 * this->getScale()) ||
+            std::abs(this->dragStart.y() - event->pos().y()) > int(12 * this->getScale())) {
             this->split->drag();
             this->dragging = false;
         }
     }
-}
-
-void SplitHeader::leaveEvent(QEvent *event)
-{
-    TooltipWidget::getInstance()->hide();
-    BaseWidget::leaveEvent(event);
 }
 
 void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
@@ -261,6 +349,27 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         this->split->doChangeChannel();
     }
+    this->doubleClicked = true;
+}
+
+void SplitHeader::enterEvent(QEvent *event)
+{
+    if (!this->tooltip.isEmpty()) {
+        auto tooltipWidget = TooltipWidget::getInstance();
+        tooltipWidget->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()), false);
+        tooltipWidget->setText(this->tooltip);
+        tooltipWidget->show();
+        tooltipWidget->raise();
+    }
+
+    BaseWidget::enterEvent(event);
+}
+
+void SplitHeader::leaveEvent(QEvent *event)
+{
+    TooltipWidget::getInstance()->hide();
+
+    BaseWidget::leaveEvent(event);
 }
 
 void SplitHeader::rightButtonClicked()
@@ -283,6 +392,12 @@ void SplitHeader::menuMoveSplit()
 
 void SplitHeader::menuReloadChannelEmotes()
 {
+    auto channel = this->split->getChannel();
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel) {
+        twitchChannel->reloadChannelEmotes();
+    }
 }
 
 void SplitHeader::menuManualReconnect()

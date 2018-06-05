@@ -1,11 +1,12 @@
 #include "application.hpp"
 
+#include "controllers/accounts/accountcontroller.hpp"
 #include "controllers/commands/commandcontroller.hpp"
 #include "controllers/highlights/highlightcontroller.hpp"
 #include "controllers/ignores/ignorecontroller.hpp"
+#include "controllers/taggedusers/taggeduserscontroller.hpp"
 #include "providers/twitch/pubsub.hpp"
 #include "providers/twitch/twitchserver.hpp"
-#include "singletons/accountmanager.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/fontmanager.hpp"
 #include "singletons/loggingmanager.hpp"
@@ -19,12 +20,6 @@
 
 #include <atomic>
 
-#ifdef Q_OS_WIN
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#endif
-
 using namespace chatterino::singletons;
 
 namespace chatterino {
@@ -34,7 +29,7 @@ namespace {
 bool isBigEndian()
 {
     int test = 1;
-    char *p = (char *)&test;
+    char *p = reinterpret_cast<char *>(&test);
 
     return p[0] == 0;
 }
@@ -61,6 +56,7 @@ void Application::construct()
     isAppConstructed = true;
 
     // 1. Instantiate all classes
+    this->settings = new singletons::SettingManager;
     this->paths = new singletons::PathManager(this->argc, this->argv);
     this->themes = new singletons::ThemeManager;
     this->windows = new singletons::WindowManager;
@@ -68,9 +64,9 @@ void Application::construct()
     this->commands = new controllers::commands::CommandController;
     this->highlights = new controllers::highlights::HighlightController;
     this->ignores = new controllers::ignores::IgnoreController;
-    this->accounts = new singletons::AccountManager;
+    this->taggedUsers = new controllers::taggedusers::TaggedUsersController;
+    this->accounts = new controllers::accounts::AccountController;
     this->emotes = new singletons::EmoteManager;
-    this->settings = new singletons::SettingManager;
     this->fonts = new singletons::FontManager;
     this->resources = new singletons::ResourceManager;
 
@@ -92,12 +88,13 @@ void Application::initialize()
 
     // 2. Initialize/load classes
     this->settings->initialize();
-    this->windows->initialize();
 
     this->nativeMessaging->registerHost();
 
     this->settings->load();
     this->commands->load();
+    this->logging->initialize();
+    this->windows->initialize();
 
     this->resources->initialize();
 
@@ -109,7 +106,6 @@ void Application::initialize()
     this->accounts->load();
 
     this->twitch.server->initialize();
-    this->logging->initialize();
 
     // XXX
     this->settings->updateWordTypeMask();
@@ -182,8 +178,9 @@ void Application::initialize()
         }
 
         auto msg = messages::Message::createTimeoutMessage(action);
+        msg->flags |= messages::Message::PubSub;
 
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        util::postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
@@ -205,10 +202,10 @@ void Application::initialize()
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
         // this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch.pubsub->listenToWhispers(this->accounts->Twitch.getCurrent());  //
+        this->twitch.pubsub->listenToWhispers(this->accounts->twitch.getCurrent());  //
     };
 
-    this->accounts->Twitch.currentUserChanged.connect(RequestModerationActions);
+    this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
 
     RequestModerationActions();
 }
@@ -229,52 +226,6 @@ void Application::save()
     this->windows->save();
 
     this->commands->save();
-}
-
-void Application::runNativeMessagingHost()
-{
-    auto app = getApp();
-
-    app->nativeMessaging = new singletons::NativeMessagingManager;
-
-#ifdef Q_OS_WIN
-    _setmode(_fileno(stdin), _O_BINARY);
-    _setmode(_fileno(stdout), _O_BINARY);
-#endif
-
-#if 0
-    bool bigEndian = isBigEndian();
-#endif
-
-    while (true) {
-        char size_c[4];
-        std::cin.read(size_c, 4);
-
-        if (std::cin.eof()) {
-            break;
-        }
-
-        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
-#if 0
-        // To avoid breaking strict-aliasing rules and potentially inducing undefined behaviour, the following code can be run instead
-        uint32_t size = 0;
-        if (bigEndian) {
-            size = size_c[3] | static_cast<uint32_t>(size_c[2]) << 8 |
-                   static_cast<uint32_t>(size_c[1]) << 16 | static_cast<uint32_t>(size_c[0]) << 24;
-        } else {
-            size = size_c[0] | static_cast<uint32_t>(size_c[1]) << 8 |
-                   static_cast<uint32_t>(size_c[2]) << 16 | static_cast<uint32_t>(size_c[3]) << 24;
-        }
-#endif
-
-        char *b = (char *)malloc(size + 1);
-        std::cin.read(b, size);
-        *(b + size) = '\0';
-
-        app->nativeMessaging->sendToGuiProcess(QByteArray(b, size));
-
-        free(b);
-    }
 }
 
 Application *getApp()

@@ -3,6 +3,7 @@
 #include "debug/log.hpp"
 
 #include <QString>
+#include <QWidget>
 #include <boost/preprocessor.hpp>
 
 #include <string>
@@ -19,5 +20,9 @@ inline QString qS(const std::string &string)
 {
     return QString::fromStdString(string);
 }
+
+const Qt::KeyboardModifiers showSplitOverlayModifiers = Qt::ControlModifier | Qt::AltModifier;
+const Qt::KeyboardModifiers showAddSplitRegions = Qt::ControlModifier | Qt::AltModifier;
+const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
 }  // namespace chatterino

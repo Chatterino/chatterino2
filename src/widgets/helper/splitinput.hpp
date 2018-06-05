@@ -40,7 +40,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    Split *const chatWidget;
+    Split *const split;
     std::unique_ptr<EmotePopup> emotePopup;
 
     struct {
@@ -52,12 +52,6 @@ private:
     } ui;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-    //    QHBoxLayout hbox;
-    //    QVBoxLayout vbox;
-    //    QHBoxLayout editContainer;
-    //    ResizingTextEdit textInput;
-    //    QLabel textLengthLabel;
-    //    RippleEffectLabel emotesLabel;
     QStringList prevMsg;
     QString currMsg;
     int prevIndex = 0;

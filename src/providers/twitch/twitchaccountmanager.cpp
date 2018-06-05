@@ -15,6 +15,9 @@ TwitchAccountManager::TwitchAccountManager()
         auto currentUser = this->getCurrent();
         currentUser->loadIgnores();
     });
+
+    this->accounts.itemRemoved.connect(
+        [this](const auto &acc) { this->removeUser(acc.item.get()); });
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
@@ -32,7 +35,7 @@ std::vector<QString> TwitchAccountManager::getUsernames() const
 
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    for (const auto &user : this->users) {
+    for (const auto &user : this->accounts.getVector()) {
         userNames.push_back(user->getUserName());
     }
 
@@ -44,7 +47,7 @@ std::shared_ptr<TwitchAccount> TwitchAccountManager::findUserByUsername(
 {
     std::lock_guard<std::mutex> lock(this->mutex);
 
-    for (const auto &user : this->users) {
+    for (const auto &user : this->accounts.getVector()) {
         if (username.compare(user->getUserName(), Qt::CaseInsensitive) == 0) {
             return user;
         }
@@ -134,25 +137,16 @@ void TwitchAccountManager::load()
     });
 }
 
-bool TwitchAccountManager::removeUser(const QString &username)
+bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
-    if (!this->userExists(username)) {
-        return false;
+    const auto &accs = this->accounts.getVector();
+
+    std::string userID(account->getUserId().toStdString());
+    if (!userID.empty()) {
+        pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
     }
 
-    this->mutex.lock();
-    this->users.erase(std::remove_if(this->users.begin(), this->users.end(), [username](auto user) {
-        if (user->getUserName() == username) {
-            std::string userID(user->getUserId().toStdString());
-            assert(!userID.empty());
-            pajlada::Settings::SettingManager::removeSetting("/accounts/uid" + userID);
-            return true;
-        }
-        return false;
-    }));
-    this->mutex.unlock();
-
-    if (username == qS(this->currentUsername.getValue())) {
+    if (account->getUserName() == qS(this->currentUsername.getValue())) {
         // The user that was removed is the current user, log into the anonymous user
         this->currentUsername = "";
     }
@@ -187,9 +181,9 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
     auto newUser = std::make_shared<TwitchAccount>(userData.username, userData.oauthToken,
                                                    userData.clientID, userData.userID);
 
-    std::lock_guard<std::mutex> lock(this->mutex);
+    //    std::lock_guard<std::mutex> lock(this->mutex);
 
-    this->users.push_back(newUser);
+    this->accounts.insertItem(newUser);
 
     return AddUserResponse::UserAdded;
 }
