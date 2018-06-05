@@ -237,7 +237,7 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
 {
     auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection.get());
 
-    this->privateMessageReceived(qobject_cast<Communi::IrcPrivateMessage *>(fakeMessage));
+    this->messageReceived(fakeMessage);
 }
 
 void AbstractIrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
