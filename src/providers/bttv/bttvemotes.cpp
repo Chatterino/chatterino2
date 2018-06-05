@@ -4,8 +4,6 @@
 #include "messages/image.hpp"
 #include "util/urlfetch.hpp"
 
-#define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
-
 namespace chatterino {
 namespace providers {
 namespace bttv {

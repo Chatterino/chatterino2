@@ -8,6 +8,7 @@
 #include "providers/ffz/ffzemotes.hpp"
 #include "providers/twitch/twitchemotes.hpp"
 #include "signalvector.hpp"
+#include "singletons/helper/giftimer.hpp"
 #include "util/concurrentmap.hpp"
 #include "util/emotemap.hpp"
 
@@ -16,7 +17,6 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QTimer>
-#include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
 namespace singletons {
@@ -32,6 +32,8 @@ public:
     providers::bttv::BTTVEmotes bttv;
     providers::ffz::FFZEmotes ffz;
 
+    GIFTimer gifTimer;
+
     void initialize();
 
     util::EmoteMap &getChatterinoEmotes();
@@ -39,9 +41,8 @@ public:
 
     util::EmoteData getCheerImage(long long int amount, bool animated);
 
-    pajlada::Signals::NoArgSignal &getGifUpdateSignal();
-
     // Bit badge/emotes?
+    // TODO: Move to twitch emote provider
     util::ConcurrentMap<QString, messages::Image *> miscImageCache;
 
 private:
@@ -68,10 +69,6 @@ public:
 
     /// Chatterino emotes
     util::EmoteMap _chatterinoEmotes;
-
-    pajlada::Signals::NoArgSignal gifUpdateTimerSignal;
-    QTimer gifUpdateTimer;
-    bool gifUpdateTimerInitiated = false;
 };
 
 }  // namespace singletons

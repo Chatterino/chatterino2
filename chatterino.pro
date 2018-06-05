@@ -124,6 +124,7 @@ SOURCES += \
     src/singletons/helper/loggingchannel.cpp \
     src/singletons/helper/moderationaction.cpp \
     src/singletons/helper/chatterinosetting.cpp \
+    src/singletons/helper/giftimer.cpp \
     src/singletons/loggingmanager.cpp \
     src/singletons/pathmanager.cpp \
     src/singletons/resourcemanager.cpp \
@@ -251,6 +252,7 @@ HEADERS  += \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
     src/singletons/helper/chatterinosetting.hpp \
+    src/singletons/helper/giftimer.hpp \
     src/util/completionmodel.hpp \
     src/singletons/helper/loggingchannel.hpp \
     src/singletons/helper/moderationaction.hpp \
