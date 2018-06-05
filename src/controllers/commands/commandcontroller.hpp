@@ -2,6 +2,7 @@
 
 #include <QMap>
 #include <memory>
+#include <mutex>
 
 #include "controllers/commands/command.hpp"
 #include "util/signalvector2.hpp"

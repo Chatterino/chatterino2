@@ -44,6 +44,11 @@ IrcConnection *AbstractIrcServer::getReadConnection() const
     return this->readConnection.get();
 }
 
+IrcConnection *AbstractIrcServer::getWriteConnection() const
+{
+    return this->writeConnection.get();
+}
+
 void AbstractIrcServer::connect()
 {
     this->disconnect();

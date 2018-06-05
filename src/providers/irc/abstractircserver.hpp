@@ -20,6 +20,7 @@ public:
 
     // connection
     IrcConnection *getReadConnection() const;
+    IrcConnection *getWriteConnection() const;
 
     void connect();
     void disconnect();

@@ -118,7 +118,6 @@ SOURCES += \
     src/providers/bttv/bttvemotes.cpp \
     src/providers/ffz/ffzemotes.cpp \
     src/providers/emoji/emojis.cpp \
-    src/singletons/commandmanager.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
     src/util/completionmodel.cpp \
@@ -249,7 +248,6 @@ HEADERS  += \
     src/providers/bttv/bttvemotes.hpp \
     src/providers/ffz/ffzemotes.hpp \
     src/providers/emoji/emojis.hpp \
-    src/singletons/commandmanager.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
     src/singletons/helper/chatterinosetting.hpp \
