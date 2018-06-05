@@ -1030,17 +1030,17 @@ void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hove
     }
 
     // Copy actions
-    menu->addAction("Copy selection",
-                    [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
-
     if (!this->selection.isEmpty()) {
-        menu->addAction("Copy message", [layout] {
-            QString copyString;
-            layout->addSelectionText(copyString);
-
-            QGuiApplication::clipboard()->setText(copyString);
-        });
+        menu->addAction("Copy selection",
+                        [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
     }
+
+    menu->addAction("Copy message", [layout] {
+        QString copyString;
+        layout->addSelectionText(copyString);
+
+        QGuiApplication::clipboard()->setText(copyString);
+    });
 
     //        menu->addAction("Quote message", [layout] {
     //            QString copyString;
