@@ -88,7 +88,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
     // fix this pile of garbage
-    for (const auto &set : app->emotes->twitchAccountEmotes[userID.toStdString()].emoteSets) {
+    for (const auto &set : app->emotes->twitch.emotes[userID.toStdString()].emoteSets) {
         // TITLE
         messages::MessageBuilder builder1;
 
@@ -107,8 +107,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
                 builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                     ->setLink(Link(Link::InsertText, key)));
             }(QString::fromStdString(emote.code),
-              app->emotes->getTwitchEmoteById(QString::fromStdString(emote.id).toLong(),
-                                              QString::fromStdString(emote.code)));
+              app->emotes->twitch.getEmoteById(QString::fromStdString(emote.id).toLong(),
+                                               QString::fromStdString(emote.code)));
         }
 
         emoteChannel->addMessage(builder2.getMessage());

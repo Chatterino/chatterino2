@@ -516,8 +516,8 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
 
         QString name = this->originalMessage.mid(start, end - start + 1);
 
-        vec.push_back(
-            std::pair<long int, util::EmoteData>(start, app->emotes->getTwitchEmoteById(id, name)));
+        vec.push_back(std::pair<long int, util::EmoteData>(
+            start, app->emotes->twitch.getEmoteById(id, name)));
     }
 }
 
