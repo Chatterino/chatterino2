@@ -60,6 +60,7 @@
         <file>licenses/qt_lgpl-3.0.txt</file>
         <file>licenses/rapidjson.txt</file>
         <file>licenses/websocketpp.txt</file>
+        <file>emoji.json</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

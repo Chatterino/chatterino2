@@ -144,8 +144,8 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags |= Message::DisableCompactEmotes;
 
     emojis.each([&builder](const QString &key, const auto &value) {
-        builder.append((new EmoteElement(value.emoteData, MessageElement::Flags::AlwaysShow))
-                           ->setLink(Link(Link::Type::InsertText, ":" + value.shortCode + ":")));
+        builder.append((new EmoteElement(value->emoteData, MessageElement::Flags::AlwaysShow))
+                           ->setLink(Link(Link::Type::InsertText, ":" + value->shortCode + ":")));
     });
     emojiChannel->addMessage(builder.getMessage());
 

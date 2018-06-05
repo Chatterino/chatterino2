@@ -85,6 +85,8 @@ public:
     // 3 = 3x
     IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
 
+    QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
 

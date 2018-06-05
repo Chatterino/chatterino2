@@ -142,10 +142,24 @@ AppearancePage::AppearancePage()
 
             scaleLabel->setText(QString::number(app->settings->emoteScale.getValue()));
         }
+
+        {
+            auto *combo = new QComboBox(this);
+            combo->addItems({"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook", "Apple", "Google",
+                             "Messenger"});
+
+            QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
+                getApp()->settings->emojiSet = str;  //
+            });
+
+            auto hbox = emotes.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Emoji set");
+            hbox.append(combo);
+        }
     }
 
     layout->addStretch(1);
-}  // namespace settingspages
+}
 
 QLayout *AppearancePage::createThemeColorChanger()
 {
