@@ -140,7 +140,7 @@ void TwitchChannel::reloadChannelEmotes()
 
     debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
-    app->emotes->reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
+    app->emotes->bttv.loadChannelEmotes(this->name, this->bttvChannelEmotes);
     app->emotes->reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
 }
 

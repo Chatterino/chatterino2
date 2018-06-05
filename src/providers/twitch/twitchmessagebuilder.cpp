@@ -531,7 +531,7 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
         return true;
     };
 
-    if (app->emotes->bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
+    if (app->emotes->bttv.globalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
         return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
