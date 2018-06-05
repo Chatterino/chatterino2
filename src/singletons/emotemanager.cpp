@@ -1,22 +1,10 @@
-#include "emotemanager.hpp"
+#include "singletons/emotemanager.hpp"
 
 #include "application.hpp"
 #include "common.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/urlfetch.hpp"
+#include "controllers/accounts/accountcontroller.hpp"
 
-#include <QDebug>
 #include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-
-#include <memory>
 
 using namespace chatterino::providers::twitch;
 using namespace chatterino::messages;
@@ -41,6 +29,8 @@ void EmoteManager::initialize()
     this->loadEmojis();
     this->bttv.loadGlobalEmotes();
     this->ffz.loadGlobalEmotes();
+
+    this->gifTimer.initialize();
 }
 
 util::EmoteMap &EmoteManager::getChatterinoEmotes()
@@ -232,35 +222,6 @@ util::EmoteData EmoteManager::getCheerImage(long long amount, bool animated)
 {
     // TODO: fix this xD
     return util::EmoteData();
-}
-
-pajlada::Signals::NoArgSignal &EmoteManager::getGifUpdateSignal()
-{
-    if (!this->gifUpdateTimerInitiated) {
-        auto app = getApp();
-
-        this->gifUpdateTimerInitiated = true;
-
-        this->gifUpdateTimer.setInterval(30);
-        this->gifUpdateTimer.start();
-
-        app->settings->enableGifAnimations.connect([this](bool enabled, auto) {
-            if (enabled) {
-                this->gifUpdateTimer.start();
-            } else {
-                this->gifUpdateTimer.stop();
-            }
-        });
-
-        QObject::connect(&this->gifUpdateTimer, &QTimer::timeout, [this] {
-            this->gifUpdateTimerSignal.invoke();
-            // fourtf:
-            auto app = getApp();
-            app->windows->repaintGifEmotes();
-        });
-    }
-
-    return this->gifUpdateTimerSignal;
 }
 
 }  // namespace singletons
