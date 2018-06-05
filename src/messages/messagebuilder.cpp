@@ -79,7 +79,7 @@ QString MessageBuilder::matchLink(const QString &string)
     "$";
 
     static QRegularExpression linkRegex(urlRegExp, QRegularExpression::CaseInsensitiveOption);
-
+    static QRegularExpression httpRegex("\\bhttps?://");
     auto match = linkRegex.match(string);
 
     if (!match.hasMatch()) {
@@ -88,6 +88,10 @@ QString MessageBuilder::matchLink(const QString &string)
 
     QString captured = match.captured();
 
+    if (!captured.contains(httpRegex)) {   
+        captured.insert(0, "http://"); 
+    }
+    
     return captured;
 }
 
