@@ -44,6 +44,10 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
+    if (this->flags & DeleteOnFocusOut) {
+        this->setAttribute(Qt::WA_DeleteOnClose);
+    }
+
     this->init();
 }
 
@@ -199,6 +203,17 @@ void BaseWindow::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
     }
+}
+
+bool BaseWindow::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowDeactivate) {
+        if (this->flags & DeleteOnFocusOut) {
+            this->close();
+        }
+    }
+
+    return QWidget::event(event);
 }
 
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,

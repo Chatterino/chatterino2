@@ -326,6 +326,10 @@ void SplitInput::paintEvent(QPaintEvent *)
         painter.setPen(QColor("#333"));
         painter.drawRect(rect);
     }
+
+    //    int offset = 2;
+    //    painter.fillRect(offset, this->height() - offset, this->width() - 2 * offset, 1,
+    //                     getApp()->themes->splits.input.focusedLine);
 }
 
 void SplitInput::resizeEvent(QResizeEvent *)

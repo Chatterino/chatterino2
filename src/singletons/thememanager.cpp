@@ -86,6 +86,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         this->messages.textColors.caret =  //
             this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
+        QColor highlighted = lightWin ? QColor("#b60505") : QColor("#ee6166");
+
         /// TABS
         if (lightWin) {
             this->tabs.regular = {QColor("#444"),
@@ -93,9 +95,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
                                   {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
             this->tabs.newMessage = {
                 fg, {bg, QColor("#ccc"), bg}, {QColor("#aaa"), QColor("#aaa"), QColor("#aaa")}};
-            this->tabs.highlighted = {fg,
-                                      {bg, QColor("#ccc"), bg},
-                                      {QColor("#b60505"), QColor("#b60505"), QColor("#b60505")}};
+            this->tabs.highlighted = {
+                fg, {bg, QColor("#ccc"), bg}, {highlighted, highlighted, highlighted}};
             this->tabs.selected = {QColor("#000"),
                                    {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                                    {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
@@ -108,12 +109,14 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
                                      {QColor("#888"), QColor("#888"), QColor("#888")}};
             this->tabs.highlighted = {fg,
                                       {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                                      {QColor("#ee6166"), QColor("#ee6166"), QColor("#ee6166")}};
+                                      {highlighted, highlighted, highlighted}};
 
             this->tabs.selected = {QColor("#fff"),
                                    {QColor("#555555"), QColor("#555555"), QColor("#555555")},
                                    {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
         }
+
+        this->splits.input.focusedLine = highlighted;
 
         // scrollbar
         this->scrollbars.highlights.highlight = QColor("#ee6166");

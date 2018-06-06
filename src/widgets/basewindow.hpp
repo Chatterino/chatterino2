@@ -19,7 +19,13 @@ class BaseWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    enum Flags { None = 0, EnableCustomFrame = 1, Frameless = 2, TopMost = 4 };
+    enum Flags {
+        None = 0,
+        EnableCustomFrame = 1,
+        Frameless = 2,
+        TopMost = 4,
+        DeleteOnFocusOut = 8
+    };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags = None);
 
@@ -37,18 +43,19 @@ public:
 
 protected:
 #ifdef USEWINSDK
-    void showEvent(QShowEvent *) override;
-    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-    void scaleChangedEvent(float) override;
+    virtual void showEvent(QShowEvent *) override;
+    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+    virtual void scaleChangedEvent(float) override;
 #endif
 
-    void paintEvent(QPaintEvent *) override;
+    virtual void paintEvent(QPaintEvent *) override;
 
-    void changeEvent(QEvent *) override;
-    void leaveEvent(QEvent *) override;
-    void resizeEvent(QResizeEvent *) override;
+    virtual void changeEvent(QEvent *) override;
+    virtual void leaveEvent(QEvent *) override;
+    virtual void resizeEvent(QResizeEvent *) override;
 
-    void themeRefreshEvent() override;
+    virtual void themeRefreshEvent() override;
+    virtual bool event(QEvent *event) override;
 
 private:
     void init();

@@ -79,6 +79,7 @@ public:
             QColor border;
             QColor background;
             QColor selection;
+            QColor focusedLine;
             QColor text;
             QString styleSheet;
             // int margin;

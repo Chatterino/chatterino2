@@ -15,6 +15,8 @@ RippleEffectButton::RippleEffectButton(BaseWidget *parent)
 
     this->effectTimer_.setInterval(20);
     this->effectTimer_.start();
+
+    this->setMouseTracking(true);
 }
 
 void RippleEffectButton::setMouseEffectColor(boost::optional<QColor> color)
@@ -83,12 +85,12 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
     }
 
     if (this->hoverMultiplier_ > 0) {
-        QRadialGradient gradient(mousePos_.x(), mousePos_.y(), 50, mousePos_.x(), mousePos_.y());
+        QRadialGradient gradient(QPointF(mousePos_), this->width() / 2);
 
         gradient.setColorAt(0,
-                            QColor(c.red(), c.green(), c.blue(), int(24 * this->hoverMultiplier_)));
+                            QColor(c.red(), c.green(), c.blue(), int(60 * this->hoverMultiplier_)));
         gradient.setColorAt(1,
-                            QColor(c.red(), c.green(), c.blue(), int(12 * this->hoverMultiplier_)));
+                            QColor(c.red(), c.green(), c.blue(), int(40 * this->hoverMultiplier_)));
 
         painter.fillRect(this->rect(), gradient);
     }
@@ -145,6 +147,8 @@ void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
 void RippleEffectButton::mouseMoveEvent(QMouseEvent *event)
 {
     this->mousePos_ = event->pos();
+
+    this->update();
 }
 
 void RippleEffectButton::onMouseEffectTimeout()
@@ -172,9 +176,9 @@ void RippleEffectButton::onMouseEffectTimeout()
         performUpdate = true;
 
         for (auto it = this->clickEffects_.begin(); it != this->clickEffects_.end();) {
-            (*it).progress += mouseDown_ ? 0.02 : 0.07;
+            it->progress += mouseDown_ ? 0.02 : 0.07;
 
-            if ((*it).progress >= 1.0) {
+            if (it->progress >= 1.0) {
                 it = this->clickEffects_.erase(it);
             } else {
                 it++;
