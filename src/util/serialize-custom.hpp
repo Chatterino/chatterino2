@@ -30,9 +30,9 @@ struct Deserialize<QString> {
 
             return QString::fromUtf8(str, strLen);
         } catch (const std::exception &e) {
-            int x = 5;
+            //            int x = 5;
         } catch (...) {
-            int y = 5;
+            //            int y = 5;
         }
 
         return QString();

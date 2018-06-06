@@ -94,7 +94,7 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
-    this->input.ui.textEdit->installEventFilter(parent);
+    this->input.ui_.textEdit->installEventFilter(parent);
 
     this->view.mouseDown.connect([this](QMouseEvent *) {
         //
@@ -142,7 +142,7 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input.ui.textEdit->focused.connect([this] { this->focused.invoke(); });
+    this->input.ui_.textEdit->focused.connect([this] { this->focused.invoke(); });
 }
 
 Split::~Split()
@@ -266,12 +266,12 @@ void Split::updateLastReadMessage()
 
 void Split::giveFocus(Qt::FocusReason reason)
 {
-    this->input.ui.textEdit->setFocus(reason);
+    this->input.ui_.textEdit->setFocus(reason);
 }
 
 bool Split::hasFocus() const
 {
-    return this->input.ui.textEdit->hasFocus();
+    return this->input.ui_.textEdit->hasFocus();
 }
 
 void Split::paintEvent(QPaintEvent *)

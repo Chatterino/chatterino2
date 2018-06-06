@@ -162,14 +162,16 @@ void TwitchChannel::sendMessage(const QString &message)
     if (app->settings->allowDuplicateMessages) {
         if (parsedMessage == this->lastSentMessage) {
             parsedMessage.append(this->messageSuffix);
-
-            this->lastSentMessage = "";
         }
     }
 
-    this->lastSentMessage = parsedMessage;
+    bool messageSent = false;
+    this->sendMessageSignal.invoke(this->name, parsedMessage, messageSent);
 
-    this->sendMessageSignal.invoke(this->name, parsedMessage);
+    if (messageSent) {
+        qDebug() << "sent";
+        this->lastSentMessage = parsedMessage;
+    }
 }
 
 bool TwitchChannel::isMod() const

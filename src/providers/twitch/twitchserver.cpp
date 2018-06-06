@@ -71,8 +71,52 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
     TwitchChannel *channel = new TwitchChannel(channelName, this->getReadConnection());
 
-    channel->sendMessageSignal.connect(
-        [this](auto chan, auto msg) { this->sendMessage(chan, msg); });
+    channel->sendMessageSignal.connect([this, channel](auto chan, auto msg, bool &sent) {
+
+        {
+            std::lock_guard<std::mutex> guard(this->lastMessageMutex);
+
+            std::queue<QTime> &lastMessage =
+                channel->hasModRights() ? this->lastMessageMod : this->lastMessagePleb;
+            size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
+
+            QTime now = QTime::currentTime();
+
+            if (lastMessage.size() > 0 &&
+                lastMessage.back().addMSecs(channel->hasModRights() ? 100 : 1100) > now) {
+                if (lastErrorTimeSpeed.addSecs(30) < now) {
+                    auto errorMessage =
+                        messages::Message::createSystemMessage("sending messages too fast");
+
+                    channel->addMessage(errorMessage);
+
+                    lastErrorTimeSpeed = now;
+                }
+                return;
+            }
+
+            while (lastMessage.size() > 0 && lastMessage.front().addSecs(32) < now) {
+                lastMessage.pop();
+            }
+
+            if (lastMessage.size() >= maxMessageCount) {
+                if (lastErrorTimeAmount.addSecs(30) < now) {
+                    auto errorMessage =
+                        messages::Message::createSystemMessage("sending too many messages");
+
+                    channel->addMessage(errorMessage);
+
+                    lastErrorTimeAmount = now;
+                }
+                return;
+            }
+
+            lastMessage.push(now);
+        }
+
+        this->sendMessage(chan, msg);
+        sent = true;
+    });
 
     return std::shared_ptr<Channel>(channel);
 }
