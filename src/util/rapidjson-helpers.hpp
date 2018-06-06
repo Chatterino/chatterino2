@@ -73,6 +73,10 @@ bool getSafe(const rapidjson::Value &obj, const char *key, Type &out)
         return false;
     }
 
+    if (obj.IsNull()) {
+        return false;
+    }
+
     try {
         out = pajlada::Settings::Deserialize<Type>::get(obj[key]);
     } catch (const std::runtime_error &) {
