@@ -84,17 +84,20 @@ void Emojis::load()
     this->loadEmojis();
 
     this->loadEmojiOne2Capabilities();
+
+    this->sortEmojis();
+
+    this->loadEmojiSet();
 }
 
 void Emojis::loadEmojis()
 {
-    static std::map<std::string, QString> toneNames{
-        {"1F3FB", "tone1"},  //
-        {"1F3FC", "tone2"},  //
-        {"1F3FD", "tone3"},  //
-        {"1F3FE", "tone4"},  //
-        {"1F3FF", "tone5"},  //
-    };
+    std::map<std::string, QString> toneNames;
+    toneNames["1F3FB"] = "tone1";
+    toneNames["1F3FC"] = "tone2";
+    toneNames["1F3FD"] = "tone3";
+    toneNames["1F3FE"] = "tone4";
+    toneNames["1F3FF"] = "tone5";
 
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
@@ -120,7 +123,7 @@ void Emojis::loadEmojis()
 
         this->emojis.insert(emojiData->unifiedCode, emojiData);
 
-        if (unparsedEmoji.HasMember("skin_variations") && false) {
+        if (unparsedEmoji.HasMember("skin_variations")) {
             for (const auto &skinVariation : unparsedEmoji["skin_variations"].GetObject()) {
                 std::string tone = skinVariation.name.GetString();
                 const auto &variation = skinVariation.value;
@@ -146,7 +149,43 @@ void Emojis::loadEmojis()
             }
         }
     }
+}
 
+void Emojis::loadEmojiOne2Capabilities()
+{
+    QFile file(":/emojidata.txt");
+    file.open(QFile::ReadOnly);
+    QTextStream in(&file);
+
+    uint unicodeBytes[4];
+
+    while (!in.atEnd()) {
+        // Line example: sunglasses 1f60e
+        QString line = in.readLine();
+
+        if (line.at(0) == '#') {
+            // Ignore lines starting with # (comments)
+            continue;
+        }
+
+        QStringList parts = line.split(' ');
+        if (parts.length() < 2) {
+            continue;
+        }
+
+        QString shortCode = parts[0];
+
+        auto emojiIt = this->emojiShortCodeToEmoji.find(shortCode);
+        if (emojiIt != this->emojiShortCodeToEmoji.end()) {
+            std::shared_ptr<EmojiData> emoji = *emojiIt;
+            emoji->capabilities.insert("EmojiOne 2");
+            continue;
+        }
+    }
+}
+
+void Emojis::sortEmojis()
+{
     for (auto &p : this->emojiFirstByte) {
         std::stable_sort(p.begin(), p.end(), [](const auto &lhs, const auto &rhs) {
             return lhs->value.length() > rhs->value.length();
@@ -156,10 +195,14 @@ void Emojis::loadEmojis()
     auto &p = this->shortCodes;
     std::stable_sort(p.begin(), p.end(),
                      [](const auto &lhs, const auto &rhs) { return lhs < rhs; });
+}
 
+void Emojis::loadEmojiSet()
+{
     auto app = getApp();
 
     app->settings->emojiSet.connect([=](const auto &emojiSet, auto) {
+        debug::Log("Using emoji set {}", emojiSet);
         this->emojis.each([=](const auto &name, std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
             // clang-format off
@@ -195,39 +238,6 @@ void Emojis::loadEmojis()
                                                            ":" + emoji->shortCode + ":<br/>Emoji");
         });
     });
-}
-
-void Emojis::loadEmojiOne2Capabilities()
-{
-    QFile file(":/emojidata.txt");
-    file.open(QFile::ReadOnly);
-    QTextStream in(&file);
-
-    uint unicodeBytes[4];
-
-    while (!in.atEnd()) {
-        // Line example: sunglasses 1f60e
-        QString line = in.readLine();
-
-        if (line.at(0) == '#') {
-            // Ignore lines starting with # (comments)
-            continue;
-        }
-
-        QStringList parts = line.split(' ');
-        if (parts.length() < 2) {
-            continue;
-        }
-
-        QString shortCode = parts[0];
-
-        auto emojiIt = this->emojiShortCodeToEmoji.find(shortCode);
-        if (emojiIt != this->emojiShortCodeToEmoji.end()) {
-            std::shared_ptr<EmojiData> emoji = *emojiIt;
-            emoji->capabilities.insert("EmojiOne 2");
-            continue;
-        }
-    }
 }
 
 void Emojis::parse(std::vector<std::tuple<util::EmoteData, QString>> &parsedWords,

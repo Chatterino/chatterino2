@@ -47,6 +47,8 @@ public:
 private:
     void loadEmojis();
     void loadEmojiOne2Capabilities();
+    void sortEmojis();
+    void loadEmojiSet();
 
 public:
     QString replaceShortCodes(const QString &text);
