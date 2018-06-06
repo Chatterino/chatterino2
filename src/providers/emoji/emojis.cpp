@@ -88,6 +88,14 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
+    static std::map<std::string, QString> toneNames{
+        {"1F3FB", "tone1"},  //
+        {"1F3FC", "tone2"},  //
+        {"1F3FD", "tone3"},  //
+        {"1F3FE", "tone4"},  //
+        {"1F3FF", "tone5"},  //
+    };
+
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -114,16 +122,8 @@ void Emojis::loadEmojis()
 
         if (unparsedEmoji.HasMember("skin_variations")) {
             for (const auto &skinVariation : unparsedEmoji["skin_variations"].GetObject()) {
-                const auto &tone = skinVariation.name.GetString();
+                std::string tone = skinVariation.name.GetString();
                 const auto &variation = skinVariation.value;
-
-                static std::map<QString, QString> toneNames{
-                    {"1F3FB", "tone1"},  //
-                    {"1F3FC", "tone2"},  //
-                    {"1F3FD", "tone3"},  //
-                    {"1F3FE", "tone4"},  //
-                    {"1F3FF", "tone5"},  //
-                };
 
                 auto variationEmojiData = std::make_shared<EmojiData>();
 
