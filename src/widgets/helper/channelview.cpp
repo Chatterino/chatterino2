@@ -12,6 +12,7 @@
 #include "ui_accountpopupform.h"
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
+#include "widgets/accountpopup2.hpp"
 #include "widgets/split.hpp"
 #include "widgets/tooltipwidget.hpp"
 
@@ -1104,10 +1105,16 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
     switch (link.type) {
         case messages::Link::UserInfo: {
             auto user = link.value;
-            this->userPopupWidget.setName(user);
-            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
-            this->userPopupWidget.show();
-            this->userPopupWidget.setFocus();
+            auto *userPopup = new AccountPopup2;
+            userPopup->setChannel(this->channel);
+            userPopup->setName(user);
+            userPopup->setAttribute(Qt::WA_DeleteOnClose);
+            userPopup->show();
+
+            //            this->userPopupWidget.setName(user);
+            //            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
+            //            this->userPopupWidget.show();
+            //            this->userPopupWidget.setFocus();
 
             qDebug() << "Clicked " << user << "s message";
             break;

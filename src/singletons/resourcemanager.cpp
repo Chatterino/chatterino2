@@ -294,6 +294,12 @@ ResourceManager::ResourceManager()
     this->split.up = QIcon(":/images/split/splitup.png");
     this->split.down = QIcon(":/images/split/splitdown.png");
     this->split.move = QIcon(":/images/split/splitmove.png");
+
+    this->buttons.ban = QPixmap(":/images/buttons/ban.png");
+    this->buttons.unban = QPixmap(":/images/buttons/unban.png");
+    this->buttons.mod = QPixmap(":/images/buttons/mod.png");
+    this->buttons.unmod = QPixmap(":/images/buttons/unmod.png");
+
     qDebug() << "init ResourceManager";
 }
 

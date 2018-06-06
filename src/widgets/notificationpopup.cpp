@@ -10,7 +10,7 @@ namespace chatterino {
 namespace widgets {
 
 NotificationPopup::NotificationPopup()
-    : BaseWindow((QWidget *)nullptr, BaseWindow::FrameLess)
+    : BaseWindow((QWidget *)nullptr, BaseWindow::Frameless)
     , channel(std::make_shared<Channel>("notifications", Channel::None))
 
 {

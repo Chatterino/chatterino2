@@ -19,7 +19,7 @@ class BaseWindow : public BaseWidget
     Q_OBJECT
 
 public:
-    enum Flags { None = 0, EnableCustomFrame = 1, FrameLess = 2, TopMost = 4 };
+    enum Flags { None = 0, EnableCustomFrame = 1, Frameless = 2, TopMost = 4 };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags = None);
 
@@ -39,9 +39,10 @@ protected:
 #ifdef USEWINSDK
     void showEvent(QShowEvent *) override;
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
-    void paintEvent(QPaintEvent *) override;
     void scaleChangedEvent(float) override;
 #endif
+
+    void paintEvent(QPaintEvent *) override;
 
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;

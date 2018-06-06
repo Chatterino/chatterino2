@@ -32,7 +32,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    if (mouseDown || mouseOver) {
+    if (mouseDown_ || mouseOver_) {
         background = this->themeManager->tabs.regular.backgrounds.hover.color();
         foreground = this->themeManager->tabs.regular.text;
     } else {
@@ -47,7 +47,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
     if (icon == IconPlus) {
         painter.setPen([&] {
             QColor tmp = foreground;
-            if (!this->mouseOver) {
+            if (!this->mouseOver_) {
                 tmp.setAlpha(180);
             }
             return tmp;
@@ -103,7 +103,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        mouseDown = false;
+        mouseDown_ = false;
 
         update();
 
@@ -129,7 +129,7 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
 void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 {
-    this->mouseDown = true;
+    this->mouseDown_ = true;
     this->update();
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,

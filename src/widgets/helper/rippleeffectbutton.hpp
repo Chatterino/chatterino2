@@ -31,16 +31,19 @@ public:
     RippleEffectButton(BaseWidget *parent);
 
     void setMouseEffectColor(boost::optional<QColor> color);
-    void setPixmap(const QPixmap *pixmap);
-    const QPixmap *getPixmap() const;
+    void setPixmap(const QPixmap &pixmap_);
+    const QPixmap &getPixmap() const;
+
+    void setBorderColor(const QColor &color);
+    const QColor &getBorderColor() const;
 
 signals:
     void clicked();
 
 protected:
-    bool selected = false;
-    bool mouseOver = false;
-    bool mouseDown = false;
+    bool selected_ = false;
+    bool mouseOver_ = false;
+    bool mouseDown_ = false;
 
     virtual void paintEvent(QPaintEvent *) override;
     virtual void enterEvent(QEvent *) override;
@@ -52,12 +55,13 @@ protected:
     void fancyPaint(QPainter &painter);
 
 private:
-    QPixmap *pixmap;
-    QPoint mousePos;
-    double hoverMultiplier = 0.0;
-    QTimer effectTimer;
-    std::vector<ClickEffect> clickEffects;
-    boost::optional<QColor> mouseEffectColor = boost::none;
+    QColor borderColor_;
+    QPixmap pixmap_;
+    QPoint mousePos_;
+    double hoverMultiplier_ = 0.0;
+    QTimer effectTimer_;
+    std::vector<ClickEffect> clickEffects_;
+    boost::optional<QColor> mouseEffectColor_ = boost::none;
 
     void onMouseEffectTimeout();
 };

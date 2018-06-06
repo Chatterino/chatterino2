@@ -28,6 +28,9 @@ public:
         this->vector = vec;
 
         auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
+            if (args.caller == this) {
+                return;
+            }
             // get row index
             int index = this->getModelIndexFromVectorIndex(args.index);
             assert(index >= 0 && index <= this->rows.size());
@@ -54,6 +57,10 @@ public:
         this->managedConnect(vec->itemInserted, insert);
 
         this->managedConnect(vec->itemRemoved, [this](auto args) {
+            if (args.caller == this) {
+                return;
+            }
+
             int row = this->getModelIndexFromVectorIndex(args.index);
             assert(row >= 0 && row <= this->rows.size());
 

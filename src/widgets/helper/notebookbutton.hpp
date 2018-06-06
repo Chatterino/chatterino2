@@ -32,7 +32,7 @@ signals:
     void clicked();
 
 private:
-    QPoint mousePos;
+    QPoint mousePos_;
 };
 
 }  // namespace widgets

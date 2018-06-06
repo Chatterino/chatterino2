@@ -61,6 +61,10 @@
         <file>licenses/rapidjson.txt</file>
         <file>licenses/websocketpp.txt</file>
         <file>emoji.json</file>
+        <file>images/buttons/ban.png</file>
+        <file>images/buttons/mod.png</file>
+        <file>images/buttons/unban.png</file>
+        <file>images/buttons/unmod.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

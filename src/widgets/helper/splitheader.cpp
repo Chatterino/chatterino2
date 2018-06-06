@@ -38,7 +38,7 @@ SplitHeader::SplitHeader(Split *_split)
         // dropdown label
         auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
-        dropdown->setPixmap(app->resources->splitHeaderContext->getPixmap());
+        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
@@ -219,8 +219,8 @@ void SplitHeader::updateModerationModeIcon()
     auto app = getApp();
 
     this->moderationButton->setPixmap(this->split->getModerationMode()
-                                          ? app->resources->moderationmode_enabled->getPixmap()
-                                          : app->resources->moderationmode_disabled->getPixmap());
+                                          ? *app->resources->moderationmode_enabled->getPixmap()
+                                          : *app->resources->moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split->getChannel();

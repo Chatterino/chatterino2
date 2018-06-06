@@ -276,7 +276,8 @@ void SplitInput::editTextChanged()
     // set textLengthLabel value
     QString text = this->ui.textEdit->toPlainText();
 
-    if (text.startsWith("/r ") && this->split->getChannel()->isTwitchChannel())  //
+    if (text.startsWith("/r ", Qt::CaseInsensitive) &&
+        this->split->getChannel()->isTwitchChannel())  //
     {
         QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty()) {
