@@ -148,6 +148,8 @@ AppearancePage::AppearancePage()
             combo->addItems({"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook", "Apple", "Google",
                              "Messenger"});
 
+            combo->setCurrentText(getApp()->settings->emojiSet);
+
             QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
                 getApp()->settings->emojiSet = str;  //
             });
