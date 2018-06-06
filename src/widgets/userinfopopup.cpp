@@ -1,6 +1,7 @@
 #include "userinfopopup.hpp"
 
 #include "application.hpp"
+#include "providers/twitch/twitchchannel.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/posttothread.hpp"
@@ -12,11 +13,16 @@
 #include <QDesktopServices>
 #include <QLabel>
 
+#define TEXT_FOLLOWERS "Followers: "
+#define TEXT_VIEWS "Views: "
+#define TEXT_CREATED "Created: "
+
 namespace chatterino {
 namespace widgets {
 
 UserInfoPopup::UserInfoPopup()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::DeleteOnFocusOut))
+    , hack_(new bool)
 {
     auto app = getApp();
 
@@ -41,9 +47,9 @@ UserInfoPopup::UserInfoPopup()
             auto font = name->font();
             font.setBold(true);
             name->setFont(font);
-            vbox.emplace<QLabel>("Loading...").assign(&this->ui_.viewCountLabel);
-            vbox.emplace<QLabel>().assign(&this->ui_.followerCountLabel);
-            vbox.emplace<QLabel>().assign(&this->ui_.createdDateLabel);
+            vbox.emplace<QLabel>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
+            vbox.emplace<QLabel>(TEXT_FOLLOWERS).assign(&this->ui_.followerCountLabel);
+            vbox.emplace<QLabel>(TEXT_CREATED).assign(&this->ui_.createdDateLabel);
         }
     }
 
@@ -54,12 +60,9 @@ UserInfoPopup::UserInfoPopup()
     {
         user->addStretch(1);
 
-        auto ignore = user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
-        //        ignore->setEnabled(false);
-
-        auto ignoreHighlights =
-            user.emplace<QCheckBox>("Ignore highlights").assign(&this->ui_.ignoreHighlights);
-        //        ignoreHighlights->setEnabled(false);
+        user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
+        user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
+        user.emplace<QCheckBox>("Ignore highlights").assign(&this->ui_.ignoreHighlights);
 
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -69,17 +72,106 @@ UserInfoPopup::UserInfoPopup()
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
+
+        // userstate
+        this->userStateChanged.connect([this, mod, unmod]() mutable {
+            providers::twitch::TwitchChannel *twitchChannel =
+                dynamic_cast<providers::twitch::TwitchChannel *>(this->channel_.get());
+
+            if (twitchChannel) {
+                qDebug() << this->userName_;
+
+                bool isMyself =
+                    QString::compare(getApp()->accounts->twitch.getCurrent()->getUserName(),
+                                     this->userName_, Qt::CaseInsensitive) == 0;
+
+                mod->setVisible(twitchChannel->isBroadcaster() && !isMyself);
+                unmod->setVisible((twitchChannel->isBroadcaster() && !isMyself) ||
+                                  (twitchChannel->isMod() && isMyself));
+            }
+        });
     }
 
-    layout.emplace<Line>(false);
+    auto lineMod = layout.emplace<Line>(false);
 
     // third line
     auto moderation = layout.emplace<QHBoxLayout>().withoutMargin();
     {
-        moderation.emplace<TimeoutWidget>();
+        auto timeout = moderation.emplace<TimeoutWidget>();
+
+        this->userStateChanged.connect([this, lineMod, timeout]() mutable {
+            providers::twitch::TwitchChannel *twitchChannel =
+                dynamic_cast<providers::twitch::TwitchChannel *>(this->channel_.get());
+
+            if (twitchChannel) {
+                lineMod->setVisible(twitchChannel->hasModRights());
+                timeout->setVisible(twitchChannel->hasModRights());
+            }
+        });
     }
 
     this->setStyleSheet("font-size: 11pt;");
+
+    this->installEvents();
+}
+
+void UserInfoPopup::installEvents()
+{
+    std::weak_ptr<bool> hack = this->hack_;
+
+    // follow
+    QObject::connect(this->ui_.follow, &QCheckBox::stateChanged, [this](int) mutable {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+        QUrl requestUrl("https://api.twitch.tv/kraken/users/" + currentUser->getUserId() +
+                        "/follows/channels/" + this->userId_);
+
+        this->ui_.follow->setEnabled(false);
+        if (this->ui_.follow->isChecked()) {
+            util::twitch::put(requestUrl,
+                              [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
+        } else {
+            util::twitch::sendDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
+        }
+    });
+
+    std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
+
+    // ignore
+    QObject::connect(
+        this->ui_.ignore, &QCheckBox::stateChanged, [this, ignoreNext, hack](int) mutable {
+            if (*ignoreNext) {
+                *ignoreNext = false;
+                return;
+            }
+
+            this->ui_.ignore->setEnabled(false);
+
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (this->ui_.ignore->isChecked()) {
+                currentUser->ignoreByID(this->userId_, this->userName_,
+                                        [=](auto result, const auto &message) mutable {
+                                            if (hack.lock()) {
+                                                if (result == IgnoreResult_Failed) {
+                                                    *ignoreNext = true;
+                                                    this->ui_.ignore->setChecked(false);
+                                                }
+                                                this->ui_.ignore->setEnabled(true);
+                                            }
+                                        });
+            } else {
+                currentUser->unignoreByID(this->userId_, this->userName_,
+                                          [=](auto result, const auto &message) mutable {
+                                              if (hack.lock()) {
+                                                  if (result == UnignoreResult_Failed) {
+                                                      *ignoreNext = true;
+                                                      this->ui_.ignore->setChecked(true);
+                                                  }
+                                                  this->ui_.ignore->setEnabled(true);
+                                              }
+                                          });
+            }
+        });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -90,21 +182,59 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->ui_.nameLabel->setText(name);
 
     this->updateUserData();
+
+    this->userStateChanged.invoke();
 }
 
 void UserInfoPopup::updateUserData()
 {
-    util::twitch::get("https://api.twitch.tv/kraken/channels/" + this->userName_, this,
-                      [=](const QJsonObject &obj) {
-                          this->ui_.followerCountLabel->setText(
-                              "Followers: " + QString::number(obj.value("followers").toInt()));
-                          this->ui_.viewCountLabel->setText(
-                              "Views: " + QString::number(obj.value("views").toInt()));
-                          this->ui_.createdDateLabel->setText(
-                              "Created: " + obj.value("created_at").toString().section("T", 0, 0));
+    std::weak_ptr<bool> hack = this->hack_;
 
-                          this->loadAvatar(QUrl(obj.value("logo").toString()));
-                      });
+    // get user info
+    util::twitch::getUserID(this->userName_, this, [this, hack](QString id) {
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+        this->userId_ = id;
+
+        // get channel info
+        util::twitch::get(
+            "https://api.twitch.tv/kraken/channels/" + id, this, [this](const QJsonObject &obj) {
+                this->ui_.followerCountLabel->setText(
+                    TEXT_FOLLOWERS + QString::number(obj.value("followers").toInt()));
+                this->ui_.viewCountLabel->setText(TEXT_VIEWS +
+                                                  QString::number(obj.value("views").toInt()));
+                this->ui_.createdDateLabel->setText(
+                    TEXT_CREATED + obj.value("created_at").toString().section("T", 0, 0));
+
+                this->loadAvatar(QUrl(obj.value("logo").toString()));
+            });
+
+        // get follow state
+        currentUser->checkFollow(id, [this, hack](auto result) {
+            if (hack.lock()) {
+                if (result != FollowResult_Failed) {
+                    this->ui_.follow->setEnabled(true);
+                    this->ui_.follow->setChecked(result == FollowResult_Following);
+                }
+            }
+        });
+
+        // get ignore state
+        bool isIgnoring = false;
+        for (const auto &ignoredUser : currentUser->getIgnores()) {
+            if (id == ignoredUser.id) {
+                isIgnoring = true;
+                break;
+            }
+        }
+
+        this->ui_.ignore->setEnabled(true);
+        this->ui_.ignore->setChecked(isIgnoring);
+    });
+
+    this->ui_.follow->setEnabled(false);
+    this->ui_.ignore->setEnabled(false);
+    this->ui_.ignoreHighlights->setEnabled(false);
 }
 
 void UserInfoPopup::loadAvatar(const QUrl &url)
@@ -150,7 +280,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("unban");
+            auto label = title.emplace<QLabel>("unban");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
@@ -169,7 +300,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("sec");
+            auto label = title.emplace<QLabel>("sec");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
@@ -188,7 +320,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("min");
+            auto label = title.emplace<QLabel>("min");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
@@ -219,7 +352,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("hour");
+            auto label = title.emplace<QLabel>("hour");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
@@ -244,7 +378,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("week");
+            auto label = title.emplace<QLabel>("week");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
@@ -269,7 +404,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            title.emplace<QLabel>("ban");
+            auto label = title.emplace<QLabel>("ban");
+            label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();

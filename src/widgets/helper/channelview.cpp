@@ -1108,6 +1108,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(user, this->channel);
             userPopup->setAttribute(Qt::WA_DeleteOnClose);
+            userPopup->move(event->globalPos());
+            userPopup->setFocus();
             userPopup->show();
 
             //            this->userPopupWidget.setName(user);
@@ -1118,15 +1120,19 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             qDebug() << "Clicked " << user << "s message";
             break;
         }
+
         case messages::Link::Url: {
             QDesktopServices::openUrl(QUrl(link.value));
             break;
         }
+
         case messages::Link::UserAction: {
             QString value = link.value;
             value.replace("{user}", layout->getMessage()->loginName);
             this->channel->sendMessage(value);
         }
+
+        default:;
     }
 }
 

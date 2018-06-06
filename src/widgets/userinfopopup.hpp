@@ -13,6 +13,8 @@ namespace widgets {
 
 class UserInfoPopup final : public BaseWindow
 {
+    Q_OBJECT
+
 public:
     UserInfoPopup();
 
@@ -23,12 +25,17 @@ private:
     bool isBroadcaster_;
 
     QString userName_;
+    QString userId_;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged;
 
+    void installEvents();
+
     void updateUserData();
     void loadAvatar(const QUrl &url);
+
+    std::shared_ptr<bool> hack_;
 
     struct {
         RippleEffectButton *avatarButton = nullptr;
@@ -38,6 +45,7 @@ private:
         QLabel *followerCountLabel = nullptr;
         QLabel *createdDateLabel = nullptr;
 
+        QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
     } ui_;

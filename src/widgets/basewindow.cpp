@@ -34,7 +34,7 @@ namespace widgets {
 
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
-                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags(0)))
+                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags()))
     , enableCustomFrame(_flags & EnableCustomFrame)
     , frameless(_flags & Frameless)
     , flags(_flags)
@@ -207,7 +207,7 @@ void BaseWindow::themeRefreshEvent()
 
 bool BaseWindow::event(QEvent *event)
 {
-    if (event->type() == QEvent::WindowDeactivate) {
+    if (event->type() == QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
         if (this->flags & DeleteOnFocusOut) {
             this->close();
         }

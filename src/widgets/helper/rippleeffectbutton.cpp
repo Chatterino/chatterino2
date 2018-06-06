@@ -51,8 +51,6 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    this->fancyPaint(painter);
-
     if (!this->pixmap_.isNull()) {
         QRect rect = this->rect();
         int s = int(6 * this->getScale());
@@ -64,6 +62,8 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
         painter.drawPixmap(rect, this->pixmap_);
     }
+
+    this->fancyPaint(painter);
 
     if (this->borderColor_.isValid()) {
         painter.setRenderHint(QPainter::Antialiasing, false);
