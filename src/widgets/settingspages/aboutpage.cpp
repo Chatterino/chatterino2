@@ -1,6 +1,7 @@
 #include "aboutpage.hpp"
 
 #include "util/layoutcreator.hpp"
+#include "util/removescrollareabackground.hpp"
 #include "widgets/helper/signallabel.hpp"
 
 #include <QFormLayout>
@@ -20,7 +21,11 @@ AboutPage::AboutPage()
 {
     util::LayoutCreator<AboutPage> layoutCreator(this);
 
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    auto scroll = layoutCreator.emplace<QScrollArea>();
+    auto widget = scroll.emplaceScrollAreaWidget();
+    util::removeScrollAreaBackground(*scroll, *widget);
+
+    auto layout = widget.setLayoutType<QVBoxLayout>();
     {
         QPixmap pixmap;
         pixmap.load(":/images/aboutlogo.png");
