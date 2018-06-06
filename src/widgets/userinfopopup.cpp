@@ -108,6 +108,31 @@ UserInfoPopup::UserInfoPopup()
                 timeout->setVisible(twitchChannel->hasModRights());
             }
         });
+
+        timeout->buttonClicked.connect([this](auto item) {
+            TimeoutWidget::Action action;
+            int arg;
+            std::tie(action, arg) = item;
+
+            switch (action) {
+                case TimeoutWidget::Ban: {
+                    if (this->channel_) {
+                        this->channel_->sendMessage("/ban " + this->userName_);
+                    }
+                } break;
+                case TimeoutWidget::Unban: {
+                    if (this->channel_) {
+                        this->channel_->sendMessage("/unban " + this->userName_);
+                    }
+                } break;
+                case TimeoutWidget::Timeout: {
+                    if (this->channel_) {
+                        this->channel_->sendMessage("/timeout " + this->userName_ + " " +
+                                                    QString::number(arg));
+                    }
+                } break;
+            }
+        });
     }
 
     this->setStyleSheet("font-size: 11pt;");
@@ -269,155 +294,83 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color1(255, 255, 255, 80);
     QColor color2(255, 255, 255, 0);
 
-    int buttonWidth = 40;
+    int buttonWidth = 32;
     int buttonWidth2 = 24;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
 
-    {
+    auto addButton = [&](Action action, const QString &text, const QPixmap &pixmap) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>("unban");
+            auto label = title.emplace<QLabel>(text);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
             hbox->setSpacing(0);
             {
-                auto unban = hbox.emplace<RippleEffectButton>(nullptr);
-                unban->setPixmap(getApp()->resources->buttons.unban);
-                unban->setScaleIndependantSize(buttonHeight, buttonHeight);
-                unban->setBorderColor(QColor(255, 255, 255, 127));
+                auto button = hbox.emplace<RippleEffectButton>(nullptr);
+                button->setPixmap(pixmap);
+                button->setScaleIndependantSize(buttonHeight, buttonHeight);
+                button->setBorderColor(QColor(255, 255, 255, 127));
+
+                QObject::connect(*button, &RippleEffectButton::clicked, [this, action] {
+                    this->buttonClicked.invoke(std::make_pair(action, -1));
+                });
             }
         }
-    }
+    };
 
-    {
+    auto addTimeouts = [&](const QString &title_,
+                           const std::vector<std::pair<QString, int>> &items) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>("sec");
+            auto label = title.emplace<QLabel>(title_);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
             hbox->setSpacing(0);
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("1");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-        }
-    }
 
-    {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<QLabel>("min");
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
-
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
+            for (const auto &item : items) {
                 auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("1");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("5");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("10");
+                a->getLabel().setText(std::get<0>(item));
                 a->setScaleIndependantSize(buttonWidth, buttonHeight);
                 a->setBorderColor(color1);
+
+                // connect
+
+                QObject::connect(
+                    *a, &RippleEffectLabel::clicked, [this, timeout = std::get<1>(item)] {
+                        this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
+                    });
             }
         }
-    }
+    };
 
-    {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<QLabel>("hour");
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
+    addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("1");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("4");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-        }
-    }
+    addTimeouts("sec", {{"1", 1}});
+    addTimeouts("min", {
+                           {"1", 1 * 60},
+                           {"5", 5 * 60},
+                           {"10", 10 * 60},
+                       });
+    addTimeouts("hour", {
+                            {"1", 1 * 60 * 60},
+                            {"4", 4 * 60 * 60},
+                        });
+    addTimeouts("weeks", {
+                             {"1", 1 * 60 * 60 * 30},
+                             {"2", 2 * 60 * 60 * 30},
+                         });
 
-    {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<QLabel>("week");
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
-
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("1");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-            {
-                auto a = hbox.emplace<RippleEffectLabel>();
-                a->getLabel().setText("2");
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
-            }
-        }
-    }
-
-    {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<QLabel>("ban");
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
-
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
-                auto ban = hbox.emplace<RippleEffectButton>(nullptr);
-                ban->setPixmap(getApp()->resources->buttons.ban);
-                ban->setScaleIndependantSize(buttonHeight, buttonHeight);
-                ban->setBorderColor(QColor(255, 255, 255, 127));
-            }
-        }
-    }
+    addButton(Ban, "ban", getApp()->resources->buttons.ban);
 }
 
 void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)

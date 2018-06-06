@@ -53,7 +53,11 @@ private:
     class TimeoutWidget : public BaseWidget
     {
     public:
+        enum Action { Ban, Unban, Timeout };
+
         TimeoutWidget();
+
+        pajlada::Signals::Signal<std::pair<Action, int>> buttonClicked;
 
     protected:
         void paintEvent(QPaintEvent *event) override;
