@@ -34,20 +34,20 @@ Window::Window(WindowType _type)
     auto app = getApp();
 
     app->accounts->twitch.currentUserChanged.connect([this] {
-        if (this->userLabel == nullptr) {
-            return;
-        }
-
         auto user = getApp()->accounts->twitch.getCurrent();
 
         if (user->isAnon()) {
             this->refreshWindowTitle("Not logged in");
 
-            this->userLabel->getLabel().setText("anonymous");
+            if (this->userLabel) {
+                this->userLabel->getLabel().setText("anonymous");
+            }
         } else {
             this->refreshWindowTitle(user->getUserName());
 
-            this->userLabel->getLabel().setText(user->getUserName());
+            if (this->userLabel) {
+                this->userLabel->getLabel().setText(user->getUserName());
+            }
         }
     });
 
