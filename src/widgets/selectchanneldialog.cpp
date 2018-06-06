@@ -125,6 +125,8 @@ SelectChannelDialog::SelectChannelDialog()
     }
 
     this->setScaleIndependantSize(300, 210);
+    this->ui.notebook->selectIndex(TAB_TWITCH);
+    this->ui.twitch.channel->setFocus();
 
     // Shortcuts
     auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
