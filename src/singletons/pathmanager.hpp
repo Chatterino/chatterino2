@@ -19,11 +19,8 @@ public:
     // %APPDATA%/chatterino/Cache or ExecutablePath/Cache for portable mode
     QString cacheFolderPath;
 
-    // Logs
+    // Default folder for logs. %APPDATA%/chatterino/Logs or ExecutablePath/Logs for portable mode
     QString logsFolderPath;
-    QString channelsLogsFolderPath;
-    QString whispersLogsFolderPath;
-    QString mentionsLogsFolderPath;
 
     QString appPathHash;
 

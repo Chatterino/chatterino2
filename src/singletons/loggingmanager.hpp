@@ -22,11 +22,8 @@ public:
 
     void addMessage(const QString &channelName, messages::MessagePtr message);
 
-    void refreshLoggingPath();
-
 private:
     std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels;
-    QString getDirectoryForChannel(const QString &channelName);
 };
 
 }  // namespace singletons

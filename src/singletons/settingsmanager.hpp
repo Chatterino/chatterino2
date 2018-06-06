@@ -107,8 +107,7 @@ public:
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
 
-    QStringSetting logPath = {"/logging/path",
-                              QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)};
+    QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};
