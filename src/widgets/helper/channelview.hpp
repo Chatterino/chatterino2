@@ -6,7 +6,6 @@
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/messageelement.hpp"
 #include "messages/selection.hpp"
-#include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/scrollbar.hpp"
@@ -124,7 +123,6 @@ private:
     bool showingLatestMessages = true;
     bool enableScrollingToBottom = true;
 
-    AccountPopupWidget userPopupWidget;
     bool onlyUpdateEmotes = false;
 
     // Mouse event variables

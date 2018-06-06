@@ -19,6 +19,7 @@
 #include "widgets/selectchanneldialog.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
+#include "widgets/userinfopopup.hpp"
 #include "widgets/window.hpp"
 
 #include <QApplication>
@@ -425,8 +426,6 @@ void Split::doOpenViewerList()
                        this->height() - this->header.height() - this->input.height());
     viewerDock->move(0, this->header.height());
 
-    auto accountPopup = new AccountPopupWidget(this->getChannel());
-    accountPopup->setAttribute(Qt::WA_DeleteOnClose);
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
     auto searchBar = new QLineEdit(viewerDock);
@@ -480,13 +479,13 @@ void Split::doOpenViewerList()
 
     QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(chattersList->currentItem()->text())) {
-            doOpenAccountPopupWidget(accountPopup, chattersList->currentItem()->text());
+            doOpenUserInfoPopup(chattersList->currentItem()->text());
         }
     });
 
     QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(resultList->currentItem()->text())) {
-            doOpenAccountPopupWidget(accountPopup, resultList->currentItem()->text());
+            doOpenUserInfoPopup(resultList->currentItem()->text());
         }
     });
 
@@ -502,12 +501,13 @@ void Split::doOpenViewerList()
     viewerDock->show();
 }
 
-void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
+void Split::doOpenUserInfoPopup(const QString &user)
 {
-    widget->setName(user);
-    widget->show();
-    widget->setFocus();
-    widget->moveTo(this, QCursor::pos());
+    auto *userPopup = new UserInfoPopup;
+    userPopup->setData(user, this->getChannel());
+    userPopup->setAttribute(Qt::WA_DeleteOnClose);
+    userPopup->move(QCursor::pos());
+    userPopup->show();
 }
 
 void Split::doCopy()

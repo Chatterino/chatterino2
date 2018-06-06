@@ -133,7 +133,6 @@ SOURCES += \
     src/singletons/windowmanager.cpp \
     src/util/networkmanager.cpp \
     src/util/networkrequest.cpp \
-    src/widgets/accountpopup.cpp \
     src/widgets/accountswitchpopupwidget.cpp \
     src/widgets/accountswitchwidget.cpp \
     src/widgets/basewidget.cpp \
@@ -278,7 +277,6 @@ HEADERS  += \
     src/util/property.hpp \
     src/util/serialize-custom.hpp \
     src/util/urlfetch.hpp \
-    src/widgets/accountpopup.hpp \
     src/widgets/accountswitchpopupwidget.hpp \
     src/widgets/accountswitchwidget.hpp \
     src/widgets/basewidget.hpp \
@@ -384,8 +382,7 @@ RESOURCES += \
 
 DISTFILES +=
 
-FORMS += \
-    forms/accountpopupform.ui
+FORMS +=
 
 # Define warning flags for Chatterino
 win32-msvc* {

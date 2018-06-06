@@ -9,7 +9,6 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "ui_accountpopupform.h"
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/split.hpp"
@@ -42,13 +41,12 @@ namespace widgets {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar(this)
-    , userPopupWidget(std::shared_ptr<TwitchChannel>())
 {
     auto app = getApp();
 
     this->setMouseTracking(true);
 
-    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([=] {
+    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([this] {
         this->layoutMessages();
         this->update();
     }));
@@ -478,7 +476,6 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
     this->channel = newChannel;
 
-    this->userPopupWidget.setChannel(newChannel);
     this->layoutMessages();
     this->queueUpdate();
 }
@@ -911,7 +908,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // no message found
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         // No message at clicked position
-        this->userPopupWidget.hide();
         return;
     }
 
@@ -1109,7 +1105,6 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             userPopup->setData(user, this->channel);
             userPopup->setAttribute(Qt::WA_DeleteOnClose);
             userPopup->move(event->globalPos());
-            userPopup->setFocus();
             userPopup->show();
 
             //            this->userPopupWidget.setName(user);
