@@ -120,7 +120,7 @@ void Emojis::loadEmojis()
 
         this->emojis.insert(emojiData->unifiedCode, emojiData);
 
-        if (unparsedEmoji.HasMember("skin_variations")) {
+        if (unparsedEmoji.HasMember("skin_variations") && false) {
             for (const auto &skinVariation : unparsedEmoji["skin_variations"].GetObject()) {
                 std::string tone = skinVariation.name.GetString();
                 const auto &variation = skinVariation.value;
