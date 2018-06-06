@@ -1,6 +1,9 @@
 #include "widgets/logindialog.hpp"
 #include "common.hpp"
 #include "util/urlfetch.hpp"
+#if FMT_USE_WINDOWS_H
+#include <Windows.h>
+#endif
 
 #include <QClipboard>
 #include <QDebug>
@@ -187,6 +190,10 @@ void AdvancedLoginWidget::refreshButtons()
 
 LoginWidget::LoginWidget()
 {
+    #if FMT_USE_WINDOWS_H
+    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    #endif
+
     this->setLayout(&this->ui.mainLayout);
 
     this->ui.mainLayout.addWidget(&this->ui.tabWidget);

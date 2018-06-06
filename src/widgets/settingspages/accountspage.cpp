@@ -9,7 +9,6 @@
 #include "widgets/logindialog.hpp"
 
 #include <algorithm>
-
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QTableView>
@@ -37,6 +36,7 @@ AccountsPage::AccountsPage()
         static auto loginWidget = new LoginWidget();
 
         loginWidget->show();
+        loginWidget->raise();
     });
 
     view->getTableView()->setStyleSheet("background: #333");
