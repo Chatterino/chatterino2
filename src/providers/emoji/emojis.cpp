@@ -127,8 +127,14 @@ void Emojis::loadEmojis()
 
                 auto variationEmojiData = std::make_shared<EmojiData>();
 
+                auto toneNameIt = toneNames.find(tone);
+                if (toneNameIt == toneNames.end()) {
+                    debug::Log("Tone with key {} does not exist in tone names map", tone);
+                    continue;
+                }
+
                 parseEmoji(variationEmojiData, variation,
-                           emojiData->shortCode + "_" + toneNames[tone]);
+                           emojiData->shortCode + "_" + toneNameIt->second);
 
                 this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCode,
                                                    variationEmojiData);
