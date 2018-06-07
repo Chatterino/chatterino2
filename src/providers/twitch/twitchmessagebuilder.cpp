@@ -498,7 +498,7 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
         return;
     }
 
-    long int id = std::stol(parameters.at(0).toStdString(), nullptr, 10);
+    const auto &id = parameters.at(0);
 
     QStringList occurences = parameters.at(1).split(',');
 

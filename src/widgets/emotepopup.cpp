@@ -102,13 +102,11 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
-        for (const auto &emote : set.second) {
+        for (const auto &emote : set.emotes) {
             [&](const QString &key, const util::EmoteData &value) {
                 builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                     ->setLink(Link(Link::InsertText, key)));
-            }(QString::fromStdString(emote.code),
-              app->emotes->twitch.getEmoteById(QString::fromStdString(emote.id).toLong(),
-                                               QString::fromStdString(emote.code)));
+            }(emote.code, app->emotes->twitch.getEmoteById(emote.id, emote.code));
         }
 
         emoteChannel->addMessage(builder2.getMessage());

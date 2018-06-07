@@ -15,27 +15,41 @@ namespace twitch {
 class TwitchEmotes
 {
 public:
-    util::EmoteData getEmoteById(long int id, const QString &emoteName);
+    util::EmoteData getEmoteById(const QString &id, const QString &emoteName);
 
     /// Twitch emotes
     void refresh(const std::shared_ptr<providers::twitch::TwitchAccount> &user);
 
+    struct TwitchEmote {
+        TwitchEmote(const QString &_id, const QString &_code)
+            : id(_id)
+            , code(_code)
+        {
+        }
+
+        // i.e. "403921"
+        QString id;
+
+        // i.e. "forsenE"
+        QString code;
+    };
+
+    struct EmoteSet {
+        QString key;
+        std::vector<TwitchEmote> emotes;
+    };
+
     struct TwitchAccountEmoteData {
-        struct TwitchEmote {
-            std::string id;
-            std::string code;
-        };
+        std::vector<EmoteSet> emoteSets;
 
-        //       emote set
-        std::map<std::string, std::vector<TwitchEmote>> emoteSets;
-
-        std::vector<std::string> emoteCodes;
+        std::vector<QString> emoteCodes;
 
         util::EmoteMap emotes;
 
         bool filled = false;
     };
 
+    // Key is the user ID
     std::map<QString, TwitchAccountEmoteData> emotes;
 
 private:
@@ -43,7 +57,7 @@ private:
     util::ConcurrentMap<QString, providers::twitch::EmoteValue *> _twitchEmotes;
 
     //        emote id
-    util::ConcurrentMap<long, util::EmoteData> _twitchEmoteFromCache;
+    util::ConcurrentMap<QString, util::EmoteData> _twitchEmoteFromCache;
 };
 
 }  // namespace twitch

@@ -12,20 +12,20 @@ namespace twitch {
 
 namespace {
 
-QString getEmoteLink(long id, const QString &emoteScale)
+QString getEmoteLink(const QString &id, const QString &emoteScale)
 {
     QString value = TWITCH_EMOTE_TEMPLATE;
 
     value.detach();
 
-    return value.replace("{id}", QString::number(id)).replace("{scale}", emoteScale);
+    return value.replace("{id}", id).replace("{scale}", emoteScale);
 }
 
 }  // namespace
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
-util::EmoteData TwitchEmotes::getEmoteById(long id, const QString &emoteName)
+util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName)
 {
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
@@ -75,38 +75,40 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
     TwitchAccountEmoteData &emoteData = this->emotes[roomID];
 
     if (emoteData.filled) {
-        qDebug() << "Already loaded for room id " << roomID;
+        debug::Log("Emotes are already loaded for room id {}", roomID);
         return;
     }
 
     QString url("https://api.twitch.tv/kraken/users/" + roomID + "/emotes");
 
-    util::twitch::getAuthorized(
-        url, clientID, oauthToken, QThread::currentThread(),
-        [=, &emoteData](const QJsonObject &root) {
-            emoteData.emoteSets.clear();
-            emoteData.emoteCodes.clear();
+    auto loadEmotes = [=, &emoteData](const QJsonObject &root) {
+        emoteData.emoteSets.clear();
+        emoteData.emoteCodes.clear();
 
-            auto emoticonSets = root.value("emoticon_sets").toObject();
-            for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
-                std::string emoteSetString = it.key().toStdString();
-                QJsonArray emoteSetList = it.value().toArray();
+        auto emoticonSets = root.value("emoticon_sets").toObject();
+        for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
+            EmoteSet emoteSet;
 
-                for (QJsonValue emoteValue : emoteSetList) {
-                    QJsonObject emoticon = emoteValue.toObject();
-                    std::string id = QString::number(emoticon["id"].toInt()).toStdString();
-                    std::string code = emoticon["code"].toString().toStdString();
-                    emoteData.emoteSets[emoteSetString].push_back({id, code});
-                    emoteData.emoteCodes.push_back(code);
+            emoteSet.key = it.key();
 
-                    util::EmoteData emote =
-                        this->getEmoteById(emoticon["id"].toInt(), emoticon["code"].toString());
-                    emoteData.emotes.insert(emoticon["code"].toString(), emote);
-                }
+            for (QJsonValue emoteValue : it.value().toArray()) {
+                QJsonObject emoticon = emoteValue.toObject();
+                QString id = QString::number(emoticon["id"].toInt());
+                QString code = emoticon["code"].toString();
+                emoteSet.emotes.emplace_back(id, code);
+                emoteData.emoteCodes.push_back(code);
+
+                util::EmoteData emote = this->getEmoteById(id, code);
+                emoteData.emotes.insert(code, emote);
             }
 
-            emoteData.filled = true;
-        });
+            emoteData.emoteSets.emplace_back(std::move(emoteSet));
+        }
+
+        emoteData.filled = true;
+    };
+
+    util::twitch::getAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
 }
 
 }  // namespace twitch
