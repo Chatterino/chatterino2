@@ -117,7 +117,7 @@ void Emojis::loadEmojis()
         parseEmoji(emojiData, unparsedEmoji);
 
         this->emojiShortCodeToEmoji.insert(emojiData->shortCode, emojiData);
-        this->shortCodes.push_back(emojiData->shortCode.toStdString());
+        this->shortCodes.emplace_back(emojiData->shortCode);
 
         this->emojiFirstByte[emojiData->value.at(0)].append(emojiData);
 
@@ -141,7 +141,7 @@ void Emojis::loadEmojis()
 
                 this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCode,
                                                    variationEmojiData);
-                this->shortCodes.push_back(variationEmojiData->shortCode.toStdString());
+                this->shortCodes.push_back(variationEmojiData->shortCode);
 
                 this->emojiFirstByte[variationEmojiData->value.at(0)].append(variationEmojiData);
 

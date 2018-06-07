@@ -40,7 +40,7 @@ public:
 
     EmojiMap emojis;
 
-    std::vector<std::string> shortCodes;
+    std::vector<QString> shortCodes;
 
     void load();
 
