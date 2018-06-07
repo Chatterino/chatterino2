@@ -88,7 +88,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
     // fix this pile of garbage
-    for (const auto &set : app->emotes->twitch.emotes[userID.toStdString()].emoteSets) {
+    for (const auto &set : app->emotes->twitch.emotes[userID].emoteSets) {
         // TITLE
         messages::MessageBuilder builder1;
 

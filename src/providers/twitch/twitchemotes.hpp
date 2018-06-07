@@ -36,7 +36,7 @@ public:
         bool filled = false;
     };
 
-    std::map<std::string, TwitchAccountEmoteData> emotes;
+    std::map<QString, TwitchAccountEmoteData> emotes;
 
 private:
     //            emote code

@@ -72,7 +72,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
         return;
     }
 
-    TwitchAccountEmoteData &emoteData = this->emotes[roomID.toStdString()];
+    TwitchAccountEmoteData &emoteData = this->emotes[roomID];
 
     if (emoteData.filled) {
         qDebug() << "Already loaded for room id " << roomID;
