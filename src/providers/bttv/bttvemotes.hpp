@@ -14,10 +14,10 @@ class BTTVEmotes
 {
 public:
     util::EmoteMap globalEmotes;
-    SignalVector<std::string> globalEmoteCodes;
+    SignalVector<QString> globalEmoteCodes;
 
     util::EmoteMap channelEmotes;
-    std::map<std::string, SignalVector<std::string>> channelEmoteCodes;
+    std::map<QString, SignalVector<QString>> channelEmoteCodes;
 
     void loadGlobalEmotes();
     void loadChannelEmotes(const QString &channelName,

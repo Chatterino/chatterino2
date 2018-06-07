@@ -32,7 +32,7 @@ void BTTVEmotes::loadGlobalEmotes()
 
         QString urlTemplate = "https:" + root.value("urlTemplate").toString();
 
-        std::vector<std::string> codes;
+        std::vector<QString> codes;
         for (const QJsonValue &emote : emotes) {
             QString id = emote.toObject().value("id").toString();
             QString code = emote.toObject().value("code").toString();
@@ -47,7 +47,7 @@ void BTTVEmotes::loadGlobalEmotes()
             emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
             this->globalEmotes.insert(code, emoteData);
-            codes.push_back(code.toStdString());
+            codes.push_back(code);
         }
 
         this->globalEmoteCodes = codes;
@@ -78,7 +78,7 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
 
         QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
 
-        std::vector<std::string> codes;
+        std::vector<QString> codes;
         for (const QJsonValue &emoteNode : emotesNode) {
             QJsonObject emoteObject = emoteNode.toObject();
 
@@ -110,10 +110,10 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
 
             this->channelEmotes.insert(code, emote);
             map->insert(code, emote);
-            codes.push_back(code.toStdString());
+            codes.push_back(code);
         }
 
-        this->channelEmoteCodes[channelName.toStdString()] = codes;
+        this->channelEmoteCodes[channelName] = codes;
     });
 }
 
