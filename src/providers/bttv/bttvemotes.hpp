@@ -19,15 +19,12 @@ public:
     util::EmoteMap channelEmotes;
     std::map<std::string, SignalVector<std::string>> channelEmoteCodes;
 
-    util::EmoteMap &getBTTVChannelEmoteFromCaches();
-
     void loadGlobalEmotes();
     void loadChannelEmotes(const QString &channelName,
                            std::weak_ptr<util::EmoteMap> channelEmoteMap);
 
-    util::ConcurrentMap<QString, util::EmoteMap> channels;
-
-    util::EmoteMap _bttvChannelEmoteFromCaches;
+private:
+    util::EmoteMap channelEmoteCache;
 };
 
 }  // namespace bttv

@@ -19,11 +19,6 @@ QString getEmoteLink(QString urlTemplate, const QString &id, const QString &emot
 
 }  // namespace
 
-util::EmoteMap &BTTVEmotes::getBTTVChannelEmoteFromCaches()
-{
-    return _bttvChannelEmoteFromCaches;
-}
-
 void BTTVEmotes::loadGlobalEmotes()
 {
     QString url("https://api.betterttv.net/2/emotes");
@@ -91,7 +86,7 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
             QString code = emoteObject.value("code").toString();
             // emoteObject.value("imageType").toString();
 
-            auto emote = this->getBTTVChannelEmoteFromCaches().getOrAdd(id, [&] {
+            auto emote = this->channelEmoteCache.getOrAdd(id, [&] {
                 util::EmoteData emoteData;
                 QString link = linkTemplate;
                 link.detach();
