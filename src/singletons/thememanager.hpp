@@ -59,8 +59,6 @@ public:
     struct {
         QColor messageSeperator;
         QColor background;
-        QColor border;
-        QColor borderFocused;
         QColor dropPreview;
         QColor dropPreviewBorder;
         QColor dropTargetRect;

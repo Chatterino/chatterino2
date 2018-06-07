@@ -20,6 +20,9 @@ public:
 
     void setData(const QString &name, const ChannelPtr &channel);
 
+protected:
+    virtual void themeRefreshEvent() override;
+
 private:
     bool isMod_;
     bool isBroadcaster_;

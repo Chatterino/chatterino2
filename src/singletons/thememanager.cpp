@@ -52,7 +52,8 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     isLight = multiplier > 0;
     bool lightWin = isLight;
 
-    QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
+    //    QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
+    QColor themeColor = QColor::fromHslF(hue, 0.8, 0.5);
     QColor themeColorNoSat = QColor::fromHslF(hue, 0, 0.5);
 
     qreal sat = 0;
@@ -86,17 +87,19 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
         this->messages.textColors.caret =  //
             this->messages.textColors.regular = isLight ? "#000" : "#fff";
 
-        QColor highlighted = lightWin ? QColor("#b60505") : QColor("#ee6166");
+        QColor highlighted = lightWin ? QColor("#ff0000") : QColor("#ee6166");
 
         /// TABS
         if (lightWin) {
             this->tabs.regular = {QColor("#444"),
-                                  {QColor("#fff"), QColor("#fff"), QColor("#fff")},
+                                  {QColor("#fff"), QColor("#eee"), QColor("#fff")},
                                   {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
-            this->tabs.newMessage = {
-                fg, {bg, QColor("#ccc"), bg}, {QColor("#aaa"), QColor("#aaa"), QColor("#aaa")}};
-            this->tabs.highlighted = {
-                fg, {bg, QColor("#ccc"), bg}, {highlighted, highlighted, highlighted}};
+            this->tabs.newMessage = {QColor("#222"),
+                                     {QColor("#fff"), QColor("#eee"), QColor("#fff")},
+                                     {QColor("#bbb"), QColor("#bbb"), QColor("#bbb")}};
+            this->tabs.highlighted = {fg,
+                                      {QColor("#fff"), QColor("#eee"), QColor("#fff")},
+                                      {highlighted, highlighted, highlighted}};
             this->tabs.selected = {QColor("#000"),
                                    {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                                    {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
@@ -147,13 +150,20 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
-    this->splits.dropTargetRect = QColor(0, 148, 255, 0x00);
-    this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
-    this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
-    this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
 
-    // this->splits.border
-    // this->splits.borderFocused
+    if (isLight) {
+        this->splits.dropTargetRect = QColor(255, 255, 255, 0x00);
+        this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
+
+        this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
+        this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
+    } else {
+        this->splits.dropTargetRect = QColor(0, 148, 255, 0x00);
+        this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
+
+        this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
+        this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
+    }
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
@@ -165,8 +175,9 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
         "border:" + this->tabs.selected.backgrounds.regular.color().name() + ";" +
-        "color:" + this->messages.textColors.regular.name() + ";" +
-        "selection-background-color:" + this->tabs.selected.backgrounds.regular.color().name();
+        "color:" + this->messages.textColors.regular.name() + ";" +  //
+        "selection-background-color:" +
+        (isLight ? "#68B1FF" : this->tabs.selected.backgrounds.regular.color().name());
 
     // Message
     this->messages.textColors.link = isLight ? QColor(66, 134, 244) : QColor(66, 134, 244);
@@ -175,7 +186,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
     this->messages.backgrounds.highlighted =
-        blendColors(themeColor, this->messages.backgrounds.regular, 0.6);
+        blendColors(themeColor, this->messages.backgrounds.regular, isLight ? 0.8 : 0.6);
     this->messages.backgrounds.subscription =
         blendColors(QColor("#C466FF"), this->messages.backgrounds.regular, 0.7);
 
@@ -200,7 +211,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->messages.selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     this->updated.invoke();
-}  // namespace singletons
+}
 
 QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
 {
@@ -222,7 +233,7 @@ void ThemeManager::normalizeColor(QColor &color)
             color.setHslF(
                 color.hueF(), color.saturationF(),
                 color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
-                                         color.saturationF() * 0.2);
+                                         color.saturationF() * 0.4);
         }
     } else {
         if (color.lightnessF() < 0.5) {

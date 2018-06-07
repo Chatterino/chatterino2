@@ -1,6 +1,8 @@
 #include "splitoverlay.hpp"
 
 #include <QEvent>
+#include <QGraphicsBlurEffect>
+#include <QGraphicsEffect>
 #include <QGraphicsOpacityEffect>
 #include <QGridLayout>
 #include <QPainter>
@@ -90,7 +92,11 @@ SplitOverlay::SplitOverlay(Split *parent)
 void SplitOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.fillRect(this->rect(), QColor(0, 0, 0, 150));
+    if (this->themeManager->isLightTheme()) {
+        painter.fillRect(this->rect(), QColor(255, 255, 255, 200));
+    } else {
+        painter.fillRect(this->rect(), QColor(0, 0, 0, 150));
+    }
 
     QRect rect;
     switch (this->hoveredElement) {
