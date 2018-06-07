@@ -79,11 +79,6 @@ void CompletionModel::refresh()
     //    }
 }
 
-void CompletionModel::addString(const std::string &str, TaggedString::Type type)
-{
-    this->addString(qS(str), type);
-}
-
 void CompletionModel::addString(const QString &str, TaggedString::Type type)
 {
     std::lock_guard<std::mutex> lock(this->emotesMutex);

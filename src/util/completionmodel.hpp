@@ -117,7 +117,6 @@ public:
     }
 
     void refresh();
-    void addString(const std::string &str, TaggedString::Type type);
     void addString(const QString &str, TaggedString::Type type);
 
     void addUser(const QString &str);
