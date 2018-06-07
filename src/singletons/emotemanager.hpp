@@ -8,8 +8,6 @@
 #include "providers/twitch/twitchemotes.hpp"
 #include "singletons/helper/giftimer.hpp"
 
-#include <QString>
-
 namespace chatterino {
 namespace singletons {
 
