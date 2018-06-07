@@ -7,7 +7,6 @@
 #include <chrono>
 #include <mutex>
 #include <set>
-#include <string>
 
 namespace chatterino {
 

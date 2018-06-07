@@ -22,7 +22,7 @@ namespace twitch {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<std::string, std::string> sentMessages;
+static std::map<QString, std::string> sentMessages;
 
 namespace detail {
 
@@ -68,7 +68,7 @@ bool PubSubClient::listen(rapidjson::Document &message)
     rj::set(message, "nonce", uuid);
 
     std::string payload = rj::stringify(message);
-    sentMessages[uuid.toStdString()] = payload;
+    sentMessages[uuid] = payload;
 
     this->send(payload.c_str());
 
@@ -100,7 +100,7 @@ void PubSubClient::unlistenPrefix(const std::string &prefix)
     rj::set(message, "nonce", CreateUUID());
 
     std::string payload = rj::stringify(message);
-    sentMessages[uuid.toStdString()] = payload;
+    sentMessages[uuid] = payload;
 
     this->send(payload.c_str());
 }

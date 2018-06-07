@@ -509,8 +509,8 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
             return;
         }
 
-        long int start = std::stol(coords.at(0).toStdString(), nullptr, 10);
-        long int end = std::stol(coords.at(1).toStdString(), nullptr, 10);
+        int start = coords.at(0).toInt();
+        int end = coords.at(1).toInt();
 
         if (start >= end || start < 0 || end > this->originalMessage.length()) {
             return;
