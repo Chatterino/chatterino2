@@ -39,14 +39,16 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
-                                           const Communi::IrcMessage *_ircMessage, QString content,
-                                           const messages::MessageParseArgs &_args)
+                                           const Communi::IrcMessage *_ircMessage,
+                                           const messages::MessageParseArgs &_args, QString content,
+                                           bool isAction)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
     , originalMessage(content)
+    , action(isAction)
 {
     auto app = getApp();
     this->usernameColor = app->themes->messages.textColors.system;

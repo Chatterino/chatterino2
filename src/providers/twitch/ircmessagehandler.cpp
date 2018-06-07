@@ -30,11 +30,13 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server)
 {
-    this->addMessage(message, message->target(), message->content(), server, false);
+    this->addMessage(message, message->target(), message->content(), server, false,
+                     message->isAction());
 }
 
-void IrcMessageHandler::addMessage(Communi::IrcMessage *message, const QString &target,
-                                   const QString &content, TwitchServer &server, bool isSub)
+void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString &target,
+                                   const QString &content, TwitchServer &server, bool isSub,
+                                   bool isAction)
 {
     QString channelName;
     if (!trimChannelName(target, channelName)) {
@@ -52,7 +54,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *message, const QString &
         args.trimSubscriberUsername = true;
     }
 
-    TwitchMessageBuilder builder(chan.get(), message, content, args);
+    TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored()) {
         messages::MessagePtr msg = builder.build();
@@ -203,7 +205,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     auto c = app->twitch.server->whispersChannel.get();
 
-    twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
+    twitch::TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
 
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
@@ -242,7 +244,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, Tw
     if (msgType == "sub" || msgType == "resub" || msgType == "subgift") {
         // Sub-specific message. I think it's only allowed for "resub" messages atm
         if (!content.isEmpty()) {
-            this->addMessage(message, target, content, server, true);
+            this->addMessage(message, target, content, server, true, false);
         }
     }
 

@@ -31,7 +31,7 @@ public:
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target, const QString &content,
-                    TwitchServer &server, bool isResub);
+                    TwitchServer &server, bool isResub, bool isAction);
 };
 
 }  // namespace twitch
