@@ -13,6 +13,7 @@
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
 #include "widgets/split.hpp"
+#include "widgets/welcomedialog.hpp"
 
 #include <QApplication>
 #include <QHeaderView>
@@ -145,6 +146,12 @@ Window::Window(WindowType _type)
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
         app->twitch.server->addFakeMessage(msg);
+    });
+
+    CreateWindowShortcut(this, "F9", [=] {
+        auto *dialog = new WelcomeDialog();
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->show();
     });
 #endif
 

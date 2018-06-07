@@ -418,7 +418,11 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         painter.drawText(rect(), text, QTextOption(Qt::AlignCenter));
     } else {
-        painter.fillRect(rect(), QColor("#555"));
+        if (getApp()->themes->isLightTheme()) {
+            painter.fillRect(rect(), QColor("#999"));
+        } else {
+            painter.fillRect(rect(), QColor("#555"));
+        }
     }
 
     for (DropRect &dropRect : this->dropRects) {
@@ -442,7 +446,11 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         int s = std::min<int>(dropRect.rect.width(), dropRect.rect.height()) - 12;
 
-        painter.setPen(QColor(255, 255, 255));
+        if (this->themeManager->isLightTheme()) {
+            painter.setPen(QColor(0, 0, 0));
+        } else {
+            painter.setPen(QColor(255, 255, 255));
+        }
         painter.drawLine(rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
                          rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
         painter.drawLine(rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),

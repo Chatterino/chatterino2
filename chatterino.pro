@@ -216,7 +216,8 @@ SOURCES += \
     src/controllers/taggedusers/taggedusersmodel.cpp \
     src/util/emotemap.cpp \
     src/providers/irc/ircconnection2.cpp \
-    src/widgets/userinfopopup.cpp
+    src/widgets/userinfopopup.cpp \
+    src/widgets/welcomedialog.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -375,7 +376,8 @@ HEADERS  += \
     src/util/mutexvalue.hpp \
     src/providers/irc/ircconnection2.hpp \
     src/widgets/helper/line.hpp \
-    src/widgets/userinfopopup.hpp
+    src/widgets/userinfopopup.hpp \
+    src/widgets/welcomedialog.hpp
 
 RESOURCES += \
     resources/resources.qrc
