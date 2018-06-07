@@ -38,7 +38,7 @@ void CompletionModel::refresh()
     }
 
     // Global: FFZ Global Emotes
-    std::vector<std::string> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
+    std::vector<QString> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
     for (const auto &m : ffzGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZGlobalEmote);
     }
@@ -51,8 +51,8 @@ void CompletionModel::refresh()
     }
 
     // Channel-specific: FFZ Channel Emotes
-    std::vector<std::string> &ffzChannelEmoteCodes =
-        app->emotes->ffz.channelEmoteCodes[this->channelName.toStdString()];
+    std::vector<QString> &ffzChannelEmoteCodes =
+        app->emotes->ffz.channelEmoteCodes[this->channelName];
     for (const auto &m : ffzChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZChannelEmote);
     }

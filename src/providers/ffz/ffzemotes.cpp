@@ -54,7 +54,7 @@ void FFZEmotes::loadGlobalEmotes()
     req.getJSON([this](QJsonObject &root) {
         auto sets = root.value("sets").toObject();
 
-        std::vector<std::string> codes;
+        std::vector<QString> codes;
         for (const QJsonValue &set : sets) {
             auto emoticons = set.toObject().value("emoticons").toArray();
 
@@ -71,7 +71,7 @@ void FFZEmotes::loadGlobalEmotes()
                     QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
 
                 this->globalEmotes.insert(code, emoteData);
-                codes.push_back(code.toStdString());
+                codes.push_back(code);
             }
 
             this->globalEmoteCodes = codes;
@@ -99,7 +99,7 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util
 
         auto setsNode = rootNode.value("sets").toObject();
 
-        std::vector<std::string> codes;
+        std::vector<QString> codes;
         for (const QJsonValue &setNode : setsNode) {
             auto emotesNode = setNode.toObject().value("emoticons").toArray();
 
@@ -123,10 +123,10 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util
 
                 this->channelEmotes.insert(code, emote);
                 map->insert(code, emote);
-                codes.push_back(code.toStdString());
+                codes.push_back(code);
             }
 
-            this->channelEmoteCodes[channelName.toStdString()] = codes;
+            this->channelEmoteCodes[channelName] = codes;
         }
     });
 }
