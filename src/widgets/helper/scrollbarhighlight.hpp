@@ -9,7 +9,7 @@ class ScrollbarHighlight
 {
 public:
     enum Style : char { None, Default, Line };
-    enum Color : char { Highlight };
+    enum Color : char { Highlight, Subscription };
 
     ScrollbarHighlight();
     ScrollbarHighlight(Color _color, Style _style = Default);

@@ -3,6 +3,7 @@
 #include "application.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "util/benchmark.hpp"
 
 #include <QApplication>
@@ -59,52 +60,24 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     layoutRequired |= widthChanged;
     this->currentLayoutWidth_ = width;
 
-    // check if emotes changed
-    bool imagesChanged = this->emoteGeneration_ != app->emotes->getGeneration();
-    layoutRequired |= imagesChanged;
-    this->emoteGeneration_ = app->emotes->getGeneration();
-
-    // check if text changed
-    bool textChanged = this->fontGeneration_ != app->fonts->getGeneration();
-    layoutRequired |= textChanged;
-    this->fontGeneration_ = app->fonts->getGeneration();
+    // check if layout state changed
+    if (this->layoutState_ != app->windows->getGeneration()) {
+        layoutRequired = true;
+        this->flags |= RequiresBufferUpdate;
+        this->layoutState_ = app->windows->getGeneration();
+    }
 
     // check if work mask changed
-    bool wordMaskChanged = this->currentWordFlags_ != flags;  // app->settings->getWordTypeMask();
-    layoutRequired |= wordMaskChanged;
+    layoutRequired |= this->currentWordFlags_ != flags;
     this->currentWordFlags_ = flags;  // app->settings->getWordTypeMask();
-
-    // check if timestamp format changed
-    bool timestampFormatChanged = this->timestampFormat_ != app->settings->timestampFormat;
-    this->timestampFormat_ = app->settings->timestampFormat.getValue();
-
-    layoutRequired |= timestampFormatChanged;
 
     // check if layout was requested manually
     layoutRequired |= bool(this->flags & RequiresLayout);
-    this->flags &= ~RequiresLayout;
+    this->flags &= decltype(RequiresLayout)(~RequiresLayout);
 
     // check if dpi changed
-    bool scaleChanged = this->scale_ != scale;
-    layoutRequired |= scaleChanged;
+    layoutRequired |= this->scale_ != scale;
     this->scale_ = scale;
-    imagesChanged |= scaleChanged;
-    textChanged |= scaleChanged;
-
-    // update word sizes if needed
-    if (imagesChanged) {
-        //        this->container.updateImages();
-        this->flags |= MessageLayout::RequiresBufferUpdate;
-    }
-    if (textChanged) {
-        //        this->container.updateText();
-        this->flags |= MessageLayout::RequiresBufferUpdate;
-    }
-    if (widthChanged || wordMaskChanged) {
-        this->deleteBuffer();
-    }
-
-    // return if no layout is required
 
     if (!layoutRequired) {
         return false;
@@ -112,7 +85,7 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
 
     int oldHeight = this->container_.getHeight();
     this->actuallyLayout(width, flags);
-    if (this->container_.getHeight() != oldHeight) {
+    if (widthChanged || this->container_.getHeight() != oldHeight) {
         this->deleteBuffer();
     }
     this->invalidateBuffer();
@@ -206,8 +179,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
         QBrush brush(color, Qt::VerPattern);
 
-        painter.fillRect(0, y + this->container_.getHeight() - 1, this->container_.getWidth(), 1,
-                         brush);
+        painter.fillRect(0, y + this->container_.getHeight() - 1, pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;
@@ -225,6 +197,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/, Selectio
     QColor backgroundColor;
     if (this->message_->flags & Message::Highlighted) {
         backgroundColor = app->themes->messages.backgrounds.highlighted;
+    } else if (this->message_->flags & Message::Subscription) {
+        backgroundColor = app->themes->messages.backgrounds.subscription;
     } else if (app->settings->alternateMessageBackground.getValue() &&
                this->flags & MessageLayout::AlternateBackground) {
         backgroundColor = app->themes->messages.backgrounds.alternate;

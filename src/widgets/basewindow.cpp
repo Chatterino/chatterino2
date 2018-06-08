@@ -34,14 +34,18 @@ namespace widgets {
 
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
-                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : (Qt::WindowFlags)0))
+                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags()))
     , enableCustomFrame(_flags & EnableCustomFrame)
-    , frameless(_flags & FrameLess)
+    , frameless(_flags & Frameless)
     , flags(_flags)
 {
     if (this->frameless) {
         this->enableCustomFrame = false;
         this->setWindowFlag(Qt::FramelessWindowHint);
+    }
+
+    if (this->flags & DeleteOnFocusOut) {
+        this->setAttribute(Qt::WA_DeleteOnClose);
     }
 
     this->init();
@@ -199,6 +203,17 @@ void BaseWindow::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
     }
+}
+
+bool BaseWindow::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
+        if (this->flags & DeleteOnFocusOut) {
+            this->close();
+        }
+    }
+
+    return QWidget::event(event);
 }
 
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
@@ -447,8 +462,22 @@ void BaseWindow::showEvent(QShowEvent *event)
     BaseWidget::showEvent(event);
 }
 
+void BaseWindow::scaleChangedEvent(float)
+{
+    this->calcButtonsSizes();
+}
+#endif
+
 void BaseWindow::paintEvent(QPaintEvent *)
 {
+    if (this->frameless) {
+        QPainter painter(this);
+
+        painter.setPen(QColor("#999"));
+        painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+    }
+
+#ifdef USEWINSDK
     if (this->hasCustomWindowFrame()) {
         QPainter painter(this);
 
@@ -457,13 +486,8 @@ void BaseWindow::paintEvent(QPaintEvent *)
         painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
                          this->themeManager->window.background);
     }
-}
-
-void BaseWindow::scaleChangedEvent(float)
-{
-    this->calcButtonsSizes();
-}
 #endif
+}
 
 void BaseWindow::calcButtonsSizes()
 {

@@ -42,9 +42,6 @@ public:
     QFont getFont(Type type, float scale);
     QFontMetrics getFontMetrics(Type type, float scale);
 
-    int getGeneration() const;
-    void incGeneration();
-
     pajlada::Settings::Setting<std::string> chatFontFamily;
     pajlada::Settings::Setting<int> chatFontSize;
 
@@ -79,8 +76,6 @@ private:
     FontData createFontData(Type type, float scale);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType;
-
-    int generation = 0;
 };
 
 }  // namespace singletons

@@ -67,9 +67,7 @@ private:
     int height_ = 0;
 
     int currentLayoutWidth_ = -1;
-    int fontGeneration_ = -1;
-    int emoteGeneration_ = -1;
-    QString timestampFormat_;
+    int layoutState_ = -1;
     float scale_ = -1;
     unsigned int bufferUpdatedCount_ = 0;
 

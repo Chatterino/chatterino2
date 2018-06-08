@@ -2,9 +2,9 @@
 
 #include "channel.hpp"
 
-#include <IrcConnection>
 #include <IrcMessage>
 #include <pajlada/signals/signal.hpp>
+#include <providers/irc/ircconnection2.hpp>
 
 #include <functional>
 #include <mutex>
@@ -19,7 +19,8 @@ public:
     virtual ~AbstractIrcServer() = default;
 
     // connection
-    Communi::IrcConnection *getReadConnection() const;
+    IrcConnection *getReadConnection() const;
+    IrcConnection *getWriteConnection() const;
 
     void connect();
     void disconnect();
@@ -33,7 +34,7 @@ public:
     // signals
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
-    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
+    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
 
     void addFakeMessage(const QString &data);
 
@@ -43,8 +44,7 @@ public:
 protected:
     AbstractIrcServer();
 
-    virtual void initializeConnection(Communi::IrcConnection *connection, bool isRead,
-                                      bool isWrite) = 0;
+    virtual void initializeConnection(IrcConnection *connection, bool isRead, bool isWrite) = 0;
     virtual std::shared_ptr<Channel> createChannel(const QString &channelName) = 0;
 
     virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
@@ -64,10 +64,12 @@ protected:
 private:
     void initConnection();
 
-    std::unique_ptr<Communi::IrcConnection> writeConnection = nullptr;
-    std::unique_ptr<Communi::IrcConnection> readConnection = nullptr;
+    std::unique_ptr<IrcConnection> writeConnection = nullptr;
+    std::unique_ptr<IrcConnection> readConnection = nullptr;
 
     std::mutex connectionMutex;
+
+    QTimer pingTimer;
 };
 
 }  // namespace irc

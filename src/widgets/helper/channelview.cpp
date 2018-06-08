@@ -9,11 +9,11 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
-#include "ui_accountpopupform.h"
 #include "util/benchmark.hpp"
 #include "util/distancebetweenpoints.hpp"
 #include "widgets/split.hpp"
 #include "widgets/tooltipwidget.hpp"
+#include "widgets/userinfopopup.hpp"
 
 #include <QClipboard>
 #include <QDebug>
@@ -41,13 +41,12 @@ namespace widgets {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar(this)
-    , userPopupWidget(std::shared_ptr<TwitchChannel>())
 {
     auto app = getApp();
 
     this->setMouseTracking(true);
 
-    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([=] {
+    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([this] {
         this->layoutMessages();
         this->update();
     }));
@@ -477,7 +476,6 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
     this->channel = newChannel;
 
-    this->userPopupWidget.setChannel(newChannel);
     this->layoutMessages();
     this->queueUpdate();
 }
@@ -811,28 +809,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
 void ChannelView::mousePressEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
-        this->unsetCursor();
-
-        event->ignore();
-        return;
-    }
-
     auto app = getApp();
 
-    if (app->settings->linksDoubleClickOnly.getValue()) {
-        this->pause(200);
-    }
-
-    this->isMouseDown = true;
-
-    this->lastPressPosition = event->screenPos();
+    this->mouseDown.invoke(event);
 
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
-
-    this->mouseDown.invoke(event);
 
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
@@ -843,80 +826,88 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         }
 
         // Start selection at the last message at its last index
-        auto lastMessageIndex = messagesSnapshot.getLength() - 1;
-        auto lastMessage = messagesSnapshot[lastMessageIndex];
-        auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
+        if (event->button() == Qt::LeftButton) {
+            auto lastMessageIndex = messagesSnapshot.getLength() - 1;
+            auto lastMessage = messagesSnapshot[lastMessageIndex];
+            auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
 
-        SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
-        this->setSelection(selectionItem, selectionItem);
-
+            SelectionItem selectionItem(lastMessageIndex, lastCharacterIndex);
+            this->setSelection(selectionItem, selectionItem);
+        }
         return;
     }
 
     // check if message is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
-        return;
+    switch (event->button()) {
+        case Qt::LeftButton: {
+            this->lastPressPosition = event->screenPos();
+            this->isMouseDown = true;
+
+            if (layout->flags & MessageLayout::Collapsed) {
+                return;
+            }
+
+            if (app->settings->linksDoubleClickOnly.getValue()) {
+                this->pause(200);
+            }
+
+            int index = layout->getSelectionIndex(relativePos);
+
+            auto selectionItem = SelectionItem(messageIndex, index);
+            this->setSelection(selectionItem, selectionItem);
+        } break;
+
+        case Qt::RightButton: {
+            this->lastRightPressPosition = event->screenPos();
+            this->isRightMouseDown = true;
+        } break;
+
+        default:;
     }
 
-    int index = layout->getSelectionIndex(relativePos);
-
-    auto selectionItem = SelectionItem(messageIndex, index);
-    this->setSelection(selectionItem, selectionItem);
-
-    this->repaint();
+    this->update();
 }
 
 void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier)) {
-        this->unsetCursor();
+    // check if mouse was pressed
+    if (event->button() == Qt::LeftButton) {
+        if (this->isMouseDown) {
+            this->isMouseDown = false;
 
-        event->ignore();
-        return;
-    }
-
-    if (!this->isMouseDown) {
-        // We didn't grab the mouse press, so we shouldn't be handling the mouse
-        // release
-        return;
-    }
-
-    auto app = getApp();
-
-    if (this->selecting) {
-        if (this->messagesAddedSinceSelectionPause > SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
-            this->showingLatestMessages = false;
+            if (fabsf(util::distanceBetweenPoints(this->lastPressPosition, event->screenPos())) >
+                15.f) {
+                return;
+            }
+        } else {
+            return;
         }
+    } else if (event->button() == Qt::RightButton) {
+        if (this->isRightMouseDown) {
+            this->isRightMouseDown = false;
 
-        this->pausedBySelection = false;
-        this->selecting = false;
-        this->pauseTimeout.stop();
-        this->pausedTemporarily = false;
-
-        this->layoutMessages();
-    }
-
-    this->isMouseDown = false;
-
-    float distance = util::distanceBetweenPoints(this->lastPressPosition, event->screenPos());
-
-    if (fabsf(distance) > 15.f) {
-        // It wasn't a proper click, so we don't care about that here
+            if (fabsf(util::distanceBetweenPoints(this->lastRightPressPosition,
+                                                  event->screenPos())) > 15.f) {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else {
+        // not left or right button
         return;
     }
 
-    // If you clicked and released less than  X pixels away, it counts
-    // as a click!
-
+    // find message
     this->layoutMessages();
 
     std::shared_ptr<messages::MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
 
+    // no message found
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         // No message at clicked position
-        this->userPopupWidget.hide();
         return;
     }
 
@@ -935,92 +926,130 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    const auto &creator = hoverLayoutElement->getCreator();
+    // handle the click
+    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+}
+
+void ChannelView::handleMouseClick(QMouseEvent *event,
+                                   const messages::MessageLayoutElement *hoveredElement,
+                                   messages::MessageLayout *layout)
+{
+    switch (event->button()) {
+        case Qt::LeftButton: {
+            if (this->selecting) {
+                if (this->messagesAddedSinceSelectionPause >
+                    SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
+                    this->showingLatestMessages = false;
+                }
+
+                this->pausedBySelection = false;
+                this->selecting = false;
+                this->pauseTimeout.stop();
+                this->pausedTemporarily = false;
+
+                this->layoutMessages();
+            }
+
+            auto &link = hoveredElement->getLink();
+            if (!getApp()->settings->linksDoubleClickOnly) {
+                this->handleLinkClick(event, link, layout);
+
+                this->linkClicked.invoke(link);
+            }
+        } break;
+        case Qt::RightButton: {
+            this->addContextMenuItems(hoveredElement, layout);
+        } break;
+        default:;
+    }
+}
+
+void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
+                                      messages::MessageLayout *layout)
+{
+    const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    if (event->button() == Qt::RightButton) {
-        static QMenu *menu = new QMenu;
-        menu->clear();
+    static QMenu *menu = new QMenu;
+    menu->clear();
 
-        // Emote actions
-        if ((creatorFlags &
-             (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) != 0) {
-            const auto &emoteElement = static_cast<const messages::EmoteElement &>(creator);
+    // Emote actions
+    if (creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) {
+        const auto &emoteElement = static_cast<const messages::EmoteElement &>(creator);
 
-            // TODO: We might want to add direct "Open image" variants alongside the Copy actions
+        // TODO: We might want to add direct "Open image" variants alongside the Copy
+        // actions
 
-            if (emoteElement.data.image1x != nullptr) {
-                menu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
-                    QApplication::clipboard()->setText(url);  //
-                });
-            }
-            if (emoteElement.data.image2x != nullptr) {
-                menu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
-                    QApplication::clipboard()->setText(url);  //
-                });
-            }
-            if (emoteElement.data.image3x != nullptr) {
-                menu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
-                    QApplication::clipboard()->setText(url);  //
-                });
-            }
-
-            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
-                menu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                menu->addAction("Copy BTTV emote link", [emotePageLink] {
-                    QApplication::clipboard()->setText(emotePageLink);  //
-                });
-            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
-                menu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                menu->addAction("Copy FFZ emote link", [emotePageLink] {
-                    QApplication::clipboard()->setText(emotePageLink);  //
-                });
-            }
+        if (emoteElement.data.image1x != nullptr) {
+            menu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
+        }
+        if (emoteElement.data.image2x != nullptr) {
+            menu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
+        }
+        if (emoteElement.data.image3x != nullptr) {
+            menu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
+            });
         }
 
-        // add seperator
-        if (!menu->actions().empty())
+        if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
             menu->addSeparator();
-
-        // Link copy
-        if (hoverLayoutElement->getLink().type == Link::Url) {
-            QString url = hoverLayoutElement->getLink().value;
-
-            menu->addAction("Open link in browser",
-                            [url] { QDesktopServices::openUrl(QUrl(url)); });
-            menu->addAction("Copy link", [url] { QApplication::clipboard()->setText(url); });
-
+            QString emotePageLink = emoteElement.data.pageLink;
+            menu->addAction("Copy BTTV emote link", [emotePageLink] {
+                QApplication::clipboard()->setText(emotePageLink);  //
+            });
+        } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
             menu->addSeparator();
+            QString emotePageLink = emoteElement.data.pageLink;
+            menu->addAction("Copy FFZ emote link", [emotePageLink] {
+                QApplication::clipboard()->setText(emotePageLink);  //
+            });
         }
-
-        // Message actions
-        menu->addAction("Copy message", [layout] {
-            QString copyString;
-            layout->addSelectionText(copyString);
-
-            QGuiApplication::clipboard()->setText(copyString);
-        });
-        //        menu->addAction("Quote message", [layout] {
-        //            QString copyString;
-        //            layout->addSelectionText(copyString);
-
-        //            // insert into input
-        //        });
-
-        menu->move(QCursor::pos());
-        menu->show();
-
-        return;
     }
 
-    auto &link = hoverLayoutElement->getLink();
-    if (event->button() != Qt::LeftButton || !app->settings->linksDoubleClickOnly) {
-        this->handleLinkClick(event, link, layout.get());
+    // add seperator
+    if (!menu->actions().empty()) {
+        menu->addSeparator();
     }
 
-    this->linkClicked.invoke(link);
+    // Link copy
+    if (hoveredElement->getLink().type == Link::Url) {
+        QString url = hoveredElement->getLink().value;
+
+        menu->addAction("Open link in browser", [url] { QDesktopServices::openUrl(QUrl(url)); });
+        menu->addAction("Copy link", [url] { QApplication::clipboard()->setText(url); });
+
+        menu->addSeparator();
+    }
+
+    // Copy actions
+    if (!this->selection.isEmpty()) {
+        menu->addAction("Copy selection",
+                        [this] { QGuiApplication::clipboard()->setText(this->getSelectedText()); });
+    }
+
+    menu->addAction("Copy message", [layout] {
+        QString copyString;
+        layout->addSelectionText(copyString);
+
+        QGuiApplication::clipboard()->setText(copyString);
+    });
+
+    //        menu->addAction("Quote message", [layout] {
+    //            QString copyString;
+    //            layout->addSelectionText(copyString);
+
+    //            // insert into input
+    //        });
+
+    menu->move(QCursor::pos());
+    menu->show();
+
+    return;
 }
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
@@ -1072,23 +1101,33 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
     switch (link.type) {
         case messages::Link::UserInfo: {
             auto user = link.value;
-            this->userPopupWidget.setName(user);
-            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
-            this->userPopupWidget.show();
-            this->userPopupWidget.setFocus();
+            auto *userPopup = new UserInfoPopup;
+            userPopup->setData(user, this->channel);
+            userPopup->setAttribute(Qt::WA_DeleteOnClose);
+            userPopup->move(event->globalPos());
+            userPopup->show();
+
+            //            this->userPopupWidget.setName(user);
+            //            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
+            //            this->userPopupWidget.show();
+            //            this->userPopupWidget.setFocus();
 
             qDebug() << "Clicked " << user << "s message";
             break;
         }
+
         case messages::Link::Url: {
             QDesktopServices::openUrl(QUrl(link.value));
             break;
         }
+
         case messages::Link::UserAction: {
             QString value = link.value;
             value.replace("{user}", layout->getMessage()->loginName);
             this->channel->sendMessage(value);
         }
+
+        default:;
     }
 }
 

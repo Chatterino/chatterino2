@@ -78,6 +78,18 @@ public:
         }
     }
 
+    void each(std::function<void(const TKey &name, TValue &value)> func)
+    {
+        QMutexLocker lock(&this->mutex);
+
+        QMutableMapIterator<TKey, TValue> it(this->data);
+
+        while (it.hasNext()) {
+            it.next();
+            func(it.key(), it.value());
+        }
+    }
+
 private:
     mutable QMutex mutex;
     QMap<TKey, TValue> data;

@@ -88,7 +88,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
     // fix this pile of garbage
-    for (const auto &set : app->emotes->twitchAccountEmotes[userID.toStdString()].emoteSets) {
+    for (const auto &set : app->emotes->twitch.emotes[userID].emoteSets) {
         // TITLE
         messages::MessageBuilder builder1;
 
@@ -102,22 +102,20 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
-        for (const auto &emote : set.second) {
+        for (const auto &emote : set.emotes) {
             [&](const QString &key, const util::EmoteData &value) {
                 builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                     ->setLink(Link(Link::InsertText, key)));
-            }(QString::fromStdString(emote.code),
-              app->emotes->getTwitchEmoteById(QString::fromStdString(emote.id).toLong(),
-                                              QString::fromStdString(emote.code)));
+            }(emote.code, app->emotes->twitch.getEmoteById(emote.id, emote.code));
         }
 
         emoteChannel->addMessage(builder2.getMessage());
     }
 
-    addEmotes(app->emotes->bttvGlobalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
+    addEmotes(app->emotes->bttv.globalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
     addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
               "BetterTTV Channel Emote");
-    addEmotes(app->emotes->ffzGlobalEmotes, "FrankerFaceZ Global Emotes",
+    addEmotes(app->emotes->ffz.globalEmotes, "FrankerFaceZ Global Emotes",
               "FrankerFaceZ Global Emote");
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
@@ -127,7 +125,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
 void EmotePopup::loadEmojis()
 {
-    auto &emojis = getApp()->emotes->getEmojis();
+    auto &emojis = getApp()->emotes->emojis.emojis;
 
     ChannelPtr emojiChannel(new Channel("", Channel::None));
 
@@ -144,8 +142,8 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags |= Message::DisableCompactEmotes;
 
     emojis.each([&builder](const QString &key, const auto &value) {
-        builder.append((new EmoteElement(value.emoteData, MessageElement::Flags::AlwaysShow))
-                           ->setLink(Link(Link::Type::InsertText, ":" + value.shortCode + ":")));
+        builder.append((new EmoteElement(value->emoteData, MessageElement::Flags::AlwaysShow))
+                           ->setLink(Link(Link::Type::InsertText, ":" + value->shortCode + ":")));
     });
     emojiChannel->addMessage(builder.getMessage());
 

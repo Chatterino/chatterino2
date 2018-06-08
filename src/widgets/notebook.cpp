@@ -43,10 +43,7 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
-    if (!title.isEmpty()) {
-        tab->setTitle(title);
-        tab->useDefaultTitle = false;
-    }
+    tab->setCustomTitle(title);
 
     Item item;
     item.page = page;
@@ -62,6 +59,8 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     }
 
     this->performLayout();
+
+    tab->show();
 
     return tab;
 }
@@ -90,7 +89,7 @@ void Notebook::removePage(QWidget *page)
         }
     }
 
-    this->performLayout();
+    this->performLayout(true);
 }
 
 void Notebook::removeCurrentPage()
@@ -262,7 +261,7 @@ void Notebook::rearrangePage(QWidget *page, int index)
 {
     this->items.move(this->indexOf(page), index);
 
-    this->performLayout();
+    this->performLayout(true);
 }
 
 bool Notebook::getAllowUserTabManagement() const
@@ -307,37 +306,18 @@ void Notebook::performLayout(bool animated)
 {
     auto app = getApp();
 
-    int xStart = (int)(2 * this->getScale());
+    int xStart = int(2 * this->getScale());
 
     int x = xStart, y = 0;
     float scale = this->getScale();
 
-    //    bool customFrame = this->parentWindow->hasCustomWindowFrame();
-
-    //    bool customFrame = false;
-
-    //    if (!this->showButtons || app->settings->hidePreferencesButton || customFrame) {
-    //        this->settingsButton.hide();
-    //    } else {
-    //        this->settingsButton.show();
-    //        x += settingsButton.width();
-    //    }
-    //    if (!this->showButtons || app->settings->hideUserButton || customFrame) {
-    //        this->userButton.hide();
-    //    } else {
-    //        this->userButton.move(x, 0);
-    //        this->userButton.show();
-    //        x += userButton.width();
-    //    }
-
-    //    if (customFrame || !this->showButtons ||
-    //        (app->settings->hideUserButton && app->settings->hidePreferencesButton)) {
-    //        x += (int)(scale * 2);
-    //    }
-
-    float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
+    int h = int(NOTEBOOK_TAB_HEIGHT * this->getScale());
 
     for (auto *btn : this->customButtons) {
+        if (!btn->isVisible()) {
+            continue;
+        }
+
         btn->setFixedSize(h, h);
         btn->move(x, 0);
         x += h;
@@ -347,14 +327,12 @@ void Notebook::performLayout(bool animated)
     bool first = true;
 
     for (auto i = this->items.begin(); i != this->items.end(); i++) {
-        //        int yOffset = i->tab->isSelected() ? 0 : 1;
+        bool wrap =
+            !first && (((i + 1 == this->items.end() && this->showAddButton) ? tabHeight : 0) + x +
+                       i->tab->width()) > width();
 
-        if (!first &&
-            (i == this->items.end() && this->showAddButton ? tabHeight : 0) + x + i->tab->width() >
-                width())  //
-        {
+        if (wrap) {
             y += i->tab->height();
-            //            y += 20;
             i->tab->moveAnimated(QPoint(xStart, y), animated);
             x = i->tab->width() + xStart;
         } else {
@@ -376,7 +354,7 @@ void Notebook::performLayout(bool animated)
         this->update();
     }
 
-    y += (int)(3 * scale);
+    y += int(3 * scale);
 
     for (auto &i : this->items) {
         i.tab->raise();
@@ -431,6 +409,8 @@ NotebookTab *Notebook::getTabFromPage(QWidget *page)
 SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
+    auto app = getApp();
+
     this->connect(this->getAddButton(), &NotebookButton::clicked,
                   [this]() { QTimer::singleShot(80, this, [this] { this->addPage(true); }); });
 
@@ -440,16 +420,28 @@ SplitNotebook::SplitNotebook(Window *parent)
         auto *settingsBtn = this->addCustomButton();
         auto *userBtn = this->addCustomButton();
 
-        //        app->settings->hidePreferencesButton.connectSimple(
-        //            [this](bool hide) { this->performLayout(); });
-        //        app->settings->hideUserButton.connectSimple([this](auto) { this->performLayout();
-        //        });
+        settingsBtn->setVisible(!app->settings->hidePreferencesButton.getValue());
+        userBtn->setVisible(!app->settings->hideUserButton.getValue());
+
+        app->settings->hidePreferencesButton.connect(
+            [this, settingsBtn](bool hide, auto) {
+                settingsBtn->setVisible(!hide);
+                this->performLayout(true);
+            },
+            this->uniqueConnections);
+
+        app->settings->hideUserButton.connect(
+            [this, userBtn](bool hide, auto) {
+                userBtn->setVisible(!hide);
+                this->performLayout(true);
+            },
+            this->uniqueConnections);
 
         settingsBtn->icon = NotebookButton::IconSettings;
         userBtn->icon = NotebookButton::IconUser;
 
         QObject::connect(settingsBtn, &NotebookButton::clicked,
-                         [this] { getApp()->windows->showSettingsDialog(); });
+                         [] { getApp()->windows->showSettingsDialog(); });
 
         QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
             getApp()->windows->showAccountSelectPopup(

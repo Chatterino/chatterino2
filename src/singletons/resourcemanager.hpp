@@ -29,6 +29,13 @@ public:
         QIcon move;
     } split;
 
+    struct {
+        QPixmap ban;
+        QPixmap unban;
+        QPixmap mod;
+        QPixmap unmod;
+    } buttons;
+
     messages::Image *badgeStaff;
     messages::Image *badgeAdmin;
     messages::Image *badgeGlobalModerator;

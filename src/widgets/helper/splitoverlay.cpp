@@ -113,6 +113,9 @@ void SplitOverlay::paintEvent(QPaintEvent *)
         default:;
     }
 
+    rect.setRight(rect.right() - 1);
+    rect.setBottom(rect.bottom() - 1);
+
     if (!rect.isNull()) {
         painter.setPen(getApp()->themes->splits.dropPreviewBorder);
         painter.setBrush(getApp()->themes->splits.dropPreview);

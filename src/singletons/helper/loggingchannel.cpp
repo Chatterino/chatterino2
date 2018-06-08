@@ -1,5 +1,10 @@
 #include "loggingchannel.hpp"
 
+#include "application.hpp"
+#include "debug/log.hpp"
+#include "singletons/pathmanager.hpp"
+#include "singletons/settingsmanager.hpp"
+
 #include <QDir>
 
 #include <ctime>
@@ -9,17 +14,30 @@ namespace singletons {
 
 QByteArray endline("\n");
 
-LoggingChannel::LoggingChannel(const QString &_channelName, const QString &_baseDirectory)
+LoggingChannel::LoggingChannel(const QString &_channelName)
     : channelName(_channelName)
-    , baseDirectory(_baseDirectory)
 {
-    QDateTime now = QDateTime::currentDateTime();
+    if (this->channelName.startsWith("/whispers")) {
+        this->subDirectory = "Whispers";
+    } else if (channelName.startsWith("/mentions")) {
+        this->subDirectory = "Mentions";
+    } else {
+        this->subDirectory = QStringLiteral("Channels") + QDir::separator() + channelName;
+    }
 
-    this->dateString = this->generateDateString(now);
+    auto app = getApp();
 
-    this->openLogFile();
+    app->settings->logPath.connect([this](const QString &logPath, auto) {
+        auto app = getApp();
 
-    this->appendLine(this->generateOpeningString(now));
+        if (logPath.isEmpty()) {
+            this->baseDirectory = app->paths->logsFolderPath;
+        } else {
+            this->baseDirectory = logPath;
+        }
+
+        this->openLogFile();
+    });
 }
 
 LoggingChannel::~LoggingChannel()
@@ -30,6 +48,9 @@ LoggingChannel::~LoggingChannel()
 
 void LoggingChannel::openLogFile()
 {
+    QDateTime now = QDateTime::currentDateTime();
+    this->dateString = this->generateDateString(now);
+
     if (this->fileHandle.isOpen()) {
         this->fileHandle.flush();
         this->fileHandle.close();
@@ -37,10 +58,21 @@ void LoggingChannel::openLogFile()
 
     QString baseFileName = this->channelName + "-" + this->dateString + ".log";
 
+    QString directory = this->baseDirectory + QDir::separator() + this->subDirectory;
+
+    if (!QDir().mkpath(directory)) {
+        debug::Log("Unable to create logging path");
+        return;
+    }
+
     // Open file handle to log file of current date
-    this->fileHandle.setFileName(this->baseDirectory + QDir::separator() + baseFileName);
+    QString fileName = directory + QDir::separator() + baseFileName;
+    debug::Log("Logging to {}", fileName);
+    this->fileHandle.setFileName(fileName);
 
     this->fileHandle.open(QIODevice::Append);
+
+    this->appendLine(this->generateOpeningString(now));
 }
 
 void LoggingChannel::addMessage(std::shared_ptr<messages::Message> message)
@@ -88,18 +120,6 @@ QString LoggingChannel::generateClosingString(const QDateTime &now) const
 
 void LoggingChannel::appendLine(const QString &line)
 {
-    /*
-    auto a1 = line.toUtf8();
-    auto a2 = line.toLatin1();
-    auto a3 = line.toLocal8Bit();
-
-    auto a4 = line.data();
-
-    auto a5 = line.toStdString();
-    */
-
-    // this->fileHandle.write(a5.c_str(), a5.length());
-    // this->fileHandle.write(a5.c_str(), a5.length());
     this->fileHandle.write(line.toUtf8());
     this->fileHandle.flush();
 }

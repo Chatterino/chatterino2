@@ -1,6 +1,7 @@
 #include "ircmessagehandler.hpp"
 
 #include "application.hpp"
+#include "controllers/highlights/highlightcontroller.hpp"
 #include "debug/log.hpp"
 #include "messages/limitedqueue.hpp"
 #include "messages/message.hpp"
@@ -10,6 +11,9 @@
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/resourcemanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/irchelpers.hpp"
+
+#include <IrcMessage>
 
 using namespace chatterino::singletons;
 using namespace chatterino::messages;
@@ -22,6 +26,51 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
 {
     static IrcMessageHandler instance;
     return instance;
+}
+
+void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server)
+{
+    this->addMessage(message, message->target(), message->content(), server, false,
+                     message->isAction());
+}
+
+void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString &target,
+                                   const QString &content, TwitchServer &server, bool isSub,
+                                   bool isAction)
+{
+    QString channelName;
+    if (!trimChannelName(target, channelName)) {
+        return;
+    }
+
+    auto chan = server.getChannelOrEmpty(channelName);
+
+    if (chan->isEmpty()) {
+        return;
+    }
+
+    messages::MessageParseArgs args;
+    if (isSub) {
+        args.trimSubscriberUsername = true;
+    }
+
+    TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
+
+    if (isSub || !builder.isIgnored()) {
+        messages::MessagePtr msg = builder.build();
+
+        if (isSub) {
+            msg->flags |= messages::Message::Subscription;
+            msg->flags &= ~messages::Message::Highlighted;
+        } else {
+            if (msg->flags & messages::Message::Highlighted) {
+                server.mentionsChannel->addMessage(msg);
+                getApp()->highlights->addHighlight(msg);
+            }
+        }
+
+        chan->addMessage(msg);
+    }
 }
 
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
@@ -156,7 +205,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     auto c = app->twitch.server->whispersChannel.get();
 
-    twitch::TwitchMessageBuilder builder(c, message, message->parameter(1), args);
+    twitch::TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
 
     if (!builder.isIgnored()) {
         messages::MessagePtr _message = builder.build();
@@ -178,9 +227,51 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message)
+void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server)
 {
-    // do nothing
+    auto data = message->toData();
+
+    auto tags = message->tags();
+    auto parameters = message->parameters();
+
+    auto target = parameters[0];
+    QString msgType = tags.value("msg-id", "").toString();
+    QString content;
+    if (parameters.size() >= 2) {
+        content = parameters[1];
+    }
+
+    if (msgType == "sub" || msgType == "resub" || msgType == "subgift") {
+        // Sub-specific message. I think it's only allowed for "resub" messages atm
+        if (!content.isEmpty()) {
+            this->addMessage(message, target, content, server, true, false);
+        }
+    }
+
+    auto it = tags.find("system-msg");
+
+    if (it != tags.end()) {
+        auto newMessage =
+            messages::Message::createSystemMessage(util::parseTagString(it.value().toString()));
+
+        newMessage->flags |= messages::Message::Subscription;
+
+        QString channelName;
+
+        if (message->parameters().size() < 1) {
+            return;
+        }
+
+        if (!trimChannelName(message->parameter(0), channelName)) {
+            return;
+        }
+
+        auto chan = server.getChannelOrEmpty(channelName);
+
+        if (!chan->isEmpty()) {
+            chan->addMessage(newMessage);
+        }
+    }
 }
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)

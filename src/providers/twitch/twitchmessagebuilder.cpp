@@ -39,14 +39,16 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
-                                           const Communi::IrcMessage *_ircMessage, QString content,
-                                           const messages::MessageParseArgs &_args)
+                                           const Communi::IrcMessage *_ircMessage,
+                                           const messages::MessageParseArgs &_args, QString content,
+                                           bool isAction)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
     , originalMessage(content)
+    , action(isAction)
 {
     auto app = getApp();
     this->usernameColor = app->themes->messages.textColors.system;
@@ -185,7 +187,7 @@ MessagePtr TwitchMessageBuilder::build()
         std::vector<std::tuple<util::EmoteData, QString>> parsed;
 
         // Parse emojis and take all non-emojis and put them in parsed as full text-words
-        app->emotes->parseEmojis(parsed, split);
+        app->emotes->emojis.parse(parsed, split);
 
         for (const auto &tuple : parsed) {
             const util::EmoteData &emoteData = std::get<0>(tuple);
@@ -288,9 +290,15 @@ void TwitchMessageBuilder::parseUsername()
     // username
     this->userName = this->ircMessage->nick();
 
-    if (this->userName.isEmpty()) {
+    if (this->userName.isEmpty() || this->args.trimSubscriberUsername) {
         this->userName = this->tags.value(QLatin1String("login")).toString();
     }
+
+    // display name
+    //    auto displayNameVariant = this->tags.value("display-name");
+    //    if (displayNameVariant.isValid()) {
+    //        this->userName = displayNameVariant.toString() + " (" + this->userName + ")";
+    //    }
 
     this->message->loginName = this->userName;
 }
@@ -490,7 +498,7 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
         return;
     }
 
-    long int id = std::stol(parameters.at(0).toStdString(), nullptr, 10);
+    const auto &id = parameters.at(0);
 
     QStringList occurences = parameters.at(1).split(',');
 
@@ -501,8 +509,8 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
             return;
         }
 
-        long int start = std::stol(coords.at(0).toStdString(), nullptr, 10);
-        long int end = std::stol(coords.at(1).toStdString(), nullptr, 10);
+        int start = coords.at(0).toInt();
+        int end = coords.at(1).toInt();
 
         if (start >= end || start < 0 || end > this->originalMessage.length()) {
             return;
@@ -510,8 +518,8 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
 
         QString name = this->originalMessage.mid(start, end - start + 1);
 
-        vec.push_back(
-            std::pair<long int, util::EmoteData>(start, app->emotes->getTwitchEmoteById(id, name)));
+        vec.push_back(std::pair<long int, util::EmoteData>(
+            start, app->emotes->twitch.getEmoteById(id, name)));
     }
 }
 
@@ -525,23 +533,20 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
         return true;
     };
 
-    if (app->emotes->bttvGlobalEmotes.tryGet(emoteString, emoteData)) {
+    if (app->emotes->bttv.globalEmotes.tryGet(emoteString, emoteData)) {
         // BTTV Global Emote
         return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
         return appendEmote(MessageElement::BttvEmote);
-    } else if (app->emotes->ffzGlobalEmotes.tryGet(emoteString, emoteData)) {
+    } else if (app->emotes->ffz.globalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
         return appendEmote(MessageElement::FfzEmote);
     } else if (this->twitchChannel != nullptr &&
                this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
         return appendEmote(MessageElement::FfzEmote);
-    } else if (app->emotes->getChatterinoEmotes().tryGet(emoteString, emoteData)) {
-        // Chatterino Emote
-        return appendEmote(MessageElement::Misc);
     }
 
     return false;

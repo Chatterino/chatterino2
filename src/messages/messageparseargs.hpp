@@ -7,6 +7,7 @@ struct MessageParseArgs {
     bool disablePingSounds = false;
     bool isReceivedWhisper = false;
     bool isSentWhisper = false;
+    bool trimSubscriberUsername = false;
 };
 
 }  // namespace messages

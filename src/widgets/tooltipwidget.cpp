@@ -37,7 +37,7 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+    this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
                          Qt::BypassWindowManagerHint);
 
     displayText->setAlignment(Qt::AlignHCenter);

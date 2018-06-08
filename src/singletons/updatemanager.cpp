@@ -7,25 +7,31 @@ namespace chatterino {
 namespace singletons {
 
 UpdateManager::UpdateManager()
-    : currentVersion(CHATTERINO_VERSION)
+    : currentVersion_(CHATTERINO_VERSION)
 {
     qDebug() << "init UpdateManager";
 }
 
 UpdateManager &UpdateManager::getInstance()
 {
+    // fourtf: don't add this class to the application class
     static UpdateManager instance;
+
     return instance;
 }
 
 const QString &UpdateManager::getCurrentVersion() const
 {
-    return this->getCurrentVersion();
+    return currentVersion_;
 }
 
 const QString &UpdateManager::getOnlineVersion() const
 {
-    return this->getOnlineVersion();
+    return onlineVersion_;
+}
+
+void UpdateManager::installUpdates()
+{
 }
 
 void UpdateManager::checkForUpdates()
@@ -33,17 +39,38 @@ void UpdateManager::checkForUpdates()
     QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
 
     util::NetworkRequest req(url);
-    req.setTimeout(20000);
+    req.setTimeout(30000);
     req.getJSON([this](QJsonObject &object) {
         QJsonValue version_val = object.value("version");
         if (!version_val.isString()) {
+            this->setStatus_(Error);
             qDebug() << "error updating";
             return;
         }
 
-        this->onlineVersion = version_val.toString();
-        this->onlineVersionUpdated.invoke();
+        this->onlineVersion_ = version_val.toString();
+
+        if (this->currentVersion_ != this->onlineVersion_) {
+            this->setStatus_(UpdateAvailable);
+        } else {
+            this->setStatus_(NoUpdateAvailable);
+        }
     });
+    this->setStatus_(Searching);
+    req.execute();
+}
+
+UpdateManager::UpdateStatus UpdateManager::getStatus() const
+{
+    return this->status_;
+}
+
+void UpdateManager::setStatus_(UpdateStatus status)
+{
+    if (this->status_ != status) {
+        this->status_ = status;
+        this->statusUpdated.invoke(status);
+    }
 }
 
 }  // namespace singletons

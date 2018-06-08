@@ -1,11 +1,11 @@
 #pragma once
 
-#include "widgets/window.hpp"
 #include "widgets/splitcontainer.hpp"
+#include "widgets/window.hpp"
 
 namespace chatterino {
-//namespace widgets {
-//struct SplitContainer::Node;
+// namespace widgets {
+// struct SplitContainer::Node;
 //}
 namespace singletons {
 
@@ -19,7 +19,8 @@ public:
     void showSettingsDialog();
     void showAccountSelectPopup(QPoint point);
 
-    void layoutVisibleChatWidgets(Channel *channel = nullptr);
+    void layoutChannelViews(Channel *channel = nullptr);
+    void forceLayoutChannelViews();
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
     // void updateAll();
@@ -35,11 +36,16 @@ public:
     void initialize();
     void closeAll();
 
+    int getGeneration() const;
+    void incGeneration();
+
     pajlada::Signals::NoArgSignal repaintGifs;
     pajlada::Signals::Signal<Channel *> layout;
 
 private:
     bool initialized = false;
+
+    std::atomic<int> generation{0};
 
     std::vector<widgets::Window *> windows;
 

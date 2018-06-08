@@ -40,8 +40,8 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    Split *const split;
-    std::unique_ptr<EmotePopup> emotePopup;
+    Split *const split_;
+    std::unique_ptr<EmotePopup> emotePopup_;
 
     struct {
         ResizingTextEdit *textEdit;
@@ -49,12 +49,12 @@ private:
         RippleEffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
-    } ui;
+    } ui_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-    QStringList prevMsg;
-    QString currMsg;
-    int prevIndex = 0;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    QStringList prevMsg_;
+    QString currMsg_;
+    int prevIndex_ = 0;
 
     void initLayout();
     void installKeyPressedEvent();

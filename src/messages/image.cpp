@@ -125,7 +125,7 @@ void Image::loadImage()
         if (this->allFrames.size() > 1) {
             if (!this->animated) {
                 util::postToThread([this] {
-                    getApp()->emotes->getGifUpdateSignal().connect([=]() {
+                    getApp()->emotes->gifTimer.signal.connect([=]() {
                         this->gifUpdateTimout();
                     });  // For some reason when Boost signal is in
                          // thread scope and thread deletes the signal
@@ -147,10 +147,10 @@ void Image::loadImage()
             loadedEventQueued = true;
 
             QTimer::singleShot(500, [] {
-                getApp()->emotes->incGeneration();
+                getApp()->windows->incGeneration();
 
                 auto app = getApp();
-                app->windows->layoutVisibleChatWidgets();
+                app->windows->layoutChannelViews();
                 loadedEventQueued = false;
             });
         }

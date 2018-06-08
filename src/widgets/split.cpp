@@ -1,6 +1,7 @@
 #include "widgets/split.hpp"
 
 #include "application.hpp"
+#include "common.hpp"
 #include "providers/twitch/emotevalue.hpp"
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchmessagebuilder.hpp"
@@ -18,6 +19,7 @@
 #include "widgets/selectchanneldialog.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/textinputdialog.hpp"
+#include "widgets/userinfopopup.hpp"
 #include "widgets/window.hpp"
 
 #include <QApplication>
@@ -92,9 +94,12 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
-    this->input.ui.textEdit->installEventFilter(parent);
+    this->input.ui_.textEdit->installEventFilter(parent);
 
-    this->view.mouseDown.connect([this](QMouseEvent *) { this->giveFocus(Qt::MouseFocusReason); });
+    this->view.mouseDown.connect([this](QMouseEvent *) {
+        //
+        this->giveFocus(Qt::MouseFocusReason);
+    });
     this->view.selectionChanged.connect([this]() {
         if (view.hasSelection()) {
             this->input.clearSelection();
@@ -129,7 +134,7 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
-        if ((status == Qt::AltModifier || status == (Qt::AltModifier | Qt::ControlModifier)) &&
+        if ((status == showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
             this->isMouseOver) {
             this->overlay->show();
         } else {
@@ -137,7 +142,7 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input.ui.textEdit->focused.connect([this] { this->focused.invoke(); });
+    this->input.ui_.textEdit->focused.connect([this] { this->focused.invoke(); });
 }
 
 Split::~Split()
@@ -261,12 +266,12 @@ void Split::updateLastReadMessage()
 
 void Split::giveFocus(Qt::FocusReason reason)
 {
-    this->input.ui.textEdit->setFocus(reason);
+    this->input.ui_.textEdit->setFocus(reason);
 }
 
 bool Split::hasFocus() const
 {
-    return this->input.ui.textEdit->hasFocus();
+    return this->input.ui_.textEdit->hasFocus();
 }
 
 void Split::paintEvent(QPaintEvent *)
@@ -307,9 +312,12 @@ void Split::enterEvent(QEvent *event)
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 
-    if (modifierStatus == Qt::AltModifier ||
-        modifierStatus == (Qt::AltModifier | Qt::ControlModifier)) {
+    if (modifierStatus == showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/) {
         this->overlay->show();
+    }
+
+    if (this->container != nullptr) {
+        this->container->resetMouseStatus();
     }
 }
 
@@ -418,8 +426,6 @@ void Split::doOpenViewerList()
                        this->height() - this->header.height() - this->input.height());
     viewerDock->move(0, this->header.height());
 
-    auto accountPopup = new AccountPopupWidget(this->getChannel());
-    accountPopup->setAttribute(Qt::WA_DeleteOnClose);
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
     auto searchBar = new QLineEdit(viewerDock);
@@ -473,13 +479,13 @@ void Split::doOpenViewerList()
 
     QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(chattersList->currentItem()->text())) {
-            doOpenAccountPopupWidget(accountPopup, chattersList->currentItem()->text());
+            doOpenUserInfoPopup(chattersList->currentItem()->text());
         }
     });
 
     QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(resultList->currentItem()->text())) {
-            doOpenAccountPopupWidget(accountPopup, resultList->currentItem()->text());
+            doOpenUserInfoPopup(resultList->currentItem()->text());
         }
     });
 
@@ -495,12 +501,13 @@ void Split::doOpenViewerList()
     viewerDock->show();
 }
 
-void Split::doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user)
+void Split::doOpenUserInfoPopup(const QString &user)
 {
-    widget->setName(user);
-    widget->show();
-    widget->setFocus();
-    widget->moveTo(this, QCursor::pos());
+    auto *userPopup = new UserInfoPopup;
+    userPopup->setData(user, this->getChannel());
+    userPopup->setAttribute(Qt::WA_DeleteOnClose);
+    userPopup->move(QCursor::pos());
+    userPopup->show();
 }
 
 void Split::doCopy()

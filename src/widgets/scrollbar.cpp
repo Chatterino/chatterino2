@@ -242,6 +242,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
                 switch (highlight.getColor()) {
                     case ScrollbarHighlight::Highlight:
                         return app->themes->scrollbars.highlights.highlight;
+                    case ScrollbarHighlight::Subscription:
+                        return app->themes->scrollbars.highlights.subscription;
                 }
                 return QColor();
             }();

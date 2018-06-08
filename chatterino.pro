@@ -6,6 +6,11 @@
 
 message(----)
 
+useBreakpad {
+    include(lib/qBreakpad/qBreakpad.pri)
+    DEFINES += CHATTERINO_USE_BREAKPAD
+}
+
 QT                += widgets core gui network multimedia svg
 CONFIG            += communi
 COMMUNI           += core model util
@@ -43,10 +48,6 @@ include(dependencies/websocketpp.pri)
 include(dependencies/openssl.pri)
 include(dependencies/boost.pri)
 
-useBreakpad {
-    include(lib/qBreakpad/qBreakpad.pri)
-    DEFINES += CHATTERINO_USE_BREAKPAD
-}
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {

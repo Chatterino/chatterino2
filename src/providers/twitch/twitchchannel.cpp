@@ -140,8 +140,8 @@ void TwitchChannel::reloadChannelEmotes()
 
     debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
-    app->emotes->reloadBTTVChannelEmotes(this->name, this->bttvChannelEmotes);
-    app->emotes->reloadFFZChannelEmotes(this->name, this->ffzChannelEmotes);
+    app->emotes->bttv.loadChannelEmotes(this->name, this->bttvChannelEmotes);
+    app->emotes->ffz.loadChannelEmotes(this->name, this->ffzChannelEmotes);
 }
 
 void TwitchChannel::sendMessage(const QString &message)
@@ -151,7 +151,7 @@ void TwitchChannel::sendMessage(const QString &message)
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
-    QString parsedMessage = app->emotes->replaceShortCodes(message);
+    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
     parsedMessage = parsedMessage.trimmed();
 
@@ -162,14 +162,16 @@ void TwitchChannel::sendMessage(const QString &message)
     if (app->settings->allowDuplicateMessages) {
         if (parsedMessage == this->lastSentMessage) {
             parsedMessage.append(this->messageSuffix);
-
-            this->lastSentMessage = "";
         }
     }
 
-    this->lastSentMessage = parsedMessage;
+    bool messageSent = false;
+    this->sendMessageSignal.invoke(this->name, parsedMessage, messageSent);
 
-    this->sendMessageSignal.invoke(this->name, parsedMessage);
+    if (messageSent) {
+        qDebug() << "sent";
+        this->lastSentMessage = parsedMessage;
+    }
 }
 
 bool TwitchChannel::isMod() const

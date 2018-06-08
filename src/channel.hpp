@@ -35,7 +35,7 @@ public:
     explicit Channel(const QString &_name, Type type);
     virtual ~Channel();
 
-    pajlada::Signals::Signal<const QString &, const QString &> sendMessageSignal;
+    pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
 
     pajlada::Signals::Signal<messages::MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<messages::MessagePtr &> messageAppended;

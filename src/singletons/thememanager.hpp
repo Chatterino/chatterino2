@@ -63,6 +63,10 @@ public:
         QColor borderFocused;
         QColor dropPreview;
         QColor dropPreviewBorder;
+        QColor dropTargetRect;
+        QColor dropTargetRectBorder;
+        QColor resizeHandle;
+        QColor resizeHandleBackground;
 
         struct {
             QColor border;
@@ -75,6 +79,7 @@ public:
             QColor border;
             QColor background;
             QColor selection;
+            QColor focusedLine;
             QColor text;
             QString styleSheet;
             // int margin;
@@ -94,7 +99,7 @@ public:
             QColor regular;
             QColor alternate;
             QColor highlighted;
-            // QColor resub;
+            QColor subscription;
             // QColor whisper;
         } backgrounds;
 
@@ -111,6 +116,7 @@ public:
         QColor thumbSelected;
         struct {
             QColor highlight;
+            QColor subscription;
         } highlights;
     } scrollbars;
 

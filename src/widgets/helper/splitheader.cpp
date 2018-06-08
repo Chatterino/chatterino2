@@ -38,7 +38,7 @@ SplitHeader::SplitHeader(Split *_split)
         // dropdown label
         auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
-        dropdown->setPixmap(app->resources->splitHeaderContext->getPixmap());
+        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
@@ -212,7 +212,6 @@ void SplitHeader::updateChannelText()
 
     this->isLive = false;
     this->titleLabel->setText(title);
-    this->tooltip = "";
 }
 
 void SplitHeader::updateModerationModeIcon()
@@ -220,8 +219,8 @@ void SplitHeader::updateModerationModeIcon()
     auto app = getApp();
 
     this->moderationButton->setPixmap(this->split->getModerationMode()
-                                          ? app->resources->moderationmode_enabled->getPixmap()
-                                          : app->resources->moderationmode_disabled->getPixmap());
+                                          ? *app->resources->moderationmode_enabled->getPixmap()
+                                          : *app->resources->moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split->getChannel();
@@ -392,6 +391,12 @@ void SplitHeader::menuMoveSplit()
 
 void SplitHeader::menuReloadChannelEmotes()
 {
+    auto channel = this->split->getChannel();
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    if (twitchChannel) {
+        twitchChannel->reloadChannelEmotes();
+    }
 }
 
 void SplitHeader::menuManualReconnect()

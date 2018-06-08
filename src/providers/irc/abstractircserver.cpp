@@ -4,6 +4,8 @@
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/message.hpp"
 
+#include <QCoreApplication>
+
 using namespace chatterino::messages;
 
 namespace chatterino {
@@ -13,14 +15,14 @@ namespace irc {
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
-    this->writeConnection.reset(new Communi::IrcConnection);
+    this->writeConnection.reset(new IrcConnection);
     this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
 
     QObject::connect(this->writeConnection.get(), &Communi::IrcConnection::messageReceived,
                      [this](auto msg) { this->writeConnectionMessageReceived(msg); });
 
     // Listen to read connection message signals
-    this->readConnection.reset(new Communi::IrcConnection);
+    this->readConnection.reset(new IrcConnection);
     this->readConnection->moveToThread(QCoreApplication::instance()->thread());
 
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::messageReceived,
@@ -31,11 +33,20 @@ AbstractIrcServer::AbstractIrcServer()
                      [this] { this->onConnected(); });
     QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
+
+    // listen to reconnect request
+    this->readConnection->reconnectRequested.connect([this] { this->connect(); });
+    //    this->writeConnection->reconnectRequested.connect([this] { this->connect(); });
 }
 
-Communi::IrcConnection *AbstractIrcServer::getReadConnection() const
+IrcConnection *AbstractIrcServer::getReadConnection() const
 {
     return this->readConnection.get();
+}
+
+IrcConnection *AbstractIrcServer::getWriteConnection() const
+{
+    return this->writeConnection.get();
 }
 
 void AbstractIrcServer::connect()
@@ -231,7 +242,7 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
 {
     auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection.get());
 
-    this->privateMessageReceived(qobject_cast<Communi::IrcPrivateMessage *>(fakeMessage));
+    this->messageReceived(fakeMessage);
 }
 
 void AbstractIrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)

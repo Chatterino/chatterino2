@@ -6,6 +6,7 @@
 #include "util/mutexvalue.hpp"
 
 #include <memory>
+#include <queue>
 
 namespace chatterino {
 namespace providers {
@@ -33,7 +34,7 @@ public:
     IndirectChannel watchingChannel;
 
 protected:
-    void initializeConnection(Communi::IrcConnection *connection, bool isRead,
+    void initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
                               bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
@@ -46,8 +47,11 @@ protected:
     QString cleanChannelName(const QString &dirtyChannelName) override;
 
 private:
-    //    mutable std::mutex lastWhisperedPersonMutex;
-    //    QString lastWhisperedPerson;
+    std::mutex lastMessageMutex;
+    std::queue<QTime> lastMessagePleb;
+    std::queue<QTime> lastMessageMod;
+    QTime lastErrorTimeSpeed;
+    QTime lastErrorTimeAmount;
 };
 
 }  // namespace twitch

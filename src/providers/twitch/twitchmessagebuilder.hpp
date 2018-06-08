@@ -30,7 +30,8 @@ public:
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
                                   const messages::MessageParseArgs &_args);
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  QString content, const messages::MessageParseArgs &_args);
+                                  const messages::MessageParseArgs &_args, QString content,
+                                  bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;

@@ -99,9 +99,41 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
         QString commandName = words[0];
 
+        // works in a valid twitch channel and /whispers, etc...
+        if (!dryRun && channel->isTwitchChannel()) {
+            if (commandName == "/w") {
+                if (words.length() <= 2) {
+                    return "";
+                }
+
+                auto app = getApp();
+
+                messages::MessageBuilder b;
+
+                b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
+                                                 messages::MessageElement::Text);
+                b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
+                b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
+
+                QString rest = "";
+
+                for (int i = 2; i < words.length(); i++) {
+                    rest += words[i] + " ";
+                }
+
+                b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
+
+                app->twitch.server->whispersChannel->addMessage(b.getMessage());
+
+                app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
+                return "";
+            }
+        }
+
         // check if default command exists
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
+        // works only in a valid twitch channel
         if (!dryRun && twitchChannel != nullptr) {
             if (commandName == "/debug-args") {
                 QString msg = QApplication::instance()->arguments().join(' ');
@@ -152,29 +184,6 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 });
 
                 return "";
-            } else if (commandName == "/w") {
-                if (words.length() <= 2) {
-                    return "";
-                }
-
-                auto app = getApp();
-
-                messages::MessageBuilder b;
-
-                b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                                                 messages::MessageElement::Text);
-                b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
-                b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
-
-                QString rest = "";
-
-                for (int i = 2; i < words.length(); i++) {
-                    rest += words[i] + " ";
-                }
-
-                b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
-
-                app->twitch.server->whispersChannel->addMessage(b.getMessage());
             }
         }
 

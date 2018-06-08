@@ -42,7 +42,7 @@ SplitContainer::SplitContainer(Notebook *parent)
     this->managedConnect(Split::modifierStatusChanged, [this](auto modifiers) {
         this->layout();
 
-        if (modifiers == Qt::AltModifier) {
+        if (modifiers == showResizeHandlesModifiers) {
             for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
                 handle->show();
                 handle->raise();
@@ -51,6 +51,12 @@ SplitContainer::SplitContainer(Notebook *parent)
             for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
                 handle->hide();
             }
+        }
+
+        if (modifiers == showSplitOverlayModifiers) {
+            this->setCursor(Qt::PointingHandCursor);
+        } else {
+            this->unsetCursor();
         }
     });
 
@@ -89,6 +95,12 @@ void SplitContainer::hideResizeHandles()
     for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
         handle->hide();
     }
+}
+
+void SplitContainer::resetMouseStatus()
+{
+    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->update();
 }
 
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
@@ -296,9 +308,8 @@ void SplitContainer::layout()
 
     std::vector<DropRect> _dropRects;
     std::vector<ResizeRect> _resizeRects;
-    this->baseNode.layout(
-        Split::modifierStatus == (Qt::AltModifier | Qt::ControlModifier) || this->isDragging,
-        this->getScale(), _dropRects, _resizeRects);
+    this->baseNode.layout(Split::modifierStatus == showAddSplitRegions || this->isDragging,
+                          this->getScale(), _dropRects, _resizeRects);
 
     this->dropRects = _dropRects;
 
@@ -345,7 +356,7 @@ void SplitContainer::layout()
             handle->setVertical(resizeRect.vertical);
             handle->node = resizeRect.node;
 
-            if (Split::modifierStatus == Qt::AltModifier) {
+            if (Split::modifierStatus == showResizeHandlesModifiers) {
                 handle->show();
                 handle->raise();
             }
@@ -371,6 +382,7 @@ void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
         if (this->splits.size() == 0) {
             // "Add Chat" was clicked
             this->appendNewSplit(true);
+            this->mouseOverPoint = QPoint(-10000, -10000);
 
             //            this->setCursor(QCursor(Qt::ArrowCursor));
         } else {
@@ -410,18 +422,31 @@ void SplitContainer::paintEvent(QPaintEvent *)
     }
 
     for (DropRect &dropRect : this->dropRects) {
-        QColor border = getApp()->themes->splits.dropPreviewBorder;
-        QColor background = getApp()->themes->splits.dropPreview;
+        QColor border = getApp()->themes->splits.dropTargetRectBorder;
+        QColor background = getApp()->themes->splits.dropTargetRect;
 
         if (!dropRect.rect.contains(this->mouseOverPoint)) {
             //            border.setAlphaF(0.1);
-            background.setAlphaF(0.1);
+            //            background.setAlphaF(0.1);
+        } else {
+            //            background.setAlphaF(0.1);
+            border.setAlpha(255);
         }
 
         painter.setPen(border);
         painter.setBrush(background);
 
-        painter.drawRect(dropRect.rect.marginsRemoved(QMargins(2, 2, 2, 2)));
+        auto rect = dropRect.rect.marginsRemoved(QMargins(2, 2, 2, 2));
+
+        painter.drawRect(rect);
+
+        int s = std::min<int>(dropRect.rect.width(), dropRect.rect.height()) - 12;
+
+        painter.setPen(QColor(255, 255, 255));
+        painter.drawLine(rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
+                         rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
+        painter.drawLine(rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
+                         rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
     }
 
     QBrush accentColor = (QApplication::activeWindow() == this->window()
@@ -449,6 +474,10 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 
 void SplitContainer::mouseMoveEvent(QMouseEvent *event)
 {
+    if (Split::modifierStatus == showSplitOverlayModifiers) {
+        this->setCursor(Qt::PointingHandCursor);
+    }
+
     this->mouseOverPoint = event->pos();
     this->update();
 }
@@ -477,10 +506,6 @@ void SplitContainer::refreshTabTitle()
         return;
     }
 
-    if (!this->tab->useDefaultTitle) {
-        return;
-    }
-
     QString newTitle = "";
     bool first = true;
 
@@ -502,7 +527,7 @@ void SplitContainer::refreshTabTitle()
         newTitle = "empty";
     }
 
-    this->tab->setTitle(newTitle);
+    this->tab->setDefaultTitle(newTitle);
 }
 
 int SplitContainer::getSplitCount()
@@ -1045,9 +1070,9 @@ SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
 void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    painter.setPen(QPen(getApp()->themes->splits.dropPreviewBorder, 2));
+    painter.setPen(QPen(getApp()->themes->splits.resizeHandle, 2));
 
-    painter.fillRect(this->rect(), getApp()->themes->splits.dropPreview);
+    painter.fillRect(this->rect(), getApp()->themes->splits.resizeHandleBackground);
 
     if (this->vertical) {
         painter.drawLine(0, this->height() / 2, this->width(), this->height() / 2);

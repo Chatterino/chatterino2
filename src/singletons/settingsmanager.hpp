@@ -40,7 +40,8 @@ public:
     BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting seperateMessages = {"/appearance/messages/separateMessages", false};
-    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
+    //    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
+    IntSetting collpseMessagesMinLines = {"/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
                                               false};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
@@ -78,11 +79,13 @@ public:
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    // 0 = Smallest size
-    // 1 = One size above 0 (usually size of 0 * 2)
-    // 2 = One size above 1 (usually size of 1 * 2)
-    // etc...
+    // 0 = No preference
+    // 1 = 1x
+    // 2 = 2x
+    // 3 = 3x
     IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
+
+    QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -103,6 +106,8 @@ public:
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
+
+    QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};

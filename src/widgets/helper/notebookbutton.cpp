@@ -32,7 +32,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
     QColor background;
     QColor foreground;
 
-    if (mouseDown || mouseOver) {
+    if (mouseDown_ || mouseOver_) {
         background = this->themeManager->tabs.regular.backgrounds.hover.color();
         foreground = this->themeManager->tabs.regular.text;
     } else {
@@ -45,12 +45,20 @@ void NotebookButton::paintEvent(QPaintEvent *)
     float h = height(), w = width();
 
     if (icon == IconPlus) {
-        painter.fillRect(
-            QRectF((h / 12) * 2 + 1, (h / 12) * 5 + 1, w - ((h / 12) * 5), (h / 12) * 1),
-            foreground);
-        painter.fillRect(
-            QRectF((h / 12) * 5 + 1, (h / 12) * 2 + 1, (h / 12) * 1, w - ((h / 12) * 5)),
-            foreground);
+        painter.setPen([&] {
+            QColor tmp = foreground;
+            if (!this->mouseOver_) {
+                tmp.setAlpha(180);
+            }
+            return tmp;
+        }());
+        QRect rect = this->rect();
+        int s = h * 4 / 9;
+
+        painter.drawLine(rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
+                         rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
+        painter.drawLine(rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
+                         rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
     } else if (icon == IconUser) {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -95,7 +103,7 @@ void NotebookButton::paintEvent(QPaintEvent *)
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        mouseDown = false;
+        mouseDown_ = false;
 
         update();
 
@@ -121,7 +129,7 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 
 void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 {
-    this->mouseDown = true;
+    this->mouseDown_ = true;
     this->update();
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,

@@ -24,7 +24,7 @@ void CompletionModel::refresh()
 
     // User-specific: Twitch Emotes
     // TODO: Fix this so it properly updates with the proper api. oauth token needs proper scope
-    for (const auto &m : app->emotes->twitchAccountEmotes) {
+    for (const auto &m : app->emotes->twitch.emotes) {
         for (const auto &emoteName : m.second.emoteCodes) {
             // XXX: No way to discern between a twitch global emote and sub emote right now
             this->addString(emoteName, TaggedString::Type::TwitchGlobalEmote);
@@ -32,33 +32,33 @@ void CompletionModel::refresh()
     }
 
     // Global: BTTV Global Emotes
-    std::vector<std::string> &bttvGlobalEmoteCodes = app->emotes->bttvGlobalEmoteCodes;
+    std::vector<QString> &bttvGlobalEmoteCodes = app->emotes->bttv.globalEmoteCodes;
     for (const auto &m : bttvGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Global: FFZ Global Emotes
-    std::vector<std::string> &ffzGlobalEmoteCodes = app->emotes->ffzGlobalEmoteCodes;
+    std::vector<QString> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
     for (const auto &m : ffzGlobalEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZGlobalEmote);
     }
 
     // Channel-specific: BTTV Channel Emotes
-    std::vector<std::string> &bttvChannelEmoteCodes =
-        app->emotes->bttvChannelEmoteCodes[this->channelName.toStdString()];
+    std::vector<QString> &bttvChannelEmoteCodes =
+        app->emotes->bttv.channelEmoteCodes[this->channelName];
     for (const auto &m : bttvChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Channel-specific: FFZ Channel Emotes
-    std::vector<std::string> &ffzChannelEmoteCodes =
-        app->emotes->ffzChannelEmoteCodes[this->channelName.toStdString()];
+    std::vector<QString> &ffzChannelEmoteCodes =
+        app->emotes->ffz.channelEmoteCodes[this->channelName];
     for (const auto &m : ffzChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZChannelEmote);
     }
 
     // Global: Emojis
-    const auto &emojiShortCodes = app->emotes->emojiShortCodes;
+    const auto &emojiShortCodes = app->emotes->emojis.shortCodes;
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":", TaggedString::Type::Emoji);
     }
@@ -77,11 +77,6 @@ void CompletionModel::refresh()
     //            this->addString('@' + name.localizedName);
     //        }
     //    }
-}
-
-void CompletionModel::addString(const std::string &str, TaggedString::Type type)
-{
-    this->addString(qS(str), type);
 }
 
 void CompletionModel::addString(const QString &str, TaggedString::Type type)

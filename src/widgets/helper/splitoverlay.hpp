@@ -35,8 +35,8 @@ private:
 
     class ButtonEventFilter : public QObject
     {
-        HoveredElement hoveredElement;
         SplitOverlay *parent;
+        HoveredElement hoveredElement;
 
     public:
         ButtonEventFilter(SplitOverlay *parent, HoveredElement hoveredElement);

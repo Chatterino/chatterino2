@@ -66,24 +66,6 @@ PathManager::PathManager(int argc, char **argv)
     if (!QDir().mkpath(this->logsFolderPath)) {
         throw std::runtime_error("Error creating logs folder");
     }
-
-    this->channelsLogsFolderPath = this->logsFolderPath + "/Channels";
-
-    if (!QDir().mkpath(this->channelsLogsFolderPath)) {
-        throw std::runtime_error("Error creating channel logs folder");
-    }
-
-    this->whispersLogsFolderPath = this->logsFolderPath + "/Whispers";
-
-    if (!QDir().mkpath(this->whispersLogsFolderPath)) {
-        throw std::runtime_error("Error creating whisper logs folder");
-    }
-
-    this->mentionsLogsFolderPath = this->logsFolderPath + "/Mentions";
-
-    if (!QDir().mkpath(this->mentionsLogsFolderPath)) {
-        throw std::runtime_error("Error creating mentions logs folder");
-    }
 }
 
 bool PathManager::createFolder(const QString &folderPath)

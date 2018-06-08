@@ -6,7 +6,6 @@
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/messageelement.hpp"
 #include "messages/selection.hpp"
-#include "widgets/accountpopup.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/scrollbar.hpp"
@@ -105,6 +104,12 @@ private:
     messages::MessageElement::Flags getFlags() const;
     bool isPaused();
 
+    void handleMouseClick(QMouseEvent *event,
+                          const messages::MessageLayoutElement *hoverLayoutElement,
+                          messages::MessageLayout *layout);
+    void addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
+                             messages::MessageLayout *layout);
+
     //    void beginPause();
     //    void endPause();
 
@@ -118,12 +123,13 @@ private:
     bool showingLatestMessages = true;
     bool enableScrollingToBottom = true;
 
-    AccountPopupWidget userPopupWidget;
     bool onlyUpdateEmotes = false;
 
     // Mouse event variables
     bool isMouseDown = false;
+    bool isRightMouseDown = false;
     QPointF lastPressPosition;
+    QPointF lastRightPressPosition;
 
     messages::Selection selection;
     bool selecting = false;

@@ -108,7 +108,7 @@ private:
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
-    void doOpenAccountPopupWidget(AccountPopupWidget *widget, QString user);
+    void doOpenUserInfoPopup(const QString &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
 

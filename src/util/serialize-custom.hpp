@@ -24,7 +24,18 @@ struct Deserialize<QString> {
             throw std::runtime_error("Deserialized rapidjson::Value is not a string");
         }
 
-        return value.GetString();
+        try {
+            const char *str = value.GetString();
+            auto strLen = value.GetStringLength();
+
+            return QString::fromUtf8(str, strLen);
+        } catch (const std::exception &e) {
+            //            int x = 5;
+        } catch (...) {
+            //            int y = 5;
+        }
+
+        return QString();
     }
 };
 

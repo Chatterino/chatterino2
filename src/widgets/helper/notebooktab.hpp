@@ -28,8 +28,14 @@ public:
 
     QWidget *page;
 
+    void setCustomTitle(const QString &title);
+    void resetCustomTitle();
+    bool hasCustomTitle() const;
+    const QString &getCustomTitle() const;
+    void setDefaultTitle(const QString &title);
+    const QString &getDefaultTitle() const;
     const QString &getTitle() const;
-    void setTitle(const QString &newTitle);
+
     bool isSelected() const;
     void setSelected(bool value);
 
@@ -55,34 +61,32 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
-    QPropertyAnimation positionChangedAnimation;
-    bool positionChangedAnimationRunning = false;
-    QPoint positionAnimationDesiredPoint;
+    QPropertyAnimation positionChangedAnimation_;
+    bool positionChangedAnimationRunning_ = false;
+    QPoint positionAnimationDesiredPoint_;
 
-    Notebook *notebook;
+    Notebook *notebook_;
 
-    QString title;
+    QString customTitle_;
+    QString defaultTitle_;
 
-public:
-    bool useDefaultTitle = true;
-
-private:
-    bool selected = false;
-    bool mouseOver = false;
-    bool mouseDown = false;
-    bool mouseOverX = false;
-    bool mouseDownX = false;
+    bool selected_ = false;
+    bool mouseOver_ = false;
+    bool mouseDown_ = false;
+    bool mouseOverX_ = false;
+    bool mouseDownX_ = false;
 
     bool hasXButton();
     bool shouldDrawXButton();
 
-    HighlightState highlightState = HighlightState::None;
+    HighlightState highlightState_ = HighlightState::None;
 
-    QMenu menu;
+    QMenu menu_;
 
     QRect getXRect();
+    void titleUpdated();
 };
 
 }  // namespace widgets

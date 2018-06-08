@@ -58,9 +58,15 @@ WindowManager::WindowManager()
     qDebug() << "init WindowManager";
 }
 
-void WindowManager::layoutVisibleChatWidgets(Channel *channel)
+void WindowManager::layoutChannelViews(Channel *channel)
 {
     this->layout.invoke(channel);
+}
+
+void WindowManager::forceLayoutChannelViews()
+{
+    this->incGeneration();
+    this->layoutChannelViews(nullptr);
 }
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
@@ -195,8 +201,7 @@ void WindowManager::initialize()
             // set custom title
             QJsonValue title_val = tab_obj.value("title");
             if (title_val.isString()) {
-                page->getTab()->setTitle(title_val.toString());
-                page->getTab()->useDefaultTitle = false;
+                page->getTab()->setCustomTitle(title_val.toString());
             }
 
             // selected
@@ -275,8 +280,8 @@ void WindowManager::save()
             assert(tab != nullptr);
 
             // custom tab title
-            if (!tab->getTab()->useDefaultTitle) {
-                tab_obj.insert("title", tab->getTab()->getTitle());
+            if (tab->getTab()->hasCustomTitle()) {
+                tab_obj.insert("title", tab->getTab()->getCustomTitle());
             }
 
             // selected
@@ -393,6 +398,16 @@ void WindowManager::closeAll()
     for (widgets::Window *window : windows) {
         window->close();
     }
+}
+
+int WindowManager::getGeneration() const
+{
+    return this->generation;
+}
+
+void WindowManager::incGeneration()
+{
+    this->generation++;
 }
 
 }  // namespace singletons
