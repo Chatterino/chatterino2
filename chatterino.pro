@@ -6,11 +6,6 @@
 
 message(----)
 
-useBreakpad {
-    include(lib/qBreakpad/qBreakpad.pri)
-    DEFINES += CHATTERINO_USE_BREAKPAD
-}
-
 QT                += widgets core gui network multimedia svg
 CONFIG            += communi
 COMMUNI           += core model util
@@ -21,6 +16,12 @@ TEMPLATE           = app
 DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/precompiled_header.hpp
 CONFIG            += precompile_header
+
+useBreakpad {
+    LIBS += -L$$PWD/lib/qBreakpad/handler/build
+    include(lib/qBreakpad/qBreakpad.pri)
+    DEFINES += CHATTERINO_USE_BREAKPAD
+}
 
 # https://bugreports.qt.io/browse/QTBUG-27018
 equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
@@ -47,7 +48,6 @@ include(dependencies/libcommuni.pri)
 include(dependencies/websocketpp.pri)
 include(dependencies/openssl.pri)
 include(dependencies/boost.pri)
-
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
@@ -120,13 +120,17 @@ SOURCES += \
     src/providers/twitch/twitchmessagebuilder.cpp \
     src/providers/twitch/twitchserver.cpp \
     src/providers/twitch/pubsub.cpp \
-    src/singletons/commandmanager.cpp \
+    src/providers/twitch/twitchemotes.cpp \
+    src/providers/bttv/bttvemotes.cpp \
+    src/providers/ffz/ffzemotes.cpp \
+    src/providers/emoji/emojis.cpp \
     src/singletons/emotemanager.cpp \
     src/singletons/fontmanager.cpp \
     src/util/completionmodel.cpp \
     src/singletons/helper/loggingchannel.cpp \
     src/singletons/helper/moderationaction.cpp \
     src/singletons/helper/chatterinosetting.cpp \
+    src/singletons/helper/giftimer.cpp \
     src/singletons/loggingmanager.cpp \
     src/singletons/pathmanager.cpp \
     src/singletons/resourcemanager.cpp \
@@ -135,7 +139,6 @@ SOURCES += \
     src/singletons/windowmanager.cpp \
     src/util/networkmanager.cpp \
     src/util/networkrequest.cpp \
-    src/widgets/accountpopup.cpp \
     src/widgets/accountswitchpopupwidget.cpp \
     src/widgets/accountswitchwidget.cpp \
     src/widgets/basewidget.cpp \
@@ -216,14 +219,16 @@ SOURCES += \
     src/widgets/notificationpopup.cpp \
     src/controllers/taggedusers/taggeduserscontroller.cpp \
     src/controllers/taggedusers/taggeduser.cpp \
-    src/controllers/taggedusers/taggedusersmodel.cpp
+    src/controllers/taggedusers/taggedusersmodel.cpp \
+    src/util/emotemap.cpp \
+    src/providers/irc/ircconnection2.cpp \
+    src/widgets/userinfopopup.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
     src/channel.hpp \
     src/const.hpp \
     src/debug/log.hpp \
-    src/emojis.hpp \
     src/messages/image.hpp \
     src/messages/layouts/messagelayout.hpp \
     src/messages/layouts/messagelayoutcontainer.hpp \
@@ -245,10 +250,14 @@ HEADERS  += \
     src/providers/twitch/twitchmessagebuilder.hpp \
     src/providers/twitch/twitchserver.hpp \
     src/providers/twitch/pubsub.hpp \
-    src/singletons/commandmanager.hpp \
+    src/providers/twitch/twitchemotes.hpp \
+    src/providers/bttv/bttvemotes.hpp \
+    src/providers/ffz/ffzemotes.hpp \
+    src/providers/emoji/emojis.hpp \
     src/singletons/emotemanager.hpp \
     src/singletons/fontmanager.hpp \
     src/singletons/helper/chatterinosetting.hpp \
+    src/singletons/helper/giftimer.hpp \
     src/util/completionmodel.hpp \
     src/singletons/helper/loggingchannel.hpp \
     src/singletons/helper/moderationaction.hpp \
@@ -274,7 +283,6 @@ HEADERS  += \
     src/util/property.hpp \
     src/util/serialize-custom.hpp \
     src/util/urlfetch.hpp \
-    src/widgets/accountpopup.hpp \
     src/widgets/accountswitchpopupwidget.hpp \
     src/widgets/accountswitchwidget.hpp \
     src/widgets/basewidget.hpp \
@@ -370,15 +378,17 @@ HEADERS  += \
     src/providerid.hpp \
     src/controllers/taggedusers/taggedusersmodel.hpp \
     src/util/qstringhash.hpp \
-    src/util/mutexvalue.hpp
+    src/util/mutexvalue.hpp \
+    src/providers/irc/ircconnection2.hpp \
+    src/widgets/helper/line.hpp \
+    src/widgets/userinfopopup.hpp
 
 RESOURCES += \
     resources/resources.qrc
 
 DISTFILES +=
 
-FORMS += \
-    forms/accountpopupform.ui
+FORMS +=
 
 # Define warning flags for Chatterino
 win32-msvc* {
