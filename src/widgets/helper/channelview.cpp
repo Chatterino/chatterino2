@@ -979,35 +979,69 @@ void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hove
 
         // TODO: We might want to add direct "Open image" variants alongside the Copy
         // actions
-
         if (emoteElement.data.image1x != nullptr) {
-            menu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
-                QApplication::clipboard()->setText(url);  //
-            });
-        }
-        if (emoteElement.data.image2x != nullptr) {
-            menu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
-                QApplication::clipboard()->setText(url);  //
-            });
-        }
-        if (emoteElement.data.image3x != nullptr) {
-            menu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
-                QApplication::clipboard()->setText(url);  //
-            });
-        }
+            QAction* addEntry = menu->addAction("Copy emote link...");
 
-        if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
-            menu->addSeparator();
-            QString emotePageLink = emoteElement.data.pageLink;
-            menu->addAction("Copy BTTV emote link", [emotePageLink] {
-                QApplication::clipboard()->setText(emotePageLink);  //
+            QMenu* procmenu = new QMenu;
+            addEntry->setMenu(procmenu);
+            procmenu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
+                QApplication::clipboard()->setText(url);  //
             });
-        } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
-            menu->addSeparator();
-            QString emotePageLink = emoteElement.data.pageLink;
-            menu->addAction("Copy FFZ emote link", [emotePageLink] {
-                QApplication::clipboard()->setText(emotePageLink);  //
+            if (emoteElement.data.image2x != nullptr) {
+                procmenu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
+                    QApplication::clipboard()->setText(url);  //
+                });
+            }
+            if (emoteElement.data.image3x != nullptr) {
+                procmenu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
+                    QApplication::clipboard()->setText(url);  //
+                });
+            }
+            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
+                procmenu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                procmenu->addAction("Copy BTTV emote link", [emotePageLink] {
+                    QApplication::clipboard()->setText(emotePageLink);  //
+                });
+            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
+                procmenu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                procmenu->addAction("Copy FFZ emote link", [emotePageLink] {
+                    QApplication::clipboard()->setText(emotePageLink);  //
+                });
+            }
+        }
+        if (emoteElement.data.image1x != nullptr) {
+            QAction* addEntry = menu->addAction("Open emote link...");
+
+            QMenu* procmenu = new QMenu;
+            addEntry->setMenu(procmenu);
+            procmenu->addAction("Open 1x link", [url = emoteElement.data.image1x->getUrl()] {
+                QDesktopServices::openUrl(QUrl(url));  //
             });
+            if (emoteElement.data.image2x != nullptr) {
+                procmenu->addAction("Open 2x link", [url = emoteElement.data.image2x->getUrl()] {
+                    QDesktopServices::openUrl(QUrl(url));  //
+                });
+            }
+            if (emoteElement.data.image3x != nullptr) {
+                procmenu->addAction("Open 3x link", [url = emoteElement.data.image3x->getUrl()] {
+                    QDesktopServices::openUrl(QUrl(url));  //
+                });
+            }
+            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
+                procmenu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                procmenu->addAction("Open BTTV emote link", [emotePageLink] {
+                    QDesktopServices::openUrl(QUrl(emotePageLink));  //
+                });
+            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
+                procmenu->addSeparator();
+                QString emotePageLink = emoteElement.data.pageLink;
+                procmenu->addAction("Open FFZ emote link", [emotePageLink] {
+                    QDesktopServices::openUrl(QUrl(emotePageLink));  //
+                });
+            }
         }
     }
 
@@ -1048,6 +1082,7 @@ void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hove
 
     menu->move(QCursor::pos());
     menu->show();
+    menu->raise();
 
     return;
 }
