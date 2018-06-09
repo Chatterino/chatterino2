@@ -1,7 +1,7 @@
 #include "widgets/logindialog.hpp"
 #include "common.hpp"
 #include "util/urlfetch.hpp"
-#if FMT_USE_WINDOWS_H
+#if USEWINSDK
 #include <Windows.h>
 #endif
 
@@ -190,7 +190,7 @@ void AdvancedLoginWidget::refreshButtons()
 
 LoginWidget::LoginWidget()
 {
-    #if FMT_USE_WINDOWS_H
+    #if USEWINSDK
     ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
     #endif
 
