@@ -660,6 +660,11 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     this->pausedTemporarily_ = false;
     this->updatePauseStatus();
 
+    if (event->modifiers() & Qt::ControlModifier) {
+        event->ignore();
+        return;
+    }
+
     if (this->scrollBar_.isVisible()) {
         auto app = getApp();
 
