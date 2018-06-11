@@ -136,9 +136,12 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
     this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
+    this->dropdownMenu.addAction("Reload channel stats", this, [this]{
+        updateChannelText();
+    });
     this->dropdownMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
-    this->dropdownMenu.addSeparator();
-    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
+    //this->dropdownMenu.addSeparator();
+    //this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
     // clang-format on
 }
 
