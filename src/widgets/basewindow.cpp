@@ -61,7 +61,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     this->updateScale();
 
-    CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(1); });
+    CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
 }
 
 BaseWindow::Flags BaseWindow::getFlags()
