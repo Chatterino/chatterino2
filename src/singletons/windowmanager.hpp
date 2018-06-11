@@ -42,8 +42,8 @@ public:
     pajlada::Signals::NoArgSignal repaintGifs;
     pajlada::Signals::Signal<Channel *> layout;
 
-    static const int uiScaleMin = -5;
-    static const int uiScaleMax = 10;
+    static const int uiScaleMin;
+    static const int uiScaleMax;
     static int clampUiScale(int scale);
     static float getUiScaleValue();
     static float getUiScaleValue(int scale);

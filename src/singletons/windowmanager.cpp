@@ -25,6 +25,9 @@ namespace singletons {
 using SplitNode = widgets::SplitContainer::Node;
 using SplitDirection = widgets::SplitContainer::Direction;
 
+const int WindowManager::uiScaleMin = -5;
+const int WindowManager::uiScaleMax = 10;
+
 void WindowManager::showSettingsDialog()
 {
     QTimer::singleShot(80, [] { widgets::SettingsDialog::showDialog(); });
