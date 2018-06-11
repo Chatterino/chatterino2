@@ -22,7 +22,7 @@ namespace chatterino {
 namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *notebook)
-    : BaseWidget(notebook)
+    : RippleEffectButton(notebook)
     , positionChangedAnimation_(this, "pos")
     , notebook_(notebook)
     , menu_(this)
@@ -68,6 +68,9 @@ NotebookTab::NotebookTab(Notebook *notebook)
 void NotebookTab::themeRefreshEvent()
 {
     this->update();
+
+    //    this->setMouseEffectColor(QColor("#999"));
+    this->setMouseEffectColor(this->themeManager->tabs.regular.text);
 }
 
 void NotebookTab::updateSize()
@@ -234,9 +237,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
     bool windowFocused = this->window() == QApplication::activeWindow();
     // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
-    QBrush tabBackground = this->mouseOver_ ? colors.backgrounds.hover
-                                            : (windowFocused ? colors.backgrounds.regular
-                                                             : colors.backgrounds.unfocused);
+    QBrush tabBackground = /*this->mouseOver_ ? colors.backgrounds.hover
+                                            :*/ (windowFocused ? colors.backgrounds.regular
+                                                               : colors.backgrounds.unfocused);
 
     //    painter.fillRect(rect(), this->mouseOver_ ? regular.backgrounds.hover
     //                                              : (windowFocused ? regular.backgrounds.regular
@@ -312,6 +315,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // draw line at bottom
     if (!this->selected_) {
         painter.fillRect(0, this->height() - 1, this->width(), 1, app->themes->window.background);
+
+        this->fancyPaint(painter);
     }
 }
 
@@ -373,19 +378,23 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void NotebookTab::enterEvent(QEvent *)
+void NotebookTab::enterEvent(QEvent *event)
 {
     this->mouseOver_ = true;
 
     this->update();
+
+    RippleEffectButton::enterEvent(event);
 }
 
-void NotebookTab::leaveEvent(QEvent *)
+void NotebookTab::leaveEvent(QEvent *event)
 {
     this->mouseOverX_ = false;
     this->mouseOver_ = false;
 
     this->update();
+
+    RippleEffectButton::leaveEvent(event);
 }
 
 void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
@@ -429,6 +438,8 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
             this->notebook_->rearrangePage(this->page, index);
         }
     }
+
+    RippleEffectButton::mouseMoveEvent(event);
 }
 
 QRect NotebookTab::getXRect()

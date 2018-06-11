@@ -5,11 +5,12 @@
 
 #include <pajlada/signals/signal.hpp>
 
-class QLabel;
 class QCheckBox;
 
 namespace chatterino {
 namespace widgets {
+
+class Label;
 
 class UserInfoPopup final : public BaseWindow
 {
@@ -43,10 +44,10 @@ private:
     struct {
         RippleEffectButton *avatarButton = nullptr;
 
-        QLabel *nameLabel = nullptr;
-        QLabel *viewCountLabel = nullptr;
-        QLabel *followerCountLabel = nullptr;
-        QLabel *createdDateLabel = nullptr;
+        Label *nameLabel = nullptr;
+        Label *viewCountLabel = nullptr;
+        Label *followerCountLabel = nullptr;
+        Label *createdDateLabel = nullptr;
 
         QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;

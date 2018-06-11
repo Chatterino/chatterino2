@@ -91,7 +91,7 @@ void Label::paintEvent(QPaintEvent *)
     painter.setFont(
         app->fonts->getFont(this->getFontStyle(), this->getScale() * this->devicePixelRatioF()));
 
-    int offset = this->hasOffset_ ? int(8 * this->getScale()) : 0;
+    int offset = this->getOffset();
 
     // draw text
     QRect textRect(offset, 0, this->width() - offset - offset, this->height());
@@ -112,9 +112,16 @@ void Label::updateSize()
 
     QFontMetrics metrics = app->fonts->getFontMetrics(this->fontStyle_, this->getScale());
 
-    this->preferedSize_ = QSize(metrics.width(this->text_), metrics.height());
+    int width = metrics.width(this->text_) + (2 * this->getOffset());
+    int height = metrics.height();
+    this->preferedSize_ = QSize(width, height);
 
     this->updateGeometry();
+}
+
+int Label::getOffset()
+{
+    return this->hasOffset_ ? int(8 * this->getScale()) : 0;
 }
 
 }  // namespace widgets

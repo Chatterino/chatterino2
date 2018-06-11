@@ -88,7 +88,7 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
         QRadialGradient gradient(QPointF(mousePos_), this->width() / 2);
 
         gradient.setColorAt(0,
-                            QColor(c.red(), c.green(), c.blue(), int(60 * this->hoverMultiplier_)));
+                            QColor(c.red(), c.green(), c.blue(), int(50 * this->hoverMultiplier_)));
         gradient.setColorAt(1,
                             QColor(c.red(), c.green(), c.blue(), int(40 * this->hoverMultiplier_)));
 
@@ -97,7 +97,7 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
 
     for (auto effect : this->clickEffects_) {
         QRadialGradient gradient(effect.position.x(), effect.position.y(),
-                                 effect.progress * float(width()) * 2, effect.position.x(),
+                                 effect.progress * qreal(width()) * 2, effect.position.x(),
                                  effect.position.y());
 
         gradient.setColorAt(0,

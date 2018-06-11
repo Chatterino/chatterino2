@@ -2,6 +2,7 @@
 
 #include "common.hpp"
 #include "widgets/basewidget.hpp"
+#include "widgets/helper/rippleeffectbutton.hpp"
 
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -17,7 +18,7 @@ namespace widgets {
 class Notebook;
 class SplitContainer;
 
-class NotebookTab : public BaseWidget
+class NotebookTab : public RippleEffectButton
 {
     Q_OBJECT
 

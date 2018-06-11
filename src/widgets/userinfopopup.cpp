@@ -8,6 +8,7 @@
 #include "util/urlfetch.hpp"
 #include "widgets/helper/line.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/label.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -32,9 +33,8 @@ UserInfoPopup::UserInfoPopup()
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         // avatar
-        //        auto avatar = head.emplace<QLabel>("Avatar").assign(&this->ui_.avatarButtoAn);
         auto avatar = head.emplace<RippleEffectButton>(nullptr).assign(&this->ui_.avatarButton);
-        avatar->setFixedSize(100, 100);
+        avatar->setScaleIndependantSize(100, 100);
         QObject::connect(*avatar, &RippleEffectButton::clicked, [this] {
             QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->userName_));
         });
@@ -42,14 +42,14 @@ UserInfoPopup::UserInfoPopup()
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
-            auto name = vbox.emplace<QLabel>().assign(&this->ui_.nameLabel);
+            auto name = vbox.emplace<Label>().assign(&this->ui_.nameLabel);
 
             auto font = name->font();
             font.setBold(true);
             name->setFont(font);
-            vbox.emplace<QLabel>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
-            vbox.emplace<QLabel>(TEXT_FOLLOWERS).assign(&this->ui_.followerCountLabel);
-            vbox.emplace<QLabel>(TEXT_CREATED).assign(&this->ui_.createdDateLabel);
+            vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
+            vbox.emplace<Label>(TEXT_FOLLOWERS).assign(&this->ui_.followerCountLabel);
+            vbox.emplace<Label>(TEXT_CREATED).assign(&this->ui_.createdDateLabel);
         }
     }
 
@@ -302,7 +302,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color2(255, 255, 255, 0);
 
     int buttonWidth = 32;
-    int buttonWidth2 = 24;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
@@ -312,7 +311,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>(text);
+            auto label = title.emplace<Label>(text);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
@@ -337,7 +336,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>(title_);
+            auto label = title.emplace<Label>(title_);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 

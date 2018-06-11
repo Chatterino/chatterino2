@@ -40,6 +40,7 @@ private:
     bool hasOffset_ = true;
 
     void updateSize();
+    int getOffset();
 };
 
 }  // namespace widgets
