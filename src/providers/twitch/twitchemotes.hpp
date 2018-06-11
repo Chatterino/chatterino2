@@ -8,6 +8,8 @@
 
 #include <map>
 
+#include <QString>
+
 namespace chatterino {
 namespace providers {
 namespace twitch {
@@ -36,11 +38,15 @@ public:
 
     struct EmoteSet {
         QString key;
+        QString channelName;
         std::vector<TwitchEmote> emotes;
     };
 
+    // std::map<QString, SubscriptionChannel> subscriberSet;
+    std::map<std::string, EmoteSet> emoteSets;
+
     struct TwitchAccountEmoteData {
-        std::vector<EmoteSet> emoteSets;
+        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
 
         std::vector<QString> emoteCodes;
 
