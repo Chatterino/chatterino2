@@ -23,7 +23,7 @@ private:
         QDialogButtonBox buttonBox;
         QPushButton okButton;
         QPushButton cancelButton;
-    } ui;
+    } ui_;
 
     QString channelName;
 

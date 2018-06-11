@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/basewidget.hpp"
-#include "widgets/helper/label.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/helper/signallabel.hpp"
 
@@ -23,6 +22,7 @@ namespace chatterino {
 namespace widgets {
 
 class Split;
+class Label;
 
 class SplitHeader : public BaseWidget, pajlada::Signals::SignalHolder
 {
@@ -61,7 +61,7 @@ private:
 
     RippleEffectButton *dropdownButton;
     //    Label *titleLabel;
-    QLabel *titleLabel;
+    Label *titleLabel;
     RippleEffectLabel *modeButton;
     RippleEffectButton *moderationButton;
 

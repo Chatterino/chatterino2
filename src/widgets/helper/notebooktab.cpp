@@ -5,6 +5,7 @@
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "util/clamp.hpp"
 #include "util/helpers.hpp"
 #include "widgets/notebook.hpp"
 #include "widgets/settingsdialog.hpp"
@@ -78,12 +79,12 @@ void NotebookTab::updateSize()
         FontStyle::UiTabs, float(qreal(this->getScale()) * this->devicePixelRatioF()));
 
     if (this->hasXButton()) {
-        width = int((metrics.width(this->getTitle()) + 32) * scale);
+        width = (metrics.width(this->getTitle()) + int(32 * scale));
     } else {
-        width = int((metrics.width(this->getTitle()) + 16) * scale);
+        width = (metrics.width(this->getTitle()) + int(16 * scale));
     }
 
-    width = std::max<int>(this->height(), std::min(int(150 * scale), width));
+    width = util::clamp(width, this->height(), int(150 * scale));
 
     if (this->width() != width) {
         this->resize(width, int(NOTEBOOK_TAB_HEIGHT * scale));

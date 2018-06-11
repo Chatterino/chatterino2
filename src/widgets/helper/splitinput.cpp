@@ -112,6 +112,7 @@ void SplitInput::scaleChangedEvent(float scale)
 
     // set maximum height
     this->setMaximumHeight(int(150 * this->getScale()));
+    this->ui_.textEdit->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 }
 
 void SplitInput::themeRefreshEvent()

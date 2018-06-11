@@ -121,7 +121,7 @@ FontManager::FontData FontManager::createFontData(Type type, float scale)
 
         static std::unordered_map<Type, UiFontData> defaultSize{
             {Tiny, {8, "Monospace", false, QFont::Normal}},
-            {UiMedium, {int(12 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {UiMedium, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
             {UiTabs, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
         };
 

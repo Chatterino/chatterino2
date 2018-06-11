@@ -25,7 +25,7 @@ namespace widgets {
 SettingsDialog *SettingsDialog::handle = nullptr;
 
 SettingsDialog::SettingsDialog()
-    : BaseWindow()
+    : BaseWindow(nullptr, BaseWindow::DisableCustomScaling)
 {
     this->initUi();
 
@@ -40,30 +40,30 @@ void SettingsDialog::initUi()
 
     // tab pages
     layoutCreator.emplace<QWidget>()
-        .assign(&this->ui.tabContainerContainer)
+        .assign(&this->ui_.tabContainerContainer)
         .emplace<QVBoxLayout>()
         .withoutMargin()
-        .assign(&this->ui.tabContainer);
+        .assign(&this->ui_.tabContainer);
 
     // right side layout
     auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
-        right.emplace<QStackedLayout>().assign(&this->ui.pageStack).withoutMargin();
+        right.emplace<QStackedLayout>().assign(&this->ui_.pageStack).withoutMargin();
 
         auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
         {
-            this->ui.okButton = buttons->addButton("Ok", QDialogButtonBox::YesRole);
-            this->ui.cancelButton = buttons->addButton("Cancel", QDialogButtonBox::NoRole);
+            this->ui_.okButton = buttons->addButton("Ok", QDialogButtonBox::YesRole);
+            this->ui_.cancelButton = buttons->addButton("Cancel", QDialogButtonBox::NoRole);
         }
     }
 
     // ---- misc
-    this->ui.tabContainerContainer->setObjectName("tabWidget");
-    this->ui.pageStack->setObjectName("pages");
+    this->ui_.tabContainerContainer->setObjectName("tabWidget");
+    this->ui_.pageStack->setObjectName("pages");
 
-    QObject::connect(this->ui.okButton, &QPushButton::clicked, this,
+    QObject::connect(this->ui_.okButton, &QPushButton::clicked, this,
                      &SettingsDialog::okButtonClicked);
-    QObject::connect(this->ui.cancelButton, &QPushButton::clicked, this,
+    QObject::connect(this->ui_.cancelButton, &QPushButton::clicked, this,
                      &SettingsDialog::cancelButtonClicked);
 }
 
@@ -74,23 +74,23 @@ SettingsDialog *SettingsDialog::getHandle()
 
 void SettingsDialog::addTabs()
 {
-    this->ui.tabContainer->setSpacing(0);
+    this->ui_.tabContainer->setSpacing(0);
 
     this->addTab(new settingspages::AccountsPage);
 
-    this->ui.tabContainer->addSpacing(16);
+    this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new settingspages::AppearancePage);
     this->addTab(new settingspages::BehaviourPage);
 
-    this->ui.tabContainer->addSpacing(16);
+    this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new settingspages::CommandPage);
     //    this->addTab(new settingspages::EmotesPage);
     this->addTab(new settingspages::HighlightingPage);
     this->addTab(new settingspages::IgnoreUsersPage);
 
-    this->ui.tabContainer->addSpacing(16);
+    this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new settingspages::KeyboardSettingsPage);
     //    this->addTab(new settingspages::LogsPage);
@@ -98,7 +98,7 @@ void SettingsDialog::addTabs()
     //    this->addTab(new settingspages::SpecialChannelsPage);
     this->addTab(new settingspages::ExternalToolsPage);
 
-    this->ui.tabContainer->addStretch(1);
+    this->ui_.tabContainer->addStretch(1);
     this->addTab(new settingspages::AboutPage, Qt::AlignBottom);
 }
 
@@ -106,8 +106,8 @@ void SettingsDialog::addTab(settingspages::SettingsPage *page, Qt::Alignment ali
 {
     auto tab = new SettingsDialogTab(this, page, page->getIconResource());
 
-    this->ui.pageStack->addWidget(page);
-    this->ui.tabContainer->addWidget(tab, 0, alignment);
+    this->ui_.pageStack->addWidget(page);
+    this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs.push_back(tab);
 
     if (this->tabs.size() == 1) {
@@ -117,7 +117,7 @@ void SettingsDialog::addTab(settingspages::SettingsPage *page, Qt::Alignment ali
 
 void SettingsDialog::select(SettingsDialogTab *tab)
 {
-    this->ui.pageStack->setCurrentWidget(tab->getSettingsPage());
+    this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
 
     if (this->selectedTab != nullptr) {
         this->selectedTab->setSelected(false);
@@ -171,7 +171,7 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
 
     this->setStyleSheet(styleSheet);
 
-    this->ui.tabContainerContainer->setFixedWidth((int)(200 * newDpi));
+    this->ui_.tabContainerContainer->setFixedWidth((int)(200 * newDpi));
 }
 
 void SettingsDialog::themeRefreshEvent()

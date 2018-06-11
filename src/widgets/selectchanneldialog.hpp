@@ -46,7 +46,7 @@ private:
             QRadioButton *mentions;
             QRadioButton *watching;
         } twitch;
-    } ui;
+    } ui_;
 
     EventFilter tabFilter;
 

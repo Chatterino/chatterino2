@@ -45,7 +45,7 @@ private:
         QStackedLayout *pageStack;
         QPushButton *okButton;
         QPushButton *cancelButton;
-    } ui;
+    } ui_;
 
     std::vector<SettingsDialogTab *> tabs;
 
