@@ -44,6 +44,7 @@ public:
     IntSetting collpseMessagesMinLines = {"/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
                                               false};
+    IntSetting uiScale = {"/appearance/uiScale", 0};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};

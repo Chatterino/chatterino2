@@ -8,23 +8,23 @@ namespace widgets {
 QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     : channelName(_channelName)
 {
-    this->ui.okButton.setText("OK");
-    this->ui.cancelButton.setText("Cancel");
+    this->ui_.okButton.setText("OK");
+    this->ui_.cancelButton.setText("Cancel");
 
-    QObject::connect(&this->ui.okButton, &QPushButton::clicked, this,
+    QObject::connect(&this->ui_.okButton, &QPushButton::clicked, this,
                      &QualityPopup::okButtonClicked);
-    QObject::connect(&this->ui.cancelButton, &QPushButton::clicked, this,
+    QObject::connect(&this->ui_.cancelButton, &QPushButton::clicked, this,
                      &QualityPopup::cancelButtonClicked);
 
-    this->ui.buttonBox.addButton(&this->ui.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
-    this->ui.buttonBox.addButton(&this->ui.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
+    this->ui_.buttonBox.addButton(&this->ui_.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
+    this->ui_.buttonBox.addButton(&this->ui_.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
 
-    this->ui.selector.addItems(options);
+    this->ui_.selector.addItems(options);
 
-    this->ui.vbox.addWidget(&this->ui.selector);
-    this->ui.vbox.addWidget(&this->ui.buttonBox);
+    this->ui_.vbox.addWidget(&this->ui_.selector);
+    this->ui_.vbox.addWidget(&this->ui_.buttonBox);
 
-    this->setLayout(&this->ui.vbox);
+    this->setLayout(&this->ui_.vbox);
 }
 
 void QualityPopup::showDialog(const QString &channelName, QStringList options)
@@ -44,7 +44,7 @@ void QualityPopup::okButtonClicked()
     QString channelURL = "twitch.tv/" + this->channelName;
 
     try {
-        streamlink::OpenStreamlink(channelURL, this->ui.selector.currentText());
+        streamlink::OpenStreamlink(channelURL, this->ui_.selector.currentText());
     } catch (const streamlink::Exception &ex) {
         debug::Log("Exception caught trying to open streamlink: {}", ex.what());
     }

@@ -3,6 +3,7 @@
 #include "widgets/settingspages/settingspage.hpp"
 
 #include <QScrollArea>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 namespace widgets {
@@ -15,6 +16,9 @@ public:
 
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();
+    QLayout *createUiScaleSlider();
+
+    std::vector<pajlada::Signals::ScopedConnection> connections_;
 };
 
 }  // namespace settingspages

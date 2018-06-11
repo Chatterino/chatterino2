@@ -9,7 +9,9 @@ namespace widgets {
 class Label : public BaseWidget
 {
 public:
-    Label(BaseWidget *parent);
+    explicit Label(QString text = QString(), FontStyle style = FontStyle::UiMedium);
+    explicit Label(BaseWidget *parent, QString text = QString(),
+                   FontStyle style = FontStyle::UiMedium);
 
     const QString &getText() const;
     void setText(const QString &text);
@@ -17,17 +19,27 @@ public:
     FontStyle getFontStyle() const;
     void setFontStyle(FontStyle style);
 
+    bool getCentered() const;
+    void setCentered(bool centered);
+
+    bool getHasOffset() const;
+    void setHasOffset(bool centered);
+
 protected:
     virtual void scaleChangedEvent(float scale) override;
-    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void paintEvent(QPaintEvent *) override;
 
     virtual QSize sizeHint() const override;
     virtual QSize minimumSizeHint() const override;
 
 private:
-    QSize preferedSize;
-    QString text;
-    FontStyle fontStyle = FontStyle::ChatMedium;
+    QString text_;
+    FontStyle fontStyle_;
+    QSize preferedSize_;
+    bool centered_ = false;
+    bool hasOffset_ = true;
+
+    void updateSize();
 };
 
 }  // namespace widgets

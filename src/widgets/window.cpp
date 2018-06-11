@@ -96,6 +96,23 @@ Window::Window(WindowType _type)
     CreateWindowShortcut(this, "CTRL+8", [this] { this->notebook.selectIndex(7); });
     CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
 
+    {
+        auto s = new QShortcut(QKeySequence::ZoomIn, this);
+        s->setContext(Qt::WindowShortcut);
+        QObject::connect(s, &QShortcut::activated, this, [] {
+            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() + 1));
+        });
+    }
+    {
+        auto s = new QShortcut(QKeySequence::ZoomOut, this);
+        s->setContext(Qt::WindowShortcut);
+        QObject::connect(s, &QShortcut::activated, this, [] {
+            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() - 1));
+        });
+    }
+
     // CTRL+SHIFT+T: New tab
     CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addPage(true); });
 

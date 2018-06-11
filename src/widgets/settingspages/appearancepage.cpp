@@ -56,6 +56,7 @@ AppearancePage::AppearancePage()
 
         form->addRow("Theme:", theme);
         // form->addRow("Theme color:", this->createThemeColorChanger());
+        form->addRow("UI Scaling:", this->createUiScaleSlider());
         form->addRow("Font:", this->createFontChanger());
 
         form->addRow("Tabs:", this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
@@ -236,6 +237,33 @@ QLayout *AppearancePage::createFontChanger()
         dialog.show();
         dialog.exec();
     });
+
+    return layout;
+}
+
+QLayout *AppearancePage::createUiScaleSlider()
+{
+    auto layout = new QHBoxLayout();
+    auto slider = new QSlider(Qt::Horizontal);
+    auto label = new QLabel();
+    layout->addWidget(slider);
+    layout->addWidget(label);
+
+    slider->setMinimum(singletons::WindowManager::uiScaleMin);
+    slider->setMaximum(singletons::WindowManager::uiScaleMax);
+    slider->setValue(
+        singletons::WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
+
+    label->setMinimumWidth(100);
+
+    QObject::connect(slider, &QSlider::valueChanged,
+                     [](auto value) { getApp()->settings->uiScale.setValue(value); });
+
+    getApp()->settings->uiScale.connect(
+        [label](auto, auto) {
+            label->setText(QString::number(singletons::WindowManager::getUiScaleValue()));
+        },
+        this->connections_);
 
     return layout;
 }
