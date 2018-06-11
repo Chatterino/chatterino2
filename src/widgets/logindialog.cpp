@@ -1,7 +1,7 @@
 #include "widgets/logindialog.hpp"
 #include "common.hpp"
 #include "util/urlfetch.hpp"
-#if USEWINSDK
+#ifdef USEWINSDK
 #include <Windows.h>
 #endif
 
@@ -190,7 +190,7 @@ void AdvancedLoginWidget::refreshButtons()
 
 LoginWidget::LoginWidget()
 {
-    #if USEWINSDK
+    #ifdef USEWINSDK
     ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
     #endif
 
