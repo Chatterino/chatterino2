@@ -37,7 +37,8 @@ SelectChannelDialog::SelectChannelDialog()
         auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(&this->ui_.twitch.channel);
         auto channel_lbl = vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
         channel_lbl->setWordWrap(true);
-        auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(&this->ui_.twitch.channelName);
+        auto channel_edit =
+            vbox.emplace<QLineEdit>().hidden().assign(&this->ui_.twitch.channelName);
 
         QObject::connect(*channel_btn, &QRadioButton::toggled, [=](bool enabled) mutable {
             if (enabled) {
@@ -125,8 +126,8 @@ SelectChannelDialog::SelectChannelDialog()
     }
 
     this->setScaleIndependantSize(300, 210);
-    this->ui.notebook->selectIndex(TAB_TWITCH);
-    this->ui.twitch.channel->setFocus();
+    this->ui_.notebook->selectIndex(TAB_TWITCH);
+    this->ui_.twitch.channel->setFocus();
 
     // Shortcuts
     auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
