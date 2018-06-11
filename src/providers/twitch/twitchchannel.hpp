@@ -100,6 +100,7 @@ private:
 
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
+    void startRefreshLiveStatusTimer(int intervalMS);
 
     mutable std::mutex streamStatusMutex;
     StreamStatus streamStatus;

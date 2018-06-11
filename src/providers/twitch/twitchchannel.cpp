@@ -31,18 +31,10 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 {
     debug::Log("[TwitchChannel:{}] Opened", this->name);
 
+    this->startRefreshLiveStatusTimer(60 * 1000);
+
     auto app = getApp();
     this->reloadChannelEmotes();
-
-    this->liveStatusTimer = new QTimer;
-    QObject::connect(this->liveStatusTimer, &QTimer::timeout, [this]() {
-        this->refreshLiveStatus();  //
-    });
-    this->liveStatusTimer->start(60000);
-
-    this->roomIDchanged.connect([this]() {
-        this->refreshLiveStatus();  //
-    });
 
     this->managedConnect(app->accounts->twitch.currentUserChanged,
                          [this]() { this->setMod(false); });
@@ -318,6 +310,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
 void TwitchChannel::refreshLiveStatus()
 {
     if (this->roomID.isEmpty()) {
+        debug::Log("[TwitchChannel:{}] Refreshing live status (Missing ID)", this->name);
         this->setLive(false);
         return;
     }
@@ -373,6 +366,7 @@ void TwitchChannel::refreshLiveStatus()
 
         {
             std::lock_guard<std::mutex> lock(channel->streamStatusMutex);
+            channel->streamStatus.live = true;
             channel->streamStatus.viewerCount = stream["viewers"].GetUint();
             channel->streamStatus.game = stream["game"].GetString();
             channel->streamStatus.title = streamChannel["status"].GetString();
@@ -400,8 +394,24 @@ void TwitchChannel::refreshLiveStatus()
             }
         }
 
-        channel->setLive(true);
+        // Signal all listeners that the stream status has been updated
+        channel->updateLiveInfo.invoke();
     });
+}
+
+void TwitchChannel::startRefreshLiveStatusTimer(int intervalMS)
+{
+    this->liveStatusTimer = new QTimer;
+    QObject::connect(this->liveStatusTimer, &QTimer::timeout, [this]() {
+        this->refreshLiveStatus();  //
+    });
+
+    // When the Room ID of a twitch channel has been set, refresh the live status an extra time
+    this->roomIDchanged.connect([this]() {
+        this->refreshLiveStatus();  //
+    });
+
+    this->liveStatusTimer->start(intervalMS);
 }
 
 void TwitchChannel::fetchRecentMessages()
