@@ -118,6 +118,7 @@ public:
 
     void setRequestType(RequestType newRequestType)
     {
+        debug::Log("Setting request type to {}", (int)newRequestType);
         this->data.requestType = newRequestType;
     }
 
@@ -318,7 +319,7 @@ public:
             } break;
 
             default: {
-                debug::Log("Unhandled request type {}", (int)this->data.requestType);
+                debug::Log("[Execute] Unhandled request type {}", (int)this->data.requestType);
             } break;
         }
     }

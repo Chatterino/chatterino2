@@ -2,6 +2,8 @@
 
 #include "debug/log.hpp"
 #include "messages/image.hpp"
+#include "util/benchmark.hpp"
+#include "util/rapidjson-helpers.hpp"
 #include "util/urlfetch.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
@@ -19,6 +21,43 @@ QString getEmoteLink(const QString &id, const QString &emoteScale)
     value.detach();
 
     return value.replace("{id}", id).replace("{scale}", emoteScale);
+}
+
+void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
+{
+    if (!emoteSet) {
+        debug::Log("null emote set sent");
+        return;
+    }
+
+    debug::Log("Load twitch emote set data for {}", emoteSet->key);
+    util::NetworkRequest req("http://localhost:1234/twitchemotes/set/" + emoteSet->key + "/");
+
+    req.setRequestType(util::NetworkRequest::GetRequest);
+
+    req.onError([](int errorCode) -> bool {
+        debug::Log("Emote sets on ERROR {}", errorCode);
+        return true;
+    });
+
+    req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
+        debug::Log("Emote sets on success");
+        if (!root.IsObject()) {
+            return false;
+        }
+
+        std::string emoteSetID;
+        QString channelName;
+        if (!rj::getSafe(root, "channel_name", channelName)) {
+            return false;
+        }
+
+        emoteSet->channelName = channelName;
+
+        return true;
+    });
+
+    req.execute();
 }
 
 }  // namespace
@@ -87,22 +126,24 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
 
         auto emoticonSets = root.value("emoticon_sets").toObject();
         for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
-            EmoteSet emoteSet;
+            auto emoteSet = std::make_shared<EmoteSet>();
 
-            emoteSet.key = it.key();
+            emoteSet->key = it.key();
+
+            loadSetData(emoteSet);
 
             for (QJsonValue emoteValue : it.value().toArray()) {
                 QJsonObject emoticon = emoteValue.toObject();
                 QString id = QString::number(emoticon["id"].toInt());
                 QString code = emoticon["code"].toString();
-                emoteSet.emotes.emplace_back(id, code);
+                emoteSet->emotes.emplace_back(id, code);
                 emoteData.emoteCodes.push_back(code);
 
                 util::EmoteData emote = this->getEmoteById(id, code);
                 emoteData.emotes.insert(code, emote);
             }
 
-            emoteData.emoteSets.emplace_back(std::move(emoteSet));
+            emoteData.emoteSets.emplace_back(emoteSet);
         }
 
         emoteData.filled = true;
