@@ -150,6 +150,8 @@ private:
 
     std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen_;
 
+    int getLayoutWidth() const;
+
 private slots:
     void wordFlagsChanged()
     {

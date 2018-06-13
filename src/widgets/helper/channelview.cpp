@@ -65,12 +65,15 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->queueUpdate();
     });
 
+    this->scrollBar_.getDesiredValueChanged().connect(
+        [this] { this->pausedByScrollingUp_ = !this->scrollBar_.isAtBottom(); });
+
     this->connections_.push_back(app->windows->repaintGifs.connect([&] {
         this->queueUpdate();  //
     }));
 
     this->connections_.push_back(app->windows->layout.connect([&](Channel *channel) {
-        if (channel == nullptr || this->channel.get() == channel) {
+        if (channel == nullptr || this->channel_.get() == channel) {
             this->layoutMessages();
         }
     }));
@@ -84,7 +87,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->layoutMessages();  //
     }));
 
-    QObject::connect(goToBottom, &RippleEffectLabel::clicked, this, [=] {
+    QObject::connect(this->goToBottom_, &RippleEffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
             this->scrollBar_.scrollToBottom(
                 app->settings->enableSmoothScrollingNewMessages.getValue());
@@ -1202,7 +1205,7 @@ bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLay
 
 int ChannelView::getLayoutWidth() const
 {
-    if (this->scrollBar.isVisible())
+    if (this->scrollBar_.isVisible())
         return int(this->width() - 8 * this->getScale());
 
     return this->width();
