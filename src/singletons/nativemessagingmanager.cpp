@@ -7,6 +7,7 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -25,7 +26,7 @@ namespace ipc = boost::interprocess;
 
 #include <iostream>
 
-#define EXTENSION_ID "aeicjepmjkgmbeohnchmpfjbpchogmjn"
+#define EXTENSION_ID "lgnlbmhbnbncmiohgcbhgiaddibhinon"
 #define MESSAGE_SIZE 1024
 
 namespace chatterino {
@@ -55,37 +56,60 @@ void NativeMessagingManager::registerHost()
         return;
     }
 
-    // create manifest
-    QJsonDocument document;
-    QJsonObject root_obj;
-    root_obj.insert("name", "com.chatterino.chatterino");
-    root_obj.insert("description", "Browser interaction with chatterino.");
-    root_obj.insert("path", QCoreApplication::applicationFilePath());
-    root_obj.insert("type", "stdio");
+    auto getBaseDocument = [&] {
+        QJsonObject obj;
+        obj.insert("name", "com.chatterino.chatterino");
+        obj.insert("description", "Browser interaction with chatterino.");
+        obj.insert("path", QCoreApplication::applicationFilePath());
+        obj.insert("type", "stdio");
 
-    // chrome
-    QJsonArray allowed_origins_arr = {"chrome-extension://aeicjepmjkgmbeohnchmpfjbpchogmjn/"};
-    root_obj.insert("allowed_origins", allowed_origins_arr);
+        return obj;
+    };
 
-    // firefox
-    QJsonArray allowed_extensions = {"585a153c7e1ac5463478f25f8f12220e9097e716@temporary-addon"};
-    root_obj.insert("allowed_extensions", allowed_extensions);
-
-    // save the manifest
-    QString manifestPath = app->paths->settingsFolderPath + "/native-messaging-manifest.json";
-
-    document.setObject(root_obj);
-
-    QFile file(manifestPath);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.write(document.toJson());
-    file.flush();
+    auto registerManifest = [&](const QString &manifestFilename, const QString &registryKeyName,
+                                const QJsonDocument &document) {
+        // save the manifest
+        QString manifestPath = app->paths->settingsFolderPath + manifestFilename;
+        QFile file(manifestPath);
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.write(document.toJson());
+        file.flush();
 
 #ifdef Q_OS_WIN
-    // clang-format off
-    QProcess::execute("REG ADD \"HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
+        // clang-format off
+        QProcess::execute("REG ADD \"" + registryKeyName + "\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
 // clang-format on
 #endif
+    };
+
+    // chrome
+    {
+        QJsonDocument document;
+
+        auto obj = getBaseDocument();
+        QJsonArray allowed_origins_arr = {"chrome-extension://aeicjepmjkgmbeohnchmpfjbpchogmjn/"};
+        obj.insert("allowed_origins", allowed_origins_arr);
+        document.setObject(obj);
+
+        registerManifest(
+            "/native-messaging-manifest-chrome.json",
+            "HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino",
+            document);
+    }
+
+    // firefox
+    {
+        QJsonDocument document;
+
+        auto obj = getBaseDocument();
+        QJsonArray allowed_extensions = {"chatterino_native@chatterino.com"};
+        obj.insert("allowed_extensions", allowed_extensions);
+        document.setObject(obj);
+
+        registerManifest("/native-messaging-manifest-firefox.json",
+                         "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com.chatterino.chatterino",
+                         document);
+    }
 }
 
 void NativeMessagingManager::openGuiMessageQueue()
@@ -150,6 +174,8 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
 
+        qDebug() << attach;
+
 #ifdef USEWINSDK
         widgets::AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
@@ -173,12 +199,12 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 
                 if (attach) {
 #ifdef USEWINSDK
-                    if (args.height != -1) {
-                        auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
-                        if (!name.isEmpty()) {
-                            window->setChannel(app->twitch.server->getOrAddChannel(name));
-                        }
+                    //                    if (args.height != -1) {
+                    auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
+                    if (!name.isEmpty()) {
+                        window->setChannel(app->twitch.server->getOrAddChannel(name));
                     }
+//                    }
 //                    window->show();
 #endif
                 }
@@ -204,7 +230,14 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
     } else {
         qDebug() << "NM unknown action " + action;
     }
-}  // namespace singletons
+}
+
+std::string &NativeMessagingManager::getGuiMessageQueueName()
+{
+    static std::string name =
+        "chatterino_gui" + singletons::PathManager::getInstance()->appPathHash.toStdString();
+    return name;
+}
 
 }  // namespace singletons
 }  // namespace chatterino

@@ -4,9 +4,12 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QStandardPaths>
+#include <cassert>
 
 namespace chatterino {
 namespace singletons {
+
+PathManager *PathManager::instance = nullptr;
 
 PathManager::PathManager(int argc, char **argv)
 {
@@ -66,6 +69,20 @@ PathManager::PathManager(int argc, char **argv)
     if (!QDir().mkpath(this->logsFolderPath)) {
         throw std::runtime_error("Error creating logs folder");
     }
+}
+
+void PathManager::initInstance(int argc, char **argv)
+{
+    assert(!instance);
+
+    instance = new PathManager(argc, argv);
+}
+
+PathManager *PathManager::getInstance()
+{
+    assert(instance);
+
+    return instance;
 }
 
 bool PathManager::createFolder(const QString &folderPath)

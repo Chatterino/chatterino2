@@ -57,7 +57,7 @@ void Application::construct()
 
     // 1. Instantiate all classes
     this->settings = new singletons::SettingManager;
-    this->paths = new singletons::PathManager(this->argc, this->argv);
+    this->paths = singletons::PathManager::getInstance();
     this->themes = new singletons::ThemeManager;
     this->windows = new singletons::WindowManager;
     this->logging = new singletons::LoggingManager;
@@ -89,7 +89,9 @@ void Application::initialize()
     // 2. Initialize/load classes
     this->settings->initialize();
 
+#ifdef Q_OS_WIN
     this->nativeMessaging->registerHost();
+#endif
 
     this->settings->load();
     this->commands->load();

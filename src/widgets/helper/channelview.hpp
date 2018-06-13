@@ -28,7 +28,7 @@ class ChannelView : public BaseWidget
 
 public:
     explicit ChannelView(BaseWidget *parent = nullptr);
-    virtual ~ChannelView();
+    virtual ~ChannelView() override;
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -42,7 +42,7 @@ public:
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
-    void setChannel(ChannelPtr channel);
+    void setChannel(ChannelPtr channel_);
     messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
@@ -78,24 +78,25 @@ protected:
                          QPoint &relativePos, int &index);
 
 private:
-    QTimer *layoutCooldown;
-    bool layoutQueued;
+    QTimer *layoutCooldown_;
+    bool layoutQueued_;
 
-    QTimer updateTimer;
-    bool updateQueued = false;
-    bool messageWasAdded = false;
-    bool lastMessageHasAlternateBackground = false;
+    QTimer updateTimer_;
+    bool updateQueued_ = false;
+    bool messageWasAdded_ = false;
+    bool lastMessageHasAlternateBackground_ = false;
 
-    bool pausedTemporarily = false;
-    bool pausedBySelection = false;
-    int messagesAddedSinceSelectionPause = 0;
-    int getLayoutWidth() const;
+    bool pausedTemporarily_ = false;
+    bool pausedBySelection_ = false;
+    bool pausedByScrollingUp_ = false;
+    void updatePauseStatus();
+    int messagesAddedSinceSelectionPause_ = 0;
 
-    QTimer pauseTimeout;
-    boost::optional<messages::MessageElement::Flags> overrideFlags;
-    messages::MessageLayoutPtr lastReadMessage;
+    QTimer pauseTimeout_;
+    boost::optional<messages::MessageElement::Flags> overrideFlags_;
+    messages::MessageLayoutPtr lastReadMessage_;
 
-    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot;
+    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot_;
 
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);
@@ -114,40 +115,40 @@ private:
     //    void beginPause();
     //    void endPause();
 
-    ChannelPtr channel;
+    ChannelPtr channel_;
 
-    Scrollbar scrollBar;
-    RippleEffectLabel *goToBottom;
+    Scrollbar scrollBar_;
+    RippleEffectLabel *goToBottom_;
 
     // This variable can be used to decide whether or not we should render the "Show latest
     // messages" button
-    bool showingLatestMessages = true;
-    bool enableScrollingToBottom = true;
+    bool showingLatestMessages_ = true;
+    bool enableScrollingToBottom_ = true;
 
-    bool onlyUpdateEmotes = false;
+    bool onlyUpdateEmotes_ = false;
 
     // Mouse event variables
-    bool isMouseDown = false;
-    bool isRightMouseDown = false;
-    QPointF lastPressPosition;
-    QPointF lastRightPressPosition;
+    bool isMouseDown_ = false;
+    bool isRightMouseDown_ = false;
+    QPointF lastPressPosition_;
+    QPointF lastRightPressPosition_;
 
-    messages::Selection selection;
-    bool selecting = false;
+    messages::Selection selection_;
+    bool selecting_ = false;
 
     messages::LimitedQueue<messages::MessageLayoutPtr> messages;
 
-    pajlada::Signals::Connection messageAppendedConnection;
-    pajlada::Signals::Connection messageAddedAtStartConnection;
-    pajlada::Signals::Connection messageRemovedConnection;
-    pajlada::Signals::Connection messageReplacedConnection;
-    pajlada::Signals::Connection repaintGifsConnection;
-    pajlada::Signals::Connection layoutConnection;
+    pajlada::Signals::Connection messageAppendedConnection_;
+    pajlada::Signals::Connection messageAddedAtStartConnection_;
+    pajlada::Signals::Connection messageRemovedConnection_;
+    pajlada::Signals::Connection messageReplacedConnection_;
+    pajlada::Signals::Connection repaintGifsConnection_;
+    pajlada::Signals::Connection layoutConnection_;
 
     std::vector<pajlada::Signals::ScopedConnection> connections_;
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
-    std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen;
+    std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen_;
 
 private slots:
     void wordFlagsChanged()

@@ -24,8 +24,11 @@ public:
     Scrollbar(ChannelView *parent = nullptr);
 
     void addHighlight(ScrollbarHighlight highlight);
-    void addHighlightsAtStart(const std::vector<ScrollbarHighlight> &highlights);
+    void addHighlightsAtStart(const std::vector<ScrollbarHighlight> &highlights_);
     void replaceHighlight(size_t index, ScrollbarHighlight replacement);
+
+    void pauseHighlights();
+    void unpauseHighlights();
 
     void scrollToBottom(bool animate = false);
     bool isAtBottom() const;
@@ -41,14 +44,16 @@ public:
     qreal getSmallChange() const;
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
+
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
     pajlada::Signals::NoArgSignal &getCurrentValueChanged();
+    pajlada::Signals::NoArgSignal &getDesiredValueChanged();
     void setCurrentValue(qreal value);
 
     void printCurrentState(const QString &prefix = QString()) const;
 
-    Q_PROPERTY(qreal desiredValue READ getDesiredValue WRITE setDesiredValue)
+    Q_PROPERTY(qreal desiredValue_ READ getDesiredValue WRITE setDesiredValue)
 
 protected:
     void paintEvent(QPaintEvent *) override;
@@ -59,34 +64,38 @@ protected:
     void leaveEvent(QEvent *) override;
 
 private:
-    Q_PROPERTY(qreal currentValue READ getCurrentValue WRITE setCurrentValue)
+    Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
 
-    QMutex mutex;
+    QMutex mutex_;
 
-    QPropertyAnimation currentValueAnimation;
+    QPropertyAnimation currentValueAnimation_;
 
-    messages::LimitedQueue<ScrollbarHighlight> highlights;
+    messages::LimitedQueue<ScrollbarHighlight> highlights_;
+    bool highlightsPaused_{false};
+    messages::LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
+    messages::LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
 
-    bool atBottom = false;
+    bool atBottom_{false};
 
-    int mouseOverIndex = -1;
-    int mouseDownIndex = -1;
-    QPoint lastMousePosition;
+    int mouseOverIndex_ = -1;
+    int mouseDownIndex_ = -1;
+    QPoint lastMousePosition_;
 
-    int buttonHeight = 0;
-    int trackHeight = 100;
+    int buttonHeight_ = 0;
+    int trackHeight_ = 100;
 
-    QRect thumbRect;
+    QRect thumbRect_;
 
-    qreal maximum = 0;
-    qreal minimum = 0;
-    qreal largeChange = 0;
-    qreal smallChange = 5;
-    qreal desiredValue = 0;
-    qreal currentValue = 0;
-    qreal smoothScrollingOffset = 0;
+    qreal maximum_ = 0;
+    qreal minimum_ = 0;
+    qreal largeChange_ = 0;
+    qreal smallChange_ = 5;
+    qreal desiredValue_ = 0;
+    qreal currentValue_ = 0;
+    qreal smoothScrollingOffset_ = 0;
 
-    pajlada::Signals::NoArgSignal currentValueChanged;
+    pajlada::Signals::NoArgSignal currentValueChanged_;
+    pajlada::Signals::NoArgSignal desiredValueChanged_;
 
     void updateScroll();
 };

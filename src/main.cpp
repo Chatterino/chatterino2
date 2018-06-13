@@ -2,6 +2,7 @@
 #include "singletons/nativemessagingmanager.hpp"
 #include "singletons/pathmanager.hpp"
 #include "singletons/updatemanager.hpp"
+#include "util/debugcount.hpp"
 #include "util/networkmanager.hpp"
 #include "widgets/lastruncrashdialog.hpp"
 
@@ -25,30 +26,11 @@
 #include <stdio.h>
 #endif
 
-int runGui(int argc, char *argv[]);
+int runGui(QApplication &a, int argc, char *argv[]);
 void runNativeMessagingHost();
 void installCustomPalette();
 
 int main(int argc, char *argv[])
-{
-    // read args
-    QStringList args;
-
-    for (int i = 1; i < argc; i++) {
-        args << argv[i];
-    }
-
-    // TODO: can be any argument
-    if (args.size() > 0 && args[0].startsWith("chrome-extension://")) {
-        runNativeMessagingHost();
-        return 0;
-    }
-
-    // run gui
-    return runGui(argc, argv);
-}
-
-int runGui(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_Use96Dpi, true);
 #ifdef Q_OS_WIN32
@@ -57,6 +39,32 @@ int runGui(int argc, char *argv[])
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
+    chatterino::singletons::PathManager::initInstance(argc, argv);
+
+    // read args
+    QStringList args;
+
+    for (int i = 1; i < argc; i++) {
+        args << argv[i];
+    }
+
+    for (auto &arg : args) {
+        chatterino::util::DebugCount::increase(arg);
+    }
+
+    // TODO: can be any argument
+    if (args.size() > 0 &&
+        (args[0].startsWith("chrome-extension://") || args[0].endsWith(".json"))) {
+        runNativeMessagingHost();
+        return 0;
+    }
+
+    // run gui
+    return runGui(a, argc, argv);
+}
+
+int runGui(QApplication &a, int argc, char *argv[])
+{
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
     installCustomPalette();
