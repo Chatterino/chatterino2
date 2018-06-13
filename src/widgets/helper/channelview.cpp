@@ -27,7 +27,6 @@
 #include <functional>
 #include <memory>
 
-#define LAYOUT_WIDTH (this->width() - (this->scrollBar.isVisible() ? 16 : 2) * this->getScale())
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 400
@@ -46,7 +45,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->setMouseTracking(true);
 
-    this->managedConnections.emplace_back(app->settings->wordFlagsChanged.connect([this] {
+    this->connections_.emplace_back(app->settings->wordFlagsChanged.connect([this] {
         this->layoutMessages();
         this->update();
     }));
@@ -64,25 +63,26 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->queueUpdate();
     });
 
-    this->repaintGifsConnection = app->windows->repaintGifs.connect([&] {
+    this->connections_.push_back(app->windows->repaintGifs.connect([&] {
         this->queueUpdate();  //
-    });
-    this->layoutConnection = app->windows->layout.connect([&](Channel *channel) {
+    }));
+
+    this->connections_.push_back(app->windows->layout.connect([&](Channel *channel) {
         if (channel == nullptr || this->channel.get() == channel) {
             this->layoutMessages();
         }
-    });
+    }));
 
     this->goToBottom = new RippleEffectLabel(this, 0);
     this->goToBottom->setStyleSheet("background-color: rgba(0,0,0,0.66); color: #FFF;");
     this->goToBottom->getLabel().setText("More messages below");
     this->goToBottom->setVisible(false);
 
-    this->managedConnections.emplace_back(app->fonts->fontChanged.connect([this] {
+    this->connections_.emplace_back(app->fonts->fontChanged.connect([this] {
         this->layoutMessages();  //
     }));
 
-    connect(goToBottom, &RippleEffectLabel::clicked, this, [=] {
+    QObject::connect(goToBottom, &RippleEffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
             this->scrollBar.scrollToBottom(
                 app->settings->enableSmoothScrollingNewMessages.getValue());
@@ -109,7 +109,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         [this](auto, auto) {
             this->update();  //
         },
-        this->managedConnections);
+        this->connections_);
 
     this->layoutCooldown = new QTimer(this);
     this->layoutCooldown->setSingleShot(true);
@@ -134,12 +134,6 @@ ChannelView::ChannelView(BaseWidget *parent)
 
 ChannelView::~ChannelView()
 {
-    this->messageAppendedConnection.disconnect();
-    this->messageRemovedConnection.disconnect();
-    this->repaintGifsConnection.disconnect();
-    this->layoutConnection.disconnect();
-    this->messageAddedAtStartConnection.disconnect();
-    this->messageReplacedConnection.disconnect();
 }
 
 void ChannelView::themeRefreshEvent()
@@ -199,7 +193,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     size_t start = this->scrollBar.getCurrentValue();
     //    int layoutWidth =
     //        (this->scrollBar.isVisible() ? width() - this->scrollBar.width() : width()) - 4;
-    int layoutWidth = LAYOUT_WIDTH;
+    int layoutWidth = this->getLayoutWidth();
 
     MessageElement::Flags flags = this->getFlags();
 
@@ -365,7 +359,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->messages.clear();
 
     // on new message
-    this->messageAppendedConnection =
+    this->channelConnections_.push_back(
         newChannel->messageAppended.connect([this](MessagePtr &message) {
             MessageLayoutPtr deleted;
 
@@ -402,9 +396,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
             this->messageWasAdded = true;
             this->layoutMessages();
-        });
+        }));
 
-    this->messageAddedAtStartConnection =
+    this->channelConnections_.push_back(
         newChannel->messagesAddedAtStart.connect([this](std::vector<MessagePtr> &messages) {
             std::vector<MessageLayoutPtr> messageRefs;
             messageRefs.resize(messages.size());
@@ -432,10 +426,10 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
             this->messageWasAdded = true;
             this->layoutMessages();
-        });
+        }));
 
     // on message removed
-    this->messageRemovedConnection =
+    this->channelConnections_.push_back(
         newChannel->messageRemovedFromStart.connect([this](MessagePtr &) {
             this->selection.selectionMin.messageIndex--;
             this->selection.selectionMax.messageIndex--;
@@ -443,10 +437,10 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             this->selection.end.messageIndex--;
 
             this->layoutMessages();
-        });
+        }));
 
     // on message replaced
-    this->messageReplacedConnection =
+    this->channelConnections_.push_back(
         newChannel->messageReplaced.connect([this](size_t index, MessagePtr replacement) {
             MessageLayoutPtr newItem(new MessageLayout(replacement));
             if (this->messages.getSnapshot()[index]->flags & MessageLayout::AlternateBackground) {
@@ -457,7 +451,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
             this->messages.replaceItem(this->messages.getSnapshot()[index], newItem);
             this->layoutMessages();
-        });
+        }));
 
     auto snapshot = newChannel->getMessageSnapshot();
 
@@ -482,10 +476,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
 void ChannelView::detachChannel()
 {
-    messageAppendedConnection.disconnect();
-    messageAddedAtStartConnection.disconnect();
-    messageRemovedConnection.disconnect();
-    messageReplacedConnection.disconnect();
+    this->channelConnections_.clear();
 }
 
 void ChannelView::pause(int msecTimeout)
@@ -696,7 +687,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == 0) {
                     desired = 0;
                 } else {
-                    snapshot[i - 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
+                    snapshot[i - 1]->layout(this->getLayoutWidth(), this->getScale(),
+                                            this->getFlags());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -718,7 +710,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 if (i == snapshotLength - 1) {
                     desired = snapshot.getLength();
                 } else {
-                    snapshot[i + 1]->layout(LAYOUT_WIDTH, this->getScale(), this->getFlags());
+                    snapshot[i + 1]->layout(this->getLayoutWidth(), this->getScale(),
+                                            this->getFlags());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
@@ -985,9 +978,9 @@ void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hove
         // TODO: We might want to add direct "Open image" variants alongside the Copy
         // actions
         if (emoteElement.data.image1x != nullptr) {
-            QAction* addEntry = menu->addAction("Copy emote link...");
+            QAction *addEntry = menu->addAction("Copy emote link...");
 
-            QMenu* procmenu = new QMenu;
+            QMenu *procmenu = new QMenu;
             addEntry->setMenu(procmenu);
             procmenu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
                 QApplication::clipboard()->setText(url);  //
@@ -1017,9 +1010,9 @@ void ChannelView::addContextMenuItems(const messages::MessageLayoutElement *hove
             }
         }
         if (emoteElement.data.image1x != nullptr) {
-            QAction* addEntry = menu->addAction("Open emote link...");
+            QAction *addEntry = menu->addAction("Open emote link...");
 
-            QMenu* procmenu = new QMenu;
+            QMenu *procmenu = new QMenu;
             addEntry->setMenu(procmenu);
             procmenu->addAction("Open 1x link", [url = emoteElement.data.image1x->getUrl()] {
                 QDesktopServices::openUrl(QUrl(url));  //
@@ -1198,6 +1191,14 @@ bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLay
     }
 
     return false;
+}
+
+int ChannelView::getLayoutWidth() const
+{
+    if (this->scrollBar.isVisible())
+        return int(this->width() - 8 * this->getScale());
+
+    return this->width();
 }
 
 }  // namespace widgets

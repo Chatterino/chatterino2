@@ -89,6 +89,7 @@ private:
     bool pausedTemporarily = false;
     bool pausedBySelection = false;
     int messagesAddedSinceSelectionPause = 0;
+    int getLayoutWidth() const;
 
     QTimer pauseTimeout;
     boost::optional<messages::MessageElement::Flags> overrideFlags;
@@ -143,8 +144,8 @@ private:
     pajlada::Signals::Connection repaintGifsConnection;
     pajlada::Signals::Connection layoutConnection;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections;
+    std::vector<pajlada::Signals::ScopedConnection> connections_;
+    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
     std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen;
 
