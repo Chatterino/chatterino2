@@ -45,7 +45,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->setMouseTracking(true);
 
-    this->connections_.emplace_back(app->settings->wordFlagsChanged.connect([this] {
+    this->connections_.push_back(app->settings->wordFlagsChanged.connect([this] {
         this->layoutMessages();
         this->update();
     }));
