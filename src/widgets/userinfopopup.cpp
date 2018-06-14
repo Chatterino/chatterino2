@@ -363,13 +363,21 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
+                           {"1", 1 * 60},
+                           {"5", 5 * 60},
+                           {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60},
+                            {"4", 4 * 60 * 60},
+                        });
+    addTimeouts("days", {
+                            {"1", 1 * 60 * 60 * 24},
+                            {"3", 3 * 60 * 60 * 24},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 30}, {"2", 2 * 60 * 60 * 30},
+                             {"1", 1 * 60 * 60 * 24 * 7},
+                             {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
