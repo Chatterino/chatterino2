@@ -485,8 +485,6 @@ void SplitHeader::menuReloadChannelEmotes()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
-        delete twitchChannel;
-        twitchChannel = nullptr;
         twitchChannel->reloadChannelEmotes();
     }
 }
