@@ -17,6 +17,8 @@ namespace twitch {
 class TwitchEmotes
 {
 public:
+    TwitchEmotes();
+
     util::EmoteData getEmoteById(const QString &id, const QString &emoteName);
 
     /// Twitch emotes
@@ -39,11 +41,11 @@ public:
     struct EmoteSet {
         QString key;
         QString channelName;
+        QString text;
         std::vector<TwitchEmote> emotes;
     };
 
-    // std::map<QString, SubscriptionChannel> subscriberSet;
-    std::map<std::string, EmoteSet> emoteSets;
+    std::map<QString, EmoteSet> staticEmoteSets;
 
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
@@ -59,6 +61,8 @@ public:
     std::map<QString, TwitchAccountEmoteData> emotes;
 
 private:
+    void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet);
+
     //            emote code
     util::ConcurrentMap<QString, providers::twitch::EmoteValue *> _twitchEmotes;
 
