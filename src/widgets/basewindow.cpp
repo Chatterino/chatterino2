@@ -1,10 +1,15 @@
 #include "basewindow.hpp"
 
 #include "application.hpp"
+#include "boost/algorithm/algorithm.hpp"
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
+#include "singletons/windowmanager.hpp"
 #include "util/nativeeventhelper.hpp"
+#include "util/posttothread.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/helper/shortcut.hpp"
+#include "widgets/label.hpp"
 #include "widgets/tooltipwidget.hpp"
 
 #include <QApplication>
@@ -35,25 +40,33 @@ namespace widgets {
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
                  Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags()))
-    , enableCustomFrame(_flags & EnableCustomFrame)
-    , frameless(_flags & Frameless)
-    , flags(_flags)
+    , enableCustomFrame_(_flags & EnableCustomFrame)
+    , frameless_(_flags & Frameless)
+    , flags_(_flags)
 {
-    if (this->frameless) {
-        this->enableCustomFrame = false;
+    if (this->frameless_) {
+        this->enableCustomFrame_ = false;
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
-    if (this->flags & DeleteOnFocusOut) {
+    if (this->flags_ & DeleteOnFocusOut) {
         this->setAttribute(Qt::WA_DeleteOnClose);
     }
 
     this->init();
+
+    this->connections_.managedConnect(
+        getApp()->settings->uiScale.getValueChangedSignal(),
+        [this](auto, auto) { util::postToThread([this] { this->updateScale(); }); });
+
+    this->updateScale();
+
+    CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
 }
 
 BaseWindow::Flags BaseWindow::getFlags()
 {
-    return this->flags;
+    return this->flags_;
 }
 
 void BaseWindow::init()
@@ -68,23 +81,23 @@ void BaseWindow::init()
         layout->setSpacing(0);
         this->setLayout(layout);
         {
-            if (!this->frameless) {
-                QHBoxLayout *buttonLayout = this->ui.titlebarBox = new QHBoxLayout();
+            if (!this->frameless_) {
+                QHBoxLayout *buttonLayout = this->ui_.titlebarBox = new QHBoxLayout();
                 buttonLayout->setMargin(0);
                 layout->addLayout(buttonLayout);
 
                 // title
-                QLabel *title = new QLabel("   Chatterino");
+                Label *title = new Label("Chatterino");
                 QObject::connect(this, &QWidget::windowTitleChanged,
-                                 [title](const QString &text) { title->setText("   " + text); });
+                                 [title](const QString &text) { title->setText(text); });
 
                 QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
                 policy.setHorizontalStretch(1);
                 //            title->setBaseSize(0, 0);
-                title->setScaledContents(true);
+                //                title->setScaledContents(true);
                 title->setSizePolicy(policy);
                 buttonLayout->addWidget(title);
-                this->ui.titleLabel = title;
+                this->ui_.titleLabel = title;
 
                 // buttons
                 TitleBarButton *_minButton = new TitleBarButton;
@@ -105,13 +118,13 @@ void BaseWindow::init()
                 QObject::connect(_exitButton, &TitleBarButton::clicked, this,
                                  [this] { this->close(); });
 
-                this->ui.minButton = _minButton;
-                this->ui.maxButton = _maxButton;
-                this->ui.exitButton = _exitButton;
+                this->ui_.minButton = _minButton;
+                this->ui_.maxButton = _maxButton;
+                this->ui_.exitButton = _exitButton;
 
-                this->ui.buttons.push_back(_minButton);
-                this->ui.buttons.push_back(_maxButton);
-                this->ui.buttons.push_back(_exitButton);
+                this->ui_.buttons.push_back(_minButton);
+                this->ui_.buttons.push_back(_maxButton);
+                this->ui_.buttons.push_back(_exitButton);
 
                 //            buttonLayout->addStretch(1);
                 buttonLayout->addWidget(_minButton);
@@ -120,8 +133,8 @@ void BaseWindow::init()
                 buttonLayout->setSpacing(0);
             }
         }
-        this->ui.layoutBase = new BaseWidget(this);
-        layout->addWidget(this->ui.layoutBase);
+        this->ui_.layoutBase = new BaseWidget(this);
+        layout->addWidget(this->ui_.layoutBase);
     }
 
     // DPI
@@ -134,7 +147,7 @@ void BaseWindow::init()
 
 #ifdef USEWINSDK
     // fourtf: don't ask me why we need to delay this
-    if (!(this->flags & Flags::TopMost)) {
+    if (!(this->flags_ & Flags::TopMost)) {
         QTimer::singleShot(1, this, [this] {
             getApp()->settings->windowTopMost.connect([this](bool topMost, auto) {
                 ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
@@ -151,18 +164,18 @@ void BaseWindow::init()
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
-    this->stayInScreenRect = value;
+    this->stayInScreenRect_ = value;
 }
 
 bool BaseWindow::getStayInScreenRect() const
 {
-    return this->stayInScreenRect;
+    return this->stayInScreenRect_;
 }
 
 QWidget *BaseWindow::getLayoutContainer()
 {
     if (this->hasCustomWindowFrame()) {
-        return this->ui.layoutBase;
+        return this->ui_.layoutBase;
     } else {
         return this;
     }
@@ -173,7 +186,7 @@ bool BaseWindow::hasCustomWindowFrame()
 #ifdef USEWINSDK
     static bool isWin8 = IsWindows8OrGreater();
 
-    return isWin8 && this->enableCustomFrame;
+    return isWin8 && this->enableCustomFrame_;
 #else
     return false;
 #endif
@@ -187,14 +200,14 @@ void BaseWindow::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager->window.text);
         this->setPalette(palette);
 
-        if (this->ui.titleLabel) {
+        if (this->ui_.titleLabel) {
             QPalette palette_title;
             palette_title.setColor(QPalette::Foreground,
                                    this->themeManager->isLightTheme() ? "#333" : "#ccc");
-            this->ui.titleLabel->setPalette(palette_title);
+            this->ui_.titleLabel->setPalette(palette_title);
         }
 
-        for (RippleEffectButton *button : this->ui.buttons) {
+        for (RippleEffectButton *button : this->ui_.buttons) {
             button->setMouseEffectColor(this->themeManager->window.text);
         }
     } else {
@@ -208,12 +221,25 @@ void BaseWindow::themeRefreshEvent()
 bool BaseWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
-        if (this->flags & DeleteOnFocusOut) {
+        if (this->flags_ & DeleteOnFocusOut) {
             this->close();
         }
     }
 
     return QWidget::event(event);
+}
+
+void BaseWindow::wheelEvent(QWheelEvent *event)
+{
+    if (event->modifiers() & Qt::ControlModifier) {
+        if (event->delta() > 0) {
+            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() + 1));
+        } else {
+            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() - 1));
+        }
+    }
 }
 
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
@@ -222,8 +248,8 @@ void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
     TitleBarButton *button = new TitleBarButton;
     button->setScaleIndependantSize(30, 30);
 
-    this->ui.buttons.push_back(button);
-    this->ui.titlebarBox->insertWidget(1, button);
+    this->ui_.buttons.push_back(button);
+    this->ui_.titlebarBox->insertWidget(1, button);
     button->setButtonStyle(style);
 
     QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
@@ -234,8 +260,8 @@ RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
     RippleEffectLabel *button = new RippleEffectLabel;
     button->setScaleIndependantHeight(30);
 
-    this->ui.buttons.push_back(button);
-    this->ui.titlebarBox->insertWidget(1, button);
+    this->ui_.buttons.push_back(button);
+    this->ui_.titlebarBox->insertWidget(1, button);
 
     QObject::connect(button, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
 
@@ -247,10 +273,10 @@ void BaseWindow::changeEvent(QEvent *)
     TooltipWidget::getInstance()->hide();
 
 #ifdef USEWINSDK
-    if (this->ui.maxButton) {
-        this->ui.maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
-                                               ? TitleBarButton::Unmaximize
-                                               : TitleBarButton::Maximize);
+    if (this->ui_.maxButton) {
+        this->ui_.maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
+                                                ? TitleBarButton::Unmaximize
+                                                : TitleBarButton::Maximize);
     }
 #endif
 
@@ -284,7 +310,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 
 void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 {
-    if (!this->stayInScreenRect)
+    if (!this->stayInScreenRect_)
         return;
 
     // move the widget into the screen geometry if it's not already in there
@@ -326,7 +352,8 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             this->resize(static_cast<int>(this->width() * resizeScale),
                          static_cast<int>(this->height() * resizeScale));
 
-            this->setScale(_scale);
+            this->nativeScale_ = _scale;
+            this->updateScale();
 
             return true;
         }
@@ -419,13 +446,13 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     bool client = false;
 
                     QPoint point(x - winrect.left, y - winrect.top);
-                    for (QWidget *widget : this->ui.buttons) {
+                    for (QWidget *widget : this->ui_.buttons) {
                         if (widget->geometry().contains(point)) {
                             client = true;
                         }
                     }
 
-                    if (this->ui.layoutBase->geometry().contains(point)) {
+                    if (this->ui_.layoutBase->geometry().contains(point)) {
                         client = true;
                     }
 
@@ -449,8 +476,8 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
 void BaseWindow::showEvent(QShowEvent *event)
 {
-    if (!this->shown && this->isVisible() && this->hasCustomWindowFrame()) {
-        this->shown = true;
+    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
+        this->shown_ = true;
         //        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
         //                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX |
         //                         WS_MINIMIZEBOX);
@@ -470,7 +497,7 @@ void BaseWindow::scaleChangedEvent(float)
 
 void BaseWindow::paintEvent(QPaintEvent *)
 {
-    if (this->frameless) {
+    if (this->frameless_) {
         QPainter painter(this);
 
         painter.setPen(QColor("#999"));
@@ -489,25 +516,32 @@ void BaseWindow::paintEvent(QPaintEvent *)
 #endif
 }
 
+void BaseWindow::updateScale()
+{
+    this->setScale(this->nativeScale_ * (this->flags_ & DisableCustomScaling
+                                             ? 1
+                                             : getApp()->windows->getUiScaleValue()));
+}
+
 void BaseWindow::calcButtonsSizes()
 {
-    if (!this->shown) {
+    if (!this->shown_) {
         return;
     }
     if ((this->width() / this->getScale()) < 300) {
-        if (this->ui.minButton)
-            this->ui.minButton->setScaleIndependantSize(30, 30);
-        if (this->ui.maxButton)
-            this->ui.maxButton->setScaleIndependantSize(30, 30);
-        if (this->ui.exitButton)
-            this->ui.exitButton->setScaleIndependantSize(30, 30);
+        if (this->ui_.minButton)
+            this->ui_.minButton->setScaleIndependantSize(30, 30);
+        if (this->ui_.maxButton)
+            this->ui_.maxButton->setScaleIndependantSize(30, 30);
+        if (this->ui_.exitButton)
+            this->ui_.exitButton->setScaleIndependantSize(30, 30);
     } else {
-        if (this->ui.minButton)
-            this->ui.minButton->setScaleIndependantSize(46, 30);
-        if (this->ui.maxButton)
-            this->ui.maxButton->setScaleIndependantSize(46, 30);
-        if (this->ui.exitButton)
-            this->ui.exitButton->setScaleIndependantSize(46, 30);
+        if (this->ui_.minButton)
+            this->ui_.minButton->setScaleIndependantSize(46, 30);
+        if (this->ui_.maxButton)
+            this->ui_.maxButton->setScaleIndependantSize(46, 30);
+        if (this->ui_.exitButton)
+            this->ui_.exitButton->setScaleIndependantSize(46, 30);
     }
 }
 }  // namespace widgets

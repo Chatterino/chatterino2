@@ -108,14 +108,11 @@ void SplitInput::initLayout()
 void SplitInput::scaleChangedEvent(float scale)
 {
     // update the icon size of the emote button
-    QString text = "<img src=':/images/emote.svg' width='xD' height='xD' />";
-    text.replace("xD", QString::number(int(12 * scale)));
-
-    this->ui_.emoteButton->getLabel().setText(text);
-    this->ui_.emoteButton->setFixedHeight(int(18 * scale));
+    this->updateEmoteButton();
 
     // set maximum height
     this->setMaximumHeight(int(150 * this->getScale()));
+    this->ui_.textEdit->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 }
 
 void SplitInput::themeRefreshEvent()
@@ -124,11 +121,29 @@ void SplitInput::themeRefreshEvent()
 
     palette.setColor(QPalette::Foreground, this->themeManager->splits.input.text);
 
+    this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
     this->ui_.textEdit->setStyleSheet(this->themeManager->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(int((this->themeManager->isLightTheme() ? 4 : 2) * this->getScale()));
+
+    this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
+}
+
+void SplitInput::updateEmoteButton()
+{
+    float scale = this->getScale();
+
+    QString text = "<img src=':/images/emote.svg' width='xD' height='xD' />";
+    text.replace("xD", QString::number(int(12 * scale)));
+
+    if (this->themeManager->isLightTheme()) {
+        text.replace("emote", "emote_dark");
+    }
+
+    this->ui_.emoteButton->getLabel().setText(text);
+    this->ui_.emoteButton->setFixedHeight(int(18 * scale));
 }
 
 void SplitInput::installKeyPressedEvent()

@@ -4,6 +4,7 @@
 #include "widgets/helper/titlebarbutton.hpp"
 
 #include <functional>
+#include <pajlada/signals/signalholder.hpp>
 
 class QHBoxLayout;
 
@@ -24,10 +25,11 @@ public:
         EnableCustomFrame = 1,
         Frameless = 2,
         TopMost = 4,
-        DeleteOnFocusOut = 8
+        DeleteOnFocusOut = 8,
+        DisableCustomScaling = 16,
     };
 
-    explicit BaseWindow(QWidget *parent = nullptr, Flags flags = None);
+    explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
@@ -56,17 +58,21 @@ protected:
 
     virtual void themeRefreshEvent() override;
     virtual bool event(QEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
+
+    void updateScale();
 
 private:
     void init();
     void moveIntoDesktopRect(QWidget *parent);
     void calcButtonsSizes();
 
-    bool enableCustomFrame;
-    bool frameless;
-    bool stayInScreenRect = false;
-    bool shown = false;
-    Flags flags;
+    bool enableCustomFrame_;
+    bool frameless_;
+    bool stayInScreenRect_ = false;
+    bool shown_ = false;
+    Flags flags_;
+    float nativeScale_ = 1;
 
     struct {
         QHBoxLayout *titlebarBox = nullptr;
@@ -76,7 +82,9 @@ private:
         TitleBarButton *exitButton = nullptr;
         QWidget *layoutBase = nullptr;
         std::vector<RippleEffectButton *> buttons;
-    } ui;
+    } ui_;
+
+    pajlada::Signals::SignalHolder connections_;
 };
 
 }  // namespace widgets

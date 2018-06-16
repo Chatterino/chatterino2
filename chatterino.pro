@@ -140,7 +140,6 @@ SOURCES += \
     src/widgets/emotepopup.cpp \
     src/widgets/helper/channelview.cpp \
     src/widgets/helper/droppreview.cpp \
-    src/widgets/helper/label.cpp \
     src/widgets/helper/notebookbutton.cpp \
     src/widgets/helper/notebooktab.cpp \
     src/widgets/helper/resizingtextedit.cpp \
@@ -216,7 +215,9 @@ SOURCES += \
     src/controllers/taggedusers/taggedusersmodel.cpp \
     src/util/emotemap.cpp \
     src/providers/irc/ircconnection2.cpp \
-    src/widgets/userinfopopup.cpp
+    src/widgets/userinfopopup.cpp \
+    src/widgets/welcomedialog.cpp \
+    src/widgets/label.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -284,7 +285,6 @@ HEADERS  += \
     src/widgets/emotepopup.hpp \
     src/widgets/helper/channelview.hpp \
     src/widgets/helper/droppreview.hpp \
-    src/widgets/helper/label.hpp \
     src/widgets/helper/notebookbutton.hpp \
     src/widgets/helper/notebooktab.hpp \
     src/widgets/helper/resizingtextedit.hpp \
@@ -375,7 +375,10 @@ HEADERS  += \
     src/util/mutexvalue.hpp \
     src/providers/irc/ircconnection2.hpp \
     src/widgets/helper/line.hpp \
-    src/widgets/userinfopopup.hpp
+    src/widgets/userinfopopup.hpp \
+    src/widgets/welcomedialog.hpp \
+    src/util/clamp.hpp \
+    src/widgets/label.hpp
 
 RESOURCES += \
     resources/resources.qrc

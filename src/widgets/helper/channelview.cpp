@@ -660,6 +660,11 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
+    if (event->modifiers() & Qt::ControlModifier) {
+        event->ignore();
+        return;
+    }
+
     this->pausedBySelection = false;
     this->pausedTemporarily = false;
 

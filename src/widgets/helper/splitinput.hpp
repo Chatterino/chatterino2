@@ -33,6 +33,7 @@ public:
 
 protected:
     virtual void scaleChangedEvent(float scale) override;
+    virtual void themeRefreshEvent() override;
 
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
@@ -58,7 +59,8 @@ private:
 
     void initLayout();
     void installKeyPressedEvent();
-    virtual void themeRefreshEvent() override;
+
+    void updateEmoteButton();
 
 private slots:
     void editTextChanged();

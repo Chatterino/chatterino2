@@ -29,7 +29,7 @@ struct Deserialize<QString> {
             auto strLen = value.GetStringLength();
 
             return QString::fromUtf8(str, strLen);
-        } catch (const std::exception &e) {
+        } catch (const std::exception &) {
             //            int x = 5;
         } catch (...) {
             //            int y = 5;

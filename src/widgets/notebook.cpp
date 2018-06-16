@@ -340,7 +340,7 @@ void Notebook::performLayout(bool animated)
             x += i->tab->width();
         }
 
-        x += 1;
+        x += int(scale * 1);
 
         first = false;
     }

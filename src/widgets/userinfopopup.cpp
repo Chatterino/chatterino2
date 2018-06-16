@@ -8,6 +8,7 @@
 #include "util/urlfetch.hpp"
 #include "widgets/helper/line.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
+#include "widgets/label.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -32,9 +33,8 @@ UserInfoPopup::UserInfoPopup()
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         // avatar
-        //        auto avatar = head.emplace<QLabel>("Avatar").assign(&this->ui_.avatarButtoAn);
         auto avatar = head.emplace<RippleEffectButton>(nullptr).assign(&this->ui_.avatarButton);
-        avatar->setFixedSize(100, 100);
+        avatar->setScaleIndependantSize(100, 100);
         QObject::connect(*avatar, &RippleEffectButton::clicked, [this] {
             QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->userName_));
         });
@@ -42,14 +42,14 @@ UserInfoPopup::UserInfoPopup()
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
-            auto name = vbox.emplace<QLabel>().assign(&this->ui_.nameLabel);
+            auto name = vbox.emplace<Label>().assign(&this->ui_.nameLabel);
 
             auto font = name->font();
             font.setBold(true);
             name->setFont(font);
-            vbox.emplace<QLabel>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
-            vbox.emplace<QLabel>(TEXT_FOLLOWERS).assign(&this->ui_.followerCountLabel);
-            vbox.emplace<QLabel>(TEXT_CREATED).assign(&this->ui_.createdDateLabel);
+            vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
+            vbox.emplace<Label>(TEXT_FOLLOWERS).assign(&this->ui_.followerCountLabel);
+            vbox.emplace<Label>(TEXT_CREATED).assign(&this->ui_.createdDateLabel);
         }
     }
 
@@ -138,6 +138,13 @@ UserInfoPopup::UserInfoPopup()
     this->setStyleSheet("font-size: 11pt;");
 
     this->installEvents();
+}
+
+void UserInfoPopup::themeRefreshEvent()
+{
+    BaseWindow::themeRefreshEvent();
+
+    this->setStyleSheet("background: #333");
 }
 
 void UserInfoPopup::installEvents()
@@ -295,7 +302,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color2(255, 255, 255, 0);
 
     int buttonWidth = 32;
-    int buttonWidth2 = 24;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
@@ -305,7 +311,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>(text);
+            auto label = title.emplace<Label>(text);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
@@ -330,7 +336,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         {
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
-            auto label = title.emplace<QLabel>(title_);
+            auto label = title.emplace<Label>(title_);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
@@ -346,7 +352,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 // connect
 
                 QObject::connect(
-                    *a, &RippleEffectLabel::clicked, [this, timeout = std::get<1>(item)] {
+                    *a, &RippleEffectLabel::clicked, [ this, timeout = std::get<1>(item) ] {
                         this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
                     });
             }
@@ -357,17 +363,13 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60},
-                           {"5", 5 * 60},
-                           {"10", 10 * 60},
+                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60},
-                            {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 30},
-                             {"2", 2 * 60 * 60 * 30},
+                             {"1", 1 * 60 * 60 * 30}, {"2", 2 * 60 * 60 * 30},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);

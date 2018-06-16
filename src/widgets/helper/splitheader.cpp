@@ -7,7 +7,7 @@
 #include "singletons/thememanager.hpp"
 #include "util/layoutcreator.hpp"
 #include "util/urlfetch.hpp"
-#include "widgets/helper/label.hpp"
+#include "widgets/label.hpp"
 #include "widgets/split.hpp"
 #include "widgets/splitcontainer.hpp"
 #include "widgets/tooltipwidget.hpp"
@@ -48,19 +48,11 @@ SplitHeader::SplitHeader(Split *_split)
             });
         });
 
-        layout->addStretch(1);
-
         // channel name label
-        //        auto title = layout.emplace<Label>(this).assign(&this->titleLabel);
-        auto title = layout.emplace<QLabel>().assign(&this->titleLabel);
+        auto title = layout.emplace<Label>().assign(&this->titleLabel);
         title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        //        title->setMouseTracking(true);
-        //        QObject::connect(this->titleLabel, &SignalLabel::mouseDoubleClick, this,
-        //                         &SplitHeader::mouseDoubleClickEvent);
-        //        QObject::connect(this->titleLabel, &SignalLabel::mouseMove, this,
-        //                         &SplitHeader::mouseMoveEvent);
-
-        layout->addStretch(1);
+        title->setCentered(true);
+        title->setHasOffset(false);
 
         // mode button
         auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
