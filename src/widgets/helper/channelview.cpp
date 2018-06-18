@@ -443,13 +443,21 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->channelConnections_.push_back(
         newChannel->messageReplaced.connect([this](size_t index, MessagePtr replacement) {
             MessageLayoutPtr newItem(new MessageLayout(replacement));
-            if (this->messages.getSnapshot()[index]->flags & MessageLayout::AlternateBackground) {
+            auto snapshot = this->messages.getSnapshot();
+            if (index >= snapshot.getLength()) {
+                debug::Log("Tried to replace out of bounds message. Index: {}. Length: {}", index,
+                           snapshot.getLength());
+                return;
+            }
+
+            const auto &message = snapshot[index];
+            if (message->flags & MessageLayout::AlternateBackground) {
                 newItem->flags |= MessageLayout::AlternateBackground;
             }
 
             this->scrollBar.replaceHighlight(index, replacement->getScrollBarHighlight());
 
-            this->messages.replaceItem(this->messages.getSnapshot()[index], newItem);
+            this->messages.replaceItem(message, newItem);
             this->layoutMessages();
         }));
 
