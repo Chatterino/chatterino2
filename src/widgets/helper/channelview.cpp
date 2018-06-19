@@ -1150,8 +1150,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(user, this->channel_);
             userPopup->setAttribute(Qt::WA_DeleteOnClose);
-            userPopup->move(QCursor::pos() -
-                            QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
+            QPoint offset(int(150 * this->getScale()), int(70 * this->getScale()));
+            userPopup->move(QCursor::pos() - offset);
             userPopup->show();
 
             qDebug() << "Clicked " << user << "s message";

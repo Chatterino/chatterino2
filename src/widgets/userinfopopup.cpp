@@ -28,6 +28,8 @@ UserInfoPopup::UserInfoPopup()
 {
     this->setStayInScreenRect(true);
 
+    this->setWindowFlag(Qt::Popup);
+
     auto app = getApp();
 
     auto layout = util::LayoutCreator<UserInfoPopup>(this).setLayoutType<QVBoxLayout>();
