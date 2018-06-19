@@ -18,7 +18,7 @@ namespace widgets {
 
 Scrollbar::Scrollbar(ChannelView *parent)
     : BaseWidget(parent)
-    , currentValueAnimation_(this, "currentValue")
+    , currentValueAnimation_(this, "currentValue_")
 {
     resize(int(16 * this->getScale()), 100);
     this->currentValueAnimation_.setDuration(150);
@@ -115,6 +115,7 @@ void Scrollbar::setDesiredValue(qreal value, bool animated)
             //            if (((this->getMaximum() - this->getLargeChange()) - value) <= 0.01) {
             //                value += 1;
             //            }
+
             this->currentValueAnimation_.setEndValue(value);
             this->smoothScrollingOffset_ = 0;
             this->atBottom_ = ((this->getMaximum() - this->getLargeChange()) - value) <= 0.0001;
@@ -191,7 +192,6 @@ void Scrollbar::setCurrentValue(qreal value)
                                               value + this->smoothScrollingOffset_));
 
     if (std::abs(this->currentValue_ - value) > 0.0001) {
-        //        qDebug() << "setCurrentValue";
         this->currentValue_ = value;
 
         this->updateScroll();

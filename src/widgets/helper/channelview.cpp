@@ -51,8 +51,6 @@ ChannelView::ChannelView(BaseWidget *parent)
     }));
 
     this->scrollBar_.getCurrentValueChanged().connect([this] {
-        //        qDebug() << "getCurrentValueChanged";
-
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->actuallyLayoutMessages(true);
 
@@ -192,6 +190,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     this->showingLatestMessages_ = this->scrollBar_.isAtBottom() || !this->scrollBar_.isVisible();
 
     size_t start = size_t(this->scrollBar_.getCurrentValue());
+    qDebug() << this->scrollBar_.getCurrentValue();
     int layoutWidth = this->getLayoutWidth();
 
     MessageElement::Flags flags = this->getFlags();
@@ -285,7 +284,6 @@ QString ChannelView::getSelectedText()
         return result;
     }
 
-    qDebug() << "xd >";
     for (int msg = _selection.selectionMin.messageIndex;
          msg <= _selection.selectionMax.messageIndex; msg++) {
         MessageLayoutPtr layout = messagesSnapshot[msg];
@@ -493,7 +491,7 @@ void ChannelView::pause(int msecTimeout)
         this->pauseTimeout_.stop();
         this->pauseTimeout_.start(msecTimeout);
 
-        qDebug() << "pause" << msecTimeout;
+        //        qDebug() << "pause" << msecTimeout;
     }
 }
 
@@ -1156,11 +1154,6 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
             userPopup->move(QCursor::pos() -
                             QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
             userPopup->show();
-
-            //            this->userPopupWidget.setName(user);
-            //            this->userPopupWidget.moveTo(this, event->screenPos().toPoint());
-            //            this->userPopupWidget.show();
-            //            this->userPopupWidget.setFocus();
 
             qDebug() << "Clicked " << user << "s message";
             break;
