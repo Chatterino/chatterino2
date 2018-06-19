@@ -118,7 +118,7 @@ void Channel::addOrReplaceTimeout(messages::MessagePtr message)
             int count = s->count + 1;
 
             messages::MessagePtr replacement(Message::createSystemMessage(
-                message->searchText + QString("(") + QString::number(count) + " times)"));
+                message->searchText + QString(" (") + QString::number(count) + " times)"));
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
