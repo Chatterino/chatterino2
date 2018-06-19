@@ -563,7 +563,8 @@ messages::MessageElement::Flags ChannelView::getFlags() const
 
 bool ChannelView::isPaused()
 {
-    return this->pausedTemporarily_ || this->pausedBySelection_ || this->pausedByScrollingUp_;
+    return false;
+    //    return this->pausedTemporarily_ || this->pausedBySelection_ || this->pausedByScrollingUp_;
 }
 
 void ChannelView::updatePauseStatus()
@@ -659,6 +660,10 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
+    if (event->orientation() != Qt::Vertical) {
+        return;
+    }
+
     this->pausedBySelection_ = false;
     this->pausedTemporarily_ = false;
     this->updatePauseStatus();

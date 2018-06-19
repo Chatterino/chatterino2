@@ -165,6 +165,8 @@ void BaseWindow::init()
 void BaseWindow::setStayInScreenRect(bool value)
 {
     this->stayInScreenRect_ = value;
+
+    this->moveIntoDesktopRect(this);
 }
 
 bool BaseWindow::getStayInScreenRect() const
@@ -231,6 +233,10 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
+    if (event->orientation() != Qt::Vertical) {
+        return;
+    }
+
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
             getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
@@ -316,7 +322,7 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
 
-    QRect s = desktop->screenGeometry(parent);
+    QRect s = desktop->availableGeometry(parent);
     QPoint p = this->pos();
 
     if (p.x() < s.left()) {

@@ -104,6 +104,11 @@ void Label::paintEvent(QPaintEvent *)
     QTextOption option(alignment);
     option.setWrapMode(QTextOption::NoWrap);
     painter.drawText(textRect, this->text_, option);
+
+#if 0
+    painter.setPen(QColor(255, 0, 0));
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+#endif
 }
 
 void Label::updateSize()

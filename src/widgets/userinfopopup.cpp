@@ -25,6 +25,8 @@ UserInfoPopup::UserInfoPopup()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::DeleteOnFocusOut))
     , hack_(new bool)
 {
+    this->setStayInScreenRect(true);
+
     auto app = getApp();
 
     auto layout = util::LayoutCreator<UserInfoPopup>(this).setLayoutType<QVBoxLayout>();
@@ -67,11 +69,16 @@ UserInfoPopup::UserInfoPopup()
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);
         mod->setScaleIndependantSize(30, 30);
-        auto unmod = user.emplace<RippleEffectLabel>();
+        auto unmod = user.emplace<RippleEffectButton>(this);
         unmod->setPixmap(app->resources->buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
+
+        QObject::connect(mod.getElement(), &RippleEffectButton::clicked,
+                         [this] { this->channel_->sendMessage("/mod " + this->userName_); });
+        QObject::connect(unmod.getElement(), &RippleEffectButton::clicked,
+                         [this] { this->channel_->sendMessage("/unmod " + this->userName_); });
 
         // userstate
         this->userStateChanged.connect([this, mod, unmod]() mutable {
@@ -301,7 +308,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color1(255, 255, 255, 80);
     QColor color2(255, 255, 255, 0);
 
-    int buttonWidth = 32;
+    int buttonWidth = 24;
+    int buttonWidth2 = 32;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
@@ -312,6 +320,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
             title->addStretch(1);
             auto label = title.emplace<Label>(text);
+            label->setHasOffset(false);
             label->setStyleSheet("color: #BBB");
             title->addStretch(1);
 
@@ -338,21 +347,25 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             title->addStretch(1);
             auto label = title.emplace<Label>(title_);
             label->setStyleSheet("color: #BBB");
+            label->setHasOffset(false);
             title->addStretch(1);
 
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
             hbox->setSpacing(0);
 
             for (const auto &item : items) {
-                auto a = hbox.emplace<RippleEffectLabel>();
+                auto a = hbox.emplace<RippleEffectLabel2>();
                 a->getLabel().setText(std::get<0>(item));
-                a->setScaleIndependantSize(buttonWidth, buttonHeight);
+
+                if (std::get<0>(item).length() > 1) {
+                    a->setScaleIndependantSize(buttonWidth2, buttonHeight);
+                } else {
+                    a->setScaleIndependantSize(buttonWidth, buttonHeight);
+                }
                 a->setBorderColor(color1);
 
-                // connect
-
                 QObject::connect(
-                    *a, &RippleEffectLabel::clicked, [ this, timeout = std::get<1>(item) ] {
+                    *a, &RippleEffectLabel2::clicked, [ this, timeout = std::get<1>(item) ] {
                         this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
                     });
             }

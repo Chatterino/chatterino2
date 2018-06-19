@@ -23,7 +23,7 @@ public:
     void setCentered(bool centered);
 
     bool getHasOffset() const;
-    void setHasOffset(bool centered);
+    void setHasOffset(bool hasOffset);
 
 protected:
     virtual void scaleChangedEvent(float scale) override;

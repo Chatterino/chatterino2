@@ -22,5 +22,26 @@ RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     this->hbox.addSpacing(spacing);
 }
 
+RippleEffectLabel2::RippleEffectLabel2(BaseWidget *parent, int padding)
+    : RippleEffectButton(parent)
+    , label_(this)
+{
+    auto *hbox = new QHBoxLayout(this);
+    this->setLayout(hbox);
+
+    //    this->label_.setAlignment(Qt::AlignCenter);
+    this->label_.setCentered(true);
+
+    hbox->setMargin(0);
+    //    hbox.addSpacing(spacing);
+    hbox->addWidget(&this->label_);
+    //    hbox.addSpacing(spacing);
+}
+
+Label &RippleEffectLabel2::getLabel()
+{
+    return this->label_;
+}
+
 }  // namespace widgets
 }  // namespace chatterino
