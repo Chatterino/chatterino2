@@ -1149,10 +1149,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const messages::Link &link
     switch (link.type) {
         case messages::Link::UserInfo: {
             auto user = link.value;
+
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(user, this->channel_);
             userPopup->setAttribute(Qt::WA_DeleteOnClose);
-            userPopup->move(event->globalPos());
+            userPopup->move(QCursor::pos() -
+                            QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
             userPopup->show();
 
             //            this->userPopupWidget.setName(user);

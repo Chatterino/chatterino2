@@ -506,7 +506,8 @@ void Split::doOpenUserInfoPopup(const QString &user)
     auto *userPopup = new UserInfoPopup;
     userPopup->setData(user, this->getChannel());
     userPopup->setAttribute(Qt::WA_DeleteOnClose);
-    userPopup->move(QCursor::pos());
+    userPopup->move(QCursor::pos() -
+                    QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
     userPopup->show();
 }
 
