@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QIcon>
+#include <functional>
 
 #ifdef USEWINSDK
 #include <ObjIdl.h>
@@ -393,14 +394,17 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             }
         } break;
         case WM_NCHITTEST: {
+            const LONG border_width = 8;  // in pixels
+            RECT winrect;
+            GetWindowRect(HWND(winId()), &winrect);
+
+            long x = GET_X_LPARAM(msg->lParam);
+            long y = GET_Y_LPARAM(msg->lParam);
+
+            QPoint point(x - winrect.left, y - winrect.top);
+
             if (this->hasCustomWindowFrame()) {
                 *result = 0;
-                const LONG border_width = 8;  // in pixels
-                RECT winrect;
-                GetWindowRect(HWND(winId()), &winrect);
-
-                long x = GET_X_LPARAM(msg->lParam);
-                long y = GET_Y_LPARAM(msg->lParam);
 
                 bool resizeWidth = minimumWidth() != maximumWidth();
                 bool resizeHeight = minimumHeight() != maximumHeight();
@@ -451,7 +455,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                 if (*result == 0) {
                     bool client = false;
 
-                    QPoint point(x - winrect.left, y - winrect.top);
                     for (QWidget *widget : this->ui_.buttons) {
                         if (widget->geometry().contains(point)) {
                             client = true;
@@ -467,6 +470,36 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     } else {
                         *result = HTCAPTION;
                     }
+                }
+
+                return true;
+            } else if (this->flags_ & FramelessDraggable) {
+                *result = 0;
+                bool client = false;
+
+                if (auto widget = this->childAt(point)) {
+                    std::function<bool(QWidget *)> recursiveCheckMouseTracking;
+                    recursiveCheckMouseTracking = [&](QWidget *widget) {
+                        if (widget == nullptr) {
+                            return false;
+                        }
+
+                        if (widget->hasMouseTracking()) {
+                            return true;
+                        }
+
+                        return recursiveCheckMouseTracking(widget->parentWidget());
+                    };
+
+                    if (recursiveCheckMouseTracking(widget)) {
+                        client = true;
+                    }
+                }
+
+                if (client) {
+                    *result = HTCLIENT;
+                } else {
+                    *result = HTCAPTION;
                 }
 
                 return true;

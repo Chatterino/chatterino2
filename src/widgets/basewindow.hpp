@@ -27,6 +27,7 @@ public:
         TopMost = 4,
         DeleteOnFocusOut = 8,
         DisableCustomScaling = 16,
+        FramelessDraggable = 32,
     };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
