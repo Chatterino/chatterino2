@@ -366,7 +366,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 a->setBorderColor(color1);
 
                 QObject::connect(
-                    *a, &RippleEffectLabel2::clicked, [ this, timeout = std::get<1>(item) ] {
+                    *a, &RippleEffectLabel2::clicked, [this, timeout = std::get<1>(item)] {
                         this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
                     });
             }
@@ -377,16 +377,21 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
+                           {"1", 1 * 60},
+                           {"5", 5 * 60},
+                           {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60},
+                            {"4", 4 * 60 * 60},
                         });
     addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24}, {"3", 3 * 60 * 60 * 24},
+                            {"1", 1 * 60 * 60 * 24},
+                            {"3", 3 * 60 * 60 * 24},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7}, {"2", 2 * 60 * 60 * 24 * 7},
+                             {"1", 1 * 60 * 60 * 24 * 7},
+                             {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);

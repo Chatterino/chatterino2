@@ -190,8 +190,8 @@ void Scrollbar::setCurrentValue(qreal value)
     value = std::max(this->minimum_, std::min(this->maximum_ - this->largeChange_,
                                               value + this->smoothScrollingOffset_));
 
-    if (std::abs(this->currentValue_ - value) > 0.000001) {
-        qDebug() << "setCurrentValue";
+    if (std::abs(this->currentValue_ - value) > 0.0001) {
+        //        qDebug() << "setCurrentValue";
         this->currentValue_ = value;
 
         this->updateScroll();

@@ -30,8 +30,11 @@ const QString &Label::getText() const
 
 void Label::setText(const QString &text)
 {
-    this->text_ = text;
-    this->updateSize();
+    if (this->text_ != text) {
+        this->text_ = text;
+        this->updateSize();
+        this->update();
+    }
 }
 
 FontStyle Label::getFontStyle() const

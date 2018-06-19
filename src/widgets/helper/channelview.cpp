@@ -51,7 +51,7 @@ ChannelView::ChannelView(BaseWidget *parent)
     }));
 
     this->scrollBar_.getCurrentValueChanged().connect([this] {
-        qDebug() << "getCurrentValueChanged";
+        //        qDebug() << "getCurrentValueChanged";
 
         // Whenever the scrollbar value has been changed, re-render the ChatWidgetView
         this->actuallyLayoutMessages(true);
