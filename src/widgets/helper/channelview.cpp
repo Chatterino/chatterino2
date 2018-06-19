@@ -190,7 +190,6 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     this->showingLatestMessages_ = this->scrollBar_.isAtBottom() || !this->scrollBar_.isVisible();
 
     size_t start = size_t(this->scrollBar_.getCurrentValue());
-    qDebug() << this->scrollBar_.getCurrentValue();
     int layoutWidth = this->getLayoutWidth();
 
     MessageElement::Flags flags = this->getFlags();

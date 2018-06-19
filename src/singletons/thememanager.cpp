@@ -185,8 +185,14 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
-    this->messages.backgrounds.highlighted =
-        blendColors(themeColor, this->messages.backgrounds.regular, isLight ? 0.8 : 0.6);
+
+    if (isLight) {
+        this->messages.backgrounds.highlighted =
+            blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
+    } else {
+        this->messages.backgrounds.highlighted = QColor(75, 40, 44);
+    }
+
     this->messages.backgrounds.subscription =
         blendColors(QColor("#C466FF"), this->messages.backgrounds.regular, 0.7);
 
