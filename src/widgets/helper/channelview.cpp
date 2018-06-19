@@ -435,7 +435,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     // on message replaced
     this->channelConnections_.push_back(
         newChannel->messageReplaced.connect([this](size_t index, MessagePtr replacement) {
-            if (this->messages.getSnapshot().getLength() >= index || index < 0) {
+            if (index >= this->messages.getSnapshot().getLength() || index < 0) {
                 return;
             }
 
