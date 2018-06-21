@@ -42,7 +42,7 @@ void UpdateManager::installUpdates()
         return;
     }
 
-#ifdef Q_OS_WIN
+    //#ifdef Q_OS_WIN
     QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
                                        "Chatterino is downloading the update "
                                        "in the background and will run the "
@@ -55,10 +55,12 @@ void UpdateManager::installUpdates()
     req.onError([this](int) -> bool {
         this->setStatus_(DownloadFailed);
 
-        QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                           "Failed while trying to download the update.");
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        box->show();
+        util::postToThread([] {
+            QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                                               "Failed while trying to download the update.");
+            box->setAttribute(Qt::WA_DeleteOnClose);
+            box->show();
+        });
 
         return true;
     });
@@ -66,24 +68,28 @@ void UpdateManager::installUpdates()
         auto filename = util::combinePath(getApp()->paths->miscDirectory, "update.zip");
 
         QFile file(filename);
+        file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+
         if (file.write(object) == -1) {
             this->setStatus_(WriteFileFailed);
             return false;
         }
 
-        QProcess::startDetached("./updater.1/ChatterinoUpdater.exe", {filename, "restart"});
+        QProcess::startDetached(util::combinePath(QCoreApplication::applicationDirPath(),
+                                                  "updater.1/ChatterinoUpdater.exe"),
+                                {filename, "restart"});
 
         QApplication::exit(0);
         return false;
     });
     this->setStatus_(Downloading);
     req.execute();
-#endif
+    //#endif
 }
 
 void UpdateManager::checkForUpdates()
 {
-#ifdef Q_OS_WIN
+    //#ifdef Q_OS_WIN
     QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
 
     util::NetworkRequest req(url);
@@ -120,7 +126,7 @@ void UpdateManager::checkForUpdates()
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->show();
             if (box->exec() == QMessageBox::Yes) {
-                this->installUpdates();
+                util::postToThread([this] { this->installUpdates(); });
             }
         } else {
             this->setStatus_(NoUpdateAvailable);
@@ -128,7 +134,7 @@ void UpdateManager::checkForUpdates()
     });
     this->setStatus_(Searching);
     req.execute();
-#endif
+    //#endif
 }
 
 UpdateManager::UpdateStatus UpdateManager::getStatus() const
