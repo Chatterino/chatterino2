@@ -125,6 +125,9 @@ public:
     QStringSetting preferredQuality = {"/external/streamlink/quality", "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
+    /// Misc
+    IntSetting startUpNotification = {"/misc/startUpNotification", 0};
+
     void updateWordTypeMask();
 
     void saveSnapshot();

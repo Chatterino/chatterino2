@@ -59,9 +59,19 @@ LastRunCrashDialog::LastRunCrashDialog()
             case singletons::UpdateManager::NoUpdateAvailable: {
                 update->setText("No update abailable.");
             } break;
-            case singletons::UpdateManager::Error: {
+            case singletons::UpdateManager::SearchFailed: {
                 update->setText("Error while searching for update.\nEither the update service is "
                                 "temporarily down or there is an issue with your installation.");
+            } break;
+            case singletons::UpdateManager::Downloading: {
+                update->setText(
+                    "Downloading the update. Chatterino will close once the download is done.");
+            } break;
+            case singletons::UpdateManager::DownloadFailed: {
+                update->setText("Download failed.");
+            } break;
+            case singletons::UpdateManager::WriteFileFailed: {
+                update->setText("Writing the update file to the hard drive failed.");
             } break;
         }
     };

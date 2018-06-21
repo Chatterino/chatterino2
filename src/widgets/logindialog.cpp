@@ -56,6 +56,8 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
     getApp()->accounts->twitch.reloadUsers();
 
     //    messageBox.exec();
+
+    getApp()->accounts->twitch.currentUsername = username;
 }
 
 }  // namespace
@@ -77,7 +79,7 @@ BasicLoginWidget::BasicLoginWidget()
         QDesktopServices::openUrl(QUrl("https://chatterino.com/client_login"));
     });
 
-    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, []() {
+    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, [this]() {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString clipboardString = clipboard->text();
         QStringList parameters = clipboardString.split(';');
@@ -108,6 +110,7 @@ BasicLoginWidget::BasicLoginWidget()
         LogInWithCredentials(userID, username, clientID, oauthToken);
 
         clipboard->clear();
+        this->window()->close();
     });
 }
 
@@ -191,7 +194,7 @@ void AdvancedLoginWidget::refreshButtons()
 LoginWidget::LoginWidget()
 {
 #ifdef USEWINSDK
-    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0,
+    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 #endif
 
@@ -205,7 +208,7 @@ LoginWidget::LoginWidget()
 
     this->ui.buttonBox.setStandardButtons(QDialogButtonBox::Close);
 
-    connect(&this->ui.buttonBox, &QDialogButtonBox::rejected, [this]() {
+    QObject::connect(&this->ui.buttonBox, &QDialogButtonBox::rejected, [this]() {
         this->close();  //
     });
 

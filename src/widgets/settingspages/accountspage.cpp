@@ -8,11 +8,11 @@
 #include "widgets/helper/editablemodelview.hpp"
 #include "widgets/logindialog.hpp"
 
-#include <algorithm>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QTableView>
 #include <QVBoxLayout>
+#include <algorithm>
 
 namespace chatterino {
 namespace widgets {

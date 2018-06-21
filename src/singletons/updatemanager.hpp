@@ -11,7 +11,16 @@ class UpdateManager
     UpdateManager();
 
 public:
-    enum UpdateStatus { None, Searching, UpdateAvailable, NoUpdateAvailable, Error };
+    enum UpdateStatus {
+        None,
+        Searching,
+        UpdateAvailable,
+        NoUpdateAvailable,
+        SearchFailed,
+        Downloading,
+        DownloadFailed,
+        WriteFileFailed,
+    };
 
     // fourtf: don't add this class to the application class
     static UpdateManager &getInstance();
@@ -28,6 +37,8 @@ private:
     QString currentVersion_;
     QString onlineVersion_;
     UpdateStatus status_ = None;
+
+    QString updateUrl_;
 
     void setStatus_(UpdateStatus status);
 };

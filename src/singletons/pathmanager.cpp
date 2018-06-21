@@ -71,7 +71,7 @@ void PathManager::initAppDataDirectory()
 
     this->rootAppDataDirectory = [&]() -> QString {
         // portable
-        if (this->portable) {
+        if (this->isPortable()) {
             return QCoreApplication::applicationDirPath();
         }
 

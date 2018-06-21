@@ -235,6 +235,22 @@ bool Window::event(QEvent *event)
     return BaseWindow::event(event);
 }
 
+void Window::showEvent(QShowEvent *event)
+{
+    if (getApp()->settings->startUpNotification.getValue() < 1) {
+        getApp()->settings->startUpNotification = 1;
+
+        auto box =
+            new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta",
+                            "Please note that this software is not stable yet. Things are rough "
+                            "around the edges and everything is subject to change.");
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->show();
+    }
+
+    BaseWindow::showEvent(event);
+}
+
 void Window::closeEvent(QCloseEvent *)
 {
     if (this->type == Window::Main) {

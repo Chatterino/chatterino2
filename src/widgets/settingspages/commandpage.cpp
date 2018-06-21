@@ -37,7 +37,8 @@ CommandPage::CommandPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     auto warning = layout.emplace<QLabel>("The command system will be reworked in the "
-                                          "future!\nYour saved commands will get discarded then.");
+                                          "future!\nYour saved commands will get discarded then. "
+                                          "Deleting commands crashes chatterino right now.");
     warning.getElement()->setStyleSheet("color: #f00");
 
     helper::EditableModelView *view =
