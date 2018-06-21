@@ -42,7 +42,7 @@ void UpdateManager::installUpdates()
         return;
     }
 
-    //#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
     QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
                                        "Chatterino is downloading the update "
                                        "in the background and will run the "
@@ -84,12 +84,12 @@ void UpdateManager::installUpdates()
     });
     this->setStatus_(Downloading);
     req.execute();
-    //#endif
+#endif
 }
 
 void UpdateManager::checkForUpdates()
 {
-    //#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN
     QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
 
     util::NetworkRequest req(url);
@@ -134,7 +134,7 @@ void UpdateManager::checkForUpdates()
     });
     this->setStatus_(Searching);
     req.execute();
-    //#endif
+#endif
 }
 
 UpdateManager::UpdateStatus UpdateManager::getStatus() const
