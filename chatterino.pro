@@ -378,7 +378,8 @@ HEADERS  += \
     src/widgets/userinfopopup.hpp \
     src/widgets/welcomedialog.hpp \
     src/util/clamp.hpp \
-    src/widgets/label.hpp
+    src/widgets/label.hpp \
+    src/util/combine_path.hpp
 
 RESOURCES += \
     resources/resources.qrc

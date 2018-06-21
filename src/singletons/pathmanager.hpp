@@ -1,38 +1,49 @@
 #pragma once
 
 #include <QString>
+#include <boost/optional.hpp>
 
 namespace chatterino {
 namespace singletons {
 
 class PathManager
 {
-    PathManager(int argc, char **argv);
+    PathManager();
 
 public:
-    static void initInstance(int argc, char **argv);
+    static void initInstance();
     static PathManager *getInstance();
 
-    // %APPDATA%/chatterino or ExecutablePath for portable mode
-    QString settingsFolderPath;
+    // Root directory for the configuration files. %APPDATA%/chatterino or ExecutablePath for
+    // portable mode
+    QString rootAppDataDirectory;
 
-    // %APPDATA%/chatterino/Custom or ExecutablePath/Custom for portable mode
-    QString customFolderPath;
+    // Directory for settings files. Same as <appDataDirectory>/Settings
+    QString settingsDirectory;
 
-    // %APPDATA%/chatterino/Cache or ExecutablePath/Cache for portable mode
-    QString cacheFolderPath;
+    // Directory for cache files. Same as <appDataDirectory>/Misc
+    QString cacheDirectory;
 
-    // Default folder for logs. %APPDATA%/chatterino/Logs or ExecutablePath/Logs for portable mode
-    QString logsFolderPath;
+    // Directory for message log files. Same as <appDataDirectory>/Misc
+    QString messageLogDirectory;
 
-    QString appPathHash;
+    // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
+    QString miscDirectory;
+
+    // Hash of QCoreApplication::applicationFilePath()
+    QString applicationFilePathHash;
 
     bool createFolder(const QString &folderPath);
     bool isPortable();
 
 private:
     static PathManager *instance;
-    bool portable;
+    boost::optional<bool> portable;
+
+    void initAppFilePathHash();
+    void initCheckPortable();
+    void initAppDataDirectory();
+    void initSubDirectories();
 };
 
 }  // namespace singletons

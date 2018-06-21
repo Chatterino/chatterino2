@@ -44,9 +44,9 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
         return;
     }
 
-    QMessageBox messageBox;
-    messageBox.setIcon(QMessageBox::Information);
-    messageBox.setText("Successfully logged in with user <b>" + qS(username) + "</b>!");
+    //    QMessageBox messageBox;
+    //    messageBox.setIcon(QMessageBox::Information);
+    //    messageBox.setText("Successfully logged in with user <b>" + qS(username) + "</b>!");
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username", username);
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/userID", userID);
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/clientID", clientID);
@@ -55,7 +55,7 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
 
     getApp()->accounts->twitch.reloadUsers();
 
-    messageBox.exec();
+    //    messageBox.exec();
 }
 
 }  // namespace
@@ -190,9 +190,10 @@ void AdvancedLoginWidget::refreshButtons()
 
 LoginWidget::LoginWidget()
 {
-    #ifdef USEWINSDK
-    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-    #endif
+#ifdef USEWINSDK
+    ::SetWindowPos((HWND)this->winId(), HWND_TOPMOST, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+#endif
 
     this->setLayout(&this->ui.mainLayout);
 

@@ -30,7 +30,7 @@ void NetworkRequest::Data::writeToCache(const QByteArray &bytes)
     if (this->useQuickLoadCache) {
         auto app = getApp();
 
-        QFile cachedFile(app->paths->cacheFolderPath + "/" + this->getHash());
+        QFile cachedFile(app->paths->cacheDirectory + "/" + this->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly)) {
             cachedFile.write(bytes);

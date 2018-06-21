@@ -183,7 +183,7 @@ public:
         if (this->data.useQuickLoadCache) {
             auto app = getApp();
 
-            QFile cachedFile(app->paths->cacheFolderPath + "/" + this->data.getHash());
+            QFile cachedFile(app->paths->cacheDirectory + "/" + this->data.getHash());
 
             if (cachedFile.exists()) {
                 if (cachedFile.open(QIODevice::ReadOnly)) {
@@ -329,7 +329,7 @@ private:
         if (this->data.useQuickLoadCache) {
             auto app = getApp();
 
-            QFile cachedFile(app->paths->cacheFolderPath + "/" + this->data.getHash());
+            QFile cachedFile(app->paths->cacheDirectory + "/" + this->data.getHash());
 
             if (cachedFile.exists()) {
                 if (cachedFile.open(QIODevice::ReadOnly)) {

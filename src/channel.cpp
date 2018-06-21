@@ -71,7 +71,10 @@ void Channel::addMessage(MessagePtr message)
         this->addRecentChatter(message);
     }
 
-    app->logging->addMessage(this->name, message);
+    // FOURTF: change this when adding more providers
+    if (this->isTwitchChannel()) {
+        app->logging->addMessage(this->name, message);
+    }
 
     if (this->messages.pushBack(message, deleted)) {
         this->messageRemovedFromStart.invoke(deleted);

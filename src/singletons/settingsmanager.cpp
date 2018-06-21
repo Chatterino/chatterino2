@@ -66,7 +66,7 @@ bool SettingManager::isIgnoredEmote(const QString &)
 void SettingManager::load()
 {
     auto app = getApp();
-    QString settingsPath = app->paths->settingsFolderPath + "/settings.json";
+    QString settingsPath = app->paths->settingsDirectory + "/settings.json";
 
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
 }

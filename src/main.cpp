@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
-    chatterino::singletons::PathManager::initInstance(argc, argv);
+    chatterino::singletons::PathManager::initInstance();
 
     // read args
     QStringList args;
@@ -83,7 +83,7 @@ int runGui(QApplication &a, int argc, char *argv[])
 
     auto &pathMan = *app->paths;
     // Running file
-    auto runningPath = pathMan.settingsFolderPath + "/running_" + pathMan.appPathHash;
+    auto runningPath = pathMan.miscDirectory + "/running_" + pathMan.applicationFilePathHash;
 
     if (QFile::exists(runningPath)) {
 #ifndef DISABLE_CRASH_DIALOG

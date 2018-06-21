@@ -40,7 +40,7 @@ CommandController::CommandController()
 void CommandController::load()
 {
     auto app = getApp();
-    this->filePath = app->paths->customFolderPath + "/Commands.txt";
+    this->filePath = app->paths->settingsDirectory + "/commands.txt";
 
     QFile textFile(this->filePath);
     if (!textFile.open(QIODevice::ReadOnly)) {

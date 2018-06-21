@@ -69,7 +69,7 @@ void NativeMessagingManager::registerHost()
     auto registerManifest = [&](const QString &manifestFilename, const QString &registryKeyName,
                                 const QJsonDocument &document) {
         // save the manifest
-        QString manifestPath = app->paths->settingsFolderPath + manifestFilename;
+        QString manifestPath = app->paths->miscDirectory + manifestFilename;
         QFile file(manifestPath);
         file.open(QIODevice::WriteOnly | QIODevice::Truncate);
         file.write(document.toJson());
@@ -235,7 +235,8 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 std::string &NativeMessagingManager::getGuiMessageQueueName()
 {
     static std::string name =
-        "chatterino_gui" + singletons::PathManager::getInstance()->appPathHash.toStdString();
+        "chatterino_gui" +
+        singletons::PathManager::getInstance()->applicationFilePathHash.toStdString();
     return name;
 }
 

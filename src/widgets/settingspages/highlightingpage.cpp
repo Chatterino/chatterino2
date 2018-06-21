@@ -10,6 +10,7 @@
 #include "widgets/helper/editablemodelview.hpp"
 
 #include <QFileDialog>
+#include <QHeaderView>
 #include <QListWidget>
 #include <QPushButton>
 #include <QStandardItemModel>
