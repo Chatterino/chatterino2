@@ -2,6 +2,7 @@
 
 #include "util/combine_path.hpp"
 #include "util/networkrequest.hpp"
+#include "util/posttothread.hpp"
 #include "version.hpp"
 
 #include <QMessageBox>
@@ -95,12 +96,14 @@ void UpdateManager::checkForUpdates()
             this->setStatus_(SearchFailed);
             qDebug() << "error updating";
 
-            QMessageBox *box =
-                new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                "Error while searching for updates.\n\nEither the service is down "
-                                "temporarily or everything is broken.");
-            box->setAttribute(Qt::WA_DeleteOnClose);
-            box->show();
+            util::postToThread([] {
+                QMessageBox *box = new QMessageBox(
+                    QMessageBox::Information, "Chatterino Update",
+                    "Error while searching for updates.\n\nEither the service is down "
+                    "temporarily or everything is broken.");
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->show();
+            });
             return;
         }
 
