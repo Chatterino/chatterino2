@@ -53,6 +53,12 @@ void UpdateManager::installUpdates()
     req.setTimeout(600000);
     req.onError([this](int) -> bool {
         this->setStatus_(DownloadFailed);
+
+        QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                                           "Failed while trying to download the update.");
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->show();
+
         return true;
     });
     req.get([this](QByteArray &object) {
