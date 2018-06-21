@@ -42,6 +42,7 @@ SplitHeader::SplitHeader(Split *_split)
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
+                qDebug() << this->dropdownButton->height();
                 this->dropdownMenu.move(
                     this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
                 this->dropdownMenu.show();
@@ -56,7 +57,15 @@ SplitHeader::SplitHeader(Split *_split)
 
         // mode button
         auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
+        this->addModeItems(mode.getElement());
 
+        QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
+            QTimer::singleShot(80, [&] {
+                this->modeMenu.move(
+                    this->modeButton->mapToGlobal(QPoint(0, this->modeButton->height())));
+                this->modeMenu.show();
+            });
+        });
         mode->hide();
 
         //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
@@ -132,6 +141,21 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
 //    this->dropdownMenu.addSeparator();
 //    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
     // clang-format on
+}
+
+void SplitHeader::addModeItems(RippleEffectLabel *)
+{
+    QAction *setsub = new QAction("Submode", this);
+    setsub->setCheckable(true);
+
+    QObject::connect(setsub, &QAction::triggered, this, [setsub, this]() {
+        QString sendcommand = "/subscribers";
+        if (setsub->isChecked()) {
+            sendcommand.append("off");
+        };
+        this->split->getChannel().get()->sendMessage(sendcommand);
+    });
+    this->modeMenu.addAction(setsub);
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -249,10 +273,17 @@ void SplitHeader::updateModes()
     }
     if (roomModes.submode) {
         text += "sub, ";
+        if (this->setsub != nullptr) {
+            this->setsub->setChecked(true);
+        }
     }
 
     if (text.length() > 2) {
         text = text.mid(0, text.size() - 2);
+    } else {
+        if (tc->hasModRights()) {
+            text = "-";
+        }
     }
 
     if (text.isEmpty()) {
