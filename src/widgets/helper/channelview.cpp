@@ -805,6 +805,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     } else {
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setText(tooltip);
+        tooltipWidget->adjustSize();
         tooltipWidget->show();
         tooltipWidget->raise();
     }
