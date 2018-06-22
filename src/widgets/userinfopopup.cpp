@@ -28,7 +28,9 @@ UserInfoPopup::UserInfoPopup()
 {
     this->setStayInScreenRect(true);
 
+#ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
+#endif
 
     auto app = getApp();
 
