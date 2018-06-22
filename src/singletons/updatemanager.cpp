@@ -60,6 +60,7 @@ void UpdateManager::installUpdates()
                                                "Failed while trying to download the update.");
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->show();
+            box->raise();
         });
 
         return true;
@@ -109,6 +110,7 @@ void UpdateManager::checkForUpdates()
                     "temporarily or everything is broken.");
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->show();
+                box->raise();
             });
             return;
         }
@@ -118,16 +120,19 @@ void UpdateManager::checkForUpdates()
 
         if (this->currentVersion_ != this->onlineVersion_) {
             this->setStatus_(UpdateAvailable);
-
-            QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                               "An update for chatterino is available.\n\nDo you "
-                                               "want to download and install it?",
-                                               QMessageBox::Yes | QMessageBox::No);
-            box->setAttribute(Qt::WA_DeleteOnClose);
-            box->show();
-            if (box->exec() == QMessageBox::Yes) {
-                util::postToThread([this] { this->installUpdates(); });
-            }
+            util::postToThread([this] {
+                QMessageBox *box =
+                    new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                                    "An update for chatterino is available.\n\nDo you "
+                                    "want to download and install it?",
+                                    QMessageBox::Yes | QMessageBox::No);
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->show();
+                box->raise();
+                if (box->exec() == QMessageBox::Yes) {
+                    this->installUpdates();
+                }
+            });
         } else {
             this->setStatus_(NoUpdateAvailable);
         }
@@ -146,7 +151,7 @@ void UpdateManager::setStatus_(UpdateStatus status)
 {
     if (this->status_ != status) {
         this->status_ = status;
-        this->statusUpdated.invoke(status);
+        util::postToThread([this, status] { this->statusUpdated.invoke(status); });
     }
 }
 
