@@ -155,6 +155,19 @@ void SplitHeader::addModeItems(RippleEffectLabel *)
         };
         this->split->getChannel().get()->sendMessage(sendcommand);
     });
+
+    QAction *setemote = new QAction("Emote only", this);
+    setemote->setCheckable(true);
+
+    QObject::connect(setsub, &QAction::triggered, this, [setsub, this]() {
+        QString sendcommand = "/emoteonly";
+        if (setsub->isChecked()) {
+            sendcommand.append("off");
+        };
+        this->split->getChannel().get()->sendMessage(sendcommand);
+    });
+
+    this->modeMenu.addAction(setemote);
     this->modeMenu.addAction(setsub);
 }
 
@@ -273,9 +286,7 @@ void SplitHeader::updateModes()
     }
     if (roomModes.submode) {
         text += "sub, ";
-        if (this->setsub != nullptr) {
-            this->setsub->setChecked(true);
-        }
+        // this->setsub->setChecked(true);
     }
 
     if (text.length() > 2) {

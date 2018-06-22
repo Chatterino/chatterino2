@@ -4,7 +4,9 @@
 #include "common.hpp"
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
+#include "singletons/pathmanager.hpp"
 
+#include <QFile>
 #include <QtAlgorithms>
 
 #include <utility>
@@ -55,6 +57,19 @@ void CompletionModel::refresh()
         app->emotes->ffz.channelEmoteCodes[this->channelName];
     for (const auto &m : ffzChannelEmoteCodes) {
         this->addString(m, TaggedString::Type::FFZChannelEmote);
+    }
+
+    // Global: Commands
+    qDebug() << app->paths->settingsDirectory;
+    QString filepath = app->paths->settingsDirectory + "/commands.txt";
+    QFile textfile(filepath);
+
+    QList<QByteArray> twitchCommands = textfile.readAll().split('\n');
+    for (const auto &m : twitchCommands) {
+        if (m.isEmpty()) {
+            continue;
+        }
+        this->addString(m, TaggedString::Type::TwitchCommands);
     }
 
     // Global: Emojis

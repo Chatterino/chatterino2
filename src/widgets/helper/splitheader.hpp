@@ -68,7 +68,8 @@ private:
     QMenu dropdownMenu;
     QMenu modeMenu;
 
-    QAction *setsub;
+    QAction setsub;
+    QAction setemote;
 
     void rightButtonClicked();
 
