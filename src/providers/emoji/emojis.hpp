@@ -22,7 +22,7 @@ struct EmojiData {
     QString nonQualifiedCode;
 
     // i.e. thinking
-    QString shortCode;
+    std::vector<QString> shortCodes;
 
     std::set<QString> capabilities;
 

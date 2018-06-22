@@ -27,10 +27,14 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData, const rapidjson::Va
     } capabilities;
 
     if (!shortCode.isEmpty()) {
-        emojiData->shortCode = shortCode;
-    } else if (!rj::getSafe(unparsedEmoji, "short_name", emojiData->shortCode)) {
-        return;
+        emojiData->shortCodes.push_back(shortCode);
+    } else {
+        const auto &shortCodes = unparsedEmoji["short_names"];
+        for (const auto &shortCode : shortCodes.GetArray()) {
+            emojiData->shortCodes.emplace_back(shortCode.GetString());
+        }
     }
+
     rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
     rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
 
@@ -118,8 +122,10 @@ void Emojis::loadEmojis()
         auto emojiData = std::make_shared<EmojiData>();
         parseEmoji(emojiData, unparsedEmoji);
 
-        this->emojiShortCodeToEmoji.insert(emojiData->shortCode, emojiData);
-        this->shortCodes.emplace_back(emojiData->shortCode);
+        for (const auto &shortCode : emojiData->shortCodes) {
+            this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
+            this->shortCodes.emplace_back(shortCode);
+        }
 
         this->emojiFirstByte[emojiData->value.at(0)].append(emojiData);
 
@@ -139,11 +145,11 @@ void Emojis::loadEmojis()
                 }
 
                 parseEmoji(variationEmojiData, variation,
-                           emojiData->shortCode + "_" + toneNameIt->second);
+                           emojiData->shortCodes[0] + "_" + toneNameIt->second);
 
-                this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCode,
+                this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCodes[0],
                                                    variationEmojiData);
-                this->shortCodes.push_back(variationEmojiData->shortCode);
+                this->shortCodes.push_back(variationEmojiData->shortCodes[0]);
 
                 this->emojiFirstByte[variationEmojiData->value.at(0)].append(variationEmojiData);
 
@@ -256,8 +262,8 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emoteData.image1x = new messages::Image(url, 0.35, emoji->value,
-                                                           ":" + emoji->shortCode + ":<br/>Emoji");
+            emoji->emoteData.image1x = new messages::Image(
+                url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
         });
     });
 }
