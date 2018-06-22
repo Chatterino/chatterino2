@@ -45,8 +45,10 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
-                helper::EditableModelView *view = *highlights.emplace<helper::EditableModelView>(
-                    app->highlights->createModel(nullptr));
+                helper::EditableModelView *view =
+                    highlights
+                        .emplace<helper::EditableModelView>(app->highlights->createModel(nullptr))
+                        .getElement();
 
                 view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);

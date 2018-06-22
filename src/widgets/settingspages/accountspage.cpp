@@ -27,7 +27,7 @@ AccountsPage::AccountsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     helper::EditableModelView *view =
-        *layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr));
+        layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr)).getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);

@@ -10,6 +10,7 @@
 
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QHeaderView>
 #include <QLabel>
 #include <QListView>
 #include <QPushButton>
@@ -65,7 +66,8 @@ IgnoreUsersPage::IgnoreUsersPage()
     auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
     {
         helper::EditableModelView *view =
-            *messages.emplace<helper::EditableModelView>(app->ignores->createModel(nullptr));
+            messages.emplace<helper::EditableModelView>(app->ignores->createModel(nullptr))
+                .getElement();
         view->setTitles({"Pattern", "Regex"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);

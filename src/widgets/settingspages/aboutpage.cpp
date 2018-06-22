@@ -23,7 +23,7 @@ AboutPage::AboutPage()
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
     auto widget = scroll.emplaceScrollAreaWidget();
-    util::removeScrollAreaBackground(*scroll, *widget);
+    util::removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
     {
@@ -73,18 +73,22 @@ AboutPage::AboutPage()
         {
             auto form = licenses.emplace<QFormLayout>();
 
-            addLicense(*form, "Qt Framework", "https://www.qt.io", ":/licenses/qt_lgpl-3.0.txt");
-            addLicense(*form, "Boost", "https://www.boost.org/", ":/licenses/boost_boost.txt");
-            addLicense(*form, "Fmt", "http://fmtlib.net/", ":/licenses/fmt_bsd2.txt");
-            addLicense(*form, "LibCommuni", "https://github.com/communi/libcommuni",
+            addLicense(form.getElement(), "Qt Framework", "https://www.qt.io",
+                       ":/licenses/qt_lgpl-3.0.txt");
+            addLicense(form.getElement(), "Boost", "https://www.boost.org/",
+                       ":/licenses/boost_boost.txt");
+            addLicense(form.getElement(), "Fmt", "http://fmtlib.net/", ":/licenses/fmt_bsd2.txt");
+            addLicense(form.getElement(), "LibCommuni", "https://github.com/communi/libcommuni",
                        ":/licenses/libcommuni_BSD3.txt");
-            addLicense(*form, "OpenSSL", "https://www.openssl.org/", ":/licenses/openssl.txt");
-            addLicense(*form, "RapidJson", "http://rapidjson.org/", ":/licenses/rapidjson.txt");
-            addLicense(*form, "Pajlada/Settings", "https://github.com/pajlada/settings",
+            addLicense(form.getElement(), "OpenSSL", "https://www.openssl.org/",
+                       ":/licenses/openssl.txt");
+            addLicense(form.getElement(), "RapidJson", "http://rapidjson.org/",
+                       ":/licenses/rapidjson.txt");
+            addLicense(form.getElement(), "Pajlada/Settings", "https://github.com/pajlada/settings",
                        ":/licenses/pajlada_settings.txt");
-            addLicense(*form, "Pajlada/Signals", "https://github.com/pajlada/signals",
+            addLicense(form.getElement(), "Pajlada/Signals", "https://github.com/pajlada/signals",
                        ":/licenses/pajlada_signals.txt");
-            addLicense(*form, "Websocketpp", "https://www.zaphoyd.com/websocketpp/",
+            addLicense(form.getElement(), "Websocketpp", "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
         }
 

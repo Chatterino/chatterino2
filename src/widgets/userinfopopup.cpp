@@ -40,7 +40,7 @@ UserInfoPopup::UserInfoPopup()
         // avatar
         auto avatar = head.emplace<RippleEffectButton>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
-        QObject::connect(*avatar, &RippleEffectButton::clicked, [this] {
+        QObject::connect(avatar.getElement(), &RippleEffectButton::clicked, [this] {
             QDesktopServices::openUrl(QUrl("https://twitch.tv/" + this->userName_));
         });
 
@@ -335,7 +335,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 button->setScaleIndependantSize(buttonHeight, buttonHeight);
                 button->setBorderColor(QColor(255, 255, 255, 127));
 
-                QObject::connect(*button, &RippleEffectButton::clicked, [this, action] {
+                QObject::connect(button.getElement(), &RippleEffectButton::clicked, [this, action] {
                     this->buttonClicked.invoke(std::make_pair(action, -1));
                 });
             }
@@ -367,10 +367,9 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 }
                 a->setBorderColor(color1);
 
-                QObject::connect(
-                    *a, &RippleEffectLabel2::clicked, [this, timeout = std::get<1>(item)] {
-                        this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
-                    });
+                QObject::connect(a.getElement(), &RippleEffectLabel2::clicked, [
+                    this, timeout = std::get<1>(item)
+                ] { this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout)); });
             }
         }
     };
@@ -379,21 +378,16 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60},
-                           {"5", 5 * 60},
-                           {"10", 10 * 60},
+                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60},
-                            {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
                         });
     addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24},
-                            {"3", 3 * 60 * 60 * 24},
+                            {"1", 1 * 60 * 60 * 24}, {"3", 3 * 60 * 60 * 24},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7},
-                             {"2", 2 * 60 * 60 * 24 * 7},
+                             {"1", 1 * 60 * 60 * 24 * 7}, {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
