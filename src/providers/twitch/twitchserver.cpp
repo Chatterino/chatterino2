@@ -194,25 +194,21 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
 
 std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &channelID)
 {
-    this->forEachChannel();
+    std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    {
-        std::lock_guard<std::mutex> lock(this->channelMutex);
+    for (const auto &weakChannel : this->channels) {
+        auto channel = weakChannel.lock();
+        if (!channel) {
+            continue;
+        }
 
-        for (const auto &weakChannel : this->channels) {
-            auto channel = weakChannel.lock();
-            if (!channel) {
-                continue;
-            }
+        auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
+        if (!twitchChannel) {
+            continue;
+        }
 
-            auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
-            if (!twitchChannel) {
-                continue;
-            }
-
-            if (twitchChannel->roomID == channelID) {
-                return twitchChannel;
-            }
+        if (twitchChannel->roomID == channelID) {
+            return twitchChannel;
         }
     }
 
