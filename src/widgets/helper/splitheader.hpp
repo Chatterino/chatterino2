@@ -68,8 +68,10 @@ private:
     QMenu dropdownMenu;
     QMenu modeMenu;
 
-    QAction setsub;
-    QAction setemote;
+    QAction *setsub = nullptr;
+    QAction *setemote = nullptr;
+    QAction *setslow = nullptr;
+    QAction *setr9k = nullptr;
 
     void rightButtonClicked();
 
