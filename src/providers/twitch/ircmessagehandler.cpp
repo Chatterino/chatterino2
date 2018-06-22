@@ -54,6 +54,10 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString 
         args.trimSubscriberUsername = true;
     }
 
+    if (chan->isBroadcaster()) {
+        args.isStaffOrBroadcaster = true;
+    }
+
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored()) {

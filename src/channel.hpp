@@ -60,6 +60,7 @@ public:
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
+    virtual bool isBroadcaster() const;
 
     static std::shared_ptr<Channel> getEmpty();
 

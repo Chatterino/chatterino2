@@ -182,7 +182,7 @@ void TwitchChannel::setMod(bool value)
     }
 }
 
-bool TwitchChannel::isBroadcaster()
+bool TwitchChannel::isBroadcaster() const
 {
     auto app = getApp();
 

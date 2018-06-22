@@ -187,6 +187,11 @@ bool Channel::isMod() const
     return false;
 }
 
+bool Channel::isBroadcaster() const
+{
+    return false;
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
     static std::shared_ptr<Channel> channel(new Channel("", None));

@@ -99,6 +99,10 @@ MessagePtr TwitchMessageBuilder::build()
     // PARSING
     this->parseUsername();
 
+    if (this->userName == this->channel->name) {
+        this->senderIsBroadcaster = true;
+    }
+
     //#ifdef XD
     //    if (this->originalMessage.length() > 100) {
     //        this->message->flags |= Message::Collapsed;
@@ -126,7 +130,25 @@ MessagePtr TwitchMessageBuilder::build()
         this->emplace<TimestampElement>();
     }
 
-    this->emplace<TwitchModerationElement>();
+    bool addModerationElement = true;
+    if (this->senderIsBroadcaster) {
+        addModerationElement = false;
+    } else {
+        bool hasUserType = this->tags.contains("user-type");
+        if (hasUserType) {
+            QString userType = this->tags.value("user-type").toString();
+
+            if (userType == "mod") {
+                if (!args.isStaffOrBroadcaster) {
+                    addModerationElement = false;
+                }
+            }
+        }
+    }
+
+    if (addModerationElement) {
+        this->emplace<TwitchModerationElement>();
+    }
 
     this->appendTwitchBadges();
 
