@@ -90,7 +90,13 @@ void Application::initialize()
     this->settings->initialize();
 
 #ifdef Q_OS_WIN
+#ifdef QT_DEBUG
+#ifdef C_DEBUG_NM
     this->nativeMessaging->registerHost();
+#endif
+#else
+    this->nativeMessaging->registerHost();
+#endif
 #endif
 
     this->settings->load();
