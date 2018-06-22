@@ -186,16 +186,7 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelNa
 
 void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func)
 {
-    std::lock_guard<std::mutex> lock(this->channelMutex);
-
-    for (std::weak_ptr<Channel> &weak : this->channels) {
-        std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan) {
-            continue;
-        }
-
-        func(chan);
-    }
+    this->forEachChannel(func);
 
     func(this->whispersChannel);
     func(this->mentionsChannel);
@@ -203,6 +194,8 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
 
 std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &channelID)
 {
+    this->forEachChannel();
+
     {
         std::lock_guard<std::mutex> lock(this->channelMutex);
 

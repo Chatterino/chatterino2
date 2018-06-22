@@ -26,9 +26,6 @@ public:
 
     util::MutexValue<QString> lastUserThatWhisperedMe;
 
-    //    QString getLastWhisperedPerson() const;
-    //    void setLastWhisperedPerson(const QString &person);
-
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     IndirectChannel watchingChannel;

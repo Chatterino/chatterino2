@@ -1,12 +1,13 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <mutex>
 
 namespace chatterino {
 namespace util {
 
 template <typename T>
-class MutexValue
+class MutexValue : boost::noncopyable
 {
     mutable std::mutex mutex;
     T value;

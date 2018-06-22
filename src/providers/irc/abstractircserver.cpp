@@ -15,38 +15,38 @@ namespace irc {
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
-    this->writeConnection.reset(new IrcConnection);
-    this->writeConnection->moveToThread(QCoreApplication::instance()->thread());
+    this->writeConnection_.reset(new IrcConnection);
+    this->writeConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(this->writeConnection.get(), &Communi::IrcConnection::messageReceived,
+    QObject::connect(this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
                      [this](auto msg) { this->writeConnectionMessageReceived(msg); });
 
     // Listen to read connection message signals
-    this->readConnection.reset(new IrcConnection);
-    this->readConnection->moveToThread(QCoreApplication::instance()->thread());
+    this->readConnection_.reset(new IrcConnection);
+    this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::messageReceived,
+    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
                      [this](auto msg) { this->messageReceived(msg); });
-    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::privateMessageReceived,
+    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::privateMessageReceived,
                      [this](auto msg) { this->privateMessageReceived(msg); });
-    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::connected,
+    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::connected,
                      [this] { this->onConnected(); });
-    QObject::connect(this->readConnection.get(), &Communi::IrcConnection::disconnected,
+    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
 
     // listen to reconnect request
-    this->readConnection->reconnectRequested.connect([this] { this->connect(); });
+    this->readConnection_->reconnectRequested.connect([this] { this->connect(); });
     //    this->writeConnection->reconnectRequested.connect([this] { this->connect(); });
 }
 
 IrcConnection *AbstractIrcServer::getReadConnection() const
 {
-    return this->readConnection.get();
+    return this->readConnection_.get();
 }
 
 IrcConnection *AbstractIrcServer::getWriteConnection() const
 {
-    return this->writeConnection.get();
+    return this->writeConnection_.get();
 }
 
 void AbstractIrcServer::connect()
@@ -54,15 +54,15 @@ void AbstractIrcServer::connect()
     this->disconnect();
 
     //    if (this->hasSeperateWriteConnection()) {
-    this->initializeConnection(this->writeConnection.get(), false, true);
-    this->initializeConnection(this->readConnection.get(), true, false);
+    this->initializeConnection(this->writeConnection_.get(), false, true);
+    this->initializeConnection(this->readConnection_.get(), true, false);
     //    } else {
     //        this->initializeConnection(this->readConnection.get(), true, true);
     //    }
 
     // fourtf: this should be asynchronous
     {
-        std::lock_guard<std::mutex> lock1(this->connectionMutex);
+        std::lock_guard<std::mutex> lock1(this->connectionMutex_);
         std::lock_guard<std::mutex> lock2(this->channelMutex);
 
         for (std::weak_ptr<Channel> &weak : this->channels.values()) {
@@ -71,12 +71,12 @@ void AbstractIrcServer::connect()
                 continue;
             }
 
-            this->writeConnection->sendRaw("JOIN #" + chan->name);
-            this->readConnection->sendRaw("JOIN #" + chan->name);
+            this->writeConnection_->sendRaw("JOIN #" + chan->name);
+            this->readConnection_->sendRaw("JOIN #" + chan->name);
         }
 
-        this->writeConnection->open();
-        this->readConnection->open();
+        this->writeConnection_->open();
+        this->readConnection_->open();
     }
 
     //    this->onConnected();
@@ -85,20 +85,20 @@ void AbstractIrcServer::connect()
 
 void AbstractIrcServer::disconnect()
 {
-    std::lock_guard<std::mutex> locker(this->connectionMutex);
+    std::lock_guard<std::mutex> locker(this->connectionMutex_);
 
-    this->readConnection->close();
-    this->writeConnection->close();
+    this->readConnection_->close();
+    this->writeConnection_->close();
 }
 
 void AbstractIrcServer::sendMessage(const QString &channelName, const QString &message)
 {
-    std::lock_guard<std::mutex> locker(this->connectionMutex);
+    std::lock_guard<std::mutex> locker(this->connectionMutex_);
 
     // fourtf: trim the message if it's sent from twitch chat
 
-    if (this->writeConnection) {
-        this->writeConnection->sendRaw("PRIVMSG #" + channelName + " :" + message);
+    if (this->writeConnection_) {
+        this->writeConnection_->sendRaw("PRIVMSG #" + channelName + " :" + message);
     }
 }
 
@@ -133,25 +133,25 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(const QString &dirty
         debug::Log("[AbstractIrcServer::addChannel] {} was destroyed", clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
 
-        if (this->readConnection) {
-            this->readConnection->sendRaw("PART #" + clojuresInCppAreShit);
+        if (this->readConnection_) {
+            this->readConnection_->sendRaw("PART #" + clojuresInCppAreShit);
         }
 
-        if (this->writeConnection) {
-            this->writeConnection->sendRaw("PART #" + clojuresInCppAreShit);
+        if (this->writeConnection_) {
+            this->writeConnection_->sendRaw("PART #" + clojuresInCppAreShit);
         }
     });
 
     // join irc channel
     {
-        std::lock_guard<std::mutex> lock2(this->connectionMutex);
+        std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
-        if (this->readConnection) {
-            this->readConnection->sendRaw("JOIN #" + channelName);
+        if (this->readConnection_) {
+            this->readConnection_->sendRaw("JOIN #" + channelName);
         }
 
-        if (this->writeConnection) {
-            this->writeConnection->sendRaw("JOIN #" + channelName);
+        if (this->writeConnection_) {
+            this->writeConnection_->sendRaw("JOIN #" + channelName);
         }
     }
 
@@ -240,7 +240,7 @@ QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 
 void AbstractIrcServer::addFakeMessage(const QString &data)
 {
-    auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection.get());
+    auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection_.get());
 
     this->messageReceived(fakeMessage);
 }
