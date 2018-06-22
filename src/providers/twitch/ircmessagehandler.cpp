@@ -150,6 +150,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
+        chan->disableAllMessages();
         chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
 
         return;

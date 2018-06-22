@@ -150,6 +150,20 @@ void Channel::addOrReplaceTimeout(messages::MessagePtr message)
     // WindowManager::getInstance().repaintVisibleChatWidgets(this);
 }
 
+void Channel::disableAllMessages()
+{
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    int snapshotLength = snapshot.getLength();
+    for (int i = 0; i < snapshotLength; i++) {
+        auto &s = snapshot[i];
+        if (s->flags & Message::System || s->flags & Message::Timeout) {
+            continue;
+        }
+
+        s->flags.EnableFlag(Message::Disabled);
+    }
+}
+
 void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
 {
     std::vector<messages::MessagePtr> addedMessages = this->messages.pushFront(_messages);
