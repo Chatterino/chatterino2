@@ -257,9 +257,9 @@ void Window::showEvent(QShowEvent *event)
         if (box->exec() == QMessageBox::Yes) {
             QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
         }
-
-        getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
     }
+
+    getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
 
     BaseWindow::showEvent(event);
 }
