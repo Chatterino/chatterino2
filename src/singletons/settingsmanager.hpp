@@ -127,6 +127,7 @@ public:
 
     /// Misc
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
+    QStringSetting currentVersion = {"/misc/currentVersion", ""};
 
     void updateWordTypeMask();
 

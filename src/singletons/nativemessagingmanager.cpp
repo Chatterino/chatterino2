@@ -26,7 +26,7 @@ namespace ipc = boost::interprocess;
 
 #include <iostream>
 
-#define EXTENSION_ID "lgnlbmhbnbncmiohgcbhgiaddibhinon"
+#define EXTENSION_ID "glknmaideaikkmemifbfkhnomoknepka"
 #define MESSAGE_SIZE 1024
 
 namespace chatterino {
@@ -87,7 +87,7 @@ void NativeMessagingManager::registerHost()
         QJsonDocument document;
 
         auto obj = getBaseDocument();
-        QJsonArray allowed_origins_arr = {"chrome-extension://aeicjepmjkgmbeohnchmpfjbpchogmjn/"};
+        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID "/"};
         obj.insert("allowed_origins", allowed_origins_arr);
         document.setObject(obj);
 
