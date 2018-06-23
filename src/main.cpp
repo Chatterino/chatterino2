@@ -12,6 +12,7 @@
 #include <QLibrary>
 #include <QStringList>
 #include <QStyleFactory>
+#include <pajlada/settings/settingmanager.hpp>
 
 #ifdef USEWINSDK
 #include "util/nativeeventhelper.hpp"
