@@ -32,8 +32,6 @@ ThemeManager::ThemeManager()
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
 {
-    qDebug() << "init ThemeManager";
-
     this->update();
 
     this->themeName.connectSimple([this](auto) { this->update(); }, false);
@@ -168,6 +166,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
+    this->splits.header.activeText = isLight ? QColor(134, 79, 242) : QColor(242, 209, 79);
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);

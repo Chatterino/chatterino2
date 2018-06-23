@@ -70,6 +70,7 @@ public:
             QColor border;
             QColor background;
             QColor text;
+            QColor activeText;
             // int margin;
         } header;
 

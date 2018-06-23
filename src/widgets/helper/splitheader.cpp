@@ -30,6 +30,9 @@ SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
     , split(_split)
 {
+    this->split->focused.connect([this]() { this->themeRefreshEvent(); });
+    this->split->focusLost.connect([this]() { this->themeRefreshEvent(); });
+
     auto app = getApp();
 
     util::LayoutCreator<SplitHeader> layoutCreator(this);
@@ -370,7 +373,12 @@ void SplitHeader::rightButtonClicked()
 void SplitHeader::themeRefreshEvent()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
+
+    if (this->split->hasFocus()) {
+        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.activeText);
+    } else {
+        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
+    }
 
     //    this->dropdownButton->setPalette(palette);
     this->titleLabel->setPalette(palette);

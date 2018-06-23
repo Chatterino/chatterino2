@@ -16,6 +16,7 @@ public:
 
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
     pajlada::Signals::NoArgSignal focused;
+    pajlada::Signals::NoArgSignal focusLost;
 
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
@@ -25,6 +26,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
     void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
 
 private:
     QCompleter *completer = nullptr;

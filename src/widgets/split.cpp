@@ -143,6 +143,7 @@ Split::Split(QWidget *parent)
     });
 
     this->input.ui_.textEdit->focused.connect([this] { this->focused.invoke(); });
+    this->input.ui_.textEdit->focusLost.connect([this] { this->focusLost.invoke(); });
 }
 
 Split::~Split()

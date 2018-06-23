@@ -146,6 +146,15 @@ void ResizingTextEdit::focusInEvent(QFocusEvent *event)
     }
 }
 
+void ResizingTextEdit::focusOutEvent(QFocusEvent *event)
+{
+    QTextEdit::focusOutEvent(event);
+
+    if (event->lostFocus()) {
+        this->focusLost.invoke();
+    }
+}
+
 void ResizingTextEdit::setCompleter(QCompleter *c)
 {
     if (this->completer) {

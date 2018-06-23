@@ -72,7 +72,6 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
     TwitchChannel *channel = new TwitchChannel(channelName, this->getReadConnection());
 
     channel->sendMessageSignal.connect([this, channel](auto chan, auto msg, bool &sent) {
-
         {
             std::lock_guard<std::mutex> guard(this->lastMessageMutex);
 

@@ -47,6 +47,7 @@ public:
 
     pajlada::Signals::NoArgSignal channelChanged;
     pajlada::Signals::NoArgSignal focused;
+    pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
     SplitContainer *getContainer();
