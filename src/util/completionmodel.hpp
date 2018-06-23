@@ -24,7 +24,6 @@ class CompletionModel : public QAbstractListModel
             TwitchGlobalEmote,
             TwitchSubscriberEmote,
             Emoji,
-            TwitchCommands,
         };
 
         TaggedString(const QString &_str, Type _type)
