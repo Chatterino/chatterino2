@@ -7,6 +7,7 @@
 #include "widgets/settingspages/accountspage.hpp"
 #include "widgets/settingspages/appearancepage.hpp"
 #include "widgets/settingspages/behaviourpage.hpp"
+#include "widgets/settingspages/browserextensionpage.hpp"
 #include "widgets/settingspages/commandpage.hpp"
 #include "widgets/settingspages/emotespage.hpp"
 #include "widgets/settingspages/externaltoolspage.hpp"
@@ -96,6 +97,7 @@ void SettingsDialog::addTabs()
     //    this->addTab(new settingspages::LogsPage);
     this->addTab(new settingspages::ModerationPage);
     //    this->addTab(new settingspages::SpecialChannelsPage);
+    this->addTab(new settingspages::BrowserExtensionPage);
     this->addTab(new settingspages::ExternalToolsPage);
 
     this->ui_.tabContainer->addStretch(1);

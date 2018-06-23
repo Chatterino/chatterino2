@@ -16,6 +16,7 @@
 #include "widgets/welcomedialog.hpp"
 
 #include <QApplication>
+#include <QDesktopServices>
 #include <QHeaderView>
 #include <QPalette>
 #include <QShortcut>
@@ -246,6 +247,18 @@ void Window::showEvent(QShowEvent *event)
                             "around the edges and everything is subject to change.");
         box->setAttribute(Qt::WA_DeleteOnClose);
         box->show();
+    }
+
+    if (getApp()->settings->currentVersion.getValue() != "" &&
+        getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
+                                   QMessageBox::Yes | QMessageBox::No);
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        if (box->exec() == QMessageBox::Yes) {
+            QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
+        }
+
+        getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
     }
 
     BaseWindow::showEvent(event);
