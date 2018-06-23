@@ -42,7 +42,7 @@ SplitHeader::SplitHeader(Split *_split)
         dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
-            QTimer::singleShot(80, [&] {
+            QTimer::singleShot(80, [&, this] {
                 this->dropdownMenu.move(
                     this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
                 this->dropdownMenu.show();
@@ -60,7 +60,7 @@ SplitHeader::SplitHeader(Split *_split)
         this->addModeItems(mode.getElement());
 
         QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
-            QTimer::singleShot(80, [&] {
+            QTimer::singleShot(80, [&, this] {
                 ChannelPtr _channel = this->split->getChannel();
                 if (_channel.get()->isMod() || _channel.get()->isBroadcaster()) {
                     this->modeMenu.move(
