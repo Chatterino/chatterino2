@@ -43,7 +43,6 @@ SplitHeader::SplitHeader(Split *_split)
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
-                qDebug() << this->dropdownButton->height();
                 this->dropdownMenu.move(
                     this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
                 this->dropdownMenu.show();
@@ -62,9 +61,12 @@ SplitHeader::SplitHeader(Split *_split)
 
         QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
             QTimer::singleShot(80, [&] {
-                this->modeMenu.move(
-                    this->modeButton->mapToGlobal(QPoint(0, this->modeButton->height())));
-                this->modeMenu.show();
+                ChannelPtr _channel = this->split->getChannel();
+                if (_channel.get()->isMod() || _channel.get()->isBroadcaster()) {
+                    this->modeMenu.move(
+                        this->modeButton->mapToGlobal(QPoint(0, this->modeButton->height())));
+                    this->modeMenu.show();
+                }
             });
         });
         mode->hide();
@@ -146,67 +148,66 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
 
 void SplitHeader::addModeItems(RippleEffectLabel *)
 {
-    QAction *setsub = new QAction("Submode", this);
-    this->setsub = setsub;
-    setsub->setCheckable(true);
+    QAction *setSub = new QAction("Submode", this);
+    this->setSub = setSub;
+    setSub->setCheckable(true);
 
-    QObject::connect(setsub, &QAction::triggered, this, [setsub, this]() {
-        QString sendcommand = "/subscribers";
-        if (!setsub->isChecked()) {
-            sendcommand.append("off");
+    QObject::connect(setSub, &QAction::triggered, this, [setSub, this]() {
+        QString sendCommand = "/subscribers";
+        if (!setSub->isChecked()) {
+            sendCommand.append("off");
         };
-        this->split->getChannel().get()->sendMessage(sendcommand);
+        this->split->getChannel().get()->sendMessage(sendCommand);
     });
 
-    QAction *setemote = new QAction("Emote only", this);
-    this->setemote = setsub;
-    setemote->setCheckable(true);
+    QAction *setEmote = new QAction("Emote only", this);
+    this->setEmote = setEmote;
+    setEmote->setCheckable(true);
 
-    QObject::connect(setemote, &QAction::triggered, this, [setemote, this]() {
-        QString sendcommand = "/emoteonly";
-        if (!setemote->isChecked()) {
-            sendcommand.append("off");
+    QObject::connect(setEmote, &QAction::triggered, this, [setEmote, this]() {
+        QString sendCommand = "/emoteonly";
+        if (!setEmote->isChecked()) {
+            sendCommand.append("off");
         };
-        this->split->getChannel().get()->sendMessage(sendcommand);
+        this->split->getChannel().get()->sendMessage(sendCommand);
     });
 
-    QAction *setslow = new QAction("Slow mode", this);
-    this->setslow = setslow;
-    setslow->setCheckable(true);
+    QAction *setSlow = new QAction("Slow mode", this);
+    this->setSlow = setSlow;
+    setSlow->setCheckable(true);
 
-    QObject::connect(setslow, &QAction::triggered, this, [setslow, this]() {
-        qDebug() << setslow->isChecked();
-        if (!setslow->isChecked()) {
+    QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
+        if (!setSlow->isChecked()) {
             this->split->getChannel().get()->sendMessage("/slowoff");
-            setslow->setChecked(false);
+            setSlow->setChecked(false);
             return;
         };
         bool ok;
-        int slowsec =
+        int slowSec =
             QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1, &ok, Qt::FramelessWindowHint);
         if (ok) {
-            this->split->getChannel().get()->sendMessage(QString("/slow %1").arg(slowsec));
+            this->split->getChannel().get()->sendMessage(QString("/slow %1").arg(slowSec));
         } else {
-            setslow->setChecked(true);
+            setSlow->setChecked(true);
         }
     });
 
-    QAction *setr9k = new QAction("R9K mode", this);
-    this->setr9k = setr9k;
-    setr9k->setCheckable(true);
+    QAction *setR9k = new QAction("R9K mode", this);
+    this->setR9k = setR9k;
+    setR9k->setCheckable(true);
 
-    QObject::connect(setr9k, &QAction::triggered, this, [setr9k, this]() {
-        QString sendcommand = "/r9kbeta";
-        if (!setr9k->isChecked()) {
-            sendcommand.append("off");
+    QObject::connect(setR9k, &QAction::triggered, this, [setR9k, this]() {
+        QString sendCommand = "/r9kbeta";
+        if (!setR9k->isChecked()) {
+            sendCommand.append("off");
         };
-        this->split->getChannel().get()->sendMessage(sendcommand);
+        this->split->getChannel().get()->sendMessage(sendCommand);
     });
 
-    this->modeMenu.addAction(setemote);
-    this->modeMenu.addAction(setsub);
-    this->modeMenu.addAction(setslow);
-    this->modeMenu.addAction(setr9k);
+    this->modeMenu.addAction(setEmote);
+    this->modeMenu.addAction(setSub);
+    this->modeMenu.addAction(setSlow);
+    this->modeMenu.addAction(setR9k);
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -313,26 +314,26 @@ void SplitHeader::updateModes()
 
     QString text;
 
-    this->setslow->setChecked(false);
-    this->setemote->setChecked(false);
-    this->setsub->setChecked(false);
-    this->setr9k->setChecked(false);
+    this->setSlow->setChecked(false);
+    this->setEmote->setChecked(false);
+    this->setSub->setChecked(false);
+    this->setR9k->setChecked(false);
 
     if (roomModes.r9k) {
         text += "r9k, ";
-        this->setr9k->setChecked(true);
+        this->setR9k->setChecked(true);
     }
     if (roomModes.slowMode) {
         text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
-        this->setslow->setChecked(true);
+        this->setSlow->setChecked(true);
     }
     if (roomModes.emoteOnly) {
         text += "emote, ";
-        this->setemote->setChecked(true);
+        this->setEmote->setChecked(true);
     }
     if (roomModes.submode) {
         text += "sub, ";
-        this->setsub->setChecked(true);
+        this->setSub->setChecked(true);
     }
 
     if (text.length() > 2) {
