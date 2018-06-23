@@ -249,7 +249,7 @@ void Window::showEvent(QShowEvent *event)
         box->show();
     }
 
-    if (getApp()->settings->currentVersion.getValue() != "" &&
+    if (  // getApp()->settings->currentVersion.getValue() != "" &&
         getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
         auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
                                    QMessageBox::Yes | QMessageBox::No);
