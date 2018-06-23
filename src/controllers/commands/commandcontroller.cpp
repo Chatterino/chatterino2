@@ -8,6 +8,7 @@
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/pathmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "util/signalvector2.hpp"
 
 #include <QApplication>
@@ -126,6 +127,12 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
                 app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
+
+                if (app->settings->inlineWhispers) {
+                    app->twitch.server->forEachChannel(
+                        [&b](ChannelPtr _channel) { _channel->addMessage(b.getMessage()); });
+                }
+
                 return "";
             }
         }
