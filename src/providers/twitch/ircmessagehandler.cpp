@@ -298,30 +298,28 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
-    return;
-    //    auto app = getApp();
-    //    MessagePtr msg = Message::createSystemMessage(message->content());
+    auto app = getApp();
+    MessagePtr msg = Message::createSystemMessage(message->content());
 
-    //    QString channelName;
-    //    if (!TrimChannelName(message->target(), channelName)) {
-    //        // Notice wasn't targeted at a single channel, send to all twitch channels
-    //        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
-    //            c->addMessage(msg);  //
-    //        });
+    QString channelName;
+    if (!trimChannelName(message->target(), channelName)) {
+        // Notice wasn't targeted at a single channel, send to all twitch channels
+        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
+            c->addMessage(msg);  //
+        });
 
-    //        return;
-    //    }
+        return;
+    }
 
-    //    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
+    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
-    //    if (channel->isEmpty()) {
-    //        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel
-    //        manager",
-    //                   channelName);
-    //        return;
-    //    }
+    if (channel->isEmpty()) {
+        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager ",
+                   channelName);
+        return;
+    }
 
-    //    channel->addMessage(msg);
+    channel->addMessage(msg);
 }
 
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
