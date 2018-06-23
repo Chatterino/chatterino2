@@ -375,7 +375,7 @@ void SplitHeader::themeRefreshEvent()
     QPalette palette;
 
     if (this->split->hasFocus()) {
-        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.activeText);
+        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.focusedText);
     } else {
         palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
     }

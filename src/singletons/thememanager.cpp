@@ -166,7 +166,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
-    this->splits.header.activeText = isLight ? QColor(134, 79, 242) : QColor(242, 209, 79);
+    this->splits.header.focusedText = isLight ? QColor("#198CFF") : QColor("#84C1FF");
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
