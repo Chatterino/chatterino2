@@ -213,12 +213,10 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->getScale();
 
-    qDebug() << painter.device()->devicePixelRatioF() << painter.device()->devicePixelRatioFScale()
-             << painter.device()->logicalDpiX();
-
-    painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale * this->devicePixelRatioF()));
-    QFontMetrics metrics =
-        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * this->devicePixelRatioF());
+    painter.setFont(getApp()->fonts->getFont(
+        FontStyle::UiTabs, scale * 96.f / this->logicalDpiX() * this->devicePixelRatioF()));
+    QFontMetrics metrics = app->fonts->getFontMetrics(
+        FontStyle::UiTabs, scale * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
     //    int fullHeight = (int)(scale * 48);

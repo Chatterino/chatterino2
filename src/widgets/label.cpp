@@ -89,10 +89,12 @@ void Label::paintEvent(QPaintEvent *)
     auto app = getApp();
 
     QPainter painter(this);
-    QFontMetrics metrics = app->fonts->getFontMetrics(this->getFontStyle(),
-                                                      this->getScale() * this->devicePixelRatioF());
-    painter.setFont(
-        app->fonts->getFont(this->getFontStyle(), this->getScale() * this->devicePixelRatioF()));
+    QFontMetrics metrics = app->fonts->getFontMetrics(
+        this->getFontStyle(),
+        this->getScale() * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
+    painter.setFont(app->fonts->getFont(
+        this->getFontStyle(),
+        this->getScale() * 96.f / this->logicalDpiX() * this->devicePixelRatioF()));
 
     int offset = this->getOffset();
 
