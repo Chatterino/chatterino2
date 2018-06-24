@@ -142,6 +142,15 @@ void TwitchChannel::sendMessage(const QString &message)
 {
     auto app = getApp();
 
+    if (!app->accounts->twitch.isLoggedIn()) {
+        // XXX: It would be nice if we could add a link here somehow that opened the "account
+        // manager" dialog
+        this->addMessage(
+            messages::Message::createSystemMessage("You need to log in to send messages. You can "
+                                                   "link your Twitch account in the settings."));
+        return;
+    }
+
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing

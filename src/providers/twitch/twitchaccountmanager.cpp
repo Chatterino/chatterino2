@@ -137,6 +137,17 @@ void TwitchAccountManager::load()
     });
 }
 
+bool TwitchAccountManager::isLoggedIn() const
+{
+    if (!this->currentUser) {
+        return false;
+    }
+
+    // Once `TwitchAccount` class has a way to check, we should also return false if the credentials
+    // are incorrect
+    return !this->currentUser->isAnon();
+}
+
 bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
     const auto &accs = this->accounts.getVector();

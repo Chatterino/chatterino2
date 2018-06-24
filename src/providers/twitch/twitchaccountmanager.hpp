@@ -47,6 +47,8 @@ public:
     void reloadUsers();
     void load();
 
+    bool isLoggedIn() const;
+
     pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
