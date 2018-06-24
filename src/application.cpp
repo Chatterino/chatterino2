@@ -89,16 +89,6 @@ void Application::initialize()
     // 2. Initialize/load classes
     this->settings->initialize();
 
-#ifdef Q_OS_WIN
-#ifdef QT_DEBUG
-#ifdef C_DEBUG_NM
-    this->nativeMessaging->registerHost();
-#endif
-#else
-    this->nativeMessaging->registerHost();
-#endif
-#endif
-
     this->settings->load();
     this->commands->load();
     this->logging->initialize();
@@ -118,7 +108,17 @@ void Application::initialize()
     // XXX
     this->settings->updateWordTypeMask();
 
+#ifdef Q_OS_WIN
+#ifdef QT_DEBUG
+#ifdef C_DEBUG_NM
+    this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
+#endif
+#else
+    this->nativeMessaging->registerHost();
+    this->nativeMessaging->openGuiMessageQueue();
+#endif
+#endif
 
     this->twitch.pubsub->sig.whisper.sent.connect([](const auto &msg) {
         debug::Log("WHISPER SENT LOL");  //
