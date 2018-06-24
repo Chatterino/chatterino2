@@ -144,12 +144,12 @@ void BaseWindow::init()
         layout->addWidget(this->ui_.layoutBase);
     }
 
-    // DPI
-    auto dpi = util::getWindowDpi(this->winId());
+// DPI
+//    auto dpi = util::getWindowDpi(this->winId());
 
-    if (dpi) {
-        this->scale = dpi.value() / 96.f;
-    }
+//    if (dpi) {
+//        this->scale = dpi.value() / 96.f;
+//    }
 #endif
 
 #ifdef USEWINSDK
@@ -418,10 +418,16 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
             float _scale = dpi / 96.f;
 
-            auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
-            SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
-                         prcNewWindow->right - prcNewWindow->left,
-                         prcNewWindow->bottom - prcNewWindow->top, SWP_NOZORDER | SWP_NOACTIVATE);
+            static bool firstResize = true;
+
+            if (!firstResize) {
+                auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
+                SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
+                             prcNewWindow->right - prcNewWindow->left,
+                             prcNewWindow->bottom - prcNewWindow->top,
+                             SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            firstResize = false;
 
             this->nativeScale_ = _scale;
             this->updateScale();
