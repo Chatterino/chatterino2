@@ -169,6 +169,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
                 QJsonObject emoticon = emoteValue.toObject();
                 QString id = QString::number(emoticon["id"].toInt());
                 QString code = emoticon["code"].toString();
+
                 auto cleanCode = cleanUpCode(code);
                 emoteSet->emotes.emplace_back(id, cleanCode);
                 emoteData.emoteCodes.push_back(cleanCode);
