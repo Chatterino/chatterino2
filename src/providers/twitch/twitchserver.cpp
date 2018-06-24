@@ -132,11 +132,11 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelName)
 {
     if (channelName == "/whispers") {
-        return whispersChannel;
+        return this->whispersChannel;
     }
 
     if (channelName == "/mentions") {
-        return mentionsChannel;
+        return this->mentionsChannel;
     }
 
     return nullptr;
@@ -196,13 +196,13 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
 
         // check if you are sending messages too fast
         if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
-            if (lastErrorTimeSpeed_ + 30s < now) {
+            if (this->lastErrorTimeSpeed_ + 30s < now) {
                 auto errorMessage =
                     messages::Message::createSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
-                lastErrorTimeSpeed_ = now;
+                this->lastErrorTimeSpeed_ = now;
             }
             return;
         }
@@ -214,13 +214,13 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
 
         // check if you are sending too many messages
         if (lastMessage.size() >= maxMessageCount) {
-            if (lastErrorTimeAmount_ + 30s < now) {
+            if (this->lastErrorTimeAmount_ + 30s < now) {
                 auto errorMessage =
                     messages::Message::createSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 
-                lastErrorTimeAmount_ = now;
+                this->lastErrorTimeAmount_ = now;
             }
             return;
         }
