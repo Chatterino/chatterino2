@@ -467,12 +467,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         } break;
         case WM_SIZE: {
             if (this->ui_.windowLayout) {
-                if (msg->wParam == SIZE_MAXIMIZED) {
-                    auto offset = int(this->getScale() * 8);
+                if (this->hasCustomWindowFrame() && !this->frameless_) {
+                    if (msg->wParam == SIZE_MAXIMIZED) {
+                        auto offset = int(this->getScale() * 8);
 
-                    this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
-                } else {
-                    this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
+                        this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
+                    } else {
+                        this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
+                    }
                 }
             }
 
