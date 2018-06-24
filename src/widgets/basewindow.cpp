@@ -415,12 +415,12 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         case WM_DPICHANGED: {
             int dpi = HIWORD(msg->wParam);
 
-            float oldScale = this->scale;
             float _scale = dpi / 96.f;
-            float resizeScale = _scale / oldScale;
 
-            this->resize(static_cast<int>(this->width() * resizeScale),
-                         static_cast<int>(this->height() * resizeScale));
+            auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
+            SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
+                         prcNewWindow->right - prcNewWindow->left,
+                         prcNewWindow->bottom - prcNewWindow->top, SWP_NOZORDER | SWP_NOACTIVATE);
 
             this->nativeScale_ = _scale;
             this->updateScale();
