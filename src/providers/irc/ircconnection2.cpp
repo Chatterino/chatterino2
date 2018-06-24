@@ -7,6 +7,7 @@ namespace irc {
 IrcConnection::IrcConnection(QObject *parent)
     : Communi::IrcConnection(parent)
 {
+    // send ping every x seconds
     this->pingTimer_.setInterval(5000);
     this->pingTimer_.start();
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
@@ -17,6 +18,7 @@ IrcConnection::IrcConnection(QObject *parent)
         this->recentlyReceivedMessage_ = false;
     });
 
+    // reconnect after x seconds without receiving a message
     this->reconnectTimer_.setInterval(5000);
     this->reconnectTimer_.setSingleShot(true);
     QObject::connect(&this->reconnectTimer_, &QTimer::timeout,

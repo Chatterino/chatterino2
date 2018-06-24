@@ -81,6 +81,7 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 
             QTime now = QTime::currentTime();
 
+            // check if you are sending messages too fast
             if (lastMessage.size() > 0 &&
                 lastMessage.back().addMSecs(channel->hasModRights() ? 100 : 1100) > now) {
                 if (lastErrorTimeSpeed.addSecs(30) < now) {
@@ -94,10 +95,12 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
                 return;
             }
 
+            // remove messages older than 30 seconds
             while (lastMessage.size() > 0 && lastMessage.front().addSecs(32) < now) {
                 lastMessage.pop();
             }
 
+            // check if you are sending too many messages
             if (lastMessage.size() >= maxMessageCount) {
                 if (lastErrorTimeAmount.addSecs(30) < now) {
                     auto errorMessage =
