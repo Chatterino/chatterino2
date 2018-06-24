@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "common.hpp"
+#include "controllers/commands/commandcontroller.hpp"
 #include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
 
@@ -61,6 +62,15 @@ void CompletionModel::refresh()
     const auto &emojiShortCodes = app->emotes->emojis.shortCodes;
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":", TaggedString::Type::Emoji);
+    }
+
+    // Commands
+    for (auto &command : app->commands->items.getVector()) {
+        this->addString(command.name, TaggedString::Command);
+    }
+
+    for (auto &command : app->commands->getDefaultTwitchCommandList()) {
+        this->addString(command, TaggedString::Command);
     }
 
     // Channel-specific: Usernames

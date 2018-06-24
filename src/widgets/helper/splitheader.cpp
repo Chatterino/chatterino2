@@ -14,6 +14,7 @@
 
 #include <QByteArray>
 #include <QDrag>
+#include <QInputDialog>
 #include <QMimeData>
 #include <QPainter>
 
@@ -30,6 +31,9 @@ SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
     , split(_split)
 {
+    this->split->focused.connect([this]() { this->themeRefreshEvent(); });
+    this->split->focusLost.connect([this]() { this->themeRefreshEvent(); });
+
     auto app = getApp();
 
     util::LayoutCreator<SplitHeader> layoutCreator(this);
@@ -41,7 +45,7 @@ SplitHeader::SplitHeader(Split *_split)
         dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
-            QTimer::singleShot(80, [&] {
+            QTimer::singleShot(80, [&, this] {
                 this->dropdownMenu.move(
                     this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
                 this->dropdownMenu.show();
@@ -50,13 +54,25 @@ SplitHeader::SplitHeader(Split *_split)
 
         // channel name label
         auto title = layout.emplace<Label>().assign(&this->titleLabel);
-        title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        title->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         title->setCentered(true);
         title->setHasOffset(false);
 
         // mode button
         auto mode = layout.emplace<RippleEffectLabel>(this).assign(&this->modeButton);
+        this->addModeItems(mode.getElement());
 
+        QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
+            QTimer::singleShot(80, [&, this] {
+                ChannelPtr _channel = this->split->getChannel();
+                if (_channel.get()->isMod() || _channel.get()->isBroadcaster()) {
+                    this->modeMenu.move(
+                        this->modeButton->mapToGlobal(QPoint(0, this->modeButton->height())));
+                    this->modeMenu.show();
+                }
+            });
+        });
+        mode->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         mode->hide();
 
         //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
@@ -129,9 +145,73 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
     this->dropdownMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
-    this->dropdownMenu.addSeparator();
-    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
+//    this->dropdownMenu.addSeparator();
+//    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
     // clang-format on
+}
+
+void SplitHeader::addModeItems(RippleEffectLabel *)
+{
+    QAction *setSub = new QAction("Submode", this);
+    this->setSub = setSub;
+    setSub->setCheckable(true);
+
+    QObject::connect(setSub, &QAction::triggered, this, [setSub, this]() {
+        QString sendCommand = "/subscribers";
+        if (!setSub->isChecked()) {
+            sendCommand.append("off");
+        };
+        this->split->getChannel().get()->sendMessage(sendCommand);
+    });
+
+    QAction *setEmote = new QAction("Emote only", this);
+    this->setEmote = setEmote;
+    setEmote->setCheckable(true);
+
+    QObject::connect(setEmote, &QAction::triggered, this, [setEmote, this]() {
+        QString sendCommand = "/emoteonly";
+        if (!setEmote->isChecked()) {
+            sendCommand.append("off");
+        };
+        this->split->getChannel().get()->sendMessage(sendCommand);
+    });
+
+    QAction *setSlow = new QAction("Slow mode", this);
+    this->setSlow = setSlow;
+    setSlow->setCheckable(true);
+
+    QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
+        if (!setSlow->isChecked()) {
+            this->split->getChannel().get()->sendMessage("/slowoff");
+            setSlow->setChecked(false);
+            return;
+        };
+        bool ok;
+        int slowSec =
+            QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1, &ok, Qt::FramelessWindowHint);
+        if (ok) {
+            this->split->getChannel().get()->sendMessage(QString("/slow %1").arg(slowSec));
+        } else {
+            setSlow->setChecked(true);
+        }
+    });
+
+    QAction *setR9k = new QAction("R9K mode", this);
+    this->setR9k = setR9k;
+    setR9k->setCheckable(true);
+
+    QObject::connect(setR9k, &QAction::triggered, this, [setR9k, this]() {
+        QString sendCommand = "/r9kbeta";
+        if (!setR9k->isChecked()) {
+            sendCommand.append("off");
+        };
+        this->split->getChannel().get()->sendMessage(sendCommand);
+    });
+
+    this->modeMenu.addAction(setEmote);
+    this->modeMenu.addAction(setSub);
+    this->modeMenu.addAction(setSlow);
+    this->modeMenu.addAction(setR9k);
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -238,21 +318,34 @@ void SplitHeader::updateModes()
 
     QString text;
 
+    this->setSlow->setChecked(false);
+    this->setEmote->setChecked(false);
+    this->setSub->setChecked(false);
+    this->setR9k->setChecked(false);
+
     if (roomModes.r9k) {
         text += "r9k, ";
+        this->setR9k->setChecked(true);
     }
     if (roomModes.slowMode) {
         text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
+        this->setSlow->setChecked(true);
     }
     if (roomModes.emoteOnly) {
         text += "emote, ";
+        this->setEmote->setChecked(true);
     }
     if (roomModes.submode) {
         text += "sub, ";
+        this->setSub->setChecked(true);
     }
 
     if (text.length() > 2) {
         text = text.mid(0, text.size() - 2);
+    } else {
+        if (tc->hasModRights()) {
+            text = "-";
+        }
     }
 
     if (text.isEmpty()) {
@@ -370,7 +463,12 @@ void SplitHeader::rightButtonClicked()
 void SplitHeader::themeRefreshEvent()
 {
     QPalette palette;
-    palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
+
+    if (this->split->hasFocus()) {
+        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.focusedText);
+    } else {
+        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
+    }
 
     //    this->dropdownButton->setPalette(palette);
     this->titleLabel->setPalette(palette);

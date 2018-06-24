@@ -8,12 +8,11 @@
 #include "widgets/helper/editablemodelview.hpp"
 #include "widgets/logindialog.hpp"
 
-#include <algorithm>
-
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QTableView>
 #include <QVBoxLayout>
+#include <algorithm>
 
 namespace chatterino {
 namespace widgets {
@@ -28,7 +27,7 @@ AccountsPage::AccountsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     helper::EditableModelView *view =
-        *layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr));
+        layout.emplace<helper::EditableModelView>(app->accounts->createModel(nullptr)).getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
@@ -37,6 +36,7 @@ AccountsPage::AccountsPage()
         static auto loginWidget = new LoginWidget();
 
         loginWidget->show();
+        loginWidget->raise();
     });
 
     view->getTableView()->setStyleSheet("background: #333");

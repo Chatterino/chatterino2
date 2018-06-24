@@ -38,6 +38,7 @@ public:
     WindowType getType();
 
 protected:
+    void showEvent(QShowEvent *) override;
     void closeEvent(QCloseEvent *event) override;
     bool event(QEvent *event) override;
 

@@ -1,6 +1,9 @@
 #include "widgets/logindialog.hpp"
 #include "common.hpp"
 #include "util/urlfetch.hpp"
+#ifdef USEWINSDK
+#include <Windows.h>
+#endif
 
 #include <QClipboard>
 #include <QDebug>
@@ -41,9 +44,9 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
         return;
     }
 
-    QMessageBox messageBox;
-    messageBox.setIcon(QMessageBox::Information);
-    messageBox.setText("Successfully logged in with user <b>" + qS(username) + "</b>!");
+    //    QMessageBox messageBox;
+    //    messageBox.setIcon(QMessageBox::Information);
+    //    messageBox.setText("Successfully logged in with user <b>" + qS(username) + "</b>!");
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/username", username);
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/userID", userID);
     pajlada::Settings::Setting<std::string>::set("/accounts/uid" + userID + "/clientID", clientID);
@@ -52,7 +55,9 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
 
     getApp()->accounts->twitch.reloadUsers();
 
-    messageBox.exec();
+    //    messageBox.exec();
+
+    getApp()->accounts->twitch.currentUsername = username;
 }
 
 }  // namespace
@@ -74,7 +79,7 @@ BasicLoginWidget::BasicLoginWidget()
         QDesktopServices::openUrl(QUrl("https://chatterino.com/client_login"));
     });
 
-    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, []() {
+    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, [this]() {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString clipboardString = clipboard->text();
         QStringList parameters = clipboardString.split(';');
@@ -105,6 +110,7 @@ BasicLoginWidget::BasicLoginWidget()
         LogInWithCredentials(userID, username, clientID, oauthToken);
 
         clipboard->clear();
+        this->window()->close();
     });
 }
 
@@ -187,6 +193,11 @@ void AdvancedLoginWidget::refreshButtons()
 
 LoginWidget::LoginWidget()
 {
+#ifdef USEWINSDK
+    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+#endif
+
     this->setLayout(&this->ui.mainLayout);
 
     this->ui.mainLayout.addWidget(&this->ui.tabWidget);
@@ -197,7 +208,7 @@ LoginWidget::LoginWidget()
 
     this->ui.buttonBox.setStandardButtons(QDialogButtonBox::Close);
 
-    connect(&this->ui.buttonBox, &QDialogButtonBox::rejected, [this]() {
+    QObject::connect(&this->ui.buttonBox, &QDialogButtonBox::rejected, [this]() {
         this->close();  //
     });
 

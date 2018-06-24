@@ -32,8 +32,6 @@ ThemeManager::ThemeManager()
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
 {
-    qDebug() << "init ThemeManager";
-
     this->update();
 
     this->themeName.connectSimple([this](auto) { this->update(); }, false);
@@ -168,6 +166,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
+    this->splits.header.focusedText = isLight ? QColor("#198CFF") : QColor("#84C1FF");
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
@@ -185,8 +184,14 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
 
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
-    this->messages.backgrounds.highlighted =
-        blendColors(themeColor, this->messages.backgrounds.regular, isLight ? 0.8 : 0.6);
+
+    if (isLight) {
+        this->messages.backgrounds.highlighted =
+            blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
+    } else {
+        this->messages.backgrounds.highlighted = QColor(75, 40, 44);
+    }
+
     this->messages.backgrounds.subscription =
         blendColors(QColor("#C466FF"), this->messages.backgrounds.regular, 0.7);
 

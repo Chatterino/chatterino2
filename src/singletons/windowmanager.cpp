@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-#define SETTINGS_FILENAME "/layout.json"
+#define SETTINGS_FILENAME "/window-layout.json"
 
 namespace chatterino {
 namespace singletons {
@@ -157,7 +157,7 @@ void WindowManager::initialize()
     assert(!this->initialized);
 
     // load file
-    QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
+    QString settingsPath = app->paths->settingsDirectory + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
@@ -311,7 +311,7 @@ void WindowManager::save()
     document.setObject(obj);
 
     // save file
-    QString settingsPath = app->paths->settingsFolderPath + SETTINGS_FILENAME;
+    QString settingsPath = app->paths->settingsDirectory + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
@@ -459,6 +459,8 @@ float WindowManager::getUiScaleValue(int scale)
             return 3.5f;
         case 10:
             return 4;
+        default:
+            assert(false);
     }
 }
 

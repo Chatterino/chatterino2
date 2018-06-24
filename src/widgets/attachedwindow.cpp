@@ -106,7 +106,7 @@ void AttachedWindow::setChannel(ChannelPtr channel)
 
 void AttachedWindow::showEvent(QShowEvent *)
 {
-    attachToHwnd_(this->target_);
+    this->attachToHwnd_(this->target_);
 }
 
 void AttachedWindow::attachToHwnd_(void *_attachedPtr)
@@ -135,7 +135,7 @@ void AttachedWindow::attachToHwnd_(void *_attachedPtr)
             DWORD filenameLength = ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
             QString qfilename = QString::fromWCharArray(filename.get(), filenameLength);
 
-            if (!qfilename.endsWith("chrome.exe")) {
+            if (!qfilename.endsWith("chrome.exe") && !qfilename.endsWith("firefox.exe")) {
                 qDebug() << "NM Illegal caller" << qfilename;
                 this->timer_.stop();
                 this->deleteLater();
@@ -178,15 +178,15 @@ void AttachedWindow::updateWindowRect_(void *_attachedPtr)
                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
     if (this->height_ == -1) {
-        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
-        //              this->width_, rect.bottom - rect.top - this->yOffset_, false);
+        ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
+                     this->width_, rect.bottom - rect.top - this->yOffset_, false);
     } else {
         ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.bottom - this->height_ - 8,
                      this->width_, this->height_, false);
     }
 
-    //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
-    //        rect.top - 82 - 8, false);
+//        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
+//        rect.top - 82 - 8, false);
 #endif
 }
 

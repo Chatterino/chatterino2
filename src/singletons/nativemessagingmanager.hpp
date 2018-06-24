@@ -26,6 +26,8 @@ public:
     void registerHost();
     void openGuiMessageQueue();
     void sendToGuiProcess(const QByteArray &array);
+
+    static std::string &getGuiMessageQueueName();
 };
 
 }  // namespace singletons

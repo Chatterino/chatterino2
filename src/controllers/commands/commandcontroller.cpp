@@ -8,11 +8,20 @@
 #include "providers/twitch/twitchchannel.hpp"
 #include "providers/twitch/twitchserver.hpp"
 #include "singletons/pathmanager.hpp"
+#include "singletons/settingsmanager.hpp"
 #include "util/signalvector2.hpp"
 
 #include <QApplication>
 #include <QFile>
 #include <QRegularExpression>
+
+#define TWITCH_DEFAULT_COMMANDS                                                               \
+    {                                                                                         \
+        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", "/timeout", \
+            "/untimeout", "/slow", "/slowoff", "/r9kbeta", "/r9kbetaoff", "/emoteonly",       \
+            "/emoteonlyoff", "/clear", "/subscribers", "/subscribersoff", "/followers",       \
+            "/followersoff"                                                                   \
+    }
 
 using namespace chatterino::providers::twitch;
 
@@ -40,7 +49,7 @@ CommandController::CommandController()
 void CommandController::load()
 {
     auto app = getApp();
-    this->filePath = app->paths->customFolderPath + "/Commands.txt";
+    this->filePath = app->paths->settingsDirectory + "/commands.txt";
 
     QFile textFile(this->filePath);
     if (!textFile.open(QIODevice::ReadOnly)) {
@@ -110,10 +119,15 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 messages::MessageBuilder b;
 
+                b.emplace<messages::TimestampElement>();
                 b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                                                 messages::MessageElement::Text);
+                                                 messages::MessageElement::Text,
+                                                 messages::MessageColor::Text,
+                                                 FontStyle::ChatMediumBold);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
-                b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
+                b.emplace<messages::TextElement>(words[1] + ":", messages::MessageElement::Text,
+                                                 messages::MessageColor::Text,
+                                                 FontStyle::ChatMediumBold);
 
                 QString rest = "";
 
@@ -122,10 +136,17 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 }
 
                 b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
+                b.getMessage()->flags |= messages::Message::DoNotTriggerNotification;
 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
                 app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
+
+                if (app->settings->inlineWhispers) {
+                    app->twitch.server->forEachChannel(
+                        [&b](ChannelPtr _channel) { _channel->addMessage(b.getMessage()); });
+                }
+
                 return "";
             }
         }
@@ -259,6 +280,14 @@ QString CommandController::execCustomCommand(const QStringList &words, const Com
     }
 
     return result.replace("{{", "{");
+}
+
+QStringList CommandController::getDefaultTwitchCommandList()
+{
+    QStringList l = TWITCH_DEFAULT_COMMANDS;
+    l += "/uptime";
+
+    return l;
 }
 
 }  // namespace commands

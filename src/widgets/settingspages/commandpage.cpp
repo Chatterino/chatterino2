@@ -37,7 +37,7 @@ CommandPage::CommandPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     helper::EditableModelView *view =
-        *layout.emplace<helper::EditableModelView>(app->commands->createModel(nullptr));
+        layout.emplace<helper::EditableModelView>(app->commands->createModel(nullptr)).getElement();
 
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
@@ -49,7 +49,7 @@ CommandPage::CommandPage()
     layout.append(this->createCheckBox("Also match the trigger at the end of the message",
                                        app->settings->allowCommandsAtEnd));
 
-    QLabel *text = *layout.emplace<QLabel>(TEXT);
+    QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
     text->setWordWrap(true);
     text->setStyleSheet("color: #bbb");
 

@@ -4,6 +4,8 @@
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 
+#include <QFile>
+
 namespace chatterino {
 namespace providers {
 namespace emoji {
@@ -25,10 +27,14 @@ void parseEmoji(const std::shared_ptr<EmojiData> &emojiData, const rapidjson::Va
     } capabilities;
 
     if (!shortCode.isEmpty()) {
-        emojiData->shortCode = shortCode;
-    } else if (!rj::getSafe(unparsedEmoji, "short_name", emojiData->shortCode)) {
-        return;
+        emojiData->shortCodes.push_back(shortCode);
+    } else {
+        const auto &shortCodes = unparsedEmoji["short_names"];
+        for (const auto &shortCode : shortCodes.GetArray()) {
+            emojiData->shortCodes.emplace_back(shortCode.GetString());
+        }
     }
+
     rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
     rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
 
@@ -116,8 +122,10 @@ void Emojis::loadEmojis()
         auto emojiData = std::make_shared<EmojiData>();
         parseEmoji(emojiData, unparsedEmoji);
 
-        this->emojiShortCodeToEmoji.insert(emojiData->shortCode, emojiData);
-        this->shortCodes.emplace_back(emojiData->shortCode);
+        for (const auto &shortCode : emojiData->shortCodes) {
+            this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
+            this->shortCodes.emplace_back(shortCode);
+        }
 
         this->emojiFirstByte[emojiData->value.at(0)].append(emojiData);
 
@@ -137,11 +145,11 @@ void Emojis::loadEmojis()
                 }
 
                 parseEmoji(variationEmojiData, variation,
-                           emojiData->shortCode + "_" + toneNameIt->second);
+                           emojiData->shortCodes[0] + "_" + toneNameIt->second);
 
-                this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCode,
+                this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCodes[0],
                                                    variationEmojiData);
-                this->shortCodes.push_back(variationEmojiData->shortCode);
+                this->shortCodes.push_back(variationEmojiData->shortCodes[0]);
 
                 this->emojiFirstByte[variationEmojiData->value.at(0)].append(variationEmojiData);
 
@@ -156,8 +164,6 @@ void Emojis::loadEmojiOne2Capabilities()
     QFile file(":/emojidata.txt");
     file.open(QFile::ReadOnly);
     QTextStream in(&file);
-
-    uint unicodeBytes[4];
 
     while (!in.atEnd()) {
         // Line example: sunglasses 1f60e
@@ -208,12 +214,34 @@ void Emojis::loadEmojiSet()
             // clang-format off
             static std::map<QString, QString> emojiSets = {
                 {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
-                {"EmojiOne 3", "https://cdn.jsdelivr.net/npm/emoji-datasource-emojione@4.0.4/img/emojione/64/"},
-                {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
-                {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},
-                {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@4.0.4/img/apple/64/"},
-                {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
-                {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
+                // {"EmojiOne 3", "https://cdn.jsdelivr.net/npm/emoji-datasource-emojione@4.0.4/img/emojione/64/"},
+                // {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
+                // {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},
+                // {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@4.0.4/img/apple/64/"},
+                // {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
+                // {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
+
+                // {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
+                // {"EmojiOne 3", "https://braize.pajlada.com/emoji/img/emojione/64/"},
+                // {"Twitter", "https://braize.pajlada.com/emoji/img/twitter/64/"},
+                // {"Facebook", "https://braize.pajlada.com/emoji/img/facebook/64/"},
+                // {"Apple", "https://braize.pajlada.com/emoji/img/apple/64/"},
+                // {"Google", "https://braize.pajlada.com/emoji/img/google/64/"},
+                // {"Messenger", "https://braize.pajlada.com/emoji/img/messenger/64/"},
+
+                {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
+                {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
+                {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
+                {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
+                {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
+                {"Messenger", "https://pajbot.com/static/emoji/img/messenger/64/"},
+
+//                {"EmojiOne 3", "https://cdn.fourtf.com/emoji/emojione/64/"},
+//                {"Twitter", "https://cdn.fourtf.com/emoji/twitter/64/"},
+//                {"Facebook", "https://cdn.fourtf.com/emoji/facebook/64/"},
+//                {"Apple", "https://cdn.fourtf.com/emoji/apple/64/"},
+//                {"Google", "https://cdn.fourtf.com/emoji/google/64/"},
+//                {"Messenger", "https://cdn.fourtf.com/emoji/messenger/64/"},
             };
             // clang-format on
 
@@ -234,8 +262,8 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emoteData.image1x = new messages::Image(url, 0.35, emoji->value,
-                                                           ":" + emoji->shortCode + ":<br/>Emoji");
+            emoji->emoteData.image1x = new messages::Image(
+                url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
         });
     });
 }

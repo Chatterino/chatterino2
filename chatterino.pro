@@ -217,7 +217,8 @@ SOURCES += \
     src/providers/irc/ircconnection2.cpp \
     src/widgets/userinfopopup.cpp \
     src/widgets/welcomedialog.cpp \
-    src/widgets/label.cpp
+    src/widgets/label.cpp \
+    src/widgets/settingspages/browserextensionpage.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -378,7 +379,10 @@ HEADERS  += \
     src/widgets/userinfopopup.hpp \
     src/widgets/welcomedialog.hpp \
     src/util/clamp.hpp \
-    src/widgets/label.hpp
+    src/widgets/label.hpp \
+    src/util/combine_path.hpp \
+    src/widgets/settingspages/browserextensionpage.hpp \
+    src/nullableptr.hpp
 
 RESOURCES += \
     resources/resources.qrc

@@ -189,7 +189,7 @@ public:
         assert(row >= 0 && row < this->rows.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(signalVectorRow, this);
+        this->vector->removeItem(signalVectorRow);
 
         return true;
     }

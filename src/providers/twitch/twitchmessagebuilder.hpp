@@ -50,6 +50,7 @@ private:
 
     QColor usernameColor;
     const QString originalMessage;
+    bool senderIsBroadcaster{};
 
     const bool action = false;
 

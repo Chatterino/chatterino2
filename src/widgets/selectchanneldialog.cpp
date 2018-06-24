@@ -16,8 +16,8 @@
 namespace chatterino {
 namespace widgets {
 
-SelectChannelDialog::SelectChannelDialog()
-    : BaseWindow((QWidget *)nullptr, BaseWindow::EnableCustomFrame)
+SelectChannelDialog::SelectChannelDialog(QWidget *parent)
+    : BaseWindow(parent, BaseWindow::EnableCustomFrame)
     , selectedChannel(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -40,15 +40,16 @@ SelectChannelDialog::SelectChannelDialog()
         auto channel_edit =
             vbox.emplace<QLineEdit>().hidden().assign(&this->ui_.twitch.channelName);
 
-        QObject::connect(*channel_btn, &QRadioButton::toggled, [=](bool enabled) mutable {
-            if (enabled) {
-                channel_edit->setFocus();
-                channel_edit->setSelection(0, channel_edit->text().length());
-            }
+        QObject::connect(channel_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             if (enabled) {
+                                 channel_edit->setFocus();
+                                 channel_edit->setSelection(0, channel_edit->text().length());
+                             }
 
-            channel_edit->setVisible(enabled);
-            channel_lbl->setVisible(enabled);
-        });
+                             channel_edit->setVisible(enabled);
+                             channel_lbl->setVisible(enabled);
+                         });
 
         channel_btn->installEventFilter(&this->tabFilter);
         channel_edit->installEventFilter(&this->tabFilter);
@@ -63,7 +64,7 @@ SelectChannelDialog::SelectChannelDialog()
         whispers_lbl->setWordWrap(true);
         whispers_btn->installEventFilter(&this->tabFilter);
 
-        QObject::connect(*whispers_btn, &QRadioButton::toggled,
+        QObject::connect(whispers_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
 
         // mentions_btn
@@ -76,7 +77,7 @@ SelectChannelDialog::SelectChannelDialog()
         mentions_lbl->setWordWrap(true);
         mentions_btn->installEventFilter(&this->tabFilter);
 
-        QObject::connect(*mentions_btn, &QRadioButton::toggled,
+        QObject::connect(mentions_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
 
         // watching_btn
@@ -88,16 +89,16 @@ SelectChannelDialog::SelectChannelDialog()
         watching_lbl->setWordWrap(true);
         watching_btn->installEventFilter(&this->tabFilter);
 
-        QObject::connect(*watching_btn, &QRadioButton::toggled,
+        QObject::connect(watching_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
 
         vbox->addStretch(1);
 
         // tabbing order
-        QWidget::setTabOrder(*watching_btn, *channel_btn);
-        QWidget::setTabOrder(*channel_btn, *whispers_btn);
-        QWidget::setTabOrder(*whispers_btn, *mentions_btn);
-        QWidget::setTabOrder(*mentions_btn, *watching_btn);
+        QWidget::setTabOrder(watching_btn.getElement(), channel_btn.getElement());
+        QWidget::setTabOrder(channel_btn.getElement(), whispers_btn.getElement());
+        QWidget::setTabOrder(whispers_btn.getElement(), mentions_btn.getElement());
+        QWidget::setTabOrder(mentions_btn.getElement(), watching_btn.getElement());
 
         // tab
         NotebookTab *tab = notebook->addPage(obj.getElement());
@@ -115,7 +116,7 @@ SelectChannelDialog::SelectChannelDialog()
         tab->setTitle("Irc");
     }*/
 
-    layout->setStretchFactor(*notebook, 1);
+    layout->setStretchFactor(notebook.getElement(), 1);
 
     auto buttons = layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {

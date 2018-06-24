@@ -12,6 +12,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/irchelpers.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -99,6 +100,10 @@ MessagePtr TwitchMessageBuilder::build()
     // PARSING
     this->parseUsername();
 
+    if (this->userName == this->channel->name) {
+        this->senderIsBroadcaster = true;
+    }
+
     //#ifdef XD
     //    if (this->originalMessage.length() > 100) {
     //        this->message->flags |= Message::Collapsed;
@@ -126,7 +131,25 @@ MessagePtr TwitchMessageBuilder::build()
         this->emplace<TimestampElement>();
     }
 
-    this->emplace<TwitchModerationElement>();
+    bool addModerationElement = true;
+    if (this->senderIsBroadcaster) {
+        addModerationElement = false;
+    } else {
+        bool hasUserType = this->tags.contains("user-type");
+        if (hasUserType) {
+            QString userType = this->tags.value("user-type").toString();
+
+            if (userType == "mod") {
+                if (!args.isStaffOrBroadcaster) {
+                    addModerationElement = false;
+                }
+            }
+        }
+    }
+
+    if (addModerationElement) {
+        this->emplace<TwitchModerationElement>();
+    }
 
     this->appendTwitchBadges();
 
@@ -313,7 +336,7 @@ void TwitchMessageBuilder::appendUsername()
 
     auto iterator = this->tags.find("display-name");
     if (iterator != this->tags.end()) {
-        QString displayName = iterator.value().toString();
+        QString displayName = util::parseTagString(iterator.value().toString()).trimmed();
 
         if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
             username = displayName;

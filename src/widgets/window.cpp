@@ -16,6 +16,7 @@
 #include "widgets/welcomedialog.hpp"
 
 #include <QApplication>
+#include <QDesktopServices>
 #include <QHeaderView>
 #include <QPalette>
 #include <QShortcut>
@@ -120,7 +121,7 @@ Window::Window(WindowType _type)
     CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
 
 #ifdef QT_DEBUG
-    std::vector<QString> cheerMessages, subMessages;
+    std::vector<QString> cheerMessages, subMessages, miscMessages;
     // clang-format off
     cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=2000;color=#B22222;display-name=arzenhuz;emotes=185989:33-37;id=1ae336ac-8e1a-4d6b-8b00-9fcee26e8337;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783470139;turbo=0;user-id=111553331;user-type= :arzenhuz!arzenhuz@arzenhuz.tmi.twitch.tv PRIVMSG #pajlada :pajacheer2000 Buy pizza for both pajaH)");
     cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=37;color=#3FBF72;display-name=VADIKUS007;emotes=;id=eedd95fd-2a17-4da1-879c-a1e76ffce582;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783184352;turbo=0;user-id=72256775;user-type= :vadikus007!vadikus007@vadikus007.tmi.twitch.tv PRIVMSG #pajlada :cheer37)");
@@ -155,10 +156,13 @@ Window::Window(WindowType _type)
 
     // resub without message
     subMessages.emplace_back(R"(@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol):\s$9.99\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\sjust\ssubscribed\swith\sa\sTier\s2\ssub.\scspice\ssubscribed\sfor\s12\smonths\sin\sa\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
+
+    // display name renders strangely
+    miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     // clang-format on
 
     CreateWindowShortcut(this, "F5", [=] {
-        const auto &messages = subMessages;
+        const auto &messages = miscMessages;
         static int index = 0;
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
@@ -233,6 +237,34 @@ bool Window::event(QEvent *event)
         default:;
     };
     return BaseWindow::event(event);
+}
+
+void Window::showEvent(QShowEvent *event)
+{
+    if (getApp()->settings->startUpNotification.getValue() < 1) {
+        getApp()->settings->startUpNotification = 1;
+
+        auto box =
+            new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta",
+                            "Please note that this software is not stable yet. Things are rough "
+                            "around the edges and everything is subject to change.");
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->show();
+    }
+
+    if (  // getApp()->settings->currentVersion.getValue() != "" &&
+        getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
+                                   QMessageBox::Yes | QMessageBox::No);
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        if (box->exec() == QMessageBox::Yes) {
+            QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
+        }
+    }
+
+    getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
+
+    BaseWindow::showEvent(event);
 }
 
 void Window::closeEvent(QCloseEvent *)

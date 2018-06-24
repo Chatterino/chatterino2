@@ -20,7 +20,7 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
 {
     auto app = getApp();
 
-    app->fonts->fontChanged.connect([=] { this->updateSize(); });
+    this->connections_.managedConnect(app->fonts->fontChanged, [this] { this->updateSize(); });
 }
 
 const QString &Label::getText() const
@@ -30,8 +30,11 @@ const QString &Label::getText() const
 
 void Label::setText(const QString &text)
 {
-    this->text_ = text;
-    this->updateSize();
+    if (this->text_ != text) {
+        this->text_ = text;
+        this->updateSize();
+        this->update();
+    }
 }
 
 FontStyle Label::getFontStyle() const
@@ -104,6 +107,11 @@ void Label::paintEvent(QPaintEvent *)
     QTextOption option(alignment);
     option.setWrapMode(QTextOption::NoWrap);
     painter.drawText(textRect, this->text_, option);
+
+#if 0
+    painter.setPen(QColor(255, 0, 0));
+    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+#endif
 }
 
 void Label::updateSize()

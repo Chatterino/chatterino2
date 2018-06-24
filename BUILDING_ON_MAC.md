@@ -13,12 +13,13 @@ If the Project does not build at this point, you might need to add additional Pa
 `brew info openssl`
 `brew info boost`
 
+If brew doesn't link openssl properly then you should be able to link it yourself using those two commands:
+- `ln -s /usr/local/opt/openssl/lib/* /usr/local/lib`
+- `ln -s /usr/local/opt/openssl/include/openssl /usr/local/include/openssl`
+
 The lines which you need to add to your project file should look similar to this
 
 ```
 INCLUDEPATH += /usr/local/opt/openssl/include
 LIBS += -L/usr/local/opt/openssl/lib
-
-INCLUDEPATH += "/usr/local/Cellar/boost/1.67.0_1/include"
-LIBS += -L"/usr/local/Cellar/boost/1.67.0_1/lib"
 ```

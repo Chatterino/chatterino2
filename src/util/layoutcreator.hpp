@@ -25,9 +25,9 @@ public:
         return this->item;
     }
 
-    T *operator*()
+    T &operator*()
     {
-        return this->item;
+        return *this->item;
     }
 
     T *getElement()

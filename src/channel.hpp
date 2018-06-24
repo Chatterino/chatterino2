@@ -51,6 +51,7 @@ public:
     void addMessage(messages::MessagePtr message);
     void addMessagesAtStart(std::vector<messages::MessagePtr> &messages);
     void addOrReplaceTimeout(messages::MessagePtr message);
+    void disableAllMessages();
     void replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement);
     virtual void addRecentChatter(const std::shared_ptr<messages::Message> &message);
 
@@ -60,6 +61,7 @@ public:
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
+    virtual bool isBroadcaster() const;
 
     static std::shared_ptr<Channel> getEmpty();
 

@@ -59,7 +59,7 @@ public:
 
     bool isMod() const override;
     void setMod(bool value);
-    bool isBroadcaster();
+    bool isBroadcaster() const override;
     bool hasModRights();
 
     void addRecentChatter(const std::shared_ptr<messages::Message> &message) final;

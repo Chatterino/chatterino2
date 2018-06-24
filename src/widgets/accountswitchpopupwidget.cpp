@@ -14,7 +14,8 @@ namespace widgets {
 AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     : QWidget(parent)
 {
-    this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setWindowFlag(Qt::FramelessWindowHint);
+    this->setWindowFlag(Qt::WindowStaysOnTopHint);
 
     this->setContentsMargins(0, 0, 0, 0);
 

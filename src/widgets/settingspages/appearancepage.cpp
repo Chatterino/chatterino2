@@ -41,7 +41,7 @@ AppearancePage::AppearancePage()
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
     auto widget = scroll.emplaceScrollAreaWidget();
-    util::removeScrollAreaBackground(*scroll, *widget);
+    util::removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
 
@@ -131,12 +131,13 @@ AppearancePage::AppearancePage()
 
             auto scaleLabel = scaleBox.emplace<QLabel>("1.0");
             scaleLabel->setFixedWidth(100);
-            QObject::connect(*emoteScale, &QSlider::valueChanged, [scaleLabel](int value) mutable {
-                float f = (float)value / 10.f;
-                scaleLabel->setText(QString::number(f));
+            QObject::connect(emoteScale.getElement(), &QSlider::valueChanged,
+                             [scaleLabel](int value) mutable {
+                                 float f = (float)value / 10.f;
+                                 scaleLabel->setText(QString::number(f));
 
-                getApp()->settings->emoteScale.setValue(f);
-            });
+                                 getApp()->settings->emoteScale.setValue(f);
+                             });
 
             emoteScale->setValue(std::max<int>(
                 5, std::min<int>(50, (int)(app->settings->emoteScale.getValue() * 10.f))));

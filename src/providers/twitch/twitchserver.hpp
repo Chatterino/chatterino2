@@ -5,6 +5,7 @@
 #include "providers/twitch/twitchchannel.hpp"
 #include "util/mutexvalue.hpp"
 
+#include <chrono>
 #include <memory>
 #include <queue>
 
@@ -26,9 +27,6 @@ public:
 
     util::MutexValue<QString> lastUserThatWhisperedMe;
 
-    //    QString getLastWhisperedPerson() const;
-    //    void setLastWhisperedPerson(const QString &person);
-
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     IndirectChannel watchingChannel;
@@ -47,11 +45,13 @@ protected:
     QString cleanChannelName(const QString &dirtyChannelName) override;
 
 private:
-    std::mutex lastMessageMutex;
-    std::queue<QTime> lastMessagePleb;
-    std::queue<QTime> lastMessageMod;
-    QTime lastErrorTimeSpeed;
-    QTime lastErrorTimeAmount;
+    std::mutex lastMessageMutex_;
+    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
+    std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
+    std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
+    std::chrono::steady_clock::time_point lastErrorTimeAmount_;
+
+    void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
 };
 
 }  // namespace twitch

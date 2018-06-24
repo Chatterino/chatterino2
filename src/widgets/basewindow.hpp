@@ -27,6 +27,7 @@ public:
         TopMost = 4,
         DeleteOnFocusOut = 8,
         DisableCustomScaling = 16,
+        FramelessDraggable = 32,
     };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
@@ -40,6 +41,8 @@ public:
     bool getStayInScreenRect() const;
 
     void moveTo(QWidget *widget, QPoint point, bool offset = true);
+
+    virtual float getScale() const override;
 
     Flags getFlags();
 

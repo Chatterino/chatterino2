@@ -23,6 +23,26 @@ QString getEmoteLink(const QString &id, const QString &emoteScale)
     return value.replace("{id}", id).replace("{scale}", emoteScale);
 }
 
+QString cleanUpCode(const QString &dirtyEmoteCode)
+{
+    // clang-format off
+    static QMap<QString, QString> emoteNameReplacements{
+        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},   {"\\&lt\\;3", "&lt;3"},
+        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
+        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},         {"\\:-?\\)", ":)"},
+        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
+        {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
+    };
+    // clang-format on
+
+    auto it = emoteNameReplacements.find(dirtyEmoteCode);
+    if (it != emoteNameReplacements.end()) {
+        return it.value();
+    }
+
+    return dirtyEmoteCode;
+}
+
 }  // namespace
 
 TwitchEmotes::TwitchEmotes()
@@ -116,8 +136,10 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
                 QJsonObject emoticon = emoteValue.toObject();
                 QString id = QString::number(emoticon["id"].toInt());
                 QString code = emoticon["code"].toString();
-                emoteSet->emotes.emplace_back(id, code);
-                emoteData.emoteCodes.push_back(code);
+
+                auto cleanCode = cleanUpCode(code);
+                emoteSet->emotes.emplace_back(id, cleanCode);
+                emoteData.emoteCodes.push_back(cleanCode);
 
                 util::EmoteData emote = this->getEmoteById(id, code);
                 emoteData.emotes.insert(code, emote);

@@ -3,6 +3,7 @@
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/rippleeffectbutton.hpp"
 #include "widgets/helper/signallabel.hpp"
+#include "widgets/label.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -25,6 +26,17 @@ public:
 private:
     QHBoxLayout hbox;
     SignalLabel label;
+};
+
+class RippleEffectLabel2 : public RippleEffectButton
+{
+public:
+    explicit RippleEffectLabel2(BaseWidget *parent = nullptr, int padding = 6);
+
+    Label &getLabel();
+
+private:
+    Label label_;
 };
 
 }  // namespace widgets

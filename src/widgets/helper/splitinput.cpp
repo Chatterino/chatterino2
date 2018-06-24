@@ -70,7 +70,7 @@ void SplitInput::initLayout()
     this->ui_.textEdit->setFont(
         app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
 
-    this->managedConnections_.emplace_back(app->fonts->fontChanged.connect([=]() {
+    this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
             app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
     }));

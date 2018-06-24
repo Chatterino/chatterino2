@@ -95,9 +95,11 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
     this->chattersListTimer->start(5 * 60 * 1000);
 
-    //    for (int i = 0; i < 1000; i++) {
-    //        this->addMessage(messages::Message::createSystemMessage("asdf"));
-    //    }
+#if 0
+    for (int i = 0; i < 1000; i++) {
+        this->addMessage(messages::Message::createSystemMessage("asdf"));
+    }
+#endif
 }
 
 TwitchChannel::~TwitchChannel()
@@ -140,6 +142,15 @@ void TwitchChannel::sendMessage(const QString &message)
 {
     auto app = getApp();
 
+    if (!app->accounts->twitch.isLoggedIn()) {
+        // XXX: It would be nice if we could add a link here somehow that opened the "account
+        // manager" dialog
+        this->addMessage(
+            messages::Message::createSystemMessage("You need to log in to send messages. You can "
+                                                   "link your Twitch account in the settings."));
+        return;
+    }
+
     debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
@@ -180,7 +191,7 @@ void TwitchChannel::setMod(bool value)
     }
 }
 
-bool TwitchChannel::isBroadcaster()
+bool TwitchChannel::isBroadcaster() const
 {
     auto app = getApp();
 

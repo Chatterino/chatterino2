@@ -64,12 +64,12 @@ protected:
 private:
     void initConnection();
 
-    std::unique_ptr<IrcConnection> writeConnection = nullptr;
-    std::unique_ptr<IrcConnection> readConnection = nullptr;
+    std::unique_ptr<IrcConnection> writeConnection_ = nullptr;
+    std::unique_ptr<IrcConnection> readConnection_ = nullptr;
 
-    std::mutex connectionMutex;
+    std::mutex connectionMutex_;
 
-    QTimer pingTimer;
+    //    bool autoReconnect_ = false;
 };
 
 }  // namespace irc

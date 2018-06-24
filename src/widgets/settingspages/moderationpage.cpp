@@ -50,7 +50,7 @@ ModerationPage::ModerationPage()
         app->settings->logPath.connect([app, created](const QString &logPath, auto) mutable {
             if (logPath == "") {
                 created->setText("Logs are saved to " +
-                                 CreateLink(app->paths->logsFolderPath, true));
+                                 CreateLink(app->paths->messageLogDirectory, true));
             } else {
                 created->setText("Logs are saved to " + CreateLink(logPath, true));
             }

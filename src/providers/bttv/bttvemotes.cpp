@@ -65,6 +65,7 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
     util::NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(3000);
+    req.setUseQuickLoadCache(true);
     req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
         auto map = _map.lock();
 

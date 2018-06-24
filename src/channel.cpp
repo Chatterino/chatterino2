@@ -71,7 +71,10 @@ void Channel::addMessage(MessagePtr message)
         this->addRecentChatter(message);
     }
 
-    app->logging->addMessage(this->name, message);
+    // FOURTF: change this when adding more providers
+    if (this->isTwitchChannel()) {
+        app->logging->addMessage(this->name, message);
+    }
 
     if (this->messages.pushBack(message, deleted)) {
         this->messageRemovedFromStart.invoke(deleted);
@@ -118,7 +121,7 @@ void Channel::addOrReplaceTimeout(messages::MessagePtr message)
             int count = s->count + 1;
 
             messages::MessagePtr replacement(Message::createSystemMessage(
-                message->searchText + QString("(") + QString::number(count) + " times)"));
+                message->searchText + QString(" (") + QString::number(count) + " times)"));
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
@@ -145,6 +148,20 @@ void Channel::addOrReplaceTimeout(messages::MessagePtr message)
 
     // XXX: Might need the following line
     // WindowManager::getInstance().repaintVisibleChatWidgets(this);
+}
+
+void Channel::disableAllMessages()
+{
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    int snapshotLength = snapshot.getLength();
+    for (int i = 0; i < snapshotLength; i++) {
+        auto &s = snapshot[i];
+        if (s->flags & Message::System || s->flags & Message::Timeout) {
+            continue;
+        }
+
+        s->flags.EnableFlag(Message::Disabled);
+    }
 }
 
 void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
@@ -180,6 +197,11 @@ void Channel::sendMessage(const QString &message)
 }
 
 bool Channel::isMod() const
+{
+    return false;
+}
+
+bool Channel::isBroadcaster() const
 {
     return false;
 }

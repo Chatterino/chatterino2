@@ -14,6 +14,7 @@
 
 // using namespace Communi;
 using namespace chatterino::singletons;
+using namespace std::chrono_literals;
 
 namespace chatterino {
 namespace providers {
@@ -71,51 +72,8 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
     TwitchChannel *channel = new TwitchChannel(channelName, this->getReadConnection());
 
-    channel->sendMessageSignal.connect([this, channel](auto chan, auto msg, bool &sent) {
-
-        {
-            std::lock_guard<std::mutex> guard(this->lastMessageMutex);
-
-            std::queue<QTime> &lastMessage =
-                channel->hasModRights() ? this->lastMessageMod : this->lastMessagePleb;
-            size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
-
-            QTime now = QTime::currentTime();
-
-            if (lastMessage.size() > 0 &&
-                lastMessage.back().addMSecs(channel->hasModRights() ? 100 : 1100) > now) {
-                if (lastErrorTimeSpeed.addSecs(30) < now) {
-                    auto errorMessage =
-                        messages::Message::createSystemMessage("sending messages too fast");
-
-                    channel->addMessage(errorMessage);
-
-                    lastErrorTimeSpeed = now;
-                }
-                return;
-            }
-
-            while (lastMessage.size() > 0 && lastMessage.front().addSecs(32) < now) {
-                lastMessage.pop();
-            }
-
-            if (lastMessage.size() >= maxMessageCount) {
-                if (lastErrorTimeAmount.addSecs(30) < now) {
-                    auto errorMessage =
-                        messages::Message::createSystemMessage("sending too many messages");
-
-                    channel->addMessage(errorMessage);
-
-                    lastErrorTimeAmount = now;
-                }
-                return;
-            }
-
-            lastMessage.push(now);
-        }
-
-        this->sendMessage(chan, msg);
-        sent = true;
+    channel->sendMessageSignal.connect([this, channel](auto &chan, auto &msg, bool &sent) {
+        this->onMessageSendRequested(channel, msg, sent);
     });
 
     return std::shared_ptr<Channel>(channel);
@@ -174,11 +132,11 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelName)
 {
     if (channelName == "/whispers") {
-        return whispersChannel;
+        return this->whispersChannel;
     }
 
     if (channelName == "/mentions") {
-        return mentionsChannel;
+        return this->mentionsChannel;
     }
 
     return nullptr;
@@ -186,16 +144,7 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelNa
 
 void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func)
 {
-    std::lock_guard<std::mutex> lock(this->channelMutex);
-
-    for (std::weak_ptr<Channel> &weak : this->channels) {
-        std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan) {
-            continue;
-        }
-
-        func(chan);
-    }
+    this->forEachChannel(func);
 
     func(this->whispersChannel);
     func(this->mentionsChannel);
@@ -203,23 +152,21 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
 
 std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &channelID)
 {
-    {
-        std::lock_guard<std::mutex> lock(this->channelMutex);
+    std::lock_guard<std::mutex> lock(this->channelMutex);
 
-        for (const auto &weakChannel : this->channels) {
-            auto channel = weakChannel.lock();
-            if (!channel) {
-                continue;
-            }
+    for (const auto &weakChannel : this->channels) {
+        auto channel = weakChannel.lock();
+        if (!channel) {
+            continue;
+        }
 
-            auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
-            if (!twitchChannel) {
-                continue;
-            }
+        auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
+        if (!twitchChannel) {
+            continue;
+        }
 
-            if (twitchChannel->roomID == channelID) {
-                return twitchChannel;
-            }
+        if (twitchChannel->roomID == channelID) {
+            return twitchChannel;
         }
     }
 
@@ -229,6 +176,60 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &chan
 QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
 {
     return dirtyChannelName.toLower();
+}
+
+void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString &message,
+                                          bool &sent)
+{
+    sent = false;
+
+    {
+        std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
+
+        //        std::queue<std::chrono::steady_clock::time_point>
+        auto &lastMessage =
+            channel->hasModRights() ? this->lastMessageMod_ : this->lastMessagePleb_;
+        size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
+        auto minMessageOffset = (channel->hasModRights() ? 100ms : 1100ms);
+
+        auto now = std::chrono::steady_clock::now();
+
+        // check if you are sending messages too fast
+        if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
+            if (this->lastErrorTimeSpeed_ + 30s < now) {
+                auto errorMessage =
+                    messages::Message::createSystemMessage("sending messages too fast");
+
+                channel->addMessage(errorMessage);
+
+                this->lastErrorTimeSpeed_ = now;
+            }
+            return;
+        }
+
+        // remove messages older than 30 seconds
+        while (!lastMessage.empty() && lastMessage.front() + 32s < now) {
+            lastMessage.pop();
+        }
+
+        // check if you are sending too many messages
+        if (lastMessage.size() >= maxMessageCount) {
+            if (this->lastErrorTimeAmount_ + 30s < now) {
+                auto errorMessage =
+                    messages::Message::createSystemMessage("sending too many messages");
+
+                channel->addMessage(errorMessage);
+
+                this->lastErrorTimeAmount_ = now;
+            }
+            return;
+        }
+
+        lastMessage.push(now);
+    }
+
+    this->sendMessage(channel->name, message);
+    sent = true;
 }
 
 }  // namespace twitch

@@ -4,68 +4,36 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QStandardPaths>
+#include <cassert>
+
+#include "util/combine_path.hpp"
 
 namespace chatterino {
 namespace singletons {
 
-PathManager::PathManager(int argc, char **argv)
+PathManager *PathManager::instance = nullptr;
+
+PathManager::PathManager()
 {
-    // hash of app path
-    this->appPathHash = QCryptographicHash::hash(QCoreApplication::applicationFilePath().toUtf8(),
-                                                 QCryptographicHash::Sha224)
-                            .toBase64()
-                            .mid(0, 32)
-                            .replace("+", "-")
-                            .replace("/", "x");
+    this->initAppFilePathHash();
 
-    // Options
-    this->portable = false;
+    this->initCheckPortable();
+    this->initAppDataDirectory();
+    this->initSubDirectories();
+}
 
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "portable") == 0) {
-            this->portable = true;
-        }
-    }
+void PathManager::initInstance()
+{
+    assert(!instance);
 
-    if (QFileInfo::exists(QCoreApplication::applicationDirPath() + "/this->portable")) {
-        this->portable = true;
-    }
+    instance = new PathManager();
+}
 
-    // Root path = %APPDATA%/Chatterino or the folder that the executable resides in
-    QString rootPath;
-    if (this->portable) {
-        rootPath.append(QCoreApplication::applicationDirPath());
-    } else {
-        // Get settings path
-        rootPath.append(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-        if (rootPath.isEmpty()) {
-            throw std::runtime_error("Error finding writable location for settings");
-        }
-    }
+PathManager *PathManager::getInstance()
+{
+    assert(instance);
 
-    this->settingsFolderPath = rootPath;
-
-    if (!QDir().mkpath(this->settingsFolderPath)) {
-        throw std::runtime_error("Error creating settings folder");
-    }
-
-    this->customFolderPath = rootPath + "/Custom";
-
-    if (!QDir().mkpath(this->customFolderPath)) {
-        throw std::runtime_error("Error creating custom folder");
-    }
-
-    this->cacheFolderPath = rootPath + "/Cache";
-
-    if (!QDir().mkpath(this->cacheFolderPath)) {
-        throw std::runtime_error("Error creating cache folder");
-    }
-
-    this->logsFolderPath = rootPath + "/Logs";
-
-    if (!QDir().mkpath(this->logsFolderPath)) {
-        throw std::runtime_error("Error creating logs folder");
-    }
+    return instance;
 }
 
 bool PathManager::createFolder(const QString &folderPath)
@@ -75,7 +43,77 @@ bool PathManager::createFolder(const QString &folderPath)
 
 bool PathManager::isPortable()
 {
-    return this->portable;
+    return this->portable.get();
+}
+
+void PathManager::initAppFilePathHash()
+{
+    this->applicationFilePathHash =
+        QCryptographicHash::hash(QCoreApplication::applicationFilePath().toUtf8(),
+                                 QCryptographicHash::Sha224)
+            .toBase64()
+            .mid(0, 32)
+            .replace("+", "-")
+            .replace("/", "x");
+}
+
+void PathManager::initCheckPortable()
+{
+    this->portable =
+        QFileInfo::exists(util::combinePath(QCoreApplication::applicationDirPath(), "portable"));
+}
+
+void PathManager::initAppDataDirectory()
+{
+    assert(this->portable.is_initialized());
+
+    // Root path = %APPDATA%/Chatterino or the folder that the executable resides in
+
+    this->rootAppDataDirectory = [&]() -> QString {
+        // portable
+        if (this->isPortable()) {
+            return QCoreApplication::applicationDirPath();
+        }
+
+        // permanent installation
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        if (path.isEmpty()) {
+            throw std::runtime_error("Error finding writable location for settings");
+        }
+
+// create directory Chatterino2 instead of chatterino on windows because the ladder one is takes by
+// chatterino 1 already
+#ifdef Q_OS_WIN
+        path.replace("chatterino", "Chatterino");
+
+        path += "2";
+#endif
+        return path;
+    }();
+}
+
+void PathManager::initSubDirectories()
+{
+    // required the app data directory to be set first
+    assert(!this->rootAppDataDirectory.isEmpty());
+
+    // create settings subdirectories and validate that they are created properly
+    auto makePath = [&](const std::string &name) -> QString {
+
+        auto path = util::combinePath(this->rootAppDataDirectory, QString::fromStdString(name));
+
+        if (!QDir().mkpath(path)) {
+            throw std::runtime_error("Error creating appdata path %appdata%/chatterino/" + name);
+        }
+
+        return path;
+    };
+
+    makePath("");
+    this->settingsDirectory = makePath("Settings");
+    this->cacheDirectory = makePath("Cache");
+    this->messageLogDirectory = makePath("Logs");
+    this->miscDirectory = makePath("Misc");
 }
 
 }  // namespace singletons

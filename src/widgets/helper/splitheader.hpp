@@ -66,6 +66,12 @@ private:
     RippleEffectButton *moderationButton;
 
     QMenu dropdownMenu;
+    QMenu modeMenu;
+
+    QAction *setSub = nullptr;
+    QAction *setEmote = nullptr;
+    QAction *setSlow = nullptr;
+    QAction *setR9k = nullptr;
 
     void rightButtonClicked();
 
@@ -78,6 +84,7 @@ private:
 
 public slots:
     void addDropdownItems(RippleEffectButton *label);
+    void addModeItems(RippleEffectLabel *label);
 
     void menuMoveSplit();
     void menuReloadChannelEmotes();

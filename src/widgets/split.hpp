@@ -5,6 +5,7 @@
 #include "messages/layouts/messagelayoutelement.hpp"
 #include "messages/limitedqueuesnapshot.hpp"
 #include "messages/messageelement.hpp"
+#include "nullableptr.hpp"
 #include "util/serialize-custom.hpp"
 #include "widgets/basewidget.hpp"
 #include "widgets/helper/channelview.hpp"
@@ -22,6 +23,7 @@ namespace widgets {
 
 class SplitContainer;
 class SplitOverlay;
+class SelectChannelDialog;
 
 // Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
 // ChatWidgetHeader
@@ -47,6 +49,7 @@ public:
 
     pajlada::Signals::NoArgSignal channelChanged;
     pajlada::Signals::NoArgSignal focused;
+    pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
     SplitContainer *getContainer();
@@ -94,6 +97,8 @@ private:
     ChannelView view;
     SplitInput input;
     SplitOverlay *overlay;
+
+    NullablePtr<SelectChannelDialog> selectChannelDialog;
 
     bool moderationMode = false;
 

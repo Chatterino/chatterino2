@@ -57,7 +57,7 @@ void Application::construct()
 
     // 1. Instantiate all classes
     this->settings = new singletons::SettingManager;
-    this->paths = new singletons::PathManager(this->argc, this->argv);
+    this->paths = singletons::PathManager::getInstance();
     this->themes = new singletons::ThemeManager;
     this->windows = new singletons::WindowManager;
     this->logging = new singletons::LoggingManager;
@@ -89,8 +89,6 @@ void Application::initialize()
     // 2. Initialize/load classes
     this->settings->initialize();
 
-    this->nativeMessaging->registerHost();
-
     this->settings->load();
     this->commands->load();
     this->logging->initialize();
@@ -110,7 +108,17 @@ void Application::initialize()
     // XXX
     this->settings->updateWordTypeMask();
 
+#ifdef Q_OS_WIN
+#ifdef QT_DEBUG
+#ifdef C_DEBUG_NM
+    this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
+#endif
+#else
+    this->nativeMessaging->registerHost();
+    this->nativeMessaging->openGuiMessageQueue();
+#endif
+#endif
 
     this->twitch.pubsub->sig.whisper.sent.connect([](const auto &msg) {
         debug::Log("WHISPER SENT LOL");  //

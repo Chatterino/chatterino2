@@ -45,7 +45,7 @@ pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
 Split::Split(SplitContainer *parent)
-    : Split((QWidget *)parent)
+    : Split(static_cast<QWidget *>(parent))
 {
     this->container = parent;
 }
@@ -143,6 +143,7 @@ Split::Split(QWidget *parent)
     });
 
     this->input.ui_.textEdit->focused.connect([this] { this->focused.invoke(); });
+    this->input.ui_.textEdit->focusLost.connect([this] { this->focusLost.invoke(); });
 }
 
 Split::~Split()
@@ -231,7 +232,13 @@ bool Split::getModerationMode() const
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {
-    SelectChannelDialog *dialog = new SelectChannelDialog();
+    if (this->selectChannelDialog.hasElement()) {
+        this->selectChannelDialog->raise();
+
+        return;
+    }
+
+    SelectChannelDialog *dialog = new SelectChannelDialog(this);
     if (!empty) {
         dialog->setSelectedChannel(this->getIndirectChannel());
     }
@@ -246,7 +253,9 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         }
 
         callback(dialog->hasSeletedChannel());
+        this->selectChannelDialog = nullptr;
     });
+    this->selectChannelDialog = dialog;
 }
 
 void Split::layoutMessages()
@@ -361,6 +370,7 @@ void Split::doCloseSplit()
 void Split::doChangeChannel()
 {
     this->showChangeChannelPopup("Change channel", false, [](bool) {});
+
     auto popup = this->findChildren<QDockWidget *>();
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
         popup.at(0)->hide();
@@ -506,7 +516,8 @@ void Split::doOpenUserInfoPopup(const QString &user)
     auto *userPopup = new UserInfoPopup;
     userPopup->setData(user, this->getChannel());
     userPopup->setAttribute(Qt::WA_DeleteOnClose);
-    userPopup->move(QCursor::pos());
+    userPopup->move(QCursor::pos() -
+                    QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
     userPopup->show();
 }
 
