@@ -12,6 +12,7 @@
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
 #include "singletons/windowmanager.hpp"
+#include "util/irchelpers.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -335,7 +336,7 @@ void TwitchMessageBuilder::appendUsername()
 
     auto iterator = this->tags.find("display-name");
     if (iterator != this->tags.end()) {
-        QString displayName = iterator.value().toString();
+        QString displayName = util::parseTagString(iterator.value().toString()).trimmed();
 
         if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
             username = displayName;
