@@ -20,7 +20,7 @@ public:
     explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~BaseWidget() override;
 
-    float getScale() const;
+    virtual float getScale() const;
     pajlada::Signals::Signal<float> scaleChanged;
 
     QSize getScaleIndependantSize() const;

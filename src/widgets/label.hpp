@@ -3,6 +3,8 @@
 #include "singletons/fontmanager.hpp"
 #include "widgets/basewidget.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 namespace chatterino {
 namespace widgets {
 
@@ -33,6 +35,8 @@ protected:
     virtual QSize minimumSizeHint() const override;
 
 private:
+    pajlada::Signals::SignalHolder connections_;
+
     QString text_;
     FontStyle fontStyle_;
     QSize preferedSize_;

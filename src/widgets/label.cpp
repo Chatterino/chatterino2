@@ -20,7 +20,7 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
 {
     auto app = getApp();
 
-    app->fonts->fontChanged.connect([=] { this->updateSize(); });
+    this->connections_.managedConnect(app->fonts->fontChanged, [this] { this->updateSize(); });
 }
 
 const QString &Label::getText() const

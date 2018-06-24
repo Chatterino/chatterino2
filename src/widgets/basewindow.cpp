@@ -65,6 +65,11 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
 }
 
+float BaseWindow::getScale() const
+{
+    return this->scale;
+}
+
 BaseWindow::Flags BaseWindow::getFlags()
 {
     return this->flags_;

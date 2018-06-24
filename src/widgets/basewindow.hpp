@@ -42,6 +42,8 @@ public:
 
     void moveTo(QWidget *widget, QPoint point, bool offset = true);
 
+    virtual float getScale() const override;
+
     Flags getFlags();
 
 protected:
