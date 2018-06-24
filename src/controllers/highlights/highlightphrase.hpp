@@ -33,7 +33,8 @@ public:
         , sound(_sound)
         , _isRegex(isRegex)
         , regex(_isRegex ? _pattern : "\\b" + QRegularExpression::escape(_pattern) + "\\b",
-                QRegularExpression::CaseInsensitiveOption)
+                QRegularExpression::CaseInsensitiveOption |
+                    QRegularExpression::UseUnicodePropertiesOption)
     {
     }
 
