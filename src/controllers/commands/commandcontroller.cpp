@@ -111,10 +111,15 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 messages::MessageBuilder b;
 
+                b.emplace<messages::TimestampElement>();
                 b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                                                 messages::MessageElement::Text);
+                                                 messages::MessageElement::Text,
+                                                 messages::MessageColor::Text,
+                                                 FontStyle::ChatMediumBold);
                 b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
-                b.emplace<messages::TextElement>(words[1], messages::MessageElement::Text);
+                b.emplace<messages::TextElement>(words[1] + ":", messages::MessageElement::Text,
+                                                 messages::MessageColor::Text,
+                                                 FontStyle::ChatMediumBold);
 
                 QString rest = "";
 
@@ -123,6 +128,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 }
 
                 b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
+                b.getMessage()->flags |= messages::Message::DoNotTriggerNotification;
 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
