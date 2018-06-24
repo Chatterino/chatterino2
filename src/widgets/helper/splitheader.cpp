@@ -54,7 +54,7 @@ SplitHeader::SplitHeader(Split *_split)
 
         // channel name label
         auto title = layout.emplace<Label>().assign(&this->titleLabel);
-        title->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        title->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         title->setCentered(true);
         title->setHasOffset(false);
 
@@ -72,6 +72,7 @@ SplitHeader::SplitHeader(Split *_split)
                 }
             });
         });
+        mode->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         mode->hide();
 
         //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
