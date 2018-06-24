@@ -21,6 +21,7 @@ public:
     CommandController();
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
+    QStringList getDefaultTwitchCommandList();
 
     void load();
     void save();

@@ -15,6 +15,14 @@
 #include <QFile>
 #include <QRegularExpression>
 
+#define TWITCH_DEFAULT_COMMANDS                                                               \
+    {                                                                                         \
+        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", "/timeout", \
+            "/untimeout", "/slow", "/slowoff", "/r9kbeta", "/r9kbetaoff", "/emoteonly",       \
+            "/emoteonlyoff", "/clear", "/subscribers", "/subscribersoff", "/followers",       \
+            "/followersoff"                                                                   \
+    }
+
 using namespace chatterino::providers::twitch;
 
 namespace chatterino {
@@ -272,6 +280,14 @@ QString CommandController::execCustomCommand(const QStringList &words, const Com
     }
 
     return result.replace("{{", "{");
+}
+
+QStringList CommandController::getDefaultTwitchCommandList()
+{
+    QStringList l = TWITCH_DEFAULT_COMMANDS;
+    l += "/uptime";
+
+    return l;
 }
 
 }  // namespace commands

@@ -69,6 +69,10 @@ void CompletionModel::refresh()
         this->addString(command.name, TaggedString::Command);
     }
 
+    for (auto &command : app->commands->getDefaultTwitchCommandList()) {
+        this->addString(command, TaggedString::Command);
+    }
+
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
     //    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
