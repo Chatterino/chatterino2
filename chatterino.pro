@@ -381,7 +381,8 @@ HEADERS  += \
     src/util/clamp.hpp \
     src/widgets/label.hpp \
     src/util/combine_path.hpp \
-    src/widgets/settingspages/browserextensionpage.hpp
+    src/widgets/settingspages/browserextensionpage.hpp \
+    src/nullableptr.hpp
 
 RESOURCES += \
     resources/resources.qrc

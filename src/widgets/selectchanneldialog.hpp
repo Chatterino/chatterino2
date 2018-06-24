@@ -15,7 +15,7 @@ namespace widgets {
 class SelectChannelDialog : public BaseWindow
 {
 public:
-    SelectChannelDialog();
+    SelectChannelDialog(QWidget *parent = nullptr);
 
     void setSelectedChannel(IndirectChannel selectedChannel);
     IndirectChannel getSelectedChannel() const;
