@@ -45,11 +45,11 @@ protected:
     QString cleanChannelName(const QString &dirtyChannelName) override;
 
 private:
-    std::mutex lastMessageMutex;
-    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb;
-    std::queue<std::chrono::steady_clock::time_point> lastMessageMod;
-    std::chrono::steady_clock::time_point lastErrorTimeSpeed;
-    std::chrono::steady_clock::time_point lastErrorTimeAmount;
+    std::mutex lastMessageMutex_;
+    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
+    std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
+    std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
+    std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
     void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
 };

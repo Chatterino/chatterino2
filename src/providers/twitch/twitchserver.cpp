@@ -184,10 +184,11 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
     sent = false;
 
     {
-        std::lock_guard<std::mutex> guard(this->lastMessageMutex);
+        std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
         //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage = channel->hasModRights() ? this->lastMessageMod : this->lastMessagePleb;
+        auto &lastMessage =
+            channel->hasModRights() ? this->lastMessageMod_ : this->lastMessagePleb_;
         size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
         auto minMessageOffset = (channel->hasModRights() ? 100ms : 1100ms);
 
@@ -195,13 +196,13 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
 
         // check if you are sending messages too fast
         if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
-            if (lastErrorTimeSpeed + 30s < now) {
+            if (lastErrorTimeSpeed_ + 30s < now) {
                 auto errorMessage =
                     messages::Message::createSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
-                lastErrorTimeSpeed = now;
+                lastErrorTimeSpeed_ = now;
             }
             return;
         }
@@ -213,13 +214,13 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
 
         // check if you are sending too many messages
         if (lastMessage.size() >= maxMessageCount) {
-            if (lastErrorTimeAmount + 30s < now) {
+            if (lastErrorTimeAmount_ + 30s < now) {
                 auto errorMessage =
                     messages::Message::createSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 
-                lastErrorTimeAmount = now;
+                lastErrorTimeAmount_ = now;
             }
             return;
         }
