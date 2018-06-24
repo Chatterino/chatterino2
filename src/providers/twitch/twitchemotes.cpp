@@ -120,12 +120,21 @@ util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emo
 
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
+        auto cleanCode = cleanUpCode(emoteName);
+        cleanCode.replace("&lt;", "<");
+        cleanCode.replace("&gt;", ">");
         newEmoteData.image1x = new messages::Image(getEmoteLink(id, "1.0"), 1, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 1x");
+        newEmoteData.image1x->setCopyString(cleanCode);
+
         newEmoteData.image2x = new messages::Image(getEmoteLink(id, "2.0"), .5, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 2x");
+        newEmoteData.image2x->setCopyString(cleanCode);
+
         newEmoteData.image3x = new messages::Image(getEmoteLink(id, "3.0"), .25, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 3x");
+
+        newEmoteData.image3x->setCopyString(cleanCode);
 
         return newEmoteData;
     });

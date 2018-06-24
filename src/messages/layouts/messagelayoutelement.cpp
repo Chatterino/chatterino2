@@ -74,7 +74,7 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image *_image, 
 
 void ImageLayoutElement::addCopyTextToString(QString &str, int from, int to) const
 {
-    str += this->image->getName();
+    str += this->image->getCopyString();
 
     if (this->hasTrailingSpace()) {
         str += " ";

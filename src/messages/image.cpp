@@ -1,6 +1,7 @@
 #include "messages/image.hpp"
 
 #include "application.hpp"
+#include "debug/log.hpp"
 #include "singletons/emotemanager.hpp"
 #include "singletons/ircmanager.hpp"
 #include "singletons/windowmanager.hpp"
@@ -209,6 +210,15 @@ const QString &Image::getName() const
     return this->name;
 }
 
+const QString &Image::getCopyString() const
+{
+    if (this->copyString.isEmpty()) {
+        return this->name;
+    }
+
+    return this->copyString;
+}
+
 const QString &Image::getTooltip() const
 {
     return this->tooltip;
@@ -256,6 +266,11 @@ int Image::getScaledHeight() const
 {
     return static_cast<int>((float)this->getHeight() * this->scale *
                             getApp()->settings->emoteScale.getValue());
+}
+
+void Image::setCopyString(const QString &newCopyString)
+{
+    this->copyString = newCopyString;
 }
 
 }  // namespace messages

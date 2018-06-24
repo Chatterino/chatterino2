@@ -25,6 +25,7 @@ public:
     qreal getScale() const;
     const QString &getUrl() const;
     const QString &getName() const;
+    const QString &getCopyString() const;
     const QString &getTooltip() const;
     const QMargins &getMargin() const;
     bool isAnimated() const;
@@ -33,6 +34,8 @@ public:
     int getScaledWidth() const;
     int getHeight() const;
     int getScaledHeight() const;
+
+    void setCopyString(const QString &newCopyString);
 
 private:
     struct FrameData {
@@ -50,6 +53,7 @@ private:
 
     QString url;
     QString name;
+    QString copyString;
     QString tooltip;
     bool animated = false;
     QMargins margin;

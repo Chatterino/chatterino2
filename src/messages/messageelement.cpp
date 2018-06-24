@@ -85,7 +85,8 @@ EmoteElement::EmoteElement(const util::EmoteData &_data, MessageElement::Flags f
 {
     if (_data.isValid()) {
         this->setTooltip(data.image1x->getTooltip());
-        this->textElement.reset(new TextElement(_data.image1x->getName(), MessageElement::Misc));
+        this->textElement.reset(
+            new TextElement(_data.image1x->getCopyString(), MessageElement::Misc));
     }
 }
 
