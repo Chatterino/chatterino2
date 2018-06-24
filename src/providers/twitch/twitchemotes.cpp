@@ -25,6 +25,7 @@ QString getEmoteLink(const QString &id, const QString &emoteScale)
 
 QString cleanUpCode(const QString &dirtyEmoteCode)
 {
+    QString cleanCode = dirtyEmoteCode;
     // clang-format off
     static QMap<QString, QString> emoteNameReplacements{
         {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},   {"\\&lt\\;3", "&lt;3"},
@@ -37,10 +38,13 @@ QString cleanUpCode(const QString &dirtyEmoteCode)
 
     auto it = emoteNameReplacements.find(dirtyEmoteCode);
     if (it != emoteNameReplacements.end()) {
-        return it.value();
+        cleanCode = it.value();
     }
 
-    return dirtyEmoteCode;
+    cleanCode.replace("&lt;", "<");
+    cleanCode.replace("&gt;", ">");
+
+    return cleanCode;
 }
 
 void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
@@ -121,8 +125,6 @@ util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emo
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         util::EmoteData newEmoteData;
         auto cleanCode = cleanUpCode(emoteName);
-        cleanCode.replace("&lt;", "<");
-        cleanCode.replace("&gt;", ">");
         newEmoteData.image1x = new messages::Image(getEmoteLink(id, "1.0"), 1, emoteName,
                                                    _emoteName + "<br/>Twitch Emote 1x");
         newEmoteData.image1x->setCopyString(cleanCode);
