@@ -162,9 +162,11 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (app->settings->allowDuplicateMessages) {
-        if (parsedMessage == this->lastSentMessage) {
-            parsedMessage.append(this->messageSuffix);
+    if (!this->hasModRights()) {
+        if (app->settings->allowDuplicateMessages) {
+            if (parsedMessage == this->lastSentMessage) {
+                parsedMessage.append(this->messageSuffix);
+            }
         }
     }
 
