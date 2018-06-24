@@ -7,7 +7,8 @@
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
     "glknmaideaikkmemifbfkhnomoknepka"
-#define FIREFOX_EXTENSION_LINK "https://addons.mozilla.org/de/firefox/addon/chatterino-native-host/"
+#define FIREFOX_EXTENSION_LINK \
+    "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
 namespace chatterino {
 namespace widgets {
