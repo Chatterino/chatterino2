@@ -98,7 +98,7 @@ AppearancePage::AppearancePage()
             hbox.emplace<QLabel>("lines");
         }
 
-        messages.append(this->createCheckBox("Seperate messages", app->settings->seperateMessages));
+        messages.append(this->createCheckBox("Separate messages", app->settings->separateMessages));
         messages.append(this->createCheckBox("Alternate message background color",
                                              app->settings->alternateMessageBackground));
         messages.append(this->createCheckBox("Show message length while typing",

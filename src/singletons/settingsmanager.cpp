@@ -47,7 +47,7 @@ void SettingManager::initialize()
     this->timestampFormat.connect([](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
     this->alternateMessageBackground.connect(
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-    this->seperateMessages.connect(
+    this->separateMessages.connect(
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
     this->collpseMessagesMinLines.connect(
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });

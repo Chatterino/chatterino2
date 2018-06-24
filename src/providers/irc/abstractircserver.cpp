@@ -53,7 +53,7 @@ void AbstractIrcServer::connect()
 {
     this->disconnect();
 
-    //    if (this->hasSeperateWriteConnection()) {
+    //    if (this->hasSeparateWriteConnection()) {
     this->initializeConnection(this->writeConnection_.get(), false, true);
     this->initializeConnection(this->readConnection_.get(), true, false);
     //    } else {

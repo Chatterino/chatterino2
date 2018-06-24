@@ -167,7 +167,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     }
 
     // draw message seperation line
-    if (app->settings->seperateMessages.getValue()) {
+    if (app->settings->separateMessages.getValue()) {
         painter.fillRect(0, y, this->container_.getWidth(), 1,
                          app->themes->splits.messageSeperator);
     }
