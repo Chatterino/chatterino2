@@ -2,6 +2,8 @@
 
 #include "debug/log.hpp"
 #include "messages/image.hpp"
+#include "util/benchmark.hpp"
+#include "util/rapidjson-helpers.hpp"
 #include "util/urlfetch.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
@@ -41,7 +43,57 @@ QString cleanUpCode(const QString &dirtyEmoteCode)
     return dirtyEmoteCode;
 }
 
+void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
+{
+    debug::Log("Load twitch emote set data for {}", emoteSet->key);
+    util::NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" +
+                             emoteSet->key + "/");
+
+    req.setRequestType(util::NetworkRequest::GetRequest);
+
+    req.onError([](int errorCode) -> bool {
+        debug::Log("Emote sets on ERROR {}", errorCode);
+        return true;
+    });
+
+    req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
+        debug::Log("Emote sets on success");
+        if (!root.IsObject()) {
+            return false;
+        }
+
+        std::string emoteSetID;
+        QString channelName;
+        if (!rj::getSafe(root, "channel_name", channelName)) {
+            return false;
+        }
+
+        emoteSet->channelName = channelName;
+
+        return true;
+    });
+
+    req.execute();
+}
+
 }  // namespace
+
+TwitchEmotes::TwitchEmotes()
+{
+    {
+        EmoteSet emoteSet;
+        emoteSet.key = "19194";
+        emoteSet.text = "Twitch Prime Emotes";
+        this->staticEmoteSets[emoteSet.key] = std::move(emoteSet);
+    }
+
+    {
+        EmoteSet emoteSet;
+        emoteSet.key = "0";
+        emoteSet.text = "Twitch Global Emotes";
+        this->staticEmoteSets[emoteSet.key] = std::move(emoteSet);
+    }
+}
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
@@ -107,29 +159,90 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
 
         auto emoticonSets = root.value("emoticon_sets").toObject();
         for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
-            EmoteSet emoteSet;
+            auto emoteSet = std::make_shared<EmoteSet>();
 
-            emoteSet.key = it.key();
+            emoteSet->key = it.key();
+
+            loadSetData(emoteSet);
 
             for (QJsonValue emoteValue : it.value().toArray()) {
                 QJsonObject emoticon = emoteValue.toObject();
                 QString id = QString::number(emoticon["id"].toInt());
                 QString code = emoticon["code"].toString();
+
                 auto cleanCode = cleanUpCode(code);
-                emoteSet.emotes.emplace_back(id, cleanCode);
+                emoteSet->emotes.emplace_back(id, cleanCode);
                 emoteData.emoteCodes.push_back(cleanCode);
 
                 util::EmoteData emote = this->getEmoteById(id, code);
                 emoteData.emotes.insert(code, emote);
             }
 
-            emoteData.emoteSets.emplace_back(std::move(emoteSet));
+            emoteData.emoteSets.emplace_back(emoteSet);
         }
 
         emoteData.filled = true;
     };
 
     util::twitch::getAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
+}
+
+void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
+{
+    if (!emoteSet) {
+        debug::Log("null emote set sent");
+        return;
+    }
+
+    auto staticSetIt = this->staticEmoteSets.find(emoteSet->key);
+    if (staticSetIt != this->staticEmoteSets.end()) {
+        const auto &staticSet = staticSetIt->second;
+        emoteSet->channelName = staticSet.channelName;
+        emoteSet->text = staticSet.text;
+        return;
+    }
+
+    debug::Log("Load twitch emote set data for {}..", emoteSet->key);
+    util::NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" +
+                             emoteSet->key + "/");
+
+    req.setRequestType(util::NetworkRequest::GetRequest);
+
+    req.onError([](int errorCode) -> bool {
+        debug::Log("Emote sets on ERROR {}", errorCode);
+        return true;
+    });
+
+    req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
+        if (!root.IsObject()) {
+            return false;
+        }
+
+        std::string emoteSetID;
+        QString channelName;
+        QString type;
+        if (!rj::getSafe(root, "channel_name", channelName)) {
+            return false;
+        }
+
+        if (!rj::getSafe(root, "type", type)) {
+            return false;
+        }
+
+        debug::Log("Loaded twitch emote set data for {}!", emoteSet->key);
+
+        if (type == "sub") {
+            emoteSet->text = QString("Twitch Subscriber Emote (%1)").arg(channelName);
+        } else {
+            emoteSet->text = QString("Twitch Account Emote (%1)").arg(channelName);
+        }
+
+        emoteSet->channelName = channelName;
+
+        return true;
+    });
+
+    req.execute();
 }
 
 }  // namespace twitch

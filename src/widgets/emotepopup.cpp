@@ -92,7 +92,18 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         // TITLE
         messages::MessageBuilder builder1;
 
-        builder1.append(new TextElement("Twitch Account Emotes", MessageElement::Text));
+        QString setText;
+        if (set->text.isEmpty()) {
+            if (set->channelName.isEmpty()) {
+                setText = "Twitch Account Emotes";
+            } else {
+                setText = "Twitch Account Emotes (" + set->channelName + ")";
+            }
+        } else {
+            setText = set->text;
+        }
+
+        builder1.append(new TextElement(setText, MessageElement::Text));
 
         builder1.getMessage()->flags |= Message::Centered;
         emoteChannel->addMessage(builder1.getMessage());
@@ -102,7 +113,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
-        for (const auto &emote : set.emotes) {
+        for (const auto &emote : set->emotes) {
             [&](const QString &key, const util::EmoteData &value) {
                 builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                     ->setLink(Link(Link::InsertText, key)));
