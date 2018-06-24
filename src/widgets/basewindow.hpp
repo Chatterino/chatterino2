@@ -63,6 +63,12 @@ protected:
     virtual bool event(QEvent *event) override;
     virtual void wheelEvent(QWheelEvent *event) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    QPointF movingRelativePos;
+    bool moving{};
+
     void updateScale();
 
 private:

@@ -254,6 +254,64 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
     }
 }
 
+void BaseWindow::mousePressEvent(QMouseEvent *event)
+{
+#ifndef Q_OS_WIN
+    if (this->flags_ & FramelessDraggable) {
+        this->movingRelativePos = event->localPos();
+        if (auto widget = this->childAt(event->localPos().x(), event->localPos().y())) {
+            std::function<bool(QWidget *)> recursiveCheckMouseTracking;
+            recursiveCheckMouseTracking = [&](QWidget *widget) {
+                if (widget == nullptr) {
+                    return false;
+                }
+
+                if (widget->hasMouseTracking()) {
+                    return true;
+                }
+
+                return recursiveCheckMouseTracking(widget->parentWidget());
+            };
+
+            if (!recursiveCheckMouseTracking(widget)) {
+                debug::Log("Start moving");
+                this->moving = true;
+            }
+        }
+    }
+#endif
+
+    BaseWidget::mousePressEvent(event);
+}
+
+void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+#ifndef Q_OS_WIN
+    if (this->flags_ & FramelessDraggable) {
+        if (this->moving) {
+            debug::Log("Stop moving");
+            this->moving = false;
+        }
+    }
+#endif
+
+    BaseWidget::mouseReleaseEvent(event);
+}
+
+void BaseWindow::mouseMoveEvent(QMouseEvent *event)
+{
+#ifndef Q_OS_WIN
+    if (this->flags_ & FramelessDraggable) {
+        if (this->moving) {
+            const auto &newPos = event->screenPos() - this->movingRelativePos;
+            this->move(newPos.x(), newPos.y());
+        }
+    }
+#endif
+
+    BaseWidget::mouseMoveEvent(event);
+}
+
 void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
                                    std::function<void()> onClicked)
 {
@@ -588,5 +646,6 @@ void BaseWindow::calcButtonsSizes()
             this->ui_.exitButton->setScaleIndependantSize(46, 30);
     }
 }
+
 }  // namespace widgets
 }  // namespace chatterino
