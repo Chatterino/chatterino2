@@ -5,6 +5,7 @@
 #include "providers/twitch/twitchchannel.hpp"
 #include "util/mutexvalue.hpp"
 
+#include <chrono>
 #include <memory>
 #include <queue>
 
@@ -45,10 +46,12 @@ protected:
 
 private:
     std::mutex lastMessageMutex;
-    std::queue<QTime> lastMessagePleb;
-    std::queue<QTime> lastMessageMod;
-    QTime lastErrorTimeSpeed;
-    QTime lastErrorTimeAmount;
+    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb;
+    std::queue<std::chrono::steady_clock::time_point> lastMessageMod;
+    std::chrono::steady_clock::time_point lastErrorTimeSpeed;
+    std::chrono::steady_clock::time_point lastErrorTimeAmount;
+
+    void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
 };
 
 }  // namespace twitch
