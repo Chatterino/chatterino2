@@ -427,6 +427,14 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 
             return true;
         }
+        case WM_SHOWWINDOW: {
+            float scale = GetDpiForWindow(msg->hwnd) / 96.f;
+
+            this->nativeScale_ = scale;
+            this->updateScale();
+
+            return true;
+        }
         case WM_NCCALCSIZE: {
             if (this->hasCustomWindowFrame()) {
                 int cx = GetSystemMetrics(SM_CXSIZEFRAME);

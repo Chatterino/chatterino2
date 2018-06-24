@@ -4,6 +4,7 @@
 #include "debug/log.hpp"
 #include "singletons/settingsmanager.hpp"
 #include "singletons/thememanager.hpp"
+#include "widgets/basewindow.hpp"
 
 #include <QChildEvent>
 #include <QDebug>
