@@ -10,6 +10,7 @@
 #include "util/posttothread.hpp"
 
 #include <IrcCommand>
+
 #include <cassert>
 
 // using namespace Communi;
