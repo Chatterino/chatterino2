@@ -10,7 +10,7 @@ template <>
 struct Serialize<QString> {
     static rapidjson::Value get(const QString &value, rapidjson::Document::AllocatorType &a)
     {
-        rapidjson::Value ret(qPrintable(value), a);
+        rapidjson::Value ret(value.toUtf8(), a);
 
         return ret;
     }
