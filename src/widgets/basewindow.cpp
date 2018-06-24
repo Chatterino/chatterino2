@@ -83,6 +83,7 @@ void BaseWindow::init()
     if (this->hasCustomWindowFrame()) {
         // CUSTOM WINDOW FRAME
         QVBoxLayout *layout = new QVBoxLayout();
+        this->ui_.windowLayout = layout;
         layout->setContentsMargins(0, 1, 0, 0);
         layout->setSpacing(0);
         this->setLayout(layout);
@@ -464,6 +465,19 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                 return QWidget::nativeEvent(eventType, message, result);
             }
         } break;
+        case WM_SIZE: {
+            if (this->ui_.windowLayout) {
+                if (msg->wParam == SIZE_MAXIMIZED) {
+                    auto offset = int(this->getScale() * 8);
+
+                    this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
+                } else {
+                    this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
+                }
+            }
+
+            return QWidget::nativeEvent(eventType, message, result);
+        }
         case WM_NCHITTEST: {
             const LONG border_width = 8;  // in pixels
             RECT winrect;

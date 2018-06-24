@@ -84,6 +84,7 @@ private:
     float nativeScale_ = 1;
 
     struct {
+        QLayout *windowLayout = nullptr;
         QHBoxLayout *titlebarBox = nullptr;
         QWidget *titleLabel = nullptr;
         TitleBarButton *minButton = nullptr;
