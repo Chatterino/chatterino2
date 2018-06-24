@@ -242,7 +242,11 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
 {
     auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection_.get());
 
-    this->messageReceived(fakeMessage);
+    if (fakeMessage->command() == "PRIVMSG") {
+        this->privateMessageReceived(static_cast<Communi::IrcPrivateMessage *>(fakeMessage));
+    } else {
+        this->messageReceived(fakeMessage);
+    }
 }
 
 void AbstractIrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
