@@ -52,8 +52,6 @@ private:
 
     pajlada::Signals::Connection themeConnection;
 
-    static void setScaleRecursive(float scale, QObject *object);
-
     friend class BaseWindow;
 };
 

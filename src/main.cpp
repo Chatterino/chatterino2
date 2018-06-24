@@ -33,9 +33,9 @@ void installCustomPalette();
 
 int main(int argc, char *argv[])
 {
-    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+//    QApplication::setAttribute(Qt::AA_Use96Dpi, false);
 #ifdef Q_OS_WIN32
-    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
+//    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 #endif
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);

@@ -628,9 +628,13 @@ void BaseWindow::paintEvent(QPaintEvent *)
 
 void BaseWindow::updateScale()
 {
-    this->setScale(this->nativeScale_ * (this->flags_ & DisableCustomScaling
-                                             ? 1
-                                             : getApp()->windows->getUiScaleValue()));
+    auto scale = this->nativeScale_ *
+                 (this->flags_ & DisableCustomScaling ? 1 : getApp()->windows->getUiScaleValue());
+    this->setScale(scale);
+
+    for (auto child : this->findChildren<BaseWidget *>()) {
+        child->setScale(scale);
+    }
 }
 
 void BaseWindow::calcButtonsSizes()

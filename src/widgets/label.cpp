@@ -69,7 +69,7 @@ void Label::setFontStyle(FontStyle style)
     this->updateSize();
 }
 
-void Label::scaleChangedEvent(float)
+void Label::scaleChangedEvent(float scale)
 {
     this->updateSize();
 }

@@ -124,35 +124,6 @@ void BaseWidget::setScale(float value)
     this->scaleChanged.invoke(value);
 
     this->setScaleIndependantSize(this->getScaleIndependantSize());
-
-    // set scale for all children
-    BaseWidget::setScaleRecursive(value, this);
-}
-
-void BaseWidget::setScaleRecursive(float scale, QObject *object)
-{
-    for (QObject *child : object->children()) {
-        BaseWidget *widget = dynamic_cast<BaseWidget *>(child);
-        if (widget != nullptr) {
-            widget->setScale(scale);
-            continue;
-        }
-
-        //        QLayout *layout = nullptr;
-        //        QWidget *widget = dynamic_cast<QWidget *>(child);
-
-        //        if (widget != nullptr) {
-        //            layout = widget->layout();
-        //        }
-
-        //        else {
-        QLayout *layout = dynamic_cast<QLayout *>(object);
-
-        if (layout != nullptr) {
-            setScaleRecursive(scale, layout);
-        }
-        //        }
-    }
 }
 
 void BaseWidget::scaleChangedEvent(float newDpi)

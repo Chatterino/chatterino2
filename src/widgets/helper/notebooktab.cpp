@@ -213,6 +213,9 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->getScale();
 
+    qDebug() << painter.device()->devicePixelRatioF() << painter.device()->devicePixelRatioFScale()
+             << painter.device()->logicalDpiX();
+
     painter.setFont(getApp()->fonts->getFont(FontStyle::UiTabs, scale * this->devicePixelRatioF()));
     QFontMetrics metrics =
         app->fonts->getFontMetrics(FontStyle::UiTabs, scale * this->devicePixelRatioF());
