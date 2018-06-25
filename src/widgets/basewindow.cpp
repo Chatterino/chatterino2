@@ -448,10 +448,10 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         case WM_SHOWWINDOW: {
             // if (IsWindows8Point1OrGreater()) {
 
-            HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
+            static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
             if (shcore != nullptr) {
                 if (auto getDpiForMonitor =
-                        (GetDpiForMonitor_)GetProcAddress(shcore, "GetDpiForMonitor")) {
+                        GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor"))) {
                     HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
 
                     UINT xScale, yScale;
@@ -466,6 +466,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                     this->updateScale();
                 }
             }
+
             return true;
         }
         case WM_NCCALCSIZE: {
