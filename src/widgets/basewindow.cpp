@@ -26,9 +26,17 @@
 #include <gdiplus.h>
 #include <windowsx.h>
 
-#include <ShellScalingApi.h>
+//#include <ShellScalingApi.h>
 #pragma comment(lib, "Dwmapi.lib")
-#pragma comment(lib, "Shcore.lib")
+
+typedef enum MONITOR_DPI_TYPE {
+    MDT_EFFECTIVE_DPI = 0,
+    MDT_ANGULAR_DPI = 1,
+    MDT_RAW_DPI = 2,
+    MDT_DEFAULT = MDT_EFFECTIVE_DPI
+} MONITOR_DPI_TYPE;
+
+typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *, UINT *);
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -441,16 +449,22 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             // if (IsWindows8Point1OrGreater()) {
 
             HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
-            if (shcore != nullptr && GetProcAddress(shcore, "GetDpiForMonitor") != nullptr) {
-                HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
+            if (shcore != nullptr) {
+                if (auto getDpiForMonitor =
+                        (GetDpiForMonitor_)GetProcAddress(shcore, "GetDpiForMonitor")) {
+                    HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
 
-                UINT xScale, yScale;
-                GetDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
+                    UINT xScale, yScale;
 
-                float scale = xScale / 96.f;
+                    getDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
 
-                this->nativeScale_ = scale;
-                this->updateScale();
+                    //                    GetDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
+
+                    float scale = xScale / 96.f;
+
+                    this->nativeScale_ = scale;
+                    this->updateScale();
+                }
             }
             return true;
         }
