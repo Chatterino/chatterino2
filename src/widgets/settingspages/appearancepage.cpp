@@ -230,6 +230,8 @@ QLayout *AppearancePage::createFontChanger()
     QObject::connect(button, &QPushButton::clicked, [=]() {
         QFontDialog dialog(app->fonts->getFont(singletons::FontManager::ChatMedium, 1.));
 
+        dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
+
         dialog.connect(&dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
             app->fonts->chatFontFamily = font.family().toStdString();
             app->fonts->chatFontSize = font.pointSize();
