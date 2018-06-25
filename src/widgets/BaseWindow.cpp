@@ -157,12 +157,12 @@ void BaseWindow::init()
     // fourtf: don't ask me why we need to delay this
     if (!(this->flags_ & Flags::TopMost)) {
         QTimer::singleShot(1, this, [this] {
-            this->connections_.managedConnect(
-                getApp()->settings->windowTopMost.getValueChangedSignal(),
+            getApp()->settings->windowTopMost.connect(
                 [this](bool topMost, auto) {
                     ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-                });
+                },
+                this->managedConnections);
         });
     }
 #else
