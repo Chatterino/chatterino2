@@ -167,10 +167,12 @@ void BaseWindow::init()
     // fourtf: don't ask me why we need to delay this
     if (!(this->flags_ & Flags::TopMost)) {
         QTimer::singleShot(1, this, [this] {
-            getApp()->settings->windowTopMost.connect([this](bool topMost, auto) {
-                ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0,
-                               0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-            });
+            this->connections_.managedConnect(
+                getApp()->settings->windowTopMost.getValueChangedSignal(),
+                [this](bool topMost, auto) {
+                    ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
+                                   0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                });
         });
     }
 #else
@@ -178,7 +180,7 @@ void BaseWindow::init()
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
 //    }
 #endif
-}
+}  // namespace widgets
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
