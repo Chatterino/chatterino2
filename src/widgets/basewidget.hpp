@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
@@ -22,6 +23,9 @@ public:
 
     virtual float getScale() const;
     pajlada::Signals::Signal<float> scaleChanged;
+
+    void setOverrideScale(boost::optional<float>);
+    boost::optional<float> getOverrideScale() const;
 
     QSize getScaleIndependantSize() const;
     int getScaleIndependantWidth() const;
@@ -46,6 +50,7 @@ protected:
 private:
     void init();
     float scale = 1.f;
+    boost::optional<float> overrideScale = boost::none;
     QSize scaleIndependantSize;
 
     std::vector<BaseWidget *> widgets;

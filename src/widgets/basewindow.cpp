@@ -7,6 +7,7 @@
 #include "singletons/windowmanager.hpp"
 #include "util/nativeeventhelper.hpp"
 #include "util/posttothread.hpp"
+#include "util/windows_helper.hpp"
 #include "widgets/helper/rippleeffectlabel.hpp"
 #include "widgets/helper/shortcut.hpp"
 #include "widgets/label.hpp"
@@ -28,15 +29,6 @@
 
 //#include <ShellScalingApi.h>
 #pragma comment(lib, "Dwmapi.lib")
-
-typedef enum MONITOR_DPI_TYPE {
-    MDT_EFFECTIVE_DPI = 0,
-    MDT_ANGULAR_DPI = 1,
-    MDT_RAW_DPI = 2,
-    MDT_DEFAULT = MDT_EFFECTIVE_DPI
-} MONITOR_DPI_TYPE;
-
-typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *, UINT *);
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -78,7 +70,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
 float BaseWindow::getScale() const
 {
-    return this->scale;
+    return this->getOverrideScale().value_or(this->scale);
 }
 
 BaseWindow::Flags BaseWindow::getFlags()
@@ -448,25 +440,9 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             return true;
         }
         case WM_SHOWWINDOW: {
-            // if (IsWindows8Point1OrGreater()) {
-
-            static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
-            if (shcore != nullptr) {
-                if (auto getDpiForMonitor =
-                        GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor"))) {
-                    HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
-
-                    UINT xScale, yScale;
-
-                    getDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
-
-                    //                    GetDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
-
-                    float scale = xScale / 96.f;
-
-                    this->nativeScale_ = scale;
-                    this->updateScale();
-                }
+            if (auto dpi = util::getWindowDpi(msg->hwnd)) {
+                this->nativeScale_ = dpi.get() / 96.f;
+                this->updateScale();
             }
 
             return true;

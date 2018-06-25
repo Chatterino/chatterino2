@@ -8,6 +8,8 @@
 #include <QVBoxLayout>
 
 #ifdef USEWINSDK
+#include "util/windows_helper.hpp"
+
 #include "Windows.h"
 // don't even think about reordering these
 #include "Psapi.h"
@@ -177,12 +179,24 @@ void AttachedWindow::updateWindowRect_(void *_attachedPtr)
     ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
+    float scale = 1.f;
+    if (auto dpi = util::getWindowDpi(attached)) {
+        scale = dpi.get() / 96.f;
+
+        //        for (auto w : this->ui_.split->findChildren<BaseWidget *>()) {
+        //            w->setOverrideScale(scale);
+        //        }
+        //        this->ui_.split->setOverrideScale(scale);
+    }
+
     if (this->height_ == -1) {
-        ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
-                     this->width_, rect.bottom - rect.top - this->yOffset_, false);
+        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
+        //              this->width_, rect.bottom - rect.top - this->yOffset_, false);
     } else {
-        ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.bottom - this->height_ - 8,
-                     this->width_, this->height_, false);
+        ::MoveWindow(hwnd,                                          //
+                     int(rect.right - this->width_ * scale - 8),    //
+                     int(rect.bottom - this->height_ * scale - 8),  //
+                     int(this->width_ * scale), int(this->height_ * scale), true);
     }
 
 //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -

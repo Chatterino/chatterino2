@@ -28,6 +28,10 @@ BaseWidget::~BaseWidget()
 
 float BaseWidget::getScale() const
 {
+    if (this->overrideScale) {
+        return this->overrideScale.get();
+    }
+
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
 
     if (baseWidget == nullptr) {
@@ -35,6 +39,17 @@ float BaseWidget::getScale() const
     }
 
     return baseWidget->scale;
+}
+
+void BaseWidget::setOverrideScale(boost::optional<float> value)
+{
+    this->overrideScale = value;
+    this->setScale(this->getScale());
+}
+
+boost::optional<float> BaseWidget::getOverrideScale() const
+{
+    return this->overrideScale;
 }
 
 QSize BaseWidget::getScaleIndependantSize() const
@@ -120,8 +135,8 @@ void BaseWidget::setScale(float value)
     // update scale value
     this->scale = value;
 
-    this->scaleChangedEvent(value);
-    this->scaleChanged.invoke(value);
+    this->scaleChangedEvent(this->getScale());
+    this->scaleChanged.invoke(this->getScale());
 
     this->setScaleIndependantSize(this->getScaleIndependantSize());
 }

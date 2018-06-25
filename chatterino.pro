@@ -218,7 +218,8 @@ SOURCES += \
     src/widgets/userinfopopup.cpp \
     src/widgets/welcomedialog.cpp \
     src/widgets/label.cpp \
-    src/widgets/settingspages/browserextensionpage.cpp
+    src/widgets/settingspages/browserextensionpage.cpp \
+    src/util/windows_helper.cpp
 
 HEADERS  += \
     src/precompiled_header.hpp \
@@ -382,7 +383,8 @@ HEADERS  += \
     src/widgets/label.hpp \
     src/util/combine_path.hpp \
     src/widgets/settingspages/browserextensionpage.hpp \
-    src/nullableptr.hpp
+    src/nullableptr.hpp \
+    src/util/windows_helper.hpp
 
 RESOURCES += \
     resources/resources.qrc
