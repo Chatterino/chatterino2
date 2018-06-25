@@ -25,7 +25,10 @@
 #include <dwmapi.h>
 #include <gdiplus.h>
 #include <windowsx.h>
+
+#include <ShellScalingApi.h>
 #pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "Shcore.lib")
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -435,34 +438,43 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             return true;
         }
         case WM_SHOWWINDOW: {
-            float scale = GetDpiForWindow(msg->hwnd) / 96.f;
+            // if (IsWindows8Point1OrGreater()) {
 
-            this->nativeScale_ = scale;
-            this->updateScale();
+            HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
+            if (shcore != nullptr && GetProcAddress(shcore, "GetDpiForMonitor") != nullptr) {
+                HMONITOR monitor = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
 
+                UINT xScale, yScale;
+                GetDpiForMonitor(monitor, MDT_DEFAULT, &xScale, &yScale);
+
+                float scale = xScale / 96.f;
+
+                this->nativeScale_ = scale;
+                this->updateScale();
+            }
             return true;
         }
         case WM_NCCALCSIZE: {
             if (this->hasCustomWindowFrame()) {
-                int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-                int cy = GetSystemMetrics(SM_CYSIZEFRAME);
+                // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
+                // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
 
                 if (msg->wParam == TRUE) {
                     NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
                     ncp->lppos->flags |= SWP_NOREDRAW;
                     RECT *clientRect = &ncp->rgrc[0];
 
-                    if (IsWindows10OrGreater()) {
-                        clientRect->left += cx;
-                        clientRect->top += 0;
-                        clientRect->right -= cx;
-                        clientRect->bottom -= cy;
-                    } else {
-                        clientRect->left += 1;
-                        clientRect->top += 0;
-                        clientRect->right -= 1;
-                        clientRect->bottom -= 1;
-                    }
+                    // if (IsWindows10OrGreater()) {
+                    //     clientRect->left += cx;
+                    //     clientRect->top += 0;
+                    //     clientRect->right -= cx;
+                    //     clientRect->bottom -= cy;
+                    // } else {
+                    clientRect->left += 1;
+                    clientRect->top += 0;
+                    clientRect->right -= 1;
+                    clientRect->bottom -= 1;
+                    // }
                 }
 
                 *result = 0;
