@@ -7,7 +7,6 @@
 #include <string>
 
 namespace chatterino {
-namespace streamlink {
 
 class Exception : public std::runtime_error
 {
@@ -24,5 +23,4 @@ void OpenStreamlink(const QString &channelURL, const QString &quality,
 // and opening a quality dialog if the quality is "Choose"
 void Start(const QString &channel);
 
-}  // namespace streamlink
 }  // namespace chatterino

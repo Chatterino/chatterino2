@@ -7,8 +7,6 @@
 #include "common/UrlFetch.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
                              const QString &_oauthClient, const QString &_userID)
@@ -258,6 +256,4 @@ std::set<TwitchUser> TwitchAccount::getIgnores() const
     return this->ignores;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

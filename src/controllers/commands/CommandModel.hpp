@@ -6,8 +6,6 @@
 #include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace commands {
 
 class CommandController;
 
@@ -26,6 +24,4 @@ protected:
     friend class CommandController;
 };
 
-}  // namespace commands
-}  // namespace controllers
 }  // namespace chatterino

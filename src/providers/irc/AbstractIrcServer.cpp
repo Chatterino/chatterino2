@@ -6,11 +6,7 @@
 
 #include <QCoreApplication>
 
-using namespace chatterino::messages;
-
 namespace chatterino {
-namespace providers {
-namespace irc {
 
 AbstractIrcServer::AbstractIrcServer()
 {
@@ -271,6 +267,4 @@ void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
     }
 }
 
-}  // namespace irc
-}  // namespace providers
 }  // namespace chatterino

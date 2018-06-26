@@ -9,7 +9,6 @@
 #include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
-namespace util {
 
 template <typename TVectorItem>
 class SignalVectorModel : public QAbstractTableModel, pajlada::Signals::SignalHolder
@@ -317,5 +316,4 @@ private:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

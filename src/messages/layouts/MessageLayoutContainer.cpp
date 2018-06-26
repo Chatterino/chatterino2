@@ -12,8 +12,6 @@
 #define MAX_UNCOLLAPSED_LINES (getApp()->settings->collpseMessagesMinLines.getValue())
 
 namespace chatterino {
-namespace messages {
-namespace layouts {
 
 int MessageLayoutContainer::getHeight() const
 {
@@ -497,6 +495,4 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
     }
 }
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

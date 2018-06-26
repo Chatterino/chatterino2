@@ -9,8 +9,6 @@
 #include "singletons/SettingsManager.hpp"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class SettingsPage : public QWidget
 {
@@ -40,6 +38,4 @@ protected:
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

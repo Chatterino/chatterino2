@@ -9,7 +9,6 @@
 #include "singletons/helper/GifTimer.hpp"
 
 namespace chatterino {
-namespace singletons {
 
 class EmoteManager
 {
@@ -26,5 +25,4 @@ public:
     GIFTimer gifTimer;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

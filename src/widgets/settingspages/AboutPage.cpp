@@ -13,8 +13,6 @@
 #define PIXMAP_WIDTH 500
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 AboutPage::AboutPage()
     : SettingsPage("About", ":/images/about.svg")
@@ -132,6 +130,4 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name, const QString
     form->addRow(a, b);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

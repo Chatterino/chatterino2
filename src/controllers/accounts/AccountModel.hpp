@@ -7,8 +7,6 @@
 #include <unordered_map>
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 class AccountController;
 
@@ -38,6 +36,4 @@ private:
     std::unordered_map<QString, int> categoryCount;
 };
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

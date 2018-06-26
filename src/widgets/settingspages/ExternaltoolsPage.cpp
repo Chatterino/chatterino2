@@ -8,8 +8,6 @@
 #define STREAMLINK_QUALITY "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 namespace {
 
@@ -74,6 +72,4 @@ ExternalToolsPage::ExternalToolsPage()
     layout->addStretch(1);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

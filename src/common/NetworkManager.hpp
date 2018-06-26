@@ -13,7 +13,6 @@
 #include <QUrl>
 
 namespace chatterino {
-namespace util {
 
 static QJsonObject parseJSONFromReplyxD(QNetworkReply *reply)
 {
@@ -169,5 +168,4 @@ public:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

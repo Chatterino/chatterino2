@@ -11,7 +11,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class Window;
 
@@ -93,5 +92,4 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> uniqueConnections;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

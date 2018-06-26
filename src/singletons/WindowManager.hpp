@@ -4,10 +4,6 @@
 #include "widgets/Window.hpp"
 
 namespace chatterino {
-// namespace widgets {
-// struct SplitContainer::Node;
-//}
-namespace singletons {
 
 class WindowManager
 {
@@ -65,5 +61,4 @@ public:
     static IndirectChannel decodeChannel(const QJsonObject &obj);
 };
 
-}  // namespace singletons
 }  // namespace chatterino

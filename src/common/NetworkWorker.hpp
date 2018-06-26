@@ -5,7 +5,6 @@
 class QNetworkReply;
 
 namespace chatterino {
-namespace util {
 
 class NetworkWorker : public QObject
 {
@@ -15,5 +14,4 @@ signals:
     void doneUrl(QNetworkReply *);
 };
 
-}  // namespace util
 }  // namespace chatterino

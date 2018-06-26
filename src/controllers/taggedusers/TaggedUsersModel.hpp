@@ -4,8 +4,6 @@
 #include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 class TaggedUsersController;
 
@@ -29,6 +27,4 @@ protected:
     friend class TaggedUsersController;
 };
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

@@ -8,7 +8,6 @@
 class QCheckBox;
 
 namespace chatterino {
-namespace widgets {
 
 class Label;
 
@@ -68,5 +67,4 @@ private:
     };
 };
 
-}  // namespace widgets
 }  // namespace chatterino

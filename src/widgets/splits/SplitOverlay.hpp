@@ -7,7 +7,6 @@
 #include "widgets/BaseWidget.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 class Split;
 
@@ -48,5 +47,4 @@ private:
     friend class ButtonEventFilter;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

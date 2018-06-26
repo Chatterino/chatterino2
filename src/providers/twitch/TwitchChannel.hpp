@@ -14,8 +14,6 @@
 #include <mutex>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 class TwitchServer;
 
@@ -133,6 +131,4 @@ private:
     std::mutex recentChattersMutex;
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

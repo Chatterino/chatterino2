@@ -22,10 +22,7 @@
 #include "widgets/StreamView.hpp"
 #endif
 
-using namespace chatterino::providers::twitch;
-
 namespace chatterino {
-namespace widgets {
 
 SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
@@ -501,5 +498,4 @@ void SplitHeader::menuShowChangelog()
 {
 }
 
-}  // namespace widgets
 }  // namespace chatterino

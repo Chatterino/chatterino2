@@ -14,7 +14,6 @@
 #endif
 
 namespace chatterino {
-namespace widgets {
 
 TooltipWidget *TooltipWidget::getInstance()
 {
@@ -96,5 +95,4 @@ void TooltipWidget::leaveEvent(QEvent *)
     // clear parents event
 }
 
-}  // namespace widgets
 }  // namespace chatterino

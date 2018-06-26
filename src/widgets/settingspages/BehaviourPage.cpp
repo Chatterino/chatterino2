@@ -19,8 +19,6 @@
 #define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 BehaviourPage::BehaviourPage()
     : SettingsPage("Feel", ":/images/behave.svg")
@@ -90,6 +88,4 @@ QSlider *BehaviourPage::createMouseScrollSlider()
     return slider;
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

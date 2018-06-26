@@ -13,9 +13,7 @@
 #include <memory>
 
 namespace chatterino {
-namespace messages {
 struct Message;
-}  // namespace messages
 
 class Channel : public std::enable_shared_from_this<Channel>
 {

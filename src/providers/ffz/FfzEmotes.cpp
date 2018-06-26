@@ -5,8 +5,6 @@
 #include "common/UrlFetch.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace ffz {
 
 namespace {
 
@@ -133,6 +131,4 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util
     });
 }
 
-}  // namespace ffz
-}  // namespace providers
 }  // namespace chatterino

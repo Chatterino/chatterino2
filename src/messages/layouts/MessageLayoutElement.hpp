@@ -14,11 +14,8 @@
 class QPainter;
 
 namespace chatterino {
-namespace messages {
 class MessageElement;
 class Image;
-
-namespace layouts {
 
 class MessageLayoutElement : boost::noncopyable
 {
@@ -113,6 +110,4 @@ private:
     QString line2;
 };
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

@@ -15,14 +15,8 @@
 //
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 class AccountController;
 }
-}  // namespace controllers
-
-namespace providers {
-namespace twitch {
 
 class TwitchAccountManager
 {
@@ -74,6 +68,4 @@ private:
     friend class chatterino::controllers::accounts::AccountController;
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

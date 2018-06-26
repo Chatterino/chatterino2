@@ -1,5 +1,7 @@
 #include "widgets/helper/SignalLabel.hpp"
 
+namespace chatterino {
+
 SignalLabel::SignalLabel(QWidget *parent, Qt::WindowFlags f)
     : QLabel(parent, f)
 {
@@ -32,4 +34,6 @@ void SignalLabel::mouseMoveEvent(QMouseEvent *event)
 {
     emit this->mouseMove(event);
     event->ignore();
+}
+
 }

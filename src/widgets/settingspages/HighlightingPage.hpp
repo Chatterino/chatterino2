@@ -9,8 +9,6 @@ class QPushButton;
 class QListWidget;
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class HighlightingPage : public SettingsPage
 {
@@ -21,6 +19,4 @@ private:
     QTimer disabledUsersChangedTimer;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

@@ -6,8 +6,6 @@
 #include <cassert>
 
 namespace chatterino {
-namespace controllers {
-namespace ignores {
 
 void IgnoreController::initialize()
 {
@@ -31,6 +29,4 @@ IgnoreModel *IgnoreController::createModel(QObject *parent)
     return model;
 }
 
-}  // namespace ignores
-}  // namespace controllers
 }  // namespace chatterino

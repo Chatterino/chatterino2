@@ -5,7 +5,6 @@
 #include <QPainter>
 
 namespace chatterino {
-namespace widgets {
 
 class Line : public BaseWidget
 {
@@ -38,5 +37,4 @@ private:
     bool vertical_;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

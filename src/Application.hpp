@@ -7,34 +7,14 @@
 
 namespace chatterino {
 
-namespace providers {
-namespace twitch {
-
 class TwitchServer;
 class PubSub;
 
-}  // namespace twitch
-}  // namespace providers
-
-namespace controllers {
-namespace commands {
 class CommandController;
-}
-namespace highlights {
 class HighlightController;
-}
-namespace ignores {
 class IgnoreController;
-}
-namespace taggedusers {
 class TaggedUsersController;
-}
-namespace accounts {
 class AccountController;
-}
-}  // namespace controllers
-
-namespace singletons {
 
 class ThemeManager;
 class WindowManager;
@@ -46,8 +26,6 @@ class NativeMessagingManager;
 class SettingManager;
 class FontManager;
 class ResourceManager;
-
-}  // namespace singletons
 
 class Application
 {

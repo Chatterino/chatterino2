@@ -9,7 +9,6 @@
 #include "debug/AssertInGuiThread.hpp"
 
 namespace chatterino {
-namespace util {
 
 template <typename TVectorItem>
 struct SignalVectorItemArgs {
@@ -123,5 +122,4 @@ public:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

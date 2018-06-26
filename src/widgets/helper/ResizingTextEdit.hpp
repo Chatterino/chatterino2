@@ -5,6 +5,8 @@
 #include <QTextEdit>
 #include <pajlada/signals/signal.hpp>
 
+namespace chatterino {
+
 class ResizingTextEdit : public QTextEdit
 {
 public:
@@ -38,3 +40,5 @@ private:
 private slots:
     void insertCompletion(const QString &completion);
 };
+
+}

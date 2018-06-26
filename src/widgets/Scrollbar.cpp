@@ -14,7 +14,6 @@
 #define MIN_THUMB_HEIGHT 10
 
 namespace chatterino {
-namespace widgets {
 
 Scrollbar::Scrollbar(ChannelView *parent)
     : BaseWidget(parent)
@@ -382,5 +381,4 @@ void Scrollbar::updateScroll()
     this->update();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

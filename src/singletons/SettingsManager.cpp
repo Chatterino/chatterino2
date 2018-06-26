@@ -6,10 +6,7 @@
 #include "singletons/ResourceManager.hpp"
 #include "singletons/WindowManager.hpp"
 
-using namespace chatterino::messages;
-
 namespace chatterino {
-namespace singletons {
 
 std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
 
@@ -227,5 +224,4 @@ void SettingManager::updateModerationActions()
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

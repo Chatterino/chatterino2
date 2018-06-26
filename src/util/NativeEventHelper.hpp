@@ -8,7 +8,6 @@
 #include <QLibrary>
 
 namespace chatterino {
-namespace util {
 
 // static boost::optional<UINT> getWindowDpi(quintptr ptr)
 //{
@@ -51,7 +50,6 @@ namespace util {
 //};
 //#endif
 
-}  // namespace util
 }  // namespace chatterino
 
 #endif

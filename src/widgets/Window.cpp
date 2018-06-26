@@ -25,7 +25,6 @@
 #include <QStandardItemModel>
 
 namespace chatterino {
-namespace widgets {
 
 Window::Window(WindowType _type)
     : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
@@ -282,5 +281,4 @@ void Window::closeEvent(QCloseEvent *)
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

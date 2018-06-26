@@ -20,7 +20,6 @@
 #define SETTINGS_FILENAME "/window-layout.json"
 
 namespace chatterino {
-namespace singletons {
 
 using SplitNode = widgets::SplitContainer::Node;
 using SplitDirection = widgets::SplitContainer::Direction;
@@ -464,5 +463,4 @@ float WindowManager::getUiScaleValue(int scale)
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

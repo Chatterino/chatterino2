@@ -5,8 +5,6 @@
 #include "common/SignalVector2.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace ignores {
 
 class IgnoreModel;
 
@@ -26,6 +24,4 @@ private:
         "/ignore/phrases"};
 };
 
-}  // namespace ignores
-}  // namespace controllers
 }  // namespace chatterino

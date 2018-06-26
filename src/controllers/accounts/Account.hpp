@@ -5,8 +5,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 class Account
 {
@@ -25,6 +23,4 @@ private:
     QString category;
 };
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

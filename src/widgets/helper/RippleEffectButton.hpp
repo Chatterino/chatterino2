@@ -11,7 +11,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class RippleEffectButton : public BaseWidget
 {
@@ -66,5 +65,4 @@ private:
     void onMouseEffectTimeout();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

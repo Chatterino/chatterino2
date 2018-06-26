@@ -7,7 +7,6 @@
 #include <cmath>
 
 namespace chatterino {
-namespace singletons {
 
 namespace detail {
 
@@ -254,5 +253,4 @@ void ThemeManager::normalizeColor(QColor &color)
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

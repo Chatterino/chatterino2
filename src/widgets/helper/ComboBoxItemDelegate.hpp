@@ -3,7 +3,6 @@
 #include <QStyledItemDelegate>
 
 namespace chatterino {
-namespace widgets {
 
 // stolen from https://wiki.qt.io/Combo_Boxes_in_Item_Views
 
@@ -22,5 +21,4 @@ public:
                               const QModelIndex &index) const;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

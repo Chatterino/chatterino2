@@ -3,7 +3,6 @@
 #include <QNetworkAccessManager>
 
 namespace chatterino {
-namespace util {
 
 QThread NetworkManager::workerThread;
 QNetworkAccessManager NetworkManager::NaM;
@@ -20,5 +19,4 @@ void NetworkManager::deinit()
     NetworkManager::workerThread.wait();
 }
 
-}  // namespace util
 }  // namespace chatterino

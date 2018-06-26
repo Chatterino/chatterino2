@@ -10,8 +10,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace controllers {
-namespace ignores {
 
 class IgnorePhrase
 {
@@ -53,8 +51,6 @@ public:
         return this->isValid() && this->regex.match(subject).hasMatch();
     }
 };
-}  // namespace ignores
-}  // namespace controllers
 }  // namespace chatterino
 
 namespace pajlada {

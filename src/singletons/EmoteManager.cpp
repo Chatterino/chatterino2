@@ -4,7 +4,6 @@
 #include "controllers/accounts/AccountController.hpp"
 
 namespace chatterino {
-namespace singletons {
 
 void EmoteManager::initialize()
 {
@@ -21,5 +20,4 @@ void EmoteManager::initialize()
     this->gifTimer.initialize();
 }
 
-}  // namespace singletons
 }  // namespace chatterino

@@ -20,8 +20,6 @@
 #include <QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 inline QString CreateLink(const QString &url, bool file = false)
 {
@@ -138,6 +136,4 @@ ModerationPage::ModerationPage()
     this->itemsChangedTimer.setSingleShot(true);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

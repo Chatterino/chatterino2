@@ -6,7 +6,6 @@
 #include "singletons/ThemeManager.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 RippleEffectButton::RippleEffectButton(BaseWidget *parent)
     : BaseWidget(parent)
@@ -191,5 +190,4 @@ void RippleEffectButton::onMouseEffectTimeout()
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -12,7 +12,6 @@
 #define nuuls nullptr
 
 namespace chatterino {
-namespace widgets {
 
 NotebookButton::NotebookButton(BaseWidget *parent)
     : RippleEffectButton(parent)
@@ -158,5 +157,4 @@ void NotebookButton::dropEvent(QDropEvent *event)
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

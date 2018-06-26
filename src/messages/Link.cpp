@@ -1,7 +1,6 @@
 #include "messages/Link.hpp"
 
 namespace chatterino {
-namespace messages {
 
 Link::Link()
     : type(None)
@@ -20,5 +19,4 @@ bool Link::isValid() const
     return this->type != None;
 }
 
-}  // namespace messages
 }  // namespace chatterino

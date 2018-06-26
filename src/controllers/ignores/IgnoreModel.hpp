@@ -6,8 +6,6 @@
 #include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace ignores {
 
 class IgnoreController;
 
@@ -27,6 +25,4 @@ protected:
     friend class IgnoreController;
 };
 
-}  // namespace ignores
-}  // namespace controllers
 }  // namespace chatterino

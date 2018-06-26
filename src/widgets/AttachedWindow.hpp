@@ -6,7 +6,6 @@
 #include "widgets/splits/Split.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 class AttachedWindow : public QWidget
 {
@@ -58,5 +57,4 @@ private:
     static std::vector<Item> items;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

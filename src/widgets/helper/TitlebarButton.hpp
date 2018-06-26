@@ -3,7 +3,6 @@
 #include "widgets/helper/RippleEffectButton.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 class TitleBarButton : public RippleEffectButton
 {
@@ -22,5 +21,4 @@ private:
     Style style;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

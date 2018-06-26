@@ -6,7 +6,6 @@
 #include <QTime>
 
 namespace chatterino {
-namespace debug {
 
 template <typename... Args>
 inline void Log(const std::string &formatString, Args &&... args)
@@ -15,5 +14,4 @@ inline void Log(const std::string &formatString, Args &&... args)
                        << fS(formatString, std::forward<Args>(args)...).c_str();
 }
 
-}  // namespace debug
 }  // namespace chatterino

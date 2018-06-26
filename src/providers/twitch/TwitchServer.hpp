@@ -10,8 +10,6 @@
 #include <queue>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 class TwitchServer final : public irc::AbstractIrcServer
 {
@@ -54,6 +52,4 @@ private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

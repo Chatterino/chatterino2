@@ -11,7 +11,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class RippleEffectLabel : public RippleEffectButton
 {
@@ -39,5 +38,4 @@ private:
     Label label_;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

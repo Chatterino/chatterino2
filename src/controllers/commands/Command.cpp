@@ -1,8 +1,6 @@
 #include "Command.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace commands {
 
 // command
 Command::Command(const QString &_text)
@@ -29,6 +27,4 @@ QString Command::toString() const
     return this->name + " " + this->func;
 }
 
-}  // namespace commands
-}  // namespace controllers
 }  // namespace chatterino

@@ -5,8 +5,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 class TaggedUser
 {
@@ -20,6 +18,4 @@ public:
     QString id;
 };
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

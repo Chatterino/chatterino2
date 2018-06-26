@@ -3,8 +3,6 @@
 #include <tuple>
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 Account::Account(ProviderId _providerId)
     : providerId(_providerId)
@@ -38,6 +36,4 @@ bool Account::operator<(const Account &other) const
     return std::tie(this->category, a) < std::tie(other.category, b);
 }
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

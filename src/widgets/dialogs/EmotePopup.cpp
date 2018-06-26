@@ -10,11 +10,7 @@
 #include <QShortcut>
 #include <QTabWidget>
 
-using namespace chatterino::providers::twitch;
-using namespace chatterino::messages;
-
 namespace chatterino {
-namespace widgets {
 
 EmotePopup::EmotePopup()
     : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
@@ -162,5 +158,4 @@ void EmotePopup::loadEmojis()
     this->viewEmojis->setChannel(emojiChannel);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

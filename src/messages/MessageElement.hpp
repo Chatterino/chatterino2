@@ -16,13 +16,8 @@
 
 namespace chatterino {
 class Channel;
-namespace util {
 struct EmoteData;
-}  // namespace util
-namespace messages {
-namespace layouts {
 struct MessageLayoutContainer;
-}  // namespace layouts
 
 using namespace chatterino::messages::layouts;
 
@@ -206,5 +201,4 @@ public:
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 };
 
-}  // namespace messages
 }  // namespace chatterino

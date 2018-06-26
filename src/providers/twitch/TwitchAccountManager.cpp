@@ -5,8 +5,6 @@
 #include "debug/Log.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchAccountManager::TwitchAccountManager()
     : anonymousUser(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
@@ -199,6 +197,4 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
     return AddUserResponse::UserAdded;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

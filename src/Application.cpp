@@ -20,8 +20,6 @@
 
 #include <atomic>
 
-using namespace chatterino::singletons;
-
 namespace chatterino {
 
 namespace {

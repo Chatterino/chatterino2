@@ -3,7 +3,6 @@
 #include "Application.hpp"
 
 namespace chatterino {
-namespace util {
 
 NetworkRequest::NetworkRequest(const char *url)
 {
@@ -40,5 +39,4 @@ void NetworkRequest::Data::writeToCache(const QByteArray &bytes)
     }
 }
 
-}  // namespace util
 }  // namespace chatterino

@@ -6,8 +6,6 @@
 #include <QLabel>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 KeyboardSettingsPage::KeyboardSettingsPage()
     : SettingsPage("Keybindings", "")
@@ -39,6 +37,4 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + F"), new QLabel("Search in current channel"));
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

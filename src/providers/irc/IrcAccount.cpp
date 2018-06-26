@@ -1,8 +1,7 @@
 #include "IrcAccount.hpp"
 
 // namespace chatterino {
-// namespace providers {
-// namespace irc {
+//
 // IrcAccount::IrcAccount(const QString &_userName, const QString &_nickName, const QString
 // &_realName,
 //                       const QString &_password)
@@ -32,6 +31,5 @@
 //{
 //    return this->password;
 //}
-//}  // namespace irc
-//}  // namespace providers
+//
 //}  // namespace chatterino

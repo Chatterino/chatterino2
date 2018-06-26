@@ -7,7 +7,6 @@
 #include <ctime>
 
 namespace chatterino {
-namespace messages {
 
 struct MessageBuilder {
 public:
@@ -35,5 +34,4 @@ protected:
     MessagePtr message;
 };
 
-}  // namespace messages
 }  // namespace chatterino

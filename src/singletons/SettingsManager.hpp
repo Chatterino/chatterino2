@@ -9,7 +9,6 @@
 #include <pajlada/settings/settinglistener.hpp>
 
 namespace chatterino {
-namespace singletons {
 
 void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
@@ -148,5 +147,4 @@ private:
     pajlada::Settings::SettingListener wordFlagsListener;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

@@ -4,7 +4,6 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace singletons {
 
 class UpdateManager
 {
@@ -43,5 +42,4 @@ private:
     void setStatus_(UpdateStatus status);
 };
 
-}  // namespace singletons
 }  // namespace chatterino

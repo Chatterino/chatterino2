@@ -25,8 +25,6 @@
 // clang-format on
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 CommandPage::CommandPage()
     : SettingsPage("Commands", ":/images/commands.svg")
@@ -57,6 +55,4 @@ CommandPage::CommandPage()
     this->commandsEditTimer.setSingleShot(true);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

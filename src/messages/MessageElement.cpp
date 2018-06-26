@@ -8,7 +8,6 @@
 #include "common/Emotemap.hpp"
 
 namespace chatterino {
-namespace messages {
 
 MessageElement::MessageElement(Flags _flags)
     : flags(_flags)
@@ -262,5 +261,4 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-}  // namespace messages
 }  // namespace chatterino

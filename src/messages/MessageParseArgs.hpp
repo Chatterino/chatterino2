@@ -1,7 +1,6 @@
 #pragma once
 
 namespace chatterino {
-namespace messages {
 
 struct MessageParseArgs {
     bool disablePingSounds = false;
@@ -11,5 +10,4 @@ struct MessageParseArgs {
     bool isStaffOrBroadcaster = false;
 };
 
-}  // namespace messages
 }  // namespace chatterino

@@ -21,7 +21,6 @@
 #endif
 
 namespace chatterino {
-namespace singletons {
 
 FontManager::FontManager()
     : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
@@ -131,5 +130,4 @@ FontManager::FontData FontManager::createFontData(Type type, float scale)
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

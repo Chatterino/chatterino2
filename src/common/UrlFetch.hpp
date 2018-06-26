@@ -22,8 +22,6 @@
 #include <functional>
 
 namespace chatterino {
-namespace util {
-namespace twitch {
 
 static void get(QString url, const QObject *caller,
                 std::function<void(const QJsonObject &)> successCallback)
@@ -155,6 +153,4 @@ static void sendDelete(QUrl url, std::function<void()> successCallback)
     });
 }
 
-}  // namespace twitch
-}  // namespace util
 }  // namespace chatterino

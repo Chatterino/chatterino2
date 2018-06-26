@@ -39,7 +39,6 @@
 #include "widgets/helper/TitlebarButton.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
@@ -172,7 +171,6 @@ void BaseWindow::init()
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
 //    }
 #endif
-}  // namespace widgets
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
@@ -686,5 +684,4 @@ void BaseWindow::calcButtonsSizes()
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

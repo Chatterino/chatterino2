@@ -1,7 +1,6 @@
 #pragma once
 
 namespace chatterino {
-namespace singletons {
 
 void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
@@ -42,5 +41,4 @@ public:
     using pajlada::Settings::Setting<Type>::operator const Type;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

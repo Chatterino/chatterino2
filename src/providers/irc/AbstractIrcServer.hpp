@@ -10,8 +10,6 @@
 #include <mutex>
 
 namespace chatterino {
-namespace providers {
-namespace irc {
 
 class AbstractIrcServer
 {
@@ -72,6 +70,4 @@ private:
     //    bool autoReconnect_ = false;
 };
 
-}  // namespace irc
-}  // namespace providers
 }  // namespace chatterino

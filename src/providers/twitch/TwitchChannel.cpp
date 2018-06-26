@@ -16,8 +16,6 @@
 #include <QTimer>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
     : Channel(channelName, Channel::Twitch)
@@ -468,6 +466,4 @@ void TwitchChannel::fetchRecentMessages()
     });
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

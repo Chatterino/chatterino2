@@ -9,7 +9,6 @@
 #include <type_traits>
 
 namespace chatterino {
-namespace util {
 
 template <class T>
 class LayoutCreator
@@ -151,5 +150,4 @@ private:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

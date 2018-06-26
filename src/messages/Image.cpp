@@ -20,7 +20,6 @@
 #include <thread>
 
 namespace chatterino {
-namespace messages {
 
 bool Image::loadedEventQueued = false;
 
@@ -273,5 +272,4 @@ void Image::setCopyString(const QString &newCopyString)
     this->copyString = newCopyString;
 }
 
-}  // namespace messages
 }  // namespace chatterino

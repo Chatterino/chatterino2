@@ -7,7 +7,6 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 class TooltipWidget : public BaseWindow
 {
@@ -38,5 +37,4 @@ private:
     void updateFont();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

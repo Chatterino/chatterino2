@@ -11,8 +11,6 @@
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 BrowserExtensionPage::BrowserExtensionPage()
     : SettingsPage("Browser Extension", "")
@@ -33,6 +31,4 @@ BrowserExtensionPage::BrowserExtensionPage()
     layout->addStretch(1);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

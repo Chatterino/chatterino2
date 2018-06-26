@@ -4,7 +4,6 @@
 #include <mutex>
 
 namespace chatterino {
-namespace util {
 
 template <typename T>
 class MutexValue : boost::noncopyable
@@ -37,5 +36,4 @@ public:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

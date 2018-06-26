@@ -8,8 +8,6 @@
 #include "common/SignalVector2.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 class AccountModel;
 
@@ -29,6 +27,4 @@ private:
         accounts;
 };
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

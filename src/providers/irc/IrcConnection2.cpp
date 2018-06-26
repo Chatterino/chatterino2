@@ -1,8 +1,6 @@
 #include "IrcConnection2.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace irc {
 
 IrcConnection::IrcConnection(QObject *parent)
     : Communi::IrcConnection(parent)
@@ -33,6 +31,4 @@ IrcConnection::IrcConnection(QObject *parent)
     });
 }
 
-}  // namespace irc
-}  // namespace providers
 }  // namespace chatterino

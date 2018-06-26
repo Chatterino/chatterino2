@@ -3,8 +3,6 @@
 #include "controllers/accounts/AccountModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 AccountController::AccountController()
 {
@@ -48,6 +46,4 @@ AccountModel *AccountController::createModel(QObject *parent)
     return model;
 }
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

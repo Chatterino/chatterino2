@@ -19,7 +19,6 @@
 #include <vector>
 
 namespace chatterino {
-namespace widgets {
 
 class Split;
 class Label;
@@ -92,5 +91,4 @@ public slots:
     void menuShowChangelog();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

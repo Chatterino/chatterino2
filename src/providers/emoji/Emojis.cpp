@@ -7,8 +7,6 @@
 #include <QFile>
 
 namespace chatterino {
-namespace providers {
-namespace emoji {
 
 namespace {
 
@@ -379,6 +377,4 @@ QString Emojis::replaceShortCodes(const QString &text)
     return ret;
 }
 
-}  // namespace emoji
-}  // namespace providers
 }  // namespace chatterino

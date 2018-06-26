@@ -10,8 +10,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 struct ActionUser;
 
@@ -58,6 +56,4 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer, Duration duratio
     });
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

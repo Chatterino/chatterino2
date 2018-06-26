@@ -6,7 +6,6 @@
 #include <QStyleOption>
 
 namespace chatterino {
-namespace widgets {
 
 SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, settingspages::SettingsPage *_page,
                                      QString imageFileName)
@@ -68,5 +67,4 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
     this->dialog->select(this);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -4,7 +4,6 @@
 #include "singletons/SettingsManager.hpp"
 
 namespace chatterino {
-namespace util {
 
 EmoteData::EmoteData(messages::Image *_image)
     : image1x(_image)
@@ -44,5 +43,4 @@ messages::Image *EmoteData::getImage(float scale) const
     return _image;
 }
 
-}  // namespace util
 }  // namespace chatterino

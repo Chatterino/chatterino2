@@ -3,7 +3,6 @@
 #ifdef USEWINSDK
 
 namespace chatterino {
-namespace util {
 
 typedef enum MONITOR_DPI_TYPE {
     MDT_EFFECTIVE_DPI = 0,
@@ -32,7 +31,6 @@ boost::optional<UINT> getWindowDpi(HWND hwnd)
     return boost::none;
 }
 
-}  // namespace util
 }  // namespace chatterino
 
 #endif

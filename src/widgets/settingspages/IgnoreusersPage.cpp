@@ -22,8 +22,6 @@
 // clang-format on
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 IgnoreUsersPage::IgnoreUsersPage()
     : SettingsPage("Ignores", "")
@@ -106,6 +104,4 @@ void IgnoreUsersPage::onShow()
     this->userListModel.setStringList(users);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

@@ -19,7 +19,6 @@
 #define TEXT_CREATED "Created: "
 
 namespace chatterino {
-namespace widgets {
 
 UserInfoPopup::UserInfoPopup()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::DeleteOnFocusOut |
@@ -404,5 +403,4 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
     //    painter.drawLine(0, this->height() / 2, this->width(), this->height() / 2);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

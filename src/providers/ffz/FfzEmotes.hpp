@@ -7,8 +7,6 @@
 #include <map>
 
 namespace chatterino {
-namespace providers {
-namespace ffz {
 
 class FFZEmotes
 {
@@ -27,6 +25,4 @@ private:
     util::ConcurrentMap<int, util::EmoteData> channelEmoteCache;
 };
 
-}  // namespace ffz
-}  // namespace providers
 }  // namespace chatterino

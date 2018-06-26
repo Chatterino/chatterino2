@@ -11,8 +11,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 class TwitchEmotes
 {
@@ -70,6 +68,4 @@ private:
     util::ConcurrentMap<QString, util::EmoteData> _twitchEmoteFromCache;
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

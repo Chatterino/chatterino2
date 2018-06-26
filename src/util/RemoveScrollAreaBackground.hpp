@@ -3,7 +3,6 @@
 #include <QScrollArea>
 
 namespace chatterino {
-namespace util {
 
 static void removeScrollAreaBackground(QScrollArea *scrollArea, QWidget *childWidget)
 {
@@ -16,5 +15,4 @@ static void removeScrollAreaBackground(QScrollArea *scrollArea, QWidget *childWi
     childWidget->setPalette(p);
 }
 
-}  // namespace util
 }  // namespace chatterino

@@ -3,8 +3,6 @@
 #include <tuple>
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 TaggedUser::TaggedUser(ProviderId _provider, const QString &_name, const QString &_id)
     : provider(_provider)
@@ -19,6 +17,4 @@ bool TaggedUser::operator<(const TaggedUser &other) const
            std::tie(other.provider, other.name, other.id);
 }
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

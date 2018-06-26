@@ -3,7 +3,6 @@
 #include <QListWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class AccountSwitchWidget : public QListWidget
 {
@@ -18,5 +17,4 @@ private:
     void refreshSelection();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

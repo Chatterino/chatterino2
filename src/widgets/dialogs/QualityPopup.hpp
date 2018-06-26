@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
 
 class QualityPopup : public BaseWindow
 {
@@ -31,5 +30,4 @@ private:
     void cancelButtonClicked();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -1,8 +1,6 @@
 #include "CommandModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace commands {
 
 // commandmodel
 CommandModel::CommandModel(QObject *parent)
@@ -25,6 +23,4 @@ void CommandModel::getRowFromItem(const Command &item, std::vector<QStandardItem
     row[1]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
 }
 
-}  // namespace commands
-}  // namespace controllers
 }  // namespace chatterino

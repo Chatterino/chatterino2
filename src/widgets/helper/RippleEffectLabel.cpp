@@ -6,7 +6,6 @@
 #include <QPainter>
 
 namespace chatterino {
-namespace widgets {
 
 RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     : RippleEffectButton(parent)
@@ -43,5 +42,4 @@ Label &RippleEffectLabel2::getLabel()
     return this->label_;
 }
 
-}  // namespace widgets
 }  // namespace chatterino

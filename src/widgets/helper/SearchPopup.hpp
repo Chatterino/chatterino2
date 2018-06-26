@@ -11,9 +11,6 @@ class QLineEdit;
 namespace chatterino {
 
 class Channel;
-
-namespace widgets {
-
 class ChannelView;
 
 class SearchPopup : public BaseWindow
@@ -32,5 +29,4 @@ private:
     void performSearch();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -4,7 +4,6 @@
 #include <boost/optional.hpp>
 
 namespace chatterino {
-namespace singletons {
 
 class PathManager
 {
@@ -46,5 +45,4 @@ private:
     void initSubDirectories();
 };
 
-}  // namespace singletons
 }  // namespace chatterino

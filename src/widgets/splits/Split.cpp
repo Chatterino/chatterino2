@@ -35,11 +35,7 @@
 #include <functional>
 #include <random>
 
-using namespace chatterino::providers::twitch;
-using namespace chatterino::messages;
-
 namespace chatterino {
-namespace widgets {
 
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
@@ -578,5 +574,4 @@ void Split::drag()
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

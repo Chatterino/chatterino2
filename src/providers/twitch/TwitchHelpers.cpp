@@ -2,8 +2,6 @@
 #include "debug/Log.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 bool trimChannelName(const QString &channelName, QString &outChannelName)
 {
@@ -17,6 +15,4 @@ bool trimChannelName(const QString &channelName, QString &outChannelName)
     return true;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

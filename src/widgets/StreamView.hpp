@@ -11,8 +11,6 @@ namespace chatterino {
 
 class Channel;
 
-namespace widgets {
-
 class StreamView : public QWidget
 {
 public:
@@ -24,5 +22,4 @@ private:
 #endif
 };
 
-}  // namespace widgets
 }  // namespace chatterino

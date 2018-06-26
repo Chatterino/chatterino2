@@ -7,7 +7,6 @@
 #include <QScreen>
 
 namespace chatterino {
-namespace widgets {
 
 NotificationPopup::NotificationPopup()
     : BaseWindow((QWidget *)nullptr, BaseWindow::Frameless)
@@ -46,5 +45,4 @@ void NotificationPopup::addMessage(messages::MessagePtr msg)
     //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
 }
 
-}  // namespace widgets
 }  // namespace chatterino

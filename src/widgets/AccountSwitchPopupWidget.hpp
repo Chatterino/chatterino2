@@ -5,7 +5,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class AccountSwitchPopupWidget : public QWidget
 {
@@ -26,5 +25,4 @@ private:
     } ui;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

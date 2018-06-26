@@ -27,9 +27,6 @@ enum FollowResult {
     FollowResult_Failed,
 };
 
-namespace providers {
-namespace twitch {
-
 class TwitchAccount : public controllers::accounts::Account
 {
 public:
@@ -81,6 +78,4 @@ private:
     std::set<TwitchUser> ignores;
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

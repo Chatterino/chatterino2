@@ -10,10 +10,8 @@
 #include <QVariant>
 
 namespace chatterino {
-class Channel;
 
-namespace providers {
-namespace twitch {
+class Channel;
 class TwitchChannel;
 
 class TwitchMessageBuilder : public messages::MessageBuilder
@@ -70,6 +68,4 @@ private:
     bool tryParseCheermote(const QString &string);
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

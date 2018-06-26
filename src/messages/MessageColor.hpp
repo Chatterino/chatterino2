@@ -5,7 +5,6 @@
 #include <QColor>
 
 namespace chatterino {
-namespace messages {
 
 struct MessageColor {
     enum Type { Custom, Text, Link, System };
@@ -20,5 +19,4 @@ private:
     QColor customColor;
 };
 
-}  // namespace messages
 }  // namespace chatterino

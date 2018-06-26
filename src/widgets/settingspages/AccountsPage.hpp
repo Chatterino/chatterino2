@@ -6,8 +6,6 @@
 #include <QPushButton>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class AccountsPage : public SettingsPage
 {
@@ -20,6 +18,4 @@ private:
     AccountSwitchWidget *accSwitchWidget;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

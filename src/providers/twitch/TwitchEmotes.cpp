@@ -9,8 +9,6 @@
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 namespace {
 
@@ -256,6 +254,4 @@ void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
     req.execute();
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

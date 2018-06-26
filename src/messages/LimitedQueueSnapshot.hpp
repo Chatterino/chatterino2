@@ -5,7 +5,6 @@
 #include <vector>
 
 namespace chatterino {
-namespace messages {
 
 template <typename T>
 class LimitedQueueSnapshot
@@ -55,5 +54,4 @@ private:
     size_t lastChunkEnd = 0;
 };
 
-}  // namespace messages
 }  // namespace chatterino

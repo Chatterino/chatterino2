@@ -10,8 +10,6 @@
 namespace chatterino {
 class Channel;
 
-namespace controllers {
-namespace commands {
 
 class CommandModel;
 
@@ -39,6 +37,4 @@ private:
     QString execCustomCommand(const QStringList &words, const Command &command);
 };
 
-}  // namespace commands
-}  // namespace controllers
 }  // namespace chatterino

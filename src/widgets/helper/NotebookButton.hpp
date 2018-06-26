@@ -5,7 +5,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class NotebookButton : public RippleEffectButton
 {
@@ -35,5 +34,4 @@ private:
     QPoint mousePos_;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -17,8 +17,6 @@ using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
@@ -772,6 +770,4 @@ void PubSub::runThread()
     debug::Log("Done with pubsub manager thread");
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

@@ -3,7 +3,6 @@
 #include "boost/noncopyable.hpp"
 
 namespace chatterino {
-namespace util {
 
 template <typename T>
 class Property final : boost::noncopyable
@@ -32,5 +31,4 @@ protected:
     T value;
 };
 
-}  // namespace util
 }  // namespace chatterino

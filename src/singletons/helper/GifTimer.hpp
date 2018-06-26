@@ -4,7 +4,6 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace singletons {
 
 class GIFTimer
 {
@@ -17,5 +16,4 @@ private:
     QTimer timer;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

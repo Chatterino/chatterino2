@@ -6,8 +6,6 @@
 #include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace highlights {
 
 class HighlightController;
 
@@ -32,6 +30,4 @@ protected:
     friend class HighlightController;
 };
 
-}  // namespace highlights
-}  // namespace controllers
 }  // namespace chatterino

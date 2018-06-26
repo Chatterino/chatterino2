@@ -3,7 +3,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace messages {
 
 struct Link {
 public:
@@ -28,5 +27,4 @@ public:
     bool isValid() const;
 };
 
-}  // namespace messages
 }  // namespace chatterino

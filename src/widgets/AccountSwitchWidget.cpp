@@ -5,7 +5,6 @@
 #include "controllers/accounts/AccountController.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     : QListWidget(parent)
@@ -81,5 +80,4 @@ void AccountSwitchWidget::refreshSelection()
     this->blockSignals(false);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

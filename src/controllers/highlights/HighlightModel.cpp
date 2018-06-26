@@ -5,8 +5,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace highlights {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
@@ -70,6 +68,4 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row, i
     }
 }
 
-}  // namespace highlights
-}  // namespace controllers
 }  // namespace chatterino

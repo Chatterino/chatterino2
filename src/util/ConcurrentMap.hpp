@@ -9,7 +9,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace util {
 
 template <typename TKey, typename TValue>
 class ConcurrentMap
@@ -95,5 +94,4 @@ private:
     QMap<TKey, TValue> data;
 };
 
-}  // namespace util
 }  // namespace chatterino

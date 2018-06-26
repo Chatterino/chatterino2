@@ -14,7 +14,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class Split;
 
@@ -68,5 +67,4 @@ private slots:
     friend class Split;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

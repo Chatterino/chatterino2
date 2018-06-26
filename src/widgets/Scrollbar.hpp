@@ -12,8 +12,6 @@
 
 namespace chatterino {
 
-namespace widgets {
-
 class ChannelView;
 
 class Scrollbar : public BaseWidget
@@ -100,5 +98,4 @@ private:
     void updateScroll();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

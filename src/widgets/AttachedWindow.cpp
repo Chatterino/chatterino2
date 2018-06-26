@@ -17,7 +17,6 @@
 #endif
 
 namespace chatterino {
-namespace widgets {
 
 AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
@@ -214,5 +213,4 @@ void AttachedWindow::updateWindowRect_(void *_attachedPtr)
 
 std::vector<AttachedWindow::Item> AttachedWindow::items;
 
-}  // namespace widgets
 }  // namespace chatterino

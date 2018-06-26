@@ -7,7 +7,6 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 class EmotePopup : public BaseWindow
 {
@@ -24,5 +23,4 @@ private:
     ChannelView *viewEmojis;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

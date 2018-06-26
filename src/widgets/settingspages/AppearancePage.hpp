@@ -6,8 +6,6 @@
 #include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class AppearancePage : public SettingsPage
 {
@@ -21,6 +19,4 @@ public:
     std::vector<pajlada::Signals::ScopedConnection> connections_;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

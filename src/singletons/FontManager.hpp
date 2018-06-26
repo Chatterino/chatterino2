@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 namespace chatterino {
-namespace singletons {
 
 class FontManager : boost::noncopyable
 {
@@ -77,8 +76,6 @@ private:
 
     std::vector<std::unordered_map<float, FontData>> fontsByType;
 };
-
-}  // namespace singletons
 
 using FontStyle = singletons::FontManager::Type;
 

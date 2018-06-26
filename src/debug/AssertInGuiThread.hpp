@@ -5,7 +5,6 @@
 #include <cassert>
 
 namespace chatterino {
-namespace util {
 
 static void assertInGuiThread()
 {
@@ -14,5 +13,4 @@ static void assertInGuiThread()
 #endif
 }
 
-}  // namespace util
 }  // namespace chatterino

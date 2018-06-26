@@ -6,8 +6,6 @@
 #include <QTimer>
 
 namespace chatterino {
-namespace providers {
-namespace irc {
 
 class IrcConnection : public Communi::IrcConnection
 {
@@ -22,6 +20,4 @@ private:
     std::atomic<bool> recentlyReceivedMessage_{true};
 };
 
-}  // namespace irc
-}  // namespace providers
 }  // namespace chatterino

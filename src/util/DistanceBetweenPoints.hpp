@@ -5,7 +5,6 @@
 #include <cmath>
 
 namespace chatterino {
-namespace util {
 
 static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
 {
@@ -18,5 +17,4 @@ static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
     return sqrt(distance);
 }
 
-}  // namespace util
 }  // namespace chatterino

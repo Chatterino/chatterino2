@@ -21,7 +21,6 @@
 #include <QDialogButtonBox>
 
 namespace chatterino {
-namespace widgets {
 
 SettingsDialog *SettingsDialog::handle = nullptr;
 
@@ -224,5 +223,4 @@ void SettingsDialog::cancelButtonClicked()
     this->close();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

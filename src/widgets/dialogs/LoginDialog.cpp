@@ -13,7 +13,6 @@
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 namespace {
 
@@ -215,5 +214,4 @@ LoginWidget::LoginWidget()
     this->ui.mainLayout.addWidget(&this->ui.buttonBox);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

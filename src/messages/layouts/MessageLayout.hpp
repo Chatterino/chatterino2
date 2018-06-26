@@ -13,8 +13,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace messages {
-namespace layouts {
 
 class MessageLayout : boost::noncopyable
 {
@@ -82,6 +80,4 @@ private:
 
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

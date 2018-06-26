@@ -3,8 +3,6 @@
 #include "util/LayoutCreator.hpp"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 EmotesPage::EmotesPage()
     : SettingsPage("Emotes", ":/images/emote.svg")
@@ -25,6 +23,4 @@ EmotesPage::EmotesPage()
     //    layout->addStretch(1);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

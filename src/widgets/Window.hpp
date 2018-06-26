@@ -12,11 +12,8 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace singletons {
-class ThemeManager;
-}  // namespace singletons
 
-namespace widgets {
+class ThemeManager;
 
 class Window : public BaseWindow
 {
@@ -58,5 +55,4 @@ public:
     void save();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

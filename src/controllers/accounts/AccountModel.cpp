@@ -3,8 +3,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace accounts {
 
 AccountModel::AccountModel(QObject *parent)
     : util::SignalVectorModel<std::shared_ptr<Account>>(1, parent)
@@ -57,6 +55,4 @@ void AccountModel::afterRemoved(const std::shared_ptr<Account> &item,
     }
 }
 
-}  // namespace accounts
-}  // namespace controllers
 }  // namespace chatterino

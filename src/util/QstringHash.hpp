@@ -4,6 +4,7 @@
 #include <QString>
 
 namespace std {
+
 template <>
 struct hash<QString> {
     std::size_t operator()(const QString &s) const
@@ -11,4 +12,5 @@ struct hash<QString> {
         return qHash(s);
     }
 };
+
 }  // namespace std

@@ -7,8 +7,6 @@
 #include <map>
 
 namespace chatterino {
-namespace providers {
-namespace bttv {
 
 class BTTVEmotes
 {
@@ -27,6 +25,4 @@ private:
     util::EmoteMap channelEmoteCache;
 };
 
-}  // namespace bttv
-}  // namespace providers
 }  // namespace chatterino

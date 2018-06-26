@@ -3,7 +3,6 @@
 #include "widgets/Scrollbar.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 ScrollbarHighlight::ScrollbarHighlight()
     : color(Color::Highlight)
@@ -32,5 +31,4 @@ bool ScrollbarHighlight::isNull() const
     return this->style == None;
 }
 
-}  // namespace widgets
 }  // namespace chatterino

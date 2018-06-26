@@ -9,7 +9,6 @@
 #include <vector>
 
 namespace chatterino {
-namespace messages {
 
 //
 // Warning:
@@ -267,5 +266,4 @@ private:
     const size_t chunkSize = 100;
 };
 
-}  // namespace messages
 }  // namespace chatterino

@@ -23,7 +23,6 @@
 #include <boost/foreach.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
@@ -467,5 +466,4 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
     return selectedPage != nullptr ? (SplitContainer *)selectedPage : this->addPage();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

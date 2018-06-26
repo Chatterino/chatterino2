@@ -21,8 +21,6 @@
 using namespace chatterino::messages;
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcPrivateMessage *_ircMessage,
@@ -803,6 +801,4 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
 
     return false;
 }
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

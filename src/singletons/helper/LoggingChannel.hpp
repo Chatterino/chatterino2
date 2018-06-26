@@ -10,7 +10,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace singletons {
 
 class LoggingChannel : boost::noncopyable
 {
@@ -41,5 +40,4 @@ private:
     friend class LoggingManager;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

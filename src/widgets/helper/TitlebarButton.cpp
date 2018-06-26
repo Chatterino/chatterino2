@@ -3,7 +3,6 @@
 #include "singletons/ThemeManager.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 TitleBarButton::TitleBarButton()
     : RippleEffectButton(nullptr)
@@ -119,5 +118,4 @@ void TitleBarButton::paintEvent(QPaintEvent *)
     this->fancyPaint(painter);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

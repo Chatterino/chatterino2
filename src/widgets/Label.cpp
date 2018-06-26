@@ -6,8 +6,6 @@
 
 namespace chatterino {
 
-namespace widgets {
-
 Label::Label(QString text, FontStyle style)
     : Label(nullptr, text, style)
 {
@@ -134,5 +132,4 @@ int Label::getOffset()
     return this->hasOffset_ ? int(8 * this->getScale()) : 0;
 }
 
-}  // namespace widgets
 }  // namespace chatterino

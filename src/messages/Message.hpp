@@ -14,7 +14,6 @@
 #include "util/DebugCount.hpp"
 
 namespace chatterino {
-namespace messages {
 
 struct Message {
     Message()
@@ -81,5 +80,4 @@ public:
 
 using MessagePtr = std::shared_ptr<Message>;
 
-}  // namespace messages
 }  // namespace chatterino

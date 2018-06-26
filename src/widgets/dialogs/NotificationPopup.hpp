@@ -5,7 +5,6 @@
 #include "widgets/BaseWindow.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 class ChannelView;
 
@@ -23,5 +22,4 @@ private:
     ChannelPtr channel;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

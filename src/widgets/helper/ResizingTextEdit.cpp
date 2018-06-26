@@ -2,6 +2,8 @@
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 
+namespace chatterino {
+
 ResizingTextEdit::ResizingTextEdit()
 {
     auto sizePolicy = this->sizePolicy();
@@ -199,4 +201,6 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer;
+}
+
 }

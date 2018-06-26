@@ -3,7 +3,6 @@
 #include "util/StreamLink.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     : channelName(_channelName)
@@ -57,5 +56,4 @@ void QualityPopup::cancelButtonClicked()
     this->close();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

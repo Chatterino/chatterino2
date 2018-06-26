@@ -10,7 +10,6 @@
 #include <ctime>
 
 namespace chatterino {
-namespace singletons {
 
 QByteArray endline("\n");
 
@@ -132,5 +131,4 @@ QString LoggingChannel::generateDateString(const QDateTime &now)
     return now.toString("yyyy-MM-dd");
 }
 
-}  // namespace singletons
 }  // namespace chatterino

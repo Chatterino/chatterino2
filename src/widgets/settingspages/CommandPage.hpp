@@ -6,8 +6,6 @@
 #include "widgets/settingspages/SettingsPage.hpp"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class CommandPage : public SettingsPage
 {
@@ -18,6 +16,4 @@ private:
     QTimer commandsEditTimer;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

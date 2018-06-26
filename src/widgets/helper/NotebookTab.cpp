@@ -19,7 +19,6 @@
 #include <boost/bind.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : RippleEffectButton(notebook)
@@ -454,5 +453,4 @@ QRect NotebookTab::getXRect()
                  static_cast<int>(16 * s), static_cast<int>(16 * s));
 }
 
-}  // namespace widgets
 }  // namespace chatterino

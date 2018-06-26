@@ -3,8 +3,6 @@
 #include <QDebug>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 SettingsPage::SettingsPage(const QString &_name, const QString &_iconResource)
     : name(_name)
@@ -93,6 +91,4 @@ QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting, 
     return w;
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

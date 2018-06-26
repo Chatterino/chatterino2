@@ -5,8 +5,6 @@
 #include "common/UrlFetch.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace bttv {
 
 namespace {
 
@@ -118,6 +116,4 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
     });
 }
 
-}  // namespace bttv
-}  // namespace providers
 }  // namespace chatterino

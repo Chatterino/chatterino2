@@ -10,7 +10,6 @@
 #include <QRadioButton>
 
 namespace chatterino {
-namespace widgets {
 
 class SelectChannelDialog : public BaseWindow
 {
@@ -57,5 +56,4 @@ private:
     friend class EventFilter;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

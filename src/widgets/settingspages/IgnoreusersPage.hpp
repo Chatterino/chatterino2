@@ -5,8 +5,6 @@
 #include <QStringListModel>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class IgnoreUsersPage : public SettingsPage
 {
@@ -19,6 +17,4 @@ private:
     QStringListModel userListModel;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

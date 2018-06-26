@@ -4,8 +4,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 // commandmodel
 TaggedUsersModel::TaggedUsersModel(QObject *parent)
@@ -61,6 +59,4 @@ void TaggedUsersModel::afterInit()
 //    }
 //}
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

@@ -10,7 +10,6 @@
 #include "util/PostToThread.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 LastRunCrashDialog::LastRunCrashDialog()
 {
@@ -85,5 +84,4 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    });
 }
 
-}  // namespace widgets
 }  // namespace chatterino

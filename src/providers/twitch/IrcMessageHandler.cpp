@@ -17,12 +17,7 @@
 
 #include <unordered_set>
 
-using namespace chatterino::singletons;
-using namespace chatterino::messages;
-
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 IrcMessageHandler &IrcMessageHandler::getInstance()
 {
@@ -369,6 +364,4 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     }
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

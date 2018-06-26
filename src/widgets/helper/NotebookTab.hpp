@@ -10,7 +10,6 @@
 #include <pajlada/signals/connection.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 #define NOTEBOOK_TAB_HEIGHT 28
 
@@ -90,5 +89,4 @@ private:
     void titleUpdated();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

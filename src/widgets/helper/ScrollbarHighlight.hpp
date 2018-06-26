@@ -3,7 +3,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace widgets {
 
 class ScrollbarHighlight
 {
@@ -23,5 +22,4 @@ private:
     Style style;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -5,8 +5,6 @@
 #include "widgets/dialogs/NotificationPopup.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace highlights {
 
 HighlightController::HighlightController()
 {
@@ -43,6 +41,4 @@ void HighlightController::addHighlight(const messages::MessagePtr &msg)
     //    popup.show();
 }
 
-}  // namespace highlights
-}  // namespace controllers
 }  // namespace chatterino

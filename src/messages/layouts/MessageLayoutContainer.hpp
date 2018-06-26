@@ -12,9 +12,6 @@
 class QPainter;
 
 namespace chatterino {
-namespace messages {
-
-namespace layouts {
 class MessageLayoutElement;
 
 struct Margin {
@@ -113,6 +110,4 @@ private:
     std::vector<Line> lines;
 };
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

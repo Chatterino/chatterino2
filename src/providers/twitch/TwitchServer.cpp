@@ -14,12 +14,9 @@
 #include <cassert>
 
 // using namespace Communi;
-using namespace chatterino::singletons;
 using namespace std::chrono_literals;
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchServer::TwitchServer()
     : whispersChannel(new Channel("/whispers", Channel::TwitchWhispers))
@@ -233,6 +230,4 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
     sent = true;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

@@ -6,7 +6,6 @@
 #include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
-namespace widgets {
 
 class Label : public BaseWidget
 {
@@ -47,5 +46,4 @@ private:
     int getOffset();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -7,8 +7,6 @@
 class QPushButton;
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class ModerationPage : public SettingsPage
 {
@@ -19,6 +17,4 @@ private:
     QTimer itemsChangedTimer;
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

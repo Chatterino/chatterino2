@@ -6,7 +6,6 @@
 #include <QPainter>
 
 namespace chatterino {
-namespace widgets {
 
 NotebookPageDropPreview::NotebookPageDropPreview(BaseWidget *parent)
     : BaseWidget(parent)
@@ -51,5 +50,4 @@ void NotebookPageDropPreview::setBounds(const QRect &rect)
     //    this->animate = true;
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -7,11 +7,8 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
-class SettingsPage;
-}  // namespace settingspages
 
+class SettingsPage;
 class SettingsDialog;
 
 class SettingsDialogTab : public BaseWidget
@@ -44,5 +41,4 @@ private:
     bool selected = false;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -25,7 +25,6 @@
 #include <algorithm>
 
 namespace chatterino {
-namespace widgets {
 
 bool SplitContainer::isDraggingSplit = false;
 Split *SplitContainer::draggingSplit = nullptr;
@@ -1151,5 +1150,4 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -31,11 +31,7 @@
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
 #define CHAT_HOVER_PAUSE_DURATION 1000
 
-using namespace chatterino::messages;
-using namespace chatterino::providers::twitch;
-
 namespace chatterino {
-namespace widgets {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
@@ -1211,5 +1207,4 @@ int ChannelView::getLayoutWidth() const
     return this->width();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

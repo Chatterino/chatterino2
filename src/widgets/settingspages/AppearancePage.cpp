@@ -30,8 +30,6 @@
 // clang-format on
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 AppearancePage::AppearancePage()
     : SettingsPage("Look", ":/images/theme.svg")
@@ -271,6 +269,4 @@ QLayout *AppearancePage::createUiScaleSlider()
     return layout;
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

@@ -6,7 +6,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class NotebookPageDropPreview : public BaseWidget
 {
@@ -24,5 +23,4 @@ protected:
     //    bool animate = false;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

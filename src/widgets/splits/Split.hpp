@@ -19,7 +19,6 @@
 #include <QWidget>
 
 namespace chatterino {
-namespace widgets {
 
 class SplitContainer;
 class SplitOverlay;
@@ -154,5 +153,4 @@ public slots:
     void doOpenViewerList();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

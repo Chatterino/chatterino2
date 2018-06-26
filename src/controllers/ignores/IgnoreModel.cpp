@@ -5,8 +5,6 @@
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace ignores {
 
 // commandmodel
 IgnoreModel::IgnoreModel(QObject *parent)
@@ -31,6 +29,4 @@ void IgnoreModel::getRowFromItem(const IgnorePhrase &item, std::vector<QStandard
     util::setBoolItem(row[1], item.isRegex());
 }
 
-}  // namespace ignores
-}  // namespace controllers
 }  // namespace chatterino

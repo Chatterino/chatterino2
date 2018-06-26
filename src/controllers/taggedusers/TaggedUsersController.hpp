@@ -4,8 +4,6 @@
 #include "common/SignalVector2.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 class TaggedUsersModel;
 
@@ -19,6 +17,4 @@ public:
     TaggedUsersModel *createModel(QObject *parent = nullptr);
 };
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

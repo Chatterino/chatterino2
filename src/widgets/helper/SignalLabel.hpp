@@ -5,6 +5,8 @@
 #include <QMouseEvent>
 #include <QWidget>
 
+namespace chatterino {
+
 class SignalLabel : public QLabel
 {
     Q_OBJECT
@@ -26,3 +28,5 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 };
+
+}

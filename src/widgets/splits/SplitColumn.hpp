@@ -5,7 +5,6 @@
 #include <vector>
 
 namespace chatterino {
-namespace helper {
 
 class SplitColumn
 {
@@ -21,5 +20,4 @@ private:
     std::vector<widgets::Split> items;
 };
 
-}  // namespace helper
 }  // namespace chatterino

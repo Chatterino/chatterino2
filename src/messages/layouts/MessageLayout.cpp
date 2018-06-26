@@ -19,8 +19,6 @@
 #define COMPACT_EMOTES_OFFSET 6
 
 namespace chatterino {
-namespace messages {
-namespace layouts {
 
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(message)
@@ -274,6 +272,4 @@ void MessageLayout::addSelectionText(QString &str, int from, int to)
     this->container_.addSelectionText(str, from, to);
 }
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

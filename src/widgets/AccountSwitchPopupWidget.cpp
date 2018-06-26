@@ -9,7 +9,6 @@
 #include <QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
 
 AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     : QWidget(parent)
@@ -58,5 +57,4 @@ void AccountSwitchPopupWidget::paintEvent(QPaintEvent *)
     painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -6,7 +6,6 @@
 using SBHighlight = chatterino::widgets::ScrollbarHighlight;
 
 namespace chatterino {
-namespace messages {
 
 void Message::addElement(MessageElement *element)
 {
@@ -212,5 +211,4 @@ MessagePtr Message::createUntimeoutMessage(const providers::twitch::UnbanAction 
     return msg;
 }
 
-}  // namespace messages
 }  // namespace chatterino

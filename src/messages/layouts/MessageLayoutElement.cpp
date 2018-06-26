@@ -8,8 +8,6 @@
 #include <QPainter>
 
 namespace chatterino {
-namespace messages {
-namespace layouts {
 
 const QRect &MessageLayoutElement::getRect() const
 {
@@ -289,6 +287,4 @@ int TextIconLayoutElement::getXFromIndex(int index)
     }
 }
 
-}  // namespace layouts
-}  // namespace messages
 }  // namespace chatterino

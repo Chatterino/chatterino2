@@ -3,8 +3,7 @@
 #include <QString>
 
 // namespace chatterino {
-// namespace providers {
-// namespace irc {
+//
 // class IrcAccount
 //{
 // public:
@@ -22,6 +21,5 @@
 //    QString realName;
 //    QString password;
 //};
-//}  // namespace irc
-//}  // namespace providers
+//
 //}  // namespace chatterino

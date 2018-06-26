@@ -10,7 +10,6 @@
 #include <mutex>
 
 namespace chatterino {
-namespace singletons {
 
 class ResourceManager
 {
@@ -154,5 +153,4 @@ public:
     void loadChatterinoBadges();
 };
 
-}  // namespace singletons
 }  // namespace chatterino

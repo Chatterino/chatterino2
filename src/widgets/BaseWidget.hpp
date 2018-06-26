@@ -5,12 +5,8 @@
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
-namespace singletons {
+
 class ThemeManager;
-}  // namespace singletons
-
-namespace widgets {
-
 class BaseWindow;
 
 class BaseWidget : public QWidget
@@ -60,5 +56,4 @@ private:
     friend class BaseWindow;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

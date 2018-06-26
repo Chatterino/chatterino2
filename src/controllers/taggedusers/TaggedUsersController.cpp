@@ -3,8 +3,6 @@
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 
 namespace chatterino {
-namespace controllers {
-namespace taggedusers {
 
 TaggedUsersController::TaggedUsersController()
 {
@@ -18,6 +16,4 @@ TaggedUsersModel *TaggedUsersController::createModel(QObject *parent)
     return model;
 }
 
-}  // namespace taggedusers
-}  // namespace controllers
 }  // namespace chatterino

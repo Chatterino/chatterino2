@@ -13,6 +13,8 @@
     qDebug() << BOOST_CURRENT_FUNCTION << __LINE__ \
              << static_cast<float>(x.nsecsElapsed()) / 1000000.0 << "ms";
 
+namespace chatterino {
+
 class BenchmarkGuard : boost::noncopyable
 {
     QElapsedTimer timer;
@@ -35,3 +37,5 @@ public:
         return qreal(timer.nsecsElapsed()) / 1000000.0;
     }
 };
+
+}  // namespace chatterino

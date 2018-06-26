@@ -8,7 +8,6 @@
 #include <QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
 
 class TextInputDialog : public QDialog
 {
@@ -41,5 +40,4 @@ private slots:
     void cancelButtonClicked();
 };
 
-}  // namespace widgets
 }  // namespace chatterino

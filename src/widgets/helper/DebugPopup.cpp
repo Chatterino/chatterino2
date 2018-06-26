@@ -8,7 +8,6 @@
 #include <QTimer>
 
 namespace chatterino {
-namespace widgets {
 
 DebugPopup::DebugPopup()
 {
@@ -26,5 +25,4 @@ DebugPopup::DebugPopup()
     layout->addWidget(text);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

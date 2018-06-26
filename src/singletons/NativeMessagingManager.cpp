@@ -30,7 +30,6 @@ namespace ipc = boost::interprocess;
 #define MESSAGE_SIZE 1024
 
 namespace chatterino {
-namespace singletons {
 
 // fourtf: don't add this class to the application class
 NativeMessagingManager::NativeMessagingManager()
@@ -240,5 +239,4 @@ std::string &NativeMessagingManager::getGuiMessageQueueName()
     return name;
 }
 
-}  // namespace singletons
 }  // namespace chatterino

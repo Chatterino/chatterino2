@@ -21,8 +21,6 @@
 #include <vector>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 using WebsocketClient = websocketpp::client<websocketpp::config::asio_tls_client>;
 using WebsocketHandle = websocketpp::connection_hdl;
@@ -159,6 +157,4 @@ private:
     void runThread();
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

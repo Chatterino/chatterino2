@@ -4,8 +4,6 @@
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 const rapidjson::Value &getArgs(const rapidjson::Value &data)
 {
@@ -80,6 +78,4 @@ rapidjson::Document createUnlistenMessage(const std::vector<std::string> &topics
     return msg;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

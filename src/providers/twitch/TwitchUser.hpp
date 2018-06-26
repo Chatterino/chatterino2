@@ -6,8 +6,6 @@
 #include <cassert>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 struct TwitchUser {
     QString id;
@@ -30,6 +28,4 @@ struct TwitchUser {
     }
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

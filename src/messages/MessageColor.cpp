@@ -1,7 +1,6 @@
 #include "MessageColor.hpp"
 
 namespace chatterino {
-namespace messages {
 
 MessageColor::MessageColor(const QColor &_color)
     : type(Type::Custom)
@@ -31,5 +30,4 @@ const QColor &MessageColor::getColor(singletons::ThemeManager &themeManager) con
     return _default;
 }
 
-}  // namespace messages
 }  // namespace chatterino

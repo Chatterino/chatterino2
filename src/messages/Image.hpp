@@ -7,7 +7,6 @@
 #include <atomic>
 
 namespace chatterino {
-namespace messages {
 
 class Image : public QObject, boost::noncopyable
 {
@@ -67,5 +66,4 @@ private:
     void gifUpdateTimout();
 };
 
-}  // namespace messages
 }  // namespace chatterino

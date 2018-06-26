@@ -3,7 +3,6 @@
 #include "singletons/ResourceManager.hpp"
 
 namespace chatterino {
-namespace singletons {
 
 ModerationAction::ModerationAction(messages::Image *_image, const QString &_action)
     : _isImage(true)
@@ -47,5 +46,4 @@ const QString &ModerationAction::getAction() const
     return this->action;
 }
 
-}  // namespace singletons
 }  // namespace chatterino

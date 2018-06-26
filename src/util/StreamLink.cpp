@@ -12,7 +12,6 @@
 #include <functional>
 
 namespace chatterino {
-namespace streamlink {
 
 namespace {
 
@@ -202,5 +201,4 @@ void Start(const QString &channel)
     OpenStreamlink(channelURL, quality, args);
 }
 
-}  // namespace streamlink
 }  // namespace chatterino

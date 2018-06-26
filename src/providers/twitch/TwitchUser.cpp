@@ -3,8 +3,6 @@
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 TwitchUser TwitchUser::fromJSON(const rapidjson::Value &value)
 {
@@ -29,6 +27,4 @@ TwitchUser TwitchUser::fromJSON(const rapidjson::Value &value)
     return user;
 }
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

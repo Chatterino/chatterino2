@@ -7,7 +7,6 @@
 #include <QString>
 
 namespace chatterino {
-namespace util {
 
 class DebugCount
 {
@@ -56,5 +55,4 @@ public:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

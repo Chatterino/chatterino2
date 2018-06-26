@@ -18,7 +18,6 @@
 #include <QtWidgets/QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
 
 class BasicLoginWidget : public QWidget
 {
@@ -86,5 +85,4 @@ private:
     } ui;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

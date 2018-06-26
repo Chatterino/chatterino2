@@ -11,7 +11,6 @@
 #include <unordered_map>
 
 namespace chatterino {
-namespace singletons {
 
 void LoggingManager::initialize()
 {
@@ -37,5 +36,4 @@ void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

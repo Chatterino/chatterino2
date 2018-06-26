@@ -25,8 +25,6 @@
 #define ALWAYS_PLAY "Always play highlight sound (Even if Chatterino is focused)"
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 HighlightingPage::HighlightingPage()
     : SettingsPage("Highlights", ":/images/notifications.svg")
@@ -106,6 +104,4 @@ HighlightingPage::HighlightingPage()
     this->disabledUsersChangedTimer.setSingleShot(true);
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

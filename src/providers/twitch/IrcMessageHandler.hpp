@@ -3,8 +3,6 @@
 #include <IrcMessage>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 class TwitchServer;
 
@@ -34,6 +32,4 @@ private:
                     TwitchServer &server, bool isResub, bool isAction);
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

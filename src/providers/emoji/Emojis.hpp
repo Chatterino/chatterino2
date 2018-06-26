@@ -10,8 +10,6 @@
 #include <map>
 
 namespace chatterino {
-namespace providers {
-namespace emoji {
 
 struct EmojiData {
     // actual byte-representation of the emoji (i.e. \154075\156150 which is :male:)
@@ -66,6 +64,4 @@ private:
     QMap<QChar, QVector<std::shared_ptr<EmojiData>>> emojiFirstByte;
 };
 
-}  // namespace emoji
-}  // namespace providers
 }  // namespace chatterino

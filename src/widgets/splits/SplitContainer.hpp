@@ -22,7 +22,6 @@
 class QJsonObject;
 
 namespace chatterino {
-namespace widgets {
 
 //
 // Note: This class is a spaghetti container. There is a lot of spaghetti code inside but it doesn't
@@ -243,5 +242,4 @@ private:
     void decodeNodeRecusively(QJsonObject &obj, Node *node);
 };
 
-}  // namespace widgets
 }  // namespace chatterino

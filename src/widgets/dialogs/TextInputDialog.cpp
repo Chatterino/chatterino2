@@ -2,7 +2,6 @@
 #include <QSizePolicy>
 
 namespace chatterino {
-namespace widgets {
 
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)
@@ -42,5 +41,4 @@ void TextInputDialog::highlightText()
     this->_lineEdit.selectAll();
 }
 
-}  // namespace widgets
 }  // namespace chatterino

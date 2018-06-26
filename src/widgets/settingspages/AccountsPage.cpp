@@ -15,8 +15,6 @@
 #include <algorithm>
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 AccountsPage::AccountsPage()
     : SettingsPage("Accounts", ":/images/accounts.svg")
@@ -66,6 +64,4 @@ AccountsPage::AccountsPage()
     //    });
 }
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

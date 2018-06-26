@@ -3,7 +3,6 @@
 #include <utility>
 
 namespace chatterino {
-namespace messages {
 
 struct SelectionItem {
     int messageIndex;
@@ -79,5 +78,4 @@ struct Selection {
     }
 };
 
-}  // namespace messages
 }  // namespace chatterino

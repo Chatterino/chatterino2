@@ -9,8 +9,6 @@
 #include <pajlada/settings/serialize.hpp>
 
 namespace chatterino {
-namespace controllers {
-namespace highlights {
 
 class HighlightPhrase
 {
@@ -70,8 +68,6 @@ public:
     //        return this->regex;
     //    }
 };
-}  // namespace highlights
-}  // namespace controllers
 }  // namespace chatterino
 
 namespace pajlada {

@@ -4,7 +4,6 @@
 #include "util/ConcurrentMap.hpp"
 
 namespace chatterino {
-namespace util {
 
 struct EmoteData {
     EmoteData() = default;
@@ -25,5 +24,4 @@ struct EmoteData {
 
 using EmoteMap = ConcurrentMap<QString, EmoteData>;
 
-}  // namespace util
 }  // namespace chatterino

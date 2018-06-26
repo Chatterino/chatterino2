@@ -16,8 +16,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-using namespace chatterino::messages;
-
 namespace chatterino {
 
 Channel::Channel(const QString &_name, Type _type)

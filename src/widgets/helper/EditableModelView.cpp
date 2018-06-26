@@ -8,8 +8,6 @@
 #include <QVBoxLayout>
 
 namespace chatterino {
-namespace widgets {
-namespace helper {
 
 EditableModelView::EditableModelView(QAbstractTableModel *_model)
     : tableView(new QTableView(this))
@@ -71,6 +69,4 @@ QAbstractTableModel *EditableModelView::getModel()
     return this->model;
 }
 
-}  // namespace helper
-}  // namespace widgets
 }  // namespace chatterino

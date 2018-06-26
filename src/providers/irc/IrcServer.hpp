@@ -4,8 +4,7 @@
 #include "providers/irc/AbstractIrcServer.hpp"
 
 namespace chatterino {
-namespace providers {
-namespace irc {
+
 // class IrcServer
 //{
 // public:
@@ -20,6 +19,5 @@ namespace irc {
 //    virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
 //    virtual void messageReceived(Communi::IrcMessage *message);
 //};
-}  // namespace irc
-}  // namespace providers
+//
 }  // namespace chatterino

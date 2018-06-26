@@ -5,7 +5,6 @@
 #include "singletons/WindowManager.hpp"
 
 namespace chatterino {
-namespace singletons {
 
 void GIFTimer::initialize()
 {
@@ -27,5 +26,4 @@ void GIFTimer::initialize()
     });
 }
 
-}  // namespace singletons
 }  // namespace chatterino

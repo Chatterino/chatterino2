@@ -3,7 +3,6 @@
 #include <type_traits>
 
 namespace chatterino {
-namespace util {
 
 // = std::enable_if<std::is_enum<T>::value>::type
 
@@ -63,5 +62,4 @@ public:
     T value;
 };
 
-}  // namespace util
 }  // namespace chatterino

@@ -9,7 +9,6 @@
 #include <QProcess>
 
 namespace chatterino {
-namespace singletons {
 
 UpdateManager::UpdateManager()
     : currentVersion_(CHATTERINO_VERSION)
@@ -155,5 +154,4 @@ void UpdateManager::setStatus_(UpdateStatus status)
     }
 }
 
-}  // namespace singletons
 }  // namespace chatterino

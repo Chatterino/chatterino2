@@ -3,7 +3,6 @@
 #include <QObject>
 
 namespace chatterino {
-namespace util {
 
 class NetworkRequester : public QObject
 {
@@ -13,5 +12,4 @@ signals:
     void requestUrl();
 };
 
-}  // namespace util
 }  // namespace chatterino

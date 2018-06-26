@@ -3,7 +3,6 @@
 #include <QComboBox>
 
 namespace chatterino {
-namespace widgets {
 
 ComboBoxItemDelegate::ComboBoxItemDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -53,5 +52,4 @@ void ComboBoxItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *mod
     else
         QStyledItemDelegate::setModelData(editor, model, index);
 }
-}  // namespace widgets
 }  // namespace chatterino

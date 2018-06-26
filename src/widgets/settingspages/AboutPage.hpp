@@ -6,8 +6,6 @@ class QLabel;
 class QFormLayout;
 
 namespace chatterino {
-namespace widgets {
-namespace settingspages {
 
 class AboutPage : public SettingsPage
 {
@@ -21,6 +19,4 @@ private:
                     const QString &licenseLink);
 };
 
-}  // namespace settingspages
-}  // namespace widgets
 }  // namespace chatterino

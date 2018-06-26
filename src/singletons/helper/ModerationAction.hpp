@@ -4,11 +4,7 @@
 
 namespace chatterino {
 
-namespace messages {
 class Image;
-}  // namespace messages
-
-namespace singletons {
 
 class ModerationAction
 {
@@ -30,5 +26,4 @@ private:
     QString action;
 };
 
-}  // namespace singletons
 }  // namespace chatterino

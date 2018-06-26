@@ -6,7 +6,6 @@
 #include <QDateTime>
 
 namespace chatterino {
-namespace messages {
 
 MessageBuilder::MessageBuilder()
     : message(new Message)
@@ -62,5 +61,4 @@ QString MessageBuilder::matchLink(const QString &string)
     return captured;
 }
 
-}  // namespace messages
 }  // namespace chatterino

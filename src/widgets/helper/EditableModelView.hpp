@@ -8,8 +8,6 @@ class QAbstractTableModel;
 class QTableView;
 
 namespace chatterino {
-namespace widgets {
-namespace helper {
 
 class EditableModelView : public QWidget
 {
@@ -28,6 +26,4 @@ private:
     QAbstractTableModel *model;
 };
 
-}  // namespace helper
-}  // namespace widgets
 }  // namespace chatterino

@@ -8,7 +8,7 @@
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
-namespace widgets {
+
 SearchPopup::SearchPopup()
 {
     this->initLayout();
@@ -83,5 +83,5 @@ void SearchPopup::performSearch()
 
     this->channelView->setChannel(channel);
 }
-}  // namespace widgets
+
 }  // namespace chatterino

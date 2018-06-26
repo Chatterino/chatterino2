@@ -9,12 +9,8 @@
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
-namespace widgets {
 
-namespace settingspages {
 class SettingsPage;
-}  // namespace settingspages
-
 class SettingsDialogTab;
 
 class SettingsDialog : public BaseWindow
@@ -65,5 +61,4 @@ private:
     //    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
 };
 
-}  // namespace widgets
 }  // namespace chatterino

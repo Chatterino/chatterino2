@@ -3,7 +3,6 @@
 #include <memory>
 
 namespace chatterino {
-namespace util {
 
 template <typename T>
 struct SharedPtrElementLess {
@@ -13,5 +12,4 @@ struct SharedPtrElementLess {
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

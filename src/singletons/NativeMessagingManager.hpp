@@ -3,7 +3,6 @@
 #include <QThread>
 
 namespace chatterino {
-namespace singletons {
 
 class NativeMessagingManager
 {
@@ -30,5 +29,4 @@ public:
     static std::string &getGuiMessageQueueName();
 };
 
-}  // namespace singletons
 }  // namespace chatterino

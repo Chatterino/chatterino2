@@ -26,8 +26,6 @@
 using namespace chatterino::providers::twitch;
 
 namespace chatterino {
-namespace controllers {
-namespace commands {
 
 CommandController::CommandController()
 {
@@ -290,6 +288,4 @@ QStringList CommandController::getDefaultTwitchCommandList()
     return l;
 }
 
-}  // namespace commands
-}  // namespace controllers
 }  // namespace chatterino

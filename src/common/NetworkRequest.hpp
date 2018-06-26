@@ -12,7 +12,6 @@
 #include <QFile>
 
 namespace chatterino {
-namespace util {
 
 static QJsonObject parseJSONFromData(const QByteArray &data)
 {
@@ -468,5 +467,4 @@ private:
     }
 };
 
-}  // namespace util
 }  // namespace chatterino

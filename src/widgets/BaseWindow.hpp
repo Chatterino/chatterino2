@@ -9,7 +9,6 @@
 class QHBoxLayout;
 
 namespace chatterino {
-namespace widgets {
 
 class RippleEffectButton;
 class RippleEffectLabel;
@@ -97,5 +96,4 @@ private:
     pajlada::Signals::SignalHolder connections_;
 };
 
-}  // namespace widgets
 }  // namespace chatterino

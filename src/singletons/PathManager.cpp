@@ -9,7 +9,6 @@
 #include "util/CombinePath.hpp"
 
 namespace chatterino {
-namespace singletons {
 
 PathManager *PathManager::instance = nullptr;
 
@@ -116,5 +115,4 @@ void PathManager::initSubDirectories()
     this->miscDirectory = makePath("Misc");
 }
 
-}  // namespace singletons
 }  // namespace chatterino

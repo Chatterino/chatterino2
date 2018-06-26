@@ -10,7 +10,6 @@
 #endif
 
 namespace chatterino {
-namespace widgets {
 
 StreamView::StreamView(ChannelPtr channel, const QUrl &url)
 {
@@ -30,5 +29,4 @@ StreamView::StreamView(ChannelPtr channel, const QUrl &url)
     this->layout()->setMargin(0);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

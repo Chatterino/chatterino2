@@ -17,7 +17,6 @@
 #include <QPainter>
 
 namespace chatterino {
-namespace widgets {
 
 SplitInput::SplitInput(Split *_chatWidget)
     : BaseWidget(_chatWidget)
@@ -363,5 +362,4 @@ void SplitInput::mousePressEvent(QMouseEvent *)
     this->split_->giveFocus(Qt::MouseFocusReason);
 }
 
-}  // namespace widgets
 }  // namespace chatterino

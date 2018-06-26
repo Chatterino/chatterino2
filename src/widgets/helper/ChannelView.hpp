@@ -20,7 +20,6 @@
 #include <unordered_set>
 
 namespace chatterino {
-namespace widgets {
 
 class ChannelView : public BaseWidget
 {
@@ -160,5 +159,4 @@ private slots:
     }
 };
 
-}  // namespace widgets
 }  // namespace chatterino

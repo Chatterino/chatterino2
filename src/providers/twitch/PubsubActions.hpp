@@ -7,8 +7,6 @@
 #include <cinttypes>
 
 namespace chatterino {
-namespace providers {
-namespace twitch {
 
 struct ActionUser {
     QString id;
@@ -105,6 +103,4 @@ struct ModerationStateAction : PubSubAction {
     bool modded;
 };
 
-}  // namespace twitch
-}  // namespace providers
 }  // namespace chatterino

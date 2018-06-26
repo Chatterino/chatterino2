@@ -3,7 +3,6 @@
 #include <QStandardItem>
 
 namespace chatterino {
-namespace util {
 
 static void setBoolItem(QStandardItem *item, bool value, bool userCheckable = true,
                         bool selectable = true)
@@ -28,5 +27,4 @@ static QStandardItem *emptyItem()
     return item;
 }
 
-}  // namespace util
 }  // namespace chatterino

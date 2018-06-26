@@ -14,7 +14,6 @@
 #define TAB_TWITCH 0
 
 namespace chatterino {
-namespace widgets {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(parent, BaseWindow::EnableCustomFrame)
@@ -279,5 +278,4 @@ void SelectChannelDialog::themeRefreshEvent()
     }
 }
 
-}  // namespace widgets
 }  // namespace chatterino

@@ -14,7 +14,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
-namespace widgets {
 
 SplitOverlay::SplitOverlay(Split *parent)
     : BaseWidget(parent)
@@ -211,5 +210,4 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
     return QObject::eventFilter(watched, event);
 }
 
-}  // namespace widgets
 }  // namespace chatterino
