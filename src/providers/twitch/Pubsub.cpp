@@ -179,7 +179,7 @@ PubSub::PubSub()
     this->moderationActionHandlers["clear"] = [this](const auto &data, const auto &roomID) {
         ClearChatAction action(data, roomID);
 
-        this->sig.moderation.chatCleared.invoke(action);
+        this->signals_.moderation.chatCleared.invoke(action);
     };
 
     this->moderationActionHandlers["slowoff"] = [this](const auto &data, const auto &roomID) {
@@ -188,7 +188,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::Off;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["slow"] = [this](const auto &data, const auto &roomID) {
@@ -225,7 +225,7 @@ PubSub::PubSub()
 
         action.duration = QString(durationArg.GetString()).toUInt(&ok, 10);
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data, const auto &roomID) {
@@ -234,7 +234,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::Off;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["r9kbeta"] = [this](const auto &data, const auto &roomID) {
@@ -243,7 +243,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::R9K;
         action.state = ModeChangedAction::State::On;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["subscribersoff"] = [this](const auto &data,
@@ -253,7 +253,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
         action.state = ModeChangedAction::State::Off;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["subscribers"] = [this](const auto &data, const auto &roomID) {
@@ -262,7 +262,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
         action.state = ModeChangedAction::State::On;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["emoteonlyoff"] = [this](const auto &data, const auto &roomID) {
@@ -271,7 +271,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::EmoteOnly;
         action.state = ModeChangedAction::State::Off;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["emoteonly"] = [this](const auto &data, const auto &roomID) {
@@ -280,7 +280,7 @@ PubSub::PubSub()
         action.mode = ModeChangedAction::Mode::EmoteOnly;
         action.state = ModeChangedAction::State::On;
 
-        this->sig.moderation.modeChanged.invoke(action);
+        this->signals_.moderation.modeChanged.invoke(action);
     };
 
     this->moderationActionHandlers["unmod"] = [this](const auto &data, const auto &roomID) {
@@ -304,7 +304,7 @@ PubSub::PubSub()
 
         action.modded = false;
 
-        this->sig.moderation.moderationStateChanged.invoke(action);
+        this->signals_.moderation.moderationStateChanged.invoke(action);
     };
 
     this->moderationActionHandlers["mod"] = [this](const auto &data, const auto &roomID) {
@@ -328,7 +328,7 @@ PubSub::PubSub()
 
         action.modded = true;
 
-        this->sig.moderation.moderationStateChanged.invoke(action);
+        this->signals_.moderation.moderationStateChanged.invoke(action);
     };
 
     this->moderationActionHandlers["timeout"] = [this](const auto &data, const auto &roomID) {
@@ -361,7 +361,7 @@ PubSub::PubSub()
                 }
             }
 
-            this->sig.moderation.userBanned.invoke(action);
+            this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
             Log("Error parsing moderation action: {}", ex.what());
         }
@@ -390,7 +390,7 @@ PubSub::PubSub()
                 }
             }
 
-            this->sig.moderation.userBanned.invoke(action);
+            this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
             Log("Error parsing moderation action: {}", ex.what());
         }
@@ -415,7 +415,7 @@ PubSub::PubSub()
                 return;
             }
 
-            this->sig.moderation.userUnbanned.invoke(action);
+            this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
             Log("Error parsing moderation action: {}", ex.what());
         }
@@ -440,7 +440,7 @@ PubSub::PubSub()
                 return;
             }
 
-            this->sig.moderation.userUnbanned.invoke(action);
+            this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
             Log("Error parsing moderation action: {}", ex.what());
         }
@@ -725,9 +725,9 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
 
         if (whisperType == "whisper_received") {
-            this->sig.whisper.received.invoke(msg);
+            this->signals_.whisper.received.invoke(msg);
         } else if (whisperType == "whisper_sent") {
-            this->sig.whisper.sent.invoke(msg);
+            this->signals_.whisper.sent.invoke(msg);
         } else if (whisperType == "thread") {
             // Handle thread?
         } else {

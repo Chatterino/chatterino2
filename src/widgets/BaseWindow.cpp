@@ -5,7 +5,6 @@
 #include "debug/Log.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/NativeEventHelper.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
