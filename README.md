@@ -35,3 +35,6 @@ To setup automatic code formating with QT Creator, see [this guide](https://gist
 7. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
 
 Qt creator should now format the documents when saving it.
+
+### CodeScene
+[![](https://codescene.io/projects/3004/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/3004/jobs/latest-successful/results)
