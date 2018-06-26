@@ -1,0 +1,69 @@
+#pragma once
+
+#include "BaseWindow.hpp"
+
+#include <QPushButton>
+#include <QStackedLayout>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <pajlada/settings/setting.hpp>
+
+namespace chatterino {
+namespace widgets {
+
+namespace settingspages {
+class SettingsPage;
+}  // namespace settingspages
+
+class SettingsDialogTab;
+
+class SettingsDialog : public BaseWindow
+{
+public:
+    SettingsDialog();
+
+    static SettingsDialog *getHandle();  // may be NULL
+
+    enum class PreferredTab {
+        NoPreference,
+        Accounts,
+    };
+
+    static void showDialog(PreferredTab preferredTab = PreferredTab::NoPreference);
+
+protected:
+    virtual void scaleChangedEvent(float newDpi) override;
+    virtual void themeRefreshEvent() override;
+
+private:
+    void refresh();
+    static SettingsDialog *handle;
+
+    struct {
+        QWidget *tabContainerContainer;
+        QVBoxLayout *tabContainer;
+        QStackedLayout *pageStack;
+        QPushButton *okButton;
+        QPushButton *cancelButton;
+    } ui_;
+
+    std::vector<SettingsDialogTab *> tabs;
+
+    void initUi();
+    void addTabs();
+    void addTab(settingspages::SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
+
+    void select(SettingsDialogTab *tab);
+
+    SettingsDialogTab *selectedTab = nullptr;
+
+    void okButtonClicked();
+    void cancelButtonClicked();
+
+    friend class SettingsDialogTab;
+
+    //    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
+};
+
+}  // namespace widgets
+}  // namespace chatterino

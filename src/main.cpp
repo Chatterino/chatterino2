@@ -1,10 +1,10 @@
-#include "application.hpp"
-#include "singletons/nativemessagingmanager.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/updatemanager.hpp"
-#include "util/debugcount.hpp"
-#include "util/networkmanager.hpp"
-#include "widgets/lastruncrashdialog.hpp"
+#include "Application.hpp"
+#include "singletons/NativeMessagingManager.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/UpdateManager.hpp"
+#include "util/DebugCount.hpp"
+#include "util/NetworkManager.hpp"
+#include "widgets/LastRunCrashDialog.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
@@ -15,7 +15,7 @@
 #include <pajlada/settings/settingmanager.hpp>
 
 #ifdef USEWINSDK
-#include "util/nativeeventhelper.hpp"
+#include "util/NativeEventHelper.hpp"
 #endif
 
 #include <fstream>
