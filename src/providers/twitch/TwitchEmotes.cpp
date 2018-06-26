@@ -193,7 +193,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
         emoteData.filled = true;
     };
 
-    getAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
+    twitchApiGetAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
 }
 
 void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)

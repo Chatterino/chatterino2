@@ -352,45 +352,45 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 
     QString cheermoteURL = "https://api.twitch.tv/kraken/bits/actions?channel_id=" + roomID;
 
-    get2(cheermoteURL, QThread::currentThread(), true,
-         [this, roomID](const rapidjson::Document &d) {
-             ResourceManager::Channel &ch = this->channels[roomID];
+    twitchApiGet2(
+        cheermoteURL, QThread::currentThread(), true, [this, roomID](const rapidjson::Document &d) {
+            ResourceManager::Channel &ch = this->channels[roomID];
 
-             ParseCheermoteSets(ch.jsonCheermoteSets, d);
+            ParseCheermoteSets(ch.jsonCheermoteSets, d);
 
-             for (auto &set : ch.jsonCheermoteSets) {
-                 CheermoteSet cheermoteSet;
-                 cheermoteSet.regex =
-                     QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+            for (auto &set : ch.jsonCheermoteSets) {
+                CheermoteSet cheermoteSet;
+                cheermoteSet.regex =
+                    QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
 
-                 for (auto &tier : set.tiers) {
-                     Cheermote cheermote;
+                for (auto &tier : set.tiers) {
+                    Cheermote cheermote;
 
-                     cheermote.color = QColor(tier.color);
-                     cheermote.minBits = tier.minBits;
+                    cheermote.color = QColor(tier.color);
+                    cheermote.minBits = tier.minBits;
 
-                     // TODO(pajlada): We currently hardcode dark here :|
-                     // We will continue to do so for now since we haven't had to
-                     // solve that anywhere else
-                     cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
-                     cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
-                     cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
+                    // TODO(pajlada): We currently hardcode dark here :|
+                    // We will continue to do so for now since we haven't had to
+                    // solve that anywhere else
+                    cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
+                    cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
+                    cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
 
-                     cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
-                     cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
-                     cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
+                    cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
+                    cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
+                    cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
 
-                     cheermoteSet.cheermotes.emplace_back(cheermote);
-                 }
+                    cheermoteSet.cheermotes.emplace_back(cheermote);
+                }
 
-                 std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
-                           [](const auto &lhs, const auto &rhs) {
-                               return lhs.minBits < rhs.minBits;  //
-                           });
+                std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
+                          [](const auto &lhs, const auto &rhs) {
+                              return lhs.minBits < rhs.minBits;  //
+                          });
 
-                 ch.cheermoteSets.emplace_back(cheermoteSet);
-             }
-         });
+                ch.cheermoteSets.emplace_back(cheermoteSet);
+            }
+        });
 }
 
 void ResourceManager::loadDynamicTwitchBadges()

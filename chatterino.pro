@@ -210,7 +210,6 @@ SOURCES += \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/settingspages/SpecialChannelsPage.cpp \
     src/widgets/splits/Split.cpp \
-    src/widgets/splits/SplitColumn.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitHeader.cpp \
     src/widgets/splits/SplitInput.cpp \
@@ -380,7 +379,6 @@ HEADERS  += \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/splits/Split.hpp \
-    src/widgets/splits/SplitColumn.hpp \
     src/widgets/splits/SplitContainer.hpp \
     src/widgets/splits/SplitHeader.hpp \
     src/widgets/splits/SplitInput.hpp \
