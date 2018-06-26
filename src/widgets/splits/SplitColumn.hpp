@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <vector>
 

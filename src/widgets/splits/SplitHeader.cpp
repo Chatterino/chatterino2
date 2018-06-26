@@ -1,4 +1,4 @@
-#include "widgets/helper/SplitHeader.hpp"
+#include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -8,8 +8,8 @@
 #include "util/LayoutCreator.hpp"
 #include "util/UrlFetch.hpp"
 #include "widgets/Label.hpp"
-#include "widgets/Split.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TooltipWidget.hpp"
 
 #include <QByteArray>

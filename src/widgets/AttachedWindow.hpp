@@ -3,7 +3,7 @@
 #include <QWidget>
 
 #include "Channel.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 namespace chatterino {
 namespace widgets {

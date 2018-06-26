@@ -3,7 +3,7 @@
 #include "Channel.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 #ifdef USEWEBENGINE
 #include <QtWebEngineWidgets>

@@ -4,7 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QList>
 #include <QMessageBox>

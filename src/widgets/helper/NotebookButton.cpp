@@ -2,7 +2,7 @@
 #include "singletons/ThemeManager.hpp"
 #include "widgets/helper/RippleEffectButton.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

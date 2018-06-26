@@ -1,6 +1,6 @@
 #include "widgets/helper/RippleEffectLabel.hpp"
 #include "singletons/ThemeManager.hpp"
-#include "widgets/helper/SplitHeader.hpp"
+#include "widgets/splits/SplitHeader.hpp"
 
 #include <QBrush>
 #include <QPainter>

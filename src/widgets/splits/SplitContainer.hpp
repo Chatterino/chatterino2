@@ -3,7 +3,7 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/DropPreview.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QDragEnterEvent>
 #include <QHBoxLayout>

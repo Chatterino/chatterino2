@@ -10,8 +10,8 @@
 
 #include "Application.hpp"
 #include "singletons/ResourceManager.hpp"
-#include "widgets/Split.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 namespace widgets {

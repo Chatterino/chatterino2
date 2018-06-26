@@ -1,4 +1,4 @@
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include "Application.hpp"
 #include "Common.hpp"
@@ -14,10 +14,10 @@
 #include "widgets/helper/DebugPopup.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
-#include "widgets/helper/SplitOverlay.hpp"
+#include "widgets/splits/SplitOverlay.hpp"
 #include "widgets/QualityPopup.hpp"
 #include "widgets/SelectChannelDialog.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/TextInputDialog.hpp"
 #include "widgets/UserInfoPopup.hpp"
 #include "widgets/Window.hpp"

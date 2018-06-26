@@ -96,7 +96,7 @@ SOURCES += \
     src/Application.cpp \
     src/Channel.cpp \
     src/ChannelData.cpp \
-    src/Common.h.cpp \
+    src/Common.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -184,11 +184,10 @@ SOURCES += \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
-    src/widgets/helper/SplitColumn.cpp \
-    src/widgets/helper/SplitHeader.cpp \
-    src/widgets/helper/SplitInput.cpp \
-    src/widgets/helper/SplitNode.cpp \
-    src/widgets/helper/SplitOverlay.cpp \
+    src/widgets/splits/SplitColumn.cpp \
+    src/widgets/splits/SplitHeader.cpp \
+    src/widgets/splits/SplitInput.cpp \
+    src/widgets/splits/SplitOverlay.cpp \
     src/widgets/helper/TitlebarButton.cpp \
     src/widgets/Label.cpp \
     src/widgets/LastRunCrashDialog.cpp \
@@ -214,8 +213,8 @@ SOURCES += \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/settingspages/SpecialChannelsPage.cpp \
-    src/widgets/Split.cpp \
-    src/widgets/SplitContainer.cpp \
+    src/widgets/splits/Split.cpp \
+    src/widgets/splits/SplitContainer.cpp \
     src/widgets/StreamView.cpp \
     src/widgets/TextInputDialog.cpp \
     src/widgets/TooltipWidget.cpp \
@@ -357,11 +356,10 @@ HEADERS  += \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/Shortcut.hpp \
     src/widgets/helper/SignalLabel.hpp \
-    src/widgets/helper/SplitColumn.hpp \
-    src/widgets/helper/SplitHeader.hpp \
-    src/widgets/helper/SplitInput.hpp \
-    src/widgets/helper/SplitNode.hpp \
-    src/widgets/helper/SplitOverlay.hpp \
+    src/widgets/splits/SplitColumn.hpp \
+    src/widgets/splits/SplitHeader.hpp \
+    src/widgets/splits/SplitInput.hpp \
+    src/widgets/splits/SplitOverlay.hpp \
     src/widgets/helper/TitlebarButton.hpp \
     src/widgets/Label.hpp \
     src/widgets/LastRunCrashDialog.hpp \
@@ -387,8 +385,8 @@ HEADERS  += \
     src/widgets/settingspages/ModerationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/settingspages/SpecialChannelsPage.hpp \
-    src/widgets/Split.hpp \
-    src/widgets/SplitContainer.hpp \
+    src/widgets/splits/Split.hpp \
+    src/widgets/splits/SplitContainer.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/TextInputDialog.hpp \
     src/widgets/Titlebar.hpp \

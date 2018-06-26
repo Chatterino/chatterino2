@@ -8,7 +8,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/SettingsDialog.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
 #include <QDebug>

@@ -12,7 +12,7 @@
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/SettingsDialog.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/WelcomeDialog.hpp"
 
 #include <QApplication>

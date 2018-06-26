@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResizingTextEdit.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/EmotePopup.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"

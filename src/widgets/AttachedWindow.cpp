@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "util/DebugCount.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>

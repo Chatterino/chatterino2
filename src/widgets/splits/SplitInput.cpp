@@ -1,4 +1,4 @@
-#include "widgets/helper/SplitInput.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
@@ -10,8 +10,8 @@
 #include "util/LayoutCreator.hpp"
 #include "util/UrlFetch.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/Split.hpp"
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QCompleter>
 #include <QPainter>

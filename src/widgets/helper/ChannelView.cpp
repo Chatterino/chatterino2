@@ -11,7 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Benchmark.hpp"
 #include "util/DistanceBetweenPoints.hpp"
-#include "widgets/Split.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/UserInfoPopup.hpp"
 

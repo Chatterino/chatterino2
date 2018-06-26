@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/SplitContainer.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 
 namespace chatterino {

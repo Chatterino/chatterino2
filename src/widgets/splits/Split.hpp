@@ -10,8 +10,8 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
-#include "widgets/helper/SplitHeader.hpp"
-#include "widgets/helper/SplitInput.hpp"
+#include "widgets/splits/SplitHeader.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QFont>
 #include <QShortcut>
