@@ -1,7 +1,7 @@
-#include "util/CompletionModel.hpp"
+#include "common/CompletionModel.hpp"
 
 #include "Application.hpp"
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Log.hpp"
 #include "singletons/EmoteManager.hpp"

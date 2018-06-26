@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageElement.hpp"
-#include "NullablePtr.hpp"
-#include "util/SerializeCustom.hpp"
+#include "common/NullablePtr.hpp"
+#include "common/SerializeCustom.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"

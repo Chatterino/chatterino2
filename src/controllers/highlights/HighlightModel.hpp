@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "util/SignalVectorModel.hpp"
+#include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
 namespace controllers {

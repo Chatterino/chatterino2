@@ -1,6 +1,7 @@
 #include "CommandController.hpp"
 
 #include "Application.hpp"
+#include "common/SignalVector2.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
@@ -9,7 +10,6 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/PathManager.hpp"
 #include "singletons/SettingsManager.hpp"
-#include "util/SignalVector2.hpp"
 
 #include <QApplication>
 #include <QFile>

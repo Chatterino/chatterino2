@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "messages/Image.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"

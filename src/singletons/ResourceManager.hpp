@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/Emotemap.hpp"
+#include "common/Emotemap.hpp"
 
 #include <QIcon>
 #include <QRegularExpression>

@@ -2,7 +2,7 @@
 
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
-#include "util/SignalVector2.hpp"
+#include "common/SignalVector2.hpp"
 
 #include <pajlada/settings/setting.hpp>
 

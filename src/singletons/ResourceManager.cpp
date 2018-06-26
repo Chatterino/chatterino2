@@ -1,5 +1,5 @@
 #include "ResourceManager.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 #include <QIcon>
 #include <QPixmap>

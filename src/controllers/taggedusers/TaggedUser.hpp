@@ -1,7 +1,8 @@
 #pragma once
 
+#include "common/ProviderId.hpp"
+
 #include <QString>
-#include <providerid.hpp>
 
 namespace chatterino {
 namespace controllers {

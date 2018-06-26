@@ -3,7 +3,7 @@
 #include "singletons/PathManager.hpp"
 #include "singletons/UpdateManager.hpp"
 #include "util/DebugCount.hpp"
-#include "util/NetworkManager.hpp"
+#include "common/NetworkManager.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QAbstractNativeEventFilter>

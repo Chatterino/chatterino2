@@ -2,9 +2,9 @@
 
 #include "Application.hpp"
 #include "singletons/PathManager.hpp"
-#include "util/NetworkManager.hpp"
-#include "util/NetworkRequester.hpp"
-#include "util/NetworkWorker.hpp"
+#include "common/NetworkManager.hpp"
+#include "common/NetworkRequester.hpp"
+#include "common/NetworkWorker.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

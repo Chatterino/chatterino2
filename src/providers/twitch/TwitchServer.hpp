@@ -1,9 +1,9 @@
 #pragma once
 
+#include "common/MutexValue.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "util/MutexValue.hpp"
 
 #include <chrono>
 #include <memory>

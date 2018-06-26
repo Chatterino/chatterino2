@@ -1,5 +1,5 @@
 //#include "singletons/IrcManager.hpp"
-//#include "Channel.hpp"
+//#include "common/Channel.hpp"
 //#include "debug/Log.hpp"
 //#include "messages/MessageParseArgs.hpp"
 //#include "providers/twitch/TwitchAccount.hpp"
@@ -11,7 +11,7 @@
 //#include "singletons/SettingsManager.hpp"
 //#include "singletons/WindowManager.hpp"
 //#include "util/PostToThread.hpp"
-//#include "util/UrlFetch.hpp"
+//#include "common/UrlFetch.hpp"
 
 //#include <irccommand.h>
 //#include <QJsonArray>

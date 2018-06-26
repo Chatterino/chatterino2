@@ -2,9 +2,9 @@
 
 #include "providers/twitch/Const.hpp"
 #include "debug/Log.hpp"
-#include "util/NetworkRequest.hpp"
+#include "common/NetworkRequest.hpp"
 #include "util/RapidjsonHelpers.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 namespace chatterino {
 namespace providers {

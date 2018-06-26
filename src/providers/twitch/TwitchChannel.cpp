@@ -1,6 +1,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/Pubsub.hpp"
@@ -9,7 +9,7 @@
 #include "singletons/IrcManager.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "util/PostToThread.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 #include <IrcConnection>
 #include <QThread>

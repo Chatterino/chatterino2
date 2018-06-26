@@ -1,4 +1,4 @@
-#include "util/NetworkRequest.hpp"
+#include "common/NetworkRequest.hpp"
 
 #include "Application.hpp"
 

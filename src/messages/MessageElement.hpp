@@ -4,7 +4,7 @@
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/FontManager.hpp"
-#include "util/Emotemap.hpp"
+#include "common/Emotemap.hpp"
 
 #include <QRect>
 #include <QString>

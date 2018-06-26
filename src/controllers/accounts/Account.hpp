@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProviderId.hpp"
+#include "common/ProviderId.hpp"
 
 #include <QString>
 

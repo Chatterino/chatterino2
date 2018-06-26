@@ -5,9 +5,9 @@
 #include "singletons/EmoteManager.hpp"
 #include "singletons/IrcManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/NetworkManager.hpp"
+#include "common/NetworkManager.hpp"
 #include "util/PostToThread.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 #include <QBuffer>
 #include <QImageReader>

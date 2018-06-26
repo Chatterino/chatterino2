@@ -1,19 +1,19 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/IrcManager.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "Version.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
-#include "widgets/helper/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/splits/Split.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/helper/Shortcut.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>

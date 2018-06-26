@@ -3,8 +3,8 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/Credentials.hpp"
 #include "debug/Log.hpp"
-#include "util/NetworkManager.hpp"
-#include "util/NetworkRequest.hpp"
+#include "common/NetworkManager.hpp"
+#include "common/NetworkRequest.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

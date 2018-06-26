@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/SignalVector2.hpp"
+#include "common/SignalVector2.hpp"
 
 #include <QAbstractTableModel>
 #include <QStandardItem>

@@ -6,7 +6,7 @@
 #include "singletons/ResourceManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"

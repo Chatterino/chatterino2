@@ -1,7 +1,7 @@
 #include "widgets/splits/Split.hpp"
 
 #include "Application.hpp"
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -10,7 +10,7 @@
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 #include "widgets/helper/DebugPopup.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"

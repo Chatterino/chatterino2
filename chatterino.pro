@@ -93,8 +93,11 @@ werr {
 
 SOURCES += \
     src/Application.cpp \
-    src/Channel.cpp \
-    src/Common.cpp \
+    src/common/Channel.cpp \
+    src/common/CompletionModel.cpp \
+    src/common/Emotemap.cpp \
+    src/common/NetworkManager.cpp \
+    src/common/NetworkRequest.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -153,11 +156,7 @@ SOURCES += \
     src/singletons/ThemeManager.cpp \
     src/singletons/UpdateManager.cpp \
     src/singletons/WindowManager.cpp \
-    src/util/CompletionModel.cpp \
     src/util/DebugCount.cpp \
-    src/util/Emotemap.cpp \
-    src/util/NetworkManager.cpp \
-    src/util/NetworkRequest.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamLink.cpp \
     src/util/WindowsHelper.cpp \
@@ -222,8 +221,26 @@ SOURCES += \
 
 HEADERS  += \
     src/Application.hpp \
-    src/Channel.hpp \
-    src/Common.hpp \
+    src/common/Channel.hpp \
+    src/common/Common.hpp \
+    src/common/CompletionModel.hpp \
+    src/common/Emotemap.hpp \
+    src/common/FlagsEnum.hpp \
+    src/common/LockedObject.hpp \
+    src/common/MutexValue.hpp \
+    src/common/NetworkManager.hpp \
+    src/common/NetworkRequest.hpp \
+    src/common/NetworkRequester.hpp \
+    src/common/NetworkWorker.hpp \
+    src/common/NullablePtr.hpp \
+    src/common/Property.hpp \
+    src/common/ProviderId.hpp \
+    src/common/SerializeCustom.hpp \
+    src/common/SignalVector.hpp \
+    src/common/SignalVector2.hpp \
+    src/common/SignalVectorModel.hpp \
+    src/common/UrlFetch.hpp \
+    src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -242,7 +259,6 @@ HEADERS  += \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
     src/debug/Log.hpp \
-    src/LockedObject.hpp \
     src/messages/Image.hpp \
     src/messages/layouts/MessageLayout.hpp \
     src/messages/layouts/MessageLayoutContainer.hpp \
@@ -256,9 +272,7 @@ HEADERS  += \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
-    src/NullablePtr.hpp \
     src/PrecompiledHeader.hpp \
-    src/ProviderId.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzEmotes.hpp \
@@ -282,7 +296,6 @@ HEADERS  += \
     src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
-    src/SignalVector.hpp \
     src/singletons/EmoteManager.hpp \
     src/singletons/FontManager.hpp \
     src/singletons/helper/ChatterinoSetting.hpp \
@@ -300,35 +313,21 @@ HEADERS  += \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
     src/util/CombinePath.hpp \
-    src/util/CompletionModel.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
     src/util/DistanceBetweenPoints.hpp \
-    src/util/Emotemap.hpp \
-    src/util/FlagsEnum.hpp \
     src/util/Helpers.hpp \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
-    src/util/MutexValue.hpp \
     src/util/NativeEventHelper.hpp \
-    src/util/NetworkManager.hpp \
-    src/util/NetworkRequest.hpp \
-    src/util/NetworkRequester.hpp \
-    src/util/NetworkWorker.hpp \
     src/util/PostToThread.hpp \
-    src/util/Property.hpp \
     src/util/QstringHash.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
-    src/util/SerializeCustom.hpp \
     src/util/SharedPtrElementLess.hpp \
-    src/util/SignalVector2.hpp \
-    src/util/SignalVectorModel.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
-    src/util/UrlFetch.hpp \
     src/util/WindowsHelper.hpp \
-    src/Version.hpp \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
@@ -390,8 +389,8 @@ HEADERS  += \
     src/widgets/TooltipWidget.hpp \
     src/widgets/Window.hpp
 
-RESOURCES += \
-    resources/resources.qrc
+RESOURCES += \ 
+    resources/resources.qrc \
 
 DISTFILES +=
 

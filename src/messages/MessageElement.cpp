@@ -5,7 +5,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "debug/Benchmark.hpp"
-#include "util/Emotemap.hpp"
+#include "common/Emotemap.hpp"
 
 namespace chatterino {
 namespace messages {

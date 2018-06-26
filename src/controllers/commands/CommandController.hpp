@@ -5,7 +5,7 @@
 #include <mutex>
 
 #include "controllers/commands/Command.hpp"
-#include "util/SignalVector2.hpp"
+#include "common/SignalVector2.hpp"
 
 namespace chatterino {
 class Channel;

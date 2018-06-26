@@ -2,7 +2,7 @@
 
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 namespace chatterino {
 namespace providers {

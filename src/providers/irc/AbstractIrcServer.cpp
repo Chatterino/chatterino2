@@ -1,6 +1,6 @@
 #include "AbstractIrcServer.hpp"
 
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 

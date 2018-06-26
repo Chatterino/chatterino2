@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "util/SignalVectorModel.hpp"
+#include "common/SignalVectorModel.hpp"
 
 namespace chatterino {
 namespace controllers {

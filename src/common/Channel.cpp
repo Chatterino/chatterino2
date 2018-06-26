@@ -1,4 +1,4 @@
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 
 #include "Application.hpp"
 #include "debug/Log.hpp"

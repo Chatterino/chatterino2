@@ -4,7 +4,7 @@
 #include "messages/Image.hpp"
 #include "debug/Benchmark.hpp"
 #include "util/RapidjsonHelpers.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 

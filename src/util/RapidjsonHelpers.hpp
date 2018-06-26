@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/SerializeCustom.hpp"
+#include "common/SerializeCustom.hpp"
 
 #include <rapidjson/document.h>
 #include <pajlada/settings/serialize.hpp>

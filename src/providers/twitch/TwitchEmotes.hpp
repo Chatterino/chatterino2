@@ -4,7 +4,7 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/ConcurrentMap.hpp"
-#include "util/Emotemap.hpp"
+#include "common/Emotemap.hpp"
 
 #include <map>
 

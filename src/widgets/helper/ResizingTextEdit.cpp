@@ -1,6 +1,6 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
-#include "Common.hpp"
-#include "util/CompletionModel.hpp"
+#include "common/Common.hpp"
+#include "common/CompletionModel.hpp"
 
 ResizingTextEdit::ResizingTextEdit()
 {

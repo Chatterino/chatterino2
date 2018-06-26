@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.hpp"
+#include "common/Common.hpp"
 
 #include <QAbstractListModel>
 

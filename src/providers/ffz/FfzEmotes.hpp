@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SignalVector.hpp"
+#include "common/SignalVector.hpp"
 #include "util/ConcurrentMap.hpp"
-#include "util/Emotemap.hpp"
+#include "common/Emotemap.hpp"
 
 #include <map>
 

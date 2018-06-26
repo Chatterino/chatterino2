@@ -1,6 +1,6 @@
 #include "StreamView.hpp"
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/splits/Split.hpp"

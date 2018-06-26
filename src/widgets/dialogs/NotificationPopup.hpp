@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "widgets/BaseWindow.hpp"
 

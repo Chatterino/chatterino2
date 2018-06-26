@@ -3,7 +3,7 @@
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
-#include "util/CompletionModel.hpp"
+#include "common/CompletionModel.hpp"
 #include "util/ConcurrentMap.hpp"
 
 #include <QString>

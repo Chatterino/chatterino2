@@ -5,7 +5,7 @@
 #include "singletons/ResourceManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/UrlFetch.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
 #include "widgets/Label.hpp"

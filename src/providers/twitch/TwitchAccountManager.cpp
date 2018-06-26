@@ -1,6 +1,6 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "providers/twitch/Const.hpp"
 #include "debug/Log.hpp"
 

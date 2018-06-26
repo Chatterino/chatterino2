@@ -4,7 +4,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {

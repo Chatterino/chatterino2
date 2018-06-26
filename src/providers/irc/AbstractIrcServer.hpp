@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 
 #include <IrcMessage>

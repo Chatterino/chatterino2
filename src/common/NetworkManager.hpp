@@ -1,8 +1,8 @@
 #pragma once
 
 #include "debug/Log.hpp"
-#include "util/NetworkRequester.hpp"
-#include "util/NetworkWorker.hpp"
+#include "common/NetworkRequester.hpp"
+#include "common/NetworkWorker.hpp"
 
 #include <QJsonDocument>
 #include <QJsonObject>

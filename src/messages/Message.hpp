@@ -2,7 +2,7 @@
 
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
-#include "util/FlagsEnum.hpp"
+#include "common/FlagsEnum.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>

@@ -1,6 +1,6 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "Application.hpp"
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
 #include "debug/AssertInGuiThread.hpp"

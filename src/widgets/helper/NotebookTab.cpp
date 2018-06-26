@@ -1,7 +1,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 
 #include "Application.hpp"
-#include "Common.hpp"
+#include "common/Common.hpp"
 #include "debug/Log.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"

@@ -1,6 +1,6 @@
 #include "widgets/dialogs/LoginDialog.hpp"
-#include "Common.hpp"
-#include "util/UrlFetch.hpp"
+#include "common/Common.hpp"
+#include "common/UrlFetch.hpp"
 #ifdef USEWINSDK
 #include <Windows.h>
 #endif

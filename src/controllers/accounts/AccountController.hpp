@@ -5,7 +5,7 @@
 #include "controllers/accounts/Account.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "util/SharedPtrElementLess.hpp"
-#include "util/SignalVector2.hpp"
+#include "common/SignalVector2.hpp"
 
 namespace chatterino {
 namespace controllers {

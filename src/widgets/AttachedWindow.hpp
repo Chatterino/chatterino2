@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "Channel.hpp"
+#include "common/Channel.hpp"
 #include "widgets/splits/Split.hpp"
 
 namespace chatterino {
