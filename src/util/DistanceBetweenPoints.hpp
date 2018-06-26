@@ -6,7 +6,7 @@
 
 namespace chatterino {
 
-static float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
+inline float distanceBetweenPoints(const QPointF &p1, const QPointF &p2)
 {
     QPointF tmp = p1 - p2;
 

@@ -2,7 +2,7 @@
 
 #include "common/SignalVectorModel.hpp"
 #include "controllers/accounts/Account.hpp"
-#include "util/QstringHash.hpp"
+#include "util/QStringHash.hpp"
 
 #include <unordered_map>
 

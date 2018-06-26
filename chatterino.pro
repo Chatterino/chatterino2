@@ -317,7 +317,7 @@ HEADERS  += \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
     src/util/PostToThread.hpp \
-    src/util/QstringHash.hpp \
+    src/util/QStringHash.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SharedPtrElementLess.hpp \
