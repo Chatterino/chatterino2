@@ -1,8 +1,8 @@
-#include "messages/layouts/messagelayoutelement.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 
-#include "application.hpp"
-#include "messages/messageelement.hpp"
-#include "util/debugcount.hpp"
+#include "Application.hpp"
+#include "messages/MessageElement.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QDebug>
 #include <QPainter>

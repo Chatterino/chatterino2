@@ -1,10 +1,10 @@
 #pragma once
 
-#include "messages/image.hpp"
-#include "messages/limitedqueue.hpp"
-#include "messages/message.hpp"
-#include "util/completionmodel.hpp"
-#include "util/concurrentmap.hpp"
+#include "messages/Image.hpp"
+#include "messages/LimitedQueue.hpp"
+#include "messages/Message.hpp"
+#include "util/CompletionModel.hpp"
+#include "util/ConcurrentMap.hpp"
 
 #include <QString>
 #include <QTimer>

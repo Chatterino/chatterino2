@@ -6,7 +6,7 @@
 #include <QSpinBox>
 #include <pajlada/signals/signal.hpp>
 
-#include "singletons/settingsmanager.hpp"
+#include "singletons/SettingsManager.hpp"
 
 namespace chatterino {
 namespace widgets {

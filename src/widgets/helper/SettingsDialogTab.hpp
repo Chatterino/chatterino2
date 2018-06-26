@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/basewidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
 #include <QIcon>
 #include <QPaintEvent>

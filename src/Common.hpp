@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debug/log.hpp"
+#include "debug/Log.hpp"
 
 #include <QString>
 #include <QWidget>

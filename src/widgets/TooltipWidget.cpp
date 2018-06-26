@@ -1,8 +1,8 @@
-#include "tooltipwidget.hpp"
+#include "TooltipWidget.hpp"
 
-#include "application.hpp"
-#include "singletons/fontmanager.hpp"
-#include "singletons/thememanager.hpp"
+#include "Application.hpp"
+#include "singletons/FontManager.hpp"
+#include "singletons/ThemeManager.hpp"
 
 #include <QDebug>
 #include <QDesktopWidget>

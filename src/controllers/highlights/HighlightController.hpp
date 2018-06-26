@@ -1,9 +1,9 @@
 #pragma once
 
-#include "controllers/highlights/highlightphrase.hpp"
-#include "messages/message.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/signalvector2.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "messages/Message.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/SignalVector2.hpp"
 
 namespace chatterino {
 namespace controllers {

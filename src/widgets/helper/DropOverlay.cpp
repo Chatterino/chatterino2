@@ -1,4 +1,4 @@
-//#include "dropoverlay.hpp"
+//#include "DropOverlay.hpp"
 
 // namespace chatterino {
 // namespace widgets {

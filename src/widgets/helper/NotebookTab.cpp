@@ -1,15 +1,15 @@
-#include "widgets/helper/notebooktab.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 
-#include "application.hpp"
-#include "common.hpp"
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/thememanager.hpp"
-#include "util/clamp.hpp"
-#include "util/helpers.hpp"
-#include "widgets/notebook.hpp"
-#include "widgets/settingsdialog.hpp"
-#include "widgets/textinputdialog.hpp"
+#include "Application.hpp"
+#include "Common.hpp"
+#include "debug/Log.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "util/Clamp.hpp"
+#include "util/Helpers.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/SettingsDialog.hpp"
+#include "widgets/TextInputDialog.hpp"
 
 #include <QApplication>
 #include <QDebug>

@@ -1,10 +1,10 @@
-#include "emotepopup.hpp"
+#include "EmotePopup.hpp"
 
-#include "application.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
-#include "messages/messagebuilder.hpp"
-#include "providers/twitch/twitchchannel.hpp"
-#include "widgets/notebook.hpp"
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>

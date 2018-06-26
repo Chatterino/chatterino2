@@ -1,8 +1,8 @@
 #pragma once
 
-#include "messages/messagebuilder.hpp"
-#include "messages/messageparseargs.hpp"
-#include "singletons/emotemanager.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "messages/MessageParseArgs.hpp"
+#include "singletons/EmoteManager.hpp"
 
 #include <IrcMessage>
 

@@ -1,15 +1,15 @@
-#include "selectchanneldialog.hpp"
+#include "SelectChannelDialog.hpp"
 
-#include "application.hpp"
-#include "providers/twitch/twitchserver.hpp"
-#include "util/layoutcreator.hpp"
+#include "Application.hpp"
+#include "providers/twitch/TwitchServer.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <QDialogButtonBox>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
-#include <widgets/notebook.hpp>
 
 #define TAB_TWITCH 0
 

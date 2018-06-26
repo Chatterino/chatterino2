@@ -1,6 +1,6 @@
-#include "accountmodel.hpp"
+#include "AccountModel.hpp"
 
-#include "util/standarditemhelper.hpp"
+#include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
 namespace controllers {

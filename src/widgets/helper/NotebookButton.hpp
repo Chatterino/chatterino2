@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rippleeffectbutton.hpp"
+#include "RippleEffectButton.hpp"
 
 #include <QWidget>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "debug/log.hpp"
-#include "providers/twitch/twitchaccount.hpp"
-#include "util/rapidjson-helpers.hpp"
+#include "debug/Log.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>

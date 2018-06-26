@@ -1,4 +1,4 @@
-#include "debugcount.hpp"
+#include "DebugCount.hpp"
 
 namespace chatterino {
 namespace util {

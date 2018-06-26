@@ -1,8 +1,8 @@
 #pragma once
 
-#include "providers/twitch/pubsubactions.hpp"
-#include "providers/twitch/twitchaccount.hpp"
-#include "providers/twitch/twitchserver.hpp"
+#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchServer.hpp"
 
 #include <rapidjson/document.h>
 #include <QString>

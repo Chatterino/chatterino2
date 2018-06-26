@@ -1,10 +1,10 @@
 #pragma once
 
-#include "channel.hpp"
+#include "Channel.hpp"
+#include "providers/irc/IrcConnection2.hpp"
 
 #include <IrcMessage>
 #include <pajlada/signals/signal.hpp>
-#include <providers/irc/ircconnection2.hpp>
 
 #include <functional>
 #include <mutex>

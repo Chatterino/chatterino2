@@ -1,11 +1,11 @@
-#include "searchpopup.hpp"
+#include "SearchPopup.hpp"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-#include "channel.hpp"
-#include "widgets/helper/channelview.hpp"
+#include "Channel.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
 namespace widgets {

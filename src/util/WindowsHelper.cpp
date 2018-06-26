@@ -1,4 +1,4 @@
-#include "windows_helper.hpp"
+#include "WindowsHelper.hpp"
 
 #ifdef USEWINSDK
 

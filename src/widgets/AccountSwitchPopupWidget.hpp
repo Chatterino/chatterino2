@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/accountswitchwidget.hpp"
+#include "widgets/AccountSwitchWidget.hpp"
 
 #include <QWidget>
 

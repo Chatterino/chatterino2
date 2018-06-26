@@ -1,7 +1,7 @@
 #pragma once
 
-#include "controllers/accounts/account.hpp"
-#include "providers/twitch/twitchuser.hpp"
+#include "controllers/accounts/Account.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 
 #include <QColor>
 #include <QString>

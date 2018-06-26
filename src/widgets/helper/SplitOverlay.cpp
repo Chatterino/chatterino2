@@ -1,4 +1,4 @@
-#include "splitoverlay.hpp"
+#include "SplitOverlay.hpp"
 
 #include <QEvent>
 #include <QGraphicsBlurEffect>
@@ -8,10 +8,10 @@
 #include <QPainter>
 #include <QPushButton>
 
-#include "application.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "widgets/split.hpp"
-#include "widgets/splitcontainer.hpp"
+#include "Application.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "widgets/Split.hpp"
+#include "widgets/SplitContainer.hpp"
 
 namespace chatterino {
 namespace widgets {

@@ -1,13 +1,13 @@
-#include "highlightingpage.hpp"
+#include "HighlightingPage.hpp"
 
-#include "application.hpp"
-#include "controllers/highlights/highlightcontroller.hpp"
-#include "controllers/highlights/highlightmodel.hpp"
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/standarditemhelper.hpp"
-#include "widgets/helper/editablemodelview.hpp"
+#include "Application.hpp"
+#include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightModel.hpp"
+#include "debug/Log.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/StandardItemHelper.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "channel.hpp"
-#include "widgets/basewindow.hpp"
-#include "widgets/notebook.hpp"
+#include "Channel.hpp"
+#include "widgets/BaseWindow.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
 

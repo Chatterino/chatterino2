@@ -1,9 +1,9 @@
 #pragma once
 
-#include "controllers/highlights/highlightphrase.hpp"
-#include "messages/messageelement.hpp"
-#include "singletons/helper/chatterinosetting.hpp"
-#include "singletons/helper/moderationaction.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
+#include "messages/MessageElement.hpp"
+#include "singletons/helper/ChatterinoSetting.hpp"
+#include "singletons/helper/ModerationAction.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>

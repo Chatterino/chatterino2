@@ -1,4 +1,4 @@
-#include "ircserver.hpp"
+#include "IrcServer.hpp"
 
 #include <cassert>
 

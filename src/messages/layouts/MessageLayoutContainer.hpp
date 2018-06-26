@@ -6,8 +6,8 @@
 #include <QPoint>
 #include <QRect>
 
-#include "messages/message.hpp"
-#include "messages/selection.hpp"
+#include "messages/Message.hpp"
+#include "messages/Selection.hpp"
 
 class QPainter;
 

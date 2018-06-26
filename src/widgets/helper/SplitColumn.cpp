@@ -1,4 +1,4 @@
-#include "splitcolumn.hpp"
+#include "SplitColumn.hpp"
 
 namespace chatterino {
 namespace helper {

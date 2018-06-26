@@ -1,14 +1,14 @@
-#include "userinfopopup.hpp"
+#include "UserInfoPopup.hpp"
 
-#include "application.hpp"
-#include "providers/twitch/twitchchannel.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/posttothread.hpp"
-#include "util/urlfetch.hpp"
-#include "widgets/helper/line.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
-#include "widgets/label.hpp"
+#include "Application.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
+#include "util/UrlFetch.hpp"
+#include "widgets/helper/Line.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/Label.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>

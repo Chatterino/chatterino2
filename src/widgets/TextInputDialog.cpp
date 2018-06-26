@@ -1,4 +1,4 @@
-#include "widgets/textinputdialog.hpp"
+#include "widgets/TextInputDialog.hpp"
 #include <QSizePolicy>
 
 namespace chatterino {

@@ -1,7 +1,7 @@
-#include "emotemap.hpp"
+#include "Emotemap.hpp"
 
-#include "application.hpp"
-#include "singletons/settingsmanager.hpp"
+#include "Application.hpp"
+#include "singletons/SettingsManager.hpp"
 
 namespace chatterino {
 namespace util {

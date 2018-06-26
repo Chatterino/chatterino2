@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/limitedqueuesnapshot.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
 
 #include <QDebug>
 

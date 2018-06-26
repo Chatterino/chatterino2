@@ -1,7 +1,7 @@
 #pragma once
 
-#include "controllers/taggedusers/taggeduser.hpp"
-#include "util/signalvector2.hpp"
+#include "controllers/taggedusers/TaggedUser.hpp"
+#include "util/SignalVector2.hpp"
 
 namespace chatterino {
 namespace controllers {

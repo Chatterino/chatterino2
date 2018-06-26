@@ -1,6 +1,6 @@
 #pragma once
 
-#include "basewindow.hpp"
+#include "BaseWindow.hpp"
 
 #include <QPushButton>
 #include <QStackedLayout>

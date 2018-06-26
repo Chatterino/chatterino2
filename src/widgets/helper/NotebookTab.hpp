@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/rippleeffectbutton.hpp"
+#include "Common.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/RippleEffectButton.hpp"
 
 #include <QMenu>
 #include <QPropertyAnimation>

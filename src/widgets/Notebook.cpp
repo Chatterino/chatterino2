@@ -1,15 +1,15 @@
-#include "widgets/notebook.hpp"
+#include "widgets/Notebook.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/thememanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "widgets/helper/notebookbutton.hpp"
-#include "widgets/helper/notebooktab.hpp"
-#include "widgets/helper/shortcut.hpp"
-#include "widgets/settingsdialog.hpp"
-#include "widgets/splitcontainer.hpp"
-#include "widgets/window.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "singletons/WindowManager.hpp"
+#include "widgets/helper/NotebookButton.hpp"
+#include "widgets/helper/NotebookTab.hpp"
+#include "widgets/helper/Shortcut.hpp"
+#include "widgets/SettingsDialog.hpp"
+#include "widgets/SplitContainer.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDebug>
 #include <QFile>

@@ -2,10 +2,10 @@
 
 #include <QObject>
 
-#include "controllers/accounts/account.hpp"
-#include "providers/twitch/twitchaccountmanager.hpp"
-#include "util/sharedptrelementless.hpp"
-#include "util/signalvector2.hpp"
+#include "controllers/accounts/Account.hpp"
+#include "providers/twitch/TwitchAccountManager.hpp"
+#include "util/SharedPtrElementLess.hpp"
+#include "util/SignalVector2.hpp"
 
 namespace chatterino {
 namespace controllers {

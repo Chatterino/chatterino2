@@ -2,8 +2,8 @@
 
 #include <QObject>
 
-#include "controllers/commands/command.hpp"
-#include "util/signalvectormodel.hpp"
+#include "controllers/commands/Command.hpp"
+#include "util/SignalVectorModel.hpp"
 
 namespace chatterino {
 namespace controllers {

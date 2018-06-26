@@ -1,7 +1,7 @@
 #pragma once
 
-#include "lockedobject.hpp"
-#include "messages/image.hpp"
+#include "LockedObject.hpp"
+#include "messages/Image.hpp"
 
 namespace chatterino {
 

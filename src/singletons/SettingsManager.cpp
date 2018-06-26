@@ -1,10 +1,10 @@
-#include "singletons/settingsmanager.hpp"
+#include "singletons/SettingsManager.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/windowmanager.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "singletons/WindowManager.hpp"
 
 using namespace chatterino::messages;
 

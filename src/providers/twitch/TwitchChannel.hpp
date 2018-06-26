@@ -2,12 +2,12 @@
 
 #include <IrcConnection>
 
-#include "channel.hpp"
-#include "common.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/ircmanager.hpp"
-#include "util/concurrentmap.hpp"
-#include "util/mutexvalue.hpp"
+#include "Channel.hpp"
+#include "Common.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/IrcManager.hpp"
+#include "util/ConcurrentMap.hpp"
+#include "util/MutexValue.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 

@@ -1,8 +1,8 @@
-#include "providers/emoji/emojis.hpp"
+#include "providers/emoji/Emojis.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/SettingsManager.hpp"
 
 #include <QFile>
 

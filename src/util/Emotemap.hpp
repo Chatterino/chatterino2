@@ -1,7 +1,7 @@
 #pragma once
 
-#include "messages/image.hpp"
-#include "util/concurrentmap.hpp"
+#include "messages/Image.hpp"
+#include "util/ConcurrentMap.hpp"
 
 namespace chatterino {
 namespace util {

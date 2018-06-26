@@ -1,4 +1,4 @@
-#include "singletons/pathmanager.hpp"
+#include "singletons/PathManager.hpp"
 
 #include <QCoreApplication>
 #include <QCryptographicHash>
@@ -6,7 +6,7 @@
 #include <QStandardPaths>
 #include <cassert>
 
-#include "util/combine_path.hpp"
+#include "util/CombinePath.hpp"
 
 namespace chatterino {
 namespace singletons {

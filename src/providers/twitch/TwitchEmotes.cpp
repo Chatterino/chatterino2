@@ -1,10 +1,10 @@
-#include "providers/twitch/twitchemotes.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 
-#include "debug/log.hpp"
-#include "messages/image.hpp"
-#include "util/benchmark.hpp"
-#include "util/rapidjson-helpers.hpp"
-#include "util/urlfetch.hpp"
+#include "debug/Log.hpp"
+#include "messages/Image.hpp"
+#include "util/Benchmark.hpp"
+#include "util/RapidjsonHelpers.hpp"
+#include "util/UrlFetch.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 

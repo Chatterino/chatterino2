@@ -1,9 +1,9 @@
-#include "streamview.hpp"
+#include "StreamView.hpp"
 
-#include "channel.hpp"
-#include "util/helpers.hpp"
-#include "util/layoutcreator.hpp"
-#include "widgets/split.hpp"
+#include "Channel.hpp"
+#include "util/Helpers.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/Split.hpp"
 
 #ifdef USEWEBENGINE
 #include <QtWebEngineWidgets>

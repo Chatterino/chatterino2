@@ -1,4 +1,4 @@
-#include "util/rapidjson-helpers.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 #include <rapidjson/prettywriter.h>
 

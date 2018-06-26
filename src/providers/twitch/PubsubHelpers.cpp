@@ -1,7 +1,7 @@
-#include "providers/twitch/pubsubhelpers.hpp"
+#include "providers/twitch/PubsubHelpers.hpp"
 
-#include "providers/twitch/pubsubactions.hpp"
-#include "util/rapidjson-helpers.hpp"
+#include "providers/twitch/PubsubActions.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 namespace providers {

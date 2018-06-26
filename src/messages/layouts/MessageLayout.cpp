@@ -1,10 +1,10 @@
-#include "messages/layouts/messagelayout.hpp"
+#include "messages/layouts/MessageLayout.hpp"
 
-#include "application.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/benchmark.hpp"
+#include "Application.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/Benchmark.hpp"
 
 #include <QApplication>
 #include <QDebug>

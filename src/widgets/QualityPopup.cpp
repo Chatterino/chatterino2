@@ -1,6 +1,6 @@
-#include "qualitypopup.hpp"
-#include "debug/log.hpp"
-#include "util/streamlink.hpp"
+#include "QualityPopup.hpp"
+#include "debug/Log.hpp"
+#include "util/StreamLink.hpp"
 
 namespace chatterino {
 namespace widgets {

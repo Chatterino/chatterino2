@@ -1,9 +1,9 @@
-#include "messagelayoutcontainer.hpp"
+#include "MessageLayoutContainer.hpp"
 
-#include "application.hpp"
-#include "messagelayoutelement.hpp"
-#include "messages/selection.hpp"
-#include "singletons/settingsmanager.hpp"
+#include "Application.hpp"
+#include "MessageLayoutElement.hpp"
+#include "messages/Selection.hpp"
+#include "singletons/SettingsManager.hpp"
 
 #include <QDebug>
 #include <QPainter>

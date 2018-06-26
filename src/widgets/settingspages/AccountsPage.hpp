@@ -1,7 +1,7 @@
 #pragma once
 
-#include "widgets/accountswitchwidget.hpp"
-#include "widgets/settingspages/settingspage.hpp"
+#include "widgets/AccountSwitchWidget.hpp"
+#include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QPushButton>
 

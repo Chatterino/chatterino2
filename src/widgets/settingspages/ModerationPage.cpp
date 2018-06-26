@@ -1,12 +1,12 @@
-#include "moderationpage.hpp"
+#include "ModerationPage.hpp"
 
-#include "application.hpp"
-#include "controllers/taggedusers/taggeduserscontroller.hpp"
-#include "controllers/taggedusers/taggedusersmodel.hpp"
-#include "singletons/loggingmanager.hpp"
-#include "singletons/pathmanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "widgets/helper/editablemodelview.hpp"
+#include "Application.hpp"
+#include "controllers/taggedusers/TaggedUsersController.hpp"
+#include "controllers/taggedusers/TaggedUsersModel.hpp"
+#include "singletons/LoggingManager.hpp"
+#include "singletons/PathManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>

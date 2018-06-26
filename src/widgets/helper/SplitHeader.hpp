@@ -1,8 +1,8 @@
 #pragma once
 
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
-#include "widgets/helper/signallabel.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/SignalLabel.hpp"
 
 #include <QAction>
 #include <QHBoxLayout>

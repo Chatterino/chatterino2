@@ -1,6 +1,6 @@
-#include "moderationaction.hpp"
+#include "ModerationAction.hpp"
 
-#include "singletons/resourcemanager.hpp"
+#include "singletons/ResourceManager.hpp"
 
 namespace chatterino {
 namespace singletons {

@@ -1,9 +1,9 @@
-#include "util/streamlink.hpp"
+#include "util/StreamLink.hpp"
 
-#include "application.hpp"
-#include "helpers.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "widgets/qualitypopup.hpp"
+#include "Application.hpp"
+#include "Helpers.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "widgets/QualityPopup.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>

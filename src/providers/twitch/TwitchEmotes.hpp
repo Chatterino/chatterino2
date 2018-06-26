@@ -1,10 +1,10 @@
 #pragma once
 
-#include "providers/twitch/emotevalue.hpp"
-#include "providers/twitch/twitchaccount.hpp"
-#include "providers/twitch/twitchemotes.hpp"
-#include "util/concurrentmap.hpp"
-#include "util/emotemap.hpp"
+#include "providers/twitch/EmoteValue.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
+#include "util/ConcurrentMap.hpp"
+#include "util/Emotemap.hpp"
 
 #include <map>
 

@@ -4,7 +4,7 @@
 #include <QPushButton>
 
 #include "pajlada/signals/signalholder.hpp"
-#include "widgets/basewidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
 namespace chatterino {
 namespace widgets {

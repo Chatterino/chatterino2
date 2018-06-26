@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/rapidjson-helpers.hpp"
-#include "util/serialize-custom.hpp"
+#include "util/RapidjsonHelpers.hpp"
+#include "util/SerializeCustom.hpp"
 
 #include <QRegularExpression>
 #include <QString>

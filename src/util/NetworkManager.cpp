@@ -1,4 +1,4 @@
-#include "util/networkmanager.hpp"
+#include "util/NetworkManager.hpp"
 
 #include <QNetworkAccessManager>
 

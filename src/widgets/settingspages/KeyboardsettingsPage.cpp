@@ -1,6 +1,6 @@
-#include "keyboardsettingspage.hpp"
+#include "KeyboardsettingsPage.hpp"
 
-#include "util/layoutcreator.hpp"
+#include "util/LayoutCreator.hpp"
 
 #include <QFormLayout>
 #include <QLabel>

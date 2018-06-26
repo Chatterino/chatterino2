@@ -1,8 +1,8 @@
 #pragma once
 
-#include "signalvector.hpp"
-#include "util/concurrentmap.hpp"
-#include "util/emotemap.hpp"
+#include "SignalVector.hpp"
+#include "util/ConcurrentMap.hpp"
+#include "util/Emotemap.hpp"
 
 #include <QMap>
 #include <QRegularExpression>

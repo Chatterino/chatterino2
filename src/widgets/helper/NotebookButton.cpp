@@ -1,8 +1,8 @@
-#include "widgets/helper/notebookbutton.hpp"
-#include "singletons/thememanager.hpp"
-#include "widgets/helper/rippleeffectbutton.hpp"
-#include "widgets/notebook.hpp"
-#include "widgets/splitcontainer.hpp"
+#include "widgets/helper/NotebookButton.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/SplitContainer.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

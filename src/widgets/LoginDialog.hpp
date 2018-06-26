@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/basewidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>

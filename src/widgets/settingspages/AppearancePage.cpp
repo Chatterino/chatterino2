@@ -1,9 +1,9 @@
-#include "appearancepage.hpp"
+#include "AppearancePage.hpp"
 
-#include "application.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/removescrollareabackground.hpp"
+#include "Application.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/RemoveScrollAreaBackground.hpp"
 
 #include <QFontDialog>
 #include <QFormLayout>

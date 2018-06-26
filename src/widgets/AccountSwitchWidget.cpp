@@ -1,8 +1,8 @@
-#include "accountswitchwidget.hpp"
+#include "AccountSwitchWidget.hpp"
 
-#include "application.hpp"
-#include "const.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
+#include "Application.hpp"
+#include "Const.hpp"
+#include "controllers/accounts/AccountController.hpp"
 
 namespace chatterino {
 namespace widgets {

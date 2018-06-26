@@ -1,8 +1,8 @@
-#include "abstractircserver.hpp"
+#include "AbstractIrcServer.hpp"
 
-#include "common.hpp"
-#include "messages/limitedqueuesnapshot.hpp"
-#include "messages/message.hpp"
+#include "Common.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/Message.hpp"
 
 #include <QCoreApplication>
 

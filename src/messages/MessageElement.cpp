@@ -1,11 +1,11 @@
-#include "messages/messageelement.hpp"
+#include "messages/MessageElement.hpp"
 
-#include "application.hpp"
-#include "messages/layouts/messagelayoutcontainer.hpp"
-#include "messages/layouts/messagelayoutelement.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/benchmark.hpp"
-#include "util/emotemap.hpp"
+#include "Application.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/Benchmark.hpp"
+#include "util/Emotemap.hpp"
 
 namespace chatterino {
 namespace messages {

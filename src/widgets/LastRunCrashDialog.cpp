@@ -1,13 +1,13 @@
-#include "lastruncrashdialog.hpp"
+#include "LastRunCrashDialog.hpp"
 
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "singletons/updatemanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/posttothread.hpp"
+#include "singletons/UpdateManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/PostToThread.hpp"
 
 namespace chatterino {
 namespace widgets {

@@ -1,8 +1,8 @@
-#include "providers/bttv/bttvemotes.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
 
-#include "debug/log.hpp"
-#include "messages/image.hpp"
-#include "util/urlfetch.hpp"
+#include "debug/Log.hpp"
+#include "messages/Image.hpp"
+#include "util/UrlFetch.hpp"
 
 namespace chatterino {
 namespace providers {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "channel.hpp"
-#include "messages/message.hpp"
-#include "widgets/basewindow.hpp"
+#include "Channel.hpp"
+#include "messages/Message.hpp"
+#include "widgets/BaseWindow.hpp"
 
 namespace chatterino {
 namespace widgets {

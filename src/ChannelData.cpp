@@ -1,4 +1,4 @@
-#include "channeldata.hpp"
+#include "ChannelData.hpp"
 
 namespace chatterino {
 

@@ -1,4 +1,4 @@
-#include "commandpage.hpp"
+#include "CommandPage.hpp"
 
 #include <QHeaderView>
 #include <QLabel>
@@ -7,13 +7,13 @@
 #include <QTableView>
 #include <QTextEdit>
 
-#include "application.hpp"
-#include "controllers/commands/commandcontroller.hpp"
-#include "controllers/commands/commandmodel.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/standarditemhelper.hpp"
-#include "widgets/helper/editablemodelview.hpp"
-//#include "widgets/helper/comboboxitemdelegate.hpp"
+#include "Application.hpp"
+#include "controllers/commands/CommandController.hpp"
+#include "controllers/commands/CommandModel.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/StandardItemHelper.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+//#include "widgets/helper/ComboBoxItemDelegate.hpp"
 
 #include <QLabel>
 #include <QTextEdit>

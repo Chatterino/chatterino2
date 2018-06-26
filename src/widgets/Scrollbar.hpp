@@ -1,9 +1,9 @@
 #pragma once
 
-#include "messages/limitedqueue.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/scrollbarhighlight.hpp"
+#include "messages/LimitedQueue.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QMutex>
 #include <QPropertyAnimation>

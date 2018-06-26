@@ -1,10 +1,10 @@
 #pragma once
 
 #include "pajlada/signals/signal.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/notebookbutton.hpp"
-#include "widgets/helper/notebooktab.hpp"
-#include "widgets/splitcontainer.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/NotebookButton.hpp"
+#include "widgets/helper/NotebookTab.hpp"
+#include "widgets/SplitContainer.hpp"
 
 #include <QList>
 #include <QMessageBox>

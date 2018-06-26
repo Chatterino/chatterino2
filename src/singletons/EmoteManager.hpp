@@ -2,11 +2,11 @@
 
 #define GIF_FRAME_LENGTH 33
 
-#include "providers/bttv/bttvemotes.hpp"
-#include "providers/emoji/emojis.hpp"
-#include "providers/ffz/ffzemotes.hpp"
-#include "providers/twitch/twitchemotes.hpp"
-#include "singletons/helper/giftimer.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/emoji/Emojis.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
+#include "singletons/helper/GifTimer.hpp"
 
 namespace chatterino {
 namespace singletons {

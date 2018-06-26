@@ -1,12 +1,12 @@
-//#include "logspage.hpp"
+//#include "LogsPage.hpp"
 
-//#include "application.hpp"
-//#include "singletons/pathmanager.hpp"
+//#include "Application.hpp"
+//#include "singletons/PathManager.hpp"
 
 //#include <QFormLayout>
 //#include <QVBoxLayout>
 
-//#include "util/layoutcreator.hpp"
+//#include "util/LayoutCreator.hpp"
 
 // namespace chatterino {
 // namespace widgets {

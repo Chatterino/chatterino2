@@ -1,7 +1,7 @@
 #pragma once
 
-#include "basewidget.hpp"
-#include "widgets/helper/titlebarbutton.hpp"
+#include "BaseWidget.hpp"
+#include "widgets/helper/TitlebarButton.hpp"
 
 #include <functional>
 #include <pajlada/signals/signalholder.hpp>

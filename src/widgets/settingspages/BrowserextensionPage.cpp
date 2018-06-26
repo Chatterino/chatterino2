@@ -1,6 +1,6 @@
-#include "browserextensionpage.hpp"
+#include "BrowserextensionPage.hpp"
 
-#include "util/layoutcreator.hpp"
+#include "util/LayoutCreator.hpp"
 
 #include <QLabel>
 

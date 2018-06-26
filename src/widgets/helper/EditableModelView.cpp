@@ -1,4 +1,4 @@
-#include "editablemodelview.hpp"
+#include "EditableModelView.hpp"
 
 #include <QAbstractTableModel>
 #include <QHBoxLayout>

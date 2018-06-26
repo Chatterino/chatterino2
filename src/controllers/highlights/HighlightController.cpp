@@ -1,8 +1,8 @@
-#include "highlightcontroller.hpp"
+#include "HighlightController.hpp"
 
-#include "application.hpp"
-#include "controllers/highlights/highlightmodel.hpp"
-#include "widgets/notificationpopup.hpp"
+#include "Application.hpp"
+#include "controllers/highlights/HighlightModel.hpp"
+#include "widgets/NotificationPopup.hpp"
 
 namespace chatterino {
 namespace controllers {

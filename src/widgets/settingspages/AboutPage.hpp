@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/settingspages/settingspage.hpp"
+#include "widgets/settingspages/SettingsPage.hpp"
 
 class QLabel;
 class QFormLayout;

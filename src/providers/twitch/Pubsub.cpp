@@ -1,9 +1,9 @@
-#include "providers/twitch/pubsub.hpp"
+#include "providers/twitch/Pubsub.hpp"
 
-#include "debug/log.hpp"
-#include "providers/twitch/pubsubactions.hpp"
-#include "providers/twitch/pubsubhelpers.hpp"
-#include "util/rapidjson-helpers.hpp"
+#include "debug/Log.hpp"
+#include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/PubsubHelpers.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 #include <rapidjson/error/en.h>
 

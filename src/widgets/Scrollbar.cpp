@@ -1,8 +1,8 @@
-#include "widgets/scrollbar.hpp"
+#include "widgets/Scrollbar.hpp"
 
-#include "application.hpp"
-#include "singletons/thememanager.hpp"
-#include "widgets/helper/channelview.hpp"
+#include "Application.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>

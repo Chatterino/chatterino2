@@ -1,10 +1,10 @@
 #pragma once
 
-#include "application.hpp"
-#include "singletons/pathmanager.hpp"
-#include "util/networkmanager.hpp"
-#include "util/networkrequester.hpp"
-#include "util/networkworker.hpp"
+#include "Application.hpp"
+#include "singletons/PathManager.hpp"
+#include "util/NetworkManager.hpp"
+#include "util/NetworkRequester.hpp"
+#include "util/NetworkWorker.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

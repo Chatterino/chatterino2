@@ -1,12 +1,12 @@
-#include "accountspage.hpp"
+#include "AccountsPage.hpp"
 
-#include "application.hpp"
-#include "const.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
-#include "controllers/accounts/accountmodel.hpp"
-#include "util/layoutcreator.hpp"
-#include "widgets/helper/editablemodelview.hpp"
-#include "widgets/logindialog.hpp"
+#include "Application.hpp"
+#include "Const.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/accounts/AccountModel.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+#include "widgets/LoginDialog.hpp"
 
 #include <QDialogButtonBox>
 #include <QHeaderView>

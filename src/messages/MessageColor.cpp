@@ -1,4 +1,4 @@
-#include "messagecolor.hpp"
+#include "MessageColor.hpp"
 
 namespace chatterino {
 namespace messages {

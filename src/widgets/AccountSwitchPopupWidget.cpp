@@ -1,6 +1,6 @@
-#include "widgets/accountswitchpopupwidget.hpp"
-#include "debug/log.hpp"
-#include "widgets/settingsdialog.hpp"
+#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "debug/Log.hpp"
+#include "widgets/SettingsDialog.hpp"
 
 #include <QHBoxLayout>
 #include <QLayout>

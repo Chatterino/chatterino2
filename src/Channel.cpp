@@ -1,12 +1,12 @@
-#include "channel.hpp"
+#include "Channel.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "messages/message.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/ircmanager.hpp"
-#include "singletons/loggingmanager.hpp"
-#include "singletons/windowmanager.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "messages/Message.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/IrcManager.hpp"
+#include "singletons/LoggingManager.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>

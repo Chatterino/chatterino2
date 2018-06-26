@@ -1,15 +1,15 @@
-#include "commandcontroller.hpp"
+#include "CommandController.hpp"
 
-#include "application.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
-#include "controllers/commands/command.hpp"
-#include "controllers/commands/commandmodel.hpp"
-#include "messages/messagebuilder.hpp"
-#include "providers/twitch/twitchchannel.hpp"
-#include "providers/twitch/twitchserver.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/signalvector2.hpp"
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/Command.hpp"
+#include "controllers/commands/CommandModel.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchServer.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/SignalVector2.hpp"
 
 #include <QApplication>
 #include <QFile>

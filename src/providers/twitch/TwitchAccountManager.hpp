@@ -1,8 +1,8 @@
 #pragma once
 
-#include "providers/twitch/twitchaccount.hpp"
-#include "util/sharedptrelementless.hpp"
-#include "util/signalvector2.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "util/SharedPtrElementLess.hpp"
+#include "util/SignalVector2.hpp"
 
 #include <pajlada/settings/setting.hpp>
 

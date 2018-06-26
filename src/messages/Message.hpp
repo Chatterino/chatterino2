@@ -1,9 +1,9 @@
 #pragma once
 
-#include "messages/messageelement.hpp"
-#include "providers/twitch/pubsubactions.hpp"
-#include "util/flagsenum.hpp"
-#include "widgets/helper/scrollbarhighlight.hpp"
+#include "messages/MessageElement.hpp"
+#include "providers/twitch/PubsubActions.hpp"
+#include "util/FlagsEnum.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
 
@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-#include "util/debugcount.hpp"
+#include "util/DebugCount.hpp"
 
 namespace chatterino {
 namespace messages {

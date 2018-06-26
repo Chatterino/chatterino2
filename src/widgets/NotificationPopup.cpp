@@ -1,6 +1,6 @@
-#include "notificationpopup.hpp"
+#include "NotificationPopup.hpp"
 
-#include "widgets/helper/channelview.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QApplication>
 #include <QDesktopWidget>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "resizingtextedit.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/emotepopup.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
+#include "ResizingTextEdit.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/EmotePopup.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

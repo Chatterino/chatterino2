@@ -1,9 +1,9 @@
 #pragma once
 
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/droppreview.hpp"
-#include "widgets/helper/notebooktab.hpp"
-#include "widgets/split.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/DropPreview.hpp"
+#include "widgets/helper/NotebookTab.hpp"
+#include "widgets/Split.hpp"
 
 #include <QDragEnterEvent>
 #include <QHBoxLayout>

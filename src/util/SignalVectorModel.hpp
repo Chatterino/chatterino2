@@ -1,9 +1,10 @@
 #pragma once
 
+#include "util/SignalVector2.hpp"
+
 #include <QAbstractTableModel>
 #include <QStandardItem>
 #include <boost/optional.hpp>
-#include <util/signalvector2.hpp>
 
 #include <pajlada/signals/signalholder.hpp>
 

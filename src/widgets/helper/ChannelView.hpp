@@ -1,14 +1,14 @@
 #pragma once
 
-#include "channel.hpp"
-#include "messages/image.hpp"
-#include "messages/layouts/messagelayout.hpp"
-#include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageelement.hpp"
-#include "messages/selection.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
-#include "widgets/scrollbar.hpp"
+#include "Channel.hpp"
+#include "messages/Image.hpp"
+#include "messages/layouts/MessageLayout.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/MessageElement.hpp"
+#include "messages/Selection.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/Scrollbar.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>

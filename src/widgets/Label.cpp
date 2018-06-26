@@ -1,6 +1,6 @@
-#include "label.hpp"
+#include "Label.hpp"
 
-#include "application.hpp"
+#include "Application.hpp"
 
 #include <QPainter>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "messages/message.hpp"
-#include "singletons/helper/loggingchannel.hpp"
+#include "messages/Message.hpp"
+#include "singletons/helper/LoggingChannel.hpp"
 
 #include <memory>
 

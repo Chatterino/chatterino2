@@ -1,13 +1,13 @@
-#include "messages/image.hpp"
+#include "messages/Image.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/ircmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/networkmanager.hpp"
-#include "util/posttothread.hpp"
-#include "util/urlfetch.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/IrcManager.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/NetworkManager.hpp"
+#include "util/PostToThread.hpp"
+#include "util/UrlFetch.hpp"
 
 #include <QBuffer>
 #include <QImageReader>

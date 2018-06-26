@@ -1,7 +1,7 @@
-#include "messagebuilder.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/thememanager.hpp"
+#include "MessageBuilder.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "singletons/ThemeManager.hpp"
 
 #include <QDateTime>
 

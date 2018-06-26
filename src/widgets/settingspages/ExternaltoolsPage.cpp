@@ -1,7 +1,7 @@
-#include "externaltoolspage.hpp"
+#include "ExternaltoolsPage.hpp"
 
-#include "application.hpp"
-#include "util/layoutcreator.hpp"
+#include "Application.hpp"
+#include "util/LayoutCreator.hpp"
 
 #include <QGroupBox>
 

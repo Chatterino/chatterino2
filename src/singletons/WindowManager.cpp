@@ -1,15 +1,15 @@
-#include "windowmanager.hpp"
+#include "WindowManager.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "providers/twitch/twitchserver.hpp"
-#include "singletons/fontmanager.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/thememanager.hpp"
-#include "util/assertinguithread.hpp"
-#include "util/clamp.hpp"
-#include "widgets/accountswitchpopupwidget.hpp"
-#include "widgets/settingsdialog.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "providers/twitch/TwitchServer.hpp"
+#include "singletons/FontManager.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "util/AssertInGuiThread.hpp"
+#include "util/Clamp.hpp"
+#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/SettingsDialog.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>

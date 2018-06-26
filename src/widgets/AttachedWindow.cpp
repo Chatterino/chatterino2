@@ -1,14 +1,14 @@
-#include "attachedwindow.hpp"
+#include "AttachedWindow.hpp"
 
-#include "application.hpp"
-#include "util/debugcount.hpp"
-#include "widgets/split.hpp"
+#include "Application.hpp"
+#include "util/DebugCount.hpp"
+#include "widgets/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
 
 #ifdef USEWINSDK
-#include "util/windows_helper.hpp"
+#include "util/WindowsHelper.hpp"
 
 #include "Windows.h"
 // don't even think about reordering these

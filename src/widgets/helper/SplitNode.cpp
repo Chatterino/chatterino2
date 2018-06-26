@@ -1,4 +1,4 @@
-#include "splitnode.hpp"
+#include "SplitNode.hpp"
 
 SplitNode::SplitNode()
 {

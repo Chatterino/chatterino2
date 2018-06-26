@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/serialize-custom.hpp"
+#include "util/SerializeCustom.hpp"
 
 #include <QBrush>
 #include <QColor>

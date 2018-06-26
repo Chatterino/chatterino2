@@ -1,6 +1,6 @@
-#include "taggeduserscontroller.hpp"
+#include "TaggedUsersController.hpp"
 
-#include "controllers/taggedusers/taggedusersmodel.hpp"
+#include "controllers/taggedusers/TaggedUsersModel.hpp"
 
 namespace chatterino {
 namespace controllers {

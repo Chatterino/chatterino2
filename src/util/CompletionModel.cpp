@@ -1,10 +1,10 @@
-#include "util/completionmodel.hpp"
+#include "util/CompletionModel.hpp"
 
-#include "application.hpp"
-#include "common.hpp"
-#include "controllers/commands/commandcontroller.hpp"
-#include "debug/log.hpp"
-#include "singletons/emotemanager.hpp"
+#include "Application.hpp"
+#include "Common.hpp"
+#include "controllers/commands/CommandController.hpp"
+#include "debug/Log.hpp"
+#include "singletons/EmoteManager.hpp"
 
 #include <QtAlgorithms>
 

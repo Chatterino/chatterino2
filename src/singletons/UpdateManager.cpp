@@ -1,9 +1,9 @@
-#include "updatemanager.hpp"
+#include "UpdateManager.hpp"
 
-#include "util/combine_path.hpp"
-#include "util/networkrequest.hpp"
-#include "util/posttothread.hpp"
-#include "version.hpp"
+#include "util/CombinePath.hpp"
+#include "util/NetworkRequest.hpp"
+#include "util/PostToThread.hpp"
+#include "Version.hpp"
 
 #include <QMessageBox>
 #include <QProcess>

@@ -1,4 +1,4 @@
-#include "ircchannel2.hpp"
+#include "IrcChannel2.hpp"
 
 namespace chatterino {
 namespace providers {

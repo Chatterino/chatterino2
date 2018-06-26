@@ -1,15 +1,15 @@
-#include "providers/twitch/twitchchannel.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
-#include "common.hpp"
-#include "debug/log.hpp"
-#include "messages/message.hpp"
-#include "providers/twitch/pubsub.hpp"
-#include "providers/twitch/twitchmessagebuilder.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/ircmanager.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/posttothread.hpp"
-#include "util/urlfetch.hpp"
+#include "Common.hpp"
+#include "debug/Log.hpp"
+#include "messages/Message.hpp"
+#include "providers/twitch/Pubsub.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/IrcManager.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/PostToThread.hpp"
+#include "util/UrlFetch.hpp"
 
 #include <IrcConnection>
 #include <QThread>

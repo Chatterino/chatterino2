@@ -2,7 +2,7 @@
 
 #include <QTimer>
 
-#include "widgets/settingspages/settingspage.hpp"
+#include "widgets/settingspages/SettingsPage.hpp"
 
 class QPushButton;
 

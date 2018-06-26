@@ -2,7 +2,7 @@
 
 #include <boost/optional.hpp>
 
-#include "widgets/basewidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
 #include <QMouseEvent>
 #include <QPainter>

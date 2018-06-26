@@ -1,8 +1,8 @@
-#include "providers/twitch/twitchaccountmanager.hpp"
+#include "providers/twitch/TwitchAccountManager.hpp"
 
-#include "common.hpp"
-#include "const.hpp"
-#include "debug/log.hpp"
+#include "Common.hpp"
+#include "Const.hpp"
+#include "debug/Log.hpp"
 
 namespace chatterino {
 namespace providers {

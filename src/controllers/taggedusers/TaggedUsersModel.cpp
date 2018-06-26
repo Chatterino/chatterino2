@@ -1,7 +1,7 @@
-#include "taggedusersmodel.hpp"
+#include "TaggedUsersModel.hpp"
 
-#include "application.hpp"
-#include "util/standarditemhelper.hpp"
+#include "Application.hpp"
+#include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
 namespace controllers {

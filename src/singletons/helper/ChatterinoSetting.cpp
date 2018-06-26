@@ -1,6 +1,6 @@
-#include "singletons/helper/chatterinosetting.hpp"
+#include "singletons/helper/ChatterinoSetting.hpp"
 
-#include "singletons/settingsmanager.hpp"
+#include "singletons/SettingsManager.hpp"
 
 namespace chatterino {
 namespace singletons {

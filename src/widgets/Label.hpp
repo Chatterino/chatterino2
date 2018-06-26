@@ -1,7 +1,7 @@
 #pragma once
 
-#include "singletons/fontmanager.hpp"
-#include "widgets/basewidget.hpp"
+#include "singletons/FontManager.hpp"
+#include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 

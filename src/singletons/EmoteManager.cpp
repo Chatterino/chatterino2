@@ -1,7 +1,7 @@
-#include "singletons/emotemanager.hpp"
+#include "singletons/EmoteManager.hpp"
 
-#include "application.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
 
 namespace chatterino {
 namespace singletons {

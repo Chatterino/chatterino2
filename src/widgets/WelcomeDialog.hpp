@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/basewindow.hpp"
+#include "widgets/BaseWindow.hpp"
 
 namespace chatterino {
 namespace widgets {

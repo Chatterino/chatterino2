@@ -1,10 +1,10 @@
-#include "widgets/basewidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/thememanager.hpp"
-#include "widgets/basewindow.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>
 #include <QDebug>

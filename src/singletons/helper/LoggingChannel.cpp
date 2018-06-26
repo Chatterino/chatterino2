@@ -1,9 +1,9 @@
-#include "loggingchannel.hpp"
+#include "LoggingChannel.hpp"
 
-#include "application.hpp"
-#include "debug/log.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/settingsmanager.hpp"
+#include "Application.hpp"
+#include "debug/Log.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/SettingsManager.hpp"
 
 #include <QDir>
 

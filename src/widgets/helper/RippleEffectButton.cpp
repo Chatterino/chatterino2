@@ -1,9 +1,9 @@
-#include "rippleeffectbutton.hpp"
+#include "RippleEffectButton.hpp"
 
 #include <QDebug>
 #include <QPainter>
 
-#include "singletons/thememanager.hpp"
+#include "singletons/ThemeManager.hpp"
 
 namespace chatterino {
 namespace widgets {

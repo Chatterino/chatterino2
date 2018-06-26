@@ -1,6 +1,6 @@
-#include "widgets/helper/scrollbarhighlight.hpp"
-#include "singletons/thememanager.hpp"
-#include "widgets/scrollbar.hpp"
+#include "widgets/helper/ScrollbarHighlight.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "widgets/Scrollbar.hpp"
 
 namespace chatterino {
 namespace widgets {

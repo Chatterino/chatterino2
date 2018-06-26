@@ -1,4 +1,4 @@
-#include "widgets/helper/signallabel.hpp"
+#include "widgets/helper/SignalLabel.hpp"
 
 SignalLabel::SignalLabel(QWidget *parent, Qt::WindowFlags f)
     : QLabel(parent, f)

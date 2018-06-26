@@ -1,13 +1,13 @@
-#include "twitchserver.hpp"
+#include "TwitchServer.hpp"
 
-#include "application.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
-#include "controllers/highlights/highlightcontroller.hpp"
-#include "providers/twitch/ircmessagehandler.hpp"
-#include "providers/twitch/twitchaccount.hpp"
-#include "providers/twitch/twitchhelpers.hpp"
-#include "providers/twitch/twitchmessagebuilder.hpp"
-#include "util/posttothread.hpp"
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchHelpers.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "util/PostToThread.hpp"
 
 #include <IrcCommand>
 

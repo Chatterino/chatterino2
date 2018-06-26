@@ -1,16 +1,16 @@
-#include "widgets/helper/splitheader.hpp"
+#include "widgets/helper/SplitHeader.hpp"
 
-#include "application.hpp"
-#include "providers/twitch/twitchchannel.hpp"
-#include "providers/twitch/twitchserver.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/thememanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "util/urlfetch.hpp"
-#include "widgets/label.hpp"
-#include "widgets/split.hpp"
-#include "widgets/splitcontainer.hpp"
-#include "widgets/tooltipwidget.hpp"
+#include "Application.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchServer.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "singletons/ThemeManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/UrlFetch.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/Split.hpp"
+#include "widgets/SplitContainer.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <QByteArray>
 #include <QDrag>
@@ -19,7 +19,7 @@
 #include <QPainter>
 
 #ifdef USEWEBENGINE
-#include "widgets/streamview.hpp"
+#include "widgets/StreamView.hpp"
 #endif
 
 using namespace chatterino::providers::twitch;

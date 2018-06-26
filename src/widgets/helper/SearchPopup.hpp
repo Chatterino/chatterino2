@@ -1,8 +1,8 @@
 #pragma once
 
-#include "messages/limitedqueuesnapshot.hpp"
-#include "messages/message.hpp"
-#include "widgets/basewindow.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/Message.hpp"
+#include "widgets/BaseWindow.hpp"
 
 #include <memory>
 

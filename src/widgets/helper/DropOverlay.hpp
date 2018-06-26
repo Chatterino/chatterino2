@@ -1,6 +1,6 @@
 //#pragma once
 
-//#include "widgets/helper/splitnode.hpp"
+//#include "widgets/helper/SplitNode.hpp"
 
 // namespace chatterino {
 // namespace widgets {

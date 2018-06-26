@@ -1,17 +1,17 @@
-#include "basewindow.hpp"
+#include "BaseWindow.hpp"
 
-#include "application.hpp"
+#include "Application.hpp"
 #include "boost/algorithm/algorithm.hpp"
-#include "debug/log.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/windowmanager.hpp"
-#include "util/nativeeventhelper.hpp"
-#include "util/posttothread.hpp"
-#include "util/windows_helper.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
-#include "widgets/helper/shortcut.hpp"
-#include "widgets/label.hpp"
-#include "widgets/tooltipwidget.hpp"
+#include "debug/Log.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/NativeEventHelper.hpp"
+#include "util/PostToThread.hpp"
+#include "util/WindowsHelper.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/Shortcut.hpp"
+#include "widgets/Label.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -36,7 +36,7 @@
 #define WM_DPICHANGED 0x02E0
 #endif
 
-#include "widgets/helper/titlebarbutton.hpp"
+#include "widgets/helper/TitlebarButton.hpp"
 
 namespace chatterino {
 namespace widgets {

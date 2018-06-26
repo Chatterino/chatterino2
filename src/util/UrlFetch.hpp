@@ -1,10 +1,10 @@
 #pragma once
 
-#include "controllers/accounts/accountcontroller.hpp"
-#include "credentials.hpp"
-#include "debug/log.hpp"
-#include "util/networkmanager.hpp"
-#include "util/networkrequest.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "Credentials.hpp"
+#include "debug/Log.hpp"
+#include "util/NetworkManager.hpp"
+#include "util/NetworkRequest.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

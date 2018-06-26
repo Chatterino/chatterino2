@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/helper/rippleeffectbutton.hpp"
+#include "widgets/helper/RippleEffectButton.hpp"
 
 namespace chatterino {
 namespace widgets {

@@ -1,4 +1,4 @@
-#include "settingspage.hpp"
+#include "SettingsPage.hpp"
 
 #include <QDebug>
 

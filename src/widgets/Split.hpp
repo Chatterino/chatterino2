@@ -1,17 +1,17 @@
 #pragma once
 
-#include "channel.hpp"
-#include "messages/layouts/messagelayout.hpp"
-#include "messages/layouts/messagelayoutelement.hpp"
-#include "messages/limitedqueuesnapshot.hpp"
-#include "messages/messageelement.hpp"
-#include "nullableptr.hpp"
-#include "util/serialize-custom.hpp"
-#include "widgets/basewidget.hpp"
-#include "widgets/helper/channelview.hpp"
-#include "widgets/helper/rippleeffectlabel.hpp"
-#include "widgets/helper/splitheader.hpp"
-#include "widgets/helper/splitinput.hpp"
+#include "Channel.hpp"
+#include "messages/layouts/MessageLayout.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/MessageElement.hpp"
+#include "NullablePtr.hpp"
+#include "util/SerializeCustom.hpp"
+#include "widgets/BaseWidget.hpp"
+#include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/SplitHeader.hpp"
+#include "widgets/helper/SplitInput.hpp"
 
 #include <QFont>
 #include <QShortcut>

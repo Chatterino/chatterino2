@@ -1,9 +1,9 @@
-#include "nativemessagingmanager.hpp"
+#include "NativeMessagingManager.hpp"
 
-#include "application.hpp"
-#include "providers/twitch/twitchserver.hpp"
-#include "singletons/pathmanager.hpp"
-#include "util/posttothread.hpp"
+#include "Application.hpp"
+#include "providers/twitch/TwitchServer.hpp"
+#include "singletons/PathManager.hpp"
+#include "util/PostToThread.hpp"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -20,8 +20,8 @@ namespace ipc = boost::interprocess;
 #include <QProcess>
 
 #include <Windows.h>
-#include "singletons/windowmanager.hpp"
-#include "widgets/attachedwindow.hpp"
+#include "singletons/WindowManager.hpp"
+#include "widgets/AttachedWindow.hpp"
 #endif
 
 #include <iostream>

@@ -1,7 +1,7 @@
-#include "controllers/ignores/ignorecontroller.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 
-#include "application.hpp"
-#include "controllers/ignores/ignoremodel.hpp"
+#include "Application.hpp"
+#include "controllers/ignores/IgnoreModel.hpp"
 
 #include <cassert>
 

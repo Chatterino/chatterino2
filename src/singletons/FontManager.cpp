@@ -1,11 +1,11 @@
-#include "singletons/fontmanager.hpp"
+#include "singletons/FontManager.hpp"
 
 #include <QDebug>
 #include <QtGlobal>
 
-#include "application.hpp"
-#include "util/assertinguithread.hpp"
-#include "windowmanager.hpp"
+#include "Application.hpp"
+#include "util/AssertInGuiThread.hpp"
+#include "WindowManager.hpp"
 
 #ifdef Q_OS_WIN32
 #define DEFAULT_FONT_FAMILY "Segoe UI"

@@ -1,7 +1,7 @@
-#include "messages/message.hpp"
-#include "messageelement.hpp"
-#include "providers/twitch/pubsubactions.hpp"
-#include "util/irchelpers.hpp"
+#include "messages/Message.hpp"
+#include "MessageElement.hpp"
+#include "providers/twitch/PubsubActions.hpp"
+#include "util/IrcHelpers.hpp"
 
 using SBHighlight = chatterino::widgets::ScrollbarHighlight;
 

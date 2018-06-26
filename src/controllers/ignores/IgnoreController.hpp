@@ -1,8 +1,8 @@
 #pragma once
 
-#include "controllers/ignores/ignorephrase.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/signalvector2.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/SignalVector2.hpp"
 
 namespace chatterino {
 namespace controllers {

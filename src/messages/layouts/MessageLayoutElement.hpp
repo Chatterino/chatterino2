@@ -7,9 +7,9 @@
 #include <boost/noncopyable.hpp>
 #include <climits>
 
-#include "messages/link.hpp"
-#include "messages/messagecolor.hpp"
-#include "singletons/fontmanager.hpp"
+#include "messages/Link.hpp"
+#include "messages/MessageColor.hpp"
+#include "singletons/FontManager.hpp"
 
 class QPainter;
 

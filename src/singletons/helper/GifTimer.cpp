@@ -1,8 +1,8 @@
-#include "singletons/helper/giftimer.hpp"
+#include "singletons/helper/GifTimer.hpp"
 
-#include "application.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "singletons/windowmanager.hpp"
+#include "Application.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "singletons/WindowManager.hpp"
 
 namespace chatterino {
 namespace singletons {

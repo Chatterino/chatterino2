@@ -1,6 +1,6 @@
-#include "providers/twitch/pubsubactions.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 
-#include "providers/twitch/pubsubhelpers.hpp"
+#include "providers/twitch/PubsubHelpers.hpp"
 
 namespace chatterino {
 namespace providers {

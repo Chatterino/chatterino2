@@ -1,10 +1,10 @@
 #pragma once
 
-#include "messages/image.hpp"
-#include "messages/link.hpp"
-#include "messages/messagecolor.hpp"
-#include "singletons/fontmanager.hpp"
-#include "util/emotemap.hpp"
+#include "messages/Image.hpp"
+#include "messages/Link.hpp"
+#include "messages/MessageColor.hpp"
+#include "singletons/FontManager.hpp"
+#include "util/Emotemap.hpp"
 
 #include <QRect>
 #include <QString>

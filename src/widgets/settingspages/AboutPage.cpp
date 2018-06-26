@@ -1,8 +1,8 @@
-#include "aboutpage.hpp"
+#include "AboutPage.hpp"
 
-#include "util/layoutcreator.hpp"
-#include "util/removescrollareabackground.hpp"
-#include "widgets/helper/signallabel.hpp"
+#include "util/LayoutCreator.hpp"
+#include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/helper/SignalLabel.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>

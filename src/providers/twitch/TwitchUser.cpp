@@ -1,6 +1,6 @@
-#include "providers/twitch/twitchuser.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 
-#include "util/rapidjson-helpers.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 namespace providers {

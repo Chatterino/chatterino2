@@ -1,6 +1,6 @@
-#include "debugpopup.hpp"
+#include "DebugPopup.hpp"
 
-#include "util/debugcount.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QFontDatabase>
 #include <QHBoxLayout>

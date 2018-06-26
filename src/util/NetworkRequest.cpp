@@ -1,6 +1,6 @@
-#include "util/networkrequest.hpp"
+#include "util/NetworkRequest.hpp"
 
-#include "application.hpp"
+#include "Application.hpp"
 
 namespace chatterino {
 namespace util {

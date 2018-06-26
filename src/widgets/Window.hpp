@@ -1,8 +1,8 @@
 #pragma once
 
-#include "util/helpers.hpp"
-#include "widgets/basewindow.hpp"
-#include "widgets/notebook.hpp"
+#include "util/Helpers.hpp"
+#include "widgets/BaseWindow.hpp"
+#include "widgets/Notebook.hpp"
 
 //#ifdef USEWINSDK
 //#include <platform/borderless/qwinwidget.h>

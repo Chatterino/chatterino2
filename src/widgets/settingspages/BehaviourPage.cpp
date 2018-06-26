@@ -1,7 +1,7 @@
-#include "behaviourpage.hpp"
+#include "BehaviourPage.hpp"
 
-#include "application.hpp"
-#include "util/layoutcreator.hpp"
+#include "Application.hpp"
+#include "util/LayoutCreator.hpp"
 
 #include <QFormLayout>
 #include <QGroupBox>

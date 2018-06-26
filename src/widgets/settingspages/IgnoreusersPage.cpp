@@ -1,12 +1,12 @@
-#include "ignoreuserspage.hpp"
+#include "IgnoreusersPage.hpp"
 
-#include "application.hpp"
-#include "controllers/accounts/accountcontroller.hpp"
-#include "controllers/ignores/ignorecontroller.hpp"
-#include "controllers/ignores/ignoremodel.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/layoutcreator.hpp"
-#include "widgets/helper/editablemodelview.hpp"
+#include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
+#include "controllers/ignores/IgnoreModel.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/LayoutCreator.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QCheckBox>
 #include <QGroupBox>

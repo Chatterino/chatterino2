@@ -1,8 +1,8 @@
-#include "ignoremodel.hpp"
+#include "IgnoreModel.hpp"
 
-#include "application.hpp"
-#include "singletons/settingsmanager.hpp"
-#include "util/standarditemhelper.hpp"
+#include "Application.hpp"
+#include "singletons/SettingsManager.hpp"
+#include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
 namespace controllers {

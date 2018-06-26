@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/message.hpp"
+#include "messages/Message.hpp"
 
 #include <QDateTime>
 #include <QFile>
