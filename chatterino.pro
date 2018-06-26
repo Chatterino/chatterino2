@@ -198,13 +198,13 @@ SOURCES += \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/AppearancePage.cpp \
     src/widgets/settingspages/BehaviourPage.cpp \
-    src/widgets/settingspages/BrowserextensionPage.cpp \
+    src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/EmotesPage.cpp \
-    src/widgets/settingspages/ExternaltoolsPage.cpp \
+    src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoreusersPage.cpp \
-    src/widgets/settingspages/KeyboardsettingsPage.cpp \
+    src/widgets/settingspages/KeyboardSettingsPage.cpp \
     src/widgets/settingspages/LogsPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
@@ -364,13 +364,13 @@ HEADERS  += \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/AppearancePage.hpp \
     src/widgets/settingspages/BehaviourPage.hpp \
-    src/widgets/settingspages/BrowserextensionPage.hpp \
+    src/widgets/settingspages/BrowserExtensionPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/EmotesPage.hpp \
-    src/widgets/settingspages/ExternaltoolsPage.hpp \
+    src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoreusersPage.hpp \
-    src/widgets/settingspages/KeyboardsettingsPage.hpp \
+    src/widgets/settingspages/KeyboardSettingsPage.hpp \
     src/widgets/settingspages/LogsPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \

@@ -1,4 +1,4 @@
-#include "KeyboardsettingsPage.hpp"
+#include "KeyboardSettingsPage.hpp"
 
 #include "util/LayoutCreator.hpp"
 

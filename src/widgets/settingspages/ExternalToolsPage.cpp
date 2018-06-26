@@ -1,4 +1,4 @@
-#include "ExternaltoolsPage.hpp"
+#include "ExternalToolsPage.hpp"
 
 #include "Application.hpp"
 #include "util/LayoutCreator.hpp"

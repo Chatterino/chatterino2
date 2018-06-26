@@ -115,7 +115,7 @@ public:
             Signal<const rapidjson::Value &> received;
             Signal<const rapidjson::Value &> sent;
         } whisper;
-    } sig;
+    } signals_;
 
     void listenToWhispers(std::shared_ptr<TwitchAccount> account);
 

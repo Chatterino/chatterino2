@@ -1,4 +1,4 @@
-#include "BrowserextensionPage.hpp"
+#include "BrowserExtensionPage.hpp"
 
 #include "util/LayoutCreator.hpp"
 
