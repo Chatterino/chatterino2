@@ -189,7 +189,7 @@ void SplitHeader::addModeItems(RippleEffectLabel *)
         if (ok) {
             this->split->getChannel().get()->sendMessage(QString("/slow %1").arg(slowSec));
         } else {
-            setSlow->setChecked(true);
+            setSlow->setChecked(false);
         }
     });
 
