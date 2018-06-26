@@ -1,19 +1,19 @@
 #include "ChannelView.hpp"
 
 #include "Application.hpp"
+#include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
-#include "messages/layouts/MessageLayout.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/layouts/MessageLayout.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "debug/Benchmark.hpp"
 #include "util/DistanceBetweenPoints.hpp"
-#include "widgets/splits/Split.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QClipboard>
 #include <QDebug>
@@ -271,7 +271,8 @@ QString ChannelView::getSelectedText()
 {
     QString result = "";
 
-    chatterino::LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot = this->getMessagesSnapshot();
+    chatterino::LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot =
+        this->getMessagesSnapshot();
 
     Selection _selection = this->selection_;
 
@@ -436,7 +437,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             auto snapshot = this->messages.getSnapshot();
             if (index >= snapshot.getLength()) {
                 Log("Tried to replace out of bounds message. Index: {}. Length: {}", index,
-                           snapshot.getLength());
+                    snapshot.getLength());
                 return;
             }
 
@@ -882,8 +883,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (this->isMouseDown_) {
             this->isMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastPressPosition_, event->screenPos())) >
-                15.f) {
+            if (fabsf(distanceBetweenPoints(this->lastPressPosition_, event->screenPos())) > 15.f) {
                 return;
             }
         } else {
@@ -893,8 +893,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         if (this->isRightMouseDown_) {
             this->isRightMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastRightPressPosition_,
-                                                  event->screenPos())) > 15.f) {
+            if (fabsf(distanceBetweenPoints(this->lastRightPressPosition_, event->screenPos())) >
+                15.f) {
                 return;
             }
         } else {

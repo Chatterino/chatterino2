@@ -22,7 +22,7 @@
 
 //#include <future>
 
-//using namespace chatterino::messages;
+// using namespace chatterino::messages;
 
 // void IrcManager::refreshIgnoredUsers(const QString &username, const QString &oauthClient,
 //                                     const QString &oauthToken)

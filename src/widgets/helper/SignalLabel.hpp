@@ -29,4 +29,4 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
 };
 
-}
+}  // namespace chatterino

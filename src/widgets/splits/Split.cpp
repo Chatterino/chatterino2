@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/UrlFetch.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -10,17 +11,16 @@
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
-#include "common/UrlFetch.hpp"
+#include "widgets/Window.hpp"
+#include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/dialogs/SelectChannelDialog.hpp"
+#include "widgets/dialogs/TextInputDialog.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/DebugPopup.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
-#include "widgets/splits/SplitOverlay.hpp"
-#include "widgets/dialogs/QualityPopup.hpp"
-#include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/dialogs/TextInputDialog.hpp"
-#include "widgets/dialogs/UserInfoPopup.hpp"
-#include "widgets/Window.hpp"
+#include "widgets/splits/SplitOverlay.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -449,18 +449,18 @@ void Split::doOpenViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    twitchApiGet("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
-                      this, [=](QJsonObject obj) {
-                          QJsonObject chattersObj = obj.value("chatters").toObject();
+    twitchApiGet("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters", this,
+                 [=](QJsonObject obj) {
+                     QJsonObject chattersObj = obj.value("chatters").toObject();
 
-                          loadingLabel->hide();
-                          for (int i = 0; i < jsonLabels.size(); i++) {
-                              chattersList->addItem(labelList.at(i));
-                              foreach (const QJsonValue &v,
-                                       chattersObj.value(jsonLabels.at(i)).toArray())
-                                  chattersList->addItem(v.toString());
-                          }
-                      });
+                     loadingLabel->hide();
+                     for (int i = 0; i < jsonLabels.size(); i++) {
+                         chattersList->addItem(labelList.at(i));
+                         foreach (const QJsonValue &v,
+                                  chattersObj.value(jsonLabels.at(i)).toArray())
+                             chattersList->addItem(v.toString());
+                     }
+                 });
 
     searchBar->setPlaceholderText("Search User...");
     QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {

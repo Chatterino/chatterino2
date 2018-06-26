@@ -1,9 +1,9 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "widgets/Label.hpp"
 #include "widgets/helper/RippleEffectButton.hpp"
 #include "widgets/helper/SignalLabel.hpp"
-#include "widgets/Label.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

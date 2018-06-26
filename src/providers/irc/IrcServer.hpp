@@ -1,7 +1,7 @@
 #pragma once
 
-#include "providers/irc/IrcAccount.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/irc/IrcAccount.hpp"
 
 namespace chatterino {
 

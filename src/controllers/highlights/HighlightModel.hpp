@@ -2,8 +2,8 @@
 
 #include <QObject>
 
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "common/SignalVectorModel.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 
 namespace chatterino {
 

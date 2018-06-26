@@ -1,12 +1,12 @@
 #include "AccountsPage.hpp"
 
 #include "Application.hpp"
-#include "providers/twitch/Const.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/accounts/AccountModel.hpp"
+#include "providers/twitch/Const.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/dialogs/LoginDialog.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #include <QDialogButtonBox>
 #include <QHeaderView>

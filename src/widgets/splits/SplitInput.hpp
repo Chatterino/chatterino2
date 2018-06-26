@@ -1,8 +1,8 @@
 #pragma once
 
-#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QHBoxLayout>

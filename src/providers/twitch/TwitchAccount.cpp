@@ -1,10 +1,10 @@
 #include "providers/twitch/TwitchAccount.hpp"
 
-#include "providers/twitch/Const.hpp"
-#include "debug/Log.hpp"
 #include "common/NetworkRequest.hpp"
-#include "util/RapidjsonHelpers.hpp"
 #include "common/UrlFetch.hpp"
+#include "debug/Log.hpp"
+#include "providers/twitch/Const.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 

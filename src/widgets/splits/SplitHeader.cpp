@@ -1,16 +1,16 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
+#include "common/UrlFetch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/ResourceManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "common/UrlFetch.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/TooltipWidget.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/TooltipWidget.hpp"
 
 #include <QByteArray>
 #include <QDrag>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "messages/layouts/MessageLayoutContainer.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
+#include "common/FlagsEnum.hpp"
 #include "messages/Message.hpp"
 #include "messages/Selection.hpp"
-#include "common/FlagsEnum.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 
 #include <QPixmap>
 

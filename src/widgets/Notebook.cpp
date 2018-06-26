@@ -4,12 +4,12 @@
 #include "debug/Log.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/Window.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/Shortcut.hpp"
-#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/Window.hpp"
 
 #include <QDebug>
 #include <QFile>

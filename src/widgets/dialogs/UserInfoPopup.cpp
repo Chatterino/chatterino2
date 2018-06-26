@@ -1,14 +1,14 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
+#include "common/UrlFetch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/ResourceManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
-#include "common/UrlFetch.hpp"
+#include "widgets/Label.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
-#include "widgets/Label.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -86,8 +86,7 @@ UserInfoPopup::UserInfoPopup()
 
         // userstate
         this->userStateChanged.connect([this, mod, unmod]() mutable {
-            TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+            TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
                 qDebug() << this->userName_;
@@ -111,8 +110,7 @@ UserInfoPopup::UserInfoPopup()
         auto timeout = moderation.emplace<TimeoutWidget>();
 
         this->userStateChanged.connect([this, lineMod, timeout]() mutable {
-            TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+            TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
                 lineMod->setVisible(twitchChannel->hasModRights());
@@ -171,8 +169,7 @@ void UserInfoPopup::installEvents()
 
         this->ui_.follow->setEnabled(false);
         if (this->ui_.follow->isChecked()) {
-            twitchApiPut(requestUrl,
-                              [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
+            twitchApiPut(requestUrl, [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
         } else {
             twitchApiDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
         }
@@ -306,8 +303,7 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
 UserInfoPopup::TimeoutWidget::TimeoutWidget()
     : BaseWidget(nullptr)
 {
-    auto layout =
-        LayoutCreator<TimeoutWidget>(this).setLayoutType<QHBoxLayout>().withoutMargin();
+    auto layout = LayoutCreator<TimeoutWidget>(this).setLayoutType<QHBoxLayout>().withoutMargin();
 
     QColor color1(255, 255, 255, 80);
     QColor color2(255, 255, 255, 0);

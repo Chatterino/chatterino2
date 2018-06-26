@@ -140,8 +140,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty()) {
-        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
-                   chanName);
+        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found", chanName);
         return;
     }
 
@@ -312,7 +311,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
     if (channel->isEmpty()) {
         Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager ",
-                   channelName);
+            channelName);
         return;
     }
 

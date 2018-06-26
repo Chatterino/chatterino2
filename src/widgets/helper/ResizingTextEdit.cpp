@@ -203,4 +203,4 @@ QCompleter *ResizingTextEdit::getCompleter() const
     return this->completer;
 }
 
-}
+}  // namespace chatterino

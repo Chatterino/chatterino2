@@ -32,8 +32,7 @@ void TwitchServer::initialize()
         [this]() { postToThread([this] { this->connect(); }); });
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
-                                        bool isWrite)
+void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 

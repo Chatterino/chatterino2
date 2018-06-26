@@ -75,9 +75,9 @@ void UpdateManager::installUpdates()
             return false;
         }
 
-        QProcess::startDetached(combinePath(QCoreApplication::applicationDirPath(),
-                                                  "updater.1/ChatterinoUpdater.exe"),
-                                {filename, "restart"});
+        QProcess::startDetached(
+            combinePath(QCoreApplication::applicationDirPath(), "updater.1/ChatterinoUpdater.exe"),
+            {filename, "restart"});
 
         QApplication::exit(0);
         return false;

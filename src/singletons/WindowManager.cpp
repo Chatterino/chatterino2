@@ -1,12 +1,12 @@
 #include "WindowManager.hpp"
 
 #include "Application.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/FontManager.hpp"
 #include "singletons/PathManager.hpp"
 #include "singletons/ThemeManager.hpp"
-#include "debug/AssertInGuiThread.hpp"
 #include "util/Clamp.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -169,8 +169,7 @@ void WindowManager::initialize()
 
         // get type
         QString type_val = window_obj.value("type").toString();
-        Window::WindowType type =
-            type_val == "main" ? Window::Main : Window::Popup;
+        Window::WindowType type = type_val == "main" ? Window::Main : Window::Popup;
 
         if (type == Window::Main && mainWindow != nullptr) {
             type = Window::Popup;

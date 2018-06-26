@@ -4,12 +4,11 @@
 #include <memory>
 #include <mutex>
 
-#include "controllers/commands/Command.hpp"
 #include "common/SignalVector2.hpp"
+#include "controllers/commands/Command.hpp"
 
 namespace chatterino {
 class Channel;
-
 
 class CommandModel;
 

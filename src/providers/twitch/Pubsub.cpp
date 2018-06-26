@@ -507,8 +507,8 @@ void PubSub::unlistenAllModerationActions()
     }
 }
 
-void PubSub::listenToChannelModerationActions(
-    const QString &channelID, std::shared_ptr<TwitchAccount> account)
+void PubSub::listenToChannelModerationActions(const QString &channelID,
+                                              std::shared_ptr<TwitchAccount> account)
 {
     assert(!channelID.isEmpty());
     assert(account != nullptr);
@@ -527,8 +527,7 @@ void PubSub::listenToChannelModerationActions(
     this->listenToTopic(topic, account);
 }
 
-void PubSub::listenToTopic(const std::string &topic,
-                           std::shared_ptr<TwitchAccount> account)
+void PubSub::listenToTopic(const std::string &topic, std::shared_ptr<TwitchAccount> account)
 {
     auto message = createListenMessage({topic}, account);
 
@@ -581,7 +580,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
 
     if (!res) {
         Log("Error parsing message '{}' from PubSub: {}", payload,
-                   rapidjson::GetParseError_En(res.Code()));
+            rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
@@ -713,7 +712,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!res) {
         Log("Error parsing message '{}' from PubSub: {}", payload,
-                   rapidjson::GetParseError_En(res.Code()));
+            rapidjson::GetParseError_En(res.Code()));
         return;
     }
 

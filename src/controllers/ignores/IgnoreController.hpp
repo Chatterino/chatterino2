@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/SignalVector2.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "singletons/SettingsManager.hpp"
-#include "common/SignalVector2.hpp"
 
 namespace chatterino {
 
@@ -20,8 +20,7 @@ public:
 private:
     bool initialized = false;
 
-    chatterino::ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {
-        "/ignore/phrases"};
+    chatterino::ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {"/ignore/phrases"};
 };
 
 }  // namespace chatterino

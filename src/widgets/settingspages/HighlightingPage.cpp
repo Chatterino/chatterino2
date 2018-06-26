@@ -44,8 +44,7 @@ HighlightingPage::HighlightingPage()
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
                 EditableModelView *view =
-                    highlights
-                        .emplace<EditableModelView>(app->highlights->createModel(nullptr))
+                    highlights.emplace<EditableModelView>(app->highlights->createModel(nullptr))
                         .getElement();
 
                 view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});

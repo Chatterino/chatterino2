@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/SignalVectorModel.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "util/QstringHash.hpp"
-#include "common/SignalVectorModel.hpp"
 
 #include <unordered_map>
 

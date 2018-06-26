@@ -1,8 +1,8 @@
 #pragma once
 
-#include "debug/Log.hpp"
 #include "common/NetworkRequester.hpp"
 #include "common/NetworkWorker.hpp"
+#include "debug/Log.hpp"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -50,11 +50,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [worker, onFinished = std::move(onFinished), request = std::move(request)]() {
+            [ worker, onFinished = std::move(onFinished), request = std::move(request) ]() {
                 QNetworkReply *reply = NetworkManager::NaM.get(request);
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [worker, reply, onFinished = std::move(onFinished)]() {
+                               [ worker, reply, onFinished = std::move(onFinished) ]() {
                                    onFinished(reply);
                                    delete worker;
                                });
@@ -110,11 +110,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [worker, data, onFinished = std::move(onFinished), request = std::move(request)]() {
+            [ worker, data, onFinished = std::move(onFinished), request = std::move(request) ]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [worker, reply, onFinished = std::move(onFinished)]() {
+                               [ worker, reply, onFinished = std::move(onFinished) ]() {
                                    onFinished(reply);
                                    delete worker;
                                });
@@ -132,11 +132,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [onFinished = std::move(onFinished), request = std::move(request), worker]() {
+            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, "");
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [onFinished = std::move(onFinished), reply, worker]() {
+                               [ onFinished = std::move(onFinished), reply, worker ]() {
                                    onFinished(reply);
                                    delete worker;
                                });
@@ -154,11 +154,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [onFinished = std::move(onFinished), request = std::move(request), worker]() {
+            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
                 QNetworkReply *reply = NetworkManager::NaM.deleteResource(request);
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [onFinished = std::move(onFinished), reply, worker]() {
+                               [ onFinished = std::move(onFinished), reply, worker ]() {
                                    onFinished(reply);
                                    delete worker;
                                });

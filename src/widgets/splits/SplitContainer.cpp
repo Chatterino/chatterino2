@@ -1,13 +1,13 @@
 #include "widgets/splits/SplitContainer.hpp"
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "debug/AssertInGuiThread.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>

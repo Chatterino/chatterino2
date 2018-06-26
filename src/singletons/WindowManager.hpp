@@ -1,7 +1,7 @@
 #pragma once
 
-#include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 

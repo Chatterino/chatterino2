@@ -4,10 +4,10 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/MutexValue.hpp"
 #include "singletons/EmoteManager.hpp"
 #include "singletons/IrcManager.hpp"
 #include "util/ConcurrentMap.hpp"
-#include "common/MutexValue.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 

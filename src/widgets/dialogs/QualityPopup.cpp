@@ -16,7 +16,8 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
                      &QualityPopup::cancelButtonClicked);
 
     this->ui_.buttonBox.addButton(&this->ui_.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
-    this->ui_.buttonBox.addButton(&this->ui_.cancelButton, QDialogButtonBox::ButtonRole::RejectRole);
+    this->ui_.buttonBox.addButton(&this->ui_.cancelButton,
+                                  QDialogButtonBox::ButtonRole::RejectRole);
 
     this->ui_.selector.addItems(options);
 

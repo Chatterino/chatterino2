@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/RapidjsonHelpers.hpp"
 #include "common/SerializeCustom.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>
 #include <QString>
@@ -94,8 +94,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
     static chatterino::HighlightPhrase get(const rapidjson::Value &value)
     {
         if (!value.IsObject()) {
-            return chatterino::HighlightPhrase(QString(), true, false,
-                                                                        false);
+            return chatterino::HighlightPhrase(QString(), true, false, false);
         }
 
         QString _pattern;
@@ -108,8 +107,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "sound", _sound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
 
-        return chatterino::HighlightPhrase(_pattern, _alert, _sound,
-                                                                    _isRegex);
+        return chatterino::HighlightPhrase(_pattern, _alert, _sound, _isRegex);
     }
 };
 

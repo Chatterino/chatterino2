@@ -1,8 +1,8 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
+#include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
-#include "common/UrlFetch.hpp"
 
 namespace chatterino {
 
@@ -37,11 +37,11 @@ void BTTVEmotes::loadGlobalEmotes()
 
             EmoteData emoteData;
             emoteData.image1x = new chatterino::Image(getEmoteLink(urlTemplate, id, "1x"), 1, code,
-                                                    code + "<br />Global BTTV Emote");
-            emoteData.image2x = new chatterino::Image(getEmoteLink(urlTemplate, id, "2x"), 0.5, code,
-                                                    code + "<br />Global BTTV Emote");
-            emoteData.image3x = new chatterino::Image(getEmoteLink(urlTemplate, id, "3x"), 0.25, code,
-                                                    code + "<br />Global BTTV Emote");
+                                                      code + "<br />Global BTTV Emote");
+            emoteData.image2x = new chatterino::Image(getEmoteLink(urlTemplate, id, "2x"), 0.5,
+                                                      code, code + "<br />Global BTTV Emote");
+            emoteData.image3x = new chatterino::Image(getEmoteLink(urlTemplate, id, "3x"), 0.25,
+                                                      code, code + "<br />Global BTTV Emote");
             emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
             this->globalEmotes.insert(code, emoteData);
@@ -91,17 +91,17 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emo
                 link.detach();
                 emoteData.image1x =
                     new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "1x"), 1,
-                                        code, code + "<br />Channel BTTV Emote");
+                                          code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
                 emoteData.image2x =
-                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "2x"), 0.5,
-                                        code, code + "<br />Channel BTTV Emote");
+                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
+                                          0.5, code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
                 emoteData.image3x =
-                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "3x"), 0.25,
-                                        code, code + "<br />Channel BTTV Emote");
+                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
+                                          0.25, code, code + "<br />Channel BTTV Emote");
                 emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
                 return emoteData;

@@ -112,7 +112,7 @@ void Emojis::loadEmojis()
 
     if (result.Code() != rapidjson::kParseErrorNone) {
         Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-                   result.Offset());
+            result.Offset());
         return;
     }
 
@@ -266,8 +266,7 @@ void Emojis::loadEmojiSet()
     });
 }
 
-void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords,
-                   const QString &text)
+void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text)
 {
     int lastParsedEmojiEndIndex = 0;
 
@@ -328,13 +327,12 @@ void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords,
 
         if (charactersFromLastParsedEmoji > 0) {
             // Add characters inbetween emojis
-            parsedWords.emplace_back(EmoteData(), text.mid(lastParsedEmojiEndIndex,
-                                                                 charactersFromLastParsedEmoji));
+            parsedWords.emplace_back(
+                EmoteData(), text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji));
         }
 
         // Push the emoji as a word to parsedWords
-        parsedWords.push_back(
-            std::tuple<EmoteData, QString>(matchedEmoji->emoteData, QString()));
+        parsedWords.push_back(std::tuple<EmoteData, QString>(matchedEmoji->emoteData, QString()));
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 

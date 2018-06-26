@@ -1,6 +1,7 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
+#include "common/UrlFetch.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -8,7 +9,6 @@
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "util/LayoutCreator.hpp"
-#include "common/UrlFetch.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"

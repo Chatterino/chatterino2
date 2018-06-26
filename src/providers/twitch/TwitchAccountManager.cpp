@@ -1,8 +1,8 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "common/Common.hpp"
-#include "providers/twitch/Const.hpp"
 #include "debug/Log.hpp"
+#include "providers/twitch/Const.hpp"
 
 namespace chatterino {
 
@@ -123,11 +123,10 @@ void TwitchAccountManager::load()
         auto user = this->findUserByUsername(newUsername);
         if (user) {
             Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
-                       newUsername);
+                newUsername);
             this->currentUser = user;
         } else {
-            Log(
-                "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
+            Log("[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
             this->currentUser = this->anonymousUser;
         }
 

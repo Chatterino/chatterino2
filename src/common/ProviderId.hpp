@@ -3,5 +3,4 @@
 namespace chatterino {
 
 enum class ProviderId { Twitch };
-
 }

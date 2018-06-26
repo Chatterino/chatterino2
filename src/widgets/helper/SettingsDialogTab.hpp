@@ -16,8 +16,7 @@ class SettingsDialogTab : public BaseWidget
     Q_OBJECT
 
 public:
-    SettingsDialogTab(SettingsDialog *dialog, SettingsPage *page,
-                      QString imageFileName);
+    SettingsDialogTab(SettingsDialog *dialog, SettingsPage *page, QString imageFileName);
 
     void setSelected(bool selected);
     SettingsPage *getSettingsPage();

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/Emotemap.hpp"
 #include "common/SignalVector.hpp"
 #include "util/ConcurrentMap.hpp"
-#include "common/Emotemap.hpp"
 
 #include <map>
 
@@ -18,8 +18,7 @@ public:
     std::map<QString, SignalVector<QString>> channelEmoteCodes;
 
     void loadGlobalEmotes();
-    void loadChannelEmotes(const QString &channelName,
-                           std::weak_ptr<EmoteMap> channelEmoteMap);
+    void loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> channelEmoteMap);
 
 private:
     EmoteMap channelEmoteCache;

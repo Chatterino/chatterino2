@@ -1,6 +1,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include "common/Common.hpp"
+#include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/Pubsub.hpp"
@@ -9,7 +10,6 @@
 #include "singletons/IrcManager.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "util/PostToThread.hpp"
-#include "common/UrlFetch.hpp"
 
 #include <IrcConnection>
 #include <QThread>
@@ -84,7 +84,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         }
 
         twitchApiGet("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
-                          QThread::currentThread(), refreshChatters);
+                     QThread::currentThread(), refreshChatters);
     };
 
     doRefreshChatters();
@@ -145,7 +145,7 @@ void TwitchChannel::sendMessage(const QString &message)
         // manager" dialog
         this->addMessage(
             chatterino::Message::createSystemMessage("You need to log in to send messages. You can "
-                                                   "link your Twitch account in the settings."));
+                                                     "link your Twitch account in the settings."));
         return;
     }
 
@@ -234,7 +234,7 @@ void TwitchChannel::addJoinedUser(const QString &user)
             std::lock_guard<std::mutex> guard(this->joinedUserMutex);
 
             auto message = chatterino::Message::createSystemMessage("Users joined: " +
-                                                                  this->joinedUsers.join(", "));
+                                                                    this->joinedUsers.join(", "));
             message->flags |= chatterino::Message::Collapsed;
             this->addMessage(message);
             this->joinedUsers.clear();
@@ -263,7 +263,7 @@ void TwitchChannel::addPartedUser(const QString &user)
             std::lock_guard<std::mutex> guard(this->partedUserMutex);
 
             auto message = chatterino::Message::createSystemMessage("Users parted: " +
-                                                                  this->partedUsers.join(", "));
+                                                                    this->partedUsers.join(", "));
             message->flags |= chatterino::Message::Collapsed;
             this->addMessage(message);
             this->partedUsers.clear();

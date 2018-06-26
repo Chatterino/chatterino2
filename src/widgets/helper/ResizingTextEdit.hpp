@@ -41,4 +41,4 @@ private slots:
     void insertCompletion(const QString &completion);
 };
 
-}
+}  // namespace chatterino

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/FlagsEnum.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
-#include "common/FlagsEnum.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
@@ -74,8 +74,7 @@ public:
 
     static std::shared_ptr<Message> createTimeoutMessage(const BanAction &action,
                                                          uint32_t count = 1);
-    static std::shared_ptr<Message> createUntimeoutMessage(
-        const UnbanAction &action);
+    static std::shared_ptr<Message> createUntimeoutMessage(const UnbanAction &action);
 };
 
 using MessagePtr = std::shared_ptr<Message>;

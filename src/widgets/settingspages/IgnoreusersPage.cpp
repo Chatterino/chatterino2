@@ -64,8 +64,7 @@ IgnoreUsersPage::IgnoreUsersPage()
     auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
     {
         EditableModelView *view =
-            messages.emplace<EditableModelView>(app->ignores->createModel(nullptr))
-                .getElement();
+            messages.emplace<EditableModelView>(app->ignores->createModel(nullptr)).getElement();
         view->setTitles({"Pattern", "Regex"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
         view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -77,8 +76,7 @@ IgnoreUsersPage::IgnoreUsersPage()
         });
 
         view->addButtonPressed.connect([] {
-            getApp()->ignores->phrases.appendItem(
-                IgnorePhrase{"my phrase", false});
+            getApp()->ignores->phrases.appendItem(IgnorePhrase{"my phrase", false});
         });
     }
 

@@ -2,10 +2,10 @@
 
 #include <QObject>
 
+#include "common/SignalVector2.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "util/SharedPtrElementLess.hpp"
-#include "common/SignalVector2.hpp"
 
 namespace chatterino {
 
@@ -23,8 +23,7 @@ public:
     TwitchAccountManager twitch;
 
 private:
-    SortedSignalVector<std::shared_ptr<Account>, SharedPtrElementLess<Account>>
-        accounts;
+    SortedSignalVector<std::shared_ptr<Account>, SharedPtrElementLess<Account>> accounts;
 };
 
 }  // namespace chatterino

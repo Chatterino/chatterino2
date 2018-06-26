@@ -121,14 +121,13 @@ public:
 
     void unlistenAllModerationActions();
 
-    void listenToChannelModerationActions(
-        const QString &channelID, std::shared_ptr<TwitchAccount> account);
+    void listenToChannelModerationActions(const QString &channelID,
+                                          std::shared_ptr<TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 
 private:
-    void listenToTopic(const std::string &topic,
-                       std::shared_ptr<TwitchAccount> account);
+    void listenToTopic(const std::string &topic, std::shared_ptr<TwitchAccount> account);
 
     void listen(rapidjson::Document &&msg);
     bool tryListen(rapidjson::Document &msg);

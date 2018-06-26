@@ -2,13 +2,13 @@
 
 #include "common/Channel.hpp"
 #include "messages/Image.hpp"
-#include "messages/layouts/MessageLayout.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
+#include "messages/layouts/MessageLayout.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
 #include "widgets/Scrollbar.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>

@@ -4,8 +4,8 @@
 #include <QtGlobal>
 
 #include "Application.hpp"
-#include "debug/AssertInGuiThread.hpp"
 #include "WindowManager.hpp"
+#include "debug/AssertInGuiThread.hpp"
 
 #ifdef Q_OS_WIN32
 #define DEFAULT_FONT_FAMILY "Segoe UI"
