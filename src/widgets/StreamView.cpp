@@ -13,7 +13,7 @@ namespace chatterino {
 
 StreamView::StreamView(ChannelPtr channel, const QUrl &url)
 {
-    util::LayoutCreator<StreamView> layoutCreator(this);
+    LayoutCreator<StreamView> layoutCreator(this);
 
 #ifdef USEWEBENGINE
     auto web = layoutCreator.emplace<QWebEngineView>(this).assign(&this->stream);

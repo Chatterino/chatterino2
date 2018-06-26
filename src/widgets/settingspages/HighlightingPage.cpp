@@ -30,7 +30,7 @@ HighlightingPage::HighlightingPage()
     : SettingsPage("Highlights", ":/images/notifications.svg")
 {
     auto app = getApp();
-    util::LayoutCreator<HighlightingPage> layoutCreator(this);
+    LayoutCreator<HighlightingPage> layoutCreator(this);
 
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
@@ -43,9 +43,9 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
             {
-                helper::EditableModelView *view =
+                EditableModelView *view =
                     highlights
-                        .emplace<helper::EditableModelView>(app->highlights->createModel(nullptr))
+                        .emplace<EditableModelView>(app->highlights->createModel(nullptr))
                         .getElement();
 
                 view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
@@ -61,7 +61,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->phrases.appendItem(
-                        controllers::highlights::HighlightPhrase{"my phrase", true, false, false});
+                        HighlightPhrase{"my phrase", true, false, false});
                 });
             }
             auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");

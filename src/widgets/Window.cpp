@@ -100,7 +100,7 @@ Window::Window(WindowType _type)
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() + 1));
         });
     }
@@ -108,7 +108,7 @@ Window::Window(WindowType _type)
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() - 1));
         });
     }

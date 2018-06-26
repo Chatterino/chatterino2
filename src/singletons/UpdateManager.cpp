@@ -49,12 +49,12 @@ void UpdateManager::installUpdates()
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->show();
 
-    util::NetworkRequest req(this->updateUrl_);
+    NetworkRequest req(this->updateUrl_);
     req.setTimeout(600000);
     req.onError([this](int) -> bool {
         this->setStatus_(DownloadFailed);
 
-        util::postToThread([] {
+        postToThread([] {
             QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
                                                "Failed while trying to download the update.");
             box->setAttribute(Qt::WA_DeleteOnClose);
@@ -65,7 +65,7 @@ void UpdateManager::installUpdates()
         return true;
     });
     req.get([this](QByteArray &object) {
-        auto filename = util::combinePath(getApp()->paths->miscDirectory, "update.zip");
+        auto filename = combinePath(getApp()->paths->miscDirectory, "update.zip");
 
         QFile file(filename);
         file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -75,7 +75,7 @@ void UpdateManager::installUpdates()
             return false;
         }
 
-        QProcess::startDetached(util::combinePath(QCoreApplication::applicationDirPath(),
+        QProcess::startDetached(combinePath(QCoreApplication::applicationDirPath(),
                                                   "updater.1/ChatterinoUpdater.exe"),
                                 {filename, "restart"});
 
@@ -92,7 +92,7 @@ void UpdateManager::checkForUpdates()
 #ifdef Q_OS_WIN
     QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setTimeout(30000);
     req.getJSON([this](QJsonObject &object) {
         QJsonValue version_val = object.value("version");
@@ -102,7 +102,7 @@ void UpdateManager::checkForUpdates()
             this->setStatus_(SearchFailed);
             qDebug() << "error updating";
 
-            util::postToThread([] {
+            postToThread([] {
                 QMessageBox *box = new QMessageBox(
                     QMessageBox::Information, "Chatterino Update",
                     "Error while searching for updates.\n\nEither the service is down "
@@ -119,7 +119,7 @@ void UpdateManager::checkForUpdates()
 
         if (this->currentVersion_ != this->onlineVersion_) {
             this->setStatus_(UpdateAvailable);
-            util::postToThread([this] {
+            postToThread([this] {
                 QMessageBox *box =
                     new QMessageBox(QMessageBox::Information, "Chatterino Update",
                                     "An update for chatterino is available.\n\nDo you "
@@ -150,7 +150,7 @@ void UpdateManager::setStatus_(UpdateStatus status)
 {
     if (this->status_ != status) {
         this->status_ = status;
-        util::postToThread([this, status] { this->statusUpdated.invoke(status); });
+        postToThread([this, status] { this->statusUpdated.invoke(status); });
     }
 }
 

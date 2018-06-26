@@ -8,9 +8,9 @@ namespace chatterino {
 
 namespace {
 
-inline messages::Image *lli(const char *pixmapPath, qreal scale = 1)
+inline chatterino::Image *lli(const char *pixmapPath, qreal scale = 1)
 {
-    return new messages::Image(new QPixmap(pixmapPath), scale);
+    return new chatterino::Image(new QPixmap(pixmapPath), scale);
 }
 
 template <typename Type>
@@ -221,7 +221,7 @@ inline bool ParseSingleCheermoteSet(ResourceManager::JSONCheermoteSet &set,
 
                     qreal chatterinoScale = 1 / scaleNumber;
 
-                    auto image = new messages::Image(url, chatterinoScale);
+                    auto image = new chatterino::Image(url, chatterinoScale);
 
                     // TODO(pajlada): Fill in name and tooltip
                     tier.images[background][state][scale] = image;
@@ -310,9 +310,9 @@ void ResourceManager::initialize()
 }
 
 ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
-    : badgeImage1x(new messages::Image(root.value("image_url_1x").toString()))
-    , badgeImage2x(new messages::Image(root.value("image_url_2x").toString()))
-    , badgeImage4x(new messages::Image(root.value("image_url_4x").toString()))
+    : badgeImage1x(new chatterino::Image(root.value("image_url_1x").toString()))
+    , badgeImage2x(new chatterino::Image(root.value("image_url_2x").toString()))
+    , badgeImage4x(new chatterino::Image(root.value("image_url_4x").toString()))
     , description(root.value("description").toString().toStdString())
     , title(root.value("title").toString().toStdString())
     , clickAction(root.value("clickAction").toString().toStdString())
@@ -324,7 +324,7 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 {
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + roomID + "/display?language=en";
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
 
     req.getJSON([this, roomID](QJsonObject &root) {
@@ -352,52 +352,52 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 
     QString cheermoteURL = "https://api.twitch.tv/kraken/bits/actions?channel_id=" + roomID;
 
-    util::twitch::get2(
-        cheermoteURL, QThread::currentThread(), true, [this, roomID](const rapidjson::Document &d) {
-            ResourceManager::Channel &ch = this->channels[roomID];
+    get2(cheermoteURL, QThread::currentThread(), true,
+         [this, roomID](const rapidjson::Document &d) {
+             ResourceManager::Channel &ch = this->channels[roomID];
 
-            ParseCheermoteSets(ch.jsonCheermoteSets, d);
+             ParseCheermoteSets(ch.jsonCheermoteSets, d);
 
-            for (auto &set : ch.jsonCheermoteSets) {
-                CheermoteSet cheermoteSet;
-                cheermoteSet.regex =
-                    QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+             for (auto &set : ch.jsonCheermoteSets) {
+                 CheermoteSet cheermoteSet;
+                 cheermoteSet.regex =
+                     QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
 
-                for (auto &tier : set.tiers) {
-                    Cheermote cheermote;
+                 for (auto &tier : set.tiers) {
+                     Cheermote cheermote;
 
-                    cheermote.color = QColor(tier.color);
-                    cheermote.minBits = tier.minBits;
+                     cheermote.color = QColor(tier.color);
+                     cheermote.minBits = tier.minBits;
 
-                    // TODO(pajlada): We currently hardcode dark here :|
-                    // We will continue to do so for now since we haven't had to
-                    // solve that anywhere else
-                    cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
-                    cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
-                    cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
+                     // TODO(pajlada): We currently hardcode dark here :|
+                     // We will continue to do so for now since we haven't had to
+                     // solve that anywhere else
+                     cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
+                     cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
+                     cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
 
-                    cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
-                    cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
-                    cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
+                     cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
+                     cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
+                     cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
 
-                    cheermoteSet.cheermotes.emplace_back(cheermote);
-                }
+                     cheermoteSet.cheermotes.emplace_back(cheermote);
+                 }
 
-                std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
-                          [](const auto &lhs, const auto &rhs) {
-                              return lhs.minBits < rhs.minBits;  //
-                          });
+                 std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
+                           [](const auto &lhs, const auto &rhs) {
+                               return lhs.minBits < rhs.minBits;  //
+                           });
 
-                ch.cheermoteSets.emplace_back(cheermoteSet);
-            }
-        });
+                 ch.cheermoteSets.emplace_back(cheermoteSet);
+             }
+         });
 }
 
 void ResourceManager::loadDynamicTwitchBadges()
 {
     static QString url("https://badges.twitch.tv/v1/badges/global/display?language=en");
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.getJSON([this](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
@@ -426,7 +426,7 @@ void ResourceManager::loadChatterinoBadges()
 
     static QString url("https://fourtf.com/chatterino/badges.json");
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
 
     req.getJSON([this](QJsonObject &root) {
@@ -438,7 +438,7 @@ void ResourceManager::loadChatterinoBadges()
             const QString &badgeVariantImageURL = badgeVariant.value("image").toString();
 
             auto badgeVariantPtr = std::make_shared<ChatterinoBadge>(
-                badgeVariantTooltip, new messages::Image(badgeVariantImageURL));
+                badgeVariantTooltip, new chatterino::Image(badgeVariantImageURL));
 
             QJsonArray badgeVariantUsers = badgeVariant.value("users").toArray();
 

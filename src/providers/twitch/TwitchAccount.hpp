@@ -27,7 +27,7 @@ enum FollowResult {
     FollowResult_Failed,
 };
 
-class TwitchAccount : public controllers::accounts::Account
+class TwitchAccount : public Account
 {
 public:
     TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient,

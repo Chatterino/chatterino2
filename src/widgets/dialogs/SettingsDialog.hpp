@@ -47,7 +47,7 @@ private:
 
     void initUi();
     void addTabs();
-    void addTab(settingspages::SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
+    void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
 
     void select(SettingsDialogTab *tab);
 

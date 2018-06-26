@@ -7,7 +7,7 @@ namespace chatterino {
 
 class TaggedUsersController;
 
-class TaggedUsersModel : public util::SignalVectorModel<TaggedUser>
+class TaggedUsersModel : public SignalVectorModel<TaggedUser>
 {
     explicit TaggedUsersModel(QObject *parent);
 

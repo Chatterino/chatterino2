@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
-    : util::SignalVectorModel<HighlightPhrase>(4, parent)
+    : SignalVectorModel<HighlightPhrase>(4, parent)
 {
 }
 
@@ -26,19 +26,19 @@ HighlightPhrase HighlightModel::getItemFromRow(std::vector<QStandardItem *> &row
 // turns a row in the model into a vector item
 void HighlightModel::getRowFromItem(const HighlightPhrase &item, std::vector<QStandardItem *> &row)
 {
-    util::setStringItem(row[0], item.getPattern());
-    util::setBoolItem(row[1], item.getAlert());
-    util::setBoolItem(row[2], item.getSound());
-    util::setBoolItem(row[3], item.isRegex());
+    setStringItem(row[0], item.getPattern());
+    setBoolItem(row[1], item.getAlert());
+    setBoolItem(row[2], item.getSound());
+    setBoolItem(row[3], item.isRegex());
 }
 
 void HighlightModel::afterInit()
 {
     std::vector<QStandardItem *> row = this->createRow();
-    util::setBoolItem(row[0], getApp()->settings->enableHighlightsSelf.getValue(), true, false);
+    setBoolItem(row[0], getApp()->settings->enableHighlightsSelf.getValue(), true, false);
     row[0]->setData("Your username (automatic)", Qt::DisplayRole);
-    util::setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true, false);
-    util::setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(), true, false);
+    setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true, false);
+    setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(), true, false);
     row[3]->setFlags(0);
     this->insertCustomRow(row, 0);
 }

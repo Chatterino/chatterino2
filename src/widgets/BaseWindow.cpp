@@ -8,10 +8,10 @@
 #include "util/NativeEventHelper.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
-#include "widgets/helper/Shortcut.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/Shortcut.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -60,7 +60,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     this->connections_.managedConnect(
         getApp()->settings->uiScale.getValueChangedSignal(),
-        [this](auto, auto) { util::postToThread([this] { this->updateScale(); }); });
+        [this](auto, auto) { postToThread([this] { this->updateScale(); }); });
 
     this->updateScale();
 
@@ -147,7 +147,7 @@ void BaseWindow::init()
     }
 
 // DPI
-//    auto dpi = util::getWindowDpi(this->winId());
+//    auto dpi = getWindowDpi(this->winId());
 
 //    if (dpi) {
 //        this->scale = dpi.value() / 96.f;
@@ -171,6 +171,7 @@ void BaseWindow::init()
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
 //    }
 #endif
+}
 
 void BaseWindow::setStayInScreenRect(bool value)
 {
@@ -249,10 +250,10 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(singletons::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() - 1));
         }
     }
@@ -278,7 +279,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
             };
 
             if (!recursiveCheckMouseTracking(widget)) {
-                debug::Log("Start moving");
+                Log("Start moving");
                 this->moving = true;
             }
         }
@@ -293,7 +294,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_ & FramelessDraggable) {
         if (this->moving) {
-            debug::Log("Stop moving");
+            Log("Stop moving");
             this->moving = false;
         }
     }
@@ -438,7 +439,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
             return true;
         }
         case WM_SHOWWINDOW: {
-            if (auto dpi = util::getWindowDpi(msg->hwnd)) {
+            if (auto dpi = getWindowDpi(msg->hwnd)) {
                 this->nativeScale_ = dpi.get() / 96.f;
                 this->updateScale();
             }

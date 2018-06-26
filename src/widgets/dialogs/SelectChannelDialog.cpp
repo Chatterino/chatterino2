@@ -23,13 +23,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     this->tabFilter.dialog = this;
 
-    util::LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
+    LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
     auto notebook = layout.emplace<Notebook>(this).assign(&this->ui_.notebook);
 
     // twitch
     {
-        util::LayoutCreator<QWidget> obj(new QWidget());
+        LayoutCreator<QWidget> obj(new QWidget());
         auto vbox = obj.setLayoutType<QVBoxLayout>();
 
         // channel_btn
@@ -106,7 +106,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     // irc
     /*{
-        util::LayoutCreator<QWidget> obj(new QWidget());
+        LayoutCreator<QWidget> obj(new QWidget());
         auto vbox = obj.setLayoutType<QVBoxLayout>();
 
         auto edit = vbox.emplace<QLabel>("not implemented");

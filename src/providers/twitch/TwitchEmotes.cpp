@@ -1,10 +1,10 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
+#include "common/UrlFetch.hpp"
+#include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
-#include "debug/Benchmark.hpp"
 #include "util/RapidjsonHelpers.hpp"
-#include "common/UrlFetch.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
@@ -47,19 +47,19 @@ QString cleanUpCode(const QString &dirtyEmoteCode)
 
 void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
 {
-    debug::Log("Load twitch emote set data for {}", emoteSet->key);
-    util::NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" +
-                             emoteSet->key + "/");
+    Log("Load twitch emote set data for {}", emoteSet->key);
+    NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
+                       "/");
 
-    req.setRequestType(util::NetworkRequest::GetRequest);
+    req.setRequestType(NetworkRequest::GetRequest);
 
     req.onError([](int errorCode) -> bool {
-        debug::Log("Emote sets on ERROR {}", errorCode);
+        Log("Emote sets on ERROR {}", errorCode);
         return true;
     });
 
     req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
-        debug::Log("Emote sets on success");
+        Log("Emote sets on success");
         if (!root.IsObject()) {
             return false;
         }
@@ -99,7 +99,7 @@ TwitchEmotes::TwitchEmotes()
 
 // id is used for lookup
 // emoteName is used for giving a name to the emote in case it doesn't exist
-util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName)
+EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName)
 {
     QString _emoteName = emoteName;
     _emoteName.replace("<", "&lt;");
@@ -121,18 +121,18 @@ util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emo
     }
 
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
-        util::EmoteData newEmoteData;
+        EmoteData newEmoteData;
         auto cleanCode = cleanUpCode(emoteName);
-        newEmoteData.image1x = new messages::Image(getEmoteLink(id, "1.0"), 1, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 1x");
+        newEmoteData.image1x = new chatterino::Image(getEmoteLink(id, "1.0"), 1, emoteName,
+                                                     _emoteName + "<br/>Twitch Emote 1x");
         newEmoteData.image1x->setCopyString(cleanCode);
 
-        newEmoteData.image2x = new messages::Image(getEmoteLink(id, "2.0"), .5, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 2x");
+        newEmoteData.image2x = new chatterino::Image(getEmoteLink(id, "2.0"), .5, emoteName,
+                                                     _emoteName + "<br/>Twitch Emote 2x");
         newEmoteData.image2x->setCopyString(cleanCode);
 
-        newEmoteData.image3x = new messages::Image(getEmoteLink(id, "3.0"), .25, emoteName,
-                                                   _emoteName + "<br/>Twitch Emote 3x");
+        newEmoteData.image3x = new chatterino::Image(getEmoteLink(id, "3.0"), .25, emoteName,
+                                                     _emoteName + "<br/>Twitch Emote 3x");
 
         newEmoteData.image3x->setCopyString(cleanCode);
 
@@ -142,21 +142,21 @@ util::EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emo
 
 void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
 {
-    debug::Log("Loading Twitch emotes for user {}", user->getUserName());
+    Log("Loading Twitch emotes for user {}", user->getUserName());
 
     const auto &roomID = user->getUserId();
     const auto &clientID = user->getOAuthClient();
     const auto &oauthToken = user->getOAuthToken();
 
     if (clientID.isEmpty() || oauthToken.isEmpty()) {
-        debug::Log("Missing Client ID or OAuth token");
+        Log("Missing Client ID or OAuth token");
         return;
     }
 
     TwitchAccountEmoteData &emoteData = this->emotes[roomID];
 
     if (emoteData.filled) {
-        debug::Log("Emotes are already loaded for room id {}", roomID);
+        Log("Emotes are already loaded for room id {}", roomID);
         return;
     }
 
@@ -183,7 +183,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
                 emoteSet->emotes.emplace_back(id, cleanCode);
                 emoteData.emoteCodes.push_back(cleanCode);
 
-                util::EmoteData emote = this->getEmoteById(id, code);
+                EmoteData emote = this->getEmoteById(id, code);
                 emoteData.emotes.insert(code, emote);
             }
 
@@ -193,13 +193,13 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
         emoteData.filled = true;
     };
 
-    util::twitch::getAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
+    getAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
 }
 
 void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
 {
     if (!emoteSet) {
-        debug::Log("null emote set sent");
+        Log("null emote set sent");
         return;
     }
 
@@ -211,14 +211,14 @@ void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
         return;
     }
 
-    debug::Log("Load twitch emote set data for {}..", emoteSet->key);
-    util::NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" +
-                             emoteSet->key + "/");
+    Log("Load twitch emote set data for {}..", emoteSet->key);
+    NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
+                       "/");
 
-    req.setRequestType(util::NetworkRequest::GetRequest);
+    req.setRequestType(NetworkRequest::GetRequest);
 
     req.onError([](int errorCode) -> bool {
-        debug::Log("Emote sets on ERROR {}", errorCode);
+        Log("Emote sets on ERROR {}", errorCode);
         return true;
     });
 
@@ -238,7 +238,7 @@ void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
             return false;
         }
 
-        debug::Log("Loaded twitch emote set data for {}!", emoteSet->key);
+        Log("Loaded twitch emote set data for {}!", emoteSet->key);
 
         if (type == "sub") {
             emoteSet->text = QString("Twitch Subscriber Emote (%1)").arg(channelName);

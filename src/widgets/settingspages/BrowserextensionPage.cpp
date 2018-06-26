@@ -15,7 +15,7 @@ namespace chatterino {
 BrowserExtensionPage::BrowserExtensionPage()
     : SettingsPage("Browser Extension", "")
 {
-    auto layout = util::LayoutCreator<BrowserExtensionPage>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<BrowserExtensionPage>(this).setLayoutType<QVBoxLayout>();
 
     auto label =
         layout.emplace<QLabel>("The browser extension will replace the default Twitch.tv chat with "

@@ -31,17 +31,17 @@ CommandPage::CommandPage()
 {
     auto app = getApp();
 
-    util::LayoutCreator<CommandPage> layoutCreator(this);
+    LayoutCreator<CommandPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    helper::EditableModelView *view =
-        layout.emplace<helper::EditableModelView>(app->commands->createModel(nullptr)).getElement();
+    EditableModelView *view =
+        layout.emplace<EditableModelView>(app->commands->createModel(nullptr)).getElement();
 
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
     view->addButtonPressed.connect([] {
         getApp()->commands->items.appendItem(
-            controllers::commands::Command{"/command", "I made a new command HeyGuys"});
+            Command{"/command", "I made a new command HeyGuys"});
     });
 
     layout.append(this->createCheckBox("Also match the trigger at the end of the message",

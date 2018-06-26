@@ -35,39 +35,39 @@ public:
         QPixmap unmod;
     } buttons;
 
-    messages::Image *badgeStaff;
-    messages::Image *badgeAdmin;
-    messages::Image *badgeGlobalModerator;
-    messages::Image *badgeModerator;
-    messages::Image *badgeTurbo;
-    messages::Image *badgeBroadcaster;
-    messages::Image *badgePremium;
-    messages::Image *badgeVerified;
-    messages::Image *badgeSubscriber;
-    messages::Image *badgeCollapsed;
+    chatterino::Image *badgeStaff;
+    chatterino::Image *badgeAdmin;
+    chatterino::Image *badgeGlobalModerator;
+    chatterino::Image *badgeModerator;
+    chatterino::Image *badgeTurbo;
+    chatterino::Image *badgeBroadcaster;
+    chatterino::Image *badgePremium;
+    chatterino::Image *badgeVerified;
+    chatterino::Image *badgeSubscriber;
+    chatterino::Image *badgeCollapsed;
 
-    messages::Image *cheerBadge100000;
-    messages::Image *cheerBadge10000;
-    messages::Image *cheerBadge5000;
-    messages::Image *cheerBadge1000;
-    messages::Image *cheerBadge100;
-    messages::Image *cheerBadge1;
+    chatterino::Image *cheerBadge100000;
+    chatterino::Image *cheerBadge10000;
+    chatterino::Image *cheerBadge5000;
+    chatterino::Image *cheerBadge1000;
+    chatterino::Image *cheerBadge100;
+    chatterino::Image *cheerBadge1;
 
-    messages::Image *moderationmode_enabled;
-    messages::Image *moderationmode_disabled;
+    chatterino::Image *moderationmode_enabled;
+    chatterino::Image *moderationmode_disabled;
 
-    messages::Image *splitHeaderContext;
+    chatterino::Image *splitHeaderContext;
 
-    std::map<std::string, messages::Image *> cheerBadges;
+    std::map<std::string, chatterino::Image *> cheerBadges;
 
     struct BadgeVersion {
         BadgeVersion() = delete;
 
         explicit BadgeVersion(QJsonObject &&root);
 
-        messages::Image *badgeImage1x;
-        messages::Image *badgeImage2x;
-        messages::Image *badgeImage4x;
+        chatterino::Image *badgeImage1x;
+        chatterino::Image *badgeImage2x;
+        chatterino::Image *badgeImage4x;
         std::string description;
         std::string title;
         std::string clickAction;
@@ -82,8 +82,8 @@ public:
 
     bool dynamicBadgesLoaded = false;
 
-    messages::Image *buttonBan;
-    messages::Image *buttonTimeout;
+    chatterino::Image *buttonBan;
+    chatterino::Image *buttonTimeout;
 
     struct JSONCheermoteSet {
         QString prefix;
@@ -102,7 +102,7 @@ public:
             QString color;
 
             //       Background        State             Scale
-            std::map<QString, std::map<QString, std::map<QString, messages::Image *>>> images;
+            std::map<QString, std::map<QString, std::map<QString, chatterino::Image *>>> images;
         };
 
         std::vector<CheermoteTier> tiers;
@@ -113,8 +113,8 @@ public:
         QColor color;
         int minBits;
 
-        util::EmoteData emoteDataAnimated;
-        util::EmoteData emoteDataStatic;
+        EmoteData emoteDataAnimated;
+        EmoteData emoteDataStatic;
     };
 
     struct CheermoteSet {
@@ -135,14 +135,14 @@ public:
 
     // Chatterino badges
     struct ChatterinoBadge {
-        ChatterinoBadge(const std::string &_tooltip, messages::Image *_image)
+        ChatterinoBadge(const std::string &_tooltip, chatterino::Image *_image)
             : tooltip(_tooltip)
             , image(_image)
         {
         }
 
         std::string tooltip;
-        messages::Image *image;
+        chatterino::Image *image;
     };
 
     //       username

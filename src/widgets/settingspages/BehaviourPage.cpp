@@ -24,7 +24,7 @@ BehaviourPage::BehaviourPage()
     : SettingsPage("Feel", ":/images/behave.svg")
 {
     auto app = getApp();
-    util::LayoutCreator<BehaviourPage> layoutCreator(this);
+    LayoutCreator<BehaviourPage> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 

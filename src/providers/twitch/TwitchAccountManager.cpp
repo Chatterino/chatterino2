@@ -92,18 +92,18 @@ void TwitchAccountManager::reloadUsers()
 
         switch (this->addUser(userData)) {
             case AddUserResponse::UserAlreadyExists: {
-                debug::Log("User {} already exists", userData.username);
+                Log("User {} already exists", userData.username);
                 // Do nothing
             } break;
             case AddUserResponse::UserValuesUpdated: {
-                debug::Log("User {} already exists, and values updated!", userData.username);
+                Log("User {} already exists, and values updated!", userData.username);
                 if (userData.username == this->getCurrent()->getUserName()) {
-                    debug::Log("It was the current user, so we need to reconnect stuff!");
+                    Log("It was the current user, so we need to reconnect stuff!");
                     this->currentUserChanged.invoke();
                 }
             } break;
             case AddUserResponse::UserAdded: {
-                debug::Log("Added user {}", userData.username);
+                Log("Added user {}", userData.username);
                 listUpdated = true;
             } break;
         }
@@ -122,11 +122,11 @@ void TwitchAccountManager::load()
         QString newUsername(QString::fromStdString(newValue));
         auto user = this->findUserByUsername(newUsername);
         if (user) {
-            debug::Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
+            Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
                        newUsername);
             this->currentUser = user;
         } else {
-            debug::Log(
+            Log(
                 "[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
             this->currentUser = this->anonymousUser;
         }

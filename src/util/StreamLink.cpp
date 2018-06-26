@@ -167,7 +167,7 @@ void Start(const QString &channel)
 
     if (preferredQuality == "choose") {
         GetStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            widgets::QualityPopup::showDialog(channel, qualityOptions);
+            QualityPopup::showDialog(channel, qualityOptions);
         });
 
         return;

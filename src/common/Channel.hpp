@@ -35,23 +35,23 @@ public:
 
     pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
 
-    pajlada::Signals::Signal<messages::MessagePtr &> messageRemovedFromStart;
-    pajlada::Signals::Signal<messages::MessagePtr &> messageAppended;
-    pajlada::Signals::Signal<std::vector<messages::MessagePtr> &> messagesAddedAtStart;
-    pajlada::Signals::Signal<size_t, messages::MessagePtr &> messageReplaced;
+    pajlada::Signals::Signal<chatterino::MessagePtr &> messageRemovedFromStart;
+    pajlada::Signals::Signal<chatterino::MessagePtr &> messageAppended;
+    pajlada::Signals::Signal<std::vector<chatterino::MessagePtr> &> messagesAddedAtStart;
+    pajlada::Signals::Signal<size_t, chatterino::MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
 
     Type getType() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
-    messages::LimitedQueueSnapshot<messages::MessagePtr> getMessageSnapshot();
+    chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> getMessageSnapshot();
 
-    void addMessage(messages::MessagePtr message);
-    void addMessagesAtStart(std::vector<messages::MessagePtr> &messages);
-    void addOrReplaceTimeout(messages::MessagePtr message);
+    void addMessage(chatterino::MessagePtr message);
+    void addMessagesAtStart(std::vector<chatterino::MessagePtr> &messages);
+    void addOrReplaceTimeout(chatterino::MessagePtr message);
     void disableAllMessages();
-    void replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement);
-    virtual void addRecentChatter(const std::shared_ptr<messages::Message> &message);
+    void replaceMessage(chatterino::MessagePtr message, chatterino::MessagePtr replacement);
+    virtual void addRecentChatter(const std::shared_ptr<chatterino::Message> &message);
 
     QString name;
     QStringList modList;
@@ -69,7 +69,7 @@ protected:
     virtual void onConnected();
 
 private:
-    messages::LimitedQueue<messages::MessagePtr> messages;
+    chatterino::LimitedQueue<chatterino::MessagePtr> messages;
     Type type;
 };
 

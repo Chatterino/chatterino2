@@ -19,7 +19,7 @@ CompletionModel::CompletionModel(const QString &_channelName)
 
 void CompletionModel::refresh()
 {
-    debug::Log("[CompletionModel:{}] Refreshing...]", this->channelName);
+    Log("[CompletionModel:{}] Refreshing...]", this->channelName);
 
     auto app = getApp();
 
@@ -75,7 +75,7 @@ void CompletionModel::refresh()
 
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
-    //    auto c = singletons::ChannelManager::getInstance().getTwitchChannel(this->channelName);
+    //    auto c = chatterino::ChannelManager::getInstance().getTwitchChannel(this->channelName);
     //    auto usernames = c->getUsernamesForCompletions();
     //    for (const auto &name : usernames) {
     //        assert(!name.displayName.isEmpty());
@@ -131,7 +131,7 @@ void CompletionModel::ClearExpiredStrings()
         const auto &taggedString = *it;
 
         if (taggedString.HasExpired(now)) {
-            // debug::Log("String {} expired", taggedString.str);
+            // Log("String {} expired", taggedString.str);
             it = this->emotes.erase(it);
         } else {
             ++it;

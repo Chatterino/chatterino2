@@ -9,7 +9,7 @@ namespace chatterino {
 
 class CommandController;
 
-class CommandModel : public util::SignalVectorModel<Command>
+class CommandModel : public SignalVectorModel<Command>
 {
     explicit CommandModel(QObject *parent);
 

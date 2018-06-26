@@ -36,14 +36,14 @@ public:
 
     const std::vector<TVectorItem> &getVector() const
     {
-        util::assertInGuiThread();
+        assertInGuiThread();
 
         return this->vector;
     }
 
     void invokeDelayedItemsChanged()
     {
-        util::assertInGuiThread();
+        assertInGuiThread();
 
         if (!this->itemsChangedTimer.isActive()) {
             itemsChangedTimer.start();
@@ -64,7 +64,7 @@ public:
 
     void removeItem(int index, void *caller = 0)
     {
-        util::assertInGuiThread();
+        assertInGuiThread();
         assert(index >= 0 && index < this->vector.size());
 
         TVectorItem item = this->vector[index];
@@ -87,7 +87,7 @@ class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
 public:
     virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = 0) override
     {
-        util::assertInGuiThread();
+        assertInGuiThread();
         if (index == -1) {
             index = this->vector.size();
         } else {
@@ -109,7 +109,7 @@ class SortedSignalVector : public BaseSignalVector<TVectorItem>
 public:
     virtual int insertItem(const TVectorItem &item, int = -1, void *caller = nullptr) override
     {
-        util::assertInGuiThread();
+        assertInGuiThread();
 
         auto it = std::lower_bound(this->vector.begin(), this->vector.end(), item, Compare{});
         int index = it - this->vector.begin();

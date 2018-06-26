@@ -73,7 +73,7 @@ void SearchPopup::performSearch()
     ChannelPtr channel(new Channel("search", Channel::None));
 
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
-        messages::MessagePtr message = this->snapshot[i];
+        chatterino::MessagePtr message = this->snapshot[i];
 
         if (text.isEmpty() ||
             message->searchText.indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) != -1) {

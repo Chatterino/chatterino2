@@ -41,7 +41,7 @@ protected:
 
     void setScale(float value);
 
-    singletons::ThemeManager *themeManager;
+    chatterino::ThemeManager *themeManager;
 
 private:
     void init();

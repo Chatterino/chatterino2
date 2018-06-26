@@ -54,22 +54,22 @@ void Application::construct()
     isAppConstructed = true;
 
     // 1. Instantiate all classes
-    this->settings = new singletons::SettingManager;
-    this->paths = singletons::PathManager::getInstance();
-    this->themes = new singletons::ThemeManager;
-    this->windows = new singletons::WindowManager;
-    this->logging = new singletons::LoggingManager;
-    this->commands = new controllers::commands::CommandController;
-    this->highlights = new controllers::highlights::HighlightController;
-    this->ignores = new controllers::ignores::IgnoreController;
-    this->taggedUsers = new controllers::taggedusers::TaggedUsersController;
-    this->accounts = new controllers::accounts::AccountController;
-    this->emotes = new singletons::EmoteManager;
-    this->fonts = new singletons::FontManager;
-    this->resources = new singletons::ResourceManager;
+    this->settings = new chatterino::SettingManager;
+    this->paths = chatterino::PathManager::getInstance();
+    this->themes = new chatterino::ThemeManager;
+    this->windows = new chatterino::WindowManager;
+    this->logging = new chatterino::LoggingManager;
+    this->commands = new CommandController;
+    this->highlights = new HighlightController;
+    this->ignores = new IgnoreController;
+    this->taggedUsers = new TaggedUsersController;
+    this->accounts = new AccountController;
+    this->emotes = new chatterino::EmoteManager;
+    this->fonts = new chatterino::FontManager;
+    this->resources = new chatterino::ResourceManager;
 
-    this->twitch.server = new providers::twitch::TwitchServer;
-    this->twitch.pubsub = new providers::twitch::PubSub;
+    this->twitch.server = new TwitchServer;
+    this->twitch.pubsub = new PubSub;
 }
 
 void Application::instantiate(int argc, char **argv)
@@ -119,11 +119,11 @@ void Application::initialize()
 #endif
 
     this->twitch.pubsub->sig.whisper.sent.connect([](const auto &msg) {
-        debug::Log("WHISPER SENT LOL");  //
+        Log("WHISPER SENT LOL");  //
     });
 
     this->twitch.pubsub->sig.whisper.received.connect([](const auto &msg) {
-        debug::Log("WHISPER RECEIVED LOL");  //
+        Log("WHISPER RECEIVED LOL");  //
     });
 
     this->twitch.pubsub->sig.moderation.chatCleared.connect([this](const auto &action) {
@@ -134,8 +134,8 @@ void Application::initialize()
 
         QString text = QString("%1 cleared the chat").arg(action.source.name);
 
-        auto msg = messages::Message::createSystemMessage(text);
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        auto msg = chatterino::Message::createSystemMessage(text);
+        postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.modeChanged.connect([this](const auto &action) {
@@ -144,18 +144,17 @@ void Application::initialize()
             return;
         }
 
-        QString text =
-            QString("%1 turned %2 %3 mode")  //
-                .arg(action.source.name)
-                .arg(action.state == providers::twitch::ModeChangedAction::State::On ? "on" : "off")
-                .arg(action.getModeName());
+        QString text = QString("%1 turned %2 %3 mode")  //
+                           .arg(action.source.name)
+                           .arg(action.state == ModeChangedAction::State::On ? "on" : "off")
+                           .arg(action.getModeName());
 
         if (action.duration > 0) {
             text.append(" (" + QString::number(action.duration) + " seconds)");
         }
 
-        auto msg = messages::Message::createSystemMessage(text);
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        auto msg = chatterino::Message::createSystemMessage(text);
+        postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.moderationStateChanged.connect([this](const auto &action) {
@@ -172,8 +171,8 @@ void Application::initialize()
             text = QString("%1 unmodded %2").arg(action.source.name, action.target.name);
         }
 
-        auto msg = messages::Message::createSystemMessage(text);
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        auto msg = chatterino::Message::createSystemMessage(text);
+        postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.userBanned.connect([&](const auto &action) {
@@ -183,10 +182,10 @@ void Application::initialize()
             return;
         }
 
-        auto msg = messages::Message::createTimeoutMessage(action);
-        msg->flags |= messages::Message::PubSub;
+        auto msg = chatterino::Message::createTimeoutMessage(action);
+        msg->flags |= chatterino::Message::PubSub;
 
-        util::postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
+        postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
     });
 
     this->twitch.pubsub->sig.moderation.userUnbanned.connect([&](const auto &action) {
@@ -196,9 +195,9 @@ void Application::initialize()
             return;
         }
 
-        auto msg = messages::Message::createUntimeoutMessage(action);
+        auto msg = chatterino::Message::createUntimeoutMessage(action);
 
-        util::postToThread([chan, msg] { chan->addMessage(msg); });
+        postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
     this->twitch.pubsub->start();

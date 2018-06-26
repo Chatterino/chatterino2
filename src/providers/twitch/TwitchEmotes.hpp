@@ -17,10 +17,10 @@ class TwitchEmotes
 public:
     TwitchEmotes();
 
-    util::EmoteData getEmoteById(const QString &id, const QString &emoteName);
+    EmoteData getEmoteById(const QString &id, const QString &emoteName);
 
     /// Twitch emotes
-    void refresh(const std::shared_ptr<providers::twitch::TwitchAccount> &user);
+    void refresh(const std::shared_ptr<TwitchAccount> &user);
 
     struct TwitchEmote {
         TwitchEmote(const QString &_id, const QString &_code)
@@ -50,7 +50,7 @@ public:
 
         std::vector<QString> emoteCodes;
 
-        util::EmoteMap emotes;
+        EmoteMap emotes;
 
         bool filled = false;
     };
@@ -62,10 +62,10 @@ private:
     void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet);
 
     //            emote code
-    util::ConcurrentMap<QString, providers::twitch::EmoteValue *> _twitchEmotes;
+    ConcurrentMap<QString, EmoteValue *> _twitchEmotes;
 
     //        emote id
-    util::ConcurrentMap<QString, util::EmoteData> _twitchEmoteFromCache;
+    ConcurrentMap<QString, EmoteData> _twitchEmoteFromCache;
 };
 
 }  // namespace chatterino

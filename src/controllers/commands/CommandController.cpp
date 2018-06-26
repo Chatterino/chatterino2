@@ -23,8 +23,6 @@
             "/followersoff"                                                                   \
     }
 
-using namespace chatterino::providers::twitch;
-
 namespace chatterino {
 
 CommandController::CommandController()
@@ -72,8 +70,7 @@ void CommandController::save()
 {
     QFile textFile(this->filePath);
     if (!textFile.open(QIODevice::WriteOnly)) {
-        debug::Log("[CommandController::saveCommands] Unable to open {} for writing",
-                   this->filePath);
+        Log("[CommandController::saveCommands] Unable to open {} for writing", this->filePath);
         return;
     }
 
@@ -115,17 +112,15 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 auto app = getApp();
 
-                messages::MessageBuilder b;
+                MessageBuilder b;
 
-                b.emplace<messages::TimestampElement>();
-                b.emplace<messages::TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                                                 messages::MessageElement::Text,
-                                                 messages::MessageColor::Text,
-                                                 FontStyle::ChatMediumBold);
-                b.emplace<messages::TextElement>("->", messages::MessageElement::Text);
-                b.emplace<messages::TextElement>(words[1] + ":", messages::MessageElement::Text,
-                                                 messages::MessageColor::Text,
-                                                 FontStyle::ChatMediumBold);
+                b.emplace<TimestampElement>();
+                b.emplace<TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
+                                       MessageElement::Text, MessageColor::Text,
+                                       FontStyle::ChatMediumBold);
+                b.emplace<TextElement>("->", MessageElement::Text);
+                b.emplace<TextElement>(words[1] + ":", MessageElement::Text, MessageColor::Text,
+                                       FontStyle::ChatMediumBold);
 
                 QString rest = "";
 
@@ -133,8 +128,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                     rest += words[i] + " ";
                 }
 
-                b.emplace<messages::TextElement>(rest, messages::MessageElement::Text);
-                b.getMessage()->flags |= messages::Message::DoNotTriggerNotification;
+                b.emplace<TextElement>(rest, MessageElement::Text);
+                b.getMessage()->flags |= Message::DoNotTriggerNotification;
 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
@@ -157,7 +152,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             if (commandName == "/debug-args") {
                 QString msg = QApplication::instance()->arguments().join(' ');
 
-                channel->addMessage(messages::Message::createSystemMessage(msg));
+                channel->addMessage(chatterino::Message::createSystemMessage(msg));
 
                 return "";
             } else if (commandName == "/uptime") {
@@ -166,7 +161,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 QString messageText =
                     streamStatus.live ? streamStatus.uptime : "Channel is not live.";
 
-                channel->addMessage(messages::Message::createSystemMessage(messageText));
+                channel->addMessage(chatterino::Message::createSystemMessage(messageText));
 
                 return "";
             } else if (commandName == "/ignore" && words.size() >= 2) {
@@ -176,13 +171,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(messages::Message::createSystemMessage(
+                    channel->addMessage(chatterino::Message::createSystemMessage(
                         "You must be logged in to ignore someone"));
                     return "";
                 }
 
                 user->ignore(target, [channel](auto resultCode, const QString &message) {
-                    channel->addMessage(messages::Message::createSystemMessage(message));
+                    channel->addMessage(chatterino::Message::createSystemMessage(message));
                 });
 
                 return "";
@@ -193,13 +188,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(messages::Message::createSystemMessage(
+                    channel->addMessage(chatterino::Message::createSystemMessage(
                         "You must be logged in to ignore someone"));
                     return "";
                 }
 
                 user->unignore(target, [channel](auto resultCode, const QString &message) {
-                    channel->addMessage(messages::Message::createSystemMessage(message));
+                    channel->addMessage(chatterino::Message::createSystemMessage(message));
                 });
 
                 return "";

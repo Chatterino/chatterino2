@@ -20,7 +20,7 @@ public:
 
     void initialize();
 
-    void addMessage(const QString &channelName, messages::MessagePtr message);
+    void addMessage(const QString &channelName, chatterino::MessagePtr message);
 
 private:
     std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels;

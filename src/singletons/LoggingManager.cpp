@@ -17,7 +17,7 @@ void LoggingManager::initialize()
     this->pathManager = getApp()->paths;
 }
 
-void LoggingManager::addMessage(const QString &channelName, messages::MessagePtr message)
+void LoggingManager::addMessage(const QString &channelName, chatterino::MessagePtr message)
 {
     auto app = getApp();
 

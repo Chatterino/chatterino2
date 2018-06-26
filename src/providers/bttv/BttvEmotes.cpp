@@ -21,7 +21,7 @@ void BTTVEmotes::loadGlobalEmotes()
 {
     QString url("https://api.betterttv.net/2/emotes");
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(30000);
     req.setUseQuickLoadCache(true);
@@ -35,12 +35,12 @@ void BTTVEmotes::loadGlobalEmotes()
             QString id = emote.toObject().value("id").toString();
             QString code = emote.toObject().value("code").toString();
 
-            util::EmoteData emoteData;
-            emoteData.image1x = new messages::Image(getEmoteLink(urlTemplate, id, "1x"), 1, code,
+            EmoteData emoteData;
+            emoteData.image1x = new chatterino::Image(getEmoteLink(urlTemplate, id, "1x"), 1, code,
                                                     code + "<br />Global BTTV Emote");
-            emoteData.image2x = new messages::Image(getEmoteLink(urlTemplate, id, "2x"), 0.5, code,
+            emoteData.image2x = new chatterino::Image(getEmoteLink(urlTemplate, id, "2x"), 0.5, code,
                                                     code + "<br />Global BTTV Emote");
-            emoteData.image3x = new messages::Image(getEmoteLink(urlTemplate, id, "3x"), 0.25, code,
+            emoteData.image3x = new chatterino::Image(getEmoteLink(urlTemplate, id, "3x"), 0.25, code,
                                                     code + "<br />Global BTTV Emote");
             emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
@@ -52,15 +52,15 @@ void BTTVEmotes::loadGlobalEmotes()
     });
 }
 
-void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util::EmoteMap> _map)
+void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
 {
     printf("[BTTVEmotes] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.betterttv.net/2/channels/" + channelName);
 
-    debug::Log("Request bttv channel emotes for {}", channelName);
+    Log("Request bttv channel emotes for {}", channelName);
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(3000);
     req.setUseQuickLoadCache(true);
@@ -86,21 +86,21 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<uti
             // emoteObject.value("imageType").toString();
 
             auto emote = this->channelEmoteCache.getOrAdd(id, [&] {
-                util::EmoteData emoteData;
+                EmoteData emoteData;
                 QString link = linkTemplate;
                 link.detach();
                 emoteData.image1x =
-                    new messages::Image(link.replace("{{id}}", id).replace("{{image}}", "1x"), 1,
+                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "1x"), 1,
                                         code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
                 emoteData.image2x =
-                    new messages::Image(link.replace("{{id}}", id).replace("{{image}}", "2x"), 0.5,
+                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "2x"), 0.5,
                                         code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
                 emoteData.image3x =
-                    new messages::Image(link.replace("{{id}}", id).replace("{{image}}", "3x"), 0.25,
+                    new chatterino::Image(link.replace("{{id}}", id).replace("{{image}}", "3x"), 0.25,
                                         code, code + "<br />Channel BTTV Emote");
                 emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 

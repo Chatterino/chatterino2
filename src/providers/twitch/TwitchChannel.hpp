@@ -60,12 +60,12 @@ public:
     bool isBroadcaster() const override;
     bool hasModRights();
 
-    void addRecentChatter(const std::shared_ptr<messages::Message> &message) final;
+    void addRecentChatter(const std::shared_ptr<chatterino::Message> &message) final;
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
 
-    const std::shared_ptr<chatterino::util::EmoteMap> bttvChannelEmotes;
-    const std::shared_ptr<chatterino::util::EmoteMap> ffzChannelEmotes;
+    const std::shared_ptr<EmoteMap> bttvChannelEmotes;
+    const std::shared_ptr<EmoteMap> ffzChannelEmotes;
 
     const QString subscriptionURL;
     const QString channelURL;

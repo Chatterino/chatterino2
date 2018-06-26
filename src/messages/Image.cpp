@@ -1,13 +1,13 @@
 #include "messages/Image.hpp"
 
 #include "Application.hpp"
+#include "common/NetworkManager.hpp"
+#include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
 #include "singletons/EmoteManager.hpp"
 #include "singletons/IrcManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "common/NetworkManager.hpp"
 #include "util/PostToThread.hpp"
-#include "common/UrlFetch.hpp"
 
 #include <QBuffer>
 #include <QImageReader>
@@ -32,7 +32,7 @@ Image::Image(const QString &url, qreal scale, const QString &name, const QString
     , ishat(isHat)
     , scale(scale)
 {
-    util::DebugCount::increase("images");
+    DebugCount::increase("images");
 }
 
 Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &tooltip,
@@ -46,25 +46,25 @@ Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &to
     , isLoading(true)
     , isLoaded(true)
 {
-    util::DebugCount::increase("images");
+    DebugCount::increase("images");
 }
 
 Image::~Image()
 {
-    util::DebugCount::decrease("images");
+    DebugCount::decrease("images");
 
     if (this->isAnimated()) {
-        util::DebugCount::decrease("animated images");
+        DebugCount::decrease("animated images");
     }
 
     if (this->isLoaded) {
-        util::DebugCount::decrease("loaded images");
+        DebugCount::decrease("loaded images");
     }
 }
 
 void Image::loadImage()
 {
-    util::NetworkRequest req(this->getUrl());
+    NetworkRequest req(this->getUrl());
     req.setCaller(this);
     req.setUseQuickLoadCache(true);
     req.get([this](QByteArray bytes) -> bool {
@@ -80,21 +80,21 @@ void Image::loadImage()
         // clear stuff before loading the image again
         this->allFrames.clear();
         if (this->isAnimated()) {
-            util::DebugCount::decrease("animated images");
+            DebugCount::decrease("animated images");
         }
         if (this->isLoaded) {
-            util::DebugCount::decrease("loaded images");
+            DebugCount::decrease("loaded images");
         }
 
         if (reader.imageCount() == -1) {
             // An error occured in the reader
-            debug::Log("An error occured reading the image: '{}'", reader.errorString());
-            debug::Log("Image url: {}", this->url);
+            Log("An error occured reading the image: '{}'", reader.errorString());
+            Log("Image url: {}", this->url);
             return false;
         }
 
         if (reader.imageCount() == 0) {
-            debug::Log("Error: No images read in the buffer");
+            Log("Error: No images read in the buffer");
             // No images read in the buffer. maybe a cache error?
             return false;
         }
@@ -108,7 +108,7 @@ void Image::loadImage()
                     this->loadedPixmap = pixmap;
                 }
 
-                chatterino::messages::Image::FrameData data;
+                chatterino::Image::FrameData data;
                 data.duration = std::max(20, reader.nextImageDelay());
                 data.image = pixmap;
 
@@ -117,14 +117,14 @@ void Image::loadImage()
         }
 
         if (this->allFrames.size() != reader.imageCount()) {
-            // debug::Log("Error: Wrong amount of images read");
+            // Log("Error: Wrong amount of images read");
             // One or more images failed to load from the buffer
             // return false;
         }
 
         if (this->allFrames.size() > 1) {
             if (!this->animated) {
-                util::postToThread([this] {
+                postToThread([this] {
                     getApp()->emotes->gifTimer.signal.connect([=]() {
                         this->gifUpdateTimout();
                     });  // For some reason when Boost signal is in
@@ -135,13 +135,13 @@ void Image::loadImage()
 
             this->animated = true;
 
-            util::DebugCount::increase("animated images");
+            DebugCount::increase("animated images");
         }
 
         this->currentPixmap = this->loadedPixmap;
 
         this->isLoaded = true;
-        util::DebugCount::increase("loaded images");
+        DebugCount::increase("loaded images");
 
         if (!loadedEventQueued) {
             loadedEventQueued = true;

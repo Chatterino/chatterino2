@@ -77,7 +77,7 @@ void TooltipWidget::updateFont()
     auto app = getApp();
 
     this->setFont(
-        app->fonts->getFont(singletons::FontManager::Type::ChatMediumSmall, this->getScale()));
+        app->fonts->getFont(chatterino::FontManager::Type::ChatMediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)

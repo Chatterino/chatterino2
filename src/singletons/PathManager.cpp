@@ -59,7 +59,7 @@ void PathManager::initAppFilePathHash()
 void PathManager::initCheckPortable()
 {
     this->portable =
-        QFileInfo::exists(util::combinePath(QCoreApplication::applicationDirPath(), "portable"));
+        QFileInfo::exists(combinePath(QCoreApplication::applicationDirPath(), "portable"));
 }
 
 void PathManager::initAppDataDirectory()
@@ -99,7 +99,7 @@ void PathManager::initSubDirectories()
     // create settings subdirectories and validate that they are created properly
     auto makePath = [&](const std::string &name) -> QString {
 
-        auto path = util::combinePath(this->rootAppDataDirectory, QString::fromStdString(name));
+        auto path = combinePath(this->rootAppDataDirectory, QString::fromStdString(name));
 
         if (!QDir().mkpath(path)) {
             throw std::runtime_error("Error creating appdata path %appdata%/chatterino/" + name);

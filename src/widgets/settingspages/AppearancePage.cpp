@@ -35,11 +35,11 @@ AppearancePage::AppearancePage()
     : SettingsPage("Look", ":/images/theme.svg")
 {
     auto app = getApp();
-    util::LayoutCreator<AppearancePage> layoutCreator(this);
+    LayoutCreator<AppearancePage> layoutCreator(this);
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
     auto widget = scroll.emplaceScrollAreaWidget();
-    util::removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
 
@@ -226,7 +226,7 @@ QLayout *AppearancePage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(singletons::FontManager::ChatMedium, 1.));
+        QFontDialog dialog(app->fonts->getFont(chatterino::FontManager::ChatMedium, 1.));
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 
@@ -250,10 +250,10 @@ QLayout *AppearancePage::createUiScaleSlider()
     layout->addWidget(slider);
     layout->addWidget(label);
 
-    slider->setMinimum(singletons::WindowManager::uiScaleMin);
-    slider->setMaximum(singletons::WindowManager::uiScaleMax);
+    slider->setMinimum(chatterino::WindowManager::uiScaleMin);
+    slider->setMaximum(chatterino::WindowManager::uiScaleMax);
     slider->setValue(
-        singletons::WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
+        chatterino::WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
 
     label->setMinimumWidth(100);
 
@@ -262,7 +262,7 @@ QLayout *AppearancePage::createUiScaleSlider()
 
     getApp()->settings->uiScale.connect(
         [label](auto, auto) {
-            label->setText(QString::number(singletons::WindowManager::getUiScaleValue()));
+            label->setText(QString::number(chatterino::WindowManager::getUiScaleValue()));
         },
         this->connections_);
 

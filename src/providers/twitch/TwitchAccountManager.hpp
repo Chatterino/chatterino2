@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/SignalVector2.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
-#include "common/SignalVector2.hpp"
 
 #include <pajlada/settings/setting.hpp>
 
@@ -15,8 +15,8 @@
 //
 
 namespace chatterino {
+
 class AccountController;
-}
 
 class TwitchAccountManager
 {
@@ -47,8 +47,7 @@ public:
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
-    util::SortedSignalVector<std::shared_ptr<TwitchAccount>,
-                             util::SharedPtrElementLess<TwitchAccount>>
+    SortedSignalVector<std::shared_ptr<TwitchAccount>, SharedPtrElementLess<TwitchAccount>>
         accounts;
 
 private:
@@ -65,7 +64,7 @@ private:
     std::shared_ptr<TwitchAccount> anonymousUser;
     mutable std::mutex mutex;
 
-    friend class chatterino::controllers::accounts::AccountController;
+    friend class chatterino::AccountController;
 };
 
 }  // namespace chatterino

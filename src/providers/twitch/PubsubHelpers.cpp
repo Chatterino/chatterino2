@@ -32,7 +32,7 @@ bool getTargetUser(const rapidjson::Value &data, ActionUser &user)
 }
 
 rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVec,
-                                        std::shared_ptr<providers::twitch::TwitchAccount> account)
+                                        std::shared_ptr<TwitchAccount> account)
 {
     rapidjson::Document msg(rapidjson::kObjectType);
     auto &a = msg.GetAllocator();

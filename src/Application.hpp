@@ -44,25 +44,25 @@ public:
 
     friend void test();
 
-    singletons::PathManager *paths = nullptr;
-    singletons::ThemeManager *themes = nullptr;
-    singletons::WindowManager *windows = nullptr;
-    singletons::LoggingManager *logging = nullptr;
-    controllers::commands::CommandController *commands = nullptr;
-    controllers::highlights::HighlightController *highlights = nullptr;
-    controllers::ignores::IgnoreController *ignores = nullptr;
-    controllers::taggedusers::TaggedUsersController *taggedUsers = nullptr;
-    controllers::accounts::AccountController *accounts = nullptr;
-    singletons::EmoteManager *emotes = nullptr;
-    singletons::NativeMessagingManager *nativeMessaging = nullptr;
-    singletons::SettingManager *settings = nullptr;
-    singletons::FontManager *fonts = nullptr;
-    singletons::ResourceManager *resources = nullptr;
+    chatterino::PathManager *paths = nullptr;
+    chatterino::ThemeManager *themes = nullptr;
+    chatterino::WindowManager *windows = nullptr;
+    chatterino::LoggingManager *logging = nullptr;
+    CommandController *commands = nullptr;
+    HighlightController *highlights = nullptr;
+    IgnoreController *ignores = nullptr;
+    TaggedUsersController *taggedUsers = nullptr;
+    AccountController *accounts = nullptr;
+    chatterino::EmoteManager *emotes = nullptr;
+    chatterino::NativeMessagingManager *nativeMessaging = nullptr;
+    chatterino::SettingManager *settings = nullptr;
+    chatterino::FontManager *fonts = nullptr;
+    chatterino::ResourceManager *resources = nullptr;
 
     /// Provider-specific
     struct {
-        providers::twitch::TwitchServer *server = nullptr;
-        providers::twitch::PubSub *pubsub = nullptr;
+        TwitchServer *server = nullptr;
+        PubSub *pubsub = nullptr;
     } twitch;
 
     void save();

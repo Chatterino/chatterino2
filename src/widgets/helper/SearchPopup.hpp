@@ -21,7 +21,7 @@ public:
     void setChannel(std::shared_ptr<Channel> channel);
 
 private:
-    messages::LimitedQueueSnapshot<messages::MessagePtr> snapshot;
+    chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> snapshot;
     QLineEdit *searchInput;
     ChannelView *channelView;
 

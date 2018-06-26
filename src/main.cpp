@@ -1,9 +1,9 @@
 #include "Application.hpp"
+#include "common/NetworkManager.hpp"
 #include "singletons/NativeMessagingManager.hpp"
 #include "singletons/PathManager.hpp"
 #include "singletons/UpdateManager.hpp"
 #include "util/DebugCount.hpp"
-#include "common/NetworkManager.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QAbstractNativeEventFilter>
@@ -40,17 +40,13 @@ int main(int argc, char *argv[])
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
     QApplication a(argc, argv);
 
-    chatterino::singletons::PathManager::initInstance();
+    chatterino::PathManager::initInstance();
 
     // read args
     QStringList args;
 
     for (int i = 1; i < argc; i++) {
         args << argv[i];
-    }
-
-    for (auto &arg : args) {
-        chatterino::util::DebugCount::increase(arg);
     }
 
     // TODO: can be any argument
@@ -71,10 +67,10 @@ int runGui(QApplication &a, int argc, char *argv[])
     installCustomPalette();
 
     // Initialize NetworkManager
-    chatterino::util::NetworkManager::init();
+    chatterino::NetworkManager::init();
 
     // Check for upates
-    chatterino::singletons::UpdateManager::getInstance().checkForUpdates();
+    chatterino::UpdateManager::getInstance().checkForUpdates();
 
     // Initialize application
     chatterino::Application::instantiate(argc, argv);
@@ -88,7 +84,7 @@ int runGui(QApplication &a, int argc, char *argv[])
 
     if (QFile::exists(runningPath)) {
 #ifndef DISABLE_CRASH_DIALOG
-        chatterino::widgets::LastRunCrashDialog dialog;
+        chatterino::LastRunCrashDialog dialog;
 
         switch (dialog.exec()) {
             case QDialog::Accepted: {
@@ -122,14 +118,14 @@ int runGui(QApplication &a, int argc, char *argv[])
     pajlada::Settings::SettingManager::save();
 
     // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
-    chatterino::util::NetworkManager::deinit();
+    chatterino::NetworkManager::deinit();
 
     _exit(0);
 }
 
 void runNativeMessagingHost()
 {
-    auto *nm = new chatterino::singletons::NativeMessagingManager;
+    auto *nm = new chatterino::NativeMessagingManager;
 
 #ifdef Q_OS_WIN
     _setmode(_fileno(stdin), _O_BINARY);

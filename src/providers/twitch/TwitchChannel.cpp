@@ -19,15 +19,15 @@ namespace chatterino {
 
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
     : Channel(channelName, Channel::Twitch)
-    , bttvChannelEmotes(new util::EmoteMap)
-    , ffzChannelEmotes(new util::EmoteMap)
+    , bttvChannelEmotes(new EmoteMap)
+    , ffzChannelEmotes(new EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
     , mod(false)
     , readConnection(_readConnection)
 {
-    debug::Log("[TwitchChannel:{}] Opened", this->name);
+    Log("[TwitchChannel:{}] Opened", this->name);
 
     this->startRefreshLiveStatusTimer(60 * 1000);
 
@@ -83,7 +83,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             }
         }
 
-        util::twitch::get("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
+        get("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
                           QThread::currentThread(), refreshChatters);
     };
 
@@ -95,7 +95,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(messages::Message::createSystemMessage("asdf"));
+        this->addMessage(chatterino::Message::createSystemMessage("asdf"));
     }
 #endif
 }
@@ -130,7 +130,7 @@ void TwitchChannel::reloadChannelEmotes()
 {
     auto app = getApp();
 
-    debug::Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
+    Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
     app->emotes->bttv.loadChannelEmotes(this->name, this->bttvChannelEmotes);
     app->emotes->ffz.loadChannelEmotes(this->name, this->ffzChannelEmotes);
@@ -144,12 +144,12 @@ void TwitchChannel::sendMessage(const QString &message)
         // XXX: It would be nice if we could add a link here somehow that opened the "account
         // manager" dialog
         this->addMessage(
-            messages::Message::createSystemMessage("You need to log in to send messages. You can "
+            chatterino::Message::createSystemMessage("You need to log in to send messages. You can "
                                                    "link your Twitch account in the settings."));
         return;
     }
 
-    debug::Log("[TwitchChannel:{}] Send message: {}", this->name, message);
+    Log("[TwitchChannel:{}] Send message: {}", this->name, message);
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -204,7 +204,7 @@ bool TwitchChannel::hasModRights()
     return this->isMod() || this->isBroadcaster();
 }
 
-void TwitchChannel::addRecentChatter(const std::shared_ptr<messages::Message> &message)
+void TwitchChannel::addRecentChatter(const std::shared_ptr<chatterino::Message> &message)
 {
     assert(!message->loginName.isEmpty());
 
@@ -233,9 +233,9 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->joinedUserMutex);
 
-            auto message = messages::Message::createSystemMessage("Users joined: " +
+            auto message = chatterino::Message::createSystemMessage("Users joined: " +
                                                                   this->joinedUsers.join(", "));
-            message->flags |= messages::Message::Collapsed;
+            message->flags |= chatterino::Message::Collapsed;
             this->addMessage(message);
             this->joinedUsers.clear();
             this->joinedUsersMergeQueued = false;
@@ -262,9 +262,9 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->partedUserMutex);
 
-            auto message = messages::Message::createSystemMessage("Users parted: " +
+            auto message = chatterino::Message::createSystemMessage("Users parted: " +
                                                                   this->partedUsers.join(", "));
-            message->flags |= messages::Message::Collapsed;
+            message->flags |= chatterino::Message::Collapsed;
             this->addMessage(message);
             this->partedUsers.clear();
 
@@ -321,18 +321,18 @@ void TwitchChannel::setLive(bool newLiveStatus)
 void TwitchChannel::refreshLiveStatus()
 {
     if (this->roomID.isEmpty()) {
-        debug::Log("[TwitchChannel:{}] Refreshing live status (Missing ID)", this->name);
+        Log("[TwitchChannel:{}] Refreshing live status (Missing ID)", this->name);
         this->setLive(false);
         return;
     }
 
-    debug::Log("[TwitchChannel:{}] Refreshing live status", this->name);
+    Log("[TwitchChannel:{}] Refreshing live status", this->name);
 
     QString url("https://api.twitch.tv/kraken/streams/" + this->roomID);
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    util::twitch::get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
+    get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
         ChannelPtr shared = weak.lock();
 
         if (!shared) {
@@ -342,12 +342,12 @@ void TwitchChannel::refreshLiveStatus()
         TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
 
         if (!d.IsObject()) {
-            debug::Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+            Log("[TwitchChannel:refreshLiveStatus] root is not an object");
             return;
         }
 
         if (!d.HasMember("stream")) {
-            debug::Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+            Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
             return;
         }
 
@@ -361,7 +361,7 @@ void TwitchChannel::refreshLiveStatus()
 
         if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
             !stream.HasMember("channel") || !stream.HasMember("created_at")) {
-            debug::Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
+            Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
             channel->setLive(false);
             return;
         }
@@ -369,7 +369,7 @@ void TwitchChannel::refreshLiveStatus()
         const rapidjson::Value &streamChannel = stream["channel"];
 
         if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-            debug::Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
+            Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
             return;
         }
 
@@ -432,7 +432,7 @@ void TwitchChannel::fetchRecentMessages()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    util::twitch::get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
+    get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
         ChannelPtr shared = weak.lock();
 
         if (!shared) {
@@ -449,15 +449,15 @@ void TwitchChannel::fetchRecentMessages()
             return;
         }
 
-        std::vector<messages::MessagePtr> messages;
+        std::vector<chatterino::MessagePtr> messages;
 
         for (const QJsonValueRef _msg : msgArray) {
             QByteArray content = _msg.toString().toUtf8();
             auto msg = Communi::IrcMessage::fromData(content, readConnection);
             auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
 
-            messages::MessageParseArgs args;
-            twitch::TwitchMessageBuilder builder(channel, privMsg, args);
+            chatterino::MessageParseArgs args;
+            TwitchMessageBuilder builder(channel, privMsg, args);
             if (!builder.isIgnored()) {
                 messages.push_back(builder.build());
             }

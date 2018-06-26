@@ -26,10 +26,10 @@ struct EmojiData {
 
     std::vector<EmojiData> variations;
 
-    util::EmoteData emoteData;
+    EmoteData emoteData;
 };
 
-using EmojiMap = util::ConcurrentMap<QString, std::shared_ptr<EmojiData>>;
+using EmojiMap = ConcurrentMap<QString, std::shared_ptr<EmojiData>>;
 
 class Emojis
 {
@@ -51,7 +51,7 @@ private:
 public:
     QString replaceShortCodes(const QString &text);
 
-    void parse(std::vector<std::tuple<util::EmoteData, QString>> &parsedWords, const QString &text);
+    void parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
 
 private:
     /// Emojis

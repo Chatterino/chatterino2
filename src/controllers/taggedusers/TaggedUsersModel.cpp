@@ -7,7 +7,7 @@ namespace chatterino {
 
 // commandmodel
 TaggedUsersModel::TaggedUsersModel(QObject *parent)
-    : util::SignalVectorModel<TaggedUser>(1, parent)
+    : SignalVectorModel<TaggedUser>(1, parent)
 {
 }
 
@@ -21,16 +21,16 @@ TaggedUser TaggedUsersModel::getItemFromRow(std::vector<QStandardItem *> &row,
 // turns a row in the model into a vector item
 void TaggedUsersModel::getRowFromItem(const TaggedUser &item, std::vector<QStandardItem *> &row)
 {
-    util::setStringItem(row[0], item.name);
+    setStringItem(row[0], item.name);
 }
 
 void TaggedUsersModel::afterInit()
 {
     //    std::vector<QStandardItem *> row = this->createRow();
-    //    util::setBoolItem(row[0], getApp()->settings->enableHighlightsSelf.getValue(), true,
+    //    setBoolItem(row[0], getApp()->settings->enableHighlightsSelf.getValue(), true,
     //    false); row[0]->setData("Your username (automatic)", Qt::DisplayRole);
-    //    util::setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true,
-    //    false); util::setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(),
+    //    setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true,
+    //    false); setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(),
     //    true, false); row[3]->setFlags(0); this->insertCustomRow(row, 0);
 }
 

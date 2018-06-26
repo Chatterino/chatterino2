@@ -17,7 +17,7 @@ DebugPopup::DebugPopup()
 
     timer->setInterval(1000);
     QObject::connect(timer, &QTimer::timeout,
-                     [text] { text->setText(util::DebugCount::getDebugText()); });
+                     [text] { text->setText(DebugCount::getDebugText()); });
     timer->start();
 
     text->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));

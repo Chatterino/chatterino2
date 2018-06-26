@@ -53,7 +53,7 @@ bool Channel::isEmpty() const
     return this->name.isEmpty();
 }
 
-messages::LimitedQueueSnapshot<messages::MessagePtr> Channel::getMessageSnapshot()
+chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> Channel::getMessageSnapshot()
 {
     return this->messages.getSnapshot();
 }
@@ -81,7 +81,7 @@ void Channel::addMessage(MessagePtr message)
     this->messageAppended.invoke(message);
 }
 
-void Channel::addOrReplaceTimeout(messages::MessagePtr message)
+void Channel::addOrReplaceTimeout(chatterino::MessagePtr message)
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.getLength();
@@ -118,7 +118,7 @@ void Channel::addOrReplaceTimeout(messages::MessagePtr message)
 
             int count = s->count + 1;
 
-            messages::MessagePtr replacement(Message::createSystemMessage(
+            chatterino::MessagePtr replacement(Message::createSystemMessage(
                 message->searchText + QString(" (") + QString::number(count) + " times)"));
 
             replacement->timeoutUser = message->timeoutUser;
@@ -162,16 +162,16 @@ void Channel::disableAllMessages()
     }
 }
 
-void Channel::addMessagesAtStart(std::vector<messages::MessagePtr> &_messages)
+void Channel::addMessagesAtStart(std::vector<chatterino::MessagePtr> &_messages)
 {
-    std::vector<messages::MessagePtr> addedMessages = this->messages.pushFront(_messages);
+    std::vector<chatterino::MessagePtr> addedMessages = this->messages.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart.invoke(addedMessages);
     }
 }
 
-void Channel::replaceMessage(messages::MessagePtr message, messages::MessagePtr replacement)
+void Channel::replaceMessage(chatterino::MessagePtr message, chatterino::MessagePtr replacement)
 {
     int index = this->messages.replaceItem(message, replacement);
 
@@ -180,7 +180,7 @@ void Channel::replaceMessage(messages::MessagePtr message, messages::MessagePtr 
     }
 }
 
-void Channel::addRecentChatter(const std::shared_ptr<messages::Message> &message)
+void Channel::addRecentChatter(const std::shared_ptr<chatterino::Message> &message)
 {
     // Do nothing by default
 }

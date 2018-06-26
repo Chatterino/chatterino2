@@ -122,7 +122,7 @@ void SettingManager::saveSnapshot()
 
     this->snapshot.reset(d);
 
-    debug::Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
+    Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
 void SettingManager::recallSnapshot()
@@ -136,14 +136,14 @@ void SettingManager::recallSnapshot()
     for (const auto &weakSetting : _settings) {
         auto setting = weakSetting.lock();
         if (!setting) {
-            debug::Log("Error stage 1 of loading");
+            Log("Error stage 1 of loading");
             continue;
         }
 
         const char *path = setting->getPath().c_str();
 
         if (!snapshotObject.HasMember(path)) {
-            debug::Log("Error stage 2 of loading");
+            Log("Error stage 2 of loading");
             continue;
         }
 

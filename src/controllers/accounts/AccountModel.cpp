@@ -5,7 +5,7 @@
 namespace chatterino {
 
 AccountModel::AccountModel(QObject *parent)
-    : util::SignalVectorModel<std::shared_ptr<Account>>(1, parent)
+    : SignalVectorModel<std::shared_ptr<Account>>(1, parent)
 {
 }
 
@@ -20,7 +20,7 @@ std::shared_ptr<Account> AccountModel::getItemFromRow(std::vector<QStandardItem 
 void AccountModel::getRowFromItem(const std::shared_ptr<Account> &item,
                                   std::vector<QStandardItem *> &row)
 {
-    util::setStringItem(row[0], item->toString(), false);
+    setStringItem(row[0], item->toString(), false);
     row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 }
 
@@ -30,7 +30,7 @@ int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
     if (this->categoryCount[item->getCategory()]++ == 0) {
         auto row = this->createRow();
 
-        util::setStringItem(row[0], item->getCategory(), false, false);
+        setStringItem(row[0], item->getCategory(), false, false);
         row[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
 
         this->insertCustomRow(std::move(row), proposedIndex);

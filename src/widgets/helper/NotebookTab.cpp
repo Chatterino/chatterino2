@@ -60,7 +60,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     //    QObject::connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool
     //    newValue) {
-    //        debug::Log("New value is {}", newValue);  //
+    //        Log("New value is {}", newValue);  //
     //    });
 }
 
@@ -86,7 +86,7 @@ void NotebookTab::updateSize()
         width = (metrics.width(this->getTitle()) + int(16 * scale));
     }
 
-    width = util::clamp(width, this->height(), int(150 * scale));
+    width = clamp(width, this->height(), int(150 * scale));
 
     if (this->width() != width) {
         this->resize(width, int(NOTEBOOK_TAB_HEIGHT * scale));
@@ -221,8 +221,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
-    singletons::ThemeManager::TabColors colors;
-    singletons::ThemeManager::TabColors regular = this->themeManager->tabs.regular;
+    chatterino::ThemeManager::TabColors colors;
+    chatterino::ThemeManager::TabColors regular = this->themeManager->tabs.regular;
 
     if (this->selected_) {
         colors = this->themeManager->tabs.selected;

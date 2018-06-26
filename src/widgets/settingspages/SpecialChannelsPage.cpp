@@ -15,7 +15,7 @@ SpecialChannelsPage::SpecialChannelsPage()
 {
     auto app = getApp();
 
-    util::LayoutCreator<SpecialChannelsPage> layoutCreator(this);
+    LayoutCreator<SpecialChannelsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     auto mentions = layout.emplace<QGroupBox>("Mentions channel").setLayoutType<QVBoxLayout>();

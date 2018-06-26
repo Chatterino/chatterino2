@@ -104,7 +104,7 @@ void SplitContainer::resetMouseStatus()
 
 void SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     Split *split = new Split(this);
     this->appendSplit(split);
@@ -138,7 +138,7 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Split *relat
 
 void SplitContainer::insertSplit(Split *split, Direction direction, Node *relativeTo)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     split->setContainer(this);
 
@@ -161,7 +161,7 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
 
 void SplitContainer::addSplit(Split *split)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     split->setParent(this);
     split->show();
@@ -202,7 +202,7 @@ void SplitContainer::setPreferedTargetRecursive(Node *node)
 
 SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     Node *node = this->baseNode.findNodeContainingSplit(split);
     assert(node != nullptr);
@@ -230,7 +230,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
 SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
     assert(split != nullptr);
 
     split->deleteLater();
@@ -239,7 +239,7 @@ SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 
 void SplitContainer::selectNextSplit(Direction direction)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     if (Node *node = this->baseNode.findNodeContainingSplit(this->selected)) {
         this->selectSplitRecursive(node, direction);
@@ -565,7 +565,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
 
     if (type == "split") {
         auto *split = new Split(this);
-        split->setChannel(singletons::WindowManager::decodeChannel(obj.value("data").toObject()));
+        split->setChannel(chatterino::WindowManager::decodeChannel(obj.value("data").toObject()));
 
         this->appendSplit(split);
     } else if (type == "horizontal" || type == "vertical") {
@@ -582,7 +582,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             if (_type == "split") {
                 auto *split = new Split(this);
                 split->setChannel(
-                    singletons::WindowManager::decodeChannel(_obj.value("data").toObject()));
+                    chatterino::WindowManager::decodeChannel(_obj.value("data").toObject()));
 
                 Node *_node = new Node();
                 _node->parent = node;
@@ -606,7 +606,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             if (node->getChildren().size() < 2) {
                 auto *split = new Split(this);
                 split->setChannel(
-                    singletons::WindowManager::decodeChannel(obj.value("data").toObject()));
+                    chatterino::WindowManager::decodeChannel(obj.value("data").toObject()));
 
                 this->insertSplit(split, direction, node);
             }

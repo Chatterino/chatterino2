@@ -32,9 +32,9 @@ HighlightModel *HighlightController::createModel(QObject *parent)
     return model;
 }
 
-void HighlightController::addHighlight(const messages::MessagePtr &msg)
+void HighlightController::addHighlight(const chatterino::MessagePtr &msg)
 {
-    //    static widgets::NotificationPopup popup;
+    //    static NotificationPopup popup;
 
     //    popup.updatePosition();
     //    popup.addMessage(msg);

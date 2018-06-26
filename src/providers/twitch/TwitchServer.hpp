@@ -11,7 +11,7 @@
 
 namespace chatterino {
 
-class TwitchServer final : public irc::AbstractIrcServer
+class TwitchServer final : public AbstractIrcServer
 {
 public:
     TwitchServer();
@@ -23,15 +23,14 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
-    util::MutexValue<QString> lastUserThatWhisperedMe;
+    MutexValue<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
     IndirectChannel watchingChannel;
 
 protected:
-    void initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
-                              bool isWrite) override;
+    void initializeConnection(IrcConnection *connection, bool isRead, bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
     void privateMessageReceived(Communi::IrcPrivateMessage *message) override;

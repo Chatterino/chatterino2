@@ -416,9 +416,9 @@ void Split::doOpenPopupPlayer()
 void Split::doOpenStreamlink()
 {
     try {
-        streamlink::Start(this->getChannel()->name);
-    } catch (const streamlink::Exception &ex) {
-        debug::Log("Error in doOpenStreamlink: {}", ex.what());
+        Start(this->getChannel()->name);
+    } catch (const Exception &ex) {
+        Log("Error in doOpenStreamlink: {}", ex.what());
     }
 }
 
@@ -449,7 +449,7 @@ void Split::doOpenViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    util::twitch::get("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
+    get("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
                       this, [=](QJsonObject obj) {
                           QJsonObject chattersObj = obj.value("chatters").toObject();
 

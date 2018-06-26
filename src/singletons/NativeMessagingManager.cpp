@@ -176,7 +176,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         qDebug() << attach;
 
 #ifdef USEWINSDK
-        widgets::AttachedWindow::GetArgs args;
+        AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
         args.width = root.value("size").toObject().value("width").toInt(-1);
@@ -190,7 +190,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 #endif
 
         if (_type == "twitch") {
-            util::postToThread([=] {
+            postToThread([=] {
                 if (!name.isEmpty()) {
                     app->twitch.server->watchingChannel.update(
                         app->twitch.server->getOrAddChannel(name));
@@ -199,7 +199,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
                 if (attach) {
 #ifdef USEWINSDK
                     //                    if (args.height != -1) {
-                    auto *window = widgets::AttachedWindow::get(::GetForegroundWindow(), args);
+                    auto *window = AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty()) {
                         window->setChannel(app->twitch.server->getOrAddChannel(name));
                     }
@@ -221,9 +221,9 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
         }
 
 #ifdef USEWINSDK
-        util::postToThread([winId] {
+        postToThread([winId] {
             qDebug() << "NW detach";
-            widgets::AttachedWindow::detach(winId);
+            AttachedWindow::detach(winId);
         });
 #endif
     } else {
@@ -235,7 +235,7 @@ std::string &NativeMessagingManager::getGuiMessageQueueName()
 {
     static std::string name =
         "chatterino_gui" +
-        singletons::PathManager::getInstance()->applicationFilePathHash.toStdString();
+        chatterino::PathManager::getInstance()->applicationFilePathHash.toStdString();
     return name;
 }
 

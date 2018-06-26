@@ -10,7 +10,7 @@ namespace chatterino {
 KeyboardSettingsPage::KeyboardSettingsPage()
     : SettingsPage("Keybindings", "")
 {
-    auto layout = util::LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();
 
     auto form = layout.emplace<QFormLayout>();
 

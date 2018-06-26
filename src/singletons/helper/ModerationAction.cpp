@@ -4,7 +4,7 @@
 
 namespace chatterino {
 
-ModerationAction::ModerationAction(messages::Image *_image, const QString &_action)
+ModerationAction::ModerationAction(chatterino::Image *_image, const QString &_action)
     : _isImage(true)
     , image(_image)
     , action(_action)
@@ -26,7 +26,7 @@ bool ModerationAction::isImage() const
     return this->_isImage;
 }
 
-messages::Image *ModerationAction::getImage() const
+chatterino::Image *ModerationAction::getImage() const
 {
     return this->image;
 }

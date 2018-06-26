@@ -25,7 +25,7 @@ public:
 
     ~SettingManager() = delete;
 
-    messages::MessageElement::Flags getWordFlags();
+    chatterino::MessageElement::Flags getWordFlags();
     bool isIgnoredEmote(const QString &emote);
 
     void initialize();
@@ -142,7 +142,7 @@ private:
 
     void updateModerationActions();
 
-    messages::MessageElement::Flags wordFlags = messages::MessageElement::Default;
+    chatterino::MessageElement::Flags wordFlags = chatterino::MessageElement::Default;
 
     pajlada::Settings::SettingListener wordFlagsListener;
 };

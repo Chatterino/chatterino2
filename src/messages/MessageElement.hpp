@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/Emotemap.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/FontManager.hpp"
-#include "common/Emotemap.hpp"
 
 #include <QRect>
 #include <QString>
@@ -18,8 +18,6 @@ namespace chatterino {
 class Channel;
 struct EmoteData;
 struct MessageLayoutContainer;
-
-using namespace chatterino::messages::layouts;
 
 class MessageElement : boost::noncopyable
 {
@@ -167,12 +165,12 @@ class EmoteElement : public MessageElement
     std::unique_ptr<TextElement> textElement;
 
 public:
-    EmoteElement(const util::EmoteData &data, MessageElement::Flags flags);
+    EmoteElement(const EmoteData &data, MessageElement::Flags flags);
     ~EmoteElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 
-    const util::EmoteData data;
+    const EmoteData data;
 };
 
 // contains a text, formated depending on the preferences

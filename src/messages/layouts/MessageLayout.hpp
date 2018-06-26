@@ -34,7 +34,7 @@ public:
     int getHeight() const;
 
     // Flags
-    util::FlagsEnum<Flags> flags;
+    FlagsEnum<Flags> flags;
 
     // Layout
     bool layout(int width, float scale_, MessageElement::Flags flags);

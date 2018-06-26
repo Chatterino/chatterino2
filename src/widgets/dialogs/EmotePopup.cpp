@@ -56,9 +56,9 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     ChannelPtr emoteChannel(new Channel("", Channel::None));
 
-    auto addEmotes = [&](util::EmoteMap &map, const QString &title, const QString &emoteDesc) {
+    auto addEmotes = [&](EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
-        messages::MessageBuilder builder1;
+        chatterino::MessageBuilder builder1;
 
         builder1.append(new TextElement(title, MessageElement::Text));
 
@@ -66,11 +66,11 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         emoteChannel->addMessage(builder1.getMessage());
 
         // EMOTES
-        messages::MessageBuilder builder2;
+        chatterino::MessageBuilder builder2;
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
-        map.each([&](const QString &key, const util::EmoteData &value) {
+        map.each([&](const QString &key, const EmoteData &value) {
             builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                 ->setLink(Link(Link::InsertText, key)));
         });
@@ -86,7 +86,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     // fix this pile of garbage
     for (const auto &set : app->emotes->twitch.emotes[userID].emoteSets) {
         // TITLE
-        messages::MessageBuilder builder1;
+        chatterino::MessageBuilder builder1;
 
         QString setText;
         if (set->text.isEmpty()) {
@@ -105,12 +105,12 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         emoteChannel->addMessage(builder1.getMessage());
 
         // EMOTES
-        messages::MessageBuilder builder2;
+        chatterino::MessageBuilder builder2;
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
         for (const auto &emote : set->emotes) {
-            [&](const QString &key, const util::EmoteData &value) {
+            [&](const QString &key, const EmoteData &value) {
                 builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
                                     ->setLink(Link(Link::InsertText, key)));
             }(emote.code, app->emotes->twitch.getEmoteById(emote.id, emote.code));
@@ -137,14 +137,14 @@ void EmotePopup::loadEmojis()
     ChannelPtr emojiChannel(new Channel("", Channel::None));
 
     // title
-    messages::MessageBuilder builder1;
+    chatterino::MessageBuilder builder1;
 
     builder1.append(new TextElement("emojis", MessageElement::Text));
     builder1.getMessage()->flags |= Message::Centered;
     emojiChannel->addMessage(builder1.getMessage());
 
     // emojis
-    messages::MessageBuilder builder;
+    chatterino::MessageBuilder builder;
     builder.getMessage()->flags |= Message::Centered;
     builder.getMessage()->flags |= Message::DisableCompactEmotes;
 

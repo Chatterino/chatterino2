@@ -46,7 +46,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString 
         return;
     }
 
-    messages::MessageParseArgs args;
+    chatterino::MessageParseArgs args;
     if (isSub) {
         args.trimSubscriberUsername = true;
     }
@@ -58,13 +58,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored()) {
-        messages::MessagePtr msg = builder.build();
+        chatterino::MessagePtr msg = builder.build();
 
         if (isSub) {
-            msg->flags |= messages::Message::Subscription;
-            msg->flags &= ~messages::Message::Highlighted;
+            msg->flags |= chatterino::Message::Subscription;
+            msg->flags &= ~chatterino::Message::Highlighted;
         } else {
-            if (msg->flags & messages::Message::Highlighted) {
+            if (msg->flags & chatterino::Message::Highlighted) {
                 server.mentionsChannel->addMessage(msg);
                 getApp()->highlights->addHighlight(msg);
             }
@@ -85,7 +85,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
         return;
     }
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
-    TwitchChannel *twitchChannel = dynamic_cast<twitch::TwitchChannel *>(chan.get());
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
 
     if (twitchChannel) {
         // room-id
@@ -140,7 +140,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty()) {
-        debug::Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
+        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found",
                    chanName);
         return;
     }
@@ -190,7 +190,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             return;
         }
 
-        twitch::TwitchChannel *tc = dynamic_cast<twitch::TwitchChannel *>(c.get());
+        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr) {
             tc->setMod(_mod == "1");
         }
@@ -200,20 +200,20 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    debug::Log("Received whisper!");
-    messages::MessageParseArgs args;
+    Log("Received whisper!");
+    chatterino::MessageParseArgs args;
 
     args.isReceivedWhisper = true;
 
     auto c = app->twitch.server->whispersChannel.get();
 
-    twitch::TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
+    TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
 
     if (!builder.isIgnored()) {
-        messages::MessagePtr _message = builder.build();
-        _message->flags |= messages::Message::DoNotTriggerNotification;
+        chatterino::MessagePtr _message = builder.build();
+        _message->flags |= chatterino::Message::DoNotTriggerNotification;
 
-        if (_message->flags & messages::Message::Highlighted) {
+        if (_message->flags & chatterino::Message::Highlighted) {
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
@@ -254,9 +254,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, Tw
 
     if (it != tags.end()) {
         auto newMessage =
-            messages::Message::createSystemMessage(util::parseTagString(it.value().toString()));
+            chatterino::Message::createSystemMessage(parseTagString(it.value().toString()));
 
-        newMessage->flags |= messages::Message::Subscription;
+        newMessage->flags |= chatterino::Message::Subscription;
 
         QString channelName;
 
@@ -311,7 +311,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     if (channel->isEmpty()) {
-        debug::Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager ",
+        Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager ",
                    channelName);
         return;
     }
@@ -338,7 +338,7 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
             return;
         }
 
-        debug::Log("Showing notice message from write connection with message id '{}'", msgID);
+        Log("Showing notice message from write connection with message id '{}'", msgID);
     }
 
     this->handleNoticeMessage(message);

@@ -19,12 +19,12 @@ struct Message {
     Message()
         : parseTime(QTime::currentTime())
     {
-        util::DebugCount::increase("messages");
+        DebugCount::increase("messages");
     }
 
     ~Message()
     {
-        util::DebugCount::decrease("messages");
+        DebugCount::decrease("messages");
     }
 
     enum MessageFlags : uint16_t {
@@ -43,7 +43,7 @@ struct Message {
         Subscription = (1 << 11),
     };
 
-    util::FlagsEnum<MessageFlags> flags;
+    FlagsEnum<MessageFlags> flags;
     QTime parseTime;
     QString id;
     QString searchText;
@@ -59,7 +59,7 @@ struct Message {
     const std::vector<std::unique_ptr<MessageElement>> &getElements() const;
 
     // Scrollbar
-    widgets::ScrollbarHighlight getScrollBarHighlight() const;
+    ScrollbarHighlight getScrollBarHighlight() const;
 
 private:
     std::vector<std::unique_ptr<MessageElement>> elements;
@@ -72,10 +72,10 @@ public:
                                                          const QString &durationInSeconds,
                                                          const QString &reason, bool multipleTimes);
 
-    static std::shared_ptr<Message> createTimeoutMessage(const providers::twitch::BanAction &action,
+    static std::shared_ptr<Message> createTimeoutMessage(const BanAction &action,
                                                          uint32_t count = 1);
     static std::shared_ptr<Message> createUntimeoutMessage(
-        const providers::twitch::UnbanAction &action);
+        const UnbanAction &action);
 };
 
 using MessagePtr = std::shared_ptr<Message>;

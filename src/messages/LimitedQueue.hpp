@@ -200,7 +200,7 @@ public:
 
     //    void insertAfter(const std::vector<T> &items, const T &index)
 
-    messages::LimitedQueueSnapshot<T> getSnapshot()
+    chatterino::LimitedQueueSnapshot<T> getSnapshot()
     {
         std::lock_guard<std::mutex> lock(this->mutex);
 

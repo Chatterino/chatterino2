@@ -23,7 +23,7 @@ public:
         }
     }
 
-    void init(util::BaseSignalVector<TVectorItem> *vec)
+    void init(BaseSignalVector<TVectorItem> *vec)
     {
         this->vector = vec;
 

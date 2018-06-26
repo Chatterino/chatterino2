@@ -52,7 +52,7 @@ void Scrollbar::unpauseHighlights()
     this->highlightsPaused_ = false;
 }
 
-messages::LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
+chatterino::LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
 {
     if (!this->highlightsPaused_) {
         this->highlightSnapshot_ = this->highlights_.getSnapshot();

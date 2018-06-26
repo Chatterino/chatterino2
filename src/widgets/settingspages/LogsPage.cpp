@@ -28,7 +28,7 @@
 //{
 //    auto app = getApp();
 
-//    util::LayoutCreator<LogsPage> layoutCreator(this);
+//    LayoutCreator<LogsPage> layoutCreator(this);
 //    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
 //    auto logPath = app->paths->logsFolderPath;

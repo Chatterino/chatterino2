@@ -18,12 +18,12 @@ MessageLayoutElement::MessageLayoutElement(MessageElement &_creator, const QSize
     : creator(_creator)
 {
     this->rect.setSize(size);
-    util::DebugCount::increase("message layout elements");
+    DebugCount::increase("message layout elements");
 }
 
 MessageLayoutElement::~MessageLayoutElement()
 {
-    util::DebugCount::decrease("message layout elements");
+    DebugCount::decrease("message layout elements");
 }
 
 MessageElement &MessageLayoutElement::getCreator() const

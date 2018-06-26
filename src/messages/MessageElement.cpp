@@ -12,12 +12,12 @@ namespace chatterino {
 MessageElement::MessageElement(Flags _flags)
     : flags(_flags)
 {
-    util::DebugCount::increase("message elements");
+    DebugCount::increase("message elements");
 }
 
 MessageElement::~MessageElement()
 {
-    util::DebugCount::decrease("message elements");
+    DebugCount::decrease("message elements");
 }
 
 MessageElement *MessageElement::setLink(const Link &_link)
@@ -78,7 +78,7 @@ void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElem
 }
 
 // EMOTE
-EmoteElement::EmoteElement(const util::EmoteData &_data, MessageElement::Flags flags)
+EmoteElement::EmoteElement(const EmoteData &_data, MessageElement::Flags flags)
     : MessageElement(flags)
     , data(_data)
 {
@@ -248,7 +248,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     if (_flags & MessageElement::ModeratorTools) {
         QSize size((int)(container.getScale() * 16), (int)(container.getScale() * 16));
 
-        for (const singletons::ModerationAction &m : getApp()->settings->getModerationActions()) {
+        for (const chatterino::ModerationAction &m : getApp()->settings->getModerationActions()) {
             if (m.isImage()) {
                 container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
                                          ->setLink(Link(Link::UserAction, m.getAction())));

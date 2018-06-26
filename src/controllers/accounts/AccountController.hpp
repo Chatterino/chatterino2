@@ -20,10 +20,10 @@ public:
 
     void load();
 
-    providers::twitch::TwitchAccountManager twitch;
+    TwitchAccountManager twitch;
 
 private:
-    util::SortedSignalVector<std::shared_ptr<Account>, util::SharedPtrElementLess<Account>>
+    SortedSignalVector<std::shared_ptr<Account>, SharedPtrElementLess<Account>>
         accounts;
 };
 

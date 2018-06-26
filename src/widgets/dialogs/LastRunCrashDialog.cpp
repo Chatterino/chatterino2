@@ -16,9 +16,9 @@ LastRunCrashDialog::LastRunCrashDialog()
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     this->setWindowTitle("Chatterino");
 
-    auto &updateManager = singletons::UpdateManager::getInstance();
+    auto &updateManager = chatterino::UpdateManager::getInstance();
 
-    auto layout = util::LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();
 
     layout.emplace<QLabel>(
         "The application wasn't terminated properly the last time it was executed.");
@@ -31,7 +31,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    auto *installUpdateButton = buttons->addButton("Install Update",
     //    QDialogButtonBox::NoRole); installUpdateButton->setEnabled(false);
     //    QObject::connect(installUpdateButton, &QPushButton::clicked, [this, update]() mutable {
-    //        auto &updateManager = singletons::UpdateManager::getInstance();
+    //        auto &updateManager = chatterino::UpdateManager::getInstance();
 
     //        updateManager.installUpdates();
     //        this->setEnabled(false);
@@ -43,36 +43,36 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     // Updates
     //    auto updateUpdateLabel = [update]() mutable {
-    //        auto &updateManager = singletons::UpdateManager::getInstance();
+    //        auto &updateManager = chatterino::UpdateManager::getInstance();
 
     //        switch (updateManager.getStatus()) {
-    //            case singletons::UpdateManager::None: {
+    //            case chatterino::UpdateManager::None: {
     //                update->setText("Not checking for updates.");
     //            } break;
-    //            case singletons::UpdateManager::Searching: {
+    //            case chatterino::UpdateManager::Searching: {
     //                update->setText("Checking for updates...");
     //            } break;
-    //            case singletons::UpdateManager::UpdateAvailable: {
+    //            case chatterino::UpdateManager::UpdateAvailable: {
     //                update->setText("Update available.");
     //            } break;
-    //            case singletons::UpdateManager::NoUpdateAvailable: {
+    //            case chatterino::UpdateManager::NoUpdateAvailable: {
     //                update->setText("No update abailable.");
     //            } break;
-    //            case singletons::UpdateManager::SearchFailed: {
+    //            case chatterino::UpdateManager::SearchFailed: {
     //                update->setText("Error while searching for update.\nEither the update service
     //                is "
     //                                "temporarily down or there is an issue with your
     //                                installation.");
     //            } break;
-    //            case singletons::UpdateManager::Downloading: {
+    //            case chatterino::UpdateManager::Downloading: {
     //                update->setText(
     //                    "Downloading the update. Chatterino will close once the download is
     //                    done.");
     //            } break;
-    //            case singletons::UpdateManager::DownloadFailed: {
+    //            case chatterino::UpdateManager::DownloadFailed: {
     //                update->setText("Download failed.");
     //            } break;
-    //            case singletons::UpdateManager::WriteFileFailed: {
+    //            case chatterino::UpdateManager::WriteFileFailed: {
     //                update->setText("Writing the update file to the hard drive failed.");
     //            } break;
     //        }
@@ -80,7 +80,7 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     //    updateUpdateLabel();
     //    this->managedConnect(updateManager.statusUpdated, [updateUpdateLabel](auto) mutable {
-    //        util::postToThread([updateUpdateLabel]() mutable { updateUpdateLabel(); });
+    //        postToThread([updateUpdateLabel]() mutable { updateUpdateLabel(); });
     //    });
 }
 

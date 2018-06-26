@@ -26,7 +26,7 @@ public:
 
     CommandModel *createModel(QObject *parent);
 
-    util::UnsortedSignalVector<Command> items;
+    UnsortedSignalVector<Command> items;
 
 private:
     QMap<QString, Command> commandsMap;

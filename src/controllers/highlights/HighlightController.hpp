@@ -1,9 +1,9 @@
 #pragma once
 
+#include "common/SignalVector2.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "singletons/SettingsManager.hpp"
-#include "common/SignalVector2.hpp"
 
 namespace chatterino {
 
@@ -16,16 +16,16 @@ public:
 
     void initialize();
 
-    util::UnsortedSignalVector<HighlightPhrase> phrases;
+    UnsortedSignalVector<HighlightPhrase> phrases;
 
     HighlightModel *createModel(QObject *parent);
 
-    void addHighlight(const messages::MessagePtr &msg);
+    void addHighlight(const chatterino::MessagePtr &msg);
 
 private:
     bool initialized = false;
 
-    singletons::ChatterinoSetting<std::vector<highlights::HighlightPhrase>> highlightsSetting = {
+    chatterino::ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting = {
         "/highlighting/highlights"};
 };
 

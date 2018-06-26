@@ -111,7 +111,7 @@ void Emojis::loadEmojis()
     rapidjson::ParseResult result = root.Parse(data.toUtf8(), data.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        debug::Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
+        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
                    result.Offset());
         return;
     }
@@ -138,7 +138,7 @@ void Emojis::loadEmojis()
 
                 auto toneNameIt = toneNames.find(tone);
                 if (toneNameIt == toneNames.end()) {
-                    debug::Log("Tone with key {} does not exist in tone names map", tone);
+                    Log("Tone with key {} does not exist in tone names map", tone);
                     continue;
                 }
 
@@ -206,7 +206,7 @@ void Emojis::loadEmojiSet()
     auto app = getApp();
 
     app->settings->emojiSet.connect([=](const auto &emojiSet, auto) {
-        debug::Log("Using emoji set {}", emojiSet);
+        Log("Using emoji set {}", emojiSet);
         this->emojis.each([=](const auto &name, std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
             // clang-format off
@@ -260,13 +260,13 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emoteData.image1x = new messages::Image(
+            emoji->emoteData.image1x = new chatterino::Image(
                 url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
         });
     });
 }
 
-void Emojis::parse(std::vector<std::tuple<util::EmoteData, QString>> &parsedWords,
+void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords,
                    const QString &text)
 {
     int lastParsedEmojiEndIndex = 0;
@@ -328,13 +328,13 @@ void Emojis::parse(std::vector<std::tuple<util::EmoteData, QString>> &parsedWord
 
         if (charactersFromLastParsedEmoji > 0) {
             // Add characters inbetween emojis
-            parsedWords.emplace_back(util::EmoteData(), text.mid(lastParsedEmojiEndIndex,
+            parsedWords.emplace_back(EmoteData(), text.mid(lastParsedEmojiEndIndex,
                                                                  charactersFromLastParsedEmoji));
         }
 
         // Push the emoji as a word to parsedWords
         parsedWords.push_back(
-            std::tuple<util::EmoteData, QString>(matchedEmoji->emoteData, QString()));
+            std::tuple<EmoteData, QString>(matchedEmoji->emoteData, QString()));
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 
@@ -343,7 +343,7 @@ void Emojis::parse(std::vector<std::tuple<util::EmoteData, QString>> &parsedWord
 
     if (lastParsedEmojiEndIndex < text.length()) {
         // Add remaining characters
-        parsedWords.emplace_back(util::EmoteData(), text.mid(lastParsedEmojiEndIndex));
+        parsedWords.emplace_back(EmoteData(), text.mid(lastParsedEmojiEndIndex));
     }
 }
 

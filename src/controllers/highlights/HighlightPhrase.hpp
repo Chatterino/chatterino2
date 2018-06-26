@@ -74,8 +74,8 @@ namespace pajlada {
 namespace Settings {
 
 template <>
-struct Serialize<chatterino::controllers::highlights::HighlightPhrase> {
-    static rapidjson::Value get(const chatterino::controllers::highlights::HighlightPhrase &value,
+struct Serialize<chatterino::HighlightPhrase> {
+    static rapidjson::Value get(const chatterino::HighlightPhrase &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
@@ -90,11 +90,11 @@ struct Serialize<chatterino::controllers::highlights::HighlightPhrase> {
 };
 
 template <>
-struct Deserialize<chatterino::controllers::highlights::HighlightPhrase> {
-    static chatterino::controllers::highlights::HighlightPhrase get(const rapidjson::Value &value)
+struct Deserialize<chatterino::HighlightPhrase> {
+    static chatterino::HighlightPhrase get(const rapidjson::Value &value)
     {
         if (!value.IsObject()) {
-            return chatterino::controllers::highlights::HighlightPhrase(QString(), true, false,
+            return chatterino::HighlightPhrase(QString(), true, false,
                                                                         false);
         }
 
@@ -108,7 +108,7 @@ struct Deserialize<chatterino::controllers::highlights::HighlightPhrase> {
         chatterino::rj::getSafe(value, "sound", _sound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
 
-        return chatterino::controllers::highlights::HighlightPhrase(_pattern, _alert, _sound,
+        return chatterino::HighlightPhrase(_pattern, _alert, _sound,
                                                                     _isRegex);
     }
 };

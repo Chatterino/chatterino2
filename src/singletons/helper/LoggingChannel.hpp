@@ -17,7 +17,7 @@ class LoggingChannel : boost::noncopyable
 
 public:
     ~LoggingChannel();
-    void addMessage(std::shared_ptr<messages::Message> message);
+    void addMessage(std::shared_ptr<chatterino::Message> message);
 
 private:
     void openLogFile();

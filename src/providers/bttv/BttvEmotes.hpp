@@ -11,18 +11,18 @@ namespace chatterino {
 class BTTVEmotes
 {
 public:
-    util::EmoteMap globalEmotes;
+    EmoteMap globalEmotes;
     SignalVector<QString> globalEmoteCodes;
 
-    util::EmoteMap channelEmotes;
+    EmoteMap channelEmotes;
     std::map<QString, SignalVector<QString>> channelEmoteCodes;
 
     void loadGlobalEmotes();
     void loadChannelEmotes(const QString &channelName,
-                           std::weak_ptr<util::EmoteMap> channelEmoteMap);
+                           std::weak_ptr<EmoteMap> channelEmoteMap);
 
 private:
-    util::EmoteMap channelEmoteCache;
+    EmoteMap channelEmoteCache;
 };
 
 }  // namespace chatterino

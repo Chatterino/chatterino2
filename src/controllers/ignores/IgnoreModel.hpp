@@ -9,7 +9,7 @@ namespace chatterino {
 
 class IgnoreController;
 
-class IgnoreModel : public util::SignalVectorModel<IgnorePhrase>
+class IgnoreModel : public SignalVectorModel<IgnorePhrase>
 {
     explicit IgnoreModel(QObject *parent);
 

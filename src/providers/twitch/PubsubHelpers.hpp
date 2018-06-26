@@ -20,7 +20,7 @@ bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
 bool getTargetUser(const rapidjson::Value &data, ActionUser &user);
 
 rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVec,
-                                        std::shared_ptr<providers::twitch::TwitchAccount> account);
+                                        std::shared_ptr<TwitchAccount> account);
 rapidjson::Document createUnlistenMessage(const std::vector<std::string> &topicsVec);
 
 // Create timer using given ioService
@@ -32,7 +32,7 @@ void runAfter(boost::asio::io_service &ioService, Duration duration, Callback cb
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            debug::Log("Error in runAfter: {}", ec.message());
+            Log("Error in runAfter: {}", ec.message());
             return;
         }
 
@@ -48,7 +48,7 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer, Duration duratio
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            debug::Log("Error in runAfter: {}", ec.message());
+            Log("Error in runAfter: {}", ec.message());
             return;
         }
 

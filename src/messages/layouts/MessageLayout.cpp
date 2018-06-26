@@ -24,12 +24,12 @@ MessageLayout::MessageLayout(MessagePtr message)
     : message_(message)
     , buffer_(nullptr)
 {
-    util::DebugCount::increase("message layout");
+    DebugCount::increase("message layout");
 }
 
 MessageLayout::~MessageLayout()
 {
-    util::DebugCount::decrease("message layout");
+    DebugCount::decrease("message layout");
 }
 
 Message *MessageLayout::getMessage()
@@ -140,7 +140,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
         this->buffer_ = std::shared_ptr<QPixmap>(pixmap);
         this->bufferValid_ = false;
-        util::DebugCount::increase("message drawing buffers");
+        DebugCount::increase("message drawing buffers");
     }
 
     if (!this->bufferValid_ || !selection.isEmpty()) {
@@ -230,7 +230,7 @@ void MessageLayout::invalidateBuffer()
 void MessageLayout::deleteBuffer()
 {
     if (this->buffer_ != nullptr) {
-        util::DebugCount::decrease("message drawing buffers");
+        DebugCount::decrease("message drawing buffers");
 
         this->buffer_ = nullptr;
     }

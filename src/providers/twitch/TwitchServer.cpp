@@ -29,10 +29,10 @@ TwitchServer::TwitchServer()
 void TwitchServer::initialize()
 {
     getApp()->accounts->twitch.currentUserChanged.connect(
-        [this]() { util::postToThread([this] { this->connect(); }); });
+        [this]() { postToThread([this] { this->connect(); }); });
 }
 
-void TwitchServer::initializeConnection(providers::irc::IrcConnection *connection, bool isRead,
+void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
                                         bool isWrite)
 {
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
@@ -196,7 +196,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
             if (this->lastErrorTimeSpeed_ + 30s < now) {
                 auto errorMessage =
-                    messages::Message::createSystemMessage("sending messages too fast");
+                    chatterino::Message::createSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
@@ -214,7 +214,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         if (lastMessage.size() >= maxMessageCount) {
             if (this->lastErrorTimeAmount_ + 30s < now) {
                 auto errorMessage =
-                    messages::Message::createSystemMessage("sending too many messages");
+                    chatterino::Message::createSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 

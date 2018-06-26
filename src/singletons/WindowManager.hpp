@@ -21,12 +21,12 @@ public:
     void repaintGifEmotes();
     // void updateAll();
 
-    widgets::Window &getMainWindow();
-    widgets::Window &getSelectedWindow();
-    widgets::Window &createWindow(widgets::Window::WindowType type);
+    Window &getMainWindow();
+    Window &getSelectedWindow();
+    Window &createWindow(Window::WindowType type);
 
     int windowCount();
-    widgets::Window *windowAt(int index);
+    Window *windowAt(int index);
 
     void save();
     void initialize();
@@ -49,12 +49,12 @@ private:
 
     std::atomic<int> generation{0};
 
-    std::vector<widgets::Window *> windows;
+    std::vector<Window *> windows;
 
-    widgets::Window *mainWindow = nullptr;
-    widgets::Window *selectedWindow = nullptr;
+    Window *mainWindow = nullptr;
+    Window *selectedWindow = nullptr;
 
-    void encodeNodeRecusively(widgets::SplitContainer::Node *node, QJsonObject &obj);
+    void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
 public:
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);

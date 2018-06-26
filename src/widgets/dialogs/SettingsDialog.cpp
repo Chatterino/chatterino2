@@ -36,7 +36,7 @@ SettingsDialog::SettingsDialog()
 
 void SettingsDialog::initUi()
 {
-    util::LayoutCreator<SettingsDialog> layoutCreator(this);
+    LayoutCreator<SettingsDialog> layoutCreator(this);
 
     // tab pages
     layoutCreator.emplace<QWidget>()
@@ -76,34 +76,34 @@ void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setSpacing(0);
 
-    this->addTab(new settingspages::AccountsPage);
+    this->addTab(new AccountsPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new settingspages::AppearancePage);
-    this->addTab(new settingspages::BehaviourPage);
+    this->addTab(new AppearancePage);
+    this->addTab(new BehaviourPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new settingspages::CommandPage);
-    //    this->addTab(new settingspages::EmotesPage);
-    this->addTab(new settingspages::HighlightingPage);
-    this->addTab(new settingspages::IgnoreUsersPage);
+    this->addTab(new CommandPage);
+    //    this->addTab(new EmotesPage);
+    this->addTab(new HighlightingPage);
+    this->addTab(new IgnoreUsersPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new settingspages::KeyboardSettingsPage);
-    //    this->addTab(new settingspages::LogsPage);
-    this->addTab(new settingspages::ModerationPage);
-    //    this->addTab(new settingspages::SpecialChannelsPage);
-    this->addTab(new settingspages::BrowserExtensionPage);
-    this->addTab(new settingspages::ExternalToolsPage);
+    this->addTab(new KeyboardSettingsPage);
+    //    this->addTab(new LogsPage);
+    this->addTab(new ModerationPage);
+    //    this->addTab(new SpecialChannelsPage);
+    this->addTab(new BrowserExtensionPage);
+    this->addTab(new ExternalToolsPage);
 
     this->ui_.tabContainer->addStretch(1);
-    this->addTab(new settingspages::AboutPage, Qt::AlignBottom);
+    this->addTab(new AboutPage, Qt::AlignBottom);
 }
 
-void SettingsDialog::addTab(settingspages::SettingsPage *page, Qt::Alignment alignment)
+void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
 {
     auto tab = new SettingsDialogTab(this, page, page->getIconResource());
 

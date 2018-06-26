@@ -31,7 +31,7 @@ static rapidjson::Document parseJSONFromData2(const QByteArray &data)
     rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        debug::Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
+        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
                    result.Offset());
         return ret;
     }
@@ -51,7 +51,7 @@ static rapidjson::Document parseJSONFromReply2(QNetworkReply *reply)
     rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        debug::Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
+        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
                    result.Offset());
         return ret;
     }
@@ -242,7 +242,7 @@ public:
 
                 if (timer != nullptr) {
                     QObject::connect(timer, &QTimer::timeout, worker, [reply, timer]() {
-                        debug::Log("Aborted!");
+                        Log("Aborted!");
                         reply->abort();
                         timer->deleteLater();
                     });
@@ -314,7 +314,7 @@ public:
             } break;
 
             default: {
-                debug::Log("[Execute] Unhandled request type {}", (int)this->data.requestType);
+                Log("[Execute] Unhandled request type {}", (int)this->data.requestType);
             } break;
         }
     }
@@ -407,14 +407,14 @@ private:
                              }
 
                              if (reply == nullptr) {
-                                 debug::Log("Unhandled request type {}", (int)data.requestType);
+                                 Log("Unhandled request type {}", (int)data.requestType);
                                  return;
                              }
 
                              if (timer != nullptr) {
                                  QObject::connect(timer, &QTimer::timeout, worker,
                                                   [reply, timer, data]() {
-                                                      debug::Log("Aborted!");
+                                                      Log("Aborted!");
                                                       reply->abort();
                                                       timer->deleteLater();
                                                       data.onError(-2);

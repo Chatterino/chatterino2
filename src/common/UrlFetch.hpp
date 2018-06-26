@@ -1,10 +1,10 @@
 #pragma once
 
-#include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/Credentials.hpp"
-#include "debug/Log.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/NetworkRequest.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "debug/Log.hpp"
+#include "providers/twitch/Credentials.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
@@ -26,7 +26,7 @@ namespace chatterino {
 static void get(QString url, const QObject *caller,
                 std::function<void(const QJsonObject &)> successCallback)
 {
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", getDefaultClientID());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
@@ -39,7 +39,7 @@ static void get(QString url, const QObject *caller,
 static void get2(QString url, const QObject *caller, bool useQuickLoadCache,
                  std::function<void(const rapidjson::Document &)> successCallback)
 {
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", getDefaultClientID());
     req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
@@ -54,7 +54,7 @@ static void getAuthorized(QString url, const QString &clientID, const QString &o
                           const QObject *caller,
                           std::function<void(const QJsonObject &)> successCallback)
 {
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(caller);
     req.setRawHeader("Client-ID", clientID.toUtf8());
     req.setRawHeader("Authorization", "OAuth " + oauthToken.toUtf8());
@@ -71,24 +71,24 @@ static void getUserID(QString username, const QObject *caller,
     get("https://api.twitch.tv/kraken/users?login=" + username, caller,
         [=](const QJsonObject &root) {
             if (!root.value("users").isArray()) {
-                debug::Log("API Error while getting user id, users is not an array");
+                Log("API Error while getting user id, users is not an array");
                 return;
             }
 
             auto users = root.value("users").toArray();
             if (users.size() != 1) {
-                debug::Log("API Error while getting user id, users array size is not 1");
+                Log("API Error while getting user id, users array size is not 1");
                 return;
             }
             if (!users[0].isObject()) {
-                debug::Log("API Error while getting user id, first user is not an object");
+                Log("API Error while getting user id, first user is not an object");
                 return;
             }
             auto firstUser = users[0].toObject();
             auto id = firstUser.value("_id");
             if (!id.isString()) {
-                debug::Log("API Error: while getting user id, first user object `_id` key is not a "
-                           "string");
+                Log("API Error: while getting user id, first user object `_id` key is not a "
+                    "string");
                 return;
             }
             successCallback(id.toString());

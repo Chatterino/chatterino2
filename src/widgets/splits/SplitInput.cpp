@@ -40,7 +40,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 void SplitInput::initLayout()
 {
     auto app = getApp();
-    util::LayoutCreator<SplitInput> layoutCreator(this);
+    LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
         layoutCreator.setLayoutType<QHBoxLayout>().withoutMargin().assign(&this->ui_.hbox);
@@ -67,19 +67,19 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
+        app->fonts->getFont(chatterino::FontManager::Type::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(singletons::FontManager::Type::ChatMedium, this->getScale()));
+            app->fonts->getFont(chatterino::FontManager::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
         if (!this->emotePopup_) {
             this->emotePopup_ = std::make_unique<EmotePopup>();
-            this->emotePopup_->linkClicked.connect([this](const messages::Link &link) {
-                if (link.type == messages::Link::InsertText) {
+            this->emotePopup_->linkClicked.connect([this](const chatterino::Link &link) {
+                if (link.type == chatterino::Link::InsertText) {
                     this->insertText(link.value + " ");
                 }
             });

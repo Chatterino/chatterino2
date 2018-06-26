@@ -4,7 +4,7 @@ namespace chatterino {
 
 // commandmodel
 CommandModel::CommandModel(QObject *parent)
-    : util::SignalVectorModel<Command>(2, parent)
+    : SignalVectorModel<Command>(2, parent)
 {
 }
 

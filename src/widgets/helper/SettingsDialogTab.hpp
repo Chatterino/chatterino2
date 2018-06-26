@@ -16,11 +16,11 @@ class SettingsDialogTab : public BaseWidget
     Q_OBJECT
 
 public:
-    SettingsDialogTab(SettingsDialog *dialog, settingspages::SettingsPage *page,
+    SettingsDialogTab(SettingsDialog *dialog, SettingsPage *page,
                       QString imageFileName);
 
     void setSelected(bool selected);
-    settingspages::SettingsPage *getSettingsPage();
+    SettingsPage *getSettingsPage();
 
 signals:
     void selectedChanged(bool);
@@ -36,7 +36,7 @@ private:
 
     // Parent settings dialog
     SettingsDialog *dialog;
-    settingspages::SettingsPage *page;
+    SettingsPage *page;
 
     bool selected = false;
 };

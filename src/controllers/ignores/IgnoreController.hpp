@@ -13,14 +13,14 @@ class IgnoreController
 public:
     void initialize();
 
-    util::UnsortedSignalVector<IgnorePhrase> phrases;
+    UnsortedSignalVector<IgnorePhrase> phrases;
 
     IgnoreModel *createModel(QObject *parent);
 
 private:
     bool initialized = false;
 
-    singletons::ChatterinoSetting<std::vector<ignores::IgnorePhrase>> ignoresSetting = {
+    chatterino::ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {
         "/ignore/phrases"};
 };
 

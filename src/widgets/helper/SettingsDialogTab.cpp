@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, settingspages::SettingsPage *_page,
+SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog, SettingsPage *_page,
                                      QString imageFileName)
     : BaseWidget(_dialog)
     , dialog(_dialog)
@@ -33,7 +33,7 @@ void SettingsDialogTab::setSelected(bool _selected)
     emit selectedChanged(selected);
 }
 
-settingspages::SettingsPage *SettingsDialogTab::getSettingsPage()
+SettingsPage *SettingsDialogTab::getSettingsPage()
 {
     return this->page;
 }

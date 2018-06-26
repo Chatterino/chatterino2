@@ -117,18 +117,18 @@ public:
         } whisper;
     } sig;
 
-    void listenToWhispers(std::shared_ptr<providers::twitch::TwitchAccount> account);
+    void listenToWhispers(std::shared_ptr<TwitchAccount> account);
 
     void unlistenAllModerationActions();
 
     void listenToChannelModerationActions(
-        const QString &channelID, std::shared_ptr<providers::twitch::TwitchAccount> account);
+        const QString &channelID, std::shared_ptr<TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 
 private:
     void listenToTopic(const std::string &topic,
-                       std::shared_ptr<providers::twitch::TwitchAccount> account);
+                       std::shared_ptr<TwitchAccount> account);
 
     void listen(rapidjson::Document &&msg);
     bool tryListen(rapidjson::Document &msg);

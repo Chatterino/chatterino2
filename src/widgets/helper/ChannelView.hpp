@@ -36,13 +36,13 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<messages::MessageElement::Flags> value);
-    const boost::optional<messages::MessageElement::Flags> &getOverrideFlags() const;
+    void setOverrideFlags(boost::optional<chatterino::MessageElement::Flags> value);
+    const boost::optional<chatterino::MessageElement::Flags> &getOverrideFlags() const;
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
     void setChannel(ChannelPtr channel_);
-    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> getMessagesSnapshot();
+    chatterino::LimitedQueueSnapshot<chatterino::MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
     void clearMessages();
@@ -50,7 +50,7 @@ public:
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
-    pajlada::Signals::Signal<const messages::Link &> linkClicked;
+    pajlada::Signals::Signal<const chatterino::Link &> linkClicked;
 
 protected:
     void themeRefreshEvent() override;
@@ -70,10 +70,10 @@ protected:
 
     void hideEvent(QHideEvent *) override;
 
-    void handleLinkClick(QMouseEvent *event, const messages::Link &link,
-                         messages::MessageLayout *layout);
+    void handleLinkClick(QMouseEvent *event, const chatterino::Link &link,
+                         chatterino::MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<messages::MessageLayout> &message,
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<chatterino::MessageLayout> &message,
                          QPoint &relativePos, int &index);
 
 private:
@@ -92,24 +92,24 @@ private:
     int messagesAddedSinceSelectionPause_ = 0;
 
     QTimer pauseTimeout_;
-    boost::optional<messages::MessageElement::Flags> overrideFlags_;
-    messages::MessageLayoutPtr lastReadMessage_;
+    boost::optional<chatterino::MessageElement::Flags> overrideFlags_;
+    chatterino::MessageLayoutPtr lastReadMessage_;
 
-    messages::LimitedQueueSnapshot<messages::MessageLayoutPtr> snapshot_;
+    chatterino::LimitedQueueSnapshot<chatterino::MessageLayoutPtr> snapshot_;
 
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);
 
     void drawMessages(QPainter &painter);
-    void setSelection(const messages::SelectionItem &start, const messages::SelectionItem &end);
-    messages::MessageElement::Flags getFlags() const;
+    void setSelection(const chatterino::SelectionItem &start, const chatterino::SelectionItem &end);
+    chatterino::MessageElement::Flags getFlags() const;
     bool isPaused();
 
     void handleMouseClick(QMouseEvent *event,
-                          const messages::MessageLayoutElement *hoverLayoutElement,
-                          messages::MessageLayout *layout);
-    void addContextMenuItems(const messages::MessageLayoutElement *hoveredElement,
-                             messages::MessageLayout *layout);
+                          const chatterino::MessageLayoutElement *hoverLayoutElement,
+                          chatterino::MessageLayout *layout);
+    void addContextMenuItems(const chatterino::MessageLayoutElement *hoveredElement,
+                             chatterino::MessageLayout *layout);
 
     //    void beginPause();
     //    void endPause();
@@ -132,10 +132,10 @@ private:
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
 
-    messages::Selection selection_;
+    chatterino::Selection selection_;
     bool selecting_ = false;
 
-    messages::LimitedQueue<messages::MessageLayoutPtr> messages;
+    chatterino::LimitedQueue<chatterino::MessageLayoutPtr> messages;
 
     pajlada::Signals::Connection messageAppendedConnection_;
     pajlada::Signals::Connection messageAddedAtStartConnection_;
@@ -147,7 +147,7 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> connections_;
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
-    std::unordered_set<std::shared_ptr<messages::MessageLayout>> messagesOnScreen_;
+    std::unordered_set<std::shared_ptr<chatterino::MessageLayout>> messagesOnScreen_;
 
     int getLayoutWidth() const;
 

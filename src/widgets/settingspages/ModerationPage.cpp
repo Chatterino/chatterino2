@@ -35,7 +35,7 @@ ModerationPage::ModerationPage()
     : SettingsPage("Moderation", "")
 {
     auto app = getApp();
-    util::LayoutCreator<ModerationPage> layoutCreator(this);
+    LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
 
@@ -119,7 +119,7 @@ ModerationPage::ModerationPage()
 
         /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
         {
-            helper::EditableModelView *view = *taggedUsers.emplace<helper::EditableModelView>(
+            EditableModelView *view = *taggedUsers.emplace<EditableModelView>(
                 app->taggedUsers->createModel(nullptr));
 
             view->setTitles({"Name"});
@@ -127,7 +127,7 @@ ModerationPage::ModerationPage()
 
             view->addButtonPressed.connect([] {
                 getApp()->taggedUsers->users.appendItem(
-                    controllers::taggedusers::TaggedUser(ProviderId::Twitch, "example", "xD"));
+                    TaggedUser(ProviderId::Twitch, "example", "xD"));
             });
         }*/
     }

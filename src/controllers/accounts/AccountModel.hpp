@@ -10,7 +10,7 @@ namespace chatterino {
 
 class AccountController;
 
-class AccountModel : public util::SignalVectorModel<std::shared_ptr<Account>>
+class AccountModel : public SignalVectorModel<std::shared_ptr<Account>>
 {
 public:
     AccountModel(QObject *parent);

@@ -17,10 +17,10 @@ public:
 
     void initialize();
 
-    providers::twitch::TwitchEmotes twitch;
-    providers::bttv::BTTVEmotes bttv;
-    providers::ffz::FFZEmotes ffz;
-    providers::emoji::Emojis emojis;
+    TwitchEmotes twitch;
+    BTTVEmotes bttv;
+    FFZEmotes ffz;
+    Emojis emojis;
 
     GIFTimer gifTimer;
 };

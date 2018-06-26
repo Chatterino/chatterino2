@@ -21,21 +21,21 @@
 
 namespace chatterino {
 
-using SplitNode = widgets::SplitContainer::Node;
-using SplitDirection = widgets::SplitContainer::Direction;
+using SplitNode = SplitContainer::Node;
+using SplitDirection = SplitContainer::Direction;
 
 const int WindowManager::uiScaleMin = -5;
 const int WindowManager::uiScaleMax = 10;
 
 void WindowManager::showSettingsDialog()
 {
-    QTimer::singleShot(80, [] { widgets::SettingsDialog::showDialog(); });
+    QTimer::singleShot(80, [] { SettingsDialog::showDialog(); });
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
     //    static QWidget *lastFocusedWidget = nullptr;
-    static widgets::AccountSwitchPopupWidget *w = new widgets::AccountSwitchPopupWidget();
+    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget();
 
     if (w->hasFocus()) {
         w->hide();
@@ -91,29 +91,29 @@ void WindowManager::repaintGifEmotes()
 //    }
 //}
 
-widgets::Window &WindowManager::getMainWindow()
+Window &WindowManager::getMainWindow()
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     return *this->mainWindow;
 }
 
-widgets::Window &WindowManager::getSelectedWindow()
+Window &WindowManager::getSelectedWindow()
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     return *this->selectedWindow;
 }
 
-widgets::Window &WindowManager::createWindow(widgets::Window::WindowType type)
+Window &WindowManager::createWindow(Window::WindowType type)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
-    auto *window = new widgets::Window(type);
+    auto *window = new Window(type);
     this->windows.push_back(window);
     window->show();
 
-    if (type != widgets::Window::Main) {
+    if (type != Window::Main) {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
@@ -134,21 +134,21 @@ int WindowManager::windowCount()
     return this->windows.size();
 }
 
-widgets::Window *WindowManager::windowAt(int index)
+Window *WindowManager::windowAt(int index)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     if (index < 0 || (size_t)index >= this->windows.size()) {
         return nullptr;
     }
-    debug::Log("getting window at bad index {}", index);
+    Log("getting window at bad index {}", index);
 
     return this->windows.at(index);
 }
 
 void WindowManager::initialize()
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     auto app = getApp();
     app->themes->repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
@@ -169,16 +169,16 @@ void WindowManager::initialize()
 
         // get type
         QString type_val = window_obj.value("type").toString();
-        widgets::Window::WindowType type =
-            type_val == "main" ? widgets::Window::Main : widgets::Window::Popup;
+        Window::WindowType type =
+            type_val == "main" ? Window::Main : Window::Popup;
 
-        if (type == widgets::Window::Main && mainWindow != nullptr) {
-            type = widgets::Window::Popup;
+        if (type == Window::Main && mainWindow != nullptr) {
+            type = Window::Popup;
         }
 
-        widgets::Window &window = createWindow(type);
+        Window &window = createWindow(type);
 
-        if (type == widgets::Window::Main) {
+        if (type == Window::Main) {
             mainWindow = &window;
         }
 
@@ -197,7 +197,7 @@ void WindowManager::initialize()
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
         for (QJsonValue tab_val : tabs) {
-            widgets::SplitContainer *page = window.getNotebook().addPage(false);
+            SplitContainer *page = window.getNotebook().addPage(false);
 
             QJsonObject tab_obj = tab_val.toObject();
 
@@ -225,7 +225,7 @@ void WindowManager::initialize()
             int colNr = 0;
             for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
                 for (QJsonValue split_val : column_val.toArray()) {
-                    widgets::Split *split = new widgets::Split(page);
+                    Split *split = new Split(page);
 
                     QJsonObject split_obj = split_val.toObject();
                     split->setChannel(decodeChannel(split_obj));
@@ -238,7 +238,7 @@ void WindowManager::initialize()
     }
 
     if (mainWindow == nullptr) {
-        mainWindow = &createWindow(widgets::Window::Main);
+        mainWindow = &createWindow(Window::Main);
         mainWindow->getNotebook().addPage(true);
     }
 
@@ -247,22 +247,22 @@ void WindowManager::initialize()
 
 void WindowManager::save()
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
     auto app = getApp();
 
     QJsonDocument document;
 
     // "serialize"
     QJsonArray window_arr;
-    for (widgets::Window *window : this->windows) {
+    for (Window *window : this->windows) {
         QJsonObject window_obj;
 
         // window type
         switch (window->getType()) {
-            case widgets::Window::Main:
+            case Window::Main:
                 window_obj.insert("type", "main");
                 break;
-            case widgets::Window::Popup:
+            case Window::Popup:
                 window_obj.insert("type", "popup");
                 break;
         }
@@ -278,8 +278,8 @@ void WindowManager::save()
 
         for (int tab_i = 0; tab_i < window->getNotebook().getPageCount(); tab_i++) {
             QJsonObject tab_obj;
-            widgets::SplitContainer *tab =
-                dynamic_cast<widgets::SplitContainer *>(window->getNotebook().getPageAt(tab_i));
+            SplitContainer *tab =
+                dynamic_cast<SplitContainer *>(window->getNotebook().getPageAt(tab_i));
             assert(tab != nullptr);
 
             // custom tab title
@@ -355,7 +355,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     switch (channel.getType()) {
         case Channel::Twitch: {
@@ -376,7 +376,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 
 IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     auto app = getApp();
 
@@ -396,9 +396,9 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 
 void WindowManager::closeAll()
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
-    for (widgets::Window *window : windows) {
+    for (Window *window : windows) {
         window->close();
     }
 }
@@ -415,7 +415,7 @@ void WindowManager::incGeneration()
 
 int WindowManager::clampUiScale(int scale)
 {
-    return util::clamp(scale, uiScaleMin, uiScaleMax);
+    return clamp(scale, uiScaleMin, uiScaleMax);
 }
 
 float WindowManager::getUiScaleValue()

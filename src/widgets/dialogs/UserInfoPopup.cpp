@@ -33,7 +33,7 @@ UserInfoPopup::UserInfoPopup()
 
     auto app = getApp();
 
-    auto layout = util::LayoutCreator<UserInfoPopup>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<UserInfoPopup>(this).setLayoutType<QVBoxLayout>();
 
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
@@ -86,8 +86,8 @@ UserInfoPopup::UserInfoPopup()
 
         // userstate
         this->userStateChanged.connect([this, mod, unmod]() mutable {
-            providers::twitch::TwitchChannel *twitchChannel =
-                dynamic_cast<providers::twitch::TwitchChannel *>(this->channel_.get());
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
                 qDebug() << this->userName_;
@@ -111,8 +111,8 @@ UserInfoPopup::UserInfoPopup()
         auto timeout = moderation.emplace<TimeoutWidget>();
 
         this->userStateChanged.connect([this, lineMod, timeout]() mutable {
-            providers::twitch::TwitchChannel *twitchChannel =
-                dynamic_cast<providers::twitch::TwitchChannel *>(this->channel_.get());
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
                 lineMod->setVisible(twitchChannel->hasModRights());
@@ -171,10 +171,10 @@ void UserInfoPopup::installEvents()
 
         this->ui_.follow->setEnabled(false);
         if (this->ui_.follow->isChecked()) {
-            util::twitch::put(requestUrl,
+            put(requestUrl,
                               [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
         } else {
-            util::twitch::sendDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
+            sendDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
         }
     });
 
@@ -234,13 +234,13 @@ void UserInfoPopup::updateUserData()
     std::weak_ptr<bool> hack = this->hack_;
 
     // get user info
-    util::twitch::getUserID(this->userName_, this, [this, hack](QString id) {
+    getUserID(this->userName_, this, [this, hack](QString id) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = id;
 
         // get channel info
-        util::twitch::get(
+        get(
             "https://api.twitch.tv/kraken/channels/" + id, this, [this](const QJsonObject &obj) {
                 this->ui_.followerCountLabel->setText(
                     TEXT_FOLLOWERS + QString::number(obj.value("followers").toInt()));
@@ -307,7 +307,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     : BaseWidget(nullptr)
 {
     auto layout =
-        util::LayoutCreator<TimeoutWidget>(this).setLayoutType<QHBoxLayout>().withoutMargin();
+        LayoutCreator<TimeoutWidget>(this).setLayoutType<QHBoxLayout>().withoutMargin();
 
     QColor color1(255, 255, 255, 80);
     QColor color2(255, 255, 255, 0);

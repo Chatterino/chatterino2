@@ -57,8 +57,8 @@ namespace pajlada {
 namespace Settings {
 
 template <>
-struct Serialize<chatterino::controllers::ignores::IgnorePhrase> {
-    static rapidjson::Value get(const chatterino::controllers::ignores::IgnorePhrase &value,
+struct Serialize<chatterino::IgnorePhrase> {
+    static rapidjson::Value get(const chatterino::IgnorePhrase &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
@@ -71,11 +71,11 @@ struct Serialize<chatterino::controllers::ignores::IgnorePhrase> {
 };
 
 template <>
-struct Deserialize<chatterino::controllers::ignores::IgnorePhrase> {
-    static chatterino::controllers::ignores::IgnorePhrase get(const rapidjson::Value &value)
+struct Deserialize<chatterino::IgnorePhrase> {
+    static chatterino::IgnorePhrase get(const rapidjson::Value &value)
     {
         if (!value.IsObject()) {
-            return chatterino::controllers::ignores::IgnorePhrase(QString(), false);
+            return chatterino::IgnorePhrase(QString(), false);
         }
 
         QString _pattern;
@@ -84,7 +84,7 @@ struct Deserialize<chatterino::controllers::ignores::IgnorePhrase> {
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "regex", _isRegex);
 
-        return chatterino::controllers::ignores::IgnorePhrase(_pattern, _isRegex);
+        return chatterino::IgnorePhrase(_pattern, _isRegex);
     }
 };
 

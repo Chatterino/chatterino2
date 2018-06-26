@@ -3,7 +3,7 @@
 #include "providers/twitch/PubsubActions.hpp"
 #include "util/IrcHelpers.hpp"
 
-using SBHighlight = chatterino::widgets::ScrollbarHighlight;
+using SBHighlight = chatterino::ScrollbarHighlight;
 
 namespace chatterino {
 
@@ -116,7 +116,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
 
     if (reason.length() > 0) {
         text.append(": \"");
-        text.append(util::parseTagString(reason));
+        text.append(parseTagString(reason));
         text.append("\"");
     }
     text.append(".");
@@ -132,7 +132,7 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     return message;
 }
 
-MessagePtr Message::createTimeoutMessage(const providers::twitch::BanAction &action, uint32_t count)
+MessagePtr Message::createTimeoutMessage(const BanAction &action, uint32_t count)
 {
     MessagePtr msg(new Message);
 
@@ -175,14 +175,14 @@ MessagePtr Message::createTimeoutMessage(const providers::twitch::BanAction &act
         }
     }
 
-    msg->addElement(new messages::TextElement(text, messages::MessageElement::Text,
-                                              messages::MessageColor::System));
+    msg->addElement(new chatterino::TextElement(text, chatterino::MessageElement::Text,
+                                                chatterino::MessageColor::System));
     msg->searchText = text;
 
     return msg;
 }
 
-MessagePtr Message::createUntimeoutMessage(const providers::twitch::UnbanAction &action)
+MessagePtr Message::createUntimeoutMessage(const UnbanAction &action)
 {
     MessagePtr msg(new Message);
 
@@ -204,8 +204,8 @@ MessagePtr Message::createUntimeoutMessage(const providers::twitch::UnbanAction 
                    .arg(action.target.name);
     }
 
-    msg->addElement(new messages::TextElement(text, messages::MessageElement::Text,
-                                              messages::MessageColor::System));
+    msg->addElement(new chatterino::TextElement(text, chatterino::MessageElement::Text,
+                                                chatterino::MessageColor::System));
     msg->searchText = text;
 
     return msg;

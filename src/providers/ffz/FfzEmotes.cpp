@@ -21,7 +21,7 @@ QString getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 }
 
 void fillInEmoteData(const QJsonObject &urls, const QString &code, const QString &tooltip,
-                     util::EmoteData &emoteData)
+                     EmoteData &emoteData)
 {
     QString url1x = getEmoteLink(urls, "1");
     QString url2x = getEmoteLink(urls, "2");
@@ -29,14 +29,14 @@ void fillInEmoteData(const QJsonObject &urls, const QString &code, const QString
 
     assert(!url1x.isEmpty());
 
-    emoteData.image1x = new messages::Image(url1x, 1, code, tooltip);
+    emoteData.image1x = new chatterino::Image(url1x, 1, code, tooltip);
 
     if (!url2x.isEmpty()) {
-        emoteData.image2x = new messages::Image(url2x, 0.5, code, tooltip);
+        emoteData.image2x = new chatterino::Image(url2x, 0.5, code, tooltip);
     }
 
     if (!url3x.isEmpty()) {
-        emoteData.image3x = new messages::Image(url3x, 0.25, code, tooltip);
+        emoteData.image3x = new chatterino::Image(url3x, 0.25, code, tooltip);
     }
 }
 
@@ -46,7 +46,7 @@ void FFZEmotes::loadGlobalEmotes()
 {
     QString url("https://api.frankerfacez.com/v1/set/global");
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(30000);
     req.setUseQuickLoadCache(true);
@@ -64,7 +64,7 @@ void FFZEmotes::loadGlobalEmotes()
                 int id = object.value("id").toInt();
                 QJsonObject urls = object.value("urls").toObject();
 
-                util::EmoteData emoteData;
+                EmoteData emoteData;
                 fillInEmoteData(urls, code, code + "<br/>Global FFZ Emote", emoteData);
                 emoteData.pageLink =
                     QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);
@@ -78,13 +78,13 @@ void FFZEmotes::loadGlobalEmotes()
     });
 }
 
-void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util::EmoteMap> _map)
+void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
 {
     printf("[FFZEmotes] Reload FFZ Channel Emotes for channel %s\n", qPrintable(channelName));
 
     QString url("https://api.frankerfacez.com/v1/room/" + channelName);
 
-    util::NetworkRequest req(url);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.setTimeout(3000);
     req.setUseQuickLoadCache(true);
@@ -113,7 +113,7 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<util
                 QJsonObject urls = emoteObject.value("urls").toObject();
 
                 auto emote = this->channelEmoteCache.getOrAdd(id, [id, &code, &urls] {
-                    util::EmoteData emoteData;
+                    EmoteData emoteData;
                     fillInEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
                     emoteData.pageLink =
                         QString("https://www.frankerfacez.com/emoticon/%1-%2").arg(id).arg(code);

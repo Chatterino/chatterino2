@@ -12,7 +12,7 @@ class TaggedUsersController
 public:
     TaggedUsersController();
 
-    util::SortedSignalVector<TaggedUser, std::less<TaggedUser>> users;
+    SortedSignalVector<TaggedUser, std::less<TaggedUser>> users;
 
     TaggedUsersModel *createModel(QObject *parent = nullptr);
 };

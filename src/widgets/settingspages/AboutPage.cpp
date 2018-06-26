@@ -17,11 +17,11 @@ namespace chatterino {
 AboutPage::AboutPage()
     : SettingsPage("About", ":/images/about.svg")
 {
-    util::LayoutCreator<AboutPage> layoutCreator(this);
+    LayoutCreator<AboutPage> layoutCreator(this);
 
     auto scroll = layoutCreator.emplace<QScrollArea>();
     auto widget = scroll.emplaceScrollAreaWidget();
-    util::removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
     auto layout = widget.setLayoutType<QVBoxLayout>();
     {

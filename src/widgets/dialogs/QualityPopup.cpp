@@ -43,9 +43,9 @@ void QualityPopup::okButtonClicked()
     QString channelURL = "twitch.tv/" + this->channelName;
 
     try {
-        streamlink::OpenStreamlink(channelURL, this->ui_.selector.currentText());
-    } catch (const streamlink::Exception &ex) {
-        debug::Log("Exception caught trying to open streamlink: {}", ex.what());
+        OpenStreamlink(channelURL, this->ui_.selector.currentText());
+    } catch (const Exception &ex) {
+        Log("Exception caught trying to open streamlink: {}", ex.what());
     }
 
     this->close();

@@ -14,7 +14,7 @@ namespace chatterino {
 class Channel;
 class TwitchChannel;
 
-class TwitchMessageBuilder : public messages::MessageBuilder
+class TwitchMessageBuilder : public chatterino::MessageBuilder
 {
 public:
     enum UsernameDisplayMode : int {
@@ -26,22 +26,22 @@ public:
     TwitchMessageBuilder() = delete;
 
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
-                                  const messages::MessageParseArgs &_args);
+                                  const chatterino::MessageParseArgs &_args);
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  const messages::MessageParseArgs &_args, QString content,
+                                  const chatterino::MessageParseArgs &_args, QString content,
                                   bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
     const Communi::IrcMessage *ircMessage;
-    messages::MessageParseArgs args;
+    chatterino::MessageParseArgs args;
     const QVariantMap tags;
 
     QString messageID;
     QString userName;
 
     bool isIgnored() const;
-    messages::MessagePtr build();
+    chatterino::MessagePtr build();
 
 private:
     QString roomID;
@@ -60,7 +60,7 @@ private:
     void parseHighlights();
 
     void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, util::EmoteData>> &vec);
+                           std::vector<std::pair<long, EmoteData>> &vec);
     bool tryAppendEmote(QString &emoteString);
 
     void appendTwitchBadges();

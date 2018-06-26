@@ -23,7 +23,7 @@ ExternalToolsPage::ExternalToolsPage()
 {
     auto app = getApp();
 
-    util::LayoutCreator<ExternalToolsPage> layoutCreator(this);
+    LayoutCreator<ExternalToolsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     {

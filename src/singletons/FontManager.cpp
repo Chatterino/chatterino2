@@ -29,7 +29,7 @@ FontManager::FontManager()
     qDebug() << "init FontManager";
 
     this->chatFontFamily.connect([this](const std::string &, auto) {
-        util::assertInGuiThread();
+        assertInGuiThread();
 
         if (getApp()->windows) {
             getApp()->windows->incGeneration();
@@ -42,7 +42,7 @@ FontManager::FontManager()
     });
 
     this->chatFontSize.connect([this](const int &, auto) {
-        util::assertInGuiThread();
+        assertInGuiThread();
 
         if (getApp()->windows) {
             getApp()->windows->incGeneration();
@@ -69,7 +69,7 @@ QFontMetrics FontManager::getFontMetrics(FontManager::Type type, float scale)
 
 FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
 {
-    util::assertInGuiThread();
+    assertInGuiThread();
 
     assert(type >= 0 && type < EndType);
 

@@ -9,7 +9,7 @@ namespace chatterino {
 
 class HighlightController;
 
-class HighlightModel : public util::SignalVectorModel<HighlightPhrase>
+class HighlightModel : public SignalVectorModel<HighlightPhrase>
 {
     explicit HighlightModel(QObject *parent);
 

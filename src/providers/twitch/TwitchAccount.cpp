@@ -10,7 +10,7 @@ namespace chatterino {
 
 TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
                              const QString &_oauthClient, const QString &_userID)
-    : controllers::accounts::Account(ProviderId::Twitch)
+    : Account(ProviderId::Twitch)
     , oauthClient(_oauthClient)
     , oauthToken(_oauthToken)
     , userName(_username)
@@ -75,8 +75,8 @@ void TwitchAccount::loadIgnores()
 {
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks");
 
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::GetRequest);
+    NetworkRequest req(url);
+    req.setRequestType(NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
     req.onSuccess([=](const rapidjson::Document &document) {
@@ -119,7 +119,7 @@ void TwitchAccount::loadIgnores()
 void TwitchAccount::ignore(const QString &targetName,
                            std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+    getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
         this->ignoreByID(targetUserID, targetName, onFinished);  //
     });
 }
@@ -130,8 +130,8 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
 
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::PutRequest);
+    NetworkRequest req(url);
+    req.setRequestType(NetworkRequest::PutRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -179,7 +179,7 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
 void TwitchAccount::unignore(const QString &targetName,
                              std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    util::twitch::getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+    getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
         this->unignoreByID(targetUserID, targetName, onFinished);  //
     });
 }
@@ -191,8 +191,8 @@ void TwitchAccount::unignoreByID(
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
 
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::DeleteRequest);
+    NetworkRequest req(url);
+    req.setRequestType(NetworkRequest::DeleteRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -226,8 +226,8 @@ void TwitchAccount::checkFollow(const QString targetUserID,
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/follows/channels/" +
                 targetUserID);
 
-    util::NetworkRequest req(url);
-    req.setRequestType(util::NetworkRequest::GetRequest);
+    NetworkRequest req(url);
+    req.setRequestType(NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 

@@ -28,7 +28,7 @@ IgnoreUsersPage::IgnoreUsersPage()
 {
     auto app = getApp();
 
-    util::LayoutCreator<IgnoreUsersPage> layoutCreator(this);
+    LayoutCreator<IgnoreUsersPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
@@ -63,8 +63,8 @@ IgnoreUsersPage::IgnoreUsersPage()
     // messages
     auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
     {
-        helper::EditableModelView *view =
-            messages.emplace<helper::EditableModelView>(app->ignores->createModel(nullptr))
+        EditableModelView *view =
+            messages.emplace<EditableModelView>(app->ignores->createModel(nullptr))
                 .getElement();
         view->setTitles({"Pattern", "Regex"});
         view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -78,7 +78,7 @@ IgnoreUsersPage::IgnoreUsersPage()
 
         view->addButtonPressed.connect([] {
             getApp()->ignores->phrases.appendItem(
-                controllers::ignores::IgnorePhrase{"my phrase", false});
+                IgnorePhrase{"my phrase", false});
         });
     }
 

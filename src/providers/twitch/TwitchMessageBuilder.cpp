@@ -18,13 +18,11 @@
 #include <QDebug>
 #include <QMediaPlayer>
 
-using namespace chatterino::messages;
-
 namespace chatterino {
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcPrivateMessage *_ircMessage,
-                                           const messages::MessageParseArgs &_args)
+                                           const chatterino::MessageParseArgs &_args)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)
@@ -39,8 +37,8 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcMessage *_ircMessage,
-                                           const messages::MessageParseArgs &_args, QString content,
-                                           bool isAction)
+                                           const chatterino::MessageParseArgs &_args,
+                                           QString content, bool isAction)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)
@@ -60,8 +58,7 @@ bool TwitchMessageBuilder::isIgnored() const
     // TODO(pajlada): Do we need to check if the phrase is valid first?
     for (const auto &phrase : app->ignores->phrases.getVector()) {
         if (phrase.isMatch(this->originalMessage)) {
-            debug::Log("Blocking message because it contains ignored phrase {}",
-                       phrase.getPattern());
+            Log("Blocking message because it contains ignored phrase {}", phrase.getPattern());
             return true;
         }
     }
@@ -71,7 +68,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
         for (const auto &user : app->accounts->twitch.getCurrent()->getIgnores()) {
             if (sourceUserID == user.id) {
-                debug::Log("Blocking message because it's from blocked user {}", user.name);
+                Log("Blocking message because it's from blocked user {}", user.name);
                 return true;
             }
         }
@@ -82,7 +79,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
         for (const auto &user : app->accounts->twitch.getCurrent()->getIgnores()) {
             if (sourceUserID == user.id) {
-                debug::Log("Blocking message because it's from blocked user {}", user.name);
+                Log("Blocking message because it's from blocked user {}", user.name);
                 return true;
             }
         }
@@ -167,7 +164,7 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // twitch emotes
-    std::vector<std::pair<long, util::EmoteData>> twitchEmotes;
+    std::vector<std::pair<long, EmoteData>> twitchEmotes;
 
     iterator = this->tags.find("emotes");
     if (iterator != this->tags.end()) {
@@ -205,13 +202,13 @@ MessagePtr TwitchMessageBuilder::build()
         }
 
         // split words
-        std::vector<std::tuple<util::EmoteData, QString>> parsed;
+        std::vector<std::tuple<EmoteData, QString>> parsed;
 
         // Parse emojis and take all non-emojis and put them in parsed as full text-words
         app->emotes->emojis.parse(parsed, split);
 
         for (const auto &tuple : parsed) {
-            const util::EmoteData &emoteData = std::get<0>(tuple);
+            const EmoteData &emoteData = std::get<0>(tuple);
 
             if (!emoteData.isValid()) {  // is text
                 QString string = std::get<1>(tuple);
@@ -334,7 +331,7 @@ void TwitchMessageBuilder::appendUsername()
 
     auto iterator = this->tags.find("display-name");
     if (iterator != this->tags.end()) {
-        QString displayName = util::parseTagString(iterator.value().toString()).trimmed();
+        QString displayName = parseTagString(iterator.value().toString()).trimmed();
 
         if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
             username = displayName;
@@ -449,13 +446,11 @@ void TwitchMessageBuilder::parseHighlights()
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
-    std::vector<controllers::highlights::HighlightPhrase> activeHighlights =
-        app->highlights->phrases.getVector();
+    std::vector<HighlightPhrase> activeHighlights = app->highlights->phrases.getVector();
 
     if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
-        controllers::highlights::HighlightPhrase selfHighlight(
-            currentUsername, app->settings->enableHighlightTaskbar,
-            app->settings->enableHighlightSound, false);
+        HighlightPhrase selfHighlight(currentUsername, app->settings->enableHighlightTaskbar,
+                                      app->settings->enableHighlightSound, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -466,10 +461,10 @@ void TwitchMessageBuilder::parseHighlights()
     bool hasFocus = (QApplication::focusWidget() != nullptr);
 
     if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
-        for (const controllers::highlights::HighlightPhrase &highlight : activeHighlights) {
+        for (const HighlightPhrase &highlight : activeHighlights) {
             if (highlight.isMatch(this->originalMessage)) {
-                debug::Log("Highlight because {} matches {}", this->originalMessage,
-                           highlight.getPattern());
+                Log("Highlight because {} matches {}", this->originalMessage,
+                    highlight.getPattern());
                 doHighlight = true;
 
                 if (highlight.getAlert()) {
@@ -506,7 +501,7 @@ void TwitchMessageBuilder::parseHighlights()
 
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessage,
                                              const QString &emote,
-                                             std::vector<std::pair<long int, util::EmoteData>> &vec)
+                                             std::vector<std::pair<long int, EmoteData>> &vec)
 {
     auto app = getApp();
     if (!emote.contains(':')) {
@@ -539,15 +534,15 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
 
         QString name = this->originalMessage.mid(start, end - start + 1);
 
-        vec.push_back(std::pair<long int, util::EmoteData>(
-            start, app->emotes->twitch.getEmoteById(id, name)));
+        vec.push_back(
+            std::pair<long int, EmoteData>(start, app->emotes->twitch.getEmoteById(id, name)));
     }
 }
 
 bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 {
     auto app = getApp();
-    util::EmoteData emoteData;
+    EmoteData emoteData;
 
     auto appendEmote = [&](MessageElement::Flags flags) {
         this->emplace<EmoteElement>(emoteData, flags);
@@ -621,7 +616,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
                     ->setTooltip(tooltip);
             } catch (const std::out_of_range &) {
-                debug::Log("No default bit badge for version {} found", versionKey);
+                Log("No default bit badge for version {} found", versionKey);
                 continue;
             }
         } else if (badge == "staff/1") {
@@ -768,7 +763,7 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
             bool ok = false;
             int numBits = amount.toInt(&ok);
             if (!ok) {
-                debug::Log("Error parsing bit amount in tryParseCheermote");
+                Log("Error parsing bit amount in tryParseCheermote");
                 return false;
             }
 
@@ -785,8 +780,8 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
             }
 
             if (savedIt == cheermoteSet.cheermotes.end()) {
-                debug::Log("Error getting a cheermote from a cheermote set for the bit amount {}",
-                           numBits);
+                Log("Error getting a cheermote from a cheermote set for the bit amount {}",
+                    numBits);
                 return false;
             }
 

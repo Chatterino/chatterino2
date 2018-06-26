@@ -33,7 +33,7 @@ SplitHeader::SplitHeader(Split *_split)
 
     auto app = getApp();
 
-    util::LayoutCreator<SplitHeader> layoutCreator(this);
+    LayoutCreator<SplitHeader> layoutCreator(this);
     auto layout = layoutCreator.emplace<QHBoxLayout>().withoutMargin();
     {
         // dropdown label
@@ -234,7 +234,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->dropdownButton->setFixedWidth(w);
     this->moderationButton->setFixedWidth(w);
     //    this->titleLabel->setFont(
-    //        singletons::FontManager::getInstance().getFont(FontStyle::Medium, scale));
+    //        chatterino::FontManager::getInstance().getFont(FontStyle::Medium, scale));
 }
 
 void SplitHeader::updateChannelText()

@@ -32,7 +32,7 @@ AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     split->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
     layout->addWidget(split);
 
-    util::DebugCount::increase("attached window");
+    DebugCount::increase("attached window");
 }
 
 AttachedWindow::~AttachedWindow()
@@ -44,7 +44,7 @@ AttachedWindow::~AttachedWindow()
         }
     }
 
-    util::DebugCount::decrease("attached window");
+    DebugCount::decrease("attached window");
 }
 
 AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
@@ -179,7 +179,7 @@ void AttachedWindow::updateWindowRect_(void *_attachedPtr)
                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
     float scale = 1.f;
-    if (auto dpi = util::getWindowDpi(attached)) {
+    if (auto dpi = getWindowDpi(attached)) {
         scale = dpi.get() / 96.f;
 
         //        for (auto w : this->ui_.split->findChildren<BaseWidget *>()) {
