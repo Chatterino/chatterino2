@@ -83,7 +83,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             }
         }
 
-        get("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
+        twitchApiGet("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
                           QThread::currentThread(), refreshChatters);
     };
 
@@ -332,7 +332,7 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    get2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
+    twitchApiGet2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
         ChannelPtr shared = weak.lock();
 
         if (!shared) {
@@ -432,7 +432,7 @@ void TwitchChannel::fetchRecentMessages()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    get(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
+    twitchApiGet(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
         ChannelPtr shared = weak.lock();
 
         if (!shared) {

@@ -171,10 +171,10 @@ void UserInfoPopup::installEvents()
 
         this->ui_.follow->setEnabled(false);
         if (this->ui_.follow->isChecked()) {
-            put(requestUrl,
+            twitchApiPut(requestUrl,
                               [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
         } else {
-            sendDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
+            twitchApiDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
         }
     });
 
@@ -234,13 +234,13 @@ void UserInfoPopup::updateUserData()
     std::weak_ptr<bool> hack = this->hack_;
 
     // get user info
-    getUserID(this->userName_, this, [this, hack](QString id) {
+    twitchApiGetUserID(this->userName_, this, [this, hack](QString id) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = id;
 
         // get channel info
-        get(
+        twitchApiGet(
             "https://api.twitch.tv/kraken/channels/" + id, this, [this](const QJsonObject &obj) {
                 this->ui_.followerCountLabel->setText(
                     TEXT_FOLLOWERS + QString::number(obj.value("followers").toInt()));

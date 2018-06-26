@@ -23,8 +23,8 @@
 
 namespace chatterino {
 
-static void get(QString url, const QObject *caller,
-                std::function<void(const QJsonObject &)> successCallback)
+static void twitchApiGet(QString url, const QObject *caller,
+                         std::function<void(const QJsonObject &)> successCallback)
 {
     NetworkRequest req(url);
     req.setCaller(caller);
@@ -36,8 +36,8 @@ static void get(QString url, const QObject *caller,
     });
 }
 
-static void get2(QString url, const QObject *caller, bool useQuickLoadCache,
-                 std::function<void(const rapidjson::Document &)> successCallback)
+static void twitchApiGet2(QString url, const QObject *caller, bool useQuickLoadCache,
+                          std::function<void(const rapidjson::Document &)> successCallback)
 {
     NetworkRequest req(url);
     req.setCaller(caller);
@@ -50,9 +50,9 @@ static void get2(QString url, const QObject *caller, bool useQuickLoadCache,
     });
 }
 
-static void getAuthorized(QString url, const QString &clientID, const QString &oauthToken,
-                          const QObject *caller,
-                          std::function<void(const QJsonObject &)> successCallback)
+static void twitchApiGetAuthorized(QString url, const QString &clientID, const QString &oauthToken,
+                                   const QObject *caller,
+                                   std::function<void(const QJsonObject &)> successCallback)
 {
     NetworkRequest req(url);
     req.setCaller(caller);
@@ -65,10 +65,11 @@ static void getAuthorized(QString url, const QString &clientID, const QString &o
     });
 }
 
-static void getUserID(QString username, const QObject *caller,
-                      std::function<void(QString)> successCallback)
+static void twitchApiGetUserID(QString username, const QObject *caller,
+                               std::function<void(QString)> successCallback)
 {
-    get("https://api.twitch.tv/kraken/users?login=" + username, caller,
+    twitchApiGet(
+        "https://api.twitch.tv/kraken/users?login=" + username, caller,
         [=](const QJsonObject &root) {
             if (!root.value("users").isArray()) {
                 Log("API Error while getting user id, users is not an array");
@@ -94,7 +95,7 @@ static void getUserID(QString username, const QObject *caller,
             successCallback(id.toString());
         });
 }
-static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
+static void twitchApiPut(QUrl url, std::function<void(QJsonObject)> successCallback)
 {
     QNetworkRequest request(url);
 
@@ -124,7 +125,7 @@ static void put(QUrl url, std::function<void(QJsonObject)> successCallback)
     });
 }
 
-static void sendDelete(QUrl url, std::function<void()> successCallback)
+static void twitchApiDelete(QUrl url, std::function<void()> successCallback)
 {
     QNetworkRequest request(url);
 

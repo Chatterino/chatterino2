@@ -449,7 +449,7 @@ void Split::doOpenViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    get("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
+    twitchApiGet("https://tmi.twitch.tv/group/user/" + this->getChannel()->name + "/chatters",
                       this, [=](QJsonObject obj) {
                           QJsonObject chattersObj = obj.value("chatters").toObject();
 

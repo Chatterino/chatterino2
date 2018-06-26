@@ -119,7 +119,7 @@ void TwitchAccount::loadIgnores()
 void TwitchAccount::ignore(const QString &targetName,
                            std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+    twitchApiGetUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
         this->ignoreByID(targetUserID, targetName, onFinished);  //
     });
 }
@@ -179,7 +179,7 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
 void TwitchAccount::unignore(const QString &targetName,
                              std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    getUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
+    twitchApiGetUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
         this->unignoreByID(targetUserID, targetName, onFinished);  //
     });
 }

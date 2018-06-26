@@ -172,7 +172,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
     this->ui.buttonLowerRow.layout.addWidget(&this->ui.buttonLowerRow.fillInUserIDButton);
 
     connect(&this->ui.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked, [=]() {
-        getUserID(this->ui.usernameInput.text(), this, [=](const QString &userID) {
+        twitchApiGetUserID(this->ui.usernameInput.text(), this, [=](const QString &userID) {
             this->ui.userIDInput.setText(userID);  //
         });
     });
