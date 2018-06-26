@@ -14,10 +14,6 @@
 #include <QStyleFactory>
 #include <pajlada/settings/settingmanager.hpp>
 
-#ifdef USEWINSDK
-#include "util/NativeEventHelper.hpp"
-#endif
-
 #include <fstream>
 #include <iostream>
 

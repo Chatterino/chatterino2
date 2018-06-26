@@ -316,7 +316,6 @@ HEADERS  += \
     src/util/Helpers.hpp \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
-    src/util/NativeEventHelper.hpp \
     src/util/PostToThread.hpp \
     src/util/QstringHash.hpp \
     src/util/RapidjsonHelpers.hpp \
