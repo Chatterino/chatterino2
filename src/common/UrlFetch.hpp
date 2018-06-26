@@ -4,7 +4,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
-#include "providers/twitch/Credentials.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

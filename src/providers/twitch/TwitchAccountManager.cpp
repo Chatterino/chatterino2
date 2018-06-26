@@ -2,7 +2,7 @@
 
 #include "common/Common.hpp"
 #include "debug/Log.hpp"
-#include "providers/twitch/Const.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 
 namespace chatterino {
 

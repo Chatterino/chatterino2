@@ -1,8 +1,10 @@
 #pragma once
 
-#include <QByteArray>
+#include <QString>
 
 namespace chatterino {
+
+static const char *ANONYMOUS_USERNAME ATTR_UNUSED = "justinfan64537";
 
 inline QByteArray getDefaultClientID()
 {

@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/accounts/AccountModel.hpp"
-#include "providers/twitch/Const.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/dialogs/LoginDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"

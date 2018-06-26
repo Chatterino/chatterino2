@@ -3,7 +3,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
-#include "providers/twitch/Const.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {

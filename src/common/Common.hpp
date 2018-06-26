@@ -25,4 +25,6 @@ const Qt::KeyboardModifiers showSplitOverlayModifiers = Qt::ControlModifier | Qt
 const Qt::KeyboardModifiers showAddSplitRegions = Qt::ControlModifier | Qt::AltModifier;
 const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
+static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
+
 }  // namespace chatterino

@@ -280,8 +280,6 @@ HEADERS  += \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcServer.hpp \
-    src/providers/twitch/Const.hpp \
-    src/providers/twitch/Credentials.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/Pubsub.hpp \
@@ -385,7 +383,8 @@ HEADERS  += \
     src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/TooltipWidget.hpp \
-    src/widgets/Window.hpp
+    src/widgets/Window.hpp \
+    src/providers/twitch/TwitchCommon.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
