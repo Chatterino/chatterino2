@@ -9,11 +9,11 @@
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Benchmark.hpp"
+#include "debug/Benchmark.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/UserInfoPopup.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QClipboard>
 #include <QDebug>

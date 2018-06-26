@@ -1,4 +1,4 @@
-#include "widgets/LoginDialog.hpp"
+#include "widgets/dialogs/LoginDialog.hpp"
 #include "Common.hpp"
 #include "util/UrlFetch.hpp"
 #ifdef USEWINSDK

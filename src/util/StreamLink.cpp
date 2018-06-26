@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "Helpers.hpp"
 #include "singletons/SettingsManager.hpp"
-#include "widgets/QualityPopup.hpp"
+#include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "controllers/accounts/AccountController.hpp"
-#include "Credentials.hpp"
+#include "providers/twitch/Credentials.hpp"
 #include "debug/Log.hpp"
 #include "util/NetworkManager.hpp"
 #include "util/NetworkRequest.hpp"

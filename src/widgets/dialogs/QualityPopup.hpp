@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BaseWindow.hpp"
+#include "widgets/BaseWindow.hpp"
 
 #include <QComboBox>
 #include <QDialogButtonBox>

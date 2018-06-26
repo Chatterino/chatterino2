@@ -1,7 +1,7 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "Common.hpp"
-#include "Const.hpp"
+#include "providers/twitch/Const.hpp"
 #include "debug/Log.hpp"
 
 namespace chatterino {

@@ -4,7 +4,7 @@
 #include "singletons/EmoteManager.hpp"
 #include "singletons/SettingsManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Benchmark.hpp"
+#include "debug/Benchmark.hpp"
 
 #include <QApplication>
 #include <QDebug>

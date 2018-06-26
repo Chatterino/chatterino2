@@ -4,7 +4,7 @@
 #include <QtGlobal>
 
 #include "Application.hpp"
-#include "util/AssertInGuiThread.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "WindowManager.hpp"
 
 #ifdef Q_OS_WIN32

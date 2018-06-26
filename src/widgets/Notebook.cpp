@@ -7,7 +7,7 @@
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/Shortcut.hpp"
-#include "widgets/SettingsDialog.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/Window.hpp"
 

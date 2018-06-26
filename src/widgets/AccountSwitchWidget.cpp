@@ -1,7 +1,7 @@
 #include "AccountSwitchWidget.hpp"
 
 #include "Application.hpp"
-#include "Const.hpp"
+#include "providers/twitch/Const.hpp"
 #include "controllers/accounts/AccountController.hpp"
 
 namespace chatterino {

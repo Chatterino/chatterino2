@@ -4,7 +4,7 @@
 #include "singletons/UpdateManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/NetworkManager.hpp"
-#include "widgets/LastRunCrashDialog.hpp"
+#include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>

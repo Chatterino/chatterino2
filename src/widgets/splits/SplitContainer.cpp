@@ -3,7 +3,7 @@
 #include "Common.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/AssertInGuiThread.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/NotebookTab.hpp"

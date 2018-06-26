@@ -91,11 +91,9 @@ werr {
     message("Enabling error on warning")
 }
 
-# src
 SOURCES += \
     src/Application.cpp \
     src/Channel.cpp \
-    src/ChannelData.cpp \
     src/Common.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
@@ -168,7 +166,16 @@ SOURCES += \
     src/widgets/AttachedWindow.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
-    src/widgets/EmotePopup.cpp \
+    src/widgets/dialogs/EmotePopup.cpp \
+    src/widgets/dialogs/LastRunCrashDialog.cpp \
+    src/widgets/dialogs/LoginDialog.cpp \
+    src/widgets/dialogs/NotificationPopup.cpp \
+    src/widgets/dialogs/QualityPopup.cpp \
+    src/widgets/dialogs/SelectChannelDialog.cpp \
+    src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/dialogs/TextInputDialog.cpp \
+    src/widgets/dialogs/UserInfoPopup.cpp \
+    src/widgets/dialogs/WelcomeDialog.cpp \
     src/widgets/helper/ChannelView.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
@@ -184,20 +191,10 @@ SOURCES += \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
-    src/widgets/splits/SplitColumn.cpp \
-    src/widgets/splits/SplitHeader.cpp \
-    src/widgets/splits/SplitInput.cpp \
-    src/widgets/splits/SplitOverlay.cpp \
     src/widgets/helper/TitlebarButton.cpp \
     src/widgets/Label.cpp \
-    src/widgets/LastRunCrashDialog.cpp \
-    src/widgets/LoginDialog.cpp \
     src/widgets/Notebook.cpp \
-    src/widgets/NotificationPopup.cpp \
-    src/widgets/QualityPopup.cpp \
     src/widgets/Scrollbar.cpp \
-    src/widgets/SelectChannelDialog.cpp \
-    src/widgets/SettingsDialog.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/AppearancePage.cpp \
@@ -214,20 +211,19 @@ SOURCES += \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/settingspages/SpecialChannelsPage.cpp \
     src/widgets/splits/Split.cpp \
+    src/widgets/splits/SplitColumn.cpp \
     src/widgets/splits/SplitContainer.cpp \
+    src/widgets/splits/SplitHeader.cpp \
+    src/widgets/splits/SplitInput.cpp \
+    src/widgets/splits/SplitOverlay.cpp \
     src/widgets/StreamView.cpp \
-    src/widgets/TextInputDialog.cpp \
     src/widgets/TooltipWidget.cpp \
-    src/widgets/UserInfoPopup.cpp \
-    src/widgets/WelcomeDialog.cpp \
     src/widgets/Window.cpp
 
 HEADERS  += \
     src/Application.hpp \
     src/Channel.hpp \
-    src/ChannelData.hpp \
     src/Common.hpp \
-    src/Const.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -243,10 +239,10 @@ HEADERS  += \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
-    src/Credentials.hpp \
+    src/debug/AssertInGuiThread.hpp \
+    src/debug/Benchmark.hpp \
     src/debug/Log.hpp \
     src/LockedObject.hpp \
-    src/messages/HighlightPhrase.hpp \
     src/messages/Image.hpp \
     src/messages/layouts/MessageLayout.hpp \
     src/messages/layouts/MessageLayoutContainer.hpp \
@@ -271,6 +267,8 @@ HEADERS  += \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcServer.hpp \
+    src/providers/twitch/Const.hpp \
+    src/providers/twitch/Credentials.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/Pubsub.hpp \
@@ -300,8 +298,6 @@ HEADERS  += \
     src/singletons/ThemeManager.hpp \
     src/singletons/UpdateManager.hpp \
     src/singletons/WindowManager.hpp \
-    src/util/AssertInGuiThread.hpp \
-    src/util/Benchmark.hpp \
     src/util/Clamp.hpp \
     src/util/CombinePath.hpp \
     src/util/CompletionModel.hpp \
@@ -338,7 +334,16 @@ HEADERS  += \
     src/widgets/AttachedWindow.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
-    src/widgets/EmotePopup.hpp \
+    src/widgets/dialogs/EmotePopup.hpp \
+    src/widgets/dialogs/LastRunCrashDialog.hpp \
+    src/widgets/dialogs/LoginDialog.hpp \
+    src/widgets/dialogs/NotificationPopup.hpp \
+    src/widgets/dialogs/QualityPopup.hpp \
+    src/widgets/dialogs/SelectChannelDialog.hpp \
+    src/widgets/dialogs/SettingsDialog.hpp \
+    src/widgets/dialogs/TextInputDialog.hpp \
+    src/widgets/dialogs/UserInfoPopup.hpp \
+    src/widgets/dialogs/WelcomeDialog.hpp \
     src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
@@ -356,20 +361,10 @@ HEADERS  += \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/Shortcut.hpp \
     src/widgets/helper/SignalLabel.hpp \
-    src/widgets/splits/SplitColumn.hpp \
-    src/widgets/splits/SplitHeader.hpp \
-    src/widgets/splits/SplitInput.hpp \
-    src/widgets/splits/SplitOverlay.hpp \
     src/widgets/helper/TitlebarButton.hpp \
     src/widgets/Label.hpp \
-    src/widgets/LastRunCrashDialog.hpp \
-    src/widgets/LoginDialog.hpp \
     src/widgets/Notebook.hpp \
-    src/widgets/NotificationPopup.hpp \
-    src/widgets/QualityPopup.hpp \
     src/widgets/Scrollbar.hpp \
-    src/widgets/SelectChannelDialog.hpp \
-    src/widgets/SettingsDialog.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/AppearancePage.hpp \
@@ -386,13 +381,13 @@ HEADERS  += \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/splits/Split.hpp \
+    src/widgets/splits/SplitColumn.hpp \
     src/widgets/splits/SplitContainer.hpp \
+    src/widgets/splits/SplitHeader.hpp \
+    src/widgets/splits/SplitInput.hpp \
+    src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
-    src/widgets/TextInputDialog.hpp \
-    src/widgets/Titlebar.hpp \
     src/widgets/TooltipWidget.hpp \
-    src/widgets/UserInfoPopup.hpp \
-    src/widgets/WelcomeDialog.hpp \
     src/widgets/Window.hpp
 
 RESOURCES += \

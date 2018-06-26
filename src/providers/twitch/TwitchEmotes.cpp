@@ -2,7 +2,7 @@
 
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
-#include "util/Benchmark.hpp"
+#include "debug/Benchmark.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/UrlFetch.hpp"
 

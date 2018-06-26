@@ -11,9 +11,9 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/SettingsDialog.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/splits/Split.hpp"
-#include "widgets/WelcomeDialog.hpp"
+#include "widgets/dialogs/WelcomeDialog.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>

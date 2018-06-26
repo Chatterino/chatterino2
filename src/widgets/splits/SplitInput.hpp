@@ -2,7 +2,7 @@
 
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/EmotePopup.hpp"
+#include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QHBoxLayout>

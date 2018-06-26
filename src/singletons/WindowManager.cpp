@@ -6,10 +6,10 @@
 #include "singletons/FontManager.hpp"
 #include "singletons/PathManager.hpp"
 #include "singletons/ThemeManager.hpp"
-#include "util/AssertInGuiThread.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "util/Clamp.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
-#include "widgets/SettingsDialog.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 
 #include <QJsonArray>
 #include <QJsonDocument>

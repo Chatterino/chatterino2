@@ -1,4 +1,4 @@
-#include "widgets/SettingsDialog.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
 #include "util/LayoutCreator.hpp"

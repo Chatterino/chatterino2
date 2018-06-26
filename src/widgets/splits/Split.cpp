@@ -15,11 +15,11 @@
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
-#include "widgets/QualityPopup.hpp"
-#include "widgets/SelectChannelDialog.hpp"
+#include "widgets/dialogs/QualityPopup.hpp"
+#include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-#include "widgets/TextInputDialog.hpp"
-#include "widgets/UserInfoPopup.hpp"
+#include "widgets/dialogs/TextInputDialog.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/Window.hpp"
 
 #include <QApplication>

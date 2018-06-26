@@ -1,6 +1,6 @@
 #include "providers/twitch/TwitchAccount.hpp"
 
-#include "Const.hpp"
+#include "providers/twitch/Const.hpp"
 #include "debug/Log.hpp"
 #include "util/NetworkRequest.hpp"
 #include "util/RapidjsonHelpers.hpp"

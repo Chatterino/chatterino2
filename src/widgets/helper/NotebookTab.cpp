@@ -8,8 +8,8 @@
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/SettingsDialog.hpp"
-#include "widgets/TextInputDialog.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/dialogs/TextInputDialog.hpp"
 
 #include <QApplication>
 #include <QDebug>

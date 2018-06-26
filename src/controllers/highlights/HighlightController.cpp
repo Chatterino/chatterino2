@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
-#include "widgets/NotificationPopup.hpp"
+#include "widgets/dialogs/NotificationPopup.hpp"
 
 namespace chatterino {
 namespace controllers {
