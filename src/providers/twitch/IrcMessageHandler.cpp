@@ -210,7 +210,6 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     if (!builder.isIgnored()) {
         chatterino::MessagePtr _message = builder.build();
-        _message->flags |= chatterino::Message::DoNotTriggerNotification;
 
         if (_message->flags & chatterino::Message::Highlighted) {
             app->twitch.server->mentionsChannel->addMessage(_message);
@@ -219,6 +218,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
         app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 
         c->addMessage(_message);
+
+        _message->flags |= chatterino::Message::DoNotTriggerNotification;
 
         if (app->settings->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
@@ -321,12 +322,22 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     static std::unordered_set<std::string> readConnectionOnlyIDs{
-        "host_on", "host_off", "host_target_went_offline", "emote_only_on", "emote_only_off",
-        "slow_on", "slow_off", "subs_on", "subs_off", "r9k_on", "r9k_off",
+        "host_on",
+        "host_off",
+        "host_target_went_offline",
+        "emote_only_on",
+        "emote_only_off",
+        "slow_on",
+        "slow_off",
+        "subs_on",
+        "subs_off",
+        "r9k_on",
+        "r9k_off",
 
         // Display for user who times someone out. This implies you're a moderator, at which point
         // you will be connected to PubSub and receive a better message from there
-        "timeout_success", "ban_success",
+        "timeout_success",
+        "ban_success",
     };
 
     QVariant v = message->tag("msg-id");
