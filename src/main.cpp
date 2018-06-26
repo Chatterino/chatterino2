@@ -27,15 +27,24 @@ int runGui(QApplication &a, int argc, char *argv[]);
 void runNativeMessagingHost();
 void installCustomPalette();
 
+//
+// Main entry point of the application.
+// Decides if it should run in gui mode, daemon mode, ...
+// Sets up the QApplication
+//
 int main(int argc, char *argv[])
 {
+    // set up the QApplication flags
     QApplication::setAttribute(Qt::AA_Use96Dpi, true);
 #ifdef Q_OS_WIN32
     QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
 #endif
     //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
+
+    // instanciate the QApplication
     QApplication a(argc, argv);
 
+    // FOURTF: might get arguments from the commandline passed in the future
     chatterino::PathManager::initInstance();
 
     // read args
@@ -45,7 +54,7 @@ int main(int argc, char *argv[])
         args << argv[i];
     }
 
-    // TODO: can be any argument
+    // run native messaging host for the browser extension
     if (args.size() > 0 &&
         (args[0].startsWith("chrome-extension://") || args[0].endsWith(".json"))) {
         runNativeMessagingHost();
@@ -116,6 +125,7 @@ int runGui(QApplication &a, int argc, char *argv[])
     // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
     chatterino::NetworkManager::deinit();
 
+    // None of the singletons has a proper destructor
     _exit(0);
 }
 
