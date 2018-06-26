@@ -322,22 +322,12 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     static std::unordered_set<std::string> readConnectionOnlyIDs{
-        "host_on",
-        "host_off",
-        "host_target_went_offline",
-        "emote_only_on",
-        "emote_only_off",
-        "slow_on",
-        "slow_off",
-        "subs_on",
-        "subs_off",
-        "r9k_on",
-        "r9k_off",
+        "host_on", "host_off", "host_target_went_offline", "emote_only_on", "emote_only_off",
+        "slow_on", "slow_off", "subs_on", "subs_off", "r9k_on", "r9k_off",
 
         // Display for user who times someone out. This implies you're a moderator, at which point
         // you will be connected to PubSub and receive a better message from there
-        "timeout_success",
-        "ban_success",
+        "timeout_success", "ban_success",
     };
 
     QVariant v = message->tag("msg-id");
