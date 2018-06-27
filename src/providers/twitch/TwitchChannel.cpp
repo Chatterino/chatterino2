@@ -123,7 +123,10 @@ void TwitchChannel::setRoomID(const QString &_roomID)
 {
     this->roomID = _roomID;
     this->roomIDchanged.invoke();
-    this->fetchMessages.invoke();
+
+    if (!this->name.startsWith("chatrooms:")) {
+        this->fetchMessages.invoke();
+    }
 }
 
 void TwitchChannel::reloadChannelEmotes()
