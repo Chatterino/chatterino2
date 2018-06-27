@@ -1,12 +1,11 @@
-#include "messagebuilder.hpp"
-#include "singletons/emotemanager.hpp"
-#include "singletons/resourcemanager.hpp"
-#include "singletons/thememanager.hpp"
+#include "MessageBuilder.hpp"
+#include "singletons/EmoteManager.hpp"
+#include "singletons/ResourceManager.hpp"
+#include "singletons/ThemeManager.hpp"
 
 #include <QDateTime>
 
 namespace chatterino {
-namespace messages {
 
 MessageBuilder::MessageBuilder()
     : message(new Message)
@@ -46,7 +45,7 @@ QString MessageBuilder::matchLink(const QString &string)
 {
     const QString urlRegExp = "^"
     // protocol identifier
-    "(?:(?:https?|ftps?|s?ftp)://)?"
+    "(?:(?:https?|ftps?)://)?"
     // user:pass authentication
     "(?:\\S+(?::\\S*)?@)?"
     "(?:"
@@ -76,7 +75,7 @@ QString MessageBuilder::matchLink(const QString &string)
 
     static QRegularExpression linkRegex(urlRegExp, QRegularExpression::CaseInsensitiveOption);
     static QRegularExpression httpRegex("\\bhttps?://");
-    static QRegularExpression ftpRegex("\\bs?ftps?://");
+    static QRegularExpression ftpRegex("\\bftps?://");
     auto match = linkRegex.match(string);
 
     if (!match.hasMatch()) {
@@ -94,5 +93,4 @@ QString MessageBuilder::matchLink(const QString &string)
     return captured;
 }
 
-}  // namespace messages
 }  // namespace chatterino
