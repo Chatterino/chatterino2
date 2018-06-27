@@ -4,6 +4,13 @@ Chatterino 2
 
 Chatterino 2 is the second installment of the Twitch chat client series "Chatterino". For now you can check out Chatterino 1 at [https://chatterino.com](https://chatterino.com).
 
+## Downloading
+You can download the Chatterino 2 Beta over [here](https://chatterino.com/download/Chatterino2BetaInstaller.exe)
+
+You might also need to install the [VC++ 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.
+
+Releases for linux and mac will follow soon™
+
 ## Building
 Before building run `git submodule update --init --recursive` to get required submodules.
 
@@ -28,3 +35,6 @@ To setup automatic code formating with QT Creator, see [this guide](https://gist
 7. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
 
 Qt creator should now format the documents when saving it.
+
+### CodeScene
+[![](https://codescene.io/projects/3004/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/3004/jobs/latest-successful/results)

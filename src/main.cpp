@@ -1,9 +1,10 @@
-#include "application.hpp"
-#include "singletons/nativemessagingmanager.hpp"
-#include "singletons/pathmanager.hpp"
-#include "singletons/updatemanager.hpp"
-#include "util/networkmanager.hpp"
-#include "widgets/lastruncrashdialog.hpp"
+#include "Application.hpp"
+#include "common/NetworkManager.hpp"
+#include "singletons/NativeMessagingManager.hpp"
+#include "singletons/PathManager.hpp"
+#include "singletons/UpdateManager.hpp"
+#include "util/DebugCount.hpp"
+#include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #include <QAbstractNativeEventFilter>
 #include <QApplication>
@@ -11,10 +12,7 @@
 #include <QLibrary>
 #include <QStringList>
 #include <QStyleFactory>
-
-#ifdef USEWINSDK
-#include "util/nativeeventhelper.hpp"
-#endif
+#include <pajlada/settings/settingmanager.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -29,12 +27,30 @@
 #include <QBreakpadHandler.h>
 #endif
 
-int runGui(int argc, char *argv[]);
+int runGui(QApplication &a, int argc, char *argv[]);
 void runNativeMessagingHost();
 void installCustomPalette();
 
+//
+// Main entry point of the application.
+// Decides if it should run in gui mode, daemon mode, ...
+// Sets up the QApplication
+//
 int main(int argc, char *argv[])
 {
+    // set up the QApplication flags
+    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
+#ifdef Q_OS_WIN32
+    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
+#endif
+    //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
+
+    // instanciate the QApplication
+    QApplication a(argc, argv);
+
+    // FOURTF: might get arguments from the commandline passed in the future
+    chatterino::PathManager::initInstance();
+
     // read args
     QStringList args;
 
@@ -42,34 +58,28 @@ int main(int argc, char *argv[])
         args << argv[i];
     }
 
-    // TODO: can be any argument
-    if (args.size() > 0 && args[0].startsWith("chrome-extension://")) {
+    // run native messaging host for the browser extension
+    if (args.size() > 0 &&
+        (args[0].startsWith("chrome-extension://") || args[0].endsWith(".json"))) {
         runNativeMessagingHost();
         return 0;
     }
 
     // run gui
-    return runGui(argc, argv);
+    return runGui(a, argc, argv);
 }
 
-int runGui(int argc, char *argv[])
+int runGui(QApplication &a, int argc, char *argv[])
 {
-    QApplication::setAttribute(Qt::AA_Use96Dpi, true);
-#ifdef Q_OS_WIN32
-    QApplication::setAttribute(Qt::AA_DisableHighDpiScaling, true);
-#endif
-    //    QApplication::setAttribute(Qt::AA_UseSoftwareOpenGL, true);
-    QApplication a(argc, argv);
-
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
     installCustomPalette();
 
     // Initialize NetworkManager
-    chatterino::util::NetworkManager::init();
+    chatterino::NetworkManager::init();
 
     // Check for upates
-    chatterino::singletons::UpdateManager::getInstance().checkForUpdates();
+    chatterino::UpdateManager::getInstance().checkForUpdates();
 
     // Initialize application
     chatterino::Application::instantiate(argc, argv);
@@ -83,11 +93,11 @@ int runGui(int argc, char *argv[])
 
     auto &pathMan = *app->paths;
     // Running file
-    auto runningPath = pathMan.settingsFolderPath + "/running_" + pathMan.appPathHash;
+    auto runningPath = pathMan.miscDirectory + "/running_" + pathMan.applicationFilePathHash;
 
     if (QFile::exists(runningPath)) {
 #ifndef DISABLE_CRASH_DIALOG
-        chatterino::widgets::LastRunCrashDialog dialog;
+        chatterino::LastRunCrashDialog dialog;
 
         switch (dialog.exec()) {
             case QDialog::Accepted: {
@@ -121,14 +131,15 @@ int runGui(int argc, char *argv[])
     pajlada::Settings::SettingManager::save();
 
     // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
-    chatterino::util::NetworkManager::deinit();
+    chatterino::NetworkManager::deinit();
 
+    // None of the singletons has a proper destructor
     _exit(0);
 }
 
 void runNativeMessagingHost()
 {
-    auto *nm = new chatterino::singletons::NativeMessagingManager;
+    auto *nm = new chatterino::NativeMessagingManager;
 
 #ifdef Q_OS_WIN
     _setmode(_fileno(stdin), _O_BINARY);
