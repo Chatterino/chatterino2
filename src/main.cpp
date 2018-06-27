@@ -23,7 +23,7 @@
 #include <stdio.h>
 #endif
 
-#ifdef CHATTERINO_USE_BREAKPAD
+#ifdef C_USE_BREAKPAD
 #include <QBreakpadHandler.h>
 #endif
 
@@ -87,7 +87,7 @@ int runGui(QApplication &a, int argc, char *argv[])
 
     app->construct();
 
-#ifdef CHATTERINO_USE_BREAKPAD
+#ifdef C_USE_BREAKPAD
     QBreakpadInstance.setDumpPath(app->paths->settingsFolderPath + "/Crashes");
 #endif
 
@@ -96,7 +96,7 @@ int runGui(QApplication &a, int argc, char *argv[])
     auto runningPath = pathMan.miscDirectory + "/running_" + pathMan.applicationFilePathHash;
 
     if (QFile::exists(runningPath)) {
-#ifndef DISABLE_CRASH_DIALOG
+#ifndef C_DISABLE_CRASH_DIALOG
         chatterino::LastRunCrashDialog dialog;
 
         switch (dialog.exec()) {

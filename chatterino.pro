@@ -20,7 +20,7 @@ CONFIG            += precompile_header
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
     include(lib/qBreakpad/qBreakpad.pri)
-    DEFINES += CHATTERINO_USE_BREAKPAD
+    DEFINES += C_USE_BREAKPAD
 }
 
 # https://bugreports.qt.io/browse/QTBUG-27018
