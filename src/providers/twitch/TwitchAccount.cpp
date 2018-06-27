@@ -106,7 +106,13 @@ void TwitchAccount::loadIgnores()
                 if (userIt == block.MemberEnd()) {
                     continue;
                 }
-                this->ignores.insert(TwitchUser::fromJSON(userIt->value));
+                TwitchUser ignoredUser;
+                if (!rj::getSafe(userIt->value, ignoredUser)) {
+                    Log("Error parsing twitch user JSON {}", rj::stringify(userIt->value));
+                    continue;
+                }
+
+                this->ignores.insert(ignoredUser);
             }
         }
 
@@ -155,7 +161,12 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
             return false;
         }
 
-        auto ignoredUser = TwitchUser::fromJSON(userIt->value);
+        TwitchUser ignoredUser;
+        if (!rj::getSafe(userIt->value, ignoredUser)) {
+            onFinished(IgnoreResult_Failed,
+                       "Bad JSON data while ignoring user (invalid user) " + targetName);
+            return false;
+        }
         {
             std::lock_guard<std::mutex> lock(this->ignoresMutex);
 
