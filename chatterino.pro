@@ -383,7 +383,8 @@ HEADERS  += \
     src/widgets/StreamView.hpp \
     src/widgets/TooltipWidget.hpp \
     src/widgets/Window.hpp \
-    src/providers/twitch/TwitchCommon.hpp
+    src/providers/twitch/TwitchCommon.hpp \
+    src/util/IsBigEndian.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

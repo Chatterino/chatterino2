@@ -16,23 +16,12 @@
 #include "singletons/SettingsManager.hpp"
 #include "singletons/ThemeManager.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
 
 #include <atomic>
 
 namespace chatterino {
-
-namespace {
-
-bool isBigEndian()
-{
-    int test = 1;
-    char *p = reinterpret_cast<char *>(&test);
-
-    return p[0] == 0;
-}
-
-}  // namespace
 
 static std::atomic<bool> isAppConstructed{false};
 static std::atomic<bool> isAppInitialized{false};
