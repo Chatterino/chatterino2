@@ -66,6 +66,7 @@
         <file>images/buttons/unban.png</file>
         <file>images/buttons/unmod.png</file>
         <file>images/emote_dark.svg</file>
+        <file>tlds.txt</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>
