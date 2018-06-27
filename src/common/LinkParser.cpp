@@ -1,30 +1,24 @@
 #include "common/LinkParser.hpp"
 
-#include "debug/Log.hpp"
-
 #include <QFile>
 #include <QRegularExpression>
 #include <QString>
 #include <QTextStream>
 
-#include <mutex>
-
 namespace chatterino {
 
-namespace {
-
-std::once_flag regexInitializedFlag;
-QRegularExpression *linkRegex = nullptr;
-
-void initializeRegularExpressions()
+LinkParser::LinkParser(const QString &unparsedString)
 {
-    std::call_once(regexInitializedFlag, [] {
+    static QRegularExpression linkRegex = [] {
         QFile tldFile(":/tlds.txt");
         tldFile.open(QFile::ReadOnly);
+
         QTextStream t1(&tldFile);
         t1.setCodec("UTF-8");
-        QString tldData = t1.readAll();
-        tldData.replace("\n", "|");
+
+        // Read the TLDs in and replace the newlines with pipes
+        QString tldData = t1.readAll().replace("\n", "|");
+
         const QString urlRegExp =
             "^"
             // protocol identifier
@@ -57,21 +51,11 @@ void initializeRegularExpressions()
             // resource path
             "(?:[/?#]\\S*)?"
             "$";
-        linkRegex = new QRegularExpression(urlRegExp, QRegularExpression::CaseInsensitiveOption);
 
-        Log("fully initialized");
-    });
+        return QRegularExpression(urlRegExp, QRegularExpression::CaseInsensitiveOption);
+    }();
 
-    Log("call_once returned");
-}
-
-}  // namespace
-
-LinkParser::LinkParser(const QString &unparsedString)
-{
-    initializeRegularExpressions();
-
-    this->match_ = linkRegex->match(unparsedString);
+    this->match_ = linkRegex.match(unparsedString);
 }
 
 }  // namespace chatterino
