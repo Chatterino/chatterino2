@@ -23,6 +23,10 @@
 #include <stdio.h>
 #endif
 
+#ifdef CHATTERINO_USE_BREAKPAD
+#include <QBreakpadHandler.h>
+#endif
+
 int runGui(QApplication &a, int argc, char *argv[]);
 void runNativeMessagingHost();
 void installCustomPalette();
@@ -82,6 +86,10 @@ int runGui(QApplication &a, int argc, char *argv[])
     auto app = chatterino::getApp();
 
     app->construct();
+
+#ifdef CHATTERINO_USE_BREAKPAD
+    QBreakpadInstance.setDumpPath(app->paths->settingsFolderPath + "/Crashes");
+#endif
 
     auto &pathMan = *app->paths;
     // Running file

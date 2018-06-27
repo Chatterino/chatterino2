@@ -17,6 +17,12 @@ DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 
+useBreakpad {
+    LIBS += -L$$PWD/lib/qBreakpad/handler/build
+    include(lib/qBreakpad/qBreakpad.pri)
+    DEFINES += CHATTERINO_USE_BREAKPAD
+}
+
 # https://bugreports.qt.io/browse/QTBUG-27018
 equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
     TARGET = bin/chatterino
