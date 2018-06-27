@@ -3,9 +3,12 @@
 #include "controllers/accounts/Account.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 
+#include <rapidjson/document.h>
 #include <QColor>
 #include <QString>
 
+#include <functional>
+#include <mutex>
 #include <set>
 
 namespace chatterino {
@@ -64,6 +67,8 @@ public:
     void checkFollow(const QString targetUserID, std::function<void(FollowResult)> onFinished);
 
     std::set<TwitchUser> getIgnores() const;
+
+    void loadEmotes(std::function<void(const rapidjson::Document &)> cb);
 
     QColor color;
 

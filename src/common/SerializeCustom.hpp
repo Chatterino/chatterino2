@@ -18,10 +18,12 @@ struct Serialize<QString> {
 
 template <>
 struct Deserialize<QString> {
-    static QString get(const rapidjson::Value &value)
+    static QString get(const rapidjson::Value &value, bool *error = nullptr)
     {
         if (!value.IsString()) {
-            throw std::runtime_error("Deserialized rapidjson::Value is not a string");
+            PAJLADA_REPORT_ERROR(error)
+            PAJLADA_THROW_EXCEPTION("Deserialized rapidjson::Value is not a string");
+            return QString{};
         }
 
         try {
@@ -35,7 +37,7 @@ struct Deserialize<QString> {
             //            int y = 5;
         }
 
-        return QString();
+        return QString{};
     }
 };
 

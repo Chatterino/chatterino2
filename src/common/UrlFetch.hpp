@@ -50,21 +50,6 @@ static void twitchApiGet2(QString url, const QObject *caller, bool useQuickLoadC
     });
 }
 
-static void twitchApiGetAuthorized(QString url, const QString &clientID, const QString &oauthToken,
-                                   const QObject *caller,
-                                   std::function<void(const QJsonObject &)> successCallback)
-{
-    NetworkRequest req(url);
-    req.setCaller(caller);
-    req.setRawHeader("Client-ID", clientID.toUtf8());
-    req.setRawHeader("Authorization", "OAuth " + oauthToken.toUtf8());
-    req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-
-    req.getJSON([=](const QJsonObject &node) {
-        successCallback(node);  //
-    });
-}
-
 static void twitchApiGetUserID(QString username, const QObject *caller,
                                std::function<void(QString)> successCallback)
 {

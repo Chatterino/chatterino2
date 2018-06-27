@@ -142,17 +142,7 @@ EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName
 
 void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
 {
-    Log("Loading Twitch emotes for user {}", user->getUserName());
-
     const auto &roomID = user->getUserId();
-    const auto &clientID = user->getOAuthClient();
-    const auto &oauthToken = user->getOAuthToken();
-
-    if (clientID.isEmpty() || oauthToken.isEmpty()) {
-        Log("Missing Client ID or OAuth token");
-        return;
-    }
-
     TwitchAccountEmoteData &emoteData = this->emotes[roomID];
 
     if (emoteData.filled) {
@@ -160,24 +150,44 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
         return;
     }
 
-    QString url("https://api.twitch.tv/kraken/users/" + roomID + "/emotes");
-
-    auto loadEmotes = [=, &emoteData](const QJsonObject &root) {
+    auto loadEmotes = [=, &emoteData](const rapidjson::Document &root) {
         emoteData.emoteSets.clear();
         emoteData.emoteCodes.clear();
 
-        auto emoticonSets = root.value("emoticon_sets").toObject();
-        for (QJsonObject::iterator it = emoticonSets.begin(); it != emoticonSets.end(); ++it) {
+        auto emoticonSets = root.FindMember("emoticon_sets");
+        if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject()) {
+            Log("No emoticon_sets in load emotes response");
+            return;
+        }
+
+        for (const auto &emoteSetJSON : emoticonSets->value.GetObject()) {
             auto emoteSet = std::make_shared<EmoteSet>();
 
-            emoteSet->key = it.key();
+            emoteSet->key = emoteSetJSON.name.GetString();
 
             loadSetData(emoteSet);
 
-            for (QJsonValue emoteValue : it.value().toArray()) {
-                QJsonObject emoticon = emoteValue.toObject();
-                QString id = QString::number(emoticon["id"].toInt());
-                QString code = emoticon["code"].toString();
+            for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray()) {
+                if (!emoteJSON.IsObject()) {
+                    Log("Emote value was invalid");
+                    return;
+                }
+
+                QString id, code;
+
+                uint64_t idNumber;
+
+                if (!rj::getSafe(emoteJSON, "id", idNumber)) {
+                    Log("No ID key found in Emote value");
+                    return;
+                }
+
+                if (!rj::getSafe(emoteJSON, "code", code)) {
+                    Log("No code key found in Emote value");
+                    return;
+                }
+
+                id = QString::number(idNumber);
 
                 auto cleanCode = cleanUpCode(code);
                 emoteSet->emotes.emplace_back(id, cleanCode);
@@ -193,7 +203,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
         emoteData.filled = true;
     };
 
-    twitchApiGetAuthorized(url, clientID, oauthToken, QThread::currentThread(), loadEmotes);
+    user->loadEmotes(loadEmotes);
 }
 
 void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)

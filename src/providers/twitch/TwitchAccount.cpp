@@ -256,4 +256,42 @@ std::set<TwitchUser> TwitchAccount::getIgnores() const
     return this->ignores;
 }
 
+void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> cb)
+{
+    Log("Loading Twitch emotes for user {}", this->getUserName());
+
+    const auto &clientID = this->getOAuthClient();
+    const auto &oauthToken = this->getOAuthToken();
+
+    if (clientID.isEmpty() || oauthToken.isEmpty()) {
+        Log("Missing Client ID or OAuth token");
+        return;
+    }
+
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/emotes");
+
+    NetworkRequest req(url);
+    req.setRequestType(NetworkRequest::GetRequest);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    req.onError([=](int errorCode) {
+        Log("Error {}", errorCode);
+        if (errorCode == 203) {
+            // onFinished(FollowResult_NotFollowing);
+        } else {
+            // onFinished(FollowResult_Failed);
+        }
+
+        return true;
+    });
+
+    req.onSuccess([=](const rapidjson::Document &document) {
+        cb(document);
+        return true;
+    });
+
+    req.execute();
+}
+
 }  // namespace chatterino

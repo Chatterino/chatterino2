@@ -77,25 +77,19 @@ bool getSafe(const rapidjson::Value &obj, const char *key, Type &out)
         return false;
     }
 
-    try {
-        out = pajlada::Settings::Deserialize<Type>::get(obj[key]);
-    } catch (const std::runtime_error &) {
-        return false;
-    }
+    bool error = false;
+    out = pajlada::Settings::Deserialize<Type>::get(obj[key], &error);
 
-    return true;
+    return !error;
 }
 
 template <typename Type>
 bool getSafe(const rapidjson::Value &value, Type &out)
 {
-    try {
-        out = pajlada::Settings::Deserialize<Type>::get(value);
-    } catch (const std::runtime_error &) {
-        return false;
-    }
+    bool error = false;
+    out = pajlada::Settings::Deserialize<Type>::get(value, &error);
 
-    return true;
+    return !error;
 }
 
 std::string stringify(const rapidjson::Value &value);
