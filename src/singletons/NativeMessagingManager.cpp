@@ -124,7 +124,7 @@ void NativeMessagingManager::openGuiMessageQueue()
 
 void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
 {
-    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
+    ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
 
     try {
         messageQueue.try_send(array.data(), array.size(), 1);
@@ -234,8 +234,7 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
 std::string &NativeMessagingManager::getGuiMessageQueueName()
 {
     static std::string name =
-        "chatterino_gui" +
-        chatterino::PathManager::getInstance()->applicationFilePathHash.toStdString();
+        "chatterino_gui" + PathManager::getInstance()->applicationFilePathHash.toStdString();
     return name;
 }
 
