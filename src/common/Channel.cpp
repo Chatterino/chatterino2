@@ -3,9 +3,9 @@
 #include "Application.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/IrcManager.hpp"
-#include "singletons/LoggingManager.hpp"
+#include "singletons/Logging.hpp"
 #include "singletons/WindowManager.hpp"
 
 #include <QJsonArray>

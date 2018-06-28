@@ -9,7 +9,7 @@
 #include <QPushButton>
 
 #include "Application.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Resources.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 

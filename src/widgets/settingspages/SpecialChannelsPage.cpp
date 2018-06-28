@@ -1,7 +1,7 @@
 #include "SpecialChannelsPage.hpp"
 
 #include "Application.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 
 #include <QGroupBox>

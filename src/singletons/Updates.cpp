@@ -1,4 +1,4 @@
-#include "UpdateManager.hpp"
+#include "Updates.hpp"
 
 #include "common/NetworkRequest.hpp"
 #include "common/Version.hpp"

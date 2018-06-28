@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"

@@ -3,8 +3,8 @@
 #include "Application.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
-#include "singletons/LoggingManager.hpp"
-#include "singletons/PathManager.hpp"
+#include "singletons/Logging.hpp"
+#include "singletons/Paths.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 

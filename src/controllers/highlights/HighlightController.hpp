@@ -3,7 +3,7 @@
 #include "common/SignalVector2.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 

@@ -2,7 +2,7 @@
 
 #include "common/SignalVector2.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 

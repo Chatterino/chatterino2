@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QFile>
 

@@ -1,6 +1,6 @@
 #define LOOKUP_COLOR_COUNT 360
 
-#include "ThemeManager.hpp"
+#include "Themes.hpp"
 
 #include <QColor>
 

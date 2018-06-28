@@ -2,8 +2,8 @@
 
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
-#include "singletons/EmoteManager.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Emotes.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 
 #include <QApplication>

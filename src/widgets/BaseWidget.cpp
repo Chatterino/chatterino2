@@ -2,8 +2,8 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
-#include "singletons/SettingsManager.hpp"
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Settings.hpp"
+#include "singletons/Themes.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>

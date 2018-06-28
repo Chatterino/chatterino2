@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "Helpers.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>

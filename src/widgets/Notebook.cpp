@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Themes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"

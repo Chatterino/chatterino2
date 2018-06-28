@@ -5,7 +5,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "singletons/UpdateManager.hpp"
+#include "singletons/Updates.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 

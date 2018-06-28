@@ -1,4 +1,4 @@
-#include "singletons/PathManager.hpp"
+#include "singletons/Paths.hpp"
 
 #include <QCoreApplication>
 #include <QCryptographicHash>

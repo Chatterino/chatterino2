@@ -4,7 +4,7 @@
 #include "common/NetworkManager.hpp"
 #include "common/NetworkRequester.hpp"
 #include "common/NetworkWorker.hpp"
-#include "singletons/PathManager.hpp"
+#include "singletons/Paths.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>

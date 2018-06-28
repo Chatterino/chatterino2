@@ -1,7 +1,7 @@
 #include "HighlightModel.hpp"
 
 #include "Application.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {

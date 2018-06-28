@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "MessageLayoutElement.hpp"
 #include "messages/Selection.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QDebug>
 #include <QPainter>

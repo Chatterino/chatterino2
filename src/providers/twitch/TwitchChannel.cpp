@@ -6,9 +6,9 @@
 #include "messages/Message.hpp"
 #include "providers/twitch/Pubsub.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/IrcManager.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "util/PostToThread.hpp"
 
 #include <IrcConnection>

@@ -1,7 +1,7 @@
 #include "singletons/helper/GifTimer.hpp"
 
 #include "Application.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 
 namespace chatterino {

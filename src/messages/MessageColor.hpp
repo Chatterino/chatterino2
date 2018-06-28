@@ -1,6 +1,6 @@
 #pragma once
 
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Themes.hpp"
 
 #include <QColor>
 

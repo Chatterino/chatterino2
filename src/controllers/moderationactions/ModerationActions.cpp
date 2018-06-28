@@ -1,7 +1,7 @@
 #include "ModerationActions.hpp"
 
 #include "Application.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QRegularExpression>
 

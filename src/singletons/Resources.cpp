@@ -1,4 +1,4 @@
-#include "ResourceManager.hpp"
+#include "Resources.hpp"
 #include "common/UrlFetch.hpp"
 
 #include <QIcon>

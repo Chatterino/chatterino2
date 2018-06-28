@@ -4,7 +4,7 @@
 #include "common/Common.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Log.hpp"
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 
 #include <QtAlgorithms>
 

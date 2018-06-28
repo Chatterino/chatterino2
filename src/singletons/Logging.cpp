@@ -1,9 +1,9 @@
-#include "singletons/LoggingManager.hpp"
+#include "singletons/Logging.hpp"
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
-#include "singletons/PathManager.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QDir>
 #include <QStandardPaths>

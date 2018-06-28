@@ -2,7 +2,7 @@
 
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageParseArgs.hpp"
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 
 #include <IrcMessage>
 

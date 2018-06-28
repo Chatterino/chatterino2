@@ -1,7 +1,7 @@
 #pragma once
 
 #include "singletons/IrcManager.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QApplication>
 

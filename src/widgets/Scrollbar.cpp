@@ -1,7 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Themes.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QDebug>

@@ -1,8 +1,8 @@
-#include "NativeMessagingManager.hpp"
+#include "NativeMessaging.hpp"
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/PathManager.hpp"
+#include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QCoreApplication>

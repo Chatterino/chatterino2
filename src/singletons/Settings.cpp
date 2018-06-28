@@ -1,9 +1,9 @@
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
-#include "singletons/PathManager.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
 
 namespace chatterino {

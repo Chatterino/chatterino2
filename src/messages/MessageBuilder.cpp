@@ -1,9 +1,9 @@
 #include "MessageBuilder.hpp"
 
 #include "common/LinkParser.hpp"
-#include "singletons/EmoteManager.hpp"
-#include "singletons/ResourceManager.hpp"
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Emotes.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Themes.hpp"
 
 #include <QDateTime>
 

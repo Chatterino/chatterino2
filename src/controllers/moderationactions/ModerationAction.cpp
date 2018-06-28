@@ -1,7 +1,7 @@
 #include "ModerationAction.hpp"
 
 #include "Application.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Resources.hpp"
 
 namespace chatterino {
 

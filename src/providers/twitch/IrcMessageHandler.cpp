@@ -9,7 +9,7 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/ResourceManager.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IrcHelpers.hpp"
 

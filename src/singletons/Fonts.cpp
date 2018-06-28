@@ -1,4 +1,4 @@
-#include "singletons/FontManager.hpp"
+#include "singletons/Fonts.hpp"
 
 #include <QDebug>
 #include <QtGlobal>

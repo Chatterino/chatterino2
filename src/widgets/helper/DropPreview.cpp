@@ -1,6 +1,6 @@
 #include "widgets/helper/DropPreview.hpp"
 #include "Application.hpp"
-#include "singletons/ThemeManager.hpp"
+#include "singletons/Themes.hpp"
 
 #include <QDebug>
 #include <QPainter>

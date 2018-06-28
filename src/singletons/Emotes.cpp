@@ -1,4 +1,4 @@
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"

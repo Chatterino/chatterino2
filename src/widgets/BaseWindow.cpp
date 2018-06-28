@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "boost/algorithm/algorithm.hpp"
 #include "debug/Log.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"

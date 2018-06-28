@@ -1,6 +1,6 @@
 #pragma once
 
-#include "singletons/FontManager.hpp"
+#include "singletons/Fonts.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <pajlada/signals/signalholder.hpp>

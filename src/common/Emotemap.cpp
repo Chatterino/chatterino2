@@ -1,7 +1,7 @@
 #include "Emotemap.hpp"
 
 #include "Application.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 

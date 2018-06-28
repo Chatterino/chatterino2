@@ -4,7 +4,7 @@
 #include "common/NetworkManager.hpp"
 #include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
-#include "singletons/EmoteManager.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/IrcManager.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"

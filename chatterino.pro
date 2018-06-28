@@ -147,20 +147,11 @@ SOURCES += \
     src/providers/twitch/TwitchMessageBuilder.cpp \
     src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
-    src/singletons/EmoteManager.cpp \
-    src/singletons/FontManager.cpp \
     src/singletons/helper/ChatterinoSetting.cpp \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/singletons/IrcManager.cpp \
-    src/singletons/LoggingManager.cpp \
-    src/singletons/NativeMessagingManager.cpp \
-    src/singletons/PathManager.cpp \
-    src/singletons/ResourceManager.cpp \
-    src/singletons/SettingsManager.cpp \
-    src/singletons/ThemeManager.cpp \
-    src/singletons/UpdateManager.cpp \
     src/singletons/WindowManager.cpp \
     src/util/DebugCount.cpp \
     src/util/RapidjsonHelpers.cpp \
@@ -224,7 +215,16 @@ SOURCES += \
     src/widgets/TooltipWidget.cpp \
     src/widgets/Window.cpp \
     src/common/LinkParser.cpp \
-    src/controllers/moderationactions/ModerationActions.cpp
+    src/controllers/moderationactions/ModerationActions.cpp \
+    src/singletons/NativeMessaging.cpp \
+    src/singletons/Emotes.cpp \
+    src/singletons/Fonts.cpp \
+    src/singletons/Logging.cpp \
+    src/singletons/Paths.cpp \
+    src/singletons/Resources.cpp \
+    src/singletons/Settings.cpp \
+    src/singletons/Themes.cpp \
+    src/singletons/Updates.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -301,20 +301,11 @@ HEADERS  += \
     src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
-    src/singletons/EmoteManager.hpp \
-    src/singletons/FontManager.hpp \
     src/singletons/helper/ChatterinoSetting.hpp \
     src/singletons/helper/GifTimer.hpp \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/singletons/IrcManager.hpp \
-    src/singletons/LoggingManager.hpp \
-    src/singletons/NativeMessagingManager.hpp \
-    src/singletons/PathManager.hpp \
-    src/singletons/ResourceManager.hpp \
-    src/singletons/SettingsManager.hpp \
-    src/singletons/ThemeManager.hpp \
-    src/singletons/UpdateManager.hpp \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
     src/util/CombinePath.hpp \
@@ -394,7 +385,16 @@ HEADERS  += \
     src/providers/twitch/TwitchCommon.hpp \
     src/util/IsBigEndian.hpp \
     src/common/LinkParser.hpp \
-    src/controllers/moderationactions/ModerationActions.hpp
+    src/controllers/moderationactions/ModerationActions.hpp \
+    src/singletons/Emotes.hpp \
+    src/singletons/Fonts.hpp \
+    src/singletons/Logging.hpp \
+    src/singletons/Paths.hpp \
+    src/singletons/Resources.hpp \
+    src/singletons/Settings.hpp \
+    src/singletons/Themes.hpp \
+    src/singletons/Updates.hpp \
+    src/singletons/NativeMessaging.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

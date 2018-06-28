@@ -8,8 +8,8 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/PathManager.hpp"
-#include "singletons/SettingsManager.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QApplication>
 #include <QFile>

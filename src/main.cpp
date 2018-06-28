@@ -1,8 +1,8 @@
 #include "Application.hpp"
 #include "common/NetworkManager.hpp"
-#include "singletons/NativeMessagingManager.hpp"
-#include "singletons/PathManager.hpp"
-#include "singletons/UpdateManager.hpp"
+#include "singletons/NativeMessaging.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Updates.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
