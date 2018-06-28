@@ -67,19 +67,19 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(chatterino::FontManager::Type::ChatMedium, this->getScale()));
+        app->fonts->getFont(FontManager::Type::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(chatterino::FontManager::Type::ChatMedium, this->getScale()));
+            app->fonts->getFont(FontManager::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
         if (!this->emotePopup_) {
             this->emotePopup_ = std::make_unique<EmotePopup>();
-            this->emotePopup_->linkClicked.connect([this](const chatterino::Link &link) {
-                if (link.type == chatterino::Link::InsertText) {
+            this->emotePopup_->linkClicked.connect([this](const Link &link) {
+                if (link.type == Link::InsertText) {
                     this->insertText(link.value + " ");
                 }
             });

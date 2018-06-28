@@ -12,7 +12,7 @@ struct MessageColor {
     MessageColor(const QColor &color);
     MessageColor(Type type = Text);
 
-    const QColor &getColor(chatterino::ThemeManager &themeManager) const;
+    const QColor &getColor(ThemeManager &themeManager) const;
 
 private:
     Type type;

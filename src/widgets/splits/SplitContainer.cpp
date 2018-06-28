@@ -565,7 +565,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
 
     if (type == "split") {
         auto *split = new Split(this);
-        split->setChannel(chatterino::WindowManager::decodeChannel(obj.value("data").toObject()));
+        split->setChannel(WindowManager::decodeChannel(obj.value("data").toObject()));
 
         this->appendSplit(split);
     } else if (type == "horizontal" || type == "vertical") {
@@ -582,7 +582,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             if (_type == "split") {
                 auto *split = new Split(this);
                 split->setChannel(
-                    chatterino::WindowManager::decodeChannel(_obj.value("data").toObject()));
+                    WindowManager::decodeChannel(_obj.value("data").toObject()));
 
                 Node *_node = new Node();
                 _node->parent = node;
@@ -606,7 +606,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             if (node->getChildren().size() < 2) {
                 auto *split = new Split(this);
                 split->setChannel(
-                    chatterino::WindowManager::decodeChannel(obj.value("data").toObject()));
+                    WindowManager::decodeChannel(obj.value("data").toObject()));
 
                 this->insertSplit(split, direction, node);
             }

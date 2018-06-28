@@ -44,6 +44,11 @@ public:
     static float getUiScaleValue();
     static float getUiScaleValue(int scale);
 
+    MessageElement::Flags getWordFlags();
+    void updateWordTypeMask();
+
+    pajlada::Signals::NoArgSignal wordFlagsChanged;
+
 private:
     bool initialized = false;
 
@@ -55,6 +60,9 @@ private:
     Window *selectedWindow = nullptr;
 
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+
+    MessageElement::Flags wordFlags = MessageElement::Default;
+    pajlada::Settings::SettingListener wordFlagsListener;
 
 public:
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);

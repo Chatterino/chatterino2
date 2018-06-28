@@ -7,7 +7,7 @@ namespace chatterino {
 EmotesPage::EmotesPage()
     : SettingsPage("Emotes", ":/images/emote.svg")
 {
-    //    chatterino::SettingManager &settings = chatterino::SettingManager::getInstance();
+    //    SettingManager &settings = SettingManager::getInstance();
     //    LayoutCreator<EmotesPage> layoutCreator(this);
     //    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 

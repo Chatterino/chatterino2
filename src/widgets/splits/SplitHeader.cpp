@@ -234,7 +234,7 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->dropdownButton->setFixedWidth(w);
     this->moderationButton->setFixedWidth(w);
     //    this->titleLabel->setFont(
-    //        chatterino::FontManager::getInstance().getFont(FontStyle::Medium, scale));
+    //        FontManager::getInstance().getFont(FontStyle::Medium, scale));
 }
 
 void SplitHeader::updateChannelText()

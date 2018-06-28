@@ -17,6 +17,8 @@ public:
 
     void initialize();
 
+    bool isIgnoredEmote(const QString &emote);
+
     TwitchEmotes twitch;
     BTTVEmotes bttv;
     FFZEmotes ffz;

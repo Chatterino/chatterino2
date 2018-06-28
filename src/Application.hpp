@@ -15,6 +15,7 @@ class HighlightController;
 class IgnoreController;
 class TaggedUsersController;
 class AccountController;
+class ModerationActions;
 
 class ThemeManager;
 class WindowManager;
@@ -44,20 +45,21 @@ public:
 
     friend void test();
 
-    chatterino::PathManager *paths = nullptr;
-    chatterino::ThemeManager *themes = nullptr;
-    chatterino::WindowManager *windows = nullptr;
-    chatterino::LoggingManager *logging = nullptr;
+    PathManager *paths = nullptr;
+    ThemeManager *themes = nullptr;
+    WindowManager *windows = nullptr;
+    LoggingManager *logging = nullptr;
     CommandController *commands = nullptr;
     HighlightController *highlights = nullptr;
     IgnoreController *ignores = nullptr;
     TaggedUsersController *taggedUsers = nullptr;
     AccountController *accounts = nullptr;
-    chatterino::EmoteManager *emotes = nullptr;
-    chatterino::NativeMessagingManager *nativeMessaging = nullptr;
-    chatterino::SettingManager *settings = nullptr;
-    chatterino::FontManager *fonts = nullptr;
-    chatterino::ResourceManager *resources = nullptr;
+    EmoteManager *emotes = nullptr;
+    NativeMessagingManager *nativeMessaging = nullptr;
+    SettingManager *settings = nullptr;
+    FontManager *fonts = nullptr;
+    ResourceManager *resources = nullptr;
+    ModerationActions *moderationActions = nullptr;
 
     /// Provider-specific
     struct {

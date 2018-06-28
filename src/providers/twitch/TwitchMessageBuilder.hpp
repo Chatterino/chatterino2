@@ -14,7 +14,7 @@ namespace chatterino {
 class Channel;
 class TwitchChannel;
 
-class TwitchMessageBuilder : public chatterino::MessageBuilder
+class TwitchMessageBuilder : public MessageBuilder
 {
 public:
     enum UsernameDisplayMode : int {
@@ -26,22 +26,22 @@ public:
     TwitchMessageBuilder() = delete;
 
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
-                                  const chatterino::MessageParseArgs &_args);
+                                  const MessageParseArgs &_args);
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  const chatterino::MessageParseArgs &_args, QString content,
+                                  const MessageParseArgs &_args, QString content,
                                   bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
     const Communi::IrcMessage *ircMessage;
-    chatterino::MessageParseArgs args;
+    MessageParseArgs args;
     const QVariantMap tags;
 
     QString messageID;
     QString userName;
 
     bool isIgnored() const;
-    chatterino::MessagePtr build();
+    MessagePtr build();
 
 private:
     QString roomID;

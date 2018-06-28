@@ -20,4 +20,9 @@ void EmoteManager::initialize()
     this->gifTimer.initialize();
 }
 
+bool EmoteManager::isIgnoredEmote(const QString &)
+{
+    return false;
+}
+
 }  // namespace chatterino

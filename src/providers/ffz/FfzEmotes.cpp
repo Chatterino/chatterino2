@@ -29,14 +29,14 @@ void fillInEmoteData(const QJsonObject &urls, const QString &code, const QString
 
     assert(!url1x.isEmpty());
 
-    emoteData.image1x = new chatterino::Image(url1x, 1, code, tooltip);
+    emoteData.image1x = new Image(url1x, 1, code, tooltip);
 
     if (!url2x.isEmpty()) {
-        emoteData.image2x = new chatterino::Image(url2x, 0.5, code, tooltip);
+        emoteData.image2x = new Image(url2x, 0.5, code, tooltip);
     }
 
     if (!url3x.isEmpty()) {
-        emoteData.image3x = new chatterino::Image(url3x, 0.25, code, tooltip);
+        emoteData.image3x = new Image(url3x, 0.25, code, tooltip);
     }
 }
 

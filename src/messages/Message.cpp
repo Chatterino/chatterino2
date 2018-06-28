@@ -175,8 +175,7 @@ MessagePtr Message::createTimeoutMessage(const BanAction &action, uint32_t count
         }
     }
 
-    msg->addElement(new chatterino::TextElement(text, chatterino::MessageElement::Text,
-                                                chatterino::MessageColor::System));
+    msg->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
     msg->searchText = text;
 
     return msg;
@@ -204,8 +203,7 @@ MessagePtr Message::createUntimeoutMessage(const UnbanAction &action)
                    .arg(action.target.name);
     }
 
-    msg->addElement(new chatterino::TextElement(text, chatterino::MessageElement::Text,
-                                                chatterino::MessageColor::System));
+    msg->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
     msg->searchText = text;
 
     return msg;

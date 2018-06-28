@@ -64,7 +64,7 @@ private:
     std::shared_ptr<TwitchAccount> anonymousUser;
     mutable std::mutex mutex;
 
-    friend class chatterino::AccountController;
+    friend class AccountController;
 };
 
 }  // namespace chatterino

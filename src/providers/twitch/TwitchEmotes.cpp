@@ -123,15 +123,15 @@ EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName
     return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         EmoteData newEmoteData;
         auto cleanCode = cleanUpCode(emoteName);
-        newEmoteData.image1x = new chatterino::Image(getEmoteLink(id, "1.0"), 1, emoteName,
+        newEmoteData.image1x = new Image(getEmoteLink(id, "1.0"), 1, emoteName,
                                                      _emoteName + "<br/>Twitch Emote 1x");
         newEmoteData.image1x->setCopyString(cleanCode);
 
-        newEmoteData.image2x = new chatterino::Image(getEmoteLink(id, "2.0"), .5, emoteName,
+        newEmoteData.image2x = new Image(getEmoteLink(id, "2.0"), .5, emoteName,
                                                      _emoteName + "<br/>Twitch Emote 2x");
         newEmoteData.image2x->setCopyString(cleanCode);
 
-        newEmoteData.image3x = new chatterino::Image(getEmoteLink(id, "3.0"), .25, emoteName,
+        newEmoteData.image3x = new Image(getEmoteLink(id, "3.0"), .25, emoteName,
                                                      _emoteName + "<br/>Twitch Emote 3x");
 
         newEmoteData.image3x->setCopyString(cleanCode);

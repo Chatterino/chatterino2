@@ -20,7 +20,7 @@ public:
 private:
     bool initialized = false;
 
-    chatterino::ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {"/ignore/phrases"};
+    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {"/ignore/phrases"};
 };
 
 }  // namespace chatterino

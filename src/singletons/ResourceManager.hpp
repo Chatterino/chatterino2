@@ -35,39 +35,39 @@ public:
         QPixmap unmod;
     } buttons;
 
-    chatterino::Image *badgeStaff;
-    chatterino::Image *badgeAdmin;
-    chatterino::Image *badgeGlobalModerator;
-    chatterino::Image *badgeModerator;
-    chatterino::Image *badgeTurbo;
-    chatterino::Image *badgeBroadcaster;
-    chatterino::Image *badgePremium;
-    chatterino::Image *badgeVerified;
-    chatterino::Image *badgeSubscriber;
-    chatterino::Image *badgeCollapsed;
+    Image *badgeStaff;
+    Image *badgeAdmin;
+    Image *badgeGlobalModerator;
+    Image *badgeModerator;
+    Image *badgeTurbo;
+    Image *badgeBroadcaster;
+    Image *badgePremium;
+    Image *badgeVerified;
+    Image *badgeSubscriber;
+    Image *badgeCollapsed;
 
-    chatterino::Image *cheerBadge100000;
-    chatterino::Image *cheerBadge10000;
-    chatterino::Image *cheerBadge5000;
-    chatterino::Image *cheerBadge1000;
-    chatterino::Image *cheerBadge100;
-    chatterino::Image *cheerBadge1;
+    Image *cheerBadge100000;
+    Image *cheerBadge10000;
+    Image *cheerBadge5000;
+    Image *cheerBadge1000;
+    Image *cheerBadge100;
+    Image *cheerBadge1;
 
-    chatterino::Image *moderationmode_enabled;
-    chatterino::Image *moderationmode_disabled;
+    Image *moderationmode_enabled;
+    Image *moderationmode_disabled;
 
-    chatterino::Image *splitHeaderContext;
+    Image *splitHeaderContext;
 
-    std::map<std::string, chatterino::Image *> cheerBadges;
+    std::map<std::string, Image *> cheerBadges;
 
     struct BadgeVersion {
         BadgeVersion() = delete;
 
         explicit BadgeVersion(QJsonObject &&root);
 
-        chatterino::Image *badgeImage1x;
-        chatterino::Image *badgeImage2x;
-        chatterino::Image *badgeImage4x;
+        Image *badgeImage1x;
+        Image *badgeImage2x;
+        Image *badgeImage4x;
         std::string description;
         std::string title;
         std::string clickAction;
@@ -82,8 +82,8 @@ public:
 
     bool dynamicBadgesLoaded = false;
 
-    chatterino::Image *buttonBan;
-    chatterino::Image *buttonTimeout;
+    Image *buttonBan;
+    Image *buttonTimeout;
 
     struct JSONCheermoteSet {
         QString prefix;
@@ -102,7 +102,7 @@ public:
             QString color;
 
             //       Background        State             Scale
-            std::map<QString, std::map<QString, std::map<QString, chatterino::Image *>>> images;
+            std::map<QString, std::map<QString, std::map<QString, Image *>>> images;
         };
 
         std::vector<CheermoteTier> tiers;
@@ -135,14 +135,14 @@ public:
 
     // Chatterino badges
     struct ChatterinoBadge {
-        ChatterinoBadge(const std::string &_tooltip, chatterino::Image *_image)
+        ChatterinoBadge(const std::string &_tooltip, Image *_image)
             : tooltip(_tooltip)
             , image(_image)
         {
         }
 
         std::string tooltip;
-        chatterino::Image *image;
+        Image *image;
     };
 
     //       username

@@ -68,10 +68,10 @@ private:
 
     QPropertyAnimation currentValueAnimation_;
 
-    chatterino::LimitedQueue<ScrollbarHighlight> highlights_;
+    LimitedQueue<ScrollbarHighlight> highlights_;
     bool highlightsPaused_{false};
-    chatterino::LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
-    chatterino::LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
+    LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
+    LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
 
     bool atBottom_{false};
 

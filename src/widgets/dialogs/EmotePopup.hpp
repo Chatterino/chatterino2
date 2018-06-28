@@ -16,7 +16,7 @@ public:
     void loadChannel(ChannelPtr channel);
     void loadEmojis();
 
-    pajlada::Signals::Signal<chatterino::Link> linkClicked;
+    pajlada::Signals::Signal<Link> linkClicked;
 
 private:
     ChannelView *viewEmotes;

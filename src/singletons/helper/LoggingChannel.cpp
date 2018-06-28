@@ -77,7 +77,7 @@ void LoggingChannel::openLogFile()
     this->appendLine(this->generateOpeningString(now));
 }
 
-void LoggingChannel::addMessage(std::shared_ptr<chatterino::Message> message)
+void LoggingChannel::addMessage(std::shared_ptr<Message> message)
 {
     QDateTime now = QDateTime::currentDateTime();
 

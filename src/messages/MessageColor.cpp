@@ -13,7 +13,7 @@ MessageColor::MessageColor(Type _type)
 {
 }
 
-const QColor &MessageColor::getColor(chatterino::ThemeManager &themeManager) const
+const QColor &MessageColor::getColor(ThemeManager &themeManager) const
 {
     switch (this->type) {
         case Type::Custom:

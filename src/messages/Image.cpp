@@ -108,7 +108,7 @@ void Image::loadImage()
                     this->loadedPixmap = pixmap;
                 }
 
-                chatterino::Image::FrameData data;
+                Image::FrameData data;
                 data.duration = std::max(20, reader.nextImageDelay());
                 data.image = pixmap;
 

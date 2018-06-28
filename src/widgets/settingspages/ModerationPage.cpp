@@ -97,25 +97,26 @@ ModerationPage::ModerationPage()
         //                         app->settings->timeoutAction));
         //        }
 
-        auto modButtons =
-            modMode.emplace<QGroupBox>("Custom moderator buttons").setLayoutType<QVBoxLayout>();
-        {
-            auto label2 =
-                modButtons.emplace<QLabel>("One action per line. {user} will be replaced with the "
-                                           "username.<br>Example `/timeout {user} 120`<br>");
-            label2->setWordWrap(true);
+        // auto modButtons =
+        //     modMode.emplace<QGroupBox>("Custom moderator buttons").setLayoutType<QVBoxLayout>();
+        // {
+        //     auto label2 =
+        //         modButtons.emplace<QLabel>("One action per line. {user} will be replaced with the
+        //         "
+        //                                    "username.<br>Example `/timeout {user} 120`<br>");
+        //     label2->setWordWrap(true);
 
-            auto text = modButtons.emplace<QTextEdit>().getElement();
+        //     auto text = modButtons.emplace<QTextEdit>().getElement();
 
-            text->setPlainText(app->settings->moderationActions);
+        //     text->setPlainText(app->moderationActions->items);
 
-            QObject::connect(text, &QTextEdit::textChanged, this,
-                             [this] { this->itemsChangedTimer.start(200); });
+        //     QObject::connect(text, &QTextEdit::textChanged, this,
+        //                      [this] { this->itemsChangedTimer.start(200); });
 
-            QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this, [text, app]() {
-                app->settings->moderationActions = text->toPlainText();
-            });
-        }
+        //     QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this, [text, app]() {
+        //         app->windows->moderationActions = text->toPlainText();
+        //     });
+        // }
 
         /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
         {

@@ -46,7 +46,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString 
         return;
     }
 
-    chatterino::MessageParseArgs args;
+    MessageParseArgs args;
     if (isSub) {
         args.trimSubscriberUsername = true;
     }
@@ -58,13 +58,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored()) {
-        chatterino::MessagePtr msg = builder.build();
+        MessagePtr msg = builder.build();
 
         if (isSub) {
-            msg->flags |= chatterino::Message::Subscription;
-            msg->flags &= ~chatterino::Message::Highlighted;
+            msg->flags |= Message::Subscription;
+            msg->flags &= ~Message::Highlighted;
         } else {
-            if (msg->flags & chatterino::Message::Highlighted) {
+            if (msg->flags & Message::Highlighted) {
                 server.mentionsChannel->addMessage(msg);
                 getApp()->highlights->addHighlight(msg);
             }
@@ -200,7 +200,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
     Log("Received whisper!");
-    chatterino::MessageParseArgs args;
+    MessageParseArgs args;
 
     args.isReceivedWhisper = true;
 
@@ -209,9 +209,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
 
     if (!builder.isIgnored()) {
-        chatterino::MessagePtr _message = builder.build();
+        MessagePtr _message = builder.build();
 
-        if (_message->flags & chatterino::Message::Highlighted) {
+        if (_message->flags & Message::Highlighted) {
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
@@ -219,7 +219,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         c->addMessage(_message);
 
-        _message->flags |= chatterino::Message::DoNotTriggerNotification;
+        _message->flags |= Message::DoNotTriggerNotification;
 
         if (app->settings->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
@@ -254,9 +254,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, Tw
 
     if (it != tags.end()) {
         auto newMessage =
-            chatterino::Message::createSystemMessage(parseTagString(it.value().toString()));
+            Message::createSystemMessage(parseTagString(it.value().toString()));
 
-        newMessage->flags |= chatterino::Message::Subscription;
+        newMessage->flags |= Message::Subscription;
 
         QString channelName;
 

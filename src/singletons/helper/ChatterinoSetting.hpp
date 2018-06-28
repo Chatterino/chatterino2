@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QString>
+#include <pajlada/settings.hpp>
+
 namespace chatterino {
 
 void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
@@ -40,5 +43,11 @@ public:
 
     using pajlada::Settings::Setting<Type>::operator const Type;
 };
+
+using BoolSetting = ChatterinoSetting<bool>;
+using FloatSetting = ChatterinoSetting<float>;
+using IntSetting = ChatterinoSetting<int>;
+using StringSetting = ChatterinoSetting<std::string>;
+using QStringSetting = ChatterinoSetting<QString>;
 
 }  // namespace chatterino

@@ -18,22 +18,17 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
 SettingManager::SettingManager()
 {
     qDebug() << "init SettingManager";
+}
 
-    this->wordFlagsListener.addSetting(this->showTimestamps);
-    this->wordFlagsListener.addSetting(this->showBadges);
-    this->wordFlagsListener.addSetting(this->enableBttvEmotes);
-    this->wordFlagsListener.addSetting(this->enableEmojis);
-    this->wordFlagsListener.addSetting(this->enableFfzEmotes);
-    this->wordFlagsListener.addSetting(this->enableTwitchEmotes);
-    this->wordFlagsListener.cb = [this](auto) {
-        this->updateWordTypeMask();  //
-    };
+SettingManager &SettingManager::getInstance()
+{
+    static SettingManager instance;
+
+    return instance;
 }
 
 void SettingManager::initialize()
 {
-    this->moderationActions.connect([this](auto, auto) { this->updateModerationActions(); });
-
     this->timestampFormat.connect([](auto, auto) {
         auto app = getApp();
         app->windows->layoutChannelViews();
@@ -50,58 +45,12 @@ void SettingManager::initialize()
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
 }
 
-MessageElement::Flags SettingManager::getWordFlags()
-{
-    return this->wordFlags;
-}
-
-bool SettingManager::isIgnoredEmote(const QString &)
-{
-    return false;
-}
-
 void SettingManager::load()
 {
     auto app = getApp();
     QString settingsPath = app->paths->settingsDirectory + "/settings.json";
 
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
-}
-
-void SettingManager::updateWordTypeMask()
-{
-    uint32_t newMaskUint = MessageElement::Text;
-
-    if (this->showTimestamps) {
-        newMaskUint |= MessageElement::Timestamp;
-    }
-
-    newMaskUint |=
-        enableTwitchEmotes ? MessageElement::TwitchEmoteImage : MessageElement::TwitchEmoteText;
-    newMaskUint |= enableFfzEmotes ? MessageElement::FfzEmoteImage : MessageElement::FfzEmoteText;
-    newMaskUint |=
-        enableBttvEmotes ? MessageElement::BttvEmoteImage : MessageElement::BttvEmoteText;
-    newMaskUint |= enableEmojis ? MessageElement::EmojiImage : MessageElement::EmojiText;
-
-    newMaskUint |= MessageElement::BitsAmount;
-    newMaskUint |= enableGifAnimations ? MessageElement::BitsAnimated : MessageElement::BitsStatic;
-
-    if (this->showBadges) {
-        newMaskUint |= MessageElement::Badges;
-    }
-
-    newMaskUint |= MessageElement::Username;
-
-    newMaskUint |= MessageElement::AlwaysShow;
-    newMaskUint |= MessageElement::Collapsed;
-
-    MessageElement::Flags newMask = static_cast<MessageElement::Flags>(newMaskUint);
-
-    if (newMask != this->wordFlags) {
-        this->wordFlags = newMask;
-
-        this->wordFlagsChanged.invoke();
-    }
 }
 
 void SettingManager::saveSnapshot()
@@ -125,7 +74,7 @@ void SettingManager::saveSnapshot()
     Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
-void SettingManager::recallSnapshot()
+void SettingManager::restoreSnapshot()
 {
     if (!this->snapshot) {
         return;
@@ -151,77 +100,9 @@ void SettingManager::recallSnapshot()
     }
 }
 
-std::vector<ModerationAction> SettingManager::getModerationActions() const
+SettingManager *getSettings()
 {
-    return this->_moderationActions;
-}
-
-void SettingManager::updateModerationActions()
-{
-    auto app = getApp();
-
-    this->_moderationActions.clear();
-
-    static QRegularExpression newLineRegex("(\r\n?|\n)+");
-    static QRegularExpression replaceRegex("[!/.]");
-    static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)");
-    QStringList list = this->moderationActions.getValue().split(newLineRegex);
-
-    int multipleTimeouts = 0;
-
-    for (QString &str : list) {
-        if (timeoutRegex.match(str).hasMatch()) {
-            multipleTimeouts++;
-            if (multipleTimeouts > 1) {
-                break;
-            }
-        }
-    }
-
-    for (int i = 0; i < list.size(); i++) {
-        QString &str = list[i];
-
-        if (str.isEmpty()) {
-            continue;
-        }
-
-        auto timeoutMatch = timeoutRegex.match(str);
-
-        if (timeoutMatch.hasMatch()) {
-            if (multipleTimeouts > 1) {
-                QString line1;
-                QString line2;
-
-                int amount = timeoutMatch.captured(1).toInt();
-
-                if (amount < 60) {
-                    line1 = QString::number(amount);
-                    line2 = "s";
-                } else if (amount < 60 * 60) {
-                    line1 = QString::number(amount / 60);
-                    line2 = "m";
-                } else if (amount < 60 * 60 * 24) {
-                    line1 = QString::number(amount / 60 / 60);
-                    line2 = "h";
-                } else {
-                    line1 = QString::number(amount / 60 / 60 / 24);
-                    line2 = "d";
-                }
-
-                this->_moderationActions.emplace_back(line1, line2, str);
-            } else {
-                this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
-            }
-        } else if (str.startsWith("/ban ")) {
-            this->_moderationActions.emplace_back(app->resources->buttonBan, str);
-        } else {
-            QString xD = str;
-
-            xD.replace(replaceRegex, "");
-
-            this->_moderationActions.emplace_back(xD.mid(0, 2), xD.mid(2, 2), str);
-        }
-    }
+    return &SettingManager::getInstance();
 }
 
 }  // namespace chatterino

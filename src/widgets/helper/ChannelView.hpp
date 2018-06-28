@@ -36,13 +36,13 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<chatterino::MessageElement::Flags> value);
-    const boost::optional<chatterino::MessageElement::Flags> &getOverrideFlags() const;
+    void setOverrideFlags(boost::optional<MessageElement::Flags> value);
+    const boost::optional<MessageElement::Flags> &getOverrideFlags() const;
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
     void setChannel(ChannelPtr channel_);
-    chatterino::LimitedQueueSnapshot<chatterino::MessageLayoutPtr> getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void layoutMessages();
 
     void clearMessages();
@@ -50,7 +50,7 @@ public:
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
-    pajlada::Signals::Signal<const chatterino::Link &> linkClicked;
+    pajlada::Signals::Signal<const Link &> linkClicked;
 
 protected:
     void themeRefreshEvent() override;
@@ -70,10 +70,10 @@ protected:
 
     void hideEvent(QHideEvent *) override;
 
-    void handleLinkClick(QMouseEvent *event, const chatterino::Link &link,
-                         chatterino::MessageLayout *layout);
+    void handleLinkClick(QMouseEvent *event, const Link &link,
+                         MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<chatterino::MessageLayout> &message,
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
                          QPoint &relativePos, int &index);
 
 private:
@@ -92,24 +92,24 @@ private:
     int messagesAddedSinceSelectionPause_ = 0;
 
     QTimer pauseTimeout_;
-    boost::optional<chatterino::MessageElement::Flags> overrideFlags_;
-    chatterino::MessageLayoutPtr lastReadMessage_;
+    boost::optional<MessageElement::Flags> overrideFlags_;
+    MessageLayoutPtr lastReadMessage_;
 
-    chatterino::LimitedQueueSnapshot<chatterino::MessageLayoutPtr> snapshot_;
+    LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);
 
     void drawMessages(QPainter &painter);
-    void setSelection(const chatterino::SelectionItem &start, const chatterino::SelectionItem &end);
-    chatterino::MessageElement::Flags getFlags() const;
+    void setSelection(const SelectionItem &start, const SelectionItem &end);
+    MessageElement::Flags getFlags() const;
     bool isPaused();
 
     void handleMouseClick(QMouseEvent *event,
-                          const chatterino::MessageLayoutElement *hoverLayoutElement,
-                          chatterino::MessageLayout *layout);
-    void addContextMenuItems(const chatterino::MessageLayoutElement *hoveredElement,
-                             chatterino::MessageLayout *layout);
+                          const MessageLayoutElement *hoverLayoutElement,
+                          MessageLayout *layout);
+    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                             MessageLayout *layout);
 
     //    void beginPause();
     //    void endPause();
@@ -132,10 +132,10 @@ private:
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
 
-    chatterino::Selection selection_;
+    Selection selection_;
     bool selecting_ = false;
 
-    chatterino::LimitedQueue<chatterino::MessageLayoutPtr> messages;
+    LimitedQueue<MessageLayoutPtr> messages;
 
     pajlada::Signals::Connection messageAppendedConnection_;
     pajlada::Signals::Connection messageAddedAtStartConnection_;
@@ -147,7 +147,7 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> connections_;
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
-    std::unordered_set<std::shared_ptr<chatterino::MessageLayout>> messagesOnScreen_;
+    std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
 
     int getLayoutWidth() const;
 

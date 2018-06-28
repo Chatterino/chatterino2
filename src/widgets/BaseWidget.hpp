@@ -41,7 +41,7 @@ protected:
 
     void setScale(float value);
 
-    chatterino::ThemeManager *themeManager;
+    ThemeManager *themeManager;
 
 private:
     void init();

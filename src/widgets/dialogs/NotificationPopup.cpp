@@ -38,7 +38,7 @@ void NotificationPopup::updatePosition()
     }
 }
 
-void NotificationPopup::addMessage(chatterino::MessagePtr msg)
+void NotificationPopup::addMessage(MessagePtr msg)
 {
     this->channel->addMessage(msg);
 

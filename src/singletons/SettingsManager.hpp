@@ -1,9 +1,9 @@
 #pragma once
 
 #include "controllers/highlights/HighlightPhrase.hpp"
+#include "controllers/moderationactions/ModerationAction.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/helper/ChatterinoSetting.hpp"
-#include "singletons/helper/ModerationAction.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -14,19 +14,10 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
 
 class SettingManager
 {
-    using BoolSetting = ChatterinoSetting<bool>;
-    using FloatSetting = ChatterinoSetting<float>;
-    using IntSetting = ChatterinoSetting<int>;
-    using StringSetting = ChatterinoSetting<std::string>;
-    using QStringSetting = ChatterinoSetting<QString>;
-
-public:
     SettingManager();
 
-    ~SettingManager() = delete;
-
-    chatterino::MessageElement::Flags getWordFlags();
-    bool isIgnoredEmote(const QString &emote);
+public:
+    static SettingManager &getInstance();
 
     void initialize();
     void load();
@@ -94,7 +85,6 @@ public:
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers", true};
 
     /// Moderation
-    QStringSetting moderationActions = {"/moderation/actions", "/ban {user}\n/timeout {user} 300"};
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
 
     /// Highlighting
@@ -128,23 +118,15 @@ public:
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
 
-    void updateWordTypeMask();
-
     void saveSnapshot();
-    void recallSnapshot();
-
-    std::vector<ModerationAction> getModerationActions() const;
-    pajlada::Signals::NoArgSignal wordFlagsChanged;
+    void restoreSnapshot();
 
 private:
-    std::vector<ModerationAction> _moderationActions;
     std::unique_ptr<rapidjson::Document> snapshot;
 
     void updateModerationActions();
-
-    chatterino::MessageElement::Flags wordFlags = chatterino::MessageElement::Default;
-
-    pajlada::Settings::SettingListener wordFlagsListener;
 };
+
+SettingManager *getSettings();
 
 }  // namespace chatterino

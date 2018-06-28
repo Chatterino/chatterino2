@@ -152,7 +152,7 @@ SOURCES += \
     src/singletons/helper/ChatterinoSetting.cpp \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
-    src/singletons/helper/ModerationAction.cpp \
+    src/controllers/moderationactions/ModerationAction.cpp \
     src/singletons/IrcManager.cpp \
     src/singletons/LoggingManager.cpp \
     src/singletons/NativeMessagingManager.cpp \
@@ -223,7 +223,8 @@ SOURCES += \
     src/widgets/StreamView.cpp \
     src/widgets/TooltipWidget.cpp \
     src/widgets/Window.cpp \
-    src/common/LinkParser.cpp
+    src/common/LinkParser.cpp \
+    src/controllers/moderationactions/ModerationActions.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -305,7 +306,7 @@ HEADERS  += \
     src/singletons/helper/ChatterinoSetting.hpp \
     src/singletons/helper/GifTimer.hpp \
     src/singletons/helper/LoggingChannel.hpp \
-    src/singletons/helper/ModerationAction.hpp \
+    src/controllers/moderationactions/ModerationAction.hpp \
     src/singletons/IrcManager.hpp \
     src/singletons/LoggingManager.hpp \
     src/singletons/NativeMessagingManager.hpp \
@@ -392,7 +393,8 @@ HEADERS  += \
     src/widgets/Window.hpp \
     src/providers/twitch/TwitchCommon.hpp \
     src/util/IsBigEndian.hpp \
-    src/common/LinkParser.hpp
+    src/common/LinkParser.hpp \
+    src/controllers/moderationactions/ModerationActions.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

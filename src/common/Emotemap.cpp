@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-EmoteData::EmoteData(chatterino::Image *_image)
+EmoteData::EmoteData(Image *_image)
     : image1x(_image)
 {
 }
@@ -16,7 +16,7 @@ bool EmoteData::isValid() const
     return this->image1x != nullptr;
 }
 
-chatterino::Image *EmoteData::getImage(float scale) const
+Image *EmoteData::getImage(float scale) const
 {
     int quality = getApp()->settings->preferredEmoteQuality;
 
@@ -31,7 +31,7 @@ chatterino::Image *EmoteData::getImage(float scale) const
         }();
     }
 
-    chatterino::Image *_image;
+    Image *_image;
     if (quality == 3 && this->image3x != nullptr) {
         _image = this->image3x;
     } else if (quality >= 2 && this->image2x != nullptr) {

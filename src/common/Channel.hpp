@@ -35,23 +35,23 @@ public:
 
     pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
 
-    pajlada::Signals::Signal<chatterino::MessagePtr &> messageRemovedFromStart;
-    pajlada::Signals::Signal<chatterino::MessagePtr &> messageAppended;
-    pajlada::Signals::Signal<std::vector<chatterino::MessagePtr> &> messagesAddedAtStart;
-    pajlada::Signals::Signal<size_t, chatterino::MessagePtr &> messageReplaced;
+    pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
+    pajlada::Signals::Signal<MessagePtr &> messageAppended;
+    pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
+    pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
 
     Type getType() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
-    chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> getMessageSnapshot();
+    LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
 
-    void addMessage(chatterino::MessagePtr message);
-    void addMessagesAtStart(std::vector<chatterino::MessagePtr> &messages);
-    void addOrReplaceTimeout(chatterino::MessagePtr message);
+    void addMessage(MessagePtr message);
+    void addMessagesAtStart(std::vector<MessagePtr> &messages);
+    void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
-    void replaceMessage(chatterino::MessagePtr message, chatterino::MessagePtr replacement);
-    virtual void addRecentChatter(const std::shared_ptr<chatterino::Message> &message);
+    void replaceMessage(MessagePtr message, MessagePtr replacement);
+    virtual void addRecentChatter(const std::shared_ptr<Message> &message);
 
     QString name;
     QStringList modList;
@@ -69,7 +69,7 @@ protected:
     virtual void onConnected();
 
 private:
-    chatterino::LimitedQueue<chatterino::MessagePtr> messages;
+    LimitedQueue<MessagePtr> messages;
     Type type;
 };
 

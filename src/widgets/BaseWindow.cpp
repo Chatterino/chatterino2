@@ -249,10 +249,10 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(chatterino::WindowManager::clampUiScale(
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
                 getApp()->settings->uiScale.getValue() - 1));
         }
     }

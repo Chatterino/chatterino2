@@ -75,7 +75,7 @@ void CompletionModel::refresh()
 
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
-    //    auto c = chatterino::ChannelManager::getInstance().getTwitchChannel(this->channelName);
+    //    auto c = ChannelManager::getInstance().getTwitchChannel(this->channelName);
     //    auto usernames = c->getUsernamesForCompletions();
     //    for (const auto &name : usernames) {
     //        assert(!name.displayName.isEmpty());

@@ -124,9 +124,9 @@ void NativeMessagingManager::openGuiMessageQueue()
 
 void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
 {
-    ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
-
     try {
+        ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
+
         messageQueue.try_send(array.data(), array.size(), 1);
     } catch (ipc::interprocess_exception &ex) {
         qDebug() << "send to gui process:" << ex.what();

@@ -152,7 +152,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             if (commandName == "/debug-args") {
                 QString msg = QApplication::instance()->arguments().join(' ');
 
-                channel->addMessage(chatterino::Message::createSystemMessage(msg));
+                channel->addMessage(Message::createSystemMessage(msg));
 
                 return "";
             } else if (commandName == "/uptime") {
@@ -161,7 +161,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 QString messageText =
                     streamStatus.live ? streamStatus.uptime : "Channel is not live.";
 
-                channel->addMessage(chatterino::Message::createSystemMessage(messageText));
+                channel->addMessage(Message::createSystemMessage(messageText));
 
                 return "";
             } else if (commandName == "/ignore" && words.size() >= 2) {
@@ -171,13 +171,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(chatterino::Message::createSystemMessage(
+                    channel->addMessage(Message::createSystemMessage(
                         "You must be logged in to ignore someone"));
                     return "";
                 }
 
                 user->ignore(target, [channel](auto resultCode, const QString &message) {
-                    channel->addMessage(chatterino::Message::createSystemMessage(message));
+                    channel->addMessage(Message::createSystemMessage(message));
                 });
 
                 return "";
@@ -188,13 +188,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(chatterino::Message::createSystemMessage(
+                    channel->addMessage(Message::createSystemMessage(
                         "You must be logged in to ignore someone"));
                     return "";
                 }
 
                 user->unignore(target, [channel](auto resultCode, const QString &message) {
-                    channel->addMessage(chatterino::Message::createSystemMessage(message));
+                    channel->addMessage(Message::createSystemMessage(message));
                 });
 
                 return "";

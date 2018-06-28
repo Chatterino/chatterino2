@@ -41,7 +41,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->setMouseTracking(true);
 
-    this->connections_.push_back(app->settings->wordFlagsChanged.connect([this] {
+    this->connections_.push_back(app->windows->wordFlagsChanged.connect([this] {
         this->layoutMessages();
         this->update();
     }));
@@ -271,8 +271,7 @@ QString ChannelView::getSelectedText()
 {
     QString result = "";
 
-    chatterino::LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot =
-        this->getMessagesSnapshot();
+    LimitedQueueSnapshot<MessageLayoutPtr> messagesSnapshot = this->getMessagesSnapshot();
 
     Selection _selection = this->selection_;
 
@@ -318,17 +317,17 @@ bool ChannelView::getEnableScrollingToBottom() const
     return this->enableScrollingToBottom_;
 }
 
-void ChannelView::setOverrideFlags(boost::optional<chatterino::MessageElement::Flags> value)
+void ChannelView::setOverrideFlags(boost::optional<MessageElement::Flags> value)
 {
     this->overrideFlags_ = value;
 }
 
-const boost::optional<chatterino::MessageElement::Flags> &ChannelView::getOverrideFlags() const
+const boost::optional<MessageElement::Flags> &ChannelView::getOverrideFlags() const
 {
     return this->overrideFlags_;
 }
 
-chatterino::LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
+LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
     if (!this->isPaused() /*|| this->scrollBar_.isVisible()*/) {
         this->snapshot_ = this->messages.getSnapshot();
@@ -531,7 +530,7 @@ void ChannelView::setSelection(const SelectionItem &start, const SelectionItem &
     this->selectionChanged.invoke();
 }
 
-chatterino::MessageElement::Flags ChannelView::getFlags() const
+MessageElement::Flags ChannelView::getFlags() const
 {
     auto app = getApp();
 
@@ -539,7 +538,7 @@ chatterino::MessageElement::Flags ChannelView::getFlags() const
         return this->overrideFlags_.get();
     }
 
-    MessageElement::Flags flags = app->settings->getWordFlags();
+    MessageElement::Flags flags = app->windows->getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 
@@ -599,11 +598,11 @@ void ChannelView::drawMessages(QPainter &painter)
     int y = int(-(messagesSnapshot[start].get()->getHeight() *
                   (fmod(this->scrollBar_.getCurrentValue(), 1))));
 
-    chatterino::MessageLayout *end = nullptr;
+    MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
 
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
-        chatterino::MessageLayout *layout = messagesSnapshot[i].get();
+        MessageLayout *layout = messagesSnapshot[i].get();
 
         bool isLastMessage = false;
         if (app->settings->showLastMessageIndicator) {
@@ -634,7 +633,7 @@ void ChannelView::drawMessages(QPainter &painter)
     }
 
     // delete the message buffers that aren't on screen
-    for (const std::shared_ptr<chatterino::MessageLayout> &item : this->messagesOnScreen_) {
+    for (const std::shared_ptr<MessageLayout> &item : this->messagesOnScreen_) {
         item->deleteBuffer();
     }
 
@@ -642,7 +641,7 @@ void ChannelView::drawMessages(QPainter &painter)
 
     // add all messages on screen to the map
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
-        std::shared_ptr<chatterino::MessageLayout> layout = messagesSnapshot[i];
+        std::shared_ptr<MessageLayout> layout = messagesSnapshot[i];
 
         this->messagesOnScreen_.insert(layout);
 
@@ -759,7 +758,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();
-    std::shared_ptr<chatterino::MessageLayout> layout;
+    std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
 
@@ -788,7 +787,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // check if word underneath cursor
-    const chatterino::MessageLayoutElement *hoverLayoutElement = layout->getElementAt(relativePos);
+    const MessageLayoutElement *hoverLayoutElement = layout->getElementAt(relativePos);
 
     if (hoverLayoutElement == nullptr) {
         this->setCursor(Qt::ArrowCursor);
@@ -821,7 +820,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
     this->mouseDown.invoke(event);
 
-    std::shared_ptr<chatterino::MessageLayout> layout;
+    std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
 
@@ -908,7 +907,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // find message
     this->layoutMessages();
 
-    std::shared_ptr<chatterino::MessageLayout> layout;
+    std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
 
@@ -927,7 +926,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    const chatterino::MessageLayoutElement *hoverLayoutElement = layout->getElementAt(relativePos);
+    const MessageLayoutElement *hoverLayoutElement = layout->getElementAt(relativePos);
 
     if (hoverLayoutElement == nullptr) {
         return;
@@ -937,9 +936,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     this->handleMouseClick(event, hoverLayoutElement, layout.get());
 }
 
-void ChannelView::handleMouseClick(QMouseEvent *event,
-                                   const chatterino::MessageLayoutElement *hoveredElement,
-                                   chatterino::MessageLayout *layout)
+void ChannelView::handleMouseClick(QMouseEvent *event, const MessageLayoutElement *hoveredElement,
+                                   MessageLayout *layout)
 {
     switch (event->button()) {
         case Qt::LeftButton: {
@@ -971,8 +969,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
     }
 }
 
-void ChannelView::addContextMenuItems(const chatterino::MessageLayoutElement *hoveredElement,
-                                      chatterino::MessageLayout *layout)
+void ChannelView::addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                                      MessageLayout *layout)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
@@ -982,7 +980,7 @@ void ChannelView::addContextMenuItems(const chatterino::MessageLayoutElement *ho
 
     // Emote actions
     if (creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) {
-        const auto &emoteElement = static_cast<const chatterino::EmoteElement &>(creator);
+        const auto &emoteElement = static_cast<const EmoteElement &>(creator);
 
         // TODO: We might want to add direct "Open image" variants alongside the Copy
         // actions
@@ -1099,7 +1097,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
     auto app = getApp();
 
     if (app->settings->linksDoubleClickOnly) {
-        std::shared_ptr<chatterino::MessageLayout> layout;
+        std::shared_ptr<MessageLayout> layout;
         QPoint relativePos;
         int messageIndex;
 
@@ -1112,8 +1110,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
             return;
         }
 
-        const chatterino::MessageLayoutElement *hoverLayoutElement =
-            layout->getElementAt(relativePos);
+        const MessageLayoutElement *hoverLayoutElement = layout->getElementAt(relativePos);
 
         if (hoverLayoutElement == nullptr) {
             return;
@@ -1133,15 +1130,14 @@ void ChannelView::hideEvent(QHideEvent *)
     this->messagesOnScreen_.clear();
 }
 
-void ChannelView::handleLinkClick(QMouseEvent *event, const chatterino::Link &link,
-                                  chatterino::MessageLayout *layout)
+void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link, MessageLayout *layout)
 {
     if (event->button() != Qt::LeftButton) {
         return;
     }
 
     switch (link.type) {
-        case chatterino::Link::UserInfo: {
+        case Link::UserInfo: {
             auto user = link.value;
 
             auto *userPopup = new UserInfoPopup;
@@ -1155,12 +1151,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const chatterino::Link &li
             break;
         }
 
-        case chatterino::Link::Url: {
+        case Link::Url: {
             QDesktopServices::openUrl(QUrl(link.value));
             break;
         }
 
-        case chatterino::Link::UserAction: {
+        case Link::UserAction: {
             QString value = link.value;
             value.replace("{user}", layout->getMessage()->loginName);
             this->channel_->sendMessage(value);
@@ -1170,7 +1166,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const chatterino::Link &li
     }
 }
 
-bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<chatterino::MessageLayout> &_message,
+bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &_message,
                                   QPoint &relativePos, int &index)
 {
     auto messagesSnapshot = this->getMessagesSnapshot();

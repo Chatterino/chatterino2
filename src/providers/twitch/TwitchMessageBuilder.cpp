@@ -22,7 +22,7 @@ namespace chatterino {
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcPrivateMessage *_ircMessage,
-                                           const chatterino::MessageParseArgs &_args)
+                                           const MessageParseArgs &_args)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)
@@ -37,7 +37,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcMessage *_ircMessage,
-                                           const chatterino::MessageParseArgs &_args,
+                                           const MessageParseArgs &_args,
                                            QString content, bool isAction)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))

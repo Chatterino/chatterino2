@@ -218,7 +218,7 @@ void SettingsDialog::cancelButtonClicked()
         tab->getSettingsPage()->cancel();
     }
 
-    getApp()->settings->recallSnapshot();
+    getApp()->settings->restoreSnapshot();
 
     this->close();
 }

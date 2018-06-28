@@ -16,7 +16,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     this->setWindowTitle("Chatterino");
 
-    auto &updateManager = chatterino::UpdateManager::getInstance();
+    auto &updateManager = UpdateManager::getInstance();
 
     auto layout = LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();
 
@@ -31,7 +31,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    auto *installUpdateButton = buttons->addButton("Install Update",
     //    QDialogButtonBox::NoRole); installUpdateButton->setEnabled(false);
     //    QObject::connect(installUpdateButton, &QPushButton::clicked, [this, update]() mutable {
-    //        auto &updateManager = chatterino::UpdateManager::getInstance();
+    //        auto &updateManager = UpdateManager::getInstance();
 
     //        updateManager.installUpdates();
     //        this->setEnabled(false);
@@ -43,36 +43,36 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     // Updates
     //    auto updateUpdateLabel = [update]() mutable {
-    //        auto &updateManager = chatterino::UpdateManager::getInstance();
+    //        auto &updateManager = UpdateManager::getInstance();
 
     //        switch (updateManager.getStatus()) {
-    //            case chatterino::UpdateManager::None: {
+    //            case UpdateManager::None: {
     //                update->setText("Not checking for updates.");
     //            } break;
-    //            case chatterino::UpdateManager::Searching: {
+    //            case UpdateManager::Searching: {
     //                update->setText("Checking for updates...");
     //            } break;
-    //            case chatterino::UpdateManager::UpdateAvailable: {
+    //            case UpdateManager::UpdateAvailable: {
     //                update->setText("Update available.");
     //            } break;
-    //            case chatterino::UpdateManager::NoUpdateAvailable: {
+    //            case UpdateManager::NoUpdateAvailable: {
     //                update->setText("No update abailable.");
     //            } break;
-    //            case chatterino::UpdateManager::SearchFailed: {
+    //            case UpdateManager::SearchFailed: {
     //                update->setText("Error while searching for update.\nEither the update service
     //                is "
     //                                "temporarily down or there is an issue with your
     //                                installation.");
     //            } break;
-    //            case chatterino::UpdateManager::Downloading: {
+    //            case UpdateManager::Downloading: {
     //                update->setText(
     //                    "Downloading the update. Chatterino will close once the download is
     //                    done.");
     //            } break;
-    //            case chatterino::UpdateManager::DownloadFailed: {
+    //            case UpdateManager::DownloadFailed: {
     //                update->setText("Download failed.");
     //            } break;
-    //            case chatterino::UpdateManager::WriteFileFailed: {
+    //            case UpdateManager::WriteFileFailed: {
     //                update->setText("Writing the update file to the hard drive failed.");
     //            } break;
     //        }

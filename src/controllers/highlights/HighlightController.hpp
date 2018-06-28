@@ -20,12 +20,12 @@ public:
 
     HighlightModel *createModel(QObject *parent);
 
-    void addHighlight(const chatterino::MessagePtr &msg);
+    void addHighlight(const MessagePtr &msg);
 
 private:
     bool initialized = false;
 
-    chatterino::ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting = {
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting = {
         "/highlighting/highlights"};
 };
 

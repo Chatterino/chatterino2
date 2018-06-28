@@ -195,7 +195,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
             if (this->lastErrorTimeSpeed_ + 30s < now) {
                 auto errorMessage =
-                    chatterino::Message::createSystemMessage("sending messages too fast");
+                    Message::createSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
@@ -213,7 +213,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         if (lastMessage.size() >= maxMessageCount) {
             if (this->lastErrorTimeAmount_ + 30s < now) {
                 auto errorMessage =
-                    chatterino::Message::createSystemMessage("sending too many messages");
+                    Message::createSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 

@@ -14,7 +14,7 @@ public:
     enum Location { TopLeft, TopRight, BottomLeft, BottomRight };
     NotificationPopup();
 
-    void addMessage(chatterino::MessagePtr msg);
+    void addMessage(MessagePtr msg);
     void updatePosition();
 
 private:

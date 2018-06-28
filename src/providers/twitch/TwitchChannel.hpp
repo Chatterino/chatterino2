@@ -60,7 +60,7 @@ public:
     bool isBroadcaster() const override;
     bool hasModRights();
 
-    void addRecentChatter(const std::shared_ptr<chatterino::Message> &message) final;
+    void addRecentChatter(const std::shared_ptr<Message> &message) final;
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
 

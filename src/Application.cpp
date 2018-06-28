@@ -4,6 +4,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
+#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "providers/twitch/Pubsub.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -43,19 +44,21 @@ void Application::construct()
     isAppConstructed = true;
 
     // 1. Instantiate all classes
-    this->settings = new chatterino::SettingManager;
-    this->paths = chatterino::PathManager::getInstance();
-    this->themes = new chatterino::ThemeManager;
-    this->windows = new chatterino::WindowManager;
-    this->logging = new chatterino::LoggingManager;
+    this->settings = getSettings();
+    this->paths = PathManager::getInstance();
+
+    this->themes = new ThemeManager;
+    this->windows = new WindowManager;
+    this->logging = new LoggingManager;
     this->commands = new CommandController;
     this->highlights = new HighlightController;
     this->ignores = new IgnoreController;
     this->taggedUsers = new TaggedUsersController;
     this->accounts = new AccountController;
-    this->emotes = new chatterino::EmoteManager;
-    this->fonts = new chatterino::FontManager;
-    this->resources = new chatterino::ResourceManager;
+    this->emotes = new EmoteManager;
+    this->fonts = new FontManager;
+    this->resources = new ResourceManager;
+    this->moderationActions = new ModerationActions;
 
     this->twitch.server = new TwitchServer;
     this->twitch.pubsub = new PubSub;
@@ -91,9 +94,10 @@ void Application::initialize()
     this->accounts->load();
 
     this->twitch.server->initialize();
+    this->moderationActions->initialize();
 
     // XXX
-    this->settings->updateWordTypeMask();
+    this->windows->updateWordTypeMask();
 
 #ifdef Q_OS_WIN
 #ifdef QT_DEBUG
@@ -123,7 +127,7 @@ void Application::initialize()
 
         QString text = QString("%1 cleared the chat").arg(action.source.name);
 
-        auto msg = chatterino::Message::createSystemMessage(text);
+        auto msg = Message::createSystemMessage(text);
         postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
@@ -142,7 +146,7 @@ void Application::initialize()
             text.append(" (" + QString::number(action.duration) + " seconds)");
         }
 
-        auto msg = chatterino::Message::createSystemMessage(text);
+        auto msg = Message::createSystemMessage(text);
         postToThread([chan, msg] { chan->addMessage(msg); });
     });
 
@@ -161,7 +165,7 @@ void Application::initialize()
                 text = QString("%1 unmodded %2").arg(action.source.name, action.target.name);
             }
 
-            auto msg = chatterino::Message::createSystemMessage(text);
+            auto msg = Message::createSystemMessage(text);
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
@@ -172,8 +176,8 @@ void Application::initialize()
             return;
         }
 
-        auto msg = chatterino::Message::createTimeoutMessage(action);
-        msg->flags |= chatterino::Message::PubSub;
+        auto msg = Message::createTimeoutMessage(action);
+        msg->flags |= Message::PubSub;
 
         postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
     });
@@ -185,7 +189,7 @@ void Application::initialize()
             return;
         }
 
-        auto msg = chatterino::Message::createUntimeoutMessage(action);
+        auto msg = Message::createUntimeoutMessage(action);
 
         postToThread([chan, msg] { chan->addMessage(msg); });
     });

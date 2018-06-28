@@ -95,7 +95,7 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
 
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(chatterino::Message::createSystemMessage("asdf"));
+        this->addMessage(Message::createSystemMessage("asdf"));
     }
 #endif
 }
@@ -144,7 +144,7 @@ void TwitchChannel::sendMessage(const QString &message)
         // XXX: It would be nice if we could add a link here somehow that opened the "account
         // manager" dialog
         this->addMessage(
-            chatterino::Message::createSystemMessage("You need to log in to send messages. You can "
+            Message::createSystemMessage("You need to log in to send messages. You can "
                                                      "link your Twitch account in the settings."));
         return;
     }
@@ -204,7 +204,7 @@ bool TwitchChannel::hasModRights()
     return this->isMod() || this->isBroadcaster();
 }
 
-void TwitchChannel::addRecentChatter(const std::shared_ptr<chatterino::Message> &message)
+void TwitchChannel::addRecentChatter(const std::shared_ptr<Message> &message)
 {
     assert(!message->loginName.isEmpty());
 
@@ -233,9 +233,9 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->joinedUserMutex);
 
-            auto message = chatterino::Message::createSystemMessage("Users joined: " +
+            auto message = Message::createSystemMessage("Users joined: " +
                                                                     this->joinedUsers.join(", "));
-            message->flags |= chatterino::Message::Collapsed;
+            message->flags |= Message::Collapsed;
             this->addMessage(message);
             this->joinedUsers.clear();
             this->joinedUsersMergeQueued = false;
@@ -262,9 +262,9 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->partedUserMutex);
 
-            auto message = chatterino::Message::createSystemMessage("Users parted: " +
+            auto message = Message::createSystemMessage("Users parted: " +
                                                                     this->partedUsers.join(", "));
-            message->flags |= chatterino::Message::Collapsed;
+            message->flags |= Message::Collapsed;
             this->addMessage(message);
             this->partedUsers.clear();
 
@@ -449,14 +449,14 @@ void TwitchChannel::fetchRecentMessages()
             return;
         }
 
-        std::vector<chatterino::MessagePtr> messages;
+        std::vector<MessagePtr> messages;
 
         for (const QJsonValueRef _msg : msgArray) {
             QByteArray content = _msg.toString().toUtf8();
             auto msg = Communi::IrcMessage::fromData(content, readConnection);
             auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
 
-            chatterino::MessageParseArgs args;
+            MessageParseArgs args;
             TwitchMessageBuilder builder(channel, privMsg, args);
             if (!builder.isIgnored()) {
                 messages.push_back(builder.build());

@@ -94,7 +94,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         auto *completionModel =
-            static_cast<chatterino::CompletionModel *>(this->completer->model());
+            static_cast<CompletionModel *>(this->completer->model());
 
         if (!this->completionInProgress) {
             // First type pressing tab after modifying a message, we refresh our completion model

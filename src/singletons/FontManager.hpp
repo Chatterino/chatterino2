@@ -77,6 +77,6 @@ private:
     std::vector<std::unordered_map<float, FontData>> fontsByType;
 };
 
-using FontStyle = chatterino::FontManager::Type;
+using FontStyle = FontManager::Type;
 
 }  // namespace chatterino

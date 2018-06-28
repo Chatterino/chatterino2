@@ -221,8 +221,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
-    chatterino::ThemeManager::TabColors colors;
-    chatterino::ThemeManager::TabColors regular = this->themeManager->tabs.regular;
+    ThemeManager::TabColors colors;
+    ThemeManager::TabColors regular = this->themeManager->tabs.regular;
 
     if (this->selected_) {
         colors = this->themeManager->tabs.selected;

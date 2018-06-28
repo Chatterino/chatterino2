@@ -8,9 +8,9 @@ namespace chatterino {
 
 namespace {
 
-inline chatterino::Image *lli(const char *pixmapPath, qreal scale = 1)
+inline Image *lli(const char *pixmapPath, qreal scale = 1)
 {
-    return new chatterino::Image(new QPixmap(pixmapPath), scale);
+    return new Image(new QPixmap(pixmapPath), scale);
 }
 
 template <typename Type>
@@ -221,7 +221,7 @@ inline bool ParseSingleCheermoteSet(ResourceManager::JSONCheermoteSet &set,
 
                     qreal chatterinoScale = 1 / scaleNumber;
 
-                    auto image = new chatterino::Image(url, chatterinoScale);
+                    auto image = new Image(url, chatterinoScale);
 
                     // TODO(pajlada): Fill in name and tooltip
                     tier.images[background][state][scale] = image;
@@ -310,9 +310,9 @@ void ResourceManager::initialize()
 }
 
 ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
-    : badgeImage1x(new chatterino::Image(root.value("image_url_1x").toString()))
-    , badgeImage2x(new chatterino::Image(root.value("image_url_2x").toString()))
-    , badgeImage4x(new chatterino::Image(root.value("image_url_4x").toString()))
+    : badgeImage1x(new Image(root.value("image_url_1x").toString()))
+    , badgeImage2x(new Image(root.value("image_url_2x").toString()))
+    , badgeImage4x(new Image(root.value("image_url_4x").toString()))
     , description(root.value("description").toString().toStdString())
     , title(root.value("title").toString().toStdString())
     , clickAction(root.value("clickAction").toString().toStdString())
@@ -438,7 +438,7 @@ void ResourceManager::loadChatterinoBadges()
             const QString &badgeVariantImageURL = badgeVariant.value("image").toString();
 
             auto badgeVariantPtr = std::make_shared<ChatterinoBadge>(
-                badgeVariantTooltip, new chatterino::Image(badgeVariantImageURL));
+                badgeVariantTooltip, new Image(badgeVariantImageURL));
 
             QJsonArray badgeVariantUsers = badgeVariant.value("users").toArray();
 

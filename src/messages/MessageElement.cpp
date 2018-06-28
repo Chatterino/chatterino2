@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Emotemap.hpp"
+#include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -248,7 +249,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     if (_flags & MessageElement::ModeratorTools) {
         QSize size((int)(container.getScale() * 16), (int)(container.getScale() * 16));
 
-        for (const chatterino::ModerationAction &m : getApp()->settings->getModerationActions()) {
+        for (const ModerationAction &m : getApp()->moderationActions->items.getVector()) {
             if (m.isImage()) {
                 container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
                                          ->setLink(Link(Link::UserAction, m.getAction())));

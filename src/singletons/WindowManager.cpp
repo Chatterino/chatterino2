@@ -59,6 +59,66 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 WindowManager::WindowManager()
 {
     qDebug() << "init WindowManager";
+
+    auto settings = getSettings();
+
+    this->wordFlagsListener.addSetting(settings->showTimestamps);
+    this->wordFlagsListener.addSetting(settings->showBadges);
+    this->wordFlagsListener.addSetting(settings->enableBttvEmotes);
+    this->wordFlagsListener.addSetting(settings->enableEmojis);
+    this->wordFlagsListener.addSetting(settings->enableFfzEmotes);
+    this->wordFlagsListener.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener.cb = [this](auto) {
+        this->updateWordTypeMask();  //
+    };
+}
+
+MessageElement::Flags WindowManager::getWordFlags()
+{
+    return this->wordFlags;
+}
+
+void WindowManager::updateWordTypeMask()
+{
+    using MEF = MessageElement::Flags;
+    auto settings = getSettings();
+
+    // text
+    auto flags = MEF::Text | MEF::Text;
+
+    // timestamp
+    if (settings->showTimestamps) {
+        flags |= MEF::Timestamp;
+    }
+
+    // emotes
+    flags |= settings->enableTwitchEmotes ? MEF::TwitchEmoteImage : MEF::TwitchEmoteText;
+    flags |= settings->enableFfzEmotes ? MEF::FfzEmoteImage : MEF::FfzEmoteText;
+    flags |= settings->enableBttvEmotes ? MEF::BttvEmoteImage : MEF::BttvEmoteText;
+    flags |= settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText;
+
+    // bits
+    flags |= MEF::BitsAmount;
+    flags |= settings->enableGifAnimations ? MEF::BitsAnimated : MEF::BitsStatic;
+
+    // badges
+    flags |= settings->showBadges ? MEF::Badges : MEF::None;
+
+    // username
+    flags |= MEF::Username;
+
+    // misc
+    flags |= MEF::AlwaysShow;
+    flags |= MEF::Collapsed;
+
+    // update flags
+    MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);
+
+    if (newFlags != this->wordFlags) {
+        this->wordFlags = newFlags;
+
+        this->wordFlagsChanged.invoke();
+    }
 }
 
 void WindowManager::layoutChannelViews(Channel *channel)
