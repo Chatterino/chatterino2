@@ -1,6 +1,5 @@
 #pragma once
 
-"
 #include "singletons/Resources.hpp"
 
 #include <QApplication>

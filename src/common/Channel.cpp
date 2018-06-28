@@ -4,7 +4,6 @@
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "singletons/Emotes.hpp"
-"
 #include "singletons/Logging.hpp"
 #include "singletons/WindowManager.hpp"
 

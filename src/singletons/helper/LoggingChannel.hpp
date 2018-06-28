@@ -11,6 +11,8 @@
 
 namespace chatterino {
 
+class Logging;
+
 class LoggingChannel : boost::noncopyable
 {
     explicit LoggingChannel(const QString &_channelName);
@@ -37,7 +39,7 @@ private:
 
     QString dateString;
 
-    friend class LoggingManager;
+    friend class Logging;
 };
 
 }  // namespace chatterino
