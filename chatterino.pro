@@ -151,7 +151,6 @@ SOURCES += \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
-    src/singletons/IrcManager.cpp \
     src/singletons/WindowManager.cpp \
     src/util/DebugCount.cpp \
     src/util/RapidjsonHelpers.cpp \
@@ -305,7 +304,6 @@ HEADERS  += \
     src/singletons/helper/GifTimer.hpp \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
-    src/singletons/IrcManager.hpp \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
     src/util/CombinePath.hpp \

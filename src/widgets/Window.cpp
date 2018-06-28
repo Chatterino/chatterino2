@@ -4,7 +4,6 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/IrcManager.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Themes.hpp"
 #include "singletons/WindowManager.hpp"
@@ -100,16 +99,16 @@ Window::Window(WindowType _type)
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() + 1));
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
         });
     }
     {
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() - 1));
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
         });
     }
 

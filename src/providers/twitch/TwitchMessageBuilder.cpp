@@ -7,7 +7,6 @@
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/IrcManager.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Themes.hpp"
@@ -37,8 +36,8 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
                                            const Communi::IrcMessage *_ircMessage,
-                                           const MessageParseArgs &_args,
-                                           QString content, bool isAction)
+                                           const MessageParseArgs &_args, QString content,
+                                           bool isAction)
     : channel(_channel)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
     , ircMessage(_ircMessage)

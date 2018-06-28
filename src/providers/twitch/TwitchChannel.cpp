@@ -7,7 +7,6 @@
 #include "providers/twitch/Pubsub.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/IrcManager.hpp"
 #include "singletons/Settings.hpp"
 #include "util/PostToThread.hpp"
 
@@ -145,7 +144,7 @@ void TwitchChannel::sendMessage(const QString &message)
         // manager" dialog
         this->addMessage(
             Message::createSystemMessage("You need to log in to send messages. You can "
-                                                     "link your Twitch account in the settings."));
+                                         "link your Twitch account in the settings."));
         return;
     }
 
@@ -233,8 +232,8 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->joinedUserMutex);
 
-            auto message = Message::createSystemMessage("Users joined: " +
-                                                                    this->joinedUsers.join(", "));
+            auto message =
+                Message::createSystemMessage("Users joined: " + this->joinedUsers.join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
             this->joinedUsers.clear();
@@ -262,8 +261,8 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->object, [this] {
             std::lock_guard<std::mutex> guard(this->partedUserMutex);
 
-            auto message = Message::createSystemMessage("Users parted: " +
-                                                                    this->partedUsers.join(", "));
+            auto message =
+                Message::createSystemMessage("Users parted: " + this->partedUsers.join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
             this->partedUsers.clear();

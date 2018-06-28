@@ -6,7 +6,6 @@
 #include "common/Common.hpp"
 #include "common/MutexValue.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/IrcManager.hpp"
 #include "util/ConcurrentMap.hpp"
 
 #include <pajlada/signals/signalholder.hpp>

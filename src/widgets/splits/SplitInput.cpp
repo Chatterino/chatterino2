@@ -5,7 +5,6 @@
 #include "controllers/commands/CommandController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/IrcManager.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Themes.hpp"
 #include "util/LayoutCreator.hpp"
@@ -66,12 +65,10 @@ void SplitInput::initLayout()
     // ---- misc
 
     // set edit font
-    this->ui_.textEdit->setFont(
-        app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+    this->ui_.textEdit->setFont(app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
-        this->ui_.textEdit->setFont(
-            app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+        this->ui_.textEdit->setFont(app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
