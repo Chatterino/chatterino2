@@ -4,7 +4,7 @@
 #include <memory>
 #include <mutex>
 
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/commands/Command.hpp"
 
 namespace chatterino {

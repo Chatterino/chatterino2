@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "util/SharedPtrElementLess.hpp"

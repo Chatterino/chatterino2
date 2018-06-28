@@ -242,8 +242,6 @@ HEADERS  += \
     src/common/Property.hpp \
     src/common/ProviderId.hpp \
     src/common/SerializeCustom.hpp \
-    src/common/SignalVector.hpp \
-    src/common/SignalVector2.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/UrlFetch.hpp \
     src/common/Version.hpp \
@@ -392,7 +390,9 @@ HEADERS  += \
     src/singletons/Settings.hpp \
     src/singletons/Updates.hpp \
     src/singletons/NativeMessaging.hpp \
-    src/singletons/Theme.hpp
+    src/singletons/Theme.hpp \
+    src/common/SimpleSignalVector.hpp \
+    src/common/SignalVector.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

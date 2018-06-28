@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "singletons/Settings.hpp"
 

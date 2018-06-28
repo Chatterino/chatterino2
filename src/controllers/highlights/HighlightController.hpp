@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "messages/Message.hpp"
 #include "singletons/Settings.hpp"

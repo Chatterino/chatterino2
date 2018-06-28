@@ -1,7 +1,7 @@
 #include "CommandController.hpp"
 
 #include "Application.hpp"
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"

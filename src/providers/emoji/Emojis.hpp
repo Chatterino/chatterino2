@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Emotemap.hpp"
-#include "common/SignalVector.hpp"
+#include "common/SimpleSignalVector.hpp"
 #include "util/ConcurrentMap.hpp"
 
 #include <QMap>

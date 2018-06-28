@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SignalVector2.hpp"
+#include "common/SignalVector.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
