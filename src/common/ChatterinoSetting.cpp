@@ -1,4 +1,4 @@
-#include "singletons/helper/ChatterinoSetting.hpp"
+#include "common/ChatterinoSetting.hpp"
 
 #include "singletons/Settings.hpp"
 

@@ -147,7 +147,7 @@ SOURCES += \
     src/providers/twitch/TwitchMessageBuilder.cpp \
     src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
-    src/singletons/helper/ChatterinoSetting.cpp \
+    src/common/ChatterinoSetting.cpp \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
@@ -300,7 +300,7 @@ HEADERS  += \
     src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
-    src/singletons/helper/ChatterinoSetting.hpp \
+    src/common/ChatterinoSetting.hpp \
     src/singletons/helper/GifTimer.hpp \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \

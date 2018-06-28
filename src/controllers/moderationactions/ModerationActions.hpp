@@ -2,7 +2,7 @@
 
 #include "common/SignalVector2.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "singletons/helper/ChatterinoSetting.hpp"
+#include "common/ChatterinoSetting.hpp"
 
 namespace chatterino {
 
