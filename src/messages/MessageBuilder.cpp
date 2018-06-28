@@ -1,4 +1,6 @@
 #include "MessageBuilder.hpp"
+
+#include "common/LinkParser.hpp"
 #include "singletons/EmoteManager.hpp"
 #include "singletons/ResourceManager.hpp"
 #include "singletons/ThemeManager.hpp"
@@ -43,19 +45,21 @@ void MessageBuilder::appendTimestamp(const QTime &time)
 
 QString MessageBuilder::matchLink(const QString &string)
 {
-    static QRegularExpression linkRegex("[[:ascii:]]*\\.[a-zA-Z]+\\/?[[:ascii:]]*");
+    LinkParser linkParser(string);
+
     static QRegularExpression httpRegex("\\bhttps?://");
+    static QRegularExpression ftpRegex("\\bftps?://");
 
-    auto match = linkRegex.match(string);
-
-    if (!match.hasMatch()) {
+    if (!linkParser.hasMatch()) {
         return QString();
     }
 
-    QString captured = match.captured();
+    QString captured = linkParser.getCaptured();
 
     if (!captured.contains(httpRegex)) {
-        captured.insert(0, "http://");
+        if (!captured.contains(ftpRegex)) {
+            captured.insert(0, "http://");
+        }
     }
 
     return captured;

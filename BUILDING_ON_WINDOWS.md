@@ -32,6 +32,11 @@
 2. Under Tools:
   - Select Qt Creator, and Qt Creator CDB Debugger Support
 
+### Compile with Breakpad support (Optional)
+1. Open up lib/qBreakpad/handler/handler.pro
+2. Build it in whichever mode you wanna build Chatterino (Debug/Profile/Release)
+3. Copy the newly built qBreakpad.lib to a folder you create: `lib/qBreakpad/build/handler`
+
 # Windows (Using MSYS2, not recommended)
 Note: This guide is currently out of date and will not work as is.
 Note: This build will have some features missing from the build.
