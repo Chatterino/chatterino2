@@ -11,12 +11,12 @@
 
 namespace chatterino {
 
-class ResourceManager
+class Resources
 {
 public:
-    ResourceManager();
+    Resources();
 
-    ~ResourceManager() = delete;
+    ~Resources() = delete;
 
     void initialize();
 

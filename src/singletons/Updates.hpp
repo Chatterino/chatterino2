@@ -5,9 +5,9 @@
 
 namespace chatterino {
 
-class UpdateManager
+class Updates
 {
-    UpdateManager();
+    Updates();
 
 public:
     enum UpdateStatus {
@@ -22,7 +22,7 @@ public:
     };
 
     // fourtf: don't add this class to the application class
-    static UpdateManager &getInstance();
+    static Updates &getInstance();
 
     void checkForUpdates();
     const QString &getCurrentVersion() const;

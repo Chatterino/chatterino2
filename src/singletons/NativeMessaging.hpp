@@ -4,13 +4,13 @@
 
 namespace chatterino {
 
-class NativeMessagingManager
+class NativeMessaging
 {
 public:
     // fourtf: don't add this class to the application class
-    NativeMessagingManager();
+    NativeMessaging();
 
-    ~NativeMessagingManager() = delete;
+    ~NativeMessaging() = delete;
 
     class ReceiverThread : public QThread
     {

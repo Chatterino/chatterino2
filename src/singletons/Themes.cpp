@@ -27,7 +27,7 @@ double getMultiplierByTheme(const QString &themeName)
 
 }  // namespace detail
 
-ThemeManager::ThemeManager()
+Themes::Themes()
     : themeName("/appearance/theme/name", "Dark")
     , themeHue("/appearance/theme/hue", 0.0)
 {
@@ -37,14 +37,14 @@ ThemeManager::ThemeManager()
     this->themeHue.connectSimple([this](auto) { this->update(); }, false);
 }
 
-void ThemeManager::update()
+void Themes::update()
 {
     this->actuallyUpdate(this->themeHue, detail::getMultiplierByTheme(this->themeName.getValue()));
 }
 
 // hue: theme color (0 - 1)
 // multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
-void ThemeManager::actuallyUpdate(double hue, double multiplier)
+void Themes::actuallyUpdate(double hue, double multiplier)
 {
     isLight = multiplier > 0;
     bool lightWin = isLight;
@@ -217,7 +217,7 @@ void ThemeManager::actuallyUpdate(double hue, double multiplier)
     this->updated.invoke();
 }
 
-QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
+QColor Themes::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
 {
     int r = int(color1.red() * (1 - ratio) + color2.red() * ratio);
     int g = int(color1.green() * (1 - ratio) + color2.green() * ratio);
@@ -226,7 +226,7 @@ QColor ThemeManager::blendColors(const QColor &color1, const QColor &color2, qre
     return QColor(r, g, b, 255);
 }
 
-void ThemeManager::normalizeColor(QColor &color)
+void Themes::normalizeColor(QColor &color)
 {
     if (this->isLight) {
         if (color.lightnessF() > 0.5) {

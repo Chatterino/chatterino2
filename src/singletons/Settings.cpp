@@ -15,19 +15,19 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
     _settings.push_back(setting);
 }
 
-SettingManager::SettingManager()
+Settings::Settings()
 {
     qDebug() << "init SettingManager";
 }
 
-SettingManager &SettingManager::getInstance()
+Settings &Settings::getInstance()
 {
-    static SettingManager instance;
+    static Settings instance;
 
     return instance;
 }
 
-void SettingManager::initialize()
+void Settings::initialize()
 {
     this->timestampFormat.connect([](auto, auto) {
         auto app = getApp();
@@ -45,7 +45,7 @@ void SettingManager::initialize()
         [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
 }
 
-void SettingManager::load()
+void Settings::load()
 {
     auto app = getApp();
     QString settingsPath = app->paths->settingsDirectory + "/settings.json";
@@ -53,7 +53,7 @@ void SettingManager::load()
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
 }
 
-void SettingManager::saveSnapshot()
+void Settings::saveSnapshot()
 {
     rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
     rapidjson::Document::AllocatorType &a = d->GetAllocator();
@@ -74,7 +74,7 @@ void SettingManager::saveSnapshot()
     Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
-void SettingManager::restoreSnapshot()
+void Settings::restoreSnapshot()
 {
     if (!this->snapshot) {
         return;
@@ -100,9 +100,9 @@ void SettingManager::restoreSnapshot()
     }
 }
 
-SettingManager *getSettings()
+Settings *getSettings()
 {
-    return &SettingManager::getInstance();
+    return &Settings::getInstance();
 }
 
 }  // namespace chatterino

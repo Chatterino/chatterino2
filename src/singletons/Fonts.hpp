@@ -11,10 +11,10 @@
 
 namespace chatterino {
 
-class FontManager : boost::noncopyable
+class Fonts : boost::noncopyable
 {
 public:
-    FontManager();
+    Fonts();
 
     // font data gets set in createFontData(...)
     enum Type : uint8_t {
@@ -77,6 +77,6 @@ private:
     std::vector<std::unordered_map<float, FontData>> fontsByType;
 };
 
-using FontStyle = FontManager::Type;
+using FontStyle = Fonts::Type;
 
 }  // namespace chatterino

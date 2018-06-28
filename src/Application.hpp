@@ -17,16 +17,16 @@ class TaggedUsersController;
 class AccountController;
 class ModerationActions;
 
-class ThemeManager;
+class Themes;
 class WindowManager;
-class LoggingManager;
-class PathManager;
+class Logging;
+class Paths;
 class AccountManager;
-class EmoteManager;
-class NativeMessagingManager;
-class SettingManager;
-class FontManager;
-class ResourceManager;
+class Emotes;
+class NativeMessaging;
+class Settings;
+class Fonts;
+class Resources;
 
 class Application
 {
@@ -45,20 +45,20 @@ public:
 
     friend void test();
 
-    PathManager *paths = nullptr;
-    ThemeManager *themes = nullptr;
+    Paths *paths = nullptr;
+    Themes *themes = nullptr;
     WindowManager *windows = nullptr;
-    LoggingManager *logging = nullptr;
+    Logging *logging = nullptr;
     CommandController *commands = nullptr;
     HighlightController *highlights = nullptr;
     IgnoreController *ignores = nullptr;
     TaggedUsersController *taggedUsers = nullptr;
     AccountController *accounts = nullptr;
-    EmoteManager *emotes = nullptr;
-    NativeMessagingManager *nativeMessaging = nullptr;
-    SettingManager *settings = nullptr;
-    FontManager *fonts = nullptr;
-    ResourceManager *resources = nullptr;
+    Emotes *emotes = nullptr;
+    NativeMessaging *nativeMessaging = nullptr;
+    Settings *settings = nullptr;
+    Fonts *fonts = nullptr;
+    Resources *resources = nullptr;
     ModerationActions *moderationActions = nullptr;
 
     /// Provider-specific

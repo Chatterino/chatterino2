@@ -10,9 +10,9 @@
 
 namespace chatterino {
 
-PathManager *PathManager::instance = nullptr;
+Paths *Paths::instance = nullptr;
 
-PathManager::PathManager()
+Paths::Paths()
 {
     this->initAppFilePathHash();
 
@@ -21,31 +21,31 @@ PathManager::PathManager()
     this->initSubDirectories();
 }
 
-void PathManager::initInstance()
+void Paths::initInstance()
 {
     assert(!instance);
 
-    instance = new PathManager();
+    instance = new Paths();
 }
 
-PathManager *PathManager::getInstance()
+Paths *Paths::getInstance()
 {
     assert(instance);
 
     return instance;
 }
 
-bool PathManager::createFolder(const QString &folderPath)
+bool Paths::createFolder(const QString &folderPath)
 {
     return QDir().mkpath(folderPath);
 }
 
-bool PathManager::isPortable()
+bool Paths::isPortable()
 {
     return this->portable.get();
 }
 
-void PathManager::initAppFilePathHash()
+void Paths::initAppFilePathHash()
 {
     this->applicationFilePathHash =
         QCryptographicHash::hash(QCoreApplication::applicationFilePath().toUtf8(),
@@ -56,13 +56,13 @@ void PathManager::initAppFilePathHash()
             .replace("/", "x");
 }
 
-void PathManager::initCheckPortable()
+void Paths::initCheckPortable()
 {
     this->portable =
         QFileInfo::exists(combinePath(QCoreApplication::applicationDirPath(), "portable"));
 }
 
-void PathManager::initAppDataDirectory()
+void Paths::initAppDataDirectory()
 {
     assert(this->portable.is_initialized());
 
@@ -91,7 +91,7 @@ void PathManager::initAppDataDirectory()
     }();
 }
 
-void PathManager::initSubDirectories()
+void Paths::initSubDirectories()
 {
     // required the app data directory to be set first
     assert(!this->rootAppDataDirectory.isEmpty());

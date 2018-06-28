@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-void EmoteManager::initialize()
+void Emotes::initialize()
 {
     getApp()->accounts->twitch.currentUserChanged.connect([this] {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
@@ -20,7 +20,7 @@ void EmoteManager::initialize()
     this->gifTimer.initialize();
 }
 
-bool EmoteManager::isIgnoredEmote(const QString &)
+bool Emotes::isIgnoredEmote(const QString &)
 {
     return false;
 }

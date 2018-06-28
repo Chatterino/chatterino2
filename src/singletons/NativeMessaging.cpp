@@ -32,12 +32,12 @@ namespace ipc = boost::interprocess;
 namespace chatterino {
 
 // fourtf: don't add this class to the application class
-NativeMessagingManager::NativeMessagingManager()
+NativeMessaging::NativeMessaging()
 {
     qDebug() << "init NativeMessagingManager";
 }
 
-void NativeMessagingManager::writeByteArray(QByteArray a)
+void NativeMessaging::writeByteArray(QByteArray a)
 {
     char *data = a.data();
     uint32_t size;
@@ -47,7 +47,7 @@ void NativeMessagingManager::writeByteArray(QByteArray a)
     std::cout.flush();
 }
 
-void NativeMessagingManager::registerHost()
+void NativeMessaging::registerHost()
 {
     auto app = getApp();
 
@@ -111,7 +111,7 @@ void NativeMessagingManager::registerHost()
     }
 }
 
-void NativeMessagingManager::openGuiMessageQueue()
+void NativeMessaging::openGuiMessageQueue()
 {
     static ReceiverThread thread;
 
@@ -122,7 +122,7 @@ void NativeMessagingManager::openGuiMessageQueue()
     thread.start();
 }
 
-void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
+void NativeMessaging::sendToGuiProcess(const QByteArray &array)
 {
     try {
         ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
@@ -133,7 +133,7 @@ void NativeMessagingManager::sendToGuiProcess(const QByteArray &array)
     }
 }
 
-void NativeMessagingManager::ReceiverThread::run()
+void NativeMessaging::ReceiverThread::run()
 {
     ipc::message_queue::remove("chatterino_gui");
 
@@ -157,7 +157,7 @@ void NativeMessagingManager::ReceiverThread::run()
     }
 }
 
-void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &root)
+void NativeMessaging::ReceiverThread::handleMessage(const QJsonObject &root)
 {
     auto app = getApp();
 
@@ -231,10 +231,10 @@ void NativeMessagingManager::ReceiverThread::handleMessage(const QJsonObject &ro
     }
 }
 
-std::string &NativeMessagingManager::getGuiMessageQueueName()
+std::string &NativeMessaging::getGuiMessageQueueName()
 {
     static std::string name =
-        "chatterino_gui" + PathManager::getInstance()->applicationFilePathHash.toStdString();
+        "chatterino_gui" + Paths::getInstance()->applicationFilePathHash.toStdString();
     return name;
 }
 

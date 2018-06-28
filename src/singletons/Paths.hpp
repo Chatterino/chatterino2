@@ -5,13 +5,13 @@
 
 namespace chatterino {
 
-class PathManager
+class Paths
 {
-    PathManager();
+    Paths();
 
 public:
     static void initInstance();
-    static PathManager *getInstance();
+    static Paths *getInstance();
 
     // Root directory for the configuration files. %APPDATA%/chatterino or ExecutablePath for
     // portable mode
@@ -36,7 +36,7 @@ public:
     bool isPortable();
 
 private:
-    static PathManager *instance;
+    static Paths *instance;
     boost::optional<bool> portable;
 
     void initAppFilePathHash();

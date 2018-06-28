@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     // FOURTF: might get arguments from the commandline passed in the future
-    chatterino::PathManager::initInstance();
+    chatterino::Paths::initInstance();
 
     // read args
     QStringList args;
@@ -79,7 +79,7 @@ int runGui(QApplication &a, int argc, char *argv[])
     chatterino::NetworkManager::init();
 
     // Check for upates
-    chatterino::UpdateManager::getInstance().checkForUpdates();
+    chatterino::Updates::getInstance().checkForUpdates();
 
     // Initialize application
     chatterino::Application::instantiate(argc, argv);
@@ -139,7 +139,7 @@ int runGui(QApplication &a, int argc, char *argv[])
 
 void runNativeMessagingHost()
 {
-    auto *nm = new chatterino::NativeMessagingManager;
+    auto *nm = new chatterino::NativeMessaging;
 
 #ifdef Q_OS_WIN
     _setmode(_fileno(stdin), _O_BINARY);

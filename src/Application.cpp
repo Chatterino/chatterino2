@@ -45,19 +45,19 @@ void Application::construct()
 
     // 1. Instantiate all classes
     this->settings = getSettings();
-    this->paths = PathManager::getInstance();
+    this->paths = Paths::getInstance();
 
-    this->themes = new ThemeManager;
+    this->themes = new Themes;
     this->windows = new WindowManager;
-    this->logging = new LoggingManager;
+    this->logging = new Logging;
     this->commands = new CommandController;
     this->highlights = new HighlightController;
     this->ignores = new IgnoreController;
     this->taggedUsers = new TaggedUsersController;
     this->accounts = new AccountController;
-    this->emotes = new EmoteManager;
-    this->fonts = new FontManager;
-    this->resources = new ResourceManager;
+    this->emotes = new Emotes;
+    this->fonts = new Fonts;
+    this->resources = new Resources;
     this->moderationActions = new ModerationActions;
 
     this->twitch.server = new TwitchServer;

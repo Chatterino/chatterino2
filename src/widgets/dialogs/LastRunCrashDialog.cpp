@@ -16,7 +16,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
     this->setWindowTitle("Chatterino");
 
-    auto &updateManager = UpdateManager::getInstance();
+    auto &updateManager = Updates::getInstance();
 
     auto layout = LayoutCreator<LastRunCrashDialog>(this).setLayoutType<QVBoxLayout>();
 

@@ -12,12 +12,12 @@
 
 namespace chatterino {
 
-void LoggingManager::initialize()
+void Logging::initialize()
 {
     this->pathManager = getApp()->paths;
 }
 
-void LoggingManager::addMessage(const QString &channelName, MessagePtr message)
+void Logging::addMessage(const QString &channelName, MessagePtr message)
 {
     auto app = getApp();
 

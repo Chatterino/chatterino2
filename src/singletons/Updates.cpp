@@ -10,31 +10,31 @@
 
 namespace chatterino {
 
-UpdateManager::UpdateManager()
+Updates::Updates()
     : currentVersion_(CHATTERINO_VERSION)
 {
     qDebug() << "init UpdateManager";
 }
 
-UpdateManager &UpdateManager::getInstance()
+Updates &Updates::getInstance()
 {
     // fourtf: don't add this class to the application class
-    static UpdateManager instance;
+    static Updates instance;
 
     return instance;
 }
 
-const QString &UpdateManager::getCurrentVersion() const
+const QString &Updates::getCurrentVersion() const
 {
     return currentVersion_;
 }
 
-const QString &UpdateManager::getOnlineVersion() const
+const QString &Updates::getOnlineVersion() const
 {
     return onlineVersion_;
 }
 
-void UpdateManager::installUpdates()
+void Updates::installUpdates()
 {
     if (this->status_ != UpdateAvailable) {
         assert(false);
@@ -87,7 +87,7 @@ void UpdateManager::installUpdates()
 #endif
 }
 
-void UpdateManager::checkForUpdates()
+void Updates::checkForUpdates()
 {
 #ifdef Q_OS_WIN
     QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
@@ -141,12 +141,12 @@ void UpdateManager::checkForUpdates()
 #endif
 }
 
-UpdateManager::UpdateStatus UpdateManager::getStatus() const
+Updates::UpdateStatus Updates::getStatus() const
 {
     return this->status_;
 }
 
-void UpdateManager::setStatus_(UpdateStatus status)
+void Updates::setStatus_(UpdateStatus status)
 {
     if (this->status_ != status) {
         this->status_ = status;

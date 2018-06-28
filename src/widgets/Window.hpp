@@ -13,7 +13,7 @@
 
 namespace chatterino {
 
-class ThemeManager;
+class Themes;
 
 class Window : public BaseWindow
 {

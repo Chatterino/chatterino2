@@ -75,7 +75,7 @@ inline bool ReadValue<std::vector<QString>>(const rapidjson::Value &object, cons
 }
 
 // Parse a single cheermote set (or "action") from the twitch api
-inline bool ParseSingleCheermoteSet(ResourceManager::JSONCheermoteSet &set,
+inline bool ParseSingleCheermoteSet(Resources::JSONCheermoteSet &set,
                                     const rapidjson::Value &action)
 {
     if (!action.IsObject()) {
@@ -122,7 +122,7 @@ inline bool ParseSingleCheermoteSet(ResourceManager::JSONCheermoteSet &set,
     }
 
     for (const rapidjson::Value &tierValue : tiersValue.GetArray()) {
-        ResourceManager::JSONCheermoteSet::CheermoteTier tier;
+        Resources::JSONCheermoteSet::CheermoteTier tier;
 
         if (!tierValue.IsObject()) {
             return false;
@@ -237,7 +237,7 @@ inline bool ParseSingleCheermoteSet(ResourceManager::JSONCheermoteSet &set,
 
 // Look through the results of https://api.twitch.tv/kraken/bits/actions?channel_id=11148817 for
 // cheermote sets or "Actions" as they are called in the API
-inline void ParseCheermoteSets(std::vector<ResourceManager::JSONCheermoteSet> &sets,
+inline void ParseCheermoteSets(std::vector<Resources::JSONCheermoteSet> &sets,
                                const rapidjson::Document &d)
 {
     if (!d.IsObject()) {
@@ -255,7 +255,7 @@ inline void ParseCheermoteSets(std::vector<ResourceManager::JSONCheermoteSet> &s
     }
 
     for (const auto &action : actionsValue.GetArray()) {
-        ResourceManager::JSONCheermoteSet set;
+        Resources::JSONCheermoteSet set;
         bool res = ParseSingleCheermoteSet(set, action);
 
         if (res) {
@@ -265,7 +265,7 @@ inline void ParseCheermoteSets(std::vector<ResourceManager::JSONCheermoteSet> &s
 }
 
 }  // namespace
-ResourceManager::ResourceManager()
+Resources::Resources()
     : badgeStaff(lli(":/images/staff_bg.png"))
     , badgeAdmin(lli(":/images/admin_bg.png"))
     , badgeGlobalModerator(lli(":/images/globalmod_bg.png"))
@@ -302,14 +302,14 @@ ResourceManager::ResourceManager()
     qDebug() << "init ResourceManager";
 }
 
-void ResourceManager::initialize()
+void Resources::initialize()
 {
     this->loadDynamicTwitchBadges();
 
     this->loadChatterinoBadges();
 }
 
-ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
+Resources::BadgeVersion::BadgeVersion(QJsonObject &&root)
     : badgeImage1x(new Image(root.value("image_url_1x").toString()))
     , badgeImage2x(new Image(root.value("image_url_2x").toString()))
     , badgeImage4x(new Image(root.value("image_url_4x").toString()))
@@ -320,7 +320,7 @@ ResourceManager::BadgeVersion::BadgeVersion(QJsonObject &&root)
 {
 }
 
-void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
+void Resources::loadChannelData(const QString &roomID, bool bypassCache)
 {
     QString url = "https://badges.twitch.tv/v1/badges/channels/" + roomID + "/display?language=en";
 
@@ -330,7 +330,7 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
     req.getJSON([this, roomID](QJsonObject &root) {
         QJsonObject sets = root.value("badge_sets").toObject();
 
-        ResourceManager::Channel &ch = this->channels[roomID];
+        Resources::Channel &ch = this->channels[roomID];
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
             QJsonObject versions = it.value().toObject().value("versions").toObject();
@@ -354,7 +354,7 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
 
     twitchApiGet2(
         cheermoteURL, QThread::currentThread(), true, [this, roomID](const rapidjson::Document &d) {
-            ResourceManager::Channel &ch = this->channels[roomID];
+            Resources::Channel &ch = this->channels[roomID];
 
             ParseCheermoteSets(ch.jsonCheermoteSets, d);
 
@@ -393,7 +393,7 @@ void ResourceManager::loadChannelData(const QString &roomID, bool bypassCache)
         });
 }
 
-void ResourceManager::loadDynamicTwitchBadges()
+void Resources::loadDynamicTwitchBadges()
 {
     static QString url("https://badges.twitch.tv/v1/badges/global/display?language=en");
 
@@ -420,7 +420,7 @@ void ResourceManager::loadDynamicTwitchBadges()
     });
 }
 
-void ResourceManager::loadChatterinoBadges()
+void Resources::loadChatterinoBadges()
 {
     this->chatterinoBadges.clear();
 

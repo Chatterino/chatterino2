@@ -12,12 +12,12 @@ namespace chatterino {
 
 void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
-class SettingManager
+class Settings
 {
-    SettingManager();
+    Settings();
 
 public:
-    static SettingManager &getInstance();
+    static Settings &getInstance();
 
     void initialize();
     void load();
@@ -127,6 +127,6 @@ private:
     void updateModerationActions();
 };
 
-SettingManager *getSettings();
+Settings *getSettings();
 
 }  // namespace chatterino

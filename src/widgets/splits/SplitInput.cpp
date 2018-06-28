@@ -67,11 +67,11 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontManager::Type::ChatMedium, this->getScale()));
+        app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(FontManager::Type::ChatMedium, this->getScale()));
+            app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup

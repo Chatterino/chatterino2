@@ -22,7 +22,7 @@
 
 namespace chatterino {
 
-FontManager::FontManager()
+Fonts::Fonts()
     : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
     , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 {
@@ -57,17 +57,17 @@ FontManager::FontManager()
     this->fontsByType.resize(size_t(EndType));
 }
 
-QFont FontManager::getFont(FontManager::Type type, float scale)
+QFont Fonts::getFont(Fonts::Type type, float scale)
 {
     return this->getOrCreateFontData(type, scale).font;
 }
 
-QFontMetrics FontManager::getFontMetrics(FontManager::Type type, float scale)
+QFontMetrics Fonts::getFontMetrics(Fonts::Type type, float scale)
 {
     return this->getOrCreateFontData(type, scale).metrics;
 }
 
-FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
+Fonts::FontData &Fonts::getOrCreateFontData(Type type, float scale)
 {
     assertInGuiThread();
 
@@ -90,7 +90,7 @@ FontManager::FontData &FontManager::getOrCreateFontData(Type type, float scale)
     return result.first->second;
 }
 
-FontManager::FontData FontManager::createFontData(Type type, float scale)
+Fonts::FontData Fonts::createFontData(Type type, float scale)
 {
     // check if it's a chat (scale the setting)
     if (type >= ChatStart && type <= ChatEnd) {

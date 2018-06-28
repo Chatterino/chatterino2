@@ -10,10 +10,10 @@
 
 namespace chatterino {
 
-class EmoteManager
+class Emotes
 {
 public:
-    ~EmoteManager() = delete;
+    ~Emotes() = delete;
 
     void initialize();
 

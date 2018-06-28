@@ -226,7 +226,7 @@ QLayout *AppearancePage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(FontManager::ChatMedium, 1.));
+        QFontDialog dialog(app->fonts->getFont(Fonts::ChatMedium, 1.));
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 

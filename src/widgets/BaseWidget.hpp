@@ -6,7 +6,7 @@
 
 namespace chatterino {
 
-class ThemeManager;
+class Themes;
 class BaseWindow;
 
 class BaseWidget : public QWidget
@@ -41,7 +41,7 @@ protected:
 
     void setScale(float value);
 
-    ThemeManager *themeManager;
+    Themes *themeManager;
 
 private:
     void init();

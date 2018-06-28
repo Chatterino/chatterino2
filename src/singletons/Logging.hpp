@@ -7,16 +7,16 @@
 
 namespace chatterino {
 
-class PathManager;
+class Paths;
 
-class LoggingManager
+class Logging
 {
-    PathManager *pathManager = nullptr;
+    Paths *pathManager = nullptr;
 
 public:
-    LoggingManager() = default;
+    Logging() = default;
 
-    ~LoggingManager() = delete;
+    ~Logging() = delete;
 
     void initialize();
 
