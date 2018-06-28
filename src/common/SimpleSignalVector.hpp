@@ -8,10 +8,10 @@
 namespace chatterino {
 
 template <typename TValue>
-class SignalVector
+class SimpleSignalVector
 {
 public:
-    SignalVector &operator=(std::vector<TValue> &other)
+    SimpleSignalVector &operator=(std::vector<TValue> &other)
     {
         this->data = other;
 

@@ -12,10 +12,10 @@ class FFZEmotes
 {
 public:
     EmoteMap globalEmotes;
-    SignalVector<QString> globalEmoteCodes;
+    SimpleSignalVector<QString> globalEmoteCodes;
 
     EmoteMap channelEmotes;
-    std::map<QString, SignalVector<QString>> channelEmoteCodes;
+    std::map<QString, SimpleSignalVector<QString>> channelEmoteCodes;
 
     void loadGlobalEmotes();
     void loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> channelEmoteMap);
