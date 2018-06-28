@@ -16,7 +16,7 @@ class TaggedUsersController;
 class AccountController;
 class ModerationActions;
 
-class Themes;
+class Theme;
 class WindowManager;
 class Logging;
 class Paths;
@@ -45,7 +45,7 @@ public:
     friend void test();
 
     Paths *paths = nullptr;
-    Themes *themes = nullptr;
+    Theme *themes = nullptr;
     WindowManager *windows = nullptr;
     Logging *logging = nullptr;
     CommandController *commands = nullptr;

@@ -2,7 +2,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"

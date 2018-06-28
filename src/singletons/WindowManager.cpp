@@ -6,7 +6,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"

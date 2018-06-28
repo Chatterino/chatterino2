@@ -1,5 +1,5 @@
 #include "widgets/helper/NotebookButton.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/RippleEffectButton.hpp"
 #include "widgets/splits/SplitContainer.hpp"

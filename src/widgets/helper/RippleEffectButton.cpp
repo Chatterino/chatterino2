@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QPainter>
 
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 
 namespace chatterino {
 

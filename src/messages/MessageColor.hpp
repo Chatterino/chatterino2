@@ -1,6 +1,6 @@
 #pragma once
 
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QColor>
 
@@ -12,7 +12,7 @@ struct MessageColor {
     MessageColor(const QColor &color);
     MessageColor(Type type = Text);
 
-    const QColor &getColor(Themes &themeManager) const;
+    const QColor &getColor(Theme &themeManager) const;
 
 private:
     Type type;

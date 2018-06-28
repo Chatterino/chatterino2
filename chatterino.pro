@@ -222,8 +222,8 @@ SOURCES += \
     src/singletons/Paths.cpp \
     src/singletons/Resources.cpp \
     src/singletons/Settings.cpp \
-    src/singletons/Themes.cpp \
-    src/singletons/Updates.cpp
+    src/singletons/Updates.cpp \
+    src/singletons/Theme.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -390,9 +390,9 @@ HEADERS  += \
     src/singletons/Paths.hpp \
     src/singletons/Resources.hpp \
     src/singletons/Settings.hpp \
-    src/singletons/Themes.hpp \
     src/singletons/Updates.hpp \
-    src/singletons/NativeMessaging.hpp
+    src/singletons/NativeMessaging.hpp \
+    src/singletons/Theme.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

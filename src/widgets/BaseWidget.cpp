@@ -3,7 +3,7 @@
 #include "Application.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>

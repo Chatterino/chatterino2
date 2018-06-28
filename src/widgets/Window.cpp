@@ -5,7 +5,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"

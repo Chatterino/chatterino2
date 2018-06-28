@@ -5,7 +5,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"

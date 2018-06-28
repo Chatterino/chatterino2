@@ -1,5 +1,5 @@
 #include "widgets/helper/RippleEffectLabel.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 
 #include <QBrush>

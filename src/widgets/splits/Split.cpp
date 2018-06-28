@@ -8,7 +8,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"

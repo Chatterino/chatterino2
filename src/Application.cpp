@@ -15,7 +15,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
@@ -47,7 +47,7 @@ void Application::construct()
     this->settings = getSettings();
     this->paths = Paths::getInstance();
 
-    this->themes = new Themes;
+    this->themes = new Theme;
     this->windows = new WindowManager;
     this->logging = new Logging;
     this->commands = new CommandController;

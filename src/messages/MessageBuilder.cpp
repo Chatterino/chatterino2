@@ -3,7 +3,7 @@
 #include "common/LinkParser.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QDateTime>
 

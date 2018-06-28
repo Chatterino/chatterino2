@@ -4,7 +4,7 @@
 #include "common/Common.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
@@ -221,8 +221,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
-    Themes::TabColors colors;
-    Themes::TabColors regular = this->themeManager->tabs.regular;
+    Theme::TabColors colors;
+    Theme::TabColors regular = this->themeManager->tabs.regular;
 
     if (this->selected_) {
         colors = this->themeManager->tabs.selected;

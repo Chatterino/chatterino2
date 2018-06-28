@@ -1,6 +1,6 @@
 #include "TitlebarButton.hpp"
 
-#include "singletons/Themes.hpp"
+#include "singletons/Theme.hpp"
 
 namespace chatterino {
 

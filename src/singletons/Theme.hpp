@@ -10,12 +10,12 @@ namespace chatterino {
 
 class WindowManager;
 
-class Themes
+class Theme
 {
 public:
-    Themes();
+    Theme();
 
-    ~Themes() = delete;
+    ~Theme() = delete;
 
     inline bool isLightTheme() const
     {
