@@ -10,6 +10,7 @@ namespace chatterino {
 LinkParser::LinkParser(const QString &unparsedString)
 {
     static QRegularExpression linkRegex = [] {
+        static QRegularExpression newLineRegex("\r?\n");
         QFile tldFile(":/tlds.txt");
         tldFile.open(QFile::ReadOnly);
 
@@ -17,7 +18,7 @@ LinkParser::LinkParser(const QString &unparsedString)
         t1.setCodec("UTF-8");
 
         // Read the TLDs in and replace the newlines with pipes
-        QString tldData = t1.readAll().replace("\n", "|");
+        QString tldData = t1.readAll().replace(newLineRegex, "|");
 
         const QString urlRegExp =
             "^"
