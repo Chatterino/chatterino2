@@ -17,7 +17,7 @@ LinkParser::LinkParser(const QString &unparsedString)
         t1.setCodec("UTF-8");
 
         // Read the TLDs in and replace the newlines with pipes
-        QString tldData = t1.readAll().replace("\n", "|");
+        QString tldData = t1.readAll().replace(QRegExp("[\\n]"), "|").remove(QRegExp("[\\s]"));
 
         const QString urlRegExp =
             "^"
