@@ -297,7 +297,8 @@ void UserInfoPopup::getLogs()
     QObject::connect(reply, &QNetworkReply::finished, this, [=] {
         QMessageBox *messageBox = new QMessageBox;
         QString answer = "";
-        if (reply->error() == QNetworkReply::NoError) {
+        if (reply->error() == QNetworkReply::NoError)
+        {
             QByteArray rawdata = reply->readAll();
             QJsonObject data = QJsonDocument::fromJson(rawdata).object();
             QJsonValue before = data.value("before");
@@ -308,16 +309,45 @@ void UserInfoPopup::getLogs()
                 message = message.replace(rx, "");
                 qint64 rawtime = before[index]["time"].toInt();
                 QDateTime timestamp = QDateTime::fromSecsSinceEpoch(rawtime);
-                answer += QString("\n[%1 %2] %3: %4")
+                answer += QString("<br><b>[%1 %2]</b> %3: %4")
                               .arg(timestamp.date().toString(), timestamp.time().toString(),
                                    this->userName_, message);
             };
-            if (before.toArray().size() == 0) {
-                answer += "\nNo recorded chat messages found.";
-            };
-        } else {
-            answer = "No logs found";
-            qDebug() << reply->errorString();
+        }
+        else
+        {
+			QString username = this->userName_;
+            QString channelName = twitchChannel->name;
+            QUrl urlRustle (QString("https://overrustlelogs.net/api/v1/stalk/" + channelName + "/" + username + ".json?limit=10"));
+            QNetworkRequest reqRustle(urlRustle);
+            static auto managerRustle = new QNetworkAccessManager();
+            auto *replyRustle = managerRustle->get(req);
+
+            QObject::connect(replyRustle, &QNetworkReply::finished,this, [=]{
+                                if (replyRustle->error() == QNetworkReply::NoError)
+                                {
+                                    QByteArray rawdata = replyRustle->readAll();
+                                    QJsonObject json  = QJsonDocument::fromJson(rawdata).object();
+                                    if (json.contains("lines"))
+                                    {
+                                            QJsonArray messages = json.value("lines").toArray();
+                                            for ( auto i: messages)
+                                            {
+
+                                                QJsonObject singleMessage = i.toObject();
+                                                const QDateTime test = QDateTime::fromTime_t( singleMessage.value("timestamp").toInt());
+                                                answer += "<b>[" + test.toString(Qt::TextDate) + "]</b> " + username + ": " + singleMessage.value("text").toString() + "<br>";
+
+                                            }
+                                    }
+                                }
+                                else
+                                {
+                                	messageBox->setIcon(QMessageBox::Critical);
+                                    answer  =  "Cbenni error: " + reply->errorString() +"\nOverrustle error: " + replyRustle->errorString() ;
+                                }
+
+           				});
         }
         messageBox->setText(answer);
         messageBox->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
