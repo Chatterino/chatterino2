@@ -3,8 +3,6 @@
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
