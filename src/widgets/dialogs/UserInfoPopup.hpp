@@ -36,12 +36,14 @@ private:
     void installEvents();
 
     void updateUserData();
+    void getLogs();
     void loadAvatar(const QUrl &url);
 
     std::shared_ptr<bool> hack_;
 
     struct {
         RippleEffectButton *avatarButton = nullptr;
+        RippleEffectLabel *viewLogs = nullptr;
 
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;

@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -11,8 +13,10 @@
 #include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QCheckBox>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QLabel>
+#include <QMessageBox>
 
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
@@ -69,6 +73,8 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights").assign(&this->ui_.ignoreHighlights);
+        auto viewLogs = user.emplace<RippleEffectLabel>(this).assign(&this->ui_.viewLogs);
+        this->ui_.viewLogs->getLabel().setText("View logs");
 
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -78,6 +84,9 @@ UserInfoPopup::UserInfoPopup()
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
+
+        QObject::connect(viewLogs.getElement(), &RippleEffectLabel::clicked,
+                         [this] { this->getLogs(); });
 
         QObject::connect(mod.getElement(), &RippleEffectButton::clicked,
                          [this] { this->channel_->sendMessage("/mod " + this->userName_); });
@@ -277,6 +286,48 @@ void UserInfoPopup::updateUserData()
     this->ui_.ignoreHighlights->setEnabled(false);
 }
 
+void UserInfoPopup::getLogs()
+{
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    QUrl url(QString("https://cbenni.com/api/logs/%1/?nick=%2")
+                 .arg(twitchChannel->name, this->userName_));
+
+    QNetworkRequest req(url);
+    static auto manager = new QNetworkAccessManager();
+    auto *reply = manager->get(req);
+
+    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+        QMessageBox *messageBox = new QMessageBox;
+        QString answer = "";
+        if (reply->error() == QNetworkReply::NoError) {
+            QByteArray rawdata = reply->readAll();
+            QJsonObject data = QJsonDocument::fromJson(rawdata).object();
+            QJsonValue before = data.value("before");
+            for (int i = before.toArray().size() - 1; i >= 0; --i) {
+                int index = before.toArray().size() - 1 - i;
+                QString message = before[index]["text"].toString();
+                QRegExp rx(QString("(.*PRIVMSG #%1 :)").arg(twitchChannel->name));
+                message = message.replace(rx, "");
+                qint64 rawtime = before[index]["time"].toInt();
+                QDateTime timestamp = QDateTime::fromSecsSinceEpoch(rawtime);
+                answer += QString("\n[%1 %2] %3: %4")
+                              .arg(timestamp.date().toString(), timestamp.time().toString(),
+                                   this->userName_, message);
+            };
+            if (before.toArray().size() == 0) {
+                answer += "\nNo recorded chat messages found.";
+            };
+        } else {
+            answer = "No logs found";
+            qDebug() << reply->errorString();
+        }
+        messageBox->setText(answer);
+        messageBox->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+        messageBox->show();
+        messageBox->raise();
+    });
+}
+
 void UserInfoPopup::loadAvatar(const QUrl &url)
 {
     QNetworkRequest req(url);
@@ -375,16 +426,21 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
+                           {"1", 1 * 60},
+                           {"5", 5 * 60},
+                           {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60},
+                            {"4", 4 * 60 * 60},
                         });
     addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24}, {"3", 3 * 60 * 60 * 24},
+                            {"1", 1 * 60 * 60 * 24},
+                            {"3", 3 * 60 * 60 * 24},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7}, {"2", 2 * 60 * 60 * 24 * 7},
+                             {"1", 1 * 60 * 60 * 24 * 7},
+                             {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
