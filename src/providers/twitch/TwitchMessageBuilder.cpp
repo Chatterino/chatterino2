@@ -239,9 +239,9 @@ MessagePtr TwitchMessageBuilder::build()
                         QRegularExpression httpRegex("\\bhttps?://");
                         QRegularExpression ftpRegex("\\bftps?://");
                         QRegularExpression getDomain("\\/\\/([^\\/]*)");
+                        QString tempString = string;
                         if (!string.contains(httpRegex)) {
                             if (!string.contains(ftpRegex)) {
-                                QString tempString = string;
                                 tempString.insert(0, "http://");
                             }
                         }
