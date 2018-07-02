@@ -67,15 +67,11 @@ HighlightingPage::HighlightingPage()
             {
                 auto text = disabledUsers.emplace<QTextEdit>().getElement();
 
-                QObject::connect(text, &QTextEdit::textChanged, this,
-                                 [this] { this->disabledUsersChangedTimer.start(200); });
-
-                QObject::connect(
-                    &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, app]() {
-                        QStringList list = text->toPlainText().split("\n", QString::SkipEmptyParts);
-                        list.removeDuplicates();
-                        app->settings->highlightUserBlacklist = list.join("\n") + "\n";
-                    });
+                QObject::connect(text, &QTextEdit::textChanged, this, [text, app] {
+                    QStringList list = text->toPlainText().split("\n", QString::SkipEmptyParts);
+                    list.removeDuplicates();
+                    app->settings->highlightUserBlacklist = list.join("\n") + "\n";
+                });
 
                 app->settings->highlightUserBlacklist.connect([=](const QString &str, auto) {
                     text->setPlainText(str);  //
@@ -98,9 +94,6 @@ HighlightingPage::HighlightingPage()
 
         layout.append(createCheckBox(ALWAYS_PLAY, app->settings->highlightAlwaysPlaySound));
     }
-
-    // ---- misc
-    this->disabledUsersChangedTimer.setSingleShot(true);
 }
 
 }  // namespace chatterino
