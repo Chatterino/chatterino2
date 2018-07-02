@@ -236,7 +236,17 @@ MessagePtr TwitchMessageBuilder::build()
                     link = Link();
                 } else {
                     if (app->settings->lowercaseLink) {
-                        string = string.toLower();
+                        QRegularExpression httpRegex("\\bhttps?://");
+                        QRegularExpression ftpRegex("\\bftps?://");
+                        QRegularExpression getDomain("\\/\\/([^\\/]*)");
+                        if (!string.contains(httpRegex)) {
+                            if (!string.contains(ftpRegex)) {
+                                QString tempString = string;
+                                tempString.insert(0, "http://");
+                            }
+                        }
+                        QString domain = getDomain.match(tempString).captured(1);
+                        string.replace(domain, domain.toLower());
                     }
                     link = Link(Link::Url, linkString);
                     textColor = MessageColor(MessageColor::Link);
