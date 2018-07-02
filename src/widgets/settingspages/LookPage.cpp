@@ -145,6 +145,9 @@ void LookPage::addMessagesGroup(QVBoxLayout &layout)
     // alternate
     box.append(this->createCheckBox("Alternate background colors",
                                     getSettings()->alternateMessageBackground));
+
+    // lowercase links
+    box.append(this->createCheckBox("Display domains as lowercase", getSettings()->lowercaseLink));
 }
 
 void LookPage::addEmotesGroup(QVBoxLayout &layout)
