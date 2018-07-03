@@ -86,8 +86,8 @@ void AppearancePage::addApplicationGroup(QVBoxLayout &layout)
 
 // show buttons
 #ifndef USEWINSDK
-    form->addRow("", this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
-    form->addRow("", this->createCheckBox(TAB_USER, app->settings->hideUserButton));
+    form->addRow("", this->createCheckBox(TAB_PREF, getSettings()->hidePreferencesButton));
+    form->addRow("", this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
 #endif
 
     // scrolling
