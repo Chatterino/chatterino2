@@ -47,8 +47,8 @@ QString MessageBuilder::matchLink(const QString &string)
 {
     LinkParser linkParser(string);
 
-    static QRegularExpression httpRegex("\\bhttps?://");
-    static QRegularExpression ftpRegex("\\bftps?://");
+    static QRegularExpression httpRegex("\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
+    static QRegularExpression ftpRegex("\\bftps?://", QRegularExpression::CaseInsensitiveOption);
 
     if (!linkParser.hasMatch()) {
         return QString();

@@ -50,6 +50,8 @@ public:
         }
     }
 
+    virtual bool isSorted() const = 0;
+
 protected:
     std::vector<TVectorItem> vector;
     QTimer itemsChangedTimer;
@@ -60,9 +62,10 @@ class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
 {
 public:
     // returns the actual index of the inserted item
-    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1, void *caller = 0) = 0;
+    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1,
+                           void *caller = nullptr) = 0;
 
-    void removeItem(int index, void *caller = 0)
+    void removeItem(int index, void *caller = nullptr)
     {
         assertInGuiThread();
         assert(index >= 0 && index < this->vector.size());
@@ -75,7 +78,7 @@ public:
         this->invokeDelayedItemsChanged();
     }
 
-    int appendItem(const TVectorItem &item, void *caller = 0)
+    int appendItem(const TVectorItem &item, void *caller = nullptr)
     {
         return this->insertItem(item, -1, caller);
     }
@@ -85,7 +88,7 @@ template <typename TVectorItem>
 class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = 0) override
+    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = nullptr) override
     {
         assertInGuiThread();
         if (index == -1) {
@@ -100,6 +103,11 @@ public:
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();
         return index;
+    }
+
+    virtual bool isSorted() const override
+    {
+        return false;
     }
 };
 
@@ -119,6 +127,11 @@ public:
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();
         return index;
+    }
+
+    virtual bool isSorted() const override
+    {
+        return true;
     }
 };
 

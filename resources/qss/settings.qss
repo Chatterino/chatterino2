@@ -1,21 +1,5 @@
-#tabWidget {
-    background-color: #333;
-}
-
 * {
     font-size: <font-size>px;
-}
-
-SettingsDialogTab:hover {
-    border: 1px solid grey;
-}
-
-QLabel, QCheckBox, QGroupBox, SettingsDialogTab {
-    color: white;
-}
-
-QGroupBox {
-    background-color: #444;
 }
 
 QCheckBox::indicator {

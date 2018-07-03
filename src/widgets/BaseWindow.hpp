@@ -70,6 +70,8 @@ protected:
 
     void updateScale();
 
+    boost::optional<QColor> overrideBackgroundColor_;
+
 private:
     void init();
     void moveIntoDesktopRect(QWidget *parent);

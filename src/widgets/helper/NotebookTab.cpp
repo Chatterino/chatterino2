@@ -238,8 +238,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
     QBrush tabBackground = /*this->mouseOver_ ? colors.backgrounds.hover
-                                            :*/ (windowFocused ? colors.backgrounds.regular
-                                                               : colors.backgrounds.unfocused);
+                                            :*/
+        (windowFocused ? colors.backgrounds.regular : colors.backgrounds.unfocused);
 
     //    painter.fillRect(rect(), this->mouseOver_ ? regular.backgrounds.hover
     //                                              : (windowFocused ? regular.backgrounds.regular

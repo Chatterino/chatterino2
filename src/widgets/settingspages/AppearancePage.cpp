@@ -4,6 +4,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/helper/Line.hpp"
 
 #include <QFontDialog>
 #include <QFormLayout>
@@ -23,8 +24,6 @@
 #define SCROLL_SMOOTH "Enable smooth scrolling"
 #define SCROLL_NEWMSG "Enable smooth scrolling for new messages"
 
-#define LAST_MSG "Mark the last message you read (dotted line)"
-
 // clang-format off
 #define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "hh:mm:ss a", "h:mm:ss a", "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss"
 // clang-format on
@@ -34,178 +33,206 @@ namespace chatterino {
 AppearancePage::AppearancePage()
     : SettingsPage("Look", ":/images/theme.svg")
 {
-    auto app = getApp();
     LayoutCreator<AppearancePage> layoutCreator(this);
 
-    auto scroll = layoutCreator.emplace<QScrollArea>();
+    auto xd = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+
+    // settings
+    auto scroll = xd.emplace<QScrollArea>();
     auto widget = scroll.emplaceScrollAreaWidget();
     removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
-    auto layout = widget.setLayoutType<QVBoxLayout>();
+    auto &layout = *widget.setLayoutType<QVBoxLayout>().withoutMargin();
 
-    auto application =
-        layout.emplace<QGroupBox>("Application").emplace<QVBoxLayout>().withoutMargin();
-    {
-        auto form = application.emplace<QFormLayout>();
+    this->addApplicationGroup(layout);
+    this->addMessagesGroup(layout);
+    this->addEmotesGroup(layout);
 
-        auto *theme = this->createComboBox({THEME_ITEMS}, app->themes->themeName);
-        QObject::connect(theme, &QComboBox::currentTextChanged,
-                         [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
+    // preview
+    xd.emplace<Line>(false);
 
-        form->addRow("Theme:", theme);
-        // form->addRow("Theme color:", this->createThemeColorChanger());
-        form->addRow("UI Scaling:", this->createUiScaleSlider());
-        form->addRow("Font:", this->createFontChanger());
+    auto channelView = xd.emplace<ChannelView>();
+    auto channel = this->createPreviewChannel();
+    channelView->setChannel(channel);
+    channelView->setScaleIndependantHeight(64);
 
-        form->addRow("Tabs:", this->createCheckBox(TAB_X, app->settings->showTabCloseButton));
+    layout.addStretch(1);
+}
+
+void AppearancePage::addApplicationGroup(QVBoxLayout &layout)
+{
+    auto box = LayoutCreator<QVBoxLayout>(&layout)
+                   .emplace<QGroupBox>("Application")
+                   .emplace<QVBoxLayout>()
+                   .withoutMargin();
+
+    auto form = box.emplace<QFormLayout>();
+
+    // theme
+    auto *theme = this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
+    QObject::connect(theme, &QComboBox::currentTextChanged,
+                     [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
+
+    form->addRow("Theme:", theme);
+
+    // ui scale
+    form->addRow("UI Scaling:", this->createUiScaleSlider());
+
+    // font
+    form->addRow("Font:", this->createFontChanger());
+
+    // tab x
+    form->addRow("Tabs:", this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
+
+// show buttons
 #ifndef USEWINSDK
-        form->addRow("", this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
-        form->addRow("", this->createCheckBox(TAB_USER, app->settings->hideUserButton));
+    form->addRow("", this->createCheckBox(TAB_PREF, app->settings->hidePreferencesButton));
+    form->addRow("", this->createCheckBox(TAB_USER, app->settings->hideUserButton));
 #endif
 
-        form->addRow("Scrolling:",
-                     this->createCheckBox(SCROLL_SMOOTH, app->settings->enableSmoothScrolling));
-        form->addRow("", this->createCheckBox(SCROLL_NEWMSG,
-                                              app->settings->enableSmoothScrollingNewMessages));
-    }
+    // scrolling
+    form->addRow("Scrolling:",
+                 this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
+    form->addRow(
+        "", this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
+}
 
-    auto messages = layout.emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
+void AppearancePage::addMessagesGroup(QVBoxLayout &layout)
+{
+    auto box =
+        LayoutCreator<QVBoxLayout>(&layout).emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
+
+    // timestamps
+    box.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
+    auto tbox = box.emplace<QHBoxLayout>().withoutMargin();
     {
-        messages.append(this->createCheckBox("Show timestamp", app->settings->showTimestamps));
-        auto tbox = messages.emplace<QHBoxLayout>().withoutMargin();
-        {
-            tbox.emplace<QLabel>("timestamp format (a = am/pm):");
-            tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, app->settings->timestampFormat));
-            tbox->addStretch(1);
-        }
-
-        messages.append(this->createCheckBox("Show badges", app->settings->showBadges));
-
-        {
-            auto *combo = new QComboBox(this);
-            combo->addItems({"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-                             "13", "14", "15"});
-            const auto currentIndex = []() -> int {
-                auto val = getApp()->settings->collpseMessagesMinLines.getValue();
-                if (val > 0) {
-                    --val;
-                }
-                return val;
-            }();
-            combo->setCurrentIndex(currentIndex);
-
-            QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
-                getApp()->settings->collpseMessagesMinLines = str.toInt();
-            });
-
-            auto hbox = messages.emplace<QHBoxLayout>().withoutMargin();
-            hbox.emplace<QLabel>("Collapse messages longer than");
-            hbox.append(combo);
-            hbox.emplace<QLabel>("lines");
-        }
-
-        messages.append(this->createCheckBox("Separate messages", app->settings->separateMessages));
-        messages.append(this->createCheckBox("Alternate message background color",
-                                             app->settings->alternateMessageBackground));
-        messages.append(this->createCheckBox("Show message length while typing",
-                                             app->settings->showMessageLength));
-
-        messages.append(this->createCheckBox(LAST_MSG, app->settings->showLastMessageIndicator));
-        {
-            auto *combo = new QComboBox(this);
-            combo->addItems({"Dotted", "Solid"});
-
-            const auto currentIndex = []() -> int {
-                switch (getApp()->settings->lastMessagePattern.getValue()) {
-                    case Qt::SolidLine: {
-                        return 1;
-                    }
-                    default:
-                    case Qt::VerPattern: {
-                        return 0;
-                    }
-                }
-            }();
-            combo->setCurrentIndex(currentIndex);
-
-            QObject::connect(combo,
-                             static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-                             [](int index) {
-                                 Qt::BrushStyle brush;
-                                 switch (index) {
-                                     case 1:
-                                         brush = Qt::SolidPattern;
-                                         break;
-                                     default:
-                                     case 0:
-                                         brush = Qt::VerPattern;
-                                         break;
-                                 }
-                                 getApp()->settings->lastMessagePattern = brush;
-                             });
-
-            auto hbox = messages.emplace<QHBoxLayout>().withoutMargin();
-            hbox.emplace<QLabel>("Last message indicator pattern");
-            hbox.append(combo);
-        }
+        tbox.emplace<QLabel>("Timestamp format (a = am/pm):");
+        tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, getSettings()->timestampFormat));
+        tbox->addStretch(1);
     }
 
-    auto emotes = layout.emplace<QGroupBox>("Emotes").setLayoutType<QVBoxLayout>();
+    // badges
+    box.append(this->createCheckBox("Show badges", getSettings()->showBadges));
+
+    // collapsing
     {
-        /*
-        emotes.append(
-            this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
-        emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
-                                           app->settings->enableBttvEmotes));
-        emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                           app->settings->enableFfzEmotes));
-        emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
-        */
-        emotes.append(
-            this->createCheckBox("Enable animations", app->settings->enableGifAnimations));
+        auto *combo = new QComboBox(this);
+        combo->addItems(
+            {"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"});
 
-        auto scaleBox = emotes.emplace<QHBoxLayout>();
-        {
-            scaleBox.emplace<QLabel>("Emote scale:");
+        const auto currentIndex = []() -> int {
+            auto val = getSettings()->collpseMessagesMinLines.getValue();
+            if (val > 0) {
+                --val;
+            }
+            return val;
+        }();
+        combo->setCurrentIndex(currentIndex);
 
-            auto emoteScale = scaleBox.emplace<QSlider>(Qt::Horizontal);
-            emoteScale->setMinimum(5);
-            emoteScale->setMaximum(50);
+        QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
+            getSettings()->collpseMessagesMinLines = str.toInt();
+        });
 
-            auto scaleLabel = scaleBox.emplace<QLabel>("1.0");
-            scaleLabel->setFixedWidth(100);
-            QObject::connect(emoteScale.getElement(), &QSlider::valueChanged,
-                             [scaleLabel](int value) mutable {
-                                 float f = (float)value / 10.f;
-                                 scaleLabel->setText(QString::number(f));
-
-                                 getApp()->settings->emoteScale.setValue(f);
-                             });
-
-            emoteScale->setValue(std::max<int>(
-                5, std::min<int>(50, (int)(app->settings->emoteScale.getValue() * 10.f))));
-
-            scaleLabel->setText(QString::number(app->settings->emoteScale.getValue()));
-        }
-
-        {
-            auto *combo = new QComboBox(this);
-            combo->addItems({"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook", "Apple", "Google",
-                             "Messenger"});
-
-            combo->setCurrentText(getApp()->settings->emojiSet);
-
-            QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
-                getApp()->settings->emojiSet = str;  //
-            });
-
-            auto hbox = emotes.emplace<QHBoxLayout>().withoutMargin();
-            hbox.emplace<QLabel>("Emoji set");
-            hbox.append(combo);
-        }
+        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
+        hbox.emplace<QLabel>("Collapse messages longer than");
+        hbox.append(combo);
+        hbox.emplace<QLabel>("lines");
     }
 
-    layout->addStretch(1);
+    // seperate
+    box.append(this->createCheckBox("Separation lines", getSettings()->separateMessages));
+
+    // alternate
+    box.append(this->createCheckBox("Alternate background colors",
+                                    getSettings()->alternateMessageBackground));
+}
+
+void AppearancePage::addEmotesGroup(QVBoxLayout &layout)
+{
+    auto box = LayoutCreator<QVBoxLayout>(&layout)
+                   .emplace<QGroupBox>("Emotes")
+                   .setLayoutType<QVBoxLayout>();
+
+    /*
+    emotes.append(
+        this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
+    emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
+                                       app->settings->enableBttvEmotes));
+    emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
+                                       app->settings->enableFfzEmotes));
+    emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
+    */
+    box.append(this->createCheckBox("Animated emotes", getSettings()->enableGifAnimations));
+
+    auto scaleBox = box.emplace<QHBoxLayout>();
+    {
+        scaleBox.emplace<QLabel>("Size:");
+
+        auto emoteScale = scaleBox.emplace<QSlider>(Qt::Horizontal);
+        emoteScale->setMinimum(5);
+        emoteScale->setMaximum(50);
+
+        auto scaleLabel = scaleBox.emplace<QLabel>("1.0");
+        scaleLabel->setFixedWidth(100);
+        QObject::connect(emoteScale.getElement(), &QSlider::valueChanged,
+                         [scaleLabel](int value) mutable {
+                             float f = float(value) / 10.f;
+                             scaleLabel->setText(QString::number(f));
+
+                             getSettings()->emoteScale.setValue(f);
+                         });
+
+        emoteScale->setValue(
+            std::max<int>(5, std::min<int>(50, int(getSettings()->emoteScale.getValue() * 10.f))));
+
+        scaleLabel->setText(QString::number(getSettings()->emoteScale.getValue()));
+    }
+
+    {
+        auto *combo = new QComboBox(this);
+        combo->addItems(
+            {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook", "Apple", "Google", "Messenger"});
+
+        combo->setCurrentText(getSettings()->emojiSet);
+
+        QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
+            getSettings()->emojiSet = str;  //
+        });
+
+        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
+        hbox.emplace<QLabel>("Emoji set:");
+        hbox.append(combo);
+    }
+}
+
+ChannelPtr AppearancePage::createPreviewChannel()
+{
+    auto channel = ChannelPtr(new Channel("preview", Channel::Misc));
+
+    {
+        auto message = MessagePtr(new Message());
+        message->addElement(new ImageElement(getApp()->resources->badgeModerator,
+                                             MessageElement::BadgeChannelAuthority));
+        message->addElement(new ImageElement(getApp()->resources->badgeSubscriber,
+                                             MessageElement::BadgeSubscription));
+        message->addElement(new TimestampElement());
+        message->addElement(new TextElement("username1:", MessageElement::Username,
+                                            QColor("#0094FF"), FontStyle::ChatMediumBold));
+        message->addElement(new TextElement("This is a preview message :)", MessageElement::Text));
+        channel->addMessage(message);
+    }
+    {
+        auto message = MessagePtr(new Message());
+        message->addElement(new ImageElement(getApp()->resources->badgePremium,
+                                             MessageElement::BadgeChannelAuthority));
+        message->addElement(new TimestampElement());
+        message->addElement(new TextElement("username2:", MessageElement::Username,
+                                            QColor("#FF6A00"), FontStyle::ChatMediumBold));
+        message->addElement(new TextElement("This is another one :)", MessageElement::Text));
+        channel->addMessage(message);
+    }
+
+    return channel;
 }
 
 QLayout *AppearancePage::createThemeColorChanger()
@@ -297,18 +324,15 @@ QLayout *AppearancePage::createUiScaleSlider()
 
     slider->setMinimum(WindowManager::uiScaleMin);
     slider->setMaximum(WindowManager::uiScaleMax);
-    slider->setValue(
-        WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
+    slider->setValue(WindowManager::clampUiScale(getSettings()->uiScale.getValue()));
 
     label->setMinimumWidth(100);
 
     QObject::connect(slider, &QSlider::valueChanged,
-                     [](auto value) { getApp()->settings->uiScale.setValue(value); });
+                     [](auto value) { getSettings()->uiScale.setValue(value); });
 
-    getApp()->settings->uiScale.connect(
-        [label](auto, auto) {
-            label->setText(QString::number(WindowManager::getUiScaleValue()));
-        },
+    getSettings()->uiScale.connect(
+        [label](auto, auto) { label->setText(QString::number(WindowManager::getUiScaleValue())); },
         this->connections_);
 
     return layout;

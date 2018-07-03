@@ -171,8 +171,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(Message::createSystemMessage(
-                        "You must be logged in to ignore someone"));
+                    channel->addMessage(
+                        Message::createSystemMessage("You must be logged in to ignore someone"));
                     return "";
                 }
 
@@ -188,8 +188,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(Message::createSystemMessage(
-                        "You must be logged in to ignore someone"));
+                    channel->addMessage(
+                        Message::createSystemMessage("You must be logged in to ignore someone"));
                     return "";
                 }
 

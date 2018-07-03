@@ -434,6 +434,8 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
+#else
+    return QWidget::nativeEvent(eventType, message, result);
 #endif
 }
 
@@ -453,7 +455,12 @@ void BaseWindow::paintEvent(QPaintEvent *)
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
 
-    this->drawCustomWindowFrame(painter);
+    //    this->drawCustomWindowFrame(painter);
+    //    QPainter painter(this);
+
+    QColor bg = this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
+
+    painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
 }
 
 void BaseWindow::updateScale()
@@ -492,14 +499,16 @@ void BaseWindow::calcButtonsSizes()
 
 void BaseWindow::drawCustomWindowFrame(QPainter &painter)
 {
-#ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
-        QPainter painter(this);
+    //#ifdef USEWINSDK
+    //    if (this->hasCustomWindowFrame()) {
+    //        QPainter painter(this);
 
-        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
-                         this->themeManager->window.background);
-    }
-#endif
+    //        QColor bg =
+    //        this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
+
+    //        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
+    //    }
+    //#endif
 }
 
 bool BaseWindow::handleDPICHANGED(MSG *msg)
