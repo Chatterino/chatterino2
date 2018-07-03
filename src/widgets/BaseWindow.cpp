@@ -434,6 +434,8 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
+#else
+    return QWidget::nativeEvent(eventType, message, result);
 #endif
 }
 
