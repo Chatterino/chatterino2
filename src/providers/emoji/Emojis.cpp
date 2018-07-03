@@ -260,8 +260,8 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emoteData.image1x = new Image(
-                url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
+            emoji->emoteData.image1x =
+                new Image(url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
         });
     });
 }

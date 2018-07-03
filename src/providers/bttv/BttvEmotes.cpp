@@ -37,11 +37,11 @@ void BTTVEmotes::loadGlobalEmotes()
 
             EmoteData emoteData;
             emoteData.image1x = new Image(getEmoteLink(urlTemplate, id, "1x"), 1, code,
-                                                      code + "<br />Global BTTV Emote");
-            emoteData.image2x = new Image(getEmoteLink(urlTemplate, id, "2x"), 0.5,
-                                                      code, code + "<br />Global BTTV Emote");
-            emoteData.image3x = new Image(getEmoteLink(urlTemplate, id, "3x"), 0.25,
-                                                      code, code + "<br />Global BTTV Emote");
+                                          code + "<br />Global BTTV Emote");
+            emoteData.image2x = new Image(getEmoteLink(urlTemplate, id, "2x"), 0.5, code,
+                                          code + "<br />Global BTTV Emote");
+            emoteData.image3x = new Image(getEmoteLink(urlTemplate, id, "3x"), 0.25, code,
+                                          code + "<br />Global BTTV Emote");
             emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
             this->globalEmotes.insert(code, emoteData);
@@ -89,19 +89,16 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emo
                 EmoteData emoteData;
                 QString link = linkTemplate;
                 link.detach();
-                emoteData.image1x =
-                    new Image(link.replace("{{id}}", id).replace("{{image}}", "1x"), 1,
-                                          code, code + "<br />Channel BTTV Emote");
+                emoteData.image1x = new Image(link.replace("{{id}}", id).replace("{{image}}", "1x"),
+                                              1, code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
-                emoteData.image2x =
-                    new Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
-                                          0.5, code, code + "<br />Channel BTTV Emote");
+                emoteData.image2x = new Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
+                                              0.5, code, code + "<br />Channel BTTV Emote");
                 link = linkTemplate;
                 link.detach();
-                emoteData.image3x =
-                    new Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
-                                          0.25, code, code + "<br />Channel BTTV Emote");
+                emoteData.image3x = new Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
+                                              0.25, code, code + "<br />Channel BTTV Emote");
                 emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
 
                 return emoteData;

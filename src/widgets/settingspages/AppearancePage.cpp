@@ -252,8 +252,7 @@ QLayout *AppearancePage::createUiScaleSlider()
 
     slider->setMinimum(WindowManager::uiScaleMin);
     slider->setMaximum(WindowManager::uiScaleMax);
-    slider->setValue(
-        WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
+    slider->setValue(WindowManager::clampUiScale(getApp()->settings->uiScale.getValue()));
 
     label->setMinimumWidth(100);
 
@@ -261,9 +260,7 @@ QLayout *AppearancePage::createUiScaleSlider()
                      [](auto value) { getApp()->settings->uiScale.setValue(value); });
 
     getApp()->settings->uiScale.connect(
-        [label](auto, auto) {
-            label->setText(QString::number(WindowManager::getUiScaleValue()));
-        },
+        [label](auto, auto) { label->setText(QString::number(WindowManager::getUiScaleValue())); },
         this->connections_);
 
     return layout;
