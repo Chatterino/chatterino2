@@ -82,8 +82,8 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new AppearancePage);
-    this->addTab(new BehaviourPage);
+    this->addTab(new LookPage);
+    this->addTab(new FeelPage);
 
     this->ui_.tabContainer->addSpacing(16);
 

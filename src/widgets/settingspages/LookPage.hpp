@@ -10,10 +10,10 @@ class QVBoxLayout;
 
 namespace chatterino {
 
-class AppearancePage : public SettingsPage
+class LookPage : public SettingsPage
 {
 public:
-    AppearancePage();
+    LookPage();
 
     void addApplicationGroup(QVBoxLayout &layout);
     void addMessagesGroup(QVBoxLayout &layout);

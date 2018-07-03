@@ -30,10 +30,10 @@
 
 namespace chatterino {
 
-AppearancePage::AppearancePage()
+LookPage::LookPage()
     : SettingsPage("Look", ":/images/theme.svg")
 {
-    LayoutCreator<AppearancePage> layoutCreator(this);
+    LayoutCreator<LookPage> layoutCreator(this);
 
     auto xd = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
@@ -59,7 +59,7 @@ AppearancePage::AppearancePage()
     layout.addStretch(1);
 }
 
-void AppearancePage::addApplicationGroup(QVBoxLayout &layout)
+void LookPage::addApplicationGroup(QVBoxLayout &layout)
 {
     auto box = LayoutCreator<QVBoxLayout>(&layout)
                    .emplace<QGroupBox>("Application")
@@ -97,7 +97,7 @@ void AppearancePage::addApplicationGroup(QVBoxLayout &layout)
         "", this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
 }
 
-void AppearancePage::addMessagesGroup(QVBoxLayout &layout)
+void LookPage::addMessagesGroup(QVBoxLayout &layout)
 {
     auto box =
         LayoutCreator<QVBoxLayout>(&layout).emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
@@ -147,7 +147,7 @@ void AppearancePage::addMessagesGroup(QVBoxLayout &layout)
                                     getSettings()->alternateMessageBackground));
 }
 
-void AppearancePage::addEmotesGroup(QVBoxLayout &layout)
+void LookPage::addEmotesGroup(QVBoxLayout &layout)
 {
     auto box = LayoutCreator<QVBoxLayout>(&layout)
                    .emplace<QGroupBox>("Emotes")
@@ -205,7 +205,7 @@ void AppearancePage::addEmotesGroup(QVBoxLayout &layout)
     }
 }
 
-ChannelPtr AppearancePage::createPreviewChannel()
+ChannelPtr LookPage::createPreviewChannel()
 {
     auto channel = ChannelPtr(new Channel("preview", Channel::Misc));
 
@@ -235,7 +235,7 @@ ChannelPtr AppearancePage::createPreviewChannel()
     return channel;
 }
 
-QLayout *AppearancePage::createThemeColorChanger()
+QLayout *LookPage::createThemeColorChanger()
 {
     auto app = getApp();
     QHBoxLayout *layout = new QHBoxLayout;
@@ -274,7 +274,7 @@ QLayout *AppearancePage::createThemeColorChanger()
     return layout;
 }
 
-QLayout *AppearancePage::createFontChanger()
+QLayout *LookPage::createFontChanger()
 {
     auto app = getApp();
 
@@ -314,7 +314,7 @@ QLayout *AppearancePage::createFontChanger()
     return layout;
 }
 
-QLayout *AppearancePage::createUiScaleSlider()
+QLayout *LookPage::createUiScaleSlider()
 {
     auto layout = new QHBoxLayout();
     auto slider = new QSlider(Qt::Horizontal);

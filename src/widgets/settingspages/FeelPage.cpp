@@ -21,11 +21,11 @@
 
 namespace chatterino {
 
-BehaviourPage::BehaviourPage()
+FeelPage::FeelPage()
     : SettingsPage("Feel", ":/images/behave.svg")
 {
     auto app = getApp();
-    LayoutCreator<BehaviourPage> layoutCreator(this);
+    LayoutCreator<FeelPage> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
@@ -113,7 +113,7 @@ BehaviourPage::BehaviourPage()
     layout->addStretch(1);
 }
 
-QSlider *BehaviourPage::createMouseScrollSlider()
+QSlider *FeelPage::createMouseScrollSlider()
 {
     auto app = getApp();
     auto slider = new QSlider(Qt::Horizontal);

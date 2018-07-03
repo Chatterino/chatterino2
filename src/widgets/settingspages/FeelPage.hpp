@@ -6,10 +6,10 @@
 
 namespace chatterino {
 
-class BehaviourPage : public SettingsPage
+class FeelPage : public SettingsPage
 {
 public:
-    BehaviourPage();
+    FeelPage();
 
 private:
     QSlider *createMouseScrollSlider();
