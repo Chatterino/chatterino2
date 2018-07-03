@@ -392,7 +392,8 @@ HEADERS  += \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Theme.hpp \
     src/common/SimpleSignalVector.hpp \
-    src/common/SignalVector.hpp
+    src/common/SignalVector.hpp \
+    src/common/Singleton.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

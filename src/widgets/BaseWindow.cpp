@@ -249,11 +249,11 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() + 1));
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() - 1));
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
         }
     }
 }
@@ -443,6 +443,16 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
                 this->updateScale();
             }
 
+            if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
+                this->shown_ = true;
+                //        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
+                //                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX |
+                //                         WS_MINIMIZEBOX);
+
+                const MARGINS shadow = {8, 8, 8, 8};
+                DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            }
+
             return true;
         }
         case WM_NCCALCSIZE: {
@@ -607,21 +617,6 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
-}
-
-void BaseWindow::showEvent(QShowEvent *event)
-{
-    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
-        this->shown_ = true;
-        //        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
-        //                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX |
-        //                         WS_MINIMIZEBOX);
-
-        const MARGINS shadow = {8, 8, 8, 8};
-        DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
-    }
-
-    BaseWidget::showEvent(event);
 }
 
 void BaseWindow::scaleChangedEvent(float)

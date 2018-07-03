@@ -47,7 +47,6 @@ public:
 
 protected:
 #ifdef USEWINSDK
-    virtual void showEvent(QShowEvent *) override;
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     virtual void scaleChangedEvent(float) override;
 #endif
