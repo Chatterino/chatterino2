@@ -7,6 +7,8 @@
 #include <pajlada/signals/signalholder.hpp>
 
 class QHBoxLayout;
+struct tagMSG;
+typedef struct tagMSG MSG;
 
 namespace chatterino {
 
@@ -30,6 +32,7 @@ public:
     };
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
+    virtual ~BaseWindow() = default;
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
@@ -46,10 +49,8 @@ public:
     Flags getFlags();
 
 protected:
-#ifdef USEWINSDK
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     virtual void scaleChangedEvent(float) override;
-#endif
 
     virtual void paintEvent(QPaintEvent *) override;
 
@@ -73,6 +74,13 @@ private:
     void init();
     void moveIntoDesktopRect(QWidget *parent);
     void calcButtonsSizes();
+    void drawCustomWindowFrame(QPainter &painter);
+
+    bool handleDPICHANGED(MSG *msg);
+    bool handleSHOWWINDOW(MSG *msg);
+    bool handleNCCALCSIZE(MSG *msg, long *result);
+    bool handleSIZE(MSG *msg);
+    bool handleNCHITTEST(MSG *msg, long *result);
 
     bool enableCustomFrame_;
     bool frameless_;

@@ -410,240 +410,50 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
         this->move(p);
 }
 
-#ifdef USEWINSDK
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
+#ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
 
     switch (msg->message) {
-        case WM_DPICHANGED: {
-            int dpi = HIWORD(msg->wParam);
+        case WM_DPICHANGED:
+            return handleDPICHANGED(msg);
 
-            float _scale = dpi / 96.f;
+        case WM_SHOWWINDOW:
+            return this->handleSHOWWINDOW(msg);
 
-            static bool firstResize = true;
+        case WM_NCCALCSIZE:
+            return this->handleNCCALCSIZE(msg, result);
 
-            if (!firstResize) {
-                auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
-                SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
-                             prcNewWindow->right - prcNewWindow->left,
-                             prcNewWindow->bottom - prcNewWindow->top,
-                             SWP_NOZORDER | SWP_NOACTIVATE);
-            }
-            firstResize = false;
+        case WM_SIZE:
+            return this->handleSIZE(msg);
 
-            this->nativeScale_ = _scale;
-            this->updateScale();
+        case WM_NCHITTEST:
+            return this->handleNCHITTEST(msg, result);
 
-            return true;
-        }
-        case WM_SHOWWINDOW: {
-            if (auto dpi = getWindowDpi(msg->hwnd)) {
-                this->nativeScale_ = dpi.get() / 96.f;
-                this->updateScale();
-            }
-
-            if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
-                this->shown_ = true;
-                //        SetWindowLongPtr((HWND)this->winId(), GWL_STYLE,
-                //                         WS_POPUP | WS_CAPTION | WS_THICKFRAME | WS_MAXIMIZEBOX |
-                //                         WS_MINIMIZEBOX);
-
-                const MARGINS shadow = {8, 8, 8, 8};
-                DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
-            }
-
-            return true;
-        }
-        case WM_NCCALCSIZE: {
-            if (this->hasCustomWindowFrame()) {
-                // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
-                // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
-
-                if (msg->wParam == TRUE) {
-                    NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
-                    ncp->lppos->flags |= SWP_NOREDRAW;
-                    RECT *clientRect = &ncp->rgrc[0];
-
-                    // if (IsWindows10OrGreater()) {
-                    //     clientRect->left += cx;
-                    //     clientRect->top += 0;
-                    //     clientRect->right -= cx;
-                    //     clientRect->bottom -= cy;
-                    // } else {
-                    clientRect->left += 1;
-                    clientRect->top += 0;
-                    clientRect->right -= 1;
-                    clientRect->bottom -= 1;
-                    // }
-                }
-
-                *result = 0;
-                return true;
-            } else {
-                return QWidget::nativeEvent(eventType, message, result);
-            }
-        } break;
-        case WM_SIZE: {
-            if (this->ui_.windowLayout) {
-                if (this->hasCustomWindowFrame() && !this->frameless_) {
-                    if (msg->wParam == SIZE_MAXIMIZED) {
-                        auto offset = int(this->getScale() * 8);
-
-                        this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
-                    } else {
-                        this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
-                    }
-                }
-            }
-
-            return QWidget::nativeEvent(eventType, message, result);
-        }
-        case WM_NCHITTEST: {
-            const LONG border_width = 8;  // in pixels
-            RECT winrect;
-            GetWindowRect(HWND(winId()), &winrect);
-
-            long x = GET_X_LPARAM(msg->lParam);
-            long y = GET_Y_LPARAM(msg->lParam);
-
-            QPoint point(x - winrect.left, y - winrect.top);
-
-            if (this->hasCustomWindowFrame()) {
-                *result = 0;
-
-                bool resizeWidth = minimumWidth() != maximumWidth();
-                bool resizeHeight = minimumHeight() != maximumHeight();
-
-                if (resizeWidth) {
-                    // left border
-                    if (x < winrect.left + border_width) {
-                        *result = HTLEFT;
-                    }
-                    // right border
-                    if (x >= winrect.right - border_width) {
-                        *result = HTRIGHT;
-                    }
-                }
-                if (resizeHeight) {
-                    // bottom border
-                    if (y >= winrect.bottom - border_width) {
-                        *result = HTBOTTOM;
-                    }
-                    // top border
-                    if (y < winrect.top + border_width) {
-                        *result = HTTOP;
-                    }
-                }
-                if (resizeWidth && resizeHeight) {
-                    // bottom left corner
-                    if (x >= winrect.left && x < winrect.left + border_width &&
-                        y < winrect.bottom && y >= winrect.bottom - border_width) {
-                        *result = HTBOTTOMLEFT;
-                    }
-                    // bottom right corner
-                    if (x < winrect.right && x >= winrect.right - border_width &&
-                        y < winrect.bottom && y >= winrect.bottom - border_width) {
-                        *result = HTBOTTOMRIGHT;
-                    }
-                    // top left corner
-                    if (x >= winrect.left && x < winrect.left + border_width && y >= winrect.top &&
-                        y < winrect.top + border_width) {
-                        *result = HTTOPLEFT;
-                    }
-                    // top right corner
-                    if (x < winrect.right && x >= winrect.right - border_width &&
-                        y >= winrect.top && y < winrect.top + border_width) {
-                        *result = HTTOPRIGHT;
-                    }
-                }
-
-                if (*result == 0) {
-                    bool client = false;
-
-                    for (QWidget *widget : this->ui_.buttons) {
-                        if (widget->geometry().contains(point)) {
-                            client = true;
-                        }
-                    }
-
-                    if (this->ui_.layoutBase->geometry().contains(point)) {
-                        client = true;
-                    }
-
-                    if (client) {
-                        *result = HTCLIENT;
-                    } else {
-                        *result = HTCAPTION;
-                    }
-                }
-
-                return true;
-            } else if (this->flags_ & FramelessDraggable) {
-                *result = 0;
-                bool client = false;
-
-                if (auto widget = this->childAt(point)) {
-                    std::function<bool(QWidget *)> recursiveCheckMouseTracking;
-                    recursiveCheckMouseTracking = [&](QWidget *widget) {
-                        if (widget == nullptr) {
-                            return false;
-                        }
-
-                        if (widget->hasMouseTracking()) {
-                            return true;
-                        }
-
-                        return recursiveCheckMouseTracking(widget->parentWidget());
-                    };
-
-                    if (recursiveCheckMouseTracking(widget)) {
-                        client = true;
-                    }
-                }
-
-                if (client) {
-                    *result = HTCLIENT;
-                } else {
-                    *result = HTCAPTION;
-                }
-
-                return true;
-            } else {
-                return QWidget::nativeEvent(eventType, message, result);
-            }
-            break;
-        }
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
+#endif
 }
 
 void BaseWindow::scaleChangedEvent(float)
 {
+#ifdef USEWINSDK
     this->calcButtonsSizes();
-}
 #endif
+}
 
 void BaseWindow::paintEvent(QPaintEvent *)
 {
-    if (this->frameless_) {
-        QPainter painter(this);
+    QPainter painter(this);
 
+    if (this->frameless_) {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
 
-#ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
-        QPainter painter(this);
-
-        //        bool windowFocused = this->window() == QApplication::activeWindow();
-
-        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
-                         this->themeManager->window.background);
-    }
-#endif
+    this->drawCustomWindowFrame(painter);
 }
 
 void BaseWindow::updateScale()
@@ -662,6 +472,7 @@ void BaseWindow::calcButtonsSizes()
     if (!this->shown_) {
         return;
     }
+
     if ((this->width() / this->getScale()) < 300) {
         if (this->ui_.minButton)
             this->ui_.minButton->setScaleIndependantSize(30, 30);
@@ -677,6 +488,229 @@ void BaseWindow::calcButtonsSizes()
         if (this->ui_.exitButton)
             this->ui_.exitButton->setScaleIndependantSize(46, 30);
     }
+}
+
+void BaseWindow::drawCustomWindowFrame(QPainter &painter)
+{
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame()) {
+        QPainter painter(this);
+
+        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
+                         this->themeManager->window.background);
+    }
+#endif
+}
+
+bool BaseWindow::handleDPICHANGED(MSG *msg)
+{
+#ifdef USEWINSDK
+    int dpi = HIWORD(msg->wParam);
+
+    float _scale = dpi / 96.f;
+
+    static bool firstResize = true;
+
+    if (!firstResize) {
+        auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
+        SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
+                     prcNewWindow->right - prcNewWindow->left,
+                     prcNewWindow->bottom - prcNewWindow->top, SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+    firstResize = false;
+
+    this->nativeScale_ = _scale;
+    this->updateScale();
+
+    return true;
+#endif
+
+    return false;
+}
+
+bool BaseWindow::handleSHOWWINDOW(MSG *msg)
+{
+#ifdef USEWINSDK
+    if (auto dpi = getWindowDpi(msg->hwnd)) {
+        this->nativeScale_ = dpi.get() / 96.f;
+        this->updateScale();
+    }
+
+    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
+        this->shown_ = true;
+
+        const MARGINS shadow = {8, 8, 8, 8};
+        DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+    }
+
+    return true;
+#endif
+
+    return false;
+}
+
+bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
+{
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame()) {
+        // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
+        // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
+
+        if (msg->wParam == TRUE) {
+            NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
+            ncp->lppos->flags |= SWP_NOREDRAW;
+            RECT *clientRect = &ncp->rgrc[0];
+
+            clientRect->left += 1;
+            clientRect->top += 0;
+            clientRect->right -= 1;
+            clientRect->bottom -= 1;
+        }
+
+        *result = 0;
+        return true;
+    }
+#endif
+
+    return false;
+}
+
+bool BaseWindow::handleSIZE(MSG *msg)
+{
+#ifdef USEWINSDK
+    if (this->ui_.windowLayout) {
+        if (this->hasCustomWindowFrame() && !this->frameless_) {
+            if (msg->wParam == SIZE_MAXIMIZED) {
+                auto offset = int(this->getScale() * 8);
+
+                this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
+            } else {
+                this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
+            }
+        }
+    }
+
+#endif
+
+    return false;
+}
+
+bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
+{
+#ifdef USEWINSDK
+    const LONG border_width = 8;  // in pixels
+    RECT winrect;
+    GetWindowRect(HWND(winId()), &winrect);
+
+    long x = GET_X_LPARAM(msg->lParam);
+    long y = GET_Y_LPARAM(msg->lParam);
+
+    QPoint point(x - winrect.left, y - winrect.top);
+
+    if (this->hasCustomWindowFrame()) {
+        *result = 0;
+
+        bool resizeWidth = minimumWidth() != maximumWidth();
+        bool resizeHeight = minimumHeight() != maximumHeight();
+
+        if (resizeWidth) {
+            // left border
+            if (x < winrect.left + border_width) {
+                *result = HTLEFT;
+            }
+            // right border
+            if (x >= winrect.right - border_width) {
+                *result = HTRIGHT;
+            }
+        }
+        if (resizeHeight) {
+            // bottom border
+            if (y >= winrect.bottom - border_width) {
+                *result = HTBOTTOM;
+            }
+            // top border
+            if (y < winrect.top + border_width) {
+                *result = HTTOP;
+            }
+        }
+        if (resizeWidth && resizeHeight) {
+            // bottom left corner
+            if (x >= winrect.left && x < winrect.left + border_width && y < winrect.bottom &&
+                y >= winrect.bottom - border_width) {
+                *result = HTBOTTOMLEFT;
+            }
+            // bottom right corner
+            if (x < winrect.right && x >= winrect.right - border_width && y < winrect.bottom &&
+                y >= winrect.bottom - border_width) {
+                *result = HTBOTTOMRIGHT;
+            }
+            // top left corner
+            if (x >= winrect.left && x < winrect.left + border_width && y >= winrect.top &&
+                y < winrect.top + border_width) {
+                *result = HTTOPLEFT;
+            }
+            // top right corner
+            if (x < winrect.right && x >= winrect.right - border_width && y >= winrect.top &&
+                y < winrect.top + border_width) {
+                *result = HTTOPRIGHT;
+            }
+        }
+
+        if (*result == 0) {
+            bool client = false;
+
+            for (QWidget *widget : this->ui_.buttons) {
+                if (widget->geometry().contains(point)) {
+                    client = true;
+                }
+            }
+
+            if (this->ui_.layoutBase->geometry().contains(point)) {
+                client = true;
+            }
+
+            if (client) {
+                *result = HTCLIENT;
+            } else {
+                *result = HTCAPTION;
+            }
+        }
+
+        return true;
+    } else if (this->flags_ & FramelessDraggable) {
+        *result = 0;
+        bool client = false;
+
+        if (auto widget = this->childAt(point)) {
+            std::function<bool(QWidget *)> recursiveCheckMouseTracking;
+            recursiveCheckMouseTracking = [&](QWidget *widget) {
+                if (widget == nullptr) {
+                    return false;
+                }
+
+                if (widget->hasMouseTracking()) {
+                    return true;
+                }
+
+                return recursiveCheckMouseTracking(widget->parentWidget());
+            };
+
+            if (recursiveCheckMouseTracking(widget)) {
+                client = true;
+            }
+        }
+
+        if (client) {
+            *result = HTCLIENT;
+        } else {
+            *result = HTCAPTION;
+        }
+
+        return true;
+    }
+#endif
+
+    return false;
 }
 
 }  // namespace chatterino
