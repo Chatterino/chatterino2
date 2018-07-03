@@ -90,17 +90,17 @@ public:
         }
     }
 
-    virtual int rowCount(const QModelIndex &parent) const
+    int rowCount(const QModelIndex &parent) const override
     {
         return this->rows.size();
     }
 
-    virtual int columnCount(const QModelIndex &parent) const
+    int columnCount(const QModelIndex &parent) const override
     {
         return this->_columnCount;
     }
 
-    virtual QVariant data(const QModelIndex &index, int role) const
+    QVariant data(const QModelIndex &index, int role) const override
     {
         int row = index.row(), column = index.column();
         assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
@@ -108,7 +108,7 @@ public:
         return rows[row].items[column]->data(role);
     }
 
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role)
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override
     {
         int row = index.row(), column = index.column();
         assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
@@ -132,7 +132,7 @@ public:
         return true;
     }
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (orientation != Qt::Horizontal) {
             return QVariant();
@@ -147,7 +147,7 @@ public:
     }
 
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
-                       int role = Qt::DisplayRole)
+                       int role = Qt::DisplayRole) override
     {
         if (orientation != Qt::Horizontal) {
             return false;
@@ -159,7 +159,7 @@ public:
         return true;
     }
 
-    Qt::ItemFlags flags(const QModelIndex &index) const
+    Qt::ItemFlags flags(const QModelIndex &index) const override
     {
         int row = index.row(), column = index.column();
         assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
@@ -180,7 +180,7 @@ public:
         this->vector->removeItem(signalVectorRow);
     }
 
-    virtual bool removeRows(int row, int count, const QModelIndex &parent) override
+    bool removeRows(int row, int count, const QModelIndex &parent) override
     {
         if (count != 1) {
             return false;
