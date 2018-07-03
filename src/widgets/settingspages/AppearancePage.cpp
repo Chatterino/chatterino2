@@ -113,7 +113,20 @@ AppearancePage::AppearancePage()
         messages.append(this->createCheckBox(LAST_MSG, app->settings->showLastMessageIndicator));
         {
             auto *combo = new QComboBox(this);
-            combo->addItems({"Ver", "Solid"});
+            combo->addItems({"Dotted", "Solid"});
+
+            const auto currentIndex = []() -> int {
+                switch (getApp()->settings->lastMessagePattern.getValue()) {
+                    case Qt::SolidLine: {
+                        return 1;
+                    }
+                    default:
+                    case Qt::VerPattern: {
+                        return 0;
+                    }
+                }
+            }();
+            combo->setCurrentIndex(currentIndex);
 
             QObject::connect(combo,
                              static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
