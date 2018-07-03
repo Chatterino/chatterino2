@@ -9,7 +9,7 @@ namespace chatterino {
 
 class AttachedWindow : public QWidget
 {
-    AttachedWindow(void *target_, int asdf);
+    AttachedWindow(void *_target, int _yOffset);
 
 public:
     struct GetArgs {
@@ -37,8 +37,10 @@ private:
     int currentYOffset_;
     int width_ = 360;
     int height_ = -1;
+#ifdef USEWINSDK
     bool validProcessName_ = false;
     bool attached_ = false;
+#endif
     QTimer timer_;
 
     struct {
