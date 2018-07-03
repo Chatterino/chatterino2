@@ -85,6 +85,14 @@ AppearancePage::AppearancePage()
             auto *combo = new QComboBox(this);
             combo->addItems({"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
                              "13", "14", "15"});
+            const auto currentIndex = []() -> int {
+                auto val = getApp()->settings->collpseMessagesMinLines.getValue();
+                if (val > 0) {
+                    --val;
+                }
+                return val;
+            }();
+            combo->setCurrentIndex(currentIndex);
 
             QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
                 getApp()->settings->collpseMessagesMinLines = str.toInt();
