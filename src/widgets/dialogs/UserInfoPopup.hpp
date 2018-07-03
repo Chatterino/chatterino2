@@ -2,7 +2,6 @@
 
 #include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/StreamView.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -30,8 +29,6 @@ private:
 
     QString userName_;
     QString userId_;
-    QString answer;
-    QMessageBox messageBox;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged;

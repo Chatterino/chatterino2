@@ -7,7 +7,6 @@
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
-#include "widgets/StreamView.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
@@ -15,7 +14,6 @@
 #include <QCheckBox>
 #include <QDesktopServices>
 #include <QLabel>
-#include <QMessageBox>
 
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
