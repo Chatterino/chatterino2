@@ -397,7 +397,7 @@ HEADERS  += \
     src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/FeelPage.hpp
 
-RESOURCES += \
+RESOURCES += \ 
     resources/resources.qrc \
 
 DISTFILES +=
@@ -433,6 +433,7 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
