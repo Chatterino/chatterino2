@@ -164,6 +164,7 @@ SOURCES += \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
     src/widgets/dialogs/LoginDialog.cpp \
+    src/widgets/dialogs/LogsPopup.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
@@ -223,7 +224,8 @@ SOURCES += \
     src/singletons/Resources.cpp \
     src/singletons/Settings.cpp \
     src/singletons/Updates.cpp \
-    src/singletons/Theme.cpp
+    src/singletons/Theme.cpp \
+    src/widgets/dialogs/LogsPopup.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -327,6 +329,7 @@ HEADERS  += \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \
+    src/widgets/dialogs/LogsPopup.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
@@ -392,7 +395,8 @@ HEADERS  += \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Theme.hpp \
     src/common/SimpleSignalVector.hpp \
-    src/common/SignalVector.hpp
+    src/common/SignalVector.hpp \
+    src/widgets/dialogs/LogsPopup.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

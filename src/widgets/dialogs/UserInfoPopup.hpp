@@ -2,6 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/StreamView.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -29,6 +30,8 @@ private:
 
     QString userName_;
     QString userId_;
+    QString answer;
+    QMessageBox messageBox;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged;
@@ -36,7 +39,8 @@ private:
     void installEvents();
 
     void updateUserData();
-    void getLogs();
+    void getLogviewerLogs();
+    void getOverrustleLogs();
     void loadAvatar(const QUrl &url);
 
     std::shared_ptr<bool> hack_;
