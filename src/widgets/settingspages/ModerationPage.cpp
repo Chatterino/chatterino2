@@ -1,6 +1,8 @@
 #include "ModerationPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/moderationactions/ModerationActionModel.hpp"
+#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
@@ -8,6 +10,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
+#include <QFileDialog>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -82,7 +85,7 @@ ModerationPage::ModerationPage()
         // Logs end
     }
 
-    auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation mode");
+    auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation buttons");
     {
         // clang-format off
         auto label = modMode.emplace<QLabel>("Click the moderation mod button (<img width='18' height='18' src=':/images/moderatormode_disabled.png'>) in a channel that you moderate to enable moderator mode.<br>");
@@ -97,26 +100,17 @@ ModerationPage::ModerationPage()
         //                         app->settings->timeoutAction));
         //        }
 
-        // auto modButtons =
-        //     modMode.emplace<QGroupBox>("Custom moderator buttons").setLayoutType<QVBoxLayout>();
-        // {
-        //     auto label2 =
-        //         modButtons.emplace<QLabel>("One action per line. {user} will be replaced with the
-        //         "
-        //                                    "username.<br>Example `/timeout {user} 120`<br>");
-        //     label2->setWordWrap(true);
+        EditableModelView *view =
+            modMode.emplace<EditableModelView>(app->moderationActions->createModel(nullptr))
+                .getElement();
 
-        //     auto text = modButtons.emplace<QTextEdit>().getElement();
+        view->setTitles({"Actions"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-        //     text->setPlainText(app->moderationActions->items);
-
-        //     QObject::connect(text, &QTextEdit::textChanged, this,
-        //                      [this] { this->itemsChangedTimer.start(200); });
-
-        //     QObject::connect(&this->itemsChangedTimer, &QTimer::timeout, this, [text, app]() {
-        //         app->windows->moderationActions = text->toPlainText();
-        //     });
-        // }
+        view->addButtonPressed.connect([] {
+            getApp()->moderationActions->items.appendItem(ModerationAction("/timeout {user} 300"));
+        });
 
         /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
         {

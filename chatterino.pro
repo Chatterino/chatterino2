@@ -223,7 +223,8 @@ SOURCES += \
     src/singletons/Resources.cpp \
     src/singletons/Settings.cpp \
     src/singletons/Updates.cpp \
-    src/singletons/Theme.cpp
+    src/singletons/Theme.cpp \
+    src/controllers/moderationactions/ModerationActionModel.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -393,7 +394,8 @@ HEADERS  += \
     src/singletons/Theme.hpp \
     src/common/SimpleSignalVector.hpp \
     src/common/SignalVector.hpp \
-    src/common/Singleton.hpp
+    src/common/Singleton.hpp \
+    src/controllers/moderationactions/ModerationActionModel.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
