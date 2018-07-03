@@ -1,4 +1,4 @@
-#include "AppearancePage.hpp"
+#include "LookPage.hpp"
 
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"
@@ -164,7 +164,7 @@ void AppearancePage::addEmotesGroup(QVBoxLayout &layout)
     */
     box.append(this->createCheckBox("Animated emotes", getSettings()->enableGifAnimations));
 
-    auto scaleBox = box.emplace<QHBoxLayout>();
+    auto scaleBox = box.emplace<QHBoxLayout>().withoutMargin();
     {
         scaleBox.emplace<QLabel>("Size:");
 

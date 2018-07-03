@@ -192,8 +192,6 @@ SOURCES += \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
-    src/widgets/settingspages/AppearancePage.cpp \
-    src/widgets/settingspages/BehaviourPage.cpp \
     src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/EmotesPage.cpp \
@@ -224,7 +222,9 @@ SOURCES += \
     src/singletons/Settings.cpp \
     src/singletons/Updates.cpp \
     src/singletons/Theme.cpp \
-    src/controllers/moderationactions/ModerationActionModel.cpp
+    src/controllers/moderationactions/ModerationActionModel.cpp \
+    src/widgets/settingspages/LookPage.cpp \
+    src/widgets/settingspages/FeelPage.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -358,8 +358,6 @@ HEADERS  += \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
-    src/widgets/settingspages/AppearancePage.hpp \
-    src/widgets/settingspages/BehaviourPage.hpp \
     src/widgets/settingspages/BrowserExtensionPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/EmotesPage.hpp \
@@ -395,7 +393,9 @@ HEADERS  += \
     src/common/SimpleSignalVector.hpp \
     src/common/SignalVector.hpp \
     src/common/Singleton.hpp \
-    src/controllers/moderationactions/ModerationActionModel.hpp
+    src/controllers/moderationactions/ModerationActionModel.hpp \
+    src/widgets/settingspages/LookPage.hpp \
+    src/widgets/settingspages/FeelPage.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
