@@ -50,6 +50,8 @@ public:
         }
     }
 
+    virtual bool isSorted() const = 0;
+
 protected:
     std::vector<TVectorItem> vector;
     QTimer itemsChangedTimer;
@@ -101,6 +103,11 @@ public:
         this->invokeDelayedItemsChanged();
         return index;
     }
+
+    virtual bool isSorted() const override
+    {
+        return false;
+    }
 };
 
 template <typename TVectorItem, typename Compare>
@@ -119,6 +126,11 @@ public:
         this->itemInserted.invoke(args);
         this->invokeDelayedItemsChanged();
         return index;
+    }
+
+    virtual bool isSorted() const override
+    {
+        return true;
     }
 };
 
