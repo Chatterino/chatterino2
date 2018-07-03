@@ -43,6 +43,43 @@ BehaviourPage::BehaviourPage()
         form->addRow("", this->createCheckBox("Show message length while typing",
                                               getSettings()->showMessageLength));
         form->addRow("", this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
+        {
+            auto *combo = new QComboBox(this);
+            combo->addItems({"Dotted", "Solid"});
+
+            const auto currentIndex = []() -> int {
+                switch (getApp()->settings->lastMessagePattern.getValue()) {
+                    case Qt::SolidLine: {
+                        return 1;
+                    }
+                    default:
+                    case Qt::VerPattern: {
+                        return 0;
+                    }
+                }
+            }();
+            combo->setCurrentIndex(currentIndex);
+
+            QObject::connect(combo,
+                             static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                             [](int index) {
+                                 Qt::BrushStyle brush;
+                                 switch (index) {
+                                     case 1:
+                                         brush = Qt::SolidPattern;
+                                         break;
+                                     default:
+                                     case 0:
+                                         brush = Qt::VerPattern;
+                                         break;
+                                 }
+                                 getSettings()->lastMessagePattern = brush;
+                             });
+
+            auto hbox = form.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Last message indicator pattern");
+            hbox.append(combo);
+        }
 
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
