@@ -28,6 +28,7 @@ public:
         TwitchWatching,
         TwitchMentions,
         TwitchEnd,
+        Misc
     };
 
     explicit Channel(const QString &_name, Type type);

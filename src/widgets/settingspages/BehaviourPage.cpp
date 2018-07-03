@@ -15,6 +15,7 @@
 #endif
 #define INPUT_EMPTY "Hide input box when empty"
 #define PAUSE_HOVERING "When hovering"
+#define LAST_MSG "Mark the last message you read (dotted line)"
 
 #define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
 
@@ -38,6 +39,11 @@ BehaviourPage::BehaviourPage()
         form->addRow(
             "", this->createCheckBox("Show which users parted the channel (up to 1000 chatters)",
                                      app->settings->showParts));
+
+        form->addRow("", this->createCheckBox("Show message length while typing",
+                                              getSettings()->showMessageLength));
+        form->addRow("", this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
+
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
 
@@ -76,7 +82,7 @@ QSlider *BehaviourPage::createMouseScrollSlider()
     auto slider = new QSlider(Qt::Horizontal);
 
     float currentValue = app->settings->mouseScrollMultiplier;
-    int sliderValue = ((currentValue - 0.1f) / 2.f) * 99.f;
+    int sliderValue = int(((currentValue - 0.1f) / 2.f) * 99.f);
     slider->setValue(sliderValue);
 
     QObject::connect(slider, &QSlider::valueChanged, [=](int newValue) {
