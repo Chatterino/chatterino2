@@ -103,6 +103,30 @@ AppearancePage::AppearancePage()
                                              app->settings->showMessageLength));
 
         messages.append(this->createCheckBox(LAST_MSG, app->settings->showLastMessageIndicator));
+        {
+            auto *combo = new QComboBox(this);
+            combo->addItems({"Ver", "Solid"});
+
+            QObject::connect(combo,
+                             static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                             [](int index) {
+                                 Qt::BrushStyle brush;
+                                 switch (index) {
+                                     case 1:
+                                         brush = Qt::SolidPattern;
+                                         break;
+                                     default:
+                                     case 0:
+                                         brush = Qt::VerPattern;
+                                         break;
+                                 }
+                                 getApp()->settings->lastMessagePattern = brush;
+                             });
+
+            auto hbox = messages.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Last message indicator pattern");
+            hbox.append(combo);
+        }
     }
 
     auto emotes = layout.emplace<QGroupBox>("Emotes").setLayoutType<QVBoxLayout>();
