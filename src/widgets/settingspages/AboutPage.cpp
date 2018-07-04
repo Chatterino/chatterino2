@@ -1,5 +1,6 @@
 #include "AboutPage.hpp"
 
+#include "debug/Log.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/helper/SignalLabel.hpp"
@@ -8,6 +9,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QTextEdit>
+#include <QTextStream>
 #include <QVBoxLayout>
 
 #define PIXMAP_WIDTH 500
@@ -103,6 +105,67 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Messenger emojis provided by <a href=\"https://facebook.com\">Facebook</a>");
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>");
             // clang-format on
+        }
+
+        // Contributors
+        auto contributors = layout.emplace<QGroupBox>("Contributors");
+        {
+            auto l = contributors.emplace<QVBoxLayout>();
+
+            QFile contributorsFile(":/contributors.txt");
+            contributorsFile.open(QFile::ReadOnly);
+
+            QTextStream stream(&contributorsFile);
+            stream.setCodec("UTF-8");
+
+            QString line;
+
+            while (stream.readLineInto(&line)) {
+                if (line.isEmpty() || line.startsWith('#')) {
+                    continue;
+                }
+
+                QStringList contributorParts = line.split("|");
+
+                if (contributorParts.size() != 4) {
+                    Log("Missing parts in line '{}'", line);
+                    continue;
+                }
+
+                QString username = contributorParts[0].trimmed();
+                QString url = contributorParts[1].trimmed();
+                QString avatarUrl = contributorParts[2].trimmed();
+                QString role = contributorParts[3].trimmed();
+
+                auto *usernameLabel = new QLabel("<a href=\"" + url + "\">" + username + "</a>");
+                usernameLabel->setOpenExternalLinks(true);
+                auto *roleLabel = new QLabel(role);
+
+                auto contributorBox2 = l.emplace<QHBoxLayout>();
+
+                const auto addAvatar = [&avatarUrl, &contributorBox2] {
+                    if (!avatarUrl.isEmpty()) {
+                        QPixmap avatarPixmap;
+                        avatarPixmap.load(avatarUrl);
+
+                        auto avatar = contributorBox2.emplace<QLabel>();
+                        avatar->setPixmap(avatarPixmap);
+                        avatar->setFixedSize(64, 64);
+                        avatar->setScaledContents(true);
+                    }
+                };
+
+                const auto addLabels = [&contributorBox2, &usernameLabel, &roleLabel] {
+                    auto labelBox = new QVBoxLayout();
+                    contributorBox2->addLayout(labelBox);
+
+                    labelBox->addWidget(usernameLabel);
+                    labelBox->addWidget(roleLabel);
+                };
+
+                addLabels();
+                addAvatar();
+            }
         }
     }
 

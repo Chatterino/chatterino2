@@ -1,0 +1,34 @@
+# To add yourself to this list, or to update one of your fields, send a PR with this file updated
+# This list is displayed in the About section of the preferences window
+# TODO: Parse this into a CONTRIBUTORS.md too
+
+fourtf | https://fourtf.com | avatars/fourtf.png | Author, main developer
+pajlada | https://pajlada.se | avatars/pajlada.png | Collaborator, co-developer
+
+Cranken | https://github.com/Cranken | | Contributor
+hemirt | https://github.com/hemirt | | Contributor
+LajamerrMittisdine | https://github.com/LajamerrMittisdine | | Contributor
+coral | https://github.com/coral |  | Contributor, design
+apa420 | https://github.com/apa420 |  | Contributor
+DatGuy1 | https://github.com/DatGuy1 |  | Contributor
+Confuseh | https://github.com/Confuseh |  | Contributor
+ch-ems | https://github.com/ch-ems |  | Contributor
+Bur0k | https://github.com/Bur0k |  | Contributor
+nuuls | https://github.com/nuuls |  | Contributor
+Chronophylos | https://github.com/Chronophylos |  | Contributor
+Ckath | https://github.com/Ckath |  | Contributor
+matijakevic | https://github.com/matijakevic |  | Contributor
+nforro | https://github.com/nforro |  | Contributor
+vanolpfan | https://github.com/vanolpfan |  | Contributor
+
+Defman21 | https://github.com/Defman21 |  | Documentation
+Jarel1337 | https://github.com/Jarel1337 |  | Documentation
+Ian321 | https://github.com/Ian321 |  | Documentation
+Yardanico | https://github.com/Yardanico |  | Documentation
+huti26 | https://github.com/huti26 |  | Documentation
+chrisduerr | https://github.com/chrisduerr |  | Documentation
+23rd | https://github.com/23rd |  | Documentation
+TranRed | https://github.com/TranRed |  | Documentation
+
+# Template
+# Name | Link | Avatar (Loaded as a resource) | Title (description of work done). Contributor is what we use for someone who has contributed in general (like sent a programming-related PR)
