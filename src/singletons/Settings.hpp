@@ -108,6 +108,8 @@ public:
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
+    BoolSetting usernameBold = {"/appearence/messages/boldUsernames", false};
+
     /// External tools
     // Streamlink
     BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath", false};
