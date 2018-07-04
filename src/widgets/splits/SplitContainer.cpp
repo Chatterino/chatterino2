@@ -1148,4 +1148,16 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+void SplitContainer::ResizeHandle::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    event->accept();
+
+    for (auto &sibling : this->node->getParent()->getChildren()) {
+        sibling->flexH = 1;
+        sibling->flexV = 1;
+    }
+
+    this->parent->layout();
+}
+
 }  // namespace chatterino
