@@ -33,39 +33,25 @@ void LogsPopup::initLayout()
     }
 }
 
-void LogsPopup::setInfo(ChannelPtr channel, QString username)
+void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 {
     this->channel_ = channel;
-    this->userName = username;
-    this->setWindowTitle("Logs for " + userName + " in " + channel->name + "'s history");
+    this->userName = userName;
+    this->setWindowTitle("Logs for " + this->userName + " in " + this->channel_->name +
+                         "'s history");
     this->getLogviewerLogs();
 }
 
-void LogsPopup::setupView()
+void LogsPopup::setupView(std::vector<MessagePtr> messages)
 {
-    ChannelPtr logsChannel(new Channel("logs", Channel::None));
-    QStringList output = this->answer.split("<br>", QString::SkipEmptyParts);
-    std::vector<MessagePtr> messages;
-
-    for (size_t i = 0; i < output.size(); i++) {
-        if (this->usedLogviewer) {
-            MessageParseArgs args;
-            auto ircMessage = Communi::IrcMessage::fromData(output[i].toUtf8(), nullptr);
-            auto privMsg = static_cast<Communi::IrcPrivateMessage *>(ircMessage);
-            TwitchMessageBuilder builder(logsChannel.get(), privMsg, args);
-            if (!builder.isIgnored()) {
-                messages.push_back(builder.build());
-            }
-        } else {
-            MessagePtr message(new Message);
-            message->addElement(new TimestampElement(this->rustleTime));
-            message->addElement(
-                new TextElement(this->userName, MessageElement::Username, MessageColor::System));
-            message->addElement(
-                new TextElement(output[i], MessageElement::Text, MessageColor::Text));
-            messages.push_back(message);
-        }
-    }
+    ChannelPtr logsChannel(new Channel("logs", Channel::Misc));
+    /*
+                MessagePtr message(new Message);
+                message->addElement(new TimestampElement(this->rustleTime));
+                message->addElement(
+                    new TextElement(this->userName, MessageElement::Username,
+       MessageColor::System)); message->addElement( new TextElement(output[line],
+       MessageElement::Text, MessageColor::Text)); messages.push_back(message);*/
     logsChannel->addMessagesAtStart(messages);
     this->channelView->setChannel(logsChannel);
 }
@@ -73,9 +59,11 @@ void LogsPopup::setupView()
 void LogsPopup::getLogviewerLogs()
 {
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    if (twitchChannel == nullptr) {
+        return;
+    }
 
     QString channelName = twitchChannel->name;
-    this->channelName_ = channelName;
 
     QString url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
                       .arg(channelName, this->userName);
@@ -88,17 +76,30 @@ void LogsPopup::getLogviewerLogs()
         return true;
     });
 
-    req.getJSON([this, channelName](QJsonObject &dataCbenni) {
-        QJsonValue before = dataCbenni.value("before");
-        for (int i = before.toArray().size() - 1; i >= 0; --i) {
-            int index = before.toArray().size() - 1 - i;
-            QString message = before[index]["text"].toString();
+    req.getJSON([this, channelName](QJsonObject &data) {
+
+        std::vector<MessagePtr> messages;
+        ChannelPtr logsChannel(new Channel("logs", Channel::None));
+
+        QJsonValue before = data.value("before");
+
+        for (auto i : before.toArray()) {
+            auto messageObject = i.toObject();
+            QString message = messageObject.value("text").toString();
+
             // Hacky way to fix the timestamp
             message.insert(1, "historical=1;");
-            message.insert(1, QString("tmi-sent-ts=%10000;").arg(before[index]["time"].toInt()));
-            this->answer += message + "<br>";
+            message.insert(1, QString("tmi-sent-ts=%10000;").arg(messageObject["time"].toInt()));
+
+            MessageParseArgs args;
+            auto ircMessage = Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
+            auto privMsg = static_cast<Communi::IrcPrivateMessage *>(ircMessage);
+            TwitchMessageBuilder builder(logsChannel.get(), privMsg, args);
+            if (!builder.isIgnored()) {
+                messages.push_back(builder.build());
+            }
         };
-        this->setupView();
+        this->setupView(messages);
     });
 
     req.execute();
@@ -106,17 +107,17 @@ void LogsPopup::getLogviewerLogs()
 
 void LogsPopup::getOverrustleLogs()
 {
-    this->usedLogviewer = false;
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-    QString channelName = this->channelName_;
+    QString channelName = twitchChannel->name;
 
-    QString urlRustle("https://overrustlelogs.net/api/v1/stalk/" + channelName + "/" +
-                      this->userName + ".json?limit=500");
+    QString url("https://overrustlelogs.net/api/v1/stalk/" + channelName + "/" + this->userName +
+                ".json?limit=500");
 
-    NetworkRequest req(urlRustle);
+    NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.onError([this, channelName](int errorCode) {
-        this->hide();
+        this->close();
         QMessageBox *box = new QMessageBox(QMessageBox::Information, "Error getting logs",
                                            "No logs could be found for channel " + channelName);
         box->setAttribute(Qt::WA_DeleteOnClose);
@@ -125,17 +126,25 @@ void LogsPopup::getOverrustleLogs()
         return true;
     });
 
-    req.getJSON([this, channelName](QJsonObject &rustleData) {
-        if (rustleData.contains("lines")) {
-            QJsonArray messages = rustleData.value("lines").toArray();
-            for (auto i : messages) {
+    req.getJSON([this, channelName](QJsonObject &data) {
+        std::vector<MessagePtr> messages;
+        if (data.contains("lines")) {
+            QJsonArray dataMessages = data.value("lines").toArray();
+            for (auto i : dataMessages) {
                 QJsonObject singleMessage = i.toObject();
-                this->rustleTime =
+                QTime timeStamp =
                     QDateTime::fromSecsSinceEpoch(singleMessage.value("timestamp").toInt()).time();
-                this->answer += QString("%1<br>").arg(singleMessage.value("text").toString());
+
+                MessagePtr message(new Message);
+                message->addElement(new TimestampElement(timeStamp));
+                message->addElement(new TextElement(this->userName, MessageElement::Username,
+                                                    MessageColor::System));
+                message->addElement(new TextElement(singleMessage.value("text").toString(),
+                                                    MessageElement::Text, MessageColor::Text));
+                messages.push_back(message);
             }
         }
-        this->setupView();
+        this->setupView(messages);
     });
     req.execute();
 }

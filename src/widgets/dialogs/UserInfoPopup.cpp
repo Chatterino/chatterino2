@@ -71,7 +71,7 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights").assign(&this->ui_.ignoreHighlights);
         auto viewLogs = user.emplace<RippleEffectLabel>(this).assign(&this->ui_.viewLogs);
-        this->ui_.viewLogs->getLabel().setText("View logs");
+        this->ui_.viewLogs->getLabel().setText("Logs");
 
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -83,8 +83,9 @@ UserInfoPopup::UserInfoPopup()
         user->addStretch(1);
 
         QObject::connect(viewLogs.getElement(), &RippleEffectLabel::clicked, [this] {
-            LogsPopup *logs = new LogsPopup();
+            auto logs = new LogsPopup();
             logs->setInfo(this->channel_, this->userName_);
+            logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
         });
 
@@ -373,11 +374,9 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 }
                 a->setBorderColor(color1);
 
-                QObject::connect(
-                    a.getElement(), &RippleEffectLabel2::clicked,
-                    [this, timeout = std::get<1>(item)] {
-                        this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
-                    });
+                QObject::connect(a.getElement(), &RippleEffectLabel2::clicked, [
+                    this, timeout = std::get<1>(item)
+                ] { this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout)); });
             }
         }
     };

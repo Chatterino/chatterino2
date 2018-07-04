@@ -13,22 +13,18 @@ class LogsPopup : public BaseWindow
 public:
     LogsPopup();
 
-    void setInfo(std::shared_ptr<Channel> channel, QString username);
+    void setInfo(std::shared_ptr<Channel> channel, QString userName);
 
 private:
-    ChannelView *channelView;
-    ChannelPtr channel_ = nullptr;
+    ChannelView *channelView = nullptr;
+    ChannelPtr channel_ = Channel::getEmpty();
 
     QString userName;
-    QString channelName_;
-    QString answer;
-
-    QTime rustleTime;
 
     bool usedLogviewer = true;
 
     void initLayout();
-    void setupView();
+    void setupView(std::vector<MessagePtr> messages);
     void getOverrustleLogs();
     void getLogviewerLogs();
 };

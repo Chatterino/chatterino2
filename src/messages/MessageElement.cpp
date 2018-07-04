@@ -211,7 +211,6 @@ TimestampElement::TimestampElement(QTime _time)
     , time(_time)
     , element(this->formatTime(_time))
 {
-    qDebug() << _time.toString();
     assert(this->element != nullptr);
 }
 

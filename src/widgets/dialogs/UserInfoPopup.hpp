@@ -36,8 +36,6 @@ private:
     void installEvents();
 
     void updateUserData();
-    void getLogviewerLogs();
-    void getOverrustleLogs();
     void loadAvatar(const QUrl &url);
 
     std::shared_ptr<bool> hack_;
