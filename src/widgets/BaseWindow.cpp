@@ -64,6 +64,8 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->updateScale();
 
     CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
+
+    //    QTimer::this->scaleChangedEvent(this->getScale());
 }
 
 float BaseWindow::getScale() const
@@ -551,6 +553,8 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         const MARGINS shadow = {8, 8, 8, 8};
         DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
     }
+
+    this->calcButtonsSizes();
 
     return true;
 #endif
