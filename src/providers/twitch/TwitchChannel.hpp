@@ -54,10 +54,9 @@ public:
     bool canSendMessage() const override;
     void sendMessage(const QString &message) override;
 
-    bool isMod() const override;
+    virtual bool isMod() const override;
     void setMod(bool value);
-    bool isBroadcaster() const override;
-    bool hasModRights();
+    virtual bool isBroadcaster() const override;
 
     void addRecentChatter(const std::shared_ptr<Message> &message) final;
     void addJoinedUser(const QString &user);

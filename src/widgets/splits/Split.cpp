@@ -193,11 +193,13 @@ void Split::setChannel(IndirectChannel newChannel)
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
 
     if (tc != nullptr) {
-        this->usermodeChangedConnection =
-            tc->userStateChanged.connect([this] { this->header.updateModerationModeIcon(); });
+        this->usermodeChangedConnection = tc->userStateChanged.connect([this] {
+            this->header.updateModerationModeIcon();
+            this->header.updateRoomModes();
+        });
 
         this->roomModeChangedConnection =
-            tc->roomModesChanged.connect([this] { this->header.updateModes(); });
+            tc->roomModesChanged.connect([this] { this->header.updateRoomModes(); });
     }
 
     this->indirectChannelChangedConnection = newChannel.getChannelChanged().connect([this] {  //
@@ -206,7 +208,7 @@ void Split::setChannel(IndirectChannel newChannel)
 
     this->header.updateModerationModeIcon();
     this->header.updateChannelText();
-    this->header.updateModes();
+    this->header.updateRoomModes();
 
     this->channelChanged.invoke();
 }

@@ -37,13 +37,18 @@ public:
     bool getDim() const;
     qreal getCurrentDimAmount() const;
 
+    void setEnable(bool value);
+    bool getEnable() const;
+
     void setBorderColor(const QColor &color);
     const QColor &getBorderColor() const;
 
 signals:
     void clicked();
+    void leftMousePress();
 
 protected:
+    bool enabled_ = true;
     bool selected_ = false;
     bool mouseOver_ = false;
     bool mouseDown_ = false;

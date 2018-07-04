@@ -34,7 +34,7 @@ public:
     // Update channel text from chat widget
     void updateChannelText();
     void updateModerationModeIcon();
-    void updateModes();
+    void updateRoomModes();
 
 protected:
     virtual void scaleChangedEvent(float) override;
@@ -52,6 +52,8 @@ private:
     void rightButtonClicked();
     void initializeChannelSignals();
     void addModeActions(QMenu &menu);
+    void setupModeLabel(RippleEffectLabel &label);
+    void addDropdownItems(RippleEffectButton *label);
 
     Split *const split;
 
@@ -65,9 +67,8 @@ private:
     RippleEffectButton *dropdownButton = nullptr;
     //    Label *titleLabel;
     Label *titleLabel = nullptr;
-    Label *modeButton = nullptr;
+    RippleEffectLabel *modeButton = nullptr;
     RippleEffectButton *moderationButton = nullptr;
-    RippleEffectButton *moderationExtraButton = nullptr;
 
     QMenu dropdownMenu;
     QMenu modeMenu;
@@ -80,8 +81,6 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> managedConnections;
 
 public slots:
-    void addDropdownItems(RippleEffectButton *label);
-    void addModeItems(RippleEffectLabel *label);
 
     void menuMoveSplit();
     void menuReloadChannelEmotes();

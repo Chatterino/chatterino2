@@ -197,12 +197,6 @@ bool TwitchChannel::isBroadcaster() const
     return this->name == app->accounts->twitch.getCurrent()->getUserName();
 }
 
-bool TwitchChannel::hasModRights()
-{
-    // fourtf: check if staff
-    return this->isMod() || this->isBroadcaster();
-}
-
 void TwitchChannel::addRecentChatter(const std::shared_ptr<Message> &message)
 {
     assert(!message->loginName.isEmpty());

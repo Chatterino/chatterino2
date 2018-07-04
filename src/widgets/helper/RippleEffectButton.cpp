@@ -46,6 +46,18 @@ bool RippleEffectButton::getDim() const
     return this->dimPixmap_;
 }
 
+void RippleEffectButton::setEnable(bool value)
+{
+    this->enabled_ = value;
+
+    this->update();
+}
+
+bool RippleEffectButton::getEnable() const
+{
+    return this->enabled_;
+}
+
 qreal RippleEffectButton::getCurrentDimAmount() const
 {
     return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
@@ -54,6 +66,8 @@ qreal RippleEffectButton::getCurrentDimAmount() const
 void RippleEffectButton::setBorderColor(const QColor &color)
 {
     this->borderColor_ = color;
+
+    this->update();
 }
 
 const QColor &RippleEffectButton::getBorderColor() const
@@ -68,7 +82,7 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (!this->pixmap_.isNull()) {
-        if (!this->mouseOver_ && this->dimPixmap_) {
+        if (!this->mouseOver_ && this->dimPixmap_ && this->enabled_) {
             painter.setOpacity(this->getCurrentDimAmount());
         }
 
@@ -96,6 +110,10 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
 void RippleEffectButton::fancyPaint(QPainter &painter)
 {
+    if (!this->enabled_) {
+        return;
+    }
+
     painter.setRenderHint(QPainter::HighQualityAntialiasing);
     painter.setRenderHint(QPainter::Antialiasing);
     QColor c;
@@ -144,6 +162,10 @@ void RippleEffectButton::leaveEvent(QEvent *)
 
 void RippleEffectButton::mousePressEvent(QMouseEvent *event)
 {
+    if (!this->enabled_) {
+        return;
+    }
+
     if (event->button() != Qt::LeftButton) {
         return;
     }
@@ -151,10 +173,16 @@ void RippleEffectButton::mousePressEvent(QMouseEvent *event)
     this->clickEffects_.push_back(ClickEffect(event->pos()));
 
     this->mouseDown_ = true;
+
+    emit this->leftMousePress();
 }
 
 void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (!this->enabled_) {
+        return;
+    }
+
     if (event->button() != Qt::LeftButton) {
         return;
     }
@@ -168,6 +196,10 @@ void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
 
 void RippleEffectButton::mouseMoveEvent(QMouseEvent *event)
 {
+    if (!this->enabled_) {
+        return;
+    }
+
     this->mousePos_ = event->pos();
 
     this->update();

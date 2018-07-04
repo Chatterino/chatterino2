@@ -203,6 +203,12 @@ bool Channel::isBroadcaster() const
     return false;
 }
 
+bool Channel::hasModRights() const
+{
+    // fourtf: check if staff
+    return this->isMod() || this->isBroadcaster();
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
     static std::shared_ptr<Channel> channel(new Channel("", None));

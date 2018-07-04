@@ -44,15 +44,23 @@ SplitHeader::SplitHeader(Split *_split)
         title->setHasOffset(false);
 
         // mode button
-        auto mode = layout.emplace<Label>(this).assign(&this->modeButton);
+        auto mode = layout.emplace<RippleEffectLabel>(nullptr).assign(&this->modeButton);
 
         mode->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         mode->hide();
 
-        //        QObject::connect(mode.getElement(), &RippleEffectButton::clicked, this, [this]
-        //        {
-        //            //
-        //        });
+        this->setupModeLabel(*mode);
+
+        QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
+            QTimer::singleShot(80, this, [&, this] {
+                ChannelPtr _channel = this->split->getChannel();
+                if (_channel->hasModRights()) {
+                    this->modeMenu.move(
+                        this->modeButton->mapToGlobal(QPoint(0, this->modeButton->height())));
+                    this->modeMenu.show();
+                }
+            });
+        });
 
         // moderation mode
         auto moderator = layout.emplace<RippleEffectButton>(this).assign(&this->moderationButton);
@@ -66,30 +74,13 @@ SplitHeader::SplitHeader(Split *_split)
 
         this->updateModerationModeIcon();
 
-        //        auto misc = layout.emplace<RippleEffectButton>(this)
-        //    RippleEffectButton *moderationExtraButton;
-
-        //        this->addModeItems(mode.getElement());
-        // moderation misc actions
-        //        QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
-        //            QTimer::singleShot(80, this, [&, this] {
-        //                ChannelPtr _channel = this->split->getChannel();
-        //                if (_channel.get()->isMod() || _channel.get()->isBroadcaster()) {
-        //                    this->modeMenu.move(
-        //                        this->modeButton->mapToGlobal(QPoint(0,
-        //                        this->modeButton->height())));
-        //                    this->modeMenu.show();
-        //                }
-        //            });
-        //        });
-
         // dropdown label
         auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
         //        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
-        QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
+        QObject::connect(dropdown.getElement(), &RippleEffectButton::leftMousePress, this, [this] {
             QTimer::singleShot(80, [&, this] {
                 this->dropdownMenu.move(
                     this->dropdownButton->mapToGlobal(QPoint(0, this->dropdownButton->height())));
@@ -112,6 +103,8 @@ SplitHeader::SplitHeader(Split *_split)
 
     this->managedConnect(app->accounts->twitch.currentUserChanged,
                          [this] { this->updateModerationModeIcon(); });
+
+    this->addModeActions(this->modeMenu);
 
     this->setMouseTracking(true);
 }
@@ -158,9 +151,60 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
     // clang-format on
 }
 
-void SplitHeader::updateModes()
+void SplitHeader::updateRoomModes()
 {
     this->modeUpdateRequested_.invoke();
+}
+
+void SplitHeader::setupModeLabel(RippleEffectLabel &label)
+{
+    this->managedConnections.push_back(this->modeUpdateRequested_.connect([this, &label] {
+        auto twitchChannel = dynamic_cast<TwitchChannel *>(this->split->getChannel().get());
+
+        // return if the channel is not a twitch channel
+        if (twitchChannel == nullptr) {
+            label.hide();
+            return;
+        }
+
+        // set lable enabled
+        label.setEnable(twitchChannel->hasModRights());
+
+        // set the label text
+        auto roomModes = twitchChannel->getRoomModes();
+        QString text;
+
+        if (roomModes.r9k)
+            text += "r9k, ";
+        if (roomModes.slowMode)
+            text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
+        if (roomModes.emoteOnly)
+            text += "emote, ";
+        if (roomModes.submode)
+            text += "sub, ";
+
+        if (text.length() > 2) {
+            text = text.mid(0, text.size() - 2);
+        }
+
+        if (text.isEmpty()) {
+            if (twitchChannel->hasModRights()) {
+                label.getLabel().setText("none");
+                label.show();
+            } else {
+                label.hide();
+            }
+        } else {
+            static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
+            QRegularExpressionMatch match = commaReplacement.match(text);
+            if (match.hasMatch()) {
+                text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+            }
+
+            label.getLabel().setText(text);
+            label.show();
+        }
+    }));
 }
 
 void SplitHeader::addModeActions(QMenu &menu)
@@ -169,6 +213,11 @@ void SplitHeader::addModeActions(QMenu &menu)
     auto setEmote = new QAction("Emote only", this);
     auto setSlow = new QAction("Slow", this);
     auto setR9k = new QAction("R9K", this);
+
+    setSub->setCheckable(true);
+    setEmote->setCheckable(true);
+    setSlow->setCheckable(true);
+    setR9k->setCheckable(true);
 
     menu.addAction(setEmote);
     menu.addAction(setSub);
@@ -189,52 +238,25 @@ void SplitHeader::addModeActions(QMenu &menu)
             setSlow->setChecked(roomModes.slowMode);
             setEmote->setChecked(roomModes.emoteOnly);
             setSub->setChecked(roomModes.submode);
-
-            QString text;
-
-            if (roomModes.r9k)
-                text += "r9k, ";
-            if (roomModes.slowMode)
-                text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
-            if (roomModes.emoteOnly)
-                text += "emote, ";
-            if (roomModes.submode)
-                text += "sub, ";
-
-            if (text.length() > 2) {
-                text = text.mid(0, text.size() - 2);
-            }
-
-            if (text.isEmpty()) {
-                this->modeButton->hide();
-            } else {
-                static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
-                QRegularExpressionMatch match = commaReplacement.match(text);
-                if (match.hasMatch()) {
-                    text =
-                        text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
-                }
-
-                this->modeButton->setText(text);
-                this->modeButton->show();
-            }
         }));
 
-    QObject::connect(setSub, &QAction::triggered, this, [setSub, this]() {
-        QString sendCommand = "/subscribers";
-        if (!setSub->isChecked()) {
-            sendCommand.append("off");
-        };
-        this->split->getChannel().get()->sendMessage(sendCommand);
-    });
+    auto toggle = [this](const QString &_command, QAction *action) mutable {
+        QString command = _command;
 
-    QObject::connect(setEmote, &QAction::triggered, this, [setEmote, this]() {
-        QString sendCommand = "/emoteonly";
-        if (!setEmote->isChecked()) {
-            sendCommand.append("off");
+        if (!action->isChecked()) {
+            command += "off";
         };
-        this->split->getChannel().get()->sendMessage(sendCommand);
-    });
+        action->setChecked(!action->isChecked());
+
+        qDebug() << command;
+        this->split->getChannel().get()->sendMessage(command);
+    };
+
+    QObject::connect(setSub, &QAction::triggered, this,
+                     [setSub, toggle]() mutable { toggle("/subscribers", setSub); });
+
+    QObject::connect(setEmote, &QAction::triggered, this,
+                     [setEmote, toggle]() mutable { toggle("/emoteonly", setEmote); });
 
     QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
         if (!setSlow->isChecked()) {
@@ -252,17 +274,8 @@ void SplitHeader::addModeActions(QMenu &menu)
         }
     });
 
-    QObject::connect(setR9k, &QAction::triggered, this, [setR9k, this]() {
-        QString sendCommand = "/r9kbeta";
-        if (!setR9k->isChecked()) {
-            sendCommand.append("off");
-        };
-        this->split->getChannel().get()->sendMessage(sendCommand);
-    });
-}
-
-void SplitHeader::addModeItems(RippleEffectLabel *)
-{
+    QObject::connect(setR9k, &QAction::triggered, this,
+                     [setR9k, toggle]() mutable { toggle("/r9kbeta", setR9k); });
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -282,7 +295,7 @@ void SplitHeader::initializeChannelSignals()
 
 void SplitHeader::scaleChangedEvent(float scale)
 {
-    int w = 28 * scale;
+    int w = int(28 * scale);
 
     this->setFixedHeight(w);
     this->dropdownButton->setFixedWidth(w);
