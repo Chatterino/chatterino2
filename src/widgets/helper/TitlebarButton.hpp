@@ -7,7 +7,15 @@ namespace chatterino {
 class TitleBarButton : public RippleEffectButton
 {
 public:
-    enum Style { Minimize = 1, Maximize = 2, Unmaximize = 4, Close = 8, User = 16, Settings = 32 };
+    enum Style {
+        None = 0,
+        Minimize = 1,
+        Maximize = 2,
+        Unmaximize = 4,
+        Close = 8,
+        User = 16,
+        Settings = 32
+    };
 
     TitleBarButton();
 

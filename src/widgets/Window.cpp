@@ -10,6 +10,7 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/dialogs/UpdatePromptDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/splits/Split.hpp"
@@ -52,10 +53,23 @@ Window::Window(WindowType _type)
     });
 
     if (this->hasCustomWindowFrame() && _type == Window::Main) {
+        // settings
         this->addTitleBarButton(TitleBarButton::Settings, [app] {
             app->windows->showSettingsDialog();  //
         });
 
+        // updates
+        auto update = this->addTitleBarButton(TitleBarButton::None, [] {});
+        update->setPixmap(QPixmap(":/images/download_update.png"));
+        QObject::connect(update, &TitleBarButton::clicked, this, [this, update] {
+            auto dialog = new UpdatePromptDialog();
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->move(update->mapToGlobal(QPoint(-100 * this->getScale(), update->height())));
+            dialog->show();
+            dialog->raise();
+        });
+
+        // account
         this->userLabel = this->addTitleBarLabel([this, app] {
             app->windows->showAccountSelectPopup(
                 this->userLabel->mapToGlobal(this->userLabel->rect().bottomLeft()));  //

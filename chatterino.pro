@@ -225,7 +225,8 @@ SOURCES += \
     src/singletons/Theme.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
     src/widgets/settingspages/LookPage.cpp \
-    src/widgets/settingspages/FeelPage.cpp
+    src/widgets/settingspages/FeelPage.cpp \
+    src/widgets/dialogs/UpdatePromptDialog.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -398,7 +399,8 @@ HEADERS  += \
     src/common/Singleton.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
     src/widgets/settingspages/LookPage.hpp \
-    src/widgets/settingspages/FeelPage.hpp
+    src/widgets/settingspages/FeelPage.hpp \
+    src/widgets/dialogs/UpdatePromptDialog.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

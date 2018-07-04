@@ -36,7 +36,8 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    void addTitleBarButton(const TitleBarButton::Style &style, std::function<void()> onClicked);
+    TitleBarButton *addTitleBarButton(const TitleBarButton::Style &style,
+                                      std::function<void()> onClicked);
     RippleEffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
     void setStayInScreenRect(bool value);

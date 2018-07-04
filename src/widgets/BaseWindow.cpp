@@ -318,8 +318,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     BaseWidget::mouseMoveEvent(event);
 }
 
-void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
-                                   std::function<void()> onClicked)
+TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
+                                              std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
     button->setScaleIndependantSize(30, 30);
@@ -329,6 +329,8 @@ void BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
     button->setButtonStyle(style);
 
     QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
+
+    return button;
 }
 
 RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)

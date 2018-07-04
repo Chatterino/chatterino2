@@ -20,7 +20,7 @@ void TitleBarButton::setButtonStyle(Style _style)
     this->update();
 }
 
-void TitleBarButton::paintEvent(QPaintEvent *)
+void TitleBarButton::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
@@ -115,9 +115,11 @@ void TitleBarButton::paintEvent(QPaintEvent *)
             painter.restore();
             break;
         }
+        default:;
     }
 
-    this->fancyPaint(painter);
+    RippleEffectButton::paintEvent(event);
+    //    this->fancyPaint(painter);
 }
 
 }  // namespace chatterino

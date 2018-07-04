@@ -72,6 +72,7 @@
         <file>contributors.txt</file>
         <file>avatars/fourtf.png</file>
         <file>avatars/pajlada.png</file>
+        <file>images/download_update.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>
