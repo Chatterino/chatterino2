@@ -417,25 +417,36 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 #ifdef USEWINSDK
     MSG *msg = reinterpret_cast<MSG *>(message);
 
+    bool returnValue = false;
+
     switch (msg->message) {
         case WM_DPICHANGED:
-            return handleDPICHANGED(msg);
+            returnValue = handleDPICHANGED(msg);
+            break;
 
         case WM_SHOWWINDOW:
-            return this->handleSHOWWINDOW(msg);
+            returnValue = this->handleSHOWWINDOW(msg);
+            break;
 
         case WM_NCCALCSIZE:
-            return this->handleNCCALCSIZE(msg, result);
+            returnValue = this->handleNCCALCSIZE(msg, result);
+            break;
 
         case WM_SIZE:
-            return this->handleSIZE(msg);
+            returnValue = this->handleSIZE(msg);
+            break;
 
         case WM_NCHITTEST:
-            return this->handleNCHITTEST(msg, result);
+            returnValue = this->handleNCHITTEST(msg, result);
+            break;
 
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
+
+    QWidget::nativeEvent(eventType, message, result);
+
+    return returnValue;
 #else
     return QWidget::nativeEvent(eventType, message, result);
 #endif
@@ -603,7 +614,7 @@ bool BaseWindow::handleSIZE(MSG *msg)
             }
         }
     }
-    return true;
+    return false;
 #else
     return false;
 #endif

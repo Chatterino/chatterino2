@@ -49,6 +49,10 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
+    void rightButtonClicked();
+    void initializeChannelSignals();
+    void addModeActions(QMenu &menu);
+
     Split *const split;
 
     QPoint dragStart;
@@ -58,23 +62,17 @@ private:
 
     pajlada::Signals::Connection onlineStatusChangedConnection;
 
-    RippleEffectButton *dropdownButton;
+    RippleEffectButton *dropdownButton = nullptr;
     //    Label *titleLabel;
-    Label *titleLabel;
-    RippleEffectLabel *modeButton;
-    RippleEffectButton *moderationButton;
+    Label *titleLabel = nullptr;
+    Label *modeButton = nullptr;
+    RippleEffectButton *moderationButton = nullptr;
+    RippleEffectButton *moderationExtraButton = nullptr;
 
     QMenu dropdownMenu;
     QMenu modeMenu;
 
-    QAction *setSub = nullptr;
-    QAction *setEmote = nullptr;
-    QAction *setSlow = nullptr;
-    QAction *setR9k = nullptr;
-
-    void rightButtonClicked();
-
-    void initializeChannelSignals();
+    pajlada::Signals::NoArgSignal modeUpdateRequested_;
 
     QString tooltip;
     bool isLive;

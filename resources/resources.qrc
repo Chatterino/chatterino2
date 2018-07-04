@@ -67,6 +67,8 @@
         <file>images/buttons/unmod.png</file>
         <file>images/emote_dark.svg</file>
         <file>tlds.txt</file>
+        <file>images/menu_black.png</file>
+        <file>images/menu_white.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

@@ -33,6 +33,9 @@ public:
     void setPixmap(const QPixmap &pixmap_);
     const QPixmap &getPixmap() const;
 
+    void setDimPixmap(bool value);
+    bool getDimPixmap() const;
+
     void setBorderColor(const QColor &color);
     const QColor &getBorderColor() const;
 
@@ -56,6 +59,7 @@ protected:
 private:
     QColor borderColor_;
     QPixmap pixmap_;
+    bool dimPixmap_ = true;
     QPoint mousePos_;
     double hoverMultiplier_ = 0.0;
     QTimer effectTimer_;
