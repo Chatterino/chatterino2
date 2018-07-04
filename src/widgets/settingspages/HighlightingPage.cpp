@@ -24,6 +24,7 @@
 #define PLAY_SOUND "Play sound when your name is mentioned"
 #define FLASH_TASKBAR "Flash taskbar when your name is mentioned"
 #define ALWAYS_PLAY "Always play highlight sound (Even if Chatterino is focused)"
+#define USERNAME_BOLD "Make @username bold"
 
 namespace chatterino {
 
@@ -104,6 +105,7 @@ HighlightingPage::HighlightingPage()
         }
 
         layout.append(createCheckBox(ALWAYS_PLAY, app->settings->highlightAlwaysPlaySound));
+        layout.append(createCheckBox(USERNAME_BOLD, app->settings->usernameBold));
     }
 
     // ---- misc

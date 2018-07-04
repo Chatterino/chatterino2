@@ -230,6 +230,12 @@ MessagePtr TwitchMessageBuilder::build()
                 // Actually just text
                 QString linkString = this->matchLink(string);
 
+                if (string[0] == '@' && app->settings->usernameBold) {
+                    this->emplace<TextElement>(string, MessageElement::Text, textColor,
+                                               FontStyle::ChatMediumBold);
+                    string = "";
+                }
+
                 Link link;
 
                 if (linkString.isEmpty()) {
@@ -508,6 +514,8 @@ void TwitchMessageBuilder::parseHighlights()
         if (doHighlight) {
             this->message->flags |= Message::Highlighted;
         }
+    }
+    for (const HighlightPhrase &highlight : activeHighlights) {
     }
 }
 
