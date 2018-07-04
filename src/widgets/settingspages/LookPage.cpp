@@ -148,6 +148,8 @@ void LookPage::addMessagesGroup(QVBoxLayout &layout)
 
     // lowercase links
     box.append(this->createCheckBox("Display domains as lowercase", getSettings()->lowercaseLink));
+    // bold usernames
+    box.append(this->createCheckBox("Make @username bold", getSettings()->usernameBold));
 }
 
 void LookPage::addEmotesGroup(QVBoxLayout &layout)
