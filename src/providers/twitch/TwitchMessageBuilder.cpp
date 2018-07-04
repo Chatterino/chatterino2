@@ -458,9 +458,14 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (!app->highlights->blacklistContains(this->ircMessage->nick())) {
         for (const HighlightPhrase &highlight : activeHighlights) {
-            if (highlight.isMatch(this->originalMessage)) {
-                Log("Highlight because {} matches {}", this->originalMessage,
-                    highlight.getPattern());
+            if (highlight.isMatch(this->originalMessage) ||
+                app->highlights->userContains(this->ircMessage->nick())) {
+                if (app->highlights->userContains(this->ircMessage->nick())) {
+                    Log("Highlight because user {} sent a message", this->ircMessage->nick());
+                } else {
+                    Log("Highlight because {} matches {}", this->originalMessage,
+                        highlight.getPattern());
+                }
                 doHighlight = true;
 
                 if (highlight.getAlert()) {
