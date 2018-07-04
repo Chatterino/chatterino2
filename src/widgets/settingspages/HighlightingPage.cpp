@@ -1,6 +1,7 @@
 #include "HighlightingPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "debug/Log.hpp"
@@ -64,22 +65,28 @@ HighlightingPage::HighlightingPage()
                         HighlightPhrase{"my phrase", true, false, false});
                 });
             }
+
             auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
             {
-                auto text = disabledUsers.emplace<QTextEdit>().getElement();
+                EditableModelView *view =
+                    disabledUsers
+                        .emplace<EditableModelView>(app->highlights->createBlacklistModel(nullptr))
+                        .getElement();
 
-                QObject::connect(text, &QTextEdit::textChanged, this,
-                                 [this] { this->disabledUsersChangedTimer.start(200); });
+                view->setTitles({"Pattern", "Regex"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
 
-                QObject::connect(
-                    &this->disabledUsersChangedTimer, &QTimer::timeout, this, [text, app]() {
-                        QStringList list = text->toPlainText().split("\n", QString::SkipEmptyParts);
-                        list.removeDuplicates();
-                        app->settings->highlightUserBlacklist = list.join("\n") + "\n";
-                    });
+                // fourtf: make class extrend BaseWidget and add this to dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
 
-                app->settings->highlightUserBlacklist.connect([=](const QString &str, auto) {
-                    text->setPlainText(str);  //
+                view->addButtonPressed.connect([] {
+                    getApp()->highlights->blacklistedUsers.appendItem(
+                        HighlightBlacklistUser{"blacklisted user", false});
                 });
             }
         }

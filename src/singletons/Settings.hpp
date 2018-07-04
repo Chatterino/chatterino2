@@ -102,7 +102,6 @@ public:
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};
-    QStringSetting highlightUserBlacklist = {"/highlighting/blacklistedUsers", ""};
 
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
 

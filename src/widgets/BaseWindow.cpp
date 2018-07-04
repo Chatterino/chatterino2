@@ -64,6 +64,8 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->updateScale();
 
     CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
+
+    //    QTimer::this->scaleChangedEvent(this->getScale());
 }
 
 float BaseWindow::getScale() const
@@ -532,9 +534,9 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
     this->updateScale();
 
     return true;
-#endif
-
+#else
     return false;
+#endif
 }
 
 bool BaseWindow::handleSHOWWINDOW(MSG *msg)
@@ -552,10 +554,12 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
     }
 
-    return true;
-#endif
+    this->calcButtonsSizes();
 
+    return true;
+#else
     return false;
+#endif
 }
 
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
@@ -579,9 +583,10 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
         *result = 0;
         return true;
     }
-#endif
-
     return false;
+#else
+    return false;
+#endif
 }
 
 bool BaseWindow::handleSIZE(MSG *msg)
@@ -598,10 +603,10 @@ bool BaseWindow::handleSIZE(MSG *msg)
             }
         }
     }
-
-#endif
-
+    return true;
+#else
     return false;
+#endif
 }
 
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
@@ -717,9 +722,9 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-#endif
-
+#else
     return false;
+#endif
 }
 
 }  // namespace chatterino

@@ -446,9 +446,6 @@ void TwitchMessageBuilder::parseHighlights()
         currentPlayerUrl = highlightSoundUrl;
     }
 
-    QStringList blackList =
-        app->settings->highlightUserBlacklist.getValue().split("\n", QString::SkipEmptyParts);
-
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights = app->highlights->phrases.getVector();
@@ -465,7 +462,7 @@ void TwitchMessageBuilder::parseHighlights()
 
     bool hasFocus = (QApplication::focusWidget() != nullptr);
 
-    if (!blackList.contains(this->ircMessage->nick(), Qt::CaseInsensitive)) {
+    if (!app->highlights->blacklistContains(this->ircMessage->nick())) {
         for (const HighlightPhrase &highlight : activeHighlights) {
             if (highlight.isMatch(this->originalMessage)) {
                 Log("Highlight because {} matches {}", this->originalMessage,
