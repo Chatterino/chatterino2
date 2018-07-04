@@ -229,11 +229,10 @@ MessagePtr TwitchMessageBuilder::build()
 
                 // Actually just text
                 QString linkString = this->matchLink(string);
+                auto Boldness = FontStyle::ChatMedium;
 
                 if (string[0] == '@' && app->settings->usernameBold) {
-                    this->emplace<TextElement>(string, MessageElement::Text, textColor,
-                                               FontStyle::ChatMediumBold);
-                    string = "";
+                    Boldness = FontStyle::ChatMediumBold;
                 }
 
                 Link link;
@@ -261,7 +260,8 @@ MessagePtr TwitchMessageBuilder::build()
                     textColor = MessageColor(MessageColor::Link);
                 }
 
-                this->emplace<TextElement>(string, MessageElement::Text, textColor)  //
+                this->emplace<TextElement>(string, MessageElement::Text, textColor,
+                                           Boldness)  //
                     ->setLink(link);
             } else {  // is emoji
                 this->emplace<EmoteElement>(emoteData, EmoteElement::EmojiAll);
