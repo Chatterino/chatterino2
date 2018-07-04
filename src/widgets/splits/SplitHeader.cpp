@@ -124,13 +124,14 @@ SplitHeader::~SplitHeader()
 void SplitHeader::addDropdownItems(RippleEffectButton *)
 {
     // clang-format off
-    this->dropdownMenu.addAction("Add new split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
+    this->dropdownMenu.addAction("New split", this->split, &Split::doAddSplit, QKeySequence(tr("Ctrl+T")));
     this->dropdownMenu.addAction("Close split", this->split, &Split::doCloseSplit, QKeySequence(tr("Ctrl+W")));
-//    this->dropdownMenu.addAction("Move split", this, SLOT(menuMoveSplit()));
-    this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
-    this->dropdownMenu.addAction("Open viewer list", this->split, &Split::doOpenViewerList);
-    this->dropdownMenu.addAction("Search in messages", this->split, &Split::doSearch, QKeySequence(tr("Ctrl+F")));
+    this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
     this->dropdownMenu.addSeparator();
+    this->dropdownMenu.addAction("Viewer list", this->split, &Split::doOpenViewerList);
+    this->dropdownMenu.addAction("Search", this->split, &Split::doSearch, QKeySequence(tr("Ctrl+F")));
+    this->dropdownMenu.addSeparator();
+    this->dropdownMenu.addAction("Popup", this->split, &Split::doPopup);
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this]{
         ChannelPtr _channel = this->split->getChannel();
@@ -143,16 +144,15 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
         }
     });
 #endif
-    this->dropdownMenu.addAction("Change channel", this->split, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
-    this->dropdownMenu.addAction("Clear chat", this->split, &Split::doClearChat);
-    this->dropdownMenu.addAction("Open in web browser", this->split, &Split::doOpenChannel);
+    this->dropdownMenu.addAction("Open browser", this->split, &Split::doOpenChannel);
 #ifndef USEWEBENGINE
-    this->dropdownMenu.addAction("Open web player", this->split, &Split::doOpenPopupPlayer);
+    this->dropdownMenu.addAction("Open browser popup", this->split, &Split::doOpenPopupPlayer);
 #endif
-    this->dropdownMenu.addAction("Open in Streamlink", this->split, &Split::doOpenStreamlink);
+    this->dropdownMenu.addAction("Open streamlink", this->split, &Split::doOpenStreamlink);
     this->dropdownMenu.addSeparator();
     this->dropdownMenu.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
-    this->dropdownMenu.addAction("Manual reconnect", this, SLOT(menuManualReconnect()));
+    this->dropdownMenu.addAction("Reconnect", this, SLOT(menuManualReconnect()));
+    this->dropdownMenu.addAction("Clear messages", this->split, &Split::doClearChat);
 //    this->dropdownMenu.addSeparator();
 //    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
     // clang-format on
