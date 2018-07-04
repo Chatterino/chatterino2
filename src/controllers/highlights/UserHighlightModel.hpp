@@ -3,22 +3,22 @@
 #include <QObject>
 
 #include "common/SignalVectorModel.hpp"
-#include "controllers/highlights/UserHighlight.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 
 namespace chatterino {
 
 class HighlightController;
 
-class UserHighlightModel : public SignalVectorModel<UserHighlight>
+class UserHighlightModel : public SignalVectorModel<HighlightPhrase>
 {
     explicit UserHighlightModel(QObject *parent);
 
 protected:
     // vector into model row
-    virtual UserHighlight getItemFromRow(std::vector<QStandardItem *> &row,
-                                         const UserHighlight &original) override;
+    virtual HighlightPhrase getItemFromRow(std::vector<QStandardItem *> &row,
+                                           const HighlightPhrase &original) override;
 
-    virtual void getRowFromItem(const UserHighlight &item,
+    virtual void getRowFromItem(const HighlightPhrase &item,
                                 std::vector<QStandardItem *> &row) override;
 
     friend class HighlightController;

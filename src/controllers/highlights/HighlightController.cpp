@@ -42,9 +42,9 @@ UserHighlightModel *HighlightController::createUserModel(QObject *parent)
     return model;
 }
 
-bool HighlightController::userContains(const QString &username)
+bool HighlightController::isHighlightedUser(const QString &username)
 {
-    std::vector<UserHighlight> userItems = this->highlightedUsers.getVector();
+    const auto &userItems = this->highlightedUsers.getVector();
     for (const auto &highlightedUser : userItems) {
         if (highlightedUser.isMatch(username)) {
             return true;

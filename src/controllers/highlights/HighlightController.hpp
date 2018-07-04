@@ -3,7 +3,6 @@
 #include "common/SignalVector.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/highlights/UserHighlight.hpp"
 #include "messages/Message.hpp"
 #include "singletons/Settings.hpp"
 
@@ -22,13 +21,13 @@ public:
 
     UnsortedSignalVector<HighlightPhrase> phrases;
     UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
-    UnsortedSignalVector<UserHighlight> highlightedUsers;
+    UnsortedSignalVector<HighlightPhrase> highlightedUsers;
 
     HighlightModel *createModel(QObject *parent);
     HighlightBlacklistModel *createBlacklistModel(QObject *parent);
     UserHighlightModel *createUserModel(QObject *parent);
 
-    bool userContains(const QString &username);
+    bool isHighlightedUser(const QString &username);
     bool blacklistContains(const QString &username);
 
     void addHighlight(const MessagePtr &msg);

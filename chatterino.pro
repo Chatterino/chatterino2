@@ -260,7 +260,6 @@ HEADERS  += \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
-    src/controllers/highlights/UserHighlight.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \

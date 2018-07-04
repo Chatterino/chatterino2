@@ -110,7 +110,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
-                        UserHighlight{"highlighted user", true, false, false});
+                        HighlightPhrase{"highlighted user", true, false, false});
                 });
             }
         }
