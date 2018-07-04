@@ -443,6 +443,7 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights = app->highlights->phrases.getVector();
+    std::vector<UserHighlight> userHighlights = app->highlights->highlightedUsers.getVector();
 
     if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
         HighlightPhrase selfHighlight(currentUsername, app->settings->enableHighlightTaskbar,
@@ -458,14 +459,9 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (!app->highlights->blacklistContains(this->ircMessage->nick())) {
         for (const HighlightPhrase &highlight : activeHighlights) {
-            if (highlight.isMatch(this->originalMessage) ||
-                app->highlights->userContains(this->ircMessage->nick())) {
-                if (app->highlights->userContains(this->ircMessage->nick())) {
-                    Log("Highlight because user {} sent a message", this->ircMessage->nick());
-                } else {
-                    Log("Highlight because {} matches {}", this->originalMessage,
-                        highlight.getPattern());
-                }
+            if (highlight.isMatch(this->originalMessage)) {
+                Log("Highlight because {} matches {}", this->originalMessage,
+                    highlight.getPattern());
                 doHighlight = true;
 
                 if (highlight.getAlert()) {
@@ -479,6 +475,24 @@ void TwitchMessageBuilder::parseHighlights()
                 if (playSound && doAlert) {
                     // Break if no further action can be taken from other highlights
                     // This might change if highlights can have custom colors/sounds/actions
+                    break;
+                }
+            }
+        }
+        for (const UserHighlight &userHighlight : userHighlights) {
+            if (userHighlight.isMatch(this->ircMessage->nick())) {
+                Log("Highlight because user {} sent a message", this->ircMessage->nick());
+                if (userHighlight.getAlert()) {
+                    doAlert = true;
+                }
+
+                if (userHighlight.getSound()) {
+                    playSound = true;
+                }
+
+                if (playSound && doAlert) {
+                    // Break if no further action can be taken from other usernames
+                    // Mostly used for regex stuff
                     break;
                 }
             }

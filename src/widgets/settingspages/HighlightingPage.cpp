@@ -96,7 +96,7 @@ HighlightingPage::HighlightingPage()
                     pingUsers.emplace<EditableModelView>(app->highlights->createUserModel(nullptr))
                         .getElement();
 
-                view->setTitles({"Username", "Regex"});
+                view->setTitles({"Username", "Flash taskbar", "Play sound", "Regex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
@@ -109,7 +109,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
-                        UserHighlight{"highlighted user", false});
+                        UserHighlight{"highlighted user", true, false, false});
                 });
             }
         }

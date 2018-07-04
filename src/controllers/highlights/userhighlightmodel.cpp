@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 UserHighlightModel::UserHighlightModel(QObject *parent)
-    : SignalVectorModel<UserHighlight>(2, parent)
+    : SignalVectorModel<UserHighlight>(4, parent)
 {
 }
 
@@ -18,8 +18,9 @@ UserHighlight UserHighlightModel::getItemFromRow(std::vector<QStandardItem *> &r
 {
     // key, regex
 
-    return UserHighlight{row[0]->data(Qt::DisplayRole).toString(),
-                         row[1]->data(Qt::CheckStateRole).toBool()};
+    return UserHighlight{
+        row[0]->data(Qt::DisplayRole).toString(), row[1]->data(Qt::CheckStateRole).toBool(),
+        row[2]->data(Qt::CheckStateRole).toBool(), row[3]->data(Qt::CheckStateRole).toBool()};
 }
 
 // row into vector item
@@ -27,7 +28,9 @@ void UserHighlightModel::getRowFromItem(const UserHighlight &item,
                                         std::vector<QStandardItem *> &row)
 {
     setStringItem(row[0], item.getPattern());
-    setBoolItem(row[1], item.isRegex());
+    setBoolItem(row[1], item.getAlert());
+    setBoolItem(row[2], item.getSound());
+    setBoolItem(row[3], item.isRegex());
 }
 
 }  // namespace chatterino
