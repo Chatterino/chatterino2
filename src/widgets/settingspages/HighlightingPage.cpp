@@ -4,6 +4,7 @@
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
+#include "controllers/highlights/UserHighlightModel.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
@@ -86,6 +87,29 @@ HighlightingPage::HighlightingPage()
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->blacklistedUsers.appendItem(
                         HighlightBlacklistUser{"blacklisted user", false});
+                });
+            }
+
+            auto pingUsers = tabs.appendTab(new QVBoxLayout, "Highlight on message");
+            {
+                EditableModelView *view =
+                    pingUsers.emplace<EditableModelView>(app->highlights->createUserModel(nullptr))
+                        .getElement();
+
+                view->setTitles({"Username", "Flash taskbar", "Play sound", "Regex"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                // fourtf: make class extrend BaseWidget and add this to dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
+
+                view->addButtonPressed.connect([] {
+                    getApp()->highlights->highlightedUsers.appendItem(
+                        UserHighlight{"highlighted user", true, false, false});
                 });
             }
         }

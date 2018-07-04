@@ -465,6 +465,7 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights = app->highlights->phrases.getVector();
+    std::vector<UserHighlight> userHighlights = app->highlights->highlightedUsers.getVector();
 
     if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
         HighlightPhrase selfHighlight(currentUsername, app->settings->enableHighlightTaskbar,
@@ -496,6 +497,26 @@ void TwitchMessageBuilder::parseHighlights()
                 if (playSound && doAlert) {
                     // Break if no further action can be taken from other highlights
                     // This might change if highlights can have custom colors/sounds/actions
+                    break;
+                }
+            }
+        }
+        for (const UserHighlight &userHighlight : userHighlights) {
+            if (userHighlight.isMatch(this->ircMessage->nick())) {
+                Log("Highlight because user {} sent a message", this->ircMessage->nick());
+                doHighlight = true;
+
+                if (userHighlight.getAlert()) {
+                    doAlert = true;
+                }
+
+                if (userHighlight.getSound()) {
+                    playSound = true;
+                }
+
+                if (playSound && doAlert) {
+                    // Break if no further action can be taken from other usernames
+                    // Mostly used for regex stuff
                     break;
                 }
             }
