@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
+#include "controllers/highlights/UserHighlightModel.hpp"
 #include "widgets/dialogs/NotificationPopup.hpp"
 
 namespace chatterino {
@@ -31,6 +32,26 @@ HighlightModel *HighlightController::createModel(QObject *parent)
     model->init(&this->phrases);
 
     return model;
+}
+
+UserHighlightModel *HighlightController::createUserModel(QObject *parent)
+{
+    auto *model = new UserHighlightModel(parent);
+    model->init(&this->highlightedUsers);
+
+    return model;
+}
+
+bool HighlightController::userContains(const QString &username)
+{
+    std::vector<UserHighlight> userItems = this->highlightedUsers.getVector();
+    for (const auto &highlightedUser : userItems) {
+        if (highlightedUser.isMatch(username)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 HighlightBlacklistModel *HighlightController::createBlacklistModel(QObject *parent)
