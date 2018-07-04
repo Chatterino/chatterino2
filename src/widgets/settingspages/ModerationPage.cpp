@@ -49,12 +49,29 @@ ModerationPage::ModerationPage()
         auto created = logs.emplace<QLabel>();
 
         app->settings->logPath.connect([app, created](const QString &logPath, auto) mutable {
+
+            QString pathOriginal;
+
             if (logPath == "") {
-                created->setText("Logs are saved to " +
-                                 CreateLink(app->paths->messageLogDirectory, true));
+                pathOriginal = app->paths->messageLogDirectory;
             } else {
-                created->setText("Logs are saved to " + CreateLink(logPath, true));
+                pathOriginal = logPath;
             }
+
+            QString pathShortened;
+
+            if (pathOriginal.size() > 50) {
+                pathShortened = pathOriginal;
+                pathShortened.resize(50);
+                pathShortened += "...";
+            } else {
+                pathShortened = pathOriginal;
+            }
+
+            pathShortened = "Logs saved at <a href=\"file:///" + pathOriginal +
+                            "\"><span style=\"color: white;\">" + pathShortened + "</span></a>";
+
+            created->setText(pathShortened);
         });
 
         created->setTextFormat(Qt::RichText);
