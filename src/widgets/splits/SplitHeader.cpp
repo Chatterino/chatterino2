@@ -61,7 +61,7 @@ SplitHeader::SplitHeader(Split *_split)
                          [this, moderator]() mutable {
                              this->split->setModerationMode(!this->split->getModerationMode());
 
-                             moderator->setDimPixmap(!this->split->getModerationMode());
+                             moderator->setDim(!this->split->getModerationMode());
                          });
 
         this->updateModerationModeIcon();

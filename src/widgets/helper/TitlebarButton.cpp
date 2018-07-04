@@ -24,6 +24,8 @@ void TitleBarButton::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
+    painter.setOpacity(this->getCurrentDimAmount());
+
     QColor color = this->themeManager->window.text;
     QColor background = this->themeManager->window.background;
 

@@ -33,8 +33,9 @@ public:
     void setPixmap(const QPixmap &pixmap_);
     const QPixmap &getPixmap() const;
 
-    void setDimPixmap(bool value);
-    bool getDimPixmap() const;
+    void setDim(bool value);
+    bool getDim() const;
+    qreal getCurrentDimAmount() const;
 
     void setBorderColor(const QColor &color);
     const QColor &getBorderColor() const;

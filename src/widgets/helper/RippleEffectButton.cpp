@@ -34,16 +34,21 @@ const QPixmap &RippleEffectButton::getPixmap() const
     return this->pixmap_;
 }
 
-void RippleEffectButton::setDimPixmap(bool value)
+void RippleEffectButton::setDim(bool value)
 {
     this->dimPixmap_ = value;
 
     this->update();
 }
 
-bool RippleEffectButton::getDimPixmap() const
+bool RippleEffectButton::getDim() const
 {
     return this->dimPixmap_;
+}
+
+qreal RippleEffectButton::getCurrentDimAmount() const
+{
+    return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
 }
 
 void RippleEffectButton::setBorderColor(const QColor &color)
@@ -64,7 +69,7 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
 
     if (!this->pixmap_.isNull()) {
         if (!this->mouseOver_ && this->dimPixmap_) {
-            painter.setOpacity(0.7);
+            painter.setOpacity(this->getCurrentDimAmount());
         }
 
         QRect rect = this->rect();
