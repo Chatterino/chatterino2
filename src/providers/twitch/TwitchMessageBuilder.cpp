@@ -482,6 +482,8 @@ void TwitchMessageBuilder::parseHighlights()
         for (const UserHighlight &userHighlight : userHighlights) {
             if (userHighlight.isMatch(this->ircMessage->nick())) {
                 Log("Highlight because user {} sent a message", this->ircMessage->nick());
+                doHighlight = true;
+
                 if (userHighlight.getAlert()) {
                     doAlert = true;
                 }
