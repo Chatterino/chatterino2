@@ -515,8 +515,6 @@ void TwitchMessageBuilder::parseHighlights()
             this->message->flags |= Message::Highlighted;
         }
     }
-    for (const HighlightPhrase &highlight : activeHighlights) {
-    }
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessage,
