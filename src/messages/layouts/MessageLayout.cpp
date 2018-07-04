@@ -175,7 +175,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         QColor color = isWindowFocused ? app->themes->tabs.selected.backgrounds.regular.color()
                                        : app->themes->tabs.selected.backgrounds.unfocused.color();
 
-        QBrush brush(color, Qt::VerPattern);
+        QBrush brush(color,
+                     static_cast<Qt::BrushStyle>(app->settings->lastMessagePattern.getValue()));
 
         painter.fillRect(0, y + this->container_.getHeight() - 1, pixmap->width(), 1, brush);
     }

@@ -248,7 +248,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElement::Flags _flags)
 {
     if (_flags & MessageElement::ModeratorTools) {
-        QSize size((int)(container.getScale() * 16), (int)(container.getScale() * 16));
+        QSize size(int(container.getScale() * 16), int(container.getScale() * 16));
 
         for (const ModerationAction &m : getApp()->moderationActions->items.getVector()) {
             if (m.isImage()) {

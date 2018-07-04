@@ -27,6 +27,7 @@ public:
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat", "h:mm"};
     BoolSetting showBadges = {"/appearance/messages/showBadges", true};
     BoolSetting showLastMessageIndicator = {"/appearance/messages/showLastMessageIndicator", false};
+    IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern", Qt::VerPattern};
     BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages", false};
@@ -101,7 +102,6 @@ public:
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};
-    QStringSetting highlightUserBlacklist = {"/highlighting/blacklistedUsers", ""};
 
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
 

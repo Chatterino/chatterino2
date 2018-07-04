@@ -23,8 +23,7 @@ public:
     const QString &getAction() const;
 
 private:
-    bool isImage_;
-    Image *image_;
+    Image *image_ = nullptr;
     QString line1_;
     QString line2_;
     QString action_;

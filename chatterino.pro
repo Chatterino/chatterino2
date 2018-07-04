@@ -112,6 +112,7 @@ SOURCES += \
     src/controllers/commands/CommandModel.cpp \
     src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
+    src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
@@ -193,8 +194,6 @@ SOURCES += \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
-    src/widgets/settingspages/AppearancePage.cpp \
-    src/widgets/settingspages/BehaviourPage.cpp \
     src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/EmotesPage.cpp \
@@ -225,7 +224,10 @@ SOURCES += \
     src/singletons/Settings.cpp \
     src/singletons/Updates.cpp \
     src/singletons/Theme.cpp \
-    src/widgets/dialogs/LogsPopup.cpp
+    src/widgets/dialogs/LogsPopup.cpp \
+    src/controllers/moderationactions/ModerationActionModel.cpp \
+    src/widgets/settingspages/LookPage.cpp \
+    src/widgets/settingspages/FeelPage.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -255,7 +257,9 @@ HEADERS  += \
     src/controllers/commands/CommandModel.hpp \
     src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
+    src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
+    src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \
@@ -360,8 +364,6 @@ HEADERS  += \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
-    src/widgets/settingspages/AppearancePage.hpp \
-    src/widgets/settingspages/BehaviourPage.hpp \
     src/widgets/settingspages/BrowserExtensionPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/EmotesPage.hpp \
@@ -396,7 +398,11 @@ HEADERS  += \
     src/singletons/Theme.hpp \
     src/common/SimpleSignalVector.hpp \
     src/common/SignalVector.hpp \
-    src/widgets/dialogs/LogsPopup.hpp
+    src/widgets/dialogs/LogsPopup.hpp \
+    src/common/Singleton.hpp \
+    src/controllers/moderationactions/ModerationActionModel.hpp \
+    src/widgets/settingspages/LookPage.hpp \
+    src/widgets/settingspages/FeelPage.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
@@ -434,6 +440,7 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
+    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing

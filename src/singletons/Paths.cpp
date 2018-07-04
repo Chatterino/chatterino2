@@ -98,7 +98,6 @@ void Paths::initSubDirectories()
 
     // create settings subdirectories and validate that they are created properly
     auto makePath = [&](const std::string &name) -> QString {
-
         auto path = combinePath(this->rootAppDataDirectory, QString::fromStdString(name));
 
         if (!QDir().mkpath(path)) {

@@ -2,6 +2,7 @@
 
 #include <QHBoxLayout>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 #include "common/Channel.hpp"

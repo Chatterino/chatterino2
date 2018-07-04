@@ -5,7 +5,6 @@
 
 #include <QRegularExpression>
 #include <QString>
-#include <memory>
 #include <pajlada/settings/serialize.hpp>
 
 namespace chatterino {

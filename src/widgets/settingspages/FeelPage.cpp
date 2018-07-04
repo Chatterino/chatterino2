@@ -1,4 +1,4 @@
-#include "BehaviourPage.hpp"
+#include "FeelPage.hpp"
 
 #include "Application.hpp"
 #include "util/LayoutCreator.hpp"
@@ -15,16 +15,17 @@
 #endif
 #define INPUT_EMPTY "Hide input box when empty"
 #define PAUSE_HOVERING "When hovering"
+#define LAST_MSG "Mark the last message you read (dotted line)"
 
 #define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
 
 namespace chatterino {
 
-BehaviourPage::BehaviourPage()
+FeelPage::FeelPage()
     : SettingsPage("Feel", ":/images/behave.svg")
 {
     auto app = getApp();
-    LayoutCreator<BehaviourPage> layoutCreator(this);
+    LayoutCreator<FeelPage> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
@@ -38,6 +39,48 @@ BehaviourPage::BehaviourPage()
         form->addRow(
             "", this->createCheckBox("Show which users parted the channel (up to 1000 chatters)",
                                      app->settings->showParts));
+
+        form->addRow("", this->createCheckBox("Show message length while typing",
+                                              getSettings()->showMessageLength));
+        form->addRow("", this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
+        {
+            auto *combo = new QComboBox(this);
+            combo->addItems({"Dotted", "Solid"});
+
+            const auto currentIndex = []() -> int {
+                switch (getApp()->settings->lastMessagePattern.getValue()) {
+                    case Qt::SolidLine: {
+                        return 1;
+                    }
+                    default:
+                    case Qt::VerPattern: {
+                        return 0;
+                    }
+                }
+            }();
+            combo->setCurrentIndex(currentIndex);
+
+            QObject::connect(combo,
+                             static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                             [](int index) {
+                                 Qt::BrushStyle brush;
+                                 switch (index) {
+                                     case 1:
+                                         brush = Qt::SolidPattern;
+                                         break;
+                                     default:
+                                     case 0:
+                                         brush = Qt::VerPattern;
+                                         break;
+                                 }
+                                 getSettings()->lastMessagePattern = brush;
+                             });
+
+            auto hbox = form.emplace<QHBoxLayout>().withoutMargin();
+            hbox.emplace<QLabel>("Last message indicator pattern");
+            hbox.append(combo);
+        }
+
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
 
@@ -70,13 +113,13 @@ BehaviourPage::BehaviourPage()
     layout->addStretch(1);
 }
 
-QSlider *BehaviourPage::createMouseScrollSlider()
+QSlider *FeelPage::createMouseScrollSlider()
 {
     auto app = getApp();
     auto slider = new QSlider(Qt::Horizontal);
 
     float currentValue = app->settings->mouseScrollMultiplier;
-    int sliderValue = ((currentValue - 0.1f) / 2.f) * 99.f;
+    int sliderValue = int(((currentValue - 0.1f) / 2.f) * 99.f);
     slider->setValue(sliderValue);
 
     QObject::connect(slider, &QSlider::valueChanged, [=](int newValue) {

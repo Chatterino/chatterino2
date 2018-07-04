@@ -1,6 +1,7 @@
 #include "HighlightController.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "widgets/dialogs/NotificationPopup.hpp"
 
@@ -30,6 +31,26 @@ HighlightModel *HighlightController::createModel(QObject *parent)
     model->init(&this->phrases);
 
     return model;
+}
+
+HighlightBlacklistModel *HighlightController::createBlacklistModel(QObject *parent)
+{
+    auto *model = new HighlightBlacklistModel(parent);
+    model->init(&this->blacklistedUsers);
+
+    return model;
+}
+
+bool HighlightController::blacklistContains(const QString &username)
+{
+    std::vector<HighlightBlacklistUser> blacklistItems = this->blacklistedUsers.getVector();
+    for (const auto &blacklistedUser : blacklistItems) {
+        if (blacklistedUser.isMatch(username)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void HighlightController::addHighlight(const MessagePtr &msg)

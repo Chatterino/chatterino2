@@ -5,16 +5,16 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
-#include "widgets/settingspages/AppearancePage.hpp"
-#include "widgets/settingspages/BehaviourPage.hpp"
 #include "widgets/settingspages/BrowserExtensionPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
 #include "widgets/settingspages/EmotesPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
+#include "widgets/settingspages/FeelPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
 #include "widgets/settingspages/IgnoreusersPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/LogsPage.hpp"
+#include "widgets/settingspages/LookPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/SpecialChannelsPage.hpp"
 
@@ -32,6 +32,8 @@ SettingsDialog::SettingsDialog()
     this->addTabs();
 
     this->scaleChangedEvent(this->getScale());
+
+    this->overrideBackgroundColor_ = QColor("#282828");
 }
 
 void SettingsDialog::initUi()
@@ -80,8 +82,8 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new AppearancePage);
-    this->addTab(new BehaviourPage);
+    this->addTab(new LookPage);
+    this->addTab(new FeelPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
@@ -149,8 +151,6 @@ void SettingsDialog::showDialog(PreferredTab preferredTab)
 
 void SettingsDialog::refresh()
 {
-    //    this->ui.accountSwitchWidget->refresh();
-
     getApp()->settings->saveSnapshot();
 
     for (auto *tab : this->tabs) {
@@ -163,16 +163,16 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     QFile file(":/qss/settings.qss");
     file.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(file.readAll());
-    styleSheet.replace("<font-size>", QString::number((int)(14 * newDpi)));
-    styleSheet.replace("<checkbox-size>", QString::number((int)(14 * newDpi)));
+    styleSheet.replace("<font-size>", QString::number(int(14 * newDpi)));
+    styleSheet.replace("<checkbox-size>", QString::number(int(14 * newDpi)));
 
     for (SettingsDialogTab *tab : this->tabs) {
-        tab->setFixedHeight((int)(30 * newDpi));
+        tab->setFixedHeight(int(30 * newDpi));
     }
 
     this->setStyleSheet(styleSheet);
 
-    this->ui_.tabContainerContainer->setFixedWidth((int)(200 * newDpi));
+    this->ui_.tabContainerContainer->setFixedWidth(int(200 * newDpi));
 }
 
 void SettingsDialog::themeRefreshEvent()
@@ -180,31 +180,9 @@ void SettingsDialog::themeRefreshEvent()
     BaseWindow::themeRefreshEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#444"));
+    palette.setColor(QPalette::Background, QColor("#f44"));
     this->setPalette(palette);
 }
-
-// void SettingsDialog::setChildrensFont(QLayout *object, QFont &font, int indent)
-//{
-//    //    for (QWidget *widget : this->widgets) {
-//    //        widget->setFont(font);
-//    //    }
-//    //    for (int i = 0; i < object->count(); i++) {
-//    //        if (object->itemAt(i)->layout()) {
-//    //            setChildrensFont(object->layout()->itemAt(i)->layout(), font, indent + 2);
-//    //        }
-
-//    //        if (object->itemAt(i)->widget()) {
-//    //            object->itemAt(i)->widget()->setFont(font);
-
-//    //            if (object->itemAt(i)->widget()->layout() &&
-//    //                !object->itemAt(i)->widget()->layout()->isEmpty()) {
-//    //                setChildrensFont(object->itemAt(i)->widget()->layout(), font, indent +
-//    2);
-//    //            }
-//    //        }
-//    //    }
-//}
 
 ///// Widget creation helpers
 void SettingsDialog::okButtonClicked()

@@ -491,7 +491,7 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
 
     std::vector<std::string> topics({"whispers." + userID});
 
-    this->listen(std::move(createListenMessage(topics, account)));
+    this->listen(createListenMessage(topics, account));
 
     if (ec) {
         Log("Unable to send message to websocket server: {}", ec.message());
