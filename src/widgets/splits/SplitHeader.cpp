@@ -87,7 +87,6 @@ SplitHeader::SplitHeader(Split *_split)
         auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton);
         dropdown->setMouseTracking(true);
         //        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
-        dropdown->setPixmap(QPixmap(":/images/menu_white.png"));
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::clicked, this, [this] {
@@ -466,9 +465,13 @@ void SplitHeader::themeRefreshEvent()
         palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
     }
 
-    //    this->dropdownButton->setPalette(palette);
+    if (this->themeManager->isLightTheme()) {
+        this->dropdownButton->setPixmap(QPixmap(":/images/menu_black.png"));
+    } else {
+        this->dropdownButton->setPixmap(QPixmap(":/images/menu_white.png"));
+    }
+
     this->titleLabel->setPalette(palette);
-    //    this->moderationLabel->setPalette(palette);
 }
 
 void SplitHeader::menuMoveSplit()
