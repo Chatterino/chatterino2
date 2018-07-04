@@ -81,6 +81,7 @@ public:
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
+    BoolSetting lowercaseLink = {"/links/linkLowercase", true};
 
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers", true};
