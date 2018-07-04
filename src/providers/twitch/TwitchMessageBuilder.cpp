@@ -229,10 +229,10 @@ MessagePtr TwitchMessageBuilder::build()
 
                 // Actually just text
                 QString linkString = this->matchLink(string);
-                auto fontstyle = FontStyle::ChatMedium;
+                auto fontStyle = FontStyle::ChatMedium;
 
                 if (string[0] == '@' && app->settings->usernameBold) {
-                    fontstyle = FontStyle::ChatMediumBold;
+                    fontStyle = FontStyle::ChatMediumBold;
                 }
 
                 Link link;
