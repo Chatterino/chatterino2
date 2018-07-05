@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Channel.hpp"
+#include "util/LayoutCreator.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QScrollArea>
@@ -14,6 +15,10 @@ class LookPage : public SettingsPage
 {
 public:
     LookPage();
+
+    void addInterfaceTab(LayoutCreator<QVBoxLayout> layout);
+    void addMessageTab(LayoutCreator<QVBoxLayout> layout);
+    void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
 
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();

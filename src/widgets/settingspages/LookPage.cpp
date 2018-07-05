@@ -17,12 +17,12 @@
 
 #define THEME_ITEMS "White", "Light", "Dark", "Black"
 
-#define TAB_X "Show close button"
-#define TAB_PREF "Hide preferences button (ctrl+p to show)"
-#define TAB_USER "Hide user button"
+#define TAB_X "Tab close button"
+#define TAB_PREF "Preferences button (ctrl+p to show)"
+#define TAB_USER "User button"
 
-#define SCROLL_SMOOTH "Enable smooth scrolling"
-#define SCROLL_NEWMSG "Enable smooth scrolling for new messages"
+#define SCROLL_SMOOTH "Smooth scrolling"
+#define SCROLL_NEWMSG "Smooth scrolling for new messages"
 
 // clang-format off
 #define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "hh:mm:ss a", "h:mm:ss a", "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss"
@@ -35,84 +35,101 @@ LookPage::LookPage()
 {
     LayoutCreator<LookPage> layoutCreator(this);
 
-    auto xd = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     // settings
-    auto scroll = xd.emplace<QScrollArea>();
-    auto widget = scroll.emplaceScrollAreaWidget();
-    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+    auto tabs = layout.emplace<QTabWidget>();
 
-    auto &layout = *widget.setLayoutType<QVBoxLayout>().withoutMargin();
+    this->addInterfaceTab(tabs.appendTab(new QVBoxLayout, "Interface"));
+    this->addMessageTab(tabs.appendTab(new QVBoxLayout, "Messages"));
+    this->addEmoteTab(tabs.appendTab(new QVBoxLayout, "Emotes"));
 
-    this->addApplicationGroup(layout);
-    this->addMessagesGroup(layout);
-    this->addEmotesGroup(layout);
+    layout->addStretch(1);
 
     // preview
-    xd.emplace<Line>(false);
+    layout.emplace<Line>(false);
 
-    auto channelView = xd.emplace<ChannelView>();
+    auto channelView = layout.emplace<ChannelView>();
     auto channel = this->createPreviewChannel();
     channelView->setChannel(channel);
     channelView->setScaleIndependantHeight(64);
-
-    layout.addStretch(1);
 }
 
-void LookPage::addApplicationGroup(QVBoxLayout &layout)
+void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
 {
-    auto box = LayoutCreator<QVBoxLayout>(&layout)
-                   .emplace<QGroupBox>("Application")
-                   .emplace<QVBoxLayout>()
-                   .withoutMargin();
-
-    auto form = box.emplace<QFormLayout>();
-
     // theme
-    auto *theme = this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
-    QObject::connect(theme, &QComboBox::currentTextChanged,
-                     [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
+    {
+        auto *theme = this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
+        QObject::connect(theme, &QComboBox::currentTextChanged,
+                         [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
 
-    form->addRow("Theme:", theme);
+        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
+        box.emplace<QLabel>("Theme: ");
+        box.append(theme);
+        box->addStretch(1);
+    }
 
     // ui scale
-    form->addRow("UI Scaling:", this->createUiScaleSlider());
-
-    // font
-    form->addRow("Font:", this->createFontChanger());
+    {
+        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
+        box.emplace<QLabel>("Scale: ");
+        box.append(this->createUiScaleSlider());
+    }
 
     // tab x
-    form->addRow("Tabs:", this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
+    layout.append(this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
 
 // show buttons
 #ifndef USEWINSDK
-    form->addRow("", this->createCheckBox(TAB_PREF, getSettings()->hidePreferencesButton));
-    form->addRow("", this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
+    layout.append(this->createCheckBox(TAB_PREF, getSettings()->hidePreferencesButton));
+    layout.append(this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
 #endif
 
     // scrolling
-    form->addRow("Scrolling:",
-                 this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
-    form->addRow(
-        "", this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
+    layout.append(this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
+    layout.append(
+        this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
+
+    layout->addStretch(1);
 }
 
-void LookPage::addMessagesGroup(QVBoxLayout &layout)
+void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
 {
-    auto box =
-        LayoutCreator<QVBoxLayout>(&layout).emplace<QGroupBox>("Messages").emplace<QVBoxLayout>();
+    // font
+    layout.append(this->createFontChanger());
+
+    // --
+    layout.emplace<Line>(false);
 
     // timestamps
-    box.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
-    auto tbox = box.emplace<QHBoxLayout>().withoutMargin();
-    {
-        tbox.emplace<QLabel>("Timestamp format (a = am/pm):");
-        tbox.append(this->createComboBox({TIMESTAMP_FORMATS}, getSettings()->timestampFormat));
-        tbox->addStretch(1);
-    }
+    layout.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
+    //    auto tbox = layout.emplace<QHBoxLayout>().withoutMargin();
+    //    {
+    //        tbox.emplace<QLabel>("Timestamp format (a = am/pm):");
+    //        tbox.append(this->createComboBox({TIMESTAMP_FORMATS},
+    //        getSettings()->timestampFormat)); tbox->addStretch(1);
+    //    }
 
     // badges
-    box.append(this->createCheckBox("Show badges", getSettings()->showBadges));
+    layout.append(this->createCheckBox("Show badges", getSettings()->showBadges));
+
+    // --
+    layout.emplace<Line>(false);
+
+    // seperate
+    layout.append(this->createCheckBox("Seperate lines", getSettings()->separateMessages));
+
+    // alternate
+    layout.append(
+        this->createCheckBox("Alternate background", getSettings()->alternateMessageBackground));
+
+    // --
+    layout.emplace<Line>(false);
+
+    // lowercase links
+    layout.append(this->createCheckBox("Lowercase domains", getSettings()->lowercaseLink));
+    // bold usernames
+    layout.append(this->createCheckBox("Bold @usernames", getSettings()->usernameBold));
 
     // collapsing
     {
@@ -133,31 +150,18 @@ void LookPage::addMessagesGroup(QVBoxLayout &layout)
             getSettings()->collpseMessagesMinLines = str.toInt();
         });
 
-        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
+        auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
         hbox.emplace<QLabel>("Collapse messages longer than");
         hbox.append(combo);
         hbox.emplace<QLabel>("lines");
     }
 
-    // seperate
-    box.append(this->createCheckBox("Separation lines", getSettings()->separateMessages));
-
-    // alternate
-    box.append(this->createCheckBox("Alternate background colors",
-                                    getSettings()->alternateMessageBackground));
-
-    // lowercase links
-    box.append(this->createCheckBox("Display domains as lowercase", getSettings()->lowercaseLink));
-    // bold usernames
-    box.append(this->createCheckBox("Make @username bold", getSettings()->usernameBold));
+    // --
+    layout->addStretch(1);
 }
 
-void LookPage::addEmotesGroup(QVBoxLayout &layout)
+void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 {
-    auto box = LayoutCreator<QVBoxLayout>(&layout)
-                   .emplace<QGroupBox>("Emotes")
-                   .setLayoutType<QVBoxLayout>();
-
     /*
     emotes.append(
         this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
@@ -167,9 +171,9 @@ void LookPage::addEmotesGroup(QVBoxLayout &layout)
                                        app->settings->enableFfzEmotes));
     emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
     */
-    box.append(this->createCheckBox("Animated emotes", getSettings()->enableGifAnimations));
+    layout.append(this->createCheckBox("Animations", getSettings()->enableGifAnimations));
 
-    auto scaleBox = box.emplace<QHBoxLayout>().withoutMargin();
+    auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         scaleBox.emplace<QLabel>("Size:");
 
@@ -204,10 +208,12 @@ void LookPage::addEmotesGroup(QVBoxLayout &layout)
             getSettings()->emojiSet = str;  //
         });
 
-        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
+        auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
         hbox.emplace<QLabel>("Emoji set:");
         hbox.append(combo);
     }
+
+    layout->addStretch(1);
 }
 
 ChannelPtr LookPage::createPreviewChannel()
@@ -284,14 +290,15 @@ QLayout *LookPage::createFontChanger()
     auto app = getApp();
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setMargin(0);
 
     // LABEL
     QLabel *label = new QLabel();
     layout->addWidget(label);
 
     auto updateFontFamilyLabel = [=](auto) {
-        label->setText(QString::fromStdString(app->fonts->chatFontFamily.getValue()) + ", " +
-                       QString::number(app->fonts->chatFontSize) + "pt");
+        label->setText("Font (" + QString::fromStdString(app->fonts->chatFontFamily.getValue()) +
+                       ", " + QString::number(app->fonts->chatFontSize) + "pt)");
     };
 
     app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
@@ -315,6 +322,8 @@ QLayout *LookPage::createFontChanger()
         dialog.show();
         dialog.exec();
     });
+
+    layout->addStretch(1);
 
     return layout;
 }
