@@ -12,7 +12,7 @@ namespace chatterino {
 class UpdateDialog : public BaseWindow
 {
 public:
-    enum Button { Dismiss };
+    enum Button { Dismiss, Install };
 
     UpdateDialog();
 

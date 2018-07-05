@@ -40,8 +40,9 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
 
     switch (status) {
         case Updates::UpdateAvailable: {
-            this->ui_.label->setText(QString("An update (%1) is available.")
-                                         .arg(Updates::getInstance().getOnlineVersion()));
+            this->ui_.label->setText(
+                QString("An update (%1) is available.\n\nDo you want to download and install it?")
+                    .arg(Updates::getInstance().getOnlineVersion()));
         } break;
 
         case Updates::SearchFailed: {
@@ -49,8 +50,8 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
         } break;
 
         case Updates::Downloading: {
-            this->ui_.label->setText("Downloading updates.");
-            // this->setActionOnFocusLoss(BaseWindow::Nothing);
+            this->ui_.label->setText("Downloading updates.\n\nChatterino will restart "
+                                     "automatically when the download is done.");
         } break;
 
         case Updates::DownloadFailed: {

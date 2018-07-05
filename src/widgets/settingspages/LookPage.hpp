@@ -16,9 +16,14 @@ class LookPage : public SettingsPage
 public:
     LookPage();
 
+private:
+    void initializeUi();
+
     void addInterfaceTab(LayoutCreator<QVBoxLayout> layout);
     void addMessageTab(LayoutCreator<QVBoxLayout> layout);
     void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
+
+    void addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLayout> layout);
 
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();

@@ -103,7 +103,7 @@ Split::Split(QWidget *parent)
     });
 
     this->input.textChanged.connect([=](const QString &newText) {
-        if (!app->settings->hideEmptyInput) {
+        if (app->settings->showEmptyInput) {
             return;
         }
 
@@ -114,9 +114,9 @@ Split::Split(QWidget *parent)
         }
     });
 
-    app->settings->hideEmptyInput.connect(
-        [this](const bool &hideEmptyInput, auto) {
-            if (hideEmptyInput && this->input.getInputText().length() == 0) {
+    app->settings->showEmptyInput.connect(
+        [this](const bool &showEmptyInput, auto) {
+            if (!showEmptyInput && this->input.getInputText().length() == 0) {
                 this->input.hide();
             } else {
                 this->input.show();

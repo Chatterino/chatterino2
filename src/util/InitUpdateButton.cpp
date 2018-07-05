@@ -25,13 +25,14 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> 
                 case UpdateDialog::Dismiss: {
                     button.hide();
                 } break;
+                case UpdateDialog::Install: {
+                    Updates::getInstance().installUpdates();
+                } break;
             }
         });
 
-#ifdef Q_OS_WIN
-        handle.reset(dialog);
-        dialog->closing.connect([&handle] { handle.release(); });
-#endif
+        //        handle.reset(dialog);
+        //        dialog->closing.connect([&handle] { handle.release(); });
     });
 
     // update image when state changes

@@ -17,21 +17,31 @@
 
 #define THEME_ITEMS "White", "Light", "Dark", "Black"
 
-#define TAB_X "Tab close button"
+#define TAB_X "Show tab close button"
 #define TAB_PREF "Preferences button (ctrl+p to show)"
 #define TAB_USER "User button"
-
-#define SCROLL_SMOOTH "Smooth scrolling"
-#define SCROLL_NEWMSG "Smooth scrolling for new messages"
 
 // clang-format off
 #define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "hh:mm:ss a", "h:mm:ss a", "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss"
 // clang-format on
 
+#ifdef USEWINSDK
+#define WINDOW_TOPMOST "Window always on top"
+#else
+#define WINDOW_TOPMOST "Window always on top (requires restart)"
+#endif
+#define INPUT_EMPTY "Show input box when empty"
+#define LAST_MSG "Mark the last message you read"
+
 namespace chatterino {
 
 LookPage::LookPage()
     : SettingsPage("Look", ":/images/theme.svg")
+{
+    this->initializeUi();
+}
+
+void LookPage::initializeUi()
 {
     LayoutCreator<LookPage> layoutCreator(this);
 
@@ -72,9 +82,14 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
     // ui scale
     {
         auto box = layout.emplace<QHBoxLayout>().withoutMargin();
-        box.emplace<QLabel>("Scale: ");
+        box.emplace<QLabel>("Window scale: ");
         box.append(this->createUiScaleSlider());
     }
+
+    layout.append(this->createCheckBox(WINDOW_TOPMOST, getSettings()->windowTopMost));
+
+    // --
+    layout.emplace<Line>(false);
 
     // tab x
     layout.append(this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
@@ -85,10 +100,10 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
     layout.append(this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
 #endif
 
-    // scrolling
-    layout.append(this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
+    // empty input
+    layout.append(this->createCheckBox(INPUT_EMPTY, getSettings()->showEmptyInput));
     layout.append(
-        this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
+        this->createCheckBox("Show message length while typing", getSettings()->showMessageLength));
 
     layout->addStretch(1);
 }
@@ -102,13 +117,12 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     layout.emplace<Line>(false);
 
     // timestamps
-    layout.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
-    //    auto tbox = layout.emplace<QHBoxLayout>().withoutMargin();
-    //    {
-    //        tbox.emplace<QLabel>("Timestamp format (a = am/pm):");
-    //        tbox.append(this->createComboBox({TIMESTAMP_FORMATS},
-    //        getSettings()->timestampFormat)); tbox->addStretch(1);
-    //    }
+    {
+        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
+        box.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
+        box.append(this->createComboBox({TIMESTAMP_FORMATS}, getSettings()->timestampFormat));
+        box->addStretch(1);
+    }
 
     // badges
     layout.append(this->createCheckBox("Show badges", getSettings()->showBadges));
@@ -155,6 +169,9 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
         hbox.append(combo);
         hbox.emplace<QLabel>("lines");
     }
+
+    // last read message
+    this->addLastReadMessageIndicatorPatternSelector(layout);
 
     // --
     layout->addStretch(1);
@@ -216,6 +233,43 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
     layout->addStretch(1);
 }
 
+void LookPage::addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLayout> layout)
+{
+    // combo
+    auto *combo = new QComboBox(this);
+    combo->addItems({"Dotted line", "Solid line"});
+
+    const auto currentIndex = []() -> int {
+        switch (getApp()->settings->lastMessagePattern.getValue()) {
+            case Qt::SolidLine:
+                return 1;
+            case Qt::VerPattern:
+            default:
+                return 0;
+        }
+    }();
+    combo->setCurrentIndex(currentIndex);
+
+    QObject::connect(combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                     [](int index) {
+                         getSettings()->lastMessagePattern = [&] {
+                             switch (index) {
+                                 case 1:
+                                     return Qt::SolidPattern;
+                                 case 0:
+                                 default:
+                                     return Qt::VerPattern;
+                             }
+                         }();
+                     });
+
+    // layout
+    auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
+    hbox.append(this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
+    hbox.append(combo);
+    hbox->addStretch(1);
+}
+
 ChannelPtr LookPage::createPreviewChannel()
 {
     auto channel = ChannelPtr(new Channel("preview", Channel::Misc));
@@ -226,7 +280,7 @@ ChannelPtr LookPage::createPreviewChannel()
                                              MessageElement::BadgeChannelAuthority));
         message->addElement(new ImageElement(getApp()->resources->badgeSubscriber,
                                              MessageElement::BadgeSubscription));
-        message->addElement(new TimestampElement());
+        message->addElement(new TimestampElement(QTime(8, 13, 42)));
         message->addElement(new TextElement("username1:", MessageElement::Username,
                                             QColor("#0094FF"), FontStyle::ChatMediumBold));
         message->addElement(new TextElement("This is a preview message :)", MessageElement::Text));
@@ -236,7 +290,7 @@ ChannelPtr LookPage::createPreviewChannel()
         auto message = MessagePtr(new Message());
         message->addElement(new ImageElement(getApp()->resources->badgePremium,
                                              MessageElement::BadgeChannelAuthority));
-        message->addElement(new TimestampElement());
+        message->addElement(new TimestampElement(QTime(8, 15, 21)));
         message->addElement(new TextElement("username2:", MessageElement::Username,
                                             QColor("#FF6A00"), FontStyle::ChatMediumBold));
         message->addElement(new TextElement("This is another one :)", MessageElement::Text));

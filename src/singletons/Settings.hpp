@@ -28,7 +28,7 @@ public:
     BoolSetting showBadges = {"/appearance/messages/showBadges", true};
     BoolSetting showLastMessageIndicator = {"/appearance/messages/showLastMessageIndicator", false};
     IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern", Qt::VerPattern};
-    BoolSetting hideEmptyInput = {"/appearance/hideEmptyInputBox", false};
+    BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages", false};
     //    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};

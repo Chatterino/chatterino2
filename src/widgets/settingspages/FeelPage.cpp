@@ -8,14 +8,9 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#ifdef USEWINSDK
-#define WINDOW_TOPMOST "Window always on top"
-#else
-#define WINDOW_TOPMOST "Window always on top (requires restart)"
-#endif
-#define INPUT_EMPTY "Hide input box when empty"
 #define PAUSE_HOVERING "When hovering"
-#define LAST_MSG "Mark the last message you read (dotted line)"
+#define SCROLL_SMOOTH "Smooth scrolling"
+#define SCROLL_NEWMSG "Smooth scrolling for new messages"
 
 #define LIMIT_CHATTERS_FOR_SMALLER_STREAMERS "Only fetch chatters list for viewers under X viewers"
 
@@ -29,57 +24,18 @@ FeelPage::FeelPage()
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
+    layout.append(this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
+    layout.append(
+        this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
+
     auto form = layout.emplace<QFormLayout>().withoutMargin();
     {
-        form->addRow("Window:", this->createCheckBox(WINDOW_TOPMOST, app->settings->windowTopMost));
-        form->addRow("Messages:", this->createCheckBox(INPUT_EMPTY, app->settings->hideEmptyInput));
         form->addRow(
             "", this->createCheckBox("Show which users joined the channel (up to 1000 chatters)",
                                      app->settings->showJoins));
         form->addRow(
             "", this->createCheckBox("Show which users parted the channel (up to 1000 chatters)",
                                      app->settings->showParts));
-
-        form->addRow("", this->createCheckBox("Show message length while typing",
-                                              getSettings()->showMessageLength));
-        form->addRow("", this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
-        {
-            auto *combo = new QComboBox(this);
-            combo->addItems({"Dotted", "Solid"});
-
-            const auto currentIndex = []() -> int {
-                switch (getApp()->settings->lastMessagePattern.getValue()) {
-                    case Qt::SolidLine: {
-                        return 1;
-                    }
-                    default:
-                    case Qt::VerPattern: {
-                        return 0;
-                    }
-                }
-            }();
-            combo->setCurrentIndex(currentIndex);
-
-            QObject::connect(combo,
-                             static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-                             [](int index) {
-                                 Qt::BrushStyle brush;
-                                 switch (index) {
-                                     case 1:
-                                         brush = Qt::SolidPattern;
-                                         break;
-                                     default:
-                                     case 0:
-                                         brush = Qt::VerPattern;
-                                         break;
-                                 }
-                                 getSettings()->lastMessagePattern = brush;
-                             });
-
-            auto hbox = form.emplace<QHBoxLayout>().withoutMargin();
-            hbox.emplace<QLabel>("Last message indicator pattern");
-            hbox.append(combo);
-        }
 
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING, app->settings->pauseChatHover));
