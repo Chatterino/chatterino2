@@ -113,6 +113,7 @@ SOURCES += \
     src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/UserHighlightModel.cpp \
     src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
@@ -260,6 +261,7 @@ HEADERS  += \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/UserHighlightModel.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \

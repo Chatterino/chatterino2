@@ -8,6 +8,7 @@
 
 namespace chatterino {
 
+class UserHighlightModel;
 class HighlightModel;
 class HighlightBlacklistModel;
 
@@ -20,10 +21,13 @@ public:
 
     UnsortedSignalVector<HighlightPhrase> phrases;
     UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
+    UnsortedSignalVector<HighlightPhrase> highlightedUsers;
 
     HighlightModel *createModel(QObject *parent);
     HighlightBlacklistModel *createBlacklistModel(QObject *parent);
+    UserHighlightModel *createUserModel(QObject *parent);
 
+    bool isHighlightedUser(const QString &username);
     bool blacklistContains(const QString &username);
 
     void addHighlight(const MessagePtr &msg);
