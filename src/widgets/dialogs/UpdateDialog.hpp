@@ -9,12 +9,12 @@ class QPushButton;
 
 namespace chatterino {
 
-class UpdatePromptDialog : public BaseWindow
+class UpdateDialog : public BaseWindow
 {
 public:
     enum Button { Dismiss };
 
-    UpdatePromptDialog();
+    UpdateDialog();
 
     pajlada::Signals::Signal<Button> buttonClicked;
 

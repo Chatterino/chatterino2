@@ -227,8 +227,8 @@ SOURCES += \
     src/controllers/moderationactions/ModerationActionModel.cpp \
     src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/FeelPage.cpp \
-    src/widgets/dialogs/UpdatePromptDialog.cpp \
-    src/util/InitUpdateButton.cpp
+    src/util/InitUpdateButton.cpp \
+    src/widgets/dialogs/UpdateDialog.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -403,8 +403,8 @@ HEADERS  += \
     src/controllers/moderationactions/ModerationActionModel.hpp \
     src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/FeelPage.hpp \
-    src/widgets/dialogs/UpdatePromptDialog.hpp \
-    src/util/InitUpdateButton.hpp
+    src/util/InitUpdateButton.hpp \
+    src/widgets/dialogs/UpdateDialog.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

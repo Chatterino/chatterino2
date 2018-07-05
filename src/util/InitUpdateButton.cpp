@@ -1,11 +1,11 @@
 #include "InitUpdateButton.hpp"
 
-#include "widgets/dialogs/UpdatePromptDialog.hpp"
+#include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/helper/RippleEffectButton.hpp"
 
 namespace chatterino {
 
-void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDialog> &handle,
+void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> &handle,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();
@@ -14,7 +14,7 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDi
     QObject::connect(&button, &RippleEffectButton::clicked, [&button, &handle] {
         (void)(handle);
 
-        auto dialog = new UpdatePromptDialog();
+        auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(QPoint(int(-100 * button.getScale()), button.height())));
         dialog->show();
@@ -22,7 +22,7 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDi
 
         dialog->buttonClicked.connect([&button](auto buttonType) {
             switch (buttonType) {
-                case UpdatePromptDialog::Dismiss: {
+                case UpdateDialog::Dismiss: {
                     button.hide();
                 } break;
             }

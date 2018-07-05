@@ -3,7 +3,7 @@
 #include "util/Helpers.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/dialogs/UpdatePromptDialog.hpp"
+#include "widgets/dialogs/UpdateDialog.hpp"
 
 //#ifdef USEWINSDK
 //#include <platform/borderless/qwinwidget.h>
@@ -46,7 +46,7 @@ private:
     void loadGeometry();
 
     RippleEffectLabel *userLabel = nullptr;
-    std::unique_ptr<UpdatePromptDialog> updateDialogHandle_;
+    std::unique_ptr<UpdateDialog> updateDialogHandle_;
 
     WindowType type;
     float dpi;

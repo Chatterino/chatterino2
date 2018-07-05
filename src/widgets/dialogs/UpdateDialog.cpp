@@ -1,4 +1,4 @@
-#include "UpdatePromptDialog.hpp"
+#include "UpdateDialog.hpp"
 
 #include "singletons/Updates.hpp"
 #include "util/LayoutCreator.hpp"
@@ -10,11 +10,11 @@
 
 namespace chatterino {
 
-UpdatePromptDialog::UpdatePromptDialog()
+UpdateDialog::UpdateDialog()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::TopMost |
                                             BaseWindow::EnableCustomFrame))
 {
-    auto layout = LayoutCreator<UpdatePromptDialog>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
     layout.emplace<Label>("You shouldn't be seeing this dialog.").assign(&this->ui_.label);
 
@@ -34,7 +34,7 @@ UpdatePromptDialog::UpdatePromptDialog()
                                       [this](auto status) { this->updateStatusChanged(status); });
 }
 
-void UpdatePromptDialog::updateStatusChanged(Updates::Status status)
+void UpdateDialog::updateStatusChanged(Updates::Status status)
 {
     this->ui_.installButton->setVisible(status == Updates::UpdateAvailable);
 

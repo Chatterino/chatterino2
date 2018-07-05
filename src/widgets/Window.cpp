@@ -12,7 +12,7 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/dialogs/UpdatePromptDialog.hpp"
+#include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/splits/Split.hpp"

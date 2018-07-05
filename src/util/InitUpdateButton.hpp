@@ -11,9 +11,9 @@ class SignalHolder;
 namespace chatterino {
 
 class RippleEffectButton;
-class UpdatePromptDialog;
+class UpdateDialog;
 
-void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDialog> &handle,
+void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> &handle,
                       pajlada::Signals::SignalHolder &signalHolder);
 
 }  // namespace chatterino
