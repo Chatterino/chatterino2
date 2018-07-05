@@ -46,22 +46,40 @@ ModerationPage::ModerationPage()
     {
         // Logs (copied from LoggingMananger)
 
-        auto created = logs.emplace<QLabel>();
+        auto logsPathLabel = logs.emplace<QLabel>();
 
-        app->settings->logPath.connect([app, created](const QString &logPath, auto) mutable {
+        app->settings->logPath.connect([app, logsPathLabel](const QString &logPath, auto) mutable {
+
+            QString pathOriginal;
+
             if (logPath == "") {
-                created->setText("Logs are saved to " +
-                                 CreateLink(app->paths->messageLogDirectory, true));
+                pathOriginal = app->paths->messageLogDirectory;
             } else {
-                created->setText("Logs are saved to " + CreateLink(logPath, true));
+                pathOriginal = logPath;
             }
+
+            QString pathShortened;
+
+            if (pathOriginal.size() > 50) {
+                pathShortened = pathOriginal;
+                pathShortened.resize(50);
+                pathShortened += "...";
+            } else {
+                pathShortened = pathOriginal;
+            }
+
+            pathShortened = "Logs saved at <a href=\"file:///" + pathOriginal +
+                            "\"><span style=\"color: white;\">" + pathShortened + "</span></a>";
+
+            logsPathLabel->setText(pathShortened);
+            logsPathLabel->setToolTip(pathOriginal);
         });
 
-        created->setTextFormat(Qt::RichText);
-        created->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                         Qt::LinksAccessibleByKeyboard |
-                                         Qt::LinksAccessibleByKeyboard);
-        created->setOpenExternalLinks(true);
+        logsPathLabel->setTextFormat(Qt::RichText);
+        logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                               Qt::LinksAccessibleByKeyboard |
+                                               Qt::LinksAccessibleByKeyboard);
+        logsPathLabel->setOpenExternalLinks(true);
         logs.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
         logs->addStretch(1);
