@@ -63,7 +63,7 @@ Window::Window(WindowType _type)
         update->setPixmap(QPixmap(":/images/download_update.png"));
         QObject::connect(update, &TitleBarButton::clicked, this, [this, update] {
             auto dialog = new UpdatePromptDialog();
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->setActionOnFocusLoss(BaseWindow::Delete);
             dialog->move(update->mapToGlobal(QPoint(-100 * this->getScale(), update->height())));
             dialog->show();
             dialog->raise();

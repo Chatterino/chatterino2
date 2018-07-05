@@ -1142,7 +1142,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link, MessageL
 
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(user, this->channel_);
-            userPopup->setAttribute(Qt::WA_DeleteOnClose);
+            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
             QPoint offset(int(150 * this->getScale()), int(70 * this->getScale()));
             userPopup->move(QCursor::pos() - offset);
             userPopup->show();

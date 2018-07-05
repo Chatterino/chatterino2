@@ -51,10 +51,6 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
-    if (this->flags_ & DeleteOnFocusOut) {
-        this->setAttribute(Qt::WA_DeleteOnClose);
-    }
-
     this->init();
 
     this->connections_.managedConnect(
@@ -186,6 +182,16 @@ bool BaseWindow::getStayInScreenRect() const
     return this->stayInScreenRect_;
 }
 
+void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
+{
+    this->actionOnFocusLoss_ = value;
+}
+
+BaseWindow::ActionOnFocusLoss BaseWindow::getActionOnFocusLoss() const
+{
+    return this->actionOnFocusLoss_;
+}
+
 QWidget *BaseWindow::getLayoutContainer()
 {
     if (this->hasCustomWindowFrame()) {
@@ -235,9 +241,7 @@ void BaseWindow::themeRefreshEvent()
 bool BaseWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
-        if (this->flags_ & DeleteOnFocusOut) {
-            this->close();
-        }
+        this->onFocusLost();
     }
 
     return QWidget::event(event);
@@ -257,6 +261,25 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
             getApp()->settings->uiScale.setValue(
                 WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
         }
+    }
+}
+
+void BaseWindow::onFocusLost()
+{
+    switch (this->getActionOnFocusLoss()) {
+        case Delete: {
+            this->deleteLater();
+        } break;
+
+        case Close: {
+            this->close();
+        } break;
+
+        case Hide: {
+            this->hide();
+        } break;
+
+        default:;
     }
 }
 
@@ -470,12 +493,7 @@ void BaseWindow::paintEvent(QPaintEvent *)
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
 
-    //    this->drawCustomWindowFrame(painter);
-    //    QPainter painter(this);
-
-    QColor bg = this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
-
-    painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
+    this->drawCustomWindowFrame(painter);
 }
 
 void BaseWindow::updateScale()
@@ -514,16 +532,15 @@ void BaseWindow::calcButtonsSizes()
 
 void BaseWindow::drawCustomWindowFrame(QPainter &painter)
 {
-    //#ifdef USEWINSDK
-    //    if (this->hasCustomWindowFrame()) {
-    //        QPainter painter(this);
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame()) {
+        QPainter painter(this);
 
-    //        QColor bg =
-    //        this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
+        QColor bg = this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
 
-    //        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
-    //    }
-    //#endif
+        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
+    }
+#endif
 }
 
 bool BaseWindow::handleDPICHANGED(MSG *msg)
@@ -606,7 +623,9 @@ bool BaseWindow::handleSIZE(MSG *msg)
 {
 #ifdef USEWINSDK
     if (this->ui_.windowLayout) {
-        if (this->hasCustomWindowFrame() && !this->frameless_) {
+        if (this->frameless_) {
+            //
+        } else if (this->hasCustomWindowFrame()) {
             if (msg->wParam == SIZE_MAXIMIZED) {
                 auto offset = int(this->getScale() * 8);
 

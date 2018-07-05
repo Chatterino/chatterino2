@@ -26,13 +26,13 @@ public:
         EnableCustomFrame = 1,
         Frameless = 2,
         TopMost = 4,
-        DeleteOnFocusOut = 8,
-        DisableCustomScaling = 16,
-        FramelessDraggable = 32,
+        DisableCustomScaling = 8,
+        FramelessDraggable = 16,
     };
 
+    enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
+
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
-    virtual ~BaseWindow() = default;
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
@@ -42,6 +42,9 @@ public:
 
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;
+
+    void setActionOnFocusLoss(ActionOnFocusLoss value);
+    ActionOnFocusLoss getActionOnFocusLoss() const;
 
     void moveTo(QWidget *widget, QPoint point, bool offset = true);
 
@@ -78,6 +81,7 @@ private:
     void moveIntoDesktopRect(QWidget *parent);
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
+    void onFocusLost();
 
     bool handleDPICHANGED(MSG *msg);
     bool handleSHOWWINDOW(MSG *msg);
@@ -86,6 +90,7 @@ private:
     bool handleNCHITTEST(MSG *msg, long *result);
 
     bool enableCustomFrame_;
+    ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
     bool stayInScreenRect_ = false;
     bool shown_ = false;
