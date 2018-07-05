@@ -20,15 +20,13 @@ LogsPopup::LogsPopup()
 
 void LogsPopup::initLayout()
 {
-    {
-        QVBoxLayout *layout = new QVBoxLayout(this);
-        layout->setMargin(0);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setMargin(0);
 
-        this->channelView_ = new ChannelView(this);
-        layout->addWidget(this->channelView_);
+    this->channelView_ = new ChannelView(this);
+    layout->addWidget(this->channelView_);
 
-        this->setLayout(layout);
-    }
+    this->setLayout(layout);
 }
 
 void LogsPopup::setInfo(ChannelPtr channel, QString userName)

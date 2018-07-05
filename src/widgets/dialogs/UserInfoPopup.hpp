@@ -42,7 +42,7 @@ private:
 
     struct {
         RippleEffectButton *avatarButton = nullptr;
-        RippleEffectLabel *viewLogs = nullptr;
+        // RippleEffectLabel2 *viewLogs = nullptr;
 
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;
