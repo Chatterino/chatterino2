@@ -7,6 +7,7 @@
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/helper/RippleEffectLabel.hpp"
 
@@ -68,6 +69,8 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights").assign(&this->ui_.ignoreHighlights);
+        auto viewLogs = user.emplace<RippleEffectLabel>(this).assign(&this->ui_.viewLogs);
+        this->ui_.viewLogs->getLabel().setText("Logs");
 
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -77,6 +80,13 @@ UserInfoPopup::UserInfoPopup()
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
+
+        QObject::connect(viewLogs.getElement(), &RippleEffectLabel::clicked, [this] {
+            auto logs = new LogsPopup();
+            logs->setInfo(this->channel_, this->userName_);
+            logs->setAttribute(Qt::WA_DeleteOnClose);
+            logs->show();
+        });
 
         QObject::connect(mod.getElement(), &RippleEffectButton::clicked,
                          [this] { this->channel_->sendMessage("/mod " + this->userName_); });
