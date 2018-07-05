@@ -199,7 +199,6 @@ SOURCES += \
     src/widgets/settingspages/EmotesPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
-    src/widgets/settingspages/IgnoreusersPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
     src/widgets/settingspages/LogsPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
@@ -228,7 +227,8 @@ SOURCES += \
     src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/FeelPage.cpp \
     src/util/InitUpdateButton.cpp \
-    src/widgets/dialogs/UpdateDialog.cpp
+    src/widgets/dialogs/UpdateDialog.cpp \
+    src/widgets/settingspages/IgnoresPage.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -370,7 +370,6 @@ HEADERS  += \
     src/widgets/settingspages/EmotesPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
-    src/widgets/settingspages/IgnoreusersPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
     src/widgets/settingspages/LogsPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
@@ -404,7 +403,8 @@ HEADERS  += \
     src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/FeelPage.hpp \
     src/util/InitUpdateButton.hpp \
-    src/widgets/dialogs/UpdateDialog.hpp
+    src/widgets/dialogs/UpdateDialog.hpp \
+    src/widgets/settingspages/IgnorePage.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

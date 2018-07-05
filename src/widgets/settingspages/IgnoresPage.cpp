@@ -1,4 +1,4 @@
-#include "IgnoreusersPage.hpp"
+#include "IgnorePage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -23,12 +23,12 @@
 
 namespace chatterino {
 
-IgnoreUsersPage::IgnoreUsersPage()
+IgnoresPage::IgnoresPage()
     : SettingsPage("Ignores", "")
 {
     auto app = getApp();
 
-    LayoutCreator<IgnoreUsersPage> layoutCreator(this);
+    LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
@@ -85,7 +85,7 @@ IgnoreUsersPage::IgnoreUsersPage()
     label->setStyleSheet("color: #BBB");
 }
 
-void IgnoreUsersPage::onShow()
+void IgnoresPage::onShow()
 {
     auto app = getApp();
 

@@ -11,7 +11,7 @@
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/FeelPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
-#include "widgets/settingspages/IgnoreusersPage.hpp"
+#include "widgets/settingspages/IgnorePage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/LogsPage.hpp"
 #include "widgets/settingspages/LookPage.hpp"
@@ -90,7 +90,7 @@ void SettingsDialog::addTabs()
     this->addTab(new CommandPage);
     //    this->addTab(new EmotesPage);
     this->addTab(new HighlightingPage);
-    this->addTab(new IgnoreUsersPage);
+    this->addTab(new IgnoresPage);
 
     this->ui_.tabContainer->addSpacing(16);
 

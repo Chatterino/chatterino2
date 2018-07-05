@@ -6,10 +6,10 @@
 
 namespace chatterino {
 
-class IgnoreUsersPage : public SettingsPage
+class IgnoresPage : public SettingsPage
 {
 public:
-    IgnoreUsersPage();
+    IgnoresPage();
 
     void onShow() final;
 

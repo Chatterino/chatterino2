@@ -43,13 +43,13 @@ HighlightingPage::HighlightingPage()
         auto tabs = layout.emplace<QTabWidget>();
         {
             // HIGHLIGHTS
-            auto highlights = tabs.appendTab(new QVBoxLayout, "Highlights");
+            auto highlights = tabs.appendTab(new QVBoxLayout, "Phrases");
             {
                 EditableModelView *view =
                     highlights.emplace<EditableModelView>(app->highlights->createModel(nullptr))
                         .getElement();
 
-                view->setTitles({"Pattern", "Flash taskbar", "Play sound", "Regex"});
+                view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound", "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
@@ -66,37 +66,13 @@ HighlightingPage::HighlightingPage()
                 });
             }
 
-            auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Disabled Users");
-            {
-                EditableModelView *view =
-                    disabledUsers
-                        .emplace<EditableModelView>(app->highlights->createBlacklistModel(nullptr))
-                        .getElement();
-
-                view->setTitles({"Pattern", "Regex"});
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
-
-                // fourtf: make class extrend BaseWidget and add this to dpiChanged
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
-
-                view->addButtonPressed.connect([] {
-                    getApp()->highlights->blacklistedUsers.appendItem(
-                        HighlightBlacklistUser{"blacklisted user", false});
-                });
-            }
-
-            auto pingUsers = tabs.appendTab(new QVBoxLayout, "Highlight on message");
+            auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
                 EditableModelView *view =
                     pingUsers.emplace<EditableModelView>(app->highlights->createUserModel(nullptr))
                         .getElement();
 
-                view->setTitles({"Username", "Flash taskbar", "Play sound", "Regex"});
+                view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound", "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
@@ -110,6 +86,30 @@ HighlightingPage::HighlightingPage()
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
                         HighlightPhrase{"highlighted user", true, false, false});
+                });
+            }
+
+            auto disabledUsers = tabs.appendTab(new QVBoxLayout, "Excluded Users");
+            {
+                EditableModelView *view =
+                    disabledUsers
+                        .emplace<EditableModelView>(app->highlights->createBlacklistModel(nullptr))
+                        .getElement();
+
+                view->setTitles({"Pattern", "Enable\nregex"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                // fourtf: make class extrend BaseWidget and add this to dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
+
+                view->addButtonPressed.connect([] {
+                    getApp()->highlights->blacklistedUsers.appendItem(
+                        HighlightBlacklistUser{"blacklisted user", false});
                 });
             }
         }
