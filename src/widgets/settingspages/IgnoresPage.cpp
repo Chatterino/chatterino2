@@ -1,4 +1,4 @@
-#include "IgnorePage.hpp"
+#include "IgnoresPage.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -23,66 +23,62 @@
 
 namespace chatterino {
 
+static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
+static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box, QStringListModel &model);
+
 IgnoresPage::IgnoresPage()
     : SettingsPage("Ignores", "")
 {
-    auto app = getApp();
-
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
-
-    //    auto group = layout.emplace<QGroupBox>("Ignored users").setLayoutType<QVBoxLayout>();
     auto tabs = layout.emplace<QTabWidget>();
-    //    tabs->setStyleSheet("color: #000");
 
-    // users
-    auto users = tabs.appendTab(new QVBoxLayout, "Users");
-    {
-        users.append(this->createCheckBox("Enable twitch ignored users",
-                                          app->settings->enableTwitchIgnoredUsers));
-
-        auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
-        {
-            anyways.emplace<QLabel>("Show anyways if:");
-            anyways.emplace<QComboBox>();
-            anyways->addStretch(1);
-        }
-
-        auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
-        {
-            auto add = addremove.emplace<QPushButton>("Ignore user");
-            auto remove = addremove.emplace<QPushButton>("Unignore User");
-            UNUSED(add);     // TODO: Add on-clicked event
-            UNUSED(remove);  // TODO: Add on-clicked event
-            addremove->addStretch(1);
-        }
-
-        users.emplace<QListView>()->setModel(&this->userListModel);
-    }
-
-    // messages
-    auto messages = tabs.appendTab(new QVBoxLayout, "Messages");
-    {
-        EditableModelView *view =
-            messages.emplace<EditableModelView>(app->ignores->createModel(nullptr)).getElement();
-        view->setTitles({"Pattern", "Regex"});
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-
-        // fourtf: make class extrend BaseWidget and add this to dpiChanged
-        QTimer::singleShot(1, [view] {
-            view->getTableView()->resizeColumnsToContents();
-            view->getTableView()->setColumnWidth(0, 200);
-        });
-
-        view->addButtonPressed.connect([] {
-            getApp()->ignores->phrases.appendItem(IgnorePhrase{"my phrase", false});
-        });
-    }
+    addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Phrases"));
+    addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"), this->userListModel);
 
     auto label = layout.emplace<QLabel>(INFO);
     label->setWordWrap(true);
     label->setStyleSheet("color: #BBB");
+}
+
+void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
+{
+    EditableModelView *view =
+        layout.emplace<EditableModelView>(getApp()->ignores->createModel(nullptr)).getElement();
+    view->setTitles({"Pattern", "Regex"});
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+    QTimer::singleShot(1, [view] {
+        view->getTableView()->resizeColumnsToContents();
+        view->getTableView()->setColumnWidth(0, 200);
+    });
+
+    view->addButtonPressed.connect([] {
+        getApp()->ignores->phrases.appendItem(IgnorePhrase{"my phrase", false});
+    });
+}
+
+void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users, QStringListModel &userModel)
+{
+    users.append(page.createCheckBox("Enable twitch ignored users",
+                                     getApp()->settings->enableTwitchIgnoredUsers));
+
+    auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
+    {
+        anyways.emplace<QLabel>("Show anyways if:");
+        anyways.emplace<QComboBox>();
+        anyways->addStretch(1);
+    }
+
+    /*auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
+    {
+        auto add = addremove.emplace<QPushButton>("Ignore user");
+        auto remove = addremove.emplace<QPushButton>("Unignore User");
+        addremove->addStretch(1);
+    }*/
+
+    users.emplace<QListView>()->setModel(&userModel);
 }
 
 void IgnoresPage::onShow()

@@ -4,6 +4,8 @@
 
 #include <QStringListModel>
 
+class QVBoxLayout;
+
 namespace chatterino {
 
 class IgnoresPage : public SettingsPage

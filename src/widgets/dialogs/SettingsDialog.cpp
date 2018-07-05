@@ -11,7 +11,7 @@
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/FeelPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
-#include "widgets/settingspages/IgnorePage.hpp"
+#include "widgets/settingspages/IgnoresPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/LogsPage.hpp"
 #include "widgets/settingspages/LookPage.hpp"

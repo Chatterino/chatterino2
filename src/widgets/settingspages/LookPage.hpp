@@ -15,10 +15,6 @@ class LookPage : public SettingsPage
 public:
     LookPage();
 
-    void addApplicationGroup(QVBoxLayout &layout);
-    void addMessagesGroup(QVBoxLayout &layout);
-    void addEmotesGroup(QVBoxLayout &layout);
-
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();
     QLayout *createUiScaleSlider();

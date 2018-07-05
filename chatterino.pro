@@ -404,7 +404,7 @@ HEADERS  += \
     src/widgets/settingspages/FeelPage.hpp \
     src/util/InitUpdateButton.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
-    src/widgets/settingspages/IgnorePage.hpp
+    src/widgets/settingspages/IgnoresPage.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
