@@ -46,9 +46,9 @@ ModerationPage::ModerationPage()
     {
         // Logs (copied from LoggingMananger)
 
-        auto created = logs.emplace<QLabel>();
+        auto logsPathLabel = logs.emplace<QLabel>();
 
-        app->settings->logPath.connect([app, created](const QString &logPath, auto) mutable {
+        app->settings->logPath.connect([app, logsPathLabel](const QString &logPath, auto) mutable {
 
             QString pathOriginal;
 
@@ -71,14 +71,15 @@ ModerationPage::ModerationPage()
             pathShortened = "Logs saved at <a href=\"file:///" + pathOriginal +
                             "\"><span style=\"color: white;\">" + pathShortened + "</span></a>";
 
-            created->setText(pathShortened);
+            logsPathLabel->setText(pathShortened);
+            logsPathLabel->setToolTip(pathOriginal);
         });
 
-        created->setTextFormat(Qt::RichText);
-        created->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                         Qt::LinksAccessibleByKeyboard |
-                                         Qt::LinksAccessibleByKeyboard);
-        created->setOpenExternalLinks(true);
+        logsPathLabel->setTextFormat(Qt::RichText);
+        logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                               Qt::LinksAccessibleByKeyboard |
+                                               Qt::LinksAccessibleByKeyboard);
+        logsPathLabel->setOpenExternalLinks(true);
         logs.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
 
         logs->addStretch(1);
