@@ -16,15 +16,13 @@ public:
     void setInfo(std::shared_ptr<Channel> channel, QString userName);
 
 private:
-    ChannelView *channelView = nullptr;
+    ChannelView *channelView_ = nullptr;
     ChannelPtr channel_ = Channel::getEmpty();
 
-    QString userName;
-
-    bool usedLogviewer = true;
+    QString userName_;
 
     void initLayout();
-    void setupView(std::vector<MessagePtr> messages);
+    void setMessages(std::vector<MessagePtr> &messages);
     void getOverrustleLogs();
     void getLogviewerLogs();
 };

@@ -24,10 +24,8 @@ void LogsPopup::initLayout()
         QVBoxLayout *layout = new QVBoxLayout(this);
         layout->setMargin(0);
 
-        {
-            this->channelView = new ChannelView(this);
-            layout->addWidget(this->channelView);
-        }
+        this->channelView_ = new ChannelView(this);
+        layout->addWidget(this->channelView_);
 
         this->setLayout(layout);
     }
@@ -36,24 +34,17 @@ void LogsPopup::initLayout()
 void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 {
     this->channel_ = channel;
-    this->userName = userName;
-    this->setWindowTitle("Logs for " + this->userName + " in " + this->channel_->name +
-                         "'s history");
+    this->userName_ = userName;
+    this->setWindowTitle(this->userName_ + "'s logs in #" + this->channel_->name);
     this->getLogviewerLogs();
 }
 
-void LogsPopup::setupView(std::vector<MessagePtr> messages)
+void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 {
     ChannelPtr logsChannel(new Channel("logs", Channel::Misc));
-    /*
-                MessagePtr message(new Message);
-                message->addElement(new TimestampElement(this->rustleTime));
-                message->addElement(
-                    new TextElement(this->userName, MessageElement::Username,
-       MessageColor::System)); message->addElement( new TextElement(output[line],
-       MessageElement::Text, MessageColor::Text)); messages.push_back(message);*/
+
     logsChannel->addMessagesAtStart(messages);
-    this->channelView->setChannel(logsChannel);
+    this->channelView_->setChannel(logsChannel);
 }
 
 void LogsPopup::getLogviewerLogs()
@@ -66,7 +57,7 @@ void LogsPopup::getLogviewerLogs()
     QString channelName = twitchChannel->name;
 
     QString url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
-                      .arg(channelName, this->userName);
+                      .arg(channelName, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -95,11 +86,9 @@ void LogsPopup::getLogviewerLogs()
             auto ircMessage = Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
             auto privMsg = static_cast<Communi::IrcPrivateMessage *>(ircMessage);
             TwitchMessageBuilder builder(logsChannel.get(), privMsg, args);
-            if (!builder.isIgnored()) {
-                messages.push_back(builder.build());
-            }
+            messages.push_back(builder.build());
         };
-        this->setupView(messages);
+        this->setMessages(messages);
     });
 
     req.execute();
@@ -108,11 +97,14 @@ void LogsPopup::getLogviewerLogs()
 void LogsPopup::getOverrustleLogs()
 {
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    if (twitchChannel == nullptr) {
+        return;
+    }
 
     QString channelName = twitchChannel->name;
 
-    QString url("https://overrustlelogs.net/api/v1/stalk/" + channelName + "/" + this->userName +
-                ".json?limit=500");
+    QString url = QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
+                      .arg(channelName, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -137,14 +129,14 @@ void LogsPopup::getOverrustleLogs()
 
                 MessagePtr message(new Message);
                 message->addElement(new TimestampElement(timeStamp));
-                message->addElement(new TextElement(this->userName, MessageElement::Username,
+                message->addElement(new TextElement(this->userName_, MessageElement::Username,
                                                     MessageColor::System));
                 message->addElement(new TextElement(singleMessage.value("text").toString(),
                                                     MessageElement::Text, MessageColor::Text));
                 messages.push_back(message);
             }
         }
-        this->setupView(messages);
+        this->setMessages(messages);
     });
     req.execute();
 }
