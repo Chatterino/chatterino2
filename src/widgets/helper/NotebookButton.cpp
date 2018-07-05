@@ -13,10 +13,23 @@
 
 namespace chatterino {
 
-NotebookButton::NotebookButton(BaseWidget *parent)
+NotebookButton::NotebookButton(Notebook *parent)
     : RippleEffectButton(parent)
+    , parent_(parent)
 {
     this->setAcceptDrops(true);
+}
+
+void NotebookButton::setIcon(Icon icon)
+{
+    this->icon_ = icon;
+
+    this->update();
+}
+
+NotebookButton::Icon NotebookButton::getIcon() const
+{
+    return this->icon_;
 }
 
 void NotebookButton::themeRefreshEvent()
@@ -24,7 +37,7 @@ void NotebookButton::themeRefreshEvent()
     this->setMouseEffectColor(this->themeManager->tabs.regular.text);
 }
 
-void NotebookButton::paintEvent(QPaintEvent *)
+void NotebookButton::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
@@ -43,60 +56,70 @@ void NotebookButton::paintEvent(QPaintEvent *)
 
     float h = height(), w = width();
 
-    if (icon == IconPlus) {
-        painter.setPen([&] {
-            QColor tmp = foreground;
-            if (!this->mouseOver_) {
-                tmp.setAlpha(180);
+    switch (icon_) {
+        case Plus: {
+            painter.setPen([&] {
+                QColor tmp = foreground;
+                if (!this->mouseOver_) {
+                    tmp.setAlpha(180);
+                }
+                return tmp;
+            }());
+            QRect rect = this->rect();
+            int s = h * 4 / 9;
+
+            painter.drawLine(
+                rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
+                rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
+            painter.drawLine(
+                rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
+                rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
+        } break;
+
+        case User: {
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+            auto a = w / 8;
+            QPainterPath path;
+
+            path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
+            path.arcTo(a, 4 * a, 6 * a, 6 * a, 0, 180);
+
+            painter.fillPath(path, foreground);
+
+            painter.setBrush(background);
+            painter.drawEllipse(2 * a, 1 * a, 4 * a, 4 * a);
+
+            painter.setBrush(foreground);
+            painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
+        } break;
+
+        case Settings: {
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+            auto a = w / 8;
+            QPainterPath path;
+
+            path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
+
+            for (int i = 0; i < 8; i++) {
+                path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0), (360 / 32.0));
+                path.arcTo(2 * a, 2 * a, 4 * a, 4 * a, i * (360 / 8.0) + (360 / 32.0),
+                           (360 / 32.0));
             }
-            return tmp;
-        }());
-        QRect rect = this->rect();
-        int s = h * 4 / 9;
 
-        painter.drawLine(rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
-                         rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
-        painter.drawLine(rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
-                         rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
-    } else if (icon == IconUser) {
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
+            painter.fillPath(path, foreground);
 
-        auto a = w / 8;
-        QPainterPath path;
+            painter.setBrush(background);
+            painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
+        } break;
 
-        path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
-        path.arcTo(a, 4 * a, 6 * a, 6 * a, 0, 180);
-
-        painter.fillPath(path, foreground);
-
-        painter.setBrush(background);
-        painter.drawEllipse(2 * a, 1 * a, 4 * a, 4 * a);
-
-        painter.setBrush(foreground);
-        painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
-    } else  // IconSettings
-    {
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
-
-        auto a = w / 8;
-        QPainterPath path;
-
-        path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
-
-        for (int i = 0; i < 8; i++) {
-            path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0), (360 / 32.0));
-            path.arcTo(2 * a, 2 * a, 4 * a, 4 * a, i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
-        }
-
-        painter.fillPath(path, foreground);
-
-        painter.setBrush(background);
-        painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
+        default:;
     }
 
-    fancyPaint(painter);
+    RippleEffectButton::paintEvent(event);
 }
 
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
@@ -155,6 +178,16 @@ void NotebookButton::dropEvent(QDropEvent *event)
             page->appendSplit(SplitContainer::draggingSplit);
         }
     }
+}
+
+void NotebookButton::hideEvent(QHideEvent *)
+{
+    this->parent_->performLayout();
+}
+
+void NotebookButton::showEvent(QShowEvent *)
+{
+    this->parent_->performLayout();
 }
 
 }  // namespace chatterino

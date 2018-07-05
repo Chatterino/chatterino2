@@ -304,8 +304,6 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::performLayout(bool animated)
 {
-    auto app = getApp();
-
     int xStart = int(2 * this->getScale());
 
     int x = xStart, y = 0;
@@ -409,8 +407,6 @@ NotebookTab *Notebook::getTabFromPage(QWidget *page)
 SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
-    auto app = getApp();
-
     this->connect(this->getAddButton(), &NotebookButton::clicked,
                   [this]() { QTimer::singleShot(80, this, [this] { this->addPage(true); }); });
 
@@ -429,13 +425,10 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setVisible(!getApp()->settings->hidePreferencesButton.getValue());
 
     getApp()->settings->hidePreferencesButton.connect(
-        [this, settingsBtn](bool hide, auto) {
-            settingsBtn->setVisible(!hide);
-            this->performLayout(true);
-        },
+        [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },
         this->uniqueConnections);
 
-    settingsBtn->icon = NotebookButton::IconSettings;
+    settingsBtn->setIcon(NotebookButton::Settings);
 
     QObject::connect(settingsBtn, &NotebookButton::clicked,
                      [] { getApp()->windows->showSettingsDialog(); });
@@ -444,13 +437,9 @@ void SplitNotebook::addCustomButtons()
     auto userBtn = this->addCustomButton();
     userBtn->setVisible(!getApp()->settings->hideUserButton.getValue());
     getApp()->settings->hideUserButton.connect(
-        [this, userBtn](bool hide, auto) {
-            userBtn->setVisible(!hide);
-            this->performLayout(true);
-        },
-        this->uniqueConnections);
+        [userBtn](bool hide, auto) { userBtn->setVisible(!hide); }, this->uniqueConnections);
 
-    userBtn->icon = NotebookButton::IconUser;
+    userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
         getApp()->windows->showAccountSelectPopup(this->mapToGlobal(userBtn->rect().bottomRight()));
     });

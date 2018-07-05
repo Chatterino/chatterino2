@@ -12,6 +12,8 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDi
 
     // show update prompt when clicking the button
     QObject::connect(&button, &RippleEffectButton::clicked, [&button, &handle] {
+        (void)(handle);
+
         auto dialog = new UpdatePromptDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(QPoint(int(-100 * button.getScale()), button.height())));
@@ -26,8 +28,10 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdatePromptDi
             }
         });
 
+#ifdef Q_OS_WIN
         handle.reset(dialog);
         dialog->closing.connect([&handle] { handle.release(); });
+#endif
     });
 
     // update image when state changes

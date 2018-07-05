@@ -6,18 +6,19 @@
 
 namespace chatterino {
 
+class Notebook;
+
 class NotebookButton : public RippleEffectButton
 {
     Q_OBJECT
 
 public:
-    static const int IconPlus = 0;
-    static const int IconUser = 1;
-    static const int IconSettings = 2;
+    enum Icon { None, Plus, User, Settings };
 
-    int icon = 0;
+    explicit NotebookButton(Notebook *parent);
 
-    NotebookButton(BaseWidget *parent);
+    void setIcon(Icon icon_);
+    Icon getIcon() const;
 
 protected:
     virtual void themeRefreshEvent() override;
@@ -27,11 +28,16 @@ protected:
     virtual void dragLeaveEvent(QDragLeaveEvent *) override;
     virtual void dropEvent(QDropEvent *) override;
 
+    virtual void hideEvent(QHideEvent *) override;
+    virtual void showEvent(QShowEvent *) override;
+
 signals:
     void clicked();
 
 private:
+    Notebook *parent_ = nullptr;
     QPoint mousePos_;
+    Icon icon_ = None;
 };
 
 }  // namespace chatterino
