@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "widgets/dialogs/LogsPopup.hpp"
 
 #include <QApplication>
 #include <QFile>
@@ -197,6 +198,33 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                     channel->addMessage(Message::createSystemMessage(message));
                 });
 
+                return "";
+            } else if (commandName == "/logs") {
+                if (words.size() < 2) {
+                    channel->addMessage(
+                        Message::createSystemMessage("Syntax: /logs [user] (channel)"));
+                    return "";
+                }
+                auto app = getApp();
+
+                auto logs = new LogsPopup();
+                auto target = words.at(1);
+
+                if (words.size() == 3) {
+                    QString channelName = words.at(2);
+                    if (words.at(2).at(0) == "#") {
+                        channelName = words.at(2).mid(1);
+                    }
+                    auto logsChannel = app->twitch.server->getChannelOrEmpty(channelName);
+                    if (logsChannel == nullptr) {
+                    } else {
+                        logs->setInfo(logsChannel, target);
+                    }
+                } else {
+                    logs->setInfo(channel, target);
+                }
+                logs->setAttribute(Qt::WA_DeleteOnClose);
+                logs->show();
                 return "";
             }
         }
