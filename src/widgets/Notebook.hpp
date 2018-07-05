@@ -2,6 +2,7 @@
 
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/dialogs/UpdatePromptDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -9,6 +10,7 @@
 #include <QList>
 #include <QMessageBox>
 #include <QWidget>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -89,6 +91,11 @@ public:
     SplitContainer *getOrAddSelectedPage();
 
 private:
+    void addCustomButtons();
+
+    pajlada::Signals::SignalHolder signalHolder_;
+    std::unique_ptr<UpdatePromptDialog> updateDialogHandle_;
+
     std::vector<pajlada::Signals::ScopedConnection> uniqueConnections;
 };
 

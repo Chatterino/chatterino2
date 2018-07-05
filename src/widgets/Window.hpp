@@ -53,7 +53,7 @@ private:
 
     SplitNotebook notebook;
 
-    pajlada::Signals::SignalHolder signalHolder;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     friend class Notebook;
 

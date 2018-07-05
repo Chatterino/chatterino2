@@ -4,6 +4,7 @@
 #include "debug/Log.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/InitUpdateButton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -416,39 +417,48 @@ SplitNotebook::SplitNotebook(Window *parent)
     bool customFrame = parent->hasCustomWindowFrame();
 
     if (!customFrame) {
-        auto settingsBtn = this->addCustomButton();
-        auto userBtn = this->addCustomButton();
-        auto updateBtn = this->addCustomButton();
-        updateBtn->setPixmap(QPixmap(":/images/download_update.png"));
-
-        settingsBtn->setVisible(!app->settings->hidePreferencesButton.getValue());
-        userBtn->setVisible(!app->settings->hideUserButton.getValue());
-
-        app->settings->hidePreferencesButton.connect(
-            [this, settingsBtn](bool hide, auto) {
-                settingsBtn->setVisible(!hide);
-                this->performLayout(true);
-            },
-            this->uniqueConnections);
-
-        app->settings->hideUserButton.connect(
-            [this, userBtn](bool hide, auto) {
-                userBtn->setVisible(!hide);
-                this->performLayout(true);
-            },
-            this->uniqueConnections);
-
-        settingsBtn->icon = NotebookButton::IconSettings;
-        userBtn->icon = NotebookButton::IconUser;
-
-        QObject::connect(settingsBtn, &NotebookButton::clicked,
-                         [] { getApp()->windows->showSettingsDialog(); });
-
-        QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
-            getApp()->windows->showAccountSelectPopup(
-                this->mapToGlobal(userBtn->rect().bottomRight()));
-        });
+        this->addCustomButtons();
     }
+}
+
+void SplitNotebook::addCustomButtons()
+{
+    // settings
+    auto settingsBtn = this->addCustomButton();
+
+    settingsBtn->setVisible(!getApp()->settings->hidePreferencesButton.getValue());
+
+    getApp()->settings->hidePreferencesButton.connect(
+        [this, settingsBtn](bool hide, auto) {
+            settingsBtn->setVisible(!hide);
+            this->performLayout(true);
+        },
+        this->uniqueConnections);
+
+    settingsBtn->icon = NotebookButton::IconSettings;
+
+    QObject::connect(settingsBtn, &NotebookButton::clicked,
+                     [] { getApp()->windows->showSettingsDialog(); });
+
+    // account
+    auto userBtn = this->addCustomButton();
+    userBtn->setVisible(!getApp()->settings->hideUserButton.getValue());
+    getApp()->settings->hideUserButton.connect(
+        [this, userBtn](bool hide, auto) {
+            userBtn->setVisible(!hide);
+            this->performLayout(true);
+        },
+        this->uniqueConnections);
+
+    userBtn->icon = NotebookButton::IconUser;
+    QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
+        getApp()->windows->showAccountSelectPopup(this->mapToGlobal(userBtn->rect().bottomRight()));
+    });
+
+    // updates
+    auto updateBtn = this->addCustomButton();
+
+    initUpdateButton(*updateBtn, this->updateDialogHandle_, this->signalHolder_);
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)

@@ -8,6 +8,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/InitUpdateButton.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -184,37 +185,8 @@ void Window::addCustomTitlebarButtons()
 
     // updates
     auto update = this->addTitleBarButton(TitleBarButton::None, [] {});
-    update->hide();
-    QObject::connect(update, &TitleBarButton::clicked, this, [this, update] {
-        auto dialog = new UpdatePromptDialog();
-        dialog->setActionOnFocusLoss(BaseWindow::Delete);
-        dialog->move(update->mapToGlobal(QPoint(int(-100 * this->getScale()), update->height())));
-        dialog->show();
-        dialog->raise();
 
-        dialog->buttonClicked.connect([update](auto button) {
-            switch (button) {
-                case UpdatePromptDialog::Dismiss: {
-                    update->hide();
-                } break;
-            }
-        });
-
-        this->updateDialogHandle_.reset(dialog);
-        dialog->closing.connect([this] { this->updateDialogHandle_.release(); });
-    });
-
-    auto updateChange = [update](auto) {
-        update->setVisible(Updates::getInstance().shouldShowUpdateButton());
-
-        auto imageUrl = Updates::getInstance().isError() ? ":/images/download_update_error.png"
-                                                         : ":/images/download_update.png";
-        update->setPixmap(QPixmap(imageUrl));
-    };
-
-    updateChange(Updates::getInstance().getStatus());
-    this->signalHolder.managedConnect(Updates::getInstance().statusUpdated,
-                                      [updateChange](auto status) { updateChange(status); });
+    initUpdateButton(*update, this->updateDialogHandle_, this->signalHolder_);
 
     // account
     this->userLabel = this->addTitleBarLabel([this] {
