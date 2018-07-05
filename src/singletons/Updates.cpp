@@ -141,12 +141,40 @@ void Updates::checkForUpdates()
 #endif
 }
 
-Updates::UpdateStatus Updates::getStatus() const
+Updates::Status Updates::getStatus() const
 {
     return this->status_;
 }
 
-void Updates::setStatus_(UpdateStatus status)
+bool Updates::shouldShowUpdateButton() const
+{
+    switch (this->getStatus()) {
+        case UpdateAvailable:
+        case SearchFailed:
+        case Downloading:
+        case DownloadFailed:
+        case WriteFileFailed:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+bool Updates::isError() const
+{
+    switch (this->getStatus()) {
+        case SearchFailed:
+        case DownloadFailed:
+        case WriteFileFailed:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+void Updates::setStatus_(Status status)
 {
     if (this->status_ != status) {
         this->status_ = status;

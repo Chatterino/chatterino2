@@ -10,10 +10,12 @@
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
 class Theme;
+class UpdatePromptDialog;
 
 class Window : public BaseWindow
 {
@@ -40,14 +42,18 @@ protected:
     bool event(QEvent *event) override;
 
 private:
+    void addCustomTitlebarButtons();
+    void loadGeometry();
+
     RippleEffectLabel *userLabel = nullptr;
+    std::unique_ptr<UpdatePromptDialog> updateDialogHandle_;
 
     WindowType type;
     float dpi;
 
-    void loadGeometry();
-
     SplitNotebook notebook;
+
+    pajlada::Signals::SignalHolder signalHolder;
 
     friend class Notebook;
 

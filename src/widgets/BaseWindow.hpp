@@ -52,6 +52,8 @@ public:
 
     Flags getFlags();
 
+    pajlada::Signals::NoArgSignal closing;
+
 protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     virtual void scaleChangedEvent(float) override;
@@ -61,6 +63,7 @@ protected:
     virtual void changeEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;
+    virtual void closeEvent(QCloseEvent *) override;
 
     virtual void themeRefreshEvent() override;
     virtual bool event(QEvent *event) override;

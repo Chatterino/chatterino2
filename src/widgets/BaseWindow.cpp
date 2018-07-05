@@ -409,6 +409,11 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     this->calcButtonsSizes();
 }
 
+void BaseWindow::closeEvent(QCloseEvent *)
+{
+    this->closing.invoke();
+}
+
 void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 {
     if (!this->stayInScreenRect_)

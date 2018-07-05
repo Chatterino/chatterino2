@@ -10,7 +10,7 @@ class Updates
     Updates();
 
 public:
-    enum UpdateStatus {
+    enum Status {
         None,
         Searching,
         UpdateAvailable,
@@ -28,18 +28,21 @@ public:
     const QString &getCurrentVersion() const;
     const QString &getOnlineVersion() const;
     void installUpdates();
-    UpdateStatus getStatus() const;
+    Status getStatus() const;
 
-    pajlada::Signals::Signal<UpdateStatus> statusUpdated;
+    bool shouldShowUpdateButton() const;
+    bool isError() const;
+
+    pajlada::Signals::Signal<Status> statusUpdated;
 
 private:
     QString currentVersion_;
     QString onlineVersion_;
-    UpdateStatus status_ = None;
+    Status status_ = None;
 
     QString updateUrl_;
 
-    void setStatus_(UpdateStatus status);
+    void setStatus_(Status status);
 };
 
 }  // namespace chatterino
