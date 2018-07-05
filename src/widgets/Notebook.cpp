@@ -416,8 +416,10 @@ SplitNotebook::SplitNotebook(Window *parent)
     bool customFrame = parent->hasCustomWindowFrame();
 
     if (!customFrame) {
-        auto *settingsBtn = this->addCustomButton();
-        auto *userBtn = this->addCustomButton();
+        auto settingsBtn = this->addCustomButton();
+        auto userBtn = this->addCustomButton();
+        auto updateBtn = this->addCustomButton();
+        updateBtn->setPixmap(QPixmap(":/images/download_update.png"));
 
         settingsBtn->setVisible(!app->settings->hidePreferencesButton.getValue());
         userBtn->setVisible(!app->settings->hideUserButton.getValue());

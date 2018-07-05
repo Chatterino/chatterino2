@@ -3,6 +3,7 @@
 #include "util/Helpers.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/UpdatePromptDialog.hpp"
 
 //#ifdef USEWINSDK
 //#include <platform/borderless/qwinwidget.h>
@@ -15,7 +16,6 @@
 namespace chatterino {
 
 class Theme;
-class UpdatePromptDialog;
 
 class Window : public BaseWindow
 {

@@ -180,7 +180,7 @@ void SettingsDialog::themeRefreshEvent()
     BaseWindow::themeRefreshEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#f44"));
+    palette.setColor(QPalette::Background, QColor("#444"));
     this->setPalette(palette);
 }
 
