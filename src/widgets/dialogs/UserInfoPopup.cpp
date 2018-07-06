@@ -178,7 +178,7 @@ void UserInfoPopup::installEvents()
 
         this->ui_.follow->setEnabled(false);
         if (this->ui_.follow->isChecked()) {
-            twitchApiPut(requestUrl, [this](QJsonObject) { this->ui_.follow->setEnabled(true); });
+            twitchApiPut(requestUrl, [this](const auto &) { this->ui_.follow->setEnabled(true); });
         } else {
             twitchApiDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
         }
@@ -373,9 +373,11 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 }
                 a->setBorderColor(color1);
 
-                QObject::connect(a.getElement(), &RippleEffectLabel2::clicked, [
-                    this, timeout = std::get<1>(item)
-                ] { this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout)); });
+                QObject::connect(
+                    a.getElement(), &RippleEffectLabel2::clicked,
+                    [this, timeout = std::get<1>(item)] {
+                        this->buttonClicked.invoke(std::make_pair(Action::Timeout, timeout));
+                    });
             }
         }
     };

@@ -80,9 +80,11 @@ static void twitchApiGetUserID(QString username, const QObject *caller,
             successCallback(id.toString());
         });
 }
-static void twitchApiPut(QUrl url, std::function<void(QJsonObject)> successCallback)
+static void twitchApiPut(QUrl url, std::function<void(const rapidjson::Document &)> successCallback)
 {
-    QNetworkRequest request(url);
+    NetworkRequest request(url);
+    request.setRequestType(NetworkRequest::PutRequest);
+    request.setCaller(QThread::currentThread());
 
     auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     QByteArray oauthToken;
@@ -92,22 +94,17 @@ static void twitchApiPut(QUrl url, std::function<void(QJsonObject)> successCallb
         // XXX(pajlada): Bail out?
     }
 
-    request.setRawHeader("Client-ID", getDefaultClientID());
-    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    request.setRawHeader("Authorization", "OAuth " + oauthToken);
+    request.makeAuthorizedV5(getDefaultClientID(), currentTwitchUser->getOAuthToken());
 
-    NetworkManager::urlPut(std::move(request), [=](QNetworkReply *reply) {
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            QByteArray data = reply->readAll();
-            QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-            if (!jsonDoc.isNull()) {
-                QJsonObject rootNode = jsonDoc.object();
-
-                successCallback(rootNode);
-            }
+    request.onSuccess([successCallback](const auto &document) {
+        if (!document.IsNull()) {
+            successCallback(document);
         }
-        reply->deleteLater();
+
+        return true;
     });
+
+    request.execute();
 }
 
 static void twitchApiDelete(QUrl url, std::function<void()> successCallback)
