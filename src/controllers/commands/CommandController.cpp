@@ -202,13 +202,19 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/logs") {
                 if (words.size() < 2) {
                     channel->addMessage(
-                        Message::createSystemMessage("Syntax: /logs [user] (channel)"));
+                        Message::createSystemMessage("Usage: /logs [user] (channel)"));
                     return "";
                 }
                 auto app = getApp();
 
                 auto logs = new LogsPopup();
-                auto target = words.at(1);
+                QString target;
+
+                if (words.at(1).at(0) == "@") {
+                    target = words.at(1).mid(1);
+                } else {
+                    target = words.at(1);
+                }
 
                 if (words.size() == 3) {
                     QString channelName = words.at(2);
