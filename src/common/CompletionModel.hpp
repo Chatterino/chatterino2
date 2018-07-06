@@ -16,123 +16,54 @@ class CompletionModel : public QAbstractListModel
         enum Type {
             Username,
 
-            // Emotes
-            FFZGlobalEmote = 20,
+            // emotes
+            EmoteStart,
+            FFZGlobalEmote,
             FFZChannelEmote,
             BTTVGlobalEmote,
             BTTVChannelEmote,
             TwitchGlobalEmote,
             TwitchSubscriberEmote,
             Emoji,
+            EmoteEnd,
+            // end emotes
+
             Command,
         };
 
-        TaggedString(const QString &_str, Type _type)
-            : str(_str)
-            , type(_type)
-            , timeAdded(std::chrono::steady_clock::now())
-        {
-        }
+        TaggedString(const QString &_str, Type _type);
+
+        bool isExpired(const std::chrono::steady_clock::time_point &now) const;
+        bool isEmote() const;
+        bool operator<(const TaggedString &that) const;
 
         QString str;
-
         // Type will help decide the lifetime of the tagged strings
         Type type;
 
         mutable std::chrono::steady_clock::time_point timeAdded;
-
-        bool HasExpired(const std::chrono::steady_clock::time_point &now) const
-        {
-            switch (this->type) {
-                case Type::Username: {
-                    static std::chrono::minutes expirationTimer(10);
-
-                    return (this->timeAdded + expirationTimer < now);
-                } break;
-
-                default: {
-                    return false;
-                } break;
-            }
-
-            return false;
-        }
-
-        bool IsEmote() const
-        {
-            return this->type >= 20;
-        }
-
-        bool operator<(const TaggedString &that) const
-        {
-            if (this->IsEmote()) {
-                if (that.IsEmote()) {
-                    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-                    if (k == 0) {
-                        return this->str > that.str;
-                    }
-
-                    return k < 0;
-                }
-
-                return true;
-            }
-
-            if (that.IsEmote()) {
-                return false;
-            }
-
-            int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-            if (k == 0) {
-                return false;
-            }
-
-            return k < 0;
-        }
     };
 
 public:
     CompletionModel(const QString &_channelName);
 
-    int columnCount(const QModelIndex &) const override
-    {
-        return 1;
-    }
-
-    QVariant data(const QModelIndex &index, int) const override
-    {
-        std::lock_guard<std::mutex> lock(this->emotesMutex);
-
-        // TODO: Implement more safely
-        auto it = this->emotes.begin();
-        std::advance(it, index.row());
-        return QVariant(it->str);
-    }
-
-    int rowCount(const QModelIndex &) const override
-    {
-        std::lock_guard<std::mutex> lock(this->emotesMutex);
-
-        return this->emotes.size();
-    }
+    virtual int columnCount(const QModelIndex &) const override;
+    virtual QVariant data(const QModelIndex &index, int) const override;
+    virtual int rowCount(const QModelIndex &) const override;
 
     void refresh();
     void addString(const QString &str, TaggedString::Type type);
-
     void addUser(const QString &str);
 
-    void ClearExpiredStrings();
+    void clearExpiredStrings();
 
 private:
-    TaggedString createUser(const QString &str)
-    {
-        return TaggedString{str, TaggedString::Type::Username};
-    }
+    TaggedString createUser(const QString &str);
 
-    mutable std::mutex emotesMutex;
-    std::set<TaggedString> emotes;
+    mutable std::mutex emotesMutex_;
+    std::set<TaggedString> emotes_;
 
-    QString channelName;
+    QString channelName_;
 };
 
 }  // namespace chatterino
