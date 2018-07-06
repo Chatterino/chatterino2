@@ -20,31 +20,27 @@ namespace chatterino {
 Channel::Channel(const QString &_name, Type _type)
     : name(_name)
     , completionModel(this->name)
-    , type(_type)
+    , type_(_type)
 {
-    this->clearCompletionModelTimer = new QTimer;
-    QObject::connect(this->clearCompletionModelTimer, &QTimer::timeout, [this]() {
+    QObject::connect(&this->clearCompletionModelTimer, &QTimer::timeout, [this]() {
         this->completionModel.ClearExpiredStrings();  //
     });
-    this->clearCompletionModelTimer->start(60 * 1000);
+    this->clearCompletionModelTimer.start(60 * 1000);
 }
 
 Channel::~Channel()
 {
     this->destroyed.invoke();
-
-    this->clearCompletionModelTimer->stop();
-    this->clearCompletionModelTimer->deleteLater();
 }
 
 Channel::Type Channel::getType() const
 {
-    return this->type;
+    return this->type_;
 }
 
 bool Channel::isTwitchChannel() const
 {
-    return this->type >= Twitch && this->type < TwitchEnd;
+    return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
 }
 
 bool Channel::isEmpty() const
@@ -54,7 +50,7 @@ bool Channel::isEmpty() const
 
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 {
-    return this->messages.getSnapshot();
+    return this->messages_.getSnapshot();
 }
 
 void Channel::addMessage(MessagePtr message)
@@ -73,7 +69,7 @@ void Channel::addMessage(MessagePtr message)
         app->logging->addMessage(this->name, message);
     }
 
-    if (this->messages.pushBack(message, deleted)) {
+    if (this->messages_.pushBack(message, deleted)) {
         this->messageRemovedFromStart.invoke(deleted);
     }
 
@@ -163,7 +159,7 @@ void Channel::disableAllMessages()
 
 void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 {
-    std::vector<MessagePtr> addedMessages = this->messages.pushFront(_messages);
+    std::vector<MessagePtr> addedMessages = this->messages_.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart.invoke(addedMessages);
@@ -172,7 +168,7 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 
 void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 {
-    int index = this->messages.replaceItem(message, replacement);
+    int index = this->messages_.replaceItem(message, replacement);
 
     if (index >= 0) {
         this->messageReplaced.invoke((size_t)index, replacement);
@@ -211,7 +207,7 @@ bool Channel::hasModRights() const
 
 std::shared_ptr<Channel> Channel::getEmpty()
 {
-    static std::shared_ptr<Channel> channel(new Channel("", None));
+    static std::shared_ptr<Channel> channel(new Channel("", Type::None));
     return channel;
 }
 

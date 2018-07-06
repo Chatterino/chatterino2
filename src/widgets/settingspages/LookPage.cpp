@@ -272,7 +272,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLay
 
 ChannelPtr LookPage::createPreviewChannel()
 {
-    auto channel = ChannelPtr(new Channel("preview", Channel::Misc));
+    auto channel = ChannelPtr(new Channel("preview", Channel::Type::Misc));
 
     {
         auto message = MessagePtr(new Message());

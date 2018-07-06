@@ -39,7 +39,7 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 {
-    ChannelPtr logsChannel(new Channel("logs", Channel::Misc));
+    ChannelPtr logsChannel(new Channel("logs", Channel::Type::Misc));
 
     logsChannel->addMessagesAtStart(messages);
     this->channelView_->setChannel(logsChannel);
@@ -68,7 +68,7 @@ void LogsPopup::getLogviewerLogs()
     req.getJSON([this, channelName](QJsonObject &data) {
 
         std::vector<MessagePtr> messages;
-        ChannelPtr logsChannel(new Channel("logs", Channel::None));
+        ChannelPtr logsChannel(new Channel("logs", Channel::Type::None));
 
         QJsonValue before = data.value("before");
 

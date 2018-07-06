@@ -47,8 +47,8 @@ private:
         Split *split;
     } ui_;
 
-    void attachToHwnd_(void *attached);
-    void updateWindowRect_(void *attached);
+    void attachToHwnd(void *attached);
+    void updateWindowRect(void *attached);
 
     struct Item {
         void *hwnd;

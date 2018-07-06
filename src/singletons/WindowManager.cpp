@@ -417,17 +417,17 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
     assertInGuiThread();
 
     switch (channel.getType()) {
-        case Channel::Twitch: {
+        case Channel::Type::Twitch: {
             obj.insert("type", "twitch");
             obj.insert("name", channel.get()->name);
         } break;
-        case Channel::TwitchMentions: {
+        case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         } break;
-        case Channel::TwitchWatching: {
+        case Channel::Type::TwitchWatching: {
             obj.insert("type", "watching");
         } break;
-        case Channel::TwitchWhispers: {
+        case Channel::Type::TwitchWhispers: {
             obj.insert("type", "whispers");
         } break;
     }

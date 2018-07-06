@@ -311,7 +311,7 @@ void SplitHeader::updateChannelText()
 
     QString title = channel->name;
 
-    if (indirectChannel.getType() == Channel::TwitchWatching) {
+    if (indirectChannel.getType() == Channel::Type::TwitchWatching) {
         title = "watching: " + (title.isEmpty() ? "none" : title);
     }
 

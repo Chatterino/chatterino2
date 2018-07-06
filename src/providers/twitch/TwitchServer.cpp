@@ -19,9 +19,9 @@ using namespace std::chrono_literals;
 namespace chatterino {
 
 TwitchServer::TwitchServer()
-    : whispersChannel(new Channel("/whispers", Channel::TwitchWhispers))
-    , mentionsChannel(new Channel("/mentions", Channel::TwitchMentions))
-    , watchingChannel(Channel::getEmpty(), Channel::TwitchWatching)
+    : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
+    , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
+    , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     qDebug() << "init TwitchServer";
 }

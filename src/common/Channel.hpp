@@ -17,10 +17,8 @@ struct Message;
 
 class Channel : public std::enable_shared_from_this<Channel>
 {
-    QTimer *clearCompletionModelTimer;
-
 public:
-    enum Type {
+    enum class Type {
         None,
         Direct,
         Twitch,
@@ -31,7 +29,7 @@ public:
         Misc
     };
 
-    explicit Channel(const QString &_name, Type type);
+    explicit Channel(const QString &_name, Type type_);
     virtual ~Channel();
 
     pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
@@ -48,7 +46,7 @@ public:
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
 
     void addMessage(MessagePtr message);
-    void addMessagesAtStart(std::vector<MessagePtr> &messages);
+    void addMessagesAtStart(std::vector<MessagePtr> &messages_);
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
@@ -71,8 +69,9 @@ protected:
     virtual void onConnected();
 
 private:
-    LimitedQueue<MessagePtr> messages;
-    Type type;
+    LimitedQueue<MessagePtr> messages_;
+    Type type_;
+    QTimer clearCompletionModelTimer_;
 };
 
 using ChannelPtr = std::shared_ptr<Channel>;
@@ -92,40 +91,41 @@ class IndirectChannel
         }
     };
 
-    std::shared_ptr<Data> data;
-
 public:
-    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::Direct)
-        : data(new Data(channel, type))
+    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::Type::Direct)
+        : data_(new Data(channel, type))
     {
     }
 
     ChannelPtr get()
     {
-        return data->channel;
+        return data_->channel;
     }
 
     void update(ChannelPtr ptr)
     {
-        assert(this->data->type != Channel::Direct);
+        assert(this->data_->type != Channel::Type::Direct);
 
-        this->data->channel = ptr;
-        this->data->changed.invoke();
+        this->data_->channel = ptr;
+        this->data_->changed.invoke();
     }
 
     pajlada::Signals::NoArgSignal &getChannelChanged()
     {
-        return this->data->changed;
+        return this->data_->changed;
     }
 
     Channel::Type getType()
     {
-        if (this->data->type == Channel::Direct) {
+        if (this->data_->type == Channel::Type::Direct) {
             return this->get()->getType();
         } else {
-            return this->data->type;
+            return this->data_->type;
         }
     }
+
+private:
+    std::shared_ptr<Data> data_;
 };
 
 }  // namespace chatterino

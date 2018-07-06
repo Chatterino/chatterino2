@@ -84,7 +84,7 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
     }
 
     if (show) {
-        window->updateWindowRect_(window->target_);
+        window->updateWindowRect(window->target_);
         window->show();
     }
 
@@ -107,10 +107,10 @@ void AttachedWindow::setChannel(ChannelPtr channel)
 
 void AttachedWindow::showEvent(QShowEvent *)
 {
-    this->attachToHwnd_(this->target_);
+    this->attachToHwnd(this->target_);
 }
 
-void AttachedWindow::attachToHwnd_(void *_attachedPtr)
+void AttachedWindow::attachToHwnd(void *_attachedPtr)
 {
 #ifdef USEWINSDK
     if (this->attached_) {
@@ -145,13 +145,13 @@ void AttachedWindow::attachToHwnd_(void *_attachedPtr)
             this->validProcessName_ = true;
         }
 
-        this->updateWindowRect_(attached);
+        this->updateWindowRect(attached);
     });
     this->timer_.start();
 #endif
 }
 
-void AttachedWindow::updateWindowRect_(void *_attachedPtr)
+void AttachedWindow::updateWindowRect(void *_attachedPtr)
 {
 #ifdef USEWINSDK
     auto hwnd = HWND(this->winId());

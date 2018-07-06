@@ -71,7 +71,7 @@ void SearchPopup::performSearch()
 {
     QString text = searchInput->text();
 
-    ChannelPtr channel(new Channel("search", Channel::None));
+    ChannelPtr channel(new Channel("search", Channel::Type::None));
 
     for (size_t i = 0; i < this->snapshot.getLength(); i++) {
         MessagePtr message = this->snapshot[i];

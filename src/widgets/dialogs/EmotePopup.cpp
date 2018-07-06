@@ -54,7 +54,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         return;
     }
 
-    ChannelPtr emoteChannel(new Channel("", Channel::None));
+    ChannelPtr emoteChannel(new Channel("", Channel::Type::None));
 
     auto addEmotes = [&](EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
@@ -134,7 +134,7 @@ void EmotePopup::loadEmojis()
 {
     auto &emojis = getApp()->emotes->emojis.emojis;
 
-    ChannelPtr emojiChannel(new Channel("", Channel::None));
+    ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
 
     // title
     MessageBuilder builder1;

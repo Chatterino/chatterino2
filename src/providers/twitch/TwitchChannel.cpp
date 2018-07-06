@@ -17,7 +17,7 @@
 namespace chatterino {
 
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
-    : Channel(channelName, Channel::Twitch)
+    : Channel(channelName, Channel::Type::Twitch)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
