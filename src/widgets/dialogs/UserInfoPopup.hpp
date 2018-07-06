@@ -21,7 +21,7 @@ public:
     void setData(const QString &name, const ChannelPtr &channel);
 
 protected:
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
 
 private:
     bool isMod_;

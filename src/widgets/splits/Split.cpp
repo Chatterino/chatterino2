@@ -286,7 +286,7 @@ void Split::paintEvent(QPaintEvent *)
     // color the background of the chat
     QPainter painter(this);
 
-    painter.fillRect(this->rect(), this->themeManager->splits.background);
+    painter.fillRect(this->rect(), this->theme->splits.background);
 }
 
 void Split::mouseMoveEvent(QMouseEvent *event)
@@ -446,7 +446,7 @@ void Split::doOpenViewerList()
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels) {
         auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->themeManager->splits.header.background);
+        label->setBackgroundColor(this->theme->splits.header.background);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -503,7 +503,7 @@ void Split::doOpenViewerList()
     dockVbox->addWidget(resultList);
     resultList->hide();
 
-    multiWidget->setStyleSheet(this->themeManager->splits.input.styleSheet);
+    multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();

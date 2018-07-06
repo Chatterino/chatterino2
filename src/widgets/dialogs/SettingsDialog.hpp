@@ -29,7 +29,7 @@ public:
 
 protected:
     virtual void scaleChangedEvent(float newDpi) override;
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
 
 private:
     void refresh();

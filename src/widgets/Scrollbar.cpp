@@ -217,7 +217,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int xOffset = mouseOver ? 0 : width() - int(4 * this->getScale());
 
     QPainter painter(this);
-    painter.fillRect(rect(), this->themeManager->scrollbars.background);
+    painter.fillRect(rect(), this->theme->scrollbars.background);
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
@@ -229,11 +229,11 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     // mouse over thumb
     if (this->mouseDownIndex_ == 2) {
-        painter.fillRect(this->thumbRect_, this->themeManager->scrollbars.thumbSelected);
+        painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumbSelected);
     }
     // mouse not over thumb
     else {
-        painter.fillRect(this->thumbRect_, this->themeManager->scrollbars.thumb);
+        painter.fillRect(this->thumbRect_, this->theme->scrollbars.thumb);
     }
 
     // draw highlights

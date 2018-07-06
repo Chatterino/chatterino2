@@ -65,7 +65,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void closeEvent(QCloseEvent *) override;
 
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
     virtual bool event(QEvent *event) override;
     virtual void wheelEvent(QWheelEvent *event) override;
 

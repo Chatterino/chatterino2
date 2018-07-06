@@ -62,7 +62,7 @@ void TooltipWidget::raise()
 }
 #endif
 
-void TooltipWidget::themeRefreshEvent()
+void TooltipWidget::themeChangedEvent()
 {
     this->setStyleSheet("color: #fff; background: #000");
 }

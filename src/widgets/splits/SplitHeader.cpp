@@ -28,8 +28,8 @@ SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
     , split(_split)
 {
-    this->split->focused.connect([this]() { this->themeRefreshEvent(); });
-    this->split->focusLost.connect([this]() { this->themeRefreshEvent(); });
+    this->split->focused.connect([this]() { this->themeChangedEvent(); });
+    this->split->focusLost.connect([this]() { this->themeChangedEvent(); });
 
     auto app = getApp();
 
@@ -374,8 +374,8 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->themeManager->splits.header.background);
-    painter.setPen(this->themeManager->splits.header.border);
+    painter.fillRect(rect(), this->theme->splits.header.background);
+    painter.setPen(this->theme->splits.header.border);
     painter.drawRect(0, 0, width() - 1, height() - 1);
 }
 
@@ -468,17 +468,17 @@ void SplitHeader::rightButtonClicked()
 {
 }
 
-void SplitHeader::themeRefreshEvent()
+void SplitHeader::themeChangedEvent()
 {
     QPalette palette;
 
     if (this->split->hasFocus()) {
-        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.focusedText);
+        palette.setColor(QPalette::Foreground, this->theme->splits.header.focusedText);
     } else {
-        palette.setColor(QPalette::Foreground, this->themeManager->splits.header.text);
+        palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
     }
 
-    if (this->themeManager->isLightTheme()) {
+    if (this->theme->isLightTheme()) {
         this->dropdownButton->setPixmap(QPixmap(":/images/menu_black.png"));
     } else {
         this->dropdownButton->setPixmap(QPixmap(":/images/menu_white.png"));

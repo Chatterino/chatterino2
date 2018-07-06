@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -15,7 +16,6 @@ class BaseWidget : public QWidget
 
 public:
     explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
-    virtual ~BaseWidget() override;
 
     virtual float getScale() const;
     pajlada::Signals::Signal<float> scaleChanged;
@@ -32,26 +32,24 @@ public:
     void setScaleIndependantHeight(int value);
 
 protected:
-    void childEvent(QChildEvent *) override;
+    virtual void childEvent(QChildEvent *) override;
+    virtual void showEvent(QShowEvent *) override;
 
     virtual void scaleChangedEvent(float newScale);
-    virtual void themeRefreshEvent();
-
-    virtual void showEvent(QShowEvent *) override;
+    virtual void themeChangedEvent();
 
     void setScale(float value);
 
-    Theme *themeManager;
+    Theme *theme;
 
 private:
-    void init();
-    float scale = 1.f;
-    boost::optional<float> overrideScale = boost::none;
-    QSize scaleIndependantSize;
+    float scale_ = 1.f;
+    boost::optional<float> overrideScale_ = boost::none;
+    QSize scaleIndependantSize_;
 
-    std::vector<BaseWidget *> widgets;
+    std::vector<BaseWidget *> widgets_;
 
-    pajlada::Signals::Connection themeConnection;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     friend class BaseWindow;
 };

@@ -27,7 +27,7 @@ public:
     void setHasOffset(bool hasOffset);
 
 protected:
-    virtual void scaleChangedEvent(float scale) override;
+    virtual void scaleChangedEvent(float scale_) override;
     virtual void paintEvent(QPaintEvent *) override;
 
     virtual QSize sizeHint() const override;

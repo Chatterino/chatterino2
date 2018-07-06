@@ -111,18 +111,18 @@ void SplitInput::scaleChangedEvent(float scale)
     this->ui_.textEdit->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 }
 
-void SplitInput::themeRefreshEvent()
+void SplitInput::themeChangedEvent()
 {
     QPalette palette;
 
-    palette.setColor(QPalette::Foreground, this->themeManager->splits.input.text);
+    palette.setColor(QPalette::Foreground, this->theme->splits.input.text);
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
-    this->ui_.textEdit->setStyleSheet(this->themeManager->splits.input.styleSheet);
+    this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
-    this->ui_.hbox->setMargin(int((this->themeManager->isLightTheme() ? 4 : 2) * this->getScale()));
+    this->ui_.hbox->setMargin(int((this->theme->isLightTheme() ? 4 : 2) * this->getScale()));
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 }
@@ -134,7 +134,7 @@ void SplitInput::updateEmoteButton()
     QString text = "<img src=':/images/emote.svg' width='xD' height='xD' />";
     text.replace("xD", QString::number(int(12 * scale)));
 
-    if (this->themeManager->isLightTheme()) {
+    if (this->theme->isLightTheme()) {
         text.replace("emote", "emote_dark");
     }
 
@@ -322,11 +322,11 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (this->themeManager->isLightTheme()) {
+    if (this->theme->isLightTheme()) {
         int s = int(3 * this->getScale());
         QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
 
-        painter.fillRect(rect, this->themeManager->splits.input.background);
+        painter.fillRect(rect, this->theme->splits.input.background);
 
         painter.setPen(QColor("#ccc"));
         painter.drawRect(rect);
@@ -334,7 +334,7 @@ void SplitInput::paintEvent(QPaintEvent *)
         int s = int(1 * this->getScale());
         QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
 
-        painter.fillRect(rect, this->themeManager->splits.input.background);
+        painter.fillRect(rect, this->theme->splits.input.background);
 
         painter.setPen(QColor("#333"));
         painter.drawRect(rect);

@@ -131,9 +131,9 @@ ChannelView::~ChannelView()
 {
 }
 
-void ChannelView::themeRefreshEvent()
+void ChannelView::themeChangedEvent()
 {
-    BaseWidget::themeRefreshEvent();
+    BaseWidget::themeChangedEvent();
 
     this->layoutMessages();
 }
@@ -575,7 +575,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     QPainter painter(this);
 
-    painter.fillRect(rect(), this->themeManager->splits.background);
+    painter.fillRect(rect(), this->theme->splits.background);
 
     // draw messages
     this->drawMessages(painter);

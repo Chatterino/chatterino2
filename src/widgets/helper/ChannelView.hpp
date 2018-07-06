@@ -53,7 +53,7 @@ public:
     pajlada::Signals::Signal<const Link &> linkClicked;
 
 protected:
-    void themeRefreshEvent() override;
+    void themeChangedEvent() override;
 
     void resizeEvent(QResizeEvent *) override;
 

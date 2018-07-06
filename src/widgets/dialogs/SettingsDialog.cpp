@@ -175,9 +175,9 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     this->ui_.tabContainerContainer->setFixedWidth(int(200 * newDpi));
 }
 
-void SettingsDialog::themeRefreshEvent()
+void SettingsDialog::themeChangedEvent()
 {
-    BaseWindow::themeRefreshEvent();
+    BaseWindow::themeChangedEvent();
 
     QPalette palette;
     palette.setColor(QPalette::Background, QColor("#444"));

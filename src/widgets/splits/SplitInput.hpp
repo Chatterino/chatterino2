@@ -31,8 +31,8 @@ public:
     pajlada::Signals::Signal<const QString &> textChanged;
 
 protected:
-    virtual void scaleChangedEvent(float scale) override;
-    virtual void themeRefreshEvent() override;
+    virtual void scaleChangedEvent(float scale_) override;
+    virtual void themeChangedEvent() override;
 
     virtual void paintEvent(QPaintEvent *) override;
     virtual void resizeEvent(QResizeEvent *) override;

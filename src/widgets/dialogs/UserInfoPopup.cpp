@@ -158,9 +158,9 @@ UserInfoPopup::UserInfoPopup()
     this->installEvents();
 }
 
-void UserInfoPopup::themeRefreshEvent()
+void UserInfoPopup::themeChangedEvent()
 {
-    BaseWindow::themeRefreshEvent();
+    BaseWindow::themeChangedEvent();
 
     this->setStyleSheet("background: #333");
 }

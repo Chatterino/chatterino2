@@ -375,7 +375,7 @@ void Notebook::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.fillRect(0, this->lineY, this->width(), (int)(3 * this->getScale()),
-                     this->themeManager->tabs.bottomLine);
+                     this->theme->tabs.bottomLine);
 }
 
 NotebookButton *Notebook::getAddButton()

@@ -267,11 +267,11 @@ void SelectChannelDialog::closeEvent(QCloseEvent *)
     this->closed.invoke();
 }
 
-void SelectChannelDialog::themeRefreshEvent()
+void SelectChannelDialog::themeChangedEvent()
 {
-    BaseWindow::themeRefreshEvent();
+    BaseWindow::themeChangedEvent();
 
-    if (this->themeManager->isLightTheme()) {
+    if (this->theme->isLightTheme()) {
         this->setStyleSheet("QRadioButton { color: #000 } QLabel { color: #000 }");
     } else {
         this->setStyleSheet("QRadioButton { color: #fff } QLabel { color: #fff }");

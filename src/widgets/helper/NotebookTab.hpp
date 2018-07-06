@@ -47,7 +47,7 @@ public:
     void hideTabXChanged(bool);
 
 protected:
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
 
     virtual void paintEvent(QPaintEvent *) override;
 

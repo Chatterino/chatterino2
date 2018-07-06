@@ -50,7 +50,7 @@ public:
     void performLayout(bool animate = false);
 
 protected:
-    virtual void scaleChangedEvent(float scale) override;
+    virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void paintEvent(QPaintEvent *) override;
 

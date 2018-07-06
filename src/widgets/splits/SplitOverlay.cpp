@@ -91,7 +91,7 @@ SplitOverlay::SplitOverlay(Split *parent)
 void SplitOverlay::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    if (this->themeManager->isLightTheme()) {
+    if (this->theme->isLightTheme()) {
         painter.fillRect(this->rect(), QColor(255, 255, 255, 200));
     } else {
         painter.fillRect(this->rect(), QColor(0, 0, 0, 150));

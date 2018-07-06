@@ -26,8 +26,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
     painter.setOpacity(this->getCurrentDimAmount());
 
-    QColor color = this->themeManager->window.text;
-    QColor background = this->themeManager->window.background;
+    QColor color = this->theme->window.text;
+    QColor background = this->theme->window.background;
 
     int xD = this->height() / 3;
     int centerX = this->width() / 2;
@@ -50,7 +50,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
             painter.drawRect(centerX - xD / 2 + xD2, xD, xD3, xD3);
             painter.fillRect(centerX - xD / 2, xD + xD2, xD3, xD3,
-                             this->themeManager->window.background);
+                             this->theme->window.background);
             painter.drawRect(centerX - xD / 2, xD + xD2, xD3, xD3);
             break;
         }

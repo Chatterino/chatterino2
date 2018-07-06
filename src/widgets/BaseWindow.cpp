@@ -66,7 +66,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
 float BaseWindow::getScale() const
 {
-    return this->getOverrideScale().value_or(this->scale);
+    return this->getOverrideScale().value_or(this->scale_);
 }
 
 BaseWindow::Flags BaseWindow::getFlags()
@@ -212,28 +212,28 @@ bool BaseWindow::hasCustomWindowFrame()
 #endif
 }
 
-void BaseWindow::themeRefreshEvent()
+void BaseWindow::themeChangedEvent()
 {
     if (this->hasCustomWindowFrame()) {
         QPalette palette;
         palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
-        palette.setColor(QPalette::Foreground, this->themeManager->window.text);
+        palette.setColor(QPalette::Foreground, this->theme->window.text);
         this->setPalette(palette);
 
         if (this->ui_.titleLabel) {
             QPalette palette_title;
             palette_title.setColor(QPalette::Foreground,
-                                   this->themeManager->isLightTheme() ? "#333" : "#ccc");
+                                   this->theme->isLightTheme() ? "#333" : "#ccc");
             this->ui_.titleLabel->setPalette(palette_title);
         }
 
         for (RippleEffectButton *button : this->ui_.buttons) {
-            button->setMouseEffectColor(this->themeManager->window.text);
+            button->setMouseEffectColor(this->theme->window.text);
         }
     } else {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->themeManager->window.background);
-        palette.setColor(QPalette::Foreground, this->themeManager->window.text);
+        palette.setColor(QPalette::Background, this->theme->window.background);
+        palette.setColor(QPalette::Foreground, this->theme->window.text);
         this->setPalette(palette);
     }
 }
@@ -541,7 +541,7 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
     if (this->hasCustomWindowFrame()) {
         QPainter painter(this);
 
-        QColor bg = this->overrideBackgroundColor_.value_or(this->themeManager->window.background);
+        QColor bg = this->overrideBackgroundColor_.value_or(this->theme->window.background);
 
         painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
     }

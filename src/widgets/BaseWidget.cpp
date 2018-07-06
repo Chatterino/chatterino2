@@ -17,18 +17,19 @@ namespace chatterino {
 BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
 {
-    this->init();
-}
+    this->theme = getApp()->themes;
 
-BaseWidget::~BaseWidget()
-{
-    this->themeConnection.disconnect();
+    this->signalHolder_.managedConnect(this->theme->updated, [this]() {
+        this->themeChangedEvent();
+
+        this->update();
+    });
 }
 
 float BaseWidget::getScale() const
 {
-    if (this->overrideScale) {
-        return this->overrideScale.get();
+    if (this->overrideScale_) {
+        return this->overrideScale_.get();
     }
 
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
@@ -37,33 +38,44 @@ float BaseWidget::getScale() const
         return 1.f;
     }
 
-    return baseWidget->scale;
+    return baseWidget->scale_;
+}
+
+void BaseWidget::setScale(float value)
+{
+    // update scale value
+    this->scale_ = value;
+
+    this->scaleChangedEvent(this->getScale());
+    this->scaleChanged.invoke(this->getScale());
+
+    this->setScaleIndependantSize(this->getScaleIndependantSize());
 }
 
 void BaseWidget::setOverrideScale(boost::optional<float> value)
 {
-    this->overrideScale = value;
+    this->overrideScale_ = value;
     this->setScale(this->getScale());
 }
 
 boost::optional<float> BaseWidget::getOverrideScale() const
 {
-    return this->overrideScale;
+    return this->overrideScale_;
 }
 
 QSize BaseWidget::getScaleIndependantSize() const
 {
-    return this->scaleIndependantSize;
+    return this->scaleIndependantSize_;
 }
 
 int BaseWidget::getScaleIndependantWidth() const
 {
-    return this->scaleIndependantSize.width();
+    return this->scaleIndependantSize_.width();
 }
 
 int BaseWidget::getScaleIndependantHeight() const
 {
-    return this->scaleIndependantSize.height();
+    return this->scaleIndependantSize_.height();
 }
 
 void BaseWidget::setScaleIndependantSize(int width, int height)
@@ -73,7 +85,7 @@ void BaseWidget::setScaleIndependantSize(int width, int height)
 
 void BaseWidget::setScaleIndependantSize(QSize size)
 {
-    this->scaleIndependantSize = size;
+    this->scaleIndependantSize_ = size;
 
     if (size.width() > 0) {
         this->setFixedWidth((int)(size.width() * this->getScale()));
@@ -85,24 +97,12 @@ void BaseWidget::setScaleIndependantSize(QSize size)
 
 void BaseWidget::setScaleIndependantWidth(int value)
 {
-    this->setScaleIndependantSize(QSize(value, this->scaleIndependantSize.height()));
+    this->setScaleIndependantSize(QSize(value, this->scaleIndependantSize_.height()));
 }
 
 void BaseWidget::setScaleIndependantHeight(int value)
 {
-    this->setScaleIndependantSize(QSize(this->scaleIndependantSize.height(), value));
-}
-
-void BaseWidget::init()
-{
-    auto app = getApp();
-    this->themeManager = app->themes;
-
-    this->themeConnection = this->themeManager->updated.connect([this]() {
-        this->themeRefreshEvent();
-
-        this->update();
-    });
+    this->setScaleIndependantSize(QSize(this->scaleIndependantSize_.height(), value));
 }
 
 void BaseWidget::childEvent(QChildEvent *event)
@@ -111,12 +111,12 @@ void BaseWidget::childEvent(QChildEvent *event)
         BaseWidget *widget = dynamic_cast<BaseWidget *>(event->child());
 
         if (widget != nullptr) {
-            this->widgets.push_back(widget);
+            this->widgets_.push_back(widget);
         }
     } else if (event->removed()) {
-        for (auto it = this->widgets.begin(); it != this->widgets.end(); it++) {
+        for (auto it = this->widgets_.begin(); it != this->widgets_.end(); it++) {
             if (*it == event->child()) {
-                this->widgets.erase(it);
+                this->widgets_.erase(it);
                 break;
             }
         }
@@ -126,25 +126,14 @@ void BaseWidget::childEvent(QChildEvent *event)
 void BaseWidget::showEvent(QShowEvent *)
 {
     this->setScale(this->getScale());
-    this->themeRefreshEvent();
-}
-
-void BaseWidget::setScale(float value)
-{
-    // update scale value
-    this->scale = value;
-
-    this->scaleChangedEvent(this->getScale());
-    this->scaleChanged.invoke(this->getScale());
-
-    this->setScaleIndependantSize(this->getScaleIndependantSize());
+    this->themeChangedEvent();
 }
 
 void BaseWidget::scaleChangedEvent(float newDpi)
 {
 }
 
-void BaseWidget::themeRefreshEvent()
+void BaseWidget::themeChangedEvent()
 {
     // Do any color scheme updates here
 }

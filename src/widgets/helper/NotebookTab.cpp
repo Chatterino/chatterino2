@@ -64,12 +64,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
     //    });
 }
 
-void NotebookTab::themeRefreshEvent()
+void NotebookTab::themeChangedEvent()
 {
     this->update();
 
     //    this->setMouseEffectColor(QColor("#999"));
-    this->setMouseEffectColor(this->themeManager->tabs.regular.text);
+    this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
 void NotebookTab::updateSize()
@@ -222,16 +222,16 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // select the right tab colors
     Theme::TabColors colors;
-    Theme::TabColors regular = this->themeManager->tabs.regular;
+    Theme::TabColors regular = this->theme->tabs.regular;
 
     if (this->selected_) {
-        colors = this->themeManager->tabs.selected;
+        colors = this->theme->tabs.selected;
     } else if (this->highlightState_ == HighlightState::Highlighted) {
-        colors = this->themeManager->tabs.highlighted;
+        colors = this->theme->tabs.highlighted;
     } else if (this->highlightState_ == HighlightState::NewMessage) {
-        colors = this->themeManager->tabs.newMessage;
+        colors = this->theme->tabs.newMessage;
     } else {
-        colors = this->themeManager->tabs.regular;
+        colors = this->theme->tabs.regular;
     }
 
     bool windowFocused = this->window() == QApplication::activeWindow();

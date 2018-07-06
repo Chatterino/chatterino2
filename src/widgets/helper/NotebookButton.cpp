@@ -32,9 +32,9 @@ NotebookButton::Icon NotebookButton::getIcon() const
     return this->icon_;
 }
 
-void NotebookButton::themeRefreshEvent()
+void NotebookButton::themeChangedEvent()
 {
-    this->setMouseEffectColor(this->themeManager->tabs.regular.text);
+    this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
 void NotebookButton::paintEvent(QPaintEvent *event)
@@ -45,11 +45,11 @@ void NotebookButton::paintEvent(QPaintEvent *event)
     QColor foreground;
 
     if (mouseDown_ || mouseOver_) {
-        background = this->themeManager->tabs.regular.backgrounds.hover.color();
-        foreground = this->themeManager->tabs.regular.text;
+        background = this->theme->tabs.regular.backgrounds.hover.color();
+        foreground = this->theme->tabs.regular.text;
     } else {
-        background = this->themeManager->tabs.regular.backgrounds.regular.color();
-        foreground = this->themeManager->tabs.regular.text;
+        background = this->theme->tabs.regular.backgrounds.regular.color();
+        foreground = this->theme->tabs.regular.text;
     }
 
     painter.setPen(Qt::NoPen);

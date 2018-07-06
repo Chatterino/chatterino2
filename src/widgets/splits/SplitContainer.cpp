@@ -400,9 +400,9 @@ void SplitContainer::paintEvent(QPaintEvent *)
     QPainter painter(this);
 
     if (this->splits.size() == 0) {
-        painter.fillRect(rect(), this->themeManager->splits.background);
+        painter.fillRect(rect(), this->theme->splits.background);
 
-        painter.setPen(this->themeManager->splits.header.text);
+        painter.setPen(this->theme->splits.header.text);
 
         QString text = "Click to add a split";
 
@@ -445,7 +445,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         int s = std::min<int>(dropRect.rect.width(), dropRect.rect.height()) - 12;
 
-        if (this->themeManager->isLightTheme()) {
+        if (this->theme->isLightTheme()) {
             painter.setPen(QColor(0, 0, 0));
         } else {
             painter.setPen(QColor(255, 255, 255));
@@ -457,8 +457,8 @@ void SplitContainer::paintEvent(QPaintEvent *)
     }
 
     QBrush accentColor = (QApplication::activeWindow() == this->window()
-                              ? this->themeManager->tabs.selected.backgrounds.regular
-                              : this->themeManager->tabs.selected.backgrounds.unfocused);
+                              ? this->theme->tabs.selected.backgrounds.regular
+                              : this->theme->tabs.selected.backgrounds.unfocused);
 
     painter.fillRect(0, 0, width(), 1, accentColor);
 }

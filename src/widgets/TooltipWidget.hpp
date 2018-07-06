@@ -27,7 +27,7 @@ public:
 protected:
     void changeEvent(QEvent *) override;
     void leaveEvent(QEvent *) override;
-    void themeRefreshEvent() override;
+    void themeChangedEvent() override;
     void scaleChangedEvent(float) override;
 
 private:

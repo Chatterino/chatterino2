@@ -121,7 +121,7 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
     if (this->mouseEffectColor_) {
         c = this->mouseEffectColor_.get();
     } else {
-        c = this->themeManager->isLightTheme() ? QColor(0, 0, 0) : QColor(255, 255, 255);
+        c = this->theme->isLightTheme() ? QColor(0, 0, 0) : QColor(255, 255, 255);
     }
 
     if (this->hoverMultiplier_ > 0) {

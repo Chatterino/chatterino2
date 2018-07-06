@@ -38,7 +38,7 @@ public:
 
 protected:
     virtual void scaleChangedEvent(float) override;
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
 
     virtual void paintEvent(QPaintEvent *) override;
     virtual void mousePressEvent(QMouseEvent *event) override;

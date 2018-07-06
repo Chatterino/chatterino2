@@ -21,7 +21,7 @@ public:
     Icon getIcon() const;
 
 protected:
-    virtual void themeRefreshEvent() override;
+    virtual void themeChangedEvent() override;
     virtual void paintEvent(QPaintEvent *) override;
     virtual void mouseReleaseEvent(QMouseEvent *) override;
     virtual void dragEnterEvent(QDragEnterEvent *) override;
