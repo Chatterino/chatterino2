@@ -39,26 +39,6 @@ static rapidjson::Document parseJSONFromData2(const QByteArray &data)
     return ret;
 }
 
-static rapidjson::Document parseJSONFromReply2(QNetworkReply *reply)
-{
-    rapidjson::Document ret(rapidjson::kNullType);
-
-    if (reply->error() != QNetworkReply::NetworkError::NoError) {
-        return ret;
-    }
-
-    QByteArray data = reply->readAll();
-    rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
-
-    if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-            result.Offset());
-        return ret;
-    }
-
-    return ret;
-}
-
 class NetworkRequest
 {
 public:
