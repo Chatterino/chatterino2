@@ -59,7 +59,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     this->updateScale();
 
-    CreateWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
+    createWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }

@@ -165,7 +165,7 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow;
 }
 
-Window &WindowManager::createWindow(Window::WindowType type)
+Window &WindowManager::createWindow(Window::Type type)
 {
     assertInGuiThread();
 
@@ -173,7 +173,7 @@ Window &WindowManager::createWindow(Window::WindowType type)
     this->windows.push_back(window);
     window->show();
 
-    if (type != Window::Main) {
+    if (type != Window::Type::Main) {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
@@ -229,15 +229,15 @@ void WindowManager::initialize()
 
         // get type
         QString type_val = window_obj.value("type").toString();
-        Window::WindowType type = type_val == "main" ? Window::Main : Window::Popup;
+        Window::Type type = type_val == "main" ? Window::Type::Main : Window::Type::Popup;
 
-        if (type == Window::Main && mainWindow != nullptr) {
-            type = Window::Popup;
+        if (type == Window::Type::Main && mainWindow != nullptr) {
+            type = Window::Type::Popup;
         }
 
         Window &window = createWindow(type);
 
-        if (type == Window::Main) {
+        if (type == Window::Type::Main) {
             mainWindow = &window;
         }
 
@@ -297,7 +297,7 @@ void WindowManager::initialize()
     }
 
     if (mainWindow == nullptr) {
-        mainWindow = &createWindow(Window::Main);
+        mainWindow = &createWindow(Window::Type::Main);
         mainWindow->getNotebook().addPage(true);
     }
 
@@ -318,10 +318,10 @@ void WindowManager::save()
 
         // window type
         switch (window->getType()) {
-            case Window::Main:
+            case Window::Type::Main:
                 window_obj.insert("type", "main");
                 break;
-            case Window::Popup:
+            case Window::Type::Popup:
                 window_obj.insert("type", "popup");
                 break;
         }

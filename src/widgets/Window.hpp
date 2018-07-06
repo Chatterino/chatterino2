@@ -22,19 +22,16 @@ class Window : public BaseWindow
     Q_OBJECT
 
 public:
-    enum WindowType { Main, Popup, Attached };
+    enum class Type { Main, Popup, Attached };
 
-    explicit Window(WindowType type);
+    explicit Window(Window::Type type);
+
+    Type getType();
+    SplitNotebook &getNotebook();
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
 
-    SplitNotebook &getNotebook();
-
-    void refreshWindowTitle(const QString &username);
-
     pajlada::Signals::NoArgSignal closed;
-
-    WindowType getType();
 
 protected:
     void showEvent(QShowEvent *) override;
@@ -43,22 +40,20 @@ protected:
 
 private:
     void addCustomTitlebarButtons();
-    void loadGeometry();
+    void addDebugStuff();
+    void addShortcuts();
+    void addLayout();
+    void onAccountSelected();
 
-    RippleEffectLabel *userLabel = nullptr;
+    Type type_;
+
+    SplitNotebook notebook_;
+    RippleEffectLabel *userLabel_ = nullptr;
     std::unique_ptr<UpdateDialog> updateDialogHandle_;
-
-    WindowType type;
-    float dpi;
-
-    SplitNotebook notebook;
 
     pajlada::Signals::SignalHolder signalHolder_;
 
     friend class Notebook;
-
-public:
-    void save();
 };
 
 }  // namespace chatterino

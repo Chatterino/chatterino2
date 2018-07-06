@@ -23,7 +23,7 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(Window::WindowType type);
+    Window &createWindow(Window::Type type);
 
     int windowCount();
     Window *windowAt(int index);

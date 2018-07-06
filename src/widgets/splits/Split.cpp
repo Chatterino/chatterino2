@@ -69,16 +69,16 @@ Split::Split(QWidget *parent)
 
     // Initialize chat widget-wide hotkeys
     // CTRL+W: Close Split
-    CreateShortcut(this, "CTRL+W", &Split::doCloseSplit);
+    createShortcut(this, "CTRL+W", &Split::doCloseSplit);
 
     // CTRL+R: Change Channel
-    CreateShortcut(this, "CTRL+R", &Split::doChangeChannel);
+    createShortcut(this, "CTRL+R", &Split::doChangeChannel);
 
     // CTRL+F: Search
-    CreateShortcut(this, "CTRL+F", &Split::doSearch);
+    createShortcut(this, "CTRL+F", &Split::doSearch);
 
     // F12
-    CreateShortcut(this, "F10", [] {
+    createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
         popup->setAttribute(Qt::WA_DeleteOnClose);
         popup->show();
@@ -379,7 +379,7 @@ void Split::doChangeChannel()
 void Split::doPopup()
 {
     auto app = getApp();
-    Window &window = app->windows->createWindow(Window::Popup);
+    Window &window = app->windows->createWindow(Window::Type::Popup);
 
     Split *split =
         new Split(static_cast<SplitContainer *>(window.getNotebook().getOrAddSelectedPage()));

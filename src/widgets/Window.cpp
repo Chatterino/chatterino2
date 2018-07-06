@@ -28,92 +28,159 @@
 
 namespace chatterino {
 
-Window::Window(WindowType _type)
+Window::Window(Type type)
     : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
-    , type(_type)
-    , dpi(this->getScale())
-    , notebook(this)
+    , type_(type)
+    , notebook_(this)
 {
-    auto app = getApp();
+    this->addCustomTitlebarButtons();
+    this->addDebugStuff();
+    this->addShortcuts();
+    this->addLayout();
 
-    app->accounts->twitch.currentUserChanged.connect([this] {
-        auto user = getApp()->accounts->twitch.getCurrent();
+    getApp()->accounts->twitch.currentUserChanged.connect([this] { this->onAccountSelected(); });
+    this->onAccountSelected();
 
-        if (user->isAnon()) {
-            this->refreshWindowTitle("Not logged in");
-
-            if (this->userLabel) {
-                this->userLabel->getLabel().setText("anonymous");
-            }
-        } else {
-            this->refreshWindowTitle(user->getUserName());
-
-            if (this->userLabel) {
-                this->userLabel->getLabel().setText(user->getUserName());
-            }
-        }
-    });
-
-    if (this->hasCustomWindowFrame() && _type == Window::Main) {
-        this->addCustomTitlebarButtons();
-    }
-
-    if (_type == Window::Main) {
+    if (type == Type::Main) {
         this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
     } else {
         this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
     }
+}
 
+Window::Type Window::getType()
+{
+    return this->type_;
+}
+
+SplitNotebook &Window::getNotebook()
+{
+    return this->notebook_;
+}
+
+void Window::repaintVisibleChatWidgets(Channel *channel)
+{
+    auto page = this->notebook_.getOrAddSelectedPage();
+
+    for (const auto &split : page->getSplits()) {
+        if (channel == nullptr || channel == split->getChannel().get()) {
+            split->layoutMessages();
+        }
+    }
+}
+
+bool Window::event(QEvent *event)
+{
+    switch (event->type()) {
+        case QEvent::WindowActivate:
+            break;
+
+        case QEvent::WindowDeactivate: {
+            auto page = this->notebook_.getOrAddSelectedPage();
+
+            if (page != nullptr) {
+                std::vector<Split *> splits = page->getSplits();
+
+                for (Split *split : splits) {
+                    split->updateLastReadMessage();
+                }
+            }
+
+            if (SplitContainer *container = dynamic_cast<SplitContainer *>(page)) {
+                container->hideResizeHandles();
+            }
+        } break;
+
+        default:;
+    };
+
+    return BaseWindow::event(event);
+}
+
+void Window::showEvent(QShowEvent *event)
+{
+    // Startup notification
+    if (getApp()->settings->startUpNotification.getValue() < 1) {
+        getApp()->settings->startUpNotification = 1;
+
+        auto box =
+            new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta",
+                            "Please note that this software is not stable yet. Things are rough "
+                            "around the edges and everything is subject to change.");
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->show();
+    }
+
+    // Show changelog
+    if (getApp()->settings->currentVersion.getValue() != "" &&
+        getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
+                                   QMessageBox::Yes | QMessageBox::No);
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        if (box->exec() == QMessageBox::Yes) {
+            QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
+        }
+    }
+
+    getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
+
+    // --
+    BaseWindow::showEvent(event);
+}
+
+void Window::closeEvent(QCloseEvent *)
+{
+    if (this->type_ == Type::Main) {
+        auto app = getApp();
+        app->windows->save();
+        app->windows->closeAll();
+    }
+
+    this->closed.invoke();
+
+    if (this->type_ == Type::Main) {
+        QApplication::exit();
+    }
+}
+
+void Window::addLayout()
+{
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    layout->addWidget(&this->notebook);
+    layout->addWidget(&this->notebook_);
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
     layout->setMargin(0);
 
-    /// Initialize program-wide hotkeys
-    // CTRL+P: Open settings dialog
-    CreateWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
+    this->notebook_.setAllowUserTabManagement(true);
+    this->notebook_.setShowAddButton(true);
+}
 
-    // CTRL+T: Create new split
-    CreateWindowShortcut(this, "CTRL+T",
-                         [this] { this->notebook.getOrAddSelectedPage()->appendNewSplit(true); });
+void Window::addCustomTitlebarButtons()
+{
+    return_unless(this->hasCustomWindowFrame());
+    return_unless(this->type_ == Type::Main);
 
-    // CTRL+Number: Switch to n'th tab
-    CreateWindowShortcut(this, "CTRL+1", [this] { this->notebook.selectIndex(0); });
-    CreateWindowShortcut(this, "CTRL+2", [this] { this->notebook.selectIndex(1); });
-    CreateWindowShortcut(this, "CTRL+3", [this] { this->notebook.selectIndex(2); });
-    CreateWindowShortcut(this, "CTRL+4", [this] { this->notebook.selectIndex(3); });
-    CreateWindowShortcut(this, "CTRL+5", [this] { this->notebook.selectIndex(4); });
-    CreateWindowShortcut(this, "CTRL+6", [this] { this->notebook.selectIndex(5); });
-    CreateWindowShortcut(this, "CTRL+7", [this] { this->notebook.selectIndex(6); });
-    CreateWindowShortcut(this, "CTRL+8", [this] { this->notebook.selectIndex(7); });
-    CreateWindowShortcut(this, "CTRL+9", [this] { this->notebook.selectIndex(8); });
+    // settings
+    this->addTitleBarButton(TitleBarButton::Settings, [] {
+        getApp()->windows->showSettingsDialog();  //
+    });
 
-    {
-        auto s = new QShortcut(QKeySequence::ZoomIn, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
-        });
-    }
-    {
-        auto s = new QShortcut(QKeySequence::ZoomOut, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
-        });
-    }
+    // updates
+    auto update = this->addTitleBarButton(TitleBarButton::None, [] {});
 
-    // CTRL+SHIFT+T: New tab
-    CreateWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook.addPage(true); });
+    initUpdateButton(*update, this->updateDialogHandle_, this->signalHolder_);
 
-    // CTRL+SHIFT+W: Close current tab
-    CreateWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook.removeCurrentPage(); });
+    // account
+    this->userLabel_ = this->addTitleBarLabel([this] {
+        getApp()->windows->showAccountSelectPopup(
+            this->userLabel_->mapToGlobal(this->userLabel_->rect().bottomLeft()));  //
+    });
+}
 
+void Window::addDebugStuff()
+{
 #ifdef QT_DEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages;
     // clang-format off
@@ -155,7 +222,7 @@ Window::Window(WindowType _type)
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     // clang-format on
 
-    CreateWindowShortcut(this, "F5", [=] {
+    createWindowShortcut(this, "F5", [=] {
         const auto &messages = miscMessages;
         static int index = 0;
         auto app = getApp();
@@ -163,135 +230,78 @@ Window::Window(WindowType _type)
         app->twitch.server->addFakeMessage(msg);
     });
 
-    CreateWindowShortcut(this, "F9", [=] {
+    createWindowShortcut(this, "F9", [=] {
         auto *dialog = new WelcomeDialog();
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         dialog->show();
     });
 #endif
-
-    this->refreshWindowTitle("");
-
-    this->notebook.setAllowUserTabManagement(true);
-    this->notebook.setShowAddButton(true);
 }
 
-void Window::addCustomTitlebarButtons()
+void Window::addShortcuts()
 {
-    // settings
-    this->addTitleBarButton(TitleBarButton::Settings, [] {
-        getApp()->windows->showSettingsDialog();  //
-    });
+    /// Initialize program-wide hotkeys
+    // Open settings
+    createWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
 
-    // updates
-    auto update = this->addTitleBarButton(TitleBarButton::None, [] {});
+    // Switch tab
+    createWindowShortcut(this, "CTRL+T",
+                         [this] { this->notebook_.getOrAddSelectedPage()->appendNewSplit(true); });
 
-    initUpdateButton(*update, this->updateDialogHandle_, this->signalHolder_);
+    createWindowShortcut(this, "CTRL+1", [this] { this->notebook_.selectIndex(0); });
+    createWindowShortcut(this, "CTRL+2", [this] { this->notebook_.selectIndex(1); });
+    createWindowShortcut(this, "CTRL+3", [this] { this->notebook_.selectIndex(2); });
+    createWindowShortcut(this, "CTRL+4", [this] { this->notebook_.selectIndex(3); });
+    createWindowShortcut(this, "CTRL+5", [this] { this->notebook_.selectIndex(4); });
+    createWindowShortcut(this, "CTRL+6", [this] { this->notebook_.selectIndex(5); });
+    createWindowShortcut(this, "CTRL+7", [this] { this->notebook_.selectIndex(6); });
+    createWindowShortcut(this, "CTRL+8", [this] { this->notebook_.selectIndex(7); });
+    createWindowShortcut(this, "CTRL+9", [this] { this->notebook_.selectIndex(8); });
 
-    // account
-    this->userLabel = this->addTitleBarLabel([this] {
-        getApp()->windows->showAccountSelectPopup(
-            this->userLabel->mapToGlobal(this->userLabel->rect().bottomLeft()));  //
-    });
-}
-
-Window::WindowType Window::getType()
-{
-    return this->type;
-}
-
-void Window::repaintVisibleChatWidgets(Channel *channel)
-{
-    auto *page = this->notebook.getOrAddSelectedPage();
-
-    if (page == nullptr) {
-        return;
+    // Zoom in
+    {
+        auto s = new QShortcut(QKeySequence::ZoomIn, this);
+        s->setContext(Qt::WindowShortcut);
+        QObject::connect(s, &QShortcut::activated, this, [] {
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
+        });
     }
 
-    for (const auto &split : page->getSplits()) {
-        if (channel == nullptr || channel == split->getChannel().get()) {
-            split->layoutMessages();
+    // Zoom out
+    {
+        auto s = new QShortcut(QKeySequence::ZoomOut, this);
+        s->setContext(Qt::WindowShortcut);
+        QObject::connect(s, &QShortcut::activated, this, [] {
+            getApp()->settings->uiScale.setValue(
+                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
+        });
+    }
+
+    // New tab
+    createWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook_.addPage(true); });
+
+    // Close tab
+    createWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook_.removeCurrentPage(); });
+}
+
+void Window::onAccountSelected()
+{
+    auto user = getApp()->accounts->twitch.getCurrent();
+    auto windowTitleEnd = QString(" - Chatterino Beta " CHATTERINO_VERSION);
+
+    if (user->isAnon()) {
+        this->setWindowTitle("Not logged in" + windowTitleEnd);
+
+        if (this->userLabel_) {
+            this->userLabel_->getLabel().setText("anonymous");
         }
-    }
-}
+    } else {
+        this->setWindowTitle(user->getUserName() + windowTitleEnd);
 
-SplitNotebook &Window::getNotebook()
-{
-    return this->notebook;
-}
-
-void Window::refreshWindowTitle(const QString &username)
-{
-    this->setWindowTitle(username + " - Chatterino Beta " CHATTERINO_VERSION);
-}
-
-bool Window::event(QEvent *event)
-{
-    switch (event->type()) {
-        case QEvent::WindowActivate:
-            break;
-
-        case QEvent::WindowDeactivate: {
-            auto page = this->notebook.getOrAddSelectedPage();
-
-            if (page != nullptr) {
-                std::vector<Split *> splits = page->getSplits();
-
-                for (Split *split : splits) {
-                    split->updateLastReadMessage();
-                }
-            }
-
-            if (SplitContainer *container = dynamic_cast<SplitContainer *>(page)) {
-                container->hideResizeHandles();
-            }
-        } break;
-
-        default:;
-    };
-    return BaseWindow::event(event);
-}
-
-void Window::showEvent(QShowEvent *event)
-{
-    if (getApp()->settings->startUpNotification.getValue() < 1) {
-        getApp()->settings->startUpNotification = 1;
-
-        auto box =
-            new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta",
-                            "Please note that this software is not stable yet. Things are rough "
-                            "around the edges and everything is subject to change.");
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        box->show();
-    }
-
-    if (  // getApp()->settings->currentVersion.getValue() != "" &&
-        getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        if (box->exec() == QMessageBox::Yes) {
-            QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
+        if (this->userLabel_) {
+            this->userLabel_->getLabel().setText(user->getUserName());
         }
-    }
-
-    getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
-
-    BaseWindow::showEvent(event);
-}
-
-void Window::closeEvent(QCloseEvent *)
-{
-    if (this->type == Window::Main) {
-        auto app = getApp();
-        app->windows->save();
-        app->windows->closeAll();
-    }
-
-    this->closed.invoke();
-
-    if (this->type == Window::Main) {
-        QApplication::exit();
     }
 }
 
