@@ -8,32 +8,33 @@ namespace chatterino {
 template <typename T>
 class MutexValue : boost::noncopyable
 {
-    mutable std::mutex mutex;
-    T value;
-
 public:
     MutexValue()
     {
     }
 
     MutexValue(T &&val)
-        : value(val)
+        : value_(val)
     {
     }
 
     T get() const
     {
-        std::lock_guard<std::mutex> guard(this->mutex);
+        std::lock_guard<std::mutex> guard(this->mutex_);
 
-        return this->value;
+        return this->value_;
     }
 
     void set(const T &val)
     {
-        std::lock_guard<std::mutex> guard(this->mutex);
+        std::lock_guard<std::mutex> guard(this->mutex_);
 
-        this->value = val;
+        this->value_ = val;
     }
+
+private:
+    mutable std::mutex mutex_;
+    T value_;
 };
 
 }  // namespace chatterino

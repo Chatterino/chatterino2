@@ -14,22 +14,6 @@
 
 namespace chatterino {
 
-static QJsonObject parseJSONFromReplyxD(QNetworkReply *reply)
-{
-    if (reply->error() != QNetworkReply::NetworkError::NoError) {
-        return QJsonObject();
-    }
-
-    QByteArray data = reply->readAll();
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-
-    if (jsonDoc.isNull()) {
-        return QJsonObject();
-    }
-
-    return jsonDoc.object();
-}
-
 class NetworkManager : public QObject
 {
     Q_OBJECT

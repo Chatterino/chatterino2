@@ -14,12 +14,12 @@ struct EmoteData {
     bool isValid() const;
     Image *getImage(float scale) const;
 
+    // Link to the emote page i.e. https://www.frankerfacez.com/emoticon/144722-pajaCringe
+    QString pageLink;
+
     Image *image1x = nullptr;
     Image *image2x = nullptr;
     Image *image3x = nullptr;
-
-    // Link to the emote page i.e. https://www.frankerfacez.com/emoticon/144722-pajaCringe
-    QString pageLink;
 };
 
 using EmoteMap = ConcurrentMap<QString, EmoteData>;

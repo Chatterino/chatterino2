@@ -22,10 +22,10 @@ Channel::Channel(const QString &_name, Type _type)
     , completionModel(this->name)
     , type_(_type)
 {
-    QObject::connect(&this->clearCompletionModelTimer, &QTimer::timeout, [this]() {
-        this->completionModel.ClearExpiredStrings();  //
+    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout, [this]() {
+        this->completionModel.clearExpiredStrings();  //
     });
-    this->clearCompletionModelTimer.start(60 * 1000);
+    this->clearCompletionModelTimer_.start(60 * 1000);
 }
 
 Channel::~Channel()

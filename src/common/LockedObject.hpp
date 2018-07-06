@@ -10,29 +10,29 @@ class LockedObject
 public:
     LockedObject &operator=(const LockedObject<Type> &other)
     {
-        this->mutex.lock();
+        this->mutex_.lock();
 
         this->data = other.getValue();
 
-        this->mutex.unlock();
+        this->mutex_.unlock();
 
         return *this;
     }
 
     LockedObject &operator=(const Type &other)
     {
-        this->mutex.lock();
+        this->mutex_.lock();
 
         this->data = other;
 
-        this->mutex.unlock();
+        this->mutex_.unlock();
 
         return *this;
     }
 
 private:
-    Type value;
-    std::mutex mutex;
+    Type value_;
+    std::mutex mutex_;
 };
 
 }  // namespace chatterino

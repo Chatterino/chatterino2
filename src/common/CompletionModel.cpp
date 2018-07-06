@@ -213,7 +213,7 @@ void CompletionModel::clearExpiredStrings()
     for (auto it = this->emotes_.begin(); it != this->emotes_.end();) {
         const auto &taggedString = *it;
 
-        if (taggedString.HasExpired(now)) {
+        if (taggedString.isExpired(now)) {
             // Log("String {} expired", taggedString.str);
             it = this->emotes_.erase(it);
         } else {
