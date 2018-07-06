@@ -23,10 +23,10 @@ class ReadOnlySignalVector : boost::noncopyable
 public:
     ReadOnlySignalVector()
     {
-        QObject::connect(&this->itemsChangedTimer, &QTimer::timeout,
+        QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
                          [this] { this->delayedItemsChanged.invoke(); });
-        this->itemsChangedTimer.setInterval(100);
-        this->itemsChangedTimer.setSingleShot(true);
+        this->itemsChangedTimer_.setInterval(100);
+        this->itemsChangedTimer_.setSingleShot(true);
     }
     virtual ~ReadOnlySignalVector() = default;
 
@@ -38,23 +38,23 @@ public:
     {
         assertInGuiThread();
 
-        return this->vector;
+        return this->vector_;
     }
 
     void invokeDelayedItemsChanged()
     {
         assertInGuiThread();
 
-        if (!this->itemsChangedTimer.isActive()) {
-            itemsChangedTimer.start();
+        if (!this->itemsChangedTimer_.isActive()) {
+            this->itemsChangedTimer_.start();
         }
     }
 
     virtual bool isSorted() const = 0;
 
 protected:
-    std::vector<TVectorItem> vector;
-    QTimer itemsChangedTimer;
+    std::vector<TVectorItem> vector_;
+    QTimer itemsChangedTimer_;
 };
 
 template <typename TVectorItem>
@@ -68,10 +68,10 @@ public:
     void removeItem(int index, void *caller = nullptr)
     {
         assertInGuiThread();
-        assert(index >= 0 && index < this->vector.size());
+        assert(index >= 0 && index < this->vector_.size());
 
-        TVectorItem item = this->vector[index];
-        this->vector.erase(this->vector.begin() + index);
+        TVectorItem item = this->vector_[index];
+        this->vector_.erase(this->vector_.begin() + index);
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemRemoved.invoke(args);
 
@@ -92,12 +92,12 @@ public:
     {
         assertInGuiThread();
         if (index == -1) {
-            index = this->vector.size();
+            index = this->vector_.size();
         } else {
-            assert(index >= 0 && index <= this->vector.size());
+            assert(index >= 0 && index <= this->vector_.size());
         }
 
-        this->vector.insert(this->vector.begin() + index, item);
+        this->vector_.insert(this->vector_.begin() + index, item);
 
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);
@@ -119,9 +119,9 @@ public:
     {
         assertInGuiThread();
 
-        auto it = std::lower_bound(this->vector.begin(), this->vector.end(), item, Compare{});
-        int index = it - this->vector.begin();
-        this->vector.insert(it, item);
+        auto it = std::lower_bound(this->vector_.begin(), this->vector_.end(), item, Compare{});
+        int index = it - this->vector_.begin();
+        this->vector_.insert(it, item);
 
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);

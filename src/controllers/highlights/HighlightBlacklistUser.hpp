@@ -13,10 +13,6 @@ namespace chatterino {
 
 class HighlightBlacklistUser
 {
-    QString pattern_;
-    bool isRegex_;
-    QRegularExpression regex_;
-
 public:
     bool operator==(const HighlightBlacklistUser &other) const
     {
@@ -58,6 +54,11 @@ public:
 
         return subject.toLower() == this->pattern_.toLower();
     }
+
+private:
+    QString pattern_;
+    bool isRegex_;
+    QRegularExpression regex_;
 };
 
 }  // namespace chatterino

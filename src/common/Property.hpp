@@ -12,23 +12,23 @@ public:
     {
     }
 
-    Property(const T &_value)
-        : value(_value)
+    Property(const T &value)
+        : value_(value)
     {
     }
 
     T &operator=(const T &f)
     {
-        return value = f;
+        return value_ = f;
     }
 
     operator T const &() const
     {
-        return value;
+        return value_;
     }
 
 protected:
-    T value;
+    T value_;
 };
 
 }  // namespace chatterino

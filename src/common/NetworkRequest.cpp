@@ -24,9 +24,9 @@ void NetworkRequest::setRequestType(RequestType newRequestType)
     this->data.requestType = newRequestType;
 }
 
-void NetworkRequest::setCaller(const QObject *_caller)
+void NetworkRequest::setCaller(const QObject *caller)
 {
-    this->data.caller = _caller;
+    this->data.caller = caller;
 }
 
 void NetworkRequest::setOnReplyCreated(std::function<void(QNetworkReply *)> f)

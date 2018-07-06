@@ -13,7 +13,7 @@ class SimpleSignalVector
 public:
     SimpleSignalVector &operator=(std::vector<TValue> &other)
     {
-        this->data = other;
+        this->data_ = other;
 
         this->updated.invoke();
 
@@ -22,13 +22,13 @@ public:
 
     operator std::vector<TValue> &()
     {
-        return this->data;
+        return this->data_;
     }
 
     pajlada::Signals::NoArgSignal updated;
 
 private:
-    std::vector<TValue> data;
+    std::vector<TValue> data_;
 };
 
 }  // namespace chatterino

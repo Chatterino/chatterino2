@@ -28,11 +28,11 @@ namespace chatterino {
 CommandController::CommandController()
 {
     auto addFirstMatchToMap = [this](auto args) {
-        this->commandsMap.remove(args.item.name);
+        this->commandsMap_.remove(args.item.name);
 
         for (const Command &cmd : this->items.getVector()) {
             if (cmd.name == args.item.name) {
-                this->commandsMap[cmd.name] = cmd;
+                this->commandsMap_[cmd.name] = cmd;
                 break;
             }
         }
@@ -45,9 +45,9 @@ CommandController::CommandController()
 void CommandController::load()
 {
     auto app = getApp();
-    this->filePath = app->paths->settingsDirectory + "/commands.txt";
+    this->filePath_ = app->paths->settingsDirectory + "/commands.txt";
 
-    QFile textFile(this->filePath);
+    QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::ReadOnly)) {
         // No commands file created yet
         return;
@@ -68,9 +68,9 @@ void CommandController::load()
 
 void CommandController::save()
 {
-    QFile textFile(this->filePath);
+    QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::WriteOnly)) {
-        Log("[CommandController::saveCommands] Unable to open {} for writing", this->filePath);
+        Log("[CommandController::saveCommands] Unable to open {} for writing", this->filePath_);
         return;
     }
 
@@ -95,7 +95,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
     Command command;
 
     {
-        std::lock_guard<std::mutex> lock(this->mutex);
+        std::lock_guard<std::mutex> lock(this->mutex_);
 
         if (words.length() == 0) {
             return text;
@@ -202,8 +202,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
         }
 
         // check if custom command exists
-        auto it = this->commandsMap.find(commandName);
-        if (it == this->commandsMap.end()) {
+        auto it = this->commandsMap_.find(commandName);
+        if (it == this->commandsMap_.end()) {
             return text;
         }
 

@@ -33,7 +33,7 @@ protected:
     friend class AccountController;
 
 private:
-    std::unordered_map<QString, int> categoryCount;
+    std::unordered_map<QString, int> categoryCount_;
 };
 
 }  // namespace chatterino

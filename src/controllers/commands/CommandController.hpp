@@ -28,10 +28,10 @@ public:
     UnsortedSignalVector<Command> items;
 
 private:
-    QMap<QString, Command> commandsMap;
+    QMap<QString, Command> commandsMap_;
 
-    std::mutex mutex;
-    QString filePath;
+    std::mutex mutex_;
+    QString filePath_;
 
     QString execCustomCommand(const QStringList &words, const Command &command);
 };

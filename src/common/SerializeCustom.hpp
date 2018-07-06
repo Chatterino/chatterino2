@@ -10,9 +10,7 @@ template <>
 struct Serialize<QString> {
     static rapidjson::Value get(const QString &value, rapidjson::Document::AllocatorType &a)
     {
-        rapidjson::Value ret(value.toUtf8(), a);
-
-        return ret;
+        return rapidjson::Value(value.toUtf8(), a);
     }
 };
 
@@ -27,10 +25,7 @@ struct Deserialize<QString> {
         }
 
         try {
-            const char *str = value.GetString();
-            auto strLen = value.GetStringLength();
-
-            return QString::fromUtf8(str, strLen);
+            return QString::fromUtf8(value.GetString(), value.GetStringLength());
         } catch (const std::exception &) {
             //            int x = 5;
         } catch (...) {

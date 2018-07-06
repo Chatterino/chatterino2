@@ -5,8 +5,8 @@
 
 namespace chatterino {
 
-EmoteData::EmoteData(Image *_image)
-    : image1x(_image)
+EmoteData::EmoteData(Image *image)
+    : image1x(image)
 {
 }
 

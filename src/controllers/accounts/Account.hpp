@@ -19,8 +19,8 @@ public:
     bool operator<(const Account &other) const;
 
 private:
-    ProviderId providerId;
-    QString category;
+    ProviderId providerId_;
+    QString category_;
 };
 
 }  // namespace chatterino

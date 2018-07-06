@@ -11,61 +11,57 @@ namespace chatterino {
 
 class HighlightPhrase
 {
-    QString pattern;
-    bool alert;
-    bool sound;
-    bool _isRegex;
-    QRegularExpression regex;
-
 public:
     bool operator==(const HighlightPhrase &other) const
     {
-        return std::tie(this->pattern, this->sound, this->alert, this->_isRegex) ==
-               std::tie(other.pattern, other.sound, other.alert, other._isRegex);
+        return std::tie(this->pattern_, this->sound_, this->alert_, this->isRegex_) ==
+               std::tie(other.pattern_, other.sound_, other.alert_, other.isRegex_);
     }
 
-    HighlightPhrase(const QString &_pattern, bool _alert, bool _sound, bool isRegex)
-        : pattern(_pattern)
-        , alert(_alert)
-        , sound(_sound)
-        , _isRegex(isRegex)
-        , regex(_isRegex ? _pattern : "\\b" + QRegularExpression::escape(_pattern) + "\\b",
-                QRegularExpression::CaseInsensitiveOption |
-                    QRegularExpression::UseUnicodePropertiesOption)
+    HighlightPhrase(const QString &pattern, bool alert, bool sound, bool isRegex)
+        : pattern_(pattern)
+        , alert_(alert)
+        , sound_(sound)
+        , isRegex_(isRegex)
+        , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+                 QRegularExpression::CaseInsensitiveOption |
+                     QRegularExpression::UseUnicodePropertiesOption)
     {
     }
 
     const QString &getPattern() const
     {
-        return this->pattern;
+        return this->pattern_;
     }
     bool getAlert() const
     {
-        return this->alert;
+        return this->alert_;
     }
     bool getSound() const
     {
-        return this->sound;
+        return this->sound_;
     }
     bool isRegex() const
     {
-        return this->_isRegex;
+        return this->isRegex_;
     }
 
     bool isValid() const
     {
-        return !this->pattern.isEmpty() && this->regex.isValid();
+        return !this->pattern_.isEmpty() && this->regex_.isValid();
     }
 
     bool isMatch(const QString &subject) const
     {
-        return this->isValid() && this->regex.match(subject).hasMatch();
+        return this->isValid() && this->regex_.match(subject).hasMatch();
     }
 
-    //    const QRegularExpression &getRegex() const
-    //    {
-    //        return this->regex;
-    //    }
+private:
+    QString pattern_;
+    bool alert_;
+    bool sound_;
+    bool isRegex_;
+    QRegularExpression regex_;
 };
 }  // namespace chatterino
 

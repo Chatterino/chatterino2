@@ -16,16 +16,16 @@ class SignalVectorModel : public QAbstractTableModel, pajlada::Signals::SignalHo
 public:
     SignalVectorModel(int columnCount, QObject *parent = nullptr)
         : QAbstractTableModel(parent)
-        , _columnCount(columnCount)
+        , columnCount_(columnCount)
     {
         for (int i = 0; i < columnCount; i++) {
-            this->_headerData.emplace_back();
+            this->headerData_.emplace_back();
         }
     }
 
     void init(BaseSignalVector<TVectorItem> *vec)
     {
-        this->vector = vec;
+        this->vector_ = vec;
 
         auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
             if (args.caller == this) {
@@ -33,7 +33,7 @@ public:
             }
             // get row index
             int index = this->getModelIndexFromVectorIndex(args.index);
-            assert(index >= 0 && index <= this->rows.size());
+            assert(index >= 0 && index <= this->rows_.size());
 
             // get row items
             std::vector<QStandardItem *> row = this->createRow();
@@ -43,7 +43,7 @@ public:
             index = this->beforeInsert(args.item, row, index);
 
             this->beginInsertRows(QModelIndex(), index, index);
-            this->rows.insert(this->rows.begin() + index, Row(row, args.item));
+            this->rows_.insert(this->rows_.begin() + index, Row(row, args.item));
             this->endInsertRows();
         };
 
@@ -62,13 +62,13 @@ public:
             }
 
             int row = this->getModelIndexFromVectorIndex(args.index);
-            assert(row >= 0 && row <= this->rows.size());
+            assert(row >= 0 && row <= this->rows_.size());
 
             // remove row
-            std::vector<QStandardItem *> items = std::move(this->rows[row].items);
+            std::vector<QStandardItem *> items = std::move(this->rows_[row].items);
 
             this->beginRemoveRows(QModelIndex(), row, row);
-            this->rows.erase(this->rows.begin() + row);
+            this->rows_.erase(this->rows_.begin() + row);
             this->endRemoveRows();
 
             this->afterRemoved(args.item, items, row);
@@ -83,7 +83,7 @@ public:
 
     virtual ~SignalVectorModel()
     {
-        for (Row &row : this->rows) {
+        for (Row &row : this->rows_) {
             for (QStandardItem *item : row.items) {
                 delete item;
             }
@@ -92,28 +92,28 @@ public:
 
     int rowCount(const QModelIndex &parent) const override
     {
-        return this->rows.size();
+        return this->rows_.size();
     }
 
     int columnCount(const QModelIndex &parent) const override
     {
-        return this->_columnCount;
+        return this->columnCount_;
     }
 
     QVariant data(const QModelIndex &index, int role) const override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
 
-        return rows[row].items[column]->data(role);
+        return rows_[row].items[column]->data(role);
     }
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
 
-        Row &rowItem = this->rows[row];
+        Row &rowItem = this->rows_[row];
 
         rowItem.items[column]->setData(value, role);
 
@@ -121,12 +121,12 @@ public:
             this->customRowSetData(rowItem.items, column, value, role);
         } else {
             int vecRow = this->getVectorIndexFromModelIndex(row);
-            this->vector->removeItem(vecRow, this);
+            this->vector_->removeItem(vecRow, this);
 
-            assert(this->rows[row].original);
+            assert(this->rows_[row].original);
             TVectorItem item =
-                this->getItemFromRow(this->rows[row].items, this->rows[row].original.get());
-            this->vector->insertItem(item, vecRow, this);
+                this->getItemFromRow(this->rows_[row].items, this->rows_[row].original.get());
+            this->vector_->insertItem(item, vecRow, this);
         }
 
         return true;
@@ -138,8 +138,8 @@ public:
             return QVariant();
         }
 
-        auto it = this->_headerData[section].find(role);
-        if (it == this->_headerData[section].end()) {
+        auto it = this->headerData_[section].find(role);
+        if (it == this->headerData_[section].end()) {
             return QVariant();
         } else {
             return it.value();
@@ -153,7 +153,7 @@ public:
             return false;
         }
 
-        this->_headerData[section][role] = value;
+        this->headerData_[section][role] = value;
 
         emit this->headerDataChanged(Qt::Horizontal, section, section);
         return true;
@@ -162,22 +162,22 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
 
-        return this->rows[index.row()].items[index.column()]->flags();
+        return this->rows_[index.row()].items[index.column()]->flags();
     }
 
     QStandardItem *getItem(int row, int column)
     {
-        assert(row >= 0 && row < this->rows.size() && column >= 0 && column < this->_columnCount);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
 
-        return rows[row].items[column];
+        return rows_[row].items[column];
     }
 
     void deleteRow(int row)
     {
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(signalVectorRow);
+        this->vector_->removeItem(signalVectorRow);
     }
 
     bool removeRows(int row, int count, const QModelIndex &parent) override
@@ -186,10 +186,10 @@ public:
             return false;
         }
 
-        assert(row >= 0 && row < this->rows.size());
+        assert(row >= 0 && row < this->rows_.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector->removeItem(signalVectorRow);
+        this->vector_->removeItem(signalVectorRow);
 
         return true;
     }
@@ -223,27 +223,27 @@ protected:
 
     void insertCustomRow(std::vector<QStandardItem *> row, int index)
     {
-        assert(index >= 0 && index <= this->rows.size());
+        assert(index >= 0 && index <= this->rows_.size());
 
         this->beginInsertRows(QModelIndex(), index, index);
-        this->rows.insert(this->rows.begin() + index, Row(std::move(row), true));
+        this->rows_.insert(this->rows_.begin() + index, Row(std::move(row), true));
         this->endInsertRows();
     }
 
     void removeCustomRow(int index)
     {
-        assert(index >= 0 && index <= this->rows.size());
-        assert(this->rows[index].isCustomRow);
+        assert(index >= 0 && index <= this->rows_.size());
+        assert(this->rows_[index].isCustomRow);
 
         this->beginRemoveRows(QModelIndex(), index, index);
-        this->rows.erase(this->rows.begin() + index);
+        this->rows_.erase(this->rows_.begin() + index);
         this->endRemoveRows();
     }
 
     std::vector<QStandardItem *> createRow()
     {
         std::vector<QStandardItem *> row;
-        for (int i = 0; i < this->_columnCount; i++) {
+        for (int i = 0; i < this->columnCount_; i++) {
             row.push_back(new QStandardItem());
         }
         return row;
@@ -268,20 +268,20 @@ protected:
         {
         }
     };
-    std::vector<Row> rows;
 
 private:
-    std::vector<QMap<int, QVariant>> _headerData;
-    BaseSignalVector<TVectorItem> *vector;
+    std::vector<QMap<int, QVariant>> headerData_;
+    BaseSignalVector<TVectorItem> *vector_;
+    std::vector<Row> rows_;
 
-    int _columnCount;
+    int columnCount_;
 
     // returns the related index of the SignalVector
     int getVectorIndexFromModelIndex(int index)
     {
         int i = 0;
 
-        for (auto &row : this->rows) {
+        for (auto &row : this->rows_) {
             if (row.isCustomRow) {
                 index--;
                 continue;
@@ -301,7 +301,7 @@ private:
     {
         int i = 0;
 
-        for (auto &row : this->rows) {
+        for (auto &row : this->rows_) {
             if (row.isCustomRow) {
                 index++;
             }

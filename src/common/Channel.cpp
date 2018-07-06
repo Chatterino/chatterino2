@@ -17,10 +17,10 @@
 
 namespace chatterino {
 
-Channel::Channel(const QString &_name, Type _type)
+Channel::Channel(const QString &_name, Type type)
     : name(_name)
     , completionModel(this->name)
-    , type_(_type)
+    , type_(type)
 {
     QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout, [this]() {
         this->completionModel.clearExpiredStrings();  //

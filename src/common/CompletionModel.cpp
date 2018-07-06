@@ -73,8 +73,8 @@ bool CompletionModel::TaggedString::operator<(const TaggedString &that) const
 
 // -- CompletionModel
 
-CompletionModel::CompletionModel(const QString &_channelName)
-    : channelName_(_channelName)
+CompletionModel::CompletionModel(const QString &channelName)
+    : channelName_(channelName)
 {
 }
 

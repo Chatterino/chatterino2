@@ -14,15 +14,15 @@ HighlightController::HighlightController()
 
 void HighlightController::initialize()
 {
-    assert(!this->initialized);
-    this->initialized = true;
+    assert(!this->initialized_);
+    this->initialized_ = true;
 
-    for (const HighlightPhrase &phrase : this->highlightsSetting.getValue()) {
+    for (const HighlightPhrase &phrase : this->highlightsSetting_.getValue()) {
         this->phrases.appendItem(phrase);
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //
-        this->highlightsSetting.setValue(this->phrases.getVector());
+        this->highlightsSetting_.setValue(this->phrases.getVector());
     });
 }
 

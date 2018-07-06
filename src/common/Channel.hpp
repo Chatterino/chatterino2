@@ -29,7 +29,7 @@ public:
         Misc
     };
 
-    explicit Channel(const QString &_name, Type type_);
+    explicit Channel(const QString &name, Type type);
     virtual ~Channel();
 
     pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;

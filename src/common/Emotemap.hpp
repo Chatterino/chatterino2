@@ -8,7 +8,7 @@ namespace chatterino {
 struct EmoteData {
     EmoteData() = default;
 
-    EmoteData(Image *_image);
+    EmoteData(Image *image);
 
     // Emotes must have a 1x image to be valid
     bool isValid() const;

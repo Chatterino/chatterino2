@@ -11,14 +11,14 @@ template <typename Type>
 class ChatterinoSetting : public pajlada::Settings::Setting<Type>
 {
 public:
-    ChatterinoSetting(const std::string &_path)
-        : pajlada::Settings::Setting<Type>(_path)
+    ChatterinoSetting(const std::string &path)
+        : pajlada::Settings::Setting<Type>(path)
     {
         _registerSetting(this->data);
     }
 
-    ChatterinoSetting(const std::string &_path, const Type &_defaultValue)
-        : pajlada::Settings::Setting<Type>(_path, _defaultValue)
+    ChatterinoSetting(const std::string &path, const Type &defaultValue)
+        : pajlada::Settings::Setting<Type>(path, defaultValue)
     {
         _registerSetting(this->data);
     }

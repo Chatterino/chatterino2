@@ -33,11 +33,11 @@ public:
     void addHighlight(const MessagePtr &msg);
 
 private:
-    bool initialized = false;
+    bool initialized_ = false;
 
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting = {
+    ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting_ = {
         "/highlighting/highlights"};
-    ChatterinoSetting<std::vector<HighlightPhrase>> blacklistSetting = {"/highlighting/blacklist"};
+    ChatterinoSetting<std::vector<HighlightPhrase>> blacklistSetting_ = {"/highlighting/blacklist"};
 };
 
 }  // namespace chatterino

@@ -45,7 +45,7 @@ class CompletionModel : public QAbstractListModel
     };
 
 public:
-    CompletionModel(const QString &_channelName);
+    CompletionModel(const QString &channelName);
 
     virtual int columnCount(const QModelIndex &) const override;
     virtual QVariant data(const QModelIndex &index, int) const override;

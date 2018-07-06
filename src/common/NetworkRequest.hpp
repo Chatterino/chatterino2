@@ -135,7 +135,7 @@ public:
     }
 
     void setUseQuickLoadCache(bool value);
-    void setCaller(const QObject *_caller);
+    void setCaller(const QObject *caller);
     void setOnReplyCreated(std::function<void(QNetworkReply *)> f);
     void setRawHeader(const char *headerName, const char *value);
     void setRawHeader(const char *headerName, const QByteArray &value);
