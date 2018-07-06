@@ -176,17 +176,18 @@ public:
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {
-    QTime time;
-    std::unique_ptr<TextElement> element;
-    QString format;
-
 public:
-    TimestampElement(QTime time = QTime::currentTime());
+    TimestampElement(QTime time_ = QTime::currentTime());
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 
-    TextElement *formatTime(const QTime &time);
+    TextElement *formatTime(const QTime &time_);
+
+private:
+    QTime time_;
+    std::unique_ptr<TextElement> element_;
+    QString format_;
 };
 
 // adds all the custom moderation buttons, adds a variable amount of items depending on settings
