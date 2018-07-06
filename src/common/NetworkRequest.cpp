@@ -19,6 +19,11 @@ NetworkRequest::NetworkRequest(const QString &url)
     this->data.request.setUrl(QUrl(url));
 }
 
+NetworkRequest::NetworkRequest(QUrl url)
+{
+    this->data.request.setUrl(url);
+}
+
 void NetworkRequest::setRequestType(RequestType newRequestType)
 {
     this->data.requestType = newRequestType;
@@ -148,8 +153,8 @@ void NetworkRequest::doRequest()
     worker->moveToThread(&NetworkManager::workerThread);
 
     if (this->data.caller != nullptr) {
-        QObject::connect(worker, &NetworkWorker::doneUrl,
-                         this->data.caller, [data = this->data](auto reply) mutable {
+        QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
+                         [data = this->data](auto reply) mutable {
                              if (reply->error() != QNetworkReply::NetworkError::NoError) {
                                  if (data.onError) {
                                      data.onError(reply->error());
@@ -172,7 +177,7 @@ void NetworkRequest::doRequest()
     }
 
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
-                     [ timer, data = std::move(this->data), worker ]() {
+                     [timer, data = std::move(this->data), worker]() {
                          QNetworkReply *reply = nullptr;
                          switch (data.requestType) {
                              case GetRequest: {
@@ -208,7 +213,7 @@ void NetworkRequest::doRequest()
                          }
 
                          QObject::connect(reply, &QNetworkReply::finished, worker,
-                                          [ data = std::move(data), worker, reply ]() mutable {
+                                          [data = std::move(data), worker, reply]() mutable {
                                               if (data.caller == nullptr) {
                                                   QByteArray bytes = reply->readAll();
                                                   data.writeToCache(bytes);

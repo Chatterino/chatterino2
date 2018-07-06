@@ -112,7 +112,9 @@ static void twitchApiPut(QUrl url, std::function<void(QJsonObject)> successCallb
 
 static void twitchApiDelete(QUrl url, std::function<void()> successCallback)
 {
-    QNetworkRequest request(url);
+    NetworkRequest request(url);
+    request.setRequestType(NetworkRequest::DeleteRequest);
+    request.setCaller(QThread::currentThread());
 
     auto currentTwitchUser = getApp()->accounts->twitch.getCurrent();
     QByteArray oauthToken;
@@ -122,21 +124,23 @@ static void twitchApiDelete(QUrl url, std::function<void()> successCallback)
         // XXX(pajlada): Bail out?
     }
 
-    request.setRawHeader("Client-ID", getDefaultClientID());
-    request.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    request.setRawHeader("Authorization", "OAuth " + oauthToken);
+    request.makeAuthorizedV5(getDefaultClientID(), currentTwitchUser->getOAuthToken());
 
-    NetworkManager::urlDelete(std::move(request), [=](QNetworkReply *reply) {
-        if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            int code =
-                reply->attribute(QNetworkRequest::Attribute::HttpStatusCodeAttribute).toInt();
-
-            if (code >= 200 && code <= 299) {
-                successCallback();
-            }
+    request.onError([successCallback](int code) {
+        if (code >= 200 && code <= 299) {
+            successCallback();
         }
-        reply->deleteLater();
+
+        return true;
     });
+
+    request.onSuccess([successCallback](const auto &document) {
+        successCallback();
+
+        return true;
+    });
+
+    request.execute();
 }
 
 }  // namespace chatterino

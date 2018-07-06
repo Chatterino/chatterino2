@@ -34,11 +34,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [ worker, data, onFinished = std::move(onFinished), request = std::move(request) ]() {
+            [worker, data, onFinished = std::move(onFinished), request = std::move(request)]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, *data);
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [ worker, reply, onFinished = std::move(onFinished) ]() {
+                               [worker, reply, onFinished = std::move(onFinished)]() {
                                    onFinished(reply);
                                    delete worker;
                                });
@@ -56,33 +56,11 @@ public:
         worker->moveToThread(&NetworkManager::workerThread);
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
+            [onFinished = std::move(onFinished), request = std::move(request), worker]() {
                 QNetworkReply *reply = NetworkManager::NaM.put(request, "");
 
                 reply->connect(reply, &QNetworkReply::finished,
-                               [ onFinished = std::move(onFinished), reply, worker ]() {
-                                   onFinished(reply);
-                                   delete worker;
-                               });
-            });
-
-        emit requester.requestUrl();
-    }
-
-    template <typename FinishedCallback>
-    static void urlDelete(QNetworkRequest request, FinishedCallback onFinished)
-    {
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [ onFinished = std::move(onFinished), request = std::move(request), worker ]() {
-                QNetworkReply *reply = NetworkManager::NaM.deleteResource(request);
-
-                reply->connect(reply, &QNetworkReply::finished,
-                               [ onFinished = std::move(onFinished), reply, worker ]() {
+                               [onFinished = std::move(onFinished), reply, worker]() {
                                    onFinished(reply);
                                    delete worker;
                                });

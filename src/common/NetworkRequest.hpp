@@ -114,6 +114,7 @@ public:
     explicit NetworkRequest(const char *url);
     explicit NetworkRequest(const std::string &url);
     explicit NetworkRequest(const QString &url);
+    NetworkRequest(QUrl url);
 
     void setRequestType(RequestType newRequestType);
 
@@ -182,7 +183,7 @@ public:
 
         if (this->data.caller != nullptr) {
             QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
-                             [ onFinished, data = this->data ](auto reply) mutable {
+                             [onFinished, data = this->data](auto reply) mutable {
                                  if (reply->error() != QNetworkReply::NetworkError::NoError) {
                                      if (data.onError) {
                                          data.onError(reply->error());
@@ -206,7 +207,7 @@ public:
 
         QObject::connect(
             &requester, &NetworkRequester::requestUrl, worker,
-            [ timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)} ]() {
+            [timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)}]() {
                 QNetworkReply *reply = NetworkManager::NaM.get(data.request);
 
                 if (timer != nullptr) {
@@ -221,21 +222,21 @@ public:
                     data.onReplyCreated(reply);
                 }
 
-                QObject::connect(reply, &QNetworkReply::finished, worker, [
-                    data = std::move(data), worker, reply, onFinished = std::move(onFinished)
-                ]() mutable {
-                    if (data.caller == nullptr) {
-                        QByteArray bytes = reply->readAll();
-                        data.writeToCache(bytes);
-                        onFinished(bytes);
+                QObject::connect(reply, &QNetworkReply::finished, worker,
+                                 [data = std::move(data), worker, reply,
+                                  onFinished = std::move(onFinished)]() mutable {
+                                     if (data.caller == nullptr) {
+                                         QByteArray bytes = reply->readAll();
+                                         data.writeToCache(bytes);
+                                         onFinished(bytes);
 
-                        reply->deleteLater();
-                    } else {
-                        emit worker->doneUrl(reply);
-                    }
+                                         reply->deleteLater();
+                                     } else {
+                                         emit worker->doneUrl(reply);
+                                     }
 
-                    delete worker;
-                });
+                                     delete worker;
+                                 });
             });
 
         emit requester.requestUrl();
@@ -244,7 +245,7 @@ public:
     template <typename FinishedCallback>
     void getJSON(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes)->bool {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData(bytes);
             onFinished(object);
 
@@ -257,7 +258,7 @@ public:
     template <typename FinishedCallback>
     void getJSON2(FinishedCallback onFinished)
     {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes)->bool {
+        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData2(bytes);
             onFinished(object);
 
