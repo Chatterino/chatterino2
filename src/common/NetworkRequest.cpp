@@ -63,7 +63,9 @@ void NetworkRequest::makeAuthorizedV5(const QString &clientID, const QString &oa
 {
     this->setRawHeader("Client-ID", clientID);
     this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    this->setRawHeader("Authorization", "OAuth " + oauthToken);
+    if (!oauthToken.isEmpty()) {
+        this->setRawHeader("Authorization", "OAuth " + oauthToken);
+    }
 }
 
 void NetworkRequest::setUseQuickLoadCache(bool value)

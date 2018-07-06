@@ -142,7 +142,7 @@ public:
     void setRawHeader(const char *headerName, const QByteArray &value);
     void setRawHeader(const char *headerName, const QString &value);
     void setTimeout(int ms);
-    void makeAuthorizedV5(const QString &clientID, const QString &oauthToken);
+    void makeAuthorizedV5(const QString &clientID, const QString &oauthToken = QString());
 
     template <typename FinishedCallback>
     void get(FinishedCallback onFinished)
@@ -247,19 +247,6 @@ public:
     {
         this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
             auto object = parseJSONFromData(bytes);
-            onFinished(object);
-
-            // XXX: Maybe return onFinished? For now I don't want to force onFinished to have a
-            // return value
-            return true;
-        });
-    }
-
-    template <typename FinishedCallback>
-    void getJSON2(FinishedCallback onFinished)
-    {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
-            auto object = parseJSONFromData2(bytes);
             onFinished(object);
 
             // XXX: Maybe return onFinished? For now I don't want to force onFinished to have a

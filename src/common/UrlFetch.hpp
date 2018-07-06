@@ -39,15 +39,19 @@ static void twitchApiGet(QString url, const QObject *caller,
 static void twitchApiGet2(QString url, const QObject *caller, bool useQuickLoadCache,
                           std::function<void(const rapidjson::Document &)> successCallback)
 {
-    NetworkRequest req(url);
-    req.setCaller(caller);
-    req.setRawHeader("Client-ID", getDefaultClientID());
-    req.setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    req.setUseQuickLoadCache(useQuickLoadCache);
+    NetworkRequest request(url);
+    request.setRequestType(NetworkRequest::GetRequest);
+    request.setCaller(caller);
+    request.makeAuthorizedV5(getDefaultClientID());
+    request.setUseQuickLoadCache(useQuickLoadCache);
 
-    req.getJSON2([=](const rapidjson::Document &document) {
+    request.onSuccess([successCallback](const rapidjson::Document &document) {
         successCallback(document);  //
+
+        return true;
     });
+
+    request.execute();
 }
 
 static void twitchApiGetUserID(QString username, const QObject *caller,
