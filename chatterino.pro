@@ -224,7 +224,6 @@ SOURCES += \
     src/singletons/Settings.cpp \
     src/singletons/Updates.cpp \
     src/singletons/Theme.cpp \
-    src/widgets/dialogs/LogsPopup.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
     src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/FeelPage.cpp \
