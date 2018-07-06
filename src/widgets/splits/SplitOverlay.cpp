@@ -17,10 +17,10 @@ namespace chatterino {
 
 SplitOverlay::SplitOverlay(Split *parent)
     : BaseWidget(parent)
-    , split(parent)
+    , split_(parent)
 {
     QGridLayout *layout = new QGridLayout(this);
-    this->_layout = layout;
+    this->layout_ = layout;
     layout->setMargin(1);
     layout->setSpacing(1);
 
@@ -30,11 +30,11 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(3, 1);
 
     QPushButton *move = new QPushButton(getApp()->resources->split.move, QString());
-    QPushButton *left = this->_left = new QPushButton(getApp()->resources->split.left, QString());
-    QPushButton *right = this->_right =
+    QPushButton *left = this->left_ = new QPushButton(getApp()->resources->split.left, QString());
+    QPushButton *right = this->right_ =
         new QPushButton(getApp()->resources->split.right, QString());
-    QPushButton *up = this->_up = new QPushButton(getApp()->resources->split.up, QString());
-    QPushButton *down = this->_down = new QPushButton(getApp()->resources->split.down, QString());
+    QPushButton *up = this->up_ = new QPushButton(getApp()->resources->split.up, QString());
+    QPushButton *down = this->down_ = new QPushButton(getApp()->resources->split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));
@@ -98,7 +98,7 @@ void SplitOverlay::paintEvent(QPaintEvent *)
     }
 
     QRect rect;
-    switch (this->hoveredElement) {
+    switch (this->hoveredElement_) {
         case SplitLeft: {
             rect = QRect(0, 0, this->width() / 2, this->height());
         } break;
@@ -134,10 +134,10 @@ void SplitOverlay::resizeEvent(QResizeEvent *event)
     bool wideEnough = event->size().width() > 150 * _scale;
     bool highEnough = event->size().height() > 150 * _scale;
 
-    this->_left->setVisible(wideEnough);
-    this->_right->setVisible(wideEnough);
-    this->_up->setVisible(highEnough);
-    this->_down->setVisible(highEnough);
+    this->left_->setVisible(wideEnough);
+    this->right_->setVisible(wideEnough);
+    this->up_->setVisible(highEnough);
+    this->down_->setVisible(highEnough);
 }
 
 void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
@@ -169,7 +169,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                 effect->setOpacity(0.99);
             }
 
-            this->parent->hoveredElement = this->hoveredElement;
+            this->parent->hoveredElement_ = this->hoveredElement;
             this->parent->update();
         } break;
         case QEvent::Leave: {
@@ -180,27 +180,27 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
                 effect->setOpacity(0.7);
             }
 
-            this->parent->hoveredElement = HoveredElement::None;
+            this->parent->hoveredElement_ = HoveredElement::None;
             this->parent->update();
         } break;
         case QEvent::MouseButtonPress: {
             if (this->hoveredElement == HoveredElement::SplitMove) {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 if (mouseEvent->button() == Qt::LeftButton) {
-                    this->parent->split->drag();
+                    this->parent->split_->drag();
                 }
                 return true;
             }
         } break;
         case QEvent::MouseButtonRelease: {
             if (this->hoveredElement != HoveredElement::SplitMove) {
-                SplitContainer *container = this->parent->split->getContainer();
+                SplitContainer *container = this->parent->split_->getContainer();
 
                 if (container != nullptr) {
                     auto *_split = new Split(container);
                     auto dir = SplitContainer::Direction(this->hoveredElement +
                                                          SplitContainer::Left - SplitLeft);
-                    container->insertSplit(_split, dir, this->parent->split);
+                    container->insertSplit(_split, dir, this->parent->split_);
                     this->parent->hide();
                 }
             }

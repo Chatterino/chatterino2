@@ -23,7 +23,7 @@ public:
     void addMessage(const QString &channelName, MessagePtr message);
 
 private:
-    std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels;
+    std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels_;
 };
 
 }  // namespace chatterino

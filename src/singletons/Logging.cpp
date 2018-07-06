@@ -25,11 +25,11 @@ void Logging::addMessage(const QString &channelName, MessagePtr message)
         return;
     }
 
-    auto it = this->loggingChannels.find(channelName);
-    if (it == this->loggingChannels.end()) {
+    auto it = this->loggingChannels_.find(channelName);
+    if (it == this->loggingChannels_.end()) {
         auto channel = new LoggingChannel(channelName);
         channel->addMessage(message);
-        this->loggingChannels.emplace(channelName,
+        this->loggingChannels_.emplace(channelName,
                                       std::unique_ptr<LoggingChannel>(std::move(channel)));
     } else {
         it->second->addMessage(message);

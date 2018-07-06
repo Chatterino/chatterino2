@@ -32,6 +32,21 @@ protected:
     //    override;
 
 private:
+    struct {
+        Split *split;
+    } ui_;
+
+    struct Item {
+        void *hwnd;
+        AttachedWindow *window;
+        QString winId;
+    };
+
+    static std::vector<Item> items;
+
+    void attachToHwnd(void *attached);
+    void updateWindowRect(void *attached);
+
     void *target_;
     int yOffset_;
     int currentYOffset_;
@@ -42,21 +57,6 @@ private:
     bool attached_ = false;
 #endif
     QTimer timer_;
-
-    struct {
-        Split *split;
-    } ui_;
-
-    void attachToHwnd(void *attached);
-    void updateWindowRect(void *attached);
-
-    struct Item {
-        void *hwnd;
-        AttachedWindow *window;
-        QString winId;
-    };
-
-    static std::vector<Item> items;
 };
 
 }  // namespace chatterino

@@ -62,7 +62,7 @@ struct Message {
     ScrollbarHighlight getScrollBarHighlight() const;
 
 private:
-    std::vector<std::unique_ptr<MessageElement>> elements;
+    std::vector<std::unique_ptr<MessageElement>> elements_;
 
 public:
     static std::shared_ptr<Message> createSystemMessage(const QString &text);

@@ -64,6 +64,9 @@ protected:
 private:
     Q_PROPERTY(qreal currentValue_ READ getCurrentValue WRITE setCurrentValue)
 
+    LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
+    void updateScroll();
+
     QMutex mutex_;
 
     QPropertyAnimation currentValueAnimation_;
@@ -71,7 +74,6 @@ private:
     LimitedQueue<ScrollbarHighlight> highlights_;
     bool highlightsPaused_{false};
     LimitedQueueSnapshot<ScrollbarHighlight> highlightSnapshot_;
-    LimitedQueueSnapshot<ScrollbarHighlight> getHighlightSnapshot();
 
     bool atBottom_{false};
 
@@ -94,8 +96,6 @@ private:
 
     pajlada::Signals::NoArgSignal currentValueChanged_;
     pajlada::Signals::NoArgSignal desiredValueChanged_;
-
-    void updateScroll();
 };
 
 }  // namespace chatterino

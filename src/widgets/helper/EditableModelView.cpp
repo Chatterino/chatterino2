@@ -9,20 +9,20 @@
 
 namespace chatterino {
 
-EditableModelView::EditableModelView(QAbstractTableModel *_model)
-    : tableView(new QTableView(this))
-    , model(_model)
+EditableModelView::EditableModelView(QAbstractTableModel *model)
+    : tableView_(new QTableView(this))
+    , model_(model)
 {
-    this->model->setParent(this);
-    this->tableView->setModel(_model);
-    this->tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    this->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    this->tableView->verticalHeader()->hide();
+    this->model_->setParent(this);
+    this->tableView_->setModel(model);
+    this->tableView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    this->tableView_->verticalHeader()->hide();
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
-    vbox->addWidget(this->tableView);
+    vbox->addWidget(this->tableView_);
 
     // create button layout
     QHBoxLayout *buttons = new QHBoxLayout(this);
@@ -39,7 +39,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *_model)
     QObject::connect(remove, &QPushButton::clicked, [this] {
         QModelIndexList list;
         while ((list = this->getTableView()->selectionModel()->selectedRows(0)).length() > 0) {
-            model->removeRow(list[0].row());
+            model_->removeRow(list[0].row());
         }
     });
 
@@ -51,22 +51,22 @@ void EditableModelView::setTitles(std::initializer_list<QString> titles)
 {
     int i = 0;
     for (const QString &title : titles) {
-        if (this->model->columnCount() == i) {
+        if (this->model_->columnCount() == i) {
             break;
         }
 
-        this->model->setHeaderData(i++, Qt::Horizontal, title, Qt::DisplayRole);
+        this->model_->setHeaderData(i++, Qt::Horizontal, title, Qt::DisplayRole);
     }
 }
 
 QTableView *EditableModelView::getTableView()
 {
-    return this->tableView;
+    return this->tableView_;
 }
 
 QAbstractTableModel *EditableModelView::getModel()
 {
-    return this->model;
+    return this->model_;
 }
 
 }  // namespace chatterino

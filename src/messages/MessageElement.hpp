@@ -120,34 +120,26 @@ protected:
     bool trailingSpace = true;
 
 private:
-    Link link;
-    QString tooltip;
-    Flags flags;
+    Link link_;
+    QString tooltip_;
+    Flags flags_;
 };
 
 // contains a simple image
 class ImageElement : public MessageElement
 {
-    Image *image;
-
 public:
     ImageElement(Image *image, MessageElement::Flags flags);
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+
+private:
+    Image *image_;
 };
 
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
-    MessageColor color;
-    FontStyle style;
-
-    struct Word {
-        QString text;
-        int width = -1;
-    };
-    std::vector<Word> words;
-
 public:
     TextElement(const QString &text, MessageElement::Flags flags,
                 const MessageColor &color = MessageColor::Text,
@@ -155,6 +147,16 @@ public:
     ~TextElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+
+private:
+    MessageColor color_;
+    FontStyle style_;
+
+    struct Word {
+        QString text;
+        int width = -1;
+    };
+    std::vector<Word> words_;
 };
 
 // contains emote data and will pick the emote based on :
@@ -162,15 +164,16 @@ public:
 //   b) which size it wants
 class EmoteElement : public MessageElement
 {
-    std::unique_ptr<TextElement> textElement;
-
 public:
-    EmoteElement(const EmoteData &data, MessageElement::Flags flags);
+    EmoteElement(const EmoteData &data, MessageElement::Flags flags_);
     ~EmoteElement() override = default;
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags_) override;
 
     const EmoteData data;
+
+private:
+    std::unique_ptr<TextElement> textElement_;
 };
 
 // contains a text, formated depending on the preferences
@@ -182,7 +185,7 @@ public:
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 
-    TextElement *formatTime(const QTime &time_);
+    TextElement *formatTime(const QTime &time);
 
 private:
     QTime time_;

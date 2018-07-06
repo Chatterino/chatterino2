@@ -88,33 +88,33 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
 
 private:
-    SplitContainer *container;
-    IndirectChannel channel;
-
-    QVBoxLayout vbox;
-    SplitHeader header;
-    ChannelView view;
-    SplitInput input;
-    SplitOverlay *overlay;
-
-    NullablePtr<SelectChannelDialog> selectChannelDialog;
-
-    bool moderationMode = false;
-
-    bool isMouseOver = false;
-    bool isDragging = false;
-
-    pajlada::Signals::Connection channelIDChangedConnection;
-    pajlada::Signals::Connection usermodeChangedConnection;
-    pajlada::Signals::Connection roomModeChangedConnection;
-
-    pajlada::Signals::Connection indirectChannelChangedConnection;
-
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
-
     void doOpenUserInfoPopup(const QString &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
+
+    SplitContainer *container_;
+    IndirectChannel channel_;
+
+    QVBoxLayout vbox_;
+    SplitHeader header_;
+    ChannelView view_;
+    SplitInput input_;
+    SplitOverlay *overlay_;
+
+    NullablePtr<SelectChannelDialog> selectChannelDialog_;
+
+    bool moderationMode_ = false;
+
+    bool isMouseOver_ = false;
+    bool isDragging_ = false;
+
+    pajlada::Signals::Connection channelIDChangedConnection_;
+    pajlada::Signals::Connection usermodeChangedConnection_;
+    pajlada::Signals::Connection roomModeChangedConnection_;
+
+    pajlada::Signals::Connection indirectChannelChangedConnection_;
+
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
 public slots:
     // Add new split to the notebook page that this chat widget is in

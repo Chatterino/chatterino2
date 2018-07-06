@@ -8,23 +8,23 @@ struct EmoteValue {
 public:
     int getSet()
     {
-        return _set;
+        return set_;
     }
 
     int getId()
     {
-        return _id;
+        return id_;
     }
 
     const QString &getChannelName()
     {
-        return _channelName;
+        return channelName_;
     }
 
 private:
-    int _set;
-    int _id;
-    QString _channelName;
+    int set_;
+    int id_;
+    QString channelName_;
 };
 
 }  // namespace chatterino

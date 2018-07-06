@@ -35,7 +35,7 @@ Fonts::Fonts()
             getApp()->windows->incGeneration();
         }
 
-        for (auto &map : this->fontsByType) {
+        for (auto &map : this->fontsByType_) {
             map.clear();
         }
         this->fontChanged.invoke();
@@ -48,13 +48,13 @@ Fonts::Fonts()
             getApp()->windows->incGeneration();
         }
 
-        for (auto &map : this->fontsByType) {
+        for (auto &map : this->fontsByType_) {
             map.clear();
         }
         this->fontChanged.invoke();
     });
 
-    this->fontsByType.resize(size_t(EndType));
+    this->fontsByType_.resize(size_t(EndType));
 }
 
 QFont Fonts::getFont(Fonts::Type type, float scale)
@@ -73,7 +73,7 @@ Fonts::FontData &Fonts::getOrCreateFontData(Type type, float scale)
 
     assert(type >= 0 && type < EndType);
 
-    auto &map = this->fontsByType[size_t(type)];
+    auto &map = this->fontsByType_[size_t(type)];
 
     // find element
     auto it = map.find(scale);

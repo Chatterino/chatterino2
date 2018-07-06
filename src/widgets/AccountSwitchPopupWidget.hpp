@@ -22,7 +22,7 @@ protected:
 private:
     struct {
         AccountSwitchWidget *accountSwitchWidget = nullptr;
-    } ui;
+    } ui_;
 };
 
 }  // namespace chatterino

@@ -34,7 +34,8 @@ protected:
     virtual QSize minimumSizeHint() const override;
 
 private:
-    pajlada::Signals::SignalHolder connections_;
+    void updateSize();
+    int getOffset();
 
     QString text_;
     FontStyle fontStyle_;
@@ -42,8 +43,7 @@ private:
     bool centered_ = false;
     bool hasOffset_ = true;
 
-    void updateSize();
-    int getOffset();
+    pajlada::Signals::SignalHolder connections_;
 };
 
 }  // namespace chatterino

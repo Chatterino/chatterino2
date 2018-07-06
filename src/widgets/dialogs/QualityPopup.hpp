@@ -16,6 +16,9 @@ public:
     static void showDialog(const QString &_channelName, QStringList options);
 
 private:
+    void okButtonClicked();
+    void cancelButtonClicked();
+
     struct {
         QVBoxLayout vbox;
         QComboBox selector;
@@ -24,10 +27,7 @@ private:
         QPushButton cancelButton;
     } ui_;
 
-    QString channelName;
-
-    void okButtonClicked();
-    void cancelButtonClicked();
+    QString channelName_;
 };
 
 }  // namespace chatterino

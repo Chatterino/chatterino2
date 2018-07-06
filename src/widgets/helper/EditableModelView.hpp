@@ -22,8 +22,8 @@ public:
     pajlada::Signals::NoArgSignal addButtonPressed;
 
 private:
-    QTableView *tableView;
-    QAbstractTableModel *model;
+    QTableView *tableView_;
+    QAbstractTableModel *model_;
 };
 
 }  // namespace chatterino

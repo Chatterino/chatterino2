@@ -18,8 +18,8 @@ public:
     void updatePosition();
 
 private:
-    ChannelView *channelView;
-    ChannelPtr channel;
+    ChannelView *channelView_;
+    ChannelPtr channel_;
 };
 
 }  // namespace chatterino

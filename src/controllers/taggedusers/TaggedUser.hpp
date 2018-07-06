@@ -9,13 +9,18 @@ namespace chatterino {
 class TaggedUser
 {
 public:
-    TaggedUser(ProviderId provider, const QString &name, const QString &id);
+    TaggedUser(ProviderId providerId, const QString &name, const QString &id);
 
     bool operator<(const TaggedUser &other) const;
 
-    ProviderId provider;
-    QString name;
-    QString id;
+    ProviderId getProviderId() const;
+    QString getName() const;
+    QString getId() const;
+
+private:
+    ProviderId providerId_;
+    QString name_;
+    QString id_;
 };
 
 }  // namespace chatterino

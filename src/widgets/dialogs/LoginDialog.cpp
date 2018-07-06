@@ -63,22 +63,22 @@ void LogInWithCredentials(const std::string &userID, const std::string &username
 
 BasicLoginWidget::BasicLoginWidget()
 {
-    this->setLayout(&this->ui.layout);
+    this->setLayout(&this->ui_.layout);
 
-    this->ui.loginButton.setText("Log in (Opens in browser)");
-    this->ui.pasteCodeButton.setText("Paste code");
+    this->ui_.loginButton.setText("Log in (Opens in browser)");
+    this->ui_.pasteCodeButton.setText("Paste code");
 
-    this->ui.horizontalLayout.addWidget(&this->ui.loginButton);
-    this->ui.horizontalLayout.addWidget(&this->ui.pasteCodeButton);
+    this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
+    this->ui_.horizontalLayout.addWidget(&this->ui_.pasteCodeButton);
 
-    this->ui.layout.addLayout(&this->ui.horizontalLayout);
+    this->ui_.layout.addLayout(&this->ui_.horizontalLayout);
 
-    connect(&this->ui.loginButton, &QPushButton::clicked, []() {
+    connect(&this->ui_.loginButton, &QPushButton::clicked, []() {
         printf("open login in browser\n");
         QDesktopServices::openUrl(QUrl("https://chatterino.com/client_login"));
     });
 
-    connect(&this->ui.pasteCodeButton, &QPushButton::clicked, [this]() {
+    connect(&this->ui_.pasteCodeButton, &QPushButton::clicked, [this]() {
         QClipboard *clipboard = QGuiApplication::clipboard();
         QString clipboardString = clipboard->text();
         QStringList parameters = clipboardString.split(';');
@@ -115,78 +115,80 @@ BasicLoginWidget::BasicLoginWidget()
 
 AdvancedLoginWidget::AdvancedLoginWidget()
 {
-    this->setLayout(&this->ui.layout);
+    this->setLayout(&this->ui_.layout);
 
-    this->ui.instructionsLabel.setText("1. Fill in your username\n2. Fill in your user ID or press "
-                                       "the 'Get user ID from username' button\n3. Fill in your "
-                                       "Client ID\n4. Fill in your OAuth Token\n5. Press Add User");
-    this->ui.instructionsLabel.setWordWrap(true);
+    this->ui_.instructionsLabel.setText(
+        "1. Fill in your username\n2. Fill in your user ID or press "
+        "the 'Get user ID from username' button\n3. Fill in your "
+        "Client ID\n4. Fill in your OAuth Token\n5. Press Add User");
+    this->ui_.instructionsLabel.setWordWrap(true);
 
-    this->ui.layout.addWidget(&this->ui.instructionsLabel);
-    this->ui.layout.addLayout(&this->ui.formLayout);
-    this->ui.layout.addLayout(&this->ui.buttonUpperRow.layout);
-    this->ui.layout.addLayout(&this->ui.buttonLowerRow.layout);
+    this->ui_.layout.addWidget(&this->ui_.instructionsLabel);
+    this->ui_.layout.addLayout(&this->ui_.formLayout);
+    this->ui_.layout.addLayout(&this->ui_.buttonUpperRow.layout);
+    this->ui_.layout.addLayout(&this->ui_.buttonLowerRow.layout);
 
     this->refreshButtons();
 
     /// Form
-    this->ui.formLayout.addRow("Username", &this->ui.usernameInput);
-    this->ui.formLayout.addRow("User ID", &this->ui.userIDInput);
-    this->ui.formLayout.addRow("Client ID", &this->ui.clientIDInput);
-    this->ui.formLayout.addRow("Oauth token", &this->ui.oauthTokenInput);
+    this->ui_.formLayout.addRow("Username", &this->ui_.usernameInput);
+    this->ui_.formLayout.addRow("User ID", &this->ui_.userIDInput);
+    this->ui_.formLayout.addRow("Client ID", &this->ui_.clientIDInput);
+    this->ui_.formLayout.addRow("Oauth token", &this->ui_.oauthTokenInput);
 
-    this->ui.oauthTokenInput.setEchoMode(QLineEdit::Password);
+    this->ui_.oauthTokenInput.setEchoMode(QLineEdit::Password);
 
-    connect(&this->ui.userIDInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
-    connect(&this->ui.usernameInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
-    connect(&this->ui.clientIDInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
-    connect(&this->ui.oauthTokenInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
+    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
+    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
+    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
+    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [=]() { this->refreshButtons(); });
 
     /// Upper button row
 
-    this->ui.buttonUpperRow.addUserButton.setText("Add user");
-    this->ui.buttonUpperRow.clearFieldsButton.setText("Clear fields");
+    this->ui_.buttonUpperRow.addUserButton.setText("Add user");
+    this->ui_.buttonUpperRow.clearFieldsButton.setText("Clear fields");
 
-    this->ui.buttonUpperRow.layout.addWidget(&this->ui.buttonUpperRow.addUserButton);
-    this->ui.buttonUpperRow.layout.addWidget(&this->ui.buttonUpperRow.clearFieldsButton);
+    this->ui_.buttonUpperRow.layout.addWidget(&this->ui_.buttonUpperRow.addUserButton);
+    this->ui_.buttonUpperRow.layout.addWidget(&this->ui_.buttonUpperRow.clearFieldsButton);
 
-    connect(&this->ui.buttonUpperRow.clearFieldsButton, &QPushButton::clicked, [=]() {
-        this->ui.userIDInput.clear();
-        this->ui.usernameInput.clear();
-        this->ui.clientIDInput.clear();
-        this->ui.oauthTokenInput.clear();
+    connect(&this->ui_.buttonUpperRow.clearFieldsButton, &QPushButton::clicked, [=]() {
+        this->ui_.userIDInput.clear();
+        this->ui_.usernameInput.clear();
+        this->ui_.clientIDInput.clear();
+        this->ui_.oauthTokenInput.clear();
     });
 
-    connect(&this->ui.buttonUpperRow.addUserButton, &QPushButton::clicked, [=]() {
-        std::string userID = this->ui.userIDInput.text().toStdString();
-        std::string username = this->ui.usernameInput.text().toStdString();
-        std::string clientID = this->ui.clientIDInput.text().toStdString();
-        std::string oauthToken = this->ui.oauthTokenInput.text().toStdString();
+    connect(&this->ui_.buttonUpperRow.addUserButton, &QPushButton::clicked, [=]() {
+        std::string userID = this->ui_.userIDInput.text().toStdString();
+        std::string username = this->ui_.usernameInput.text().toStdString();
+        std::string clientID = this->ui_.clientIDInput.text().toStdString();
+        std::string oauthToken = this->ui_.oauthTokenInput.text().toStdString();
 
         LogInWithCredentials(userID, username, clientID, oauthToken);
     });
 
     /// Lower button row
-    this->ui.buttonLowerRow.fillInUserIDButton.setText("Get user ID from username");
+    this->ui_.buttonLowerRow.fillInUserIDButton.setText("Get user ID from username");
 
-    this->ui.buttonLowerRow.layout.addWidget(&this->ui.buttonLowerRow.fillInUserIDButton);
+    this->ui_.buttonLowerRow.layout.addWidget(&this->ui_.buttonLowerRow.fillInUserIDButton);
 
-    connect(&this->ui.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked, [=]() {
-        twitchApiGetUserID(this->ui.usernameInput.text(), this, [=](const QString &userID) {
-            this->ui.userIDInput.setText(userID);  //
+    connect(&this->ui_.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked, [=]() {
+        twitchApiGetUserID(this->ui_.usernameInput.text(), this, [=](const QString &userID) {
+            this->ui_.userIDInput.setText(userID);  //
         });
     });
 }
 
 void AdvancedLoginWidget::refreshButtons()
 {
-    this->ui.buttonLowerRow.fillInUserIDButton.setEnabled(!this->ui.usernameInput.text().isEmpty());
+    this->ui_.buttonLowerRow.fillInUserIDButton.setEnabled(
+        !this->ui_.usernameInput.text().isEmpty());
 
-    if (this->ui.userIDInput.text().isEmpty() || this->ui.usernameInput.text().isEmpty() ||
-        this->ui.clientIDInput.text().isEmpty() || this->ui.oauthTokenInput.text().isEmpty()) {
-        this->ui.buttonUpperRow.addUserButton.setEnabled(false);
+    if (this->ui_.userIDInput.text().isEmpty() || this->ui_.usernameInput.text().isEmpty() ||
+        this->ui_.clientIDInput.text().isEmpty() || this->ui_.oauthTokenInput.text().isEmpty()) {
+        this->ui_.buttonUpperRow.addUserButton.setEnabled(false);
     } else {
-        this->ui.buttonUpperRow.addUserButton.setEnabled(true);
+        this->ui_.buttonUpperRow.addUserButton.setEnabled(true);
     }
 }
 
@@ -197,21 +199,21 @@ LoginWidget::LoginWidget()
                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 #endif
 
-    this->setLayout(&this->ui.mainLayout);
+    this->setLayout(&this->ui_.mainLayout);
 
-    this->ui.mainLayout.addWidget(&this->ui.tabWidget);
+    this->ui_.mainLayout.addWidget(&this->ui_.tabWidget);
 
-    this->ui.tabWidget.addTab(&this->ui.basic, "Basic");
+    this->ui_.tabWidget.addTab(&this->ui_.basic, "Basic");
 
-    this->ui.tabWidget.addTab(&this->ui.advanced, "Advanced");
+    this->ui_.tabWidget.addTab(&this->ui_.advanced, "Advanced");
 
-    this->ui.buttonBox.setStandardButtons(QDialogButtonBox::Close);
+    this->ui_.buttonBox.setStandardButtons(QDialogButtonBox::Close);
 
-    QObject::connect(&this->ui.buttonBox, &QDialogButtonBox::rejected, [this]() {
+    QObject::connect(&this->ui_.buttonBox, &QDialogButtonBox::rejected, [this]() {
         this->close();  //
     });
 
-    this->ui.mainLayout.addWidget(&this->ui.buttonBox);
+    this->ui_.mainLayout.addWidget(&this->ui_.buttonBox);
 }
 
 }  // namespace chatterino

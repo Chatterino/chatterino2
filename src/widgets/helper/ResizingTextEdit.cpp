@@ -82,7 +82,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     if (doComplete) {
         // check if there is a completer
-        if (!this->completer) {
+        if (!this->completer_) {
             return;
         }
 
@@ -93,32 +93,32 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        auto *completionModel = static_cast<CompletionModel *>(this->completer->model());
+        auto *completionModel = static_cast<CompletionModel *>(this->completer_->model());
 
-        if (!this->completionInProgress) {
+        if (!this->completionInProgress_) {
             // First type pressing tab after modifying a message, we refresh our completion model
-            this->completer->setModel(completionModel);
+            this->completer_->setModel(completionModel);
             completionModel->refresh();
-            this->completionInProgress = true;
-            this->completer->setCompletionPrefix(currentCompletionPrefix);
-            this->completer->complete();
+            this->completionInProgress_ = true;
+            this->completer_->setCompletionPrefix(currentCompletionPrefix);
+            this->completer_->complete();
             return;
         }
 
         // scrolling through selections
         if (event->key() == Qt::Key_Tab) {
-            if (!this->completer->setCurrentRow(this->completer->currentRow() + 1)) {
+            if (!this->completer_->setCurrentRow(this->completer_->currentRow() + 1)) {
                 // wrap over and start again
-                this->completer->setCurrentRow(0);
+                this->completer_->setCurrentRow(0);
             }
         } else {
-            if (!this->completer->setCurrentRow(this->completer->currentRow() - 1)) {
+            if (!this->completer_->setCurrentRow(this->completer_->currentRow() - 1)) {
                 // wrap over and start again
-                this->completer->setCurrentRow(this->completer->completionCount() - 1);
+                this->completer_->setCurrentRow(this->completer_->completionCount() - 1);
             }
         }
 
-        this->completer->complete();
+        this->completer_->complete();
         return;
     }
 
@@ -130,7 +130,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     if (event->key() != Qt::Key_Shift && event->key() != Qt::Key_Control &&
         event->key() != Qt::Key_Alt && event->key() != Qt::Key_Super_L &&
         event->key() != Qt::Key_Super_R) {
-        this->completionInProgress = false;
+        this->completionInProgress_ = false;
     }
 
     if (!event->isAccepted()) {
@@ -158,27 +158,27 @@ void ResizingTextEdit::focusOutEvent(QFocusEvent *event)
 
 void ResizingTextEdit::setCompleter(QCompleter *c)
 {
-    if (this->completer) {
-        QObject::disconnect(this->completer, nullptr, this, nullptr);
+    if (this->completer_) {
+        QObject::disconnect(this->completer_, nullptr, this, nullptr);
     }
 
-    this->completer = c;
+    this->completer_ = c;
 
-    if (!this->completer) {
+    if (!this->completer_) {
         return;
     }
 
-    this->completer->setWidget(this);
-    this->completer->setCompletionMode(QCompleter::InlineCompletion);
-    this->completer->setCaseSensitivity(Qt::CaseInsensitive);
-    QObject::connect(completer,
+    this->completer_->setWidget(this);
+    this->completer_->setCompletionMode(QCompleter::InlineCompletion);
+    this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
+    QObject::connect(completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::highlighted),
                      this, &ResizingTextEdit::insertCompletion);
 }
 
 void ResizingTextEdit::insertCompletion(const QString &completion)
 {
-    if (this->completer->widget() != this) {
+    if (this->completer_->widget() != this) {
         return;
     }
 
@@ -199,7 +199,7 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
 
 QCompleter *ResizingTextEdit::getCompleter() const
 {
-    return this->completer;
+    return this->completer_;
 }
 
 }  // namespace chatterino

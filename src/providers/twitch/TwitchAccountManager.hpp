@@ -59,10 +59,10 @@ private:
     AddUserResponse addUser(const UserData &data);
     bool removeUser(TwitchAccount *account);
 
-    std::shared_ptr<TwitchAccount> currentUser;
+    std::shared_ptr<TwitchAccount> currentUser_;
 
-    std::shared_ptr<TwitchAccount> anonymousUser;
-    mutable std::mutex mutex;
+    std::shared_ptr<TwitchAccount> anonymousUser_;
+    mutable std::mutex mutex_;
 
     friend class AccountController;
 };

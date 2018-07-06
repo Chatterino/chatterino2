@@ -16,7 +16,7 @@ public:
     void onShow() final;
 
 private:
-    QStringListModel userListModel;
+    QStringListModel userListModel_;
 };
 
 }  // namespace chatterino

@@ -27,11 +27,11 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , originalMessage(_ircMessage->content())
-    , action(_ircMessage->isAction())
+    , originalMessage_(_ircMessage->content())
+    , action_(_ircMessage->isAction())
 {
     auto app = getApp();
-    this->usernameColor = app->themes->messages.textColors.system;
+    this->usernameColor_ = app->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
@@ -43,11 +43,11 @@ TwitchMessageBuilder::TwitchMessageBuilder(Channel *_channel,
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
-    , originalMessage(content)
-    , action(isAction)
+    , originalMessage_(content)
+    , action_(isAction)
 {
     auto app = getApp();
-    this->usernameColor = app->themes->messages.textColors.system;
+    this->usernameColor_ = app->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -56,7 +56,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
     for (const auto &phrase : app->ignores->phrases.getVector()) {
-        if (phrase.isMatch(this->originalMessage)) {
+        if (phrase.isMatch(this->originalMessage_)) {
             Log("Blocking message because it contains ignored phrase {}", phrase.getPattern());
             return true;
         }
@@ -105,7 +105,7 @@ MessagePtr TwitchMessageBuilder::build()
     //        MessageElement::Collapsed);
     //    }
     //#endif
-    this->message->flags |= Message::Collapsed;
+    this->message_->flags |= Message::Collapsed;
 
     // PARSING
     this->parseMessageID();
@@ -181,13 +181,13 @@ MessagePtr TwitchMessageBuilder::build()
 
     // words
 
-    QStringList splits = this->originalMessage.split(' ');
+    QStringList splits = this->originalMessage_.split(' ');
 
     long int i = 0;
 
     for (QString split : splits) {
         MessageColor textColor =
-            this->action ? MessageColor(this->usernameColor) : MessageColor(MessageColor::Text);
+            this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
 
         // twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
@@ -279,7 +279,7 @@ MessagePtr TwitchMessageBuilder::build()
         i++;
     }
 
-    this->message->searchText = this->userName + ": " + this->originalMessage;
+    this->message_->searchText = this->userName + ": " + this->originalMessage_;
 
     return this->getMessage();
 }
@@ -302,10 +302,10 @@ void TwitchMessageBuilder::parseRoomID()
     auto iterator = this->tags.find("room-id");
 
     if (iterator != std::end(this->tags)) {
-        this->roomID = iterator.value().toString();
+        this->roomID_ = iterator.value().toString();
 
         if (this->twitchChannel->roomID.isEmpty()) {
-            this->twitchChannel->roomID = this->roomID;
+            this->twitchChannel->roomID = this->roomID_;
         }
     }
 }
@@ -323,7 +323,7 @@ void TwitchMessageBuilder::parseUsername()
 {
     auto iterator = this->tags.find("color");
     if (iterator != this->tags.end()) {
-        this->usernameColor = QColor(iterator.value().toString());
+        this->usernameColor_ = QColor(iterator.value().toString());
     }
 
     // username
@@ -339,7 +339,7 @@ void TwitchMessageBuilder::parseUsername()
     //        this->userName = displayNameVariant.toString() + " (" + this->userName + ")";
     //    }
 
-    this->message->loginName = this->userName;
+    this->message_->loginName = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -347,7 +347,7 @@ void TwitchMessageBuilder::appendUsername()
     auto app = getApp();
 
     QString username = this->userName;
-    this->message->loginName = username;
+    this->message_->loginName = username;
     QString localizedName;
 
     auto iterator = this->tags.find("display-name");
@@ -357,12 +357,12 @@ void TwitchMessageBuilder::appendUsername()
         if (QString::compare(displayName, this->userName, Qt::CaseInsensitive) == 0) {
             username = displayName;
 
-            this->message->displayName = displayName;
+            this->message_->displayName = displayName;
         } else {
             localizedName = displayName;
 
-            this->message->displayName = username;
-            this->message->localizedName = displayName;
+            this->message_->displayName = username;
+            this->message_->localizedName = displayName;
         }
     }
 
@@ -402,7 +402,7 @@ void TwitchMessageBuilder::appendUsername()
         // userDisplayString += IrcManager::getInstance().getUser().getUserName();
     } else if (this->args.isReceivedWhisper) {
         // Sender username
-        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
+        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor_,
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
 
@@ -421,11 +421,11 @@ void TwitchMessageBuilder::appendUsername()
         this->emplace<TextElement>(currentUser->getUserName() + ":", MessageElement::Text,
                                    selfColor, FontStyle::ChatMediumBold);
     } else {
-        if (!this->action) {
+        if (!this->action_) {
             usernameText += ":";
         }
 
-        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor,
+        this->emplace<TextElement>(usernameText, MessageElement::Text, this->usernameColor_,
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
     }
@@ -443,7 +443,7 @@ void TwitchMessageBuilder::parseHighlights()
     QString currentUsername = currentUser->getUserName();
 
     if (this->ircMessage->nick() == currentUsername) {
-        currentUser->color = this->usernameColor;
+        currentUser->color = this->usernameColor_;
         // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
@@ -481,8 +481,8 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (!app->highlights->blacklistContains(this->ircMessage->nick())) {
         for (const HighlightPhrase &highlight : activeHighlights) {
-            if (highlight.isMatch(this->originalMessage)) {
-                Log("Highlight because {} matches {}", this->originalMessage,
+            if (highlight.isMatch(this->originalMessage_)) {
+                Log("Highlight because {} matches {}", this->originalMessage_,
                     highlight.getPattern());
                 doHighlight = true;
 
@@ -533,7 +533,7 @@ void TwitchMessageBuilder::parseHighlights()
         }
 
         if (doHighlight) {
-            this->message->flags |= Message::Highlighted;
+            this->message_->flags |= Message::Highlighted;
         }
     }
 }
@@ -567,11 +567,11 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
         int start = coords.at(0).toInt();
         int end = coords.at(1).toInt();
 
-        if (start >= end || start < 0 || end > this->originalMessage.length()) {
+        if (start >= end || start < 0 || end > this->originalMessage_.length()) {
             return;
         }
 
-        QString name = this->originalMessage.mid(start, end - start + 1);
+        QString name = this->originalMessage_.mid(start, end - start + 1);
 
         vec.push_back(
             std::pair<long int, EmoteData>(start, app->emotes->twitch.getEmoteById(id, name)));
@@ -613,7 +613,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
 {
     auto app = getApp();
 
-    const auto &channelResources = app->resources->channels[this->roomID];
+    const auto &channelResources = app->resources->channels[this->roomID_];
 
     auto iterator = this->tags.find("badges");
 
@@ -791,7 +791,7 @@ bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
 {
     auto app = getApp();
     // Try to parse custom cheermotes
-    const auto &channelResources = app->resources->channels[this->roomID];
+    const auto &channelResources = app->resources->channels[this->roomID_];
     if (channelResources.loaded) {
         for (const auto &cheermoteSet : channelResources.cheermoteSets) {
             auto match = cheermoteSet.regex.match(string);

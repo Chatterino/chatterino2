@@ -33,7 +33,7 @@ enum FollowResult {
 class TwitchAccount : public Account
 {
 public:
-    TwitchAccount(const QString &username, const QString &oauthToken, const QString &oauthClient,
+    TwitchAccount(const QString &username, const QString &oauthToken_, const QString &oauthClient_,
                   const QString &_userID);
 
     virtual QString toString() const override;
@@ -73,14 +73,14 @@ public:
     QColor color;
 
 private:
-    QString oauthClient;
-    QString oauthToken;
-    QString userName;
-    QString userId;
-    const bool _isAnon;
+    QString oauthClient_;
+    QString oauthToken_;
+    QString userName_;
+    QString userId_;
+    const bool isAnon_;
 
-    mutable std::mutex ignoresMutex;
-    std::set<TwitchUser> ignores;
+    mutable std::mutex ignoresMutex_;
+    std::set<TwitchUser> ignores_;
 };
 
 }  // namespace chatterino

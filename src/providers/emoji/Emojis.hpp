@@ -35,12 +35,12 @@ class Emojis
 {
 public:
     void initialize();
+    void load();
+    void parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
 
     EmojiMap emojis;
-
     std::vector<QString> shortCodes;
-
-    void load();
+    QString replaceShortCodes(const QString &text);
 
 private:
     void loadEmojis();
@@ -48,20 +48,14 @@ private:
     void sortEmojis();
     void loadEmojiSet();
 
-public:
-    QString replaceShortCodes(const QString &text);
-
-    void parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text);
-
-private:
     /// Emojis
-    QRegularExpression findShortCodesRegex{":([-+\\w]+):"};
+    QRegularExpression findShortCodesRegex_{":([-+\\w]+):"};
 
     // shortCodeToEmoji maps strings like "sunglasses" to its emoji
-    QMap<QString, std::shared_ptr<EmojiData>> emojiShortCodeToEmoji;
+    QMap<QString, std::shared_ptr<EmojiData>> emojiShortCodeToEmoji_;
 
     // Maps the first character of the emoji unicode string to a vector of possible emojis
-    QMap<QChar, QVector<std::shared_ptr<EmojiData>>> emojiFirstByte;
+    QMap<QChar, QVector<std::shared_ptr<EmojiData>>> emojiFirstByte_;
 };
 
 }  // namespace chatterino

@@ -112,7 +112,7 @@ private:
     } ui_;
 
     pajlada::Signals::SignalHolder connections_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
 }  // namespace chatterino

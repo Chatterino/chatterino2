@@ -5,7 +5,7 @@
 namespace chatterino {
 
 QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
-    : channelName(_channelName)
+    : channelName_(_channelName)
 {
     this->ui_.okButton.setText("OK");
     this->ui_.cancelButton.setText("Cancel");
@@ -41,10 +41,10 @@ void QualityPopup::showDialog(const QString &channelName, QStringList options)
 
 void QualityPopup::okButtonClicked()
 {
-    QString channelURL = "twitch.tv/" + this->channelName;
+    QString channelURL = "twitch.tv/" + this->channelName_;
 
     try {
-        OpenStreamlink(channelURL, this->ui_.selector.currentText());
+        openStreamlink(channelURL, this->ui_.selector.currentText());
     } catch (const Exception &ex) {
         Log("Exception caught trying to open streamlink: {}", ex.what());
     }

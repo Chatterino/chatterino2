@@ -16,7 +16,7 @@ public:
     HighlightingPage();
 
 private:
-    QTimer disabledUsersChangedTimer;
+    QTimer disabledUsersChangedTimer_;
 };
 
 }  // namespace chatterino

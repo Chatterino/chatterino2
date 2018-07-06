@@ -10,17 +10,17 @@ namespace chatterino {
 
 NotificationPopup::NotificationPopup()
     : BaseWindow((QWidget *)nullptr, BaseWindow::Frameless)
-    , channel(std::make_shared<Channel>("notifications", Channel::Type::None))
+    , channel_(std::make_shared<Channel>("notifications", Channel::Type::None))
 
 {
-    this->channelView = new ChannelView(this);
+    this->channelView_ = new ChannelView(this);
 
     auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
 
-    layout->addWidget(this->channelView);
+    layout->addWidget(this->channelView_);
 
-    this->channelView->setChannel(this->channel);
+    this->channelView_->setChannel(this->channel_);
     this->setScaleIndependantSize(300, 150);
 }
 
@@ -40,7 +40,7 @@ void NotificationPopup::updatePosition()
 
 void NotificationPopup::addMessage(MessagePtr msg)
 {
-    this->channel->addMessage(msg);
+    this->channel_->addMessage(msg);
 
     //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
 }

@@ -36,13 +36,13 @@ public:
     bool isPortable();
 
 private:
-    static Paths *instance;
-    boost::optional<bool> portable;
-
     void initAppFilePathHash();
     void initCheckPortable();
     void initAppDataDirectory();
     void initSubDirectories();
+
+    static Paths *instance;
+    boost::optional<bool> portable_;
 };
 
 }  // namespace chatterino

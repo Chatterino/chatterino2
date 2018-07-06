@@ -31,11 +31,11 @@ public:
     }
 
 protected:
-    QString name;
-    QString iconResource;
+    QString name_;
+    QString iconResource_;
 
-    pajlada::Signals::NoArgSignal onCancel;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    pajlada::Signals::NoArgSignal onCancel_;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
 }  // namespace chatterino

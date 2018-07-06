@@ -66,7 +66,7 @@ ExternalToolsPage::ExternalToolsPage()
             [=](const auto &value, auto) {
                 customPath->setEnabled(value);  //
             },
-            this->managedConnections);
+            this->managedConnections_);
     }
 
     layout->addStretch(1);

@@ -2,22 +2,22 @@
 
 namespace chatterino {
 
-MessageColor::MessageColor(const QColor &_color)
-    : type(Type::Custom)
-    , customColor(_color)
+MessageColor::MessageColor(const QColor &color)
+    : type_(Type::Custom)
+    , customColor_(color)
 {
 }
 
-MessageColor::MessageColor(Type _type)
-    : type(_type)
+MessageColor::MessageColor(Type type)
+    : type_(type)
 {
 }
 
 const QColor &MessageColor::getColor(Theme &themeManager) const
 {
-    switch (this->type) {
+    switch (this->type_) {
         case Type::Custom:
-            return this->customColor;
+            return this->customColor_;
         case Type::Text:
             return themeManager.messages.textColors.regular;
         case Type::System:

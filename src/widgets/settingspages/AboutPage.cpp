@@ -30,7 +30,7 @@ AboutPage::AboutPage()
         QPixmap pixmap;
         pixmap.load(":/images/aboutlogo.png");
 
-        auto logo = layout.emplace<QLabel>().assign(&this->logo);
+        auto logo = layout.emplace<QLabel>().assign(&this->logo_);
         logo->setPixmap(pixmap);
         logo->setFixedSize(PIXMAP_WIDTH, PIXMAP_WIDTH * pixmap.height() / pixmap.width());
         logo->setScaledContents(true);

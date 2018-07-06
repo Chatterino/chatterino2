@@ -26,7 +26,7 @@ TooltipWidget *TooltipWidget::getInstance()
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
     : BaseWindow(parent, BaseWindow::TopMost)
-    , displayText(new QLabel())
+    , displayText_(new QLabel())
 {
     auto app = getApp();
 
@@ -39,19 +39,19 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
                          Qt::BypassWindowManagerHint);
 
-    displayText->setAlignment(Qt::AlignHCenter);
-    displayText->setText("tooltip text");
+    displayText_->setAlignment(Qt::AlignHCenter);
+    displayText_->setText("tooltip text");
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(10, 5, 10, 5);
-    layout->addWidget(displayText);
+    layout->addWidget(displayText_);
     this->setLayout(layout);
 
-    this->fontChangedConnection = app->fonts->fontChanged.connect([this] { this->updateFont(); });
+    this->fontChangedConnection_ = app->fonts->fontChanged.connect([this] { this->updateFont(); });
 }
 
 TooltipWidget::~TooltipWidget()
 {
-    this->fontChangedConnection.disconnect();
+    this->fontChangedConnection_.disconnect();
 }
 
 #ifdef USEWINSDK
@@ -81,7 +81,7 @@ void TooltipWidget::updateFont()
 
 void TooltipWidget::setText(QString text)
 {
-    this->displayText->setText(text);
+    this->displayText_->setText(text);
 }
 
 void TooltipWidget::changeEvent(QEvent *)

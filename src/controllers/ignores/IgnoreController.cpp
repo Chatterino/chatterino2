@@ -9,15 +9,15 @@ namespace chatterino {
 
 void IgnoreController::initialize()
 {
-    assert(!this->initialized);
-    this->initialized = true;
+    assert(!this->initialized_);
+    this->initialized_ = true;
 
-    for (const IgnorePhrase &phrase : this->ignoresSetting.getValue()) {
+    for (const IgnorePhrase &phrase : this->ignoresSetting_.getValue()) {
         this->phrases.appendItem(phrase);
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //
-        this->ignoresSetting.setValue(this->phrases.getVector());
+        this->ignoresSetting_.setValue(this->phrases.getVector());
     });
 }
 

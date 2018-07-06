@@ -18,10 +18,10 @@ public:
 
     bool tryGet(const TKey &name, TValue &value) const
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        auto a = this->data.find(name);
-        if (a == this->data.end()) {
+        auto a = this->data_.find(name);
+        if (a == this->data_.end()) {
             return false;
         }
 
@@ -32,12 +32,12 @@ public:
 
     TValue getOrAdd(const TKey &name, std::function<TValue()> addLambda)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        auto a = this->data.find(name);
-        if (a == this->data.end()) {
+        auto a = this->data_.find(name);
+        if (a == this->data_.end()) {
             TValue value = addLambda();
-            this->data.insert(name, value);
+            this->data_.insert(name, value);
             return value;
         }
 
@@ -46,30 +46,30 @@ public:
 
     TValue &operator[](const TKey &name)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        return this->data[name];
+        return this->data_[name];
     }
 
     void clear()
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        this->data.clear();
+        this->data_.clear();
     }
 
     void insert(const TKey &name, const TValue &value)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        this->data.insert(name, value);
+        this->data_.insert(name, value);
     }
 
     void each(std::function<void(const TKey &name, const TValue &value)> func) const
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        QMapIterator<TKey, TValue> it(this->data);
+        QMapIterator<TKey, TValue> it(this->data_);
 
         while (it.hasNext()) {
             it.next();
@@ -79,9 +79,9 @@ public:
 
     void each(std::function<void(const TKey &name, TValue &value)> func)
     {
-        QMutexLocker lock(&this->mutex);
+        QMutexLocker lock(&this->mutex_);
 
-        QMutableMapIterator<TKey, TValue> it(this->data);
+        QMutableMapIterator<TKey, TValue> it(this->data_);
 
         while (it.hasNext()) {
             it.next();
@@ -90,8 +90,8 @@ public:
     }
 
 private:
-    mutable QMutex mutex;
-    QMap<TKey, TValue> data;
+    mutable QMutex mutex_;
+    QMap<TKey, TValue> data_;
 };
 
 }  // namespace chatterino

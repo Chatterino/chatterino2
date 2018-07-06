@@ -9,16 +9,16 @@ namespace chatterino {
 
 RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     : RippleEffectButton(parent)
-    , label(this)
+    , label_(this)
 {
-    setLayout(&this->hbox);
+    setLayout(&this->hbox_);
 
-    this->label.setAlignment(Qt::AlignCenter);
+    this->label_.setAlignment(Qt::AlignCenter);
 
-    this->hbox.setMargin(0);
-    this->hbox.addSpacing(spacing);
-    this->hbox.addWidget(&this->label);
-    this->hbox.addSpacing(spacing);
+    this->hbox_.setMargin(0);
+    this->hbox_.addSpacing(spacing);
+    this->hbox_.addWidget(&this->label_);
+    this->hbox_.addSpacing(spacing);
 }
 
 RippleEffectLabel2::RippleEffectLabel2(BaseWidget *parent, int padding)

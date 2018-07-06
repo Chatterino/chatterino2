@@ -4,17 +4,32 @@
 
 namespace chatterino {
 
-TaggedUser::TaggedUser(ProviderId _provider, const QString &_name, const QString &_id)
-    : provider(_provider)
-    , name(_name)
-    , id(_id)
+TaggedUser::TaggedUser(ProviderId provider, const QString &name, const QString &id)
+    : providerId_(provider)
+    , name_(name)
+    , id_(id)
 {
 }
 
 bool TaggedUser::operator<(const TaggedUser &other) const
 {
-    return std::tie(this->provider, this->name, this->id) <
-           std::tie(other.provider, other.name, other.id);
+    return std::tie(this->providerId_, this->name_, this->id_) <
+           std::tie(other.providerId_, other.name_, other.id_);
+}
+
+ProviderId TaggedUser::getProviderId() const
+{
+    return this->providerId_;
+}
+
+QString TaggedUser::getName() const
+{
+    return this->name_;
+}
+
+QString TaggedUser::getId() const
+{
+    return this->id_;
 }
 
 }  // namespace chatterino

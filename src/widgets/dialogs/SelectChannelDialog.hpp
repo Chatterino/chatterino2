@@ -16,7 +16,7 @@ class SelectChannelDialog : public BaseWindow
 public:
     SelectChannelDialog(QWidget *parent = nullptr);
 
-    void setSelectedChannel(IndirectChannel selectedChannel);
+    void setSelectedChannel(IndirectChannel selectedChannel_);
     IndirectChannel getSelectedChannel() const;
     bool hasSeletedChannel() const;
 
@@ -47,10 +47,10 @@ private:
         } twitch;
     } ui_;
 
-    EventFilter tabFilter;
+    EventFilter tabFilter_;
 
-    ChannelPtr selectedChannel;
-    bool _hasSelectedChannel = false;
+    ChannelPtr selectedChannel_;
+    bool hasSelectedChannel_ = false;
 
     void ok();
     friend class EventFilter;

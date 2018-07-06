@@ -121,11 +121,11 @@ void Emojis::loadEmojis()
         parseEmoji(emojiData, unparsedEmoji);
 
         for (const auto &shortCode : emojiData->shortCodes) {
-            this->emojiShortCodeToEmoji.insert(shortCode, emojiData);
+            this->emojiShortCodeToEmoji_.insert(shortCode, emojiData);
             this->shortCodes.emplace_back(shortCode);
         }
 
-        this->emojiFirstByte[emojiData->value.at(0)].append(emojiData);
+        this->emojiFirstByte_[emojiData->value.at(0)].append(emojiData);
 
         this->emojis.insert(emojiData->unifiedCode, emojiData);
 
@@ -145,11 +145,11 @@ void Emojis::loadEmojis()
                 parseEmoji(variationEmojiData, variation,
                            emojiData->shortCodes[0] + "_" + toneNameIt->second);
 
-                this->emojiShortCodeToEmoji.insert(variationEmojiData->shortCodes[0],
+                this->emojiShortCodeToEmoji_.insert(variationEmojiData->shortCodes[0],
                                                    variationEmojiData);
                 this->shortCodes.push_back(variationEmojiData->shortCodes[0]);
 
-                this->emojiFirstByte[variationEmojiData->value.at(0)].append(variationEmojiData);
+                this->emojiFirstByte_[variationEmojiData->value.at(0)].append(variationEmojiData);
 
                 this->emojis.insert(variationEmojiData->unifiedCode, variationEmojiData);
             }
@@ -179,8 +179,8 @@ void Emojis::loadEmojiOne2Capabilities()
 
         QString shortCode = parts[0];
 
-        auto emojiIt = this->emojiShortCodeToEmoji.find(shortCode);
-        if (emojiIt != this->emojiShortCodeToEmoji.end()) {
+        auto emojiIt = this->emojiShortCodeToEmoji_.find(shortCode);
+        if (emojiIt != this->emojiShortCodeToEmoji_.end()) {
             std::shared_ptr<EmojiData> emoji = *emojiIt;
             emoji->capabilities.insert("EmojiOne 2");
             continue;
@@ -190,7 +190,7 @@ void Emojis::loadEmojiOne2Capabilities()
 
 void Emojis::sortEmojis()
 {
-    for (auto &p : this->emojiFirstByte) {
+    for (auto &p : this->emojiFirstByte_) {
         std::stable_sort(p.begin(), p.end(), [](const auto &lhs, const auto &rhs) {
             return lhs->value.length() > rhs->value.length();
         });
@@ -277,8 +277,8 @@ void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, con
             continue;
         }
 
-        auto it = this->emojiFirstByte.find(character);
-        if (it == this->emojiFirstByte.end()) {
+        auto it = this->emojiFirstByte_.find(character);
+        if (it == this->emojiFirstByte_.end()) {
             // No emoji starts with this character
             continue;
         }
@@ -348,7 +348,7 @@ void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, con
 QString Emojis::replaceShortCodes(const QString &text)
 {
     QString ret(text);
-    auto it = this->findShortCodesRegex.globalMatch(text);
+    auto it = this->findShortCodesRegex_.globalMatch(text);
 
     int32_t offset = 0;
 
@@ -359,9 +359,9 @@ QString Emojis::replaceShortCodes(const QString &text)
 
         QString matchString = capturedString.toLower().mid(1, capturedString.size() - 2);
 
-        auto emojiIt = this->emojiShortCodeToEmoji.constFind(matchString);
+        auto emojiIt = this->emojiShortCodeToEmoji_.constFind(matchString);
 
-        if (emojiIt == this->emojiShortCodeToEmoji.constEnd()) {
+        if (emojiIt == this->emojiShortCodeToEmoji_.constEnd()) {
             continue;
         }
 

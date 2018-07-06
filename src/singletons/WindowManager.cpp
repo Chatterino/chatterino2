@@ -62,20 +62,20 @@ WindowManager::WindowManager()
 
     auto settings = getSettings();
 
-    this->wordFlagsListener.addSetting(settings->showTimestamps);
-    this->wordFlagsListener.addSetting(settings->showBadges);
-    this->wordFlagsListener.addSetting(settings->enableBttvEmotes);
-    this->wordFlagsListener.addSetting(settings->enableEmojis);
-    this->wordFlagsListener.addSetting(settings->enableFfzEmotes);
-    this->wordFlagsListener.addSetting(settings->enableTwitchEmotes);
-    this->wordFlagsListener.cb = [this](auto) {
+    this->wordFlagsListener_.addSetting(settings->showTimestamps);
+    this->wordFlagsListener_.addSetting(settings->showBadges);
+    this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableEmojis);
+    this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
 }
 
 MessageElement::Flags WindowManager::getWordFlags()
 {
-    return this->wordFlags;
+    return this->wordFlags_;
 }
 
 void WindowManager::updateWordTypeMask()
@@ -114,8 +114,8 @@ void WindowManager::updateWordTypeMask()
     // update flags
     MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);
 
-    if (newFlags != this->wordFlags) {
-        this->wordFlags = newFlags;
+    if (newFlags != this->wordFlags_) {
+        this->wordFlags_ = newFlags;
 
         this->wordFlagsChanged.invoke();
     }
@@ -134,8 +134,8 @@ void WindowManager::forceLayoutChannelViews()
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (this->mainWindow != nullptr) {
-        this->mainWindow->repaintVisibleChatWidgets(channel);
+    if (this->mainWindow_ != nullptr) {
+        this->mainWindow_->repaintVisibleChatWidgets(channel);
     }
 }
 
@@ -155,14 +155,14 @@ Window &WindowManager::getMainWindow()
 {
     assertInGuiThread();
 
-    return *this->mainWindow;
+    return *this->mainWindow_;
 }
 
 Window &WindowManager::getSelectedWindow()
 {
     assertInGuiThread();
 
-    return *this->selectedWindow;
+    return *this->selectedWindow_;
 }
 
 Window &WindowManager::createWindow(Window::Type type)
@@ -170,16 +170,16 @@ Window &WindowManager::createWindow(Window::Type type)
     assertInGuiThread();
 
     auto *window = new Window(type);
-    this->windows.push_back(window);
+    this->windows_.push_back(window);
     window->show();
 
     if (type != Window::Type::Main) {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
-            for (auto it = this->windows.begin(); it != this->windows.end(); it++) {
+            for (auto it = this->windows_.begin(); it != this->windows_.end(); it++) {
                 if (*it == window) {
-                    this->windows.erase(it);
+                    this->windows_.erase(it);
                     break;
                 }
             }
@@ -191,19 +191,19 @@ Window &WindowManager::createWindow(Window::Type type)
 
 int WindowManager::windowCount()
 {
-    return this->windows.size();
+    return this->windows_.size();
 }
 
 Window *WindowManager::windowAt(int index)
 {
     assertInGuiThread();
 
-    if (index < 0 || (size_t)index >= this->windows.size()) {
+    if (index < 0 || (size_t)index >= this->windows_.size()) {
         return nullptr;
     }
     Log("getting window at bad index {}", index);
 
-    return this->windows.at(index);
+    return this->windows_.at(index);
 }
 
 void WindowManager::initialize()
@@ -211,9 +211,9 @@ void WindowManager::initialize()
     assertInGuiThread();
 
     auto app = getApp();
-    app->themes->repaintVisibleChatWidgets.connect([this] { this->repaintVisibleChatWidgets(); });
+    app->themes->repaintVisibleChatWidgets_.connect([this] { this->repaintVisibleChatWidgets(); });
 
-    assert(!this->initialized);
+    assert(!this->initialized_);
 
     // load file
     QString settingsPath = app->paths->settingsDirectory + SETTINGS_FILENAME;
@@ -231,14 +231,14 @@ void WindowManager::initialize()
         QString type_val = window_obj.value("type").toString();
         Window::Type type = type_val == "main" ? Window::Type::Main : Window::Type::Popup;
 
-        if (type == Window::Type::Main && mainWindow != nullptr) {
+        if (type == Window::Type::Main && mainWindow_ != nullptr) {
             type = Window::Type::Popup;
         }
 
         Window &window = createWindow(type);
 
         if (type == Window::Type::Main) {
-            mainWindow = &window;
+            mainWindow_ = &window;
         }
 
         // get geometry
@@ -296,12 +296,12 @@ void WindowManager::initialize()
         }
     }
 
-    if (mainWindow == nullptr) {
-        mainWindow = &createWindow(Window::Type::Main);
-        mainWindow->getNotebook().addPage(true);
+    if (mainWindow_ == nullptr) {
+        mainWindow_ = &createWindow(Window::Type::Main);
+        mainWindow_->getNotebook().addPage(true);
     }
 
-    this->initialized = true;
+    this->initialized_ = true;
 }
 
 void WindowManager::save()
@@ -313,7 +313,7 @@ void WindowManager::save()
 
     // "serialize"
     QJsonArray window_arr;
-    for (Window *window : this->windows) {
+    for (Window *window : this->windows_) {
         QJsonObject window_obj;
 
         // window type
@@ -457,19 +457,19 @@ void WindowManager::closeAll()
 {
     assertInGuiThread();
 
-    for (Window *window : windows) {
+    for (Window *window : windows_) {
         window->close();
     }
 }
 
 int WindowManager::getGeneration() const
 {
-    return this->generation;
+    return this->generation_;
 }
 
 void WindowManager::incGeneration()
 {
-    this->generation++;
+    this->generation_++;
 }
 
 int WindowManager::clampUiScale(int scale)

@@ -20,8 +20,8 @@ public:
     ModerationActionModel *createModel(QObject *parent);
 
 private:
-    ChatterinoSetting<std::vector<ModerationAction>> setting = {"/moderation/actions"};
-    bool initialized = false;
+    ChatterinoSetting<std::vector<ModerationAction>> setting_ = {"/moderation/actions"};
+    bool initialized_ = false;
 };
 
 }  // namespace chatterino

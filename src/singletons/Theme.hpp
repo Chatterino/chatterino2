@@ -19,7 +19,7 @@ public:
 
     inline bool isLightTheme() const
     {
-        return this->isLight;
+        return this->isLight_;
     }
 
     struct TabColors {
@@ -136,16 +136,15 @@ public:
 private:
     void actuallyUpdate(double hue, double multiplier);
     QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
-
-    double middleLookupTable[360] = {};
-    double minLookupTable[360] = {};
-
     void fillLookupTableValues(double (&array)[360], double from, double to, double fromValue,
                                double toValue);
 
-    bool isLight = false;
+    double middleLookupTable_[360] = {};
+    double minLookupTable_[360] = {};
 
-    pajlada::Signals::NoArgSignal repaintVisibleChatWidgets;
+    bool isLight_ = false;
+
+    pajlada::Signals::NoArgSignal repaintVisibleChatWidgets_;
 
     friend class WindowManager;
 };

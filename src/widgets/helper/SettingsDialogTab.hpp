@@ -16,9 +16,9 @@ class SettingsDialogTab : public BaseWidget
     Q_OBJECT
 
 public:
-    SettingsDialogTab(SettingsDialog *dialog, SettingsPage *page, QString imageFileName);
+    SettingsDialogTab(SettingsDialog *dialog_, SettingsPage *page_, QString imageFileName);
 
-    void setSelected(bool selected);
+    void setSelected(bool selected_);
     SettingsPage *getSettingsPage();
 
 signals:
@@ -31,13 +31,13 @@ private:
     struct {
         QString labelText;
         QIcon icon;
-    } ui;
+    } ui_;
 
     // Parent settings dialog
-    SettingsDialog *dialog;
-    SettingsPage *page;
+    SettingsDialog *dialog_;
+    SettingsPage *page_;
 
-    bool selected = false;
+    bool selected_ = false;
 };
 
 }  // namespace chatterino

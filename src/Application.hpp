@@ -32,7 +32,7 @@ class Application
     Application(int _argc, char **_argv);
 
 public:
-    static void instantiate(int argc, char **argv);
+    static void instantiate(int argc_, char **argv_);
 
     ~Application() = delete;
 
@@ -72,8 +72,8 @@ public:
     static void runNativeMessagingHost();
 
 private:
-    int argc;
-    char **argv;
+    int argc_;
+    char **argv_;
 };
 
 Application *getApp();

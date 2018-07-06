@@ -40,6 +40,10 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
+    void initLayout();
+    void installKeyPressedEvent();
+    void updateEmoteButton();
+
     Split *const split_;
     std::unique_ptr<EmotePopup> emotePopup_;
 
@@ -55,11 +59,6 @@ private:
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;
-
-    void initLayout();
-    void installKeyPressedEvent();
-
-    void updateEmoteButton();
 
 private slots:
     void editTextChanged();

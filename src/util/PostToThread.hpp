@@ -16,16 +16,16 @@ class LambdaRunnable : public QRunnable
 public:
     LambdaRunnable(std::function<void()> action)
     {
-        this->action = action;
+        this->action_ = action;
     }
 
     void run()
     {
-        this->action();
+        this->action_();
     }
 
 private:
-    std::function<void()> action;
+    std::function<void()> action_;
 };
 
 // Taken from

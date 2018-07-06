@@ -15,16 +15,16 @@ namespace chatterino {
 EmotePopup::EmotePopup()
     : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
 {
-    this->viewEmotes = new ChannelView();
-    this->viewEmojis = new ChannelView();
+    this->viewEmotes_ = new ChannelView();
+    this->viewEmojis_ = new ChannelView();
 
-    this->viewEmotes->setOverrideFlags(MessageElement::Flags(
+    this->viewEmotes_->setOverrideFlags(MessageElement::Flags(
         MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
-    this->viewEmojis->setOverrideFlags(MessageElement::Flags(
+    this->viewEmojis_->setOverrideFlags(MessageElement::Flags(
         MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
 
-    this->viewEmotes->setEnableScrollingToBottom(false);
-    this->viewEmojis->setEnableScrollingToBottom(false);
+    this->viewEmotes_->setEnableScrollingToBottom(false);
+    this->viewEmojis_->setEnableScrollingToBottom(false);
 
     auto *layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
@@ -33,14 +33,14 @@ EmotePopup::EmotePopup()
     layout->addWidget(notebook);
     layout->setMargin(0);
 
-    notebook->addPage(this->viewEmotes, "Emotes");
-    notebook->addPage(this->viewEmojis, "Emojis");
+    notebook->addPage(this->viewEmotes_, "Emotes");
+    notebook->addPage(this->viewEmojis_, "Emojis");
 
     this->loadEmojis();
 
-    this->viewEmotes->linkClicked.connect(
+    this->viewEmotes_->linkClicked.connect(
         [this](const Link &link) { this->linkClicked.invoke(link); });
-    this->viewEmojis->linkClicked.connect(
+    this->viewEmojis_->linkClicked.connect(
         [this](const Link &link) { this->linkClicked.invoke(link); });
 }
 
@@ -127,7 +127,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
 
-    this->viewEmotes->setChannel(emoteChannel);
+    this->viewEmotes_->setChannel(emoteChannel);
 }
 
 void EmotePopup::loadEmojis()
@@ -155,7 +155,7 @@ void EmotePopup::loadEmojis()
     });
     emojiChannel->addMessage(builder.getMessage());
 
-    this->viewEmojis->setChannel(emojiChannel);
+    this->viewEmojis_->setChannel(emojiChannel);
 }
 
 }  // namespace chatterino

@@ -29,7 +29,7 @@ public:
         QHBoxLayout horizontalLayout;
         QPushButton loginButton;
         QPushButton pasteCodeButton;
-    } ui;
+    } ui_;
 };
 
 class AdvancedLoginWidget : public QWidget
@@ -63,7 +63,7 @@ public:
 
             QPushButton fillInUserIDButton;
         } buttonLowerRow;
-    } ui;
+    } ui_;
 };
 
 class LoginWidget : public QDialog
@@ -82,7 +82,7 @@ private:
         BasicLoginWidget basic;
 
         AdvancedLoginWidget advanced;
-    } ui;
+    } ui_;
 };
 
 }  // namespace chatterino

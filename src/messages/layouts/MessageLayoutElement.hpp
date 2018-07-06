@@ -20,7 +20,7 @@ class Image;
 class MessageLayoutElement : boost::noncopyable
 {
 public:
-    MessageLayoutElement(MessageElement &creator, const QSize &size);
+    MessageLayoutElement(MessageElement &creator_, const QSize &size);
     virtual ~MessageLayoutElement();
 
     const QRect &getRect() const;
@@ -29,7 +29,7 @@ public:
     bool hasTrailingSpace() const;
 
     MessageLayoutElement *setTrailingSpace(bool value);
-    MessageLayoutElement *setLink(const Link &link);
+    MessageLayoutElement *setLink(const Link &link_);
 
     virtual void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const = 0;
     virtual int getSelectionIndexCount() = 0;
@@ -43,16 +43,16 @@ protected:
     bool trailingSpace = true;
 
 private:
-    QRect rect;
-    Link link;
-    MessageElement &creator;
+    QRect rect_;
+    Link link_;
+    MessageElement &creator_;
 };
 
 // IMAGE
 class ImageLayoutElement : public MessageLayoutElement
 {
 public:
-    ImageLayoutElement(MessageElement &creator, Image *image, const QSize &size);
+    ImageLayoutElement(MessageElement &creator_, Image *image, const QSize &size);
 
 protected:
     void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
@@ -70,7 +70,7 @@ private:
 class TextLayoutElement : public MessageLayoutElement
 {
 public:
-    TextLayoutElement(MessageElement &creator, QString &text, const QSize &size, QColor color,
+    TextLayoutElement(MessageElement &creator_, QString &text, const QSize &size, QColor color,
                       FontStyle style, float scale);
 
 protected:
@@ -93,7 +93,7 @@ private:
 class TextIconLayoutElement : public MessageLayoutElement
 {
 public:
-    TextIconLayoutElement(MessageElement &creator, const QString &line1, const QString &line2,
+    TextIconLayoutElement(MessageElement &creator_, const QString &line1, const QString &line2,
                           float scale, const QSize &size);
 
 protected:

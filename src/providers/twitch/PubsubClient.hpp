@@ -40,15 +40,6 @@ struct Listener {
 
 class PubSubClient : public std::enable_shared_from_this<PubSubClient>
 {
-    WebsocketClient &websocketClient;
-    WebsocketHandle handle;
-    uint16_t numListens = 0;
-
-    std::vector<Listener> listeners;
-
-    std::atomic<bool> awaitingPong{false};
-    std::atomic<bool> started{false};
-
 public:
     PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle);
 
@@ -65,6 +56,15 @@ public:
 private:
     void ping();
     bool send(const char *payload);
+
+    WebsocketClient &websocketClient_;
+    WebsocketHandle handle_;
+    uint16_t numListens_ = 0;
+
+    std::vector<Listener> listeners_;
+
+    std::atomic<bool> awaitingPong_{false};
+    std::atomic<bool> started_{false};
 };
 
 }  // namespace detail

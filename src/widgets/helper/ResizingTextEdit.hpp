@@ -31,11 +31,11 @@ protected:
     void focusOutEvent(QFocusEvent *event) override;
 
 private:
-    QCompleter *completer = nullptr;
-    bool completionInProgress = false;
-
     // hadSpace is set to true in case the "textUnderCursor" word was after a space
     QString textUnderCursor(bool *hadSpace = nullptr) const;
+
+    QCompleter *completer_ = nullptr;
+    bool completionInProgress_ = false;
 
 private slots:
     void insertCompletion(const QString &completion);

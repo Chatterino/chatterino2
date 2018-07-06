@@ -5,40 +5,50 @@ namespace chatterino {
 
 TextInputDialog::TextInputDialog(QWidget *parent)
     : QDialog(parent)
-    , _vbox(this)
-    , _okButton("OK")
-    , _cancelButton("Cancel")
+    , vbox_(this)
+    , okButton_("OK")
+    , cancelButton_("Cancel")
 {
-    _vbox.addWidget(&_lineEdit);
-    _vbox.addLayout(&_buttonBox);
-    _buttonBox.addStretch(1);
-    _buttonBox.addWidget(&_okButton);
-    _buttonBox.addWidget(&_cancelButton);
+    this->vbox_.addWidget(&lineEdit_);
+    this->vbox_.addLayout(&buttonBox_);
+    this->buttonBox_.addStretch(1);
+    this->buttonBox_.addWidget(&okButton_);
+    this->buttonBox_.addWidget(&cancelButton_);
 
-    QObject::connect(&_okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-    QObject::connect(&_cancelButton, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
+    QObject::connect(&this->okButton_, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
+    QObject::connect(&this->cancelButton_, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
 
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    setWindowFlags((windowFlags() & ~(Qt::WindowContextHelpButtonHint)) | Qt::Dialog |
-                   Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags((this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) | Qt::Dialog |
+                         Qt::MSWindowsFixedSizeDialogHint);
+}
+
+QString TextInputDialog::getText() const
+{
+    return this->lineEdit_.text();
+}
+
+void TextInputDialog::setText(const QString &text)
+{
+    this->lineEdit_.setText(text);
 }
 
 void TextInputDialog::okButtonClicked()
 {
-    accept();
-    close();
+    this->accept();
+    this->close();
 }
 
 void TextInputDialog::cancelButtonClicked()
 {
-    reject();
-    close();
+    this->reject();
+    this->close();
 }
 
 void TextInputDialog::highlightText()
 {
-    this->_lineEdit.selectAll();
+    this->lineEdit_.selectAll();
 }
 
 }  // namespace chatterino

@@ -32,8 +32,17 @@ protected:
     virtual void themeChangedEvent() override;
 
 private:
-    void refresh();
     static SettingsDialog *handle;
+
+    void refresh();
+
+    void initUi();
+    void addTabs();
+    void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
+    void selectTab(SettingsDialogTab *tab);
+
+    void onOkClicked();
+    void onCancelClicked();
 
     struct {
         QWidget *tabContainerContainer;
@@ -42,23 +51,10 @@ private:
         QPushButton *okButton;
         QPushButton *cancelButton;
     } ui_;
-
-    std::vector<SettingsDialogTab *> tabs;
-
-    void initUi();
-    void addTabs();
-    void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
-
-    void select(SettingsDialogTab *tab);
-
-    SettingsDialogTab *selectedTab = nullptr;
-
-    void okButtonClicked();
-    void cancelButtonClicked();
+    std::vector<SettingsDialogTab *> tabs_;
+    SettingsDialogTab *selectedTab_ = nullptr;
 
     friend class SettingsDialogTab;
-
-    //    static void setChildrensFont(QLayout *object, QFont &font, int indent = 0);
 };
 
 }  // namespace chatterino

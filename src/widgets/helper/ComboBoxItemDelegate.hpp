@@ -11,7 +11,7 @@ class ComboBoxItemDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    ComboBoxItemDelegate(QObject *parent = 0);
+    ComboBoxItemDelegate(QObject *parent = nullptr);
     ~ComboBoxItemDelegate();
 
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,

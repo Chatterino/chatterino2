@@ -131,7 +131,7 @@ HighlightingPage::HighlightingPage()
     }
 
     // ---- misc
-    this->disabledUsersChangedTimer.setSingleShot(true);
+    this->disabledUsersChangedTimer_.setSingleShot(true);
 }
 
 }  // namespace chatterino

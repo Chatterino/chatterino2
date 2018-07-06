@@ -20,13 +20,13 @@ public:
     TitleBarButton();
 
     Style getButtonStyle() const;
-    void setButtonStyle(Style style);
+    void setButtonStyle(Style style_);
 
 protected:
     void paintEvent(QPaintEvent *) override;
 
 private:
-    Style style;
+    Style style_;
 };
 
 }  // namespace chatterino

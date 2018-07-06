@@ -51,7 +51,7 @@ CommandPage::CommandPage()
     text->setStyleSheet("color: #bbb");
 
     // ---- end of layout
-    this->commandsEditTimer.setSingleShot(true);
+    this->commandsEditTimer_.setSingleShot(true);
 }
 
 }  // namespace chatterino

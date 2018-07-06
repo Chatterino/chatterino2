@@ -21,7 +21,7 @@ public:
     void loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> channelEmoteMap);
 
 private:
-    EmoteMap channelEmoteCache;
+    EmoteMap channelEmoteCache_;
 };
 
 }  // namespace chatterino

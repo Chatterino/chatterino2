@@ -12,7 +12,7 @@ class Image;
 class ModerationAction
 {
 public:
-    ModerationAction(const QString &action_);
+    ModerationAction(const QString &action);
 
     bool operator==(const ModerationAction &other) const;
 

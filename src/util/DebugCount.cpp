@@ -2,7 +2,7 @@
 
 namespace chatterino {
 
-QMap<QString, int64_t> DebugCount::counts;
-std::mutex DebugCount::mut;
+QMap<QString, int64_t> DebugCount::counts_;
+std::mutex DebugCount::mut_;
 
 }  // namespace chatterino

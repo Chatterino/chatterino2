@@ -9,8 +9,17 @@ class WindowManager
 {
 public:
     WindowManager();
-
     ~WindowManager() = delete;
+
+    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    static IndirectChannel decodeChannel(const QJsonObject &obj);
+
+    static int clampUiScale(int scale);
+    static float getUiScaleValue();
+    static float getUiScaleValue(int scale);
+
+    static const int uiScaleMin;
+    static const int uiScaleMax;
 
     void showSettingsDialog();
     void showAccountSelectPopup(QPoint point);
@@ -19,7 +28,6 @@ public:
     void forceLayoutChannelViews();
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
-    // void updateAll();
 
     Window &getMainWindow();
     Window &getSelectedWindow();
@@ -35,38 +43,28 @@ public:
     int getGeneration() const;
     void incGeneration();
 
-    pajlada::Signals::NoArgSignal repaintGifs;
-    pajlada::Signals::Signal<Channel *> layout;
-
-    static const int uiScaleMin;
-    static const int uiScaleMax;
-    static int clampUiScale(int scale);
-    static float getUiScaleValue();
-    static float getUiScaleValue(int scale);
-
     MessageElement::Flags getWordFlags();
     void updateWordTypeMask();
+
+    pajlada::Signals::NoArgSignal repaintGifs;
+    pajlada::Signals::Signal<Channel *> layout;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
 
 private:
-    bool initialized = false;
-
-    std::atomic<int> generation{0};
-
-    std::vector<Window *> windows;
-
-    Window *mainWindow = nullptr;
-    Window *selectedWindow = nullptr;
-
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
-    MessageElement::Flags wordFlags = MessageElement::Default;
-    pajlada::Settings::SettingListener wordFlagsListener;
+    bool initialized_ = false;
 
-public:
-    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static IndirectChannel decodeChannel(const QJsonObject &obj);
+    std::atomic<int> generation_{0};
+
+    std::vector<Window *> windows_;
+
+    Window *mainWindow_ = nullptr;
+    Window *selectedWindow_ = nullptr;
+
+    MessageElement::Flags wordFlags_ = MessageElement::Default;
+    pajlada::Settings::SettingListener wordFlagsListener_;
 };
 
 }  // namespace chatterino

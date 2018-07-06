@@ -11,15 +11,15 @@ public:
     enum Color : char { Highlight, Subscription };
 
     ScrollbarHighlight();
-    ScrollbarHighlight(Color _color, Style _style = Default);
+    ScrollbarHighlight(Color color, Style style = Default);
 
     Color getColor() const;
     Style getStyle() const;
     bool isNull() const;
 
 private:
-    Color color;
-    Style style;
+    Color color_;
+    Style style_;
 };
 
 }  // namespace chatterino

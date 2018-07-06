@@ -138,7 +138,6 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/Pubsub.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/TwitchAccount.cpp \
@@ -177,8 +176,6 @@ SOURCES += \
     src/widgets/helper/ChannelView.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
-    src/widgets/helper/DropOverlay.cpp \
-    src/widgets/helper/DropPreview.cpp \
     src/widgets/helper/EditableModelView.cpp \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
@@ -229,7 +226,8 @@ SOURCES += \
     src/widgets/settingspages/FeelPage.cpp \
     src/util/InitUpdateButton.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
-    src/widgets/settingspages/IgnoresPage.cpp
+    src/widgets/settingspages/IgnoresPage.cpp \
+    src/providers/twitch/PubsubClient.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -296,7 +294,6 @@ HEADERS  += \
     src/providers/irc/IrcServer.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/Pubsub.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubHelpers.hpp \
     src/providers/twitch/TwitchAccount.hpp \
@@ -347,8 +344,6 @@ HEADERS  += \
     src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
-    src/widgets/helper/DropOverlay.hpp \
-    src/widgets/helper/DropPreview.hpp \
     src/widgets/helper/EditableModelView.hpp \
     src/widgets/helper/Line.hpp \
     src/widgets/helper/NotebookButton.hpp \
@@ -407,7 +402,8 @@ HEADERS  += \
     src/widgets/settingspages/FeelPage.hpp \
     src/util/InitUpdateButton.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
-    src/widgets/settingspages/IgnoresPage.hpp
+    src/widgets/settingspages/IgnoresPage.hpp \
+    src/providers/twitch/PubsubClient.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

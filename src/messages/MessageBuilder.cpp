@@ -10,18 +10,18 @@
 namespace chatterino {
 
 MessageBuilder::MessageBuilder()
-    : message(new Message)
+    : message_(new Message)
 {
 }
 
 MessagePtr MessageBuilder::getMessage()
 {
-    return this->message;
+    return this->message_;
 }
 
 void MessageBuilder::append(MessageElement *element)
 {
-    this->message->addElement(element);
+    this->message_->addElement(element);
 }
 
 void MessageBuilder::appendTimestamp()
@@ -32,9 +32,9 @@ void MessageBuilder::appendTimestamp()
 void MessageBuilder::setHighlight(bool value)
 {
     if (value) {
-        this->message->flags |= Message::Highlighted;
+        this->message_->flags |= Message::Highlighted;
     } else {
-        this->message->flags &= ~Message::Highlighted;
+        this->message_->flags &= ~Message::Highlighted;
     }
 }
 

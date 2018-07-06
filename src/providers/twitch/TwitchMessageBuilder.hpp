@@ -28,8 +28,7 @@ public:
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
                                   const MessageParseArgs &_args);
     explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  const MessageParseArgs &_args, QString content,
-                                  bool isAction);
+                                  const MessageParseArgs &_args, QString content, bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
@@ -44,14 +43,6 @@ public:
     MessagePtr build();
 
 private:
-    QString roomID;
-
-    QColor usernameColor;
-    const QString originalMessage;
-    bool senderIsBroadcaster{};
-
-    const bool action = false;
-
     void parseMessageID();
     void parseRoomID();
     void appendChannelName();
@@ -66,6 +57,14 @@ private:
     void appendTwitchBadges();
     void appendChatterinoBadges();
     bool tryParseCheermote(const QString &string);
+
+    QString roomID_;
+
+    QColor usernameColor_;
+    const QString originalMessage_;
+    bool senderIsBroadcaster{};
+
+    const bool action_ = false;
 };
 
 }  // namespace chatterino

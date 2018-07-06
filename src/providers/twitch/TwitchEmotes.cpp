@@ -120,7 +120,7 @@ EmoteData TwitchEmotes::getEmoteById(const QString &id, const QString &emoteName
         _emoteName = it.value();
     }
 
-    return _twitchEmoteFromCache.getOrAdd(id, [&emoteName, &_emoteName, &id] {
+    return twitchEmoteFromCache_.getOrAdd(id, [&emoteName, &_emoteName, &id] {
         EmoteData newEmoteData;
         auto cleanCode = cleanUpCode(emoteName);
         newEmoteData.image1x =

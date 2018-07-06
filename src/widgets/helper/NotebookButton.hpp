@@ -17,7 +17,7 @@ public:
 
     explicit NotebookButton(Notebook *parent);
 
-    void setIcon(Icon icon_);
+    void setIcon(Icon icon);
     Icon getIcon() const;
 
 protected:

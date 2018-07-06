@@ -4,25 +4,25 @@
 
 namespace chatterino {
 
-SettingsPage::SettingsPage(const QString &_name, const QString &_iconResource)
-    : name(_name)
-    , iconResource(_iconResource)
+SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
+    : name_(name)
+    , iconResource_(iconResource)
 {
 }
 
 const QString &SettingsPage::getName()
 {
-    return this->name;
+    return this->name_;
 }
 
 const QString &SettingsPage::getIconResource()
 {
-    return this->iconResource;
+    return this->iconResource_;
 }
 
 void SettingsPage::cancel()
 {
-    this->onCancel.invoke();
+    this->onCancel_.invoke();
 }
 
 QCheckBox *SettingsPage::createCheckBox(const QString &text,
@@ -35,7 +35,7 @@ QCheckBox *SettingsPage::createCheckBox(const QString &text,
         [checkbox](const bool &value, auto) {
             checkbox->setChecked(value);  //
         },
-        this->managedConnections);
+        this->managedConnections_);
 
     // update setting on toggle
     QObject::connect(checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
@@ -56,7 +56,7 @@ QComboBox *SettingsPage::createComboBox(const QStringList &items,
 
     // update when setting changes
     setting.connect([combo](const QString &value, auto) { combo->setCurrentText(value); },
-                    this->managedConnections);
+                    this->managedConnections_);
 
     QObject::connect(combo, &QComboBox::currentTextChanged,
                      [&setting](const QString &newValue) { setting = newValue; });

@@ -42,7 +42,7 @@ bool Paths::createFolder(const QString &folderPath)
 
 bool Paths::isPortable()
 {
-    return this->portable.get();
+    return this->portable_.get();
 }
 
 void Paths::initAppFilePathHash()
@@ -58,13 +58,13 @@ void Paths::initAppFilePathHash()
 
 void Paths::initCheckPortable()
 {
-    this->portable =
+    this->portable_ =
         QFileInfo::exists(combinePath(QCoreApplication::applicationDirPath(), "portable"));
 }
 
 void Paths::initAppDataDirectory()
 {
-    assert(this->portable.is_initialized());
+    assert(this->portable_.is_initialized());
 
     // Root path = %APPDATA%/Chatterino or the folder that the executable resides in
 

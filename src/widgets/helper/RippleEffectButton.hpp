@@ -48,11 +48,6 @@ signals:
     void leftMousePress();
 
 protected:
-    bool enabled_ = true;
-    bool selected_ = false;
-    bool mouseOver_ = false;
-    bool mouseDown_ = false;
-
     virtual void paintEvent(QPaintEvent *) override;
     virtual void enterEvent(QEvent *) override;
     virtual void leaveEvent(QEvent *) override;
@@ -62,7 +57,14 @@ protected:
 
     void fancyPaint(QPainter &painter);
 
+    bool enabled_ = true;
+    bool selected_ = false;
+    bool mouseOver_ = false;
+    bool mouseDown_ = false;
+
 private:
+    void onMouseEffectTimeout();
+
     QColor borderColor_;
     QPixmap pixmap_;
     bool dimPixmap_ = true;
@@ -71,8 +73,6 @@ private:
     QTimer effectTimer_;
     std::vector<ClickEffect> clickEffects_;
     boost::optional<QColor> mouseEffectColor_ = boost::none;
-
-    void onMouseEffectTimeout();
 };
 
 }  // namespace chatterino

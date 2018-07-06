@@ -13,7 +13,7 @@ public:
     CommandPage();
 
 private:
-    QTimer commandsEditTimer;
+    QTimer commandsEditTimer_;
 };
 
 }  // namespace chatterino

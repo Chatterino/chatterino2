@@ -21,7 +21,7 @@ TaggedUser TaggedUsersModel::getItemFromRow(std::vector<QStandardItem *> &row,
 // turns a row in the model into a vector item
 void TaggedUsersModel::getRowFromItem(const TaggedUser &item, std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[0], item.name);
+    setStringItem(row[0], item.getName());
 }
 
 void TaggedUsersModel::afterInit()

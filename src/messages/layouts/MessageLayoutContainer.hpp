@@ -51,7 +51,7 @@ struct MessageLayoutContainer {
     float getScale() const;
 
     // methods
-    void begin(int width, float scale, Message::MessageFlags flags);
+    void begin(int width_, float scale_, Message::MessageFlags flags_);
     void end();
 
     void clear();
@@ -60,7 +60,7 @@ struct MessageLayoutContainer {
     void addElementNoLineBreak(MessageLayoutElement *element);
     void breakLine();
     bool atStartOfLine();
-    bool fitsInLine(int width);
+    bool fitsInLine(int width_);
     MessageLayoutElement *getElementAt(QPoint point);
 
     // painting
@@ -86,28 +86,27 @@ private:
 
     // helpers
     void _addElement(MessageLayoutElement *element, bool forceAdd = false);
-
-    // variables
-    float scale = 1.f;
-    int width = 0;
-    Message::MessageFlags flags = Message::MessageFlags::None;
-    int line = 0;
-    int height = 0;
-    int currentX = 0;
-    int currentY = 0;
-    int charIndex = 0;
-    size_t lineStart = 0;
-    int lineHeight = 0;
-    int spaceWidth = 4;
-    int textLineHeight = 0;
-    int dotdotdotWidth = 0;
-    bool _canAddMessages = true;
-    bool _isCollapsed = false;
-
     bool canCollapse();
 
-    std::vector<std::unique_ptr<MessageLayoutElement>> elements;
-    std::vector<Line> lines;
+    // variables
+    float scale_ = 1.f;
+    int width_ = 0;
+    Message::MessageFlags flags_ = Message::MessageFlags::None;
+    int line_ = 0;
+    int height_ = 0;
+    int currentX_ = 0;
+    int currentY_ = 0;
+    int charIndex_ = 0;
+    size_t lineStart_ = 0;
+    int lineHeight_ = 0;
+    int spaceWidth_ = 4;
+    int textLineHeight_ = 0;
+    int dotdotdotWidth_ = 0;
+    bool canAddMessages_ = true;
+    bool isCollapsed_ = false;
+
+    std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
+    std::vector<Line> lines_;
 };
 
 }  // namespace chatterino

@@ -11,13 +11,13 @@ namespace chatterino {
 
 const QRect &MessageLayoutElement::getRect() const
 {
-    return this->rect;
+    return this->rect_;
 }
 
-MessageLayoutElement::MessageLayoutElement(MessageElement &_creator, const QSize &size)
-    : creator(_creator)
+MessageLayoutElement::MessageLayoutElement(MessageElement &creator, const QSize &size)
+    : creator_(creator)
 {
-    this->rect.setSize(size);
+    this->rect_.setSize(size);
     DebugCount::increase("message layout elements");
 }
 
@@ -28,12 +28,12 @@ MessageLayoutElement::~MessageLayoutElement()
 
 MessageElement &MessageLayoutElement::getCreator() const
 {
-    return this->creator;
+    return this->creator_;
 }
 
 void MessageLayoutElement::setPosition(QPoint point)
 {
-    this->rect.moveTopLeft(point);
+    this->rect_.moveTopLeft(point);
 }
 
 bool MessageLayoutElement::hasTrailingSpace() const
@@ -50,13 +50,13 @@ MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
 
 MessageLayoutElement *MessageLayoutElement::setLink(const Link &_link)
 {
-    this->link = _link;
+    this->link_ = _link;
     return this;
 }
 
 const Link &MessageLayoutElement::getLink() const
 {
-    return this->link;
+    return this->link_;
 }
 
 //

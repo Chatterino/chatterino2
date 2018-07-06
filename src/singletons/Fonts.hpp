@@ -74,7 +74,7 @@ private:
     FontData &getOrCreateFontData(Type type, float scale);
     FontData createFontData(Type type, float scale);
 
-    std::vector<std::unordered_map<float, FontData>> fontsByType;
+    std::vector<std::unordered_map<float, FontData>> fontsByType_;
 };
 
 using FontStyle = Fonts::Type;

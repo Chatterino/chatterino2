@@ -6,7 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
-#include "providers/twitch/Pubsub.hpp"
+#include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
@@ -33,8 +33,8 @@ static Application *staticApp = nullptr;
 // It will create the instances of the major classes, and connect their signals to each other
 
 Application::Application(int _argc, char **_argv)
-    : argc(_argc)
-    , argv(_argv)
+    : argc_(_argc)
+    , argv_(_argv)
 {
 }
 

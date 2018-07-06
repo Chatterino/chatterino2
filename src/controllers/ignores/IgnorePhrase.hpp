@@ -13,43 +13,44 @@ namespace chatterino {
 
 class IgnorePhrase
 {
-    QString pattern;
-    bool _isRegex;
-    QRegularExpression regex;
-
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern, this->_isRegex) == std::tie(other.pattern, other._isRegex);
+        return std::tie(this->pattern_, this->isRegex_) == std::tie(other.pattern_, other.isRegex_);
     }
 
-    IgnorePhrase(const QString &_pattern, bool isRegex)
-        : pattern(_pattern)
-        , _isRegex(isRegex)
-        , regex(_isRegex ? _pattern : "\\b" + QRegularExpression::escape(_pattern) + "\\b",
-                QRegularExpression::CaseInsensitiveOption |
-                    QRegularExpression::UseUnicodePropertiesOption)
+    IgnorePhrase(const QString &pattern, bool isRegex)
+        : pattern_(pattern)
+        , isRegex_(isRegex)
+        , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+                 QRegularExpression::CaseInsensitiveOption |
+                     QRegularExpression::UseUnicodePropertiesOption)
     {
     }
 
     const QString &getPattern() const
     {
-        return this->pattern;
+        return this->pattern_;
     }
     bool isRegex() const
     {
-        return this->_isRegex;
+        return this->isRegex_;
     }
 
     bool isValid() const
     {
-        return !this->pattern.isEmpty() && this->regex.isValid();
+        return !this->pattern_.isEmpty() && this->regex_.isValid();
     }
 
     bool isMatch(const QString &subject) const
     {
-        return this->isValid() && this->regex.match(subject).hasMatch();
+        return this->isValid() && this->regex_.match(subject).hasMatch();
     }
+
+private:
+    QString pattern_;
+    bool isRegex_;
+    QRegularExpression regex_;
 };
 }  // namespace chatterino
 

@@ -24,13 +24,6 @@ protected:
 private:
     // fourtf: !!! preserve the order of left, up, right and down
     enum HoveredElement { None, SplitMove, SplitLeft, SplitUp, SplitRight, SplitDown };
-    HoveredElement hoveredElement = None;
-    Split *split;
-    QGridLayout *_layout;
-    QPushButton *_left;
-    QPushButton *_up;
-    QPushButton *_right;
-    QPushButton *_down;
 
     class ButtonEventFilter : public QObject
     {
@@ -43,6 +36,14 @@ private:
     protected:
         bool eventFilter(QObject *watched, QEvent *event) override;
     };
+
+    HoveredElement hoveredElement_ = None;
+    Split *split_;
+    QGridLayout *layout_;
+    QPushButton *left_;
+    QPushButton *up_;
+    QPushButton *right_;
+    QPushButton *down_;
 
     friend class ButtonEventFilter;
 };

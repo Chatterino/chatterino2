@@ -15,7 +15,7 @@ namespace chatterino {
 
 namespace {
 
-const char *GetBinaryName()
+const char *getBinaryName()
 {
 #ifdef _WIN32
     return "streamlink.exe";
@@ -24,7 +24,7 @@ const char *GetBinaryName()
 #endif
 }
 
-const char *GetDefaultBinaryPath()
+const char *getDefaultBinaryPath()
 {
 #ifdef _WIN32
     return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
@@ -38,13 +38,13 @@ QString getStreamlinkProgram()
     auto app = getApp();
 
     if (app->settings->streamlinkUseCustomPath) {
-        return app->settings->streamlinkPath + "/" + GetBinaryName();
+        return app->settings->streamlinkPath + "/" + getBinaryName();
     } else {
-        return GetBinaryName();
+        return getBinaryName();
     }
 }
 
-bool CheckStreamlinkPath(const QString &path)
+bool checkStreamlinkPath(const QString &path)
 {
     QFileInfo fileinfo(path);
 
@@ -95,7 +95,7 @@ QProcess *createStreamlinkProcess()
 
 }  // namespace
 
-void GetStreamQualities(const QString &channelURL, std::function<void(QStringList)> cb)
+void getStreamQualities(const QString &channelURL, std::function<void(QStringList)> cb)
 {
     auto p = createStreamlinkProcess();
 
@@ -130,7 +130,7 @@ void GetStreamQualities(const QString &channelURL, std::function<void(QStringLis
     p->start();
 }
 
-void OpenStreamlink(const QString &channelURL, const QString &quality, QStringList extraArguments)
+void openStreamlink(const QString &channelURL, const QString &quality, QStringList extraArguments)
 {
     auto app = getApp();
 
@@ -156,7 +156,7 @@ void OpenStreamlink(const QString &channelURL, const QString &quality, QStringLi
     }
 }
 
-void Start(const QString &channel)
+void openStreamlinkForChannel(const QString &channel)
 {
     auto app = getApp();
 
@@ -166,7 +166,7 @@ void Start(const QString &channel)
     preferredQuality = preferredQuality.toLower();
 
     if (preferredQuality == "choose") {
-        GetStreamQualities(channelURL, [=](QStringList qualityOptions) {
+        getStreamQualities(channelURL, [=](QStringList qualityOptions) {
             QualityPopup::showDialog(channel, qualityOptions);
         });
 
@@ -198,7 +198,7 @@ void Start(const QString &channel)
         args << "--stream-sorting-excludes" << exclude;
     }
 
-    OpenStreamlink(channelURL, quality, args);
+    openStreamlink(channelURL, quality, args);
 }
 
 }  // namespace chatterino

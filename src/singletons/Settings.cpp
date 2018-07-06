@@ -69,18 +69,18 @@ void Settings::saveSnapshot()
         d->AddMember(key.Move(), val.Move(), a);
     }
 
-    this->snapshot.reset(d);
+    this->snapshot_.reset(d);
 
     Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
 void Settings::restoreSnapshot()
 {
-    if (!this->snapshot) {
+    if (!this->snapshot_) {
         return;
     }
 
-    const auto &snapshotObject = this->snapshot->GetObject();
+    const auto &snapshotObject = this->snapshot_->GetObject();
 
     for (const auto &weakSetting : _settings) {
         auto setting = weakSetting.lock();

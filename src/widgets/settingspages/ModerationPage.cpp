@@ -146,7 +146,7 @@ ModerationPage::ModerationPage()
     }
 
     // ---- misc
-    this->itemsChangedTimer.setSingleShot(true);
+    this->itemsChangedTimer_.setSingleShot(true);
 }
 
 }  // namespace chatterino

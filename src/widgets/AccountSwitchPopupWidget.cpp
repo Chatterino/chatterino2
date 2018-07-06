@@ -17,10 +17,10 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
 
     this->setContentsMargins(0, 0, 0, 0);
 
-    this->ui.accountSwitchWidget = new AccountSwitchWidget(this);
+    this->ui_.accountSwitchWidget = new AccountSwitchWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout(this);
-    this->ui.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
-    vbox->addWidget(this->ui.accountSwitchWidget);
+    this->ui_.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
+    vbox->addWidget(this->ui_.accountSwitchWidget);
 
     // vbox->setSizeConstraint(QLayout::SetMinimumSize);
 
@@ -41,7 +41,7 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
 
 void AccountSwitchPopupWidget::refresh()
 {
-    this->ui.accountSwitchWidget->refresh();
+    this->ui_.accountSwitchWidget->refresh();
 }
 
 void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent *)

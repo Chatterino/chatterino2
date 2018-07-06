@@ -22,7 +22,7 @@ class NotebookTab : public RippleEffectButton
     Q_OBJECT
 
 public:
-    explicit NotebookTab(Notebook *_notebook);
+    explicit NotebookTab(Notebook *notebook);
 
     void updateSize();
 
@@ -61,7 +61,10 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    bool hasXButton();
+    bool shouldDrawXButton();
+    QRect getXRect();
+    void titleUpdated();
 
     QPropertyAnimation positionChangedAnimation_;
     bool positionChangedAnimationRunning_ = false;
@@ -78,15 +81,11 @@ private:
     bool mouseOverX_ = false;
     bool mouseDownX_ = false;
 
-    bool hasXButton();
-    bool shouldDrawXButton();
-
     HighlightState highlightState_ = HighlightState::None;
 
     QMenu menu_;
 
-    QRect getXRect();
-    void titleUpdated();
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
 }  // namespace chatterino

@@ -64,22 +64,21 @@ private:
         QWidget *selectedWidget = nullptr;
     };
 
-    QList<Item> items;
-    QWidget *selectedPage = nullptr;
-
     bool containsPage(QWidget *page);
     Item &findItem(QWidget *page);
 
     static bool containsChild(const QObject *obj, const QObject *child);
-
-    NotebookButton addButton;
-    std::vector<NotebookButton *> customButtons;
-
-    bool allowUserTabManagement = false;
-    bool showAddButton = false;
-    int lineY = 20;
-
     NotebookTab *getTabFromPage(QWidget *page);
+
+    QList<Item> items_;
+    QWidget *selectedPage_ = nullptr;
+
+    NotebookButton addButton_;
+    std::vector<NotebookButton *> customButtons_;
+
+    bool allowUserTabManagement_ = false;
+    bool showAddButton_ = false;
+    int lineY_ = 20;
 };
 
 class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder
@@ -96,7 +95,7 @@ private:
     pajlada::Signals::SignalHolder signalHolder_;
     std::unique_ptr<UpdateDialog> updateDialogHandle_;
 
-    std::vector<pajlada::Signals::ScopedConnection> uniqueConnections;
+    std::vector<pajlada::Signals::ScopedConnection> connections_;
 };
 
 }  // namespace chatterino

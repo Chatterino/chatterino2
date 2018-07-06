@@ -355,8 +355,8 @@ QLayout *LookPage::createFontChanger()
                        ", " + QString::number(app->fonts->chatFontSize) + "pt)");
     };
 
-    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections);
-    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections);
+    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections_);
+    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections_);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");

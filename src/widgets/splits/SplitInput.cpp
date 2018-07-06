@@ -91,7 +91,7 @@ void SplitInput::initLayout()
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable, [this](bool available) {
         if (available) {
-            this->split_->view.clearSelection();
+            this->split_->view_.clearSelection();
         }
     });
 
@@ -254,7 +254,7 @@ void SplitInput::installKeyPressedEvent()
                 notebook->selectPreviousTab();
             }
         } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
-            if (this->split_->view.hasSelection()) {
+            if (this->split_->view_.hasSelection()) {
                 this->split_->doCopy();
                 event->accept();
             }

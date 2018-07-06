@@ -28,7 +28,6 @@ SettingsDialog::SettingsDialog()
     : BaseWindow(nullptr, BaseWindow::DisableCustomScaling)
 {
     this->initUi();
-
     this->addTabs();
 
     this->scaleChangedEvent(this->getScale());
@@ -63,10 +62,9 @@ void SettingsDialog::initUi()
     this->ui_.tabContainerContainer->setObjectName("tabWidget");
     this->ui_.pageStack->setObjectName("pages");
 
-    QObject::connect(this->ui_.okButton, &QPushButton::clicked, this,
-                     &SettingsDialog::okButtonClicked);
+    QObject::connect(this->ui_.okButton, &QPushButton::clicked, this, &SettingsDialog::onOkClicked);
     QObject::connect(this->ui_.cancelButton, &QPushButton::clicked, this,
-                     &SettingsDialog::cancelButtonClicked);
+                     &SettingsDialog::onCancelClicked);
 }
 
 SettingsDialog *SettingsDialog::getHandle()
@@ -111,25 +109,25 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
 
     this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
-    this->tabs.push_back(tab);
+    this->tabs_.push_back(tab);
 
-    if (this->tabs.size() == 1) {
-        this->select(tab);
+    if (this->tabs_.size() == 1) {
+        this->selectTab(tab);
     }
 }
 
-void SettingsDialog::select(SettingsDialogTab *tab)
+void SettingsDialog::selectTab(SettingsDialogTab *tab)
 {
     this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
 
-    if (this->selectedTab != nullptr) {
-        this->selectedTab->setSelected(false);
-        this->selectedTab->setStyleSheet("color: #FFF");
+    if (this->selectedTab_ != nullptr) {
+        this->selectedTab_->setSelected(false);
+        this->selectedTab_->setStyleSheet("color: #FFF");
     }
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #555; color: #FFF");
-    this->selectedTab = tab;
+    this->selectedTab_ = tab;
 }
 
 void SettingsDialog::showDialog(PreferredTab preferredTab)
@@ -139,7 +137,7 @@ void SettingsDialog::showDialog(PreferredTab preferredTab)
 
     switch (preferredTab) {
         case SettingsDialog::PreferredTab::Accounts: {
-            instance->select(instance->tabs.at(0));
+            instance->selectTab(instance->tabs_.at(0));
         } break;
     }
 
@@ -153,7 +151,7 @@ void SettingsDialog::refresh()
 {
     getApp()->settings->saveSnapshot();
 
-    for (auto *tab : this->tabs) {
+    for (auto *tab : this->tabs_) {
         tab->getSettingsPage()->onShow();
     }
 }
@@ -166,7 +164,7 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     styleSheet.replace("<font-size>", QString::number(int(14 * newDpi)));
     styleSheet.replace("<checkbox-size>", QString::number(int(14 * newDpi)));
 
-    for (SettingsDialogTab *tab : this->tabs) {
+    for (SettingsDialogTab *tab : this->tabs_) {
         tab->setFixedHeight(int(30 * newDpi));
     }
 
@@ -185,14 +183,14 @@ void SettingsDialog::themeChangedEvent()
 }
 
 ///// Widget creation helpers
-void SettingsDialog::okButtonClicked()
+void SettingsDialog::onOkClicked()
 {
     this->close();
 }
 
-void SettingsDialog::cancelButtonClicked()
+void SettingsDialog::onCancelClicked()
 {
-    for (auto &tab : this->tabs) {
+    for (auto &tab : this->tabs_) {
         tab->getSettingsPage()->cancel();
     }
 

@@ -8,14 +8,14 @@
 
 namespace chatterino {
 
-TwitchAccount::TwitchAccount(const QString &_username, const QString &_oauthToken,
-                             const QString &_oauthClient, const QString &_userID)
+TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
+                             const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
-    , oauthClient(_oauthClient)
-    , oauthToken(_oauthToken)
-    , userName(_username)
-    , userId(_userID)
-    , _isAnon(_username == ANONYMOUS_USERNAME)
+    , oauthClient_(oauthClient)
+    , oauthToken_(oauthToken)
+    , userName_(username)
+    , userId_(userID)
+    , isAnon_(username == ANONYMOUS_USERNAME)
 {
 }
 
@@ -26,49 +26,49 @@ QString TwitchAccount::toString() const
 
 const QString &TwitchAccount::getUserName() const
 {
-    return this->userName;
+    return this->userName_;
 }
 
 const QString &TwitchAccount::getOAuthClient() const
 {
-    return this->oauthClient;
+    return this->oauthClient_;
 }
 
 const QString &TwitchAccount::getOAuthToken() const
 {
-    return this->oauthToken;
+    return this->oauthToken_;
 }
 
 const QString &TwitchAccount::getUserId() const
 {
-    return this->userId;
+    return this->userId_;
 }
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
 {
-    if (this->oauthClient.compare(newClientID) == 0) {
+    if (this->oauthClient_.compare(newClientID) == 0) {
         return false;
     }
 
-    this->oauthClient = newClientID;
+    this->oauthClient_ = newClientID;
 
     return true;
 }
 
 bool TwitchAccount::setOAuthToken(const QString &newOAuthToken)
 {
-    if (this->oauthToken.compare(newOAuthToken) == 0) {
+    if (this->oauthToken_.compare(newOAuthToken) == 0) {
         return false;
     }
 
-    this->oauthToken = newOAuthToken;
+    this->oauthToken_ = newOAuthToken;
 
     return true;
 }
 
 bool TwitchAccount::isAnon() const
 {
-    return this->_isAnon;
+    return this->isAnon_;
 }
 
 void TwitchAccount::loadIgnores()
@@ -95,8 +95,8 @@ void TwitchAccount::loadIgnores()
         }
 
         {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex);
-            this->ignores.clear();
+            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+            this->ignores_.clear();
 
             for (const auto &block : blocks.GetArray()) {
                 if (!block.IsObject()) {
@@ -112,7 +112,7 @@ void TwitchAccount::loadIgnores()
                     continue;
                 }
 
-                this->ignores.insert(ignoredUser);
+                this->ignores_.insert(ignoredUser);
             }
         }
 
@@ -168,9 +168,9 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
             return false;
         }
         {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex);
+            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
 
-            auto res = this->ignores.insert(ignoredUser);
+            auto res = this->ignores_.insert(ignoredUser);
             if (!res.second) {
                 const TwitchUser &existingUser = *(res.first);
                 existingUser.update(ignoredUser);
@@ -219,9 +219,9 @@ void TwitchAccount::unignoreByID(
         TwitchUser ignoredUser;
         ignoredUser.id = targetUserID;
         {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex);
+            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
 
-            this->ignores.erase(ignoredUser);
+            this->ignores_.erase(ignoredUser);
         }
         onFinished(UnignoreResult_Success, "Successfully unignored user " + targetName);
 
@@ -262,9 +262,9 @@ void TwitchAccount::checkFollow(const QString targetUserID,
 
 std::set<TwitchUser> TwitchAccount::getIgnores() const
 {
-    std::lock_guard<std::mutex> lock(this->ignoresMutex);
+    std::lock_guard<std::mutex> lock(this->ignoresMutex_);
 
-    return this->ignores;
+    return this->ignores_;
 }
 
 void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> cb)

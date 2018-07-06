@@ -94,7 +94,7 @@ UserInfoPopup::UserInfoPopup()
                          [this] { this->channel_->sendMessage("/unmod " + this->userName_); });
 
         // userstate
-        this->userStateChanged.connect([this, mod, unmod]() mutable {
+        this->userStateChanged_.connect([this, mod, unmod]() mutable {
             TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
@@ -118,7 +118,7 @@ UserInfoPopup::UserInfoPopup()
     {
         auto timeout = moderation.emplace<TimeoutWidget>();
 
-        this->userStateChanged.connect([this, lineMod, timeout]() mutable {
+        this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
             TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
             if (twitchChannel) {
@@ -232,7 +232,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
     this->updateUserData();
 
-    this->userStateChanged.invoke();
+    this->userStateChanged_.invoke();
 }
 
 void UserInfoPopup::updateUserData()

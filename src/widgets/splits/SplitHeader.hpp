@@ -55,33 +55,32 @@ private:
     void setupModeLabel(RippleEffectLabel &label);
     void addDropdownItems(RippleEffectButton *label);
 
-    Split *const split;
+    Split *const split_;
 
-    QPoint dragStart;
-    bool dragging = false;
-    bool doubleClicked = false;
-    bool showingHelpTooltip = false;
+    QPoint dragStart_;
+    bool dragging_ = false;
+    bool doubleClicked_ = false;
+    bool showingHelpTooltip_ = false;
 
-    pajlada::Signals::Connection onlineStatusChangedConnection;
+    pajlada::Signals::Connection onlineStatusChangedConnection_;
 
-    RippleEffectButton *dropdownButton = nullptr;
+    RippleEffectButton *dropdownButton_ = nullptr;
     //    Label *titleLabel;
     Label *titleLabel = nullptr;
-    RippleEffectLabel *modeButton = nullptr;
-    RippleEffectButton *moderationButton = nullptr;
+    RippleEffectLabel *modeButton_ = nullptr;
+    RippleEffectButton *moderationButton_ = nullptr;
 
-    QMenu dropdownMenu;
-    QMenu modeMenu;
+    QMenu dropdownMenu_;
+    QMenu modeMenu_;
 
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
 
-    QString tooltip;
-    bool isLive;
+    QString tooltip_;
+    bool isLive_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections;
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
 public slots:
-
     void menuMoveSplit();
     void menuReloadChannelEmotes();
     void menuManualReconnect();

@@ -160,7 +160,7 @@ void BaseWindow::init()
                     ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
                                    0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 },
-                this->managedConnections);
+                this->managedConnections_);
         });
     }
 #else

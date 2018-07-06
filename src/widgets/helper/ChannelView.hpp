@@ -70,13 +70,26 @@ protected:
 
     void hideEvent(QHideEvent *) override;
 
-    void handleLinkClick(QMouseEvent *event, const Link &link,
-                         MessageLayout *layout);
+    void handleLinkClick(QMouseEvent *event, const Link &link, MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
-                         QPoint &relativePos, int &index);
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message, QPoint &relativePos,
+                         int &index);
 
 private:
+    void updatePauseStatus();
+    void detachChannel();
+    void actuallyLayoutMessages(bool causedByScollbar = false);
+
+    void drawMessages(QPainter &painter);
+    void setSelection(const SelectionItem &start, const SelectionItem &end);
+    MessageElement::Flags getFlags() const;
+    bool isPaused();
+
+    void handleMouseClick(QMouseEvent *event, const MessageLayoutElement *hoverLayoutElement,
+                          MessageLayout *layout);
+    void addContextMenuItems(const MessageLayoutElement *hoveredElement, MessageLayout *layout);
+    int getLayoutWidth() const;
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -88,7 +101,6 @@ private:
     bool pausedTemporarily_ = false;
     bool pausedBySelection_ = false;
     bool pausedByScrollingUp_ = false;
-    void updatePauseStatus();
     int messagesAddedSinceSelectionPause_ = 0;
 
     QTimer pauseTimeout_;
@@ -96,23 +108,6 @@ private:
     MessageLayoutPtr lastReadMessage_;
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
-
-    void detachChannel();
-    void actuallyLayoutMessages(bool causedByScollbar = false);
-
-    void drawMessages(QPainter &painter);
-    void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElement::Flags getFlags() const;
-    bool isPaused();
-
-    void handleMouseClick(QMouseEvent *event,
-                          const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout);
-    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayout *layout);
-
-    //    void beginPause();
-    //    void endPause();
 
     ChannelPtr channel_;
 
@@ -148,8 +143,6 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
-
-    int getLayoutWidth() const;
 
 private slots:
     void wordFlagsChanged()

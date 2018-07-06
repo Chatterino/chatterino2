@@ -14,15 +14,15 @@ ModerationActions::ModerationActions()
 
 void ModerationActions::initialize()
 {
-    assert(!this->initialized);
-    this->initialized = true;
+    assert(!this->initialized_);
+    this->initialized_ = true;
 
-    for (auto &val : this->setting.getValue()) {
+    for (auto &val : this->setting_.getValue()) {
         this->items.insertItem(val);
     }
 
     this->items.delayedItemsChanged.connect([this] {  //
-        this->setting.setValue(this->items.getVector());
+        this->setting_.setValue(this->items.getVector());
     });
 }
 

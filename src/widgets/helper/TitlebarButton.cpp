@@ -11,12 +11,12 @@ TitleBarButton::TitleBarButton()
 
 TitleBarButton::Style TitleBarButton::getButtonStyle() const
 {
-    return this->style;
+    return this->style_;
 }
 
 void TitleBarButton::setButtonStyle(Style _style)
 {
-    this->style = _style;
+    this->style_ = _style;
     this->update();
 }
 
@@ -34,7 +34,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
     painter.setRenderHint(QPainter::Antialiasing, false);
 
-    switch (this->style) {
+    switch (this->style_) {
         case Minimize: {
             painter.fillRect(centerX - xD / 2, xD * 3 / 2, xD, 1, color);
             break;

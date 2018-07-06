@@ -31,10 +31,10 @@ protected:
     void scaleChangedEvent(float) override;
 
 private:
-    QLabel *displayText;
-    pajlada::Signals::Connection fontChangedConnection;
-
     void updateFont();
+
+    QLabel *displayText_;
+    pajlada::Signals::Connection fontChangedConnection_;
 };
 
 }  // namespace chatterino

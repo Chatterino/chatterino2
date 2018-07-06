@@ -13,10 +13,10 @@ public:
     AboutPage();
 
 private:
-    QLabel *logo;
-
-    void addLicense(QFormLayout *form, const QString &name, const QString &website,
+    void addLicense(QFormLayout *form, const QString &name_, const QString &website,
                     const QString &licenseLink);
+
+    QLabel *logo_;
 };
 
 }  // namespace chatterino

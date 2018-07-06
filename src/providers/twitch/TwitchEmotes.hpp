@@ -62,10 +62,10 @@ private:
     void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet);
 
     //            emote code
-    ConcurrentMap<QString, EmoteValue *> _twitchEmotes;
+    ConcurrentMap<QString, EmoteValue *> twitchEmotes_;
 
-    //        emote id
-    ConcurrentMap<QString, EmoteData> _twitchEmoteFromCache;
+    //            emote id
+    ConcurrentMap<QString, EmoteData> twitchEmoteFromCache_;
 };
 
 }  // namespace chatterino

@@ -5,30 +5,30 @@
 namespace chatterino {
 
 ScrollbarHighlight::ScrollbarHighlight()
-    : color(Color::Highlight)
-    , style(Style::None)
+    : color_(Color::Highlight)
+    , style_(Style::None)
 {
 }
 
-ScrollbarHighlight::ScrollbarHighlight(Color _color, Style _style)
-    : color(_color)
-    , style(_style)
+ScrollbarHighlight::ScrollbarHighlight(Color color, Style style)
+    : color_(color)
+    , style_(style)
 {
 }
 
 ScrollbarHighlight::Color ScrollbarHighlight::getColor() const
 {
-    return this->color;
+    return this->color_;
 }
 
 ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const
 {
-    return this->style;
+    return this->style_;
 }
 
 bool ScrollbarHighlight::isNull() const
 {
-    return this->style == None;
+    return this->style_ == None;
 }
 
 }  // namespace chatterino

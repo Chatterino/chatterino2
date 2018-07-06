@@ -80,7 +80,7 @@ public:
     QString roomID;
 
     RoomModes getRoomModes();
-    void setRoomModes(const RoomModes &roomModes);
+    void setRoomModes(const RoomModes &roomModes_);
 
     StreamStatus getStreamStatus() const;
 
@@ -97,36 +97,35 @@ private:
     void setLive(bool newLiveStatus);
     void refreshLiveStatus();
     void startRefreshLiveStatusTimer(int intervalMS);
-
-    mutable std::mutex streamStatusMutex;
-    StreamStatus streamStatus;
-
-    mutable std::mutex userStateMutex;
-    UserState userState;
-
     void fetchRecentMessages();
 
-    bool mod;
-    QByteArray messageSuffix;
-    QString lastSentMessage;
-    RoomModes roomModes;
-    std::mutex roomModeMutex;
+    mutable std::mutex streamStatusMutex_;
+    StreamStatus streamStatus_;
 
-    QObject object;
-    std::mutex joinedUserMutex;
-    QStringList joinedUsers;
-    bool joinedUsersMergeQueued = false;
-    std::mutex partedUserMutex;
-    QStringList partedUsers;
-    bool partedUsersMergeQueued = false;
+    mutable std::mutex userStateMutex_;
+    UserState userState_;
 
-    Communi::IrcConnection *readConnection;
+    bool mod_ = false;
+    QByteArray messageSuffix_;
+    QString lastSentMessage_;
+    RoomModes roomModes_;
+    std::mutex roomModeMutex_;
 
-    friend class TwitchServer;
+    QObject object_;
+    std::mutex joinedUserMutex_;
+    QStringList joinedUsers_;
+    bool joinedUsersMergeQueued_ = false;
+    std::mutex partedUserMutex_;
+    QStringList partedUsers_;
+    bool partedUsersMergeQueued_ = false;
+
+    Communi::IrcConnection *readConnection_ = nullptr;
 
     // Key = login name
-    std::map<QString, NameOptions> recentChatters;
-    std::mutex recentChattersMutex;
+    std::map<QString, NameOptions> recentChatters_;
+    std::mutex recentChattersMutex_;
+
+    friend class TwitchServer;
 };
 
 }  // namespace chatterino

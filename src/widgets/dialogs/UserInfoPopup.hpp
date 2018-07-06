@@ -24,6 +24,10 @@ protected:
     virtual void themeChangedEvent() override;
 
 private:
+    void installEvents();
+    void updateUserData();
+
+    void loadAvatar(const QUrl &url);
     bool isMod_;
     bool isBroadcaster_;
 
@@ -31,12 +35,7 @@ private:
     QString userId_;
     ChannelPtr channel_;
 
-    pajlada::Signals::NoArgSignal userStateChanged;
-
-    void installEvents();
-
-    void updateUserData();
-    void loadAvatar(const QUrl &url);
+    pajlada::Signals::NoArgSignal userStateChanged_;
 
     std::shared_ptr<bool> hack_;
 

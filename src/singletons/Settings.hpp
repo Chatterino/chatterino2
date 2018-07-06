@@ -125,9 +125,9 @@ public:
     void restoreSnapshot();
 
 private:
-    std::unique_ptr<rapidjson::Document> snapshot;
-
     void updateModerationActions();
+
+    std::unique_ptr<rapidjson::Document> snapshot_;
 };
 
 Settings *getSettings();

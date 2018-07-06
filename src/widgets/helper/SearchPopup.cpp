@@ -30,9 +30,9 @@ void SearchPopup::initLayout()
 
             // SEARCH INPUT
             {
-                this->searchInput = new QLineEdit(this);
-                layout2->addWidget(this->searchInput);
-                QObject::connect(this->searchInput, &QLineEdit::returnPressed,
+                this->searchInput_ = new QLineEdit(this);
+                layout2->addWidget(this->searchInput_);
+                QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
                                  [this] { this->performSearch(); });
             }
 
@@ -50,9 +50,9 @@ void SearchPopup::initLayout()
 
         // CHANNELVIEW
         {
-            this->channelView = new ChannelView(this);
+            this->channelView_ = new ChannelView(this);
 
-            layout1->addWidget(this->channelView);
+            layout1->addWidget(this->channelView_);
         }
 
         this->setLayout(layout1);
@@ -61,7 +61,7 @@ void SearchPopup::initLayout()
 
 void SearchPopup::setChannel(ChannelPtr channel)
 {
-    this->snapshot = channel->getMessageSnapshot();
+    this->snapshot_ = channel->getMessageSnapshot();
     this->performSearch();
 
     this->setWindowTitle("Searching in " + channel->name + "s history");
@@ -69,20 +69,20 @@ void SearchPopup::setChannel(ChannelPtr channel)
 
 void SearchPopup::performSearch()
 {
-    QString text = searchInput->text();
+    QString text = searchInput_->text();
 
     ChannelPtr channel(new Channel("search", Channel::Type::None));
 
-    for (size_t i = 0; i < this->snapshot.getLength(); i++) {
-        MessagePtr message = this->snapshot[i];
+    for (size_t i = 0; i < this->snapshot_.getLength(); i++) {
+        MessagePtr message = this->snapshot_[i];
 
         if (text.isEmpty() ||
-            message->searchText.indexOf(this->searchInput->text(), 0, Qt::CaseInsensitive) != -1) {
+            message->searchText.indexOf(this->searchInput_->text(), 0, Qt::CaseInsensitive) != -1) {
             channel->addMessage(message);
         }
     }
 
-    this->channelView->setChannel(channel);
+    this->channelView_->setChannel(channel);
 }
 
 }  // namespace chatterino

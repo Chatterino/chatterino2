@@ -7,7 +7,7 @@
 namespace chatterino {
 
 TwitchAccountManager::TwitchAccountManager()
-    : anonymousUser(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
+    : anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
     this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
@@ -20,18 +20,18 @@ TwitchAccountManager::TwitchAccountManager()
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()
 {
-    if (!this->currentUser) {
-        return this->anonymousUser;
+    if (!this->currentUser_) {
+        return this->anonymousUser_;
     }
 
-    return this->currentUser;
+    return this->currentUser_;
 }
 
 std::vector<QString> TwitchAccountManager::getUsernames() const
 {
     std::vector<QString> userNames;
 
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::lock_guard<std::mutex> lock(this->mutex_);
 
     for (const auto &user : this->accounts.getVector()) {
         userNames.push_back(user->getUserName());
@@ -43,7 +43,7 @@ std::vector<QString> TwitchAccountManager::getUsernames() const
 std::shared_ptr<TwitchAccount> TwitchAccountManager::findUserByUsername(
     const QString &username) const
 {
-    std::lock_guard<std::mutex> lock(this->mutex);
+    std::lock_guard<std::mutex> lock(this->mutex_);
 
     for (const auto &user : this->accounts.getVector()) {
         if (username.compare(user->getUserName(), Qt::CaseInsensitive) == 0) {
@@ -124,10 +124,10 @@ void TwitchAccountManager::load()
         if (user) {
             Log("[AccountManager:currentUsernameChanged] User successfully updated to {}",
                 newUsername);
-            this->currentUser = user;
+            this->currentUser_ = user;
         } else {
             Log("[AccountManager:currentUsernameChanged] User successfully updated to anonymous");
-            this->currentUser = this->anonymousUser;
+            this->currentUser_ = this->anonymousUser_;
         }
 
         this->currentUserChanged.invoke();
@@ -136,13 +136,13 @@ void TwitchAccountManager::load()
 
 bool TwitchAccountManager::isLoggedIn() const
 {
-    if (!this->currentUser) {
+    if (!this->currentUser_) {
         return false;
     }
 
     // Once `TwitchAccount` class has a way to check, we should also return false if the credentials
     // are incorrect
-    return !this->currentUser->isAnon();
+    return !this->currentUser_->isAnon();
 }
 
 bool TwitchAccountManager::removeUser(TwitchAccount *account)

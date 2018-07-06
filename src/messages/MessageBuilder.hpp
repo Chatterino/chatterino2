@@ -31,7 +31,7 @@ public:
     }
 
 protected:
-    MessagePtr message;
+    MessagePtr message_;
 };
 
 }  // namespace chatterino

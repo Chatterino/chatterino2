@@ -1,7 +1,6 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/DropPreview.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
 
@@ -41,14 +40,14 @@ public:
     struct Position final {
     private:
         Position() = default;
-        Position(Node *_relativeNode, Direction _direcion)
-            : relativeNode(_relativeNode)
-            , direction(_direcion)
+        Position(Node *relativeNode, Direction direcion)
+            : relativeNode_(relativeNode)
+            , direction_(direcion)
         {
         }
 
-        Node *relativeNode;
-        Direction direction;
+        Node *relativeNode_;
+        Direction direction_;
 
         friend struct Node;
         friend class SplitContainer;
@@ -91,15 +90,6 @@ public:
         const std::vector<std::unique_ptr<Node>> &getChildren();
 
     private:
-        Type type;
-        Split *split;
-        Node *preferedFocusTarget;
-        Node *parent;
-        QRectF geometry;
-        qreal flexH = 1;
-        qreal flexV = 1;
-        std::vector<std::unique_ptr<Node>> children;
-
         Node();
         Node(Split *_split, Node *_parent);
 
@@ -107,16 +97,25 @@ public:
         Node *findNodeContainingSplit(Split *_split);
         void insertSplitRelative(Split *_split, Direction _direction);
         void nestSplitIntoCollection(Split *_split, Direction _direction);
-        void _insertNextToThis(Split *_split, Direction _direction);
+        void insertNextToThis(Split *_split, Direction _direction);
         void setSplit(Split *_split);
         Position releaseSplit();
         qreal getFlex(bool isVertical);
         qreal getSize(bool isVertical);
         qreal getChildrensTotalFlex(bool isVertical);
-        void layout(bool addSpacing, float _scale, std::vector<DropRect> &dropRects,
+        void layout(bool addSpacing, float _scale, std::vector<DropRect> &dropRects_,
                     std::vector<ResizeRect> &resizeRects);
 
         static Type toContainerType(Direction _dir);
+
+        Type type_;
+        Split *split_;
+        Node *preferedFocusTarget_;
+        Node *parent_;
+        QRectF geometry_;
+        qreal flexH_ = 1;
+        qreal flexV_ = 1;
+        std::vector<std::unique_ptr<Node>> children_;
 
         friend class SplitContainer;
     };
@@ -139,9 +138,9 @@ private:
         void dropEvent(QDropEvent *event) override;
 
     private:
-        std::vector<DropRect> rects;
-        QPoint mouseOverPoint;
-        SplitContainer *parent;
+        std::vector<DropRect> rects_;
+        QPoint mouseOverPoint_;
+        SplitContainer *parent_;
     };
 
     class ResizeHandle final : public QWidget
@@ -161,8 +160,8 @@ private:
         friend class SplitContainer;
 
     private:
-        bool vertical;
-        bool isMouseDown = false;
+        bool vertical_;
+        bool isMouseDown_ = false;
     };
 
 public:
@@ -186,7 +185,7 @@ public:
     NotebookTab *getTab() const;
     Node *getBaseNode();
 
-    void setTab(NotebookTab *tab);
+    void setTab(NotebookTab *tab_);
     void hideResizeHandles();
     void resetMouseStatus();
 
@@ -206,6 +205,16 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void layout();
+    void setSelected(Split *selected_);
+    void selectSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node, Direction direction);
+    void setPreferedTargetRecursive(Node *node);
+
+    void addSplit(Split *split);
+
+    void decodeNodeRecusively(QJsonObject &obj, Node *node);
+
     struct DropRegion {
         QRect rect;
         std::pair<int, int> position;
@@ -217,30 +226,19 @@ private:
         }
     };
 
-    void addSplit(Split *split);
+    std::vector<DropRect> dropRects_;
+    std::vector<DropRegion> dropRegions_;
+    DropOverlay overlay_;
+    std::vector<std::unique_ptr<ResizeHandle>> resizeHandles_;
+    QPoint mouseOverPoint_;
 
-    std::vector<DropRect> dropRects;
-    std::vector<DropRegion> dropRegions;
-    NotebookPageDropPreview dropPreview;
-    DropOverlay overlay;
-    std::vector<std::unique_ptr<ResizeHandle>> resizeHandles;
-    QPoint mouseOverPoint;
+    Node baseNode_;
+    Split *selected_;
 
-    void layout();
+    NotebookTab *tab_;
+    std::vector<Split *> splits_;
 
-    Node baseNode;
-    Split *selected;
-    void setSelected(Split *selected);
-    void selectSplitRecursive(Node *node, Direction direction);
-    void focusSplitRecursive(Node *node, Direction direction);
-    void setPreferedTargetRecursive(Node *node);
-
-    NotebookTab *tab;
-    std::vector<Split *> splits;
-
-    bool isDragging = false;
-
-    void decodeNodeRecusively(QJsonObject &obj, Node *node);
+    bool isDragging_ = false;
 };
 
 }  // namespace chatterino

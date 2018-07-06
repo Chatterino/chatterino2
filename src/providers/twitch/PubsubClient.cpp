@@ -1,4 +1,4 @@
-#include "providers/twitch/Pubsub.hpp"
+#include "providers/twitch/PubsubClient.hpp"
 
 #include "debug/Log.hpp"
 #include "providers/twitch/PubsubActions.hpp"
@@ -24,41 +24,41 @@ static std::map<QString, std::string> sentMessages;
 
 namespace detail {
 
-PubSubClient::PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle)
-    : websocketClient(_websocketClient)
-    , handle(_handle)
+PubSubClient::PubSubClient(WebsocketClient &websocketClient, WebsocketHandle handle)
+    : websocketClient_(websocketClient)
+    , handle_(handle)
 {
 }
 
 void PubSubClient::start()
 {
-    assert(!this->started);
+    assert(!this->started_);
 
-    this->started = true;
+    this->started_ = true;
 
     this->ping();
 }
 
 void PubSubClient::stop()
 {
-    assert(this->started);
+    assert(this->started_);
 
-    this->started = false;
+    this->started_ = false;
 }
 
 bool PubSubClient::listen(rapidjson::Document &message)
 {
     int numRequestedListens = message["data"]["topics"].Size();
 
-    if (this->numListens + numRequestedListens > MAX_PUBSUB_LISTENS) {
+    if (this->numListens_ + numRequestedListens > MAX_PUBSUB_LISTENS) {
         // This PubSubClient is already at its peak listens
         return false;
     }
 
-    this->numListens += numRequestedListens;
+    this->numListens_ += numRequestedListens;
 
     for (const auto &topic : message["data"]["topics"].GetArray()) {
-        this->listeners.emplace_back(Listener{topic.GetString(), false, false, false});
+        this->listeners_.emplace_back(Listener{topic.GetString(), false, false, false});
     }
 
     auto uuid = CreateUUID();
@@ -77,11 +77,11 @@ void PubSubClient::unlistenPrefix(const std::string &prefix)
 {
     std::vector<std::string> topics;
 
-    for (auto it = this->listeners.begin(); it != this->listeners.end();) {
+    for (auto it = this->listeners_.begin(); it != this->listeners_.end();) {
         const auto &listener = *it;
         if (listener.topic.find(prefix) == 0) {
             topics.push_back(listener.topic);
-            it = this->listeners.erase(it);
+            it = this->listeners_.erase(it);
         } else {
             ++it;
         }
@@ -105,16 +105,16 @@ void PubSubClient::unlistenPrefix(const std::string &prefix)
 
 void PubSubClient::handlePong()
 {
-    assert(this->awaitingPong);
+    assert(this->awaitingPong_);
 
     Log("Got pong!");
 
-    this->awaitingPong = false;
+    this->awaitingPong_ = false;
 }
 
 bool PubSubClient::isListeningToTopic(const std::string &payload)
 {
-    for (const auto &listener : this->listeners) {
+    for (const auto &listener : this->listeners_) {
         if (listener.topic == payload) {
             return true;
         }
@@ -125,29 +125,29 @@ bool PubSubClient::isListeningToTopic(const std::string &payload)
 
 void PubSubClient::ping()
 {
-    assert(this->started);
+    assert(this->started_);
 
     if (!this->send(pingPayload)) {
         return;
     }
 
-    this->awaitingPong = true;
+    this->awaitingPong_ = true;
 
     auto self = this->shared_from_this();
 
-    runAfter(this->websocketClient.get_io_service(), std::chrono::seconds(15), [self](auto timer) {
-        if (!self->started) {
+    runAfter(this->websocketClient_.get_io_service(), std::chrono::seconds(15), [self](auto timer) {
+        if (!self->started_) {
             return;
         }
 
-        if (self->awaitingPong) {
+        if (self->awaitingPong_) {
             Log("No pong respnose, disconnect!");
             // TODO(pajlada): Label this connection as "disconnect me"
         }
     });
 
-    runAfter(this->websocketClient.get_io_service(), std::chrono::minutes(5), [self](auto timer) {
-        if (!self->started) {
+    runAfter(this->websocketClient_.get_io_service(), std::chrono::minutes(5), [self](auto timer) {
+        if (!self->started_) {
             return;
         }
 
@@ -158,7 +158,7 @@ void PubSubClient::ping()
 bool PubSubClient::send(const char *payload)
 {
     WebsocketErrorCode ec;
-    this->websocketClient.send(this->handle, payload, websocketpp::frame::opcode::text, ec);
+    this->websocketClient_.send(this->handle_, payload, websocketpp::frame::opcode::text, ec);
 
     if (ec) {
         Log("Error sending message {}: {}", payload, ec.message());

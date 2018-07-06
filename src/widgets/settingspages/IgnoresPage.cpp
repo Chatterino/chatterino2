@@ -34,7 +34,7 @@ IgnoresPage::IgnoresPage()
     auto tabs = layout.emplace<QTabWidget>();
 
     addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Phrases"));
-    addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"), this->userListModel);
+    addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"), this->userListModel_);
 
     auto label = layout.emplace<QLabel>(INFO);
     label->setWordWrap(true);
@@ -95,7 +95,7 @@ void IgnoresPage::onShow()
     for (const auto &ignoredUser : user->getIgnores()) {
         users << ignoredUser.name;
     }
-    this->userListModel.setStringList(users);
+    this->userListModel_.setStringList(users);
 }
 
 }  // namespace chatterino

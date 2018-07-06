@@ -21,12 +21,12 @@ public:
     void setChannel(std::shared_ptr<Channel> channel);
 
 private:
-    LimitedQueueSnapshot<MessagePtr> snapshot;
-    QLineEdit *searchInput;
-    ChannelView *channelView;
-
     void initLayout();
     void performSearch();
+
+    LimitedQueueSnapshot<MessagePtr> snapshot_;
+    QLineEdit *searchInput_;
+    ChannelView *channelView_;
 };
 
 }  // namespace chatterino

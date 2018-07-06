@@ -19,12 +19,12 @@ public:
 
     SignalLabel &getLabel()
     {
-        return this->label;
+        return this->label_;
     }
 
 private:
-    QHBoxLayout hbox;
-    SignalLabel label;
+    QHBoxLayout hbox_;
+    SignalLabel label_;
 };
 
 class RippleEffectLabel2 : public RippleEffectButton

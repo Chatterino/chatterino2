@@ -112,7 +112,7 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emot
 
                 QJsonObject urls = emoteObject.value("urls").toObject();
 
-                auto emote = this->channelEmoteCache.getOrAdd(id, [id, &code, &urls] {
+                auto emote = this->channelEmoteCache_.getOrAdd(id, [id, &code, &urls] {
                     EmoteData emoteData;
                     fillInEmoteData(urls, code, code + "<br/>Channel FFZ Emote", emoteData);
                     emoteData.pageLink =

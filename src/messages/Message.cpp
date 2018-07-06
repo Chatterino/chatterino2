@@ -9,12 +9,12 @@ namespace chatterino {
 
 void Message::addElement(MessageElement *element)
 {
-    this->elements.push_back(std::unique_ptr<MessageElement>(element));
+    this->elements_.push_back(std::unique_ptr<MessageElement>(element));
 }
 
 const std::vector<std::unique_ptr<MessageElement>> &Message::getElements() const
 {
-    return this->elements;
+    return this->elements_;
 }
 
 SBHighlight Message::getScrollBarHighlight() const

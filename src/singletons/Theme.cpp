@@ -46,8 +46,8 @@ void Theme::update()
 // multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
 void Theme::actuallyUpdate(double hue, double multiplier)
 {
-    isLight = multiplier > 0;
-    bool lightWin = isLight;
+    isLight_ = multiplier > 0;
+    bool lightWin = isLight_;
 
     //    QColor themeColor = QColor::fromHslF(hue, 0.43, 0.5);
     QColor themeColor = QColor::fromHslF(hue, 0.8, 0.5);
@@ -82,7 +82,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         // message (referenced later)
         this->messages.textColors.caret =  //
-            this->messages.textColors.regular = isLight ? "#000" : "#fff";
+            this->messages.textColors.regular = isLight_ ? "#000" : "#fff";
 
         QColor highlighted = lightWin ? QColor("#ff0000") : QColor("#ee6166");
 
@@ -141,14 +141,14 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     }
 
     // Split
-    bool flat = isLight;
+    bool flat = isLight_;
 
-    this->splits.messageSeperator = isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
+    this->splits.messageSeperator = isLight_ ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
-    if (isLight) {
+    if (isLight_) {
         this->splits.dropTargetRect = QColor(255, 255, 255, 0x00);
         this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
 
@@ -165,7 +165,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
-    this->splits.header.focusedText = isLight ? QColor("#198CFF") : QColor("#84C1FF");
+    this->splits.header.focusedText = isLight_ ? QColor("#198CFF") : QColor("#84C1FF");
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
@@ -175,16 +175,16 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         "border:" + this->tabs.selected.backgrounds.regular.color().name() + ";" +
         "color:" + this->messages.textColors.regular.name() + ";" +  //
         "selection-background-color:" +
-        (isLight ? "#68B1FF" : this->tabs.selected.backgrounds.regular.color().name());
+        (isLight_ ? "#68B1FF" : this->tabs.selected.backgrounds.regular.color().name());
 
     // Message
-    this->messages.textColors.link = isLight ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    this->messages.textColors.link = isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
 
-    if (isLight) {
+    if (isLight_) {
         this->messages.backgrounds.highlighted =
             blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
     } else {
@@ -228,7 +228,7 @@ QColor Theme::blendColors(const QColor &color1, const QColor &color2, qreal rati
 
 void Theme::normalizeColor(QColor &color)
 {
-    if (this->isLight) {
+    if (this->isLight_) {
         if (color.lightnessF() > 0.5) {
             color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }

@@ -18,9 +18,9 @@ public:
     IgnoreModel *createModel(QObject *parent);
 
 private:
-    bool initialized = false;
+    bool initialized_ = false;
 
-    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting = {"/ignore/phrases"};
+    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {"/ignore/phrases"};
 };
 
 }  // namespace chatterino

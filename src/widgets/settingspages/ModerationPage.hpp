@@ -14,7 +14,7 @@ public:
     ModerationPage();
 
 private:
-    QTimer itemsChangedTimer;
+    QTimer itemsChangedTimer_;
 };
 
 }  // namespace chatterino

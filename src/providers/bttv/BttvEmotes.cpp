@@ -85,7 +85,7 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emo
             QString code = emoteObject.value("code").toString();
             // emoteObject.value("imageType").toString();
 
-            auto emote = this->channelEmoteCache.getOrAdd(id, [&] {
+            auto emote = this->channelEmoteCache_.getOrAdd(id, [&] {
                 EmoteData emoteData;
                 QString link = linkTemplate;
                 link.detach();

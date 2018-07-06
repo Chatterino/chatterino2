@@ -31,10 +31,9 @@ Split *SplitContainer::draggingSplit = nullptr;
 
 SplitContainer::SplitContainer(Notebook *parent)
     : BaseWidget(parent)
-    , dropPreview(this)
-    , overlay(this)
-    , mouseOverPoint(-10000, -10000)
-    , tab(nullptr)
+    , overlay_(this)
+    , mouseOverPoint_(-10000, -10000)
+    , tab_(nullptr)
 {
     this->refreshTabTitle();
 
@@ -42,12 +41,12 @@ SplitContainer::SplitContainer(Notebook *parent)
         this->layout();
 
         if (modifiers == showResizeHandlesModifiers) {
-            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
+            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
                 handle->show();
                 handle->raise();
             }
         } else {
-            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
+            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
                 handle->hide();
             }
         }
@@ -62,12 +61,12 @@ SplitContainer::SplitContainer(Notebook *parent)
     this->setCursor(Qt::PointingHandCursor);
     this->setAcceptDrops(true);
 
-    this->managedConnect(this->overlay.dragEnded, [this]() {
-        this->isDragging = false;
+    this->managedConnect(this->overlay_.dragEnded, [this]() {
+        this->isDragging_ = false;
         this->layout();
     });
 
-    this->overlay.hide();
+    this->overlay_.hide();
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -75,30 +74,30 @@ SplitContainer::SplitContainer(Notebook *parent)
 
 NotebookTab *SplitContainer::getTab() const
 {
-    return this->tab;
+    return this->tab_;
 }
 
 void SplitContainer::setTab(NotebookTab *_tab)
 {
-    this->tab = _tab;
+    this->tab_ = _tab;
 
-    this->tab->page = this;
+    this->tab_->page = this;
 
     this->refreshTabTitle();
 }
 
 void SplitContainer::hideResizeHandles()
 {
-    this->overlay.hide();
+    this->overlay_.hide();
 
-    for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles) {
+    for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
         handle->hide();
     }
 }
 
 void SplitContainer::resetMouseStatus()
 {
-    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->update();
 }
 
@@ -125,12 +124,12 @@ void SplitContainer::appendSplit(Split *split)
 
 void SplitContainer::insertSplit(Split *split, const Position &position)
 {
-    this->insertSplit(split, position.direction, reinterpret_cast<Node *>(position.relativeNode));
+    this->insertSplit(split, position.direction_, reinterpret_cast<Node *>(position.relativeNode_));
 }
 
 void SplitContainer::insertSplit(Split *split, Direction direction, Split *relativeTo)
 {
-    Node *node = this->baseNode.findNodeContainingSplit(relativeTo);
+    Node *node = this->baseNode_.findNodeContainingSplit(relativeTo);
     assert(node != nullptr);
 
     this->insertSplit(split, direction, node);
@@ -143,15 +142,15 @@ void SplitContainer::insertSplit(Split *split, Direction direction, Node *relati
     split->setContainer(this);
 
     if (relativeTo == nullptr) {
-        if (this->baseNode.type == Node::EmptyRoot) {
-            this->baseNode.setSplit(split);
-        } else if (this->baseNode.type == Node::_Split) {
-            this->baseNode.nestSplitIntoCollection(split, direction);
+        if (this->baseNode_.type_ == Node::EmptyRoot) {
+            this->baseNode_.setSplit(split);
+        } else if (this->baseNode_.type_ == Node::_Split) {
+            this->baseNode_.nestSplitIntoCollection(split, direction);
         } else {
-            this->baseNode.insertSplitRelative(split, direction);
+            this->baseNode_.insertSplitRelative(split, direction);
         }
     } else {
-        assert(this->baseNode.isOrContainsNode(relativeTo));
+        assert(this->baseNode_.isOrContainsNode(relativeTo));
 
         relativeTo->insertSplitRelative(split, direction);
     }
@@ -167,13 +166,13 @@ void SplitContainer::addSplit(Split *split)
     split->show();
     split->giveFocus(Qt::MouseFocusReason);
     this->unsetCursor();
-    this->splits.push_back(split);
+    this->splits_.push_back(split);
 
     this->refreshTabTitle();
 
     split->getChannelView().tabHighlightRequested.connect([this](HighlightState state) {
-        if (this->tab != nullptr) {
-            this->tab->setHighlightState(state);
+        if (this->tab_ != nullptr) {
+            this->tab_->setHighlightState(state);
         }
     });
 
@@ -184,19 +183,19 @@ void SplitContainer::addSplit(Split *split)
 
 void SplitContainer::setSelected(Split *split)
 {
-    this->selected = split;
+    this->selected_ = split;
 
-    if (Node *node = this->baseNode.findNodeContainingSplit(split)) {
+    if (Node *node = this->baseNode_.findNodeContainingSplit(split)) {
         this->setPreferedTargetRecursive(node);
     }
 }
 
 void SplitContainer::setPreferedTargetRecursive(Node *node)
 {
-    if (node->parent != nullptr) {
-        node->parent->preferedFocusTarget = node;
+    if (node->parent_ != nullptr) {
+        node->parent_->preferedFocusTarget_ = node;
 
-        this->setPreferedTargetRecursive(node->parent);
+        this->setPreferedTargetRecursive(node->parent_);
     }
 }
 
@@ -204,18 +203,18 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 {
     assertInGuiThread();
 
-    Node *node = this->baseNode.findNodeContainingSplit(split);
+    Node *node = this->baseNode_.findNodeContainingSplit(split);
     assert(node != nullptr);
 
-    this->splits.erase(std::find(this->splits.begin(), this->splits.end(), split));
+    this->splits_.erase(std::find(this->splits_.begin(), this->splits_.end(), split));
     split->setParent(nullptr);
     Position position = node->releaseSplit();
     this->layout();
-    if (splits.size() == 0) {
+    if (splits_.size() == 0) {
         this->setSelected(nullptr);
         this->setCursor(Qt::PointingHandCursor);
     } else {
-        this->splits.front()->giveFocus(Qt::MouseFocusReason);
+        this->splits_.front()->giveFocus(Qt::MouseFocusReason);
     }
 
     this->refreshTabTitle();
@@ -241,16 +240,16 @@ void SplitContainer::selectNextSplit(Direction direction)
 {
     assertInGuiThread();
 
-    if (Node *node = this->baseNode.findNodeContainingSplit(this->selected)) {
+    if (Node *node = this->baseNode_.findNodeContainingSplit(this->selected_)) {
         this->selectSplitRecursive(node, direction);
     }
 }
 
 void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
 {
-    if (node->parent != nullptr) {
-        if (node->parent->type == Node::toContainerType(direction)) {
-            auto &siblings = node->parent->children;
+    if (node->parent_ != nullptr) {
+        if (node->parent_->type_ == Node::toContainerType(direction)) {
+            auto &siblings = node->parent_->children_;
 
             auto it = std::find_if(siblings.begin(), siblings.end(),
                                    [node](const auto &other) { return other.get() == node; });
@@ -258,42 +257,42 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
 
             if (direction == Direction::Left || direction == Direction::Above) {
                 if (it == siblings.begin()) {
-                    this->selectSplitRecursive(node->parent, direction);
+                    this->selectSplitRecursive(node->parent_, direction);
                 } else {
                     this->focusSplitRecursive(siblings[it - siblings.begin() - 1].get(), direction);
                 }
             } else {
                 if (it->get() == siblings.back().get()) {
-                    this->selectSplitRecursive(node->parent, direction);
+                    this->selectSplitRecursive(node->parent_, direction);
                 } else {
                     this->focusSplitRecursive(siblings[it - siblings.begin() + 1].get(), direction);
                 }
             }
         } else {
-            this->selectSplitRecursive(node->parent, direction);
+            this->selectSplitRecursive(node->parent_, direction);
         }
     }
 }
 
 void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 {
-    switch (node->type) {
+    switch (node->type_) {
         case Node::_Split: {
-            node->split->giveFocus(Qt::OtherFocusReason);
+            node->split_->giveFocus(Qt::OtherFocusReason);
         } break;
 
         case Node::HorizontalContainer:
         case Node::VerticalContainer: {
-            auto &children = node->children;
+            auto &children = node->children_;
 
             auto it = std::find_if(children.begin(), children.end(), [node](const auto &other) {
-                return node->preferedFocusTarget == other.get();
+                return node->preferedFocusTarget_ == other.get();
             });
 
             if (it != children.end()) {
                 this->focusSplitRecursive(it->get(), direction);
             } else {
-                this->focusSplitRecursive(node->children.front().get(), direction);
+                this->focusSplitRecursive(node->children_.front().get(), direction);
             }
         } break;
 
@@ -303,19 +302,19 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 
 void SplitContainer::layout()
 {
-    this->baseNode.geometry = this->rect();
+    this->baseNode_.geometry_ = this->rect();
 
     std::vector<DropRect> _dropRects;
     std::vector<ResizeRect> _resizeRects;
-    this->baseNode.layout(Split::modifierStatus == showAddSplitRegions || this->isDragging,
-                          this->getScale(), _dropRects, _resizeRects);
+    this->baseNode_.layout(Split::modifierStatus == showAddSplitRegions || this->isDragging_,
+                           this->getScale(), _dropRects, _resizeRects);
 
-    this->dropRects = _dropRects;
+    this->dropRects_ = _dropRects;
 
-    for (Split *split : this->splits) {
+    for (Split *split : this->splits_) {
         const QRect &g = split->geometry();
 
-        Node *node = this->baseNode.findNodeContainingSplit(split);
+        Node *node = this->baseNode_.findNodeContainingSplit(split);
 
         _dropRects.push_back(DropRect(QRect(g.left(), g.top(), g.width() / 4, g.height()),
                                       Position(node, Direction::Left)));
@@ -330,27 +329,27 @@ void SplitContainer::layout()
                      Position(node, Direction::Below)));
     }
 
-    if (this->splits.empty()) {
+    if (this->splits_.empty()) {
         QRect g = this->rect();
         _dropRects.push_back(DropRect(QRect(g.left(), g.top(), g.width(), g.height()),
                                       Position(nullptr, Direction::Below)));
     }
 
-    this->overlay.setRects(std::move(_dropRects));
+    this->overlay_.setRects(std::move(_dropRects));
 
     // handle resizeHandles
-    if (this->resizeHandles.size() < _resizeRects.size()) {
-        while (this->resizeHandles.size() < _resizeRects.size()) {
-            this->resizeHandles.push_back(std::make_unique<ResizeHandle>(this));
+    if (this->resizeHandles_.size() < _resizeRects.size()) {
+        while (this->resizeHandles_.size() < _resizeRects.size()) {
+            this->resizeHandles_.push_back(std::make_unique<ResizeHandle>(this));
         }
-    } else if (this->resizeHandles.size() > _resizeRects.size()) {
-        this->resizeHandles.resize(_resizeRects.size());
+    } else if (this->resizeHandles_.size() > _resizeRects.size()) {
+        this->resizeHandles_.resize(_resizeRects.size());
     }
 
     {
         size_t i = 0;
         for (ResizeRect &resizeRect : _resizeRects) {
-            ResizeHandle *handle = this->resizeHandles[i].get();
+            ResizeHandle *handle = this->resizeHandles_[i].get();
             handle->setGeometry(resizeRect.rect);
             handle->setVertical(resizeRect.vertical);
             handle->node = resizeRect.node;
@@ -378,17 +377,17 @@ void SplitContainer::resizeEvent(QResizeEvent *event)
 void SplitContainer::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        if (this->splits.size() == 0) {
+        if (this->splits_.size() == 0) {
             // "Add Chat" was clicked
             this->appendNewSplit(true);
-            this->mouseOverPoint = QPoint(-10000, -10000);
+            this->mouseOverPoint_ = QPoint(-10000, -10000);
 
             //            this->setCursor(QCursor(Qt::ArrowCursor));
         } else {
             auto it =
-                std::find_if(this->dropRects.begin(), this->dropRects.end(),
+                std::find_if(this->dropRects_.begin(), this->dropRects_.end(),
                              [event](DropRect &rect) { return rect.rect.contains(event->pos()); });
-            if (it != this->dropRects.end()) {
+            if (it != this->dropRects_.end()) {
                 this->insertSplit(new Split(this), it->position);
             }
         }
@@ -399,7 +398,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (this->splits.size() == 0) {
+    if (this->splits_.size() == 0) {
         painter.fillRect(rect(), this->theme->splits.background);
 
         painter.setPen(this->theme->splits.header.text);
@@ -424,11 +423,11 @@ void SplitContainer::paintEvent(QPaintEvent *)
         }
     }
 
-    for (DropRect &dropRect : this->dropRects) {
+    for (DropRect &dropRect : this->dropRects_) {
         QColor border = getApp()->themes->splits.dropTargetRectBorder;
         QColor background = getApp()->themes->splits.dropTargetRect;
 
-        if (!dropRect.rect.contains(this->mouseOverPoint)) {
+        if (!dropRect.rect.contains(this->mouseOverPoint_)) {
             //            border.setAlphaF(0.1);
             //            background.setAlphaF(0.1);
         } else {
@@ -471,12 +470,12 @@ void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
     if (!SplitContainer::isDraggingSplit)
         return;
 
-    this->isDragging = true;
+    this->isDragging_ = true;
     this->layout();
 
-    this->overlay.setGeometry(this->rect());
-    this->overlay.show();
-    this->overlay.raise();
+    this->overlay_.setGeometry(this->rect());
+    this->overlay_.show();
+    this->overlay_.raise();
 }
 
 void SplitContainer::mouseMoveEvent(QMouseEvent *event)
@@ -485,38 +484,38 @@ void SplitContainer::mouseMoveEvent(QMouseEvent *event)
         this->setCursor(Qt::PointingHandCursor);
     }
 
-    this->mouseOverPoint = event->pos();
+    this->mouseOverPoint_ = event->pos();
     this->update();
 }
 
 void SplitContainer::leaveEvent(QEvent *)
 {
-    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->update();
 }
 
 void SplitContainer::focusInEvent(QFocusEvent *)
 {
-    if (this->baseNode.findNodeContainingSplit(this->selected) != nullptr) {
-        this->selected->setFocus();
+    if (this->baseNode_.findNodeContainingSplit(this->selected_) != nullptr) {
+        this->selected_->setFocus();
         return;
     }
 
-    if (this->splits.size() != 0) {
-        this->splits.front()->setFocus();
+    if (this->splits_.size() != 0) {
+        this->splits_.front()->setFocus();
     }
 }
 
 void SplitContainer::refreshTabTitle()
 {
-    if (this->tab == nullptr) {
+    if (this->tab_ == nullptr) {
         return;
     }
 
     QString newTitle = "";
     bool first = true;
 
-    for (const auto &chatWidget : this->splits) {
+    for (const auto &chatWidget : this->splits_) {
         auto channelName = chatWidget->getChannel()->name;
         if (channelName.isEmpty()) {
             continue;
@@ -534,7 +533,7 @@ void SplitContainer::refreshTabTitle()
         newTitle = "empty";
     }
 
-    this->tab->setDefaultTitle(newTitle);
+    this->tab_->setDefaultTitle(newTitle);
 }
 
 int SplitContainer::getSplitCount()
@@ -544,19 +543,19 @@ int SplitContainer::getSplitCount()
 
 const std::vector<Split *> SplitContainer::getSplits() const
 {
-    return this->splits;
+    return this->splits_;
 }
 
 SplitContainer::Node *SplitContainer::getBaseNode()
 {
-    return &this->baseNode;
+    return &this->baseNode_;
 }
 
 void SplitContainer::decodeFromJson(QJsonObject &obj)
 {
-    assert(this->baseNode.type == Node::EmptyRoot);
+    assert(this->baseNode_.type_ == Node::EmptyRoot);
 
-    this->decodeNodeRecusively(obj, &this->baseNode);
+    this->decodeNodeRecusively(obj, &this->baseNode_);
 }
 
 void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
@@ -573,7 +572,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
 
         Direction direction = vertical ? Direction::Below : Direction::Right;
 
-        node->type = vertical ? Node::VerticalContainer : Node::HorizontalContainer;
+        node->type_ = vertical ? Node::VerticalContainer : Node::HorizontalContainer;
 
         for (QJsonValue _val : obj.value("items").toArray()) {
             auto _obj = _val.toObject();
@@ -584,19 +583,19 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 split->setChannel(WindowManager::decodeChannel(_obj.value("data").toObject()));
 
                 Node *_node = new Node();
-                _node->parent = node;
-                _node->split = split;
-                _node->type = Node::_Split;
+                _node->parent_ = node;
+                _node->split_ = split;
+                _node->type_ = Node::_Split;
 
-                _node->flexH = _obj.value("flexh").toDouble(1.0);
-                _node->flexV = _obj.value("flexv").toDouble(1.0);
-                node->children.emplace_back(_node);
+                _node->flexH_ = _obj.value("flexh").toDouble(1.0);
+                _node->flexV_ = _obj.value("flexv").toDouble(1.0);
+                node->children_.emplace_back(_node);
 
                 this->addSplit(split);
             } else {
                 Node *_node = new Node();
-                _node->parent = node;
-                node->children.emplace_back(_node);
+                _node->parent_ = node;
+                node->children_.emplace_back(_node);
                 this->decodeNodeRecusively(_obj, _node);
             }
         }
@@ -618,44 +617,44 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
 
 SplitContainer::Node::Type SplitContainer::Node::getType()
 {
-    return this->type;
+    return this->type_;
 }
 Split *SplitContainer::Node::getSplit()
 {
-    return this->split;
+    return this->split_;
 }
 
 SplitContainer::Node *SplitContainer::Node::getParent()
 {
-    return this->parent;
+    return this->parent_;
 }
 
 qreal SplitContainer::Node::getHorizontalFlex()
 {
-    return this->flexH;
+    return this->flexH_;
 }
 
 qreal SplitContainer::Node::getVerticalFlex()
 {
-    return this->flexV;
+    return this->flexV_;
 }
 
 const std::vector<std::unique_ptr<SplitContainer::Node>> &SplitContainer::Node::getChildren()
 {
-    return this->children;
+    return this->children_;
 }
 
 SplitContainer::Node::Node()
-    : type(SplitContainer::Node::Type::EmptyRoot)
-    , split(nullptr)
-    , parent(nullptr)
+    : type_(SplitContainer::Node::Type::EmptyRoot)
+    , split_(nullptr)
+    , parent_(nullptr)
 {
 }
 
 SplitContainer::Node::Node(Split *_split, Node *_parent)
-    : type(Type::_Split)
-    , split(_split)
-    , parent(_parent)
+    : type_(Type::_Split)
+    , split_(_split)
+    , parent_(_parent)
 {
 }
 
@@ -665,17 +664,17 @@ bool SplitContainer::Node::isOrContainsNode(SplitContainer::Node *_node)
         return true;
     }
 
-    return std::any_of(this->children.begin(), this->children.end(),
+    return std::any_of(this->children_.begin(), this->children_.end(),
                        [_node](std::unique_ptr<Node> &n) { return n->isOrContainsNode(_node); });
 }
 
 SplitContainer::Node *SplitContainer::Node::findNodeContainingSplit(Split *_split)
 {
-    if (this->type == Type::_Split && this->split == _split) {
+    if (this->type_ == Type::_Split && this->split_ == _split) {
         return this;
     }
 
-    for (std::unique_ptr<Node> &node : this->children) {
+    for (std::unique_ptr<Node> &node : this->children_) {
         Node *a = node->findNodeContainingSplit(_split);
 
         if (a != nullptr) {
@@ -687,8 +686,8 @@ SplitContainer::Node *SplitContainer::Node::findNodeContainingSplit(Split *_spli
 
 void SplitContainer::Node::insertSplitRelative(Split *_split, Direction _direction)
 {
-    if (this->parent == nullptr) {
-        switch (this->type) {
+    if (this->parent_ == nullptr) {
+        switch (this->type_) {
             case Node::EmptyRoot: {
                 this->setSplit(_split);
             } break;
@@ -706,9 +705,9 @@ void SplitContainer::Node::insertSplitRelative(Split *_split, Direction _directi
     }
 
     // parent != nullptr
-    if (parent->type == toContainerType(_direction)) {
+    if (parent_->type_ == toContainerType(_direction)) {
         // hell yeah we'll just insert it next to outselves
-        this->_insertNextToThis(_split, _direction);
+        this->insertNextToThis(_split, _direction);
     } else {
         this->nestSplitIntoCollection(_split, _direction);
     }
@@ -716,38 +715,38 @@ void SplitContainer::Node::insertSplitRelative(Split *_split, Direction _directi
 
 void SplitContainer::Node::nestSplitIntoCollection(Split *_split, Direction _direction)
 {
-    if (toContainerType(_direction) == this->type) {
-        this->children.emplace_back(new Node(_split, this));
+    if (toContainerType(_direction) == this->type_) {
+        this->children_.emplace_back(new Node(_split, this));
     } else {
         // we'll need to nest outselves
         // move all our data into a new node
         Node *clone = new Node();
-        clone->type = this->type;
-        clone->children = std::move(this->children);
-        for (std::unique_ptr<Node> &node : clone->children) {
-            node->parent = clone;
+        clone->type_ = this->type_;
+        clone->children_ = std::move(this->children_);
+        for (std::unique_ptr<Node> &node : clone->children_) {
+            node->parent_ = clone;
         }
-        clone->split = this->split;
-        clone->parent = this;
+        clone->split_ = this->split_;
+        clone->parent_ = this;
 
         // add the node to our children and change our type
-        this->children.push_back(std::unique_ptr<Node>(clone));
-        this->type = toContainerType(_direction);
-        this->split = nullptr;
+        this->children_.push_back(std::unique_ptr<Node>(clone));
+        this->type_ = toContainerType(_direction);
+        this->split_ = nullptr;
 
-        clone->_insertNextToThis(_split, _direction);
+        clone->insertNextToThis(_split, _direction);
     }
 }
 
-void SplitContainer::Node::_insertNextToThis(Split *_split, Direction _direction)
+void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
 {
-    auto &siblings = this->parent->children;
+    auto &siblings = this->parent_->children_;
 
-    qreal width = this->parent->geometry.width() / siblings.size();
-    qreal height = this->parent->geometry.height() / siblings.size();
+    qreal width = this->parent_->geometry_.width() / siblings.size();
+    qreal height = this->parent_->geometry_.height() / siblings.size();
 
     if (siblings.size() == 1) {
-        this->geometry = QRect(0, 0, int(width), int(height));
+        this->geometry_ = QRect(0, 0, int(width), int(height));
     }
 
     auto it = std::find_if(siblings.begin(), siblings.end(),
@@ -758,34 +757,34 @@ void SplitContainer::Node::_insertNextToThis(Split *_split, Direction _direction
         it++;
     }
 
-    Node *node = new Node(_split, this->parent);
-    node->geometry = QRectF(0, 0, width, height);
+    Node *node = new Node(_split, this->parent_);
+    node->geometry_ = QRectF(0, 0, width, height);
     siblings.insert(it, std::unique_ptr<Node>(node));
 }
 
 void SplitContainer::Node::setSplit(Split *_split)
 {
-    assert(this->split == nullptr);
-    assert(this->children.size() == 0);
+    assert(this->split_ == nullptr);
+    assert(this->children_.size() == 0);
 
-    this->split = _split;
-    this->type = Type::_Split;
+    this->split_ = _split;
+    this->type_ = Type::_Split;
 }
 
 SplitContainer::Position SplitContainer::Node::releaseSplit()
 {
-    assert(this->type == Type::_Split);
+    assert(this->type_ == Type::_Split);
 
-    if (parent == nullptr) {
-        this->type = Type::EmptyRoot;
-        this->split = nullptr;
+    if (parent_ == nullptr) {
+        this->type_ = Type::EmptyRoot;
+        this->split_ = nullptr;
 
         Position pos;
-        pos.relativeNode = nullptr;
-        pos.direction = Direction::Right;
+        pos.relativeNode_ = nullptr;
+        pos.direction_ = Direction::Right;
         return pos;
     } else {
-        auto &siblings = this->parent->children;
+        auto &siblings = this->parent_->children_;
 
         auto it = std::find_if(begin(siblings), end(siblings),
                                [this](auto &node) { return this == node.get(); });
@@ -794,35 +793,35 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         Position position;
         if (siblings.size() == 2) {
             // delete this and move split to parent
-            position.relativeNode = this->parent;
-            if (this->parent->type == Type::VerticalContainer) {
-                position.direction = siblings.begin() == it ? Direction::Above : Direction::Below;
+            position.relativeNode_ = this->parent_;
+            if (this->parent_->type_ == Type::VerticalContainer) {
+                position.direction_ = siblings.begin() == it ? Direction::Above : Direction::Below;
             } else {
-                position.direction = siblings.begin() == it ? Direction::Left : Direction::Right;
+                position.direction_ = siblings.begin() == it ? Direction::Left : Direction::Right;
             }
 
-            Node *_parent = this->parent;
+            Node *_parent = this->parent_;
             siblings.erase(it);
             std::unique_ptr<Node> &sibling = siblings.front();
-            _parent->type = sibling->type;
-            _parent->split = sibling->split;
-            std::vector<std::unique_ptr<Node>> nodes = std::move(sibling->children);
+            _parent->type_ = sibling->type_;
+            _parent->split_ = sibling->split_;
+            std::vector<std::unique_ptr<Node>> nodes = std::move(sibling->children_);
             for (auto &node : nodes) {
-                node->parent = _parent;
+                node->parent_ = _parent;
             }
-            _parent->children = std::move(nodes);
+            _parent->children_ = std::move(nodes);
         } else {
             if (this == siblings.back().get()) {
-                position.direction = this->parent->type == Type::VerticalContainer
-                                         ? Direction::Below
-                                         : Direction::Right;
+                position.direction_ = this->parent_->type_ == Type::VerticalContainer
+                                          ? Direction::Below
+                                          : Direction::Right;
                 siblings.erase(it);
-                position.relativeNode = siblings.back().get();
+                position.relativeNode_ = siblings.back().get();
             } else {
-                position.relativeNode = (it + 1)->get();
-                position.direction = this->parent->type == Type::VerticalContainer
-                                         ? Direction::Above
-                                         : Direction::Left;
+                position.relativeNode_ = (it + 1)->get();
+                position.direction_ = this->parent_->type_ == Type::VerticalContainer
+                                          ? Direction::Above
+                                          : Direction::Left;
                 siblings.erase(it);
             }
         }
@@ -833,46 +832,46 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
 
 qreal SplitContainer::Node::getFlex(bool isVertical)
 {
-    return isVertical ? this->flexV : this->flexH;
+    return isVertical ? this->flexV_ : this->flexH_;
 }
 
 qreal SplitContainer::Node::getSize(bool isVertical)
 {
-    return isVertical ? this->geometry.height() : this->geometry.width();
+    return isVertical ? this->geometry_.height() : this->geometry_.width();
 }
 
 qreal SplitContainer::Node::getChildrensTotalFlex(bool isVertical)
 {
     return std::accumulate(
-        this->children.begin(), this->children.end(), qreal(0),
+        this->children_.begin(), this->children_.end(), qreal(0),
         [=](qreal val, std::unique_ptr<Node> &node) { return val + node->getFlex(isVertical); });
 }
 
 void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<DropRect> &dropRects,
                                   std::vector<ResizeRect> &resizeRects)
 {
-    for (std::unique_ptr<Node> &node : this->children) {
-        if (node->flexH <= 0)
-            node->flexH = 0;
-        if (node->flexV <= 0)
-            node->flexV = 0;
+    for (std::unique_ptr<Node> &node : this->children_) {
+        if (node->flexH_ <= 0)
+            node->flexH_ = 0;
+        if (node->flexV_ <= 0)
+            node->flexV_ = 0;
     }
 
-    switch (this->type) {
+    switch (this->type_) {
         case Node::_Split: {
-            QRect rect = this->geometry.toRect();
-            this->split->setGeometry(rect.marginsRemoved(QMargins(1, 1, 1, 1)));
+            QRect rect = this->geometry_.toRect();
+            this->split_->setGeometry(rect.marginsRemoved(QMargins(1, 1, 1, 1)));
         } break;
         case Node::VerticalContainer:
         case Node::HorizontalContainer: {
-            bool isVertical = this->type == Node::VerticalContainer;
+            bool isVertical = this->type_ == Node::VerticalContainer;
 
             // vars
             qreal minSize = qreal(48 * _scale);
 
             qreal totalFlex = this->getChildrensTotalFlex(isVertical);
             qreal totalSize = std::accumulate(
-                this->children.begin(), this->children.end(), qreal(0),
+                this->children_.begin(), this->children_.end(), qreal(0),
                 [=](int val, std::unique_ptr<Node> &node) {
                     return val + std::max<qreal>(this->getSize(isVertical) / totalFlex *
                                                      node->getFlex(isVertical),
@@ -880,7 +879,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
                 });
 
             qreal sizeMultiplier = this->getSize(isVertical) / totalSize;
-            QRectF childRect = this->geometry;
+            QRectF childRect = this->geometry_;
 
             // add spacing if reqested
             if (addSpacing) {
@@ -889,23 +888,23 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
 
                 // droprect left / above
                 dropRects.emplace_back(
-                    QRectF(this->geometry.left(), this->geometry.top(),
-                           isVertical ? offset : this->geometry.width(),
-                           isVertical ? this->geometry.height() : offset)
+                    QRectF(this->geometry_.left(), this->geometry_.top(),
+                           isVertical ? offset : this->geometry_.width(),
+                           isVertical ? this->geometry_.height() : offset)
                         .toRect(),
                     Position(this, isVertical ? Direction::Left : Direction::Above));
 
                 // droprect right / below
                 if (isVertical) {
                     dropRects.emplace_back(
-                        QRectF(this->geometry.right() - offset, this->geometry.top(), offset,
-                               this->geometry.height())
+                        QRectF(this->geometry_.right() - offset, this->geometry_.top(), offset,
+                               this->geometry_.height())
                             .toRect(),
                         Position(this, Direction::Right));
                 } else {
                     dropRects.emplace_back(
-                        QRectF(this->geometry.left(), this->geometry.bottom() - offset,
-                               this->geometry.width(), offset)
+                        QRectF(this->geometry_.left(), this->geometry_.bottom() - offset,
+                               this->geometry_.width(), offset)
                             .toRect(),
                         Position(this, Direction::Below));
                 }
@@ -922,43 +921,45 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
 
             // iterate children
             qreal pos = isVertical ? childRect.top() : childRect.left();
-            for (std::unique_ptr<Node> &child : this->children) {
+            for (std::unique_ptr<Node> &child : this->children_) {
                 // set rect
                 QRectF rect = childRect;
                 if (isVertical) {
                     rect.setTop(pos);
                     rect.setHeight(
-                        std::max<qreal>(this->geometry.height() / totalFlex * child->flexV,
+                        std::max<qreal>(this->geometry_.height() / totalFlex * child->flexV_,
                                         minSize) *
                         sizeMultiplier);
                 } else {
                     rect.setLeft(pos);
-                    rect.setWidth(std::max<qreal>(this->geometry.width() / totalFlex * child->flexH,
-                                                  minSize) *
-                                  sizeMultiplier);
+                    rect.setWidth(
+                        std::max<qreal>(this->geometry_.width() / totalFlex * child->flexH_,
+                                        minSize) *
+                        sizeMultiplier);
                 }
 
-                child->geometry = rect;
+                child->geometry_ = rect;
                 child->layout(addSpacing, _scale, dropRects, resizeRects);
 
                 pos += child->getSize(isVertical);
 
                 // add resize rect
-                if (child != this->children.front()) {
-                    QRectF r = isVertical ? QRectF(this->geometry.left(), child->geometry.top() - 4,
-                                                   this->geometry.width(), 8)
-                                          : QRectF(child->geometry.left() - 4, this->geometry.top(),
-                                                   8, this->geometry.height());
+                if (child != this->children_.front()) {
+                    QRectF r = isVertical
+                                   ? QRectF(this->geometry_.left(), child->geometry_.top() - 4,
+                                            this->geometry_.width(), 8)
+                                   : QRectF(child->geometry_.left() - 4, this->geometry_.top(), 8,
+                                            this->geometry_.height());
                     resizeRects.push_back(ResizeRect(r.toRect(), child.get(), isVertical));
                 }
 
                 // normalize flex
                 if (isVertical) {
-                    child->flexV = child->flexV / totalFlex * this->children.size();
-                    child->flexH = 1;
+                    child->flexV_ = child->flexV_ / totalFlex * this->children_.size();
+                    child->flexH_ = 1;
                 } else {
-                    child->flexH = child->flexH / totalFlex * this->children.size();
-                    child->flexV = 1;
+                    child->flexH_ = child->flexH_ / totalFlex * this->children_.size();
+                    child->flexV_ = 1;
                 }
             }
         } break;
@@ -977,8 +978,8 @@ SplitContainer::Node::Type SplitContainer::Node::toContainerType(Direction _dir)
 
 SplitContainer::DropOverlay::DropOverlay(SplitContainer *_parent)
     : QWidget(_parent)
-    , mouseOverPoint(-10000, -10000)
-    , parent(_parent)
+    , mouseOverPoint_(-10000, -10000)
+    , parent_(_parent)
 {
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -986,7 +987,7 @@ SplitContainer::DropOverlay::DropOverlay(SplitContainer *_parent)
 
 void SplitContainer::DropOverlay::setRects(std::vector<SplitContainer::DropRect> _rects)
 {
-    this->rects = std::move(_rects);
+    this->rects_ = std::move(_rects);
 }
 
 // pajlada::Signals::NoArgSignal dragEnded;
@@ -999,8 +1000,8 @@ void SplitContainer::DropOverlay::paintEvent(QPaintEvent *)
 
     bool foundMover = false;
 
-    for (DropRect &rect : this->rects) {
-        if (!foundMover && rect.rect.contains(this->mouseOverPoint)) {
+    for (DropRect &rect : this->rects_) {
+        if (!foundMover && rect.rect.contains(this->mouseOverPoint_)) {
             painter.setBrush(getApp()->themes->splits.dropPreview);
             painter.setPen(getApp()->themes->splits.dropPreviewBorder);
             foundMover = true;
@@ -1023,13 +1024,13 @@ void SplitContainer::DropOverlay::dragMoveEvent(QDragMoveEvent *event)
 {
     event->acceptProposedAction();
 
-    this->mouseOverPoint = event->pos();
+    this->mouseOverPoint_ = event->pos();
     this->update();
 }
 
 void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent *)
 {
-    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->close();
     this->dragEnded.invoke();
 }
@@ -1037,19 +1038,19 @@ void SplitContainer::DropOverlay::dragLeaveEvent(QDragLeaveEvent *)
 void SplitContainer::DropOverlay::dropEvent(QDropEvent *event)
 {
     Position *position = nullptr;
-    for (DropRect &rect : this->rects) {
-        if (rect.rect.contains(this->mouseOverPoint)) {
+    for (DropRect &rect : this->rects_) {
+        if (rect.rect.contains(this->mouseOverPoint_)) {
             position = &rect.position;
             break;
         }
     }
 
     if (position != nullptr) {
-        this->parent->insertSplit(SplitContainer::draggingSplit, *position);
+        this->parent_->insertSplit(SplitContainer::draggingSplit, *position);
         event->acceptProposedAction();
     }
 
-    this->mouseOverPoint = QPoint(-10000, -10000);
+    this->mouseOverPoint_ = QPoint(-10000, -10000);
     this->close();
     this->dragEnded.invoke();
 }
@@ -1061,7 +1062,7 @@ void SplitContainer::DropOverlay::dropEvent(QDropEvent *event)
 void SplitContainer::ResizeHandle::setVertical(bool isVertical)
 {
     this->setCursor(isVertical ? Qt::SplitVCursor : Qt::SplitHCursor);
-    this->vertical = isVertical;
+    this->vertical_ = isVertical;
 }
 
 SplitContainer::ResizeHandle::ResizeHandle(SplitContainer *_parent)
@@ -1079,7 +1080,7 @@ void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
 
     painter.fillRect(this->rect(), getApp()->themes->splits.resizeHandleBackground);
 
-    if (this->vertical) {
+    if (this->vertical_) {
         painter.drawLine(0, this->height() / 2, this->width(), this->height() / 2);
     } else {
         painter.drawLine(this->width() / 2, 0, this->width() / 2, this->height());
@@ -1088,24 +1089,24 @@ void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
 
 void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *)
 {
-    this->isMouseDown = true;
+    this->isMouseDown_ = true;
 }
 
 void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent *)
 {
-    this->isMouseDown = false;
+    this->isMouseDown_ = false;
 }
 
 void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!this->isMouseDown) {
+    if (!this->isMouseDown_) {
         return;
     }
 
     assert(node != nullptr);
-    assert(node->parent != nullptr);
+    assert(node->parent_ != nullptr);
 
-    auto &siblings = node->parent->getChildren();
+    auto &siblings = node->parent_->getChildren();
     auto it =
         std::find_if(siblings.begin(), siblings.end(),
                      [this](const std::unique_ptr<Node> &n) { return n.get() == this->node; });
@@ -1113,8 +1114,8 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
     assert(it != siblings.end());
     Node *before = siblings[it - siblings.begin() - 1].get();
 
-    QPoint topLeft = this->parent->mapToGlobal(before->geometry.topLeft().toPoint());
-    QPoint bottomRight = this->parent->mapToGlobal(this->node->geometry.bottomRight().toPoint());
+    QPoint topLeft = this->parent->mapToGlobal(before->geometry_.topLeft().toPoint());
+    QPoint bottomRight = this->parent->mapToGlobal(this->node->geometry_.bottomRight().toPoint());
 
     int globalX = topLeft.x() > event->globalX()
                       ? topLeft.x()
@@ -1125,26 +1126,26 @@ void SplitContainer::ResizeHandle::mouseMoveEvent(QMouseEvent *event)
 
     QPoint mousePoint(globalX, globalY);
 
-    if (this->vertical) {
-        qreal totalFlexV = this->node->flexV + before->flexV;
-        before->flexV =
+    if (this->vertical_) {
+        qreal totalFlexV = this->node->flexV_ + before->flexV_;
+        before->flexV_ =
             totalFlexV * (mousePoint.y() - topLeft.y()) / (bottomRight.y() - topLeft.y());
-        this->node->flexV = totalFlexV - before->flexV;
+        this->node->flexV_ = totalFlexV - before->flexV_;
 
         this->parent->layout();
 
         // move handle
-        this->move(this->x(), int(before->geometry.bottom() - 4));
+        this->move(this->x(), int(before->geometry_.bottom() - 4));
     } else {
-        qreal totalFlexH = this->node->flexH + before->flexH;
-        before->flexH =
+        qreal totalFlexH = this->node->flexH_ + before->flexH_;
+        before->flexH_ =
             totalFlexH * (mousePoint.x() - topLeft.x()) / (bottomRight.x() - topLeft.x());
-        this->node->flexH = totalFlexH - before->flexH;
+        this->node->flexH_ = totalFlexH - before->flexH_;
 
         this->parent->layout();
 
         // move handle
-        this->move(int(before->geometry.right() - 4), this->y());
+        this->move(int(before->geometry_.right() - 4), this->y());
     }
 }
 
@@ -1153,8 +1154,8 @@ void SplitContainer::ResizeHandle::mouseDoubleClickEvent(QMouseEvent *event)
     event->accept();
 
     for (auto &sibling : this->node->getParent()->getChildren()) {
-        sibling->flexH = 1;
-        sibling->flexV = 1;
+        sibling->flexH_ = 1;
+        sibling->flexV_ = 1;
     }
 
     this->parent->layout();

@@ -4,7 +4,7 @@
 #include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
-#include "providers/twitch/Pubsub.hpp"
+#include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
@@ -16,15 +16,15 @@
 
 namespace chatterino {
 
-TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *_readConnection)
+TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection)
     : Channel(channelName, Channel::Type::Twitch)
     , bttvChannelEmotes(new EmoteMap)
     , ffzChannelEmotes(new EmoteMap)
     , subscriptionURL("https://www.twitch.tv/subs/" + name)
     , channelURL("https://twitch.tv/" + name)
     , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
-    , mod(false)
-    , readConnection(_readConnection)
+    , mod_(false)
+    , readConnection_(readConnection)
 {
     Log("[TwitchChannel:{}] Opened", this->name);
 
@@ -60,8 +60,8 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
         this->fetchRecentMessages();  //
     });
 
-    this->messageSuffix.append(' ');
-    this->messageSuffix.append(QChar(0x206D));
+    this->messageSuffix_.append(' ');
+    this->messageSuffix_.append(QChar(0x206D));
 
     static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
     auto refreshChatters = [=](QJsonObject obj) {
@@ -161,8 +161,8 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!this->hasModRights()) {
         if (app->settings->allowDuplicateMessages) {
-            if (parsedMessage == this->lastSentMessage) {
-                parsedMessage.append(this->messageSuffix);
+            if (parsedMessage == this->lastSentMessage_) {
+                parsedMessage.append(this->messageSuffix_);
             }
         }
     }
@@ -172,19 +172,19 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (messageSent) {
         qDebug() << "sent";
-        this->lastSentMessage = parsedMessage;
+        this->lastSentMessage_ = parsedMessage;
     }
 }
 
 bool TwitchChannel::isMod() const
 {
-    return this->mod;
+    return this->mod_;
 }
 
 void TwitchChannel::setMod(bool value)
 {
-    if (this->mod != value) {
-        this->mod = value;
+    if (this->mod_ != value) {
+        this->mod_ = value;
 
         this->userStateChanged.invoke();
     }
@@ -201,9 +201,9 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<Message> &message)
 {
     assert(!message->loginName.isEmpty());
 
-    std::lock_guard<std::mutex> lock(this->recentChattersMutex);
+    std::lock_guard<std::mutex> lock(this->recentChattersMutex_);
 
-    this->recentChatters[message->loginName] = {message->displayName, message->localizedName};
+    this->recentChatters_[message->loginName] = {message->displayName, message->localizedName};
 
     this->completionModel.addUser(message->displayName);
 }
@@ -216,22 +216,22 @@ void TwitchChannel::addJoinedUser(const QString &user)
         return;
     }
 
-    std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+    std::lock_guard<std::mutex> guard(this->joinedUserMutex_);
 
-    joinedUsers << user;
+    joinedUsers_ << user;
 
-    if (!this->joinedUsersMergeQueued) {
-        this->joinedUsersMergeQueued = true;
+    if (!this->joinedUsersMergeQueued_) {
+        this->joinedUsersMergeQueued_ = true;
 
-        QTimer::singleShot(500, &this->object, [this] {
-            std::lock_guard<std::mutex> guard(this->joinedUserMutex);
+        QTimer::singleShot(500, &this->object_, [this] {
+            std::lock_guard<std::mutex> guard(this->joinedUserMutex_);
 
             auto message =
-                Message::createSystemMessage("Users joined: " + this->joinedUsers.join(", "));
+                Message::createSystemMessage("Users joined: " + this->joinedUsers_.join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
-            this->joinedUsers.clear();
-            this->joinedUsersMergeQueued = false;
+            this->joinedUsers_.clear();
+            this->joinedUsersMergeQueued_ = false;
         });
     }
 }
@@ -245,39 +245,39 @@ void TwitchChannel::addPartedUser(const QString &user)
         return;
     }
 
-    std::lock_guard<std::mutex> guard(this->partedUserMutex);
+    std::lock_guard<std::mutex> guard(this->partedUserMutex_);
 
-    partedUsers << user;
+    partedUsers_ << user;
 
-    if (!this->partedUsersMergeQueued) {
-        this->partedUsersMergeQueued = true;
+    if (!this->partedUsersMergeQueued_) {
+        this->partedUsersMergeQueued_ = true;
 
-        QTimer::singleShot(500, &this->object, [this] {
-            std::lock_guard<std::mutex> guard(this->partedUserMutex);
+        QTimer::singleShot(500, &this->object_, [this] {
+            std::lock_guard<std::mutex> guard(this->partedUserMutex_);
 
             auto message =
-                Message::createSystemMessage("Users parted: " + this->partedUsers.join(", "));
+                Message::createSystemMessage("Users parted: " + this->partedUsers_.join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
-            this->partedUsers.clear();
+            this->partedUsers_.clear();
 
-            this->partedUsersMergeQueued = false;
+            this->partedUsersMergeQueued_ = false;
         });
     }
 }
 
 TwitchChannel::RoomModes TwitchChannel::getRoomModes()
 {
-    std::lock_guard<std::mutex> lock(this->roomModeMutex);
+    std::lock_guard<std::mutex> lock(this->roomModeMutex_);
 
-    return this->roomModes;
+    return this->roomModes_;
 }
 
 void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 {
     {
-        std::lock_guard<std::mutex> lock(this->roomModeMutex);
-        this->roomModes = _roomModes;
+        std::lock_guard<std::mutex> lock(this->roomModeMutex_);
+        this->roomModes_ = _roomModes;
     }
 
     this->roomModesChanged.invoke();
@@ -285,24 +285,24 @@ void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 
 bool TwitchChannel::isLive() const
 {
-    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-    return this->streamStatus.live;
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
+    return this->streamStatus_.live;
 }
 
 TwitchChannel::StreamStatus TwitchChannel::getStreamStatus() const
 {
-    std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-    return this->streamStatus;
+    std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
+    return this->streamStatus_;
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     bool gotNewLiveStatus = false;
     {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex);
-        if (this->streamStatus.live != newLiveStatus) {
+        std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
+        if (this->streamStatus_.live != newLiveStatus) {
             gotNewLiveStatus = true;
-            this->streamStatus.live = newLiveStatus;
+            this->streamStatus_.live = newLiveStatus;
         }
     }
 
@@ -369,21 +369,21 @@ void TwitchChannel::refreshLiveStatus()
         // Stream is live
 
         {
-            std::lock_guard<std::mutex> lock(channel->streamStatusMutex);
-            channel->streamStatus.live = true;
-            channel->streamStatus.viewerCount = stream["viewers"].GetUint();
-            channel->streamStatus.game = stream["game"].GetString();
-            channel->streamStatus.title = streamChannel["status"].GetString();
+            std::lock_guard<std::mutex> lock(channel->streamStatusMutex_);
+            channel->streamStatus_.live = true;
+            channel->streamStatus_.viewerCount = stream["viewers"].GetUint();
+            channel->streamStatus_.game = stream["game"].GetString();
+            channel->streamStatus_.title = streamChannel["status"].GetString();
             QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
             auto diff = since.secsTo(QDateTime::currentDateTime());
-            channel->streamStatus.uptime =
+            channel->streamStatus_.uptime =
                 QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
 
-            channel->streamStatus.rerun = false;
+            channel->streamStatus_.rerun = false;
             if (stream.HasMember("stream_type")) {
-                channel->streamStatus.streamType = stream["stream_type"].GetString();
+                channel->streamStatus_.streamType = stream["stream_type"].GetString();
             } else {
-                channel->streamStatus.streamType = QString();
+                channel->streamStatus_.streamType = QString();
             }
 
             if (stream.HasMember("broadcast_platform")) {
@@ -392,7 +392,7 @@ void TwitchChannel::refreshLiveStatus()
                 if (broadcastPlatformValue.IsString()) {
                     const char *broadcastPlatform = stream["broadcast_platform"].GetString();
                     if (strcmp(broadcastPlatform, "rerun") == 0) {
-                        channel->streamStatus.rerun = true;
+                        channel->streamStatus_.rerun = true;
                     }
                 }
             }
@@ -435,7 +435,7 @@ void TwitchChannel::fetchRecentMessages()
         auto channel = dynamic_cast<TwitchChannel *>(shared.get());
         assert(channel != nullptr);
 
-        static auto readConnection = channel->readConnection;
+        static auto readConnection = channel->readConnection_;
 
         QJsonArray msgArray = obj.value("messages").toArray();
         if (msgArray.empty()) {

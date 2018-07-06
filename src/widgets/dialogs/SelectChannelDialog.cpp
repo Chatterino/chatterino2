@@ -17,11 +17,11 @@ namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(parent, BaseWindow::EnableCustomFrame)
-    , selectedChannel(Channel::getEmpty())
+    , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
 
-    this->tabFilter.dialog = this;
+    this->tabFilter_.dialog = this;
 
     LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
@@ -50,8 +50,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              channel_lbl->setVisible(enabled);
                          });
 
-        channel_btn->installEventFilter(&this->tabFilter);
-        channel_edit->installEventFilter(&this->tabFilter);
+        channel_btn->installEventFilter(&this->tabFilter_);
+        channel_edit->installEventFilter(&this->tabFilter_);
 
         // whispers_btn
         auto whispers_btn =
@@ -61,7 +61,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 .hidden();
 
         whispers_lbl->setWordWrap(true);
-        whispers_btn->installEventFilter(&this->tabFilter);
+        whispers_btn->installEventFilter(&this->tabFilter_);
 
         QObject::connect(whispers_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
@@ -74,7 +74,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 .hidden();
 
         mentions_lbl->setWordWrap(true);
-        mentions_btn->installEventFilter(&this->tabFilter);
+        mentions_btn->installEventFilter(&this->tabFilter_);
 
         QObject::connect(mentions_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
@@ -86,7 +86,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             vbox.emplace<QLabel>("Requires the chatterino browser extension.").hidden();
 
         watching_lbl->setWordWrap(true);
-        watching_btn->installEventFilter(&this->tabFilter);
+        watching_btn->installEventFilter(&this->tabFilter_);
 
         QObject::connect(watching_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
@@ -138,7 +138,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
 void SelectChannelDialog::ok()
 {
-    this->_hasSelectedChannel = true;
+    this->hasSelectedChannel_ = true;
     this->close();
 }
 
@@ -148,7 +148,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     assert(channel);
 
-    this->selectedChannel = channel;
+    this->selectedChannel_ = channel;
 
     switch (_channel.getType()) {
         case Channel::Type::Twitch: {
@@ -174,13 +174,13 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
         }
     }
 
-    this->_hasSelectedChannel = false;
+    this->hasSelectedChannel_ = false;
 }
 
 IndirectChannel SelectChannelDialog::getSelectedChannel() const
 {
-    if (!this->_hasSelectedChannel) {
-        return this->selectedChannel;
+    if (!this->hasSelectedChannel_) {
+        return this->selectedChannel_;
     }
 
     auto app = getApp();
@@ -199,12 +199,12 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
         }
     }
 
-    return this->selectedChannel;
+    return this->selectedChannel_;
 }
 
 bool SelectChannelDialog::hasSeletedChannel() const
 {
-    return this->_hasSelectedChannel;
+    return this->hasSelectedChannel_;
 }
 
 bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched, QEvent *event)
