@@ -302,7 +302,7 @@ Resources::Resources()
     qDebug() << "init ResourceManager";
 }
 
-void Resources::initialize()
+void Resources::initialize(Application &app)
 {
     this->loadDynamicTwitchBadges();
 

@@ -114,4 +114,9 @@ void Paths::initSubDirectories()
     this->miscDirectory = makePath("Misc");
 }
 
+Paths *getPaths()
+{
+    return Paths::getInstance();
+}
+
 }  // namespace chatterino

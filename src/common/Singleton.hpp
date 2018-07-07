@@ -8,14 +8,13 @@ class Application;
 
 class Singleton : boost::noncopyable
 {
-    virtual ~Singleton() = default;
-
-    virtual void initialize(Application &application)
+public:
+    virtual void initialize(Application &app)
     {
-        (void)(application);
+        (void)(app);
     }
 
-    virtual void finalize()
+    virtual void save()
     {
     }
 };

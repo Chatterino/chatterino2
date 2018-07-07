@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "common/Emotemap.hpp"
 
 #include <QIcon>
@@ -11,14 +13,14 @@
 
 namespace chatterino {
 
-class Resources
+class Resources : public Singleton
 {
 public:
     Resources();
 
     ~Resources() = delete;
 
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     struct {
         QIcon left;

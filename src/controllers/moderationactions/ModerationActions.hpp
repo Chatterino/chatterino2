@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -8,12 +10,12 @@ namespace chatterino {
 
 class ModerationActionModel;
 
-class ModerationActions
+class ModerationActions final : public Singleton
 {
 public:
     ModerationActions();
 
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     UnsortedSignalVector<ModerationAction> items;
 

@@ -29,26 +29,11 @@ Settings &Settings::getInstance()
 
 void Settings::initialize()
 {
-    this->timestampFormat.connect([](auto, auto) {
-        auto app = getApp();
-        app->windows->layoutChannelViews();
-    });
-
-    this->emoteScale.connect([](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-
-    this->timestampFormat.connect([](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-    this->alternateMessageBackground.connect(
-        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-    this->separateMessages.connect(
-        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
-    this->collpseMessagesMinLines.connect(
-        [](auto, auto) { getApp()->windows->forceLayoutChannelViews(); });
 }
 
 void Settings::load()
 {
-    auto app = getApp();
-    QString settingsPath = app->paths->settingsDirectory + "/settings.json";
+    QString settingsPath = getPaths()->settingsDirectory + "/settings.json";
 
     pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
 }

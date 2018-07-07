@@ -5,10 +5,10 @@
 
 namespace chatterino {
 
-void Emotes::initialize()
+void Emotes::initialize(Application &app)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect([this] {
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
+    app.accounts->twitch.currentUserChanged.connect([this, &app] {
+        auto currentUser = app.accounts->twitch.getCurrent();
         assert(currentUser);
         this->twitch.refresh(currentUser);
     });

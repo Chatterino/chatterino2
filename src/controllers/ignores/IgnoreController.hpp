@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "common/SignalVector.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "singletons/Settings.hpp"
@@ -8,10 +10,10 @@ namespace chatterino {
 
 class IgnoreModel;
 
-class IgnoreController
+class IgnoreController : public Singleton
 {
 public:
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     UnsortedSignalVector<IgnorePhrase> phrases;
 

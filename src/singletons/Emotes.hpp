@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #define GIF_FRAME_LENGTH 33
 
 #include "providers/bttv/BttvEmotes.hpp"
@@ -10,12 +12,10 @@
 
 namespace chatterino {
 
-class Emotes
+class Emotes final : public Singleton
 {
 public:
-    ~Emotes() = delete;
-
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     bool isIgnoredEmote(const QString &emote);
 

@@ -676,7 +676,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
 
         auto snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.getLength());
-        int i = std::min(int(desired), snapshotLength);
+        int i = std::min<int>(int(desired), snapshotLength);
 
         if (delta > 0) {
             qreal scrollFactor = fmod(desired, 1);

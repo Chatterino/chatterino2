@@ -6,6 +6,8 @@
 
 namespace chatterino {
 
+class Singleton;
+
 class TwitchServer;
 class PubSub;
 
@@ -44,7 +46,9 @@ public:
 
     friend void test();
 
-    Paths *paths = nullptr;
+    [[deprecated("use getSettings() instead")]] Settings *settings = nullptr;
+    [[deprecated("use getPaths() instead")]] Paths *paths = nullptr;
+
     Theme *themes = nullptr;
     WindowManager *windows = nullptr;
     Logging *logging = nullptr;
@@ -55,15 +59,15 @@ public:
     AccountController *accounts = nullptr;
     Emotes *emotes = nullptr;
     NativeMessaging *nativeMessaging = nullptr;
-    Settings *settings = nullptr;
     Fonts *fonts = nullptr;
     Resources *resources = nullptr;
     ModerationActions *moderationActions = nullptr;
+    TwitchServer *twitch2 = nullptr;
 
     /// Provider-specific
     struct {
-        TwitchServer *server = nullptr;
-        PubSub *pubsub = nullptr;
+        [[deprecated("use twitch2 instead")]] TwitchServer *server = nullptr;
+        [[deprecated("use twitch2->pubsub instead")]] PubSub *pubsub = nullptr;
     } twitch;
 
     void save();
@@ -72,8 +76,12 @@ public:
     static void runNativeMessagingHost();
 
 private:
+    void addSingleton(Singleton *singleton);
+
     int argc_;
     char **argv_;
+
+    std::vector<Singleton *> singletons_;
 };
 
 Application *getApp();

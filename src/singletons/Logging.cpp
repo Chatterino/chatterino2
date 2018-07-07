@@ -12,16 +12,13 @@
 
 namespace chatterino {
 
-void Logging::initialize()
+void Logging::initialize(Application &app)
 {
-    this->pathManager = getApp()->paths;
 }
 
 void Logging::addMessage(const QString &channelName, MessagePtr message)
 {
-    auto app = getApp();
-
-    if (!app->settings->enableLogging) {
+    if (!getSettings()->enableLogging) {
         return;
     }
 
@@ -30,7 +27,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message)
         auto channel = new LoggingChannel(channelName);
         channel->addMessage(message);
         this->loggingChannels_.emplace(channelName,
-                                      std::unique_ptr<LoggingChannel>(std::move(channel)));
+                                       std::unique_ptr<LoggingChannel>(std::move(channel)));
     } else {
         it->second->addMessage(message);
     }

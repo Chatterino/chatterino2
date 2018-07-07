@@ -1,16 +1,15 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include <QThread>
 
 namespace chatterino {
-
-class NativeMessaging
+class NativeMessaging final
 {
 public:
     // fourtf: don't add this class to the application class
     NativeMessaging();
-
-    ~NativeMessaging() = delete;
 
     class ReceiverThread : public QThread
     {

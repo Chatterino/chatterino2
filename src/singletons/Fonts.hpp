@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include <QFont>
 #include <QFontDatabase>
 #include <QFontMetrics>
@@ -11,10 +13,12 @@
 
 namespace chatterino {
 
-class Fonts : boost::noncopyable
+class Fonts final : public Singleton
 {
 public:
     Fonts();
+
+    virtual void initialize(Application &app) override;
 
     // font data gets set in createFontData(...)
     enum Type : uint8_t {

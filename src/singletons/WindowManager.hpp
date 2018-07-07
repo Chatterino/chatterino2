@@ -1,15 +1,16 @@
 #pragma once
 
+#include <common/Singleton.hpp>
+
 #include "widgets/Window.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 
-class WindowManager
+class WindowManager : public Singleton
 {
 public:
     WindowManager();
-    ~WindowManager() = delete;
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static IndirectChannel decodeChannel(const QJsonObject &obj);
@@ -36,8 +37,8 @@ public:
     int windowCount();
     Window *windowAt(int index);
 
-    void save();
-    void initialize();
+    virtual void initialize(Application &app) override;
+    virtual void save() override;
     void closeAll();
 
     int getGeneration() const;

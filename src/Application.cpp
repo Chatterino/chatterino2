@@ -36,6 +36,8 @@ Application::Application(int _argc, char **_argv)
     : argc_(_argc)
     , argv_(_argv)
 {
+    getSettings()->initialize();
+    getSettings()->load();
 }
 
 void Application::construct()
@@ -45,23 +47,24 @@ void Application::construct()
 
     // 1. Instantiate all classes
     this->settings = getSettings();
-    this->paths = Paths::getInstance();
+    this->paths = getPaths();
 
-    this->themes = new Theme;
-    this->windows = new WindowManager;
-    this->logging = new Logging;
-    this->commands = new CommandController;
-    this->highlights = new HighlightController;
-    this->ignores = new IgnoreController;
-    this->taggedUsers = new TaggedUsersController;
-    this->accounts = new AccountController;
-    this->emotes = new Emotes;
-    this->fonts = new Fonts;
-    this->resources = new Resources;
-    this->moderationActions = new ModerationActions;
+    this->addSingleton(this->themes = new Theme);
+    this->addSingleton(this->windows = new WindowManager);
+    this->addSingleton(this->logging = new Logging);
+    this->addSingleton(this->commands = new CommandController);
+    this->addSingleton(this->highlights = new HighlightController);
+    this->addSingleton(this->ignores = new IgnoreController);
+    this->addSingleton(this->taggedUsers = new TaggedUsersController);
+    this->addSingleton(this->accounts = new AccountController);
+    this->addSingleton(this->emotes = new Emotes);
+    this->addSingleton(this->fonts = new Fonts);
+    this->addSingleton(this->resources = new Resources);
+    this->addSingleton(this->moderationActions = new ModerationActions);
 
-    this->twitch.server = new TwitchServer;
-    this->twitch.pubsub = new PubSub;
+    this->addSingleton(this->twitch2 = new TwitchServer);
+    this->twitch.server = this->twitch2;
+    this->twitch.pubsub = this->twitch2->pubsub;
 }
 
 void Application::instantiate(int argc, char **argv)
@@ -77,24 +80,9 @@ void Application::initialize()
     isAppInitialized = true;
 
     // 2. Initialize/load classes
-    this->settings->initialize();
-
-    this->settings->load();
-    this->commands->load();
-    this->logging->initialize();
-    this->windows->initialize();
-
-    this->resources->initialize();
-
-    this->highlights->initialize();
-    this->ignores->initialize();
-
-    this->emotes->initialize();
-
-    this->accounts->load();
-
-    this->twitch.server->initialize();
-    this->moderationActions->initialize();
+    for (Singleton *singleton : this->singletons_) {
+        singleton->initialize(*this);
+    }
 
     // XXX
     this->windows->updateWordTypeMask();
@@ -197,11 +185,11 @@ void Application::initialize()
     this->twitch.pubsub->start();
 
     auto RequestModerationActions = [=]() {
-        this->twitch.pubsub->unlistenAllModerationActions();
+        this->twitch.server->pubsub->unlistenAllModerationActions();
         // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
         // this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch.pubsub->listenToWhispers(this->accounts->twitch.getCurrent());  //
+        this->twitch.server->pubsub->listenToWhispers(this->accounts->twitch.getCurrent());  //
     };
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
@@ -222,9 +210,14 @@ int Application::run(QApplication &qtApp)
 
 void Application::save()
 {
-    this->windows->save();
+    for (Singleton *singleton : this->singletons_) {
+        singleton->save();
+    }
+}
 
-    this->commands->save();
+void Application::addSingleton(Singleton *singleton)
+{
+    this->singletons_.push_back(singleton);
 }
 
 Application *getApp()

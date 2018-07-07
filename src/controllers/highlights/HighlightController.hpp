@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "common/SignalVector.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
@@ -12,12 +14,12 @@ class UserHighlightModel;
 class HighlightModel;
 class HighlightBlacklistModel;
 
-class HighlightController
+class HighlightController : public Singleton
 {
 public:
     HighlightController();
 
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     UnsortedSignalVector<HighlightPhrase> phrases;
     UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;

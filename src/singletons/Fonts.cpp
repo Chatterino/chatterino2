@@ -26,35 +26,36 @@ Fonts::Fonts()
     : chatFontFamily("/appearance/currentFontFamily", DEFAULT_FONT_FAMILY)
     , chatFontSize("/appearance/currentFontSize", DEFAULT_FONT_SIZE)
 {
-    qDebug() << "init FontManager";
-
-    this->chatFontFamily.connect([this](const std::string &, auto) {
-        assertInGuiThread();
-
-        if (getApp()->windows) {
-            getApp()->windows->incGeneration();
-        }
-
-        for (auto &map : this->fontsByType_) {
-            map.clear();
-        }
-        this->fontChanged.invoke();
-    });
-
-    this->chatFontSize.connect([this](const int &, auto) {
-        assertInGuiThread();
-
-        if (getApp()->windows) {
-            getApp()->windows->incGeneration();
-        }
-
-        for (auto &map : this->fontsByType_) {
-            map.clear();
-        }
-        this->fontChanged.invoke();
-    });
-
     this->fontsByType_.resize(size_t(EndType));
+}
+
+void Fonts::initialize(Application &app)
+{
+    this->chatFontFamily.connect([this, &app](const std::string &, auto) {
+        assertInGuiThread();
+
+        if (app.windows) {
+            app.windows->incGeneration();
+        }
+
+        for (auto &map : this->fontsByType_) {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
+
+    this->chatFontSize.connect([this, &app](const int &, auto) {
+        assertInGuiThread();
+
+        if (app.windows) {
+            app.windows->incGeneration();
+        }
+
+        for (auto &map : this->fontsByType_) {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
 }
 
 QFont Fonts::getFont(Fonts::Type type, float scale)

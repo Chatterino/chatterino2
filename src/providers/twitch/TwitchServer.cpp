@@ -1,9 +1,11 @@
 #include "TwitchServer.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
+#include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -24,16 +26,22 @@ TwitchServer::TwitchServer()
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
     qDebug() << "init TwitchServer";
+
+    this->pubsub = new PubSub;
 }
 
-void TwitchServer::initialize()
+void TwitchServer::initialize(Application &app)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect(
+    this->app = &app;
+
+    app.accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
+    assert(this->app);
+
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();

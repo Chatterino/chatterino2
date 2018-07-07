@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/SerializeCustom.hpp"
+#include "common/Singleton.hpp"
 
 #include <QBrush>
 #include <QColor>
@@ -10,12 +11,10 @@ namespace chatterino {
 
 class WindowManager;
 
-class Theme
+class Theme final : public Singleton
 {
 public:
     Theme();
-
-    ~Theme() = delete;
 
     inline bool isLightTheme() const
     {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "messages/Message.hpp"
 #include "singletons/helper/LoggingChannel.hpp"
 
@@ -9,16 +11,14 @@ namespace chatterino {
 
 class Paths;
 
-class Logging
+class Logging : public Singleton
 {
     Paths *pathManager = nullptr;
 
 public:
     Logging() = default;
 
-    ~Logging() = delete;
-
-    void initialize();
+    virtual void initialize(Application &app) override;
 
     void addMessage(const QString &channelName, MessagePtr message);
 

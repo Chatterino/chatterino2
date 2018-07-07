@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include <QObject>
 
 #include "common/SignalVector.hpp"
@@ -11,14 +13,14 @@ namespace chatterino {
 
 class AccountModel;
 
-class AccountController
+class AccountController : public Singleton
 {
 public:
     AccountController();
 
     AccountModel *createModel(QObject *parent);
 
-    void load();
+    virtual void initialize(Application &app) override;
 
     TwitchAccountManager twitch;
 

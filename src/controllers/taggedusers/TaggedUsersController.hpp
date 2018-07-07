@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/Singleton.hpp"
+
 #include "common/SignalVector.hpp"
 #include "controllers/taggedusers/TaggedUser.hpp"
 
@@ -7,7 +9,7 @@ namespace chatterino {
 
 class TaggedUsersModel;
 
-class TaggedUsersController
+class TaggedUsersController : public Singleton
 {
 public:
     TaggedUsersController();

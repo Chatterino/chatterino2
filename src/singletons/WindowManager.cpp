@@ -206,17 +206,16 @@ Window *WindowManager::windowAt(int index)
     return this->windows_.at(index);
 }
 
-void WindowManager::initialize()
+void WindowManager::initialize(Application &app)
 {
     assertInGuiThread();
 
-    auto app = getApp();
-    app->themes->repaintVisibleChatWidgets_.connect([this] { this->repaintVisibleChatWidgets(); });
+    app.themes->repaintVisibleChatWidgets_.connect([this] { this->repaintVisibleChatWidgets(); });
 
     assert(!this->initialized_);
 
     // load file
-    QString settingsPath = app->paths->settingsDirectory + SETTINGS_FILENAME;
+    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::ReadOnly);
     QByteArray data = file.readAll();
@@ -301,6 +300,22 @@ void WindowManager::initialize()
         mainWindow_->getNotebook().addPage(true);
     }
 
+    auto settings = getSettings();
+
+    settings->timestampFormat.connect([this](auto, auto) {
+        auto app = getApp();
+        this->layoutChannelViews();
+    });
+
+    settings->emoteScale.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
+
+    settings->timestampFormat.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings->alternateMessageBackground.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings->separateMessages.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings->collpseMessagesMinLines.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+
     this->initialized_ = true;
 }
 
@@ -321,9 +336,12 @@ void WindowManager::save()
             case Window::Type::Main:
                 window_obj.insert("type", "main");
                 break;
+
             case Window::Type::Popup:
                 window_obj.insert("type", "popup");
                 break;
+
+            case Window::Type::Attached:;
         }
 
         // window geometry

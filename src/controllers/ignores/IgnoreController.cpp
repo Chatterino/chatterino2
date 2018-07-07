@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-void IgnoreController::initialize()
+void IgnoreController::initialize(Application &)
 {
     assert(!this->initialized_);
     this->initialized_ = true;

@@ -43,6 +43,11 @@ CommandController::CommandController()
     this->items.itemRemoved.connect(addFirstMatchToMap);
 }
 
+void CommandController::initialize(Application &app)
+{
+    this->load();
+}
+
 void CommandController::load()
 {
     auto app = getApp();
