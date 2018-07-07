@@ -338,7 +338,7 @@ void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> 
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        Log("Error {}", errorCode);
+        Log("[TwitchAccount::loadEmotes] Error {}", errorCode);
         if (errorCode == 203) {
             // onFinished(FollowResult_NotFollowing);
         } else {
