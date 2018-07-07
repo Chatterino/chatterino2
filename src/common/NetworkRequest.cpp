@@ -105,7 +105,6 @@ void NetworkRequest::execute()
             // Get requests try to load from cache, then perform the request
             if (this->data->useQuickLoadCache_) {
                 if (this->tryLoadCachedFile()) {
-                    Log("Loaded from cache");
                     // Successfully loaded from cache
                     return;
                 }
@@ -167,8 +166,7 @@ void NetworkRequest::doRequest()
 
     this->timer->start();
 
-    auto onUrlRequested = [data = std::move(this->data), timer = std::move(this->timer),
-                           worker]() mutable {
+    auto onUrlRequested = [data = this->data, timer = this->timer, worker]() mutable {
         QNetworkReply *reply = nullptr;
         switch (data->requestType_) {
             case NetworkRequestType::Get: {
@@ -205,7 +203,7 @@ void NetworkRequest::doRequest()
 
         bool directAction = (data->caller_ == nullptr);
 
-        auto handleReply = [data = std::move(data), timer = timer, reply]() mutable {
+        auto handleReply = [data, timer, reply]() mutable {
             if (reply->error() != QNetworkReply::NetworkError::NoError) {
                 if (data->onError_) {
                     data->onError_(reply->error());
@@ -224,9 +222,9 @@ void NetworkRequest::doRequest()
             reply->deleteLater();
         };
 
-
         if (data->caller_ != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_, std::move(handleReply));
+            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
+                             std::move(handleReply));
             QObject::connect(reply, &QNetworkReply::finished, worker, [worker]() mutable {
                 emit worker->doneUrl();
 
