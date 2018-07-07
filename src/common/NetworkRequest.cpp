@@ -224,6 +224,7 @@ void NetworkRequest::doRequest()
             reply->deleteLater();
         };
 
+
         if (data->caller_ != nullptr) {
             QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_, std::move(handleReply));
             QObject::connect(reply, &QNetworkReply::finished, worker, [worker]() mutable {
