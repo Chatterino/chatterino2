@@ -7,11 +7,13 @@ namespace chatterino {
 
 void Emotes::initialize(Application &app)
 {
-    app.accounts->twitch.currentUserChanged.connect([this, &app] {
+    const auto refreshTwitchEmotes = [this, &app] {
         auto currentUser = app.accounts->twitch.getCurrent();
         assert(currentUser);
         this->twitch.refresh(currentUser);
-    });
+    };
+    app.accounts->twitch.currentUserChanged.connect(refreshTwitchEmotes);
+    refreshTwitchEmotes();
 
     this->emojis.load();
     this->bttv.loadGlobalEmotes();
