@@ -66,7 +66,8 @@ void Image::loadImage()
     NetworkRequest req(this->getUrl());
     req.setCaller(this);
     req.setUseQuickLoadCache(true);
-    req.get([this](QByteArray bytes) -> bool {
+    req.onSuccess([this](auto result) -> bool {
+        auto bytes = result.getData();
         QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
         QBuffer buffer(&copy);
         buffer.open(QIODevice::ReadOnly);
@@ -156,6 +157,8 @@ void Image::loadImage()
 
         return true;
     });
+
+    req.execute();
 }
 
 void Image::gifUpdateTimout()

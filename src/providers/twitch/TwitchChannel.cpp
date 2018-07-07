@@ -2,9 +2,11 @@
 
 #include "common/Common.hpp"
 #include "common/UrlFetch.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/PubsubClient.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
@@ -82,8 +84,16 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
             }
         }
 
-        twitchApiGet("https://tmi.twitch.tv/group/user/" + this->name + "/chatters",
-                     QThread::currentThread(), refreshChatters);
+        NetworkRequest request("https://tmi.twitch.tv/group/user/" + this->name + "/chatters");
+
+        request.setCaller(QThread::currentThread());
+        request.onSuccess([refreshChatters](auto result) {
+            refreshChatters(result.parseJson());  //
+
+            return true;
+        });
+
+        request.execute();
     };
 
     doRefreshChatters();
@@ -153,7 +163,7 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
-    parsedMessage.trim();
+    parsedMessage = parsedMessage.trimmed();
 
     if (parsedMessage.isEmpty()) {
         return;
@@ -325,23 +335,26 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    twitchApiGet2(url, QThread::currentThread(), false, [weak](const rapidjson::Document &d) {
+    auto request = makeGetStreamRequest(this->roomID, QThread::currentThread());
+
+    request.onSuccess([weak](auto result) {
+        auto d = result.parseRapidJson();
         ChannelPtr shared = weak.lock();
 
         if (!shared) {
-            return;
+            return false;
         }
 
         TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
 
         if (!d.IsObject()) {
             Log("[TwitchChannel:refreshLiveStatus] root is not an object");
-            return;
+            return false;
         }
 
         if (!d.HasMember("stream")) {
             Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
-            return;
+            return false;
         }
 
         const auto &stream = d["stream"];
@@ -349,21 +362,21 @@ void TwitchChannel::refreshLiveStatus()
         if (!stream.IsObject()) {
             // Stream is offline (stream is most likely null)
             channel->setLive(false);
-            return;
+            return false;
         }
 
         if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
             !stream.HasMember("channel") || !stream.HasMember("created_at")) {
             Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
             channel->setLive(false);
-            return;
+            return false;
         }
 
         const rapidjson::Value &streamChannel = stream["channel"];
 
         if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
             Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
-            return;
+            return false;
         }
 
         // Stream is live
@@ -400,7 +413,11 @@ void TwitchChannel::refreshLiveStatus()
 
         // Signal all listeners that the stream status has been updated
         channel->updateLiveInfo.invoke();
+
+        return true;
     });
+
+    request.execute();
 }
 
 void TwitchChannel::startRefreshLiveStatusTimer(int intervalMS)
@@ -423,13 +440,18 @@ void TwitchChannel::fetchRecentMessages()
     static QString genericURL =
         "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
 
+    NetworkRequest request(genericURL.arg(this->roomID));
+    request.makeAuthorizedV5(getDefaultClientID());
+    request.setCaller(QThread::currentThread());
+
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    twitchApiGet(genericURL.arg(roomID), QThread::currentThread(), [weak](QJsonObject obj) {
+    request.onSuccess([weak](auto result) {
+        auto obj = result.parseJson();
         ChannelPtr shared = weak.lock();
 
         if (!shared) {
-            return;
+            return false;
         }
 
         auto channel = dynamic_cast<TwitchChannel *>(shared.get());
@@ -439,7 +461,7 @@ void TwitchChannel::fetchRecentMessages()
 
         QJsonArray msgArray = obj.value("messages").toArray();
         if (msgArray.empty()) {
-            return;
+            return false;
         }
 
         std::vector<MessagePtr> messages;
@@ -455,8 +477,13 @@ void TwitchChannel::fetchRecentMessages()
                 messages.push_back(builder.build());
             }
         }
+
         channel->addMessagesAtStart(messages);
+
+        return true;
     });
+
+    request.execute();
 }
 
 }  // namespace chatterino

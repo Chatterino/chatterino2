@@ -7,6 +7,7 @@
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QDateTime>
+#include <QJsonArray>
 #include <QMessageBox>
 #include <QVBoxLayout>
 
@@ -65,8 +66,8 @@ void LogsPopup::getLogviewerLogs()
         return true;
     });
 
-    req.getJSON([this, channelName](QJsonObject &data) {
-
+    req.onSuccess([this, channelName](auto result) {
+        auto data = result.parseJson();
         std::vector<MessagePtr> messages;
         ChannelPtr logsChannel(new Channel("logs", Channel::Type::None));
 
@@ -87,6 +88,8 @@ void LogsPopup::getLogviewerLogs()
             messages.push_back(builder.build());
         };
         this->setMessages(messages);
+
+        return true;
     });
 
     req.execute();
@@ -113,10 +116,12 @@ void LogsPopup::getOverrustleLogs()
         box->setAttribute(Qt::WA_DeleteOnClose);
         box->show();
         box->raise();
+
         return true;
     });
 
-    req.getJSON([this, channelName](QJsonObject &data) {
+    req.onSuccess([this, channelName](auto result) {
+        auto data = result.parseJson();
         std::vector<MessagePtr> messages;
         if (data.contains("lines")) {
             QJsonArray dataMessages = data.value("lines").toArray();
@@ -135,7 +140,10 @@ void LogsPopup::getOverrustleLogs()
             }
         }
         this->setMessages(messages);
+
+        return true;
     });
+
     req.execute();
 }
 }  // namespace chatterino

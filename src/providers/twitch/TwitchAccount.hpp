@@ -65,6 +65,8 @@ public:
                       std::function<void(UnignoreResult, const QString &message)> onFinished);
 
     void checkFollow(const QString targetUserID, std::function<void(FollowResult)> onFinished);
+    void followUser(const QString userID, std::function<void()> successCallback);
+    void unfollowUser(const QString userID, std::function<void()> successCallback);
 
     std::set<TwitchUser> getIgnores() const;
 

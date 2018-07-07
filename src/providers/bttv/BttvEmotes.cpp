@@ -21,11 +21,12 @@ void BTTVEmotes::loadGlobalEmotes()
 {
     QString url("https://api.betterttv.net/2/emotes");
 
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.setTimeout(30000);
-    req.setUseQuickLoadCache(true);
-    req.getJSON([this](QJsonObject &root) {
+    NetworkRequest request(url);
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(30000);
+    request.setUseQuickLoadCache(true);
+    request.onSuccess([this](auto result) {
+        auto root = result.parseJson();
         auto emotes = root.value("emotes").toArray();
 
         QString urlTemplate = "https:" + root.value("urlTemplate").toString();
@@ -49,7 +50,11 @@ void BTTVEmotes::loadGlobalEmotes()
         }
 
         this->globalEmoteCodes = codes;
+
+        return true;
     });
+
+    request.execute();
 }
 
 void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
@@ -60,15 +65,16 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emo
 
     Log("Request bttv channel emotes for {}", channelName);
 
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.setTimeout(3000);
-    req.setUseQuickLoadCache(true);
-    req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
+    NetworkRequest request(url);
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(3000);
+    request.setUseQuickLoadCache(true);
+    request.onSuccess([this, channelName, _map](auto result) {
+        auto rootNode = result.parseJson();
         auto map = _map.lock();
 
         if (_map.expired()) {
-            return;
+            return false;
         }
 
         map->clear();
@@ -110,7 +116,11 @@ void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emo
         }
 
         this->channelEmoteCodes[channelName] = codes;
+
+        return true;
     });
+
+    request.execute();
 }
 
 }  // namespace chatterino

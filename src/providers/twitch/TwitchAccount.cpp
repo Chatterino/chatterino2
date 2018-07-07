@@ -3,6 +3,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/UrlFetch.hpp"
 #include "debug/Log.hpp"
+#include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -76,10 +77,10 @@ void TwitchAccount::loadIgnores()
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks");
 
     NetworkRequest req(url);
-    req.setRequestType(NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
-    req.onSuccess([=](const rapidjson::Document &document) {
+    req.onSuccess([=](auto result) {
+        auto document = result.parseRapidJson();
         if (!document.IsObject()) {
             return false;
         }
@@ -125,9 +126,11 @@ void TwitchAccount::loadIgnores()
 void TwitchAccount::ignore(const QString &targetName,
                            std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    twitchApiGetUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
-        this->ignoreByID(targetUserID, targetName, onFinished);  //
-    });
+    const auto onIdFetched = [this, targetName, onFinished](QString targetUserId) {
+        this->ignoreByID(targetUserId, targetName, onFinished);  //
+    };
+
+    PartialTwitchUser::byName(this->userName_).getId(onIdFetched);
 }
 
 void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targetName,
@@ -136,8 +139,7 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
 
-    NetworkRequest req(url);
-    req.setRequestType(NetworkRequest::PutRequest);
+    NetworkRequest req(url, NetworkRequestType::Put);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -148,7 +150,8 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
         return true;
     });
 
-    req.onSuccess([=](const rapidjson::Document &document) {
+    req.onSuccess([=](auto result) {
+        auto document = result.parseRapidJson();
         if (!document.IsObject()) {
             onFinished(IgnoreResult_Failed, "Bad JSON data while ignoring user " + targetName);
             return false;
@@ -190,9 +193,11 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
 void TwitchAccount::unignore(const QString &targetName,
                              std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    twitchApiGetUserID(targetName, QThread::currentThread(), [=](QString targetUserID) {
-        this->unignoreByID(targetUserID, targetName, onFinished);  //
-    });
+    const auto onIdFetched = [this, targetName, onFinished](QString targetUserId) {
+        this->unignoreByID(targetUserId, targetName, onFinished);  //
+    };
+
+    PartialTwitchUser::byName(this->userName_).getId(onIdFetched);
 }
 
 void TwitchAccount::unignoreByID(
@@ -202,8 +207,7 @@ void TwitchAccount::unignoreByID(
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
 
-    NetworkRequest req(url);
-    req.setRequestType(NetworkRequest::DeleteRequest);
+    NetworkRequest req(url, NetworkRequestType::Delete);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -215,7 +219,8 @@ void TwitchAccount::unignoreByID(
         return true;
     });
 
-    req.onSuccess([=](const rapidjson::Document &document) {
+    req.onSuccess([=](auto result) {
+        auto document = result.parseRapidJson();
         TwitchUser ignoredUser;
         ignoredUser.id = targetUserID;
         {
@@ -238,7 +243,6 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                 targetUserID);
 
     NetworkRequest req(url);
-    req.setRequestType(NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -252,12 +256,60 @@ void TwitchAccount::checkFollow(const QString targetUserID,
         return true;
     });
 
-    req.onSuccess([=](const rapidjson::Document &document) {
+    req.onSuccess([=](auto result) {
+        auto document = result.parseRapidJson();
         onFinished(FollowResult_Following);
         return true;
     });
 
     req.execute();
+}
+
+void TwitchAccount::followUser(const QString userID, std::function<void()> successCallback)
+{
+    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                    "/follows/channels/" + userID);
+
+    NetworkRequest request(requestUrl, NetworkRequestType::Put);
+    request.setCaller(QThread::currentThread());
+
+    request.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    // TODO: Properly check result of follow request
+    request.onSuccess([successCallback](auto result) {
+        successCallback();
+
+        return true;
+    });
+
+    request.execute();
+}
+
+void TwitchAccount::unfollowUser(const QString userID, std::function<void()> successCallback)
+{
+    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                    "/follows/channels/" + userID);
+
+    NetworkRequest request(requestUrl, NetworkRequestType::Delete);
+    request.setCaller(QThread::currentThread());
+
+    request.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    request.onError([successCallback](int code) {
+        if (code >= 200 && code <= 299) {
+            successCallback();
+        }
+
+        return true;
+    });
+
+    request.onSuccess([successCallback](const auto &document) {
+        successCallback();
+
+        return true;
+    });
+
+    request.execute();
 }
 
 std::set<TwitchUser> TwitchAccount::getIgnores() const
@@ -282,7 +334,6 @@ void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> 
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/emotes");
 
     NetworkRequest req(url);
-    req.setRequestType(NetworkRequest::GetRequest);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
@@ -297,8 +348,8 @@ void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> 
         return true;
     });
 
-    req.onSuccess([=](const rapidjson::Document &document) {
-        cb(document);
+    req.onSuccess([=](auto result) {
+        cb(result.parseRapidJson());
         return true;
     });
 

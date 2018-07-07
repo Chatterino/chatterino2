@@ -1,6 +1,10 @@
 #include "widgets/dialogs/LoginDialog.hpp"
+
 #include "common/Common.hpp"
 #include "common/UrlFetch.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/PartialTwitchUser.hpp"
+
 #ifdef USEWINSDK
 #include <Windows.h>
 #endif
@@ -173,9 +177,10 @@ AdvancedLoginWidget::AdvancedLoginWidget()
     this->ui_.buttonLowerRow.layout.addWidget(&this->ui_.buttonLowerRow.fillInUserIDButton);
 
     connect(&this->ui_.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked, [=]() {
-        twitchApiGetUserID(this->ui_.usernameInput.text(), this, [=](const QString &userID) {
+        const auto onIdFetched = [=](const QString &userID) {
             this->ui_.userIDInput.setText(userID);  //
-        });
+        };
+        PartialTwitchUser::byName(this->ui_.usernameInput.text()).getId(onIdFetched, this);
     });
 }
 

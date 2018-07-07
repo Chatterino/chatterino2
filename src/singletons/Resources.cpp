@@ -327,7 +327,8 @@ void Resources::loadChannelData(const QString &roomID, bool bypassCache)
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
 
-    req.getJSON([this, roomID](QJsonObject &root) {
+    req.onSuccess([this, roomID](auto result) {
+        auto root = result.parseJson();
         QJsonObject sets = root.value("badge_sets").toObject();
 
         Resources::Channel &ch = this->channels[roomID];
@@ -348,49 +349,58 @@ void Resources::loadChannelData(const QString &roomID, bool bypassCache)
         }
 
         ch.loaded = true;
+
+        return true;
     });
 
-    QString cheermoteURL = "https://api.twitch.tv/kraken/bits/actions?channel_id=" + roomID;
+    req.execute();
 
-    twitchApiGet2(
-        cheermoteURL, QThread::currentThread(), true, [this, roomID](const rapidjson::Document &d) {
-            Resources::Channel &ch = this->channels[roomID];
+    QString cheermoteUrl = "https://api.twitch.tv/kraken/bits/actions?channel_id=" + roomID;
+    auto request = NetworkRequest::twitchRequest(cheermoteUrl);
+    request.setCaller(QThread::currentThread());
 
-            ParseCheermoteSets(ch.jsonCheermoteSets, d);
+    request.onSuccess([this, roomID](auto result) {
+        auto d = result.parseRapidJson();
+        Resources::Channel &ch = this->channels[roomID];
 
-            for (auto &set : ch.jsonCheermoteSets) {
-                CheermoteSet cheermoteSet;
-                cheermoteSet.regex =
-                    QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+        ParseCheermoteSets(ch.jsonCheermoteSets, d);
 
-                for (auto &tier : set.tiers) {
-                    Cheermote cheermote;
+        for (auto &set : ch.jsonCheermoteSets) {
+            CheermoteSet cheermoteSet;
+            cheermoteSet.regex = QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
 
-                    cheermote.color = QColor(tier.color);
-                    cheermote.minBits = tier.minBits;
+            for (auto &tier : set.tiers) {
+                Cheermote cheermote;
 
-                    // TODO(pajlada): We currently hardcode dark here :|
-                    // We will continue to do so for now since we haven't had to
-                    // solve that anywhere else
-                    cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
-                    cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
-                    cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
+                cheermote.color = QColor(tier.color);
+                cheermote.minBits = tier.minBits;
 
-                    cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
-                    cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
-                    cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
+                // TODO(pajlada): We currently hardcode dark here :|
+                // We will continue to do so for now since we haven't had to
+                // solve that anywhere else
+                cheermote.emoteDataAnimated.image1x = tier.images["dark"]["animated"]["1"];
+                cheermote.emoteDataAnimated.image2x = tier.images["dark"]["animated"]["2"];
+                cheermote.emoteDataAnimated.image3x = tier.images["dark"]["animated"]["4"];
 
-                    cheermoteSet.cheermotes.emplace_back(cheermote);
-                }
+                cheermote.emoteDataStatic.image1x = tier.images["dark"]["static"]["1"];
+                cheermote.emoteDataStatic.image2x = tier.images["dark"]["static"]["2"];
+                cheermote.emoteDataStatic.image3x = tier.images["dark"]["static"]["4"];
 
-                std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
-                          [](const auto &lhs, const auto &rhs) {
-                              return lhs.minBits < rhs.minBits;  //
-                          });
-
-                ch.cheermoteSets.emplace_back(cheermoteSet);
+                cheermoteSet.cheermotes.emplace_back(cheermote);
             }
-        });
+
+            std::sort(cheermoteSet.cheermotes.begin(), cheermoteSet.cheermotes.end(),
+                      [](const auto &lhs, const auto &rhs) {
+                          return lhs.minBits < rhs.minBits;  //
+                      });
+
+            ch.cheermoteSets.emplace_back(cheermoteSet);
+        }
+
+        return true;
+    });
+
+    request.execute();
 }
 
 void Resources::loadDynamicTwitchBadges()
@@ -399,7 +409,8 @@ void Resources::loadDynamicTwitchBadges()
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
-    req.getJSON([this](QJsonObject &root) {
+    req.onSuccess([this](auto result) {
+        auto root = result.parseJson();
         QJsonObject sets = root.value("badge_sets").toObject();
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
             QJsonObject versions = it.value().toObject().value("versions").toObject();
@@ -417,7 +428,11 @@ void Resources::loadDynamicTwitchBadges()
         }
 
         this->dynamicBadgesLoaded = true;
+
+        return true;
     });
+
+    req.execute();
 }
 
 void Resources::loadChatterinoBadges()
@@ -429,7 +444,8 @@ void Resources::loadChatterinoBadges()
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
 
-    req.getJSON([this](QJsonObject &root) {
+    req.onSuccess([this](auto result) {
+        auto root = result.parseJson();
         QJsonArray badgeVariants = root.value("badges").toArray();
         for (QJsonArray::iterator it = badgeVariants.begin(); it != badgeVariants.end(); ++it) {
             QJsonObject badgeVariant = it->toObject();
@@ -449,7 +465,11 @@ void Resources::loadChatterinoBadges()
                     std::shared_ptr<ChatterinoBadge>(badgeVariantPtr);
             }
         }
+
+        return true;
     });
+
+    req.execute();
 }
 
 }  // namespace chatterino

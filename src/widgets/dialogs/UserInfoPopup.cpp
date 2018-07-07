@@ -2,6 +2,8 @@
 
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
@@ -176,11 +178,15 @@ void UserInfoPopup::installEvents()
         QUrl requestUrl("https://api.twitch.tv/kraken/users/" + currentUser->getUserId() +
                         "/follows/channels/" + this->userId_);
 
+        const auto reenableFollowCheckbox = [this] {
+            this->ui_.follow->setEnabled(true);  //
+        };
+
         this->ui_.follow->setEnabled(false);
         if (this->ui_.follow->isChecked()) {
-            twitchApiPut(requestUrl, [this](const auto &) { this->ui_.follow->setEnabled(true); });
+            currentUser->followUser(this->userId_, reenableFollowCheckbox);
         } else {
-            twitchApiDelete(requestUrl, [this] { this->ui_.follow->setEnabled(true); });
+            currentUser->unfollowUser(this->userId_, reenableFollowCheckbox);
         }
     });
 
@@ -239,24 +245,28 @@ void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->hack_;
 
-    // get user info
-    twitchApiGetUserID(this->userName_, this, [this, hack](QString id) {
+    const auto onIdFetched = [this, hack](QString id) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = id;
 
-        // get channel info
-        twitchApiGet(
-            "https://api.twitch.tv/kraken/channels/" + id, this, [this](const QJsonObject &obj) {
-                this->ui_.followerCountLabel->setText(
-                    TEXT_FOLLOWERS + QString::number(obj.value("followers").toInt()));
-                this->ui_.viewCountLabel->setText(TEXT_VIEWS +
-                                                  QString::number(obj.value("views").toInt()));
-                this->ui_.createdDateLabel->setText(
-                    TEXT_CREATED + obj.value("created_at").toString().section("T", 0, 0));
+        auto request = makeGetChannelRequest(id, this);
 
-                this->loadAvatar(QUrl(obj.value("logo").toString()));
-            });
+        request.onSuccess([this](auto result) {
+            auto obj = result.parseJson();
+            this->ui_.followerCountLabel->setText(TEXT_FOLLOWERS +
+                                                  QString::number(obj.value("followers").toInt()));
+            this->ui_.viewCountLabel->setText(TEXT_VIEWS +
+                                              QString::number(obj.value("views").toInt()));
+            this->ui_.createdDateLabel->setText(
+                TEXT_CREATED + obj.value("created_at").toString().section("T", 0, 0));
+
+            this->loadAvatar(QUrl(obj.value("logo").toString()));
+
+            return true;
+        });
+
+        request.execute();
 
         // get follow state
         currentUser->checkFollow(id, [this, hack](auto result) {
@@ -279,7 +289,9 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.ignore->setEnabled(true);
         this->ui_.ignore->setChecked(isIgnoring);
-    });
+    };
+
+    PartialTwitchUser::byName(this->userName_).getId(onIdFetched, this);
 
     this->ui_.follow->setEnabled(false);
     this->ui_.ignore->setEnabled(false);
@@ -386,16 +398,21 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
-                           {"1", 1 * 60}, {"5", 5 * 60}, {"10", 10 * 60},
+                           {"1", 1 * 60},
+                           {"5", 5 * 60},
+                           {"10", 10 * 60},
                        });
     addTimeouts("hour", {
-                            {"1", 1 * 60 * 60}, {"4", 4 * 60 * 60},
+                            {"1", 1 * 60 * 60},
+                            {"4", 4 * 60 * 60},
                         });
     addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24}, {"3", 3 * 60 * 60 * 24},
+                            {"1", 1 * 60 * 60 * 24},
+                            {"3", 3 * 60 * 60 * 24},
                         });
     addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7}, {"2", 2 * 60 * 60 * 24 * 7},
+                             {"1", 1 * 60 * 60 * 24 * 7},
+                             {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);

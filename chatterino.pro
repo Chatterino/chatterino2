@@ -103,6 +103,8 @@ SOURCES += \
     src/common/CompletionModel.cpp \
     src/common/Emotemap.cpp \
     src/common/NetworkManager.cpp \
+    src/common/NetworkResult.cpp \
+    src/common/NetworkData.cpp \
     src/common/NetworkRequest.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
@@ -138,6 +140,7 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
+    src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/TwitchAccount.cpp \
@@ -239,6 +242,8 @@ HEADERS  += \
     src/common/LockedObject.hpp \
     src/common/MutexValue.hpp \
     src/common/NetworkManager.hpp \
+    src/common/NetworkResult.hpp \
+    src/common/NetworkData.hpp \
     src/common/NetworkRequest.hpp \
     src/common/NetworkRequester.hpp \
     src/common/NetworkWorker.hpp \
@@ -294,6 +299,7 @@ HEADERS  += \
     src/providers/irc/IrcServer.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
+    src/providers/twitch/PartialTwitchUser.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubHelpers.hpp \
     src/providers/twitch/TwitchAccount.hpp \

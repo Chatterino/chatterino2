@@ -5,6 +5,7 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QProcess>
 
@@ -94,7 +95,8 @@ void Updates::checkForUpdates()
 
     NetworkRequest req(url);
     req.setTimeout(30000);
-    req.getJSON([this](QJsonObject &object) {
+    req.onSuccess([this](auto result) {
+        auto object = result.parseJson();
         QJsonValue version_val = object.value("version");
         QJsonValue update_val = object.value("update");
 

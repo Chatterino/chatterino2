@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
@@ -323,13 +324,13 @@ void SplitHeader::updateChannelText()
         if (streamStatus.live) {
             this->isLive_ = true;
             this->tooltip_ = "<style>.center    { text-align: center; }</style>"
-                            "<p class = \"center\">" +
-                            streamStatus.title + "<br><br>" + streamStatus.game + "<br>" +
-                            (streamStatus.rerun ? "Vod-casting" : "Live") + " for " +
-                            streamStatus.uptime + " with " +
-                            QString::number(streamStatus.viewerCount) +
-                            " viewers"
-                            "</p>";
+                             "<p class = \"center\">" +
+                             streamStatus.title + "<br><br>" + streamStatus.game + "<br>" +
+                             (streamStatus.rerun ? "Vod-casting" : "Live") + " for " +
+                             streamStatus.uptime + " with " +
+                             QString::number(streamStatus.viewerCount) +
+                             " viewers"
+                             "</p>";
             if (streamStatus.rerun) {
                 title += " (rerun)";
             } else if (streamStatus.streamType.isEmpty()) {
@@ -355,8 +356,8 @@ void SplitHeader::updateModerationModeIcon()
     auto app = getApp();
 
     this->moderationButton_->setPixmap(this->split_->getModerationMode()
-                                          ? *app->resources->moderationmode_enabled->getPixmap()
-                                          : *app->resources->moderationmode_disabled->getPixmap());
+                                           ? *app->resources->moderationmode_enabled->getPixmap()
+                                           : *app->resources->moderationmode_disabled->getPixmap());
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split_->getChannel();

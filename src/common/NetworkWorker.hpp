@@ -2,8 +2,6 @@
 
 #include <QObject>
 
-class QNetworkReply;
-
 namespace chatterino {
 
 class NetworkWorker : public QObject
@@ -11,7 +9,7 @@ class NetworkWorker : public QObject
     Q_OBJECT
 
 signals:
-    void doneUrl(QNetworkReply *);
+    void doneUrl();
 };
 
 }  // namespace chatterino

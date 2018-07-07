@@ -45,39 +45,6 @@ QString cleanUpCode(const QString &dirtyEmoteCode)
     return cleanCode;
 }
 
-void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
-{
-    Log("Load twitch emote set data for {}", emoteSet->key);
-    NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
-                       "/");
-
-    req.setRequestType(NetworkRequest::GetRequest);
-
-    req.onError([](int errorCode) -> bool {
-        Log("Emote sets on ERROR {}", errorCode);
-        return true;
-    });
-
-    req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
-        Log("Emote sets on success");
-        if (!root.IsObject()) {
-            return false;
-        }
-
-        std::string emoteSetID;
-        QString channelName;
-        if (!rj::getSafe(root, "channel_name", channelName)) {
-            return false;
-        }
-
-        emoteSet->channelName = channelName;
-
-        return true;
-    });
-
-    req.execute();
-}
-
 }  // namespace
 
 TwitchEmotes::TwitchEmotes()
@@ -165,7 +132,7 @@ void TwitchEmotes::refresh(const std::shared_ptr<TwitchAccount> &user)
 
             emoteSet->key = emoteSetJSON.name.GetString();
 
-            loadSetData(emoteSet);
+            this->loadSetData(emoteSet);
 
             for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray()) {
                 if (!emoteJSON.IsObject()) {
@@ -221,18 +188,17 @@ void TwitchEmotes::loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet)
         return;
     }
 
-    Log("Load twitch emote set data for {}..", emoteSet->key);
     NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
                        "/");
-
-    req.setRequestType(NetworkRequest::GetRequest);
+    req.setUseQuickLoadCache(true);
 
     req.onError([](int errorCode) -> bool {
-        Log("Emote sets on ERROR {}", errorCode);
+        Log("Error code {} while loading emote set data", errorCode);
         return true;
     });
 
-    req.onSuccess([emoteSet](const rapidjson::Document &root) -> bool {
+    req.onSuccess([emoteSet](auto result) -> bool {
+        auto root = result.parseRapidJson();
         if (!root.IsObject()) {
             return false;
         }

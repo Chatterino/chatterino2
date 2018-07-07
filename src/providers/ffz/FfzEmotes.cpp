@@ -46,11 +46,12 @@ void FFZEmotes::loadGlobalEmotes()
 {
     QString url("https://api.frankerfacez.com/v1/set/global");
 
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.setTimeout(30000);
-    req.setUseQuickLoadCache(true);
-    req.getJSON([this](QJsonObject &root) {
+    NetworkRequest request(url);
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(30000);
+    request.setUseQuickLoadCache(true);
+    request.onSuccess([this](auto result) {
+        auto root = result.parseJson();
         auto sets = root.value("sets").toObject();
 
         std::vector<QString> codes;
@@ -75,7 +76,11 @@ void FFZEmotes::loadGlobalEmotes()
 
             this->globalEmoteCodes = codes;
         }
+
+        return true;
     });
+
+    request.execute();
 }
 
 void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
@@ -84,15 +89,16 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emot
 
     QString url("https://api.frankerfacez.com/v1/room/" + channelName);
 
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.setTimeout(3000);
-    req.setUseQuickLoadCache(true);
-    req.getJSON([this, channelName, _map](QJsonObject &rootNode) {
+    NetworkRequest request(url);
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(3000);
+    request.setUseQuickLoadCache(true);
+    request.onSuccess([this, channelName, _map](auto result) {
+        auto rootNode = result.parseJson();
         auto map = _map.lock();
 
         if (_map.expired()) {
-            return;
+            return false;
         }
 
         map->clear();
@@ -128,7 +134,11 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emot
 
             this->channelEmoteCodes[channelName] = codes;
         }
+
+        return true;
     });
+
+    request.execute();
 }
 
 }  // namespace chatterino

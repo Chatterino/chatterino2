@@ -1,248 +1,70 @@
 #pragma once
 
 #include "Application.hpp"
-#include "common/NetworkManager.hpp"
+#include "common/NetworkCommon.hpp"
+#include "common/NetworkData.hpp"
 #include "common/NetworkRequester.hpp"
+#include "common/NetworkResult.hpp"
+#include "common/NetworkTimer.hpp"
 #include "common/NetworkWorker.hpp"
-#include "singletons/Paths.hpp"
-
-#include <rapidjson/document.h>
-#include <rapidjson/error/en.h>
-#include <QCryptographicHash>
-#include <QFile>
 
 namespace chatterino {
 
-static QJsonObject parseJSONFromData(const QByteArray &data)
-{
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
-
-    if (jsonDoc.isNull()) {
-        return QJsonObject();
-    }
-
-    return jsonDoc.object();
-}
-
-static rapidjson::Document parseJSONFromData2(const QByteArray &data)
-{
-    rapidjson::Document ret(rapidjson::kNullType);
-
-    rapidjson::ParseResult result = ret.Parse(data.data(), data.length());
-
-    if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-            result.Offset());
-        return ret;
-    }
-
-    return ret;
-}
-
 class NetworkRequest
 {
-public:
-    enum RequestType {
-        GetRequest,
-        PostRequest,
-        PutRequest,
-        DeleteRequest,
-    };
+    // Stores all data about the request that needs to be passed around to each part of the request
+    NetworkData data;
 
-private:
-    struct Data {
-        QNetworkRequest request;
-        const QObject *caller = nullptr;
-        std::function<void(QNetworkReply *)> onReplyCreated;
-        int timeoutMS = -1;
-        bool useQuickLoadCache = false;
+    // Timer that tracks the timeout
+    // By default, there's no explicit timeout for the request
+    // to enable the timer, the "setTimeout" function needs to be called before execute is called
+    std::unique_ptr<NetworkTimer> timer;
 
-        std::function<bool(int)> onError;
-        std::function<bool(const rapidjson::Document &)> onSuccess;
-
-        NetworkRequest::RequestType requestType;
-
-        QByteArray payload;
-
-        QString getHash()
-        {
-            if (this->hash.isEmpty()) {
-                QByteArray bytes;
-
-                bytes.append(this->request.url().toString());
-
-                for (const auto &header : this->request.rawHeaderList()) {
-                    bytes.append(header);
-                }
-
-                QByteArray hashBytes(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
-
-                this->hash = hashBytes.toHex();
-            }
-
-            return this->hash;
-        }
-
-        void writeToCache(const QByteArray &bytes);
-
-    private:
-        QString hash;
-    } data;
+    // The NetworkRequest destructor will assert if executed_ hasn't been set to true before dying
+    bool executed_ = false;
 
 public:
     NetworkRequest() = delete;
-    explicit NetworkRequest(const char *url);
-    explicit NetworkRequest(const std::string &url);
-    explicit NetworkRequest(const QString &url);
-    NetworkRequest(QUrl url);
+    NetworkRequest(const NetworkRequest &other) = delete;
+    NetworkRequest &operator=(const NetworkRequest &other) = delete;
 
-    void setRequestType(RequestType newRequestType);
+    NetworkRequest(NetworkRequest &&other) = default;
+    NetworkRequest &operator=(NetworkRequest &&other) = default;
 
-    template <typename Func>
-    void onError(Func cb)
-    {
-        this->data.onError = cb;
-    }
+    explicit NetworkRequest(const std::string &url,
+                            NetworkRequestType requestType = NetworkRequestType::Get);
+    NetworkRequest(QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
 
-    template <typename Func>
-    void onSuccess(Func cb)
-    {
-        this->data.onSuccess = cb;
-    }
+    ~NetworkRequest();
 
-    void setPayload(const QByteArray &payload)
-    {
-        this->data.payload = payload;
-    }
+    void setRequestType(NetworkRequestType newRequestType);
 
+    void onReplyCreated(NetworkReplyCreatedCallback cb);
+    void onError(NetworkErrorCallback cb);
+    void onSuccess(NetworkSuccessCallback cb);
+
+    void setPayload(const QByteArray &payload);
     void setUseQuickLoadCache(bool value);
     void setCaller(const QObject *caller);
-    void setOnReplyCreated(std::function<void(QNetworkReply *)> f);
     void setRawHeader(const char *headerName, const char *value);
     void setRawHeader(const char *headerName, const QByteArray &value);
     void setRawHeader(const char *headerName, const QString &value);
     void setTimeout(int ms);
     void makeAuthorizedV5(const QString &clientID, const QString &oauthToken = QString());
 
-    template <typename FinishedCallback>
-    void get(FinishedCallback onFinished)
-    {
-        if (this->data.useQuickLoadCache) {
-            auto app = getApp();
-
-            QFile cachedFile(app->paths->cacheDirectory + "/" + this->data.getHash());
-
-            if (cachedFile.exists()) {
-                if (cachedFile.open(QIODevice::ReadOnly)) {
-                    QByteArray bytes = cachedFile.readAll();
-
-                    // qDebug() << "Loaded cached resource" << this->data.request.url();
-
-                    bool success = onFinished(bytes);
-
-                    cachedFile.close();
-
-                    if (!success) {
-                        // The images were not successfully loaded from the file
-                        // XXX: Invalidate the cache file so we don't attempt to load it again next
-                        // time
-                    }
-                }
-            }
-        }
-
-        QTimer *timer = nullptr;
-        if (this->data.timeoutMS > 0) {
-            timer = new QTimer;
-        }
-
-        NetworkRequester requester;
-        NetworkWorker *worker = new NetworkWorker;
-
-        worker->moveToThread(&NetworkManager::workerThread);
-
-        if (this->data.caller != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, this->data.caller,
-                             [onFinished, data = this->data](auto reply) mutable {
-                                 if (reply->error() != QNetworkReply::NetworkError::NoError) {
-                                     if (data.onError) {
-                                         data.onError(reply->error());
-                                     }
-                                     return;
-                                 }
-
-                                 QByteArray readBytes = reply->readAll();
-                                 QByteArray bytes;
-                                 bytes.setRawData(readBytes.data(), readBytes.size());
-                                 data.writeToCache(bytes);
-                                 onFinished(bytes);
-
-                                 reply->deleteLater();
-                             });
-        }
-
-        if (timer != nullptr) {
-            timer->start(this->data.timeoutMS);
-        }
-
-        QObject::connect(
-            &requester, &NetworkRequester::requestUrl, worker,
-            [timer, data = std::move(this->data), worker, onFinished{std::move(onFinished)}]() {
-                QNetworkReply *reply = NetworkManager::NaM.get(data.request);
-
-                if (timer != nullptr) {
-                    QObject::connect(timer, &QTimer::timeout, worker, [reply, timer]() {
-                        Log("Aborted!");
-                        reply->abort();
-                        timer->deleteLater();
-                    });
-                }
-
-                if (data.onReplyCreated) {
-                    data.onReplyCreated(reply);
-                }
-
-                QObject::connect(reply, &QNetworkReply::finished, worker,
-                                 [data = std::move(data), worker, reply,
-                                  onFinished = std::move(onFinished)]() mutable {
-                                     if (data.caller == nullptr) {
-                                         QByteArray bytes = reply->readAll();
-                                         data.writeToCache(bytes);
-                                         onFinished(bytes);
-
-                                         reply->deleteLater();
-                                     } else {
-                                         emit worker->doneUrl(reply);
-                                     }
-
-                                     delete worker;
-                                 });
-            });
-
-        emit requester.requestUrl();
-    }
-
-    template <typename FinishedCallback>
-    void getJSON(FinishedCallback onFinished)
-    {
-        this->get([onFinished{std::move(onFinished)}](const QByteArray &bytes) -> bool {
-            auto object = parseJSONFromData(bytes);
-            onFinished(object);
-
-            // XXX: Maybe return onFinished? For now I don't want to force onFinished to have a
-            // return value
-            return true;
-        });
-    }
-
     void execute();
 
 private:
-    void useCache();
+    // Returns true if the file was successfully loaded from cache
+    // Returns false if the cache file either didn't exist, or it contained "invalid" data
+    // "invalid" is specified by the onSuccess callback
+    bool tryLoadCachedFile();
+
     void doRequest();
-    void executeGet();
-    void executePut();
-    void executeDelete();
+
+public:
+    // Helper creator functions
+    static NetworkRequest twitchRequest(QUrl url);
 };
 
 }  // namespace chatterino
