@@ -1,18 +1,16 @@
 #pragma once
 
-#include "common/NetworkWorker.hpp"
-
-#include <QTimer>
-
-#include <cassert>
 #include <functional>
-#include <memory>
+
+class QTimer;
 
 namespace chatterino {
 
+class NetworkWorker;
+
 class NetworkTimer
 {
-    std::unique_ptr<QTimer> timer_;
+    QTimer *timer_ = nullptr;
 
     bool started_{};
 
@@ -20,10 +18,7 @@ public:
     int timeoutMS_ = -1;
 
     NetworkTimer() = default;
-    ~NetworkTimer()
-    {
-        this->timer_.release();
-    }
+    ~NetworkTimer() = default;
 
     NetworkTimer(const NetworkTimer &other) = delete;
     NetworkTimer &operator=(const NetworkTimer &other) = delete;
@@ -31,31 +26,11 @@ public:
     NetworkTimer(NetworkTimer &&other) = default;
     NetworkTimer &operator=(NetworkTimer &&other) = default;
 
-    void start()
-    {
-        if (this->timeoutMS_ <= 0) {
-            return;
-        }
+    void start();
 
-        this->timer_ = std::make_unique<QTimer>();
-        this->timer_->start(this->timeoutMS_);
+    void onTimeout(NetworkWorker *worker, std::function<void()> cb) const;
 
-        this->started_ = true;
-    }
-
-    bool isStarted() const
-    {
-        return this->started_;
-    }
-
-    void onTimeout(NetworkWorker *worker, std::function<void()> cb) const
-    {
-        if (!this->timer_) {
-            return;
-        }
-
-        QObject::connect(this->timer_.get(), &QTimer::timeout, worker, cb);
-    }
+    bool isStarted() const;
 };
 
 }  // namespace chatterino

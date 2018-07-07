@@ -204,6 +204,7 @@ void NetworkRequest::doRequest()
         bool directAction = (data->caller_ == nullptr);
 
         auto handleReply = [data, timer, reply]() mutable {
+            // TODO(pajlada): A reply was received, kill the timeout timer
             if (reply->error() != QNetworkReply::NetworkError::NoError) {
                 if (data->onError_) {
                     data->onError_(reply->error());

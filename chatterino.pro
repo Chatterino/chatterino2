@@ -106,6 +106,7 @@ SOURCES += \
     src/common/NetworkResult.cpp \
     src/common/NetworkData.cpp \
     src/common/NetworkRequest.cpp \
+    src/common/NetworkTimer.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
