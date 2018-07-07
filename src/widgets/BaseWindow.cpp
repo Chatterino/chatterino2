@@ -60,7 +60,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->updateScale();
 
     createWindowShortcut(this, "CTRL+0", [] {
-        if (!getSettings()->lockUiScale.getValue()) {
+        if (!getSettings()->lockUiScaleHotkeys.getValue()) {
             getSettings()->uiScale.setValue(0);
         }
     });
@@ -259,12 +259,12 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            if (!getSettings()->lockUiScale.getValue()) {
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
                 getSettings()->uiScale.setValue(
                     WindowManager::clampUiScale(getSettings()->uiScale.getValue() + 1));
             }
         } else {
-            if (!getSettings()->lockUiScale.getValue()) {
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
                 getSettings()->uiScale.setValue(
                     WindowManager::clampUiScale(getSettings()->uiScale.getValue() - 1));
             }

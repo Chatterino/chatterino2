@@ -263,7 +263,7 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            if (!getSettings()->lockUiScale.getValue()) {
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
                 getSettings()->uiScale.setValue(
                     WindowManager::clampUiScale(getSettings()->uiScale.getValue() + 1));
             }
@@ -275,7 +275,7 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            if (!getSettings()->lockUiScale.getValue()) {
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
                 getSettings()->uiScale.setValue(
                     WindowManager::clampUiScale(getSettings()->uiScale.getValue() - 1));
             }
