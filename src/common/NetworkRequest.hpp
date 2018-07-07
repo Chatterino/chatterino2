@@ -13,7 +13,7 @@ namespace chatterino {
 class NetworkRequest
 {
     // Stores all data about the request that needs to be passed around to each part of the request
-    NetworkData data;
+    std::shared_ptr<NetworkData> data;
 
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request

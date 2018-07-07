@@ -20,7 +20,10 @@ public:
     int timeoutMS_ = -1;
 
     NetworkTimer() = default;
-    ~NetworkTimer() = default;
+    ~NetworkTimer()
+    {
+        this->timer_.release();
+    }
 
     NetworkTimer(const NetworkTimer &other) = delete;
     NetworkTimer &operator=(const NetworkTimer &other) = delete;

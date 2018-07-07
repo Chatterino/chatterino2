@@ -12,17 +12,19 @@
 namespace chatterino {
 
 NetworkRequest::NetworkRequest(const std::string &url, NetworkRequestType requestType)
-    : timer(new NetworkTimer)
+    : data(new NetworkData)
+    , timer(new NetworkTimer)
 {
-    this->data.request_.setUrl(QUrl(QString::fromStdString(url)));
-    this->data.requestType_ = requestType;
+    this->data->request_.setUrl(QUrl(QString::fromStdString(url)));
+    this->data->requestType_ = requestType;
 }
 
 NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
-    : timer(new NetworkTimer)
+    : data(new NetworkData)
+    , timer(new NetworkTimer)
 {
-    this->data.request_.setUrl(url);
-    this->data.requestType_ = requestType;
+    this->data->request_.setUrl(url);
+    this->data->requestType_ = requestType;
 }
 
 NetworkRequest::~NetworkRequest()
@@ -32,42 +34,42 @@ NetworkRequest::~NetworkRequest()
 
 void NetworkRequest::setRequestType(NetworkRequestType newRequestType)
 {
-    this->data.requestType_ = newRequestType;
+    this->data->requestType_ = newRequestType;
 }
 
 void NetworkRequest::setCaller(const QObject *caller)
 {
-    this->data.caller_ = caller;
+    this->data->caller_ = caller;
 }
 
 void NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb)
 {
-    this->data.onReplyCreated_ = cb;
+    this->data->onReplyCreated_ = cb;
 }
 
 void NetworkRequest::onError(NetworkErrorCallback cb)
 {
-    this->data.onError_ = cb;
+    this->data->onError_ = cb;
 }
 
 void NetworkRequest::onSuccess(NetworkSuccessCallback cb)
 {
-    this->data.onSuccess_ = cb;
+    this->data->onSuccess_ = cb;
 }
 
 void NetworkRequest::setRawHeader(const char *headerName, const char *value)
 {
-    this->data.request_.setRawHeader(headerName, value);
+    this->data->request_.setRawHeader(headerName, value);
 }
 
 void NetworkRequest::setRawHeader(const char *headerName, const QByteArray &value)
 {
-    this->data.request_.setRawHeader(headerName, value);
+    this->data->request_.setRawHeader(headerName, value);
 }
 
 void NetworkRequest::setRawHeader(const char *headerName, const QString &value)
 {
-    this->data.request_.setRawHeader(headerName, value.toUtf8());
+    this->data->request_.setRawHeader(headerName, value.toUtf8());
 }
 
 void NetworkRequest::setTimeout(int ms)
@@ -86,22 +88,22 @@ void NetworkRequest::makeAuthorizedV5(const QString &clientID, const QString &oa
 
 void NetworkRequest::setPayload(const QByteArray &payload)
 {
-    this->data.payload_ = payload;
+    this->data->payload_ = payload;
 }
 
 void NetworkRequest::setUseQuickLoadCache(bool value)
 {
-    this->data.useQuickLoadCache_ = value;
+    this->data->useQuickLoadCache_ = value;
 }
 
 void NetworkRequest::execute()
 {
     this->executed_ = true;
 
-    switch (this->data.requestType_) {
+    switch (this->data->requestType_) {
         case NetworkRequestType::Get: {
             // Get requests try to load from cache, then perform the request
-            if (this->data.useQuickLoadCache_) {
+            if (this->data->useQuickLoadCache_) {
                 if (this->tryLoadCachedFile()) {
                     Log("Loaded from cache");
                     // Successfully loaded from cache
@@ -132,7 +134,7 @@ bool NetworkRequest::tryLoadCachedFile()
 {
     auto app = getApp();
 
-    QFile cachedFile(app->paths->cacheDirectory + "/" + this->data.getHash());
+    QFile cachedFile(app->paths->cacheDirectory + "/" + this->data->getHash());
 
     if (!cachedFile.exists()) {
         // File didn't exist
@@ -147,7 +149,7 @@ bool NetworkRequest::tryLoadCachedFile()
     QByteArray bytes = cachedFile.readAll();
     NetworkResult result(bytes);
 
-    bool success = this->data.onSuccess_(result);
+    bool success = this->data->onSuccess_(result);
 
     cachedFile.close();
 
@@ -168,17 +170,17 @@ void NetworkRequest::doRequest()
     auto onUrlRequested = [data = std::move(this->data), timer = std::move(this->timer),
                            worker]() mutable {
         QNetworkReply *reply = nullptr;
-        switch (data.requestType_) {
+        switch (data->requestType_) {
             case NetworkRequestType::Get: {
-                reply = NetworkManager::NaM.get(data.request_);
+                reply = NetworkManager::NaM.get(data->request_);
             } break;
 
             case NetworkRequestType::Put: {
-                reply = NetworkManager::NaM.put(data.request_, data.payload_);
+                reply = NetworkManager::NaM.put(data->request_, data->payload_);
             } break;
 
             case NetworkRequestType::Delete: {
-                reply = NetworkManager::NaM.deleteResource(data.request_);
+                reply = NetworkManager::NaM.deleteResource(data->request_);
             } break;
         }
 
@@ -191,22 +193,22 @@ void NetworkRequest::doRequest()
             timer->onTimeout(worker, [reply, data]() {
                 Log("Aborted!");
                 reply->abort();
-                if (data.onError_) {
-                    data.onError_(-2);
+                if (data->onError_) {
+                    data->onError_(-2);
                 }
             });
         }
 
-        if (data.onReplyCreated_) {
-            data.onReplyCreated_(reply);
+        if (data->onReplyCreated_) {
+            data->onReplyCreated_(reply);
         }
 
-        bool directAction = (data.caller_ == nullptr);
+        bool directAction = (data->caller_ == nullptr);
 
         auto handleReply = [data = std::move(data), timer = std::move(timer), reply]() mutable {
             if (reply->error() != QNetworkReply::NetworkError::NoError) {
-                if (data.onError_) {
-                    data.onError_(reply->error());
+                if (data->onError_) {
+                    data->onError_(reply->error());
                 }
                 return;
             }
@@ -214,16 +216,16 @@ void NetworkRequest::doRequest()
             QByteArray readBytes = reply->readAll();
             QByteArray bytes;
             bytes.setRawData(readBytes.data(), readBytes.size());
-            data.writeToCache(bytes);
+            data->writeToCache(bytes);
 
             NetworkResult result(bytes);
-            data.onSuccess_(result);
+            data->onSuccess_(result);
 
             reply->deleteLater();
         };
 
-        if (data.caller_ != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, data.caller_, std::move(handleReply));
+        if (data->caller_ != nullptr) {
+            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_, std::move(handleReply));
             QObject::connect(reply, &QNetworkReply::finished, worker, [worker]() mutable {
                 emit worker->doneUrl();
 
