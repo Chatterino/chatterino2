@@ -18,7 +18,7 @@ class NetworkRequest
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request
     // to enable the timer, the "setTimeout" function needs to be called before execute is called
-    std::unique_ptr<NetworkTimer> timer;
+    std::shared_ptr<NetworkTimer> timer;
 
     // The NetworkRequest destructor will assert if executed_ hasn't been set to true before dying
     bool executed_ = false;
