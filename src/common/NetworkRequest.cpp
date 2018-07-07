@@ -205,7 +205,7 @@ void NetworkRequest::doRequest()
 
         bool directAction = (data->caller_ == nullptr);
 
-        auto handleReply = [data = std::move(data), timer = std::move(timer), reply]() mutable {
+        auto handleReply = [data = std::move(data), timer = timer, reply]() mutable {
             if (reply->error() != QNetworkReply::NetworkError::NoError) {
                 if (data->onError_) {
                     data->onError_(reply->error());
@@ -241,7 +241,7 @@ void NetworkRequest::doRequest()
         }
     };
 
-    QObject::connect(&requester, &NetworkRequester::requestUrl, worker, std::move(onUrlRequested));
+    QObject::connect(&requester, &NetworkRequester::requestUrl, worker, onUrlRequested);
 
     emit requester.requestUrl();
 }
