@@ -85,10 +85,10 @@ void TwitchAccountManager::reloadUsers()
             continue;
         }
 
-        userData.username = qS(username);
-        userData.userID = qS(userID);
-        userData.clientID = qS(clientID);
-        userData.oauthToken = qS(oauthToken);
+        userData.username = qS(username).trimmed();
+        userData.userID = qS(userID).trimmed();
+        userData.clientID = qS(clientID).trimmed();
+        userData.oauthToken = qS(oauthToken).trimmed();
 
         switch (this->addUser(userData)) {
             case AddUserResponse::UserAlreadyExists: {
