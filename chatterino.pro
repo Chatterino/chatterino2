@@ -102,10 +102,10 @@ SOURCES += \
     src/common/Channel.cpp \
     src/common/CompletionModel.cpp \
     src/common/Emotemap.cpp \
-    src/common/NetworkManager.cpp \
-    src/common/NetworkResult.cpp \
     src/common/NetworkData.cpp \
+    src/common/NetworkManager.cpp \
     src/common/NetworkRequest.cpp \
+    src/common/NetworkResult.cpp \
     src/common/NetworkTimer.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
@@ -242,11 +242,13 @@ HEADERS  += \
     src/common/FlagsEnum.hpp \
     src/common/LockedObject.hpp \
     src/common/MutexValue.hpp \
-    src/common/NetworkManager.hpp \
-    src/common/NetworkResult.hpp \
+    src/common/NetworkCommon.hpp \
     src/common/NetworkData.hpp \
+    src/common/NetworkManager.hpp \
     src/common/NetworkRequest.hpp \
     src/common/NetworkRequester.hpp \
+    src/common/NetworkResult.hpp \
+    src/common/NetworkTimer.hpp \
     src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
     src/common/Property.hpp \
