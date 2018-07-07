@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Version.hpp"
+#include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
@@ -65,8 +66,10 @@ void Updates::installUpdates()
 
         return true;
     });
-    req.get([this](QByteArray &object) {
-        auto filename = combinePath(getApp()->paths->miscDirectory, "update.zip");
+
+    req.onSuccess([this](auto result) -> bool {
+        QByteArray object = result.getData();
+        auto filename = combinePath(getPaths()->miscDirectory, "update.zip");
 
         QFile file(filename);
         file.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -95,7 +98,7 @@ void Updates::checkForUpdates()
 
     NetworkRequest req(url);
     req.setTimeout(30000);
-    req.onSuccess([this](auto result) {
+    req.onSuccess([this](auto result) -> bool {
         auto object = result.parseJson();
         QJsonValue version_val = object.value("version");
         QJsonValue update_val = object.value("update");
@@ -113,7 +116,7 @@ void Updates::checkForUpdates()
                 box->show();
                 box->raise();
             });
-            return;
+            return false;
         }
 
         this->onlineVersion_ = version_val.toString();
@@ -137,6 +140,7 @@ void Updates::checkForUpdates()
         } else {
             this->setStatus_(NoUpdateAvailable);
         }
+        return false;
     });
     this->setStatus_(Searching);
     req.execute();

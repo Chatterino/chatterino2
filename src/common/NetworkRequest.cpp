@@ -27,7 +27,7 @@ NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
 
 NetworkRequest::~NetworkRequest()
 {
-    assert(this->executed_);
+    //    assert(this->executed_);
 }
 
 void NetworkRequest::setRequestType(NetworkRequestType newRequestType)
