@@ -497,7 +497,7 @@ int WindowManager::clampUiScale(int scale)
 
 float WindowManager::getUiScaleValue()
 {
-    return getUiScaleValue(getApp()->settings->uiScale.getValue());
+    return getUiScaleValue(getSettings()->uiScale.getValue());
 }
 
 float WindowManager::getUiScaleValue(int scale)
