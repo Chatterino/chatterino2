@@ -446,6 +446,8 @@ win32-msvc* {
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
 
+    QMAKE_CXXFLAGS_WARN_ON += -Werror=return-type
+
     equals(QMAKE_CXX, "clang++") {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
     } else {
