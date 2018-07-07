@@ -30,9 +30,8 @@ bool NetworkTimer::isStarted() const
 
 void NetworkTimer::onTimeout(NetworkWorker *worker, std::function<void()> cb) const
 {
-    if (!this->timer_) {
-        return;
-    }
+    assert(this->timer_ != nullptr);
+    assert(worker != nullptr);
 
     QObject::connect(this->timer_, &QTimer::timeout, worker, cb);
 }
