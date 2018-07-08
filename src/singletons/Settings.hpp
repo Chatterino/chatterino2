@@ -83,6 +83,9 @@ public:
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting lowercaseLink = {"/links/linkLowercase", true};
 
+    /// Ignored phrases
+    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace", "***"};
+
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers", true};
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/SerializeCustom.hpp"
+#include "singletons/Settings.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>
@@ -16,15 +17,18 @@ class IgnorePhrase
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_) == std::tie(other.pattern_, other.isRegex_);
+        return std::tie(this->pattern_, this->isRegex_, this->isReplace_, this->replace_) ==
+               std::tie(other.pattern_, other.isRegex_, other.isReplace_, other.replace_);
     }
 
-    IgnorePhrase(const QString &pattern, bool isRegex)
+    IgnorePhrase(const QString &pattern, bool isRegex, bool isReplace, const QString &replace)
         : pattern_(pattern)
         , isRegex_(isRegex)
         , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
                  QRegularExpression::CaseInsensitiveOption |
                      QRegularExpression::UseUnicodePropertiesOption)
+        , isReplace_(isReplace)
+        , replace_(replace)
     {
     }
 
@@ -47,10 +51,22 @@ public:
         return this->isValid() && this->regex_.match(subject).hasMatch();
     }
 
+    bool isReplace() const
+    {
+        return this->isReplace_;
+    }
+
+    const QString &getReplace() const
+    {
+        return this->replace_;
+    }
+
 private:
     QString pattern_;
     bool isRegex_;
     QRegularExpression regex_;
+    bool isReplace_;
+    QString replace_;
 };
 }  // namespace chatterino
 
@@ -66,6 +82,8 @@ struct Serialize<chatterino::IgnorePhrase> {
 
         AddMember(ret, "pattern", value.getPattern(), a);
         AddMember(ret, "regex", value.isRegex(), a);
+        AddMember(ret, "onlyWord", value.isReplace(), a);
+        AddMember(ret, "replace", value.getReplace(), a);
 
         return ret;
     }
@@ -76,16 +94,22 @@ struct Deserialize<chatterino::IgnorePhrase> {
     static chatterino::IgnorePhrase get(const rapidjson::Value &value)
     {
         if (!value.IsObject()) {
-            return chatterino::IgnorePhrase(QString(), false);
+            return chatterino::IgnorePhrase(
+                QString(), false, false,
+                ::chatterino::getSettings()->ignoredPhraseReplace.getValue());
         }
 
         QString _pattern;
         bool _isRegex = false;
+        bool _isReplace = false;
+        QString _replace;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "regex", _isRegex);
+        chatterino::rj::getSafe(value, "onlyWord", _isReplace);
+        chatterino::rj::getSafe(value, "replace", _replace);
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex);
+        return chatterino::IgnorePhrase(_pattern, _isRegex, _isReplace, _replace);
     }
 };
 

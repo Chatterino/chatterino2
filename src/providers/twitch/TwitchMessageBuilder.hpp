@@ -61,7 +61,7 @@ private:
     QString roomID_;
 
     QColor usernameColor_;
-    const QString originalMessage_;
+    QString originalMessage_;
     bool senderIsBroadcaster{};
 
     const bool action_ = false;

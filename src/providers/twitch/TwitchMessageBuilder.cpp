@@ -56,7 +56,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
     for (const auto &phrase : app->ignores->phrases.getVector()) {
-        if (phrase.isMatch(this->originalMessage_)) {
+        if (!phrase.isReplace() && phrase.isMatch(this->originalMessage_)) {
             Log("Blocking message because it contains ignored phrase {}", phrase.getPattern());
             return true;
         }
@@ -168,13 +168,22 @@ MessagePtr TwitchMessageBuilder::build()
 
     auto currentTwitchEmote = twitchEmotes.begin();
 
+    /*for (const auto &phrase : app->ignores->phrases.getVector()) {
+        if (phrase.isReplace() && phrase.isMatch(this->originalMessage_)) {
+            Log("Replacing message because it contains ignored phrase {}", phrase.getPattern());
+            this->originalMessage_.replace(phrase.getPattern(), phrase.getReplace());
+        }
+    }*/
+
     // words
 
     QStringList splits = this->originalMessage_.split(' ');
 
     long int i = 0;
 
-    for (QString split : splits) {
+    for (int current = 0; current < splits.size(); ++current) {
+        const QString &split = splits[current];
+        Log("Splits {} {} {}", current, split, i);
         MessageColor textColor =
             this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
 
