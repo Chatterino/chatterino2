@@ -141,9 +141,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendUsername();
 
     // highlights
-    if (/*app->settings->enableHighlights &&*/ !isPastMsg) {
-        this->parseHighlights();
-    }
+    this->parseHighlights(isPastMsg);
 
     QString bits;
     auto iterator = this->tags.find("bits");
@@ -420,7 +418,7 @@ void TwitchMessageBuilder::appendUsername()
     }
 }
 
-void TwitchMessageBuilder::parseHighlights()
+void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 {
     static auto player = new QMediaPlayer;
     static QUrl currentPlayerUrl;
@@ -513,12 +511,14 @@ void TwitchMessageBuilder::parseHighlights()
 
         this->setHighlight(doHighlight);
 
-        if (playSound && (!hasFocus || app->settings->highlightAlwaysPlaySound)) {
-            player->play();
-        }
+        if (!isPastMsg) {
+            if (playSound && (!hasFocus || app->settings->highlightAlwaysPlaySound)) {
+                player->play();
+            }
 
-        if (doAlert) {
-            QApplication::alert(getApp()->windows->getMainWindow().window(), 2500);
+            if (doAlert) {
+                QApplication::alert(getApp()->windows->getMainWindow().window(), 2500);
+            }
         }
 
         if (doHighlight) {

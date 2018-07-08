@@ -48,7 +48,7 @@ private:
     void appendChannelName();
     void parseUsername();
     void appendUsername();
-    void parseHighlights();
+    void parseHighlights(bool isPastMsg);
 
     void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
                            std::vector<std::pair<long, EmoteData>> &vec);
