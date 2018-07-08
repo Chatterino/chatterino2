@@ -220,13 +220,6 @@ MessagePtr TwitchMessageBuilder::build()
 
     auto currentTwitchEmote = twitchEmotes.begin();
 
-    /*for (const auto &phrase : app->ignores->phrases.getVector()) {
-        if (phrase.isReplace() && phrase.isMatch(this->originalMessage_)) {
-            Log("Replacing message because it contains ignored phrase {}", phrase.getPattern());
-            this->originalMessage_.replace(phrase.getPattern(), phrase.getReplace());
-        }
-    }*/
-
     // words
 
     QStringList splits = this->originalMessage_.split(' ');
