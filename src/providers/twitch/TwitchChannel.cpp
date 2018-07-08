@@ -13,6 +13,7 @@
 #include "util/PostToThread.hpp"
 
 #include <IrcConnection>
+#include <QJsonArray>
 #include <QThread>
 #include <QTimer>
 
