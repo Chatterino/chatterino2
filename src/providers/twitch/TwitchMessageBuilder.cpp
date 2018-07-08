@@ -166,6 +166,58 @@ MessagePtr TwitchMessageBuilder::build()
                   [](const auto &a, const auto &b) { return a.first < b.first; });
     }
 
+    const auto &phrases = app->ignores->phrases.getVector();
+    auto removeEmotesInRange = [&twitchEmotes](int pos, int len) mutable {
+        twitchEmotes.erase(
+            std::remove_if(twitchEmotes.begin(), twitchEmotes.end(),
+                           [&pos, &len](const auto &item) {
+                               return ((item.first >= pos) && item.first < (pos + len));
+                           }),
+            twitchEmotes.end());
+    };
+
+    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
+        auto it = std::find_if(twitchEmotes.begin(), twitchEmotes.end(),
+                               [&pos](const auto &item) { return item.first >= pos; });
+        while (it != twitchEmotes.end()) {
+            it->first += by;
+            ++it;
+        }
+    };
+
+    for (const auto &phrase : phrases) {
+        if (!phrase.isReplace() || !phrase.isValid()) {
+            continue;
+        }
+        if (phrase.isRegex()) {
+            const auto &regex = phrase.getRegex();
+            QRegularExpressionMatch match;
+            int from = 0;
+            while ((from = this->originalMessage_.indexOf(regex, from, &match)) != -1) {
+                int len = match.capturedLength();
+                removeEmotesInRange(from, len);
+                auto mid = this->originalMessage_.mid(from, len);
+                mid.replace(regex, phrase.getReplace());
+                this->originalMessage_.replace(from, len, mid);
+                int midsize = mid.size();
+                from += midsize;
+                shiftIndicesAfter(from, midsize - len);
+            }
+        } else {
+            const auto &pattern = phrase.getPattern();
+            int from = 0;
+            while ((from = this->originalMessage_.indexOf(pattern, from)) != -1) {
+                int len = pattern.size();
+                removeEmotesInRange(from, len);
+                const auto &replace = phrase.getReplace();
+                this->originalMessage_.replace(from, len, replace);
+                int replacesize = replace.size();
+                from += replacesize;
+                shiftIndicesAfter(from, replacesize - len);
+            }
+        }
+    }
+
     auto currentTwitchEmote = twitchEmotes.begin();
 
     /*for (const auto &phrase : app->ignores->phrases.getVector()) {
@@ -181,9 +233,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     long int i = 0;
 
-    for (int current = 0; current < splits.size(); ++current) {
-        const QString &split = splits[current];
-        Log("Splits {} {} {}", current, split, i);
+    for (const auto &split : splits) {
         MessageColor textColor =
             this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
 

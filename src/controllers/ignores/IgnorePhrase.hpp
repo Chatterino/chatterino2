@@ -24,7 +24,7 @@ public:
     IgnorePhrase(const QString &pattern, bool isRegex, bool isReplace, const QString &replace)
         : pattern_(pattern)
         , isRegex_(isRegex)
-        , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+        , regex_(!isRegex ? pattern : QRegularExpression::escape(pattern),
                  QRegularExpression::CaseInsensitiveOption |
                      QRegularExpression::UseUnicodePropertiesOption)
         , isReplace_(isReplace)
@@ -49,6 +49,11 @@ public:
     bool isMatch(const QString &subject) const
     {
         return this->isValid() && this->regex_.match(subject).hasMatch();
+    }
+
+    const QRegularExpression &getRegex() const
+    {
+        return this->regex_;
     }
 
     bool isReplace() const
