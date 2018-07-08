@@ -54,12 +54,16 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->init();
 
     this->connections_.managedConnect(
-        getApp()->settings->uiScale.getValueChangedSignal(),
+        getSettings()->uiScale.getValueChangedSignal(),
         [this](auto, auto) { postToThread([this] { this->updateScale(); }); });
 
     this->updateScale();
 
-    createWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
+    createWindowShortcut(this, "CTRL+0", [] {
+        if (!getSettings()->lockUiScaleHotkeys.getValue()) {
+            getSettings()->uiScale.setValue(0);
+        }
+    });
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }
@@ -255,11 +259,15 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
+                getSettings()->uiScale.setValue(
+                    WindowManager::clampUiScale(getSettings()->uiScale.getValue() + 1));
+            }
         } else {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
+            if (!getSettings()->lockUiScaleHotkeys.getValue()) {
+                getSettings()->uiScale.setValue(
+                    WindowManager::clampUiScale(getSettings()->uiScale.getValue() - 1));
+            }
         }
     }
 }

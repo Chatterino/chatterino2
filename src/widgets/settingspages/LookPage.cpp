@@ -86,6 +86,9 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
         box.append(this->createUiScaleSlider());
     }
 
+    layout.append(
+        this->createCheckBox("Lock window scale hotkeys", getSettings()->lockUiScaleHotkeys));
+
     layout.append(this->createCheckBox(WINDOW_TOPMOST, getSettings()->windowTopMost));
 
     // --
