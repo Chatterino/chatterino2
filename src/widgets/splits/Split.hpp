@@ -60,6 +60,8 @@ public:
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
+    void insertTextToInput(const QString &text);
+
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);
     void giveFocus(Qt::FocusReason reason);
