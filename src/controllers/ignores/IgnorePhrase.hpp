@@ -17,19 +17,27 @@ class IgnorePhrase
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_, this->isReplace_, this->replace_) ==
-               std::tie(other.pattern_, other.isRegex_, other.isReplace_, other.replace_);
+        return std::tie(this->pattern_, this->isRegex_, this->isReplace_, this->replace_,
+                        this->caseInsensitive_) == std::tie(other.pattern_, other.isRegex_,
+                                                            other.isReplace_, other.replace_,
+                                                            other.caseInsensitive_);
     }
 
-    IgnorePhrase(const QString &pattern, bool isRegex, bool isReplace, const QString &replace)
+    IgnorePhrase(const QString &pattern, bool isRegex, bool isReplace, const QString &replace,
+                 bool caseInsensitive)
         : pattern_(pattern)
         , isRegex_(isRegex)
-        , regex_(!isRegex ? pattern : QRegularExpression::escape(pattern),
-                 QRegularExpression::CaseInsensitiveOption |
-                     QRegularExpression::UseUnicodePropertiesOption)
+        , regex_(pattern)
         , isReplace_(isReplace)
         , replace_(replace)
+        , caseInsensitive_(caseInsensitive)
     {
+        if (this->caseInsensitive_) {
+            regex_.setPatternOptions(QRegularExpression::CaseInsensitiveOption |
+                                     QRegularExpression::UseUnicodePropertiesOption);
+        } else {
+            regex_.setPatternOptions(QRegularExpression::UseUnicodePropertiesOption);
+        }
     }
 
     const QString &getPattern() const
@@ -41,14 +49,11 @@ public:
         return this->isRegex_;
     }
 
-    bool isValid() const
-    {
-        return !this->pattern_.isEmpty() && this->regex_.isValid();
-    }
-
     bool isMatch(const QString &subject) const
     {
-        return this->isValid() && this->regex_.match(subject).hasMatch();
+        return !this->pattern_.isEmpty() &&
+               (this->isRegex() ? (this->regex_.isValid() && this->regex_.match(subject).hasMatch())
+                                : subject.contains(this->pattern_, this->caseSensitivity()));
     }
 
     const QRegularExpression &getRegex() const
@@ -66,12 +71,23 @@ public:
         return this->replace_;
     }
 
+    bool caseInsensitive() const
+    {
+        return this->caseInsensitive_;
+    }
+
+    Qt::CaseSensitivity caseSensitivity() const
+    {
+        return this->caseInsensitive_ ? Qt::CaseInsensitive : Qt::CaseSensitive;
+    }
+
 private:
     QString pattern_;
     bool isRegex_;
     QRegularExpression regex_;
     bool isReplace_;
     QString replace_;
+    bool caseInsensitive_;
 };
 }  // namespace chatterino
 
@@ -89,6 +105,7 @@ struct Serialize<chatterino::IgnorePhrase> {
         AddMember(ret, "regex", value.isRegex(), a);
         AddMember(ret, "onlyWord", value.isReplace(), a);
         AddMember(ret, "replace", value.getReplace(), a);
+        AddMember(ret, "caseInsens", value.caseInsensitive(), a);
 
         return ret;
     }
@@ -101,20 +118,22 @@ struct Deserialize<chatterino::IgnorePhrase> {
         if (!value.IsObject()) {
             return chatterino::IgnorePhrase(
                 QString(), false, false,
-                ::chatterino::getSettings()->ignoredPhraseReplace.getValue());
+                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), false);
         }
 
         QString _pattern;
         bool _isRegex = false;
         bool _isReplace = false;
         QString _replace;
+        bool _caseInsens = false;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "onlyWord", _isReplace);
         chatterino::rj::getSafe(value, "replace", _replace);
+        chatterino::rj::getSafe(value, "caseInsens", _caseInsens);
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex, _isReplace, _replace);
+        return chatterino::IgnorePhrase(_pattern, _isRegex, _isReplace, _replace, _caseInsens);
     }
 };
 

@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 IgnoreModel::IgnoreModel(QObject *parent)
-    : SignalVectorModel<IgnorePhrase>(4, parent)
+    : SignalVectorModel<IgnorePhrase>(5, parent)
 {
 }
 
@@ -20,7 +20,8 @@ IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row,
 
     return IgnorePhrase{
         row[0]->data(Qt::DisplayRole).toString(), row[1]->data(Qt::CheckStateRole).toBool(),
-        row[2]->data(Qt::CheckStateRole).toBool(), row[3]->data(Qt::DisplayRole).toString()};
+        row[3]->data(Qt::CheckStateRole).toBool(), row[4]->data(Qt::DisplayRole).toString(),
+        row[2]->data(Qt::CheckStateRole).toBool()};
 }
 
 // turns a row in the model into a vector item
@@ -28,8 +29,9 @@ void IgnoreModel::getRowFromItem(const IgnorePhrase &item, std::vector<QStandard
 {
     setStringItem(row[0], item.getPattern());
     setBoolItem(row[1], item.isRegex());
-    setBoolItem(row[2], item.isReplace());
-    setStringItem(row[3], item.getReplace());
+    setBoolItem(row[2], item.caseInsensitive());
+    setBoolItem(row[3], item.isReplace());
+    setStringItem(row[4], item.getReplace());
 }
 
 }  // namespace chatterino

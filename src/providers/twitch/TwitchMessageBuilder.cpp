@@ -186,11 +186,14 @@ MessagePtr TwitchMessageBuilder::build()
     };
 
     for (const auto &phrase : phrases) {
-        if (!phrase.isReplace() || !phrase.isValid()) {
+        if (!phrase.isReplace()) {
             continue;
         }
         if (phrase.isRegex()) {
             const auto &regex = phrase.getRegex();
+            if (!regex.isValid()) {
+                continue;
+            }
             QRegularExpressionMatch match;
             int from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from, &match)) != -1) {
@@ -205,8 +208,12 @@ MessagePtr TwitchMessageBuilder::build()
             }
         } else {
             const auto &pattern = phrase.getPattern();
+            if (pattern.isEmpty()) {
+                continue;
+            }
             int from = 0;
-            while ((from = this->originalMessage_.indexOf(pattern, from)) != -1) {
+            while ((from = this->originalMessage_.indexOf(pattern, from,
+                                                          phrase.caseSensitivity())) != -1) {
                 int len = pattern.size();
                 removeEmotesInRange(from, len);
                 const auto &replace = phrase.getReplace();
