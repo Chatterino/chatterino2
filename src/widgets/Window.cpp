@@ -177,6 +177,7 @@ void Window::addCustomTitlebarButtons()
         getApp()->windows->showAccountSelectPopup(
             this->userLabel_->mapToGlobal(this->userLabel_->rect().bottomLeft()));  //
     });
+    this->userLabel_->setMinimumWidth(20 * getScale());
 }
 
 void Window::addDebugStuff()
