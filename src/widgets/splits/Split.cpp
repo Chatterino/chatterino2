@@ -227,6 +227,11 @@ bool Split::getModerationMode() const
     return this->moderationMode_;
 }
 
+void Split::insertTextToInput(const QString &text)
+{
+    this->input_.insertText(text);
+}
+
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {

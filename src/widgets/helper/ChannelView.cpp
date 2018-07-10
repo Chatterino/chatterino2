@@ -963,7 +963,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event, const MessageLayoutElemen
             }
         } break;
         case Qt::RightButton: {
-            this->addContextMenuItems(hoveredElement, layout);
+            auto &link = hoveredElement->getLink();
+            if (link.type == Link::UserInfo) {
+                Split *split = dynamic_cast<Split *>(this->parentWidget());
+                if (split != nullptr) {
+                    split->insertTextToInput("@" + link.value + ", ");
+                }
+            } else {
+                this->addContextMenuItems(hoveredElement, layout);
+            }
         } break;
         default:;
     }
