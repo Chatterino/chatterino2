@@ -49,7 +49,6 @@ void FFZEmotes::loadGlobalEmotes()
     NetworkRequest request(url);
     request.setCaller(QThread::currentThread());
     request.setTimeout(30000);
-    request.setUseQuickLoadCache(true);
     request.onSuccess([this](auto result) {
         auto root = result.parseJson();
         auto sets = root.value("sets").toObject();
@@ -92,7 +91,6 @@ void FFZEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<Emot
     NetworkRequest request(url);
     request.setCaller(QThread::currentThread());
     request.setTimeout(3000);
-    request.setUseQuickLoadCache(true);
     request.onSuccess([this, channelName, _map](auto result) {
         auto rootNode = result.parseJson();
         auto map = _map.lock();
