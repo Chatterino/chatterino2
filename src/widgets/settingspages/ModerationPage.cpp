@@ -21,6 +21,7 @@
 #include <QTableView>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
 
@@ -34,6 +35,52 @@ inline QString CreateLink(const QString &url, bool file = false)
     return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" + url + "</span></a>");
 }
 
+qint64 dirSize(QString dirPath)
+{
+    qint64 size = 0;
+    QDir dir(dirPath);
+    // calculate total size of current directories' files
+    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
+    for (QString filePath : dir.entryList(fileFilters)) {
+        QFileInfo fi(dir, filePath);
+        size += fi.size();
+    }
+    // add size of child directories recursively
+    QDir::Filters dirFilters = QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
+    for (QString childDirPath : dir.entryList(dirFilters))
+        size += dirSize(dirPath + QDir::separator() + childDirPath);
+    return size;
+}
+
+QString formatSize(qint64 size)
+{
+    QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
+    int i;
+    double outputSize = size;
+    for (i = 0; i < units.size() - 1; i++) {
+        if (outputSize < 1024)
+            break;
+        outputSize = outputSize / 1024;
+    }
+    return QString("%0 %1").arg(outputSize, 0, 'f', 2).arg(units[i]);
+}
+
+QString fetchLogDirectorySize()
+{
+    auto app = getApp();
+    QString logPathDirectory;
+    if (app->settings->logPath == "") {
+        logPathDirectory = app->paths->messageLogDirectory;
+    } else {
+        logPathDirectory = app->settings->logPath;
+    }
+    qint64 logsSize = dirSize(logPathDirectory);
+    QString logsSizeLabel = "Your logs currently take up ";
+    logsSizeLabel += formatSize(logsSize);
+    logsSizeLabel += " of space";
+    return logsSizeLabel;
+}
+
 ModerationPage::ModerationPage()
     : SettingsPage("Moderation", "")
 {
@@ -44,12 +91,14 @@ ModerationPage::ModerationPage()
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
-        // Logs (copied from LoggingMananger)
-
         auto logsPathLabel = logs.emplace<QLabel>();
 
-        app->settings->logPath.connect([app, logsPathLabel](const QString &logPath, auto) mutable {
+        // Show how big (size-wise) the logs are
+        auto logsPathSizeLabel = logs.emplace<QLabel>();
+        logsPathSizeLabel->setText(QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
+        // Logs (copied from LoggingMananger)
+        app->settings->logPath.connect([app, logsPathLabel](const QString &logPath, auto) mutable {
             QString pathOriginal;
 
             if (logPath == "") {
@@ -86,19 +135,29 @@ ModerationPage::ModerationPage()
         auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
 
         // Setting custom logpath
-        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this, [this]() {
-            auto app = getApp();
-            auto dirName = QFileDialog::getExistingDirectory(this);
+        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this,
+                         [this, logsPathSizeLabel]() mutable {
+                             auto app = getApp();
+                             auto dirName = QFileDialog::getExistingDirectory(this);
 
-            app->settings->logPath = dirName;
-        });
+                             app->settings->logPath = dirName;
+
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(
+                                 QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+                         });
 
         // Reset custom logpath
         auto resetDir = logs.emplace<QPushButton>("Reset logpath");
-        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this, []() {
-            auto app = getApp();
-            app->settings->logPath = "";
-        });
+        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
+                         [logsPathSizeLabel]() mutable {
+                             auto app = getApp();
+                             app->settings->logPath = "";
+
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(
+                                 QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+                         });
 
         // Logs end
     }
