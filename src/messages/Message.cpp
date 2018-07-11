@@ -66,29 +66,38 @@ QString makeDuration(int count, const QString &order)
     }
 
     return text;
+
 }
 
-QString makeDuration(uint32_t timeoutSeconds)
+QString makeDuration(int timeoutSeconds)
 {
-    int timeoutMinutes = floor(timeoutSeconds / 60);
+    QString res = "";
 
-    if (timeoutMinutes > 0 && timeoutSeconds % 60 == 0) {
-        int timeoutHours = floor(timeoutMinutes / 60);
-
-        if (timeoutHours > 0 && timeoutMinutes % 60 == 0) {
-            int timeoutDays = floor(timeoutHours / 24);
-
-            if (timeoutDays > 0 && timeoutHours % 24 == 0) {
-                return makeDuration(timeoutDays, "day");
-            }
-
-            return makeDuration(timeoutHours, "hour");
-        }
-
-        return makeDuration(timeoutMinutes, "minute");
+    int seconds = timeoutSeconds % 60;
+    int timeoutMinutes = timeoutSeconds / 60;
+    int minutes = timeoutMinutes % 60;
+    int timeoutHours = timeoutMinutes / 60;
+    int hours = timeoutHours % 24;
+    int days = timeoutHours / 24;
+    if (days > 0) {
+        res.append(makeDuration(days, "day"));
     }
-
-    return makeDuration(timeoutSeconds, "second");
+    if (hours > 0) {
+        if (!res.isEmpty() )
+            res.append(" ");
+        res.append(makeDuration(hours, "hour"));
+    }
+    if (minutes > 0) {
+        if (!res.isEmpty() )
+            res.append(" ");
+        res.append(makeDuration(minutes, "minute"));
+    }
+    if (seconds > 0) {
+        if (!res.endsWith(" "))
+            res.append(" ");
+        res.append(makeDuration(seconds, "second"));
+    }
+    return res;
 }
 
 }  // namespace
