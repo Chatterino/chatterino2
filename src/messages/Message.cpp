@@ -54,18 +54,10 @@ MessagePtr Message::createMessage(const QString &text)
 
 namespace {
 
-QString makeDuration(int count, const QString &order)
+void appendDuration(int count, QChar &&order, QString &outString)
 {
-    QString text;
-
-    text.append(QString::number(count));
-    text.append(" " + order);
-
-    if (count > 1) {
-        text.append("s");
-    }
-
-    return text;
+    outString.append(QString::number(count));
+    outString.append(order);
 }
 
 QString makeDuration(int timeoutSeconds)
@@ -79,22 +71,25 @@ QString makeDuration(int timeoutSeconds)
     int hours = timeoutHours % 24;
     int days = timeoutHours / 24;
     if (days > 0) {
-        res.append(makeDuration(days, "day"));
+        appendDuration(days, 'd', res);
     }
     if (hours > 0) {
-        if (!res.isEmpty() )
+        if (!res.isEmpty()) {
             res.append(" ");
-        res.append(makeDuration(hours, "hour"));
+        }
+        appendDuration(hours, 'h', res);
     }
     if (minutes > 0) {
-        if (!res.isEmpty() )
+        if (!res.isEmpty()) {
             res.append(" ");
-        res.append(makeDuration(minutes, "minute"));
+        }
+        appendDuration(minutes, 'm', res);
     }
     if (seconds > 0) {
-        if (!res.endsWith(" "))
+        if (!res.isEmpty()) {
             res.append(" ");
-        res.append(makeDuration(seconds, "second"));
+        }
+        appendDuration(seconds, 's', res);
     }
     return res;
 }
