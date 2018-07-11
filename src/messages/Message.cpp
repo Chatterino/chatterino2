@@ -70,7 +70,7 @@ QString makeDuration(int count, const QString &order)
 
 QString makeDuration(int timeoutSeconds)
 {
-    QString res = "";
+    QString res;
 
     int seconds = timeoutSeconds % 60;
     int timeoutMinutes = timeoutSeconds / 60;
