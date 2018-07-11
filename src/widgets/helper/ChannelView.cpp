@@ -1067,7 +1067,7 @@ void ChannelView::addContextMenuItems(const MessageLayoutElement *hoveredElement
     if (hoveredElement->getLink().type == Link::Url) {
         QString url = hoveredElement->getLink().value;
 
-        menu->addAction("Open link in browser", [url] { QDesktopServices::openUrl(QUrl(url)); });
+        menu->addAction("Open link", [url] { QDesktopServices::openUrl(QUrl(url)); });
         menu->addAction("Copy link", [url] { QApplication::clipboard()->setText(url); });
 
         menu->addSeparator();

@@ -20,9 +20,16 @@ LinkParser::LinkParser(const QString &unparsedString)
         // Read the TLDs in and replace the newlines with pipes
         QString tldData = t1.readAll().replace(newLineRegex, "|");
 
-        const QString urlRegExp =
+        const QString hyperlinkRegExp =
             "^"
-            // protocol identifier
+            // Identifier for spotify
+            "(?x-mi:(spotify:(?:"
+            "(?:artist|album|track|user:[^:]+:playlist):"
+            "[a-zA-Z0-9]+|user:[^:]+|search:"
+            "(?:[-\\w$\\.+!*'(),]+|%[a-fA-F0-9]{2})+)))"
+            // If nothing matches then just go on
+            "|"
+            // Identifier for http and ftp
             "(?:(?:https?|ftps?)://)?"
             // user:pass authentication
             "(?:\\S+(?::\\S*)?@)?"
@@ -53,7 +60,7 @@ LinkParser::LinkParser(const QString &unparsedString)
             "(?:[/?#]\\S*)?"
             "$";
 
-        return QRegularExpression(urlRegExp, QRegularExpression::CaseInsensitiveOption);
+        return QRegularExpression(hyperlinkRegExp, QRegularExpression::CaseInsensitiveOption);
     }();
 
     this->match_ = linkRegex.match(unparsedString);
