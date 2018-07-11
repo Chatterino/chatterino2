@@ -66,7 +66,6 @@ QString makeDuration(int count, const QString &order)
     }
 
     return text;
-
 }
 
 QString makeDuration(int timeoutSeconds)
