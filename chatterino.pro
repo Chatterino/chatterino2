@@ -231,7 +231,8 @@ SOURCES += \
     src/util/InitUpdateButton.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
-    src/providers/twitch/PubsubClient.cpp
+    src/providers/twitch/PubsubClient.cpp \
+    src/providers/twitch/TwitchApi.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -412,7 +413,8 @@ HEADERS  += \
     src/util/InitUpdateButton.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
-    src/providers/twitch/PubsubClient.hpp
+    src/providers/twitch/PubsubClient.hpp \
+    src/providers/twitch/TwitchApi.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
