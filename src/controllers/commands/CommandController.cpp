@@ -172,11 +172,21 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 channel->addMessage(Message::createSystemMessage(messageText));
 
                 return "";
-            } else if (commandName == "/ignore" && words.size() >= 2) {
+            } else if (commandName == "/ignore") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /ignore [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
+
+                if (words.at(1).at(0) == "@") {
+                    target = words.at(1).mid(1);
+                } else {
+                    target = words.at(1);
+                }
 
                 if (user->isAnon()) {
                     channel->addMessage(
@@ -189,11 +199,21 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 });
 
                 return "";
-            } else if (commandName == "/unignore" && words.size() >= 2) {
+            } else if (commandName == "/unignore") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /unignore [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
+
+                if (words.at(1).at(0) == "@") {
+                    target = words.at(1).mid(1);
+                } else {
+                    target = words.at(1);
+                }
 
                 if (user->isAnon()) {
                     channel->addMessage(
@@ -214,7 +234,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
+
+                if (words.at(1).at(0) == "@") {
+                    target = words.at(1).mid(1);
+                } else {
+                    target = words.at(1);
+                }
 
                 if (user->isAnon()) {
                     channel->addMessage(
@@ -243,7 +269,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
+
+                if (words.at(1).at(0) == "@") {
+                    target = words.at(1).mid(1);
+                } else {
+                    target = words.at(1);
+                }
 
                 if (user->isAnon()) {
                     channel->addMessage(
