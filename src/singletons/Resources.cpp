@@ -287,6 +287,8 @@ Resources::Resources()
     , splitHeaderContext(lli(":/images/tool_moreCollapser_off16.png"))
     , buttonBan(lli(":/images/button_ban.png", 0.25))
     , buttonTimeout(lli(":/images/button_timeout.png", 0.25))
+    , pajaDank(lli(":/images/pajaDank.png", 0.25))
+    , ppHop(new Image("https://fourtf.com/ppHop.gif", 0.25))
 {
     this->split.left = QIcon(":/images/split/splitleft.png");
     this->split.right = QIcon(":/images/split/splitright.png");

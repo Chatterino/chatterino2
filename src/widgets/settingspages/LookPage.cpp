@@ -62,7 +62,7 @@ void LookPage::initializeUi()
     auto channelView = layout.emplace<ChannelView>();
     auto channel = this->createPreviewChannel();
     channelView->setChannel(channel);
-    channelView->setScaleIndependantHeight(64);
+    channelView->setScaleIndependantHeight(74);
 }
 
 void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
@@ -283,7 +283,10 @@ ChannelPtr LookPage::createPreviewChannel()
                                              MessageElement::BadgeSubscription));
         message->addElement(new TextElement("username1:", MessageElement::Username,
                                             QColor("#0094FF"), FontStyle::ChatMediumBold));
-        message->addElement(new TextElement("This is a preview message :)", MessageElement::Text));
+        message->addElement(new TextElement("This is a preview message", MessageElement::Text));
+        message->addElement(new EmoteElement(EmoteData(getApp()->resources->pajaDank),
+                                             MessageElement::Flags::AlwaysShow));
+        // message->addElement(new)
         channel->addMessage(message);
     }
     {
@@ -293,7 +296,12 @@ ChannelPtr LookPage::createPreviewChannel()
                                              MessageElement::BadgeChannelAuthority));
         message->addElement(new TextElement("username2:", MessageElement::Username,
                                             QColor("#FF6A00"), FontStyle::ChatMediumBold));
-        message->addElement(new TextElement("This is another one :)", MessageElement::Text));
+        message->addElement(new TextElement("This is another one", MessageElement::Text));
+        message->addElement(
+            new EmoteElement(EmoteData(getApp()->resources->ppHop), MessageElement::BttvEmote));
+        message->addElement(
+            (new TextElement("www.fourtf.com", MessageElement::Text, MessageColor::Link))
+                ->setLink(Link(Link::Url, "https://www.fourtf.com")));
         channel->addMessage(message);
     }
 
