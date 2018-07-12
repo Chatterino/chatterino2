@@ -74,6 +74,7 @@
         <file>avatars/pajlada.png</file>
         <file>images/download_update.png</file>
         <file>images/download_update_error.png</file>
+		<file>images/pajaDank.png</file>
     </qresource>
     <qresource prefix="/qt/etc">
         <file>qt.conf</file>

@@ -86,6 +86,8 @@ public:
 
     Image *buttonBan;
     Image *buttonTimeout;
+    Image *pajaDank;
+    Image *ppHop;
 
     struct JSONCheermoteSet {
         QString prefix;
