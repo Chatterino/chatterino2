@@ -180,7 +180,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
 
                 if (words.at(1).at(0) == "@") {
                     target = words.at(1).mid(1);
@@ -207,7 +207,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
 
                 if (words.at(1).at(0) == "@") {
                     target = words.at(1).mid(1);
@@ -234,7 +234,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
 
                 if (words.at(1).at(0) == "@") {
                     target = words.at(1).mid(1);
@@ -269,7 +269,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
+                QString target;
 
                 if (words.at(1).at(0) == "@") {
                     target = words.at(1).mid(1);
