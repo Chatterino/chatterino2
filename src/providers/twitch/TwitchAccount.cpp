@@ -138,7 +138,6 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
 {
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
-    qDebug() << url;
     NetworkRequest req(url, NetworkRequestType::Put);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
