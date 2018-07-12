@@ -130,7 +130,7 @@ void TwitchAccount::ignore(const QString &targetName,
         this->ignoreByID(targetUserId, targetName, onFinished);  //
     };
 
-    PartialTwitchUser::byName(this->userName_).getId(onIdFetched);
+    PartialTwitchUser::byName(targetName).getId(onIdFetched);
 }
 
 void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targetName,
@@ -138,7 +138,7 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
 {
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
                 targetUserID);
-
+    qDebug() << url;
     NetworkRequest req(url, NetworkRequestType::Put);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
@@ -197,7 +197,7 @@ void TwitchAccount::unignore(const QString &targetName,
         this->unignoreByID(targetUserId, targetName, onFinished);  //
     };
 
-    PartialTwitchUser::byName(this->userName_).getId(onIdFetched);
+    PartialTwitchUser::byName(targetName).getId(onIdFetched);
 }
 
 void TwitchAccount::unignoreByID(
