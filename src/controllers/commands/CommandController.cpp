@@ -6,6 +6,8 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
@@ -201,6 +203,56 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 user->unignore(target, [channel](auto resultCode, const QString &message) {
                     channel->addMessage(Message::createSystemMessage(message));
+                });
+
+                return "";
+            } else if (commandName == "/follow" && words.size() >= 2) {
+                auto app = getApp();
+
+                auto user = app->accounts->twitch.getCurrent();
+                auto target = words.at(1);
+
+                if (user->isAnon()) {
+                    channel->addMessage(
+                        Message::createSystemMessage("You must be logged in to follow someone"));
+                    return "";
+                }
+
+                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
+                    if (userId.isEmpty()) {
+                        channel->addMessage(Message::createSystemMessage(
+                            "User " + target + " could not be followed!"));
+                        return;
+                    }
+                    user->followUser(userId, [channel, target]() {
+                        channel->addMessage(
+                            Message::createSystemMessage("You successfully followed " + target));
+                    });
+                });
+
+                return "";
+            } else if (commandName == "/unfollow" && words.size() >= 2) {
+                auto app = getApp();
+
+                auto user = app->accounts->twitch.getCurrent();
+                auto target = words.at(1);
+
+                if (user->isAnon()) {
+                    channel->addMessage(
+                        Message::createSystemMessage("You must be logged in to follow someone"));
+                    return "";
+                }
+
+                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
+                    if (userId.isEmpty()) {
+                        channel->addMessage(Message::createSystemMessage(
+                            "User " + target + " could not be followed!"));
+                        return;
+                    }
+                    user->unfollowUser(userId, [channel, target]() {
+                        channel->addMessage(
+                            Message::createSystemMessage("You successfully unfollowed " + target));
+                    });
                 });
 
                 return "";
