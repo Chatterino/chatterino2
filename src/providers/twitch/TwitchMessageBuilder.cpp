@@ -216,44 +216,41 @@ MessagePtr TwitchMessageBuilder::build()
 
                 // Actually just text
                 QString linkString = this->matchLink(string);
-                auto fontStyle = FontStyle::ChatMedium;
-
-                if (string.startsWith('@') && app->settings->enableUsernameBold) {
-                    fontStyle = FontStyle::ChatMediumBold;
-                }
 
                 Link link;
 
                 if (linkString.isEmpty()) {
                     link = Link();
-                } else {
-                    if (app->settings->lowercaseLink) {
-                        QRegularExpression httpRegex("\\bhttps?://",
-                                                     QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression ftpRegex("\\bftps?://",
-                                                    QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression getDomain("\\/\\/([^\\/]*)");
-                        QString tempString = string;
-
-                        if (!string.contains(httpRegex)) {
-                            if (!string.contains(ftpRegex)) {
-                                tempString.insert(0, "http://");
-                            }
-                        }
-                        QString domain = getDomain.match(tempString).captured(1);
-                        string.replace(domain, domain.toLower());
+                    if (string.startsWith('@')) {
+                        this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
+                                                   FontStyle::ChatMediumBold);
+                        this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor);
+                    } else {
+                        this->emplace<TextElement>(string, TextElement::Text, textColor);
                     }
+                } else {
+                    QRegularExpression httpRegex("\\bhttps?://",
+                                                 QRegularExpression::CaseInsensitiveOption);
+                    QRegularExpression ftpRegex("\\bftps?://",
+                                                QRegularExpression::CaseInsensitiveOption);
+                    QRegularExpression getDomain("\\/\\/([^\\/]*)");
+                    QString tempString = string;
+
+                    if (!string.contains(httpRegex)) {
+                        if (!string.contains(ftpRegex)) {
+                            tempString.insert(0, "http://");
+                        }
+                    }
+                    QString domain = getDomain.match(tempString).captured(1);
+                    QString lowercaseLinkString = string;
+                    lowercaseLinkString.replace(domain, domain.toLower());
+
                     link = Link(Link::Url, linkString);
                     textColor = MessageColor(MessageColor::Link);
-                }
-                if (string.startsWith('@')) {
-                    this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
-                                               FontStyle::ChatMediumBold)  //
+                    this->emplace<TextElement>(lowercaseLinkString, TextElement::LowercaseLink,
+                                               textColor)
                         ->setLink(link);
-                    this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor)  //
-                        ->setLink(link);
-                } else {
-                    this->emplace<TextElement>(string, TextElement::Text, textColor)  //
+                    this->emplace<TextElement>(string, TextElement::OriginalLink, textColor)
                         ->setLink(link);
                 }
 

@@ -69,6 +69,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
     this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
     this->wordFlagsListener_.addSetting(settings->enableUsernameBold);
+    this->wordFlagsListener_.addSetting(settings->enableLowercaseLink);
     this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
@@ -112,6 +113,7 @@ void WindowManager::updateWordTypeMask()
     flags |= MEF::AlwaysShow;
     flags |= MEF::Collapsed;
     flags |= settings->enableUsernameBold ? MEF::BoldUsername : MEF::NonBoldUsername;
+    flags |= settings->enableLowercaseLink ? MEF::LowercaseLink : MEF::OriginalLink;
 
     // update flags
     MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);

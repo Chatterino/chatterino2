@@ -141,7 +141,7 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     layout.emplace<Line>(false);
 
     // lowercase links
-    layout.append(this->createCheckBox("Lowercase domains", getSettings()->lowercaseLink));
+    layout.append(this->createCheckBox("Lowercase domains", getSettings()->enableLowercaseLink));
     // bold usernames
     layout.append(this->createCheckBox("Bold @usernames", getSettings()->enableUsernameBold));
 

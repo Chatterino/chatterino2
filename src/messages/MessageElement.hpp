@@ -96,6 +96,10 @@ public:
         BoldUsername = (1 << 27),
         NonBoldUsername = (1 << 28),
 
+        // for links
+        LowercaseLink = (1 << 29),
+        OriginalLink = (1 << 30),
+
         Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage | BttvEmoteImage |
                   TwitchEmoteImage | BitsAmount | Text | AlwaysShow,
     };
