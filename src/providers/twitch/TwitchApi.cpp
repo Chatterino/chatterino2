@@ -21,18 +21,18 @@ void TwitchApi::findUserId(const QString user, std::function<void(QString)> succ
         if (!root.value("users").isArray()) {
             Log("API Error while getting user id, users is not an array");
             successCallback("");
-            return true;
+            return false;
         }
         auto users = root.value("users").toArray();
         if (users.size() != 1) {
             Log("API Error while getting user id, users array size is not 1");
             successCallback("");
-            return true;
+            return false;
         }
         if (!users[0].isObject()) {
             Log("API Error while getting user id, first user is not an object");
             successCallback("");
-            return true;
+            return false;
         }
         auto firstUser = users[0].toObject();
         auto id = firstUser.value("_id");
@@ -40,7 +40,7 @@ void TwitchApi::findUserId(const QString user, std::function<void(QString)> succ
             Log("API Error: while getting user id, first user object `_id` key is not a "
                 "string");
             successCallback("");
-            return true;
+            return false;
         }
         successCallback(id.toString());
         return true;
