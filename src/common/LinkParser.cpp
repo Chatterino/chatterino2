@@ -29,6 +29,7 @@ LinkParser::LinkParser(const QString &unparsedString)
             "(?:[-\\w$\\.+!*'(),]+|%[a-fA-F0-9]{2})+)))"
             // If nothing matches then just go on
             "|"
+            "^"
             // Identifier for http and ftp
             "(?:(?:https?|ftps?)://)?"
             // user:pass authentication
