@@ -43,6 +43,7 @@ public:
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {"/appearance/smoothScrollingNewMessages",
                                                     false};
+    BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames", false};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
 
     /// Behaviour
@@ -107,8 +108,6 @@ public:
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
-
-    BoolSetting usernameBold = {"/appearence/messages/boldUsernames", false};
 
     /// External tools
     // Streamlink

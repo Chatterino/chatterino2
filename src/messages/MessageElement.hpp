@@ -92,6 +92,10 @@ public:
         // used in the ChannelView class to make the collapse buttons visible if needed
         Collapsed = (1 << 26),
 
+        // used for dynamic bold usernames
+        BoldUsername = (1 << 27),
+        NonBoldUsername = (1 << 28),
+
         Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage | BttvEmoteImage |
                   TwitchEmoteImage | BitsAmount | Text | AlwaysShow,
     };

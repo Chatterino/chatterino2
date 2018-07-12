@@ -68,6 +68,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableEmojis);
     this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
     this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableUsernameBold);
     this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
@@ -110,6 +111,7 @@ void WindowManager::updateWordTypeMask()
     // misc
     flags |= MEF::AlwaysShow;
     flags |= MEF::Collapsed;
+    flags |= settings->enableUsernameBold ? MEF::BoldUsername : MEF::NonBoldUsername;
 
     // update flags
     MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);
