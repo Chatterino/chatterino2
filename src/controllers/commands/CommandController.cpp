@@ -237,7 +237,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 return "";
             } else if (commandName == "/unfollow") {
                 if (words.size() < 2) {
-                    channel->addMessage(Message::createSystemMessage("Usage: /follow [user]"));
+                    channel->addMessage(Message::createSystemMessage("Usage: /unfollow [user]"));
                     return "";
                 }
                 auto app = getApp();
