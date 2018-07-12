@@ -212,16 +212,17 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
+
                 if (user->isAnon()) {
                     channel->addMessage(
                         Message::createSystemMessage("You must be logged in to follow someone"));
-
                     return "";
                 }
-                TwitchApi::FindUserId(target, [user, channel, target](QString userId) {
+
+                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
                     if (userId.isEmpty()) {
-                        channel->addMessage(
-                            Message::createSystemMessage("User " + target + " was not found!"));
+                        channel->addMessage(Message::createSystemMessage(
+                            "User " + target + " could not be followed!"));
                         return;
                     }
                     user->followUser(userId, [channel, target]() {
@@ -236,16 +237,17 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 auto user = app->accounts->twitch.getCurrent();
                 auto target = words.at(1);
+
                 if (user->isAnon()) {
                     channel->addMessage(
                         Message::createSystemMessage("You must be logged in to follow someone"));
                     return "";
                 }
 
-                TwitchApi::FindUserId(target, [user, channel, target](QString userId) {
+                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
                     if (userId.isEmpty()) {
-                        channel->addMessage(
-                            Message::createSystemMessage("User " + target + " was not found!"));
+                        channel->addMessage(Message::createSystemMessage(
+                            "User " + target + " could not be followed!"));
                         return;
                     }
                     user->unfollowUser(userId, [channel, target]() {

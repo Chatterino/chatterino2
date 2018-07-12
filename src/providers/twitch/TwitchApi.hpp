@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
 #include <QString>
 
 namespace chatterino {
@@ -9,7 +7,7 @@ namespace chatterino {
 class TwitchApi
 {
 public:
-    static void FindUserId(const QString user, std::function<void(QString)> callback);
+    static void findUserId(const QString user, std::function<void(QString)> callback);
 
 private:
 };
