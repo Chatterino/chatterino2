@@ -206,7 +206,11 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 });
 
                 return "";
-            } else if (commandName == "/follow" && words.size() >= 2) {
+            } else if (commandName == "/follow") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /follow [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
@@ -231,7 +235,11 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 });
 
                 return "";
-            } else if (commandName == "/unfollow" && words.size() >= 2) {
+            } else if (commandName == "/unfollow") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /follow [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
