@@ -218,7 +218,7 @@ MessagePtr TwitchMessageBuilder::build()
                 QString linkString = this->matchLink(string);
                 auto fontStyle = FontStyle::ChatMedium;
 
-                if (string.startsWith('@') && app->settings->usernameBold) {
+                if (string.startsWith('@') && app->settings->enableUsernameBold) {
                     fontStyle = FontStyle::ChatMediumBold;
                 }
 
@@ -246,10 +246,17 @@ MessagePtr TwitchMessageBuilder::build()
                     link = Link(Link::Url, linkString);
                     textColor = MessageColor(MessageColor::Link);
                 }
+                if (string.startsWith('@')) {
+                    this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
+                                               FontStyle::ChatMediumBold)  //
+                        ->setLink(link);
+                    this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor)  //
+                        ->setLink(link);
+                } else {
+                    this->emplace<TextElement>(string, TextElement::Text, textColor)  //
+                        ->setLink(link);
+                }
 
-                this->emplace<TextElement>(string, MessageElement::Text, textColor,
-                                           fontStyle)  //
-                    ->setLink(link);
             } else {  // is emoji
                 this->emplace<EmoteElement>(emoteData, EmoteElement::EmojiAll);
             }
