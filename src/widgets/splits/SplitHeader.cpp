@@ -56,9 +56,7 @@ SplitHeader::SplitHeader(Split *_split)
             QTimer::singleShot(80, this, [&, this] {
                 ChannelPtr _channel = this->split_->getChannel();
                 if (_channel->hasModRights()) {
-                    this->modeMenu_.move(
-                        this->modeButton_->mapToGlobal(QPoint(0, this->modeButton_->height())));
-                    this->modeMenu_.show();
+                    this->modeMenu_.popup(QCursor::pos());
                 }
             });
         });
@@ -83,9 +81,7 @@ SplitHeader::SplitHeader(Split *_split)
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::leftMousePress, this, [this] {
             QTimer::singleShot(80, [&, this] {
-                this->dropdownMenu_.move(
-                    this->dropdownButton_->mapToGlobal(QPoint(0, this->dropdownButton_->height())));
-                this->dropdownMenu_.show();
+                this->dropdownMenu_.popup(QCursor::pos());
             });
         });
     }
