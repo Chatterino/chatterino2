@@ -6,7 +6,6 @@
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -172,7 +171,11 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 channel->addMessage(Message::createSystemMessage(messageText));
 
                 return "";
-            } else if (commandName == "/ignore" && words.size() >= 2) {
+            } else if (commandName == "/ignore") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /ignore [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
@@ -189,7 +192,11 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 });
 
                 return "";
-            } else if (commandName == "/unignore" && words.size() >= 2) {
+            } else if (commandName == "/unignore") {
+                if (words.size() < 2) {
+                    channel->addMessage(Message::createSystemMessage("Usage: /unignore [user]"));
+                    return "";
+                }
                 auto app = getApp();
 
                 auto user = app->accounts->twitch.getCurrent();
