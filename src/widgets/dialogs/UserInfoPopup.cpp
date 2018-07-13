@@ -231,10 +231,10 @@ void UserInfoPopup::installEvents()
 
     // ignore highlights
     QObject::connect(
-        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool gotClicked) mutable {
+        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool checkedState) mutable {
             this->ui_.ignoreHighlights->setEnabled(false);
 
-            if (gotClicked) {
+            if (checkedState) {
                 getApp()->highlights->blacklistedUsers.insertItem(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
