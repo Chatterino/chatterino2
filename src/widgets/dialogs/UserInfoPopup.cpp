@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "common/UrlFetch.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
