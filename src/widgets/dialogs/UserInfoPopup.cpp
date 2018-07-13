@@ -230,41 +230,34 @@ void UserInfoPopup::installEvents()
         });
 
     // ignore highlights
-    QObject::connect(this->ui_.ignoreHighlights, &QCheckBox::stateChanged, [this](int) mutable {
-        this->ui_.ignoreHighlights->setEnabled(false);
+    QObject::connect(
+        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool gotClicked) mutable {
+            this->ui_.ignoreHighlights->setEnabled(false);
 
-        if (this->ui_.ignoreHighlights->isChecked()) {
-            bool isUserBlacklisted = true;
-            auto ignoreHighlightsUsersVector = getApp()->highlights->blacklistedUsers.getVector();
-            for (int i = 0; i < ignoreHighlightsUsersVector.size(); i++) {
-                if (this->userName_ == ignoreHighlightsUsersVector[i].getPattern()) {
-                    isUserBlacklisted = false;
-                }
-            }
-            if (isUserBlacklisted) {
+            if (gotClicked) {
                 getApp()->highlights->blacklistedUsers.insertItem(
                     HighlightBlacklistUser{this->userName_, false});
-            }
-            this->ui_.ignoreHighlights->setEnabled(true);
-        } else {
-            const auto &ignoreHighlightsUsersVector =
-                getApp()->highlights->blacklistedUsers.getVector();
+                this->ui_.ignoreHighlights->setEnabled(true);
+            } else {
+                const auto &ignoreHighlightsUsersVector =
+                    getApp()->highlights->blacklistedUsers.getVector();
 
-            for (int i = 0; i < ignoreHighlightsUsersVector.size(); i++) {
-                if (this->userName_ == ignoreHighlightsUsersVector[i].getPattern()) {
-                    getApp()->highlights->blacklistedUsers.removeItem(i);
-                    i--;
+                for (int i = 0; i < ignoreHighlightsUsersVector.size(); i++) {
+                    if (this->userName_ == ignoreHighlightsUsersVector[i].getPattern()) {
+                        getApp()->highlights->blacklistedUsers.removeItem(i);
+                        i--;
+                    }
                 }
+                bool isUsernameBlacklisted =
+                    getApp()->highlights->blacklistContains(this->userName_);
+                if (isUsernameBlacklisted) {
+                    this->channel_->addMessage(Message::createSystemMessage(
+                        this->userName_ +
+                        " was not fully removed from the highlight blacklist(regex)"));
+                }
+                this->ui_.ignoreHighlights->setEnabled(true);
             }
-            bool isUsernameBlacklisted = getApp()->highlights->blacklistContains(this->userName_);
-            if (isUsernameBlacklisted) {
-                this->channel_->addMessage(Message::createSystemMessage(
-                    this->userName_ +
-                    " was not fully removed from the highlight blacklist(regex)"));
-            }
-            this->ui_.ignoreHighlights->setEnabled(true);
-        }
-    });
+        });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
