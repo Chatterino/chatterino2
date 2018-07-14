@@ -298,8 +298,8 @@ void TwitchMessageBuilder::parseRoomID()
     if (iterator != std::end(this->tags)) {
         this->roomID_ = iterator.value().toString();
 
-        if (this->twitchChannel->roomID.isEmpty()) {
-            this->twitchChannel->roomID = this->roomID_;
+        if (this->twitchChannel->getRoomID().isEmpty()) {
+            this->twitchChannel->setRoomID(this->roomID_);
         }
     }
 }

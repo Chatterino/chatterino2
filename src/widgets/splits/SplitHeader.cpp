@@ -284,7 +284,7 @@ void SplitHeader::initializeChannelSignals()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
-        this->managedConnections_.emplace_back(twitchChannel->updateLiveInfo.connect([this]() {
+        this->managedConnections_.emplace_back(twitchChannel->liveStatusChanged.connect([this]() {
             this->updateChannelText();  //
         }));
     }
@@ -494,7 +494,7 @@ void SplitHeader::menuReloadChannelEmotes()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
-        twitchChannel->reloadChannelEmotes();
+        twitchChannel->refreshChannelEmotes();
     }
 }
 

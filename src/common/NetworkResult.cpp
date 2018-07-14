@@ -25,7 +25,7 @@ QJsonObject NetworkResult::parseJson() const
 
 rapidjson::Document NetworkResult::parseRapidJson() const
 {
-    rapidjson::Document ret(rapidjson::kNullType);
+    rapidjson::Document ret(rapidjson::kObjectType);
 
     rapidjson::ParseResult result = ret.Parse(this->data_.data(), this->data_.length());
 

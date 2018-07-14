@@ -212,9 +212,7 @@ void NetworkRequest::doRequest()
                 return;
             }
 
-            QByteArray readBytes = reply->readAll();
-            QByteArray bytes;
-            bytes.setRawData(readBytes.data(), readBytes.size());
+            QByteArray bytes = reply->readAll();
             data->writeToCache(bytes);
 
             NetworkResult result(bytes);

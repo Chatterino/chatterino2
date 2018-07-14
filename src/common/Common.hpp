@@ -27,14 +27,14 @@ const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
 static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
 
-#define return_if(x) \
-    if ((x)) {       \
-        return;      \
+#define return_if(condition) \
+    if ((condition)) {       \
+        return;              \
     }
 
-#define return_unless(x) \
-    if (!(x)) {          \
-        return;          \
+#define return_unless(condition) \
+    if (!(condition)) {          \
+        return;                  \
     }
 
 }  // namespace chatterino

@@ -65,6 +65,9 @@ public:
 
     CompletionModel completionModel;
 
+    // pre c++17 polyfill
+    std::weak_ptr<Channel> weak_from_this();
+
 protected:
     virtual void onConnected();
 

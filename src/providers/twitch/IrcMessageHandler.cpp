@@ -85,18 +85,17 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
         return;
     }
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
-    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
 
-    if (twitchChannel) {
+    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get())) {
         // room-id
         decltype(tags.find("xD")) it;
 
         if ((it = tags.find("room-id")) != tags.end()) {
-            auto roomID = it.value().toString();
+            auto roomId = it.value().toString();
 
-            twitchChannel->setRoomID(roomID);
+            twitchChannel->setRoomID(roomId);
 
-            app->resources->loadChannelData(roomID);
+            app->resources->loadChannelData(roomId);
         }
 
         // Room modes
