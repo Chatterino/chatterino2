@@ -1,4 +1,4 @@
-#include "providers/twitch/twitchapi.hpp"
+#include "providers/twitch/TwitchApi.hpp"
 
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
