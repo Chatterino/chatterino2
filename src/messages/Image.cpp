@@ -1,8 +1,7 @@
 #include "messages/Image.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkManager.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"

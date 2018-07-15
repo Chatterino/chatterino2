@@ -256,7 +256,6 @@ HEADERS  += \
     src/common/ProviderId.hpp \
     src/common/SerializeCustom.hpp \
     src/common/SignalVectorModel.hpp \
-    src/common/UrlFetch.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
@@ -414,8 +413,7 @@ HEADERS  += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/providers/twitch/PubsubClient.hpp \
-    src/providers/twitch/TwitchApi.hpp \
-    src/common/UniqueAccess.hpp
+    src/providers/twitch/TwitchApi.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
@@ -453,7 +451,6 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
@@ -462,6 +459,7 @@ win32-msvc* {
 
     equals(QMAKE_CXX, "clang++") {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
     } else {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
     }

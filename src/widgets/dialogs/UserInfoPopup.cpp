@@ -1,7 +1,7 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -250,7 +250,10 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = id;
 
-        auto request = makeGetChannelRequest(id, this);
+        QString url("https://api.twitch.tv/kraken/channels/" + id);
+
+        auto request = NetworkRequest::twitchRequest(url);
+        request.setCaller(this);
 
         request.onSuccess([this](auto result) {
             auto obj = result.parseJson();

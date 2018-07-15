@@ -128,7 +128,7 @@ int runGui(QApplication &a, int argc, char *argv[])
     QFile::remove(runningPath);
 
     // Save settings
-    pajlada::Settings::SettingManager::save();
+    pajlada::Settings::SettingManager::gSave();
 
     // Deinitialize NetworkManager (stop thread and wait for finish, should be instant)
     chatterino::NetworkManager::deinit();

@@ -1,6 +1,6 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
 

@@ -1,7 +1,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/UrlFetch.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"

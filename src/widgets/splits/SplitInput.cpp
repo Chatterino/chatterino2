@@ -1,7 +1,6 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
-#include "common/UrlFetch.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"

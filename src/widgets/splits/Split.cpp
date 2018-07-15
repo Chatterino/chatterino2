@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -27,6 +27,7 @@
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
+#include <QJsonArray>
 #include <QListWidget>
 #include <QMimeData>
 #include <QPainter>

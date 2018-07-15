@@ -35,7 +35,7 @@ void Settings::load()
 {
     QString settingsPath = getPaths()->settingsDirectory + "/settings.json";
 
-    pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
+    pajlada::Settings::SettingManager::gLoad(qPrintable(settingsPath));
 }
 
 void Settings::saveSnapshot()
