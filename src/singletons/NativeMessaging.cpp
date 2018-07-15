@@ -1,4 +1,4 @@
-#include "NativeMessaging.hpp"
+#include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchServer.hpp"
