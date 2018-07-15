@@ -452,7 +452,6 @@ win32-msvc* {
     QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
     QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
     QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
 
     # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
     QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
@@ -461,6 +460,7 @@ win32-msvc* {
 
     equals(QMAKE_CXX, "clang++") {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
+        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
     } else {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
     }
