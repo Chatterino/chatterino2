@@ -80,9 +80,7 @@ SplitHeader::SplitHeader(Split *_split)
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::leftMousePress, this, [this] {
-            QTimer::singleShot(80, [&, this] {
-                this->dropdownMenu_.popup(QCursor::pos());
-            });
+            QTimer::singleShot(80, [&, this] { this->dropdownMenu_.popup(QCursor::pos()); });
         });
     }
 
@@ -168,17 +166,17 @@ void SplitHeader::setupModeLabel(RippleEffectLabel &label)
         label.setEnable(twitchChannel->hasModRights());
 
         // set the label text
-        auto roomModes = twitchChannel->getRoomModes();
         QString text;
 
-        if (roomModes.r9k)
-            text += "r9k, ";
-        if (roomModes.slowMode)
-            text += QString("slow(%1), ").arg(QString::number(roomModes.slowMode));
-        if (roomModes.emoteOnly)
-            text += "emote, ";
-        if (roomModes.submode)
-            text += "sub, ";
+        {
+            auto roomModes = twitchChannel->accessRoomModes();
+
+            if (roomModes->r9k) text += "r9k, ";
+            if (roomModes->slowMode)
+                text += QString("slow(%1), ").arg(QString::number(roomModes->slowMode));
+            if (roomModes->emoteOnly) text += "emote, ";
+            if (roomModes->submode) text += "sub, ";
+        }
 
         if (text.length() > 2) {
             text = text.mid(0, text.size() - 2);
@@ -229,12 +227,12 @@ void SplitHeader::addModeActions(QMenu &menu)
                 return;
             }
 
-            auto roomModes = twitchChannel->getRoomModes();
+            auto roomModes = twitchChannel->accessRoomModes();
 
-            setR9k->setChecked(roomModes.r9k);
-            setSlow->setChecked(roomModes.slowMode);
-            setEmote->setChecked(roomModes.emoteOnly);
-            setSub->setChecked(roomModes.submode);
+            setR9k->setChecked(roomModes->r9k);
+            setSlow->setChecked(roomModes->slowMode);
+            setEmote->setChecked(roomModes->emoteOnly);
+            setSub->setChecked(roomModes->submode);
         }));
 
     auto toggle = [this](const QString &_command, QAction *action) mutable {
@@ -315,22 +313,22 @@ void SplitHeader::updateChannelText()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel != nullptr) {
-        const auto streamStatus = twitchChannel->getStreamStatus();
+        const auto streamStatus = twitchChannel->accessStreamStatus();
 
-        if (streamStatus.live) {
+        if (streamStatus->live) {
             this->isLive_ = true;
             this->tooltip_ = "<style>.center    { text-align: center; }</style>"
                              "<p class = \"center\">" +
-                             streamStatus.title + "<br><br>" + streamStatus.game + "<br>" +
-                             (streamStatus.rerun ? "Vod-casting" : "Live") + " for " +
-                             streamStatus.uptime + " with " +
-                             QString::number(streamStatus.viewerCount) +
+                             streamStatus->title + "<br><br>" + streamStatus->game + "<br>" +
+                             (streamStatus->rerun ? "Vod-casting" : "Live") + " for " +
+                             streamStatus->uptime + " with " +
+                             QString::number(streamStatus->viewerCount) +
                              " viewers"
                              "</p>";
-            if (streamStatus.rerun) {
+            if (streamStatus->rerun) {
                 title += " (rerun)";
-            } else if (streamStatus.streamType.isEmpty()) {
-                title += " (" + streamStatus.streamType + ")";
+            } else if (streamStatus->streamType.isEmpty()) {
+                title += " (" + streamStatus->streamType + ")";
             } else {
                 title += " (live)";
             }

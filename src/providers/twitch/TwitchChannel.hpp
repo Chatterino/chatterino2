@@ -5,6 +5,7 @@
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
 #include "common/MutexValue.hpp"
+#include "common/UniqueAccess.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/ConcurrentMap.hpp"
 
@@ -43,50 +44,53 @@ public:
         QString broadcasterLang;
     };
 
-    bool isEmpty() const override;
-    bool canSendMessage() const override;
-    void sendMessage(const QString &message) override;
+    void refreshChannelEmotes();
 
+    // Channel methods
+    virtual bool isEmpty() const override;
+    virtual bool canSendMessage() const override;
+    virtual void sendMessage(const QString &message) override;
+
+    // Auto completion
+    void addRecentChatter(const std::shared_ptr<Message> &message) final;
+    void addJoinedUser(const QString &user);
+    void addPartedUser(const QString &user);
+
+    // Twitch data
     bool isLive() const;
     virtual bool isMod() const override;
     void setMod(bool value);
     virtual bool isBroadcaster() const override;
 
-    QString getRoomID() const;
-    void setRoomID(const QString &id);
-    RoomModes getRoomModes();
+    QString getRoomId() const;
+    void setRoomId(const QString &id);
+    const AccessGuard<RoomModes> accessRoomModes() const;
     void setRoomModes(const RoomModes &roomModes_);
-    StreamStatus getStreamStatus() const;
+    const AccessGuard<StreamStatus> accessStreamStatus() const;
 
-    void addRecentChatter(const std::shared_ptr<Message> &message) final;
-    void addJoinedUser(const QString &user);
-    void addPartedUser(const QString &user);
+    const EmoteMap &getFfzEmotes() const;
+    const EmoteMap &getBttvEmotes() const;
+    const QString &getSubscriptionUrl();
+    const QString &getChannelUrl();
+    const QString &getPopoutPlayerUrl();
 
+    // Signals
+    pajlada::Signals::NoArgSignal roomIdChanged;
+    pajlada::Signals::NoArgSignal liveStatusChanged;
+    pajlada::Signals::NoArgSignal userStateChanged;
+    pajlada::Signals::NoArgSignal roomModesChanged;
+
+private:
     struct NameOptions {
         QString displayName;
         QString localizedName;
     };
 
-    void refreshChannelEmotes();
-
-    const std::shared_ptr<EmoteMap> bttvChannelEmotes;
-    const std::shared_ptr<EmoteMap> ffzChannelEmotes;
-
-    const QString subscriptionURL;
-    const QString channelURL;
-    const QString popoutPlayerURL;
-
-    pajlada::Signals::NoArgSignal roomIDChanged;
-    pajlada::Signals::NoArgSignal liveStatusChanged;
-
-    pajlada::Signals::NoArgSignal userStateChanged;
-    pajlada::Signals::NoArgSignal roomModesChanged;
-
-private:
     explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
 
-    void initializeLiveStatusTimer(int intervalMS);
+    // Methods
     void refreshLiveStatus();
+    bool parseLiveStatus(const rapidjson::Document &document);
     void refreshPubsub();
     void refreshViewerList();
     bool parseViewerList(const QJsonObject &jsonRoot);
@@ -95,35 +99,32 @@ private:
 
     void setLive(bool newLiveStatus);
 
-    mutable std::mutex streamStatusMutex_;
-    StreamStatus streamStatus_;
+    // Twitch data
+    UniqueAccess<StreamStatus> streamStatus_;
+    UniqueAccess<UserState> userState_;
+    UniqueAccess<RoomModes> roomModes_;
 
-    mutable std::mutex userStateMutex_;
-    UserState userState_;
+    const std::shared_ptr<EmoteMap> bttvEmotes_;
+    const std::shared_ptr<EmoteMap> ffzEmotes_;
+    const QString subscriptionUrl_;
+    const QString channelUrl_;
+    const QString popoutPlayerUrl_;
 
     bool mod_ = false;
-    QByteArray messageSuffix_;
-    QString lastSentMessage_;
-    RoomModes roomModes_;
-    std::mutex roomModeMutex_;
     MutexValue<QString> roomID_;
 
-    QObject object_;
-    std::mutex joinedUserMutex_;
-    QStringList joinedUsers_;
+    UniqueAccess<QStringList> joinedUsers_;
     bool joinedUsersMergeQueued_ = false;
-    std::mutex partedUserMutex_;
-    QStringList partedUsers_;
+    UniqueAccess<QStringList> partedUsers_;
     bool partedUsersMergeQueued_ = false;
 
-    Communi::IrcConnection *readConnection_ = nullptr;
-
-    // Key = login name
-    std::map<QString, NameOptions> recentChatters_;
-    std::mutex recentChattersMutex_;
-
+    // --
+    QByteArray messageSuffix_;
+    QString lastSentMessage_;
+    QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
+    Communi::IrcConnection *readConnection_ = nullptr;
 
     friend class TwitchServer;
 };

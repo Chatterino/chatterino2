@@ -142,7 +142,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
 
-                if (app->settings->inlineWhispers) {
+                if (getSettings()->inlineWhispers) {
                     app->twitch.server->forEachChannel(
                         [&b](ChannelPtr _channel) { _channel->addMessage(b.getMessage()); });
                 }
@@ -163,10 +163,10 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 return "";
             } else if (commandName == "/uptime") {
-                const auto &streamStatus = twitchChannel->getStreamStatus();
+                const auto &streamStatus = twitchChannel->accessStreamStatus();
 
                 QString messageText =
-                    streamStatus.live ? streamStatus.uptime : "Channel is not live.";
+                    streamStatus->live ? streamStatus->uptime : "Channel is not live.";
 
                 channel->addMessage(Message::createSystemMessage(messageText));
 

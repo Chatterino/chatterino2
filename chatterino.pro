@@ -232,8 +232,7 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/providers/twitch/PubsubClient.cpp \
-    src/providers/twitch/TwitchApi.cpp \
-    src/common/uniqueaccess.cpp
+    src/providers/twitch/TwitchApi.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -416,7 +415,7 @@ HEADERS  += \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/TwitchApi.hpp \
-    src/common/uniqueaccess.hpp
+    src/common/UniqueAccess.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

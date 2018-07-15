@@ -56,7 +56,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     ChannelPtr emoteChannel(new Channel("", Channel::Type::None));
 
-    auto addEmotes = [&](EmoteMap &map, const QString &title, const QString &emoteDesc) {
+    auto addEmotes = [&](const EmoteMap &map, const QString &title, const QString &emoteDesc) {
         // TITLE
         MessageBuilder builder1;
 
@@ -120,12 +120,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     }
 
     addEmotes(app->emotes->bttv.globalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
-    addEmotes(*channel->bttvChannelEmotes.get(), "BetterTTV Channel Emotes",
-              "BetterTTV Channel Emote");
+    addEmotes(channel->getBttvEmotes(), "BetterTTV Channel Emotes", "BetterTTV Channel Emote");
     addEmotes(app->emotes->ffz.globalEmotes, "FrankerFaceZ Global Emotes",
               "FrankerFaceZ Global Emote");
-    addEmotes(*channel->ffzChannelEmotes.get(), "FrankerFaceZ Channel Emotes",
-              "FrankerFaceZ Channel Emote");
+    addEmotes(channel->getFfzEmotes(), "FrankerFaceZ Channel Emotes", "FrankerFaceZ Channel Emote");
 
     this->viewEmotes_->setChannel(emoteChannel);
 }

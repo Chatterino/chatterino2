@@ -21,14 +21,29 @@ public:
         this->mutex_.unlock();
     }
 
-    T *operator->() const
+    const T *operator->() const
     {
         return &this->element_;
     }
 
-    T &operator*() const
+    T *operator->()
+    {
+        return &this->element_;
+    }
+
+    const T &operator*() const
     {
         return this->element_;
+    }
+
+    T &operator*()
+    {
+        return this->element_;
+    }
+
+    T clone() const
+    {
+        return T(this->element_);
     }
 
 private:
@@ -40,7 +55,7 @@ template <typename T>
 class UniqueAccess
 {
 public:
-    template <typename std::enable_if<std::is_default_constructible<T>::value>::type * = 0>
+    template <typename X = decltype(T())>
     UniqueAccess()
         : element_(T())
     {
@@ -73,9 +88,14 @@ public:
         return AccessGuard<T>(this->element_, this->mutex_);
     }
 
+    const AccessGuard<T> access() const
+    {
+        return AccessGuard<T>(this->element_, this->mutex_);
+    }
+
 private:
-    T element_;
-    std::mutex mutex_;
+    mutable T element_;
+    mutable std::mutex mutex_;
 };
 
 }  // namespace chatterino

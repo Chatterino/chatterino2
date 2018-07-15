@@ -298,8 +298,8 @@ void TwitchMessageBuilder::parseRoomID()
     if (iterator != std::end(this->tags)) {
         this->roomID_ = iterator.value().toString();
 
-        if (this->twitchChannel->getRoomID().isEmpty()) {
-            this->twitchChannel->setRoomID(this->roomID_);
+        if (this->twitchChannel->getRoomId().isEmpty()) {
+            this->twitchChannel->setRoomId(this->roomID_);
         }
     }
 }
@@ -588,14 +588,14 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
         // BTTV Global Emote
         return appendEmote(MessageElement::BttvEmote);
     } else if (this->twitchChannel != nullptr &&
-               this->twitchChannel->bttvChannelEmotes->tryGet(emoteString, emoteData)) {
+               this->twitchChannel->getBttvEmotes().tryGet(emoteString, emoteData)) {
         // BTTV Channel Emote
         return appendEmote(MessageElement::BttvEmote);
     } else if (app->emotes->ffz.globalEmotes.tryGet(emoteString, emoteData)) {
         // FFZ Global Emote
         return appendEmote(MessageElement::FfzEmote);
     } else if (this->twitchChannel != nullptr &&
-               this->twitchChannel->ffzChannelEmotes->tryGet(emoteString, emoteData)) {
+               this->twitchChannel->getFfzEmotes().tryGet(emoteString, emoteData)) {
         // FFZ Channel Emote
         return appendEmote(MessageElement::FfzEmote);
     }

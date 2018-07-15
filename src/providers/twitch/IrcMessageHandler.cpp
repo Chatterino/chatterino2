@@ -93,31 +93,33 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
         if ((it = tags.find("room-id")) != tags.end()) {
             auto roomId = it.value().toString();
 
-            twitchChannel->setRoomID(roomId);
+            twitchChannel->setRoomId(roomId);
 
             app->resources->loadChannelData(roomId);
         }
 
         // Room modes
-        TwitchChannel::RoomModes roomModes = twitchChannel->getRoomModes();
+        {
+            auto roomModes = twitchChannel->accessRoomModes();
 
-        if ((it = tags.find("emote-only")) != tags.end()) {
-            roomModes.emoteOnly = it.value() == "1";
-        }
-        if ((it = tags.find("subs-only")) != tags.end()) {
-            roomModes.submode = it.value() == "1";
-        }
-        if ((it = tags.find("slow")) != tags.end()) {
-            roomModes.slowMode = it.value().toInt();
-        }
-        if ((it = tags.find("r9k")) != tags.end()) {
-            roomModes.r9k = it.value() == "1";
-        }
-        if ((it = tags.find("broadcaster-lang")) != tags.end()) {
-            roomModes.broadcasterLang = it.value().toString();
+            if ((it = tags.find("emote-only")) != tags.end()) {
+                roomModes->emoteOnly = it.value() == "1";
+            }
+            if ((it = tags.find("subs-only")) != tags.end()) {
+                roomModes->submode = it.value() == "1";
+            }
+            if ((it = tags.find("slow")) != tags.end()) {
+                roomModes->slowMode = it.value().toInt();
+            }
+            if ((it = tags.find("r9k")) != tags.end()) {
+                roomModes->r9k = it.value() == "1";
+            }
+            if ((it = tags.find("broadcaster-lang")) != tags.end()) {
+                roomModes->broadcasterLang = it.value().toString();
+            }
         }
 
-        twitchChannel->setRoomModes(roomModes);
+        twitchChannel->roomModesChanged.invoke();
     }
 }
 
