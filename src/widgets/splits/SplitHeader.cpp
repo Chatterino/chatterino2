@@ -1,7 +1,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 
 #include "Application.hpp"
-#include "common/UrlFetch.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -80,9 +79,7 @@ SplitHeader::SplitHeader(Split *_split)
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
         QObject::connect(dropdown.getElement(), &RippleEffectButton::leftMousePress, this, [this] {
-            QTimer::singleShot(80, [&, this] {
-                this->dropdownMenu_.popup(QCursor::pos());
-            });
+            QTimer::singleShot(80, [&, this] { this->dropdownMenu_.popup(QCursor::pos()); });
         });
     }
 

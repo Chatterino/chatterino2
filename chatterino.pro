@@ -256,7 +256,6 @@ HEADERS  += \
     src/common/ProviderId.hpp \
     src/common/SerializeCustom.hpp \
     src/common/SignalVectorModel.hpp \
-    src/common/UrlFetch.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \

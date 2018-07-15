@@ -1,7 +1,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include "common/Common.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
@@ -336,7 +336,8 @@ void TwitchChannel::refreshLiveStatus()
 
     std::weak_ptr<Channel> weak = this->shared_from_this();
 
-    auto request = makeGetStreamRequest(this->roomID, QThread::currentThread());
+    auto request = NetworkRequest::twitchRequest(url);
+    request.setCaller(QThread::currentThread());
 
     request.onSuccess([weak](auto result) {
         auto d = result.parseRapidJson();
