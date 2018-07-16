@@ -19,7 +19,7 @@
 
 namespace chatterino {
 
-TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection)
+TwitchChannel::TwitchChannel(const QString &channelName)
     : Channel(channelName, Channel::Type::Twitch)
     , bttvEmotes_(new EmoteMap)
     , ffzEmotes_(new EmoteMap)
@@ -27,7 +27,6 @@ TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection 
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
     , mod_(false)
-    , readConnection_(readConnection)
 {
     Log("[TwitchChannel:{}] Opened", this->name);
 
@@ -420,7 +419,9 @@ bool TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
 
     for (const auto jsonMessage : jsonMessages) {
         auto content = jsonMessage.toString().toUtf8();
-        auto message = Communi::IrcMessage::fromData(content, this->readConnection_);
+        // passing nullptr as the channel makes the message invalid but we don't check for that
+        // anyways
+        auto message = Communi::IrcMessage::fromData(content, nullptr);
         auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         assert(privMsg);
 

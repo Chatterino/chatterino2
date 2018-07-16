@@ -140,7 +140,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
-                app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
+                app->twitch.server->sendMessage("jtv", text);
 
                 if (getSettings()->inlineWhispers) {
                     app->twitch.server->forEachChannel(

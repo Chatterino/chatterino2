@@ -86,7 +86,7 @@ private:
         QString localizedName;
     };
 
-    explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
+    explicit TwitchChannel(const QString &channelName);
 
     // Methods
     void refreshLiveStatus();
@@ -124,7 +124,6 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-    Communi::IrcConnection *readConnection_ = nullptr;
 
     friend class TwitchServer;
 };

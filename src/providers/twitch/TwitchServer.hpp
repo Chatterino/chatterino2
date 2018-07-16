@@ -22,7 +22,6 @@ public:
 
     virtual void initialize(Application &app) override;
 
-    // fourtf: ugh
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
@@ -36,16 +35,18 @@ public:
     PubSub *pubsub;
 
 protected:
-    void initializeConnection(IrcConnection *connection, bool isRead, bool isWrite) override;
-    std::shared_ptr<Channel> createChannel(const QString &channelName) override;
+    virtual void initializeConnection(IrcConnection *connection, bool isRead,
+                                      bool isWrite) override;
+    virtual std::shared_ptr<Channel> createChannel(const QString &channelName) override;
 
-    void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
-    void messageReceived(Communi::IrcMessage *message) override;
-    void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
+    virtual void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
+    virtual void messageReceived(Communi::IrcMessage *message) override;
+    virtual void writeConnectionMessageReceived(Communi::IrcMessage *message) override;
 
-    std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
+    virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelname) override;
 
-    QString cleanChannelName(const QString &dirtyChannelName) override;
+    virtual QString cleanChannelName(const QString &dirtyChannelName) override;
+    virtual bool hasSeparateWriteConnection() const override;
 
 private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
@@ -57,6 +58,10 @@ private:
     std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
+
+    bool singleConnection_ = false;
+
+    pajlada::Signals::SignalHolder signalHolder_;
 };
 
 }  // namespace chatterino

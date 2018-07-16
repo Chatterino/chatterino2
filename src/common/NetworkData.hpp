@@ -13,6 +13,9 @@ namespace chatterino {
 class NetworkResult;
 
 struct NetworkData {
+    NetworkData();
+    ~NetworkData();
+
     QNetworkRequest request_;
     const QObject *caller_ = nullptr;
     bool useQuickLoadCache_{};

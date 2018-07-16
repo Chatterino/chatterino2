@@ -2,11 +2,22 @@
 
 #include "Application.hpp"
 #include "singletons/Paths.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QCryptographicHash>
 #include <QFile>
 
 namespace chatterino {
+
+NetworkData::NetworkData()
+{
+    DebugCount::increase("NetworkData");
+}
+
+NetworkData::~NetworkData()
+{
+    DebugCount::decrease("NetworkData");
+}
 
 QString NetworkData::getHash()
 {

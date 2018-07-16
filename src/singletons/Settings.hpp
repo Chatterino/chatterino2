@@ -52,6 +52,8 @@ public:
     BoolSetting showJoins = {"/behaviour/showJoins", false};
     BoolSetting showParts = {"/behaviour/showParts", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
+    // BoolSetting twitchSeperateWriteConnection = {"/behaviour/twitchSeperateWriteConnection",
+    // false};
 
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {

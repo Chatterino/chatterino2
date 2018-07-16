@@ -15,7 +15,7 @@ DebugPopup::DebugPopup()
     auto *text = new QLabel(this);
     auto *timer = new QTimer(this);
 
-    timer->setInterval(1000);
+    timer->setInterval(300);
     QObject::connect(timer, &QTimer::timeout,
                      [text] { text->setText(DebugCount::getDebugText()); });
     timer->start();

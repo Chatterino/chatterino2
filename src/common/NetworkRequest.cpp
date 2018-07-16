@@ -167,20 +167,21 @@ void NetworkRequest::doRequest()
     this->timer->start();
 
     auto onUrlRequested = [data = this->data, timer = this->timer, worker]() mutable {
-        QNetworkReply *reply = nullptr;
-        switch (data->requestType_) {
-            case NetworkRequestType::Get: {
-                reply = NetworkManager::NaM.get(data->request_);
-            } break;
+        auto reply = [&]() -> QNetworkReply * {
+            switch (data->requestType_) {
+                case NetworkRequestType::Get:
+                    return NetworkManager::NaM.get(data->request_);
 
-            case NetworkRequestType::Put: {
-                reply = NetworkManager::NaM.put(data->request_, data->payload_);
-            } break;
+                case NetworkRequestType::Put:
+                    return NetworkManager::NaM.put(data->request_, data->payload_);
 
-            case NetworkRequestType::Delete: {
-                reply = NetworkManager::NaM.deleteResource(data->request_);
-            } break;
-        }
+                case NetworkRequestType::Delete:
+                    return NetworkManager::NaM.deleteResource(data->request_);
+
+                default:
+                    return nullptr;
+            }
+        }();
 
         if (reply == nullptr) {
             Log("Unhandled request type");
@@ -201,8 +202,6 @@ void NetworkRequest::doRequest()
             data->onReplyCreated_(reply);
         }
 
-        bool directAction = (data->caller_ == nullptr);
-
         auto handleReply = [data, timer, reply]() mutable {
             // TODO(pajlada): A reply was received, kill the timeout timer
             if (reply->error() != QNetworkReply::NetworkError::NoError) {
@@ -222,8 +221,7 @@ void NetworkRequest::doRequest()
         };
 
         if (data->caller_ != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
-                             std::move(handleReply));
+            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_, handleReply);
             QObject::connect(reply, &QNetworkReply::finished, worker, [worker]() mutable {
                 emit worker->doneUrl();
 
@@ -231,7 +229,7 @@ void NetworkRequest::doRequest()
             });
         } else {
             QObject::connect(reply, &QNetworkReply::finished, worker,
-                             [handleReply = std::move(handleReply), worker]() mutable {
+                             [handleReply, worker]() mutable {
                                  handleReply();
 
                                  delete worker;

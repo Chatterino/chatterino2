@@ -46,8 +46,8 @@ public:
 
     friend void test();
 
-    [[deprecated("use getSettings() instead")]] Settings *settings = nullptr;
-    [[deprecated("use getPaths() instead")]] Paths *paths = nullptr;
+    Settings *settings = nullptr;
+    Paths *paths = nullptr;
 
     Theme *themes = nullptr;
     WindowManager *windows = nullptr;
