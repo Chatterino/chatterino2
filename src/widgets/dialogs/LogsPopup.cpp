@@ -46,7 +46,7 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
     this->channelView_->setChannel(logsChannel);
 }
 
-void LogsPopup::getLogviewerLogs()
+void LogsPopup::getRoomID()
 {
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
     if (twitchChannel == nullptr) {
@@ -57,18 +57,30 @@ void LogsPopup::getLogviewerLogs()
 
     QString url = QString("https://cbenni.com/api/channel/%1").arg(channelName);
 
-    NetworkRequest reqID(url);
-    reqID.setCaller(QThread::currentThread());
+    NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
 
-    reqID.onError([this](int errorCode) {
+    req.onError([this](int errorCode) {
         this->getOverrustleLogs();
         return true;
     });
 
-    reqID.getJSON(
-        [this](QJsonObject &data) { this->roomID_ = data.value("channel")["id"].toInt(); });
+    req.getJSON([this](QJsonObject &data) {
+        this->roomID_ = data.value("channel")["id"].toInt();
+        this->getLogviewerLogs();
+    });
 
-    reqID.execute();
+    req.execute();
+}
+
+void LogsPopup::getLogviewerLogs()
+{
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    if (twitchChannel == nullptr) {
+        return;
+    }
+
+    QString channelName = twitchChannel->name;
 
     url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
               .arg(channelName, this->userName_);

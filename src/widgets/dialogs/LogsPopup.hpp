@@ -27,6 +27,7 @@ private:
 >>>>>>> Add channel badges and emotes to LogsPopup
     void initLayout();
     void setMessages(std::vector<MessagePtr> &messages);
+    void getRoomID();
     void getOverrustleLogs();
     void getLogviewerLogs();
 
