@@ -35,7 +35,7 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
     this->channel_ = channel;
     this->userName_ = userName;
     this->setWindowTitle(this->userName_ + "'s logs in #" + this->channel_->name);
-    this->getLogviewerLogs();
+    this->getRoomID();
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
@@ -65,9 +65,11 @@ void LogsPopup::getRoomID()
         return true;
     });
 
-    req.getJSON([this](QJsonObject &data) {
+    req.onSuccess([this, channelName](auto result) {
+        auto data = result.parseJson();
         this->roomID_ = data.value("channel")["id"].toInt();
         this->getLogviewerLogs();
+        return true;
     });
 
     req.execute();
@@ -82,8 +84,8 @@ void LogsPopup::getLogviewerLogs()
 
     QString channelName = twitchChannel->name;
 
-    url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
-              .arg(channelName, this->userName_);
+    auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
+                   .arg(channelName, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
