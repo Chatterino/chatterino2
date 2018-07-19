@@ -229,33 +229,36 @@ MessagePtr TwitchMessageBuilder::build()
                         this->emplace<TextElement>(string, TextElement::Text, textColor);
                     }
                 } else {
-                    QRegularExpression httpRegex("\\bhttps?://",
-                                                 QRegularExpression::CaseInsensitiveOption);
-                    QRegularExpression ftpRegex("\\bftps?://",
-                                                QRegularExpression::CaseInsensitiveOption);
-                    QRegularExpression getDomain("\\/\\/([^\\/]*)");
-                    QString tempString = string;
-                    QString lowercaseLinkString;
-                    // QString lowercaseLinkBackEndString;
-
-                    if (!string.contains(httpRegex)) {
-                        if (!string.contains(ftpRegex)) {
-                            tempString.insert(0, "http://");
-                        }
-                    }
-                    bool ok = true;
-                    for (int j = 7; tempString.size() >= j && ok; j++) {
-                        if (tempString[j] == '/') {
-                            for (int k = j; tempString.size() >= k; k++) {
-                                lowercaseLinkString.push_back(tempString[k]);
-                            }
-                            tempString.resize(++j);
-                            ok = false;
-                        }
-                    }
-                    QString domain = getDomain.match(tempString).captured(1);
-                    tempString.replace(domain, domain.toLower());
-                    lowercaseLinkString.insert(0, tempString);
+                    const QString tempstring1 =
+                            "^"
+                            // Identifier for http and ftp
+                            "(?:(?:https?|ftps?)://)?"
+                            // user:pass authentication
+                            "(?:\\S+(?::\\S*)?@)?"
+                            "(?:"
+                            // IP address dotted notation octets
+                            // excludes loopback network 0.0.0.0
+                            // excludes reserved space >= 224.0.0.0
+                            // excludes network & broacast addresses
+                            // (first & last IP address of each class)
+                            "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])"
+                            "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}"
+                            "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))"
+                            "|"
+                            // host name
+                            "(?:(?:[_a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)"
+                            // domain name
+                            "(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*"
+                            // TLD identifier
+                            "(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,}))"
+                            "\\.?"
+                            ")"
+                            // port number
+                            "(?::\\d{2,5})?";
+                    QRegularExpression getDomain(tempstring1, QRegularExpression::CaseInsensitiveOption);
+                    QString domain = getDomain.match(string).captured(0);
+                    QString lowercaseLinkString = string;
+                    lowercaseLinkString.replace(domain, domain.toLower());
 
                     link = Link(Link::Url, linkString);
                     textColor = MessageColor(MessageColor::Link);
