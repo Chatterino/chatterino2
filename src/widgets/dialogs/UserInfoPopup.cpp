@@ -1,7 +1,7 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
@@ -231,10 +231,10 @@ void UserInfoPopup::installEvents()
 
     // ignore highlights
     QObject::connect(
-        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool checkedState) mutable {
+        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool gotClicked) mutable {
             this->ui_.ignoreHighlights->setEnabled(false);
 
-            if (checkedState) {
+            if (gotClicked) {
                 getApp()->highlights->blacklistedUsers.insertItem(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
@@ -248,14 +248,11 @@ void UserInfoPopup::installEvents()
                         i--;
                     }
                 }
-                bool isUsernameBlacklisted =
-                    getApp()->highlights->blacklistContains(this->userName_);
-                if (isUsernameBlacklisted) {
-                    this->channel_->addMessage(Message::createSystemMessage(
-                        this->userName_ +
-                        " was not fully removed from the highlight blacklist(regex)"));
+                if (getApp()->highlights->blacklistContains(this->userName_)) {
+                    this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
+                } else {
+                    this->ui_.ignoreHighlights->setEnabled(true);
                 }
-                this->ui_.ignoreHighlights->setEnabled(true);
             }
         });
 }
@@ -281,7 +278,10 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = id;
 
-        auto request = makeGetChannelRequest(id, this);
+        QString url("https://api.twitch.tv/kraken/channels/" + id);
+
+        auto request = NetworkRequest::twitchRequest(url);
+        request.setCaller(this);
 
         request.onSuccess([this](auto result) {
             auto obj = result.parseJson();
@@ -327,10 +327,13 @@ void UserInfoPopup::updateUserData()
                 break;
             }
         }
-
+        if (getApp()->highlights->blacklistContains(this->userName_) && !isIgnoringHighlights) {
+            this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
+        } else {
+            this->ui_.ignoreHighlights->setEnabled(true);
+        }
         this->ui_.ignore->setEnabled(true);
         this->ui_.ignore->setChecked(isIgnoring);
-        this->ui_.ignoreHighlights->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
     };
 
