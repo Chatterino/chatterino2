@@ -235,15 +235,27 @@ MessagePtr TwitchMessageBuilder::build()
                                                 QRegularExpression::CaseInsensitiveOption);
                     QRegularExpression getDomain("\\/\\/([^\\/]*)");
                     QString tempString = string;
+                    QString lowercaseLinkString;
+                    // QString lowercaseLinkBackEndString;
 
                     if (!string.contains(httpRegex)) {
                         if (!string.contains(ftpRegex)) {
                             tempString.insert(0, "http://");
                         }
                     }
+                    bool ok = true;
+                    for (int j = 7; tempString.size() >= j && ok; j++) {
+                        if (tempString[j] == '/') {
+                            for (int k = j; tempString.size() >= k; k++) {
+                                lowercaseLinkString.push_back(tempString[k]);
+                            }
+                            tempString.resize(++j);
+                            ok = false;
+                        }
+                    }
                     QString domain = getDomain.match(tempString).captured(1);
-                    QString lowercaseLinkString = string;
-                    lowercaseLinkString.replace(domain, domain.toLower());
+                    tempString.replace(domain, domain.toLower());
+                    lowercaseLinkString.insert(0, tempString);
 
                     link = Link(Link::Url, linkString);
                     textColor = MessageColor(MessageColor::Link);

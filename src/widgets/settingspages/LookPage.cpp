@@ -286,7 +286,9 @@ ChannelPtr LookPage::createPreviewChannel()
         message->addElement(new TextElement("This is a preview message", MessageElement::Text));
         message->addElement(new EmoteElement(EmoteData(getApp()->resources->pajaDank),
                                              MessageElement::Flags::AlwaysShow));
-        // message->addElement(new)
+        message->addElement(new TextElement("@fourtf", TextElement::BoldUsername,
+                                            MessageColor::Text, FontStyle::ChatMediumBold));
+        message->addElement(new TextElement("@fourtf", TextElement::NonBoldUsername));
         channel->addMessage(message);
     }
     {
@@ -300,7 +302,10 @@ ChannelPtr LookPage::createPreviewChannel()
         message->addElement(
             new EmoteElement(EmoteData(getApp()->resources->ppHop), MessageElement::BttvEmote));
         message->addElement(
-            (new TextElement("www.fourtf.com", MessageElement::Text, MessageColor::Link))
+            (new TextElement("www.fourtf.com", MessageElement::LowercaseLink, MessageColor::Link))
+                ->setLink(Link(Link::Url, "https://www.fourtf.com")));
+        message->addElement(
+            (new TextElement("wWw.FoUrTf.CoM", MessageElement::OriginalLink, MessageColor::Link))
                 ->setLink(Link(Link::Url, "https://www.fourtf.com")));
         channel->addMessage(message);
     }
