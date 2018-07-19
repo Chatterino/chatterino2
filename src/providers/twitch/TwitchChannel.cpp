@@ -302,18 +302,18 @@ void TwitchChannel::refreshLiveStatus()
     //<<<<<<< HEAD
     //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
     //=======
-    //    auto request = NetworkRequest::twitchRequest(url);
-    //    request.setCaller(QThread::currentThread());
+    auto request = NetworkRequest::twitchRequest(url);
+    request.setCaller(QThread::currentThread());
     //>>>>>>> 9bfbdefd2f0972a738230d5b95a009f73b1dd933
 
-    //    request.onSuccess([this, weak = this->weak_from_this()](auto result) {
-    //        ChannelPtr shared = weak.lock();
-    //        if (!shared) return false;
+    request.onSuccess([this, weak = this->weak_from_this()](auto result) {
+        ChannelPtr shared = weak.lock();
+        if (!shared) return false;
 
-    //        return this->parseLiveStatus(result.parseRapidJson());
-    //    });
+        return this->parseLiveStatus(result.parseRapidJson());
+    });
 
-    //    request.execute();
+    request.execute();
 }
 
 bool TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
