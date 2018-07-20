@@ -513,7 +513,7 @@ void PubSub::listenToChannelModerationActions(const QString &channelID,
     assert(!channelID.isEmpty());
     assert(account != nullptr);
     QString userID = account->getUserId();
-    assert(!userID.isEmpty());
+    if (userID.isEmpty()) return;
 
     std::string topic(fS("chat_moderator_actions.{}.{}", userID, channelID));
 

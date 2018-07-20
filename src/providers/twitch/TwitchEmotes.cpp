@@ -1,6 +1,6 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"

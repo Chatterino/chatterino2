@@ -32,8 +32,8 @@ ModerationAction::ModerationAction(const QString &action)
 
     if (timeoutMatch.hasMatch()) {
         // if (multipleTimeouts > 1) {
-        QString line1;
-        QString line2;
+        // QString line1;
+        // QString line2;
 
         int amount = timeoutMatch.captured(1).toInt();
 
@@ -51,8 +51,8 @@ ModerationAction::ModerationAction(const QString &action)
             this->line2_ = "d";
         }
 
-        this->line1_ = line1;
-        this->line2_ = line2;
+        // line1 = this->line1_;
+        // line2 = this->line2_;
         // } else {
         //     this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
         // }

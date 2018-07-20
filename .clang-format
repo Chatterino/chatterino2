@@ -15,7 +15,7 @@ BreakBeforeBraces: Custom
 AccessModifierOffset: -4
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 AllowShortFunctionsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: false
 DerivePointerBinding: false
 BraceWrapping: {

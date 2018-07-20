@@ -1,7 +1,6 @@
 #pragma once
 
-#include <common/Singleton.hpp>
-
+#include "common/Singleton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 

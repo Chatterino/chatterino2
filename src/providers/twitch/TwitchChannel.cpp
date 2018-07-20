@@ -1,7 +1,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
 #include "common/Common.hpp"
-#include "common/UrlFetch.hpp"
+#include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
@@ -21,102 +21,50 @@ namespace chatterino {
 
 TwitchChannel::TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection)
     : Channel(channelName, Channel::Type::Twitch)
-    , bttvChannelEmotes(new EmoteMap)
-    , ffzChannelEmotes(new EmoteMap)
-    , subscriptionURL("https://www.twitch.tv/subs/" + name)
-    , channelURL("https://twitch.tv/" + name)
-    , popoutPlayerURL("https://player.twitch.tv/?channel=" + name)
+    , bttvEmotes_(new EmoteMap)
+    , ffzEmotes_(new EmoteMap)
+    , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
+    , channelUrl_("https://twitch.tv/" + name)
+    , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
     , mod_(false)
     , readConnection_(readConnection)
 {
     Log("[TwitchChannel:{}] Opened", this->name);
 
-    this->startRefreshLiveStatusTimer(60 * 1000);
+    this->refreshChannelEmotes();
+    // this->refreshViewerList();
 
-    auto app = getApp();
-    this->reloadChannelEmotes();
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
+                         [=] { this->setMod(false); });
 
-    this->managedConnect(app->accounts->twitch.currentUserChanged,
-                         [this]() { this->setMod(false); });
+    // pubsub
+    this->userStateChanged.connect([=] { this->refreshPubsub(); });
+    this->roomIdChanged.connect([=] { this->refreshPubsub(); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
+                         [=] { this->refreshPubsub(); });
+    this->refreshPubsub();
 
-    auto refreshPubSubState = [=]() {
-        if (!this->hasModRights()) {
-            return;
-        }
+    // room id loaded -> refresh live status
+    this->roomIdChanged.connect([this]() { this->refreshLiveStatus(); });
 
-        if (this->roomID.isEmpty()) {
-            return;
-        }
+    // timers
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout,
+                     [=] { this->refreshViewerList(); });
+    this->chattersListTimer_.start(5 * 60 * 1000);
 
-        auto account = app->accounts->twitch.getCurrent();
-        if (account && !account->getUserId().isEmpty()) {
-            app->twitch.pubsub->listenToChannelModerationActions(this->roomID, account);
-        }
-    };
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] { this->refreshLiveStatus(); });
+    this->liveStatusTimer_.start(60 * 1000);
 
-    this->userStateChanged.connect(refreshPubSubState);
-    this->roomIDchanged.connect(refreshPubSubState);
-    this->managedConnect(app->accounts->twitch.currentUserChanged, refreshPubSubState);
-    refreshPubSubState();
-
-    this->fetchMessages.connect([this] {
-        this->fetchRecentMessages();  //
-    });
-
+    // --
     this->messageSuffix_.append(' ');
     this->messageSuffix_.append(QChar(0x206D));
 
-    static QStringList jsonLabels = {"moderators", "staff", "admins", "global_mods", "viewers"};
-    auto refreshChatters = [=](QJsonObject obj) {
-        QJsonObject chattersObj = obj.value("chatters").toObject();
-        for (int i = 0; i < jsonLabels.size(); i++) {
-            foreach (const QJsonValue &v, chattersObj.value(jsonLabels.at(i)).toArray()) {
-                this->completionModel.addUser(v.toString());
-            }
-        }
-    };
-
-    auto doRefreshChatters = [=]() {
-        const auto streamStatus = this->getStreamStatus();
-
-        if (app->settings->onlyFetchChattersForSmallerStreamers) {
-            if (streamStatus.live && streamStatus.viewerCount > app->settings->smallStreamerLimit) {
-                return;
-            }
-        }
-
-        NetworkRequest request("https://tmi.twitch.tv/group/user/" + this->name + "/chatters");
-
-        request.setCaller(QThread::currentThread());
-        request.onSuccess([refreshChatters](auto result) {
-            refreshChatters(result.parseJson());  //
-
-            return true;
-        });
-
-        request.execute();
-    };
-
-    doRefreshChatters();
-
-    this->chattersListTimer = new QTimer;
-    QObject::connect(this->chattersListTimer, &QTimer::timeout, doRefreshChatters);
-    this->chattersListTimer->start(5 * 60 * 1000);
-
+    // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
         this->addMessage(Message::createSystemMessage("asdf"));
     }
 #endif
-}
-
-TwitchChannel::~TwitchChannel()
-{
-    this->liveStatusTimer->stop();
-    this->liveStatusTimer->deleteLater();
-
-    this->chattersListTimer->stop();
-    this->chattersListTimer->deleteLater();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -129,21 +77,14 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
-void TwitchChannel::setRoomID(const QString &_roomID)
-{
-    this->roomID = _roomID;
-    this->roomIDchanged.invoke();
-    this->fetchMessages.invoke();
-}
-
-void TwitchChannel::reloadChannelEmotes()
+void TwitchChannel::refreshChannelEmotes()
 {
     auto app = getApp();
 
     Log("[TwitchChannel:{}] Reloading channel emotes", this->name);
 
-    app->emotes->bttv.loadChannelEmotes(this->name, this->bttvChannelEmotes);
-    app->emotes->ffz.loadChannelEmotes(this->name, this->ffzChannelEmotes);
+    app->emotes->bttv.loadChannelEmotes(this->name, this->bttvEmotes_);
+    app->emotes->ffz.loadChannelEmotes(this->name, this->ffzEmotes_);
 }
 
 void TwitchChannel::sendMessage(const QString &message)
@@ -171,7 +112,7 @@ void TwitchChannel::sendMessage(const QString &message)
     }
 
     if (!this->hasModRights()) {
-        if (app->settings->allowDuplicateMessages) {
+        if (getSettings()->allowDuplicateMessages) {
             if (parsedMessage == this->lastSentMessage_) {
                 parsedMessage.append(this->messageSuffix_);
             }
@@ -212,36 +153,30 @@ void TwitchChannel::addRecentChatter(const std::shared_ptr<Message> &message)
 {
     assert(!message->loginName.isEmpty());
 
-    std::lock_guard<std::mutex> lock(this->recentChattersMutex_);
-
-    this->recentChatters_[message->loginName] = {message->displayName, message->localizedName};
-
     this->completionModel.addUser(message->displayName);
 }
 
 void TwitchChannel::addJoinedUser(const QString &user)
 {
-    auto *app = getApp();
+    auto app = getApp();
     if (user == app->accounts->twitch.getCurrent()->getUserName() ||
-        !app->settings->showJoins.getValue()) {
+        !getSettings()->showJoins.getValue()) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard(this->joinedUserMutex_);
-
-    joinedUsers_ << user;
+    auto joinedUsers = this->joinedUsers_.access();
+    joinedUsers->append(user);
 
     if (!this->joinedUsersMergeQueued_) {
         this->joinedUsersMergeQueued_ = true;
 
-        QTimer::singleShot(500, &this->object_, [this] {
-            std::lock_guard<std::mutex> guard(this->joinedUserMutex_);
+        QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
+            auto joinedUsers = this->joinedUsers_.access();
 
-            auto message =
-                Message::createSystemMessage("Users joined: " + this->joinedUsers_.join(", "));
+            auto message = Message::createSystemMessage("Users joined: " + joinedUsers->join(", "));
             message->flags |= Message::Collapsed;
+            joinedUsers->clear();
             this->addMessage(message);
-            this->joinedUsers_.clear();
             this->joinedUsersMergeQueued_ = false;
         });
     }
@@ -249,82 +184,112 @@ void TwitchChannel::addJoinedUser(const QString &user)
 
 void TwitchChannel::addPartedUser(const QString &user)
 {
-    auto *app = getApp();
+    auto app = getApp();
 
     if (user == app->accounts->twitch.getCurrent()->getUserName() ||
-        !app->settings->showJoins.getValue()) {
+        !getSettings()->showJoins.getValue()) {
         return;
     }
 
-    std::lock_guard<std::mutex> guard(this->partedUserMutex_);
-
-    partedUsers_ << user;
+    auto partedUsers = this->partedUsers_.access();
+    partedUsers->append(user);
 
     if (!this->partedUsersMergeQueued_) {
         this->partedUsersMergeQueued_ = true;
 
-        QTimer::singleShot(500, &this->object_, [this] {
-            std::lock_guard<std::mutex> guard(this->partedUserMutex_);
+        QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
+            auto partedUsers = this->partedUsers_.access();
 
-            auto message =
-                Message::createSystemMessage("Users parted: " + this->partedUsers_.join(", "));
+            auto message = Message::createSystemMessage("Users parted: " + partedUsers->join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
-            this->partedUsers_.clear();
+            partedUsers->clear();
 
             this->partedUsersMergeQueued_ = false;
         });
     }
 }
 
-TwitchChannel::RoomModes TwitchChannel::getRoomModes()
+QString TwitchChannel::getRoomId() const
 {
-    std::lock_guard<std::mutex> lock(this->roomModeMutex_);
+    return this->roomID_.get();
+}
 
-    return this->roomModes_;
+void TwitchChannel::setRoomId(const QString &id)
+{
+    this->roomID_.set(id);
+    this->roomIdChanged.invoke();
+    this->loadRecentMessages();
+}
+
+const AccessGuard<TwitchChannel::RoomModes> TwitchChannel::accessRoomModes() const
+{
+    return this->roomModes_.access();
 }
 
 void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 {
-    {
-        std::lock_guard<std::mutex> lock(this->roomModeMutex_);
-        this->roomModes_ = _roomModes;
-    }
+    this->roomModes_ = _roomModes;
 
     this->roomModesChanged.invoke();
 }
 
 bool TwitchChannel::isLive() const
 {
-    std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
-    return this->streamStatus_.live;
+    return this->streamStatus_.access()->live;
 }
 
-TwitchChannel::StreamStatus TwitchChannel::getStreamStatus() const
+const AccessGuard<TwitchChannel::StreamStatus> TwitchChannel::accessStreamStatus() const
 {
-    std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
-    return this->streamStatus_;
+    return this->streamStatus_.access();
+}
+
+const EmoteMap &TwitchChannel::getFfzEmotes() const
+{
+    return *this->ffzEmotes_;
+}
+
+const EmoteMap &TwitchChannel::getBttvEmotes() const
+{
+    return *this->bttvEmotes_;
+}
+
+const QString &TwitchChannel::getSubscriptionUrl()
+{
+    return this->subscriptionUrl_;
+}
+
+const QString &TwitchChannel::getChannelUrl()
+{
+    return this->channelUrl_;
+}
+
+const QString &TwitchChannel::getPopoutPlayerUrl()
+{
+    return this->popoutPlayerUrl_;
 }
 
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     bool gotNewLiveStatus = false;
     {
-        std::lock_guard<std::mutex> lock(this->streamStatusMutex_);
-        if (this->streamStatus_.live != newLiveStatus) {
+        auto guard = this->streamStatus_.access();
+        if (guard->live != newLiveStatus) {
             gotNewLiveStatus = true;
-            this->streamStatus_.live = newLiveStatus;
+            guard->live = newLiveStatus;
         }
     }
 
     if (gotNewLiveStatus) {
-        this->updateLiveInfo.invoke();
+        this->liveStatusChanged.invoke();
     }
 }
 
 void TwitchChannel::refreshLiveStatus()
 {
-    if (this->roomID.isEmpty()) {
+    auto roomID = this->getRoomId();
+
+    if (roomID.isEmpty()) {
         Log("[TwitchChannel:{}] Refreshing live status (Missing ID)", this->name);
         this->setLive(false);
         return;
@@ -332,159 +297,196 @@ void TwitchChannel::refreshLiveStatus()
 
     Log("[TwitchChannel:{}] Refreshing live status", this->name);
 
-    QString url("https://api.twitch.tv/kraken/streams/" + this->roomID);
+    QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
-    std::weak_ptr<Channel> weak = this->shared_from_this();
+    //<<<<<<< HEAD
+    //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
+    //=======
+    //    auto request = NetworkRequest::twitchRequest(url);
+    //    request.setCaller(QThread::currentThread());
+    //>>>>>>> 9bfbdefd2f0972a738230d5b95a009f73b1dd933
 
-    auto request = makeGetStreamRequest(this->roomID, QThread::currentThread());
+    //    request.onSuccess([this, weak = this->weak_from_this()](auto result) {
+    //        ChannelPtr shared = weak.lock();
+    //        if (!shared) return false;
 
-    request.onSuccess([weak](auto result) {
-        auto d = result.parseRapidJson();
-        ChannelPtr shared = weak.lock();
+    //        return this->parseLiveStatus(result.parseRapidJson());
+    //    });
 
-        if (!shared) {
-            return false;
+    //    request.execute();
+}
+
+bool TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
+{
+    if (!document.IsObject()) {
+        Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+        return false;
+    }
+
+    if (!document.HasMember("stream")) {
+        Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+        return false;
+    }
+
+    const auto &stream = document["stream"];
+
+    if (!stream.IsObject()) {
+        // Stream is offline (stream is most likely null)
+        this->setLive(false);
+        return false;
+    }
+
+    if (!stream.HasMember("viewers") || !stream.HasMember("game") || !stream.HasMember("channel") ||
+        !stream.HasMember("created_at")) {
+        Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
+        this->setLive(false);
+        return false;
+    }
+
+    const rapidjson::Value &streamChannel = stream["channel"];
+
+    if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
+        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
+        return false;
+    }
+
+    // Stream is live
+
+    {
+        auto status = this->streamStatus_.access();
+        status->live = true;
+        status->viewerCount = stream["viewers"].GetUint();
+        status->game = stream["game"].GetString();
+        status->title = streamChannel["status"].GetString();
+        QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
+        auto diff = since.secsTo(QDateTime::currentDateTime());
+        status->uptime =
+            QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+
+        status->rerun = false;
+        if (stream.HasMember("stream_type")) {
+            status->streamType = stream["stream_type"].GetString();
+        } else {
+            status->streamType = QString();
         }
 
-        TwitchChannel *channel = dynamic_cast<TwitchChannel *>(shared.get());
+        if (stream.HasMember("broadcast_platform")) {
+            const auto &broadcastPlatformValue = stream["broadcast_platform"];
 
-        if (!d.IsObject()) {
-            Log("[TwitchChannel:refreshLiveStatus] root is not an object");
-            return false;
-        }
-
-        if (!d.HasMember("stream")) {
-            Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
-            return false;
-        }
-
-        const auto &stream = d["stream"];
-
-        if (!stream.IsObject()) {
-            // Stream is offline (stream is most likely null)
-            channel->setLive(false);
-            return false;
-        }
-
-        if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
-            !stream.HasMember("channel") || !stream.HasMember("created_at")) {
-            Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
-            channel->setLive(false);
-            return false;
-        }
-
-        const rapidjson::Value &streamChannel = stream["channel"];
-
-        if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-            Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
-            return false;
-        }
-
-        // Stream is live
-
-        {
-            std::lock_guard<std::mutex> lock(channel->streamStatusMutex_);
-            channel->streamStatus_.live = true;
-            channel->streamStatus_.viewerCount = stream["viewers"].GetUint();
-            channel->streamStatus_.game = stream["game"].GetString();
-            channel->streamStatus_.title = streamChannel["status"].GetString();
-            QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
-            auto diff = since.secsTo(QDateTime::currentDateTime());
-            channel->streamStatus_.uptime =
-                QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
-
-            channel->streamStatus_.rerun = false;
-            if (stream.HasMember("stream_type")) {
-                channel->streamStatus_.streamType = stream["stream_type"].GetString();
-            } else {
-                channel->streamStatus_.streamType = QString();
-            }
-
-            if (stream.HasMember("broadcast_platform")) {
-                const auto &broadcastPlatformValue = stream["broadcast_platform"];
-
-                if (broadcastPlatformValue.IsString()) {
-                    const char *broadcastPlatform = stream["broadcast_platform"].GetString();
-                    if (strcmp(broadcastPlatform, "rerun") == 0) {
-                        channel->streamStatus_.rerun = true;
-                    }
+            if (broadcastPlatformValue.IsString()) {
+                const char *broadcastPlatform = stream["broadcast_platform"].GetString();
+                if (strcmp(broadcastPlatform, "rerun") == 0) {
+                    status->rerun = true;
                 }
             }
         }
+    }
 
-        // Signal all listeners that the stream status has been updated
-        channel->updateLiveInfo.invoke();
+    // Signal all listeners that the stream status has been updated
+    this->liveStatusChanged.invoke();
 
-        return true;
-    });
-
-    request.execute();
+    return true;
 }
 
-void TwitchChannel::startRefreshLiveStatusTimer(int intervalMS)
-{
-    this->liveStatusTimer = new QTimer;
-    QObject::connect(this->liveStatusTimer, &QTimer::timeout, [this]() {
-        this->refreshLiveStatus();  //
-    });
-
-    // When the Room ID of a twitch channel has been set, refresh the live status an extra time
-    this->roomIDchanged.connect([this]() {
-        this->refreshLiveStatus();  //
-    });
-
-    this->liveStatusTimer->start(intervalMS);
-}
-
-void TwitchChannel::fetchRecentMessages()
+void TwitchChannel::loadRecentMessages()
 {
     static QString genericURL =
         "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
 
-    NetworkRequest request(genericURL.arg(this->roomID));
+    NetworkRequest request(genericURL.arg(this->getRoomId()));
     request.makeAuthorizedV5(getDefaultClientID());
     request.setCaller(QThread::currentThread());
 
-    std::weak_ptr<Channel> weak = this->shared_from_this();
-
-    request.onSuccess([weak](auto result) {
-        auto obj = result.parseJson();
+    request.onSuccess([this, weak = this->weak_from_this()](auto result) {
+        // channel still exists?
         ChannelPtr shared = weak.lock();
+        if (!shared) return false;
 
-        if (!shared) {
-            return false;
-        }
-
-        auto channel = dynamic_cast<TwitchChannel *>(shared.get());
-        assert(channel != nullptr);
-
-        static auto readConnection = channel->readConnection_;
-
-        QJsonArray msgArray = obj.value("messages").toArray();
-        if (msgArray.empty()) {
-            return false;
-        }
-
-        std::vector<MessagePtr> messages;
-
-        for (const QJsonValueRef _msg : msgArray) {
-            QByteArray content = _msg.toString().toUtf8();
-            auto msg = Communi::IrcMessage::fromData(content, readConnection);
-            auto privMsg = static_cast<Communi::IrcPrivateMessage *>(msg);
-
-            MessageParseArgs args;
-            TwitchMessageBuilder builder(channel, privMsg, args);
-            if (!builder.isIgnored()) {
-                messages.push_back(builder.build());
-            }
-        }
-
-        channel->addMessagesAtStart(messages);
-
-        return true;
+        // parse json
+        return this->parseRecentMessages(result.parseJson());
     });
 
     request.execute();
+}
+
+bool TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
+{
+    QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
+    if (jsonMessages.empty()) {
+        return false;
+    }
+
+    std::vector<MessagePtr> messages;
+
+    for (const auto jsonMessage : jsonMessages) {
+        auto content = jsonMessage.toString().toUtf8();
+        auto message = Communi::IrcMessage::fromData(content, this->readConnection_);
+        auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
+        assert(privMsg);
+
+        MessageParseArgs args;
+        TwitchMessageBuilder builder(this, privMsg, args);
+        if (!builder.isIgnored()) {
+            messages.push_back(builder.build());
+        }
+    }
+
+    this->addMessagesAtStart(messages);
+
+    return true;
+}
+
+void TwitchChannel::refreshPubsub()
+{
+    // listen to moderation actions
+    if (!this->hasModRights()) return;
+    auto roomId = this->getRoomId();
+    if (roomId.isEmpty()) return;
+
+    auto account = getApp()->accounts->twitch.getCurrent();
+    getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId, account);
+}
+
+void TwitchChannel::refreshViewerList()
+{
+    // setting?
+    const auto streamStatus = this->accessStreamStatus();
+
+    if (getSettings()->onlyFetchChattersForSmallerStreamers) {
+        if (streamStatus->live && streamStatus->viewerCount > getSettings()->smallStreamerLimit) {
+            return;
+        }
+    }
+
+    // get viewer list
+    NetworkRequest request("https://tmi.twitch.tv/group/user/" + this->name + "/chatters");
+
+    request.setCaller(QThread::currentThread());
+    request.onSuccess([this, weak = this->weak_from_this()](auto result) {
+        // channel still exists?
+        auto shared = weak.lock();
+        if (!shared) return false;
+
+        return this->parseViewerList(result.parseJson());
+    });
+
+    request.execute();
+}
+
+bool TwitchChannel::parseViewerList(const QJsonObject &jsonRoot)
+{
+    static QStringList categories = {"moderators", "staff", "admins", "global_mods", "viewers"};
+
+    // parse json
+    QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
+
+    for (const auto &category : categories) {
+        for (const auto jsonCategory : jsonCategories.value(category).toArray()) {
+            this->completionModel.addUser(jsonCategory.toString());
+        }
+    }
+
+    return true;
 }
 
 }  // namespace chatterino

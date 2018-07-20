@@ -1093,8 +1093,7 @@ void ChannelView::addContextMenuItems(const MessageLayoutElement *hoveredElement
     //            // insert into input
     //        });
 
-    menu->move(QCursor::pos());
-    menu->show();
+    menu->popup(QCursor::pos());
     menu->raise();
 
     return;

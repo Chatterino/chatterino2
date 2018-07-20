@@ -41,7 +41,7 @@ public:
     using pajlada::Settings::Setting<Type>::operator==;
     using pajlada::Settings::Setting<Type>::operator!=;
 
-    using pajlada::Settings::Setting<Type>::operator const Type;
+    using pajlada::Settings::Setting<Type>::operator Type;
 };
 
 using BoolSetting = ChatterinoSetting<bool>;

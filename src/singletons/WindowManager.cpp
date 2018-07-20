@@ -1,4 +1,4 @@
-#include "WindowManager.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -11,11 +11,10 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-
-#include <QDebug>
 
 #define SETTINGS_FILENAME "/window-layout.json"
 

@@ -215,4 +215,9 @@ void Channel::onConnected()
 {
 }
 
+std::weak_ptr<Channel> Channel::weak_from_this()
+{
+    return std::weak_ptr<Channel>(this->shared_from_this());
+}
+
 }  // namespace chatterino

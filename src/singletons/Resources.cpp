@@ -1,8 +1,12 @@
-#include "Resources.hpp"
-#include "common/UrlFetch.hpp"
+#include "singletons/Resources.hpp"
 
+#include "common/NetworkRequest.hpp"
+
+#include <QDebug>
 #include <QIcon>
+#include <QJsonArray>
 #include <QPixmap>
+#include <QThread>
 
 namespace chatterino {
 
