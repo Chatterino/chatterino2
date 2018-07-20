@@ -217,10 +217,9 @@ MessagePtr TwitchMessageBuilder::build()
                 // Actually just text
                 QString linkString = this->matchLink(string);
 
-                Link link;
+                Link link = Link();
 
                 if (linkString.isEmpty()) {
-                    link = Link();
                     if (string.startsWith('@')) {
                         this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
                                                    FontStyle::ChatMediumBold);
@@ -229,38 +228,19 @@ MessagePtr TwitchMessageBuilder::build()
                         this->emplace<TextElement>(string, TextElement::Text, textColor);
                     }
                 } else {
-                    const QString tempstring1 =
-                            "^"
-                            // Identifier for http and ftp
-                            "(?:(?:https?|ftps?)://)?"
-                            // user:pass authentication
-                            "(?:\\S+(?::\\S*)?@)?"
-                            "(?:"
-                            // IP address dotted notation octets
-                            // excludes loopback network 0.0.0.0
-                            // excludes reserved space >= 224.0.0.0
-                            // excludes network & broacast addresses
-                            // (first & last IP address of each class)
-                            "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])"
-                            "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}"
-                            "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))"
-                            "|"
-                            // host name
-                            "(?:(?:[_a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)"
-                            // domain name
-                            "(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]-*)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*"
-                            // TLD identifier
-                            "(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,}))"
-                            "\\.?"
-                            ")"
-                            // port number
-                            "(?::\\d{2,5})?";
-                    QRegularExpression getDomain(tempstring1, QRegularExpression::CaseInsensitiveOption);
-                    QString domain = getDomain.match(string).captured(0);
-                    QString lowercaseLinkString = string;
-                    lowercaseLinkString.replace(domain, domain.toLower());
+                    static QRegularExpression domainRegex(
+                        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
+                        QRegularExpression::CaseInsensitiveOption);
 
+                    auto match = domainRegex.match(string);
+                    QString lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
+                                                  match.captured(1).toLower() +
+                                                  string.mid(match.capturedEnd(1));
+                    qDebug() << string.mid(0, match.capturedStart(1));
+                    qDebug() << match.captured(1).toLower();
+                    qDebug() << string.mid(match.capturedEnd(1));
                     link = Link(Link::Url, linkString);
+
                     textColor = MessageColor(MessageColor::Link);
                     this->emplace<TextElement>(lowercaseLinkString, TextElement::LowercaseLink,
                                                textColor)
