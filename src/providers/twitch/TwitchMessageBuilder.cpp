@@ -229,13 +229,18 @@ MessagePtr TwitchMessageBuilder::build()
                     }
                 } else {
                     static QRegularExpression domainRegex(
-                        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
+                        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/:]+)(?:\/.*)?$)",
                         QRegularExpression::CaseInsensitiveOption);
 
+                    QString lowercaseLinkString;
                     auto match = domainRegex.match(string);
-                    QString lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
-                                                  match.captured(1).toLower() +
-                                                  string.mid(match.capturedEnd(1));
+                    if (match.isValid()) {
+                        lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
+                                              match.captured(1).toLower() +
+                                              string.mid(match.capturedEnd(1));
+                    } else {
+                        lowercaseLinkString = string;
+                    }
                     qDebug() << string.mid(0, match.capturedStart(1));
                     qDebug() << match.captured(1).toLower();
                     qDebug() << string.mid(match.capturedEnd(1));
