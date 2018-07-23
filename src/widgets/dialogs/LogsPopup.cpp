@@ -35,7 +35,7 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
     this->channel_ = channel;
     this->userName_ = userName;
     this->setWindowTitle(this->userName_ + "'s logs in #" + this->channel_->name);
-    this->getLogviewerLogs();
+    this->getRoomID();
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
@@ -44,6 +44,35 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 
     logsChannel->addMessagesAtStart(messages);
     this->channelView_->setChannel(logsChannel);
+}
+
+void LogsPopup::getRoomID()
+{
+    TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(this->channel_.get());
+    if (twitchChannel == nullptr) {
+        return;
+    }
+
+    QString channelName = twitchChannel->name;
+
+    QString url = QString("https://cbenni.com/api/channel/%1").arg(channelName);
+
+    NetworkRequest req(url);
+    req.setCaller(QThread::currentThread());
+
+    req.onError([this](int errorCode) {
+        this->getOverrustleLogs();
+        return true;
+    });
+
+    req.onSuccess([this, channelName](auto result) {
+        auto data = result.parseJson();
+        this->roomID_ = data.value("channel")["id"].toInt();
+        this->getLogviewerLogs();
+        return true;
+    });
+
+    req.execute();
 }
 
 void LogsPopup::getLogviewerLogs()
@@ -55,8 +84,8 @@ void LogsPopup::getLogviewerLogs()
 
     QString channelName = twitchChannel->name;
 
-    QString url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
-                      .arg(channelName, this->userName_);
+    auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
+                   .arg(channelName, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -69,7 +98,6 @@ void LogsPopup::getLogviewerLogs()
     req.onSuccess([this, channelName](auto result) {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
-        ChannelPtr logsChannel(new Channel("logs", Channel::Type::None));
 
         QJsonValue before = data.value("before");
 
@@ -80,11 +108,12 @@ void LogsPopup::getLogviewerLogs()
             // Hacky way to fix the timestamp
             message.insert(1, "historical=1;");
             message.insert(1, QString("tmi-sent-ts=%10000;").arg(messageObject["time"].toInt()));
+            message.insert(1, QString("room-id=%1;").arg(this->roomID_));
 
             MessageParseArgs args;
             auto ircMessage = Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
             auto privMsg = static_cast<Communi::IrcPrivateMessage *>(ircMessage);
-            TwitchMessageBuilder builder(logsChannel.get(), privMsg, args);
+            TwitchMessageBuilder builder(this->channel_.get(), privMsg, args);
             messages.push_back(builder.build());
         };
         this->setMessages(messages);
