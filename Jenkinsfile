@@ -12,5 +12,9 @@ pipeline {
                 }
             }
         }
+
+        stage('Run Tests') {
+            echo 'lol'
+        }
     }
 }
