@@ -5,10 +5,10 @@ pipeline {
         stage('Build') {
             parallel {
                 stage('GCC') {
-                    sh 'mkdir -p build && cd build && qmake .. && make'
+                    sh 'mkdir -p build-linux-gcc && cd build && qmake .. && make'
                 }
                 stage('Clang') {
-                    sh 'mkdir -p build && cd build && qmake -spec linux-clang .. && make'
+                    sh 'mkdir -p build-linux-clang && cd build && qmake -spec linux-clang .. && make'
                 }
             }
         }
