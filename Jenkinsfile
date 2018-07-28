@@ -3,20 +3,13 @@ pipeline {
 
     stages {
         stage('Build') {
-            steps {
-                echo 'Building..'
-                sh 'mkdir -p build && cd build && qmake .. && make'
-                echo 'lol'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
+            parallel {
+                stage('GCC') {
+                    sh 'mkdir -p build && cd build && qmake .. && make'
+                }
+                stage('Clang') {
+                    sh 'mkdir -p build && cd build && qmake -spec linux-clang .. && make'
+                }
             }
         }
     }
