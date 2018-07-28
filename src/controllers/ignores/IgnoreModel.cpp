@@ -29,8 +29,8 @@ void IgnoreModel::getRowFromItem(const IgnorePhrase &item, std::vector<QStandard
 {
     setStringItem(row[0], item.getPattern());
     setBoolItem(row[1], item.isRegex());
-    setBoolItem(row[2], item.caseInsensitive());
-    setBoolItem(row[3], item.isReplace());
+    setBoolItem(row[2], item.isCaseSensitive());
+    setBoolItem(row[3], item.isBlock());
     setStringItem(row[4], item.getReplace());
 }
 

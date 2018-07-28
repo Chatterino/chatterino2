@@ -17,26 +17,26 @@ class IgnorePhrase
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_, this->isReplace_, this->replace_,
-                        this->caseInsensitive_) == std::tie(other.pattern_, other.isRegex_,
-                                                            other.isReplace_, other.replace_,
-                                                            other.caseInsensitive_);
+        return std::tie(this->pattern_, this->isRegex_, this->isBlock_, this->replace_,
+                        this->isCaseSensitive_) == std::tie(other.pattern_, other.isRegex_,
+                                                            other.isBlock_, other.replace_,
+                                                            other.isCaseSensitive_);
     }
 
-    IgnorePhrase(const QString &pattern, bool isRegex, bool isReplace, const QString &replace,
-                 bool caseInsensitive)
+    IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock, const QString &replace,
+                 bool isCaseSensitive)
         : pattern_(pattern)
         , isRegex_(isRegex)
         , regex_(pattern)
-        , isReplace_(isReplace)
+        , isBlock_(isBlock)
         , replace_(replace)
-        , caseInsensitive_(caseInsensitive)
+        , isCaseSensitive_(isCaseSensitive)
     {
-        if (this->caseInsensitive_) {
+        if (this->isCaseSensitive_) {
+            regex_.setPatternOptions(QRegularExpression::UseUnicodePropertiesOption);
+        } else {
             regex_.setPatternOptions(QRegularExpression::CaseInsensitiveOption |
                                      QRegularExpression::UseUnicodePropertiesOption);
-        } else {
-            regex_.setPatternOptions(QRegularExpression::UseUnicodePropertiesOption);
         }
     }
 
@@ -44,9 +44,15 @@ public:
     {
         return this->pattern_;
     }
+
     bool isRegex() const
     {
         return this->isRegex_;
+    }
+
+    bool isRegexValid() const
+    {
+        return this->regex_.isValid();
     }
 
     bool isMatch(const QString &subject) const
@@ -61,9 +67,9 @@ public:
         return this->regex_;
     }
 
-    bool isReplace() const
+    bool isBlock() const
     {
-        return this->isReplace_;
+        return this->isBlock_;
     }
 
     const QString &getReplace() const
@@ -71,23 +77,23 @@ public:
         return this->replace_;
     }
 
-    bool caseInsensitive() const
+    bool isCaseSensitive() const
     {
-        return this->caseInsensitive_;
+        return this->isCaseSensitive_;
     }
 
     Qt::CaseSensitivity caseSensitivity() const
     {
-        return this->caseInsensitive_ ? Qt::CaseInsensitive : Qt::CaseSensitive;
+        return this->isCaseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
     }
 
 private:
     QString pattern_;
     bool isRegex_;
     QRegularExpression regex_;
-    bool isReplace_;
+    bool isBlock_;
     QString replace_;
-    bool caseInsensitive_;
+    bool isCaseSensitive_;
 };
 }  // namespace chatterino
 
@@ -103,9 +109,9 @@ struct Serialize<chatterino::IgnorePhrase> {
 
         AddMember(ret, "pattern", value.getPattern(), a);
         AddMember(ret, "regex", value.isRegex(), a);
-        AddMember(ret, "onlyWord", value.isReplace(), a);
-        AddMember(ret, "replace", value.getReplace(), a);
-        AddMember(ret, "caseInsens", value.caseInsensitive(), a);
+        AddMember(ret, "isBlock", value.isBlock(), a);
+        AddMember(ret, "replaceWith", value.getReplace(), a);
+        AddMember(ret, "caseSensitive", value.isCaseSensitive(), a);
 
         return ret;
     }
@@ -118,22 +124,22 @@ struct Deserialize<chatterino::IgnorePhrase> {
         if (!value.IsObject()) {
             return chatterino::IgnorePhrase(
                 QString(), false, false,
-                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), false);
+                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), true);
         }
 
         QString _pattern;
         bool _isRegex = false;
-        bool _isReplace = false;
+        bool _isBlock = false;
         QString _replace;
-        bool _caseInsens = false;
+        bool _caseSens = true;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "regex", _isRegex);
-        chatterino::rj::getSafe(value, "onlyWord", _isReplace);
-        chatterino::rj::getSafe(value, "replace", _replace);
-        chatterino::rj::getSafe(value, "caseInsens", _caseInsens);
+        chatterino::rj::getSafe(value, "isBlock", _isBlock);
+        chatterino::rj::getSafe(value, "replaceWith", _replace);
+        chatterino::rj::getSafe(value, "caseSensitive", _caseSens);
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex, _isReplace, _replace, _caseInsens);
+        return chatterino::IgnorePhrase(_pattern, _isRegex, _isBlock, _replace, _caseSens);
     }
 };
 

@@ -56,7 +56,7 @@ bool TwitchMessageBuilder::isIgnored() const
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
     for (const auto &phrase : app->ignores->phrases.getVector()) {
-        if (!phrase.isReplace() && phrase.isMatch(this->originalMessage_)) {
+        if (phrase.isBlock() && phrase.isMatch(this->originalMessage_)) {
             Log("Blocking message because it contains ignored phrase {}", phrase.getPattern());
             return true;
         }
@@ -152,7 +152,7 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // twitch emotes
-    std::vector<std::pair<long, EmoteData>> twitchEmotes;
+    std::vector<std::tuple<long, EmoteData, QString>> twitchEmotes;
 
     iterator = this->tags.find("emotes");
     if (iterator != this->tags.end()) {
@@ -161,32 +161,31 @@ MessagePtr TwitchMessageBuilder::build()
         for (QString emote : emoteString) {
             this->appendTwitchEmote(ircMessage, emote, twitchEmotes);
         }
-
-        std::sort(twitchEmotes.begin(), twitchEmotes.end(),
-                  [](const auto &a, const auto &b) { return a.first < b.first; });
     }
 
     const auto &phrases = app->ignores->phrases.getVector();
     auto removeEmotesInRange = [&twitchEmotes](int pos, int len) mutable {
-        twitchEmotes.erase(
-            std::remove_if(twitchEmotes.begin(), twitchEmotes.end(),
-                           [&pos, &len](const auto &item) {
-                               return ((item.first >= pos) && item.first < (pos + len));
-                           }),
-            twitchEmotes.end());
+        auto it = std::remove_if(
+            twitchEmotes.begin(), twitchEmotes.end(), [&pos, &len](const auto &item) {
+                return ((std::get<0>(item) >= pos) && std::get<0>(item) < (pos + len));
+            });
+
+        std::vector<std::tuple<long, EmoteData, QString>> v(it, twitchEmotes.end());
+        twitchEmotes.erase(it, twitchEmotes.end());
+        return v;
     };
 
     auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
         auto it = std::find_if(twitchEmotes.begin(), twitchEmotes.end(),
-                               [&pos](const auto &item) { return item.first >= pos; });
+                               [&pos](const auto &item) { return std::get<0>(item) >= pos; });
         while (it != twitchEmotes.end()) {
-            it->first += by;
+            std::get<0>(*it) += by;
             ++it;
         }
     };
 
     for (const auto &phrase : phrases) {
-        if (!phrase.isReplace()) {
+        if (phrase.isBlock()) {
             continue;
         }
         if (phrase.isRegex()) {
@@ -198,9 +197,23 @@ MessagePtr TwitchMessageBuilder::build()
             int from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from, &match)) != -1) {
                 int len = match.capturedLength();
-                removeEmotesInRange(from, len);
+                auto vret = removeEmotesInRange(from, len);
                 auto mid = this->originalMessage_.mid(from, len);
                 mid.replace(regex, phrase.getReplace());
+
+                // hemirt
+                // doesnt check for own emotes in the Replace part
+                // mb in IgnoredPhrase ??
+
+                for (auto &tup : vret) {
+                    int index = 0;
+                    const auto &emote = std::get<2>(tup);
+                    while ((index = mid.indexOf(emote, index)) != -1) {
+                        std::get<0>(tup) = from + index;
+                        index += emote.size();
+                        twitchEmotes.push_back(tup);
+                    }
+                }
                 this->originalMessage_.replace(from, len, mid);
                 int midsize = mid.size();
                 from += midsize;
@@ -215,8 +228,22 @@ MessagePtr TwitchMessageBuilder::build()
             while ((from = this->originalMessage_.indexOf(pattern, from,
                                                           phrase.caseSensitivity())) != -1) {
                 int len = pattern.size();
-                removeEmotesInRange(from, len);
-                const auto &replace = phrase.getReplace();
+                auto vret = removeEmotesInRange(from, len);
+                auto replace = phrase.getReplace();
+
+                // hemirt
+                // doesnt check for own emotes in the Replace part
+                // mb in IgnoredPhrase ??
+
+                for (auto &tup : vret) {
+                    int index = 0;
+                    const auto &emote = std::get<2>(tup);
+                    while ((index = replace.indexOf(emote, index)) != -1) {
+                        std::get<0>(tup) = from + index;
+                        index += emote.size();
+                        twitchEmotes.push_back(tup);
+                    }
+                }
                 this->originalMessage_.replace(from, len, replace);
                 int replacesize = replace.size();
                 from += replacesize;
@@ -225,6 +252,8 @@ MessagePtr TwitchMessageBuilder::build()
         }
     }
 
+    std::sort(twitchEmotes.begin(), twitchEmotes.end(),
+              [](const auto &a, const auto &b) { return std::get<0>(a) < std::get<0>(b); });
     auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
@@ -238,8 +267,8 @@ MessagePtr TwitchMessageBuilder::build()
             this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
 
         // twitch emote
-        if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
-            auto emoteImage = currentTwitchEmote->second;
+        if (currentTwitchEmote != twitchEmotes.end() && std::get<0>(*currentTwitchEmote) == i) {
+            auto emoteImage = std::get<1>(*currentTwitchEmote);
             this->emplace<EmoteElement>(emoteImage, MessageElement::TwitchEmote);
 
             i += split.length() + 1;
@@ -586,9 +615,9 @@ void TwitchMessageBuilder::parseHighlights()
     }
 }
 
-void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessage,
-                                             const QString &emote,
-                                             std::vector<std::pair<long int, EmoteData>> &vec)
+void TwitchMessageBuilder::appendTwitchEmote(
+    const Communi::IrcMessage *ircMessage, const QString &emote,
+    std::vector<std::tuple<long int, EmoteData, QString>> &vec)
 {
     auto app = getApp();
     if (!emote.contains(':')) {
@@ -621,8 +650,8 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
 
         QString name = this->originalMessage_.mid(start, end - start + 1);
 
-        vec.push_back(
-            std::pair<long int, EmoteData>(start, app->emotes->twitch.getEmoteById(id, name)));
+        vec.push_back(std::tuple<long int, EmoteData, QString>(
+            start, app->emotes->twitch.getEmoteById(id, name), name));
     }
 }
 

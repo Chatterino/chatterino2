@@ -51,7 +51,7 @@ private:
     void parseHighlights();
 
     void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, EmoteData>> &vec);
+                           std::vector<std::tuple<long, EmoteData, QString> > &vec);
     bool tryAppendEmote(QString &emoteString);
 
     void appendTwitchBadges();
