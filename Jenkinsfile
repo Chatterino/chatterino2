@@ -16,11 +16,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Run Tests') {
-            steps {
-                echo 'lol'
-            }
-        }
     }
 }
