@@ -217,7 +217,7 @@ MessagePtr TwitchMessageBuilder::build()
                 // Actually just text
                 QString linkString = this->matchLink(string);
 
-                Link link = Link();
+                Link link;
 
                 if (linkString.isEmpty()) {
                     if (string.startsWith('@')) {
@@ -241,9 +241,6 @@ MessagePtr TwitchMessageBuilder::build()
                     } else {
                         lowercaseLinkString = string;
                     }
-                    qDebug() << string.mid(0, match.capturedStart(1));
-                    qDebug() << match.captured(1).toLower();
-                    qDebug() << string.mid(match.capturedEnd(1));
                     link = Link(Link::Url, linkString);
 
                     textColor = MessageColor(MessageColor::Link);
