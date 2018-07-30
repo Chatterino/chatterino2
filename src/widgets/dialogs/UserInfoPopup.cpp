@@ -230,31 +230,29 @@ void UserInfoPopup::installEvents()
         });
 
     // ignore highlights
-    QObject::connect(
-        this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool gotClicked) mutable {
-            this->ui_.ignoreHighlights->setEnabled(false);
+    QObject::connect(this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool checked) mutable {
+        this->ui_.ignoreHighlights->setEnabled(false);
 
-            if (gotClicked) {
-                getApp()->highlights->blacklistedUsers.insertItem(
-                    HighlightBlacklistUser{this->userName_, false});
-                this->ui_.ignoreHighlights->setEnabled(true);
-            } else {
-                const auto &ignoreHighlightsUsersVector =
-                    getApp()->highlights->blacklistedUsers.getVector();
+        if (checked) {
+            getApp()->highlights->blacklistedUsers.insertItem(
+                HighlightBlacklistUser{this->userName_, false});
+            this->ui_.ignoreHighlights->setEnabled(true);
+        } else {
+            const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
 
-                for (int i = 0; i < ignoreHighlightsUsersVector.size(); i++) {
-                    if (this->userName_ == ignoreHighlightsUsersVector[i].getPattern()) {
-                        getApp()->highlights->blacklistedUsers.removeItem(i);
-                        i--;
-                    }
-                }
-                if (getApp()->highlights->blacklistContains(this->userName_)) {
-                    this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
-                } else {
-                    this->ui_.ignoreHighlights->setEnabled(true);
+            for (int i = 0; i < vector.size(); i++) {
+                if (this->userName_ == vector[i].getPattern()) {
+                    getApp()->highlights->blacklistedUsers.removeItem(i);
+                    i--;
                 }
             }
-        });
+            if (getApp()->highlights->blacklistContains(this->userName_)) {
+                this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
+            } else {
+                this->ui_.ignoreHighlights->setEnabled(true);
+            }
+        }
+    });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -320,9 +318,9 @@ void UserInfoPopup::updateUserData()
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
-        auto ignoreHighlightsUsersVector = getApp()->highlights->blacklistedUsers.getVector();
-        for (int i = 0; i < ignoreHighlightsUsersVector.size(); i++) {
-            if (this->userName_ == ignoreHighlightsUsersVector[i].getPattern()) {
+        const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
+        for (int i = 0; i < vector.size(); i++) {
+            if (this->userName_ == vector[i].getPattern()) {
                 isIgnoringHighlights = true;
                 break;
             }
