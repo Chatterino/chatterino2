@@ -53,6 +53,7 @@ void LookPage::initializeUi()
     this->addInterfaceTab(tabs.appendTab(new QVBoxLayout, "Interface"));
     this->addMessageTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     this->addEmoteTab(tabs.appendTab(new QVBoxLayout, "Emotes"));
+    this->addSplitHeaderTab(tabs.appendTab(new QVBoxLayout, "Split header"));
 
     layout->addStretch(1);
 
@@ -104,7 +105,6 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
     layout.append(this->createCheckBox(INPUT_EMPTY, getSettings()->showEmptyInput));
     layout.append(
         this->createCheckBox("Show message length while typing", getSettings()->showMessageLength));
-
     layout->addStretch(1);
 }
 
@@ -229,6 +229,16 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
         hbox.emplace<QLabel>("Emoji set:");
         hbox.append(combo);
     }
+
+    layout->addStretch(1);
+}
+
+void LookPage::addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout)
+{
+    layout.append(this->createCheckBox("Show viewer count", getSettings()->showViewerCount));
+    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
+    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
+    layout.append(this->createCheckBox("Show uptime", getSettings()->showUptime));
 
     layout->addStretch(1);
 }

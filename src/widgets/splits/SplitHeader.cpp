@@ -101,6 +101,20 @@ SplitHeader::SplitHeader(Split *_split)
     this->addModeActions(this->modeMenu_);
 
     this->setMouseTracking(true);
+
+    // Update title on title-settings-change
+    getSettings()->showViewerCount.connect(
+        [this](const auto &, const auto &) { this->updateChannelText(); },
+        this->managedConnections_);
+    getSettings()->showTitle.connect(
+        [this](const auto &, const auto &) { this->updateChannelText(); },
+        this->managedConnections_);
+    getSettings()->showGame.connect(
+        [this](const auto &, const auto &) { this->updateChannelText(); },
+        this->managedConnections_);
+    getSettings()->showUptime.connect(
+        [this](const auto &, const auto &) { this->updateChannelText(); },
+        this->managedConnections_);
 }
 
 SplitHeader::~SplitHeader()
@@ -330,6 +344,18 @@ void SplitHeader::updateChannelText()
                 title += " (" + streamStatus->streamType + ")";
             } else {
                 title += " (live)";
+            }
+            if (getSettings()->showViewerCount) {
+                title += " - " + QString::number(streamStatus->viewerCount) + " viewers";
+            }
+            if (getSettings()->showTitle) {
+                title += " - " + streamStatus->title;
+            }
+            if (getSettings()->showGame) {
+                title += " - " + streamStatus->game;
+            }
+            if (getSettings()->showUptime) {
+                title += "  - uptime: " + streamStatus->uptime;
             }
         } else {
             this->tooltip_ = QString();
