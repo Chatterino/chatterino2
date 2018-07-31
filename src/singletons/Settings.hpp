@@ -30,7 +30,6 @@ public:
     IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern", Qt::VerPattern};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
-
     BoolSetting separateMessages = {"/appearance/messages/separateMessages", false};
     //    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
     IntSetting collpseMessagesMinLines = {"/appearance/messages/collapseMessagesMinLines", 0};
