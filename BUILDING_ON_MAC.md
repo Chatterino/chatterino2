@@ -3,7 +3,9 @@
 1. Install Xcode and Xcode Command Line Utilites
 2. Start Xcode, settings -> Locations, activate your Command Line Tools
 3. Install brew https://brew.sh/
-4. `brew install boost openssl rapidjson qt`
+4. `brew install boost openssl rapidjson`
+5. `brew install qt`
+6. Step 5 should output some directions to add qt to your path, you will need to do this for qmake
 5. Go into project directory
 6. Create build folder `mkdir build && cd build`
 7. `qmake .. && make`
