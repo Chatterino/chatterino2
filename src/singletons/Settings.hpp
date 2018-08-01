@@ -36,6 +36,7 @@ public:
     BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
                                               false};
     IntSetting uiScale = {"/appearance/uiScale", 0};
+    IntSetting boldScale = {"/appearance/boldScale", 57};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
