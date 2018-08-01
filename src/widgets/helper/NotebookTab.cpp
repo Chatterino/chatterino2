@@ -50,15 +50,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
-    //    QAction *enableHighlightsOnNewMessageAction =
+    //    QAction *enableSelfHighlightsOnNewMessageAction =
     //        new QAction("Enable highlights on new message", &this->menu);
-    //    enableHighlightsOnNewMessageAction->setCheckable(true);
+    //    enableSelfHighlightsOnNewMessageAction->setCheckable(true);
 
     this->menu_.addAction("Close", [=]() { this->notebook_->removePage(this->page); });
 
-    //    this->menu.addAction(enableHighlightsOnNewMessageAction);
+    //    this->menu.addAction(enableSelfHighlightsOnNewMessageAction);
 
-    //    QObject::connect(enableHighlightsOnNewMessageAction, &QAction::toggled, [this](bool
+    //    QObject::connect(enableSelfHighlightsOnNewMessageAction, &QAction::toggled, [this](bool
     //    newValue) {
     //        Log("New value is {}", newValue);  //
     //    });
