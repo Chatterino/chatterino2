@@ -7,6 +7,7 @@
 #include <boost/noncopyable.hpp>
 #include <climits>
 
+#include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
@@ -15,7 +16,6 @@ class QPainter;
 
 namespace chatterino {
 class MessageElement;
-class Image;
 
 class MessageLayoutElement : boost::noncopyable
 {
@@ -52,7 +52,7 @@ private:
 class ImageLayoutElement : public MessageLayoutElement
 {
 public:
-    ImageLayoutElement(MessageElement &creator_, Image *image, const QSize &size);
+    ImageLayoutElement(MessageElement &creator, ImagePtr image, const QSize &size);
 
 protected:
     void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
@@ -63,7 +63,7 @@ protected:
     int getXFromIndex(int index) override;
 
 private:
-    Image *image;
+    ImagePtr image_;
 };
 
 // TEXT

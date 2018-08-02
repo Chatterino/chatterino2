@@ -18,7 +18,7 @@ class Logging : public Singleton
 public:
     Logging() = default;
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     void addMessage(const QString &channelName, MessagePtr message);
 

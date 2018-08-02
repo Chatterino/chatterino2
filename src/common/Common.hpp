@@ -1,9 +1,13 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Outcome.hpp"
+#include "common/ProviderId.hpp"
 #include "debug/Log.hpp"
 
 #include <QString>
 #include <QWidget>
+#include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
 
 #include <string>
@@ -27,14 +31,18 @@ const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
 static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
 
-#define return_if(condition) \
-    if ((condition)) {       \
-        return;              \
-    }
+template <typename T>
+std::weak_ptr<T> weakOf(T *element)
+{
+    return element->shared_from_this();
+}
 
-#define return_unless(condition) \
-    if (!(condition)) {          \
-        return;                  \
-    }
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+
+template <class... Ts>
+overloaded(Ts...)->overloaded<Ts...>;
 
 }  // namespace chatterino

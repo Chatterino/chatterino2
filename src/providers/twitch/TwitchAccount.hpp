@@ -1,6 +1,8 @@
 #pragma once
 
+#include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
+#include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 
 #include <rapidjson/document.h>
@@ -33,6 +35,28 @@ enum FollowResult {
 class TwitchAccount : public Account
 {
 public:
+    struct TwitchEmote {
+        EmoteId id;
+        EmoteName name;
+    };
+
+    struct EmoteSet {
+        QString key;
+        QString channelName;
+        QString text;
+        std::vector<TwitchEmote> emotes;
+    };
+
+    std::map<QString, EmoteSet> staticEmoteSets;
+
+    struct TwitchAccountEmoteData {
+        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
+
+        std::vector<EmoteName> allEmoteNames;
+
+        EmoteMap emotes;
+    };
+
     TwitchAccount(const QString &username, const QString &oauthToken_, const QString &oauthClient_,
                   const QString &_userID);
 
@@ -70,11 +94,15 @@ public:
 
     std::set<TwitchUser> getIgnores() const;
 
-    void loadEmotes(std::function<void(const rapidjson::Document &)> cb);
+    void loadEmotes();
+    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     QColor color;
 
 private:
+    void parseEmotes(const rapidjson::Document &document);
+    void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
+
     QString oauthClient_;
     QString oauthToken_;
     QString userName_;
@@ -83,6 +111,9 @@ private:
 
     mutable std::mutex ignoresMutex_;
     std::set<TwitchUser> ignores_;
+
+    //    std::map<UserId, TwitchAccountEmoteData> emotes;
+    UniqueAccess<TwitchAccountEmoteData> emotes_;
 };
 
 }  // namespace chatterino

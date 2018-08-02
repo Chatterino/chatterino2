@@ -29,22 +29,18 @@ TwitchServer::TwitchServer()
 
     this->pubsub = new PubSub;
 
-    getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) { this->connect(); },
-                                                         this->signalHolder_, false);
+    // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) { this->connect(); },
+    //                                                     this->signalHolder_, false);
 }
 
-void TwitchServer::initialize(Application &app)
+void TwitchServer::initialize(Settings &settings, Paths &paths)
 {
-    this->app = &app;
-
-    app.accounts->twitch.currentUserChanged.connect(
+    getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
-    assert(this->app);
-
     this->singleConnection_ = isRead == isWrite;
 
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
@@ -236,7 +232,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         lastMessage.push(now);
     }
 
-    this->sendMessage(channel->name, message);
+    this->sendMessage(channel->getName(), message);
     sent = true;
 }
 

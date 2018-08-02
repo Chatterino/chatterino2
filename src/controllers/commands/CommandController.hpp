@@ -10,11 +10,14 @@
 #include "controllers/commands/Command.hpp"
 
 namespace chatterino {
+
+class Settings;
+class Paths;
 class Channel;
 
 class CommandModel;
 
-class CommandController : public Singleton
+class CommandController final : public Singleton
 {
 public:
     CommandController();
@@ -22,7 +25,7 @@ public:
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
     QStringList getDefaultTwitchCommandList();
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
 
     CommandModel *createModel(QObject *parent);
@@ -30,7 +33,7 @@ public:
     UnsortedSignalVector<Command> items;
 
 private:
-    void load();
+    void load(Paths &paths);
 
     QMap<QString, Command> commandsMap_;
 

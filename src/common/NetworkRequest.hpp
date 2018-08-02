@@ -33,7 +33,7 @@ public:
 
     explicit NetworkRequest(const std::string &url,
                             NetworkRequestType requestType = NetworkRequestType::Get);
-    NetworkRequest(QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+    explicit NetworkRequest(QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
 
     ~NetworkRequest();
 
@@ -58,7 +58,7 @@ private:
     // Returns true if the file was successfully loaded from cache
     // Returns false if the cache file either didn't exist, or it contained "invalid" data
     // "invalid" is specified by the onSuccess callback
-    bool tryLoadCachedFile();
+    Outcome tryLoadCachedFile();
 
     void doRequest();
 

@@ -14,25 +14,13 @@ Paths *Paths::instance = nullptr;
 
 Paths::Paths()
 {
+    this->instance = this;
+
     this->initAppFilePathHash();
 
     this->initCheckPortable();
     this->initAppDataDirectory();
     this->initSubDirectories();
-}
-
-void Paths::initInstance()
-{
-    assert(!instance);
-
-    instance = new Paths();
-}
-
-Paths *Paths::getInstance()
-{
-    assert(instance);
-
-    return instance;
 }
 
 bool Paths::createFolder(const QString &folderPath)
@@ -116,7 +104,7 @@ void Paths::initSubDirectories()
 
 Paths *getPaths()
 {
-    return Paths::getInstance();
+    return Paths::instance;
 }
 
 }  // namespace chatterino

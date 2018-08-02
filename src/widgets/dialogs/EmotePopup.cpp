@@ -46,7 +46,7 @@ EmotePopup::EmotePopup()
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
 {
-    this->setWindowTitle("Emotes from " + _channel->name);
+    this->setWindowTitle("Emotes from " + _channel->getName());
 
     TwitchChannel *channel = dynamic_cast<TwitchChannel *>(_channel.get());
 
@@ -70,21 +70,19 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::Centered;
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
-        map.each([&](const QString &key, const EmoteData &value) {
-            builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
-                                ->setLink(Link(Link::InsertText, key)));
-        });
+        for (auto emote : map) {
+            builder2.append((new EmoteElement(emote.second, MessageElement::Flags::AlwaysShow))
+                                ->setLink(Link(Link::InsertText, emote.first.string)));
+        }
 
         emoteChannel->addMessage(builder2.getMessage());
     };
 
     auto app = getApp();
 
-    QString userID = app->accounts->twitch.getCurrent()->getUserId();
-
     // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
     // fix this pile of garbage
-    for (const auto &set : app->emotes->twitch.emotes[userID].emoteSets) {
+    for (const auto &set : app->accounts->twitch.getCurrent()->accessEmotes()->emoteSets) {
         // TITLE
         MessageBuilder builder1;
 
@@ -110,20 +108,22 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
         for (const auto &emote : set->emotes) {
-            [&](const QString &key, const EmoteData &value) {
-                builder2.append((new EmoteElement(value, MessageElement::Flags::AlwaysShow))
-                                    ->setLink(Link(Link::InsertText, key)));
-            }(emote.code, app->emotes->twitch.getEmoteById(emote.id, emote.code));
+            builder2.append(
+                (new EmoteElement(app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
+                                  MessageElement::Flags::AlwaysShow))
+                    ->setLink(Link(Link::InsertText, emote.name.string)));
         }
 
         emoteChannel->addMessage(builder2.getMessage());
     }
 
-    addEmotes(app->emotes->bttv.globalEmotes, "BetterTTV Global Emotes", "BetterTTV Global Emote");
-    addEmotes(channel->getBttvEmotes(), "BetterTTV Channel Emotes", "BetterTTV Channel Emote");
-    addEmotes(app->emotes->ffz.globalEmotes, "FrankerFaceZ Global Emotes",
-              "FrankerFaceZ Global Emote");
-    addEmotes(channel->getFfzEmotes(), "FrankerFaceZ Channel Emotes", "FrankerFaceZ Channel Emote");
+    addEmotes(*app->emotes->bttv.accessGlobalEmotes(), "BetterTTV Global Emotes",
+              "BetterTTV Global Emote");
+    addEmotes(*channel->accessBttvEmotes(), "BetterTTV Channel Emotes", "BetterTTV Channel Emote");
+    //    addEmotes(*app->emotes->ffz.accessGlobalEmotes(), "FrankerFaceZ Global Emotes",
+    //              "FrankerFaceZ Global Emote");
+    addEmotes(*channel->accessFfzEmotes(), "FrankerFaceZ Channel Emotes",
+              "FrankerFaceZ Channel Emote");
 
     this->viewEmotes_->setChannel(emoteChannel);
 }
@@ -146,9 +146,9 @@ void EmotePopup::loadEmojis()
     builder.getMessage()->flags |= Message::Centered;
     builder.getMessage()->flags |= Message::DisableCompactEmotes;
 
-    emojis.each([&builder](const QString &key, const auto &value) {
+    emojis.each([&builder](const auto &key, const auto &value) {
         builder.append(
-            (new EmoteElement(value->emoteData, MessageElement::Flags::AlwaysShow))
+            (new EmoteElement(value->emote, MessageElement::Flags::AlwaysShow))
                 ->setLink(Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":")));
     });
     emojiChannel->addMessage(builder.getMessage());

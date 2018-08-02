@@ -33,7 +33,7 @@ AccountController::AccountController()
     });
 }
 
-void AccountController::initialize(Application &app)
+void AccountController::initialize(Settings &settings, Paths &paths)
 {
     this->twitch.load();
 }

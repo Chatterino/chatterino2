@@ -16,6 +16,8 @@
 #include <QCheckBox>
 #include <QDesktopServices>
 #include <QLabel>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
@@ -255,7 +257,7 @@ void UserInfoPopup::updateUserData()
         auto request = NetworkRequest::twitchRequest(url);
         request.setCaller(this);
 
-        request.onSuccess([this](auto result) {
+        request.onSuccess([this](auto result) -> Outcome {
             auto obj = result.parseJson();
             this->ui_.followerCountLabel->setText(TEXT_FOLLOWERS +
                                                   QString::number(obj.value("followers").toInt()));
@@ -266,7 +268,7 @@ void UserInfoPopup::updateUserData()
 
             this->loadAvatar(QUrl(obj.value("logo").toString()));
 
-            return true;
+            return Success;
         });
 
         request.execute();

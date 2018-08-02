@@ -54,12 +54,9 @@ void AbstractIrcServer::connect()
         std::lock_guard<std::mutex> lock2(this->channelMutex);
 
         for (std::weak_ptr<Channel> &weak : this->channels.values()) {
-            std::shared_ptr<Channel> chan = weak.lock();
-            if (!chan) {
-                continue;
+            if (auto channel = std::shared_ptr<Channel>(weak.lock())) {
+                this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
-
-            this->readConnection_->sendRaw("JOIN #" + chan->name);
         }
 
         this->writeConnection_->open();

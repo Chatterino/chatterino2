@@ -16,6 +16,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QMediaPlayer>
+#include <boost/variant.hpp>
 
 namespace chatterino {
 
@@ -83,7 +84,7 @@ MessagePtr TwitchMessageBuilder::build()
     // PARSING
     this->parseUsername();
 
-    if (this->userName == this->channel->name) {
+    if (this->userName == this->channel->getName()) {
         this->senderIsBroadcaster = true;
     }
 
@@ -143,14 +144,15 @@ MessagePtr TwitchMessageBuilder::build()
     // highlights
     this->parseHighlights(isPastMsg);
 
-    QString bits;
+    //    QString bits;
     auto iterator = this->tags.find("bits");
     if (iterator != this->tags.end()) {
-        bits = iterator.value().toString();
+        this->hasBits_ = true;
+        //        bits = iterator.value().toString();
     }
 
     // twitch emotes
-    std::vector<std::pair<long, EmoteData>> twitchEmotes;
+    std::vector<std::pair<int, EmotePtr>> twitchEmotes;
 
     iterator = this->tags.find("emotes");
     if (iterator != this->tags.end()) {
@@ -164,113 +166,117 @@ MessagePtr TwitchMessageBuilder::build()
                   [](const auto &a, const auto &b) { return a.first < b.first; });
     }
 
-    auto currentTwitchEmote = twitchEmotes.begin();
-
     // words
-
     QStringList splits = this->originalMessage_.split(' ');
 
-    long int i = 0;
+    this->addWords(splits, twitchEmotes);
 
-    for (QString split : splits) {
-        MessageColor textColor =
-            this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
+    this->message_->searchText = this->userName + ": " + this->originalMessage_;
 
-        // twitch emote
+    return this->getMessage();
+}
+
+void TwitchMessageBuilder::addWords(const QStringList &words,
+                                    const std::vector<std::pair<int, EmotePtr>> &twitchEmotes)
+{
+    auto i = int();
+    auto currentTwitchEmote = twitchEmotes.begin();
+
+    for (const auto &word : words) {
+        // check if it's a twitch emote twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && currentTwitchEmote->first == i) {
             auto emoteImage = currentTwitchEmote->second;
             this->emplace<EmoteElement>(emoteImage, MessageElement::TwitchEmote);
 
-            i += split.length() + 1;
-            currentTwitchEmote = std::next(currentTwitchEmote);
+            i += word.length() + 1;
+            currentTwitchEmote++;
 
             continue;
         }
 
         // split words
-        std::vector<std::tuple<EmoteData, QString>> parsed;
-
-        // Parse emojis and take all non-emojis and put them in parsed as full text-words
-        app->emotes->emojis.parse(parsed, split);
-
-        for (const auto &tuple : parsed) {
-            const EmoteData &emoteData = std::get<0>(tuple);
-
-            if (!emoteData.isValid()) {  // is text
-                QString string = std::get<1>(tuple);
-
-                if (!bits.isEmpty() && this->tryParseCheermote(string)) {
-                    // This string was parsed as a cheermote
-                    continue;
-                }
-
-                // TODO: Implement ignored emotes
-                // Format of ignored emotes:
-                // Emote name: "forsenPuke" - if string in ignoredEmotes
-                // Will match emote regardless of source (i.e. bttv, ffz)
-                // Emote source + name: "bttv:nyanPls"
-                if (this->tryAppendEmote(string)) {
-                    // Successfully appended an emote
-                    continue;
-                }
-
-                // Actually just text
-                QString linkString = this->matchLink(string);
-
-                Link link;
-
-                if (linkString.isEmpty()) {
-                    link = Link();
-                } else {
-                    if (app->settings->lowercaseLink) {
-                        QRegularExpression httpRegex("\\bhttps?://",
-                                                     QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression ftpRegex("\\bftps?://",
-                                                    QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression getDomain("\\/\\/([^\\/]*)");
-                        QString tempString = string;
-
-                        if (!string.contains(httpRegex)) {
-                            if (!string.contains(ftpRegex)) {
-                                tempString.insert(0, "http://");
-                            }
-                        }
-                        QString domain = getDomain.match(tempString).captured(1);
-                        string.replace(domain, domain.toLower());
-                    }
-                    link = Link(Link::Url, linkString);
-                    textColor = MessageColor(MessageColor::Link);
-                }
-                if (string.startsWith('@')) {
-                    this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
-                                               FontStyle::ChatMediumBold)  //
-                        ->setLink(link);
-                    this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor)  //
-                        ->setLink(link);
-                } else {
-                    this->emplace<TextElement>(string, TextElement::Text, textColor)  //
-                        ->setLink(link);
-                }
-
-            } else {  // is emoji
-                this->emplace<EmoteElement>(emoteData, EmoteElement::EmojiAll);
-            }
+        for (auto &variant : getApp()->emotes->emojis.parse(word)) {
+            //            if (std::holds_alternative<QString>(variant)) {
+            //                this->addTextOrEmoji(std::get<1>(variant));
+            //            } else {
+            //                //                this->addTextOrEmoji(std::get<EmotePtr>(variant));
+            //            }
+            boost::apply_visitor(/*overloaded{[&](EmotePtr arg) { this->addTextOrEmoji(arg); },
+                                    [&](const QString &arg) { this->addTextOrEmoji(arg); }}*/
+                                 [&](auto &&arg) { this->addTextOrEmoji(arg); }, variant);
         }
 
-        for (int j = 0; j < split.size(); j++) {
+        for (int j = 0; j < word.size(); j++) {
             i++;
 
-            if (split.at(j).isHighSurrogate()) {
+            if (word.at(j).isHighSurrogate()) {
                 j++;
             }
         }
 
         i++;
     }
+}
 
-    this->message_->searchText = this->userName + ": " + this->originalMessage_;
+void TwitchMessageBuilder::addTextOrEmoji(EmotePtr emote)
+{
+    this->emplace<EmoteElement>(emote, EmoteElement::EmojiAll);
+}
 
-    return this->getMessage();
+void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
+{
+    auto string = QString(string_);
+
+    if (this->hasBits_ && this->tryParseCheermote(string)) {
+        // This string was parsed as a cheermote
+        return;
+    }
+
+    // TODO: Implement ignored emotes
+    // Format of ignored emotes:
+    // Emote name: "forsenPuke" - if string in ignoredEmotes
+    // Will match emote regardless of source (i.e. bttv, ffz)
+    // Emote source + name: "bttv:nyanPls"
+    if (this->tryAppendEmote({string})) {
+        // Successfully appended an emote
+        return;
+    }
+
+    // Actually just text
+    auto linkString = this->matchLink(string);
+    auto link = Link();
+    auto textColor =
+        this->action_ ? MessageColor(this->usernameColor_) : MessageColor(MessageColor::Text);
+
+    if (!linkString.isEmpty()) {
+        if (getApp()->settings->lowercaseLink) {
+            QRegularExpression httpRegex("\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
+            QRegularExpression ftpRegex("\\bftps?://", QRegularExpression::CaseInsensitiveOption);
+            QRegularExpression getDomain("\\/\\/([^\\/]*)");
+            QString tempString = string;
+
+            if (!string.contains(httpRegex)) {
+                if (!string.contains(ftpRegex)) {
+                    tempString.insert(0, "http://");
+                }
+            }
+            QString domain = getDomain.match(tempString).captured(1);
+            string.replace(domain, domain.toLower());
+        }
+        link = Link(Link::Url, linkString);
+        textColor = MessageColor(MessageColor::Link);
+    }
+    if (string.startsWith('@')) {
+        this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
+                                   FontStyle::ChatMediumBold)  //
+            ->setLink(link);
+        this->emplace<TextElement>(string, TextElement::NonBoldUsername,
+                                   textColor)  //
+            ->setLink(link);
+    } else {
+        this->emplace<TextElement>(string, TextElement::Text, textColor)  //
+            ->setLink(link);
+    }
 }
 
 void TwitchMessageBuilder::parseMessageID()
@@ -301,8 +307,8 @@ void TwitchMessageBuilder::parseRoomID()
 
 void TwitchMessageBuilder::appendChannelName()
 {
-    QString channelName("#" + this->channel->name);
-    Link link(Link::Url, this->channel->name + "\n" + this->messageID);
+    QString channelName("#" + this->channel->getName());
+    Link link(Link::Url, this->channel->getName() + "\n" + this->messageID);
 
     this->emplace<TextElement>(channelName, MessageElement::ChannelName, MessageColor::System)  //
         ->setLink(link);
@@ -531,71 +537,64 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
 void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessage,
                                              const QString &emote,
-                                             std::vector<std::pair<long int, EmoteData>> &vec)
+                                             std::vector<std::pair<int, EmotePtr>> &vec)
 {
     auto app = getApp();
     if (!emote.contains(':')) {
         return;
     }
 
-    QStringList parameters = emote.split(':');
+    auto parameters = emote.split(':');
 
     if (parameters.length() < 2) {
         return;
     }
 
-    const auto &id = parameters.at(0);
+    auto id = EmoteId{parameters.at(0)};
 
-    QStringList occurences = parameters.at(1).split(',');
+    auto occurences = parameters.at(1).split(',');
 
     for (QString occurence : occurences) {
-        QStringList coords = occurence.split('-');
+        auto coords = occurence.split('-');
 
         if (coords.length() < 2) {
             return;
         }
 
-        int start = coords.at(0).toInt();
-        int end = coords.at(1).toInt();
+        auto start = coords.at(0).toInt();
+        auto end = coords.at(1).toInt();
 
         if (start >= end || start < 0 || end > this->originalMessage_.length()) {
             return;
         }
 
-        QString name = this->originalMessage_.mid(start, end - start + 1);
+        auto name = EmoteName{this->originalMessage_.mid(start, end - start + 1)};
 
-        vec.push_back(
-            std::pair<long int, EmoteData>(start, app->emotes->twitch.getEmoteById(id, name)));
+        vec.push_back(std::make_pair(start, app->emotes->twitch.getOrCreateEmote(id, name)));
     }
 }
 
-bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
+Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
-    auto app = getApp();
-    EmoteData emoteData;
+    auto flags = MessageElement::Flags::None;
+    auto emote = boost::optional<EmotePtr>{};
 
-    auto appendEmote = [&](MessageElement::Flags flags) {
-        this->emplace<EmoteElement>(emoteData, flags);
-        return true;
-    };
-
-    if (app->emotes->bttv.globalEmotes.tryGet(emoteString, emoteData)) {
-        // BTTV Global Emote
-        return appendEmote(MessageElement::BttvEmote);
-    } else if (this->twitchChannel != nullptr &&
-               this->twitchChannel->getBttvEmotes().tryGet(emoteString, emoteData)) {
-        // BTTV Channel Emote
-        return appendEmote(MessageElement::BttvEmote);
-    } else if (app->emotes->ffz.globalEmotes.tryGet(emoteString, emoteData)) {
-        // FFZ Global Emote
-        return appendEmote(MessageElement::FfzEmote);
-    } else if (this->twitchChannel != nullptr &&
-               this->twitchChannel->getFfzEmotes().tryGet(emoteString, emoteData)) {
-        // FFZ Channel Emote
-        return appendEmote(MessageElement::FfzEmote);
+    if ((emote = getApp()->emotes->bttv.getGlobalEmote(name))) {
+        flags = MessageElement::BttvEmote;
+    } else if (twitchChannel && (emote = this->twitchChannel->getBttvEmote(name))) {
+        flags = MessageElement::BttvEmote;
+    } else if ((emote = getApp()->emotes->ffz.getGlobalEmote(name))) {
+        flags = MessageElement::FfzEmote;
+    } else if (twitchChannel && (emote = this->twitchChannel->getFfzEmote(name))) {
+        flags = MessageElement::FfzEmote;
     }
 
-    return false;
+    if (emote) {
+        this->emplace<EmoteElement>(emote.get(), flags);
+        return Success;
+    }
+
+    return Failure;
 }
 
 // fourtf: this is ugly
@@ -603,8 +602,6 @@ bool TwitchMessageBuilder::tryAppendEmote(QString &emoteString)
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     auto app = getApp();
-
-    const auto &channelResources = app->resources->channels[this->roomID_];
 
     auto iterator = this->tags.find("badges");
 
@@ -621,68 +618,75 @@ void TwitchMessageBuilder::appendTwitchBadges()
         }
 
         if (badge.startsWith("bits/")) {
-            if (!app->resources->dynamicBadgesLoaded) {
-                // Do nothing
-                continue;
-            }
+            // if (!app->resources->dynamicBadgesLoaded) {
+            //     // Do nothing
+            //     continue;
+            // }
 
-            QString cheerAmountQS = badge.mid(5);
-            std::string versionKey = cheerAmountQS.toStdString();
-            QString tooltip = QString("Twitch cheer ") + cheerAmountQS;
+            QString cheerAmount = badge.mid(5);
+            QString tooltip = QString("Twitch cheer ") + cheerAmount;
 
             // Try to fetch channel-specific bit badge
             try {
-                const auto &badge = channelResources.badgeSets.at("bits").versions.at(versionKey);
-                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
-                    ->setTooltip(tooltip);
-                continue;
+                if (twitchChannel)
+                    if (const auto &badge =
+                            this->twitchChannel->getTwitchBadge("bits", cheerAmount)) {
+                        this->emplace<EmoteElement>(badge.get(), MessageElement::BadgeVanity)
+                            ->setTooltip(tooltip);
+                        continue;
+                    }
             } catch (const std::out_of_range &) {
                 // Channel does not contain a special bit badge for this version
             }
 
             // Use default bit badge
-            try {
-                const auto &badge = app->resources->badgeSets.at("bits").versions.at(versionKey);
-                this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
-                    ->setTooltip(tooltip);
-            } catch (const std::out_of_range &) {
-                Log("No default bit badge for version {} found", versionKey);
-                continue;
-            }
+            // try {
+            //    const auto &badge = app->resources->badgeSets.at("bits").versions.at(cheerAmount);
+            //    this->emplace<ImageElement>(badge.badgeImage1x, MessageElement::BadgeVanity)
+            //        ->setTooltip(tooltip);
+            //} catch (const std::out_of_range &) {
+            //    Log("No default bit badge for version {} found", cheerAmount);
+            //    continue;
+            //}
         } else if (badge == "staff/1") {
-            this->emplace<ImageElement>(app->resources->badgeStaff,
+            this->emplace<ImageElement>(Image::fromNonOwningPixmap(&app->resources->twitch.staff),
                                         MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Staff");
         } else if (badge == "admin/1") {
-            this->emplace<ImageElement>(app->resources->badgeAdmin,
+            this->emplace<ImageElement>(Image::fromNonOwningPixmap(&app->resources->twitch.admin),
                                         MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Admin");
         } else if (badge == "global_mod/1") {
-            this->emplace<ImageElement>(app->resources->badgeGlobalModerator,
-                                        MessageElement::BadgeGlobalAuthority)
+            this->emplace<ImageElement>(
+                    Image::fromNonOwningPixmap(&app->resources->twitch.globalmod),
+                    MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Global Moderator");
         } else if (badge == "moderator/1") {
             // TODO: Implement custom FFZ moderator badge
-            this->emplace<ImageElement>(app->resources->badgeModerator,
-                                        MessageElement::BadgeChannelAuthority)
+            this->emplace<ImageElement>(
+                    Image::fromNonOwningPixmap(&app->resources->twitch.moderator),
+                    MessageElement::BadgeChannelAuthority)
                 ->setTooltip("Twitch Channel Moderator");
         } else if (badge == "turbo/1") {
-            this->emplace<ImageElement>(app->resources->badgeTurbo,
+            this->emplace<ImageElement>(Image::fromNonOwningPixmap(&app->resources->twitch.turbo),
                                         MessageElement::BadgeGlobalAuthority)
                 ->setTooltip("Twitch Turbo Subscriber");
         } else if (badge == "broadcaster/1") {
-            this->emplace<ImageElement>(app->resources->badgeBroadcaster,
-                                        MessageElement::BadgeChannelAuthority)
+            this->emplace<ImageElement>(
+                    Image::fromNonOwningPixmap(&app->resources->twitch.broadcaster),
+                    MessageElement::BadgeChannelAuthority)
                 ->setTooltip("Twitch Broadcaster");
         } else if (badge == "premium/1") {
-            this->emplace<ImageElement>(app->resources->badgePremium, MessageElement::BadgeVanity)
+            this->emplace<ImageElement>(Image::fromNonOwningPixmap(&app->resources->twitch.prime),
+                                        MessageElement::BadgeVanity)
                 ->setTooltip("Twitch Prime Subscriber");
         } else if (badge.startsWith("partner/")) {
             int index = badge.midRef(8).toInt();
             switch (index) {
                 case 1: {
-                    this->emplace<ImageElement>(app->resources->badgeVerified,
-                                                MessageElement::BadgeVanity)
+                    this->emplace<ImageElement>(
+                            Image::fromNonOwningPixmap(&app->resources->twitch.verified),
+                            MessageElement::BadgeVanity)
                         ->setTooltip("Twitch Verified");
                 } break;
                 default: {
@@ -690,140 +694,142 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 } break;
             }
         } else if (badge.startsWith("subscriber/")) {
-            if (channelResources.loaded == false) {
-                // qDebug() << "Channel resources are not loaded, can't add the subscriber badge";
-                continue;
-            }
+            //            if (channelResources.loaded == false) {
+            //                // qDebug() << "Channel resources are not loaded, can't add the
+            //                subscriber
+            //                // badge";
+            //                continue;
+            //            }
 
-            auto badgeSetIt = channelResources.badgeSets.find("subscriber");
-            if (badgeSetIt == channelResources.badgeSets.end()) {
-                // Fall back to default badge
-                this->emplace<ImageElement>(app->resources->badgeSubscriber,
-                                            MessageElement::BadgeSubscription)
-                    ->setTooltip("Twitch Subscriber");
-                continue;
-            }
+            // auto badgeSetIt = channelResources.badgeSets.find("subscriber");
+            // if (badgeSetIt == channelResources.badgeSets.end()) {
+            //    // Fall back to default badge
+            //    this->emplace<ImageElement>(app->resources->badgeSubscriber,
+            //                                MessageElement::BadgeSubscription)
+            //        ->setTooltip("Twitch Subscriber");
+            //    continue;
+            //}
 
-            const auto &badgeSet = badgeSetIt->second;
+            // const auto &badgeSet = badgeSetIt->second;
 
-            std::string versionKey = badge.mid(11).toStdString();
+            // std::string versionKey = badge.mid(11).toStdString();
 
-            auto badgeVersionIt = badgeSet.versions.find(versionKey);
+            // auto badgeVersionIt = badgeSet.versions.find(versionKey);
 
-            if (badgeVersionIt == badgeSet.versions.end()) {
-                // Fall back to default badge
-                this->emplace<ImageElement>(app->resources->badgeSubscriber,
-                                            MessageElement::BadgeSubscription)
-                    ->setTooltip("Twitch Subscriber");
-                continue;
-            }
+            // if (badgeVersionIt == badgeSet.versions.end()) {
+            //    // Fall back to default badge
+            //    this->emplace<ImageElement>(app->resources->badgeSubscriber,
+            //                                MessageElement::BadgeSubscription)
+            //        ->setTooltip("Twitch Subscriber");
+            //    continue;
+            //}
 
-            auto &badgeVersion = badgeVersionIt->second;
+            // auto &badgeVersion = badgeVersionIt->second;
 
-            this->emplace<ImageElement>(badgeVersion.badgeImage1x,
-                                        MessageElement::BadgeSubscription)
-                ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
+            // this->emplace<ImageElement>(badgeVersion.badgeImage1x,
+            //                            MessageElement::BadgeSubscription)
+            //    ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
         } else {
-            if (!app->resources->dynamicBadgesLoaded) {
-                // Do nothing
-                continue;
-            }
+            // if (!app->resources->dynamicBadgesLoaded) {
+            //    // Do nothing
+            //    continue;
+            //}
 
-            QStringList parts = badge.split('/');
+            // QStringList parts = badge.split('/');
 
-            if (parts.length() != 2) {
-                qDebug() << "Bad number of parts: " << parts.length() << " in " << parts;
-                continue;
-            }
+            // if (parts.length() != 2) {
+            //    qDebug() << "Bad number of parts: " << parts.length() << " in " << parts;
+            //    continue;
+            //}
 
-            MessageElement::Flags badgeType = MessageElement::Flags::BadgeVanity;
+            // MessageElement::Flags badgeType = MessageElement::Flags::BadgeVanity;
 
-            std::string badgeSetKey = parts[0].toStdString();
-            std::string versionKey = parts[1].toStdString();
+            // std::string badgeSetKey = parts[0].toStdString();
+            // std::string versionKey = parts[1].toStdString();
 
-            try {
-                auto &badgeSet = app->resources->badgeSets.at(badgeSetKey);
+            // try {
+            //    auto &badgeSet = app->resources->badgeSets.at(badgeSetKey);
 
-                try {
-                    auto &badgeVersion = badgeSet.versions.at(versionKey);
+            //    try {
+            //        auto &badgeVersion = badgeSet.versions.at(versionKey);
 
-                    this->emplace<ImageElement>(badgeVersion.badgeImage1x, badgeType)
-                        ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
-                } catch (const std::exception &e) {
-                    qDebug() << "Exception caught:" << e.what()
-                             << "when trying to fetch badge version " << versionKey.c_str();
-                }
-            } catch (const std::exception &e) {
-                qDebug() << "No badge set with key" << badgeSetKey.c_str()
-                         << ". Exception: " << e.what();
-            }
+            //        this->emplace<ImageElement>(badgeVersion.badgeImage1x, badgeType)
+            //            ->setTooltip("Twitch " + QString::fromStdString(badgeVersion.title));
+            //    } catch (const std::exception &e) {
+            //        qDebug() << "Exception caught:" << e.what()
+            //                 << "when trying to fetch badge version " << versionKey.c_str();
+            //    }
+            //} catch (const std::exception &e) {
+            //    qDebug() << "No badge set with key" << badgeSetKey.c_str()
+            //             << ". Exception: " << e.what();
+            //}
         }
     }
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    auto app = getApp();
+    //    auto app = getApp();
 
-    auto &badges = app->resources->chatterinoBadges;
-    auto it = badges.find(this->userName.toStdString());
+    //    auto &badges = app->resources->chatterinoBadges;
+    //    auto it = badges.find(this->userName.toStdString());
 
-    if (it == badges.end()) {
-        return;
-    }
+    //    if (it == badges.end()) {
+    //        return;
+    //    }
 
-    const auto badge = it->second;
+    //    const auto badge = it->second;
 
-    this->emplace<ImageElement>(badge->image, MessageElement::BadgeChatterino)
-        ->setTooltip(QString::fromStdString(badge->tooltip));
+    //    this->emplace<ImageElement>(badge->image, MessageElement::BadgeChatterino)
+    //        ->setTooltip(QString::fromStdString(badge->tooltip));
 }
 
-bool TwitchMessageBuilder::tryParseCheermote(const QString &string)
+Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 {
-    auto app = getApp();
-    // Try to parse custom cheermotes
-    const auto &channelResources = app->resources->channels[this->roomID_];
-    if (channelResources.loaded) {
-        for (const auto &cheermoteSet : channelResources.cheermoteSets) {
-            auto match = cheermoteSet.regex.match(string);
-            if (!match.hasMatch()) {
-                continue;
-            }
-            QString amount = match.captured(1);
-            bool ok = false;
-            int numBits = amount.toInt(&ok);
-            if (!ok) {
-                Log("Error parsing bit amount in tryParseCheermote");
-                return false;
-            }
+    // auto app = getApp();
+    //// Try to parse custom cheermotes
+    // const auto &channelResources = app->resources->channels[this->roomID_];
+    // if (channelResources.loaded) {
+    //    for (const auto &cheermoteSet : channelResources.cheermoteSets) {
+    //        auto match = cheermoteSet.regex.match(string);
+    //        if (!match.hasMatch()) {
+    //            continue;
+    //        }
+    //        QString amount = match.captured(1);
+    //        bool ok = false;
+    //        int numBits = amount.toInt(&ok);
+    //        if (!ok) {
+    //            Log("Error parsing bit amount in tryParseCheermote");
+    //            return Failure;
+    //        }
 
-            auto savedIt = cheermoteSet.cheermotes.end();
+    //        auto savedIt = cheermoteSet.cheermotes.end();
 
-            // Fetch cheermote that matches our numBits
-            for (auto it = cheermoteSet.cheermotes.begin(); it != cheermoteSet.cheermotes.end();
-                 ++it) {
-                if (numBits >= it->minBits) {
-                    savedIt = it;
-                } else {
-                    break;
-                }
-            }
+    //        // Fetch cheermote that matches our numBits
+    //        for (auto it = cheermoteSet.cheermotes.begin(); it != cheermoteSet.cheermotes.end();
+    //             ++it) {
+    //            if (numBits >= it->minBits) {
+    //                savedIt = it;
+    //            } else {
+    //                break;
+    //            }
+    //        }
 
-            if (savedIt == cheermoteSet.cheermotes.end()) {
-                Log("Error getting a cheermote from a cheermote set for the bit amount {}",
-                    numBits);
-                return false;
-            }
+    //        if (savedIt == cheermoteSet.cheermotes.end()) {
+    //            Log("Error getting a cheermote from a cheermote set for the bit amount {}",
+    //                numBits);
+    //            return Failure;
+    //        }
 
-            const auto &cheermote = *savedIt;
+    //        const auto &cheermote = *savedIt;
 
-            this->emplace<EmoteElement>(cheermote.emoteDataAnimated, EmoteElement::BitsAnimated);
-            this->emplace<TextElement>(amount, EmoteElement::Text, cheermote.color);
+    //        this->emplace<EmoteElement>(cheermote.animatedEmote, EmoteElement::BitsAnimated);
+    //        this->emplace<TextElement>(amount, EmoteElement::Text, cheermote.color);
 
-            return true;
-        }
-    }
+    //        return Success;
+    //    }
+    //}
 
-    return false;
+    return Failure;
 }
 }  // namespace chatterino

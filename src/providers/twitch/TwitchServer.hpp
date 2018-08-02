@@ -12,15 +12,18 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class PubSub;
 
-class TwitchServer : public AbstractIrcServer, public Singleton
+class TwitchServer final : public AbstractIrcServer, public Singleton
 {
 public:
     TwitchServer();
     virtual ~TwitchServer() override = default;
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
 
@@ -50,8 +53,6 @@ protected:
 
 private:
     void onMessageSendRequested(TwitchChannel *channel, const QString &message, bool &sent);
-
-    Application *app = nullptr;
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;

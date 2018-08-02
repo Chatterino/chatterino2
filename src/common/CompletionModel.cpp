@@ -2,8 +2,10 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Log.hpp"
+#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 
 #include <QtAlgorithms>
@@ -107,41 +109,45 @@ void CompletionModel::refresh()
     auto app = getApp();
 
     // User-specific: Twitch Emotes
-    // TODO: Fix this so it properly updates with the proper api. oauth token needs proper scope
-    for (const auto &m : app->emotes->twitch.emotes) {
-        for (const auto &emoteName : m.second.emoteCodes) {
+    if (auto account = app->accounts->twitch.getCurrent()) {
+        for (const auto &emote : account->accessEmotes()->allEmoteNames) {
             // XXX: No way to discern between a twitch global emote and sub emote right now
-            this->addString(emoteName, TaggedString::Type::TwitchGlobalEmote);
+            this->addString(emote.string, TaggedString::Type::TwitchGlobalEmote);
         }
     }
 
-    // Global: BTTV Global Emotes
-    std::vector<QString> &bttvGlobalEmoteCodes = app->emotes->bttv.globalEmoteCodes;
-    for (const auto &m : bttvGlobalEmoteCodes) {
-        this->addString(m, TaggedString::Type::BTTVGlobalEmote);
+    //    // Global: BTTV Global Emotes
+    //    std::vector<QString> &bttvGlobalEmoteCodes = app->emotes->bttv.globalEmoteNames_;
+    //    for (const auto &m : bttvGlobalEmoteCodes) {
+    //        this->addString(m, TaggedString::Type::BTTVGlobalEmote);
+    //    }
+
+    //    // Global: FFZ Global Emotes
+    //    std::vector<QString> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
+    //    for (const auto &m : ffzGlobalEmoteCodes) {
+    //        this->addString(m, TaggedString::Type::FFZGlobalEmote);
+    //    }
+
+    // Channel emotes
+    if (auto channel = dynamic_cast<TwitchChannel *>(
+            getApp()->twitch2->getChannelOrEmptyByID(this->channelName_).get())) {
+        auto bttv = channel->accessBttvEmotes();
+        //        auto it = bttv->begin();
+        //        for (const auto &emote : *bttv) {
+        //        }
+        //            std::vector<QString> &bttvChannelEmoteCodes =
+        //                app->emotes->bttv.channelEmoteName_[this->channelName_];
+        //        for (const auto &m : bttvChannelEmoteCodes) {
+        //            this->addString(m, TaggedString::Type::BTTVChannelEmote);
+        //        }
+
+        // Channel-specific: FFZ Channel Emotes
+        for (const auto &emote : *channel->accessFfzEmotes()) {
+            this->addString(emote.second->name.string, TaggedString::Type::FFZChannelEmote);
+        }
     }
 
-    // Global: FFZ Global Emotes
-    std::vector<QString> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
-    for (const auto &m : ffzGlobalEmoteCodes) {
-        this->addString(m, TaggedString::Type::FFZGlobalEmote);
-    }
-
-    // Channel-specific: BTTV Channel Emotes
-    std::vector<QString> &bttvChannelEmoteCodes =
-        app->emotes->bttv.channelEmoteCodes[this->channelName_];
-    for (const auto &m : bttvChannelEmoteCodes) {
-        this->addString(m, TaggedString::Type::BTTVChannelEmote);
-    }
-
-    // Channel-specific: FFZ Channel Emotes
-    std::vector<QString> &ffzChannelEmoteCodes =
-        app->emotes->ffz.channelEmoteCodes[this->channelName_];
-    for (const auto &m : ffzChannelEmoteCodes) {
-        this->addString(m, TaggedString::Type::FFZChannelEmote);
-    }
-
-    // Global: Emojis
+    // Emojis
     const auto &emojiShortCodes = app->emotes->emojis.shortCodes;
     for (const auto &m : emojiShortCodes) {
         this->addString(":" + m + ":", TaggedString::Type::Emoji);

@@ -3,122 +3,107 @@
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "messages/Image.hpp"
+#include "messages/ImageSet.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
+
+#include <QJsonArray>
+#include <QThread>
 
 namespace chatterino {
 
 namespace {
 
-QString getEmoteLink(QString urlTemplate, const QString &id, const QString &emoteScale)
+Url getEmoteLink(QString urlTemplate, const EmoteId &id, const QString &emoteScale)
 {
     urlTemplate.detach();
 
-    return urlTemplate.replace("{{id}}", id).replace("{{image}}", emoteScale);
+    return {urlTemplate.replace("{{id}}", id.string).replace("{{image}}", emoteScale)};
 }
 
 }  // namespace
 
-void BTTVEmotes::loadGlobalEmotes()
+AccessGuard<const EmoteMap> BttvEmotes::accessGlobalEmotes() const
 {
-    QString url("https://api.betterttv.net/2/emotes");
+    return this->globalEmotes_.accessConst();
+}
 
-    NetworkRequest request(url);
+boost::optional<EmotePtr> BttvEmotes::getGlobalEmote(const EmoteName &name)
+{
+    auto emotes = this->globalEmotes_.access();
+    auto it = emotes->find(name);
+
+    if (it == emotes->end()) return boost::none;
+    return it->second;
+}
+
+// FOURTF: never returns anything
+// boost::optional<EmotePtr> BttvEmotes::getEmote(const EmoteId &id)
+//{
+//    auto cache = this->channelEmoteCache_.access();
+//    auto it = cache->find(id);
+//
+//    if (it != cache->end()) {
+//        auto shared = it->second.lock();
+//        if (shared) {
+//            return shared;
+//        }
+//    }
+//
+//    return boost::none;
+//}
+
+void BttvEmotes::loadGlobalEmotes()
+{
+    auto request = NetworkRequest(QString(globalEmoteApiUrl));
+
     request.setCaller(QThread::currentThread());
     request.setTimeout(30000);
-    request.onSuccess([this](auto result) {
-        auto root = result.parseJson();
-        auto emotes = root.value("emotes").toArray();
+    request.onSuccess([this](auto result) -> Outcome {
+        //        if (auto shared = weak.lock()) {
+        auto currentEmotes = this->globalEmotes_.access();
 
-        QString urlTemplate = "https:" + root.value("urlTemplate").toString();
+        auto pair = this->parseGlobalEmotes(result.parseJson(), *currentEmotes);
 
-        std::vector<QString> codes;
-        for (const QJsonValue &emote : emotes) {
-            QString id = emote.toObject().value("id").toString();
-            QString code = emote.toObject().value("code").toString();
-
-            EmoteData emoteData;
-            emoteData.image1x = new Image(getEmoteLink(urlTemplate, id, "1x"), 1, code,
-                                          code + "<br />Global BTTV Emote");
-            emoteData.image2x = new Image(getEmoteLink(urlTemplate, id, "2x"), 0.5, code,
-                                          code + "<br />Global BTTV Emote");
-            emoteData.image3x = new Image(getEmoteLink(urlTemplate, id, "3x"), 0.25, code,
-                                          code + "<br />Global BTTV Emote");
-            emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
-
-            this->globalEmotes.insert(code, emoteData);
-            codes.push_back(code);
+        if (pair.first) {
+            *currentEmotes = std::move(pair.second);
         }
 
-        this->globalEmoteCodes = codes;
-
-        return true;
+        return pair.first;
+        //        }
+        return Failure;
     });
 
     request.execute();
 }
 
-void BTTVEmotes::loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> _map)
+std::pair<Outcome, EmoteMap> BttvEmotes::parseGlobalEmotes(const QJsonObject &jsonRoot,
+                                                           const EmoteMap &currentEmotes)
 {
-    printf("[BTTVEmotes] Reload BTTV Channel Emotes for channel %s\n", qPrintable(channelName));
+    auto emotes = EmoteMap();
+    auto jsonEmotes = jsonRoot.value("emotes").toArray();
+    auto urlTemplate = QString("https:" + jsonRoot.value("urlTemplate").toString());
 
-    QString url("https://api.betterttv.net/2/channels/" + channelName);
+    for (const QJsonValue &jsonEmote : jsonEmotes) {
+        auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
+        auto name = EmoteName{jsonEmote.toObject().value("code").toString()};
 
-    Log("Request bttv channel emotes for {}", channelName);
+        auto emote = Emote({name,
+                            ImageSet{Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
+                                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
+                                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+                            Tooltip{name.string + "<br />Global Bttv Emote"},
+                            Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
-    NetworkRequest request(url);
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(3000);
-    request.onSuccess([this, channelName, _map](auto result) {
-        auto rootNode = result.parseJson();
-        auto map = _map.lock();
-
-        if (_map.expired()) {
-            return false;
+        auto it = currentEmotes.find(name);
+        if (it != currentEmotes.end() && *it->second == emote) {
+            // reuse old shared_ptr if nothing changed
+            emotes[name] = it->second;
+        } else {
+            emotes[name] = std::make_shared<Emote>(std::move(emote));
         }
+    }
 
-        map->clear();
-
-        auto emotesNode = rootNode.value("emotes").toArray();
-
-        QString linkTemplate = "https:" + rootNode.value("urlTemplate").toString();
-
-        std::vector<QString> codes;
-        for (const QJsonValue &emoteNode : emotesNode) {
-            QJsonObject emoteObject = emoteNode.toObject();
-
-            QString id = emoteObject.value("id").toString();
-            QString code = emoteObject.value("code").toString();
-            // emoteObject.value("imageType").toString();
-
-            auto emote = this->channelEmoteCache_.getOrAdd(id, [&] {
-                EmoteData emoteData;
-                QString link = linkTemplate;
-                link.detach();
-                emoteData.image1x = new Image(link.replace("{{id}}", id).replace("{{image}}", "1x"),
-                                              1, code, code + "<br />Channel BTTV Emote");
-                link = linkTemplate;
-                link.detach();
-                emoteData.image2x = new Image(link.replace("{{id}}", id).replace("{{image}}", "2x"),
-                                              0.5, code, code + "<br />Channel BTTV Emote");
-                link = linkTemplate;
-                link.detach();
-                emoteData.image3x = new Image(link.replace("{{id}}", id).replace("{{image}}", "3x"),
-                                              0.25, code, code + "<br />Channel BTTV Emote");
-                emoteData.pageLink = "https://manage.betterttv.net/emotes/" + id;
-
-                return emoteData;
-            });
-
-            this->channelEmotes.insert(code, emote);
-            map->insert(code, emote);
-            codes.push_back(code);
-        }
-
-        this->channelEmoteCodes[channelName] = codes;
-
-        return true;
-    });
-
-    request.execute();
+    return {Success, std::move(emotes)};
 }
 
 }  // namespace chatterino

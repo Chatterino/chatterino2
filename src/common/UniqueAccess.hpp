@@ -1,12 +1,13 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <mutex>
 #include <type_traits>
 
 namespace chatterino {
 
 template <typename T>
-class AccessGuard
+class AccessGuard : boost::noncopyable
 {
 public:
     AccessGuard(T &element, std::mutex &mutex)
@@ -21,29 +22,14 @@ public:
         this->mutex_.unlock();
     }
 
-    const T *operator->() const
+    T *operator->() const
     {
         return &this->element_;
     }
 
-    T *operator->()
-    {
-        return &this->element_;
-    }
-
-    const T &operator*() const
+    T &operator*() const
     {
         return this->element_;
-    }
-
-    T &operator*()
-    {
-        return this->element_;
-    }
-
-    T clone() const
-    {
-        return T(this->element_);
     }
 
 private:
@@ -55,7 +41,7 @@ template <typename T>
 class UniqueAccess
 {
 public:
-    template <typename X = decltype(T())>
+//    template <typename X = decltype(T())>
     UniqueAccess()
         : element_(T())
     {
@@ -83,14 +69,15 @@ public:
         return *this;
     }
 
-    AccessGuard<T> access()
+    AccessGuard<T> access() const
     {
         return AccessGuard<T>(this->element_, this->mutex_);
     }
 
-    const AccessGuard<T> access() const
+    template <typename X = T, typename = std::enable_if_t<!std::is_const_v<X>>>
+    AccessGuard<const X> accessConst() const
     {
-        return AccessGuard<T>(this->element_, this->mutex_);
+        return AccessGuard<const T>(this->element_, this->mutex_);
     }
 
 private:

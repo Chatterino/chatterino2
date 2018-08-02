@@ -12,7 +12,7 @@ ModerationActions::ModerationActions()
 {
 }
 
-void ModerationActions::initialize(Application &app)
+void ModerationActions::initialize(Settings &settings, Paths &paths)
 {
     assert(!this->initialized_);
     this->initialized_ = true;

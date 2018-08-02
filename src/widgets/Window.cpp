@@ -159,8 +159,8 @@ void Window::addLayout()
 
 void Window::addCustomTitlebarButtons()
 {
-    return_unless(this->hasCustomWindowFrame());
-    return_unless(this->type_ == Type::Main);
+    if (!this->hasCustomWindowFrame()) return;
+    if (this->type_ != Type::Main) return;
 
     // settings
     this->addTitleBarButton(TitleBarButton::Settings, [] {

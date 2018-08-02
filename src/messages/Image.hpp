@@ -1,69 +1,86 @@
 #pragma once
 
+#include "common/Common.hpp"
+
 #include <QPixmap>
 #include <QString>
-#include <boost/noncopyable.hpp>
-
 #include <atomic>
+#include <boost/noncopyable.hpp>
+#include <memory>
+#include <mutex>
+
+#include "common/NullablePtr.hpp"
 
 namespace chatterino {
 
-class Image : public QObject, boost::noncopyable
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
+
+class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
 public:
-    explicit Image(const QString &_url, qreal _scale = 1, const QString &_name = "",
-                   const QString &_tooltip = "", const QMargins &_margin = QMargins(),
-                   bool isHat = false);
+    static ImagePtr fromUrl(const Url &url, qreal scale = 1);
+    static ImagePtr fromOwningPixmap(std::unique_ptr<QPixmap> pixmap, qreal scale = 1);
+    static ImagePtr fromNonOwningPixmap(QPixmap *pixmap, qreal scale = 1);
+    static ImagePtr getEmpty();
 
-    explicit Image(QPixmap *_currentPixmap, qreal _scale = 1, const QString &_name = "",
-                   const QString &_tooltip = "", const QMargins &_margin = QMargins(),
-                   bool isHat = false);
-    ~Image();
-
-    const QPixmap *getPixmap();
+    const Url &getUrl() const;
+    NullablePtr<const QPixmap> getPixmap() const;
     qreal getScale() const;
-    const QString &getUrl() const;
-    const QString &getName() const;
-    const QString &getCopyString() const;
-    const QString &getTooltip() const;
-    const QMargins &getMargin() const;
     bool isAnimated() const;
-    bool isHat() const;
     int getWidth() const;
-    int getScaledWidth() const;
     int getHeight() const;
-    int getScaledHeight() const;
+    bool isLoaded() const;
+    bool isError() const;
+    bool isValid() const;
+    bool isNull() const;
 
-    void setCopyString(const QString &newCopyString);
+    bool operator==(const Image &image) const;
+    bool operator!=(const Image &image) const;
 
 private:
-    struct FrameData {
-        QPixmap *image;
-        int duration;
+    class Frame
+    {
+    public:
+        QPixmap *getPixmap() const;
+        int getDuration() const;
+
+        Frame(QPixmap *nonOwning, int duration = 1);
+        Frame(std::unique_ptr<QPixmap> nonOwning, int duration = 1);
+
+    private:
+        QPixmap *nonOwning_;
+        std::unique_ptr<QPixmap> owning_;
+        int duration_;
     };
 
-    static bool loadedEventQueued;
+    Image();
+    Image(const Url &url, qreal scale);
+    Image(std::unique_ptr<QPixmap> owning, qreal scale);
+    Image(QPixmap *nonOwning, qreal scale);
 
-    QPixmap *currentPixmap = nullptr;
-    QPixmap *loadedPixmap = nullptr;
-    std::vector<FrameData> allFrames;
-    int currentFrame = 0;
-    int currentFrameOffset = 0;
+    void load();
+    Outcome parse(const QByteArray &data);
+    std::vector<Frame> readFrames(QImageReader &reader);
+    Outcome setFrames(std::vector<Frame> frames);
+    void updateAnimation();
+    void queueLoadedEvent();
 
-    QString url;
-    QString name;
-    QString copyString;
-    QString tooltip;
-    bool animated = false;
-    QMargins margin;
-    bool ishat;
-    qreal scale;
+    Url url_;
+    bool isLoaded_{false};
+    bool isLoading_{false};
+    bool isAnimated_{false};
+    bool isError_{false};
+    bool isNull_ = false;
+    qreal scale_ = 1;
+    QObject object_;
 
-    bool isLoading = false;
-    std::atomic<bool> isLoaded{false};
+    std::vector<Frame> frames_;
+    std::mutex framesMutex_;
+    NullablePtr<QPixmap> currentFramePixmap_;
+    int currentFrameIndex_ = 0;
+    int currentFrameOffset_ = 0;
 
-    void loadImage();
-    void gifUpdateTimout();
+    static std::atomic<bool> loadedEventQueued;
 };
-
 }  // namespace chatterino

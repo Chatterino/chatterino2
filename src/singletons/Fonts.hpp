@@ -13,12 +13,15 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class Fonts final : public Singleton
 {
 public:
     Fonts();
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     // font data gets set in createFontData(...)
     enum Type : uint8_t {

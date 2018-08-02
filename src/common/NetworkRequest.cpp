@@ -129,7 +129,7 @@ void NetworkRequest::execute()
     }
 }
 
-bool NetworkRequest::tryLoadCachedFile()
+Outcome NetworkRequest::tryLoadCachedFile()
 {
     auto app = getApp();
 
@@ -137,24 +137,24 @@ bool NetworkRequest::tryLoadCachedFile()
 
     if (!cachedFile.exists()) {
         // File didn't exist
-        return false;
+        return Failure;
     }
 
     if (!cachedFile.open(QIODevice::ReadOnly)) {
         // File could not be opened
-        return false;
+        return Failure;
     }
 
     QByteArray bytes = cachedFile.readAll();
     NetworkResult result(bytes);
 
-    bool success = this->data->onSuccess_(result);
+    auto outcome = this->data->onSuccess_(result);
 
     cachedFile.close();
 
     // XXX: If success is false, we should invalidate the cache file somehow/somewhere
 
-    return success;
+    return outcome;
 }
 
 void NetworkRequest::doRequest()

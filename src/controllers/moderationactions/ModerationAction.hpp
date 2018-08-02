@@ -1,13 +1,13 @@
 #pragma once
 
 #include <QString>
+#include <boost/optional.hpp>
 #include <pajlada/settings/serialize.hpp>
 
+#include "messages/Image.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-
-class Image;
 
 class ModerationAction
 {
@@ -17,13 +17,13 @@ public:
     bool operator==(const ModerationAction &other) const;
 
     bool isImage() const;
-    Image *getImage() const;
+    const boost::optional<ImagePtr> &getImage() const;
     const QString &getLine1() const;
     const QString &getLine2() const;
     const QString &getAction() const;
 
 private:
-    Image *image_ = nullptr;
+    boost::optional<ImagePtr> image_;
     QString line1_;
     QString line2_;
     QString action_;

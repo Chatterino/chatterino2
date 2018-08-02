@@ -38,7 +38,7 @@ rapidjson::Document NetworkResult::parseRapidJson() const
     return ret;
 }
 
-QByteArray NetworkResult::getData() const
+const QByteArray &NetworkResult::getData() const
 {
     return this->data_;
 }

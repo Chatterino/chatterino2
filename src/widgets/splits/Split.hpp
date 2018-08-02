@@ -90,7 +90,11 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
 
 private:
-    void doOpenUserInfoPopup(const QString &user);
+    void showUserInfoPopup(const QString &userName)
+    {
+        this->showUserInfoPopup(UserName{userName});
+    }
+    void showUserInfoPopup(const UserName &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
 
@@ -137,22 +141,22 @@ public slots:
     void doClearChat();
 
     // Open link to twitch channel in default browser
-    void doOpenChannel();
+    void openInBrowser();
 
     // Open popup player of twitch channel in default browser
-    void doOpenPopupPlayer();
+    void openInPopupPlayer();
 
     // Open twitch channel stream through streamlink
-    void doOpenStreamlink();
+    void openInStreamlink();
 
     // Copy text from chat
-    void doCopy();
+    void copyToClipboard();
 
     // Open a search popup
-    void doSearch();
+    void showSearchPopup();
 
     // Open viewer list of the channel
-    void doOpenViewerList();
+    void showViewerList();
 };
 
 }  // namespace chatterino

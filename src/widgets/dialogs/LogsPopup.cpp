@@ -34,7 +34,7 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 {
     this->channel_ = channel;
     this->userName_ = userName;
-    this->setWindowTitle(this->userName_ + "'s logs in #" + this->channel_->name);
+    this->setWindowTitle(this->userName_ + "'s logs in #" + this->channel_->getName());
     this->getLogviewerLogs();
 }
 
@@ -53,7 +53,7 @@ void LogsPopup::getLogviewerLogs()
         return;
     }
 
-    QString channelName = twitchChannel->name;
+    QString channelName = twitchChannel->getName();
 
     QString url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
                       .arg(channelName, this->userName_);
@@ -66,7 +66,7 @@ void LogsPopup::getLogviewerLogs()
         return true;
     });
 
-    req.onSuccess([this, channelName](auto result) {
+    req.onSuccess([this, channelName](auto result) -> Outcome {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
         ChannelPtr logsChannel(new Channel("logs", Channel::Type::None));
@@ -89,7 +89,7 @@ void LogsPopup::getLogviewerLogs()
         };
         this->setMessages(messages);
 
-        return true;
+        return Success;
     });
 
     req.execute();
@@ -102,7 +102,7 @@ void LogsPopup::getOverrustleLogs()
         return;
     }
 
-    QString channelName = twitchChannel->name;
+    QString channelName = twitchChannel->getName();
 
     QString url = QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
                       .arg(channelName, this->userName_);
@@ -120,7 +120,7 @@ void LogsPopup::getOverrustleLogs()
         return true;
     });
 
-    req.onSuccess([this, channelName](auto result) {
+    req.onSuccess([this, channelName](auto result) -> Outcome {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
         if (data.contains("lines")) {
@@ -141,7 +141,7 @@ void LogsPopup::getOverrustleLogs()
         }
         this->setMessages(messages);
 
-        return true;
+        return Success;
     });
 
     req.execute();

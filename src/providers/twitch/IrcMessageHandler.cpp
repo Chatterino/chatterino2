@@ -94,8 +94,6 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
             auto roomId = it.value().toString();
 
             twitchChannel->setRoomId(roomId);
-
-            app->resources->loadChannelData(roomId);
         }
 
         // Room modes

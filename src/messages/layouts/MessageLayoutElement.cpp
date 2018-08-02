@@ -63,16 +63,17 @@ const Link &MessageLayoutElement::getLink() const
 // IMAGE
 //
 
-ImageLayoutElement::ImageLayoutElement(MessageElement &_creator, Image *_image, const QSize &_size)
-    : MessageLayoutElement(_creator, _size)
-    , image(_image)
+ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image, const QSize &size)
+    : MessageLayoutElement(creator, size)
+    , image_(image)
 {
-    this->trailingSpace = _creator.hasTrailingSpace();
+    this->trailingSpace = creator.hasTrailingSpace();
 }
 
 void ImageLayoutElement::addCopyTextToString(QString &str, int from, int to) const
 {
-    str += this->image->getCopyString();
+    //    str += this->image_->getCopyString();
+    str += "not implemented";
 
     if (this->hasTrailingSpace()) {
         str += " ";
@@ -86,13 +87,12 @@ int ImageLayoutElement::getSelectionIndexCount()
 
 void ImageLayoutElement::paint(QPainter &painter)
 {
-    if (this->image == nullptr) {
+    if (this->image_ == nullptr) {
         return;
     }
 
-    const QPixmap *pixmap = this->image->getPixmap();
-
-    if (pixmap != nullptr && !this->image->isAnimated()) {
+    auto pixmap = this->image_->getPixmap();
+    if (pixmap && !this->image_->isAnimated()) {
         // fourtf: make it use qreal values
         painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
     }
@@ -100,19 +100,15 @@ void ImageLayoutElement::paint(QPainter &painter)
 
 void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
-    if (this->image == nullptr) {
+    if (this->image_ == nullptr) {
         return;
     }
 
-    if (this->image->isAnimated()) {
-        //        qDebug() << this->image->getUrl();
-        auto pixmap = this->image->getPixmap();
-
-        if (pixmap != nullptr) {
-            // fourtf: make it use qreal values
-            QRect _rect = this->getRect();
-            _rect.moveTop(_rect.y() + yOffset);
-            painter.drawPixmap(QRectF(_rect), *pixmap, QRectF());
+    if (this->image_->isAnimated()) {
+        if (auto pixmap = this->image_->getPixmap()) {
+            auto rect = this->getRect();
+            rect.moveTop(rect.y() + yOffset);
+            painter.drawPixmap(QRectF(rect), *pixmap, QRectF());
         }
     }
 }
