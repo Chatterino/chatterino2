@@ -118,7 +118,7 @@ public:
         rowItem.items[column]->setData(value, role);
 
         if (rowItem.isCustomRow) {
-            this->customRowSetData(rowItem.items, column, value, role);
+            this->customRowSetData(rowItem.items, column, value, role, row);
         } else {
             int vecRow = this->getVectorIndexFromModelIndex(row);
             this->vector_->removeItem(vecRow, this);
@@ -217,7 +217,7 @@ protected:
     }
 
     virtual void customRowSetData(const std::vector<QStandardItem *> &row, int column,
-                                  const QVariant &value, int role)
+                                  const QVariant &value, int role, int rowIndex)
     {
     }
 

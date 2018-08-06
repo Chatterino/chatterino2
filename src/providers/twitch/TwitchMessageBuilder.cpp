@@ -486,9 +486,9 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     std::vector<HighlightPhrase> activeHighlights = app->highlights->phrases.getVector();
     std::vector<HighlightPhrase> userHighlights = app->highlights->highlightedUsers.getVector();
 
-    if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
-        HighlightPhrase selfHighlight(currentUsername, app->settings->enableHighlightTaskbar,
-                                      app->settings->enableHighlightSound, false);
+    if (app->settings->enableSelfHighlight && currentUsername.size() > 0) {
+        HighlightPhrase selfHighlight(currentUsername, app->settings->enableSelfHighlightTaskbar,
+                                      app->settings->enableSelfHighlightSound, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -537,6 +537,20 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
                     // Break if no further action can be taken from other usernames
                     // Mostly used for regex stuff
                     break;
+                }
+            }
+        }
+        if (app->settings->enableWhisperHighlight) {
+            if (this->args.isReceivedWhisper) {
+                Log("Highlight because it's a whisper", this->args.isReceivedWhisper);
+                doHighlight = true;
+
+                if (getSettings()->enableWhisperHighlightTaskbar) {
+                    doAlert = true;
+                }
+
+                if (getSettings()->enableWhisperHighlightSound) {
+                    playSound = true;
                 }
             }
         }

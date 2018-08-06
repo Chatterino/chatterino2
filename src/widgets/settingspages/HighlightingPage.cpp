@@ -37,7 +37,7 @@ HighlightingPage::HighlightingPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         // GENERAL
-        // layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, app->settings->enableHighlights));
+        // layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS, app->settings->enableSelfHighlights));
 
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
