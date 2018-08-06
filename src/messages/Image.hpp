@@ -6,6 +6,7 @@
 #include <QString>
 #include <atomic>
 #include <boost/noncopyable.hpp>
+#include <boost/variant.hpp>
 #include <memory>
 #include <mutex>
 
@@ -13,19 +14,10 @@
 
 namespace chatterino {
 namespace {
-class Frame
-{
-public:
-    explicit Frame(const QPixmap *nonOwning, int duration = 1);
-    explicit Frame(std::unique_ptr<QPixmap> owning, int duration = 1);
-
-    const QPixmap *pixmap() const;
-    int duration() const;
-
-private:
-    const QPixmap *nonOwning_{nullptr};
-    std::unique_ptr<QPixmap> owning_{};
-    int duration_{};
+using Pixmap = boost::variant<const QPixmap *, std::unique_ptr<QPixmap>>;
+struct Frame {
+    Pixmap pixmap;
+    int duration;
 };
 class Frames
 {
@@ -44,7 +36,7 @@ public:
 private:
     std::vector<Frame> items_;
     int index_{0};
-    int timeOffset_{0};
+    int durationOffset_{0};
 };
 }  // namespace
 

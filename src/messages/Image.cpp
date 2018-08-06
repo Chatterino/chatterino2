@@ -20,28 +20,12 @@
 
 namespace chatterino {
 namespace {
-// Frame
-Frame::Frame(const QPixmap *nonOwning, int duration)
-    : nonOwning_(nonOwning)
-    , duration_(duration)
+const QPixmap *getPixmap(const Pixmap &pixmap)
 {
-}
-
-Frame::Frame(std::unique_ptr<QPixmap> owning, int duration)
-    : owning_(std::move(owning))
-    , duration_(duration)
-{
-}
-
-int Frame::duration() const
-{
-    return this->duration_;
-}
-
-const QPixmap *Frame::pixmap() const
-{
-    if (this->nonOwning_) return this->nonOwning_;
-    return this->owning_.get();
+    if (pixmap.which() == 0)
+        return boost::get<const QPixmap *>(pixmap);
+    else
+        return boost::get<std::unique_ptr<QPixmap>>(pixmap).get();
 }
 
 // Frames
@@ -65,12 +49,12 @@ Frames::~Frames()
 
 void Frames::advance()
 {
-    this->timeOffset_ += GIF_FRAME_LENGTH;
+    this->durationOffset_ += GIF_FRAME_LENGTH;
 
     while (true) {
         this->index_ %= this->items_.size();
-        if (this->timeOffset_ > this->items_[this->index_].duration()) {
-            this->timeOffset_ -= this->items_[this->index_].duration();
+        if (this->durationOffset_ > this->items_[this->index_].duration) {
+            this->durationOffset_ -= this->items_[this->index_].duration;
             this->index_ = (this->index_ + 1) % this->items_.size();
         } else {
             break;
@@ -86,13 +70,13 @@ bool Frames::animated() const
 const QPixmap *Frames::current() const
 {
     if (this->items_.size() == 0) return nullptr;
-    return this->items_[this->index_].pixmap();
+    return getPixmap(this->items_[this->index_].pixmap);
 }
 
 const QPixmap *Frames::first() const
 {
     if (this->items_.size() == 0) return nullptr;
-    return this->items_.front().pixmap();
+    return getPixmap(this->items_.front().pixmap);
 }
 
 // functions
@@ -111,7 +95,7 @@ std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
             auto pixmap = std::make_unique<QPixmap>(QPixmap::fromImage(image));
 
             int duration = std::max(20, reader.nextImageDelay());
-            frames.push_back(Frame(std::move(pixmap), duration));
+            frames.push_back(Frame{std::move(pixmap), duration});
         }
     }
 
@@ -191,7 +175,7 @@ Image::Image(std::unique_ptr<QPixmap> owning, qreal scale)
     : scale_(scale)
 {
     std::vector<Frame> vec;
-    vec.push_back(Frame(std::move(owning)));
+    vec.push_back(Frame{std::move(owning)});
     this->frames_ = std::move(vec);
 }
 
@@ -199,7 +183,7 @@ Image::Image(QPixmap *nonOwning, qreal scale)
     : scale_(scale)
 {
     std::vector<Frame> vec;
-    vec.push_back(Frame(nonOwning));
+    vec.push_back(Frame{nonOwning});
     this->frames_ = std::move(vec);
 }
 
