@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
@@ -227,6 +228,31 @@ void UserInfoPopup::installEvents()
                                           });
             }
         });
+
+    // ignore highlights
+    QObject::connect(this->ui_.ignoreHighlights, &QCheckBox::clicked, [this](bool checked) mutable {
+        this->ui_.ignoreHighlights->setEnabled(false);
+
+        if (checked) {
+            getApp()->highlights->blacklistedUsers.insertItem(
+                HighlightBlacklistUser{this->userName_, false});
+            this->ui_.ignoreHighlights->setEnabled(true);
+        } else {
+            const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
+
+            for (int i = 0; i < vector.size(); i++) {
+                if (this->userName_ == vector[i].getPattern()) {
+                    getApp()->highlights->blacklistedUsers.removeItem(i);
+                    i--;
+                }
+            }
+            if (getApp()->highlights->blacklistContains(this->userName_)) {
+                this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
+            } else {
+                this->ui_.ignoreHighlights->setEnabled(true);
+            }
+        }
+    });
 }
 
 void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
@@ -290,8 +316,23 @@ void UserInfoPopup::updateUserData()
             }
         }
 
+        // get ignoreHighlights state
+        bool isIgnoringHighlights = false;
+        const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
+        for (int i = 0; i < vector.size(); i++) {
+            if (this->userName_ == vector[i].getPattern()) {
+                isIgnoringHighlights = true;
+                break;
+            }
+        }
+        if (getApp()->highlights->blacklistContains(this->userName_) && !isIgnoringHighlights) {
+            this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
+        } else {
+            this->ui_.ignoreHighlights->setEnabled(true);
+        }
         this->ui_.ignore->setEnabled(true);
         this->ui_.ignore->setChecked(isIgnoring);
+        this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
     };
 
     PartialTwitchUser::byName(this->userName_).getId(onIdFetched, this);
