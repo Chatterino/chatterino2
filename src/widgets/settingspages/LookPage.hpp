@@ -28,6 +28,7 @@ private:
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();
     QLayout *createUiScaleSlider();
+    QLayout *createBoldScaleSlider();
 
     ChannelPtr createPreviewChannel();
 

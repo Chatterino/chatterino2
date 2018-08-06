@@ -113,6 +113,12 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // font
     layout.append(this->createFontChanger());
 
+    // bold-slider
+    {
+        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
+        box.emplace<QLabel>("Boldness: ");
+        box.append(this->createBoldScaleSlider());
+    }
     // --
     layout.emplace<Line>(false);
 
@@ -415,6 +421,42 @@ QLayout *LookPage::createUiScaleSlider()
     getSettings()->uiScale.connect(
         [label](auto, auto) { label->setText(QString::number(WindowManager::getUiScaleValue())); },
         this->connections_);
+
+    return layout;
+}
+
+QLayout *LookPage::createBoldScaleSlider()
+{
+    auto layout = new QHBoxLayout();
+    auto slider = new QSlider(Qt::Horizontal);
+    auto label = new QLabel();
+
+    layout->addWidget(slider);
+    layout->addWidget(label);
+
+    slider->setMinimum(50);
+    slider->setMaximum(100);
+    slider->setValue(getSettings()->boldScale.getValue());
+
+    label->setMinimumWidth(100);
+
+    QObject::connect(slider, &QSlider::valueChanged,
+                     [](auto value) { getSettings()->boldScale.setValue(value); });
+    // show value
+    // getSettings()->boldScale.connect(
+    //    [label](auto, auto) {
+    //        label->setText(QString::number(getSettings()->boldScale.getValue()));
+    //    },
+    //    this->connections_);
+
+    QPushButton *button = new QPushButton("Reset");
+    layout->addWidget(button);
+    button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
+
+    QObject::connect(button, &QPushButton::clicked, [=]() {
+        getSettings()->boldScale.setValue(57);
+        slider->setValue(57);
+    });
 
     return layout;
 }

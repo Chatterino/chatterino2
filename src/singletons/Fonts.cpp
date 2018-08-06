@@ -56,6 +56,19 @@ void Fonts::initialize(Application &app)
         }
         this->fontChanged.invoke();
     });
+
+    getSettings()->boldScale.connect([this, &app](const int &, auto) {
+        assertInGuiThread();
+
+        if (app.windows) {
+            app.windows->incGeneration();
+        }
+
+        for (auto &map : this->fontsByType_) {
+            map.clear();
+        }
+        this->fontChanged.invoke();
+    });
 }
 
 QFont Fonts::getFont(Fonts::Type type, float scale)
@@ -99,12 +112,13 @@ Fonts::FontData Fonts::createFontData(Type type, float scale)
             {ChatSmall, {0.6f, false, QFont::Normal}},
             {ChatMediumSmall, {0.8f, false, QFont::Normal}},
             {ChatMedium, {1, false, QFont::Normal}},
-            {ChatMediumBold, {1, false, QFont::Medium}},
+            {ChatMediumBold, {1, false, QFont::Weight(getApp()->settings->boldScale.getValue())}},
             {ChatMediumItalic, {1, true, QFont::Normal}},
             {ChatLarge, {1.2f, false, QFont::Normal}},
             {ChatVeryLarge, {1.4f, false, QFont::Normal}},
         };
-
+        sizeScale[ChatMediumBold] = {1, false,
+                                     QFont::Weight(getApp()->settings->boldScale.getValue())};
         auto data = sizeScale[type];
         return FontData(QFont(QString::fromStdString(this->chatFontFamily.getValue()),
                               int(this->chatFontSize.getValue() * data.scale * scale), data.weight,
