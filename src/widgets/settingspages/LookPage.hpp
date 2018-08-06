@@ -22,6 +22,7 @@ private:
     void addInterfaceTab(LayoutCreator<QVBoxLayout> layout);
     void addMessageTab(LayoutCreator<QVBoxLayout> layout);
     void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
+    void addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout);
 
     void addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLayout> layout);
 

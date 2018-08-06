@@ -45,6 +45,12 @@ public:
     BoolSetting enableSmoothScrollingNewMessages = {"/appearance/smoothScrollingNewMessages",
                                                     false};
     BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames", false};
+    // BoolSetting customizable splitheader
+    BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount", false};
+    BoolSetting showTitle = {"/appearance/splitheader/showTitle", false};
+    BoolSetting showGame = {"/appearance/splitheader/showGame", false};
+    BoolSetting showUptime = {"/appearance/splitheader/showUptime", false};
+
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
 
     /// Behaviour
