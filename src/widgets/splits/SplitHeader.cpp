@@ -129,8 +129,8 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
     this->dropdownMenu_.addAction("Close split", this->split_, &Split::doCloseSplit, QKeySequence(tr("Ctrl+W")));
     this->dropdownMenu_.addAction("Change channel", this->split_, &Split::doChangeChannel, QKeySequence(tr("Ctrl+R")));
     this->dropdownMenu_.addSeparator();
-    this->dropdownMenu_.addAction("Viewer list", this->split_, &Split::doOpenViewerList);
-    this->dropdownMenu_.addAction("Search", this->split_, &Split::doSearch, QKeySequence(tr("Ctrl+F")));
+    this->dropdownMenu_.addAction("Viewer list", this->split_, &Split::showViewerList);
+    this->dropdownMenu_.addAction("Search", this->split_, &Split::showSearchPopup, QKeySequence(tr("Ctrl+F")));
     this->dropdownMenu_.addSeparator();
     this->dropdownMenu_.addAction("Popup", this->split_, &Split::doPopup);
 #ifdef USEWEBENGINE
@@ -145,11 +145,11 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
         }
     });
 #endif
-    this->dropdownMenu_.addAction("Open browser", this->split_, &Split::doOpenChannel);
+    this->dropdownMenu_.addAction("Open browser", this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
-    this->dropdownMenu_.addAction("Open browser popup", this->split_, &Split::doOpenPopupPlayer);
+    this->dropdownMenu_.addAction("Open browser popup", this->split_, &Split::openInPopupPlayer);
 #endif
-    this->dropdownMenu_.addAction("Open streamlink", this->split_, &Split::doOpenStreamlink);
+    this->dropdownMenu_.addAction("Open streamlink", this->split_, &Split::openInStreamlink);
     this->dropdownMenu_.addSeparator();
     this->dropdownMenu_.addAction("Reload channel emotes", this, SLOT(menuReloadChannelEmotes()));
     this->dropdownMenu_.addAction("Reconnect", this, SLOT(menuManualReconnect()));
@@ -317,7 +317,7 @@ void SplitHeader::updateChannelText()
     auto indirectChannel = this->split_->getIndirectChannel();
     auto channel = this->split_->getChannel();
 
-    QString title = channel->name;
+    QString title = channel->getName();
 
     if (indirectChannel.getType() == Channel::Type::TwitchWatching) {
         title = "watching: " + (title.isEmpty() ? "none" : title);
@@ -375,8 +375,8 @@ void SplitHeader::updateModerationModeIcon()
     auto app = getApp();
 
     this->moderationButton_->setPixmap(this->split_->getModerationMode()
-                                           ? *app->resources->moderationmode_enabled->getPixmap()
-                                           : *app->resources->moderationmode_disabled->getPixmap());
+                                           ? app->resources->buttons.modModeEnabled
+                                           : app->resources->buttons.modModeDisabled);
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split_->getChannel();
@@ -499,9 +499,9 @@ void SplitHeader::themeChangedEvent()
     }
 
     if (this->theme->isLightTheme()) {
-        this->dropdownButton_->setPixmap(QPixmap(":/images/menu_black.png"));
+        this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuDark);
     } else {
-        this->dropdownButton_->setPixmap(QPixmap(":/images/menu_white.png"));
+        this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuLight);
     }
 
     this->titleLabel->setPalette(palette);

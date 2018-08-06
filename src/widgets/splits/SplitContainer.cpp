@@ -464,11 +464,9 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
 void SplitContainer::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (!event->mimeData()->hasFormat("chatterino/split"))
-        return;
+    if (!event->mimeData()->hasFormat("chatterino/split")) return;
 
-    if (!SplitContainer::isDraggingSplit)
-        return;
+    if (!SplitContainer::isDraggingSplit) return;
 
     this->isDragging_ = true;
     this->layout();
@@ -516,7 +514,7 @@ void SplitContainer::refreshTabTitle()
     bool first = true;
 
     for (const auto &chatWidget : this->splits_) {
-        auto channelName = chatWidget->getChannel()->name;
+        auto channelName = chatWidget->getChannel()->getName();
         if (channelName.isEmpty()) {
             continue;
         }
@@ -851,10 +849,8 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale, std::vector<Dro
                                   std::vector<ResizeRect> &resizeRects)
 {
     for (std::unique_ptr<Node> &node : this->children_) {
-        if (node->flexH_ <= 0)
-            node->flexH_ = 0;
-        if (node->flexV_ <= 0)
-            node->flexV_ = 0;
+        if (node->flexH_ <= 0) node->flexH_ = 0;
+        if (node->flexV_ <= 0) node->flexV_ = 0;
     }
 
     switch (this->type_) {

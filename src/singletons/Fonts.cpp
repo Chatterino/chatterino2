@@ -29,14 +29,10 @@ Fonts::Fonts()
     this->fontsByType_.resize(size_t(EndType));
 }
 
-void Fonts::initialize(Application &app)
+void Fonts::initialize(Settings &, Paths &)
 {
-    this->chatFontFamily.connect([this, &app](const std::string &, auto) {
+    this->chatFontFamily.connect([this](const std::string &, auto) {
         assertInGuiThread();
-
-        if (app.windows) {
-            app.windows->incGeneration();
-        }
 
         for (auto &map : this->fontsByType_) {
             map.clear();
@@ -44,12 +40,8 @@ void Fonts::initialize(Application &app)
         this->fontChanged.invoke();
     });
 
-    this->chatFontSize.connect([this, &app](const int &, auto) {
+    this->chatFontSize.connect([this](const int &, auto) {
         assertInGuiThread();
-
-        if (app.windows) {
-            app.windows->incGeneration();
-        }
 
         for (auto &map : this->fontsByType_) {
             map.clear();
@@ -57,12 +49,10 @@ void Fonts::initialize(Application &app)
         this->fontChanged.invoke();
     });
 
-    getSettings()->boldScale.connect([this, &app](const int &, auto) {
+    getSettings()->boldScale.connect([this](const int &, auto) {
         assertInGuiThread();
 
-        if (app.windows) {
-            app.windows->incGeneration();
-        }
+        getApp()->windows->incGeneration();
 
         for (auto &map : this->fontsByType_) {
             map.clear();

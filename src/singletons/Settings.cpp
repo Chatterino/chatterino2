@@ -10,32 +10,25 @@ namespace chatterino {
 
 std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
 
+Settings *Settings::instance = nullptr;
+
 void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
 {
     _settings.push_back(setting);
 }
 
-Settings::Settings()
+Settings::Settings(Paths &paths)
 {
-    qDebug() << "init SettingManager";
+    instance = this;
+
+    QString settingsPath = paths.settingsDirectory + "/settings.json";
+
+    pajlada::Settings::SettingManager::gLoad(qPrintable(settingsPath));
 }
 
 Settings &Settings::getInstance()
 {
-    static Settings instance;
-
-    return instance;
-}
-
-void Settings::initialize()
-{
-}
-
-void Settings::load()
-{
-    QString settingsPath = getPaths()->settingsDirectory + "/settings.json";
-
-    pajlada::Settings::SettingManager::gLoad(qPrintable(settingsPath));
+    return *instance;
 }
 
 void Settings::saveSnapshot()

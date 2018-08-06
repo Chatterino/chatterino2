@@ -9,7 +9,7 @@ namespace chatterino {
 
 class TaggedUsersModel;
 
-class TaggedUsersController : public Singleton
+class TaggedUsersController final : public Singleton
 {
 public:
     TaggedUsersController();

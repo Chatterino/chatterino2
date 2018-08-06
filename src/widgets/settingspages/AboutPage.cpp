@@ -28,7 +28,7 @@ AboutPage::AboutPage()
     auto layout = widget.setLayoutType<QVBoxLayout>();
     {
         QPixmap pixmap;
-        pixmap.load(":/images/aboutlogo.png");
+        pixmap.load(":/settings/aboutlogo.png");
 
         auto logo = layout.emplace<QLabel>().assign(&this->logo_);
         logo->setPixmap(pixmap);

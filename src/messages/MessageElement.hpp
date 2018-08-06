@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Emotemap.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
@@ -16,7 +17,6 @@
 
 namespace chatterino {
 class Channel;
-struct EmoteData;
 struct MessageLayoutContainer;
 
 class MessageElement : boost::noncopyable
@@ -137,12 +137,12 @@ private:
 class ImageElement : public MessageElement
 {
 public:
-    ImageElement(Image *image, MessageElement::Flags flags);
+    ImageElement(ImagePtr image, MessageElement::Flags flags);
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
 
 private:
-    Image *image_;
+    ImagePtr image_;
 };
 
 // contains a text, it will split it into words
@@ -173,15 +173,14 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
-    EmoteElement(const EmoteData &data, MessageElement::Flags flags_);
-    ~EmoteElement() override = default;
+    EmoteElement(const EmotePtr &data, MessageElement::Flags flags_);
 
     void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags_) override;
-
-    const EmoteData data;
+    EmotePtr getEmote() const;
 
 private:
     std::unique_ptr<TextElement> textElement_;
+    EmotePtr emote_;
 };
 
 // contains a text, formated depending on the preferences

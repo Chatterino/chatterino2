@@ -1,16 +1,28 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
 #include <QThread>
 
+class Application;
+class Paths;
+
 namespace chatterino {
-class NativeMessaging final
+
+void registerNmHost(Application &app);
+std::string &getNmQueueName(Paths &paths);
+
+class NativeMessagingClient final
 {
 public:
-    // fourtf: don't add this class to the application class
-    NativeMessaging();
+    void sendMessage(const QByteArray &array);
+    void writeToCout(const QByteArray &array);
+};
 
+class NativeMessagingServer final
+{
+public:
+    void start();
+
+private:
     class ReceiverThread : public QThread
     {
     public:
@@ -20,12 +32,7 @@ public:
         void handleMessage(const QJsonObject &root);
     };
 
-    void writeByteArray(QByteArray a);
-    void registerHost();
-    void openGuiMessageQueue();
-    void sendToGuiProcess(const QByteArray &array);
-
-    static std::string &getGuiMessageQueueName();
+    ReceiverThread thread;
 };
 
 }  // namespace chatterino

@@ -12,7 +12,7 @@ HighlightController::HighlightController()
 {
 }
 
-void HighlightController::initialize(Application &app)
+void HighlightController::initialize(Settings &settings, Paths &paths)
 {
     assert(!this->initialized_);
     this->initialized_ = true;

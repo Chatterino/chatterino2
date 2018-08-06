@@ -17,13 +17,11 @@ public:
     virtual ~AbstractIrcServer() = default;
 
     // connection
-    IrcConnection *getReadConnection() const;
-    IrcConnection *getWriteConnection() const;
-
     void connect();
     void disconnect();
 
     void sendMessage(const QString &channelName, const QString &message);
+    void sendRawMessage(const QString &rawMessage);
 
     // channels
     std::shared_ptr<Channel> getOrAddChannel(const QString &dirtyChannelName);
@@ -54,6 +52,7 @@ protected:
 
     virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelName);
 
+    virtual bool hasSeparateWriteConnection() const = 0;
     virtual QString cleanChannelName(const QString &dirtyChannelName);
 
     QMap<QString, std::weak_ptr<Channel>> channels;

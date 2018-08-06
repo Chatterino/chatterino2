@@ -6,7 +6,10 @@
 
 namespace chatterino {
 
-class WindowManager : public Singleton
+class Settings;
+class Paths;
+
+class WindowManager final : public Singleton
 {
 public:
     WindowManager();
@@ -36,7 +39,7 @@ public:
     int windowCount();
     Window *windowAt(int index);
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
 

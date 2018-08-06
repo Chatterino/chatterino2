@@ -29,12 +29,11 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(1, 1);
     layout->setColumnStretch(3, 1);
 
-    QPushButton *move = new QPushButton(getApp()->resources->split.move, QString());
-    QPushButton *left = this->left_ = new QPushButton(getApp()->resources->split.left, QString());
-    QPushButton *right = this->right_ =
-        new QPushButton(getApp()->resources->split.right, QString());
-    QPushButton *up = this->up_ = new QPushButton(getApp()->resources->split.up, QString());
-    QPushButton *down = this->down_ = new QPushButton(getApp()->resources->split.down, QString());
+    auto *move = new QPushButton(getApp()->resources->split.move, QString());
+    auto *left = this->left_ = new QPushButton(getApp()->resources->split.left, QString());
+    auto *right = this->right_ = new QPushButton(getApp()->resources->split.right, QString());
+    auto *up = this->up_ = new QPushButton(getApp()->resources->split.up, QString());
+    auto *down = this->down_ = new QPushButton(getApp()->resources->split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));

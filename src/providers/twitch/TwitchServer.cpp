@@ -28,26 +28,26 @@ TwitchServer::TwitchServer()
     qDebug() << "init TwitchServer";
 
     this->pubsub = new PubSub;
+
+    // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) { this->connect(); },
+    //                                                     this->signalHolder_, false);
 }
 
-void TwitchServer::initialize(Application &app)
+void TwitchServer::initialize(Settings &settings, Paths &paths)
 {
-    this->app = &app;
-
-    app.accounts->twitch.currentUserChanged.connect(
+    getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
 {
-    assert(this->app);
+    this->singleConnection_ = isRead == isWrite;
 
     std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
-    //    QString oauthClient = account->getOAuthClient();
     QString oauthToken = account->getOAuthToken();
 
     if (!oauthToken.startsWith("oauth:")) {
@@ -60,9 +60,6 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
 
     if (!account->isAnon()) {
         connection->setPassword(oauthToken);
-
-        // fourtf: ignored users
-        //        this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
     connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
@@ -75,7 +72,7 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    TwitchChannel *channel = new TwitchChannel(channelName, this->getReadConnection());
+    TwitchChannel *channel = new TwitchChannel(channelName);
 
     channel->sendMessageSignal.connect([this, channel](auto &chan, auto &msg, bool &sent) {
         this->onMessageSendRequested(channel, msg, sent);
@@ -91,6 +88,8 @@ void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
 void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
+    qDebug() << message->toData();
+
     //    this->readConnection
     if (message->type() == Communi::IrcMessage::Type::Private) {
         // We already have a handler for private messages
@@ -179,6 +178,12 @@ QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
     return dirtyChannelName.toLower();
 }
 
+bool TwitchServer::hasSeparateWriteConnection() const
+{
+    return true;
+    // return getSettings()->twitchSeperateWriteConnection;
+}
+
 void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString &message,
                                           bool &sent)
 {
@@ -227,7 +232,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         lastMessage.push(now);
     }
 
-    this->sendMessage(channel->name, message);
+    this->sendMessage(channel->getName(), message);
     sent = true;
 }
 

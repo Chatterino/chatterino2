@@ -10,16 +10,19 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class UserHighlightModel;
 class HighlightModel;
 class HighlightBlacklistModel;
 
-class HighlightController : public Singleton
+class HighlightController final : public Singleton
 {
 public:
     HighlightController();
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     UnsortedSignalVector<HighlightPhrase> phrases;
     UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;

@@ -1,12 +1,12 @@
 #pragma once
 
+#include "common/Singleton.hpp"
 #include "singletons/Resources.hpp"
 
 #include <QApplication>
+#include <memory>
 
 namespace chatterino {
-
-class Singleton;
 
 class TwitchServer;
 class PubSub;
@@ -24,45 +24,47 @@ class Logging;
 class Paths;
 class AccountManager;
 class Emotes;
-class NativeMessaging;
 class Settings;
 class Fonts;
 class Resources;
 
 class Application
 {
-    Application(int _argc, char **_argv);
+    std::vector<std::unique_ptr<Singleton>> singletons_;
+    int argc_;
+    char **argv_;
 
 public:
-    static void instantiate(int argc_, char **argv_);
+    static Application *instance;
 
-    ~Application() = delete;
+    Application(Settings &settings, Paths &paths);
 
-    void construct();
-    void initialize();
+    void initialize(Settings &settings, Paths &paths);
     void load();
+    void save();
 
     int run(QApplication &qtApp);
 
     friend void test();
 
-    [[deprecated("use getSettings() instead")]] Settings *settings = nullptr;
-    [[deprecated("use getPaths() instead")]] Paths *paths = nullptr;
+    Settings *const settings = nullptr;
+    Paths *const paths = nullptr;
+    Resources2 *const resources;
 
-    Theme *themes = nullptr;
-    WindowManager *windows = nullptr;
-    Logging *logging = nullptr;
-    CommandController *commands = nullptr;
-    HighlightController *highlights = nullptr;
-    IgnoreController *ignores = nullptr;
-    TaggedUsersController *taggedUsers = nullptr;
-    AccountController *accounts = nullptr;
-    Emotes *emotes = nullptr;
-    NativeMessaging *nativeMessaging = nullptr;
-    Fonts *fonts = nullptr;
-    Resources *resources = nullptr;
-    ModerationActions *moderationActions = nullptr;
-    TwitchServer *twitch2 = nullptr;
+    Theme *const themes = nullptr;
+    Fonts *const fonts = nullptr;
+    Emotes *const emotes = nullptr;
+    WindowManager *const windows = nullptr;
+
+    AccountController *const accounts = nullptr;
+    CommandController *const commands = nullptr;
+    HighlightController *const highlights = nullptr;
+    IgnoreController *const ignores = nullptr;
+    TaggedUsersController *const taggedUsers = nullptr;
+    ModerationActions *const moderationActions = nullptr;
+    TwitchServer *const twitch2 = nullptr;
+
+    [[deprecated]] Logging *const logging = nullptr;
 
     /// Provider-specific
     struct {
@@ -70,22 +72,20 @@ public:
         [[deprecated("use twitch2->pubsub instead")]] PubSub *pubsub = nullptr;
     } twitch;
 
-    void save();
-
-    // Special application mode that only initializes the native messaging host
-    static void runNativeMessagingHost();
-
 private:
     void addSingleton(Singleton *singleton);
+    void initPubsub();
+    void initNm();
 
-    int argc_;
-    char **argv_;
-
-    std::vector<Singleton *> singletons_;
+    template <typename T, typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
+    T &emplace()
+    {
+        auto t = new T;
+        this->singletons_.push_back(std::unique_ptr<T>(t));
+        return *t;
+    }
 };
 
 Application *getApp();
-
-bool appInitialized();
 
 }  // namespace chatterino

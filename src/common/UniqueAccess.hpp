@@ -10,52 +10,52 @@ class AccessGuard
 {
 public:
     AccessGuard(T &element, std::mutex &mutex)
-        : element_(element)
-        , mutex_(mutex)
+        : element_(&element)
+        , mutex_(&mutex)
     {
-        this->mutex_.lock();
+        this->mutex_->lock();
+    }
+
+    AccessGuard(AccessGuard<T> &&other)
+        : element_(other.element_)
+        , mutex_(other.mutex_)
+    {
+        other.isValid_ = false;
+    }
+
+    AccessGuard<T> &operator=(AccessGuard<T> &&other)
+    {
+        other.isValid_ = false;
+        this->element_ = other.element_;
+        this->mutex_ = other.element_;
     }
 
     ~AccessGuard()
     {
-        this->mutex_.unlock();
+        if (this->isValid_) this->mutex_->unlock();
     }
 
-    const T *operator->() const
-    {
-        return &this->element_;
-    }
-
-    T *operator->()
-    {
-        return &this->element_;
-    }
-
-    const T &operator*() const
+    T *operator->() const
     {
         return this->element_;
     }
 
-    T &operator*()
+    T &operator*() const
     {
-        return this->element_;
-    }
-
-    T clone() const
-    {
-        return T(this->element_);
+        return *this->element_;
     }
 
 private:
-    T &element_;
-    std::mutex &mutex_;
+    T *element_;
+    std::mutex *mutex_;
+    bool isValid_ = true;
 };
 
 template <typename T>
 class UniqueAccess
 {
 public:
-    template <typename X = decltype(T())>
+    //    template <typename X = decltype(T())>
     UniqueAccess()
         : element_(T())
     {
@@ -83,14 +83,15 @@ public:
         return *this;
     }
 
-    AccessGuard<T> access()
+    AccessGuard<T> access() const
     {
         return AccessGuard<T>(this->element_, this->mutex_);
     }
 
-    const AccessGuard<T> access() const
+    template <typename X = T, typename = std::enable_if_t<!std::is_const_v<X>>>
+    AccessGuard<const X> accessConst() const
     {
-        return AccessGuard<T>(this->element_, this->mutex_);
+        return AccessGuard<const T>(this->element_, this->mutex_);
     }
 
 private:

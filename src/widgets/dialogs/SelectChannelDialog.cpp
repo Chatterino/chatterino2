@@ -154,7 +154,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
         case Channel::Type::Twitch: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
-            this->ui_.twitch.channelName->setText(channel->name);
+            this->ui_.twitch.channelName->setText(channel->getName());
         } break;
         case Channel::Type::TwitchWatching: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);

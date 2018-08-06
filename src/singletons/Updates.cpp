@@ -67,7 +67,7 @@ void Updates::installUpdates()
         return true;
     });
 
-    req.onSuccess([this](auto result) -> bool {
+    req.onSuccess([this](auto result) -> Outcome {
         QByteArray object = result.getData();
         auto filename = combinePath(getPaths()->miscDirectory, "update.zip");
 
@@ -76,7 +76,7 @@ void Updates::installUpdates()
 
         if (file.write(object) == -1) {
             this->setStatus_(WriteFileFailed);
-            return false;
+            return Failure;
         }
 
         QProcess::startDetached(
@@ -84,7 +84,7 @@ void Updates::installUpdates()
             {filename, "restart"});
 
         QApplication::exit(0);
-        return false;
+        return Success;
     });
     this->setStatus_(Downloading);
     req.execute();
@@ -98,7 +98,7 @@ void Updates::checkForUpdates()
 
     NetworkRequest req(url);
     req.setTimeout(30000);
-    req.onSuccess([this](auto result) -> bool {
+    req.onSuccess([this](auto result) -> Outcome {
         auto object = result.parseJson();
         QJsonValue version_val = object.value("version");
         QJsonValue update_val = object.value("update");
@@ -116,7 +116,7 @@ void Updates::checkForUpdates()
                 box->show();
                 box->raise();
             });
-            return false;
+            return Failure;
         }
 
         this->onlineVersion_ = version_val.toString();
@@ -140,7 +140,7 @@ void Updates::checkForUpdates()
         } else {
             this->setStatus_(NoUpdateAvailable);
         }
-        return false;
+        return Failure;
     });
     this->setStatus_(Searching);
     req.execute();

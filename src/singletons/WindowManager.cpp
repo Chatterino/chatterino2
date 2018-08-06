@@ -209,11 +209,12 @@ Window *WindowManager::windowAt(int index)
     return this->windows_.at(index);
 }
 
-void WindowManager::initialize(Application &app)
+void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    app.themes->repaintVisibleChatWidgets_.connect([this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect(
+        [this] { this->repaintVisibleChatWidgets(); });
 
     assert(!this->initialized_);
 
@@ -303,20 +304,15 @@ void WindowManager::initialize(Application &app)
         mainWindow_->getNotebook().addPage(true);
     }
 
-    auto settings = getSettings();
+    settings.timestampFormat.connect([this](auto, auto) { this->layoutChannelViews(); });
 
-    settings->timestampFormat.connect([this](auto, auto) {
-        auto app = getApp();
-        this->layoutChannelViews();
-    });
+    settings.emoteScale.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
 
-    settings->emoteScale.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-
-    settings->timestampFormat.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->alternateMessageBackground.connect(
+    settings.timestampFormat.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.alternateMessageBackground.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->separateMessages.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->collpseMessagesMinLines.connect(
+    settings.separateMessages.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.collpseMessagesMinLines.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
 
     this->initialized_ = true;
@@ -440,7 +436,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
     switch (channel.getType()) {
         case Channel::Type::Twitch: {
             obj.insert("type", "twitch");
-            obj.insert("name", channel.get()->name);
+            obj.insert("name", channel.get()->getName());
         } break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");

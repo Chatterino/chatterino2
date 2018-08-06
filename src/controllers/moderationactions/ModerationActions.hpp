@@ -8,6 +8,9 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class ModerationActionModel;
 
 class ModerationActions final : public Singleton
@@ -15,7 +18,7 @@ class ModerationActions final : public Singleton
 public:
     ModerationActions();
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     UnsortedSignalVector<ModerationAction> items;
 

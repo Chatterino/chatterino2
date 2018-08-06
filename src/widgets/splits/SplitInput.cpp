@@ -130,7 +130,7 @@ void SplitInput::updateEmoteButton()
 {
     float scale = this->getScale();
 
-    QString text = "<img src=':/images/emote.svg' width='xD' height='xD' />";
+    QString text = "<img src=':/buttons/emote.svg' width='xD' height='xD' />";
     text.replace("xD", QString::number(int(12 * scale)));
 
     if (this->theme->isLightTheme()) {
@@ -254,7 +254,7 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
             if (this->split_->view_.hasSelection()) {
-                this->split_->doCopy();
+                this->split_->copyToClipboard();
                 event->accept();
             }
         }

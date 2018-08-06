@@ -32,6 +32,58 @@
 #define CHAT_HOVER_PAUSE_DURATION 1000
 
 namespace chatterino {
+namespace {
+void addEmoteContextMenuItems(const Emote &emote, MessageElement::Flags creatorFlags, QMenu &menu)
+{
+    auto openAction = menu.addAction("Open");
+    auto openMenu = new QMenu;
+    openAction->setMenu(openMenu);
+
+    auto copyAction = menu.addAction("Copy");
+    auto copyMenu = new QMenu;
+    copyAction->setMenu(copyMenu);
+
+    // see if the QMenu actually gets destroyed
+    QObject::connect(openMenu, &QMenu::destroyed, [] {
+        QMessageBox(QMessageBox::Information, "xD", "the menu got deleted").exec();
+    });
+
+    // Add copy and open links for 1x, 2x, 3x
+    auto addImageLink = [&](const ImagePtr &image, char scale) {
+        if (!image->empty()) {
+            copyMenu->addAction(QString(scale) + "x link", [url = image->url()] {
+                QApplication::clipboard()->setText(url.string);
+            });
+            openMenu->addAction(QString(scale) + "x link", [url = image->url()] {
+                QDesktopServices::openUrl(QUrl(url.string));
+            });
+        }
+    };
+
+    addImageLink(emote.images.getImage1(), '1');
+    addImageLink(emote.images.getImage2(), '2');
+    addImageLink(emote.images.getImage3(), '3');
+
+    // Copy and open emote page link
+    auto addPageLink = [&](const QString &name) {
+        copyMenu->addSeparator();
+        openMenu->addSeparator();
+
+        copyMenu->addAction("Copy " + name + " emote link", [url = emote.homePage] {
+            QApplication::clipboard()->setText(url.string);  //
+        });
+        openMenu->addAction("Open " + name + " emote link", [url = emote.homePage] {
+            QDesktopServices::openUrl(QUrl(url.string));  //
+        });
+    };
+
+    if (creatorFlags & MessageElement::Flags::BttvEmote) {
+        addPageLink("BTTV");
+    } else if (creatorFlags & MessageElement::Flags::FfzEmote) {
+        addPageLink("FFZ");
+    }
+}
+}  // namespace
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
@@ -988,74 +1040,8 @@ void ChannelView::addContextMenuItems(const MessageLayoutElement *hoveredElement
 
     // Emote actions
     if (creatorFlags & (MessageElement::Flags::EmoteImages | MessageElement::Flags::EmojiImage)) {
-        const auto &emoteElement = static_cast<const EmoteElement &>(creator);
-
-        // TODO: We might want to add direct "Open image" variants alongside the Copy
-        // actions
-        if (emoteElement.data.image1x != nullptr) {
-            QAction *addEntry = menu->addAction("Copy emote link...");
-
-            QMenu *procmenu = new QMenu;
-            addEntry->setMenu(procmenu);
-            procmenu->addAction("Copy 1x link", [url = emoteElement.data.image1x->getUrl()] {
-                QApplication::clipboard()->setText(url);  //
-            });
-            if (emoteElement.data.image2x != nullptr) {
-                procmenu->addAction("Copy 2x link", [url = emoteElement.data.image2x->getUrl()] {
-                    QApplication::clipboard()->setText(url);  //
-                });
-            }
-            if (emoteElement.data.image3x != nullptr) {
-                procmenu->addAction("Copy 3x link", [url = emoteElement.data.image3x->getUrl()] {
-                    QApplication::clipboard()->setText(url);  //
-                });
-            }
-            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
-                procmenu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                procmenu->addAction("Copy BTTV emote link", [emotePageLink] {
-                    QApplication::clipboard()->setText(emotePageLink);  //
-                });
-            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
-                procmenu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                procmenu->addAction("Copy FFZ emote link", [emotePageLink] {
-                    QApplication::clipboard()->setText(emotePageLink);  //
-                });
-            }
-        }
-        if (emoteElement.data.image1x != nullptr) {
-            QAction *addEntry = menu->addAction("Open emote link...");
-
-            QMenu *procmenu = new QMenu;
-            addEntry->setMenu(procmenu);
-            procmenu->addAction("Open 1x link", [url = emoteElement.data.image1x->getUrl()] {
-                QDesktopServices::openUrl(QUrl(url));  //
-            });
-            if (emoteElement.data.image2x != nullptr) {
-                procmenu->addAction("Open 2x link", [url = emoteElement.data.image2x->getUrl()] {
-                    QDesktopServices::openUrl(QUrl(url));  //
-                });
-            }
-            if (emoteElement.data.image3x != nullptr) {
-                procmenu->addAction("Open 3x link", [url = emoteElement.data.image3x->getUrl()] {
-                    QDesktopServices::openUrl(QUrl(url));  //
-                });
-            }
-            if ((creatorFlags & MessageElement::Flags::BttvEmote) != 0) {
-                procmenu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                procmenu->addAction("Open BTTV emote link", [emotePageLink] {
-                    QDesktopServices::openUrl(QUrl(emotePageLink));  //
-                });
-            } else if ((creatorFlags & MessageElement::Flags::FfzEmote) != 0) {
-                procmenu->addSeparator();
-                QString emotePageLink = emoteElement.data.pageLink;
-                procmenu->addAction("Open FFZ emote link", [emotePageLink] {
-                    QDesktopServices::openUrl(QUrl(emotePageLink));  //
-                });
-            }
-        }
+        const auto emoteElement = dynamic_cast<const EmoteElement *>(&creator);
+        if (emoteElement) addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags, *menu);
     }
 
     // add seperator
@@ -1204,8 +1190,7 @@ bool ChannelView::tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &_mes
 
 int ChannelView::getLayoutWidth() const
 {
-    if (this->scrollBar_.isVisible())
-        return int(this->width() - 8 * this->getScale());
+    if (this->scrollBar_.isVisible()) return int(this->width() - 8 * this->getScale());
 
     return this->width();
 }

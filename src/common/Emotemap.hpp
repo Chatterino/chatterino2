@@ -5,23 +5,23 @@
 
 namespace chatterino {
 
-struct EmoteData {
-    EmoteData() = default;
+// struct EmoteData {
+//    EmoteData() = default;
 
-    EmoteData(Image *image);
+//    EmoteData(Image *image);
 
-    // Emotes must have a 1x image to be valid
-    bool isValid() const;
-    Image *getImage(float scale) const;
+//    // Emotes must have a 1x image to be valid
+//    bool isValid() const;
+//    Image *getImage(float scale) const;
 
-    // Link to the emote page i.e. https://www.frankerfacez.com/emoticon/144722-pajaCringe
-    QString pageLink;
+//    // Link to the emote page i.e. https://www.frankerfacez.com/emoticon/144722-pajaCringe
+//    QString pageLink;
 
-    Image *image1x = nullptr;
-    Image *image2x = nullptr;
-    Image *image3x = nullptr;
-};
+//    Image *image1x = nullptr;
+//    Image *image2x = nullptr;
+//    Image *image3x = nullptr;
+//};
 
-using EmoteMap = ConcurrentMap<QString, EmoteData>;
+// using EmoteMap = ConcurrentMap<QString, EmoteData>;
 
 }  // namespace chatterino

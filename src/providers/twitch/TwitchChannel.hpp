@@ -6,12 +6,14 @@
 #include "common/Common.hpp"
 #include "common/MutexValue.hpp"
 #include "common/UniqueAccess.hpp"
+#include "messages/Emote.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/ConcurrentMap.hpp"
 
 #include <pajlada/signals/signalholder.hpp>
 
 #include <mutex>
+#include <unordered_map>
 
 namespace chatterino {
 
@@ -64,15 +66,19 @@ public:
 
     QString getRoomId() const;
     void setRoomId(const QString &id);
-    const AccessGuard<RoomModes> accessRoomModes() const;
+    AccessGuard<const RoomModes> accessRoomModes() const;
     void setRoomModes(const RoomModes &roomModes_);
-    const AccessGuard<StreamStatus> accessStreamStatus() const;
+    AccessGuard<const StreamStatus> accessStreamStatus() const;
 
-    const EmoteMap &getFfzEmotes() const;
-    const EmoteMap &getBttvEmotes() const;
+    boost::optional<EmotePtr> getBttvEmote(const EmoteName &name) const;
+    boost::optional<EmotePtr> getFfzEmote(const EmoteName &name) const;
+    AccessGuard<const EmoteMap> accessBttvEmotes() const;
+    AccessGuard<const EmoteMap> accessFfzEmotes() const;
     const QString &getSubscriptionUrl();
     const QString &getChannelUrl();
     const QString &getPopoutPlayerUrl();
+
+    boost::optional<EmotePtr> getTwitchBadge(const QString &set, const QString &version) const;
 
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
@@ -86,26 +92,43 @@ private:
         QString localizedName;
     };
 
-    explicit TwitchChannel(const QString &channelName, Communi::IrcConnection *readConnection);
+    struct CheerEmote {
+        // a Cheermote indicates one tier
+        QColor color;
+        int minBits;
+
+        EmotePtr animatedEmote;
+        EmotePtr staticEmote;
+    };
+
+    struct CheerEmoteSet {
+        QRegularExpression regex;
+        std::vector<CheerEmote> cheerEmotes;
+    };
+
+    explicit TwitchChannel(const QString &channelName);
 
     // Methods
     void refreshLiveStatus();
-    bool parseLiveStatus(const rapidjson::Document &document);
+    Outcome parseLiveStatus(const rapidjson::Document &document);
     void refreshPubsub();
     void refreshViewerList();
-    bool parseViewerList(const QJsonObject &jsonRoot);
+    Outcome parseViewerList(const QJsonObject &jsonRoot);
     void loadRecentMessages();
-    bool parseRecentMessages(const QJsonObject &jsonRoot);
+    Outcome parseRecentMessages(const QJsonObject &jsonRoot);
 
     void setLive(bool newLiveStatus);
+
+    void loadBadges();
+    void loadCheerEmotes();
 
     // Twitch data
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<UserState> userState_;
     UniqueAccess<RoomModes> roomModes_;
 
-    const std::shared_ptr<EmoteMap> bttvEmotes_;
-    const std::shared_ptr<EmoteMap> ffzEmotes_;
+    UniqueAccess<EmoteMap> bttvEmotes_;
+    UniqueAccess<EmoteMap> ffzEmotes_;
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
@@ -118,13 +141,16 @@ private:
     UniqueAccess<QStringList> partedUsers_;
     bool partedUsersMergeQueued_ = false;
 
+    // "subscribers": { "0": ... "3": ... "6": ...
+    UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>> badgeSets_;
+    std::vector<CheerEmoteSet> cheerEmoteSets_;
+
     // --
     QByteArray messageSuffix_;
     QString lastSentMessage_;
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-    Communi::IrcConnection *readConnection_ = nullptr;
 
     friend class TwitchServer;
 };

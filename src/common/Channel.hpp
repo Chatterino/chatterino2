@@ -41,6 +41,7 @@ public:
     pajlada::Signals::NoArgSignal destroyed;
 
     Type getType() const;
+    const QString &getName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
@@ -52,7 +53,6 @@ public:
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     virtual void addRecentChatter(const std::shared_ptr<Message> &message);
 
-    QString name;
     QStringList modList;
 
     virtual bool canSendMessage() const;
@@ -72,6 +72,7 @@ protected:
     virtual void onConnected();
 
 private:
+    const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
     QTimer clearCompletionModelTimer_;

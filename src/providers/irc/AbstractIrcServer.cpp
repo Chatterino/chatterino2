@@ -35,26 +35,18 @@ AbstractIrcServer::AbstractIrcServer()
     //    this->writeConnection->reconnectRequested.connect([this] { this->connect(); });
 }
 
-IrcConnection *AbstractIrcServer::getReadConnection() const
-{
-    return this->readConnection_.get();
-}
-
-IrcConnection *AbstractIrcServer::getWriteConnection() const
-{
-    return this->writeConnection_.get();
-}
-
 void AbstractIrcServer::connect()
 {
     this->disconnect();
 
-    //    if (this->hasSeparateWriteConnection()) {
-    this->initializeConnection(this->writeConnection_.get(), false, true);
-    this->initializeConnection(this->readConnection_.get(), true, false);
-    //    } else {
-    //        this->initializeConnection(this->readConnection.get(), true, true);
-    //    }
+    bool separateWriteConnection = this->hasSeparateWriteConnection();
+
+    if (separateWriteConnection) {
+        this->initializeConnection(this->writeConnection_.get(), false, true);
+        this->initializeConnection(this->readConnection_.get(), true, false);
+    } else {
+        this->initializeConnection(this->readConnection_.get(), true, true);
+    }
 
     // fourtf: this should be asynchronous
     {
@@ -62,13 +54,9 @@ void AbstractIrcServer::connect()
         std::lock_guard<std::mutex> lock2(this->channelMutex);
 
         for (std::weak_ptr<Channel> &weak : this->channels.values()) {
-            std::shared_ptr<Channel> chan = weak.lock();
-            if (!chan) {
-                continue;
+            if (auto channel = std::shared_ptr<Channel>(weak.lock())) {
+                this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
-
-            this->writeConnection_->sendRaw("JOIN #" + chan->name);
-            this->readConnection_->sendRaw("JOIN #" + chan->name);
         }
 
         this->writeConnection_->open();
@@ -89,12 +77,17 @@ void AbstractIrcServer::disconnect()
 
 void AbstractIrcServer::sendMessage(const QString &channelName, const QString &message)
 {
+    this->sendRawMessage("PRIVMSG #" + channelName + " :" + message);
+}
+
+void AbstractIrcServer::sendRawMessage(const QString &rawMessage)
+{
     std::lock_guard<std::mutex> locker(this->connectionMutex_);
 
-    // fourtf: trim the message if it's sent from twitch chat
-
-    if (this->writeConnection_) {
-        this->writeConnection_->sendRaw("PRIVMSG #" + channelName + " :" + message);
+    if (this->hasSeparateWriteConnection()) {
+        this->writeConnection_->sendRaw(rawMessage);
+    } else {
+        this->readConnection_->sendRaw(rawMessage);
     }
 }
 

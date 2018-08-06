@@ -1,12 +1,44 @@
 #include "providers/twitch/TwitchAccount.hpp"
 
+#include <QThread>
+
+#include "Application.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
+
+namespace {
+
+EmoteName cleanUpCode(const EmoteName &dirtyEmoteCode)
+{
+    auto cleanCode = dirtyEmoteCode.string;
+    cleanCode.detach();
+
+    static QMap<QString, QString> emoteNameReplacements{
+        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("}, {"\\&lt\\;3", "&lt;3"},
+        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},     {"\\:-?[\\\\/]", ":/"},
+        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},       {"\\:-?\\)", ":)"},
+        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},     {"\\;-?\\)", ";)"},
+        {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
+    };
+
+    auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
+    if (it != emoteNameReplacements.end()) {
+        cleanCode = it.value();
+    }
+
+    cleanCode.replace("&lt;", "<");
+    cleanCode.replace("&gt;", ">");
+
+    return {cleanCode};
+}
+
+}  // namespace
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
@@ -78,20 +110,20 @@ void TwitchAccount::loadIgnores()
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
-    req.onSuccess([=](auto result) {
+    req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
         if (!document.IsObject()) {
-            return false;
+            return Failure;
         }
 
         auto blocksIt = document.FindMember("blocks");
         if (blocksIt == document.MemberEnd()) {
-            return false;
+            return Failure;
         }
         const auto &blocks = blocksIt->value;
 
         if (!blocks.IsArray()) {
-            return false;
+            return Failure;
         }
 
         {
@@ -116,7 +148,7 @@ void TwitchAccount::loadIgnores()
             }
         }
 
-        return true;
+        return Success;
     });
 
     req.execute();
@@ -148,25 +180,25 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
         return true;
     });
 
-    req.onSuccess([=](auto result) {
+    req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
         if (!document.IsObject()) {
             onFinished(IgnoreResult_Failed, "Bad JSON data while ignoring user " + targetName);
-            return false;
+            return Failure;
         }
 
         auto userIt = document.FindMember("user");
         if (userIt == document.MemberEnd()) {
             onFinished(IgnoreResult_Failed,
                        "Bad JSON data while ignoring user (missing user) " + targetName);
-            return false;
+            return Failure;
         }
 
         TwitchUser ignoredUser;
         if (!rj::getSafe(userIt->value, ignoredUser)) {
             onFinished(IgnoreResult_Failed,
                        "Bad JSON data while ignoring user (invalid user) " + targetName);
-            return false;
+            return Failure;
         }
         {
             std::lock_guard<std::mutex> lock(this->ignoresMutex_);
@@ -177,12 +209,12 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
                 existingUser.update(ignoredUser);
                 onFinished(IgnoreResult_AlreadyIgnored,
                            "User " + targetName + " is already ignored");
-                return false;
+                return Failure;
             }
         }
         onFinished(IgnoreResult_Success, "Successfully ignored user " + targetName);
 
-        return true;
+        return Success;
     });
 
     req.execute();
@@ -217,7 +249,7 @@ void TwitchAccount::unignoreByID(
         return true;
     });
 
-    req.onSuccess([=](auto result) {
+    req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
         TwitchUser ignoredUser;
         ignoredUser.id = targetUserID;
@@ -228,7 +260,7 @@ void TwitchAccount::unignoreByID(
         }
         onFinished(UnignoreResult_Success, "Successfully unignored user " + targetName);
 
-        return true;
+        return Success;
     });
 
     req.execute();
@@ -254,10 +286,10 @@ void TwitchAccount::checkFollow(const QString targetUserID,
         return true;
     });
 
-    req.onSuccess([=](auto result) {
+    req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
         onFinished(FollowResult_Following);
-        return true;
+        return Success;
     });
 
     req.execute();
@@ -274,10 +306,10 @@ void TwitchAccount::followUser(const QString userID, std::function<void()> succe
     request.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     // TODO: Properly check result of follow request
-    request.onSuccess([successCallback](auto result) {
+    request.onSuccess([successCallback](auto result) -> Outcome {
         successCallback();
 
-        return true;
+        return Success;
     });
 
     request.execute();
@@ -301,10 +333,10 @@ void TwitchAccount::unfollowUser(const QString userID, std::function<void()> suc
         return true;
     });
 
-    request.onSuccess([successCallback](const auto &document) {
+    request.onSuccess([successCallback](const auto &document) -> Outcome {
         successCallback();
 
-        return true;
+        return Success;
     });
 
     request.execute();
@@ -317,7 +349,7 @@ std::set<TwitchUser> TwitchAccount::getIgnores() const
     return this->ignores_;
 }
 
-void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> cb)
+void TwitchAccount::loadEmotes()
 {
     Log("Loading Twitch emotes for user {}", this->getUserName());
 
@@ -346,9 +378,124 @@ void TwitchAccount::loadEmotes(std::function<void(const rapidjson::Document &)> 
         return true;
     });
 
-    req.onSuccess([=](auto result) {
-        cb(result.parseRapidJson());
+    req.onSuccess([=](auto result) -> Outcome {
+        this->parseEmotes(result.parseRapidJson());
+
+        return Success;
+    });
+
+    req.execute();
+}
+
+AccessGuard<const TwitchAccount::TwitchAccountEmoteData> TwitchAccount::accessEmotes() const
+{
+    return this->emotes_.accessConst();
+}
+
+void TwitchAccount::parseEmotes(const rapidjson::Document &root)
+{
+    auto emoteData = this->emotes_.access();
+
+    emoteData->emoteSets.clear();
+    emoteData->allEmoteNames.clear();
+
+    auto emoticonSets = root.FindMember("emoticon_sets");
+    if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject()) {
+        Log("No emoticon_sets in load emotes response");
+        return;
+    }
+
+    for (const auto &emoteSetJSON : emoticonSets->value.GetObject()) {
+        auto emoteSet = std::make_shared<EmoteSet>();
+
+        emoteSet->key = emoteSetJSON.name.GetString();
+
+        this->loadEmoteSetData(emoteSet);
+
+        for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray()) {
+            if (!emoteJSON.IsObject()) {
+                Log("Emote value was invalid");
+                return;
+            }
+
+            uint64_t idNumber;
+            if (!rj::getSafe(emoteJSON, "id", idNumber)) {
+                Log("No ID key found in Emote value");
+                return;
+            }
+
+            EmoteName code;
+            if (!rj::getSafe(emoteJSON, "code", code)) {
+                Log("No code key found in Emote value");
+                return;
+            }
+
+            auto id = EmoteId{QString::number(idNumber)};
+
+            auto cleanCode = cleanUpCode(code);
+            emoteSet->emotes.emplace_back(TwitchEmote{id, cleanCode});
+            emoteData->allEmoteNames.push_back(cleanCode);
+
+            auto emote = getApp()->emotes->twitch.getOrCreateEmote(id, code);
+            emoteData->emotes.emplace(code, emote);
+        }
+
+        emoteData->emoteSets.emplace_back(emoteSet);
+    }
+};
+
+void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
+{
+    if (!emoteSet) {
+        Log("null emote set sent");
+        return;
+    }
+
+    auto staticSetIt = this->staticEmoteSets.find(emoteSet->key);
+    if (staticSetIt != this->staticEmoteSets.end()) {
+        const auto &staticSet = staticSetIt->second;
+        emoteSet->channelName = staticSet.channelName;
+        emoteSet->text = staticSet.text;
+        return;
+    }
+
+    NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
+                       "/");
+    req.setUseQuickLoadCache(true);
+
+    req.onError([](int errorCode) -> bool {
+        Log("Error code {} while loading emote set data", errorCode);
         return true;
+    });
+
+    req.onSuccess([emoteSet](auto result) -> Outcome {
+        auto root = result.parseRapidJson();
+        if (!root.IsObject()) {
+            return Failure;
+        }
+
+        std::string emoteSetID;
+        QString channelName;
+        QString type;
+        if (!rj::getSafe(root, "channel_name", channelName)) {
+            return Failure;
+        }
+
+        if (!rj::getSafe(root, "type", type)) {
+            return Failure;
+        }
+
+        Log("Loaded twitch emote set data for {}!", emoteSet->key);
+
+        if (type == "sub") {
+            emoteSet->text = QString("Twitch Subscriber Emote (%1)").arg(channelName);
+        } else {
+            emoteSet->text = QString("Twitch Account Emote (%1)").arg(channelName);
+        }
+
+        emoteSet->channelName = channelName;
+
+        return Success;
     });
 
     req.execute();

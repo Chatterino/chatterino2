@@ -76,7 +76,7 @@ Split::Split(QWidget *parent)
     createShortcut(this, "CTRL+R", &Split::doChangeChannel);
 
     // CTRL+F: Search
-    createShortcut(this, "CTRL+F", &Split::doSearch);
+    createShortcut(this, "CTRL+F", &Split::showSearchPopup);
 
     // F12
     createShortcut(this, "F10", [] {
@@ -378,7 +378,7 @@ void Split::doChangeChannel()
     auto popup = this->findChildren<QDockWidget *>();
     if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating()) {
         popup.at(0)->hide();
-        doOpenViewerList();
+        showViewerList();
     }
 }
 
@@ -401,36 +401,33 @@ void Split::doClearChat()
     this->view_.clearMessages();
 }
 
-void Split::doOpenChannel()
+void Split::openInBrowser()
 {
-    ChannelPtr _channel = this->getChannel();
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
+    auto channel = this->getChannel();
 
-    if (tc != nullptr) {
-        QDesktopServices::openUrl("https://twitch.tv/" + tc->name);
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        QDesktopServices::openUrl("https://twitch.tv/" + twitchChannel->getName());
     }
 }
 
-void Split::doOpenPopupPlayer()
+void Split::openInPopupPlayer()
 {
-    ChannelPtr _channel = this->getChannel();
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
-
-    if (tc != nullptr) {
-        QDesktopServices::openUrl("https://player.twitch.tv/?channel=" + tc->name);
+    ChannelPtr channel = this->getChannel();
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+        QDesktopServices::openUrl("https://player.twitch.tv/?channel=" + twitchChannel->getName());
     }
 }
 
-void Split::doOpenStreamlink()
+void Split::openInStreamlink()
 {
     try {
-        openStreamlinkForChannel(this->getChannel()->name);
+        openStreamlinkForChannel(this->getChannel()->getName());
     } catch (const Exception &ex) {
         Log("Error in doOpenStreamlink: {}", ex.what());
     }
 }
 
-void Split::doOpenViewerList()
+void Split::showViewerList()
 {
     auto viewerDock = new QDockWidget("Viewer List", this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -458,10 +455,10 @@ void Split::doOpenViewerList()
     auto loadingLabel = new QLabel("Loading...");
 
     auto request = NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
-                                                 this->getChannel()->name + "/chatters");
+                                                 this->getChannel()->getName() + "/chatters");
 
     request.setCaller(this);
-    request.onSuccess([=](auto result) {
+    request.onSuccess([=](auto result) -> Outcome {
         auto obj = result.parseJson();
         QJsonObject chattersObj = obj.value("chatters").toObject();
 
@@ -472,7 +469,7 @@ void Split::doOpenViewerList()
                 chattersList->addItem(v.toString());
         }
 
-        return true;
+        return Success;
     });
 
     request.execute();
@@ -485,8 +482,7 @@ void Split::doOpenViewerList()
             chattersList->hide();
             resultList->clear();
             for (auto &item : results) {
-                if (!labels.contains(item->text()))
-                    resultList->addItem(item->text());
+                if (!labels.contains(item->text())) resultList->addItem(item->text());
             }
             resultList->show();
         } else {
@@ -500,13 +496,13 @@ void Split::doOpenViewerList()
 
     QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(chattersList->currentItem()->text())) {
-            doOpenUserInfoPopup(chattersList->currentItem()->text());
+            showUserInfoPopup(chattersList->currentItem()->text());
         }
     });
 
     QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
         if (!labels.contains(resultList->currentItem()->text())) {
-            doOpenUserInfoPopup(resultList->currentItem()->text());
+            showUserInfoPopup(resultList->currentItem()->text());
         }
     });
 
@@ -522,22 +518,22 @@ void Split::doOpenViewerList()
     viewerDock->show();
 }
 
-void Split::doOpenUserInfoPopup(const QString &user)
+void Split::showUserInfoPopup(const UserName &user)
 {
     auto *userPopup = new UserInfoPopup;
-    userPopup->setData(user, this->getChannel());
+    userPopup->setData(user.string, this->getChannel());
     userPopup->setAttribute(Qt::WA_DeleteOnClose);
     userPopup->move(QCursor::pos() -
                     QPoint(int(150 * this->getScale()), int(70 * this->getScale())));
     userPopup->show();
 }
 
-void Split::doCopy()
+void Split::copyToClipboard()
 {
     QApplication::clipboard()->setText(this->view_.getSelectedText());
 }
 
-void Split::doSearch()
+void Split::showSearchPopup()
 {
     SearchPopup *popup = new SearchPopup();
 
@@ -563,26 +559,19 @@ static Iter select_randomly(Iter start, Iter end)
 
 void Split::drag()
 {
-    auto container = dynamic_cast<SplitContainer *>(this->parentWidget());
-
-    if (container != nullptr) {
+    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget())) {
         SplitContainer::isDraggingSplit = true;
         SplitContainer::draggingSplit = this;
 
         auto originalLocation = container->releaseSplit(this);
-
-        QDrag *drag = new QDrag(this);
-        QMimeData *mimeData = new QMimeData;
+        auto drag = new QDrag(this);
+        auto mimeData = new QMimeData;
 
         mimeData->setData("chatterino/split", "xD");
-
         drag->setMimeData(mimeData);
 
-        Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
-
-        if (dropAction == Qt::IgnoreAction) {
-            container->insertSplit(this,
-                                   originalLocation);  // SplitContainer::dragOriginalPosition);
+        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction) {
+            container->insertSplit(this, originalLocation);
         }
 
         SplitContainer::isDraggingSplit = false;

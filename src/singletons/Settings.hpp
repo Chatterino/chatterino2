@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Paths.hpp"
+
 #include "common/ChatterinoSetting.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
@@ -14,13 +16,12 @@ void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> set
 
 class Settings
 {
-    Settings();
+    static Settings *instance;
 
 public:
-    static Settings &getInstance();
+    Settings(Paths &paths);
 
-    void initialize();
-    void load();
+    static Settings &getInstance();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -59,6 +60,8 @@ public:
     BoolSetting showJoins = {"/behaviour/showJoins", false};
     BoolSetting showParts = {"/behaviour/showParts", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
+    // BoolSetting twitchSeperateWriteConnection = {"/behaviour/twitchSeperateWriteConnection",
+    // false};
 
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {
@@ -136,6 +139,6 @@ private:
     std::unique_ptr<rapidjson::Document> snapshot_;
 };
 
-Settings *getSettings();
+[[deprecated]] Settings *getSettings();
 
 }  // namespace chatterino

@@ -4,6 +4,7 @@
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
+#include <QJsonArray>
 #include <cassert>
 
 namespace chatterino {
@@ -36,32 +37,32 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback, cons
     request.setCaller(caller);
     request.makeAuthorizedV5(getDefaultClientID());
 
-    request.onSuccess([successCallback](auto result) {
+    request.onSuccess([successCallback](auto result) -> Outcome {
         auto root = result.parseJson();
         if (!root.value("users").isArray()) {
             Log("API Error while getting user id, users is not an array");
-            return false;
+            return Failure;
         }
 
         auto users = root.value("users").toArray();
         if (users.size() != 1) {
             Log("API Error while getting user id, users array size is not 1");
-            return false;
+            return Failure;
         }
         if (!users[0].isObject()) {
             Log("API Error while getting user id, first user is not an object");
-            return false;
+            return Failure;
         }
         auto firstUser = users[0].toObject();
         auto id = firstUser.value("_id");
         if (!id.isString()) {
             Log("API Error: while getting user id, first user object `_id` key is not a "
                 "string");
-            return false;
+            return Failure;
         }
         successCallback(id.toString());
 
-        return true;
+        return Success;
     });
 
     request.execute();

@@ -1,5 +1,6 @@
 #include "ModerationAction.hpp"
 
+#include <QRegularExpression>
 #include "Application.hpp"
 #include "singletons/Resources.hpp"
 
@@ -57,7 +58,7 @@ ModerationAction::ModerationAction(const QString &action)
         //     this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
         // }
     } else if (action.startsWith("/ban ")) {
-        this->image_ = getApp()->resources->buttonBan;
+        this->image_ = Image::fromNonOwningPixmap(&getApp()->resources->buttons.ban);
     } else {
         QString xD = action;
 
@@ -75,10 +76,10 @@ bool ModerationAction::operator==(const ModerationAction &other) const
 
 bool ModerationAction::isImage() const
 {
-    return this->image_ != nullptr;
+    return bool(this->image_);
 }
 
-Image *ModerationAction::getImage() const
+const boost::optional<ImagePtr> &ModerationAction::getImage() const
 {
     return this->image_;
 }

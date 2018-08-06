@@ -64,7 +64,7 @@ void SearchPopup::setChannel(ChannelPtr channel)
     this->snapshot_ = channel->getMessageSnapshot();
     this->performSearch();
 
-    this->setWindowTitle("Searching in " + channel->name + "s history");
+    this->setWindowTitle("Searching in " + channel->getName() + "s history");
 }
 
 void SearchPopup::performSearch()

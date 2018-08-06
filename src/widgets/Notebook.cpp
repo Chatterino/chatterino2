@@ -29,6 +29,8 @@ Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
     , addButton_(this)
 {
+    this->addButton_.setIcon(NotebookButton::Icon::Plus);
+
     this->addButton_.setHidden(true);
 
     auto *shortcut_next = new QShortcut(QKeySequence("Ctrl+Tab"), this);
@@ -425,8 +427,7 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setVisible(!getApp()->settings->hidePreferencesButton.getValue());
 
     getApp()->settings->hidePreferencesButton.connect(
-        [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },
-        this->connections_);
+        [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); }, this->connections_);
 
     settingsBtn->setIcon(NotebookButton::Settings);
 

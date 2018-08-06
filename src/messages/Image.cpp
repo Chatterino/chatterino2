@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
@@ -18,259 +19,287 @@
 #include <thread>
 
 namespace chatterino {
+namespace {
+// Frame
+Frame::Frame(const QPixmap *nonOwning, int duration)
+    : nonOwning_(nonOwning)
+    , duration_(duration)
+{
+}
 
-bool Image::loadedEventQueued = false;
+Frame::Frame(std::unique_ptr<QPixmap> owning, int duration)
+    : owning_(std::move(owning))
+    , duration_(duration)
+{
+}
 
-Image::Image(const QString &url, qreal scale, const QString &name, const QString &tooltip,
-             const QMargins &margin, bool isHat)
-    : url(url)
-    , name(name)
-    , tooltip(tooltip)
-    , margin(margin)
-    , ishat(isHat)
-    , scale(scale)
+int Frame::duration() const
+{
+    return this->duration_;
+}
+
+const QPixmap *Frame::pixmap() const
+{
+    if (this->nonOwning_) return this->nonOwning_;
+    return this->owning_.get();
+}
+
+// Frames
+Frames::Frames()
 {
     DebugCount::increase("images");
 }
 
-Image::Image(QPixmap *image, qreal scale, const QString &name, const QString &tooltip,
-             const QMargins &margin, bool isHat)
-    : currentPixmap(image)
-    , name(name)
-    , tooltip(tooltip)
-    , margin(margin)
-    , ishat(isHat)
-    , scale(scale)
-    , isLoading(true)
-    , isLoaded(true)
+Frames::Frames(std::vector<Frame> &&frames)
+    : items_(std::move(frames))
 {
     DebugCount::increase("images");
+    if (this->animated()) DebugCount::increase("animated images");
 }
 
-Image::~Image()
+Frames::~Frames()
 {
     DebugCount::decrease("images");
+    if (this->animated()) DebugCount::decrease("animated images");
+}
 
-    if (this->isAnimated()) {
-        DebugCount::decrease("animated images");
-    }
+void Frames::advance()
+{
+    this->timeOffset_ += GIF_FRAME_LENGTH;
 
-    if (this->isLoaded) {
-        DebugCount::decrease("loaded images");
+    while (true) {
+        this->index_ %= this->items_.size();
+        if (this->timeOffset_ > this->items_[this->index_].duration()) {
+            this->timeOffset_ -= this->items_[this->index_].duration();
+            this->index_ = (this->index_ + 1) % this->items_.size();
+        } else {
+            break;
+        }
     }
 }
 
-void Image::loadImage()
+bool Frames::animated() const
 {
-    NetworkRequest req(this->getUrl());
-    req.setCaller(this);
-    req.setUseQuickLoadCache(true);
-    req.onSuccess([this](auto result) -> bool {
-        auto bytes = result.getData();
-        QByteArray copy = QByteArray::fromRawData(bytes.constData(), bytes.length());
-        QBuffer buffer(&copy);
-        buffer.open(QIODevice::ReadOnly);
+    return this->items_.size() > 1;
+}
 
-        QImage image;
+const QPixmap *Frames::current() const
+{
+    if (this->items_.size() == 0) return nullptr;
+    return this->items_[this->index_].pixmap();
+}
+
+const QPixmap *Frames::first() const
+{
+    if (this->items_.size() == 0) return nullptr;
+    return this->items_.front().pixmap();
+}
+
+// functions
+std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
+{
+    std::vector<Frame> frames;
+
+    if (reader.imageCount() <= 0) {
+        Log("Error while reading image {}: '{}'", url.string, reader.errorString());
+        return frames;
+    }
+
+    QImage image;
+    for (int index = 0; index < reader.imageCount(); ++index) {
+        if (reader.read(&image)) {
+            auto pixmap = std::make_unique<QPixmap>(QPixmap::fromImage(image));
+
+            int duration = std::max(20, reader.nextImageDelay());
+            frames.push_back(Frame(std::move(pixmap), duration));
+        }
+    }
+
+    if (frames.size() != 0) {
+        Log("Error while reading image {}: '{}'", url.string, reader.errorString());
+    }
+
+    return frames;
+}
+
+void queueLoadedEvent()
+{
+    static auto eventQueued = false;
+
+    if (!eventQueued) {
+        eventQueued = true;
+
+        QTimer::singleShot(250, [] {
+            getApp()->windows->incGeneration();
+            getApp()->windows->layoutChannelViews();
+            eventQueued = false;
+        });
+    }
+}
+}  // namespace
+
+// IMAGE2
+std::atomic<bool> Image::loadedEventQueued{false};
+
+ImagePtr Image::fromUrl(const Url &url, qreal scale)
+{
+    static std::unordered_map<Url, std::weak_ptr<Image>> cache;
+    static std::mutex mutex;
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    auto shared = cache[url].lock();
+
+    if (!shared) {
+        cache[url] = shared = ImagePtr(new Image(url, scale));
+    } else {
+        Warn("same image loaded multiple times: {}", url.string);
+    }
+
+    return shared;
+}
+
+ImagePtr Image::fromOwningPixmap(std::unique_ptr<QPixmap> pixmap, qreal scale)
+{
+    return ImagePtr(new Image(std::move(pixmap), scale));
+}
+
+ImagePtr Image::fromNonOwningPixmap(QPixmap *pixmap, qreal scale)
+{
+    return ImagePtr(new Image(pixmap, scale));
+}
+
+ImagePtr Image::getEmpty()
+{
+    static auto empty = ImagePtr(new Image);
+    return empty;
+}
+
+Image::Image()
+    : empty_(true)
+{
+}
+
+Image::Image(const Url &url, qreal scale)
+    : url_(url)
+    , scale_(scale)
+    , shouldLoad_(true)
+{
+}
+
+Image::Image(std::unique_ptr<QPixmap> owning, qreal scale)
+    : scale_(scale)
+{
+    std::vector<Frame> vec;
+    vec.push_back(Frame(std::move(owning)));
+    this->frames_ = std::move(vec);
+}
+
+Image::Image(QPixmap *nonOwning, qreal scale)
+    : scale_(scale)
+{
+    std::vector<Frame> vec;
+    vec.push_back(Frame(nonOwning));
+    this->frames_ = std::move(vec);
+}
+
+const Url &Image::url() const
+{
+    return this->url_;
+}
+
+const QPixmap *Image::pixmap() const
+{
+    assertInGuiThread();
+
+    if (this->shouldLoad_) {
+        const_cast<Image *>(this)->shouldLoad_ = false;
+        const_cast<Image *>(this)->load();
+    }
+
+    return this->frames_.current();
+}
+
+qreal Image::scale() const
+{
+    return this->scale_;
+}
+
+bool Image::empty() const
+{
+    return this->empty_;
+}
+
+bool Image::animated() const
+{
+    assertInGuiThread();
+
+    return this->frames_.animated();
+}
+
+int Image::width() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_.first())
+        return pixmap->width() * this->scale_;
+    else
+        return 16;
+}
+
+int Image::height() const
+{
+    assertInGuiThread();
+
+    if (auto pixmap = this->frames_.first())
+        return pixmap->height() * this->scale_;
+    else
+        return 16;
+}
+
+void Image::load()
+{
+    NetworkRequest req(this->url().string);
+    req.setCaller(&this->object_);
+    req.setUseQuickLoadCache(true);
+    req.onSuccess([this, weak = weakOf(this)](auto result) -> Outcome {
+        assertInGuiThread();
+
+        auto shared = weak.lock();
+        if (!shared) return Failure;
+
+        // const cast since we are only reading from it
+        QBuffer buffer(const_cast<QByteArray *>(&result.getData()));
+        buffer.open(QIODevice::ReadOnly);
         QImageReader reader(&buffer);
 
-        bool first = true;
+        this->frames_ = readFrames(reader, this->url());
+        return Success;
+    });
+    req.onError([this, weak = weakOf(this)](int) {
+        auto shared = weak.lock();
+        if (!shared) return false;
 
-        // clear stuff before loading the image again
-        this->allFrames.clear();
-        if (this->isAnimated()) {
-            DebugCount::decrease("animated images");
-        }
-        if (this->isLoaded) {
-            DebugCount::decrease("loaded images");
-        }
+        this->frames_ = std::vector<Frame>();
 
-        if (reader.imageCount() == -1) {
-            // An error occured in the reader
-            Log("An error occured reading the image: '{}'", reader.errorString());
-            Log("Image url: {}", this->url);
-            return false;
-        }
-
-        if (reader.imageCount() == 0) {
-            Log("Error: No images read in the buffer");
-            // No images read in the buffer. maybe a cache error?
-            return false;
-        }
-
-        for (int index = 0; index < reader.imageCount(); ++index) {
-            if (reader.read(&image)) {
-                auto pixmap = new QPixmap(QPixmap::fromImage(image));
-
-                if (first) {
-                    first = false;
-                    this->loadedPixmap = pixmap;
-                }
-
-                Image::FrameData data;
-                data.duration = std::max(20, reader.nextImageDelay());
-                data.image = pixmap;
-
-                this->allFrames.push_back(data);
-            }
-        }
-
-        if (this->allFrames.size() != reader.imageCount()) {
-            // Log("Error: Wrong amount of images read");
-            // One or more images failed to load from the buffer
-            // return false;
-        }
-
-        if (this->allFrames.size() > 1) {
-            if (!this->animated) {
-                postToThread([this] {
-                    getApp()->emotes->gifTimer.signal.connect([=]() {
-                        this->gifUpdateTimout();
-                    });  // For some reason when Boost signal is in
-                         // thread scope and thread deletes the signal
-                         // doesn't work, so this is the fix.
-                });
-            }
-
-            this->animated = true;
-
-            DebugCount::increase("animated images");
-        }
-
-        this->currentPixmap = this->loadedPixmap;
-
-        this->isLoaded = true;
-        DebugCount::increase("loaded images");
-
-        if (!loadedEventQueued) {
-            loadedEventQueued = true;
-
-            QTimer::singleShot(500, [] {
-                getApp()->windows->incGeneration();
-
-                auto app = getApp();
-                app->windows->layoutChannelViews();
-                loadedEventQueued = false;
-            });
-        }
-
-        return true;
+        return false;
     });
 
     req.execute();
 }
 
-void Image::gifUpdateTimout()
+bool Image::operator==(const Image &other) const
 {
-    if (this->animated) {
-        this->currentFrameOffset += GIF_FRAME_LENGTH;
+    if (this->empty() && other.empty()) return true;
+    if (!this->url_.string.isEmpty() && this->url_ == other.url_) return true;
+    if (this->frames_.first() == other.frames_.first()) return true;
 
-        while (true) {
-            if (this->currentFrameOffset > this->allFrames.at(this->currentFrame).duration) {
-                this->currentFrameOffset -= this->allFrames.at(this->currentFrame).duration;
-                this->currentFrame = (this->currentFrame + 1) % this->allFrames.size();
-            } else {
-                break;
-            }
-        }
-
-        this->currentPixmap = this->allFrames[this->currentFrame].image;
-    }
+    return false;
 }
 
-const QPixmap *Image::getPixmap()
+bool Image::operator!=(const Image &other) const
 {
-    if (!this->isLoading) {
-        this->isLoading = true;
-
-        this->loadImage();
-
-        return nullptr;
-    }
-
-    if (this->isLoaded) {
-        return this->currentPixmap;
-    } else {
-        return nullptr;
-    }
-}
-
-qreal Image::getScale() const
-{
-    return this->scale;
-}
-
-const QString &Image::getUrl() const
-{
-    return this->url;
-}
-
-const QString &Image::getName() const
-{
-    return this->name;
-}
-
-const QString &Image::getCopyString() const
-{
-    if (this->copyString.isEmpty()) {
-        return this->name;
-    }
-
-    return this->copyString;
-}
-
-const QString &Image::getTooltip() const
-{
-    return this->tooltip;
-}
-
-const QMargins &Image::getMargin() const
-{
-    return this->margin;
-}
-
-bool Image::isAnimated() const
-{
-    return this->animated;
-}
-
-bool Image::isHat() const
-{
-    return this->ishat;
-}
-
-int Image::getWidth() const
-{
-    if (this->currentPixmap == nullptr) {
-        return 16;
-    }
-
-    return this->currentPixmap->width();
-}
-
-int Image::getScaledWidth() const
-{
-    return static_cast<int>((float)this->getWidth() * this->scale *
-                            getApp()->settings->emoteScale.getValue());
-}
-
-int Image::getHeight() const
-{
-    if (this->currentPixmap == nullptr) {
-        return 16;
-    }
-    return this->currentPixmap->height();
-}
-
-int Image::getScaledHeight() const
-{
-    return static_cast<int>((float)this->getHeight() * this->scale *
-                            getApp()->settings->emoteScale.getValue());
-}
-
-void Image::setCopyString(const QString &newCopyString)
-{
-    this->copyString = newCopyString;
+    return !this->operator==(other);
 }
 
 }  // namespace chatterino

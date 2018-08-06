@@ -17,9 +17,9 @@
 
 namespace chatterino {
 
-Channel::Channel(const QString &_name, Type type)
-    : name(_name)
-    , completionModel(this->name)
+Channel::Channel(const QString &name, Type type)
+    : completionModel(name)
+    , name_(name)
     , type_(type)
 {
     QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout, [this]() {
@@ -38,6 +38,11 @@ Channel::Type Channel::getType() const
     return this->type_;
 }
 
+const QString &Channel::getName() const
+{
+    return this->name_;
+}
+
 bool Channel::isTwitchChannel() const
 {
     return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
@@ -45,7 +50,7 @@ bool Channel::isTwitchChannel() const
 
 bool Channel::isEmpty() const
 {
-    return this->name.isEmpty();
+    return this->name_.isEmpty();
 }
 
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
@@ -66,7 +71,7 @@ void Channel::addMessage(MessagePtr message)
 
     // FOURTF: change this when adding more providers
     if (this->isTwitchChannel()) {
-        app->logging->addMessage(this->name, message);
+        app->logging->addMessage(this->name_, message);
     }
 
     if (this->messages_.pushBack(message, deleted)) {

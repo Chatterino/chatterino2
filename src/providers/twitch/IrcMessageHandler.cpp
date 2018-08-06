@@ -94,29 +94,28 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
             auto roomId = it.value().toString();
 
             twitchChannel->setRoomId(roomId);
-
-            app->resources->loadChannelData(roomId);
         }
 
         // Room modes
         {
-            auto roomModes = twitchChannel->accessRoomModes();
+            auto roomModes = *twitchChannel->accessRoomModes();
 
             if ((it = tags.find("emote-only")) != tags.end()) {
-                roomModes->emoteOnly = it.value() == "1";
+                roomModes.emoteOnly = it.value() == "1";
             }
             if ((it = tags.find("subs-only")) != tags.end()) {
-                roomModes->submode = it.value() == "1";
+                roomModes.submode = it.value() == "1";
             }
             if ((it = tags.find("slow")) != tags.end()) {
-                roomModes->slowMode = it.value().toInt();
+                roomModes.slowMode = it.value().toInt();
             }
             if ((it = tags.find("r9k")) != tags.end()) {
-                roomModes->r9k = it.value() == "1";
+                roomModes.r9k = it.value() == "1";
             }
             if ((it = tags.find("broadcaster-lang")) != tags.end()) {
-                roomModes->broadcasterLang = it.value().toString();
+                roomModes.broadcasterLang = it.value().toString();
             }
+            twitchChannel->setRoomModes(roomModes);
         }
 
         twitchChannel->roomModesChanged.invoke();

@@ -11,6 +11,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
 
 #include <QApplication>
@@ -44,15 +45,14 @@ CommandController::CommandController()
     this->items.itemRemoved.connect(addFirstMatchToMap);
 }
 
-void CommandController::initialize(Application &app)
+void CommandController::initialize(Settings &, Paths &paths)
 {
-    this->load();
+    this->load(paths);
 }
 
-void CommandController::load()
+void CommandController::load(Paths &paths)
 {
-    auto app = getApp();
-    this->filePath_ = app->paths->settingsDirectory + "/commands.txt";
+    this->filePath_ = combinePath(paths.settingsDirectory, "commands.txt");
 
     QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::ReadOnly)) {
@@ -140,7 +140,7 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 app->twitch.server->whispersChannel->addMessage(b.getMessage());
 
-                app->twitch.server->getWriteConnection()->sendRaw("PRIVMSG #jtv :" + text + "\r\n");
+                app->twitch.server->sendMessage("jtv", text);
 
                 if (getSettings()->inlineWhispers) {
                     app->twitch.server->forEachChannel(

@@ -4,7 +4,12 @@
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
 
+#include <rapidjson/error/en.h>
+#include <rapidjson/error/error.h>
+#include <rapidjson/rapidjson.h>
 #include <QFile>
+#include <boost/variant.hpp>
+#include <memory>
 
 namespace chatterino {
 
@@ -146,7 +151,7 @@ void Emojis::loadEmojis()
                            emojiData->shortCodes[0] + "_" + toneNameIt->second);
 
                 this->emojiShortCodeToEmoji_.insert(variationEmojiData->shortCodes[0],
-                                                   variationEmojiData);
+                                                    variationEmojiData);
                 this->shortCodes.push_back(variationEmojiData->shortCodes[0]);
 
                 this->emojiFirstByte_[variationEmojiData->value.at(0)].append(variationEmojiData);
@@ -260,14 +265,16 @@ void Emojis::loadEmojiSet()
                 urlPrefix = it->second;
             }
             QString url = urlPrefix + code + ".png";
-            emoji->emoteData.image1x =
-                new Image(url, 0.35, emoji->value, ":" + emoji->shortCodes[0] + ":<br/>Emoji");
+            emoji->emote = std::make_shared<Emote>(
+                Emote{EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
+                      Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
     });
 }
 
-void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, const QString &text)
+std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(const QString &text)
 {
+    auto result = std::vector<boost::variant<EmotePtr, QString>>();
     int lastParsedEmojiEndIndex = 0;
 
     for (auto i = 0; i < text.length(); ++i) {
@@ -327,12 +334,11 @@ void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, con
 
         if (charactersFromLastParsedEmoji > 0) {
             // Add characters inbetween emojis
-            parsedWords.emplace_back(
-                EmoteData(), text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji));
+            result.emplace_back(text.mid(lastParsedEmojiEndIndex, charactersFromLastParsedEmoji));
         }
 
         // Push the emoji as a word to parsedWords
-        parsedWords.push_back(std::tuple<EmoteData, QString>(matchedEmoji->emoteData, QString()));
+        result.emplace_back(matchedEmoji->emote);
 
         lastParsedEmojiEndIndex = currentParsedEmojiEndIndex;
 
@@ -341,8 +347,10 @@ void Emojis::parse(std::vector<std::tuple<EmoteData, QString>> &parsedWords, con
 
     if (lastParsedEmojiEndIndex < text.length()) {
         // Add remaining characters
-        parsedWords.emplace_back(EmoteData(), text.mid(lastParsedEmojiEndIndex));
+        result.emplace_back(text.mid(lastParsedEmojiEndIndex));
     }
+
+    return result;
 }
 
 QString Emojis::replaceShortCodes(const QString &text)

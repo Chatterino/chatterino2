@@ -12,7 +12,7 @@
 
 namespace chatterino {
 
-void Logging::initialize(Application &app)
+void Logging::initialize(Settings &settings, Paths &paths)
 {
 }
 

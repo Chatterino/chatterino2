@@ -4,14 +4,18 @@
 
 namespace chatterino {
 
-class Application;
+class Settings;
+class Paths;
 
 class Singleton : boost::noncopyable
 {
 public:
-    virtual void initialize(Application &app)
+    virtual ~Singleton() = default;
+
+    virtual void initialize(Settings &settings, Paths &paths)
     {
-        (void)(app);
+        (void)(settings);
+        (void)(paths);
     }
 
     virtual void save()

@@ -51,14 +51,20 @@ private:
     void parseHighlights(bool isPastMsg);
 
     void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
-                           std::vector<std::pair<long, EmoteData>> &vec);
-    bool tryAppendEmote(QString &emoteString);
+                           std::vector<std::pair<int, EmotePtr>> &vec);
+    Outcome tryAppendEmote(const EmoteName &name);
+
+    void addWords(const QStringList &words,
+                  const std::vector<std::pair<int, EmotePtr>> &twitchEmotes);
+    void addTextOrEmoji(EmotePtr emote);
+    void addTextOrEmoji(const QString &value);
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
-    bool tryParseCheermote(const QString &string);
+    Outcome tryParseCheermote(const QString &string);
 
     QString roomID_;
+    bool hasBits_ = false;
 
     QColor usernameColor_;
     const QString originalMessage_;

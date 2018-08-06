@@ -24,6 +24,8 @@ FeelPage::FeelPage()
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
+    // layout.append(this->createCheckBox("Use a seperate write connection.",
+    //                                    getSettings()->twitchSeperateWriteConnection));
     layout.append(this->createCheckBox(SCROLL_SMOOTH, getSettings()->enableSmoothScrolling));
     layout.append(
         this->createCheckBox(SCROLL_NEWMSG, getSettings()->enableSmoothScrollingNewMessages));
