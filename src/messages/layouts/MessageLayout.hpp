@@ -40,8 +40,9 @@ public:
     bool layout(int width, float scale_, MessageElement::Flags flags);
 
     // Painting
-    void paint(QPainter &painter, int width, int y, int messageIndex, Selection &selection,
-               bool isLastReadMessage, bool isWindowFocused);
+    void paint(QPainter &painter, int width, int y, int messageIndex,
+               Selection &selection, bool isLastReadMessage,
+               bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();

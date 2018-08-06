@@ -19,7 +19,8 @@ public:
     static PartialTwitchUser byName(const QString &username);
     static PartialTwitchUser byId(const QString &id);
 
-    void getId(std::function<void(QString)> successCallback, const QObject *caller = nullptr);
+    void getId(std::function<void(QString)> successCallback,
+               const QObject *caller = nullptr);
 };
 
 }  // namespace chatterino

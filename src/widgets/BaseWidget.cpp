@@ -97,12 +97,14 @@ void BaseWidget::setScaleIndependantSize(QSize size)
 
 void BaseWidget::setScaleIndependantWidth(int value)
 {
-    this->setScaleIndependantSize(QSize(value, this->scaleIndependantSize_.height()));
+    this->setScaleIndependantSize(
+        QSize(value, this->scaleIndependantSize_.height()));
 }
 
 void BaseWidget::setScaleIndependantHeight(int value)
 {
-    this->setScaleIndependantSize(QSize(this->scaleIndependantSize_.height(), value));
+    this->setScaleIndependantSize(
+        QSize(this->scaleIndependantSize_.height(), value));
 }
 
 void BaseWidget::childEvent(QChildEvent *event)
@@ -114,7 +116,8 @@ void BaseWidget::childEvent(QChildEvent *event)
             this->widgets_.push_back(widget);
         }
     } else if (event->removed()) {
-        for (auto it = this->widgets_.begin(); it != this->widgets_.end(); it++) {
+        for (auto it = this->widgets_.begin(); it != this->widgets_.end();
+             it++) {
             if (*it == event->child()) {
                 this->widgets_.erase(it);
                 break;

@@ -32,7 +32,8 @@ public:
     explicit Channel(const QString &name, Type type);
     virtual ~Channel();
 
-    pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
+    pajlada::Signals::Signal<const QString &, const QString &, bool &>
+        sendMessageSignal;
 
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &> messageAppended;
@@ -96,7 +97,8 @@ class IndirectChannel
     };
 
 public:
-    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::Type::Direct)
+    IndirectChannel(ChannelPtr channel,
+                    Channel::Type type = Channel::Type::Direct)
         : data_(new Data(channel, type))
     {
     }

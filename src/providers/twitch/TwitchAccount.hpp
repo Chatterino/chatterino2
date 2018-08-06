@@ -57,8 +57,8 @@ public:
         EmoteMap emotes;
     };
 
-    TwitchAccount(const QString &username, const QString &oauthToken_, const QString &oauthClient_,
-                  const QString &_userID);
+    TwitchAccount(const QString &username, const QString &oauthToken_,
+                  const QString &oauthClient_, const QString &_userID);
 
     virtual QString toString() const override;
 
@@ -81,16 +81,22 @@ public:
     void loadIgnores();
     void ignore(const QString &targetName,
                 std::function<void(IgnoreResult, const QString &)> onFinished);
-    void ignoreByID(const QString &targetUserID, const QString &targetName,
-                    std::function<void(IgnoreResult, const QString &)> onFinished);
-    void unignore(const QString &targetName,
-                  std::function<void(UnignoreResult, const QString &)> onFinished);
-    void unignoreByID(const QString &targetUserID, const QString &targetName,
-                      std::function<void(UnignoreResult, const QString &message)> onFinished);
+    void ignoreByID(
+        const QString &targetUserID, const QString &targetName,
+        std::function<void(IgnoreResult, const QString &)> onFinished);
+    void unignore(
+        const QString &targetName,
+        std::function<void(UnignoreResult, const QString &)> onFinished);
+    void unignoreByID(
+        const QString &targetUserID, const QString &targetName,
+        std::function<void(UnignoreResult, const QString &message)> onFinished);
 
-    void checkFollow(const QString targetUserID, std::function<void(FollowResult)> onFinished);
-    void followUser(const QString userID, std::function<void()> successCallback);
-    void unfollowUser(const QString userID, std::function<void()> successCallback);
+    void checkFollow(const QString targetUserID,
+                     std::function<void(FollowResult)> onFinished);
+    void followUser(const QString userID,
+                    std::function<void()> successCallback);
+    void unfollowUser(const QString userID,
+                      std::function<void()> successCallback);
 
     std::set<TwitchUser> getIgnores() const;
 

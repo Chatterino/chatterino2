@@ -20,11 +20,13 @@ public:
 
     void cancel();
 
-    QCheckBox *createCheckBox(const QString &text, pajlada::Settings::Setting<bool> &setting);
+    QCheckBox *createCheckBox(const QString &text,
+                              pajlada::Settings::Setting<bool> &setting);
     QComboBox *createComboBox(const QStringList &items,
                               pajlada::Settings::Setting<QString> &setting);
     QLineEdit *createLineEdit(pajlada::Settings::Setting<QString> &setting);
-    QSpinBox *createSpinBox(pajlada::Settings::Setting<int> &setting, int min = 0, int max = 2500);
+    QSpinBox *createSpinBox(pajlada::Settings::Setting<int> &setting,
+                            int min = 0, int max = 2500);
 
     virtual void onShow()
     {

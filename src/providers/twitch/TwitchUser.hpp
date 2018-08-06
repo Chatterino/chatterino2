@@ -36,7 +36,8 @@ namespace Settings {
 
 template <>
 struct Deserialize<chatterino::TwitchUser> {
-    static chatterino::TwitchUser get(const rapidjson::Value &value, bool *error = nullptr)
+    static chatterino::TwitchUser get(const rapidjson::Value &value,
+                                      bool *error = nullptr)
     {
         using namespace chatterino;
 
@@ -44,7 +45,8 @@ struct Deserialize<chatterino::TwitchUser> {
 
         if (!value.IsObject()) {
             PAJLADA_REPORT_ERROR(error)
-            PAJLADA_THROW_EXCEPTION("Deserialized rapidjson::Value is wrong type");
+            PAJLADA_THROW_EXCEPTION(
+                "Deserialized rapidjson::Value is wrong type");
             return user;
         }
 

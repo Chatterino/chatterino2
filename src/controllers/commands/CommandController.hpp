@@ -22,7 +22,8 @@ class CommandController final : public Singleton
 public:
     CommandController();
 
-    QString execCommand(const QString &text, std::shared_ptr<Channel> channel, bool dryRun);
+    QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
+                        bool dryRun);
     QStringList getDefaultTwitchCommandList();
 
     virtual void initialize(Settings &settings, Paths &paths) override;

@@ -85,7 +85,8 @@ std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
     std::vector<Frame> frames;
 
     if (reader.imageCount() <= 0) {
-        Log("Error while reading image {}: '{}'", url.string, reader.errorString());
+        Log("Error while reading image {}: '{}'", url.string,
+            reader.errorString());
         return frames;
     }
 
@@ -100,7 +101,8 @@ std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
     }
 
     if (frames.size() != 0) {
-        Log("Error while reading image {}: '{}'", url.string, reader.errorString());
+        Log("Error while reading image {}: '{}'", url.string,
+            reader.errorString());
     }
 
     return frames;

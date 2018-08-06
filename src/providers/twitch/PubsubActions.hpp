@@ -21,7 +21,8 @@ struct PubSubAction {
     QString roomID;
 };
 
-// Used when a chat mode (i.e. slowmode, subscribers only mode) is enabled or disabled
+// Used when a chat mode (i.e. slowmode, subscribers only mode) is enabled or
+// disabled
 struct ModeChangedAction : PubSubAction {
     using PubSubAction::PubSubAction;
 

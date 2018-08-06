@@ -47,9 +47,12 @@ QString MessageBuilder::matchLink(const QString &string)
 {
     LinkParser linkParser(string);
 
-    static QRegularExpression httpRegex("\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression ftpRegex("\\bftps?://", QRegularExpression::CaseInsensitiveOption);
-    static QRegularExpression spotifyRegex("\\bspotify:", QRegularExpression::CaseInsensitiveOption);
+    static QRegularExpression httpRegex(
+        "\\bhttps?://", QRegularExpression::CaseInsensitiveOption);
+    static QRegularExpression ftpRegex(
+        "\\bftps?://", QRegularExpression::CaseInsensitiveOption);
+    static QRegularExpression spotifyRegex(
+        "\\bspotify:", QRegularExpression::CaseInsensitiveOption);
 
     if (!linkParser.hasMatch()) {
         return QString();
@@ -57,7 +60,8 @@ QString MessageBuilder::matchLink(const QString &string)
 
     QString captured = linkParser.getCaptured();
 
-    if (!captured.contains(httpRegex) && !captured.contains(ftpRegex) && !captured.contains(spotifyRegex)) {
+    if (!captured.contains(httpRegex) && !captured.contains(ftpRegex) &&
+        !captured.contains(spotifyRegex)) {
         captured.insert(0, "http://");
     }
 

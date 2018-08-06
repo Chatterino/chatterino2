@@ -30,7 +30,8 @@ QString NetworkData::getHash()
             bytes.append(header);
         }
 
-        QByteArray hashBytes(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
+        QByteArray hashBytes(
+            QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
 
         this->hash_ = hashBytes.toHex();
     }

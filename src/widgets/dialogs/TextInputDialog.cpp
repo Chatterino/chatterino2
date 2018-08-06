@@ -15,13 +15,16 @@ TextInputDialog::TextInputDialog(QWidget *parent)
     this->buttonBox_.addWidget(&okButton_);
     this->buttonBox_.addWidget(&cancelButton_);
 
-    QObject::connect(&this->okButton_, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
-    QObject::connect(&this->cancelButton_, SIGNAL(clicked()), this, SLOT(cancelButtonClicked()));
+    QObject::connect(&this->okButton_, SIGNAL(clicked()), this,
+                     SLOT(okButtonClicked()));
+    QObject::connect(&this->cancelButton_, SIGNAL(clicked()), this,
+                     SLOT(cancelButtonClicked()));
 
     this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
-    this->setWindowFlags((this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) | Qt::Dialog |
-                         Qt::MSWindowsFixedSizeDialogHint);
+    this->setWindowFlags(
+        (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
 
 QString TextInputDialog::getText() const

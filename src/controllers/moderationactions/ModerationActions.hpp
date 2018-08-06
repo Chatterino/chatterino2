@@ -25,7 +25,8 @@ public:
     ModerationActionModel *createModel(QObject *parent);
 
 private:
-    ChatterinoSetting<std::vector<ModerationAction>> setting_ = {"/moderation/actions"};
+    ChatterinoSetting<std::vector<ModerationAction>> setting_ = {
+        "/moderation/actions"};
     bool initialized_ = false;
 };
 

@@ -32,11 +32,13 @@ void ChatterinoBadges::loadChatterinoBadges()
         for (auto jsonBadge_ : jsonRoot.value("badges").toArray()) {
             auto jsonBadge = jsonBadge_.toObject();
 
-            auto emote = Emote{EmoteName{}, ImageSet{Url{jsonBadge.value("image").toString()}},
-                               Tooltip{jsonBadge.value("tooltip").toString()}, Url{}};
+            auto emote = Emote{
+                EmoteName{}, ImageSet{Url{jsonBadge.value("image").toString()}},
+                Tooltip{jsonBadge.value("tooltip").toString()}, Url{}};
 
             for (auto jsonUser : jsonBadge.value("users").toArray()) {
-                replacement.add(UserName{jsonUser.toString()}, std::move(emote));
+                replacement.add(UserName{jsonUser.toString()},
+                                std::move(emote));
             }
         }
 

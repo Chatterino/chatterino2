@@ -19,7 +19,8 @@ TaggedUser TaggedUsersModel::getItemFromRow(std::vector<QStandardItem *> &row,
 }
 
 // turns a row in the model into a vector item
-void TaggedUsersModel::getRowFromItem(const TaggedUser &item, std::vector<QStandardItem *> &row)
+void TaggedUsersModel::getRowFromItem(const TaggedUser &item,
+                                      std::vector<QStandardItem *> &row)
 {
     setStringItem(row[0], item.getName());
 }
@@ -27,14 +28,18 @@ void TaggedUsersModel::getRowFromItem(const TaggedUser &item, std::vector<QStand
 void TaggedUsersModel::afterInit()
 {
     //    std::vector<QStandardItem *> row = this->createRow();
-    //    setBoolItem(row[0], getApp()->settings->enableHighlightsSelf.getValue(), true,
-    //    false); row[0]->setData("Your username (automatic)", Qt::DisplayRole);
-    //    setBoolItem(row[1], getApp()->settings->enableHighlightTaskbar.getValue(), true,
-    //    false); setBoolItem(row[2], getApp()->settings->enableHighlightSound.getValue(),
-    //    true, false); row[3]->setFlags(0); this->insertCustomRow(row, 0);
+    //    setBoolItem(row[0],
+    //    getApp()->settings->enableHighlightsSelf.getValue(), true, false);
+    //    row[0]->setData("Your username (automatic)", Qt::DisplayRole);
+    //    setBoolItem(row[1],
+    //    getApp()->settings->enableHighlightTaskbar.getValue(), true, false);
+    //    setBoolItem(row[2],
+    //    getApp()->settings->enableHighlightSound.getValue(), true, false);
+    //    row[3]->setFlags(0); this->insertCustomRow(row, 0);
 }
 
-// void TaggedUserModel::customRowSetData(const std::vector<QStandardItem *> &row, int column,
+// void TaggedUserModel::customRowSetData(const std::vector<QStandardItem *>
+// &row, int column,
 //                                       const QVariant &value, int role)
 //{
 //    switch (column) {

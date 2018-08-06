@@ -11,7 +11,8 @@
 
 namespace chatterino {
 
-NetworkRequest::NetworkRequest(const std::string &url, NetworkRequestType requestType)
+NetworkRequest::NetworkRequest(const std::string &url,
+                               NetworkRequestType requestType)
     : data(new NetworkData)
     , timer(new NetworkTimer)
 {
@@ -62,7 +63,8 @@ void NetworkRequest::setRawHeader(const char *headerName, const char *value)
     this->data->request_.setRawHeader(headerName, value);
 }
 
-void NetworkRequest::setRawHeader(const char *headerName, const QByteArray &value)
+void NetworkRequest::setRawHeader(const char *headerName,
+                                  const QByteArray &value)
 {
     this->data->request_.setRawHeader(headerName, value);
 }
@@ -77,7 +79,8 @@ void NetworkRequest::setTimeout(int ms)
     this->timer->timeoutMS_ = ms;
 }
 
-void NetworkRequest::makeAuthorizedV5(const QString &clientID, const QString &oauthToken)
+void NetworkRequest::makeAuthorizedV5(const QString &clientID,
+                                      const QString &oauthToken)
 {
     this->setRawHeader("Client-ID", clientID);
     this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
@@ -114,12 +117,14 @@ void NetworkRequest::execute()
         } break;
 
         case NetworkRequestType::Put: {
-            // Put requests cannot be cached, therefore the request is called immediately
+            // Put requests cannot be cached, therefore the request is called
+            // immediately
             this->doRequest();
         } break;
 
         case NetworkRequestType::Delete: {
-            // Delete requests cannot be cached, therefore the request is called immediately
+            // Delete requests cannot be cached, therefore the request is called
+            // immediately
             this->doRequest();
         } break;
 
@@ -152,7 +157,8 @@ Outcome NetworkRequest::tryLoadCachedFile()
 
     cachedFile.close();
 
-    // XXX: If success is false, we should invalidate the cache file somehow/somewhere
+    // XXX: If success is false, we should invalidate the cache file
+    // somehow/somewhere
 
     return outcome;
 }
@@ -166,14 +172,16 @@ void NetworkRequest::doRequest()
 
     this->timer->start();
 
-    auto onUrlRequested = [data = this->data, timer = this->timer, worker]() mutable {
+    auto onUrlRequested = [data = this->data, timer = this->timer,
+                           worker]() mutable {
         auto reply = [&]() -> QNetworkReply * {
             switch (data->requestType_) {
                 case NetworkRequestType::Get:
                     return NetworkManager::NaM.get(data->request_);
 
                 case NetworkRequestType::Put:
-                    return NetworkManager::NaM.put(data->request_, data->payload_);
+                    return NetworkManager::NaM.put(data->request_,
+                                                   data->payload_);
 
                 case NetworkRequestType::Delete:
                     return NetworkManager::NaM.deleteResource(data->request_);
@@ -221,12 +229,14 @@ void NetworkRequest::doRequest()
         };
 
         if (data->caller_ != nullptr) {
-            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_, handleReply);
-            QObject::connect(reply, &QNetworkReply::finished, worker, [worker]() mutable {
-                emit worker->doneUrl();
+            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
+                             handleReply);
+            QObject::connect(reply, &QNetworkReply::finished, worker,
+                             [worker]() mutable {
+                                 emit worker->doneUrl();
 
-                delete worker;
-            });
+                                 delete worker;
+                             });
         } else {
             QObject::connect(reply, &QNetworkReply::finished, worker,
                              [handleReply, worker]() mutable {
@@ -237,7 +247,8 @@ void NetworkRequest::doRequest()
         }
     };
 
-    QObject::connect(&requester, &NetworkRequester::requestUrl, worker, onUrlRequested);
+    QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
+                     onUrlRequested);
 
     emit requester.requestUrl();
 }

@@ -22,11 +22,13 @@ SplitInput::SplitInput(Split *_chatWidget)
 {
     this->initLayout();
 
-    auto completer = new QCompleter(&this->split_->getChannel().get()->completionModel);
+    auto completer =
+        new QCompleter(&this->split_->getChannel().get()->completionModel);
     this->ui_.textEdit->setCompleter(completer);
 
     this->split_->channelChanged.connect([this] {
-        auto completer = new QCompleter(&this->split_->getChannel()->completionModel);
+        auto completer =
+            new QCompleter(&this->split_->getChannel()->completionModel);
         this->ui_.textEdit->setCompleter(completer);
     });
 
@@ -41,10 +43,12 @@ void SplitInput::initLayout()
     LayoutCreator<SplitInput> layoutCreator(this);
 
     auto layout =
-        layoutCreator.setLayoutType<QHBoxLayout>().withoutMargin().assign(&this->ui_.hbox);
+        layoutCreator.setLayoutType<QHBoxLayout>().withoutMargin().assign(
+            &this->ui_.hbox);
 
     // input
-    auto textEdit = layout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
+    auto textEdit =
+        layout.emplace<ResizingTextEdit>().assign(&this->ui_.textEdit);
     connect(textEdit.getElement(), &ResizingTextEdit::textChanged, this,
             &SplitInput::editTextChanged);
 
@@ -52,7 +56,8 @@ void SplitInput::initLayout()
     auto box = layout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
     {
-        auto textEditLength = box.emplace<QLabel>().assign(&this->ui_.textEditLength);
+        auto textEditLength =
+            box.emplace<QLabel>().assign(&this->ui_.textEditLength);
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
@@ -64,39 +69,46 @@ void SplitInput::initLayout()
     // ---- misc
 
     // set edit font
-    this->ui_.textEdit->setFont(app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+    this->ui_.textEdit->setFont(
+        app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
-        this->ui_.textEdit->setFont(app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+        this->ui_.textEdit->setFont(
+            app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
-        if (!this->emotePopup_) {
-            this->emotePopup_ = std::make_unique<EmotePopup>();
-            this->emotePopup_->linkClicked.connect([this](const Link &link) {
-                if (link.type == Link::InsertText) {
-                    this->insertText(link.value + " ");
-                }
-            });
-        }
+    QObject::connect(
+        this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
+            if (!this->emotePopup_) {
+                this->emotePopup_ = std::make_unique<EmotePopup>();
+                this->emotePopup_->linkClicked.connect(
+                    [this](const Link &link) {
+                        if (link.type == Link::InsertText) {
+                            this->insertText(link.value + " ");
+                        }
+                    });
+            }
 
-        this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                                  int(500 * this->emotePopup_->getScale()));
-        this->emotePopup_->loadChannel(this->split_->getChannel());
-        this->emotePopup_->show();
-    });
+            this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
+                                      int(500 * this->emotePopup_->getScale()));
+            this->emotePopup_->loadChannel(this->split_->getChannel());
+            this->emotePopup_->show();
+        });
 
     // clear channelview selection when selecting in the input
-    QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable, [this](bool available) {
-        if (available) {
-            this->split_->view_.clearSelection();
-        }
-    });
+    QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
+                     [this](bool available) {
+                         if (available) {
+                             this->split_->view_.clearSelection();
+                         }
+                     });
 
     // textEditLength visibility
     app->settings->showMessageLength.connect(
-        [this](const bool &value, auto) { this->ui_.textEditLength->setHidden(!value); },
+        [this](const bool &value, auto) {
+            this->ui_.textEditLength->setHidden(!value);
+        },
         this->managedConnections_);
 }
 
@@ -107,7 +119,8 @@ void SplitInput::scaleChangedEvent(float scale)
 
     // set maximum height
     this->setMaximumHeight(int(150 * this->getScale()));
-    this->ui_.textEdit->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
+    this->ui_.textEdit->setFont(
+        getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 }
 
 void SplitInput::themeChangedEvent()
@@ -121,7 +134,8 @@ void SplitInput::themeChangedEvent()
 
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
-    this->ui_.hbox->setMargin(int((this->theme->isLightTheme() ? 4 : 2) * this->getScale()));
+    this->ui_.hbox->setMargin(
+        int((this->theme->isLightTheme() ? 4 : 2) * this->getScale()));
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 }
@@ -189,7 +203,8 @@ void SplitInput::installKeyPressedEvent()
                     }
 
                     this->prevIndex_--;
-                    this->ui_.textEdit->setText(this->prevMsg_.at(this->prevIndex_));
+                    this->ui_.textEdit->setText(
+                        this->prevMsg_.at(this->prevIndex_));
 
                     QTextCursor cursor = this->ui_.textEdit->textCursor();
                     cursor.movePosition(QTextCursor::End);
@@ -210,7 +225,8 @@ void SplitInput::installKeyPressedEvent()
                 if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                     this->prevIndex_ != this->prevMsg_.size()) {
                     this->prevIndex_++;
-                    this->ui_.textEdit->setText(this->prevMsg_.at(this->prevIndex_));
+                    this->ui_.textEdit->setText(
+                        this->prevMsg_.at(this->prevIndex_));
                 } else {
                     this->prevIndex_ = this->prevMsg_.size();
                     this->ui_.textEdit->setText(this->currMsg_);
@@ -238,21 +254,27 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_Tab) {
             if (event->modifiers() == Qt::ControlModifier) {
-                SplitContainer *page = static_cast<SplitContainer *>(this->split_->parentWidget());
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->split_->parentWidget());
 
-                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+                Notebook *notebook =
+                    static_cast<Notebook *>(page->parentWidget());
 
                 notebook->selectNextTab();
             }
         } else if (event->key() == Qt::Key_Backtab) {
-            if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) {
-                SplitContainer *page = static_cast<SplitContainer *>(this->split_->parentWidget());
+            if (event->modifiers() ==
+                (Qt::ControlModifier | Qt::ShiftModifier)) {
+                SplitContainer *page =
+                    static_cast<SplitContainer *>(this->split_->parentWidget());
 
-                Notebook *notebook = static_cast<Notebook *>(page->parentWidget());
+                Notebook *notebook =
+                    static_cast<Notebook *>(page->parentWidget());
 
                 notebook->selectPreviousTab();
             }
-        } else if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
+        } else if (event->key() == Qt::Key_C &&
+                   event->modifiers() == Qt::ControlModifier) {
             if (this->split_->view_.hasSelection()) {
                 this->split_->copyToClipboard();
                 event->accept();
@@ -303,7 +325,8 @@ void SplitInput::editTextChanged()
         static QRegularExpression spaceRegex("\\s\\s+");
         text = text.replace(spaceRegex, " ");
 
-        text = app->commands->execCommand(text, this->split_->getChannel(), true);
+        text =
+            app->commands->execCommand(text, this->split_->getChannel(), true);
     }
 
     QString labelText;
@@ -340,7 +363,8 @@ void SplitInput::paintEvent(QPaintEvent *)
     }
 
     //    int offset = 2;
-    //    painter.fillRect(offset, this->height() - offset, this->width() - 2 * offset, 1,
+    //    painter.fillRect(offset, this->height() - offset, this->width() - 2 *
+    //    offset, 1,
     //                     getApp()->themes->splits.input.focusedLine);
 }
 

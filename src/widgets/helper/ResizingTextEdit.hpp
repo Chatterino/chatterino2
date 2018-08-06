@@ -31,7 +31,8 @@ protected:
     void focusOutEvent(QFocusEvent *event) override;
 
 private:
-    // hadSpace is set to true in case the "textUnderCursor" word was after a space
+    // hadSpace is set to true in case the "textUnderCursor" word was after a
+    // space
     QString textUnderCursor(bool *hadSpace = nullptr) const;
 
     QCompleter *completer_ = nullptr;

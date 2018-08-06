@@ -25,7 +25,8 @@ struct JSONCheermoteSet {
         QString color;
 
         //       Background        State             Scale
-        std::map<QString, std::map<QString, std::map<QString, ImagePtr>>> images;
+        std::map<QString, std::map<QString, std::map<QString, ImagePtr>>>
+            images;
     };
 
     std::vector<CheermoteTier> tiers;

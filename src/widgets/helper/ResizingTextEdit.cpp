@@ -12,7 +12,8 @@ ResizingTextEdit::ResizingTextEdit()
     this->setSizePolicy(sizePolicy);
     this->setAcceptRichText(false);
 
-    QObject::connect(this, &QTextEdit::textChanged, this, &QWidget::updateGeometry);
+    QObject::connect(this, &QTextEdit::textChanged, this,
+                     &QWidget::updateGeometry);
 
     this->setFocusPolicy(Qt::ClickFocus);
 }
@@ -77,8 +78,9 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     this->keyPressed.invoke(event);
 
-    bool doComplete = (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
-                      (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+    bool doComplete =
+        (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
+        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
 
     if (doComplete) {
         // check if there is a completer
@@ -93,10 +95,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             return;
         }
 
-        auto *completionModel = static_cast<CompletionModel *>(this->completer_->model());
+        auto *completionModel =
+            static_cast<CompletionModel *>(this->completer_->model());
 
         if (!this->completionInProgress_) {
-            // First type pressing tab after modifying a message, we refresh our completion model
+            // First type pressing tab after modifying a message, we refresh our
+            // completion model
             this->completer_->setModel(completionModel);
             completionModel->refresh();
             this->completionInProgress_ = true;
@@ -107,14 +111,17 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
         // scrolling through selections
         if (event->key() == Qt::Key_Tab) {
-            if (!this->completer_->setCurrentRow(this->completer_->currentRow() + 1)) {
+            if (!this->completer_->setCurrentRow(
+                    this->completer_->currentRow() + 1)) {
                 // wrap over and start again
                 this->completer_->setCurrentRow(0);
             }
         } else {
-            if (!this->completer_->setCurrentRow(this->completer_->currentRow() - 1)) {
+            if (!this->completer_->setCurrentRow(
+                    this->completer_->currentRow() - 1)) {
                 // wrap over and start again
-                this->completer_->setCurrentRow(this->completer_->completionCount() - 1);
+                this->completer_->setCurrentRow(
+                    this->completer_->completionCount() - 1);
             }
         }
 
@@ -123,10 +130,10 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     }
 
     // (hemirt)
-    // this resets the selection in the completion list, it should probably only trigger on actual
-    // chat input (space, character) and not on every key input (pressing alt for example)
-    // (fourtf)
-    // fixed for shift+tab, there might be a better solution but nobody is gonna bother anyways
+    // this resets the selection in the completion list, it should probably only
+    // trigger on actual chat input (space, character) and not on every key
+    // input (pressing alt for example) (fourtf) fixed for shift+tab, there
+    // might be a better solution but nobody is gonna bother anyways
     if (event->key() != Qt::Key_Shift && event->key() != Qt::Key_Control &&
         event->key() != Qt::Key_Alt && event->key() != Qt::Key_Super_L &&
         event->key() != Qt::Key_Super_R) {
@@ -172,7 +179,8 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
     QObject::connect(completer_,
-                     static_cast<void (QCompleter::*)(const QString &)>(&QCompleter::highlighted),
+                     static_cast<void (QCompleter::*)(const QString &)>(
+                         &QCompleter::highlighted),
                      this, &ResizingTextEdit::insertCompletion);
 }
 
@@ -192,7 +200,8 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
     }
 
     QTextCursor tc = this->textCursor();
-    tc.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, prefixSize);
+    tc.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor,
+                    prefixSize);
     tc.insertText(completion);
     this->setTextCursor(tc);
 }

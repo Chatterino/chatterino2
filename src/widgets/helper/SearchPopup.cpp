@@ -77,7 +77,8 @@ void SearchPopup::performSearch()
         MessagePtr message = this->snapshot_[i];
 
         if (text.isEmpty() ||
-            message->searchText.indexOf(this->searchInput_->text(), 0, Qt::CaseInsensitive) != -1) {
+            message->searchText.indexOf(this->searchInput_->text(), 0,
+                                        Qt::CaseInsensitive) != -1) {
             channel->addMessage(message);
         }
     }

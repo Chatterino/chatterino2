@@ -27,13 +27,14 @@ IrcConnection::IrcConnection(QObject *parent)
         }
     });
 
-    QObject::connect(this, &Communi::IrcConnection::messageReceived, [this](Communi::IrcMessage *) {
-        this->recentlyReceivedMessage_ = true;
+    QObject::connect(this, &Communi::IrcConnection::messageReceived,
+                     [this](Communi::IrcMessage *) {
+                         this->recentlyReceivedMessage_ = true;
 
-        if (this->reconnectTimer_.isActive()) {
-            this->reconnectTimer_.stop();
-        }
-    });
+                         if (this->reconnectTimer_.isActive()) {
+                             this->reconnectTimer_.stop();
+                         }
+                     });
 }
 
 }  // namespace chatterino

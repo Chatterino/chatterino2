@@ -13,7 +13,8 @@ namespace chatterino {
 class RippleEffectButton;
 class UpdateDialog;
 
-void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> &handle,
+void initUpdateButton(RippleEffectButton &button,
+                      std::unique_ptr<UpdateDialog> &handle,
                       pajlada::Signals::SignalHolder &signalHolder);
 
 }  // namespace chatterino

@@ -20,10 +20,12 @@ EmoteName cleanUpCode(const EmoteName &dirtyEmoteCode)
     cleanCode.detach();
 
     static QMap<QString, QString> emoteNameReplacements{
-        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("}, {"\\&lt\\;3", "&lt;3"},
-        {"\\:-?(o|O)", ":O"},       {"\\:-?(p|P)", ":P"},     {"\\:-?[\\\\/]", ":/"},
-        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},       {"\\:-?\\)", ":)"},
-        {"\\:-?D", ":D"},           {"\\;-?(p|P)", ";P"},     {"\\;-?\\)", ";)"},
+        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
+        {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
+        {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
+        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
+        {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
+        {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
         {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
     };
 
@@ -105,7 +107,8 @@ bool TwitchAccount::isAnon() const
 
 void TwitchAccount::loadIgnores()
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks");
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                "/blocks");
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -140,7 +143,8 @@ void TwitchAccount::loadIgnores()
                 }
                 TwitchUser ignoredUser;
                 if (!rj::getSafe(userIt->value, ignoredUser)) {
-                    Log("Error parsing twitch user JSON {}", rj::stringify(userIt->value));
+                    Log("Error parsing twitch user JSON {}",
+                        rj::stringify(userIt->value));
                     continue;
                 }
 
@@ -154,28 +158,32 @@ void TwitchAccount::loadIgnores()
     req.execute();
 }
 
-void TwitchAccount::ignore(const QString &targetName,
-                           std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::ignore(
+    const QString &targetName,
+    std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    const auto onIdFetched = [this, targetName, onFinished](QString targetUserId) {
+    const auto onIdFetched = [this, targetName,
+                              onFinished](QString targetUserId) {
         this->ignoreByID(targetUserId, targetName, onFinished);  //
     };
 
     PartialTwitchUser::byName(targetName).getId(onIdFetched);
 }
 
-void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targetName,
-                               std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::ignoreByID(
+    const QString &targetUserID, const QString &targetName,
+    std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
-                targetUserID);
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                "/blocks/" + targetUserID);
     NetworkRequest req(url, NetworkRequestType::Put);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        onFinished(IgnoreResult_Failed, "An unknown error occured while trying to ignore user " +
-                                            targetName + " (" + QString::number(errorCode) + ")");
+        onFinished(IgnoreResult_Failed,
+                   "An unknown error occured while trying to ignore user " +
+                       targetName + " (" + QString::number(errorCode) + ")");
 
         return true;
     });
@@ -183,21 +191,24 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
     req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
         if (!document.IsObject()) {
-            onFinished(IgnoreResult_Failed, "Bad JSON data while ignoring user " + targetName);
+            onFinished(IgnoreResult_Failed,
+                       "Bad JSON data while ignoring user " + targetName);
             return Failure;
         }
 
         auto userIt = document.FindMember("user");
         if (userIt == document.MemberEnd()) {
             onFinished(IgnoreResult_Failed,
-                       "Bad JSON data while ignoring user (missing user) " + targetName);
+                       "Bad JSON data while ignoring user (missing user) " +
+                           targetName);
             return Failure;
         }
 
         TwitchUser ignoredUser;
         if (!rj::getSafe(userIt->value, ignoredUser)) {
             onFinished(IgnoreResult_Failed,
-                       "Bad JSON data while ignoring user (invalid user) " + targetName);
+                       "Bad JSON data while ignoring user (invalid user) " +
+                           targetName);
             return Failure;
         }
         {
@@ -212,7 +223,8 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
                 return Failure;
             }
         }
-        onFinished(IgnoreResult_Success, "Successfully ignored user " + targetName);
+        onFinished(IgnoreResult_Success,
+                   "Successfully ignored user " + targetName);
 
         return Success;
     });
@@ -220,10 +232,12 @@ void TwitchAccount::ignoreByID(const QString &targetUserID, const QString &targe
     req.execute();
 }
 
-void TwitchAccount::unignore(const QString &targetName,
-                             std::function<void(UnignoreResult, const QString &message)> onFinished)
+void TwitchAccount::unignore(
+    const QString &targetName,
+    std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    const auto onIdFetched = [this, targetName, onFinished](QString targetUserId) {
+    const auto onIdFetched = [this, targetName,
+                              onFinished](QString targetUserId) {
         this->unignoreByID(targetUserId, targetName, onFinished);  //
     };
 
@@ -234,8 +248,8 @@ void TwitchAccount::unignoreByID(
     const QString &targetUserID, const QString &targetName,
     std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/blocks/" +
-                targetUserID);
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                "/blocks/" + targetUserID);
 
     NetworkRequest req(url, NetworkRequestType::Delete);
     req.setCaller(QThread::currentThread());
@@ -243,8 +257,8 @@ void TwitchAccount::unignoreByID(
 
     req.onError([=](int errorCode) {
         onFinished(UnignoreResult_Failed,
-                   "An unknown error occured while trying to unignore user " + targetName + " (" +
-                       QString::number(errorCode) + ")");
+                   "An unknown error occured while trying to unignore user " +
+                       targetName + " (" + QString::number(errorCode) + ")");
 
         return true;
     });
@@ -258,7 +272,8 @@ void TwitchAccount::unignoreByID(
 
             this->ignores_.erase(ignoredUser);
         }
-        onFinished(UnignoreResult_Success, "Successfully unignored user " + targetName);
+        onFinished(UnignoreResult_Success,
+                   "Successfully unignored user " + targetName);
 
         return Success;
     });
@@ -269,8 +284,8 @@ void TwitchAccount::unignoreByID(
 void TwitchAccount::checkFollow(const QString targetUserID,
                                 std::function<void(FollowResult)> onFinished)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/follows/channels/" +
-                targetUserID);
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                "/follows/channels/" + targetUserID);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -295,7 +310,8 @@ void TwitchAccount::checkFollow(const QString targetUserID,
     req.execute();
 }
 
-void TwitchAccount::followUser(const QString userID, std::function<void()> successCallback)
+void TwitchAccount::followUser(const QString userID,
+                               std::function<void()> successCallback)
 {
     QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
                     "/follows/channels/" + userID);
@@ -315,7 +331,8 @@ void TwitchAccount::followUser(const QString userID, std::function<void()> succe
     request.execute();
 }
 
-void TwitchAccount::unfollowUser(const QString userID, std::function<void()> successCallback)
+void TwitchAccount::unfollowUser(const QString userID,
+                                 std::function<void()> successCallback)
 {
     QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
                     "/follows/channels/" + userID);
@@ -361,7 +378,8 @@ void TwitchAccount::loadEmotes()
         return;
     }
 
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() + "/emotes");
+    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
+                "/emotes");
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -387,7 +405,8 @@ void TwitchAccount::loadEmotes()
     req.execute();
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData> TwitchAccount::accessEmotes() const
+AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
 }
@@ -412,7 +431,8 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 
         this->loadEmoteSetData(emoteSet);
 
-        for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray()) {
+        for (const rapidjson::Value &emoteJSON :
+             emoteSetJSON.value.GetArray()) {
             if (!emoteJSON.IsObject()) {
                 Log("Emote value was invalid");
                 return;
@@ -459,8 +479,9 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         return;
     }
 
-    NetworkRequest req("https://braize.pajlada.com/chatterino/twitchemotes/set/" + emoteSet->key +
-                       "/");
+    NetworkRequest req(
+        "https://braize.pajlada.com/chatterino/twitchemotes/set/" +
+        emoteSet->key + "/");
     req.setUseQuickLoadCache(true);
 
     req.onError([](int errorCode) -> bool {
@@ -488,9 +509,11 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         Log("Loaded twitch emote set data for {}!", emoteSet->key);
 
         if (type == "sub") {
-            emoteSet->text = QString("Twitch Subscriber Emote (%1)").arg(channelName);
+            emoteSet->text =
+                QString("Twitch Subscriber Emote (%1)").arg(channelName);
         } else {
-            emoteSet->text = QString("Twitch Account Emote (%1)").arg(channelName);
+            emoteSet->text =
+                QString("Twitch Account Emote (%1)").arg(channelName);
         }
 
         emoteSet->channelName = channelName;

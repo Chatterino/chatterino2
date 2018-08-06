@@ -72,10 +72,11 @@ public:
         // - Chatterino top donator badge
         BadgeChatterino = (1 << 18),
 
-        // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke) custom badge?
+        // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke)
+        // custom badge?
 
-        Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription | BadgeVanity |
-                 BadgeChatterino,
+        Badges = BadgeGlobalAuthority | BadgeChannelAuthority |
+                 BadgeSubscription | BadgeVanity | BadgeChatterino,
 
         ChannelName = (1 << 19),
 
@@ -89,7 +90,8 @@ public:
 
         AlwaysShow = (1 << 25),
 
-        // used in the ChannelView class to make the collapse buttons visible if needed
+        // used in the ChannelView class to make the collapse buttons visible if
+        // needed
         Collapsed = (1 << 26),
 
         // used for dynamic bold usernames
@@ -100,8 +102,9 @@ public:
         LowercaseLink = (1 << 29),
         OriginalLink = (1 << 30),
 
-        Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage | BttvEmoteImage |
-                  TwitchEmoteImage | BitsAmount | Text | AlwaysShow,
+        Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
+                  BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
+                  AlwaysShow,
     };
 
     enum UpdateFlags : char {
@@ -121,7 +124,8 @@ public:
     bool hasTrailingSpace() const;
     Flags getFlags() const;
 
-    virtual void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) = 0;
+    virtual void addToContainer(MessageLayoutContainer &container,
+                                MessageElement::Flags flags) = 0;
 
 protected:
     MessageElement(Flags flags);
@@ -139,7 +143,8 @@ class ImageElement : public MessageElement
 public:
     ImageElement(ImagePtr image, MessageElement::Flags flags);
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElement::Flags flags) override;
 
 private:
     ImagePtr image_;
@@ -154,7 +159,8 @@ public:
                 FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElement::Flags flags) override;
 
 private:
     MessageColor color_;
@@ -175,7 +181,8 @@ class EmoteElement : public MessageElement
 public:
     EmoteElement(const EmotePtr &data, MessageElement::Flags flags_);
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags_) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElement::Flags flags_) override;
     EmotePtr getEmote() const;
 
 private:
@@ -190,7 +197,8 @@ public:
     TimestampElement(QTime time_ = QTime::currentTime());
     ~TimestampElement() override = default;
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElement::Flags flags) override;
 
     TextElement *formatTime(const QTime &time);
 
@@ -200,14 +208,15 @@ private:
     QString format_;
 };
 
-// adds all the custom moderation buttons, adds a variable amount of items depending on settings
-// fourtf: implement
+// adds all the custom moderation buttons, adds a variable amount of items
+// depending on settings fourtf: implement
 class TwitchModerationElement : public MessageElement
 {
 public:
     TwitchModerationElement();
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElement::Flags flags) override;
 };
 
 }  // namespace chatterino

@@ -18,12 +18,13 @@
 #include <QFile>
 #include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                                               \
-    {                                                                                         \
-        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", "/timeout", \
-            "/untimeout", "/slow", "/slowoff", "/r9kbeta", "/r9kbetaoff", "/emoteonly",       \
-            "/emoteonlyoff", "/clear", "/subscribers", "/subscribersoff", "/followers",       \
-            "/followersoff"                                                                   \
+#define TWITCH_DEFAULT_COMMANDS                                         \
+    {                                                                   \
+        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", \
+            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
+            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
+            "/clear", "/subscribers", "/subscribersoff", "/followers",  \
+            "/followersoff"                                             \
     }
 
 namespace chatterino {
@@ -77,7 +78,8 @@ void CommandController::save()
 {
     QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::WriteOnly)) {
-        Log("[CommandController::saveCommands] Unable to open {} for writing", this->filePath_);
+        Log("[CommandController::saveCommands] Unable to open {} for writing",
+            this->filePath_);
         return;
     }
 
@@ -96,7 +98,8 @@ CommandModel *CommandController::createModel(QObject *parent)
     return model;
 }
 
-QString CommandController::execCommand(const QString &text, ChannelPtr channel, bool dryRun)
+QString CommandController::execCommand(const QString &text, ChannelPtr channel,
+                                       bool dryRun)
 {
     QStringList words = text.split(' ', QString::SkipEmptyParts);
     Command command;
@@ -122,11 +125,13 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 MessageBuilder b;
 
                 b.emplace<TimestampElement>();
-                b.emplace<TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
-                                       MessageElement::Text, MessageColor::Text,
-                                       FontStyle::ChatMediumBold);
+                b.emplace<TextElement>(
+                    app->accounts->twitch.getCurrent()->getUserName(),
+                    MessageElement::Text, MessageColor::Text,
+                    FontStyle::ChatMediumBold);
                 b.emplace<TextElement>("->", MessageElement::Text);
-                b.emplace<TextElement>(words[1] + ":", MessageElement::Text, MessageColor::Text,
+                b.emplace<TextElement>(words[1] + ":", MessageElement::Text,
+                                       MessageColor::Text,
                                        FontStyle::ChatMediumBold);
 
                 QString rest = "";
@@ -144,7 +149,9 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
 
                 if (getSettings()->inlineWhispers) {
                     app->twitch.server->forEachChannel(
-                        [&b](ChannelPtr _channel) { _channel->addMessage(b.getMessage()); });
+                        [&b](ChannelPtr _channel) {
+                            _channel->addMessage(b.getMessage());
+                        });
                 }
 
                 return "";
@@ -165,15 +172,17 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
             } else if (commandName == "/uptime") {
                 const auto &streamStatus = twitchChannel->accessStreamStatus();
 
-                QString messageText =
-                    streamStatus->live ? streamStatus->uptime : "Channel is not live.";
+                QString messageText = streamStatus->live
+                                          ? streamStatus->uptime
+                                          : "Channel is not live.";
 
                 channel->addMessage(Message::createSystemMessage(messageText));
 
                 return "";
             } else if (commandName == "/ignore") {
                 if (words.size() < 2) {
-                    channel->addMessage(Message::createSystemMessage("Usage: /ignore [user]"));
+                    channel->addMessage(
+                        Message::createSystemMessage("Usage: /ignore [user]"));
                     return "";
                 }
                 auto app = getApp();
@@ -182,19 +191,21 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(
-                        Message::createSystemMessage("You must be logged in to ignore someone"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "You must be logged in to ignore someone"));
                     return "";
                 }
 
-                user->ignore(target, [channel](auto resultCode, const QString &message) {
+                user->ignore(target, [channel](auto resultCode,
+                                               const QString &message) {
                     channel->addMessage(Message::createSystemMessage(message));
                 });
 
                 return "";
             } else if (commandName == "/unignore") {
                 if (words.size() < 2) {
-                    channel->addMessage(Message::createSystemMessage("Usage: /unignore [user]"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "Usage: /unignore [user]"));
                     return "";
                 }
                 auto app = getApp();
@@ -203,19 +214,21 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(
-                        Message::createSystemMessage("You must be logged in to ignore someone"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "You must be logged in to ignore someone"));
                     return "";
                 }
 
-                user->unignore(target, [channel](auto resultCode, const QString &message) {
+                user->unignore(target, [channel](auto resultCode,
+                                                 const QString &message) {
                     channel->addMessage(Message::createSystemMessage(message));
                 });
 
                 return "";
             } else if (commandName == "/follow") {
                 if (words.size() < 2) {
-                    channel->addMessage(Message::createSystemMessage("Usage: /follow [user]"));
+                    channel->addMessage(
+                        Message::createSystemMessage("Usage: /follow [user]"));
                     return "";
                 }
                 auto app = getApp();
@@ -224,27 +237,29 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(
-                        Message::createSystemMessage("You must be logged in to follow someone"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "You must be logged in to follow someone"));
                     return "";
                 }
 
-                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty()) {
-                        channel->addMessage(Message::createSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->followUser(userId, [channel, target]() {
-                        channel->addMessage(
-                            Message::createSystemMessage("You successfully followed " + target));
+                TwitchApi::findUserId(
+                    target, [user, channel, target](QString userId) {
+                        if (userId.isEmpty()) {
+                            channel->addMessage(Message::createSystemMessage(
+                                "User " + target + " could not be followed!"));
+                            return;
+                        }
+                        user->followUser(userId, [channel, target]() {
+                            channel->addMessage(Message::createSystemMessage(
+                                "You successfully followed " + target));
+                        });
                     });
-                });
 
                 return "";
             } else if (commandName == "/unfollow") {
                 if (words.size() < 2) {
-                    channel->addMessage(Message::createSystemMessage("Usage: /unfollow [user]"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "Usage: /unfollow [user]"));
                     return "";
                 }
                 auto app = getApp();
@@ -253,28 +268,29 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                 auto target = words.at(1);
 
                 if (user->isAnon()) {
-                    channel->addMessage(
-                        Message::createSystemMessage("You must be logged in to follow someone"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "You must be logged in to follow someone"));
                     return "";
                 }
 
-                TwitchApi::findUserId(target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty()) {
-                        channel->addMessage(Message::createSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->unfollowUser(userId, [channel, target]() {
-                        channel->addMessage(
-                            Message::createSystemMessage("You successfully unfollowed " + target));
+                TwitchApi::findUserId(
+                    target, [user, channel, target](QString userId) {
+                        if (userId.isEmpty()) {
+                            channel->addMessage(Message::createSystemMessage(
+                                "User " + target + " could not be followed!"));
+                            return;
+                        }
+                        user->unfollowUser(userId, [channel, target]() {
+                            channel->addMessage(Message::createSystemMessage(
+                                "You successfully unfollowed " + target));
+                        });
                     });
-                });
 
                 return "";
             } else if (commandName == "/logs") {
                 if (words.size() < 2) {
-                    channel->addMessage(
-                        Message::createSystemMessage("Usage: /logs [user] (channel)"));
+                    channel->addMessage(Message::createSystemMessage(
+                        "Usage: /logs [user] (channel)"));
                     return "";
                 }
                 auto app = getApp();
@@ -293,7 +309,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
                     if (words.at(2).at(0) == "#") {
                         channelName = words.at(2).mid(1);
                     }
-                    auto logsChannel = app->twitch.server->getChannelOrEmpty(channelName);
+                    auto logsChannel =
+                        app->twitch.server->getChannelOrEmpty(channelName);
                     if (logsChannel == nullptr) {
                     } else {
                         logs->setInfo(logsChannel, target);
@@ -319,7 +336,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel, 
     return this->execCustomCommand(words, command);
 }
 
-QString CommandController::execCustomCommand(const QStringList &words, const Command &command)
+QString CommandController::execCustomCommand(const QStringList &words,
+                                             const Command &command)
 {
     QString result;
 
@@ -331,13 +349,15 @@ QString CommandController::execCustomCommand(const QStringList &words, const Com
     int matchOffset = 0;
 
     while (true) {
-        QRegularExpressionMatch match = parseCommand.match(command.func, matchOffset);
+        QRegularExpressionMatch match =
+            parseCommand.match(command.func, matchOffset);
 
         if (!match.hasMatch()) {
             break;
         }
 
-        result += command.func.mid(lastCaptureEnd, match.capturedStart() - lastCaptureEnd + 1);
+        result += command.func.mid(lastCaptureEnd,
+                                   match.capturedStart() - lastCaptureEnd + 1);
 
         lastCaptureEnd = match.capturedEnd();
         matchOffset = lastCaptureEnd - 1;

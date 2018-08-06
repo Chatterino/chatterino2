@@ -13,7 +13,8 @@ namespace chatterino {
 //{
 //}
 
-// ModerationAction::ModerationAction(const QString &_line1, const QString &_line2,
+// ModerationAction::ModerationAction(const QString &_line1, const QString
+// &_line2,
 //                                   const QString &_action)
 //    : _isImage(false)
 //    , image(nullptr)
@@ -55,10 +56,12 @@ ModerationAction::ModerationAction(const QString &action)
         // line1 = this->line1_;
         // line2 = this->line2_;
         // } else {
-        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
+        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
+        //     str);
         // }
     } else if (action.startsWith("/ban ")) {
-        this->image_ = Image::fromNonOwningPixmap(&getApp()->resources->buttons.ban);
+        this->image_ =
+            Image::fromNonOwningPixmap(&getApp()->resources->buttons.ban);
     } else {
         QString xD = action;
 

@@ -30,10 +30,14 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(3, 1);
 
     auto *move = new QPushButton(getApp()->resources->split.move, QString());
-    auto *left = this->left_ = new QPushButton(getApp()->resources->split.left, QString());
-    auto *right = this->right_ = new QPushButton(getApp()->resources->split.right, QString());
-    auto *up = this->up_ = new QPushButton(getApp()->resources->split.up, QString());
-    auto *down = this->down_ = new QPushButton(getApp()->resources->split.down, QString());
+    auto *left = this->left_ =
+        new QPushButton(getApp()->resources->split.left, QString());
+    auto *right = this->right_ =
+        new QPushButton(getApp()->resources->split.right, QString());
+    auto *up = this->up_ =
+        new QPushButton(getApp()->resources->split.up, QString());
+    auto *down = this->down_ =
+        new QPushButton(getApp()->resources->split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));
@@ -103,7 +107,8 @@ void SplitOverlay::paintEvent(QPaintEvent *)
         } break;
 
         case SplitRight: {
-            rect = QRect(this->width() / 2, 0, this->width() / 2, this->height());
+            rect =
+                QRect(this->width() / 2, 0, this->width() / 2, this->height());
         } break;
 
         case SplitUp: {
@@ -111,7 +116,8 @@ void SplitOverlay::paintEvent(QPaintEvent *)
         } break;
 
         case SplitDown: {
-            rect = QRect(0, this->height() / 2, this->width(), this->height() / 2);
+            rect =
+                QRect(0, this->height() / 2, this->width(), this->height() / 2);
         } break;
 
         default:;
@@ -145,24 +151,28 @@ void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
 
     //    qDebug() << QGuiApplication::queryKeyboardModifiers();
 
-    //    if ((QGuiApplication::queryKeyboardModifiers() & Qt::AltModifier) == Qt::AltModifier) {
+    //    if ((QGuiApplication::queryKeyboardModifiers() & Qt::AltModifier) ==
+    //    Qt::AltModifier) {
     //        this->hide();
     //    }
 }
 
-SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent, HoveredElement _element)
+SplitOverlay::ButtonEventFilter::ButtonEventFilter(SplitOverlay *_parent,
+                                                   HoveredElement _element)
     : QObject(_parent)
     , parent(_parent)
     , hoveredElement(_element)
 {
 }
 
-bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *event)
+bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
+                                                  QEvent *event)
 {
     switch (event->type()) {
         case QEvent::Enter: {
             QGraphicsOpacityEffect *effect =
-                dynamic_cast<QGraphicsOpacityEffect *>(((QWidget *)watched)->graphicsEffect());
+                dynamic_cast<QGraphicsOpacityEffect *>(
+                    ((QWidget *)watched)->graphicsEffect());
 
             if (effect != nullptr) {
                 effect->setOpacity(0.99);
@@ -173,7 +183,8 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
         } break;
         case QEvent::Leave: {
             QGraphicsOpacityEffect *effect =
-                dynamic_cast<QGraphicsOpacityEffect *>(((QWidget *)watched)->graphicsEffect());
+                dynamic_cast<QGraphicsOpacityEffect *>(
+                    ((QWidget *)watched)->graphicsEffect());
 
             if (effect != nullptr) {
                 effect->setOpacity(0.7);
@@ -193,12 +204,14 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched, QEvent *even
         } break;
         case QEvent::MouseButtonRelease: {
             if (this->hoveredElement != HoveredElement::SplitMove) {
-                SplitContainer *container = this->parent->split_->getContainer();
+                SplitContainer *container =
+                    this->parent->split_->getContainer();
 
                 if (container != nullptr) {
                     auto *_split = new Split(container);
                     auto dir = SplitContainer::Direction(this->hoveredElement +
-                                                         SplitContainer::Left - SplitLeft);
+                                                         SplitContainer::Left -
+                                                         SplitLeft);
                     container->insertSplit(_split, dir, this->parent->split_);
                     this->parent->hide();
                 }

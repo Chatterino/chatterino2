@@ -111,26 +111,32 @@ void CompletionModel::refresh()
     // User-specific: Twitch Emotes
     if (auto account = app->accounts->twitch.getCurrent()) {
         for (const auto &emote : account->accessEmotes()->allEmoteNames) {
-            // XXX: No way to discern between a twitch global emote and sub emote right now
-            this->addString(emote.string, TaggedString::Type::TwitchGlobalEmote);
+            // XXX: No way to discern between a twitch global emote and sub
+            // emote right now
+            this->addString(emote.string,
+                            TaggedString::Type::TwitchGlobalEmote);
         }
     }
 
     //    // Global: BTTV Global Emotes
-    //    std::vector<QString> &bttvGlobalEmoteCodes = app->emotes->bttv.globalEmoteNames_;
-    //    for (const auto &m : bttvGlobalEmoteCodes) {
+    //    std::vector<QString> &bttvGlobalEmoteCodes =
+    //    app->emotes->bttv.globalEmoteNames_; for (const auto &m :
+    //    bttvGlobalEmoteCodes) {
     //        this->addString(m, TaggedString::Type::BTTVGlobalEmote);
     //    }
 
     //    // Global: FFZ Global Emotes
-    //    std::vector<QString> &ffzGlobalEmoteCodes = app->emotes->ffz.globalEmoteCodes;
-    //    for (const auto &m : ffzGlobalEmoteCodes) {
+    //    std::vector<QString> &ffzGlobalEmoteCodes =
+    //    app->emotes->ffz.globalEmoteCodes; for (const auto &m :
+    //    ffzGlobalEmoteCodes) {
     //        this->addString(m, TaggedString::Type::FFZGlobalEmote);
     //    }
 
     // Channel emotes
     if (auto channel = dynamic_cast<TwitchChannel *>(
-            getApp()->twitch2->getChannelOrEmptyByID(this->channelName_).get())) {
+            getApp()
+                ->twitch2->getChannelOrEmptyByID(this->channelName_)
+                .get())) {
         auto bttv = channel->accessBttvEmotes();
         //        auto it = bttv->begin();
         //        for (const auto &emote : *bttv) {
@@ -143,7 +149,8 @@ void CompletionModel::refresh()
 
         // Channel-specific: FFZ Channel Emotes
         for (const auto &emote : *channel->accessFfzEmotes()) {
-            this->addString(emote.second->name.string, TaggedString::Type::FFZChannelEmote);
+            this->addString(emote.second->name.string,
+                            TaggedString::Type::FFZChannelEmote);
         }
     }
 
@@ -164,7 +171,8 @@ void CompletionModel::refresh()
 
     // Channel-specific: Usernames
     // fourtf: only works with twitch chat
-    //    auto c = ChannelManager::getInstance().getTwitchChannel(this->channelName);
+    //    auto c =
+    //    ChannelManager::getInstance().getTwitchChannel(this->channelName);
     //    auto usernames = c->getUsernamesForCompletions();
     //    for (const auto &name : usernames) {
     //        assert(!name.displayName.isEmpty());
@@ -191,9 +199,11 @@ void CompletionModel::addUser(const QString &username)
     auto add = [this](const QString &str) {
         auto ts = this->createUser(str + " ");
         // Always add a space at the end of completions
-        std::pair<std::set<TaggedString>::iterator, bool> p = this->emotes_.insert(ts);
+        std::pair<std::set<TaggedString>::iterator, bool> p =
+            this->emotes_.insert(ts);
         if (!p.second) {
-            // No inseration was made, figure out if we need to replace the username.
+            // No inseration was made, figure out if we need to replace the
+            // username.
 
             if (p.first->str > ts.str) {
                 // Replace lowercase version of name with mixed-case version

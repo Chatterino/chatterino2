@@ -5,7 +5,8 @@
 
 namespace chatterino {
 
-void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> &handle,
+void initUpdateButton(RippleEffectButton &button,
+                      std::unique_ptr<UpdateDialog> &handle,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();
@@ -16,7 +17,8 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> 
 
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
-        dialog->move(button.mapToGlobal(QPoint(int(-100 * button.getScale()), button.height())));
+        dialog->move(button.mapToGlobal(
+            QPoint(int(-100 * button.getScale()), button.height())));
         dialog->show();
         dialog->raise();
 
@@ -39,15 +41,17 @@ void initUpdateButton(RippleEffectButton &button, std::unique_ptr<UpdateDialog> 
     auto updateChange = [&button](auto) {
         button.setVisible(Updates::getInstance().shouldShowUpdateButton());
 
-        auto imageUrl = Updates::getInstance().isError() ? ":/images/download_update_error.png"
-                                                         : ":/images/download_update.png";
+        auto imageUrl = Updates::getInstance().isError()
+                            ? ":/images/download_update_error.png"
+                            : ":/images/download_update.png";
         button.setPixmap(QPixmap(imageUrl));
     };
 
     updateChange(Updates::getInstance().getStatus());
 
-    signalHolder.managedConnect(Updates::getInstance().statusUpdated,
-                                [updateChange](auto status) { updateChange(status); });
+    signalHolder.managedConnect(
+        Updates::getInstance().statusUpdated,
+        [updateChange](auto status) { updateChange(status); });
 }
 
 }  // namespace chatterino

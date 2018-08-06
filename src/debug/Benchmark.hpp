@@ -29,7 +29,8 @@ public:
 
     ~BenchmarkGuard()
     {
-        qDebug() << this->name << float(timer.nsecsElapsed()) / 1000000.0f << "ms";
+        qDebug() << this->name << float(timer.nsecsElapsed()) / 1000000.0f
+                 << "ms";
     }
 
     qreal getElapsedMs()

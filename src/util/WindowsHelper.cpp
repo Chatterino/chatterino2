@@ -11,14 +11,17 @@ typedef enum MONITOR_DPI_TYPE {
     MDT_DEFAULT = MDT_EFFECTIVE_DPI
 } MONITOR_DPI_TYPE;
 
-typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *, UINT *);
+typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *,
+                                             UINT *);
 
 boost::optional<UINT> getWindowDpi(HWND hwnd)
 {
     static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
     if (shcore != nullptr) {
-        if (auto getDpiForMonitor = GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor"))) {
-            HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        if (auto getDpiForMonitor =
+                GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor"))) {
+            HMONITOR monitor =
+                MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
 
             UINT xScale, yScale;
 

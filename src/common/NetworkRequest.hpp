@@ -12,15 +12,18 @@ namespace chatterino {
 
 class NetworkRequest
 {
-    // Stores all data about the request that needs to be passed around to each part of the request
+    // Stores all data about the request that needs to be passed around to each
+    // part of the request
     std::shared_ptr<NetworkData> data;
 
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request
-    // to enable the timer, the "setTimeout" function needs to be called before execute is called
+    // to enable the timer, the "setTimeout" function needs to be called before
+    // execute is called
     std::shared_ptr<NetworkTimer> timer;
 
-    // The NetworkRequest destructor will assert if executed_ hasn't been set to true before dying
+    // The NetworkRequest destructor will assert if executed_ hasn't been set to
+    // true before dying
     bool executed_ = false;
 
 public:
@@ -31,9 +34,11 @@ public:
     NetworkRequest(NetworkRequest &&other) = default;
     NetworkRequest &operator=(NetworkRequest &&other) = default;
 
-    explicit NetworkRequest(const std::string &url,
-                            NetworkRequestType requestType = NetworkRequestType::Get);
-    explicit NetworkRequest(QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+    explicit NetworkRequest(
+        const std::string &url,
+        NetworkRequestType requestType = NetworkRequestType::Get);
+    explicit NetworkRequest(
+        QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
 
     ~NetworkRequest();
 
@@ -50,14 +55,15 @@ public:
     void setRawHeader(const char *headerName, const QByteArray &value);
     void setRawHeader(const char *headerName, const QString &value);
     void setTimeout(int ms);
-    void makeAuthorizedV5(const QString &clientID, const QString &oauthToken = QString());
+    void makeAuthorizedV5(const QString &clientID,
+                          const QString &oauthToken = QString());
 
     void execute();
 
 private:
     // Returns true if the file was successfully loaded from cache
-    // Returns false if the cache file either didn't exist, or it contained "invalid" data
-    // "invalid" is specified by the onSuccess callback
+    // Returns false if the cache file either didn't exist, or it contained
+    // "invalid" data "invalid" is specified by the onSuccess callback
     Outcome tryLoadCachedFile();
 
     void doRequest();

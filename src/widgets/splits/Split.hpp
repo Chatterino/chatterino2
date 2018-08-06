@@ -24,9 +24,10 @@ class SplitContainer;
 class SplitOverlay;
 class SelectChannelDialog;
 
-// Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
-// ChatWidgetHeader
-//   - Responsible for rendering which channel the ChatWidget is in, and the menu in the top-left of
+// Each ChatWidget consists of three sub-elements that handle their own part of
+// the chat widget: ChatWidgetHeader
+//   - Responsible for rendering which channel the ChatWidget is in, and the
+//   menu in the top-left of
 //     the chat widget
 // ChatWidgetView
 //   - Responsible for rendering all chat messages, and the scrollbar
@@ -76,7 +77,8 @@ public:
 
     void setContainer(SplitContainer *container);
 
-    static pajlada::Signals::Signal<Qt::KeyboardModifiers> modifierStatusChanged;
+    static pajlada::Signals::Signal<Qt::KeyboardModifiers>
+        modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;
 
 protected:

@@ -32,7 +32,8 @@ namespace ipc = boost::interprocess;
 namespace chatterino {
 
 void registerNmManifest(Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName, const QJsonDocument &document);
+                        const QString &registryKeyName,
+                        const QJsonDocument &document);
 
 void registerNmHost(Paths &paths)
 {
@@ -53,14 +54,15 @@ void registerNmHost(Paths &paths)
         QJsonDocument document;
 
         auto obj = getBaseDocument();
-        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID "/"};
+        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID
+                                          "/"};
         obj.insert("allowed_origins", allowed_origins_arr);
         document.setObject(obj);
 
-        registerNmManifest(
-            paths, "/native-messaging-manifest-chrome.json",
-            "HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino",
-            document);
+        registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
+                           "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
+                           "s\\com.chatterino.chatterino",
+                           document);
     }
 
     // firefox
@@ -72,14 +74,16 @@ void registerNmHost(Paths &paths)
         obj.insert("allowed_extensions", allowed_extensions);
         document.setObject(obj);
 
-        registerNmManifest(
-            paths, "/native-messaging-manifest-firefox.json",
-            "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com.chatterino.chatterino", document);
+        registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
+                           "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
+                           "chatterino.chatterino",
+                           document);
     }
 }
 
 void registerNmManifest(Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName, const QJsonDocument &document)
+                        const QString &registryKeyName,
+                        const QJsonDocument &document)
 {
     (void)registryKeyName;
 
@@ -99,7 +103,8 @@ void registerNmManifest(Paths &paths, const QString &manifestFilename,
 
 std::string &getNmQueueName(Paths &paths)
 {
-    static std::string name = "chatterino_gui" + paths.applicationFilePathHash.toStdString();
+    static std::string name =
+        "chatterino_gui" + paths.applicationFilePathHash.toStdString();
     return name;
 }
 
@@ -137,18 +142,20 @@ void NativeMessagingServer::ReceiverThread::run()
 {
     ipc::message_queue::remove("chatterino_gui");
 
-    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
+    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
+                                    MESSAGE_SIZE);
 
     while (true) {
         try {
-            std::unique_ptr<char> buf(static_cast<char *>(malloc(MESSAGE_SIZE)));
+            std::unique_ptr<char> buf(
+                static_cast<char *>(malloc(MESSAGE_SIZE)));
             ipc::message_queue::size_type retSize;
             unsigned int priority;
 
             messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document =
-                QJsonDocument::fromJson(QByteArray::fromRawData(buf.get(), retSize));
+            QJsonDocument document = QJsonDocument::fromJson(
+                QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());
         } catch (ipc::interprocess_exception &ex) {
@@ -157,7 +164,8 @@ void NativeMessagingServer::ReceiverThread::run()
     }
 }
 
-void NativeMessagingServer::ReceiverThread::handleMessage(const QJsonObject &root)
+void NativeMessagingServer::ReceiverThread::handleMessage(
+    const QJsonObject &root)
 {
     auto app = getApp();
 
@@ -199,9 +207,11 @@ void NativeMessagingServer::ReceiverThread::handleMessage(const QJsonObject &roo
                 if (attach) {
 #ifdef USEWINSDK
                     //                    if (args.height != -1) {
-                    auto *window = AttachedWindow::get(::GetForegroundWindow(), args);
+                    auto *window =
+                        AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty()) {
-                        window->setChannel(app->twitch.server->getOrAddChannel(name));
+                        window->setChannel(
+                            app->twitch.server->getOrAddChannel(name));
                     }
 //                    }
 //                    window->show();

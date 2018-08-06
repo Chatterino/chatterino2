@@ -25,10 +25,13 @@ public:
 
     TwitchMessageBuilder() = delete;
 
-    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
+    explicit TwitchMessageBuilder(Channel *_channel,
+                                  const Communi::IrcPrivateMessage *_ircMessage,
                                   const MessageParseArgs &_args);
-    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  const MessageParseArgs &_args, QString content, bool isAction);
+    explicit TwitchMessageBuilder(Channel *_channel,
+                                  const Communi::IrcMessage *_ircMessage,
+                                  const MessageParseArgs &_args,
+                                  QString content, bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
@@ -50,7 +53,8 @@ private:
     void appendUsername();
     void parseHighlights(bool isPastMsg);
 
-    void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
+    void appendTwitchEmote(const Communi::IrcMessage *ircMessage,
+                           const QString &emote,
                            std::vector<std::pair<int, EmotePtr>> &vec);
     Outcome tryAppendEmote(const EmoteName &name);
 

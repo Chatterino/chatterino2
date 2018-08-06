@@ -11,7 +11,8 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/ConcurrentMap.hpp"
 
-#define TWITCH_EMOTE_TEMPLATE "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
+#define TWITCH_EMOTE_TEMPLATE \
+    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
 namespace chatterino {
 
@@ -26,7 +27,8 @@ public:
 
 private:
     UniqueAccess<std::unordered_map<EmoteName, EmotePtr>> twitchEmotes_;
-    UniqueAccess<std::unordered_map<EmoteId, std::weak_ptr<Emote>>> twitchEmotesCache_;
+    UniqueAccess<std::unordered_map<EmoteId, std::weak_ptr<Emote>>>
+        twitchEmotesCache_;
 };
 
 }  // namespace chatterino

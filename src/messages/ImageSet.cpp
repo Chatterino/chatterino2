@@ -13,7 +13,8 @@ ImageSet::ImageSet()
 {
 }
 
-ImageSet::ImageSet(const ImagePtr &image1, const ImagePtr &image2, const ImagePtr &image3)
+ImageSet::ImageSet(const ImagePtr &image1, const ImagePtr &image2,
+                   const ImagePtr &image3)
     : imageX1_(image1)
     , imageX2_(image2)
     , imageX3_(image3)

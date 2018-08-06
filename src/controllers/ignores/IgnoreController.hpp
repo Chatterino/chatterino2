@@ -25,7 +25,8 @@ public:
 private:
     bool initialized_ = false;
 
-    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {"/ignore/phrases"};
+    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {
+        "/ignore/phrases"};
 };
 
 }  // namespace chatterino

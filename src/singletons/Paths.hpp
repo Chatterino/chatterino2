@@ -12,8 +12,8 @@ public:
 
     Paths();
 
-    // Root directory for the configuration files. %APPDATA%/chatterino or ExecutablePath for
-    // portable mode
+    // Root directory for the configuration files. %APPDATA%/chatterino or
+    // ExecutablePath for portable mode
     QString rootAppDataDirectory;
 
     // Directory for settings files. Same as <appDataDirectory>/Settings

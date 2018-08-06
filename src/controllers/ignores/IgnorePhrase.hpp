@@ -16,13 +16,15 @@ class IgnorePhrase
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_) == std::tie(other.pattern_, other.isRegex_);
+        return std::tie(this->pattern_, this->isRegex_) ==
+               std::tie(other.pattern_, other.isRegex_);
     }
 
     IgnorePhrase(const QString &pattern, bool isRegex)
         : pattern_(pattern)
         , isRegex_(isRegex)
-        , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+        , regex_(isRegex_ ? pattern
+                          : "\\b" + QRegularExpression::escape(pattern) + "\\b",
                  QRegularExpression::CaseInsensitiveOption |
                      QRegularExpression::UseUnicodePropertiesOption)
     {

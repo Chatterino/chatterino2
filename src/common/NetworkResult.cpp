@@ -27,11 +27,12 @@ rapidjson::Document NetworkResult::parseRapidJson() const
 {
     rapidjson::Document ret(rapidjson::kObjectType);
 
-    rapidjson::ParseResult result = ret.Parse(this->data_.data(), this->data_.length());
+    rapidjson::ParseResult result =
+        ret.Parse(this->data_.data(), this->data_.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-            result.Offset());
+        Log("JSON parse error: {} ({})",
+            rapidjson::GetParseError_En(result.Code()), result.Offset());
         return ret;
     }
 

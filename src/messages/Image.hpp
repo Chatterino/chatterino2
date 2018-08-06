@@ -47,7 +47,8 @@ class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
 public:
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
-    static ImagePtr fromOwningPixmap(std::unique_ptr<QPixmap> pixmap, qreal scale = 1);
+    static ImagePtr fromOwningPixmap(std::unique_ptr<QPixmap> pixmap,
+                                     qreal scale = 1);
     static ImagePtr fromNonOwningPixmap(QPixmap *pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 

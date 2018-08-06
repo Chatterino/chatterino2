@@ -14,16 +14,20 @@ class HighlightPhrase
 public:
     bool operator==(const HighlightPhrase &other) const
     {
-        return std::tie(this->pattern_, this->sound_, this->alert_, this->isRegex_) ==
-               std::tie(other.pattern_, other.sound_, other.alert_, other.isRegex_);
+        return std::tie(this->pattern_, this->sound_, this->alert_,
+                        this->isRegex_) == std::tie(other.pattern_,
+                                                    other.sound_, other.alert_,
+                                                    other.isRegex_);
     }
 
-    HighlightPhrase(const QString &pattern, bool alert, bool sound, bool isRegex)
+    HighlightPhrase(const QString &pattern, bool alert, bool sound,
+                    bool isRegex)
         : pattern_(pattern)
         , alert_(alert)
         , sound_(sound)
         , isRegex_(isRegex)
-        , regex_(isRegex_ ? pattern : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+        , regex_(isRegex_ ? pattern
+                          : "\\b" + QRegularExpression::escape(pattern) + "\\b",
                  QRegularExpression::CaseInsensitiveOption |
                      QRegularExpression::UseUnicodePropertiesOption)
     {

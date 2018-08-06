@@ -22,9 +22,10 @@ Channel::Channel(const QString &name, Type type)
     , name_(name)
     , type_(type)
 {
-    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout, [this]() {
-        this->completionModel.clearExpiredStrings();  //
-    });
+    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout,
+                     [this]() {
+                         this->completionModel.clearExpiredStrings();  //
+                     });
     this->clearCompletionModelTimer_.start(60 * 1000);
 }
 
@@ -65,7 +66,8 @@ void Channel::addMessage(MessagePtr message)
 
     const QString &username = message->loginName;
     if (!username.isEmpty()) {
-        // TODO: Add recent chatters display name. This should maybe be a setting
+        // TODO: Add recent chatters display name. This should maybe be a
+        // setting
         this->addRecentChatter(message);
     }
 
@@ -101,17 +103,21 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             break;
         }
 
-        if (s->flags.HasFlag(Message::Untimeout) && s->timeoutUser == message->timeoutUser) {
+        if (s->flags.HasFlag(Message::Untimeout) &&
+            s->timeoutUser == message->timeoutUser) {
             break;
         }
 
-        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == message->timeoutUser) {
-            if (message->flags.HasFlag(Message::PubSub) && !s->flags.HasFlag(Message::PubSub)) {
+        if (s->flags.HasFlag(Message::Timeout) &&
+            s->timeoutUser == message->timeoutUser) {
+            if (message->flags.HasFlag(Message::PubSub) &&
+                !s->flags.HasFlag(Message::PubSub)) {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
-            if (!message->flags.HasFlag(Message::PubSub) && s->flags.HasFlag(Message::PubSub)) {
+            if (!message->flags.HasFlag(Message::PubSub) &&
+                s->flags.HasFlag(Message::PubSub)) {
                 addMessage = false;
                 break;
             }
@@ -119,7 +125,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             int count = s->count + 1;
 
             MessagePtr replacement(Message::createSystemMessage(
-                message->searchText + QString(" (") + QString::number(count) + " times)"));
+                message->searchText + QString(" (") + QString::number(count) +
+                " times)"));
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
@@ -164,7 +171,8 @@ void Channel::disableAllMessages()
 
 void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 {
-    std::vector<MessagePtr> addedMessages = this->messages_.pushFront(_messages);
+    std::vector<MessagePtr> addedMessages =
+        this->messages_.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart.invoke(addedMessages);

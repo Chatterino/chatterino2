@@ -77,7 +77,8 @@ private:
     void initPubsub();
     void initNm();
 
-    template <typename T, typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
+    template <typename T,
+              typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
     T &emplace()
     {
         auto t = new T;

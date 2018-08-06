@@ -25,15 +25,17 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
     return instance;
 }
 
-void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server)
+void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
+                                          TwitchServer &server)
 {
-    this->addMessage(message, message->target(), message->content(), server, false,
-                     message->isAction());
+    this->addMessage(message, message->target(), message->content(), server,
+                     false, message->isAction());
 }
 
-void IrcMessageHandler::addMessage(Communi::IrcMessage *_message, const QString &target,
-                                   const QString &content, TwitchServer &server, bool isSub,
-                                   bool isAction)
+void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
+                                   const QString &target,
+                                   const QString &content, TwitchServer &server,
+                                   bool isSub, bool isAction)
 {
     QString channelName;
     if (!trimChannelName(target, channelName)) {
@@ -140,14 +142,17 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty()) {
-        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not found", chanName);
+        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not "
+            "found",
+            chanName);
         return;
     }
 
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
         chan->disableAllMessages();
-        chan->addMessage(Message::createSystemMessage("Chat has been cleared by a moderator."));
+        chan->addMessage(Message::createSystemMessage(
+            "Chat has been cleared by a moderator."));
 
         return;
     }
@@ -165,7 +170,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         reason = v.toString();
     }
 
-    auto timeoutMsg = Message::createTimeoutMessage(username, durationInSeconds, reason, false);
+    auto timeoutMsg = Message::createTimeoutMessage(username, durationInSeconds,
+                                                    reason, false);
     chan->addOrReplaceTimeout(timeoutMsg);
 
     // refresh all
@@ -206,7 +212,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     auto c = app->twitch.server->whispersChannel.get();
 
-    TwitchMessageBuilder builder(c, message, args, message->parameter(1), false);
+    TwitchMessageBuilder builder(c, message, args, message->parameter(1),
+                                 false);
 
     if (!builder.isIgnored()) {
         MessagePtr _message = builder.build();
@@ -229,7 +236,8 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 }
 
-void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server)
+void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
+                                                TwitchServer &server)
 {
     auto data = message->toData();
 
@@ -244,7 +252,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, Tw
     }
 
     if (msgType == "sub" || msgType == "resub" || msgType == "subgift") {
-        // Sub-specific message. I think it's only allowed for "resub" messages atm
+        // Sub-specific message. I think it's only allowed for "resub" messages
+        // atm
         if (!content.isEmpty()) {
             this->addMessage(message, target, content, server, true, false);
         }
@@ -253,7 +262,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message, Tw
     auto it = tags.find("system-msg");
 
     if (it != tags.end()) {
-        auto newMessage = Message::createSystemMessage(parseTagString(it.value().toString()));
+        auto newMessage =
+            Message::createSystemMessage(parseTagString(it.value().toString()));
 
         newMessage->flags |= Message::Subscription;
 
@@ -279,7 +289,8 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
 
-    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto channel = app->twitch.server->getChannelOrEmpty(
+        message->parameter(0).remove(0, 1));
 
     if (channel->isEmpty()) {
         return;
@@ -299,10 +310,12 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
     QString channelName;
     if (!trimChannelName(message->target(), channelName)) {
-        // Notice wasn't targeted at a single channel, send to all twitch channels
-        app->twitch.server->forEachChannelAndSpecialChannels([msg](const auto &c) {
-            c->addMessage(msg);  //
-        });
+        // Notice wasn't targeted at a single channel, send to all twitch
+        // channels
+        app->twitch.server->forEachChannelAndSpecialChannels(
+            [msg](const auto &c) {
+                c->addMessage(msg);  //
+            });
 
         return;
     }
@@ -310,7 +323,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     if (channel->isEmpty()) {
-        Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel manager ",
+        Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel "
+            "manager ",
             channelName);
         return;
     }
@@ -318,7 +332,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     channel->addMessage(msg);
 }
 
-void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message)
+void IrcMessageHandler::handleWriteConnectionNoticeMessage(
+    Communi::IrcNoticeMessage *message)
 {
     static std::unordered_set<std::string> readConnectionOnlyIDs{
         "host_on",
@@ -333,8 +348,9 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
         "r9k_on",
         "r9k_off",
 
-        // Display for user who times someone out. This implies you're a moderator, at which point
-        // you will be connected to PubSub and receive a better message from there
+        // Display for user who times someone out. This implies you're a
+        // moderator, at which point you will be connected to PubSub and receive
+        // a better message from there
         "timeout_success",
         "ban_success",
     };
@@ -347,7 +363,8 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
             return;
         }
 
-        Log("Showing notice message from write connection with message id '{}'", msgID);
+        Log("Showing notice message from write connection with message id '{}'",
+            msgID);
     }
 
     this->handleNoticeMessage(message);
@@ -356,9 +373,11 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(Communi::IrcNoticeMes
 void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto channel = app->twitch.server->getChannelOrEmpty(
+        message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+    if (TwitchChannel *twitchChannel =
+            dynamic_cast<TwitchChannel *>(channel.get())) {
         twitchChannel->addJoinedUser(message->nick());
     }
 }
@@ -366,9 +385,11 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    auto channel = app->twitch.server->getChannelOrEmpty(message->parameter(0).remove(0, 1));
+    auto channel = app->twitch.server->getChannelOrEmpty(
+        message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+    if (TwitchChannel *twitchChannel =
+            dynamic_cast<TwitchChannel *>(channel.get())) {
         twitchChannel->addPartedUser(message->nick());
     }
 }

@@ -31,8 +31,9 @@ bool getTargetUser(const rapidjson::Value &data, ActionUser &user)
     return rj::getSafe(data, "target_user_id", user.id);
 }
 
-rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVec,
-                                        std::shared_ptr<TwitchAccount> account)
+rapidjson::Document createListenMessage(
+    const std::vector<std::string> &topicsVec,
+    std::shared_ptr<TwitchAccount> account)
 {
     rapidjson::Document msg(rapidjson::kObjectType);
     auto &a = msg.GetAllocator();
@@ -57,7 +58,8 @@ rapidjson::Document createListenMessage(const std::vector<std::string> &topicsVe
     return msg;
 }
 
-rapidjson::Document createUnlistenMessage(const std::vector<std::string> &topicsVec)
+rapidjson::Document createUnlistenMessage(
+    const std::vector<std::string> &topicsVec)
 {
     rapidjson::Document msg(rapidjson::kObjectType);
     auto &a = msg.GetAllocator();

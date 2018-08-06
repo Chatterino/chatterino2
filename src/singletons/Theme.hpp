@@ -135,8 +135,8 @@ public:
 private:
     void actuallyUpdate(double hue, double multiplier);
     QColor blendColors(const QColor &color1, const QColor &color2, qreal ratio);
-    void fillLookupTableValues(double (&array)[360], double from, double to, double fromValue,
-                               double toValue);
+    void fillLookupTableValues(double (&array)[360], double from, double to,
+                               double fromValue, double toValue);
 
     double middleLookupTable_[360] = {};
     double minLookupTable_[360] = {};

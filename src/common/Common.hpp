@@ -25,8 +25,10 @@ inline QString qS(const std::string &string)
     return QString::fromStdString(string);
 }
 
-const Qt::KeyboardModifiers showSplitOverlayModifiers = Qt::ControlModifier | Qt::AltModifier;
-const Qt::KeyboardModifiers showAddSplitRegions = Qt::ControlModifier | Qt::AltModifier;
+const Qt::KeyboardModifiers showSplitOverlayModifiers =
+    Qt::ControlModifier | Qt::AltModifier;
+const Qt::KeyboardModifiers showAddSplitRegions =
+    Qt::ControlModifier | Qt::AltModifier;
 const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
 
 static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";

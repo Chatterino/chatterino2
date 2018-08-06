@@ -16,7 +16,8 @@ namespace chatterino {
 //
 // Explanation:
 // - messages can be appended until 'limit' is reached
-// - when the limit is reached for every message added one will be removed at the start
+// - when the limit is reached for every message added one will be removed at
+// the start
 // - messages can only be added to the start when there is space for them,
 //   trying to add messages to the start when it's full will not add them
 // - you are able to get a "Snapshot" which captures the state of this object
@@ -41,7 +42,8 @@ public:
     {
         std::lock_guard<std::mutex> lock(this->mutex_);
 
-        this->chunks_ = std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+        this->chunks_ =
+            std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
         Chunk chunk = std::make_shared<std::vector<T>>();
         chunk->resize(this->chunkSize_);
         this->chunks_->push_back(chunk);
@@ -60,8 +62,8 @@ public:
         // still space in the last chunk
         if (lastChunk->size() <= this->lastChunkEnd_) {
             // create new chunk vector
-            ChunkVector newVector =
-                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+            ChunkVector newVector = std::make_shared<
+                std::vector<std::shared_ptr<std::vector<T>>>>();
 
             // copy chunks
             for (Chunk &chunk : *this->chunks_) {
@@ -93,8 +95,8 @@ public:
             std::lock_guard<std::mutex> lock(this->mutex_);
 
             // create new vector to clone chunks into
-            ChunkVector newChunks =
-                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+            ChunkVector newChunks = std::make_shared<
+                std::vector<std::shared_ptr<std::vector<T>>>>();
 
             newChunks->resize(this->chunks_->size());
 
@@ -142,7 +144,8 @@ public:
             Chunk &chunk = this->chunks_->at(i);
 
             size_t start = i == 0 ? this->firstChunkOffset_ : 0;
-            size_t end = i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
+            size_t end =
+                i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
 
             for (size_t j = start; j < end; j++) {
                 if (chunk->at(j) == item) {
@@ -176,7 +179,8 @@ public:
             Chunk &chunk = this->chunks_->at(i);
 
             size_t start = i == 0 ? this->firstChunkOffset_ : 0;
-            size_t end = i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
+            size_t end =
+                i == chunk->size() - 1 ? this->lastChunkEnd_ : chunk->size();
 
             for (size_t j = start; j < end; j++) {
                 if (x == index) {
@@ -204,8 +208,9 @@ public:
     {
         std::lock_guard<std::mutex> lock(this->mutex_);
 
-        return LimitedQueueSnapshot<T>(this->chunks_, this->limit_ - this->space(),
-                                       this->firstChunkOffset_, this->lastChunkEnd_);
+        return LimitedQueueSnapshot<T>(
+            this->chunks_, this->limit_ - this->space(),
+            this->firstChunkOffset_, this->lastChunkEnd_);
     }
 
 private:
@@ -238,8 +243,8 @@ private:
         // need to delete the first chunk
         if (this->firstChunkOffset_ == this->chunks_->front()->size() - 1) {
             // copy the chunk vector
-            ChunkVector newVector =
-                std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
+            ChunkVector newVector = std::make_shared<
+                std::vector<std::shared_ptr<std::vector<T>>>>();
 
             // delete first chunk
             bool first = true;

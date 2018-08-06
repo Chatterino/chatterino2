@@ -8,7 +8,8 @@
 
 namespace chatterino {
 
-void TwitchApi::findUserId(const QString user, std::function<void(QString)> successCallback)
+void TwitchApi::findUserId(const QString user,
+                           std::function<void(QString)> successCallback)
 {
     QString requestUrl("https://api.twitch.tv/kraken/users?login=" + user);
 
@@ -37,7 +38,8 @@ void TwitchApi::findUserId(const QString user, std::function<void(QString)> succ
         auto firstUser = users[0].toObject();
         auto id = firstUser.value("_id");
         if (!id.isString()) {
-            Log("API Error: while getting user id, first user object `_id` key is not a "
+            Log("API Error: while getting user id, first user object `_id` key "
+                "is not a "
                 "string");
             successCallback("");
             return Failure;

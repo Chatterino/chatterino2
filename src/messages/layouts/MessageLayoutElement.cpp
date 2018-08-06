@@ -14,7 +14,8 @@ const QRect &MessageLayoutElement::getRect() const
     return this->rect_;
 }
 
-MessageLayoutElement::MessageLayoutElement(MessageElement &creator, const QSize &size)
+MessageLayoutElement::MessageLayoutElement(MessageElement &creator,
+                                           const QSize &size)
     : creator_(creator)
 {
     this->rect_.setSize(size);
@@ -63,14 +64,16 @@ const Link &MessageLayoutElement::getLink() const
 // IMAGE
 //
 
-ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image, const QSize &size)
+ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
+                                       const QSize &size)
     : MessageLayoutElement(creator, size)
     , image_(image)
 {
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void ImageLayoutElement::addCopyTextToString(QString &str, int from, int to) const
+void ImageLayoutElement::addCopyTextToString(QString &str, int from,
+                                             int to) const
 {
     //    str += this->image_->getCopyString();
     str += "not implemented";
@@ -134,8 +137,9 @@ int ImageLayoutElement::getXFromIndex(int index)
 // TEXT
 //
 
-TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text, const QSize &_size,
-                                     QColor _color, FontStyle _style, float _scale)
+TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
+                                     const QSize &_size, QColor _color,
+                                     FontStyle _style, float _scale)
     : MessageLayoutElement(_creator, _size)
     , text(_text)
     , color(_color)
@@ -144,7 +148,8 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text, c
 {
 }
 
-void TextLayoutElement::addCopyTextToString(QString &str, int from, int to) const
+void TextLayoutElement::addCopyTextToString(QString &str, int from,
+                                            int to) const
 {
     str += this->text.mid(from, to - from);
 
@@ -166,8 +171,9 @@ void TextLayoutElement::paint(QPainter &painter)
 
     painter.setFont(app->fonts->getFont(this->style, this->scale));
 
-    painter.drawText(QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000), this->text,
-                     QTextOption(Qt::AlignLeft | Qt::AlignTop));
+    painter.drawText(
+        QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
+        this->text, QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -219,8 +225,10 @@ int TextLayoutElement::getXFromIndex(int index)
 }
 
 // TEXT ICON
-TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator, const QString &_line1,
-                                             const QString &_line2, float _scale, const QSize &size)
+TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
+                                             const QString &_line1,
+                                             const QString &_line2,
+                                             float _scale, const QSize &size)
     : MessageLayoutElement(creator, size)
     , scale(_scale)
     , line1(_line1)
@@ -228,7 +236,8 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator, const QStr
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &str, int from, int to) const
+void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
+                                                int to) const
 {
 }
 
@@ -254,11 +263,12 @@ void TextIconLayoutElement::paint(QPainter &painter)
         painter.drawText(_rect, this->line1, option);
     } else {
         painter.drawText(
-            QPoint(this->getRect().x(), this->getRect().y() + this->getRect().height() / 2),
+            QPoint(this->getRect().x(),
+                   this->getRect().y() + this->getRect().height() / 2),
             this->line1);
-        painter.drawText(
-            QPoint(this->getRect().x(), this->getRect().y() + this->getRect().height()),
-            this->line2);
+        painter.drawText(QPoint(this->getRect().x(),
+                                this->getRect().y() + this->getRect().height()),
+                         this->line2);
     }
 }
 

@@ -59,7 +59,8 @@ public:
         return !this->hasElement();
     }
 
-    template <typename X = T, typename = std::enable_if_t<!std::is_const<X>::value>>
+    template <typename X = T,
+              typename = std::enable_if_t<!std::is_const<X>::value>>
     operator NullablePtr<const T>() const
     {
         return NullablePtr<const T>(this->element_);

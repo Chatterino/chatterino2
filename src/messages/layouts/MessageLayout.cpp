@@ -98,12 +98,14 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
     if (this->flags & MessageLayout::Expanded ||
         (_flags & MessageElement::ModeratorTools &&
          !(this->message_->flags & Message::MessageFlags::Disabled))) {
-        messageFlags = Message::MessageFlags(messageFlags & ~Message::MessageFlags::Collapsed);
+        messageFlags = Message::MessageFlags(messageFlags &
+                                             ~Message::MessageFlags::Collapsed);
     }
 
     this->container_.begin(width, this->scale_, messageFlags);
 
-    for (const std::unique_ptr<MessageElement> &element : this->message_->getElements()) {
+    for (const std::unique_ptr<MessageElement> &element :
+         this->message_->getElements()) {
         element->addToContainer(this->container_, _flags);
     }
 
@@ -123,7 +125,8 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
 
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
-                          Selection &selection, bool isLastReadMessage, bool isWindowFocused)
+                          Selection &selection, bool isLastReadMessage,
+                          bool isWindowFocused)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -132,7 +135,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (!pixmap) {
 #ifdef Q_OS_MACOS
         pixmap = new QPixmap(int(width * painter.device()->devicePixelRatioF()),
-                             int(container_.getHeight() * painter.device()->devicePixelRatioF()));
+                             int(container_.getHeight() *
+                                 painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
         pixmap = new QPixmap(width, std::max(16, this->container_.getHeight()));
@@ -149,14 +153,16 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
     // draw on buffer
     painter.drawPixmap(0, y, *pixmap);
-    //    painter.drawPixmap(0, y, this->container.width, this->container.getHeight(), *pixmap);
+    //    painter.drawPixmap(0, y, this->container.width,
+    //    this->container.getHeight(), *pixmap);
 
     // draw gif emotes
     this->container_.paintAnimatedElements(painter, y);
 
     // draw disabled
     if (this->message_->flags.HasFlag(Message::Disabled)) {
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(), app->themes->messages.disabled);
+        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                         app->themes->messages.disabled);
     }
 
     // draw selection
@@ -172,19 +178,23 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
     // draw last read message line
     if (isLastReadMessage) {
-        QColor color = isWindowFocused ? app->themes->tabs.selected.backgrounds.regular.color()
-                                       : app->themes->tabs.selected.backgrounds.unfocused.color();
+        QColor color =
+            isWindowFocused
+                ? app->themes->tabs.selected.backgrounds.regular.color()
+                : app->themes->tabs.selected.backgrounds.unfocused.color();
 
-        QBrush brush(color,
-                     static_cast<Qt::BrushStyle>(app->settings->lastMessagePattern.getValue()));
+        QBrush brush(color, static_cast<Qt::BrushStyle>(
+                                app->settings->lastMessagePattern.getValue()));
 
-        painter.fillRect(0, y + this->container_.getHeight() - 1, pixmap->width(), 1, brush);
+        painter.fillRect(0, y + this->container_.getHeight() - 1,
+                         pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;
 }
 
-void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/, Selection & /*selection*/)
+void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
+                                 Selection & /*selection*/)
 {
     auto app = getApp();
 
@@ -212,8 +222,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/, Selectio
 #ifdef FOURTF
     // debug
     painter.setPen(QColor(255, 0, 0));
-    painter.drawRect(buffer->rect().x(), buffer->rect().y(), buffer->rect().width() - 1,
-                     buffer->rect().height() - 1);
+    painter.drawRect(buffer->rect().x(), buffer->rect().y(),
+                     buffer->rect().width() - 1, buffer->rect().height() - 1);
 
     QTextOption option;
     option.setAlignment(Qt::AlignRight | Qt::AlignTop);

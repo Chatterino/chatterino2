@@ -22,7 +22,8 @@
 
 namespace chatterino {
 
-using WebsocketClient = websocketpp::client<websocketpp::config::asio_tls_client>;
+using WebsocketClient =
+    websocketpp::client<websocketpp::config::asio_tls_client>;
 using WebsocketHandle = websocketpp::connection_hdl;
 using WebsocketErrorCode = websocketpp::lib::error_code;
 
@@ -71,11 +72,14 @@ private:
 
 class PubSub
 {
-    using WebsocketMessagePtr = websocketpp::config::asio_tls_client::message_type::ptr;
-    using WebsocketContextPtr = websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
+    using WebsocketMessagePtr =
+        websocketpp::config::asio_tls_client::message_type::ptr;
+    using WebsocketContextPtr =
+        websocketpp::lib::shared_ptr<boost::asio::ssl::context>;
 
     template <typename T>
-    using Signal = pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
+    using Signal =
+        pajlada::Signals::Signal<T>;  // type-id is vector<T, Alloc<T>>
 
     WebsocketClient websocketClient;
     std::unique_ptr<std::thread> mainThread;
@@ -121,13 +125,14 @@ public:
 
     void unlistenAllModerationActions();
 
-    void listenToChannelModerationActions(const QString &channelID,
-                                          std::shared_ptr<TwitchAccount> account);
+    void listenToChannelModerationActions(
+        const QString &channelID, std::shared_ptr<TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 
 private:
-    void listenToTopic(const std::string &topic, std::shared_ptr<TwitchAccount> account);
+    void listenToTopic(const std::string &topic,
+                       std::shared_ptr<TwitchAccount> account);
 
     void listen(rapidjson::Document &&msg);
     bool tryListen(rapidjson::Document &msg);
@@ -142,7 +147,8 @@ private:
              std::owner_less<WebsocketHandle>>
         clients;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &, const QString &)>>
+    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
+                                                       const QString &)>>
         moderationActionHandlers;
 
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);

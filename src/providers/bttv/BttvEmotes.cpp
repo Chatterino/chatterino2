@@ -13,11 +13,13 @@ namespace chatterino {
 
 namespace {
 
-Url getEmoteLink(QString urlTemplate, const EmoteId &id, const QString &emoteScale)
+Url getEmoteLink(QString urlTemplate, const EmoteId &id,
+                 const QString &emoteScale)
 {
     urlTemplate.detach();
 
-    return {urlTemplate.replace("{{id}}", id.string).replace("{{image}}", emoteScale)};
+    return {urlTemplate.replace("{{id}}", id.string)
+                .replace("{{image}}", emoteScale)};
 }
 
 }  // namespace
@@ -76,23 +78,26 @@ void BttvEmotes::loadGlobalEmotes()
     request.execute();
 }
 
-std::pair<Outcome, EmoteMap> BttvEmotes::parseGlobalEmotes(const QJsonObject &jsonRoot,
-                                                           const EmoteMap &currentEmotes)
+std::pair<Outcome, EmoteMap> BttvEmotes::parseGlobalEmotes(
+    const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
 {
     auto emotes = EmoteMap();
     auto jsonEmotes = jsonRoot.value("emotes").toArray();
-    auto urlTemplate = QString("https:" + jsonRoot.value("urlTemplate").toString());
+    auto urlTemplate =
+        QString("https:" + jsonRoot.value("urlTemplate").toString());
 
     for (const QJsonValue &jsonEmote : jsonEmotes) {
         auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
         auto name = EmoteName{jsonEmote.toObject().value("code").toString()};
 
-        auto emote = Emote({name,
-                            ImageSet{Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
-                                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
-                                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-                            Tooltip{name.string + "<br />Global Bttv Emote"},
-                            Url{"https://manage.betterttv.net/emotes/" + id.string}});
+        auto emote = Emote(
+            {name,
+             ImageSet{
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+             Tooltip{name.string + "<br />Global Bttv Emote"},
+             Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
         auto it = currentEmotes.find(name);
         if (it != currentEmotes.end() && *it->second == emote) {

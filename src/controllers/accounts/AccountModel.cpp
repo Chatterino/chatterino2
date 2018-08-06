@@ -10,8 +10,8 @@ AccountModel::AccountModel(QObject *parent)
 }
 
 // turn a vector item into a model row
-std::shared_ptr<Account> AccountModel::getItemFromRow(std::vector<QStandardItem *> &,
-                                                      const std::shared_ptr<Account> &original)
+std::shared_ptr<Account> AccountModel::getItemFromRow(
+    std::vector<QStandardItem *> &, const std::shared_ptr<Account> &original)
 {
     return original;
 }
@@ -25,7 +25,8 @@ void AccountModel::getRowFromItem(const std::shared_ptr<Account> &item,
 }
 
 int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
-                               std::vector<QStandardItem *> &row, int proposedIndex)
+                               std::vector<QStandardItem *> &row,
+                               int proposedIndex)
 {
     if (this->categoryCount_[item->getCategory()]++ == 0) {
         auto row = this->createRow();

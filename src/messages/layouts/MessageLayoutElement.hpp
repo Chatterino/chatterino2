@@ -31,7 +31,8 @@ public:
     MessageLayoutElement *setTrailingSpace(bool value);
     MessageLayoutElement *setLink(const Link &link_);
 
-    virtual void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const = 0;
+    virtual void addCopyTextToString(QString &str, int from = 0,
+                                     int to = INT_MAX) const = 0;
     virtual int getSelectionIndexCount() = 0;
     virtual void paint(QPainter &painter) = 0;
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
@@ -52,10 +53,12 @@ private:
 class ImageLayoutElement : public MessageLayoutElement
 {
 public:
-    ImageLayoutElement(MessageElement &creator, ImagePtr image, const QSize &size);
+    ImageLayoutElement(MessageElement &creator, ImagePtr image,
+                       const QSize &size);
 
 protected:
-    void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
     int getSelectionIndexCount() override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
@@ -70,11 +73,13 @@ private:
 class TextLayoutElement : public MessageLayoutElement
 {
 public:
-    TextLayoutElement(MessageElement &creator_, QString &text, const QSize &size, QColor color,
-                      FontStyle style, float scale);
+    TextLayoutElement(MessageElement &creator_, QString &text,
+                      const QSize &size, QColor color, FontStyle style,
+                      float scale);
 
 protected:
-    void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
     int getSelectionIndexCount() override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
@@ -93,11 +98,12 @@ private:
 class TextIconLayoutElement : public MessageLayoutElement
 {
 public:
-    TextIconLayoutElement(MessageElement &creator_, const QString &line1, const QString &line2,
-                          float scale, const QSize &size);
+    TextIconLayoutElement(MessageElement &creator_, const QString &line1,
+                          const QString &line2, float scale, const QSize &size);
 
 protected:
-    void addCopyTextToString(QString &str, int from = 0, int to = INT_MAX) const override;
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
     int getSelectionIndexCount() override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;

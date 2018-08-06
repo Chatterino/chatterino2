@@ -7,7 +7,8 @@ namespace chatterino {
 class TwitchApi
 {
 public:
-    static void findUserId(const QString user, std::function<void(QString)> callback);
+    static void findUserId(const QString user,
+                           std::function<void(QString)> callback);
 
 private:
 };

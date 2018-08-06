@@ -11,7 +11,8 @@
 namespace chatterino {
 
 template <typename TVectorItem>
-class SignalVectorModel : public QAbstractTableModel, pajlada::Signals::SignalHolder
+class SignalVectorModel : public QAbstractTableModel,
+                          pajlada::Signals::SignalHolder
 {
 public:
     SignalVectorModel(int columnCount, QObject *parent = nullptr)
@@ -43,7 +44,8 @@ public:
             index = this->beforeInsert(args.item, row, index);
 
             this->beginInsertRows(QModelIndex(), index, index);
-            this->rows_.insert(this->rows_.begin() + index, Row(row, args.item));
+            this->rows_.insert(this->rows_.begin() + index,
+                               Row(row, args.item));
             this->endInsertRows();
         };
 
@@ -65,7 +67,8 @@ public:
             assert(row >= 0 && row <= this->rows_.size());
 
             // remove row
-            std::vector<QStandardItem *> items = std::move(this->rows_[row].items);
+            std::vector<QStandardItem *> items =
+                std::move(this->rows_[row].items);
 
             this->beginRemoveRows(QModelIndex(), row, row);
             this->rows_.erase(this->rows_.begin() + row);
@@ -103,15 +106,18 @@ public:
     QVariant data(const QModelIndex &index, int role) const override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
+               column < this->columnCount_);
 
         return rows_[row].items[column]->data(role);
     }
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override
+    bool setData(const QModelIndex &index, const QVariant &value,
+                 int role) override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
+               column < this->columnCount_);
 
         Row &rowItem = this->rows_[row];
 
@@ -124,15 +130,16 @@ public:
             this->vector_->removeItem(vecRow, this);
 
             assert(this->rows_[row].original);
-            TVectorItem item =
-                this->getItemFromRow(this->rows_[row].items, this->rows_[row].original.get());
+            TVectorItem item = this->getItemFromRow(
+                this->rows_[row].items, this->rows_[row].original.get());
             this->vector_->insertItem(item, vecRow, this);
         }
 
         return true;
     }
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role) const override
     {
         if (orientation != Qt::Horizontal) {
             return QVariant();
@@ -146,7 +153,8 @@ public:
         }
     }
 
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
+    bool setHeaderData(int section, Qt::Orientation orientation,
+                       const QVariant &value,
                        int role = Qt::DisplayRole) override
     {
         if (orientation != Qt::Horizontal) {
@@ -162,14 +170,16 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
+               column < this->columnCount_);
 
         return this->rows_[index.row()].items[index.column()]->flags();
     }
 
     QStandardItem *getItem(int row, int column)
     {
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 && column < this->columnCount_);
+        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
+               column < this->columnCount_);
 
         return rows_[row].items[column];
     }
@@ -204,20 +214,23 @@ protected:
                                        const TVectorItem &original) = 0;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const TVectorItem &item, std::vector<QStandardItem *> &row) = 0;
+    virtual void getRowFromItem(const TVectorItem &item,
+                                std::vector<QStandardItem *> &row) = 0;
 
-    virtual int beforeInsert(const TVectorItem &item, std::vector<QStandardItem *> &row,
+    virtual int beforeInsert(const TVectorItem &item,
+                             std::vector<QStandardItem *> &row,
                              int proposedIndex)
     {
         return proposedIndex;
     }
 
-    virtual void afterRemoved(const TVectorItem &item, std::vector<QStandardItem *> &row, int index)
+    virtual void afterRemoved(const TVectorItem &item,
+                              std::vector<QStandardItem *> &row, int index)
     {
     }
 
-    virtual void customRowSetData(const std::vector<QStandardItem *> &row, int column,
-                                  const QVariant &value, int role)
+    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
+                                  int column, const QVariant &value, int role)
     {
     }
 
@@ -226,7 +239,8 @@ protected:
         assert(index >= 0 && index <= this->rows_.size());
 
         this->beginInsertRows(QModelIndex(), index, index);
-        this->rows_.insert(this->rows_.begin() + index, Row(std::move(row), true));
+        this->rows_.insert(this->rows_.begin() + index,
+                           Row(std::move(row), true));
         this->endInsertRows();
     }
 

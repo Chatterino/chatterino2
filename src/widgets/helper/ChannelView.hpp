@@ -70,10 +70,11 @@ protected:
 
     void hideEvent(QHideEvent *) override;
 
-    void handleLinkClick(QMouseEvent *event, const Link &link, MessageLayout *layout);
+    void handleLinkClick(QMouseEvent *event, const Link &link,
+                         MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message, QPoint &relativePos,
-                         int &index);
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
+                         QPoint &relativePos, int &index);
 
 private:
     void updatePauseStatus();
@@ -85,9 +86,11 @@ private:
     MessageElement::Flags getFlags() const;
     bool isPaused();
 
-    void handleMouseClick(QMouseEvent *event, const MessageLayoutElement *hoverLayoutElement,
+    void handleMouseClick(QMouseEvent *event,
+                          const MessageLayoutElement *hoverLayoutElement,
                           MessageLayout *layout);
-    void addContextMenuItems(const MessageLayoutElement *hoveredElement, MessageLayout *layout);
+    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                             MessageLayout *layout);
     int getLayoutWidth() const;
 
     QTimer *layoutCooldown_;
@@ -114,8 +117,8 @@ private:
     Scrollbar scrollBar_;
     RippleEffectLabel *goToBottom_;
 
-    // This variable can be used to decide whether or not we should render the "Show latest
-    // messages" button
+    // This variable can be used to decide whether or not we should render the
+    // "Show latest messages" button
     bool showingLatestMessages_ = true;
     bool enableScrollingToBottom_ = true;
 

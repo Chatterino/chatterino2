@@ -78,7 +78,8 @@ public:
     const QString &getChannelUrl();
     const QString &getPopoutPlayerUrl();
 
-    boost::optional<EmotePtr> getTwitchBadge(const QString &set, const QString &version) const;
+    boost::optional<EmotePtr> getTwitchBadge(const QString &set,
+                                             const QString &version) const;
 
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;

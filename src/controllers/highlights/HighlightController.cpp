@@ -25,12 +25,14 @@ void HighlightController::initialize(Settings &settings, Paths &paths)
         this->highlightsSetting_.setValue(this->phrases.getVector());
     });
 
-    for (const HighlightBlacklistUser &blacklistedUser : this->blacklistSetting_.getValue()) {
+    for (const HighlightBlacklistUser &blacklistedUser :
+         this->blacklistSetting_.getValue()) {
         this->blacklistedUsers.appendItem(blacklistedUser);
     }
 
-    this->blacklistedUsers.delayedItemsChanged.connect(
-        [this] { this->blacklistSetting_.setValue(this->blacklistedUsers.getVector()); });
+    this->blacklistedUsers.delayedItemsChanged.connect([this] {
+        this->blacklistSetting_.setValue(this->blacklistedUsers.getVector());
+    });
 }
 
 HighlightModel *HighlightController::createModel(QObject *parent)
@@ -61,7 +63,8 @@ bool HighlightController::isHighlightedUser(const QString &username)
     return false;
 }
 
-HighlightBlacklistModel *HighlightController::createBlacklistModel(QObject *parent)
+HighlightBlacklistModel *HighlightController::createBlacklistModel(
+    QObject *parent)
 {
     auto *model = new HighlightBlacklistModel(parent);
     model->init(&this->blacklistedUsers);
@@ -71,7 +74,8 @@ HighlightBlacklistModel *HighlightController::createBlacklistModel(QObject *pare
 
 bool HighlightController::blacklistContains(const QString &username)
 {
-    std::vector<HighlightBlacklistUser> blacklistItems = this->blacklistedUsers.getVector();
+    std::vector<HighlightBlacklistUser> blacklistItems =
+        this->blacklistedUsers.getVector();
     for (const auto &blacklistedUser : blacklistItems) {
         if (blacklistedUser.isMatch(username)) {
             return true;

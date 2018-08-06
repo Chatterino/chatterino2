@@ -49,12 +49,16 @@ void SettingsDialog::initUi()
     // right side layout
     auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
-        right.emplace<QStackedLayout>().assign(&this->ui_.pageStack).withoutMargin();
+        right.emplace<QStackedLayout>()
+            .assign(&this->ui_.pageStack)
+            .withoutMargin();
 
         auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
         {
-            this->ui_.okButton = buttons->addButton("Ok", QDialogButtonBox::YesRole);
-            this->ui_.cancelButton = buttons->addButton("Cancel", QDialogButtonBox::NoRole);
+            this->ui_.okButton =
+                buttons->addButton("Ok", QDialogButtonBox::YesRole);
+            this->ui_.cancelButton =
+                buttons->addButton("Cancel", QDialogButtonBox::NoRole);
         }
     }
 
@@ -62,7 +66,8 @@ void SettingsDialog::initUi()
     this->ui_.tabContainerContainer->setObjectName("tabWidget");
     this->ui_.pageStack->setObjectName("pages");
 
-    QObject::connect(this->ui_.okButton, &QPushButton::clicked, this, &SettingsDialog::onOkClicked);
+    QObject::connect(this->ui_.okButton, &QPushButton::clicked, this,
+                     &SettingsDialog::onOkClicked);
     QObject::connect(this->ui_.cancelButton, &QPushButton::clicked, this,
                      &SettingsDialog::onCancelClicked);
 }

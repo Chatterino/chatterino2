@@ -7,7 +7,8 @@
 // class IrcAccount
 //{
 // public:
-//    IrcAccount(const QString &userName, const QString &nickName, const QString &realName,
+//    IrcAccount(const QString &userName, const QString &nickName, const QString
+//    &realName,
 //               const QString &password);
 
 //    const QString &getUserName() const;

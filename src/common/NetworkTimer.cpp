@@ -28,7 +28,8 @@ bool NetworkTimer::isStarted() const
     return this->started_;
 }
 
-void NetworkTimer::onTimeout(NetworkWorker *worker, std::function<void()> cb) const
+void NetworkTimer::onTimeout(NetworkWorker *worker,
+                             std::function<void()> cb) const
 {
     assert(this->timer_ != nullptr);
     assert(worker != nullptr);

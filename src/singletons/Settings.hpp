@@ -12,7 +12,8 @@
 
 namespace chatterino {
 
-void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting);
+void _actuallyRegisterSetting(
+    std::weak_ptr<pajlada::Settings::ISettingData> setting);
 
 class Settings
 {
@@ -25,48 +26,62 @@ public:
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
-    QStringSetting timestampFormat = {"/appearance/messages/timestampFormat", "h:mm"};
+    QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
+                                      "h:mm"};
     BoolSetting showBadges = {"/appearance/messages/showBadges", true};
-    BoolSetting showLastMessageIndicator = {"/appearance/messages/showLastMessageIndicator", false};
-    IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern", Qt::VerPattern};
+    BoolSetting showLastMessageIndicator = {
+        "/appearance/messages/showLastMessageIndicator", false};
+    IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
+                                     Qt::VerPattern};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
-    BoolSetting showMessageLength = {"/appearance/messages/showMessageLength", false};
-    BoolSetting separateMessages = {"/appearance/messages/separateMessages", false};
-    //    BoolSetting collapseLongMessages = {"/appearance/messages/collapseLongMessages", false};
-    IntSetting collpseMessagesMinLines = {"/appearance/messages/collapseMessagesMinLines", 0};
-    BoolSetting alternateMessageBackground = {"/appearance/messages/alternateMessageBackground",
-                                              false};
+    BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
+                                     false};
+    BoolSetting separateMessages = {"/appearance/messages/separateMessages",
+                                    false};
+    //    BoolSetting collapseLongMessages =
+    //    {"/appearance/messages/collapseLongMessages", false};
+    IntSetting collpseMessagesMinLines = {
+        "/appearance/messages/collapseMessagesMinLines", 0};
+    BoolSetting alternateMessageBackground = {
+        "/appearance/messages/alternateMessageBackground", false};
     IntSetting uiScale = {"/appearance/uiScale", 0};
     IntSetting boldScale = {"/appearance/boldScale", 57};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
-    BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton", false};
+    BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
+                                         false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
-    BoolSetting enableSmoothScrollingNewMessages = {"/appearance/smoothScrollingNewMessages",
-                                                    false};
-    BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames", false};
+    BoolSetting enableSmoothScrollingNewMessages = {
+        "/appearance/smoothScrollingNewMessages", false};
+    BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames",
+                                      false};
     // BoolSetting customizable splitheader
-    BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount", false};
+    BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount",
+                                   false};
     BoolSetting showTitle = {"/appearance/splitheader/showTitle", false};
     BoolSetting showGame = {"/appearance/splitheader/showGame", false};
     BoolSetting showUptime = {"/appearance/splitheader/showUptime", false};
 
-    // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame", false};
+    // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
+    // false};
 
     /// Behaviour
-    BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages", true};
+    BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
+                                          true};
     BoolSetting mentionUsersWithAt = {"/behaviour/mentionUsersWithAt", false};
     BoolSetting showJoins = {"/behaviour/showJoins", false};
     BoolSetting showParts = {"/behaviour/showParts", false};
-    FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier", 1.0};
-    // BoolSetting twitchSeperateWriteConnection = {"/behaviour/twitchSeperateWriteConnection",
-    // false};
+    FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
+                                          1.0};
+    // BoolSetting twitchSeperateWriteConnection =
+    // {"/behaviour/twitchSeperateWriteConnection", false};
 
     // Auto-completion
     BoolSetting onlyFetchChattersForSmallerStreamers = {
         "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
-    IntSetting smallStreamerLimit = {"/behaviour/autocompletion/smallStreamerLimit", 1000};
+    IntSetting smallStreamerLimit = {
+        "/behaviour/autocompletion/smallStreamerLimit", 1000};
 
     BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
 
@@ -74,7 +89,8 @@ public:
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
 
     /// Emotes
-    BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight", false};
+    BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
+                                           false};
     BoolSetting enableTwitchEmotes = {"/emotes/enableTwitchEmotes", true};
     BoolSetting enableBttvEmotes = {"/emotes/enableBTTVEmotes", true};
     BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
@@ -95,16 +111,19 @@ public:
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
     /// Ingored Users
-    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers", true};
+    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
+                                            true};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
-    BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword", true};
+    BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword",
+                                        true};
     BoolSetting enableHighlightSound = {"/highlighting/enableSound", true};
-    BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing", true};
+    BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing",
+                                          true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
 
     /// Logging
@@ -115,15 +134,18 @@ public:
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
                                          "qrc:/sounds/ping2.wav"};
 
-    BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound", false};
+    BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound",
+                                            false};
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
     /// External tools
     // Streamlink
-    BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath", false};
+    BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath",
+                                           false};
     QStringSetting streamlinkPath = {"/external/streamlink/customPath", ""};
-    QStringSetting preferredQuality = {"/external/streamlink/quality", "Choose"};
+    QStringSetting preferredQuality = {"/external/streamlink/quality",
+                                       "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
     /// Misc

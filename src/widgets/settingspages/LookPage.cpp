@@ -70,9 +70,12 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
 {
     // theme
     {
-        auto *theme = this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
+        auto *theme =
+            this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
         QObject::connect(theme, &QComboBox::currentTextChanged,
-                         [](const QString &) { getApp()->windows->forceLayoutChannelViews(); });
+                         [](const QString &) {
+                             getApp()->windows->forceLayoutChannelViews();
+                         });
 
         auto box = layout.emplace<QHBoxLayout>().withoutMargin();
         box.emplace<QLabel>("Theme: ");
@@ -87,24 +90,29 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
         box.append(this->createUiScaleSlider());
     }
 
-    layout.append(this->createCheckBox(WINDOW_TOPMOST, getSettings()->windowTopMost));
+    layout.append(
+        this->createCheckBox(WINDOW_TOPMOST, getSettings()->windowTopMost));
 
     // --
     layout.emplace<Line>(false);
 
     // tab x
-    layout.append(this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
+    layout.append(
+        this->createCheckBox(TAB_X, getSettings()->showTabCloseButton));
 
 // show buttons
 #ifndef USEWINSDK
-    layout.append(this->createCheckBox(TAB_PREF, getSettings()->hidePreferencesButton));
-    layout.append(this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
+    layout.append(
+        this->createCheckBox(TAB_PREF, getSettings()->hidePreferencesButton));
+    layout.append(
+        this->createCheckBox(TAB_USER, getSettings()->hideUserButton));
 #endif
 
     // empty input
-    layout.append(this->createCheckBox(INPUT_EMPTY, getSettings()->showEmptyInput));
     layout.append(
-        this->createCheckBox("Show message length while typing", getSettings()->showMessageLength));
+        this->createCheckBox(INPUT_EMPTY, getSettings()->showEmptyInput));
+    layout.append(this->createCheckBox("Show message length while typing",
+                                       getSettings()->showMessageLength));
     layout->addStretch(1);
 }
 
@@ -125,37 +133,43 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // timestamps
     {
         auto box = layout.emplace<QHBoxLayout>().withoutMargin();
-        box.append(this->createCheckBox("Show timestamps", getSettings()->showTimestamps));
-        box.append(this->createComboBox({TIMESTAMP_FORMATS}, getSettings()->timestampFormat));
+        box.append(this->createCheckBox("Show timestamps",
+                                        getSettings()->showTimestamps));
+        box.append(this->createComboBox({TIMESTAMP_FORMATS},
+                                        getSettings()->timestampFormat));
         box->addStretch(1);
     }
 
     // badges
-    layout.append(this->createCheckBox("Show badges", getSettings()->showBadges));
+    layout.append(
+        this->createCheckBox("Show badges", getSettings()->showBadges));
 
     // --
     layout.emplace<Line>(false);
 
     // seperate
-    layout.append(this->createCheckBox("Seperate lines", getSettings()->separateMessages));
+    layout.append(this->createCheckBox("Seperate lines",
+                                       getSettings()->separateMessages));
 
     // alternate
-    layout.append(
-        this->createCheckBox("Alternate background", getSettings()->alternateMessageBackground));
+    layout.append(this->createCheckBox(
+        "Alternate background", getSettings()->alternateMessageBackground));
 
     // --
     layout.emplace<Line>(false);
 
     // lowercase links
-    layout.append(this->createCheckBox("Lowercase domains", getSettings()->enableLowercaseLink));
+    layout.append(this->createCheckBox("Lowercase domains",
+                                       getSettings()->enableLowercaseLink));
     // bold usernames
-    layout.append(this->createCheckBox("Bold @usernames", getSettings()->enableUsernameBold));
+    layout.append(this->createCheckBox("Bold @usernames",
+                                       getSettings()->enableUsernameBold));
 
     // collapsing
     {
         auto *combo = new QComboBox(this);
-        combo->addItems(
-            {"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"});
+        combo->addItems({"Never", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                         "11", "12", "13", "14", "15"});
 
         const auto currentIndex = []() -> int {
             auto val = getSettings()->collpseMessagesMinLines.getValue();
@@ -166,9 +180,10 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
         }();
         combo->setCurrentIndex(currentIndex);
 
-        QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
-            getSettings()->collpseMessagesMinLines = str.toInt();
-        });
+        QObject::connect(
+            combo, &QComboBox::currentTextChanged, [](const QString &str) {
+                getSettings()->collpseMessagesMinLines = str.toInt();
+            });
 
         auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
         hbox.emplace<QLabel>("Collapse messages longer than");
@@ -187,14 +202,17 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 {
     /*
     emotes.append(
-        this->createCheckBox("Enable Twitch emotes", app->settings->enableTwitchEmotes));
+        this->createCheckBox("Enable Twitch emotes",
+    app->settings->enableTwitchEmotes));
     emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
                                        app->settings->enableBttvEmotes));
     emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
                                        app->settings->enableFfzEmotes));
-    emotes.append(this->createCheckBox("Enable emojis", app->settings->enableEmojis));
+    emotes.append(this->createCheckBox("Enable emojis",
+    app->settings->enableEmojis));
     */
-    layout.append(this->createCheckBox("Animations", getSettings()->enableGifAnimations));
+    layout.append(
+        this->createCheckBox("Animations", getSettings()->enableGifAnimations));
 
     auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
@@ -214,22 +232,25 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
                              getSettings()->emoteScale.setValue(f);
                          });
 
-        emoteScale->setValue(
-            std::max<int>(5, std::min<int>(50, int(getSettings()->emoteScale.getValue() * 10.f))));
+        emoteScale->setValue(std::max<int>(
+            5, std::min<int>(
+                   50, int(getSettings()->emoteScale.getValue() * 10.f))));
 
-        scaleLabel->setText(QString::number(getSettings()->emoteScale.getValue()));
+        scaleLabel->setText(
+            QString::number(getSettings()->emoteScale.getValue()));
     }
 
     {
         auto *combo = new QComboBox(this);
-        combo->addItems(
-            {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook", "Apple", "Google", "Messenger"});
+        combo->addItems({"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
+                         "Apple", "Google", "Messenger"});
 
         combo->setCurrentText(getSettings()->emojiSet);
 
-        QObject::connect(combo, &QComboBox::currentTextChanged, [](const QString &str) {
-            getSettings()->emojiSet = str;  //
-        });
+        QObject::connect(combo, &QComboBox::currentTextChanged,
+                         [](const QString &str) {
+                             getSettings()->emojiSet = str;  //
+                         });
 
         auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
         hbox.emplace<QLabel>("Emoji set:");
@@ -241,15 +262,18 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 
 void LookPage::addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout)
 {
-    layout.append(this->createCheckBox("Show viewer count", getSettings()->showViewerCount));
+    layout.append(this->createCheckBox("Show viewer count",
+                                       getSettings()->showViewerCount));
     layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
     layout.append(this->createCheckBox("Show game", getSettings()->showGame));
-    layout.append(this->createCheckBox("Show uptime", getSettings()->showUptime));
+    layout.append(
+        this->createCheckBox("Show uptime", getSettings()->showUptime));
 
     layout->addStretch(1);
 }
 
-void LookPage::addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLayout> layout)
+void LookPage::addLastReadMessageIndicatorPatternSelector(
+    LayoutCreator<QVBoxLayout> layout)
 {
     // combo
     auto *combo = new QComboBox(this);
@@ -266,22 +290,25 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLay
     }();
     combo->setCurrentIndex(currentIndex);
 
-    QObject::connect(combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-                     [](int index) {
-                         getSettings()->lastMessagePattern = [&] {
-                             switch (index) {
-                                 case 1:
-                                     return Qt::SolidPattern;
-                                 case 0:
-                                 default:
-                                     return Qt::VerPattern;
-                             }
-                         }();
-                     });
+    QObject::connect(
+        combo,
+        static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+        [](int index) {
+            getSettings()->lastMessagePattern = [&] {
+                switch (index) {
+                    case 1:
+                        return Qt::SolidPattern;
+                    case 0:
+                    default:
+                        return Qt::VerPattern;
+                }
+            }();
+        });
 
     // layout
     auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
-    hbox.append(this->createCheckBox(LAST_MSG, getSettings()->showLastMessageIndicator));
+    hbox.append(this->createCheckBox(LAST_MSG,
+                                     getSettings()->showLastMessageIndicator));
     hbox.append(combo);
     hbox->addStretch(1);
 }
@@ -293,39 +320,49 @@ ChannelPtr LookPage::createPreviewChannel()
     {
         auto message = MessagePtr(new Message());
         message->addElement(new TimestampElement(QTime(8, 13, 42)));
+        message->addElement(new ImageElement(
+            Image::fromNonOwningPixmap(&getApp()->resources->twitch.moderator),
+            MessageElement::BadgeChannelAuthority));
+        message->addElement(new ImageElement(
+            Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber),
+            MessageElement::BadgeSubscription));
         message->addElement(
-            new ImageElement(Image::fromNonOwningPixmap(&getApp()->resources->twitch.moderator),
-                             MessageElement::BadgeChannelAuthority));
+            new TextElement("username1:", MessageElement::Username,
+                            QColor("#0094FF"), FontStyle::ChatMediumBold));
         message->addElement(
-            new ImageElement(Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber),
-                             MessageElement::BadgeSubscription));
-        message->addElement(new TextElement("username1:", MessageElement::Username,
-                                            QColor("#0094FF"), FontStyle::ChatMediumBold));
-        message->addElement(new TextElement("This is a preview message", MessageElement::Text));
+            new TextElement("This is a preview message", MessageElement::Text));
+        message->addElement(new ImageElement(
+            Image::fromNonOwningPixmap(&getApp()->resources->pajaDank),
+            MessageElement::Flags::AlwaysShow));
         message->addElement(
-            new ImageElement(Image::fromNonOwningPixmap(&getApp()->resources->pajaDank),
-                             MessageElement::Flags::AlwaysShow));
-        message->addElement(new TextElement("@fourtf", TextElement::BoldUsername,
-                                            MessageColor::Text, FontStyle::ChatMediumBold));
-        message->addElement(new TextElement("@fourtf", TextElement::NonBoldUsername));
+            new TextElement("@fourtf", TextElement::BoldUsername,
+                            MessageColor::Text, FontStyle::ChatMediumBold));
+        message->addElement(
+            new TextElement("@fourtf", TextElement::NonBoldUsername));
         channel->addMessage(message);
     }
     {
         auto message = MessagePtr(new Message());
         message->addElement(new TimestampElement(QTime(8, 15, 21)));
         message->addElement(
-            new ImageElement(Image::fromNonOwningPixmap(&getApp()->resources->twitch.broadcaster),
+            new ImageElement(Image::fromNonOwningPixmap(
+                                 &getApp()->resources->twitch.broadcaster),
                              MessageElement::BadgeChannelAuthority));
-        message->addElement(new TextElement("username2:", MessageElement::Username,
-                                            QColor("#FF6A00"), FontStyle::ChatMediumBold));
-        message->addElement(new TextElement("This is another one", MessageElement::Text));
-        // message->addElement(new ImageElement(
-        //    Image::fromNonOwningPixmap(&getApp()->resources->ppHop), MessageElement::BttvEmote));
         message->addElement(
-            (new TextElement("www.fourtf.com", MessageElement::LowercaseLink, MessageColor::Link))
+            new TextElement("username2:", MessageElement::Username,
+                            QColor("#FF6A00"), FontStyle::ChatMediumBold));
+        message->addElement(
+            new TextElement("This is another one", MessageElement::Text));
+        // message->addElement(new ImageElement(
+        //    Image::fromNonOwningPixmap(&getApp()->resources->ppHop),
+        //    MessageElement::BttvEmote));
+        message->addElement(
+            (new TextElement("www.fourtf.com", MessageElement::LowercaseLink,
+                             MessageColor::Link))
                 ->setLink(Link(Link::Url, "https://www.fourtf.com")));
         message->addElement(
-            (new TextElement("wWw.FoUrTf.CoM", MessageElement::OriginalLink, MessageColor::Link))
+            (new TextElement("wWw.FoUrTf.CoM", MessageElement::OriginalLink,
+                             MessageColor::Link))
                 ->setLink(Link(Link::Url, "https://www.fourtf.com")));
         channel->addMessage(message);
     }
@@ -343,7 +380,8 @@ QLayout *LookPage::createThemeColorChanger()
     // SLIDER
     QSlider *slider = new QSlider(Qt::Horizontal);
     layout->addWidget(slider);
-    slider->setValue(int(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100));
+    slider->setValue(
+        int(std::min(std::max(themeHue.getValue(), 0.0), 1.0) * 100));
 
     // BUTTON
     QPushButton *button = new QPushButton;
@@ -384,12 +422,16 @@ QLayout *LookPage::createFontChanger()
     layout->addWidget(label);
 
     auto updateFontFamilyLabel = [=](auto) {
-        label->setText("Font (" + QString::fromStdString(app->fonts->chatFontFamily.getValue()) +
-                       ", " + QString::number(app->fonts->chatFontSize) + "pt)");
+        label->setText(
+            "Font (" +
+            QString::fromStdString(app->fonts->chatFontFamily.getValue()) +
+            ", " + QString::number(app->fonts->chatFontSize) + "pt)");
     };
 
-    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel, this->managedConnections_);
-    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel, this->managedConnections_);
+    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel,
+                                             this->managedConnections_);
+    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel,
+                                           this->managedConnections_);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");
@@ -401,10 +443,11 @@ QLayout *LookPage::createFontChanger()
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 
-        dialog.connect(&dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
-            app->fonts->chatFontFamily = font.family().toStdString();
-            app->fonts->chatFontSize = font.pointSize();
-        });
+        dialog.connect(
+            &dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
+                app->fonts->chatFontFamily = font.family().toStdString();
+                app->fonts->chatFontSize = font.pointSize();
+            });
 
         dialog.show();
         dialog.exec();
@@ -425,15 +468,19 @@ QLayout *LookPage::createUiScaleSlider()
 
     slider->setMinimum(WindowManager::uiScaleMin);
     slider->setMaximum(WindowManager::uiScaleMax);
-    slider->setValue(WindowManager::clampUiScale(getSettings()->uiScale.getValue()));
+    slider->setValue(
+        WindowManager::clampUiScale(getSettings()->uiScale.getValue()));
 
     label->setMinimumWidth(100);
 
-    QObject::connect(slider, &QSlider::valueChanged,
-                     [](auto value) { getSettings()->uiScale.setValue(value); });
+    QObject::connect(slider, &QSlider::valueChanged, [](auto value) {
+        getSettings()->uiScale.setValue(value);
+    });
 
     getSettings()->uiScale.connect(
-        [label](auto, auto) { label->setText(QString::number(WindowManager::getUiScaleValue())); },
+        [label](auto, auto) {
+            label->setText(QString::number(WindowManager::getUiScaleValue()));
+        },
         this->connections_);
 
     return layout;
@@ -454,8 +501,9 @@ QLayout *LookPage::createBoldScaleSlider()
 
     label->setMinimumWidth(100);
 
-    QObject::connect(slider, &QSlider::valueChanged,
-                     [](auto value) { getSettings()->boldScale.setValue(value); });
+    QObject::connect(slider, &QSlider::valueChanged, [](auto value) {
+        getSettings()->boldScale.setValue(value);
+    });
     // show value
     // getSettings()->boldScale.connect(
     //    [label](auto, auto) {

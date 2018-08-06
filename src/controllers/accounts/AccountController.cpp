@@ -7,7 +7,8 @@ namespace chatterino {
 AccountController::AccountController()
 {
     this->twitch.accounts.itemInserted.connect([this](const auto &args) {
-        this->accounts_.insertItem(std::dynamic_pointer_cast<Account>(args.item));
+        this->accounts_.insertItem(
+            std::dynamic_pointer_cast<Account>(args.item));
     });
 
     this->twitch.accounts.itemRemoved.connect([this](const auto &args) {

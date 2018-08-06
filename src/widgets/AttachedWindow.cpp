@@ -129,14 +129,17 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
             DWORD processId;
             ::GetWindowThreadProcessId(attached, &processId);
 
-            HANDLE process =
-                ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+            HANDLE process = ::OpenProcess(
+                PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
 
             std::unique_ptr<TCHAR[]> filename(new TCHAR[512]);
-            DWORD filenameLength = ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
-            QString qfilename = QString::fromWCharArray(filename.get(), filenameLength);
+            DWORD filenameLength =
+                ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
+            QString qfilename =
+                QString::fromWCharArray(filename.get(), filenameLength);
 
-            if (!qfilename.endsWith("chrome.exe") && !qfilename.endsWith("firefox.exe")) {
+            if (!qfilename.endsWith("chrome.exe") &&
+                !qfilename.endsWith("firefox.exe")) {
                 qDebug() << "NM Illegal caller" << qfilename;
                 this->timer_.stop();
                 this->deleteLater();
@@ -157,9 +160,9 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
     auto hwnd = HWND(this->winId());
     auto attached = HWND(_attachedPtr);
 
-    // We get the window rect first so we can close this window when it returns an error.
-    // If we query the process first and check the filename then it will return and empty string
-    // that doens't match.
+    // We get the window rect first so we can close this window when it returns
+    // an error. If we query the process first and check the filename then it
+    // will return and empty string that doens't match.
     ::SetLastError(0);
     RECT rect;
     ::GetWindowRect(attached, &rect);
@@ -189,21 +192,25 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
     }
 
     if (this->height_ == -1) {
-        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top + this->yOffset_ - 8,
-        //              this->width_, rect.bottom - rect.top - this->yOffset_, false);
+        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top +
+        // this->yOffset_ - 8,
+        //              this->width_, rect.bottom - rect.top - this->yOffset_,
+        //              false);
     } else {
         ::MoveWindow(hwnd,                                          //
                      int(rect.right - this->width_ * scale - 8),    //
                      int(rect.bottom - this->height_ * scale - 8),  //
-                     int(this->width_ * scale), int(this->height_ * scale), true);
+                     int(this->width_ * scale), int(this->height_ * scale),
+                     true);
     }
 
-//        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8, rect.bottom -
-//        rect.top - 82 - 8, false);
+//        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8,
+//        rect.bottom - rect.top - 82 - 8, false);
 #endif
 }
 
-// void AttachedWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+// void AttachedWindow::nativeEvent(const QByteArray &eventType, void *message,
+// long *result)
 //{
 //    MSG *msg = reinterpret_cast
 

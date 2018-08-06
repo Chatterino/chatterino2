@@ -57,7 +57,8 @@ TwitchChannel::TwitchChannel(const QString &name)
                      [=] { this->refreshViewerList(); });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] { this->refreshLiveStatus(); });
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
+                     [=] { this->refreshLiveStatus(); });
     this->liveStatusTimer_.start(60 * 1000);
 
     // --
@@ -84,15 +85,16 @@ bool TwitchChannel::canSendMessage() const
 
 void TwitchChannel::refreshChannelEmotes()
 {
-    loadBttvChannelEmotes(this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
-        if (auto shared = weak.lock())  //
-            *this->bttvEmotes_.access() = emoteMap;
-    });
-    getApp()->emotes->ffz.loadChannelEmotes(this->getName(),
-                                            [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
-                                                if (auto shared = weak.lock())
-                                                    *this->ffzEmotes_.access() = emoteMap;
-                                            });
+    loadBttvChannelEmotes(
+        this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+            if (auto shared = weak.lock())  //
+                *this->bttvEmotes_.access() = emoteMap;
+        });
+    getApp()->emotes->ffz.loadChannelEmotes(
+        this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+            if (auto shared = weak.lock())
+                *this->ffzEmotes_.access() = emoteMap;
+        });
 }
 
 void TwitchChannel::sendMessage(const QString &message)
@@ -100,11 +102,11 @@ void TwitchChannel::sendMessage(const QString &message)
     auto app = getApp();
 
     if (!app->accounts->twitch.isLoggedIn()) {
-        // XXX: It would be nice if we could add a link here somehow that opened the "account
-        // manager" dialog
-        this->addMessage(
-            Message::createSystemMessage("You need to log in to send messages. You can "
-                                         "link your Twitch account in the settings."));
+        // XXX: It would be nice if we could add a link here somehow that opened
+        // the "account manager" dialog
+        this->addMessage(Message::createSystemMessage(
+            "You need to log in to send messages. You can "
+            "link your Twitch account in the settings."));
         return;
     }
 
@@ -181,7 +183,8 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto joinedUsers = this->joinedUsers_.access();
 
-            auto message = Message::createSystemMessage("Users joined: " + joinedUsers->join(", "));
+            auto message = Message::createSystemMessage(
+                "Users joined: " + joinedUsers->join(", "));
             message->flags |= Message::Collapsed;
             joinedUsers->clear();
             this->addMessage(message);
@@ -208,7 +211,8 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto partedUsers = this->partedUsers_.access();
 
-            auto message = Message::createSystemMessage("Users parted: " + partedUsers->join(", "));
+            auto message = Message::createSystemMessage(
+                "Users parted: " + partedUsers->join(", "));
             message->flags |= Message::Collapsed;
             this->addMessage(message);
             partedUsers->clear();
@@ -230,7 +234,8 @@ void TwitchChannel::setRoomId(const QString &id)
     this->loadRecentMessages();
 }
 
-AccessGuard<const TwitchChannel::RoomModes> TwitchChannel::accessRoomModes() const
+AccessGuard<const TwitchChannel::RoomModes> TwitchChannel::accessRoomModes()
+    const
 {
     return this->roomModes_.accessConst();
 }
@@ -247,12 +252,14 @@ bool TwitchChannel::isLive() const
     return this->streamStatus_.access()->live;
 }
 
-AccessGuard<const TwitchChannel::StreamStatus> TwitchChannel::accessStreamStatus() const
+AccessGuard<const TwitchChannel::StreamStatus>
+TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
 }
 
-boost::optional<EmotePtr> TwitchChannel::getBttvEmote(const EmoteName &name) const
+boost::optional<EmotePtr> TwitchChannel::getBttvEmote(
+    const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.access();
     auto it = emotes->find(name);
@@ -261,7 +268,8 @@ boost::optional<EmotePtr> TwitchChannel::getBttvEmote(const EmoteName &name) con
     return it->second;
 }
 
-boost::optional<EmotePtr> TwitchChannel::getFfzEmote(const EmoteName &name) const
+boost::optional<EmotePtr> TwitchChannel::getFfzEmote(
+    const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.access();
     auto it = emotes->find(name);
@@ -316,7 +324,8 @@ void TwitchChannel::refreshLiveStatus()
     auto roomID = this->getRoomId();
 
     if (roomID.isEmpty()) {
-        Log("[TwitchChannel:{}] Refreshing live status (Missing ID)", this->getName());
+        Log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
+            this->getName());
         this->setLive(false);
         return;
     }
@@ -332,12 +341,13 @@ void TwitchChannel::refreshLiveStatus()
     request.setCaller(QThread::currentThread());
     //>>>>>>> 9bfbdefd2f0972a738230d5b95a009f73b1dd933
 
-    request.onSuccess([this, weak = this->weak_from_this()](auto result) -> Outcome {
-        ChannelPtr shared = weak.lock();
-        if (!shared) return Failure;
+    request.onSuccess(
+        [this, weak = this->weak_from_this()](auto result) -> Outcome {
+            ChannelPtr shared = weak.lock();
+            if (!shared) return Failure;
 
-        return this->parseLiveStatus(result.parseRapidJson());
-    });
+            return this->parseLiveStatus(result.parseRapidJson());
+        });
 
     request.execute();
 }
@@ -362,8 +372,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
         return Failure;
     }
 
-    if (!stream.HasMember("viewers") || !stream.HasMember("game") || !stream.HasMember("channel") ||
-        !stream.HasMember("created_at")) {
+    if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
+        !stream.HasMember("channel") || !stream.HasMember("created_at")) {
         Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
         this->setLive(false);
         return Failure;
@@ -372,7 +382,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     const rapidjson::Value &streamChannel = stream["channel"];
 
     if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in channel");
+        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
+            "channel");
         return Failure;
     }
 
@@ -384,10 +395,11 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();
         status->title = streamChannel["status"].GetString();
-        QDateTime since = QDateTime::fromString(stream["created_at"].GetString(), Qt::ISODate);
+        QDateTime since = QDateTime::fromString(
+            stream["created_at"].GetString(), Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
-        status->uptime =
-            QString::number(diff / 3600) + "h " + QString::number(diff % 3600 / 60) + "m";
+        status->uptime = QString::number(diff / 3600) + "h " +
+                         QString::number(diff % 3600 / 60) + "m";
 
         status->rerun = false;
         if (stream.HasMember("stream_type")) {
@@ -400,7 +412,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
             const auto &broadcastPlatformValue = stream["broadcast_platform"];
 
             if (broadcastPlatformValue.IsString()) {
-                const char *broadcastPlatform = stream["broadcast_platform"].GetString();
+                const char *broadcastPlatform =
+                    stream["broadcast_platform"].GetString();
                 if (strcmp(broadcastPlatform, "rerun") == 0) {
                     status->rerun = true;
                 }
@@ -417,18 +430,20 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 void TwitchChannel::loadRecentMessages()
 {
     static QString genericURL =
-        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" + getDefaultClientID();
+        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" +
+        getDefaultClientID();
 
     NetworkRequest request(genericURL.arg(this->getRoomId()));
     request.makeAuthorizedV5(getDefaultClientID());
     request.setCaller(QThread::currentThread());
 
-    request.onSuccess([this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-        ChannelPtr shared = weak.lock();
-        if (!shared) return Failure;
+    request.onSuccess(
+        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            ChannelPtr shared = weak.lock();
+            if (!shared) return Failure;
 
-        return this->parseRecentMessages(result.parseJson());
-    });
+            return this->parseRecentMessages(result.parseJson());
+        });
 
     request.execute();
 }
@@ -442,8 +457,8 @@ Outcome TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
 
     for (const auto jsonMessage : jsonMessages) {
         auto content = jsonMessage.toString().toUtf8();
-        // passing nullptr as the channel makes the message invalid but we don't check for that
-        // anyways
+        // passing nullptr as the channel makes the message invalid but we don't
+        // check for that anyways
         auto message = Communi::IrcMessage::fromData(content, nullptr);
         auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         assert(privMsg);
@@ -468,7 +483,8 @@ void TwitchChannel::refreshPubsub()
     if (roomId.isEmpty()) return;
 
     auto account = getApp()->accounts->twitch.getCurrent();
-    getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId, account);
+    getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId,
+                                                                account);
 }
 
 void TwitchChannel::refreshViewerList()
@@ -477,35 +493,40 @@ void TwitchChannel::refreshViewerList()
     const auto streamStatus = this->accessStreamStatus();
 
     if (getSettings()->onlyFetchChattersForSmallerStreamers) {
-        if (streamStatus->live && streamStatus->viewerCount > getSettings()->smallStreamerLimit) {
+        if (streamStatus->live &&
+            streamStatus->viewerCount > getSettings()->smallStreamerLimit) {
             return;
         }
     }
 
     // get viewer list
-    NetworkRequest request("https://tmi.twitch.tv/group/user/" + this->getName() + "/chatters");
+    NetworkRequest request("https://tmi.twitch.tv/group/user/" +
+                           this->getName() + "/chatters");
 
     request.setCaller(QThread::currentThread());
-    request.onSuccess([this, weak = this->weak_from_this()](auto result) -> Outcome {
-        // channel still exists?
-        auto shared = weak.lock();
-        if (!shared) return Failure;
+    request.onSuccess(
+        [this, weak = this->weak_from_this()](auto result) -> Outcome {
+            // channel still exists?
+            auto shared = weak.lock();
+            if (!shared) return Failure;
 
-        return this->parseViewerList(result.parseJson());
-    });
+            return this->parseViewerList(result.parseJson());
+        });
 
     request.execute();
 }
 
 Outcome TwitchChannel::parseViewerList(const QJsonObject &jsonRoot)
 {
-    static QStringList categories = {"moderators", "staff", "admins", "global_mods", "viewers"};
+    static QStringList categories = {"moderators", "staff", "admins",
+                                     "global_mods", "viewers"};
 
     // parse json
     QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
 
     for (const auto &category : categories) {
-        for (const auto jsonCategory : jsonCategories.value(category).toArray()) {
+        for (const auto jsonCategory :
+             jsonCategories.value(category).toArray()) {
             this->completionModel.addUser(jsonCategory.toString());
         }
     }
@@ -515,8 +536,8 @@ Outcome TwitchChannel::parseViewerList(const QJsonObject &jsonRoot)
 
 void TwitchChannel::loadBadges()
 {
-    auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" + this->getRoomId() +
-                   "/display?language=en"};
+    auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
+                   this->getRoomId() + "/display?language=en"};
     NetworkRequest req(url.string);
     req.setCaller(QThread::currentThread());
 
@@ -529,19 +550,24 @@ void TwitchChannel::loadBadges()
         auto jsonRoot = result.parseJson();
 
         auto _ = jsonRoot["badge_sets"].toObject();
-        for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end(); jsonBadgeSet++) {
+        for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end();
+             jsonBadgeSet++) {
             auto &versions = (*badgeSets)[jsonBadgeSet.key()];
 
             auto _ = jsonBadgeSet->toObject()["versions"].toObject();
-            for (auto jsonVersion_ = _.begin(); jsonVersion_ != _.end(); jsonVersion_++) {
+            for (auto jsonVersion_ = _.begin(); jsonVersion_ != _.end();
+                 jsonVersion_++) {
                 auto jsonVersion = jsonVersion_->toObject();
-                auto emote = std::make_shared<Emote>(
-                    Emote{EmoteName{},
-                          ImageSet{Image::fromUrl({jsonVersion["image_url_1x"].toString()}),
-                                   Image::fromUrl({jsonVersion["image_url_2x"].toString()}),
-                                   Image::fromUrl({jsonVersion["image_url_4x"].toString()})},
-                          Tooltip{jsonRoot["description"].toString()},
-                          Url{jsonVersion["clickURL"].toString()}});
+                auto emote = std::make_shared<Emote>(Emote{
+                    EmoteName{},
+                    ImageSet{Image::fromUrl(
+                                 {jsonVersion["image_url_1x"].toString()}),
+                             Image::fromUrl(
+                                 {jsonVersion["image_url_2x"].toString()}),
+                             Image::fromUrl(
+                                 {jsonVersion["image_url_4x"].toString()})},
+                    Tooltip{jsonRoot["description"].toString()},
+                    Url{jsonVersion["clickURL"].toString()}});
 
                 versions.emplace(jsonVersion_.key(), emote);
             };
@@ -555,63 +581,67 @@ void TwitchChannel::loadBadges()
 
 void TwitchChannel::loadCheerEmotes()
 {
-    auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" + this->getRoomId()};
+    auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" +
+                   this->getRoomId()};
     auto request = NetworkRequest::twitchRequest(url.string);
     request.setCaller(QThread::currentThread());
 
-    request.onSuccess([this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-        auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
+    request.onSuccess(
+        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
 
-        for (auto &set : cheerEmoteSets) {
-            auto cheerEmoteSet = CheerEmoteSet();
-            cheerEmoteSet.regex = QRegularExpression("^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+            for (auto &set : cheerEmoteSets) {
+                auto cheerEmoteSet = CheerEmoteSet();
+                cheerEmoteSet.regex = QRegularExpression(
+                    "^" + set.prefix.toLower() + "([1-9][0-9]*)$");
 
-            for (auto &tier : set.tiers) {
-                CheerEmote cheerEmote;
+                for (auto &tier : set.tiers) {
+                    CheerEmote cheerEmote;
 
-                cheerEmote.color = QColor(tier.color);
-                cheerEmote.minBits = tier.minBits;
+                    cheerEmote.color = QColor(tier.color);
+                    cheerEmote.minBits = tier.minBits;
 
-                // TODO(pajlada): We currently hardcode dark here :|
-                // We will continue to do so for now since we haven't had to
-                // solve that anywhere else
+                    // TODO(pajlada): We currently hardcode dark here :|
+                    // We will continue to do so for now since we haven't had to
+                    // solve that anywhere else
 
-                cheerEmote.animatedEmote =
-                    std::make_shared<Emote>(Emote{EmoteName{"cheer emote"},
-                                                  ImageSet{
-                                                      tier.images["dark"]["animated"]["1"],
-                                                      tier.images["dark"]["animated"]["2"],
-                                                      tier.images["dark"]["animated"]["4"],
-                                                  },
-                                                  Tooltip{}, Url{}});
-                cheerEmote.staticEmote =
-                    std::make_shared<Emote>(Emote{EmoteName{"cheer emote"},
-                                                  ImageSet{
-                                                      tier.images["dark"]["static"]["1"],
-                                                      tier.images["dark"]["static"]["2"],
-                                                      tier.images["dark"]["static"]["4"],
-                                                  },
-                                                  Tooltip{}, Url{}});
+                    cheerEmote.animatedEmote = std::make_shared<Emote>(
+                        Emote{EmoteName{"cheer emote"},
+                              ImageSet{
+                                  tier.images["dark"]["animated"]["1"],
+                                  tier.images["dark"]["animated"]["2"],
+                                  tier.images["dark"]["animated"]["4"],
+                              },
+                              Tooltip{}, Url{}});
+                    cheerEmote.staticEmote = std::make_shared<Emote>(
+                        Emote{EmoteName{"cheer emote"},
+                              ImageSet{
+                                  tier.images["dark"]["static"]["1"],
+                                  tier.images["dark"]["static"]["2"],
+                                  tier.images["dark"]["static"]["4"],
+                              },
+                              Tooltip{}, Url{}});
 
-                cheerEmoteSet.cheerEmotes.emplace_back(cheerEmote);
+                    cheerEmoteSet.cheerEmotes.emplace_back(cheerEmote);
+                }
+
+                std::sort(cheerEmoteSet.cheerEmotes.begin(),
+                          cheerEmoteSet.cheerEmotes.end(),
+                          [](const auto &lhs, const auto &rhs) {
+                              return lhs.minBits < rhs.minBits;  //
+                          });
+
+                this->cheerEmoteSets_.emplace_back(cheerEmoteSet);
             }
 
-            std::sort(cheerEmoteSet.cheerEmotes.begin(), cheerEmoteSet.cheerEmotes.end(),
-                      [](const auto &lhs, const auto &rhs) {
-                          return lhs.minBits < rhs.minBits;  //
-                      });
-
-            this->cheerEmoteSets_.emplace_back(cheerEmoteSet);
-        }
-
-        return Success;
-    });
+            return Success;
+        });
 
     request.execute();
 }
 
-boost::optional<EmotePtr> TwitchChannel::getTwitchBadge(const QString &set,
-                                                        const QString &version) const
+boost::optional<EmotePtr> TwitchChannel::getTwitchBadge(
+    const QString &set, const QString &version) const
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);

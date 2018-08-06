@@ -55,7 +55,8 @@ public:
     pajlada::Signals::NoArgSignal closing;
 
 protected:
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+    virtual bool nativeEvent(const QByteArray &eventType, void *message,
+                             long *result) override;
     virtual void scaleChangedEvent(float) override;
 
     virtual void paintEvent(QPaintEvent *) override;

@@ -4,7 +4,8 @@
 
 namespace chatterino {
 
-TaggedUser::TaggedUser(ProviderId provider, const QString &name, const QString &id)
+TaggedUser::TaggedUser(ProviderId provider, const QString &name,
+                       const QString &id)
     : providerId_(provider)
     , name_(name)
     , id_(id)

@@ -39,48 +39,58 @@ SplitHeader::SplitHeader(Split *_split)
     {
         // channel name label
         auto title = layout.emplace<Label>().assign(&this->titleLabel);
-        title->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+        title->setSizePolicy(QSizePolicy::MinimumExpanding,
+                             QSizePolicy::Preferred);
         title->setCentered(true);
         title->setHasOffset(false);
 
         // mode button
-        auto mode = layout.emplace<RippleEffectLabel>(nullptr).assign(&this->modeButton_);
+        auto mode = layout.emplace<RippleEffectLabel>(nullptr).assign(
+            &this->modeButton_);
 
         mode->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         mode->hide();
 
         this->setupModeLabel(*mode);
 
-        QObject::connect(mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
-            QTimer::singleShot(80, this, [&, this] {
-                ChannelPtr _channel = this->split_->getChannel();
-                if (_channel->hasModRights()) {
-                    this->modeMenu_.popup(QCursor::pos());
-                }
+        QObject::connect(
+            mode.getElement(), &RippleEffectLabel::clicked, this, [this] {
+                QTimer::singleShot(80, this, [&, this] {
+                    ChannelPtr _channel = this->split_->getChannel();
+                    if (_channel->hasModRights()) {
+                        this->modeMenu_.popup(QCursor::pos());
+                    }
+                });
             });
-        });
 
         // moderation mode
-        auto moderator = layout.emplace<RippleEffectButton>(this).assign(&this->moderationButton_);
+        auto moderator = layout.emplace<RippleEffectButton>(this).assign(
+            &this->moderationButton_);
 
-        QObject::connect(moderator.getElement(), &RippleEffectButton::clicked, this,
-                         [this, moderator]() mutable {
-                             this->split_->setModerationMode(!this->split_->getModerationMode());
+        QObject::connect(
+            moderator.getElement(), &RippleEffectButton::clicked, this,
+            [this, moderator]() mutable {
+                this->split_->setModerationMode(
+                    !this->split_->getModerationMode());
 
-                             moderator->setDim(!this->split_->getModerationMode());
-                         });
+                moderator->setDim(!this->split_->getModerationMode());
+            });
 
         this->updateModerationModeIcon();
 
         // dropdown label
-        auto dropdown = layout.emplace<RippleEffectButton>(this).assign(&this->dropdownButton_);
+        auto dropdown = layout.emplace<RippleEffectButton>(this).assign(
+            &this->dropdownButton_);
         dropdown->setMouseTracking(true);
         //        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
-        QObject::connect(dropdown.getElement(), &RippleEffectButton::leftMousePress, this, [this] {
-            QTimer::singleShot(80, [&, this] { this->dropdownMenu_.popup(QCursor::pos()); });
-        });
+        QObject::connect(dropdown.getElement(),
+                         &RippleEffectButton::leftMousePress, this, [this] {
+                             QTimer::singleShot(80, [&, this] {
+                                 this->dropdownMenu_.popup(QCursor::pos());
+                             });
+                         });
     }
 
     // ---- misc
@@ -166,53 +176,57 @@ void SplitHeader::updateRoomModes()
 
 void SplitHeader::setupModeLabel(RippleEffectLabel &label)
 {
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect([this, &label] {
-        auto twitchChannel = dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+    this->managedConnections_.push_back(
+        this->modeUpdateRequested_.connect([this, &label] {
+            auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
 
-        // return if the channel is not a twitch channel
-        if (twitchChannel == nullptr) {
-            label.hide();
-            return;
-        }
-
-        // set lable enabled
-        label.setEnable(twitchChannel->hasModRights());
-
-        // set the label text
-        QString text;
-
-        {
-            auto roomModes = twitchChannel->accessRoomModes();
-
-            if (roomModes->r9k) text += "r9k, ";
-            if (roomModes->slowMode)
-                text += QString("slow(%1), ").arg(QString::number(roomModes->slowMode));
-            if (roomModes->emoteOnly) text += "emote, ";
-            if (roomModes->submode) text += "sub, ";
-        }
-
-        if (text.length() > 2) {
-            text = text.mid(0, text.size() - 2);
-        }
-
-        if (text.isEmpty()) {
-            if (twitchChannel->hasModRights()) {
-                label.getLabel().setText("none");
-                label.show();
-            } else {
+            // return if the channel is not a twitch channel
+            if (twitchChannel == nullptr) {
                 label.hide();
-            }
-        } else {
-            static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
-            QRegularExpressionMatch match = commaReplacement.match(text);
-            if (match.hasMatch()) {
-                text = text.mid(0, match.capturedStart(1)) + '\n' + text.mid(match.capturedEnd(1));
+                return;
             }
 
-            label.getLabel().setText(text);
-            label.show();
-        }
-    }));
+            // set lable enabled
+            label.setEnable(twitchChannel->hasModRights());
+
+            // set the label text
+            QString text;
+
+            {
+                auto roomModes = twitchChannel->accessRoomModes();
+
+                if (roomModes->r9k) text += "r9k, ";
+                if (roomModes->slowMode)
+                    text += QString("slow(%1), ")
+                                .arg(QString::number(roomModes->slowMode));
+                if (roomModes->emoteOnly) text += "emote, ";
+                if (roomModes->submode) text += "sub, ";
+            }
+
+            if (text.length() > 2) {
+                text = text.mid(0, text.size() - 2);
+            }
+
+            if (text.isEmpty()) {
+                if (twitchChannel->hasModRights()) {
+                    label.getLabel().setText("none");
+                    label.show();
+                } else {
+                    label.hide();
+                }
+            } else {
+                static QRegularExpression commaReplacement("^.+?, .+?,( ).+$");
+                QRegularExpressionMatch match = commaReplacement.match(text);
+                if (match.hasMatch()) {
+                    text = text.mid(0, match.capturedStart(1)) + '\n' +
+                           text.mid(match.capturedEnd(1));
+                }
+
+                label.getLabel().setText(text);
+                label.show();
+            }
+        }));
 }
 
 void SplitHeader::addModeActions(QMenu &menu)
@@ -234,7 +248,8 @@ void SplitHeader::addModeActions(QMenu &menu)
 
     this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
         [this, setSub, setEmote, setSlow, setR9k]() {
-            auto twitchChannel = dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+            auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
             if (twitchChannel == nullptr) {
                 this->modeButton_->hide();
                 return;
@@ -260,11 +275,13 @@ void SplitHeader::addModeActions(QMenu &menu)
         this->split_->getChannel().get()->sendMessage(command);
     };
 
-    QObject::connect(setSub, &QAction::triggered, this,
-                     [setSub, toggle]() mutable { toggle("/subscribers", setSub); });
+    QObject::connect(
+        setSub, &QAction::triggered, this,
+        [setSub, toggle]() mutable { toggle("/subscribers", setSub); });
 
-    QObject::connect(setEmote, &QAction::triggered, this,
-                     [setEmote, toggle]() mutable { toggle("/emoteonly", setEmote); });
+    QObject::connect(
+        setEmote, &QAction::triggered, this,
+        [setEmote, toggle]() mutable { toggle("/emoteonly", setEmote); });
 
     QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
         if (!setSlow->isChecked()) {
@@ -273,17 +290,19 @@ void SplitHeader::addModeActions(QMenu &menu)
             return;
         };
         bool ok;
-        int slowSec =
-            QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1, &ok, Qt::FramelessWindowHint);
+        int slowSec = QInputDialog::getInt(this, "", "Seconds:", 10, 0, 500, 1,
+                                           &ok, Qt::FramelessWindowHint);
         if (ok) {
-            this->split_->getChannel().get()->sendMessage(QString("/slow %1").arg(slowSec));
+            this->split_->getChannel().get()->sendMessage(
+                QString("/slow %1").arg(slowSec));
         } else {
             setSlow->setChecked(false);
         }
     });
 
-    QObject::connect(setR9k, &QAction::triggered, this,
-                     [setR9k, toggle]() mutable { toggle("/r9kbeta", setR9k); });
+    QObject::connect(
+        setR9k, &QAction::triggered, this,
+        [setR9k, toggle]() mutable { toggle("/r9kbeta", setR9k); });
 }
 
 void SplitHeader::initializeChannelSignals()
@@ -295,9 +314,10 @@ void SplitHeader::initializeChannelSignals()
     TwitchChannel *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     if (twitchChannel) {
-        this->managedConnections_.emplace_back(twitchChannel->liveStatusChanged.connect([this]() {
-            this->updateChannelText();  //
-        }));
+        this->managedConnections_.emplace_back(
+            twitchChannel->liveStatusChanged.connect([this]() {
+                this->updateChannelText();  //
+            }));
     }
 }
 
@@ -332,9 +352,10 @@ void SplitHeader::updateChannelText()
             this->isLive_ = true;
             this->tooltip_ = "<style>.center    { text-align: center; }</style>"
                              "<p class = \"center\">" +
-                             streamStatus->title + "<br><br>" + streamStatus->game + "<br>" +
-                             (streamStatus->rerun ? "Vod-casting" : "Live") + " for " +
-                             streamStatus->uptime + " with " +
+                             streamStatus->title + "<br><br>" +
+                             streamStatus->game + "<br>" +
+                             (streamStatus->rerun ? "Vod-casting" : "Live") +
+                             " for " + streamStatus->uptime + " with " +
                              QString::number(streamStatus->viewerCount) +
                              " viewers"
                              "</p>";
@@ -346,7 +367,8 @@ void SplitHeader::updateChannelText()
                 title += " (live)";
             }
             if (getSettings()->showViewerCount) {
-                title += " - " + QString::number(streamStatus->viewerCount) + " viewers";
+                title += " - " + QString::number(streamStatus->viewerCount) +
+                         " viewers";
             }
             if (getSettings()->showTitle) {
                 title += " - " + streamStatus->title;
@@ -374,9 +396,10 @@ void SplitHeader::updateModerationModeIcon()
 {
     auto app = getApp();
 
-    this->moderationButton_->setPixmap(this->split_->getModerationMode()
-                                           ? app->resources->buttons.modModeEnabled
-                                           : app->resources->buttons.modModeDisabled);
+    this->moderationButton_->setPixmap(
+        this->split_->getModerationMode()
+            ? app->resources->buttons.modModeEnabled
+            : app->resources->buttons.modModeDisabled);
 
     bool modButtonVisible = false;
     ChannelPtr channel = this->split_->getChannel();
@@ -427,7 +450,8 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
 
                 TooltipWidget *widget = new TooltipWidget();
 
-                widget->setText("Double click or press <Ctrl+R> to change the channel.\nClick and "
+                widget->setText("Double click or press <Ctrl+R> to change the "
+                                "channel.\nClick and "
                                 "drag to move the split.");
                 widget->setAttribute(Qt::WA_DeleteOnClose);
                 widget->move(pos);
@@ -448,8 +472,10 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
 void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
     if (this->dragging_) {
-        if (std::abs(this->dragStart_.x() - event->pos().x()) > int(12 * this->getScale()) ||
-            std::abs(this->dragStart_.y() - event->pos().y()) > int(12 * this->getScale())) {
+        if (std::abs(this->dragStart_.x() - event->pos().x()) >
+                int(12 * this->getScale()) ||
+            std::abs(this->dragStart_.y() - event->pos().y()) >
+                int(12 * this->getScale())) {
             this->split_->drag();
             this->dragging_ = false;
         }
@@ -468,7 +494,8 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltip_.isEmpty()) {
         auto tooltipWidget = TooltipWidget::getInstance();
-        tooltipWidget->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()), false);
+        tooltipWidget->moveTo(
+            this, this->mapToGlobal(this->rect().bottomLeft()), false);
         tooltipWidget->setText(this->tooltip_);
         tooltipWidget->show();
         tooltipWidget->raise();
@@ -493,7 +520,8 @@ void SplitHeader::themeChangedEvent()
     QPalette palette;
 
     if (this->split_->hasFocus()) {
-        palette.setColor(QPalette::Foreground, this->theme->splits.header.focusedText);
+        palette.setColor(QPalette::Foreground,
+                         this->theme->splits.header.focusedText);
     } else {
         palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
     }
@@ -501,7 +529,8 @@ void SplitHeader::themeChangedEvent()
     if (this->theme->isLightTheme()) {
         this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuDark);
     } else {
-        this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuLight);
+        this->dropdownButton_->setPixmap(
+            getApp()->resources->buttons.menuLight);
     }
 
     this->titleLabel->setPalette(palette);

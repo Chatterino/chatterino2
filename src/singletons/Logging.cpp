@@ -26,8 +26,8 @@ void Logging::addMessage(const QString &channelName, MessagePtr message)
     if (it == this->loggingChannels_.end()) {
         auto channel = new LoggingChannel(channelName);
         channel->addMessage(message);
-        this->loggingChannels_.emplace(channelName,
-                                       std::unique_ptr<LoggingChannel>(std::move(channel)));
+        this->loggingChannels_.emplace(
+            channelName, std::unique_ptr<LoggingChannel>(std::move(channel)));
     } else {
         it->second->addMessage(message);
     }

@@ -21,7 +21,8 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
     } else if (channelName.startsWith("/mentions")) {
         this->subDirectory = "Mentions";
     } else {
-        this->subDirectory = QStringLiteral("Channels") + QDir::separator() + channelName;
+        this->subDirectory =
+            QStringLiteral("Channels") + QDir::separator() + channelName;
     }
 
     // FOURTF: change this when adding more providers
@@ -60,7 +61,8 @@ void LoggingChannel::openLogFile()
 
     QString baseFileName = this->channelName + "-" + this->dateString + ".log";
 
-    QString directory = this->baseDirectory + QDir::separator() + this->subDirectory;
+    QString directory =
+        this->baseDirectory + QDir::separator() + this->subDirectory;
 
     if (!QDir().mkpath(directory)) {
         Log("Unable to create logging path");

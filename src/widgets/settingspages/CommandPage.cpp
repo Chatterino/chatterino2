@@ -35,16 +35,19 @@ CommandPage::CommandPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     EditableModelView *view =
-        layout.emplace<EditableModelView>(app->commands->createModel(nullptr)).getElement();
+        layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
+            .getElement();
 
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
     view->addButtonPressed.connect([] {
-        getApp()->commands->items.appendItem(Command{"/command", "I made a new command HeyGuys"});
+        getApp()->commands->items.appendItem(
+            Command{"/command", "I made a new command HeyGuys"});
     });
 
-    layout.append(this->createCheckBox("Also match the trigger at the end of the message",
-                                       app->settings->allowCommandsAtEnd));
+    layout.append(
+        this->createCheckBox("Also match the trigger at the end of the message",
+                             app->settings->allowCommandsAtEnd));
 
     QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
     text->setWordWrap(true);

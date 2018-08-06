@@ -15,8 +15,9 @@ class UserHighlightModel : public SignalVectorModel<HighlightPhrase>
 
 protected:
     // vector into model row
-    virtual HighlightPhrase getItemFromRow(std::vector<QStandardItem *> &row,
-                                           const HighlightPhrase &original) override;
+    virtual HighlightPhrase getItemFromRow(
+        std::vector<QStandardItem *> &row,
+        const HighlightPhrase &original) override;
 
     virtual void getRowFromItem(const HighlightPhrase &item,
                                 std::vector<QStandardItem *> &row) override;

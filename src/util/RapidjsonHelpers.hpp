@@ -26,7 +26,8 @@ void set(rapidjson::Value &obj, const char *key, const Type &value,
 }
 
 template <>
-inline void set(rapidjson::Value &obj, const char *key, const rapidjson::Value &value,
+inline void set(rapidjson::Value &obj, const char *key,
+                const rapidjson::Value &value,
                 rapidjson::Document::AllocatorType &a)
 {
     assert(obj.IsObject());
@@ -45,7 +46,8 @@ void set(rapidjson::Document &obj, const char *key, const Type &value)
 }
 
 template <>
-inline void set(rapidjson::Document &obj, const char *key, const rapidjson::Value &value)
+inline void set(rapidjson::Document &obj, const char *key,
+                const rapidjson::Value &value)
 {
     assert(obj.IsObject());
 
@@ -55,7 +57,8 @@ inline void set(rapidjson::Document &obj, const char *key, const rapidjson::Valu
 }
 
 template <typename Type>
-void add(rapidjson::Value &arr, const Type &value, rapidjson::Document::AllocatorType &a)
+void add(rapidjson::Value &arr, const Type &value,
+         rapidjson::Document::AllocatorType &a)
 {
     assert(arr.IsArray());
 

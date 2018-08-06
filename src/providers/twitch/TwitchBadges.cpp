@@ -19,7 +19,8 @@ void TwitchBadges::initialize(Settings &settings, Paths &paths)
 
 void TwitchBadges::loadTwitchBadges()
 {
-    static QString url("https://badges.twitch.tv/v1/badges/global/display?language=en");
+    static QString url(
+        "https://badges.twitch.tv/v1/badges/global/display?language=en");
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -28,24 +29,29 @@ void TwitchBadges::loadTwitchBadges()
         QJsonObject sets = root.value("badge_sets").toObject();
 
         for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
-            QJsonObject versions = it.value().toObject().value("versions").toObject();
+            QJsonObject versions =
+                it.value().toObject().value("versions").toObject();
 
-            for (auto versionIt = std::begin(versions); versionIt != std::end(versions);
-                 ++versionIt) {
-                auto emote =
-                    Emote{{""},
-                          ImageSet{
-                              Image::fromUrl({root.value("image_url_1x").toString()}, 1),
-                              Image::fromUrl({root.value("image_url_2x").toString()}, 0.5),
-                              Image::fromUrl({root.value("image_url_4x").toString()}, 0.25),
-                          },
-                          Tooltip{root.value("description").toString()},
-                          Url{root.value("clickURL").toString()}};
+            for (auto versionIt = std::begin(versions);
+                 versionIt != std::end(versions); ++versionIt) {
+                auto emote = Emote{
+                    {""},
+                    ImageSet{
+                        Image::fromUrl({root.value("image_url_1x").toString()},
+                                       1),
+                        Image::fromUrl({root.value("image_url_2x").toString()},
+                                       0.5),
+                        Image::fromUrl({root.value("image_url_4x").toString()},
+                                       0.25),
+                    },
+                    Tooltip{root.value("description").toString()},
+                    Url{root.value("clickURL").toString()}};
                 // "title"
                 // "clickAction"
 
                 QJsonObject versionObj = versionIt.value().toObject();
-                this->badges.emplace(versionIt.key(), std::make_shared<Emote>(emote));
+                this->badges.emplace(versionIt.key(),
+                                     std::make_shared<Emote>(emote));
             }
         }
 

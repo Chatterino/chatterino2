@@ -10,8 +10,10 @@ namespace chatterino {
 
 class FfzEmotes final : std::enable_shared_from_this<FfzEmotes>
 {
-    static constexpr const char *globalEmoteApiUrl = "https://api.frankerfacez.com/v1/set/global";
-    static constexpr const char *channelEmoteApiUrl = "https://api.betterttv.net/2/channels/";
+    static constexpr const char *globalEmoteApiUrl =
+        "https://api.frankerfacez.com/v1/set/global";
+    static constexpr const char *channelEmoteApiUrl =
+        "https://api.betterttv.net/2/channels/";
 
 public:
     // FfzEmotes();
@@ -23,7 +25,8 @@ public:
     boost::optional<EmotePtr> getEmote(const EmoteId &id);
 
     void loadGlobalEmotes();
-    void loadChannelEmotes(const QString &channelName, std::function<void(EmoteMap &&)> callback);
+    void loadChannelEmotes(const QString &channelName,
+                           std::function<void(EmoteMap &&)> callback);
 
 protected:
     Outcome parseGlobalEmotes(const QJsonObject &jsonRoot);

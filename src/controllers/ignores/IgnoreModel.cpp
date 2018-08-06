@@ -23,7 +23,8 @@ IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row,
 }
 
 // turns a row in the model into a vector item
-void IgnoreModel::getRowFromItem(const IgnorePhrase &item, std::vector<QStandardItem *> &row)
+void IgnoreModel::getRowFromItem(const IgnorePhrase &item,
+                                 std::vector<QStandardItem *> &row)
 {
     setStringItem(row[0], item.getPattern());
     setBoolItem(row[1], item.isRegex());

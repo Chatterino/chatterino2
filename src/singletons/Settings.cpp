@@ -12,7 +12,8 @@ std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
 
 Settings *Settings::instance = nullptr;
 
-void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
+void _actuallyRegisterSetting(
+    std::weak_ptr<pajlada::Settings::ISettingData> setting)
 {
     _settings.push_back(setting);
 }

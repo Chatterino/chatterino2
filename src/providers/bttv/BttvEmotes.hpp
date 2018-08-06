@@ -10,7 +10,8 @@ namespace chatterino {
 
 class BttvEmotes final : std::enable_shared_from_this<BttvEmotes>
 {
-    static constexpr const char *globalEmoteApiUrl = "https://api.betterttv.net/2/emotes";
+    static constexpr const char *globalEmoteApiUrl =
+        "https://api.betterttv.net/2/emotes";
 
 public:
     // BttvEmotes();
@@ -22,8 +23,8 @@ public:
     void loadGlobalEmotes();
 
 private:
-    std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonObject &jsonRoot,
-                                                   const EmoteMap &currentEmotes);
+    std::pair<Outcome, EmoteMap> parseGlobalEmotes(
+        const QJsonObject &jsonRoot, const EmoteMap &currentEmotes);
 
     UniqueAccess<EmoteMap> globalEmotes_;
     // UniqueAccess<WeakEmoteIdMap> channelEmoteCache_;

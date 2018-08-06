@@ -19,9 +19,11 @@ EmotePopup::EmotePopup()
     this->viewEmojis_ = new ChannelView();
 
     this->viewEmotes_->setOverrideFlags(MessageElement::Flags(
-        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+        MessageElement::Default | MessageElement::AlwaysShow |
+        MessageElement::EmoteImages));
     this->viewEmojis_->setOverrideFlags(MessageElement::Flags(
-        MessageElement::Default | MessageElement::AlwaysShow | MessageElement::EmoteImages));
+        MessageElement::Default | MessageElement::AlwaysShow |
+        MessageElement::EmoteImages));
 
     this->viewEmotes_->setEnableScrollingToBottom(false);
     this->viewEmojis_->setEnableScrollingToBottom(false);
@@ -56,7 +58,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     ChannelPtr emoteChannel(new Channel("", Channel::Type::None));
 
-    auto addEmotes = [&](const EmoteMap &map, const QString &title, const QString &emoteDesc) {
+    auto addEmotes = [&](const EmoteMap &map, const QString &title,
+                         const QString &emoteDesc) {
         // TITLE
         MessageBuilder builder1;
 
@@ -71,8 +74,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         builder2.getMessage()->flags |= Message::DisableCompactEmotes;
 
         for (auto emote : map) {
-            builder2.append((new EmoteElement(emote.second, MessageElement::Flags::AlwaysShow))
-                                ->setLink(Link(Link::InsertText, emote.first.string)));
+            builder2.append(
+                (new EmoteElement(emote.second,
+                                  MessageElement::Flags::AlwaysShow))
+                    ->setLink(Link(Link::InsertText, emote.first.string)));
         }
 
         emoteChannel->addMessage(builder2.getMessage());
@@ -80,9 +85,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     auto app = getApp();
 
-    // fourtf: the entire emote manager needs to be refactored so there's no point in trying to
-    // fix this pile of garbage
-    for (const auto &set : app->accounts->twitch.getCurrent()->accessEmotes()->emoteSets) {
+    // fourtf: the entire emote manager needs to be refactored so there's no
+    // point in trying to fix this pile of garbage
+    for (const auto &set :
+         app->accounts->twitch.getCurrent()->accessEmotes()->emoteSets) {
         // TITLE
         MessageBuilder builder1;
 
@@ -109,18 +115,21 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
         for (const auto &emote : set->emotes) {
             builder2.append(
-                (new EmoteElement(app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
-                                  MessageElement::Flags::AlwaysShow))
+                (new EmoteElement(
+                     app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
+                     MessageElement::Flags::AlwaysShow))
                     ->setLink(Link(Link::InsertText, emote.name.string)));
         }
 
         emoteChannel->addMessage(builder2.getMessage());
     }
 
-    addEmotes(*app->emotes->bttv.accessGlobalEmotes(), "BetterTTV Global Emotes",
-              "BetterTTV Global Emote");
-    addEmotes(*channel->accessBttvEmotes(), "BetterTTV Channel Emotes", "BetterTTV Channel Emote");
-    //    addEmotes(*app->emotes->ffz.accessGlobalEmotes(), "FrankerFaceZ Global Emotes",
+    addEmotes(*app->emotes->bttv.accessGlobalEmotes(),
+              "BetterTTV Global Emotes", "BetterTTV Global Emote");
+    addEmotes(*channel->accessBttvEmotes(), "BetterTTV Channel Emotes",
+              "BetterTTV Channel Emote");
+    //    addEmotes(*app->emotes->ffz.accessGlobalEmotes(), "FrankerFaceZ Global
+    //    Emotes",
     //              "FrankerFaceZ Global Emote");
     addEmotes(*channel->accessFfzEmotes(), "FrankerFaceZ Channel Emotes",
               "FrankerFaceZ Channel Emote");
@@ -149,7 +158,8 @@ void EmotePopup::loadEmojis()
     emojis.each([&builder](const auto &key, const auto &value) {
         builder.append(
             (new EmoteElement(value->emote, MessageElement::Flags::AlwaysShow))
-                ->setLink(Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":")));
+                ->setLink(Link(Link::Type::InsertText,
+                               ":" + value->shortCodes[0] + ":")));
     });
     emojiChannel->addMessage(builder.getMessage());
 

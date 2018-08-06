@@ -11,8 +11,8 @@ ModerationActionModel ::ModerationActionModel(QObject *parent)
 }
 
 // turn a vector item into a model row
-ModerationAction ModerationActionModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                                       const ModerationAction &original)
+ModerationAction ModerationActionModel::getItemFromRow(
+    std::vector<QStandardItem *> &row, const ModerationAction &original)
 {
     return ModerationAction(row[0]->data(Qt::DisplayRole).toString());
 }

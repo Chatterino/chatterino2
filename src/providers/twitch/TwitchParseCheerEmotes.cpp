@@ -9,7 +9,8 @@ namespace chatterino {
 namespace {
 
 template <typename Type>
-inline bool ReadValue(const rapidjson::Value &object, const char *key, Type &out)
+inline bool ReadValue(const rapidjson::Value &object, const char *key,
+                      Type &out)
 {
     if (!object.HasMember(key)) {
         return false;
@@ -27,7 +28,8 @@ inline bool ReadValue(const rapidjson::Value &object, const char *key, Type &out
 }
 
 template <>
-inline bool ReadValue<QString>(const rapidjson::Value &object, const char *key, QString &out)
+inline bool ReadValue<QString>(const rapidjson::Value &object, const char *key,
+                               QString &out)
 {
     if (!object.HasMember(key)) {
         return false;
@@ -45,7 +47,8 @@ inline bool ReadValue<QString>(const rapidjson::Value &object, const char *key, 
 }
 
 template <>
-inline bool ReadValue<std::vector<QString>>(const rapidjson::Value &object, const char *key,
+inline bool ReadValue<std::vector<QString>>(const rapidjson::Value &object,
+                                            const char *key,
                                             std::vector<QString> &out)
 {
     if (!object.HasMember(key)) {
@@ -70,7 +73,8 @@ inline bool ReadValue<std::vector<QString>>(const rapidjson::Value &object, cons
 }
 
 // Parse a single cheermote set (or "action") from the twitch api
-inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set, const rapidjson::Value &action)
+inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set,
+                                    const rapidjson::Value &action)
 {
     if (!action.IsObject()) {
         return false;
@@ -160,13 +164,15 @@ inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set, const rapidjson::Valu
                 continue;
             }
 
-            const rapidjson::Value &imageBackgroundStates = imageBackgroundValue.value;
+            const rapidjson::Value &imageBackgroundStates =
+                imageBackgroundValue.value;
             if (!imageBackgroundStates.IsObject()) {
                 continue;
             }
 
             // Read each key which represents a background
-            for (const auto &imageBackgroundState : imageBackgroundStates.GetObject()) {
+            for (const auto &imageBackgroundState :
+                 imageBackgroundStates.GetObject()) {
                 QString state = imageBackgroundState.name.GetString();
                 bool stateExists = false;
                 for (const auto &_state : set.states) {
@@ -180,13 +186,15 @@ inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set, const rapidjson::Valu
                     continue;
                 }
 
-                const rapidjson::Value &imageScalesValue = imageBackgroundState.value;
+                const rapidjson::Value &imageScalesValue =
+                    imageBackgroundState.value;
                 if (!imageScalesValue.IsObject()) {
                     continue;
                 }
 
                 // Read each key which represents a scale
-                for (const auto &imageScaleValue : imageScalesValue.GetObject()) {
+                for (const auto &imageScaleValue :
+                     imageScalesValue.GetObject()) {
                     QString scale = imageScaleValue.name.GetString();
                     bool scaleExists = false;
                     for (const auto &_scale : set.scales) {
@@ -200,7 +208,8 @@ inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set, const rapidjson::Valu
                         continue;
                     }
 
-                    const rapidjson::Value &imageScaleURLValue = imageScaleValue.value;
+                    const rapidjson::Value &imageScaleURLValue =
+                        imageScaleValue.value;
                     if (!imageScaleURLValue.IsString()) {
                         continue;
                     }
@@ -230,8 +239,9 @@ inline bool ParseSingleCheermoteSet(JSONCheermoteSet &set, const rapidjson::Valu
 }
 }  // namespace
 
-// Look through the results of https://api.twitch.tv/kraken/bits/actions?channel_id=11148817 for
-// cheermote sets or "Actions" as they are called in the API
+// Look through the results of
+// https://api.twitch.tv/kraken/bits/actions?channel_id=11148817 for cheermote
+// sets or "Actions" as they are called in the API
 std::vector<JSONCheermoteSet> ParseCheermoteSets(const rapidjson::Document &d)
 {
     std::vector<JSONCheermoteSet> sets;

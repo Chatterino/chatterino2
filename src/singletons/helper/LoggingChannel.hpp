@@ -24,8 +24,10 @@ public:
 private:
     void openLogFile();
 
-    QString generateOpeningString(const QDateTime &now = QDateTime::currentDateTime()) const;
-    QString generateClosingString(const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateOpeningString(
+        const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateClosingString(
+        const QDateTime &now = QDateTime::currentDateTime()) const;
 
     void appendLine(const QString &line);
 

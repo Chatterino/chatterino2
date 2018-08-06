@@ -25,7 +25,8 @@ PartialTwitchUser PartialTwitchUser::byId(const QString &id)
     return user;
 }
 
-void PartialTwitchUser::getId(std::function<void(QString)> successCallback, const QObject *caller)
+void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
+                              const QObject *caller)
 {
     assert(!this->username_.isEmpty());
 
@@ -33,7 +34,8 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback, cons
         caller = QThread::currentThread();
     }
 
-    NetworkRequest request("https://api.twitch.tv/kraken/users?login=" + this->username_);
+    NetworkRequest request("https://api.twitch.tv/kraken/users?login=" +
+                           this->username_);
     request.setCaller(caller);
     request.makeAuthorizedV5(getDefaultClientID());
 
@@ -56,7 +58,8 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback, cons
         auto firstUser = users[0].toObject();
         auto id = firstUser.value("_id");
         if (!id.isString()) {
-            Log("API Error: while getting user id, first user object `_id` key is not a "
+            Log("API Error: while getting user id, first user object `_id` key "
+                "is not a "
                 "string");
             return Failure;
         }

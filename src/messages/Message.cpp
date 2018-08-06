@@ -33,7 +33,8 @@ MessagePtr Message::createSystemMessage(const QString &text)
     MessagePtr message(new Message);
 
     message->addElement(new TimestampElement(QTime::currentTime()));
-    message->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
+    message->addElement(
+        new TextElement(text, MessageElement::Text, MessageColor::System));
     message->flags |= MessageFlags::System;
     message->flags |= MessageFlags::DoNotTriggerNotification;
     message->searchText = text;
@@ -46,7 +47,8 @@ MessagePtr Message::createMessage(const QString &text)
     MessagePtr message(new Message);
 
     message->addElement(new TimestampElement(QTime::currentTime()));
-    message->addElement(new TextElement(text, MessageElement::Text, MessageColor::Text));
+    message->addElement(
+        new TextElement(text, MessageElement::Text, MessageColor::Text));
     message->searchText = text;
 
     return message;
@@ -96,8 +98,10 @@ QString makeDuration(int timeoutSeconds)
 
 }  // namespace
 
-MessagePtr Message::createTimeoutMessage(const QString &username, const QString &durationInSeconds,
-                                         const QString &reason, bool multipleTimes)
+MessagePtr Message::createTimeoutMessage(const QString &username,
+                                         const QString &durationInSeconds,
+                                         const QString &reason,
+                                         bool multipleTimes)
 {
     QString text;
 
@@ -135,7 +139,8 @@ MessagePtr Message::createTimeoutMessage(const QString &username, const QString 
     return message;
 }
 
-MessagePtr Message::createTimeoutMessage(const BanAction &action, uint32_t count)
+MessagePtr Message::createTimeoutMessage(const BanAction &action,
+                                         uint32_t count)
 {
     MessagePtr msg(new Message);
 
@@ -178,7 +183,8 @@ MessagePtr Message::createTimeoutMessage(const BanAction &action, uint32_t count
         }
     }
 
-    msg->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
+    msg->addElement(
+        new TextElement(text, MessageElement::Text, MessageColor::System));
     msg->searchText = text;
 
     return msg;
@@ -206,7 +212,8 @@ MessagePtr Message::createUntimeoutMessage(const UnbanAction &action)
                    .arg(action.target.name);
     }
 
-    msg->addElement(new TextElement(text, MessageElement::Text, MessageColor::System));
+    msg->addElement(
+        new TextElement(text, MessageElement::Text, MessageColor::System));
     msg->searchText = text;
 
     return msg;

@@ -24,7 +24,8 @@ private:
     void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
     void addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout);
 
-    void addLastReadMessageIndicatorPatternSelector(LayoutCreator<QVBoxLayout> layout);
+    void addLastReadMessageIndicatorPatternSelector(
+        LayoutCreator<QVBoxLayout> layout);
 
     QLayout *createThemeColorChanger();
     QLayout *createFontChanger();

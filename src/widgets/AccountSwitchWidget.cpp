@@ -39,10 +39,12 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     QObject::connect(this, &QListWidget::clicked, [=] {
         if (!this->selectedItems().isEmpty()) {
             QString newUsername = this->currentItem()->text();
-            if (newUsername.compare(ANONYMOUS_USERNAME_LABEL, Qt::CaseInsensitive) == 0) {
+            if (newUsername.compare(ANONYMOUS_USERNAME_LABEL,
+                                    Qt::CaseInsensitive) == 0) {
                 app->accounts->twitch.currentUsername = "";
             } else {
-                app->accounts->twitch.currentUsername = newUsername.toStdString();
+                app->accounts->twitch.currentUsername =
+                    newUsername.toStdString();
             }
         }
     });
@@ -70,7 +72,8 @@ void AccountSwitchWidget::refreshSelection()
             for (int i = 0; i < this->count(); ++i) {
                 QString itemText = this->item(i)->text();
 
-                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0) {
+                if (itemText.compare(currentUsername, Qt::CaseInsensitive) ==
+                    0) {
                     this->setCurrentRow(i);
                     break;
                 }

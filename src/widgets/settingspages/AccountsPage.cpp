@@ -25,7 +25,8 @@ AccountsPage::AccountsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     EditableModelView *view =
-        layout.emplace<EditableModelView>(app->accounts->createModel(nullptr)).getElement();
+        layout.emplace<EditableModelView>(app->accounts->createModel(nullptr))
+            .getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
@@ -41,8 +42,9 @@ AccountsPage::AccountsPage()
 
     //    auto buttons = layout.emplace<QDialogButtonBox>();
     //    {
-    //        this->addButton = buttons->addButton("Add", QDialogButtonBox::YesRole);
-    //        this->removeButton = buttons->addButton("Remove", QDialogButtonBox::NoRole);
+    //        this->addButton = buttons->addButton("Add",
+    //        QDialogButtonBox::YesRole); this->removeButton =
+    //        buttons->addButton("Remove", QDialogButtonBox::NoRole);
     //    }
 
     //    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);

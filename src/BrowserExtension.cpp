@@ -54,15 +54,16 @@ void runLoop(NativeMessagingClient &client)
         std::cin.read(b.get(), size);
         *(b.get() + size) = '\0';
 
-        client.sendMessage(QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
+        client.sendMessage(
+            QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
     }
 }
 }  // namespace
 
 bool shouldRunBrowserExtensionHost(const QStringList &args)
 {
-    return args.size() > 0 &&
-           (args[0].startsWith("chrome-extension://") || args[0].endsWith(".json"));
+    return args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
+                               args[0].endsWith(".json"));
 }
 
 void runBrowserExtensionHost()

@@ -68,13 +68,14 @@ public:
     static std::shared_ptr<Message> createSystemMessage(const QString &text);
     static std::shared_ptr<Message> createMessage(const QString &text);
 
-    static std::shared_ptr<Message> createTimeoutMessage(const QString &username,
-                                                         const QString &durationInSeconds,
-                                                         const QString &reason, bool multipleTimes);
+    static std::shared_ptr<Message> createTimeoutMessage(
+        const QString &username, const QString &durationInSeconds,
+        const QString &reason, bool multipleTimes);
 
-    static std::shared_ptr<Message> createTimeoutMessage(const BanAction &action,
-                                                         uint32_t count = 1);
-    static std::shared_ptr<Message> createUntimeoutMessage(const UnbanAction &action);
+    static std::shared_ptr<Message> createTimeoutMessage(
+        const BanAction &action, uint32_t count = 1);
+    static std::shared_ptr<Message> createUntimeoutMessage(
+        const UnbanAction &action);
 };
 
 using MessagePtr = std::shared_ptr<Message>;

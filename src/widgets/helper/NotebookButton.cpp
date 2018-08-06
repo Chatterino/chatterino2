@@ -68,12 +68,14 @@ void NotebookButton::paintEvent(QPaintEvent *event)
             QRect rect = this->rect();
             int s = h * 4 / 9;
 
-            painter.drawLine(
-                rect.left() + rect.width() / 2 - (s / 2), rect.top() + rect.height() / 2,
-                rect.left() + rect.width() / 2 + (s / 2), rect.top() + rect.height() / 2);
-            painter.drawLine(
-                rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 - (s / 2),
-                rect.left() + rect.width() / 2, rect.top() + rect.height() / 2 + (s / 2));
+            painter.drawLine(rect.left() + rect.width() / 2 - (s / 2),
+                             rect.top() + rect.height() / 2,
+                             rect.left() + rect.width() / 2 + (s / 2),
+                             rect.top() + rect.height() / 2);
+            painter.drawLine(rect.left() + rect.width() / 2,
+                             rect.top() + rect.height() / 2 - (s / 2),
+                             rect.left() + rect.width() / 2,
+                             rect.top() + rect.height() / 2 + (s / 2));
         } break;
 
         case User: {
@@ -105,9 +107,10 @@ void NotebookButton::paintEvent(QPaintEvent *event)
             path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
 
             for (int i = 0; i < 8; i++) {
-                path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0), (360 / 32.0));
-                path.arcTo(2 * a, 2 * a, 4 * a, 4 * a, i * (360 / 8.0) + (360 / 32.0),
+                path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
                            (360 / 32.0));
+                path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
+                           i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
             }
 
             painter.fillPath(path, foreground);
@@ -144,8 +147,8 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
     event->acceptProposedAction();
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonPress,
-                             QPointF(this->width() / 2, this->height() / 2), Qt::LeftButton,
-                             Qt::LeftButton, 0);
+                             QPointF(this->width() / 2, this->height() / 2),
+                             Qt::LeftButton, Qt::LeftButton, 0);
     RippleEffectButton::mousePressEvent(e);
     delete e;
 }
@@ -156,8 +159,8 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
     this->update();
 
     auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
-                             QPointF(this->width() / 2, this->height() / 2), Qt::LeftButton,
-                             Qt::LeftButton, 0);
+                             QPointF(this->width() / 2, this->height() / 2),
+                             Qt::LeftButton, Qt::LeftButton, 0);
     RippleEffectButton::mouseReleaseEvent(e);
     delete e;
 }

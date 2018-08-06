@@ -16,14 +16,16 @@ class HighlightBlacklistUser
 public:
     bool operator==(const HighlightBlacklistUser &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_) == std::tie(other.pattern_, other.isRegex_);
+        return std::tie(this->pattern_, this->isRegex_) ==
+               std::tie(other.pattern_, other.isRegex_);
     }
 
     HighlightBlacklistUser(const QString &pattern, bool isRegex = false)
         : pattern_(pattern)
         , isRegex_(isRegex)
-        , regex_(isRegex ? pattern : "", QRegularExpression::CaseInsensitiveOption |
-                                             QRegularExpression::UseUnicodePropertiesOption)
+        , regex_(isRegex ? pattern : "",
+                 QRegularExpression::CaseInsensitiveOption |
+                     QRegularExpression::UseUnicodePropertiesOption)
     {
     }
 
