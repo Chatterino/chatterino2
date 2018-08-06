@@ -220,35 +220,34 @@ MessagePtr TwitchMessageBuilder::build()
                 Link link;
 
                 if (linkString.isEmpty()) {
-                    link = Link();
+                    if (string.startsWith('@')) {
+                        this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
+                                                   FontStyle::ChatMediumBold);
+                        this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor);
+                    } else {
+                        this->emplace<TextElement>(string, TextElement::Text, textColor);
+                    }
                 } else {
-                    if (app->settings->lowercaseLink) {
-                        QRegularExpression httpRegex("\\bhttps?://",
-                                                     QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression ftpRegex("\\bftps?://",
-                                                    QRegularExpression::CaseInsensitiveOption);
-                        QRegularExpression getDomain("\\/\\/([^\\/]*)");
-                        QString tempString = string;
+                    static QRegularExpression domainRegex(
+                        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/:]+)(?:\/.*)?$)",
+                        QRegularExpression::CaseInsensitiveOption);
 
-                        if (!string.contains(httpRegex)) {
-                            if (!string.contains(ftpRegex)) {
-                                tempString.insert(0, "http://");
-                            }
-                        }
-                        QString domain = getDomain.match(tempString).captured(1);
-                        string.replace(domain, domain.toLower());
+                    QString lowercaseLinkString;
+                    auto match = domainRegex.match(string);
+                    if (match.isValid()) {
+                        lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
+                                              match.captured(1).toLower() +
+                                              string.mid(match.capturedEnd(1));
+                    } else {
+                        lowercaseLinkString = string;
                     }
                     link = Link(Link::Url, linkString);
+
                     textColor = MessageColor(MessageColor::Link);
-                }
-                if (string.startsWith('@')) {
-                    this->emplace<TextElement>(string, TextElement::BoldUsername, textColor,
-                                               FontStyle::ChatMediumBold)  //
+                    this->emplace<TextElement>(lowercaseLinkString, TextElement::LowercaseLink,
+                                               textColor)
                         ->setLink(link);
-                    this->emplace<TextElement>(string, TextElement::NonBoldUsername, textColor)  //
-                        ->setLink(link);
-                } else {
-                    this->emplace<TextElement>(string, TextElement::Text, textColor)  //
+                    this->emplace<TextElement>(string, TextElement::OriginalLink, textColor)
                         ->setLink(link);
                 }
 
