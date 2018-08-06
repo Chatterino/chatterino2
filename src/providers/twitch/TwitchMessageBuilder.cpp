@@ -98,7 +98,7 @@ MessagePtr TwitchMessageBuilder::build()
     //        MessageElement::Collapsed);
     //    }
     //#endif
-    this->message_->flags |= Message::Collapsed;
+    this->message().flags |= Message::Collapsed;
 
     // PARSING
     this->parseMessageID();
@@ -175,9 +175,9 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->addWords(splits, twitchEmotes);
 
-    this->message_->searchText = this->userName + ": " + this->originalMessage_;
+    this->message().searchText = this->userName + ": " + this->originalMessage_;
 
-    return this->getMessage();
+    return this->release();
 }
 
 void TwitchMessageBuilder::addWords(
@@ -376,7 +376,7 @@ void TwitchMessageBuilder::parseUsername()
     //        this->userName + ")";
     //    }
 
-    this->message_->loginName = this->userName;
+    this->message().loginName = this->userName;
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -384,7 +384,7 @@ void TwitchMessageBuilder::appendUsername()
     auto app = getApp();
 
     QString username = this->userName;
-    this->message_->loginName = username;
+    this->message().loginName = username;
     QString localizedName;
 
     auto iterator = this->tags.find("display-name");
@@ -396,12 +396,12 @@ void TwitchMessageBuilder::appendUsername()
                              Qt::CaseInsensitive) == 0) {
             username = displayName;
 
-            this->message_->displayName = displayName;
+            this->message().displayName = displayName;
         } else {
             localizedName = displayName;
 
-            this->message_->displayName = username;
-            this->message_->localizedName = displayName;
+            this->message().displayName = username;
+            this->message().localizedName = displayName;
         }
     }
 
@@ -573,7 +573,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
             }
         }
 
-        this->setHighlight(doHighlight);
+        this->message().flags.set(Message::Highlighted, doHighlight);
 
         if (!isPastMsg) {
             if (playSound &&
@@ -585,10 +585,6 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
                 QApplication::alert(getApp()->windows->getMainWindow().window(),
                                     2500);
             }
-        }
-
-        if (doHighlight) {
-            this->message_->flags |= Message::Highlighted;
         }
     }
 }
@@ -662,7 +658,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
 // fourtf: this is ugly
 //		   maybe put the individual badges into a map instead of this
-//mess
+// mess
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     auto app = getApp();

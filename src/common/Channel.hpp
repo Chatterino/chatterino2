@@ -52,7 +52,7 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
-    virtual void addRecentChatter(const std::shared_ptr<Message> &message);
+    virtual void addRecentChatter(const MessagePtr &message);
 
     QStringList modList;
 

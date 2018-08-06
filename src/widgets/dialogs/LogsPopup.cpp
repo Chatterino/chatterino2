@@ -170,15 +170,15 @@ void LogsPopup::getOverrustleLogs()
                                       singleMessage.value("timestamp").toInt())
                                       .time();
 
-                MessagePtr message(new Message);
-                message->addElement(new TimestampElement(timeStamp));
-                message->addElement(new TextElement(this->userName_,
-                                                    MessageElement::Username,
-                                                    MessageColor::System));
-                message->addElement(
-                    new TextElement(singleMessage.value("text").toString(),
-                                    MessageElement::Text, MessageColor::Text));
-                messages.push_back(message);
+                MessageBuilder builder;
+                builder.emplace<TimestampElement>(timeStamp);
+                builder.emplace<TextElement>(this->userName_,
+                                             MessageElement::Username,
+                                             MessageColor::System);
+                builder.emplace<TextElement>(
+                    singleMessage.value("text").toString(),
+                    MessageElement::Text, MessageColor::Text);
+                messages.push_back(builder.release());
             }
         }
         this->setMessages(messages);

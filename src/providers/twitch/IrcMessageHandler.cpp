@@ -60,13 +60,16 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored()) {
-        MessagePtr msg = builder.build();
-
         if (isSub) {
-            msg->flags |= Message::Subscription;
-            msg->flags &= ~Message::Highlighted;
-        } else {
-            if (msg->flags & Message::Highlighted) {
+            builder->flags |= Message::Subscription;
+            builder->flags &= ~Message::Highlighted;
+        }
+
+        auto highlighted = bool(builder->flags & Message::Highlighted);
+        auto msg = builder.build();
+
+        if (!isSub) {
+            if (highlighted) {
                 server.mentionsChannel->addMessage(msg);
                 getApp()->highlights->addHighlight(msg);
             }
@@ -151,8 +154,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     // check if the chat has been cleared by a moderator
     if (message->parameters().length() == 1) {
         chan->disableAllMessages();
-        chan->addMessage(Message::createSystemMessage(
-            "Chat has been cleared by a moderator."));
+        chan->addMessage(
+            makeSystemMessage("Chat has been cleared by a moderator."));
 
         return;
     }
@@ -170,8 +173,9 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         reason = v.toString();
     }
 
-    auto timeoutMsg = Message::createTimeoutMessage(username, durationInSeconds,
-                                                    reason, false);
+    auto timeoutMsg = MessageBuilder(timeoutMessage, username,
+                                     durationInSeconds, reason, false)
+                          .release();
     chan->addOrReplaceTimeout(timeoutMsg);
 
     // refresh all
@@ -216,17 +220,17 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
                                  false);
 
     if (!builder.isIgnored()) {
+        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
+
         MessagePtr _message = builder.build();
 
         if (_message->flags & Message::Highlighted) {
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
-        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
-
         c->addMessage(_message);
 
-        _message->flags |= Message::DoNotTriggerNotification;
+        // _message->flags |= Message::DoNotTriggerNotification;
 
         if (app->settings->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
@@ -262,10 +266,11 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     auto it = tags.find("system-msg");
 
     if (it != tags.end()) {
-        auto newMessage =
-            Message::createSystemMessage(parseTagString(it.value().toString()));
+        auto b = MessageBuilder(systemMessage,
+                                parseTagString(it.value().toString()));
 
-        newMessage->flags |= Message::Subscription;
+        b->flags |= Message::Subscription;
+        auto newMessage = b.release();
 
         QString channelName;
 
@@ -306,7 +311,7 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     auto app = getApp();
-    MessagePtr msg = Message::createSystemMessage(message->content());
+    MessagePtr msg = makeSystemMessage(message->content());
 
     QString channelName;
     if (!trimChannelName(message->target(), channelName)) {

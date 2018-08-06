@@ -47,29 +47,29 @@ public:
 
     friend void test();
 
-    Settings *const settings = nullptr;
-    Paths *const paths = nullptr;
+    Settings *const settings{};
+    Paths *const paths{};
     Resources2 *const resources;
 
-    Theme *const themes = nullptr;
-    Fonts *const fonts = nullptr;
-    Emotes *const emotes = nullptr;
-    WindowManager *const windows = nullptr;
+    Theme *const themes{};
+    Fonts *const fonts{};
+    Emotes *const emotes{};
+    WindowManager *const windows{};
 
-    AccountController *const accounts = nullptr;
-    CommandController *const commands = nullptr;
-    HighlightController *const highlights = nullptr;
-    IgnoreController *const ignores = nullptr;
-    TaggedUsersController *const taggedUsers = nullptr;
-    ModerationActions *const moderationActions = nullptr;
-    TwitchServer *const twitch2 = nullptr;
+    AccountController *const accounts{};
+    CommandController *const commands{};
+    HighlightController *const highlights{};
+    IgnoreController *const ignores{};
+    TaggedUsersController *const taggedUsers{};
+    ModerationActions *const moderationActions{};
+    TwitchServer *const twitch2{};
 
-    [[deprecated]] Logging *const logging = nullptr;
+    /*[[deprecated]]*/ Logging *const logging{};
 
     /// Provider-specific
     struct {
-        [[deprecated("use twitch2 instead")]] TwitchServer *server = nullptr;
-        [[deprecated("use twitch2->pubsub instead")]] PubSub *pubsub = nullptr;
+        /*[[deprecated("use twitch2 instead")]]*/ TwitchServer *server{};
+        /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub *pubsub{};
     } twitch;
 
 private:

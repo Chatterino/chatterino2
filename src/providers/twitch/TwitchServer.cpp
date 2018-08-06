@@ -217,7 +217,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
             lastMessage.back() + minMessageOffset > now) {
             if (this->lastErrorTimeSpeed_ + 30s < now) {
                 auto errorMessage =
-                    Message::createSystemMessage("sending messages too fast");
+                    makeSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
@@ -235,7 +235,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
         if (lastMessage.size() >= maxMessageCount) {
             if (this->lastErrorTimeAmount_ + 30s < now) {
                 auto errorMessage =
-                    Message::createSystemMessage("sending too many messages");
+                    makeSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 

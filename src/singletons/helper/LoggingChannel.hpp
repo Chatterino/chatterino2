@@ -19,7 +19,7 @@ class LoggingChannel : boost::noncopyable
 
 public:
     ~LoggingChannel();
-    void addMessage(std::shared_ptr<Message> message);
+    void addMessage(MessagePtr message);
 
 private:
     void openLogFile();

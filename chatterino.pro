@@ -248,7 +248,8 @@ SOURCES += \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/util/JsonQuery.cpp \
     src/RunGui.cpp \
-    src/BrowserExtension.cpp
+    src/BrowserExtension.cpp \
+    src/util/FormatTime.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -444,7 +445,8 @@ HEADERS  += \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
     src/util/JsonQuery.hpp \
     src/RunGui.hpp \
-    src/BrowserExtension.hpp
+    src/BrowserExtension.hpp \
+    src/util/FormatTime.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

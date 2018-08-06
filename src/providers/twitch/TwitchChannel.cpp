@@ -68,7 +68,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(Message::createSystemMessage("asdf"));
+        this->addMessage(makeSystemMessage("asdf"));
     }
 #endif
 }
@@ -104,9 +104,9 @@ void TwitchChannel::sendMessage(const QString &message)
     if (!app->accounts->twitch.isLoggedIn()) {
         // XXX: It would be nice if we could add a link here somehow that opened
         // the "account manager" dialog
-        this->addMessage(Message::createSystemMessage(
-            "You need to log in to send messages. You can "
-            "link your Twitch account in the settings."));
+        this->addMessage(
+            makeSystemMessage("You need to log in to send messages. You can "
+                              "link your Twitch account in the settings."));
         return;
     }
 
@@ -159,7 +159,7 @@ bool TwitchChannel::isBroadcaster() const
     return this->getName() == app->accounts->twitch.getCurrent()->getUserName();
 }
 
-void TwitchChannel::addRecentChatter(const std::shared_ptr<Message> &message)
+void TwitchChannel::addRecentChatter(const MessagePtr &message)
 {
     assert(!message->loginName.isEmpty());
 
@@ -183,11 +183,11 @@ void TwitchChannel::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto joinedUsers = this->joinedUsers_.access();
 
-            auto message = Message::createSystemMessage(
-                "Users joined: " + joinedUsers->join(", "));
-            message->flags |= Message::Collapsed;
+            MessageBuilder builder(systemMessage,
+                                   "Users joined: " + joinedUsers->join(", "));
+            builder->flags |= Message::Collapsed;
             joinedUsers->clear();
-            this->addMessage(message);
+            this->addMessage(builder.release());
             this->joinedUsersMergeQueued_ = false;
         });
     }
@@ -211,10 +211,10 @@ void TwitchChannel::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto partedUsers = this->partedUsers_.access();
 
-            auto message = Message::createSystemMessage(
-                "Users parted: " + partedUsers->join(", "));
-            message->flags |= Message::Collapsed;
-            this->addMessage(message);
+            MessageBuilder builder(systemMessage,
+                                   "Users parted: " + partedUsers->join(", "));
+            builder->flags |= Message::Collapsed;
+            this->addMessage(builder.release());
             partedUsers->clear();
 
             this->partedUsersMergeQueued_ = false;

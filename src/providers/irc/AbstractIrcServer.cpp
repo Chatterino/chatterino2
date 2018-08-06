@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 
 #include <QCoreApplication>
 
@@ -189,8 +190,8 @@ void AbstractIrcServer::onConnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    MessagePtr connMsg = Message::createSystemMessage("connected to chat");
-    MessagePtr reconnMsg = Message::createSystemMessage("reconnected to chat");
+    auto connected = makeSystemMessage("connected to chat");
+    auto reconnected = makeSystemMessage("reconnected to chat");
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {
         std::shared_ptr<Channel> chan = weak.lock();
@@ -205,11 +206,12 @@ void AbstractIrcServer::onConnected()
                                   Message::DisconnectedMessage;
 
         if (replaceMessage) {
-            chan->replaceMessage(snapshot[snapshot.getLength() - 1], reconnMsg);
+            chan->replaceMessage(snapshot[snapshot.getLength() - 1],
+                                 reconnected);
             continue;
         }
 
-        chan->addMessage(connMsg);
+        chan->addMessage(connected);
     }
 }
 
@@ -217,8 +219,9 @@ void AbstractIrcServer::onDisconnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    MessagePtr msg = Message::createSystemMessage("disconnected from chat");
-    msg->flags |= Message::DisconnectedMessage;
+    MessageBuilder b(systemMessage, "disconnected from chat");
+    b->flags |= Message::DisconnectedMessage;
+    auto disconnected = b.release();
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {
         std::shared_ptr<Channel> chan = weak.lock();
@@ -226,7 +229,7 @@ void AbstractIrcServer::onDisconnected()
             continue;
         }
 
-        chan->addMessage(msg);
+        chan->addMessage(disconnected);
     }
 }
 

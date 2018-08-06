@@ -54,6 +54,24 @@ public:
         reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
     }
 
+    void set(T flag)
+    {
+        reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
+    }
+
+    void unset(T flag)
+    {
+        reinterpret_cast<Q &>(this->value) &= ~static_cast<Q>(flag);
+    }
+
+    void set(T flag, bool value)
+    {
+        if (value)
+            this->set(flag);
+        else
+            this->unset(flag);
+    }
+
     bool HasFlag(Q flag) const
     {
         return (this->value & flag) == flag;

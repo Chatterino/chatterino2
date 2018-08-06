@@ -6,27 +6,13 @@
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
-
 #include <cinttypes>
 #include <memory>
 #include <vector>
 
-#include "util/DebugCount.hpp"
-
 namespace chatterino {
 
-struct Message {
-    Message()
-        : parseTime(QTime::currentTime())
-    {
-        DebugCount::increase("messages");
-    }
-
-    ~Message()
-    {
-        DebugCount::decrease("messages");
-    }
-
+struct Message : boost::noncopyable {
     enum MessageFlags : uint16_t {
         None = 0,
         System = (1 << 0),
@@ -43,6 +29,9 @@ struct Message {
         Subscription = (1 << 11),
     };
 
+    Message();
+    ~Message();
+
     FlagsEnum<MessageFlags> flags;
     QTime parseTime;
     QString id;
@@ -51,33 +40,12 @@ struct Message {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
-
     uint32_t count = 1;
+    std::vector<std::unique_ptr<MessageElement>> elements;
 
-    // Messages should not be added after the message is done initializing.
-    void addElement(MessageElement *element);
-    const std::vector<std::unique_ptr<MessageElement>> &getElements() const;
-
-    // Scrollbar
     ScrollbarHighlight getScrollBarHighlight() const;
-
-private:
-    std::vector<std::unique_ptr<MessageElement>> elements_;
-
-public:
-    static std::shared_ptr<Message> createSystemMessage(const QString &text);
-    static std::shared_ptr<Message> createMessage(const QString &text);
-
-    static std::shared_ptr<Message> createTimeoutMessage(
-        const QString &username, const QString &durationInSeconds,
-        const QString &reason, bool multipleTimes);
-
-    static std::shared_ptr<Message> createTimeoutMessage(
-        const BanAction &action, uint32_t count = 1);
-    static std::shared_ptr<Message> createUntimeoutMessage(
-        const UnbanAction &action);
 };
 
-using MessagePtr = std::shared_ptr<Message>;
+using MessagePtr = std::shared_ptr<const Message>;
 
 }  // namespace chatterino

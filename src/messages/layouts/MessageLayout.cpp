@@ -5,6 +5,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -32,7 +33,7 @@ MessageLayout::~MessageLayout()
     DebugCount::decrease("message layout");
 }
 
-Message *MessageLayout::getMessage()
+const Message *MessageLayout::getMessage()
 {
     return this->message_.get();
 }
@@ -104,8 +105,7 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
 
     this->container_.begin(width, this->scale_, messageFlags);
 
-    for (const std::unique_ptr<MessageElement> &element :
-         this->message_->getElements()) {
+    for (const auto &element : this->message_->elements) {
         element->addToContainer(this->container_, _flags);
     }
 

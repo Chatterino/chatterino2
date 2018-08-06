@@ -63,24 +63,24 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         // TITLE
         MessageBuilder builder1;
 
-        builder1.append(new TextElement(title, MessageElement::Text));
+        builder1.emplace<TextElement>(title, MessageElement::Text);
 
-        builder1.getMessage()->flags |= Message::Centered;
-        emoteChannel->addMessage(builder1.getMessage());
+        builder1->flags |= Message::Centered;
+        emoteChannel->addMessage(builder1.release());
 
         // EMOTES
         MessageBuilder builder2;
-        builder2.getMessage()->flags |= Message::Centered;
-        builder2.getMessage()->flags |= Message::DisableCompactEmotes;
+        builder2->flags |= Message::Centered;
+        builder2->flags |= Message::DisableCompactEmotes;
 
         for (auto emote : map) {
-            builder2.append(
-                (new EmoteElement(emote.second,
-                                  MessageElement::Flags::AlwaysShow))
-                    ->setLink(Link(Link::InsertText, emote.first.string)));
+            builder2
+                .emplace<EmoteElement>(emote.second,
+                                       MessageElement::Flags::AlwaysShow)
+                ->setLink(Link(Link::InsertText, emote.first.string));
         }
 
-        emoteChannel->addMessage(builder2.getMessage());
+        emoteChannel->addMessage(builder2.release());
     };
 
     auto app = getApp();
@@ -103,25 +103,25 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
             setText = set->text;
         }
 
-        builder1.append(new TextElement(setText, MessageElement::Text));
+        builder1.emplace<TextElement>(setText, MessageElement::Text);
 
-        builder1.getMessage()->flags |= Message::Centered;
-        emoteChannel->addMessage(builder1.getMessage());
+        builder1->flags |= Message::Centered;
+        emoteChannel->addMessage(builder1.release());
 
         // EMOTES
         MessageBuilder builder2;
-        builder2.getMessage()->flags |= Message::Centered;
-        builder2.getMessage()->flags |= Message::DisableCompactEmotes;
+        builder2->flags |= Message::Centered;
+        builder2->flags |= Message::DisableCompactEmotes;
 
         for (const auto &emote : set->emotes) {
-            builder2.append(
-                (new EmoteElement(
-                     app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
-                     MessageElement::Flags::AlwaysShow))
-                    ->setLink(Link(Link::InsertText, emote.name.string)));
+            builder2
+                .emplace<EmoteElement>(
+                    app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
+                    MessageElement::Flags::AlwaysShow)
+                ->setLink(Link(Link::InsertText, emote.name.string));
         }
 
-        emoteChannel->addMessage(builder2.getMessage());
+        emoteChannel->addMessage(builder2.release());
     }
 
     addEmotes(*app->emotes->bttv.accessGlobalEmotes(),
@@ -146,22 +146,23 @@ void EmotePopup::loadEmojis()
     // title
     MessageBuilder builder1;
 
-    builder1.append(new TextElement("emojis", MessageElement::Text));
-    builder1.getMessage()->flags |= Message::Centered;
-    emojiChannel->addMessage(builder1.getMessage());
+    builder1.emplace<TextElement>("emojis", MessageElement::Text);
+    builder1->flags |= Message::Centered;
+    emojiChannel->addMessage(builder1.release());
 
     // emojis
     MessageBuilder builder;
-    builder.getMessage()->flags |= Message::Centered;
-    builder.getMessage()->flags |= Message::DisableCompactEmotes;
+    builder->flags |= Message::Centered;
+    builder->flags |= Message::DisableCompactEmotes;
 
     emojis.each([&builder](const auto &key, const auto &value) {
-        builder.append(
-            (new EmoteElement(value->emote, MessageElement::Flags::AlwaysShow))
-                ->setLink(Link(Link::Type::InsertText,
-                               ":" + value->shortCodes[0] + ":")));
+        builder
+            .emplace<EmoteElement>(value->emote,
+                                   MessageElement::Flags::AlwaysShow)
+            ->setLink(
+                Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
     });
-    emojiChannel->addMessage(builder.getMessage());
+    emojiChannel->addMessage(builder.release());
 
     this->viewEmojis_->setChannel(emojiChannel);
 }

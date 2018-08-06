@@ -6,6 +6,7 @@
 #include "debug/Log.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QBuffer>

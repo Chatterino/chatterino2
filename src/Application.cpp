@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
@@ -130,7 +131,7 @@ void Application::initPubsub()
             QString text =
                 QString("%1 cleared the chat").arg(action.source.name);
 
-            auto msg = Message::createSystemMessage(text);
+            auto msg = makeSystemMessage(text);
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
@@ -154,7 +155,7 @@ void Application::initPubsub()
                             " seconds)");
             }
 
-            auto msg = Message::createSystemMessage(text);
+            auto msg = makeSystemMessage(text);
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
@@ -176,7 +177,7 @@ void Application::initPubsub()
                            .arg(action.source.name, action.target.name);
             }
 
-            auto msg = Message::createSystemMessage(text);
+            auto msg = makeSystemMessage(text);
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
@@ -189,10 +190,12 @@ void Application::initPubsub()
                 return;
             }
 
-            auto msg = Message::createTimeoutMessage(action);
+            MessageBuilder msg(action);
             msg->flags |= Message::PubSub;
 
-            postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
+            postToThread([chan, msg = msg.release()] {
+                chan->addOrReplaceTimeout(msg);
+            });
         });
 
     this->twitch.pubsub->signals_.moderation.userUnbanned.connect(
@@ -204,7 +207,7 @@ void Application::initPubsub()
                 return;
             }
 
-            auto msg = Message::createUntimeoutMessage(action);
+            auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] { chan->addMessage(msg); });
         });

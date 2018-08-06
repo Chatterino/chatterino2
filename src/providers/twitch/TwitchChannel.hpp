@@ -54,7 +54,7 @@ public:
     virtual void sendMessage(const QString &message) override;
 
     // Auto completion
-    void addRecentChatter(const std::shared_ptr<Message> &message) final;
+    void addRecentChatter(const MessagePtr &message) final;
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
 

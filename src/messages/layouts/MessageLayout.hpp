@@ -28,7 +28,7 @@ public:
     MessageLayout(MessagePtr message_);
     ~MessageLayout();
 
-    Message *getMessage();
+    const Message *getMessage();
 
     // Height
     int getHeight() const;

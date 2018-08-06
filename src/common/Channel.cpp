@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/WindowManager.hpp"
@@ -124,15 +125,15 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             int count = s->count + 1;
 
-            MessagePtr replacement(Message::createSystemMessage(
-                message->searchText + QString(" (") + QString::number(count) +
-                " times)"));
+            MessageBuilder replacement(systemMessage,
+                                       message->searchText + QString(" (") +
+                                           QString::number(count) + " times)");
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
             replacement->flags = message->flags;
 
-            this->replaceMessage(s, replacement);
+            this->replaceMessage(s, replacement.release());
 
             return;
         }
@@ -143,7 +144,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         auto &s = snapshot[i];
         if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
             s->loginName == message->timeoutUser) {
-            s->flags.EnableFlag(Message::Disabled);
+            // FOURTF: disabled for now
+            // s->flags.EnableFlag(Message::Disabled);
         }
     }
 
@@ -165,7 +167,8 @@ void Channel::disableAllMessages()
             continue;
         }
 
-        s->flags.EnableFlag(Message::Disabled);
+        // FOURTF: disabled for now
+        // s->flags.EnableFlag(Message::Disabled);
     }
 }
 
@@ -188,7 +191,7 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
-void Channel::addRecentChatter(const std::shared_ptr<Message> &message)
+void Channel::addRecentChatter(const MessagePtr &message)
 {
     // Do nothing by default
 }

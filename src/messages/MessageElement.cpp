@@ -7,6 +7,7 @@
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "singletons/Settings.hpp"
+#include "util/DebugCount.hpp"
 
 namespace chatterino {
 
