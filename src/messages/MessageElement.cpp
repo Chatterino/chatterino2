@@ -70,8 +70,8 @@ ImageElement::ImageElement(ImagePtr image, MessageElement::Flags flags)
 void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags)
 {
     if (flags & this->getFlags()) {
-        auto size = QSize(this->image_->getWidth() * container.getScale(),
-                          this->image_->getHeight() * container.getScale());
+        auto size = QSize(this->image_->width() * container.getScale(),
+                          this->image_->height() * container.getScale());
 
         container.addElement(
             (new ImageLayoutElement(*this, this->image_, size))->setLink(this->getLink()));
@@ -83,10 +83,7 @@ EmoteElement::EmoteElement(const EmotePtr &emote, MessageElement::Flags flags)
     : MessageElement(flags)
     , emote_(emote)
 {
-    auto image = emote->images.getImage1();
-    if (image->isValid()) {
-        this->textElement_.reset(new TextElement(emote->getCopyString(), MessageElement::Misc));
-    }
+    this->textElement_.reset(new TextElement(emote->getCopyString(), MessageElement::Misc));
 
     this->setTooltip(emote->tooltip.string);
 }
@@ -101,10 +98,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElem
     if (flags & this->getFlags()) {
         if (flags & MessageElement::EmoteImages) {
             auto image = this->emote_->images.getImage(container.getScale());
-            if (!image->isValid()) return;
+            if (image->empty()) return;
 
-            QSize size(int(container.getScale() * image->getWidth()),
-                       int(container.getScale() * image->getHeight()));
+            auto size = QSize(int(container.getScale() * image->width()),
+                              int(container.getScale() * image->height()));
 
             container.addElement(
                 (new ImageLayoutElement(*this, image, size))->setLink(this->getLink()));
@@ -123,7 +120,7 @@ TextElement::TextElement(const QString &text, MessageElement::Flags flags,
     , color_(color)
     , style_(style)
 {
-    for (QString word : text.split(' ')) {
+    for (const auto &word : text.split(' ')) {
         this->words_.push_back({word, -1});
         // fourtf: add logic to store multiple spaces after message
     }

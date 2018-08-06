@@ -230,9 +230,9 @@ void TwitchChannel::setRoomId(const QString &id)
     this->loadRecentMessages();
 }
 
-const AccessGuard<TwitchChannel::RoomModes> TwitchChannel::accessRoomModes() const
+AccessGuard<const TwitchChannel::RoomModes> TwitchChannel::accessRoomModes() const
 {
-    return this->roomModes_.access();
+    return this->roomModes_.accessConst();
 }
 
 void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
@@ -247,9 +247,9 @@ bool TwitchChannel::isLive() const
     return this->streamStatus_.access()->live;
 }
 
-const AccessGuard<TwitchChannel::StreamStatus> TwitchChannel::accessStreamStatus() const
+AccessGuard<const TwitchChannel::StreamStatus> TwitchChannel::accessStreamStatus() const
 {
-    return this->streamStatus_.access();
+    return this->streamStatus_.accessConst();
 }
 
 boost::optional<EmotePtr> TwitchChannel::getBttvEmote(const EmoteName &name) const

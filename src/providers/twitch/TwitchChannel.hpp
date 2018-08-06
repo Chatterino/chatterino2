@@ -66,9 +66,9 @@ public:
 
     QString getRoomId() const;
     void setRoomId(const QString &id);
-    const AccessGuard<RoomModes> accessRoomModes() const;
+    AccessGuard<const RoomModes> accessRoomModes() const;
     void setRoomModes(const RoomModes &roomModes_);
-    const AccessGuard<StreamStatus> accessStreamStatus() const;
+    AccessGuard<const StreamStatus> accessStreamStatus() const;
 
     boost::optional<EmotePtr> getBttvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> getFfzEmote(const EmoteName &name) const;

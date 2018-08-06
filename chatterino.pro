@@ -9,18 +9,13 @@ message(----)
 QT                += widgets core gui network multimedia svg
 CONFIG            += communi
 COMMUNI           += core model util
+CONFIG            += c++14
 INCLUDEPATH       += src/
 TARGET             = chatterino
 TEMPLATE           = app
 DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
-
-win32-msvc* {
-    QMAKE_CXXFLAGS = /std=c++17
-} else {
-    QMAKE_CXXFLAGS = -std=c++17
-}
 
 debug {
     DEFINES += QT_DEBUG

@@ -12,6 +12,41 @@
 #include "common/NullablePtr.hpp"
 
 namespace chatterino {
+namespace {
+class Frame
+{
+public:
+    explicit Frame(const QPixmap *nonOwning, int duration = 1);
+    explicit Frame(std::unique_ptr<QPixmap> owning, int duration = 1);
+
+    const QPixmap *pixmap() const;
+    int duration() const;
+
+private:
+    const QPixmap *nonOwning_{nullptr};
+    std::unique_ptr<QPixmap> owning_{};
+    int duration_{};
+};
+class Frames
+{
+public:
+    Frames();
+    Frames(std::vector<Frame> &&frames);
+    ~Frames();
+    Frames(Frames &&other) = default;
+    Frames &operator=(Frames &&other) = default;
+
+    bool animated() const;
+    void advance();
+    const QPixmap *current() const;
+    const QPixmap *first() const;
+
+private:
+    std::vector<Frame> items_;
+    int index_{0};
+    int timeOffset_{0};
+};
+}  // namespace
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
@@ -24,62 +59,31 @@ public:
     static ImagePtr fromNonOwningPixmap(QPixmap *pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
-    const Url &getUrl() const;
-    NullablePtr<const QPixmap> getPixmap() const;
-    qreal getScale() const;
-    bool isAnimated() const;
-    int getWidth() const;
-    int getHeight() const;
-    bool isLoaded() const;
-    bool isError() const;
-    bool isValid() const;
-    bool isNull() const;
+    const Url &url() const;
+    const QPixmap *pixmap() const;
+    qreal scale() const;
+    bool empty() const;
+    int width() const;
+    int height() const;
+    bool animated() const;
 
     bool operator==(const Image &image) const;
     bool operator!=(const Image &image) const;
 
 private:
-    class Frame
-    {
-    public:
-        QPixmap *getPixmap() const;
-        int getDuration() const;
-
-        Frame(QPixmap *nonOwning, int duration = 1);
-        Frame(std::unique_ptr<QPixmap> nonOwning, int duration = 1);
-
-    private:
-        QPixmap *nonOwning_;
-        std::unique_ptr<QPixmap> owning_;
-        int duration_;
-    };
-
     Image();
     Image(const Url &url, qreal scale);
     Image(std::unique_ptr<QPixmap> owning, qreal scale);
     Image(QPixmap *nonOwning, qreal scale);
 
     void load();
-    Outcome parse(const QByteArray &data);
-    std::vector<Frame> readFrames(QImageReader &reader);
-    Outcome setFrames(std::vector<Frame> frames);
-    void updateAnimation();
-    void queueLoadedEvent();
 
-    Url url_;
-    bool isLoaded_{false};
-    bool isLoading_{false};
-    bool isAnimated_{false};
-    bool isError_{false};
-    bool isNull_ = false;
-    qreal scale_ = 1;
-    QObject object_;
-
-    std::vector<Frame> frames_;
-    std::mutex framesMutex_;
-    NullablePtr<QPixmap> currentFramePixmap_;
-    int currentFrameIndex_ = 0;
-    int currentFrameOffset_ = 0;
+    Url url_{};
+    qreal scale_{1};
+    bool empty_{false};
+    bool shouldLoad_{false};
+    Frames frames_{};
+    QObject object_{};
 
     static std::atomic<bool> loadedEventQueued;
 };

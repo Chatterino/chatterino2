@@ -25,7 +25,7 @@ public:
         return element_;
     }
 
-    typename std::add_lvalue_reference<T>::type &operator*() const
+    typename std::add_lvalue_reference<T>::type operator*() const
     {
         assert(this->hasElement());
 

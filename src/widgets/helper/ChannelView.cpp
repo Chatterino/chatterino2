@@ -50,11 +50,11 @@ void addEmoteContextMenuItems(const Emote &emote, MessageElement::Flags creatorF
 
     // Add copy and open links for 1x, 2x, 3x
     auto addImageLink = [&](const ImagePtr &image, char scale) {
-        if (image->isValid()) {
-            copyMenu->addAction(QString(scale) + "x link", [url = image->getUrl()] {
+        if (!image->empty()) {
+            copyMenu->addAction(QString(scale) + "x link", [url = image->url()] {
                 QApplication::clipboard()->setText(url.string);
             });
-            openMenu->addAction(QString(scale) + "x link", [url = image->getUrl()] {
+            openMenu->addAction(QString(scale) + "x link", [url = image->url()] {
                 QDesktopServices::openUrl(QUrl(url.string));
             });
         }

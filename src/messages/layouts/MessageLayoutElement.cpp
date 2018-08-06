@@ -91,8 +91,8 @@ void ImageLayoutElement::paint(QPainter &painter)
         return;
     }
 
-    auto pixmap = this->image_->getPixmap();
-    if (pixmap && !this->image_->isAnimated()) {
+    auto pixmap = this->image_->pixmap();
+    if (pixmap && !this->image_->animated()) {
         // fourtf: make it use qreal values
         painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
     }
@@ -104,8 +104,8 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
         return;
     }
 
-    if (this->image_->isAnimated()) {
-        if (auto pixmap = this->image_->getPixmap()) {
+    if (this->image_->animated()) {
+        if (auto pixmap = this->image_->pixmap()) {
             auto rect = this->getRect();
             rect.moveTop(rect.y() + yOffset);
             painter.drawPixmap(QRectF(rect), *pixmap, QRectF());

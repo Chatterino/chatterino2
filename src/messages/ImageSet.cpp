@@ -70,11 +70,11 @@ const ImagePtr &ImageSet::getImage(float scale) const
             scale = 1;
     }
 
-    if (this->imageX3_->isValid() && quality == 3) {
+    if (!this->imageX3_->empty() && quality == 3) {
         return this->imageX3_;
     }
 
-    if (this->imageX2_->isValid() && quality == 2) {
+    if (!this->imageX2_->empty() && quality == 2) {
         return this->imageX3_;
     }
 

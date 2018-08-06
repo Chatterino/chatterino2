@@ -37,12 +37,4 @@ std::weak_ptr<T> weakOf(T *element)
     return element->shared_from_this();
 }
 
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-
-template <class... Ts>
-overloaded(Ts...)->overloaded<Ts...>;
-
 }  // namespace chatterino
