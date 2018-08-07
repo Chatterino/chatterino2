@@ -444,12 +444,13 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
                 return;
             }
 
-            EmoteName code;
-            if (!rj::getSafe(emoteJSON, "code", code)) {
+            QString _code;
+            if (!rj::getSafe(emoteJSON, "code", _code)) {
                 Log("No code key found in Emote value");
                 return;
             }
 
+            auto code = EmoteName{_code};
             auto id = EmoteId{QString::number(idNumber)};
 
             auto cleanCode = cleanUpCode(code);
