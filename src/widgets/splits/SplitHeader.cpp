@@ -13,6 +13,7 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QByteArray>
+#include <QDesktopWidget>
 #include <QDrag>
 #include <QInputDialog>
 #include <QMimeData>
@@ -85,12 +86,33 @@ SplitHeader::SplitHeader(Split *_split)
         //        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
-        QObject::connect(dropdown.getElement(),
-                         &RippleEffectButton::leftMousePress, this, [this] {
-                             QTimer::singleShot(80, [&, this] {
-                                 this->dropdownMenu_.popup(QCursor::pos());
-                             });
-                         });
+        QObject::connect(
+            dropdown.getElement(), &RippleEffectButton::leftMousePress, this,
+            [this] {
+                QTimer::singleShot(80, this, [this] {
+                    auto point = [this] {
+                        auto bounds =
+                            QApplication::desktop()->availableGeometry(this);
+
+                        auto point = this->dropdownButton_->mapToGlobal(
+                            QPoint(this->dropdownButton_->width() -
+                                       this->dropdownMenu_.width(),
+                                   this->dropdownButton_->height()));
+
+                        if (point.y() + this->dropdownMenu_.height() >
+                            bounds.bottom()) {
+                            point.setY(point.y() -
+                                       this->dropdownMenu_.height() -
+                                       this->dropdownButton_->height());
+                        }
+
+                        return point;
+                    };
+
+                    this->dropdownMenu_.popup(point());
+                    this->dropdownMenu_.move(point());
+                });
+            });
     }
 
     // ---- misc
