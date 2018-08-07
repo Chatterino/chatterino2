@@ -191,7 +191,7 @@ void Application::initPubsub()
             }
 
             MessageBuilder msg(action);
-            msg->flags |= Message::PubSub;
+            msg->flags.set(MessageFlag::PubSub);
 
             postToThread([chan, msg = msg.release()] {
                 chan->addOrReplaceTimeout(msg);

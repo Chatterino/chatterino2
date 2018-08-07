@@ -21,9 +21,9 @@ Message::~Message()
 
 SBHighlight Message::getScrollBarHighlight() const
 {
-    if (this->flags & Message::Highlighted) {
+    if (this->flags.has(MessageFlag::Highlighted)) {
         return SBHighlight(SBHighlight::Highlight);
-    } else if (this->flags & Message::Subscription) {
+    } else if (this->flags.has(MessageFlag::Subscription)) {
         return SBHighlight(SBHighlight::Subscription);
     }
     return SBHighlight();

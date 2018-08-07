@@ -185,7 +185,7 @@ void TwitchChannel::addJoinedUser(const QString &user)
 
             MessageBuilder builder(systemMessage,
                                    "Users joined: " + joinedUsers->join(", "));
-            builder->flags |= Message::Collapsed;
+            builder->flags.set(MessageFlag::Collapsed);
             joinedUsers->clear();
             this->addMessage(builder.release());
             this->joinedUsersMergeQueued_ = false;
@@ -213,7 +213,7 @@ void TwitchChannel::addPartedUser(const QString &user)
 
             MessageBuilder builder(systemMessage,
                                    "Users parted: " + partedUsers->join(", "));
-            builder->flags |= Message::Collapsed;
+            builder->flags.set(MessageFlag::Collapsed);
             this->addMessage(builder.release());
             partedUsers->clear();
 

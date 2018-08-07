@@ -34,7 +34,7 @@
 namespace chatterino {
 namespace {
 void addEmoteContextMenuItems(const Emote &emote,
-                              MessageElement::Flags creatorFlags, QMenu &menu)
+                              MessageElementFlags creatorFlags, QMenu &menu)
 {
     auto openAction = menu.addAction("Open");
     auto openMenu = new QMenu;
@@ -83,9 +83,9 @@ void addEmoteContextMenuItems(const Emote &emote,
                             });
     };
 
-    if (creatorFlags & MessageElement::Flags::BttvEmote) {
+    if (creatorFlags.has(MessageElementFlag::BttvEmote)) {
         addPageLink("BTTV");
-    } else if (creatorFlags & MessageElement::Flags::FfzEmote) {
+    } else if (creatorFlags.has(MessageElementFlag::FfzEmote)) {
         addPageLink("FFZ");
     }
 }
@@ -252,7 +252,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     size_t start = size_t(this->scrollBar_.getCurrentValue());
     int layoutWidth = this->getLayoutWidth();
 
-    MessageElement::Flags flags = this->getFlags();
+    MessageElementFlags flags = this->getFlags();
 
     // layout the visible messages in the view
     if (messagesSnapshot.getLength() > start) {
@@ -387,12 +387,12 @@ bool ChannelView::getEnableScrollingToBottom() const
     return this->enableScrollingToBottom_;
 }
 
-void ChannelView::setOverrideFlags(boost::optional<MessageElement::Flags> value)
+void ChannelView::setOverrideFlags(boost::optional<MessageElementFlags> value)
 {
     this->overrideFlags_ = value;
 }
 
-const boost::optional<MessageElement::Flags> &ChannelView::getOverrideFlags()
+const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
     const
 {
     return this->overrideFlags_;
@@ -423,7 +423,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             auto messageRef = new MessageLayout(message);
 
             if (this->lastMessageHasAlternateBackground_) {
-                messageRef->flags |= MessageLayout::AlternateBackground;
+                messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
             }
             this->lastMessageHasAlternateBackground_ =
                 !this->lastMessageHasAlternateBackground_;
@@ -443,8 +443,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 //                }
             }
 
-            if (!(message->flags & Message::DoNotTriggerNotification)) {
-                if (message->flags & Message::Highlighted) {
+            if (!message->flags.has(MessageFlag::DoNotTriggerNotification)) {
+                if (message->flags.has(MessageFlag::Highlighted)) {
                     this->tabHighlightRequested.invoke(
                         HighlightState::Highlighted);
                 } else {
@@ -521,8 +521,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             }
 
             const auto &message = snapshot[index];
-            if (message->flags & MessageLayout::AlternateBackground) {
-                newItem->flags |= MessageLayout::AlternateBackground;
+            if (message->flags.has(MessageLayoutFlag::AlternateBackground)) {
+                newItem->flags.set(MessageLayoutFlag::AlternateBackground);
             }
 
             this->scrollBar_.replaceHighlight(
@@ -540,7 +540,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
         auto messageRef = new MessageLayout(snapshot[i]);
 
         if (this->lastMessageHasAlternateBackground_) {
-            messageRef->flags |= MessageLayout::AlternateBackground;
+            messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
         }
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
@@ -613,7 +613,7 @@ void ChannelView::setSelection(const SelectionItem &start,
     this->selectionChanged.invoke();
 }
 
-MessageElement::Flags ChannelView::getFlags() const
+MessageElementFlags ChannelView::getFlags() const
 {
     auto app = getApp();
 
@@ -621,17 +621,16 @@ MessageElement::Flags ChannelView::getFlags() const
         return this->overrideFlags_.get();
     }
 
-    MessageElement::Flags flags = app->windows->getWordFlags();
+    MessageElementFlags flags = app->windows->getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 
     if (split != nullptr) {
         if (split->getModerationMode()) {
-            flags =
-                MessageElement::Flags(flags | MessageElement::ModeratorTools);
+            flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->channel_ == app->twitch.server->mentionsChannel) {
-            flags = MessageElement::Flags(flags | MessageElement::ChannelName);
+            flags.set(MessageElementFlag::ChannelName);
         }
     }
 
@@ -870,7 +869,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
+    if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
         this->setCursor(Qt::PointingHandCursor);
         tooltipWidget->hide();
         return;
@@ -941,7 +940,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             this->lastPressPosition_ = event->screenPos();
             this->isMouseDown_ = true;
 
-            if (layout->flags & MessageLayout::Collapsed) {
+            if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
                 return;
             }
 
@@ -1010,9 +1009,9 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // message under cursor is collapsed
-    if (layout->flags & MessageLayout::Collapsed) {
-        layout->flags |= MessageLayout::Expanded;
-        layout->flags |= MessageLayout::RequiresLayout;
+    if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
+        layout->flags.set(MessageLayoutFlag::Expanded);
+        layout->flags.set(MessageLayoutFlag::RequiresLayout);
 
         this->layoutMessages();
         return;
@@ -1081,8 +1080,8 @@ void ChannelView::addContextMenuItems(
     menu->clear();
 
     // Emote actions
-    if (creatorFlags & (MessageElement::Flags::EmoteImages |
-                        MessageElement::Flags::EmojiImage)) {
+    if (creatorFlags.hasAny({MessageElementFlag::EmoteImages,
+                             MessageElementFlag::EmojiImage})) {
         const auto emoteElement = dynamic_cast<const EmoteElement *>(&creator);
         if (emoteElement)
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
@@ -1147,7 +1146,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         }
 
         // message under cursor is collapsed
-        if (layout->flags & MessageLayout::Collapsed) {
+        if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
             return;
         }
 

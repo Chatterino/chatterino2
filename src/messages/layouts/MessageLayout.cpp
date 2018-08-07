@@ -46,7 +46,7 @@ int MessageLayout::getHeight() const
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
+bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
@@ -62,7 +62,7 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     // check if layout state changed
     if (this->layoutState_ != app->windows->getGeneration()) {
         layoutRequired = true;
-        this->flags |= RequiresBufferUpdate;
+        this->flags.set(MessageLayoutFlag::RequiresBufferUpdate);
         this->layoutState_ = app->windows->getGeneration();
     }
 
@@ -71,8 +71,8 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     this->currentWordFlags_ = flags;  // app->settings->getWordTypeMask();
 
     // check if layout was requested manually
-    layoutRequired |= bool(this->flags & RequiresLayout);
-    this->flags &= decltype(RequiresLayout)(~RequiresLayout);
+    layoutRequired |= this->flags.has(MessageLayoutFlag::RequiresLayout);
+    this->flags.unset(MessageLayoutFlag::RequiresLayout);
 
     // check if dpi changed
     layoutRequired |= this->scale_ != scale;
@@ -92,15 +92,15 @@ bool MessageLayout::layout(int width, float scale, MessageElement::Flags flags)
     return true;
 }
 
-void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
+void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
 {
-    auto messageFlags = this->message_->flags.value;
+    auto messageFlags = this->message_->flags;
 
-    if (this->flags & MessageLayout::Expanded ||
-        (_flags & MessageElement::ModeratorTools &&
-         !(this->message_->flags & Message::MessageFlags::Disabled))) {
-        messageFlags = Message::MessageFlags(messageFlags &
-                                             ~Message::MessageFlags::Collapsed);
+    if (this->flags.has(MessageLayoutFlag::Expanded) ||
+        (_flags.has(MessageElementFlag::ModeratorTools) &&
+         !this->message_->flags.has(MessageFlag::Disabled)))  //
+    {
+        messageFlags.unset(MessageFlag::Collapsed);
     }
 
     this->container_.begin(width, this->scale_, messageFlags);
@@ -117,9 +117,9 @@ void MessageLayout::actuallyLayout(int width, MessageElement::Flags _flags)
     this->height_ = this->container_.getHeight();
 
     // collapsed state
-    this->flags &= ~Flags::Collapsed;
+    this->flags.unset(MessageLayoutFlag::Collapsed);
     if (this->container_.isCollapsed()) {
-        this->flags |= Flags::Collapsed;
+        this->flags.set(MessageLayoutFlag::Collapsed);
     }
 }
 
@@ -160,7 +160,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     this->container_.paintAnimatedElements(painter, y);
 
     // draw disabled
-    if (this->message_->flags.HasFlag(Message::Disabled)) {
+    if (this->message_->flags.has(MessageFlag::Disabled)) {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(),
                          app->themes->messages.disabled);
     }
@@ -204,12 +204,12 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw background
     QColor backgroundColor;
-    if (this->message_->flags & Message::Highlighted) {
+    if (this->message_->flags.has(MessageFlag::Highlighted)) {
         backgroundColor = app->themes->messages.backgrounds.highlighted;
-    } else if (this->message_->flags & Message::Subscription) {
+    } else if (this->message_->flags.has(MessageFlag::Subscription)) {
         backgroundColor = app->themes->messages.backgrounds.subscription;
     } else if (app->settings->alternateMessageBackground.getValue() &&
-               this->flags & MessageLayout::AlternateBackground) {
+               this->flags.has(MessageLayoutFlag::AlternateBackground)) {
         backgroundColor = app->themes->messages.backgrounds.alternate;
     } else {
         backgroundColor = app->themes->messages.backgrounds.regular;

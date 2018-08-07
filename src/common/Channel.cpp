@@ -104,21 +104,24 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             break;
         }
 
-        if (s->flags.HasFlag(Message::Untimeout) &&
+        if (s->flags.has(MessageFlag::Untimeout) &&
             s->timeoutUser == message->timeoutUser) {
             break;
         }
 
-        if (s->flags.HasFlag(Message::Timeout) &&
-            s->timeoutUser == message->timeoutUser) {
-            if (message->flags.HasFlag(Message::PubSub) &&
-                !s->flags.HasFlag(Message::PubSub)) {
+        if (s->flags.has(MessageFlag::Timeout) &&
+            s->timeoutUser == message->timeoutUser)  //
+        {
+            if (message->flags.has(MessageFlag::PubSub) &&
+                !s->flags.has(MessageFlag::PubSub))  //
+            {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
-            if (!message->flags.HasFlag(Message::PubSub) &&
-                s->flags.HasFlag(Message::PubSub)) {
+            if (!message->flags.has(MessageFlag::PubSub) &&
+                s->flags.has(MessageFlag::PubSub))  //
+            {
                 addMessage = false;
                 break;
             }
@@ -142,10 +145,10 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     // disable the messages from the user
     for (int i = 0; i < snapshotLength; i++) {
         auto &s = snapshot[i];
-        if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
+        if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
             s->loginName == message->timeoutUser) {
             // FOURTF: disabled for now
-            // s->flags.EnableFlag(Message::Disabled);
+            // s->flags.EnableFlag(MessageFlag::Disabled);
         }
     }
 
@@ -163,12 +166,12 @@ void Channel::disableAllMessages()
     int snapshotLength = snapshot.getLength();
     for (int i = 0; i < snapshotLength; i++) {
         auto &s = snapshot[i];
-        if (s->flags & Message::System || s->flags & Message::Timeout) {
+        if (s->flags.hasAny({MessageFlag::System, MessageFlag::Timeout})) {
             continue;
         }
 
         // FOURTF: disabled for now
-        // s->flags.EnableFlag(Message::Disabled);
+        // s->flags.EnableFlag(MessageFlag::Disabled);
     }
 }
 

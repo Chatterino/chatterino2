@@ -173,11 +173,11 @@ void LogsPopup::getOverrustleLogs()
                 MessageBuilder builder;
                 builder.emplace<TimestampElement>(timeStamp);
                 builder.emplace<TextElement>(this->userName_,
-                                             MessageElement::Username,
+                                             MessageElementFlag::Username,
                                              MessageColor::System);
                 builder.emplace<TextElement>(
                     singleMessage.value("text").toString(),
-                    MessageElement::Text, MessageColor::Text);
+                    MessageElementFlag::Text, MessageColor::Text);
                 messages.push_back(builder.release());
             }
         }

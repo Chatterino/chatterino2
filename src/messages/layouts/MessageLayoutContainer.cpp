@@ -30,8 +30,7 @@ float MessageLayoutContainer::getScale() const
 }
 
 // methods
-void MessageLayoutContainer::begin(int width, float scale,
-                                   Message::MessageFlags flags)
+void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
 {
     this->clear();
     this->width_ = width;
@@ -97,8 +96,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     // compact emote offset
     bool isCompactEmote =
-        !(this->flags_ & Message::DisableCompactEmotes) &&
-        element->getCreator().getFlags() & MessageElement::EmoteImages;
+        !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
+        element->getCreator().getFlags().has(MessageElementFlag::EmoteImages);
 
     if (isCompactEmote) {
         newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
@@ -126,7 +125,7 @@ void MessageLayoutContainer::breakLine()
 {
     int xOffset = 0;
 
-    if (this->flags_ & Message::Centered && this->elements_.size() > 0) {
+    if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0) {
         xOffset = (width_ - this->elements_.at(this->elements_.size() - 1)
                                 ->getRect()
                                 .right()) /
@@ -137,15 +136,17 @@ void MessageLayoutContainer::breakLine()
         MessageLayoutElement *element = this->elements_.at(i).get();
 
         bool isCompactEmote =
-            !(this->flags_ & Message::DisableCompactEmotes) &&
-            element->getCreator().getFlags() & MessageElement::EmoteImages;
+            !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
+            element->getCreator().getFlags().has(
+                MessageElementFlag::EmoteImages);
 
         int yExtra = 0;
         if (isCompactEmote) {
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
         }
 
-        //        if (element->getCreator().getFlags() & MessageElement::Badges)
+        //        if (element->getCreator().getFlags() &
+        //        MessageElementFlag::Badges)
         //        {
         if (element->getRect().height() < this->textLineHeight_) {
             yExtra -= (this->textLineHeight_ - element->getRect().height()) / 2;
@@ -199,7 +200,7 @@ bool MessageLayoutContainer::fitsInLine(int _width)
 void MessageLayoutContainer::end()
 {
     if (!this->canAddElements()) {
-        static TextElement dotdotdot("...", MessageElement::Collapsed,
+        static TextElement dotdotdot("...", MessageElementFlag::Collapsed,
                                      MessageColor::Link);
         static QString dotdotdotText("...");
 
@@ -230,7 +231,7 @@ void MessageLayoutContainer::end()
 bool MessageLayoutContainer::canCollapse()
 {
     return getApp()->settings->collpseMessagesMinLines.getValue() > 0 &&
-           this->flags_ & Message::MessageFlags::Collapsed;
+           this->flags_.has(MessageFlag::Collapsed);
 }
 
 bool MessageLayoutContainer::isCollapsed()

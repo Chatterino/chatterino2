@@ -18,12 +18,12 @@ EmotePopup::EmotePopup()
     this->viewEmotes_ = new ChannelView();
     this->viewEmojis_ = new ChannelView();
 
-    this->viewEmotes_->setOverrideFlags(MessageElement::Flags(
-        MessageElement::Default | MessageElement::AlwaysShow |
-        MessageElement::EmoteImages));
-    this->viewEmojis_->setOverrideFlags(MessageElement::Flags(
-        MessageElement::Default | MessageElement::AlwaysShow |
-        MessageElement::EmoteImages));
+    this->viewEmotes_->setOverrideFlags(MessageElementFlags{
+        MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
+        MessageElementFlag::EmoteImages});
+    this->viewEmojis_->setOverrideFlags(MessageElementFlags{
+        MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
+        MessageElementFlag::EmoteImages});
 
     this->viewEmotes_->setEnableScrollingToBottom(false);
     this->viewEmojis_->setEnableScrollingToBottom(false);
@@ -63,20 +63,20 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         // TITLE
         MessageBuilder builder1;
 
-        builder1.emplace<TextElement>(title, MessageElement::Text);
+        builder1.emplace<TextElement>(title, MessageElementFlag::Text);
 
-        builder1->flags |= Message::Centered;
+        builder1->flags.set(MessageFlag::Centered);
         emoteChannel->addMessage(builder1.release());
 
         // EMOTES
         MessageBuilder builder2;
-        builder2->flags |= Message::Centered;
-        builder2->flags |= Message::DisableCompactEmotes;
+        builder2->flags.set(MessageFlag::Centered);
+        builder2->flags.set(MessageFlag::DisableCompactEmotes);
 
         for (auto emote : map) {
             builder2
                 .emplace<EmoteElement>(emote.second,
-                                       MessageElement::Flags::AlwaysShow)
+                                       MessageElementFlag::AlwaysShow)
                 ->setLink(Link(Link::InsertText, emote.first.string));
         }
 
@@ -103,21 +103,21 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
             setText = set->text;
         }
 
-        builder1.emplace<TextElement>(setText, MessageElement::Text);
+        builder1.emplace<TextElement>(setText, MessageElementFlag::Text);
 
-        builder1->flags |= Message::Centered;
+        builder1->flags.set(MessageFlag::Centered);
         emoteChannel->addMessage(builder1.release());
 
         // EMOTES
         MessageBuilder builder2;
-        builder2->flags |= Message::Centered;
-        builder2->flags |= Message::DisableCompactEmotes;
+        builder2->flags.set(MessageFlag::Centered);
+        builder2->flags.set(MessageFlag::DisableCompactEmotes);
 
         for (const auto &emote : set->emotes) {
             builder2
                 .emplace<EmoteElement>(
                     app->emotes->twitch.getOrCreateEmote(emote.id, emote.name),
-                    MessageElement::Flags::AlwaysShow)
+                    MessageElementFlag::AlwaysShow)
                 ->setLink(Link(Link::InsertText, emote.name.string));
         }
 
@@ -146,19 +146,18 @@ void EmotePopup::loadEmojis()
     // title
     MessageBuilder builder1;
 
-    builder1.emplace<TextElement>("emojis", MessageElement::Text);
-    builder1->flags |= Message::Centered;
+    builder1.emplace<TextElement>("emojis", MessageElementFlag::Text);
+    builder1->flags.set(MessageFlag::Centered);
     emojiChannel->addMessage(builder1.release());
 
     // emojis
     MessageBuilder builder;
-    builder->flags |= Message::Centered;
-    builder->flags |= Message::DisableCompactEmotes;
+    builder->flags.set(MessageFlag::Centered);
+    builder->flags.set(MessageFlag::DisableCompactEmotes);
 
     emojis.each([&builder](const auto &key, const auto &value) {
         builder
-            .emplace<EmoteElement>(value->emote,
-                                   MessageElement::Flags::AlwaysShow)
+            .emplace<EmoteElement>(value->emote, MessageElementFlag::AlwaysShow)
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
     });

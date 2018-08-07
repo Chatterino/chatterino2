@@ -202,8 +202,8 @@ void AbstractIrcServer::onConnected()
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
         bool replaceMessage = snapshot.getLength() > 0 &&
-                              snapshot[snapshot.getLength() - 1]->flags &
-                                  Message::DisconnectedMessage;
+                              snapshot[snapshot.getLength() - 1]->flags.has(
+                                  MessageFlag::DisconnectedMessage);
 
         if (replaceMessage) {
             chan->replaceMessage(snapshot[snapshot.getLength() - 1],
@@ -220,7 +220,7 @@ void AbstractIrcServer::onDisconnected()
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     MessageBuilder b(systemMessage, "disconnected from chat");
-    b->flags |= Message::DisconnectedMessage;
+    b->flags.set(MessageFlag::DisconnectedMessage);
     auto disconnected = b.release();
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {

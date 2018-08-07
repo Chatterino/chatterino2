@@ -61,11 +61,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 
     if (isSub || !builder.isIgnored()) {
         if (isSub) {
-            builder->flags |= Message::Subscription;
-            builder->flags &= ~Message::Highlighted;
+            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.unset(MessageFlag::Highlighted);
         }
 
-        auto highlighted = bool(builder->flags & Message::Highlighted);
+        auto highlighted = builder->flags.has(MessageFlag::Highlighted);
         auto msg = builder.build();
 
         if (!isSub) {
@@ -224,13 +224,11 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         MessagePtr _message = builder.build();
 
-        if (_message->flags & Message::Highlighted) {
+        if (_message->flags.has(MessageFlag::Highlighted)) {
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
         c->addMessage(_message);
-
-        // _message->flags |= Message::DoNotTriggerNotification;
 
         if (app->settings->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
@@ -269,7 +267,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         auto b = MessageBuilder(systemMessage,
                                 parseTagString(it.value().toString()));
 
-        b->flags |= Message::Subscription;
+        b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
 
         QString channelName;

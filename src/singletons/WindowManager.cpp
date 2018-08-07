@@ -74,53 +74,54 @@ WindowManager::WindowManager()
     };
 }
 
-MessageElement::Flags WindowManager::getWordFlags()
+MessageElementFlags WindowManager::getWordFlags()
 {
     return this->wordFlags_;
 }
 
 void WindowManager::updateWordTypeMask()
 {
-    using MEF = MessageElement::Flags;
+    using MEF = MessageElementFlag;
     auto settings = getSettings();
 
     // text
-    auto flags = MEF::Text | MEF::Text;
+    auto flags = MessageElementFlags(MEF::Text);
 
     // timestamp
     if (settings->showTimestamps) {
-        flags |= MEF::Timestamp;
+        flags.set(MEF::Timestamp);
     }
 
     // emotes
-    flags |= settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
-                                          : MEF::TwitchEmoteText;
-    flags |= settings->enableFfzEmotes ? MEF::FfzEmoteImage : MEF::FfzEmoteText;
-    flags |=
-        settings->enableBttvEmotes ? MEF::BttvEmoteImage : MEF::BttvEmoteText;
-    flags |= settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText;
+    flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
+                                           : MEF::TwitchEmoteText);
+    flags.set(settings->enableFfzEmotes ? MEF::FfzEmoteImage
+                                        : MEF::FfzEmoteText);
+    flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
+                                         : MEF::BttvEmoteText);
+    flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
 
     // bits
-    flags |= MEF::BitsAmount;
-    flags |=
-        settings->enableGifAnimations ? MEF::BitsAnimated : MEF::BitsStatic;
+    flags.set(MEF::BitsAmount);
+    flags.set(settings->enableGifAnimations ? MEF::BitsAnimated
+                                            : MEF::BitsStatic);
 
     // badges
-    flags |= settings->showBadges ? MEF::Badges : MEF::None;
+    flags.set(settings->showBadges ? MEF::Badges : MEF::None);
 
     // username
-    flags |= MEF::Username;
+    flags.set(MEF::Username);
 
     // misc
-    flags |= MEF::AlwaysShow;
-    flags |= MEF::Collapsed;
-    flags |=
-        settings->enableUsernameBold ? MEF::BoldUsername : MEF::NonBoldUsername;
-    flags |=
-        settings->enableLowercaseLink ? MEF::LowercaseLink : MEF::OriginalLink;
+    flags.set(MEF::AlwaysShow);
+    flags.set(MEF::Collapsed);
+    flags.set(settings->enableUsernameBold ? MEF::BoldUsername
+                                           : MEF::NonBoldUsername);
+    flags.set(settings->enableLowercaseLink ? MEF::LowercaseLink
+                                            : MEF::OriginalLink);
 
     // update flags
-    MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);
+    MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
 
     if (newFlags != this->wordFlags_) {
         this->wordFlags_ = newFlags;

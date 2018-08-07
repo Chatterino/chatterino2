@@ -36,8 +36,8 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<MessageElement::Flags> value);
-    const boost::optional<MessageElement::Flags> &getOverrideFlags() const;
+    void setOverrideFlags(boost::optional<MessageElementFlags> value);
+    const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
@@ -83,7 +83,7 @@ private:
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElement::Flags getFlags() const;
+    MessageElementFlags getFlags() const;
     bool isPaused();
 
     void handleMouseClick(QMouseEvent *event,
@@ -107,7 +107,7 @@ private:
     int messagesAddedSinceSelectionPause_ = 0;
 
     QTimer pauseTimeout_;
-    boost::optional<MessageElement::Flags> overrideFlags_;
+    boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;

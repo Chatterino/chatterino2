@@ -11,7 +11,7 @@
 
 namespace chatterino {
 
-MessageElement::MessageElement(Flags flags)
+MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
     DebugCount::increase("message elements");
@@ -55,13 +55,13 @@ bool MessageElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-MessageElement::Flags MessageElement::getFlags() const
+MessageElementFlags MessageElement::getFlags() const
 {
     return this->flags_;
 }
 
 // IMAGE
-ImageElement::ImageElement(ImagePtr image, MessageElement::Flags flags)
+ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
     , image_(image)
 {
@@ -69,9 +69,9 @@ ImageElement::ImageElement(ImagePtr image, MessageElement::Flags flags)
 }
 
 void ImageElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElement::Flags flags)
+                                  MessageElementFlags flags)
 {
-    if (flags & this->getFlags()) {
+    if (flags.hasAny(this->getFlags())) {
         auto size = QSize(this->image_->width() * container.getScale(),
                           this->image_->height() * container.getScale());
 
@@ -81,12 +81,12 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
 }
 
 // EMOTE
-EmoteElement::EmoteElement(const EmotePtr &emote, MessageElement::Flags flags)
+EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
     , emote_(emote)
 {
     this->textElement_.reset(
-        new TextElement(emote->getCopyString(), MessageElement::Misc));
+        new TextElement(emote->getCopyString(), MessageElementFlag::Misc));
 
     this->setTooltip(emote->tooltip.string);
 }
@@ -97,10 +97,10 @@ EmotePtr EmoteElement::getEmote() const
 }
 
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
-                                  MessageElement::Flags flags)
+                                  MessageElementFlags flags)
 {
-    if (flags & this->getFlags()) {
-        if (flags & MessageElement::EmoteImages) {
+    if (flags.hasAny(this->getFlags())) {
+        if (flags.has(MessageElementFlag::EmoteImages)) {
             auto image = this->emote_->images.getImage(container.getScale());
             if (image->empty()) return;
 
@@ -112,14 +112,14 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
         } else {
             if (this->textElement_) {
                 this->textElement_->addToContainer(container,
-                                                   MessageElement::Misc);
+                                                   MessageElementFlag::Misc);
             }
         }
     }
 }
 
 // TEXT
-TextElement::TextElement(const QString &text, MessageElement::Flags flags,
+TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
     : MessageElement(flags)
     , color_(color)
@@ -132,11 +132,11 @@ TextElement::TextElement(const QString &text, MessageElement::Flags flags,
 }
 
 void TextElement::addToContainer(MessageLayoutContainer &container,
-                                 MessageElement::Flags flags)
+                                 MessageElementFlags flags)
 {
     auto app = getApp();
 
-    if (flags & this->getFlags()) {
+    if (flags.hasAny(this->getFlags())) {
         QFontMetrics metrics =
             app->fonts->getFontMetrics(this->style_, container.getScale());
 
@@ -212,7 +212,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
-    : MessageElement(MessageElement::Timestamp)
+    : MessageElement(MessageElementFlag::Timestamp)
     , time_(time)
     , element_(this->formatTime(time))
 {
@@ -220,9 +220,9 @@ TimestampElement::TimestampElement(QTime time)
 }
 
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
-                                      MessageElement::Flags flags)
+                                      MessageElementFlags flags)
 {
-    if (flags & this->getFlags()) {
+    if (flags.hasAny(this->getFlags())) {
         auto app = getApp();
         if (app->settings->timestampFormat != this->format_) {
             this->format_ = app->settings->timestampFormat.getValue();
@@ -239,20 +239,20 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getApp()->settings->timestampFormat);
 
-    return new TextElement(format, Flags::Timestamp, MessageColor::System,
-                           FontStyle::ChatMedium);
+    return new TextElement(format, MessageElementFlag::Timestamp,
+                           MessageColor::System, FontStyle::ChatMedium);
 }
 
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
-    : MessageElement(MessageElement::ModeratorTools)
+    : MessageElement(MessageElementFlag::ModeratorTools)
 {
 }
 
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
-                                             MessageElement::Flags flags)
+                                             MessageElementFlags flags)
 {
-    if (flags & MessageElement::ModeratorTools) {
+    if (flags.has(MessageElementFlag::ModeratorTools)) {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
 

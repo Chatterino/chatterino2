@@ -51,7 +51,7 @@ struct MessageLayoutContainer {
     float getScale() const;
 
     // methods
-    void begin(int width_, float scale_, Message::MessageFlags flags_);
+    void begin(int width_, float scale_, MessageFlags flags_);
     void end();
 
     void clear();
@@ -92,7 +92,7 @@ private:
     // variables
     float scale_ = 1.f;
     int width_ = 0;
-    Message::MessageFlags flags_ = Message::MessageFlags::None;
+    MessageFlags flags_ = MessageFlag::None;
     int line_ = 0;
     int height_ = 0;
     int currentX_ = 0;

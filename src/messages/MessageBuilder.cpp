@@ -25,7 +25,7 @@ MessageBuilder::MessageBuilder(const QString &text)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElement::Text,
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
     this->message().searchText = text;
 }
@@ -34,10 +34,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElement::Text,
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
-    this->message().flags |= Message::System;
-    this->message().flags |= Message::DoNotTriggerNotification;
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
     this->message().searchText = text;
 }
 
@@ -75,17 +75,17 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
         text.append(" (multiple times)");
     }
 
-    this->message().flags.EnableFlag(Message::System);
-    this->message().flags.EnableFlag(Message::Timeout);
-    this->message().flags.EnableFlag(Message::DoNotTriggerNotification);
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::Timeout);
+    this->message().flags.set(MessageFlag::DoNotTriggerNotification);
     this->message().timeoutUser = username;
 }
 
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 {
     this->emplace<TimestampElement>();
-    this->message().flags.EnableFlag(Message::System);
-    this->message().flags.EnableFlag(Message::Timeout);
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::Timeout);
     this->message().timeoutUser = action.target.name;
     this->message().count = count;
 
@@ -121,7 +121,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
         }
     }
 
-    this->emplace<TextElement>(text, MessageElement::Text,
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
     this->message().searchText = text;
 }
@@ -129,8 +129,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 MessageBuilder::MessageBuilder(const UnbanAction &action)
 {
     this->emplace<TimestampElement>();
-    this->message().flags.EnableFlag(Message::System);
-    this->message().flags.EnableFlag(Message::Untimeout);
+    this->message().flags.set(MessageFlag::System);
+    this->message().flags.set(MessageFlag::Untimeout);
 
     this->message().timeoutUser = action.target.name;
 
@@ -146,7 +146,7 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
                    .arg(action.target.name);
     }
 
-    this->emplace<TextElement>(text, MessageElement::Text,
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
     this->message().searchText = text;
 }

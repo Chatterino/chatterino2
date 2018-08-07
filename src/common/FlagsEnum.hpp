@@ -15,43 +15,26 @@ public:
     {
     }
 
-    FlagsEnum(T _value)
-        : value(_value)
+    FlagsEnum(T value)
+        : value(value)
     {
     }
 
-    inline T operator~() const
+    FlagsEnum(std::initializer_list<T> flags)
     {
-        return (T) ~(Q)this->value;
-    }
-    inline T operator|(Q a) const
-    {
-        return (T)((Q)a | (Q)this->value);
-    }
-    inline T operator&(Q a) const
-    {
-        return (T)((Q)a & (Q)this->value);
-    }
-    inline T operator^(Q a) const
-    {
-        return (T)((Q)a ^ (Q)this->value);
-    }
-    inline T &operator|=(const Q &a)
-    {
-        return (T &)((Q &)this->value |= (Q)a);
-    }
-    inline T &operator&=(const Q &a)
-    {
-        return (T &)((Q &)this->value &= (Q)a);
-    }
-    inline T &operator^=(const Q &a)
-    {
-        return (T &)((Q &)this->value ^= (Q)a);
+        for (auto flag : flags) {
+            this->set(flag);
+        }
     }
 
-    void EnableFlag(T flag)
+    bool operator==(const FlagsEnum<T> &other)
     {
-        reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
+        return this->value == other.value;
+    }
+
+    bool operator!=(const FlagsEnum &other)
+    {
+        return this->value != other.value;
     }
 
     void set(T flag)
@@ -72,11 +55,44 @@ public:
             this->unset(flag);
     }
 
-    bool HasFlag(Q flag) const
+    bool has(T flag) const
     {
-        return (this->value & flag) == flag;
+        return static_cast<Q>(this->value) & static_cast<Q>(flag);
     }
 
+    // bool hasAny(std::initializer_list<T> flags) const
+    //{
+    //    for (auto flag : flags) {
+    //        if (this->has(flag)) return true;
+    //    }
+    //    return false;
+    //}
+
+    bool hasAny(FlagsEnum flags) const
+    {
+        return static_cast<Q>(this->value) & static_cast<Q>(flags.value);
+    }
+
+    // bool hasAll(std::initializer_list<T> flags) const
+    //{
+    //    for (auto flag : flags) {
+    //        if (!this->has(flag)) return false;
+    //    }
+    //    return true;
+    //}
+
+    bool hasAll(FlagsEnum<T> flags) const
+    {
+        return (static_cast<Q>(this->value) & static_cast<Q>(flags.value)) &&
+               static_cast<Q>(flags->value);
+    }
+
+    bool hasNone(std::initializer_list<T> flags) const
+    {
+        return !this->hasAny(flags);
+    }
+
+private:
     T value;
 };
 

@@ -46,7 +46,7 @@ public:
     int getGeneration() const;
     void incGeneration();
 
-    MessageElement::Flags getWordFlags();
+    MessageElementFlags getWordFlags();
     void updateWordTypeMask();
 
     pajlada::Signals::NoArgSignal repaintGifs;
@@ -66,7 +66,7 @@ private:
     Window *mainWindow_ = nullptr;
     Window *selectedWindow_ = nullptr;
 
-    MessageElement::Flags wordFlags_ = MessageElement::Default;
+    MessageElementFlags wordFlags_ = MessageElementFlag::Default;
     pajlada::Settings::SettingListener wordFlagsListener_;
 };
 
