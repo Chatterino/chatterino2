@@ -103,6 +103,8 @@ void removeRunningFile(const QString &path)
 
 void runGui(QApplication &a, Paths &paths, Settings &settings)
 {
+    initQt();
+
     chatterino::NetworkManager::init();
     chatterino::Updates::getInstance().checkForUpdates();
 

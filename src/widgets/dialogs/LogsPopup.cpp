@@ -149,7 +149,7 @@ void LogsPopup::getOverrustleLogs()
     req.setCaller(QThread::currentThread());
     req.onError([this, channelName](int errorCode) {
         this->close();
-        QMessageBox *box = new QMessageBox(
+        auto box = new QMessageBox(
             QMessageBox::Information, "Error getting logs",
             "No logs could be found for channel " + channelName);
         box->setAttribute(Qt::WA_DeleteOnClose);
