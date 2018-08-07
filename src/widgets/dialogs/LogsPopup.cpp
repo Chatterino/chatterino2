@@ -147,8 +147,8 @@ void LogsPopup::getOverrustleLogs()
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
-    req.onError([this, channelName](int errorCode) {
-        this->close();
+    req.onError([channelName](int errorCode) {
+        //        this->close();
         auto box = new QMessageBox(
             QMessageBox::Information, "Error getting logs",
             "No logs could be found for channel " + channelName);

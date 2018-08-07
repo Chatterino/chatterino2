@@ -6,6 +6,8 @@
 #include <QApplication>
 #include <QStringList>
 
+#include <messages/Image.hpp>
+
 using namespace chatterino;
 
 int main(int argc, char **argv)

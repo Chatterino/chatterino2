@@ -1140,9 +1140,13 @@ void SplitContainer::ResizeHandle::paintEvent(QPaintEvent *)
     }
 }
 
-void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *)
+void SplitContainer::ResizeHandle::mousePressEvent(QMouseEvent *event)
 {
     this->isMouseDown_ = true;
+
+    if (event->button() == Qt::RightButton) {
+        this->resetFlex();
+    }
 }
 
 void SplitContainer::ResizeHandle::mouseReleaseEvent(QMouseEvent *)
@@ -1211,6 +1215,11 @@ void SplitContainer::ResizeHandle::mouseDoubleClickEvent(QMouseEvent *event)
 {
     event->accept();
 
+    this->resetFlex();
+}
+
+void SplitContainer::ResizeHandle::resetFlex()
+{
     for (auto &sibling : this->node->getParent()->getChildren()) {
         sibling->flexH_ = 1;
         sibling->flexV_ = 1;

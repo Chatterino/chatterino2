@@ -83,7 +83,7 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
         auto viewLogs = user.emplace<RippleEffectLabel2>(this);
-        viewLogs->getLabel().setText("Logs");
+        viewLogs->getLabel().setText("Online logs");
 
         auto mod = user.emplace<RippleEffectButton>(this);
         mod->setPixmap(app->resources->buttons.mod);

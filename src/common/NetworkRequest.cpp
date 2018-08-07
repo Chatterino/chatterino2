@@ -2,11 +2,12 @@
 
 #include "Application.hpp"
 #include "common/NetworkManager.hpp"
+#include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QFile>
-
 #include <cassert>
 
 namespace chatterino {
@@ -165,6 +166,8 @@ Outcome NetworkRequest::tryLoadCachedFile()
 
 void NetworkRequest::doRequest()
 {
+    DebugCount::increase("http request started");
+
     NetworkRequester requester;
     NetworkWorker *worker = new NetworkWorker;
 
@@ -223,6 +226,8 @@ void NetworkRequest::doRequest()
             data->writeToCache(bytes);
 
             NetworkResult result(bytes);
+
+            DebugCount::increase("http request success");
             data->onSuccess_(result);
 
             reply->deleteLater();

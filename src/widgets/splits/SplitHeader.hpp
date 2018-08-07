@@ -51,12 +51,11 @@ protected:
 private:
     void rightButtonClicked();
     void initializeChannelSignals();
-    void addModeActions(QMenu &menu);
     void setupModeLabel(RippleEffectLabel &label);
-    void addDropdownItems(RippleEffectButton *label);
-    void showMenu();
+    std::unique_ptr<QMenu> createMainMenu();
+    std::unique_ptr<QMenu> createChatModeMenu();
 
-    Split *const split_;
+    Split *split_;
 
     QPoint dragStart_;
     bool dragging_ = false;
@@ -70,9 +69,6 @@ private:
     Label *titleLabel{};
     RippleEffectLabel *modeButton_{};
     RippleEffectButton *moderationButton_{};
-
-    QMenu dropdownMenu_;
-    QMenu modeMenu_;
 
     bool menuVisible_{};
 

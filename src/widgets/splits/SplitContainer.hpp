@@ -161,6 +161,8 @@ private:
         friend class SplitContainer;
 
     private:
+        void resetFlex();
+
         bool vertical_;
         bool isMouseDown_ = false;
     };

@@ -220,8 +220,8 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->scrollbars.background = QColor(0, 0, 0, 0);
     //    this->scrollbars.background = splits.background;
     //    this->scrollbars.background.setAlphaF(qreal(0.2));
-    this->scrollbars.thumb = getColor(0, sat, 0.80);
-    this->scrollbars.thumbSelected = getColor(0, sat, 0.7);
+    this->scrollbars.thumb = getColor(0, sat, 0.70);
+    this->scrollbars.thumbSelected = getColor(0, sat, 0.65);
 
     // tooltip
     this->tooltip.background = QColor(0, 0, 0);

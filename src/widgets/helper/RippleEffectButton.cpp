@@ -1,9 +1,12 @@
 #include "RippleEffectButton.hpp"
 
+#include <QApplication>
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QPainter>
 
 #include "singletons/Theme.hpp"
+#include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {
 
@@ -74,6 +77,20 @@ void RippleEffectButton::setBorderColor(const QColor &color)
 const QColor &RippleEffectButton::getBorderColor() const
 {
     return this->borderColor_;
+}
+
+void RippleEffectButton::setMenu(std::unique_ptr<QMenu> menu)
+{
+    this->menu_ = std::move(menu);
+
+    this->menu_->installEventFilter(
+        new FunctionEventFilter(this, [this](QObject *, QEvent *event) {
+            if (event->type() == QEvent::Hide) {
+                QTimer::singleShot(20, this,
+                                   [this] { this->menuVisible_ = false; });
+            }
+            return false;
+        }));
 }
 
 void RippleEffectButton::paintEvent(QPaintEvent *)
@@ -177,6 +194,10 @@ void RippleEffectButton::mousePressEvent(QMouseEvent *event)
     this->mouseDown_ = true;
 
     emit this->leftMousePress();
+
+    if (this->menu_ && !this->menuVisible_) {
+        QTimer::singleShot(80, this, [this] { this->showMenu(); });
+    }
 }
 
 void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
@@ -249,6 +270,28 @@ void RippleEffectButton::onMouseEffectTimeout()
     if (performUpdate) {
         update();
     }
+}
+
+void RippleEffectButton::showMenu()
+{
+    if (!this->menu_) return;
+
+    auto point = [this] {
+        auto bounds = QApplication::desktop()->availableGeometry(this);
+
+        auto point = this->mapToGlobal(
+            QPoint(this->width() - this->menu_->width(), this->height()));
+
+        if (point.y() + this->menu_->height() > bounds.bottom()) {
+            point.setY(point.y() - this->menu_->height() - this->height());
+        }
+
+        return point;
+    };
+
+    this->menu_->popup(point());
+    this->menu_->move(point());
+    this->menuVisible_ = true;
 }
 
 }  // namespace chatterino

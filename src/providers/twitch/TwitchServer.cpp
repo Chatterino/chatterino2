@@ -96,8 +96,6 @@ void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
 void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
-    qDebug() << message->toData();
-
     //    this->readConnection
     if (message->type() == Communi::IrcMessage::Type::Private) {
         // We already have a handler for private messages

@@ -4,6 +4,7 @@
 
 #include "widgets/BaseWidget.hpp"
 
+#include <QMenu>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPoint>
@@ -43,6 +44,8 @@ public:
     void setBorderColor(const QColor &color);
     const QColor &getBorderColor() const;
 
+    void setMenu(std::unique_ptr<QMenu> menu);
+
 signals:
     void clicked();
     void leftMousePress();
@@ -57,22 +60,25 @@ protected:
 
     void fancyPaint(QPainter &painter);
 
-    bool enabled_ = true;
-    bool selected_ = false;
-    bool mouseOver_ = false;
-    bool mouseDown_ = false;
+    bool enabled_{true};
+    bool selected_{false};
+    bool mouseOver_{false};
+    bool mouseDown_{false};
+    bool menuVisible_{false};
 
 private:
     void onMouseEffectTimeout();
+    void showMenu();
 
-    QColor borderColor_;
-    QPixmap pixmap_;
-    bool dimPixmap_ = true;
-    QPoint mousePos_;
-    double hoverMultiplier_ = 0.0;
-    QTimer effectTimer_;
-    std::vector<ClickEffect> clickEffects_;
-    boost::optional<QColor> mouseEffectColor_ = boost::none;
+    QColor borderColor_{};
+    QPixmap pixmap_{};
+    bool dimPixmap_{true};
+    QPoint mousePos_{};
+    double hoverMultiplier_{0.0};
+    QTimer effectTimer_{};
+    std::vector<ClickEffect> clickEffects_{};
+    boost::optional<QColor> mouseEffectColor_{};
+    std::unique_ptr<QMenu> menu_{};
 };
 
 }  // namespace chatterino
