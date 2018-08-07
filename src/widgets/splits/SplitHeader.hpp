@@ -54,6 +54,7 @@ private:
     void addModeActions(QMenu &menu);
     void setupModeLabel(RippleEffectLabel &label);
     void addDropdownItems(RippleEffectButton *label);
+    void showMenu();
 
     Split *const split_;
 
@@ -64,14 +65,16 @@ private:
 
     pajlada::Signals::Connection onlineStatusChangedConnection_;
 
-    RippleEffectButton *dropdownButton_ = nullptr;
-    //    Label *titleLabel;
-    Label *titleLabel = nullptr;
-    RippleEffectLabel *modeButton_ = nullptr;
-    RippleEffectButton *moderationButton_ = nullptr;
+    RippleEffectButton *dropdownButton_{};
+    //    Label *titleLabel{};
+    Label *titleLabel{};
+    RippleEffectLabel *modeButton_{};
+    RippleEffectButton *moderationButton_{};
 
     QMenu dropdownMenu_;
     QMenu modeMenu_;
+
+    bool menuVisible_{};
 
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
 

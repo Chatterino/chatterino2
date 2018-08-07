@@ -6,6 +6,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
+#include "util/FunctionEventFilter.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -86,33 +87,13 @@ SplitHeader::SplitHeader(Split *_split)
         //        dropdown->setPixmap(*app->resources->splitHeaderContext->getPixmap());
         //        dropdown->setScaleIndependantSize(23, 23);
         this->addDropdownItems(dropdown.getElement());
-        QObject::connect(
-            dropdown.getElement(), &RippleEffectButton::leftMousePress, this,
-            [this] {
-                QTimer::singleShot(80, this, [this] {
-                    auto point = [this] {
-                        auto bounds =
-                            QApplication::desktop()->availableGeometry(this);
-
-                        auto point = this->dropdownButton_->mapToGlobal(
-                            QPoint(this->dropdownButton_->width() -
-                                       this->dropdownMenu_.width(),
-                                   this->dropdownButton_->height()));
-
-                        if (point.y() + this->dropdownMenu_.height() >
-                            bounds.bottom()) {
-                            point.setY(point.y() -
-                                       this->dropdownMenu_.height() -
-                                       this->dropdownButton_->height());
-                        }
-
-                        return point;
-                    };
-
-                    this->dropdownMenu_.popup(point());
-                    this->dropdownMenu_.move(point());
-                });
-            });
+        QObject::connect(dropdown.getElement(),
+                         &RippleEffectButton::leftMousePress, this, [this] {
+                             if (!this->menuVisible_) {
+                                 QTimer::singleShot(
+                                     80, this, [this] { this->showMenu(); });
+                             }
+                         });
     }
 
     // ---- misc
@@ -147,6 +128,15 @@ SplitHeader::SplitHeader(Split *_split)
     getSettings()->showUptime.connect(
         [this](const auto &, const auto &) { this->updateChannelText(); },
         this->managedConnections_);
+
+    this->dropdownMenu_.installEventFilter(
+        new FunctionEventFilter(this, [this](QObject *, QEvent *event) {
+            if (event->type() == QEvent::Hide) {
+                QTimer::singleShot(20, this,
+                                   [this] { this->menuVisible_ = false; });
+            }
+            return false;
+        }));
 }
 
 SplitHeader::~SplitHeader()
@@ -189,6 +179,28 @@ void SplitHeader::addDropdownItems(RippleEffectButton *)
 //    this->dropdownMenu.addSeparator();
 //    this->dropdownMenu.addAction("Show changelog", this, SLOT(menuShowChangelog()));
     // clang-format on
+}
+
+void SplitHeader::showMenu()
+{
+    auto point = [this] {
+        auto bounds = QApplication::desktop()->availableGeometry(this);
+
+        auto point = this->dropdownButton_->mapToGlobal(
+            QPoint(this->dropdownButton_->width() - this->dropdownMenu_.width(),
+                   this->dropdownButton_->height()));
+
+        if (point.y() + this->dropdownMenu_.height() > bounds.bottom()) {
+            point.setY(point.y() - this->dropdownMenu_.height() -
+                       this->dropdownButton_->height());
+        }
+
+        return point;
+    };
+
+    this->dropdownMenu_.popup(point());
+    this->dropdownMenu_.move(point());
+    this->menuVisible_ = true;
 }
 
 void SplitHeader::updateRoomModes()

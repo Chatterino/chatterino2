@@ -249,7 +249,8 @@ SOURCES += \
     src/util/JsonQuery.cpp \
     src/RunGui.cpp \
     src/BrowserExtension.cpp \
-    src/util/FormatTime.cpp
+    src/util/FormatTime.cpp \
+    src/util/FunctionEventFilter.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -446,7 +447,8 @@ HEADERS  += \
     src/util/JsonQuery.hpp \
     src/RunGui.hpp \
     src/BrowserExtension.hpp \
-    src/util/FormatTime.hpp
+    src/util/FormatTime.hpp \
+    src/util/FunctionEventFilter.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \
