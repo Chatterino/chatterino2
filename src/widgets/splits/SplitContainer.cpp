@@ -20,9 +20,8 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <boost/foreach.hpp>
-
 #include <algorithm>
+#include <boost/foreach.hpp>
 
 namespace chatterino {
 
@@ -328,10 +327,10 @@ void SplitContainer::layout()
         Node *node = this->baseNode_.findNodeContainingSplit(split);
 
         _dropRects.push_back(
-            DropRect(QRect(g.left(), g.top(), g.width() / 4, g.height()),
+            DropRect(QRect(g.left(), g.top(), g.width() / 3, g.height()),
                      Position(node, Direction::Left)));
-        _dropRects.push_back(DropRect(QRect(g.left() + g.width() / 4 * 3,
-                                            g.top(), g.width() / 4, g.height()),
+        _dropRects.push_back(DropRect(QRect(g.left() + g.width() / 3 * 2,
+                                            g.top(), g.width() / 3, g.height()),
                                       Position(node, Direction::Right)));
 
         _dropRects.push_back(

@@ -760,7 +760,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 case 1: {
                     this->emplace<ImageElement>(
                             Image::fromNonOwningPixmap(
-                                &app->resources->twitch.verified),
+                                &app->resources->twitch.verified, 0.25),
                             MessageElementFlag::BadgeVanity)
                         ->setTooltip("Twitch Verified");
                 } break;
