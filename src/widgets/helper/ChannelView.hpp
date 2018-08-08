@@ -27,7 +27,6 @@ class ChannelView : public BaseWidget
 
 public:
     explicit ChannelView(BaseWidget *parent = nullptr);
-    virtual ~ChannelView() override;
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -77,6 +76,14 @@ protected:
                          QPoint &relativePos, int &index);
 
 private:
+    void initializeLayout();
+    void initializeScrollbar();
+    void initializeSignals();
+
+    // void messageAppended(MessagePtr &message);
+    // void messageAddedAtStart(std::vector<MessagePtr> &messages);
+    // void messageRemoveFromStart(MessagePtr &message);
+
     void updatePauseStatus();
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);

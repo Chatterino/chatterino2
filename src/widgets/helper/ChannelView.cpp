@@ -95,70 +95,11 @@ ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar_(this)
 {
-    auto app = getApp();
-
     this->setMouseTracking(true);
 
-    this->connections_.push_back(app->windows->wordFlagsChanged.connect([this] {
-        this->layoutMessages();
-        this->update();
-    }));
-
-    this->scrollBar_.getCurrentValueChanged().connect([this] {
-        // Whenever the scrollbar value has been changed, re-render the
-        // ChatWidgetView
-        this->actuallyLayoutMessages(true);
-
-        //        if (!this->isPaused()) {
-        this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
-                                      this->scrollBar_.isVisible() &&
-                                      !this->scrollBar_.isAtBottom());
-        //        }
-
-        this->queueUpdate();
-    });
-
-    this->scrollBar_.getDesiredValueChanged().connect([this] {
-        this->pausedByScrollingUp_ = !this->scrollBar_.isAtBottom();
-    });
-
-    this->connections_.push_back(app->windows->repaintGifs.connect([&] {
-        this->queueUpdate();  //
-    }));
-
-    this->connections_.push_back(
-        app->windows->layout.connect([&](Channel *channel) {
-            if (channel == nullptr || this->channel_.get() == channel) {
-                this->layoutMessages();
-            }
-        }));
-
-    this->goToBottom_ = new EffectLabel(this, 0);
-    this->goToBottom_->setStyleSheet(
-        "background-color: rgba(0,0,0,0.66); color: #FFF;");
-    this->goToBottom_->getLabel().setText("More messages below");
-    this->goToBottom_->setVisible(false);
-
-    this->connections_.emplace_back(app->fonts->fontChanged.connect([this] {
-        this->layoutMessages();  //
-    }));
-
-    QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
-        QTimer::singleShot(180, [=] {
-            this->scrollBar_.scrollToBottom(
-                app->settings->enableSmoothScrollingNewMessages.getValue());
-        });
-    });
-
-    //    this->updateTimer.setInterval(1000 / 60);
-    //    this->updateTimer.setSingleShot(true);
-    //    connect(&this->updateTimer, &QTimer::timeout, this, [this] {
-    //        if (this->updateQueued) {
-    //            this->updateQueued = false;
-    //            this->repaint();
-    //            this->updateTimer.start();
-    //        }
-    //    });
+    this->initializeLayout();
+    this->initializeScrollbar();
+    this->initializeSignals();
 
     this->pauseTimeout_.setSingleShot(true);
     QObject::connect(&this->pauseTimeout_, &QTimer::timeout, [this] {
@@ -167,31 +108,68 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->layoutMessages();
     });
 
-    app->settings->showLastMessageIndicator.connect(
-        [this](auto, auto) {
-            this->update();  //
-        },
-        this->connections_);
-
-    this->layoutCooldown_ = new QTimer(this);
-    this->layoutCooldown_->setSingleShot(true);
-    this->layoutCooldown_->setInterval(66);
-
-    QObject::connect(this->layoutCooldown_, &QTimer::timeout, [this] {
-        if (this->layoutQueued_) {
-            this->layoutMessages();
-            this->layoutQueued_ = false;
-        }
-    });
-
-    QShortcut *shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
         QGuiApplication::clipboard()->setText(this->getSelectedText());
     });
 }
 
-ChannelView::~ChannelView()
+void ChannelView::initializeLayout()
 {
+    this->goToBottom_ = new EffectLabel(this, 0);
+    this->goToBottom_->setStyleSheet(
+        "background-color: rgba(0,0,0,0.66); color: #FFF;");
+    this->goToBottom_->getLabel().setText("More messages below");
+    this->goToBottom_->setVisible(false);
+
+    QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
+        QTimer::singleShot(180, [=] {
+            this->scrollBar_.scrollToBottom(
+                getApp()
+                    ->settings->enableSmoothScrollingNewMessages.getValue());
+        });
+    });
+}
+
+void ChannelView::initializeScrollbar()
+{
+    this->scrollBar_.getCurrentValueChanged().connect([this] {
+        this->actuallyLayoutMessages(true);
+
+        this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
+                                      this->scrollBar_.isVisible() &&
+                                      !this->scrollBar_.isAtBottom());
+
+        this->queueUpdate();
+    });
+
+    this->scrollBar_.getDesiredValueChanged().connect([this] {
+        this->pausedByScrollingUp_ = !this->scrollBar_.isAtBottom();
+    });
+}
+
+void ChannelView::initializeSignals()
+{
+    this->connections_.push_back(
+        getApp()->windows->wordFlagsChanged.connect([this] {
+            this->layoutMessages();
+            this->update();
+        }));
+
+    getApp()->settings->showLastMessageIndicator.connect(
+        [this](auto, auto) { this->update(); }, this->connections_);
+
+    connections_.push_back(
+        getApp()->windows->repaintGifs.connect([&] { this->queueUpdate(); }));
+
+    connections_.push_back(
+        getApp()->windows->layout.connect([&](Channel *channel) {
+            if (channel == nullptr || this->channel_.get() == channel)
+                this->layoutMessages();
+        }));
+
+    connections_.push_back(getApp()->fonts->fontChanged.connect(
+        [this] { this->layoutMessages(); }));
 }
 
 void ChannelView::themeChangedEvent()
