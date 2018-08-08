@@ -326,25 +326,30 @@ void SplitContainer::layout()
 
         Node *node = this->baseNode_.findNodeContainingSplit(split);
 
+        // left
         _dropRects.push_back(
             DropRect(QRect(g.left(), g.top(), g.width() / 3, g.height()),
                      Position(node, Direction::Left)));
-        _dropRects.push_back(DropRect(QRect(g.left() + g.width() / 3 * 2,
-                                            g.top(), g.width() / 3, g.height()),
+        // right
+        _dropRects.push_back(DropRect(QRect(g.right() - g.width() / 3, g.top(),
+                                            g.width() / 3, g.height()),
                                       Position(node, Direction::Right)));
 
+        // top
         _dropRects.push_back(
             DropRect(QRect(g.left(), g.top(), g.width(), g.height() / 2),
                      Position(node, Direction::Above)));
-        _dropRects.push_back(DropRect(QRect(g.left(), g.top() + g.height() / 2,
-                                            g.width(), g.height() / 2),
-                                      Position(node, Direction::Below)));
+        // bottom
+        _dropRects.push_back(
+            DropRect(QRect(g.left(), g.bottom() - g.height() / 2, g.width(),
+                           g.height() / 2),
+                     Position(node, Direction::Below)));
     }
 
     if (this->splits_.empty()) {
         QRect g = this->rect();
         _dropRects.push_back(
-            DropRect(QRect(g.left(), g.top(), g.width(), g.height()),
+            DropRect(QRect(g.left(), g.top(), g.width() - 1, g.height() - 1),
                      Position(nullptr, Direction::Below)));
     }
 

@@ -31,8 +31,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , originalMessage_(_ircMessage->content())
     , action_(_ircMessage->isAction())
 {
-    auto app = getApp();
-    this->usernameColor_ = app->themes->messages.textColors.system;
+    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -46,8 +45,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , originalMessage_(content)
     , action_(isAction)
 {
-    auto app = getApp();
-    this->usernameColor_ = app->themes->messages.textColors.system;
+    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const

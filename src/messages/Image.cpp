@@ -140,7 +140,7 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     if (!shared) {
         cache[url] = shared = ImagePtr(new Image(url, scale));
     } else {
-        Warn("same image loaded multiple times: {}", url.string);
+        // Warn("same image loaded multiple times: {}", url.string);
     }
 
     return shared;
