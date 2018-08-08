@@ -28,7 +28,7 @@
 
 namespace chatterino {
 namespace {
-auto formatRoomMode(TwitchChannel &channel)
+auto formatRoomMode(TwitchChannel &channel) -> QString
 {
     QString text;
 
@@ -53,6 +53,8 @@ auto formatRoomMode(TwitchChannel &channel)
         if (match.hasMatch())
             text = match.captured(1) + '\n' + match.captured(2);
     }
+
+    if (text.isEmpty() && channel.hasModRights()) return "none";
 
     return text;
 }
@@ -156,11 +158,8 @@ void SplitHeader::initializeLayout()
              });
          }),
          // dropdown
-         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
-             w->setMouseTracking(true);
-             w->setMenu(this->createMainMenu());
-             QObject::connect(w, &Button::leftMousePress, this, [this] {});
-         })});
+         this->dropdownButton_ = makeWidget<Button>(
+             [&](auto w) { w->setMenu(this->createMainMenu()); })});
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -293,32 +292,22 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        auto twitchChannel =
-            dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(
+                this->split_->getChannel().get()))  //
+        {
+            label.setEnable(twitchChannel->hasModRights());
 
-        // return if the channel is not a twitch channel
-        if (twitchChannel == nullptr) {
-            label.hide();
-            return;
-        }
+            // set the label text
+            auto text = formatRoomMode(*twitchChannel);
 
-        // set lable enabled
-        label.setEnable(twitchChannel->hasModRights());
-
-        // set the label text
-        auto text = formatRoomMode(*twitchChannel);
-
-        if (text.isEmpty()) {
-            if (twitchChannel->hasModRights()) {
-                label.getLabel().setText("none");
+            if (!text.isEmpty()) {
+                label.getLabel().setText(text);
                 label.show();
-            } else {
-                label.hide();
+                return;
             }
-        } else {
-            label.getLabel().setText(text);
-            label.show();
         }
+
+        label.hide();
     });
 }
 
