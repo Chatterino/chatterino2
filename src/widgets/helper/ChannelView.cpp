@@ -133,7 +133,7 @@ ChannelView::ChannelView(BaseWidget *parent)
             }
         }));
 
-    this->goToBottom_ = new RippleEffectLabel(this, 0);
+    this->goToBottom_ = new EffectLabel(this, 0);
     this->goToBottom_->setStyleSheet(
         "background-color: rgba(0,0,0,0.66); color: #FFF;");
     this->goToBottom_->getLabel().setText("More messages below");
@@ -143,7 +143,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->layoutMessages();  //
     }));
 
-    QObject::connect(this->goToBottom_, &RippleEffectLabel::clicked, this, [=] {
+    QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
             this->scrollBar_.scrollToBottom(
                 app->settings->enableSmoothScrollingNewMessages.getValue());

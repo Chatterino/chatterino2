@@ -1,10 +1,10 @@
 #pragma once
 
-#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/helper/Button.hpp"
 
 namespace chatterino {
 
-class TitleBarButton : public RippleEffectButton
+class TitleBarButton : public Button
 {
 public:
     enum Style {

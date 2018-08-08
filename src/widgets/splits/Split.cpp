@@ -57,8 +57,6 @@ Split::Split(QWidget *parent)
     , input_(this)
     , overlay_(new SplitOverlay(this))
 {
-    auto app = getApp();
-
     this->setMouseTracking(true);
 
     this->vbox_.setSpacing(0);
@@ -70,13 +68,13 @@ Split::Split(QWidget *parent)
 
     // Initialize chat widget-wide hotkeys
     // CTRL+W: Close Split
-    createShortcut(this, "CTRL+W", &Split::doCloseSplit);
+    createShortcut(this, "CTRL+W", &Split::deleteFromContainer);
 
     // CTRL+R: Change Channel
-    createShortcut(this, "CTRL+R", &Split::doChangeChannel);
+    createShortcut(this, "CTRL+R", &Split::changeChannel);
 
     // CTRL+F: Search
-    createShortcut(this, "CTRL+F", &Split::showSearchPopup);
+    createShortcut(this, "CTRL+F", &Split::showSearch);
 
     // F12
     createShortcut(this, "F10", [] {
@@ -104,7 +102,7 @@ Split::Split(QWidget *parent)
     });
 
     this->input_.textChanged.connect([=](const QString &newText) {
-        if (app->settings->showEmptyInput) {
+        if (getSettings()->showEmptyInput) {
             return;
         }
 
@@ -115,7 +113,7 @@ Split::Split(QWidget *parent)
         }
     });
 
-    app->settings->showEmptyInput.connect(
+    getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
             if (!showEmptyInput && this->input_.getInputText().length() == 0) {
                 this->input_.hide();
@@ -362,21 +360,21 @@ void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
 }
 
 /// Slots
-void Split::doAddSplit()
+void Split::addSibling()
 {
     if (this->container_) {
         this->container_->appendNewSplit(true);
     }
 }
 
-void Split::doCloseSplit()
+void Split::deleteFromContainer()
 {
     if (this->container_) {
         this->container_->deleteSplit(this);
     }
 }
 
-void Split::doChangeChannel()
+void Split::changeChannel()
 {
     this->showChangeChannelPopup("Change channel", false, [](bool) {});
 
@@ -388,7 +386,7 @@ void Split::doChangeChannel()
     }
 }
 
-void Split::doPopup()
+void Split::popup()
 {
     auto app = getApp();
     Window &window = app->windows->createWindow(Window::Type::Popup);
@@ -402,7 +400,7 @@ void Split::doPopup()
     window.show();
 }
 
-void Split::doClearChat()
+void Split::clear()
 {
     this->view_.clearMessages();
 }
@@ -417,7 +415,7 @@ void Split::openInBrowser()
     }
 }
 
-void Split::openInPopupPlayer()
+void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
@@ -548,7 +546,7 @@ void Split::copyToClipboard()
     QApplication::clipboard()->setText(this->view_.getSelectedText());
 }
 
-void Split::showSearchPopup()
+void Split::showSearch()
 {
     SearchPopup *popup = new SearchPopup();
 

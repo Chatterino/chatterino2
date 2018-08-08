@@ -61,7 +61,7 @@ void SplitInput::initLayout()
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
-        box.emplace<RippleEffectLabel>().assign(&this->ui_.emoteButton);
+        box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
     }
 
     this->ui_.emoteButton->getLabel().setTextFormat(Qt::RichText);
@@ -79,7 +79,7 @@ void SplitInput::initLayout()
 
     // open emote popup
     QObject::connect(
-        this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
+        this->ui_.emoteButton, &EffectLabel::clicked, [this] {
             if (!this->emotePopup_) {
                 this->emotePopup_ = std::make_unique<EmotePopup>();
                 this->emotePopup_->linkClicked.connect(

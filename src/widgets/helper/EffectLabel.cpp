@@ -1,4 +1,4 @@
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 
@@ -7,8 +7,8 @@
 
 namespace chatterino {
 
-RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
-    : RippleEffectButton(parent)
+EffectLabel::EffectLabel(BaseWidget *parent, int spacing)
+    : Button(parent)
     , label_(this)
 {
     setLayout(&this->hbox_);
@@ -21,8 +21,8 @@ RippleEffectLabel::RippleEffectLabel(BaseWidget *parent, int spacing)
     this->hbox_.addSpacing(spacing);
 }
 
-RippleEffectLabel2::RippleEffectLabel2(BaseWidget *parent, int padding)
-    : RippleEffectButton(parent)
+EffectLabel2::EffectLabel2(BaseWidget *parent, int padding)
+    : Button(parent)
     , label_(this)
 {
     auto *hbox = new QHBoxLayout(this);
@@ -37,7 +37,7 @@ RippleEffectLabel2::RippleEffectLabel2(BaseWidget *parent, int padding)
     //    hbox.addSpacing(spacing);
 }
 
-Label &RippleEffectLabel2::getLabel()
+Label &EffectLabel2::getLabel()
 {
     return this->label_;
 }

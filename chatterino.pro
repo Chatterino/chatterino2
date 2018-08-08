@@ -186,8 +186,6 @@ SOURCES += \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
-    src/widgets/helper/RippleEffectButton.cpp \
-    src/widgets/helper/RippleEffectLabel.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
@@ -250,7 +248,9 @@ SOURCES += \
     src/RunGui.cpp \
     src/BrowserExtension.cpp \
     src/util/FormatTime.cpp \
-    src/util/FunctionEventFilter.cpp
+    src/util/FunctionEventFilter.cpp \
+    src/widgets/helper/EffectLabel.cpp \
+    src/widgets/helper/Button.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -374,8 +374,6 @@ HEADERS  += \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
-    src/widgets/helper/RippleEffectButton.hpp \
-    src/widgets/helper/RippleEffectLabel.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
@@ -448,7 +446,10 @@ HEADERS  += \
     src/RunGui.hpp \
     src/BrowserExtension.hpp \
     src/util/FormatTime.hpp \
-    src/util/FunctionEventFilter.hpp
+    src/util/FunctionEventFilter.hpp \
+    src/widgets/helper/EffectLabel.hpp \
+    src/util/LayoutHelper.hpp \
+    src/widgets/helper/Button.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

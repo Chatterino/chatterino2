@@ -323,10 +323,10 @@ ChannelPtr LookPage::createPreviewChannel()
         MessageBuilder builder;
         builder.emplace<TimestampElement>(QTime(8, 13, 42));
         builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber), MessageElementFlag::BadgeSubscription);
+        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
         builder.emplace<TextElement>("username1:", MessageElementFlag::Username, QColor("#0094FF"), FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("This is a preview message", MessageElementFlag::Text);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->pajaDank), MessageElementFlag::AlwaysShow);
+        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->pajaDank, 0.25), MessageElementFlag::AlwaysShow);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::BoldUsername, MessageColor::Text, FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::NonBoldUsername);
         channel->addMessage(builder.release());

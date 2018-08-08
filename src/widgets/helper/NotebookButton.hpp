@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RippleEffectButton.hpp"
+#include "Button.hpp"
 
 #include <QWidget>
 
@@ -8,7 +8,7 @@ namespace chatterino {
 
 class Notebook;
 
-class NotebookButton : public RippleEffectButton
+class NotebookButton : public Button
 {
     Q_OBJECT
 

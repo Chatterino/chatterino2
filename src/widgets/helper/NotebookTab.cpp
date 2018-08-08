@@ -21,7 +21,7 @@
 namespace chatterino {
 
 NotebookTab::NotebookTab(Notebook *notebook)
-    : RippleEffectButton(notebook)
+    : Button(notebook)
     , positionChangedAnimation_(this, "pos")
     , notebook_(notebook)
     , menu_(this)
@@ -404,7 +404,7 @@ void NotebookTab::enterEvent(QEvent *event)
 
     this->update();
 
-    RippleEffectButton::enterEvent(event);
+    Button::enterEvent(event);
 }
 
 void NotebookTab::leaveEvent(QEvent *event)
@@ -414,7 +414,7 @@ void NotebookTab::leaveEvent(QEvent *event)
 
     this->update();
 
-    RippleEffectButton::leaveEvent(event);
+    Button::leaveEvent(event);
 }
 
 void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
@@ -459,7 +459,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    RippleEffectButton::mouseMoveEvent(event);
+    Button::mouseMoveEvent(event);
 }
 
 QRect NotebookTab::getXRect()

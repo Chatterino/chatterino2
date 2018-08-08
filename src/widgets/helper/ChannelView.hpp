@@ -8,7 +8,7 @@
 #include "messages/layouts/MessageLayout.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/Scrollbar.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -115,7 +115,7 @@ private:
     ChannelPtr channel_;
 
     Scrollbar scrollBar_;
-    RippleEffectLabel *goToBottom_;
+    EffectLabel *goToBottom_;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

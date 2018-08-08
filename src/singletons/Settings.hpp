@@ -161,6 +161,6 @@ private:
     std::unique_ptr<rapidjson::Document> snapshot_;
 };
 
-[[deprecated]] Settings *getSettings();
+Settings *getSettings();
 
 }  // namespace chatterino

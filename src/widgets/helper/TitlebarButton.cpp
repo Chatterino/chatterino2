@@ -5,7 +5,7 @@
 namespace chatterino {
 
 TitleBarButton::TitleBarButton()
-    : RippleEffectButton(nullptr)
+    : Button(nullptr)
 {
 }
 
@@ -119,7 +119,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    RippleEffectButton::paintEvent(event);
+    Button::paintEvent(event);
     //    this->fancyPaint(painter);
 }
 

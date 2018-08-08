@@ -9,7 +9,7 @@
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Shortcut.hpp"
 
 #include <QApplication>
@@ -239,7 +239,7 @@ void BaseWindow::themeChangedEvent()
             this->ui_.titleLabel->setPalette(palette_title);
         }
 
-        for (RippleEffectButton *button : this->ui_.buttons) {
+        for (Button *button : this->ui_.buttons) {
             button->setMouseEffectColor(this->theme->window.text);
         }
     } else {
@@ -371,15 +371,15 @@ TitleBarButton *BaseWindow::addTitleBarButton(
     return button;
 }
 
-RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
-    RippleEffectLabel *button = new RippleEffectLabel;
+    EffectLabel *button = new EffectLabel;
     button->setScaleIndependantHeight(30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
 
-    QObject::connect(button, &RippleEffectLabel::clicked, this,
+    QObject::connect(button, &EffectLabel::clicked, this,
                      [onClicked] { onClicked(); });
 
     return button;

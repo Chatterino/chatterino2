@@ -82,6 +82,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 }
 
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
+    : MessageBuilder()
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -127,6 +128,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 }
 
 MessageBuilder::MessageBuilder(const UnbanAction &action)
+    : MessageBuilder()
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);

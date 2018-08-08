@@ -2,7 +2,7 @@
 
 #include "widgets/BaseWidget.hpp"
 #include "widgets/Label.hpp"
-#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/helper/Button.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
 #include <QHBoxLayout>
@@ -12,10 +12,10 @@
 
 namespace chatterino {
 
-class RippleEffectLabel : public RippleEffectButton
+class EffectLabel : public Button
 {
 public:
-    explicit RippleEffectLabel(BaseWidget *parent = nullptr, int spacing = 6);
+    explicit EffectLabel(BaseWidget *parent = nullptr, int spacing = 6);
 
     SignalLabel &getLabel()
     {
@@ -27,10 +27,10 @@ private:
     SignalLabel label_;
 };
 
-class RippleEffectLabel2 : public RippleEffectButton
+class EffectLabel2 : public Button
 {
 public:
-    explicit RippleEffectLabel2(BaseWidget *parent = nullptr, int padding = 6);
+    explicit EffectLabel2(BaseWidget *parent = nullptr, int padding = 6);
 
     Label &getLabel();
 

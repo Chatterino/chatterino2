@@ -13,7 +13,7 @@
 
 namespace chatterino {
 
-class RippleEffectButton : public BaseWidget
+class Button : public BaseWidget
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ class RippleEffectButton : public BaseWidget
     };
 
 public:
-    RippleEffectButton(BaseWidget *parent);
+    Button(BaseWidget *parent = nullptr);
 
     void setMouseEffectColor(boost::optional<QColor> color);
     void setPixmap(const QPixmap &pixmap_);
