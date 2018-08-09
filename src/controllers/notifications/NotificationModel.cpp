@@ -15,7 +15,7 @@ NotificationModel::NotificationModel(QObject *parent)
 QString NotificationModel::getItemFromRow(std::vector<QStandardItem *> &row,
                                           const QString &original)
 {
-    return QString(row[0]->data().toString());
+    return QString(row[0]->data(Qt::DisplayRole).toString());
 }
 
 void NotificationModel::getRowFromItem(const QString &item,
