@@ -17,6 +17,7 @@ class IgnoreController;
 class TaggedUsersController;
 class AccountController;
 class ModerationActions;
+class NotificationController;
 
 class Theme;
 class WindowManager;
@@ -59,6 +60,7 @@ public:
     AccountController *const accounts{};
     CommandController *const commands{};
     HighlightController *const highlights{};
+    NotificationController *const notifications{};
     IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};

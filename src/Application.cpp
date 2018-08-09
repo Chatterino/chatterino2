@@ -5,6 +5,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
+#include "controllers/notifications/NotificationController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -47,6 +48,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
     , highlights(&this->emplace<HighlightController>())
+    , notifications(&this->emplace<NotificationController>())
     , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())

@@ -16,6 +16,7 @@
 #include "widgets/settingspages/LogsPage.hpp"
 #include "widgets/settingspages/LookPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
+#include "widgets/settingspages/NotificationPage.hpp"
 #include "widgets/settingspages/SpecialChannelsPage.hpp"
 
 #include <QDialogButtonBox>
@@ -100,6 +101,7 @@ void SettingsDialog::addTabs()
     this->addTab(new KeyboardSettingsPage);
     //    this->addTab(new LogsPage);
     this->addTab(new ModerationPage);
+    this->addTab(new NotificationPage);
     //    this->addTab(new SpecialChannelsPage);
     this->addTab(new BrowserExtensionPage);
     this->addTab(new ExternalToolsPage);

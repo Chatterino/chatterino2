@@ -391,6 +391,9 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
     {
         auto status = this->streamStatus_.access();
+        if (!status->live /*&&*/) {
+            // notifcation send
+        }
         status->live = true;
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();

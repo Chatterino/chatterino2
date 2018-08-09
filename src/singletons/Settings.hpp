@@ -139,6 +139,12 @@ public:
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
 
+    /// Notifications
+    BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",
+                                            false};
+    BoolSetting notificationPlaySound = {"/notifications/enablePlaySound",
+                                         false};
+
     /// External tools
     // Streamlink
     BoolSetting streamlinkUseCustomPath = {"/external/streamlink/useCustomPath",

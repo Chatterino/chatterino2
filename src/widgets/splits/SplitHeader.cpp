@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
@@ -154,6 +155,20 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     &Split::openInPopupPlayer);
 #endif
     menu->addAction("Open streamlink", this->split_, &Split::openInStreamlink);
+
+    auto action = new QAction(this);
+    action->setText("Notify when live");
+    action->setCheckable(true);
+    QObject::connect(menu.get(), &QMenu::aboutToShow, this, [action, this]() {
+        action->setChecked(getApp()->notifications->isChannelNotified(
+            this->split_->getChannel()->getName()));
+    });
+    action->connect(action, &QAction::triggered, this, [this]() {
+        getApp()->notifications->updateChannelNotification(
+            this->split_->getChannel()->getName());
+    });
+    menu->addAction(action);
+
     menu->addSeparator();
     menu->addAction("Reload channel emotes", this,
                     SLOT(menuReloadChannelEmotes()));
