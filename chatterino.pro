@@ -250,7 +250,8 @@ SOURCES += \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
     src/widgets/helper/EffectLabel.cpp \
-    src/widgets/helper/Button.cpp
+    src/widgets/helper/Button.cpp \
+    src/messages/MessageContainer.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -449,7 +450,8 @@ HEADERS  += \
     src/util/FunctionEventFilter.hpp \
     src/widgets/helper/EffectLabel.hpp \
     src/util/LayoutHelper.hpp \
-    src/widgets/helper/Button.hpp
+    src/widgets/helper/Button.hpp \
+    src/messages/MessageContainer.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

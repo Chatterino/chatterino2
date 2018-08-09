@@ -37,7 +37,7 @@
 namespace chatterino {
 
 LookPage::LookPage()
-    : SettingsPage("Look", ":/images/theme.svg")
+    : SettingsPage("Look", ":/settings/theme.svg")
 {
     this->initializeUi();
 }

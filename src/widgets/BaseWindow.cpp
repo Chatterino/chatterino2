@@ -104,8 +104,6 @@ void BaseWindow::init()
                 QSizePolicy policy(QSizePolicy::Ignored,
                                    QSizePolicy::Preferred);
                 policy.setHorizontalStretch(1);
-                //            title->setBaseSize(0, 0);
-                //                title->setScaledContents(true);
                 title->setSizePolicy(policy);
                 buttonLayout->addWidget(title);
                 this->ui_.titleLabel = title;

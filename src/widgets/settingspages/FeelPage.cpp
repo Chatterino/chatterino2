@@ -18,7 +18,7 @@
 namespace chatterino {
 
 FeelPage::FeelPage()
-    : SettingsPage("Feel", ":/images/behave.svg")
+    : SettingsPage("Feel", ":/settings/behave.svg")
 {
     auto app = getApp();
     LayoutCreator<FeelPage> layoutCreator(this);

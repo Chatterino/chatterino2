@@ -27,7 +27,7 @@
 namespace chatterino {
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/images/commands.svg")
+    : SettingsPage("Commands", ":/settings/commands.svg")
 {
     auto app = getApp();
 

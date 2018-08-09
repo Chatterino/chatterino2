@@ -17,7 +17,7 @@
 namespace chatterino {
 
 AboutPage::AboutPage()
-    : SettingsPage("About", ":/images/about.svg")
+    : SettingsPage("About", ":/settings/about.svg")
 {
     LayoutCreator<AboutPage> layoutCreator(this);
 
@@ -178,6 +178,18 @@ AboutPage::AboutPage()
             }
         }
     }
+
+    auto buildInfo = QStringList();
+    buildInfo += "Qt " QT_VERSION_STR;
+#ifdef USEWINSDK
+    buildInfo += "Windows SDK";
+#endif
+#ifdef _MSC_FULL_VER
+    buildInfo += "MSVC " + QString::number(_MSC_FULL_VER, 10);
+#endif
+
+    auto buildText = QString("Built with " + buildInfo.join(", "));
+    layout.emplace<QLabel>(buildText);
 
     layout->addStretch(1);
 }
