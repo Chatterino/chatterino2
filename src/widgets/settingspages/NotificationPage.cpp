@@ -1,8 +1,9 @@
 #include "NotificationPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/notifications/NotificationController.hpp"
+#include "controllers/notifications/NotificationModel.hpp"
 #include "singletons/Settings.hpp"
-#include "src/controllers/notifications/NotificationController.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -57,7 +58,8 @@ NotificationPage::NotificationPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->notifications->addChannelNotification("channel");
+                    getApp()->notifications->notificationVector.appendItem(
+                        "channel");
                 });
             }
         }
