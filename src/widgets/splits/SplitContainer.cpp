@@ -311,7 +311,7 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 
 void SplitContainer::layout()
 {
-    this->baseNode_.geometry_ = this->rect().adjusted(0, 0, -1, -1);
+    this->baseNode_.geometry_ = this->rect().adjusted(-1, -1, 0, 0);
 
     std::vector<DropRect> _dropRects;
     std::vector<ResizeRect> _resizeRects;

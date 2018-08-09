@@ -197,6 +197,8 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     if (this->menu_ && !this->menuVisible_) {
         QTimer::singleShot(80, this, [this] { this->showMenu(); });
+        this->mouseDown_ = false;
+        this->mouseOver_ = false;
     }
 }
 
