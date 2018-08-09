@@ -78,23 +78,21 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(
-        this->ui_.emoteButton, &EffectLabel::clicked, [this] {
-            if (!this->emotePopup_) {
-                this->emotePopup_ = std::make_unique<EmotePopup>();
-                this->emotePopup_->linkClicked.connect(
-                    [this](const Link &link) {
-                        if (link.type == Link::InsertText) {
-                            this->insertText(link.value + " ");
-                        }
-                    });
-            }
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [this] {
+        if (!this->emotePopup_) {
+            this->emotePopup_ = std::make_unique<EmotePopup>();
+            this->emotePopup_->linkClicked.connect([this](const Link &link) {
+                if (link.type == Link::InsertText) {
+                    this->insertText(link.value + " ");
+                }
+            });
+        }
 
-            this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                                      int(500 * this->emotePopup_->getScale()));
-            this->emotePopup_->loadChannel(this->split_->getChannel());
-            this->emotePopup_->show();
-        });
+        this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
+                                  int(500 * this->emotePopup_->getScale()));
+        this->emotePopup_->loadChannel(this->split_->getChannel());
+        this->emotePopup_->show();
+    });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -346,7 +344,7 @@ void SplitInput::paintEvent(QPaintEvent *)
 
     if (this->theme->isLightTheme()) {
         int s = int(3 * this->getScale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);
 
@@ -354,7 +352,7 @@ void SplitInput::paintEvent(QPaintEvent *)
         painter.drawRect(rect);
     } else {
         int s = int(1 * this->getScale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);
 

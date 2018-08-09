@@ -40,12 +40,12 @@ SplitContainer::SplitContainer(Notebook *parent)
         this->layout();
 
         if (modifiers == showResizeHandlesModifiers) {
-            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
+            for (auto &handle : this->resizeHandles_) {
                 handle->show();
                 handle->raise();
             }
         } else {
-            for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
+            for (auto &handle : this->resizeHandles_) {
                 handle->hide();
             }
         }
@@ -89,7 +89,7 @@ void SplitContainer::hideResizeHandles()
 {
     this->overlay_.hide();
 
-    for (std::unique_ptr<ResizeHandle> &handle : this->resizeHandles_) {
+    for (auto &handle : this->resizeHandles_) {
         handle->hide();
     }
 }
@@ -311,7 +311,7 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 
 void SplitContainer::layout()
 {
-    this->baseNode_.geometry_ = this->rect();
+    this->baseNode_.geometry_ = this->rect().adjusted(0, 0, -1, -1);
 
     std::vector<DropRect> _dropRects;
     std::vector<ResizeRect> _resizeRects;
@@ -904,7 +904,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
         case Node::_Split: {
             QRect rect = this->geometry_.toRect();
             this->split_->setGeometry(
-                rect.marginsRemoved(QMargins(1, 1, 1, 1)));
+                rect.marginsRemoved(QMargins(1, 1, 0, 0)));
         } break;
         case Node::VerticalContainer:
         case Node::HorizontalContainer: {
@@ -968,10 +968,10 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             }
 
             // iterate children
-            qreal pos = isVertical ? childRect.top() : childRect.left();
+            auto pos = int(isVertical ? childRect.top() : childRect.left());
             for (std::unique_ptr<Node> &child : this->children_) {
                 // set rect
-                QRectF rect = childRect;
+                QRect rect = childRect.toRect();
                 if (isVertical) {
                     rect.setTop(pos);
                     rect.setHeight(
@@ -985,6 +985,11 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                                                       totalFlex * child->flexH_,
                                                   minSize) *
                                   sizeMultiplier);
+                }
+
+                if (child == this->children_.back()) {
+                    rect.setRight(childRect.right() - 1);
+                    rect.setBottom(childRect.bottom() - 1);
                 }
 
                 child->geometry_ = rect;
