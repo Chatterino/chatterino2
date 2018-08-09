@@ -4,6 +4,7 @@
 
 #include <QPixmap>
 #include <QString>
+#include <QThread>
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
@@ -17,6 +18,10 @@ namespace {
 using Pixmap = boost::variant<const QPixmap *, std::unique_ptr<QPixmap>>;
 struct Frame {
     Pixmap pixmap;
+    int duration;
+};
+struct ParseFrame {
+    QImage image;
     int duration;
 };
 class Frames
@@ -77,7 +82,5 @@ private:
     bool shouldLoad_{false};
     Frames frames_{};
     QObject object_{};
-
-    static std::atomic<bool> loadedEventQueued;
 };
 }  // namespace chatterino

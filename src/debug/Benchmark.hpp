@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QDebug>
+#include "debug/Log.hpp"
+
 #include <QElapsedTimer>
 #include <boost/current_function.hpp>
 #include <boost/noncopyable.hpp>
@@ -29,8 +30,7 @@ public:
 
     ~BenchmarkGuard()
     {
-        qDebug() << this->name << float(timer.nsecsElapsed()) / 1000000.0f
-                 << "ms";
+        Log("{} {} ms", this->name, float(timer.nsecsElapsed()) / 1000000.0f);
     }
 
     qreal getElapsedMs()

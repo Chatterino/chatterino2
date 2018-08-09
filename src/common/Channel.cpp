@@ -98,8 +98,6 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     for (int i = snapshotLength - 1; i >= end; --i) {
         auto &s = snapshot[i];
 
-        qDebug() << s->parseTime << minimumTime;
-
         if (s->parseTime < minimumTime) {
             break;
         }

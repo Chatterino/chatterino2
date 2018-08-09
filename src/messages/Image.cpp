@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
@@ -15,7 +16,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QTimer>
-
 #include <functional>
 #include <thread>
 
@@ -81,11 +81,11 @@ const QPixmap *Frames::first() const
 }
 
 // functions
-std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
+std::vector<ParseFrame> readFrames(QImageReader &reader, const Url &url)
 {
-    std::vector<Frame> frames;
+    std::vector<ParseFrame> frames;
 
-    if (reader.imageCount() <= 0) {
+    if (reader.imageCount() == 0) {
         Log("Error while reading image {}: '{}'", url.string,
             reader.errorString());
         return frames;
@@ -94,14 +94,14 @@ std::vector<Frame> readFrames(QImageReader &reader, const Url &url)
     QImage image;
     for (int index = 0; index < reader.imageCount(); ++index) {
         if (reader.read(&image)) {
-            auto pixmap = std::make_unique<QPixmap>(QPixmap::fromImage(image));
+            QPixmap::fromImage(image);
 
             int duration = std::max(20, reader.nextImageDelay());
-            frames.push_back(Frame{std::move(pixmap), duration});
+            frames.push_back(ParseFrame{image, duration});
         }
     }
 
-    if (frames.size() != 0) {
+    if (frames.size() == 0) {
         Log("Error while reading image {}: '{}'", url.string,
             reader.errorString());
     }
@@ -123,11 +123,65 @@ void queueLoadedEvent()
         });
     }
 }
+
+// parsed
+template <typename Assign>
+void asd(std::queue<std::pair<Assign, std::vector<Frame>>> &queued,
+         std::mutex &mutex, std::atomic_bool &loadedEventQueued)
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    int i = 0;
+
+    while (!queued.empty()) {
+        queued.front().first(std::move(queued.front().second));
+        queued.pop();
+
+        if (++i > 50) {
+            QTimer::singleShot(3,
+                               [&] { asd(queued, mutex, loadedEventQueued); });
+            return;
+        }
+    }
+
+    getApp()->windows->forceLayoutChannelViews();
+    loadedEventQueued = false;
+}
+
+template <typename Assign>
+auto makeConvertCallback(std::vector<ParseFrame> parsed, Assign assign)
+{
+    return [parsed = std::move(parsed), assign] {
+        // BenchmarkGuard guard("convert image");
+
+        // convert to pixmap
+        auto frames = std::vector<Frame>();
+        std::transform(parsed.begin(), parsed.end(), std::back_inserter(frames),
+                       [](auto &frame) {
+                           return Frame{std::make_unique<QPixmap>(
+                                            QPixmap::fromImage(frame.image)),
+                                        frame.duration};
+                       });
+
+        // put into stack
+        static std::queue<std::pair<Assign, std::vector<Frame>>> queued;
+        static std::mutex mutex;
+
+        std::lock_guard<std::mutex> lock(mutex);
+        queued.emplace(assign, std::move(frames));
+
+        static std::atomic_bool loadedEventQueued{false};
+
+        if (!loadedEventQueued) {
+            loadedEventQueued = true;
+
+            QTimer::singleShot(100,
+                               [=] { asd(queued, mutex, loadedEventQueued); });
+        }
+    };
+}
 }  // namespace
 
 // IMAGE2
-std::atomic<bool> Image::loadedEventQueued{false};
-
 ImagePtr Image::fromUrl(const Url &url, qreal scale)
 {
     static std::unordered_map<Url, std::weak_ptr<Image>> cache;
@@ -249,25 +303,36 @@ void Image::load()
     NetworkRequest req(this->url().string);
     req.setCaller(&this->object_);
     req.setUseQuickLoadCache(true);
-    req.onSuccess([this, weak = weakOf(this)](auto result) -> Outcome {
+    req.onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
         assertInGuiThread();
 
         auto shared = weak.lock();
         if (!shared) return Failure;
 
-        // const cast since we are only reading from it
-        QBuffer buffer(const_cast<QByteArray *>(&result.getData()));
-        buffer.open(QIODevice::ReadOnly);
-        QImageReader reader(&buffer);
+        static auto parseThread = [] {
+            auto thread = std::make_unique<QThread>();
+            thread->start();
+            return thread;
+        }();
 
-        this->frames_ = readFrames(reader, this->url());
+        postToThread(
+            [data = result.getData(), weak, that] {
+                // BenchmarkGuard guard("parse image");
 
-        if (!loadedEventQueued) {
-            QTimer::singleShot(150, [] {
-                getApp()->windows->forceLayoutChannelViews();
-                loadedEventQueued = false;
-            });
-        }
+                // const cast since we are only reading from it
+                QBuffer buffer(const_cast<QByteArray *>(&data));
+                buffer.open(QIODevice::ReadOnly);
+                QImageReader reader(&buffer);
+                auto parsed = readFrames(reader, that->url());
+
+                postToThread(
+                    makeConvertCallback(std::move(parsed), [weak](auto frames) {
+                        if (auto shared = weak.lock())
+                            shared->frames_ = std::move(frames);
+                    }));
+            },
+            parseThread.get());
+
         return Success;
     });
 
