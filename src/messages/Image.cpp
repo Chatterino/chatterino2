@@ -261,15 +261,14 @@ void Image::load()
         QImageReader reader(&buffer);
 
         this->frames_ = readFrames(reader, this->url());
+
+        if (!loadedEventQueued) {
+            QTimer::singleShot(150, [] {
+                getApp()->windows->forceLayoutChannelViews();
+                loadedEventQueued = false;
+            });
+        }
         return Success;
-    });
-    req.onError([this, weak = weakOf(this)](int) {
-        auto shared = weak.lock();
-        if (!shared) return false;
-
-        this->frames_ = std::vector<Frame>();
-
-        return false;
     });
 
     req.execute();
