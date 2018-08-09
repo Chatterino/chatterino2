@@ -459,7 +459,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
+#if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
+    MSG *msg = *reinterpret_cast<MSG **>(message);
+#else
     MSG *msg = reinterpret_cast<MSG *>(message);
+#endif
 
     bool returnValue = false;
 
