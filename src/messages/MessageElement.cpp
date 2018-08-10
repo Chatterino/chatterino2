@@ -1,7 +1,6 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "common/Emotemap.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
@@ -102,7 +101,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     if (flags.hasAny(this->getFlags())) {
         if (flags.has(MessageElementFlag::EmoteImages)) {
             auto image = this->emote_->images.getImage(container.getScale());
-            if (image->empty()) return;
+            if (image->isEmpty()) return;
 
             auto size = QSize(int(container.getScale() * image->width()),
                               int(container.getScale() * image->height()));

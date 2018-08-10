@@ -116,7 +116,6 @@ private:
     void refreshViewerList();
     Outcome parseViewerList(const QJsonObject &jsonRoot);
     void loadRecentMessages();
-    Outcome parseRecentMessages(const QJsonObject &jsonRoot);
 
     void setLive(bool newLiveStatus);
 
@@ -144,7 +143,7 @@ private:
 
     // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>> badgeSets_;
-    std::vector<CheerEmoteSet> cheerEmoteSets_;
+    UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
 
     // --
     QByteArray messageSuffix_;

@@ -322,11 +322,11 @@ ChannelPtr LookPage::createPreviewChannel()
     {
         MessageBuilder builder;
         builder.emplace<TimestampElement>(QTime(8, 13, 42));
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
         builder.emplace<TextElement>("username1:", MessageElementFlag::Username, QColor("#0094FF"), FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("This is a preview message", MessageElementFlag::Text);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->pajaDank, 0.25), MessageElementFlag::AlwaysShow);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->pajaDank, 0.25), MessageElementFlag::AlwaysShow);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::BoldUsername, MessageColor::Text, FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::NonBoldUsername);
         channel->addMessage(builder.release());
@@ -334,7 +334,7 @@ ChannelPtr LookPage::createPreviewChannel()
     {
         MessageBuilder message;
         message.emplace<TimestampElement>(QTime(8, 15, 21));
-        message.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
+        message.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
         message.emplace<TextElement>("username2:", MessageElementFlag::Username, QColor("#FF6A00"), FontStyle::ChatMediumBold);
         message.emplace<TextElement>("This is another one", MessageElementFlag::Text);
         // message.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->ppHop), MessageElementFlag::BttvEmote);

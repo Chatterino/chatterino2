@@ -3,7 +3,6 @@
 #include <QString>
 #include <unordered_map>
 
-#include "common/Emotemap.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/EmoteValue.hpp"

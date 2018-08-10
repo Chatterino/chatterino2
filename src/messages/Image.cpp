@@ -21,22 +21,14 @@
 
 namespace chatterino {
 namespace {
-const QPixmap *getPixmap(const Pixmap &pixmap)
-{
-    if (pixmap.which() == 0)
-        return boost::get<const QPixmap *>(pixmap);
-    else
-        return boost::get<std::unique_ptr<QPixmap>>(pixmap).get();
-}
-
 // Frames
 Frames::Frames()
 {
     DebugCount::increase("images");
 }
 
-Frames::Frames(std::vector<Frame> &&frames)
-    : items_(std::move(frames))
+Frames::Frames(const QVector<Frame<QPixmap>> &frames)
+    : items_(frames)
 {
     DebugCount::increase("images");
     if (this->animated()) DebugCount::increase("animated images");
@@ -68,22 +60,22 @@ bool Frames::animated() const
     return this->items_.size() > 1;
 }
 
-const QPixmap *Frames::current() const
+boost::optional<QPixmap> Frames::current() const
 {
-    if (this->items_.size() == 0) return nullptr;
-    return getPixmap(this->items_[this->index_].pixmap);
+    if (this->items_.size() == 0) return boost::none;
+    return this->items_[this->index_].image;
 }
 
-const QPixmap *Frames::first() const
+boost::optional<QPixmap> Frames::first() const
 {
-    if (this->items_.size() == 0) return nullptr;
-    return getPixmap(this->items_.front().pixmap);
+    if (this->items_.size() == 0) return boost::none;
+    return this->items_.front().image;
 }
 
 // functions
-std::vector<ParseFrame> readFrames(QImageReader &reader, const Url &url)
+QVector<Frame<QImage>> readFrames(QImageReader &reader, const Url &url)
 {
-    std::vector<ParseFrame> frames;
+    QVector<Frame<QImage>> frames;
 
     if (reader.imageCount() == 0) {
         Log("Error while reading image {}: '{}'", url.string,
@@ -97,7 +89,7 @@ std::vector<ParseFrame> readFrames(QImageReader &reader, const Url &url)
             QPixmap::fromImage(image);
 
             int duration = std::max(20, reader.nextImageDelay());
-            frames.push_back(ParseFrame{image, duration});
+            frames.push_back(Frame<QImage>{image, duration});
         }
     }
 
@@ -109,36 +101,22 @@ std::vector<ParseFrame> readFrames(QImageReader &reader, const Url &url)
     return frames;
 }
 
-void queueLoadedEvent()
-{
-    static auto eventQueued = false;
-
-    if (!eventQueued) {
-        eventQueued = true;
-
-        QTimer::singleShot(250, [] {
-            getApp()->windows->incGeneration();
-            getApp()->windows->layoutChannelViews();
-            eventQueued = false;
-        });
-    }
-}
-
 // parsed
 template <typename Assign>
-void asd(std::queue<std::pair<Assign, std::vector<Frame>>> &queued,
-         std::mutex &mutex, std::atomic_bool &loadedEventQueued)
+void assignDelayed(
+    std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>> &queued,
+    std::mutex &mutex, std::atomic_bool &loadedEventQueued)
 {
     std::lock_guard<std::mutex> lock(mutex);
     int i = 0;
 
     while (!queued.empty()) {
-        queued.front().first(std::move(queued.front().second));
+        queued.front().first(queued.front().second);
         queued.pop();
 
         if (++i > 50) {
-            QTimer::singleShot(3,
-                               [&] { asd(queued, mutex, loadedEventQueued); });
+            QTimer::singleShot(
+                3, [&] { assignDelayed(queued, mutex, loadedEventQueued); });
             return;
         }
     }
@@ -148,34 +126,31 @@ void asd(std::queue<std::pair<Assign, std::vector<Frame>>> &queued,
 }
 
 template <typename Assign>
-auto makeConvertCallback(std::vector<ParseFrame> parsed, Assign assign)
+auto makeConvertCallback(const QVector<Frame<QImage>> &parsed, Assign assign)
 {
-    return [parsed = std::move(parsed), assign] {
-        // BenchmarkGuard guard("convert image");
-
+    return [parsed, assign] {
         // convert to pixmap
-        auto frames = std::vector<Frame>();
+        auto frames = QVector<Frame<QPixmap>>();
         std::transform(parsed.begin(), parsed.end(), std::back_inserter(frames),
                        [](auto &frame) {
-                           return Frame{std::make_unique<QPixmap>(
-                                            QPixmap::fromImage(frame.image)),
-                                        frame.duration};
+                           return Frame<QPixmap>{
+                               QPixmap::fromImage(frame.image), frame.duration};
                        });
 
         // put into stack
-        static std::queue<std::pair<Assign, std::vector<Frame>>> queued;
+        static std::queue<std::pair<Assign, QVector<Frame<QPixmap>>>> queued;
         static std::mutex mutex;
 
         std::lock_guard<std::mutex> lock(mutex);
-        queued.emplace(assign, std::move(frames));
+        queued.emplace(assign, frames);
 
         static std::atomic_bool loadedEventQueued{false};
 
         if (!loadedEventQueued) {
             loadedEventQueued = true;
 
-            QTimer::singleShot(100,
-                               [=] { asd(queued, mutex, loadedEventQueued); });
+            QTimer::singleShot(
+                100, [=] { assignDelayed(queued, mutex, loadedEventQueued); });
         }
     };
 }
@@ -200,12 +175,7 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     return shared;
 }
 
-ImagePtr Image::fromOwningPixmap(std::unique_ptr<QPixmap> pixmap, qreal scale)
-{
-    return ImagePtr(new Image(std::move(pixmap), scale));
-}
-
-ImagePtr Image::fromNonOwningPixmap(QPixmap *pixmap, qreal scale)
+ImagePtr Image::fromPixmap(const QPixmap &pixmap, qreal scale)
 {
     return ImagePtr(new Image(pixmap, scale));
 }
@@ -228,20 +198,10 @@ Image::Image(const Url &url, qreal scale)
 {
 }
 
-Image::Image(std::unique_ptr<QPixmap> owning, qreal scale)
+Image::Image(const QPixmap &pixmap, qreal scale)
     : scale_(scale)
+    , frames_(QVector<Frame<QPixmap>>{Frame<QPixmap>{pixmap}})
 {
-    std::vector<Frame> vec;
-    vec.push_back(Frame{std::move(owning)});
-    this->frames_ = std::move(vec);
-}
-
-Image::Image(QPixmap *nonOwning, qreal scale)
-    : scale_(scale)
-{
-    std::vector<Frame> vec;
-    vec.push_back(Frame{nonOwning});
-    this->frames_ = std::move(vec);
 }
 
 const Url &Image::url() const
@@ -249,7 +209,7 @@ const Url &Image::url() const
     return this->url_;
 }
 
-const QPixmap *Image::pixmap() const
+boost::optional<QPixmap> Image::pixmap() const
 {
     assertInGuiThread();
 
@@ -266,7 +226,7 @@ qreal Image::scale() const
     return this->scale_;
 }
 
-bool Image::empty() const
+bool Image::isEmpty() const
 {
     return this->empty_;
 }
@@ -301,37 +261,24 @@ int Image::height() const
 void Image::load()
 {
     NetworkRequest req(this->url().string);
+    req.setExecuteConcurrently(true);
     req.setCaller(&this->object_);
     req.setUseQuickLoadCache(true);
     req.onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
-        assertInGuiThread();
-
         auto shared = weak.lock();
         if (!shared) return Failure;
 
-        static auto parseThread = [] {
-            auto thread = std::make_unique<QThread>();
-            thread->start();
-            return thread;
-        }();
+        auto data = result.getData();
 
-        postToThread(
-            [data = result.getData(), weak, that] {
-                // BenchmarkGuard guard("parse image");
+        // const cast since we are only reading from it
+        QBuffer buffer(const_cast<QByteArray *>(&data));
+        buffer.open(QIODevice::ReadOnly);
+        QImageReader reader(&buffer);
+        auto parsed = readFrames(reader, that->url());
 
-                // const cast since we are only reading from it
-                QBuffer buffer(const_cast<QByteArray *>(&data));
-                buffer.open(QIODevice::ReadOnly);
-                QImageReader reader(&buffer);
-                auto parsed = readFrames(reader, that->url());
-
-                postToThread(
-                    makeConvertCallback(std::move(parsed), [weak](auto frames) {
-                        if (auto shared = weak.lock())
-                            shared->frames_ = std::move(frames);
-                    }));
-            },
-            parseThread.get());
+        postToThread(makeConvertCallback(parsed, [weak](auto frames) {
+            if (auto shared = weak.lock()) shared->frames_ = frames;
+        }));
 
         return Success;
     });
@@ -341,7 +288,7 @@ void Image::load()
 
 bool Image::operator==(const Image &other) const
 {
-    if (this->empty() && other.empty()) return true;
+    if (this->isEmpty() && other.isEmpty()) return true;
     if (!this->url_.string.isEmpty() && this->url_ == other.url_) return true;
     if (this->frames_.first() == other.frames_.first()) return true;
 

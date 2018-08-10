@@ -8,6 +8,7 @@
 #include "util/DebugCount.hpp"
 
 #include <QFile>
+#include <QtConcurrent>
 #include <cassert>
 
 namespace chatterino {
@@ -78,6 +79,11 @@ void NetworkRequest::setRawHeader(const char *headerName, const QString &value)
 void NetworkRequest::setTimeout(int ms)
 {
     this->timer->timeoutMS_ = ms;
+}
+
+void NetworkRequest::setExecuteConcurrently(bool value)
+{
+    this->data->executeConcurrently = value;
 }
 
 void NetworkRequest::makeAuthorizedV5(const QString &clientID,
@@ -228,7 +234,16 @@ void NetworkRequest::doRequest()
             NetworkResult result(bytes);
 
             DebugCount::increase("http request success");
-            data->onSuccess_(result);
+            Log("starting {}", data->request_.url().toString());
+            if (data->onSuccess_) {
+                if (data->executeConcurrently)
+                    QtConcurrent::run(
+                        [onSuccess = std::move(data->onSuccess_),
+                         result = std::move(result)] { onSuccess(result); });
+                else
+                    data->onSuccess_(result);
+            }
+            Log("finished {}", data->request_.url().toString());
 
             reply->deleteLater();
         };

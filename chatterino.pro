@@ -6,7 +6,7 @@
 
 message(----)
 
-QT                += widgets core gui network multimedia svg
+QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
 CONFIG            += c++14
@@ -105,7 +105,6 @@ SOURCES += \
     src/Application.cpp \
     src/common/Channel.cpp \
     src/common/CompletionModel.cpp \
-    src/common/Emotemap.cpp \
     src/common/NetworkData.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkRequest.cpp \
@@ -258,7 +257,6 @@ HEADERS  += \
     src/common/Channel.hpp \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
-    src/common/Emotemap.hpp \
     src/common/FlagsEnum.hpp \
     src/common/LockedObject.hpp \
     src/common/MutexValue.hpp \

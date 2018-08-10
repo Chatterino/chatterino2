@@ -22,6 +22,32 @@
 #include <QTimer>
 
 namespace chatterino {
+namespace {
+auto parseRecentMessages(const QJsonObject &jsonRoot, TwitchChannel &channel)
+{
+    QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
+    std::vector<MessagePtr> messages;
+
+    if (jsonMessages.empty()) return messages;
+
+    for (const auto jsonMessage : jsonMessages) {
+        auto content = jsonMessage.toString().toUtf8();
+        // passing nullptr as the channel makes the message invalid but we don't
+        // check for that anyways
+        auto message = Communi::IrcMessage::fromData(content, nullptr);
+        auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
+        assert(privMsg);
+
+        MessageParseArgs args;
+        TwitchMessageBuilder builder(&channel, privMsg, args);
+        if (!builder.isIgnored()) {
+            messages.push_back(builder.build());
+        }
+    }
+
+    return messages;
+}
+}  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
     : Channel(name, Channel::Type::Twitch)
@@ -436,43 +462,21 @@ void TwitchChannel::loadRecentMessages()
     NetworkRequest request(genericURL.arg(this->getRoomId()));
     request.makeAuthorizedV5(getDefaultClientID());
     request.setCaller(QThread::currentThread());
+    // can't be concurrent right now due to SignalVector
+    //    request.setExecuteConcurrently(true);
 
-    request.onSuccess(
-        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-            ChannelPtr shared = weak.lock();
-            if (!shared) return Failure;
+    request.onSuccess([that = this](auto result) -> Outcome {
+        auto messages = parseRecentMessages(result.parseJson(), *that);
 
-            return this->parseRecentMessages(result.parseJson());
-        });
+        //        postToThread([that, weak = weakOf<Channel>(that),
+        //                      messages = std::move(messages)]() mutable {
+        that->addMessagesAtStart(messages);
+        //        });
+
+        return Success;
+    });
 
     request.execute();
-}
-
-Outcome TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
-{
-    QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
-    if (jsonMessages.empty()) return Failure;
-
-    std::vector<MessagePtr> messages;
-
-    for (const auto jsonMessage : jsonMessages) {
-        auto content = jsonMessage.toString().toUtf8();
-        // passing nullptr as the channel makes the message invalid but we don't
-        // check for that anyways
-        auto message = Communi::IrcMessage::fromData(content, nullptr);
-        auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
-        assert(privMsg);
-
-        MessageParseArgs args;
-        TwitchMessageBuilder builder(this, privMsg, args);
-        if (!builder.isIgnored()) {
-            messages.push_back(builder.build());
-        }
-    }
-
-    this->addMessagesAtStart(messages);
-
-    return Success;
 }
 
 void TwitchChannel::refreshPubsub()
@@ -581,7 +585,7 @@ void TwitchChannel::loadBadges()
 
 void TwitchChannel::loadCheerEmotes()
 {
-    auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" +
+    /*auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" +
                    this->getRoomId()};
     auto request = NetworkRequest::twitchRequest(url.string);
     request.setCaller(QThread::currentThread());
@@ -589,6 +593,7 @@ void TwitchChannel::loadCheerEmotes()
     request.onSuccess(
         [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
+            std::vector<CheerEmoteSet> emoteSets;
 
             for (auto &set : cheerEmoteSets) {
                 auto cheerEmoteSet = CheerEmoteSet();
@@ -631,13 +636,15 @@ void TwitchChannel::loadCheerEmotes()
                               return lhs.minBits < rhs.minBits;  //
                           });
 
-                this->cheerEmoteSets_.emplace_back(cheerEmoteSet);
+                emoteSets.emplace_back(cheerEmoteSet);
             }
+            *this->cheerEmoteSets_.access() = std::move(emoteSets);
 
             return Success;
         });
 
     request.execute();
+    */
 }
 
 boost::optional<EmotePtr> TwitchChannel::getTwitchBadge(

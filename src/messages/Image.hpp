@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QString>
 #include <QThread>
+#include <QVector>
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/variant.hpp>
@@ -15,31 +16,27 @@
 
 namespace chatterino {
 namespace {
-using Pixmap = boost::variant<const QPixmap *, std::unique_ptr<QPixmap>>;
+template <typename Image>
 struct Frame {
-    Pixmap pixmap;
-    int duration;
-};
-struct ParseFrame {
-    QImage image;
+    Image image;
     int duration;
 };
 class Frames
 {
 public:
     Frames();
-    Frames(std::vector<Frame> &&frames);
+    Frames(const QVector<Frame<QPixmap>> &frames);
     ~Frames();
     Frames(Frames &&other) = default;
     Frames &operator=(Frames &&other) = default;
 
     bool animated() const;
     void advance();
-    const QPixmap *current() const;
-    const QPixmap *first() const;
+    boost::optional<QPixmap> current() const;
+    boost::optional<QPixmap> first() const;
 
 private:
-    std::vector<Frame> items_;
+    QVector<Frame<QPixmap>> items_;
     int index_{0};
     int durationOffset_{0};
 };
@@ -52,15 +49,13 @@ class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
 public:
     static ImagePtr fromUrl(const Url &url, qreal scale = 1);
-    static ImagePtr fromOwningPixmap(std::unique_ptr<QPixmap> pixmap,
-                                     qreal scale = 1);
-    static ImagePtr fromNonOwningPixmap(QPixmap *pixmap, qreal scale = 1);
+    static ImagePtr fromPixmap(const QPixmap &pixmap, qreal scale = 1);
     static ImagePtr getEmpty();
 
     const Url &url() const;
-    const QPixmap *pixmap() const;
+    boost::optional<QPixmap> pixmap() const;
     qreal scale() const;
-    bool empty() const;
+    bool isEmpty() const;
     int width() const;
     int height() const;
     bool animated() const;
@@ -71,8 +66,7 @@ public:
 private:
     Image();
     Image(const Url &url, qreal scale);
-    Image(std::unique_ptr<QPixmap> owning, qreal scale);
-    Image(QPixmap *nonOwning, qreal scale);
+    Image(const QPixmap &nonOwning, qreal scale);
 
     void load();
 

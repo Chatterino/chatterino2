@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
 #include "common/FlagsEnum.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"

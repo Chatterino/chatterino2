@@ -21,8 +21,6 @@ public:
 
     const ImagePtr &getImage(float scale) const;
 
-    ImagePtr getImage(float scale);
-
     bool operator==(const ImageSet &other) const;
     bool operator!=(const ImageSet &other) const;
 

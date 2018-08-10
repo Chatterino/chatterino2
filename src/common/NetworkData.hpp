@@ -19,6 +19,7 @@ struct NetworkData {
     QNetworkRequest request_;
     const QObject *caller_ = nullptr;
     bool useQuickLoadCache_{};
+    bool executeConcurrently{};
 
     NetworkReplyCreatedCallback onReplyCreated_;
     NetworkErrorCallback onError_;

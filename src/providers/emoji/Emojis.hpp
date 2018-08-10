@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
 #include "common/SimpleSignalVector.hpp"
 #include "messages/Emote.hpp"
 #include "util/ConcurrentMap.hpp"
