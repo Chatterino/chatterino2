@@ -250,12 +250,12 @@ void TwitchChannel::addPartedUser(const QString &user)
 
 QString TwitchChannel::getRoomId() const
 {
-    return this->roomID_.get();
+    return *this->roomID_.access();
 }
 
 void TwitchChannel::setRoomId(const QString &id)
 {
-    this->roomID_.set(id);
+    (*this->roomID_.access()) = id;
     this->roomIdChanged.invoke();
     this->loadRecentMessages();
 }

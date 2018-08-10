@@ -31,11 +31,9 @@ void runLoop(NativeMessagingClient &client)
         char size_c[4];
         std::cin.read(size_c, 4);
 
-        if (std::cin.eof()) {
-            break;
-        }
+        if (std::cin.eof()) break;
 
-        uint32_t size = *reinterpret_cast<uint32_t *>(size_c);
+        auto size = *reinterpret_cast<uint32_t *>(size_c);
 
 #if 0
     bool bigEndian = isBigEndian();
@@ -50,12 +48,12 @@ void runLoop(NativeMessagingClient &client)
         }
 #endif
 
-        std::unique_ptr<char[]> b(new char[size + 1]);
-        std::cin.read(b.get(), size);
-        *(b.get() + size) = '\0';
+        std::unique_ptr<char[]> buffer(new char[size + 1]);
+        std::cin.read(buffer.get(), size);
+        *(buffer.get() + size) = '\0';
 
         client.sendMessage(
-            QByteArray::fromRawData(b.get(), static_cast<int32_t>(size)));
+            QByteArray::fromRawData(buffer.get(), static_cast<int32_t>(size)));
     }
 }
 }  // namespace

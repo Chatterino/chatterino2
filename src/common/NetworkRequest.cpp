@@ -186,14 +186,14 @@ void NetworkRequest::doRequest()
         auto reply = [&]() -> QNetworkReply * {
             switch (data->requestType_) {
                 case NetworkRequestType::Get:
-                    return NetworkManager::NaM.get(data->request_);
+                    return NetworkManager::accessManager.get(data->request_);
 
                 case NetworkRequestType::Put:
-                    return NetworkManager::NaM.put(data->request_,
+                    return NetworkManager::accessManager.put(data->request_,
                                                    data->payload_);
 
                 case NetworkRequestType::Delete:
-                    return NetworkManager::NaM.deleteResource(data->request_);
+                    return NetworkManager::accessManager.deleteResource(data->request_);
 
                 default:
                     return nullptr;

@@ -2,11 +2,11 @@
 
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "common/SerializeCustom.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "uril/RapidJsonSerializeQString.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"

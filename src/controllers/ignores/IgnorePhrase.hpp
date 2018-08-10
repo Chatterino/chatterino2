@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SerializeCustom.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>

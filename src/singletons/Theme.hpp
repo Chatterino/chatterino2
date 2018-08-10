@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/SerializeCustom.hpp"
 #include "common/Singleton.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 
 #include <QBrush>
 #include <QColor>

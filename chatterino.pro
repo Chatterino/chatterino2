@@ -258,7 +258,6 @@ HEADERS  += \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
     src/common/FlagsEnum.hpp \
-    src/common/LockedObject.hpp \
     src/common/MutexValue.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkData.hpp \
@@ -271,7 +270,7 @@ HEADERS  += \
     src/common/NullablePtr.hpp \
     src/common/Property.hpp \
     src/common/ProviderId.hpp \
-    src/common/SerializeCustom.hpp \
+    src/uril/RapidJsonSerializeQString.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \

@@ -134,7 +134,7 @@ private:
     const QString popoutPlayerUrl_;
 
     bool mod_ = false;
-    MutexValue<QString> roomID_;
+    UniqueAccess<QString> roomID_;
 
     UniqueAccess<QStringList> joinedUsers_;
     bool joinedUsersMergeQueued_ = false;

@@ -200,7 +200,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         if (_type == "twitch") {
             postToThread([=] {
                 if (!name.isEmpty()) {
-                    app->twitch.server->watchingChannel.update(
+                    app->twitch.server->watchingChannel.reset(
                         app->twitch.server->getOrAddChannel(name));
                 }
 

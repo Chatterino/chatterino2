@@ -18,6 +18,9 @@
 
 namespace chatterino {
 
+//
+// Channel
+//
 Channel::Channel(const QString &name, Type type)
     : completionModel(name)
     , name_(name)
@@ -67,8 +70,7 @@ void Channel::addMessage(MessagePtr message)
 
     const QString &username = message->loginName;
     if (!username.isEmpty()) {
-        // TODO: Add recent chatters display name. This should maybe be a
-        // setting
+        // TODO: Add recent chatters display name
         this->addRecentChatter(message);
     }
 
@@ -194,7 +196,6 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 
 void Channel::addRecentChatter(const MessagePtr &message)
 {
-    // Do nothing by default
 }
 
 bool Channel::canSendMessage() const
@@ -232,9 +233,45 @@ void Channel::onConnected()
 {
 }
 
-std::weak_ptr<Channel> Channel::weak_from_this()
+//
+// Indirect channel
+//
+IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
+    : channel(_channel)
+    , type(_type)
 {
-    return std::weak_ptr<Channel>(this->shared_from_this());
+}
+
+IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
+    : data_(std::make_unique<Data>(channel, type))
+{
+}
+
+ChannelPtr IndirectChannel::get()
+{
+    return data_->channel;
+}
+
+void IndirectChannel::reset(ChannelPtr channel)
+{
+    assert(this->data_->type != Channel::Type::Direct);
+
+    this->data_->channel = channel;
+    this->data_->changed.invoke();
+}
+
+pajlada::Signals::NoArgSignal &IndirectChannel::getChannelChanged()
+{
+    return this->data_->changed;
+}
+
+Channel::Type IndirectChannel::getType()
+{
+    if (this->data_->type == Channel::Type::Direct) {
+        return this->get()->getType();
+    } else {
+        return this->data_->type;
+    }
 }
 
 }  // namespace chatterino

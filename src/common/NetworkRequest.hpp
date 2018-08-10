@@ -58,8 +58,6 @@ public:
     void execute();
 
 private:
-    // Returns true if the file was successfully loaded from cache
-    // Returns false if the cache file either didn't exist, or it contained
     // "invalid" data "invalid" is specified by the onSuccess callback
     Outcome tryLoadCachedFile();
 

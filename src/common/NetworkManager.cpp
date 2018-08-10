@@ -5,11 +5,11 @@
 namespace chatterino {
 
 QThread NetworkManager::workerThread;
-QNetworkAccessManager NetworkManager::NaM;
+QNetworkAccessManager NetworkManager::accessManager;
 
 void NetworkManager::init()
 {
-    NetworkManager::NaM.moveToThread(&NetworkManager::workerThread);
+    NetworkManager::accessManager.moveToThread(&NetworkManager::workerThread);
     NetworkManager::workerThread.start();
 }
 
