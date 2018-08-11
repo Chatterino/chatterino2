@@ -79,10 +79,12 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    TwitchChannel *channel = new TwitchChannel(channelName);
+    auto channel =
+        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
+    channel->refreshChannelEmotes();
 
     channel->sendMessageSignal.connect(
-        [this, channel](auto &chan, auto &msg, bool &sent) {
+        [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
         });
 
@@ -175,7 +177,7 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel) continue;
 
-        if (twitchChannel->getRoomId() == channelId) {
+        if (twitchChannel->roomId() == channelId) {
             return twitchChannel;
         }
     }

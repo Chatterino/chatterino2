@@ -2,9 +2,9 @@
 
 #include <IrcConnection>
 
+#include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Emotes.hpp"
@@ -64,19 +64,19 @@ public:
     void setMod(bool value);
     virtual bool isBroadcaster() const override;
 
-    QString getRoomId() const;
+    QString roomId() const;
     void setRoomId(const QString &id);
     AccessGuard<const RoomModes> accessRoomModes() const;
     void setRoomModes(const RoomModes &roomModes_);
     AccessGuard<const StreamStatus> accessStreamStatus() const;
 
-    boost::optional<EmotePtr> getBttvEmote(const EmoteName &name) const;
-    boost::optional<EmotePtr> getFfzEmote(const EmoteName &name) const;
-    AccessGuard<const EmoteMap> accessBttvEmotes() const;
-    AccessGuard<const EmoteMap> accessFfzEmotes() const;
-    const QString &getSubscriptionUrl();
-    const QString &getChannelUrl();
-    const QString &getPopoutPlayerUrl();
+    boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
+    boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::shared_ptr<const EmoteMap> bttvEmotes() const;
+    std::shared_ptr<const EmoteMap> ffzEmotes() const;
+    const QString &subscriptionUrl();
+    const QString &channelUrl();
+    const QString &popoutPlayerUrl();
 
     boost::optional<EmotePtr> getTwitchBadge(const QString &set,
                                              const QString &version) const;
@@ -127,8 +127,8 @@ private:
     UniqueAccess<UserState> userState_;
     UniqueAccess<RoomModes> roomModes_;
 
-    UniqueAccess<EmoteMap> bttvEmotes_;
-    UniqueAccess<EmoteMap> ffzEmotes_;
+    Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
+    Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;

@@ -44,8 +44,45 @@ std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonObject &jsonRoot,
 
     return {Success, std::move(emotes)};
 }
+EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+{
+    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+    static std::mutex mutex;
+
+    return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+}
+std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
+{
+    auto emotes = EmoteMap();
+    auto jsonEmotes = jsonRoot.value("emotes").toArray();
+    auto urlTemplate = "https:" + jsonRoot.value("urlTemplate").toString();
+
+    for (auto jsonEmote_ : jsonEmotes) {
+        auto jsonEmote = jsonEmote_.toObject();
+
+        auto id = EmoteId{jsonEmote.value("id").toString()};
+        auto name = EmoteName{jsonEmote.value("code").toString()};
+        // emoteObject.value("imageType").toString();
+
+        auto emote = Emote(
+            {name,
+             ImageSet{
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
+                 Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+             Tooltip{name.string + "<br />Channel Bttv Emote"},
+             Url{"https://manage.betterttv.net/emotes/" + id.string}});
+
+        emotes[name] = cachedOrMake(std::move(emote), id);
+    }
+
+    return {Success, std::move(emotes)};
+}
 }  // namespace
 
+//
+// BttvEmotes
+//
 BttvEmotes::BttvEmotes()
     : global_(std::make_shared<EmoteMap>())
 {
@@ -82,6 +119,33 @@ void BttvEmotes::loadGlobal()
     });
 
     request.execute();
+}
+
+void BttvEmotes::loadChannel(const QString &channelName,
+                             std::function<void(EmoteMap &&)> callback)
+{
+    auto request =
+        NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelName);
+
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(3000);
+
+    request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
+        auto pair = parseChannelEmotes(result.parseJson());
+        if (pair.first) callback(std::move(pair.second));
+        return pair.first;
+    });
+
+    request.execute();
+}
+
+static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
+                        const QString &emoteScale)
+{
+    urlTemplate.detach();
+
+    return {urlTemplate.replace("{{id}}", id.string)
+                .replace("{{image}}", emoteScale)};
 }
 
 }  // namespace chatterino

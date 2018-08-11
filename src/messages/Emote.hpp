@@ -38,5 +38,9 @@ using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;
 using WeakEmoteIdMap = std::unordered_map<EmoteId, std::weak_ptr<const Emote>>;
 
 EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache);
+EmotePtr cachedOrMakeEmotePtr(
+    Emote &&emote,
+    std::unordered_map<EmoteId, std::weak_ptr<const Emote>> &cache,
+    std::mutex &mutex, const EmoteId &id);
 
 }  // namespace chatterino

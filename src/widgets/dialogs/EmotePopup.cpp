@@ -74,6 +74,8 @@ EmotePopup::EmotePopup()
     layout->addWidget(notebook);
     layout->setMargin(0);
 
+    auto clicked = [this](const Link &link) { this->linkClicked.invoke(link); };
+
     auto makeView = [&](QString tabTitle) {
         auto view = new ChannelView();
 
@@ -82,6 +84,7 @@ EmotePopup::EmotePopup()
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
         notebook->addPage(view, tabTitle);
+        view->linkClicked.connect(clicked);
 
         return view;
     };
@@ -92,11 +95,6 @@ EmotePopup::EmotePopup()
     this->viewEmojis_ = makeView("Emojis");
 
     this->loadEmojis();
-
-    this->globalEmotesView_->linkClicked.connect(
-        [this](const Link &link) { this->linkClicked.invoke(link); });
-    this->viewEmojis_->linkClicked.connect(
-        [this](const Link &link) { this->linkClicked.invoke(link); });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
@@ -128,10 +126,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     addEmotes(*globalChannel, *getApp()->emotes->ffz.global(), "FrankerFaceZ");
 
     // channel
-    // addEmotes(*channel->accessBttvEmotes(), "BetterTTV Channel Emotes",
-    //          "BetterTTV Channel Emote");
-    // addEmotes(*channel->accessFfzEmotes(), "FrankerFaceZ Channel Emotes",
-    //          "FrankerFaceZ Channel Emote");
+    addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV");
+    addEmotes(*channelChannel, *twitchChannel->ffzEmotes(), "FrankerFaceZ");
 
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);

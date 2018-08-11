@@ -11,6 +11,7 @@
 #include <boost/variant.hpp>
 #include <memory>
 #include <mutex>
+#include <pajlada/signals/signal.hpp>
 
 #include "common/NullablePtr.hpp"
 
@@ -21,14 +22,12 @@ struct Frame {
     Image image;
     int duration;
 };
-class Frames
+class Frames : boost::noncopyable
 {
 public:
     Frames();
     Frames(const QVector<Frame<QPixmap>> &frames);
     ~Frames();
-    Frames(Frames &&other) = default;
-    Frames &operator=(Frames &&other) = default;
 
     bool animated() const;
     void advance();
@@ -39,6 +38,7 @@ private:
     QVector<Frame<QPixmap>> items_;
     int index_{0};
     int durationOffset_{0};
+    pajlada::Signals::Connection gifTimerConnection_;
 };
 }  // namespace
 
@@ -74,7 +74,7 @@ private:
     qreal scale_{1};
     bool empty_{false};
     bool shouldLoad_{false};
-    Frames frames_{};
+    std::unique_ptr<Frames> frames_{};
     QObject object_{};
 };
 }  // namespace chatterino

@@ -137,7 +137,7 @@ void CompletionModel::refresh()
             getApp()
                 ->twitch2->getChannelOrEmptyByID(this->channelName_)
                 .get())) {
-        auto bttv = channel->accessBttvEmotes();
+        auto bttv = channel->bttvEmotes();
         //        auto it = bttv->begin();
         //        for (const auto &emote : *bttv) {
         //        }
@@ -148,7 +148,7 @@ void CompletionModel::refresh()
         //        }
 
         // Channel-specific: FFZ Channel Emotes
-        for (const auto &emote : *channel->accessFfzEmotes()) {
+        for (const auto &emote : *channel->ffzEmotes()) {
             this->addString(emote.second->name.string,
                             TaggedString::Type::FFZChannelEmote);
         }

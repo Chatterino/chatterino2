@@ -341,7 +341,7 @@ void TwitchMessageBuilder::parseRoomID()
     if (iterator != std::end(this->tags)) {
         this->roomID_ = iterator.value().toString();
 
-        if (this->twitchChannel->getRoomId().isEmpty()) {
+        if (this->twitchChannel->roomId().isEmpty()) {
             this->twitchChannel->setRoomId(this->roomID_);
         }
     }
@@ -641,12 +641,12 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     if ((emote = getApp()->emotes->bttv.global(name))) {
         flags = MessageElementFlag::BttvEmote;
     } else if (twitchChannel &&
-               (emote = this->twitchChannel->getBttvEmote(name))) {
+               (emote = this->twitchChannel->bttvEmote(name))) {
         flags = MessageElementFlag::BttvEmote;
     } else if ((emote = getApp()->emotes->ffz.global(name))) {
         flags = MessageElementFlag::FfzEmote;
     } else if (twitchChannel &&
-               (emote = this->twitchChannel->getFfzEmote(name))) {
+               (emote = this->twitchChannel->ffzEmote(name))) {
         flags = MessageElementFlag::FfzEmote;
     }
 

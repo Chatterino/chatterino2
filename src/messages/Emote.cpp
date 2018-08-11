@@ -24,4 +24,22 @@ EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache)
     return std::make_shared<Emote>(std::move(emote));
 }
 
+EmotePtr cachedOrMakeEmotePtr(
+    Emote &&emote,
+    std::unordered_map<EmoteId, std::weak_ptr<const Emote>> &cache,
+    std::mutex &mutex, const EmoteId &id)
+{
+    std::lock_guard<std::mutex> guard(mutex);
+
+    auto shared = cache[id].lock();
+    if (shared && *shared == emote) {
+        // reuse old shared_ptr if nothing changed
+        return shared;
+    } else {
+        shared = std::make_shared<Emote>(std::move(emote));
+        cache[id] = shared;
+        return shared;
+    }
+}
+
 }  // namespace chatterino
