@@ -78,6 +78,16 @@ const QString &TwitchAccount::getUserId() const
     return this->userId_;
 }
 
+QColor TwitchAccount::color()
+{
+    return this->color_.get();
+}
+
+void TwitchAccount::setColor(QColor color)
+{
+    this->color_.set(color);
+}
+
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
 {
     if (this->oauthClient_.compare(newClientID) == 0) {

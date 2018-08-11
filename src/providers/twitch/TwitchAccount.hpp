@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
@@ -66,8 +67,10 @@ public:
     const QString &getUserName() const;
     const QString &getOAuthToken() const;
     const QString &getOAuthClient() const;
-
     const QString &getUserId() const;
+
+    QColor color();
+    void setColor(QColor color);
 
     // Attempts to update the users OAuth Client ID
     // Returns true if the value has changed, otherwise false
@@ -104,8 +107,6 @@ public:
     void loadEmotes();
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
-    QColor color;
-
 private:
     void parseEmotes(const rapidjson::Document &document);
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
@@ -115,6 +116,7 @@ private:
     QString userName_;
     QString userId_;
     const bool isAnon_;
+    Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
     std::set<TwitchUser> ignores_;

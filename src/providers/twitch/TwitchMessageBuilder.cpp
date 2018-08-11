@@ -457,7 +457,7 @@ void TwitchMessageBuilder::appendUsername()
                                    app->themes->messages.textColors.system,
                                    FontStyle::ChatMedium);
 
-        QColor selfColor = currentUser->color;
+        QColor selfColor = currentUser->color();
         if (!selfColor.isValid()) {
             selfColor = app->themes->messages.textColors.system;
         }
@@ -490,7 +490,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     QString currentUsername = currentUser->getUserName();
 
     if (this->ircMessage->nick() == currentUsername) {
-        currentUser->color = this->usernameColor_;
+        currentUser->setColor(this->usernameColor_);
         // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
@@ -645,8 +645,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::BttvEmote;
     } else if ((emote = getApp()->emotes->ffz.global(name))) {
         flags = MessageElementFlag::FfzEmote;
-    } else if (twitchChannel &&
-               (emote = this->twitchChannel->ffzEmote(name))) {
+    } else if (twitchChannel && (emote = this->twitchChannel->ffzEmote(name))) {
         flags = MessageElementFlag::FfzEmote;
     }
 
