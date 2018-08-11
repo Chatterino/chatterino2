@@ -25,7 +25,8 @@ public:
         Accounts,
     };
 
-    static void showDialog(PreferredTab preferredTab = PreferredTab::NoPreference);
+    static void showDialog(
+        PreferredTab preferredTab = PreferredTab::NoPreference);
 
 protected:
     virtual void scaleChangedEvent(float newDpi) override;

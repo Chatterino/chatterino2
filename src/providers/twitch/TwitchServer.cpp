@@ -28,26 +28,30 @@ TwitchServer::TwitchServer()
     qDebug() << "init TwitchServer";
 
     this->pubsub = new PubSub;
+
+    // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
+    // this->connect(); },
+    //                                                     this->signalHolder_,
+    //                                                     false);
 }
 
-void TwitchServer::initialize(Application &app)
+void TwitchServer::initialize(Settings &settings, Paths &paths)
 {
-    this->app = &app;
-
-    app.accounts->twitch.currentUserChanged.connect(
+    getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, bool isWrite)
+void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
+                                        bool isWrite)
 {
-    assert(this->app);
+    this->singleConnection_ = isRead == isWrite;
 
-    std::shared_ptr<TwitchAccount> account = getApp()->accounts->twitch.getCurrent();
+    std::shared_ptr<TwitchAccount> account =
+        getApp()->accounts->twitch.getCurrent();
 
     qDebug() << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
-    //    QString oauthClient = account->getOAuthClient();
     QString oauthToken = account->getOAuthToken();
 
     if (!oauthToken.startsWith("oauth:")) {
@@ -60,14 +64,14 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
 
     if (!account->isAnon()) {
         connection->setPassword(oauthToken);
-
-        // fourtf: ignored users
-        //        this->refreshIgnoredUsers(username, oauthClient, oauthToken);
     }
 
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    connection->sendCommand(Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
+    connection->sendCommand(
+        Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
+    connection->sendCommand(
+        Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
+    connection->sendCommand(
+        Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6667);
@@ -75,11 +79,14 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead, 
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    TwitchChannel *channel = new TwitchChannel(channelName, this->getReadConnection());
+    auto channel =
+        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
+    channel->refreshChannelEmotes();
 
-    channel->sendMessageSignal.connect([this, channel](auto &chan, auto &msg, bool &sent) {
-        this->onMessageSendRequested(channel, msg, sent);
-    });
+    channel->sendMessageSignal.connect(
+        [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
+            this->onMessageSendRequested(channel, msg, sent);
+        });
 
     return std::shared_ptr<Channel>(channel);
 }
@@ -114,7 +121,8 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
     } else if (command == "MODE") {
         handler.handleModeMessage(message);
     } else if (command == "NOTICE") {
-        handler.handleNoticeMessage(static_cast<Communi::IrcNoticeMessage *>(message));
+        handler.handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
     } else if (command == "JOIN") {
         handler.handleJoinMessage(message);
     } else if (command == "PART") {
@@ -134,7 +142,8 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelName)
+std::shared_ptr<Channel> TwitchServer::getCustomChannel(
+    const QString &channelName)
 {
     if (channelName == "/whispers") {
         return this->whispersChannel;
@@ -147,7 +156,8 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(const QString &channelNa
     return nullptr;
 }
 
-void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func)
+void TwitchServer::forEachChannelAndSpecialChannels(
+    std::function<void(ChannelPtr)> func)
 {
     this->forEachChannel(func);
 
@@ -155,22 +165,19 @@ void TwitchServer::forEachChannelAndSpecialChannels(std::function<void(ChannelPt
     func(this->mentionsChannel);
 }
 
-std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(const QString &channelID)
+std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
+    const QString &channelId)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
     for (const auto &weakChannel : this->channels) {
         auto channel = weakChannel.lock();
-        if (!channel) {
-            continue;
-        }
+        if (!channel) continue;
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
-        if (!twitchChannel) {
-            continue;
-        }
+        if (!twitchChannel) continue;
 
-        if (twitchChannel->roomID == channelID) {
+        if (twitchChannel->roomId() == channelId) {
             return twitchChannel;
         }
     }
@@ -183,8 +190,14 @@ QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
     return dirtyChannelName.toLower();
 }
 
-void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString &message,
-                                          bool &sent)
+bool TwitchServer::hasSeparateWriteConnection() const
+{
+    return true;
+    // return getSettings()->twitchSeperateWriteConnection;
+}
+
+void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
+                                          const QString &message, bool &sent)
 {
     sent = false;
 
@@ -192,17 +205,19 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
         //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage =
-            channel->hasModRights() ? this->lastMessageMod_ : this->lastMessagePleb_;
+        auto &lastMessage = channel->hasModRights() ? this->lastMessageMod_
+                                                    : this->lastMessagePleb_;
         size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
         auto minMessageOffset = (channel->hasModRights() ? 100ms : 1100ms);
 
         auto now = std::chrono::steady_clock::now();
 
         // check if you are sending messages too fast
-        if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now) {
+        if (!lastMessage.empty() &&
+            lastMessage.back() + minMessageOffset > now) {
             if (this->lastErrorTimeSpeed_ + 30s < now) {
-                auto errorMessage = Message::createSystemMessage("sending messages too fast");
+                auto errorMessage =
+                    makeSystemMessage("sending messages too fast");
 
                 channel->addMessage(errorMessage);
 
@@ -219,7 +234,8 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         // check if you are sending too many messages
         if (lastMessage.size() >= maxMessageCount) {
             if (this->lastErrorTimeAmount_ + 30s < now) {
-                auto errorMessage = Message::createSystemMessage("sending too many messages");
+                auto errorMessage =
+                    makeSystemMessage("sending too many messages");
 
                 channel->addMessage(errorMessage);
 
@@ -231,7 +247,7 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel, const QString 
         lastMessage.push(now);
     }
 
-    this->sendMessage(channel->name, message);
+    this->sendMessage(channel->getName(), message);
     sent = true;
 }
 

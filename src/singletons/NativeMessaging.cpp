@@ -1,4 +1,4 @@
-#include "NativeMessaging.hpp"
+#include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -31,29 +31,13 @@ namespace ipc = boost::interprocess;
 
 namespace chatterino {
 
-// fourtf: don't add this class to the application class
-NativeMessaging::NativeMessaging()
-{
-    qDebug() << "init NativeMessagingManager";
-}
+void registerNmManifest(Paths &paths, const QString &manifestFilename,
+                        const QString &registryKeyName,
+                        const QJsonDocument &document);
 
-void NativeMessaging::writeByteArray(QByteArray a)
+void registerNmHost(Paths &paths)
 {
-    char *data = a.data();
-    uint32_t size;
-    size = a.size();
-    std::cout.write(reinterpret_cast<char *>(&size), 4);
-    std::cout.write(data, a.size());
-    std::cout.flush();
-}
-
-void NativeMessaging::registerHost()
-{
-    auto app = getApp();
-
-    if (app->paths->isPortable()) {
-        return;
-    }
+    if (paths.isPortable()) return;
 
     auto getBaseDocument = [&] {
         QJsonObject obj;
@@ -65,35 +49,20 @@ void NativeMessaging::registerHost()
         return obj;
     };
 
-    auto registerManifest = [&](const QString &manifestFilename, const QString &registryKeyName,
-                                const QJsonDocument &document) {
-        // save the manifest
-        QString manifestPath = app->paths->miscDirectory + manifestFilename;
-        QFile file(manifestPath);
-        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-        file.write(document.toJson());
-        file.flush();
-
-#ifdef Q_OS_WIN
-        // clang-format off
-        QProcess::execute("REG ADD \"" + registryKeyName + "\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
-// clang-format on
-#endif
-    };
-
     // chrome
     {
         QJsonDocument document;
 
         auto obj = getBaseDocument();
-        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID "/"};
+        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID
+                                          "/"};
         obj.insert("allowed_origins", allowed_origins_arr);
         document.setObject(obj);
 
-        registerManifest(
-            "/native-messaging-manifest-chrome.json",
-            "HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.chatterino.chatterino",
-            document);
+        registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
+                           "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
+                           "s\\com.chatterino.chatterino",
+                           document);
     }
 
     // firefox
@@ -105,24 +74,43 @@ void NativeMessaging::registerHost()
         obj.insert("allowed_extensions", allowed_extensions);
         document.setObject(obj);
 
-        registerManifest("/native-messaging-manifest-firefox.json",
-                         "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com.chatterino.chatterino",
-                         document);
+        registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
+                           "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
+                           "chatterino.chatterino",
+                           document);
     }
 }
 
-void NativeMessaging::openGuiMessageQueue()
+void registerNmManifest(Paths &paths, const QString &manifestFilename,
+                        const QString &registryKeyName,
+                        const QJsonDocument &document)
 {
-    static ReceiverThread thread;
+    (void)registryKeyName;
 
-    if (thread.isRunning()) {
-        thread.exit();
-    }
+    // save the manifest
+    QString manifestPath = paths.miscDirectory + manifestFilename;
+    QFile file(manifestPath);
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    file.write(document.toJson());
+    file.flush();
 
-    thread.start();
+#ifdef Q_OS_WIN
+    // clang-format off
+        QProcess::execute("REG ADD \"" + registryKeyName + "\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
+// clang-format on
+#endif
 }
 
-void NativeMessaging::sendToGuiProcess(const QByteArray &array)
+std::string &getNmQueueName(Paths &paths)
+{
+    static std::string name =
+        "chatterino_gui" + paths.applicationFilePathHash.toStdString();
+    return name;
+}
+
+// CLIENT
+
+void NativeMessagingClient::sendMessage(const QByteArray &array)
 {
     try {
         ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
@@ -133,22 +121,41 @@ void NativeMessaging::sendToGuiProcess(const QByteArray &array)
     }
 }
 
-void NativeMessaging::ReceiverThread::run()
+void NativeMessagingClient::writeToCout(const QByteArray &array)
+{
+    auto *data = array.data();
+    auto size = uint32_t(array.size());
+
+    std::cout.write(reinterpret_cast<char *>(&size), 4);
+    std::cout.write(data, size);
+    std::cout.flush();
+}
+
+// SERVER
+
+void NativeMessagingServer::start()
+{
+    this->thread.start();
+}
+
+void NativeMessagingServer::ReceiverThread::run()
 {
     ipc::message_queue::remove("chatterino_gui");
 
-    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
+    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
+                                    MESSAGE_SIZE);
 
     while (true) {
         try {
-            std::unique_ptr<char> buf(static_cast<char *>(malloc(MESSAGE_SIZE)));
+            std::unique_ptr<char> buf(
+                static_cast<char *>(malloc(MESSAGE_SIZE)));
             ipc::message_queue::size_type retSize;
             unsigned int priority;
 
             messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document =
-                QJsonDocument::fromJson(QByteArray::fromRawData(buf.get(), retSize));
+            QJsonDocument document = QJsonDocument::fromJson(
+                QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());
         } catch (ipc::interprocess_exception &ex) {
@@ -157,7 +164,8 @@ void NativeMessaging::ReceiverThread::run()
     }
 }
 
-void NativeMessaging::ReceiverThread::handleMessage(const QJsonObject &root)
+void NativeMessagingServer::ReceiverThread::handleMessage(
+    const QJsonObject &root)
 {
     auto app = getApp();
 
@@ -192,16 +200,18 @@ void NativeMessaging::ReceiverThread::handleMessage(const QJsonObject &root)
         if (_type == "twitch") {
             postToThread([=] {
                 if (!name.isEmpty()) {
-                    app->twitch.server->watchingChannel.update(
+                    app->twitch.server->watchingChannel.reset(
                         app->twitch.server->getOrAddChannel(name));
                 }
 
                 if (attach) {
 #ifdef USEWINSDK
                     //                    if (args.height != -1) {
-                    auto *window = AttachedWindow::get(::GetForegroundWindow(), args);
+                    auto *window =
+                        AttachedWindow::get(::GetForegroundWindow(), args);
                     if (!name.isEmpty()) {
-                        window->setChannel(app->twitch.server->getOrAddChannel(name));
+                        window->setChannel(
+                            app->twitch.server->getOrAddChannel(name));
                     }
 //                    }
 //                    window->show();
@@ -229,13 +239,6 @@ void NativeMessaging::ReceiverThread::handleMessage(const QJsonObject &root)
     } else {
         qDebug() << "NM unknown action " + action;
     }
-}
-
-std::string &NativeMessaging::getGuiMessageQueueName()
-{
-    static std::string name =
-        "chatterino_gui" + Paths::getInstance()->applicationFilePathHash.toStdString();
-    return name;
 }
 
 }  // namespace chatterino

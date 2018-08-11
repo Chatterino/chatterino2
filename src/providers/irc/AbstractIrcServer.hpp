@@ -17,13 +17,11 @@ public:
     virtual ~AbstractIrcServer() = default;
 
     // connection
-    IrcConnection *getReadConnection() const;
-    IrcConnection *getWriteConnection() const;
-
     void connect();
     void disconnect();
 
     void sendMessage(const QString &channelName, const QString &message);
+    void sendRawMessage(const QString &rawMessage);
 
     // channels
     std::shared_ptr<Channel> getOrAddChannel(const QString &dirtyChannelName);
@@ -32,7 +30,8 @@ public:
     // signals
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
-    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *> onPrivateMessage;
+    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *>
+    //    onPrivateMessage;
 
     void addFakeMessage(const QString &data);
 
@@ -42,8 +41,10 @@ public:
 protected:
     AbstractIrcServer();
 
-    virtual void initializeConnection(IrcConnection *connection, bool isRead, bool isWrite) = 0;
-    virtual std::shared_ptr<Channel> createChannel(const QString &channelName) = 0;
+    virtual void initializeConnection(IrcConnection *connection, bool isRead,
+                                      bool isWrite) = 0;
+    virtual std::shared_ptr<Channel> createChannel(
+        const QString &channelName) = 0;
 
     virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
     virtual void messageReceived(Communi::IrcMessage *message);
@@ -52,8 +53,10 @@ protected:
     virtual void onConnected();
     virtual void onDisconnected();
 
-    virtual std::shared_ptr<Channel> getCustomChannel(const QString &channelName);
+    virtual std::shared_ptr<Channel> getCustomChannel(
+        const QString &channelName);
 
+    virtual bool hasSeparateWriteConnection() const = 0;
     virtual QString cleanChannelName(const QString &dirtyChannelName);
 
     QMap<QString, std::weak_ptr<Channel>> channels;

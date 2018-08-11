@@ -15,8 +15,9 @@ class HighlightBlacklistModel : public SignalVectorModel<HighlightBlacklistUser>
 
 protected:
     // turn a vector item into a model row
-    virtual HighlightBlacklistUser getItemFromRow(std::vector<QStandardItem *> &row,
-                                                  const HighlightBlacklistUser &original) override;
+    virtual HighlightBlacklistUser getItemFromRow(
+        std::vector<QStandardItem *> &row,
+        const HighlightBlacklistUser &original) override;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const HighlightBlacklistUser &item,

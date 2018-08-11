@@ -10,16 +10,19 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class UserHighlightModel;
 class HighlightModel;
 class HighlightBlacklistModel;
 
-class HighlightController : public Singleton
+class HighlightController final : public Singleton
 {
 public:
     HighlightController();
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     UnsortedSignalVector<HighlightPhrase> phrases;
     UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
@@ -39,7 +42,8 @@ private:
 
     ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting_ = {
         "/highlighting/highlights"};
-    ChatterinoSetting<std::vector<HighlightPhrase>> blacklistSetting_ = {"/highlighting/blacklist"};
+    ChatterinoSetting<std::vector<HighlightBlacklistUser>> blacklistSetting_ = {
+        "/highlighting/blacklist"};
 };
 
 }  // namespace chatterino

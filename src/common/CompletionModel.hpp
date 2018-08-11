@@ -10,6 +10,8 @@
 
 namespace chatterino {
 
+class TwitchChannel;
+
 class CompletionModel : public QAbstractListModel
 {
     struct TaggedString {

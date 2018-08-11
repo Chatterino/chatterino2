@@ -24,7 +24,8 @@ static std::map<QString, std::string> sentMessages;
 
 namespace detail {
 
-PubSubClient::PubSubClient(WebsocketClient &websocketClient, WebsocketHandle handle)
+PubSubClient::PubSubClient(WebsocketClient &websocketClient,
+                           WebsocketHandle handle)
     : websocketClient_(websocketClient)
     , handle_(handle)
 {
@@ -58,7 +59,8 @@ bool PubSubClient::listen(rapidjson::Document &message)
     this->numListens_ += numRequestedListens;
 
     for (const auto &topic : message["data"]["topics"].GetArray()) {
-        this->listeners_.emplace_back(Listener{topic.GetString(), false, false, false});
+        this->listeners_.emplace_back(
+            Listener{topic.GetString(), false, false, false});
     }
 
     auto uuid = CreateUUID();
@@ -107,7 +109,7 @@ void PubSubClient::handlePong()
 {
     assert(this->awaitingPong_);
 
-    Log("Got pong!");
+    log("Got pong!");
 
     this->awaitingPong_ = false;
 }
@@ -135,34 +137,38 @@ void PubSubClient::ping()
 
     auto self = this->shared_from_this();
 
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::seconds(15), [self](auto timer) {
-        if (!self->started_) {
-            return;
-        }
+    runAfter(this->websocketClient_.get_io_service(), std::chrono::seconds(15),
+             [self](auto timer) {
+                 if (!self->started_) {
+                     return;
+                 }
 
-        if (self->awaitingPong_) {
-            Log("No pong respnose, disconnect!");
-            // TODO(pajlada): Label this connection as "disconnect me"
-        }
-    });
+                 if (self->awaitingPong_) {
+                     log("No pong respnose, disconnect!");
+                     // TODO(pajlada): Label this connection as "disconnect me"
+                 }
+             });
 
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::minutes(5), [self](auto timer) {
-        if (!self->started_) {
-            return;
-        }
+    runAfter(this->websocketClient_.get_io_service(), std::chrono::minutes(5),
+             [self](auto timer) {
+                 if (!self->started_) {
+                     return;
+                 }
 
-        self->ping();  //
-    });
+                 self->ping();  //
+             });
 }
 
 bool PubSubClient::send(const char *payload)
 {
     WebsocketErrorCode ec;
-    this->websocketClient_.send(this->handle_, payload, websocketpp::frame::opcode::text, ec);
+    this->websocketClient_.send(this->handle_, payload,
+                                websocketpp::frame::opcode::text, ec);
 
     if (ec) {
-        Log("Error sending message {}: {}", payload, ec.message());
-        // TODO(pajlada): Check which error code happened and maybe gracefully handle it
+        log("Error sending message {}: {}", payload, ec.message());
+        // TODO(pajlada): Check which error code happened and maybe gracefully
+        // handle it
 
         return false;
     }
@@ -176,13 +182,15 @@ PubSub::PubSub()
 {
     qDebug() << "init PubSub";
 
-    this->moderationActionHandlers["clear"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["clear"] = [this](const auto &data,
+                                                     const auto &roomID) {
         ClearChatAction action(data, roomID);
 
         this->signals_.moderation.chatCleared.invoke(action);
     };
 
-    this->moderationActionHandlers["slowoff"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["slowoff"] = [this](const auto &data,
+                                                       const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::Slow;
@@ -191,33 +199,34 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["slow"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["slow"] = [this](const auto &data,
+                                                    const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::On;
 
         if (!data.HasMember("args")) {
-            Log("Missing required args member");
+            log("Missing required args member");
             return;
         }
 
         const auto &args = data["args"];
 
         if (!args.IsArray()) {
-            Log("args member must be an array");
+            log("args member must be an array");
             return;
         }
 
         if (args.Size() == 0) {
-            Log("Missing duration argument in slowmode on");
+            log("Missing duration argument in slowmode on");
             return;
         }
 
         const auto &durationArg = args[0];
 
         if (!durationArg.IsString()) {
-            Log("Duration arg must be a string");
+            log("Duration arg must be a string");
             return;
         }
 
@@ -228,7 +237,8 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["r9kbetaoff"] = [this](const auto &data,
+                                                          const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::R9K;
@@ -237,7 +247,8 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["r9kbeta"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["r9kbeta"] = [this](const auto &data,
+                                                       const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::R9K;
@@ -246,17 +257,18 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["subscribersoff"] = [this](const auto &data,
-                                                              const auto &roomID) {
-        ModeChangedAction action(data, roomID);
+    this->moderationActionHandlers["subscribersoff"] =
+        [this](const auto &data, const auto &roomID) {
+            ModeChangedAction action(data, roomID);
 
-        action.mode = ModeChangedAction::Mode::SubscribersOnly;
-        action.state = ModeChangedAction::State::Off;
+            action.mode = ModeChangedAction::Mode::SubscribersOnly;
+            action.state = ModeChangedAction::State::Off;
 
-        this->signals_.moderation.modeChanged.invoke(action);
-    };
+            this->signals_.moderation.modeChanged.invoke(action);
+        };
 
-    this->moderationActionHandlers["subscribers"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["subscribers"] = [this](const auto &data,
+                                                           const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::SubscribersOnly;
@@ -265,16 +277,18 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["emoteonlyoff"] = [this](const auto &data, const auto &roomID) {
-        ModeChangedAction action(data, roomID);
+    this->moderationActionHandlers["emoteonlyoff"] =
+        [this](const auto &data, const auto &roomID) {
+            ModeChangedAction action(data, roomID);
 
-        action.mode = ModeChangedAction::Mode::EmoteOnly;
-        action.state = ModeChangedAction::State::Off;
+            action.mode = ModeChangedAction::Mode::EmoteOnly;
+            action.state = ModeChangedAction::State::Off;
 
-        this->signals_.moderation.modeChanged.invoke(action);
-    };
+            this->signals_.moderation.modeChanged.invoke(action);
+        };
 
-    this->moderationActionHandlers["emoteonly"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["emoteonly"] = [this](const auto &data,
+                                                         const auto &roomID) {
         ModeChangedAction action(data, roomID);
 
         action.mode = ModeChangedAction::Mode::EmoteOnly;
@@ -283,7 +297,8 @@ PubSub::PubSub()
         this->signals_.moderation.modeChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["unmod"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["unmod"] = [this](const auto &data,
+                                                     const auto &roomID) {
         ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
@@ -299,7 +314,7 @@ PubSub::PubSub()
                 return;
             }
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
 
         action.modded = false;
@@ -307,7 +322,8 @@ PubSub::PubSub()
         this->signals_.moderation.moderationStateChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["mod"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["mod"] = [this](const auto &data,
+                                                   const auto &roomID) {
         ModerationStateAction action(data, roomID);
 
         getTargetUser(data, action.target);
@@ -323,7 +339,7 @@ PubSub::PubSub()
                 return;
             }
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
 
         action.modded = true;
@@ -331,7 +347,8 @@ PubSub::PubSub()
         this->signals_.moderation.moderationStateChanged.invoke(action);
     };
 
-    this->moderationActionHandlers["timeout"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["timeout"] = [this](const auto &data,
+                                                       const auto &roomID) {
         BanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
@@ -363,11 +380,12 @@ PubSub::PubSub()
 
             this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
-    this->moderationActionHandlers["ban"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["ban"] = [this](const auto &data,
+                                                   const auto &roomID) {
         BanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
@@ -392,11 +410,12 @@ PubSub::PubSub()
 
             this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
-    this->moderationActionHandlers["unban"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["unban"] = [this](const auto &data,
+                                                     const auto &roomID) {
         UnbanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
@@ -417,11 +436,12 @@ PubSub::PubSub()
 
             this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
-    this->moderationActionHandlers["untimeout"] = [this](const auto &data, const auto &roomID) {
+    this->moderationActionHandlers["untimeout"] = [this](const auto &data,
+                                                         const auto &roomID) {
         UnbanAction action(data, roomID);
 
         getCreatedByUser(data, action.source);
@@ -442,21 +462,26 @@ PubSub::PubSub()
 
             this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
-    this->websocketClient.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    this->websocketClient.clear_access_channels(
+        websocketpp::log::alevel::frame_payload);
 
     this->websocketClient.init_asio();
 
     // SSL Handshake
-    this->websocketClient.set_tls_init_handler(bind(&PubSub::onTLSInit, this, ::_1));
+    this->websocketClient.set_tls_init_handler(
+        bind(&PubSub::onTLSInit, this, ::_1));
 
-    this->websocketClient.set_message_handler(bind(&PubSub::onMessage, this, ::_1, ::_2));
-    this->websocketClient.set_open_handler(bind(&PubSub::onConnectionOpen, this, ::_1));
-    this->websocketClient.set_close_handler(bind(&PubSub::onConnectionClose, this, ::_1));
+    this->websocketClient.set_message_handler(
+        bind(&PubSub::onMessage, this, ::_1, ::_2));
+    this->websocketClient.set_open_handler(
+        bind(&PubSub::onConnectionOpen, this, ::_1));
+    this->websocketClient.set_close_handler(
+        bind(&PubSub::onConnectionClose, this, ::_1));
 
     // Add an initial client
     this->addClient();
@@ -468,7 +493,7 @@ void PubSub::addClient()
     auto con = this->websocketClient.get_connection(TWITCH_PUBSUB_URL, ec);
 
     if (ec) {
-        Log("Unable to establish connection: {}", ec.message());
+        log("Unable to establish connection: {}", ec.message());
         return;
     }
 
@@ -477,7 +502,8 @@ void PubSub::addClient()
 
 void PubSub::start()
 {
-    this->mainThread.reset(new std::thread(std::bind(&PubSub::runThread, this)));
+    this->mainThread.reset(
+        new std::thread(std::bind(&PubSub::runThread, this)));
 }
 
 void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
@@ -486,7 +512,7 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
 
     std::string userID = account->getUserId().toStdString();
 
-    Log("Connection open!");
+    log("Connection open!");
     websocketpp::lib::error_code ec;
 
     std::vector<std::string> topics({"whispers." + userID});
@@ -494,7 +520,7 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
     this->listen(createListenMessage(topics, account));
 
     if (ec) {
-        Log("Unable to send message to websocket server: {}", ec.message());
+        log("Unable to send message to websocket server: {}", ec.message());
         return;
     }
 }
@@ -507,27 +533,28 @@ void PubSub::unlistenAllModerationActions()
     }
 }
 
-void PubSub::listenToChannelModerationActions(const QString &channelID,
-                                              std::shared_ptr<TwitchAccount> account)
+void PubSub::listenToChannelModerationActions(
+    const QString &channelID, std::shared_ptr<TwitchAccount> account)
 {
     assert(!channelID.isEmpty());
     assert(account != nullptr);
     QString userID = account->getUserId();
-    assert(!userID.isEmpty());
+    if (userID.isEmpty()) return;
 
     std::string topic(fS("chat_moderator_actions.{}.{}", userID, channelID));
 
     if (this->isListeningToTopic(topic)) {
-        Log("We are already listening to topic {}", topic);
+        log("We are already listening to topic {}", topic);
         return;
     }
 
-    Log("Listen to topic {}", topic);
+    log("Listen to topic {}", topic);
 
     this->listenToTopic(topic, account);
 }
 
-void PubSub::listenToTopic(const std::string &topic, std::shared_ptr<TwitchAccount> account)
+void PubSub::listenToTopic(const std::string &topic,
+                           std::shared_ptr<TwitchAccount> account)
 {
     auto message = createListenMessage({topic}, account);
 
@@ -537,17 +564,18 @@ void PubSub::listenToTopic(const std::string &topic, std::shared_ptr<TwitchAccou
 void PubSub::listen(rapidjson::Document &&msg)
 {
     if (this->tryListen(msg)) {
-        Log("Successfully listened!");
+        log("Successfully listened!");
         return;
     }
 
-    Log("Added to the back of the queue");
-    this->requests.emplace_back(std::make_unique<rapidjson::Document>(std::move(msg)));
+    log("Added to the back of the queue");
+    this->requests.emplace_back(
+        std::make_unique<rapidjson::Document>(std::move(msg)));
 }
 
 bool PubSub::tryListen(rapidjson::Document &msg)
 {
-    Log("tryListen with {} clients", this->clients.size());
+    log("tryListen with {} clients", this->clients.size());
     for (const auto &p : this->clients) {
         const auto &client = p.second;
         if (client->listen(msg)) {
@@ -570,7 +598,8 @@ bool PubSub::isListeningToTopic(const std::string &topic)
     return false;
 }
 
-void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr websocketMessage)
+void PubSub::onMessage(websocketpp::connection_hdl hdl,
+                       WebsocketMessagePtr websocketMessage)
 {
     const std::string &payload = websocketMessage->get_payload();
 
@@ -579,20 +608,22 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
     rapidjson::ParseResult res = msg.Parse(payload.c_str());
 
     if (!res) {
-        Log("Error parsing message '{}' from PubSub: {}", payload,
+        log("Error parsing message '{}' from PubSub: {}", payload,
             rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (!msg.IsObject()) {
-        Log("Error parsing message '{}' from PubSub. Root object is not an object", payload);
+        log("Error parsing message '{}' from PubSub. Root object is not an "
+            "object",
+            payload);
         return;
     }
 
     std::string type;
 
     if (!rj::getSafe(msg, "type", type)) {
-        Log("Missing required string member `type` in message root");
+        log("Missing required string member `type` in message root");
         return;
     }
 
@@ -600,14 +631,14 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
         this->handleListenResponse(msg);
     } else if (type == "MESSAGE") {
         if (!msg.HasMember("data")) {
-            Log("Missing required object member `data` in message root");
+            log("Missing required object member `data` in message root");
             return;
         }
 
         const auto &data = msg["data"];
 
         if (!data.IsObject()) {
-            Log("Member `data` must be an object");
+            log("Member `data` must be an object");
             return;
         }
 
@@ -615,23 +646,25 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr webs
     } else if (type == "PONG") {
         auto clientIt = this->clients.find(hdl);
 
-        // If this assert goes off, there's something wrong with the connection creation/preserving
-        // code KKona
+        // If this assert goes off, there's something wrong with the connection
+        // creation/preserving code KKona
         assert(clientIt != this->clients.end());
 
         auto &client = *clientIt;
 
         client.second->handlePong();
     } else {
-        Log("Unknown message type: {}", type);
+        log("Unknown message type: {}", type);
     }
 }
 
 void PubSub::onConnectionOpen(WebsocketHandle hdl)
 {
-    auto client = std::make_shared<detail::PubSubClient>(this->websocketClient, hdl);
+    auto client =
+        std::make_shared<detail::PubSubClient>(this->websocketClient, hdl);
 
-    // We separate the starting from the constructor because we will want to use shared_from_this
+    // We separate the starting from the constructor because we will want to use
+    // shared_from_this
     client->start();
 
     this->clients.emplace(hdl, client);
@@ -643,8 +676,8 @@ void PubSub::onConnectionClose(WebsocketHandle hdl)
 {
     auto clientIt = this->clients.find(hdl);
 
-    // If this assert goes off, there's something wrong with the connection creation/preserving
-    // code KKona
+    // If this assert goes off, there's something wrong with the connection
+    // creation/preserving code KKona
     assert(clientIt != this->clients.end());
 
     auto &client = clientIt->second;
@@ -658,14 +691,15 @@ void PubSub::onConnectionClose(WebsocketHandle hdl)
 
 PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
 {
-    WebsocketContextPtr ctx(new boost::asio::ssl::context(boost::asio::ssl::context::tlsv1));
+    WebsocketContextPtr ctx(
+        new boost::asio::ssl::context(boost::asio::ssl::context::tlsv1));
 
     try {
         ctx->set_options(boost::asio::ssl::context::default_workarounds |
                          boost::asio::ssl::context::no_sslv2 |
                          boost::asio::ssl::context::single_dh_use);
     } catch (const std::exception &e) {
-        Log("Exception caught in OnTLSInit: {}", e.what());
+        log("Exception caught in OnTLSInit: {}", e.what());
     }
 
     return ctx;
@@ -680,12 +714,12 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
         rj::getSafe(msg, "nonce", nonce);
 
         if (error.empty()) {
-            Log("Successfully listened to nonce {}", nonce);
+            log("Successfully listened to nonce {}", nonce);
             // Nothing went wrong
             return;
         }
 
-        Log("PubSub error: {} on nonce {}", error, nonce);
+        log("PubSub error: {} on nonce {}", error, nonce);
         return;
     }
 }
@@ -695,14 +729,14 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     QString topic;
 
     if (!rj::getSafe(outerData, "topic", topic)) {
-        Log("Missing required string member `topic` in outerData");
+        log("Missing required string member `topic` in outerData");
         return;
     }
 
     std::string payload;
 
     if (!rj::getSafe(outerData, "message", payload)) {
-        Log("Expected string message in outerData");
+        log("Expected string message in outerData");
         return;
     }
 
@@ -711,7 +745,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     rapidjson::ParseResult res = msg.Parse(payload.c_str());
 
     if (!res) {
-        Log("Error parsing message '{}' from PubSub: {}", payload,
+        log("Error parsing message '{}' from PubSub: {}", payload,
             rapidjson::GetParseError_En(res.Code()));
         return;
     }
@@ -720,7 +754,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         std::string whisperType;
 
         if (!rj::getSafe(msg, "type", whisperType)) {
-            Log("Bad whisper data");
+            log("Bad whisper data");
             return;
         }
 
@@ -731,7 +765,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         } else if (whisperType == "thread") {
             // Handle thread?
         } else {
-            Log("Invalid whisper type: {}", whisperType);
+            log("Invalid whisper type: {}", whisperType);
             assert(false);
             return;
         }
@@ -743,30 +777,30 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         std::string moderationAction;
 
         if (!rj::getSafe(data, "moderation_action", moderationAction)) {
-            Log("Missing moderation action in data: {}", rj::stringify(data));
+            log("Missing moderation action in data: {}", rj::stringify(data));
             return;
         }
 
         auto handlerIt = this->moderationActionHandlers.find(moderationAction);
 
         if (handlerIt == this->moderationActionHandlers.end()) {
-            Log("No handler found for moderation action {}", moderationAction);
+            log("No handler found for moderation action {}", moderationAction);
             return;
         }
 
         // Invoke handler function
         handlerIt->second(data, topicParts[2]);
     } else {
-        Log("Unknown topic: {}", topic);
+        log("Unknown topic: {}", topic);
         return;
     }
 }
 
 void PubSub::runThread()
 {
-    Log("Start pubsub manager thread");
+    log("Start pubsub manager thread");
     this->websocketClient.run();
-    Log("Done with pubsub manager thread");
+    log("Done with pubsub manager thread");
 }
 
 }  // namespace chatterino

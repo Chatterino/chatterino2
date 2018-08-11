@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <utility>
 
 namespace chatterino {
@@ -23,13 +24,8 @@ struct SelectionItem {
 
     bool operator<(const SelectionItem &b) const
     {
-        if (this->messageIndex < b.messageIndex) {
-            return true;
-        }
-        if (this->messageIndex == b.messageIndex && this->charIndex < b.charIndex) {
-            return true;
-        }
-        return false;
+        return std::tie(this->messageIndex, this->charIndex) <
+               std::tie(b.messageIndex, b.charIndex);
     }
 
     bool operator>(const SelectionItem &b) const
@@ -39,7 +35,8 @@ struct SelectionItem {
 
     bool operator==(const SelectionItem &b) const
     {
-        return this->messageIndex == b.messageIndex && this->charIndex == b.charIndex;
+        return this->messageIndex == b.messageIndex &&
+               this->charIndex == b.charIndex;
     }
 
     bool operator!=(const SelectionItem &b) const
@@ -74,7 +71,8 @@ struct Selection {
 
     bool isSingleMessage() const
     {
-        return this->selectionMin.messageIndex == this->selectionMax.messageIndex;
+        return this->selectionMin.messageIndex ==
+               this->selectionMax.messageIndex;
     }
 };
 

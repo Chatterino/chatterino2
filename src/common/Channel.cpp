@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/WindowManager.hpp"
@@ -17,14 +18,18 @@
 
 namespace chatterino {
 
-Channel::Channel(const QString &_name, Type type)
-    : name(_name)
-    , completionModel(this->name)
+//
+// Channel
+//
+Channel::Channel(const QString &name, Type type)
+    : completionModel(name)
+    , name_(name)
     , type_(type)
 {
-    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout, [this]() {
-        this->completionModel.clearExpiredStrings();  //
-    });
+    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout,
+                     [this]() {
+                         this->completionModel.clearExpiredStrings();  //
+                     });
     this->clearCompletionModelTimer_.start(60 * 1000);
 }
 
@@ -38,6 +43,11 @@ Channel::Type Channel::getType() const
     return this->type_;
 }
 
+const QString &Channel::getName() const
+{
+    return this->name_;
+}
+
 bool Channel::isTwitchChannel() const
 {
     return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
@@ -45,7 +55,7 @@ bool Channel::isTwitchChannel() const
 
 bool Channel::isEmpty() const
 {
-    return this->name.isEmpty();
+    return this->name_.isEmpty();
 }
 
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
@@ -60,13 +70,13 @@ void Channel::addMessage(MessagePtr message)
 
     const QString &username = message->loginName;
     if (!username.isEmpty()) {
-        // TODO: Add recent chatters display name. This should maybe be a setting
+        // TODO: Add recent chatters display name
         this->addRecentChatter(message);
     }
 
     // FOURTF: change this when adding more providers
     if (this->isTwitchChannel()) {
-        app->logging->addMessage(this->name, message);
+        app->logging->addMessage(this->name_, message);
     }
 
     if (this->messages_.pushBack(message, deleted)) {
@@ -90,37 +100,43 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     for (int i = snapshotLength - 1; i >= end; --i) {
         auto &s = snapshot[i];
 
-        qDebug() << s->parseTime << minimumTime;
-
         if (s->parseTime < minimumTime) {
             break;
         }
 
-        if (s->flags.HasFlag(Message::Untimeout) && s->timeoutUser == message->timeoutUser) {
+        if (s->flags.has(MessageFlag::Untimeout) &&
+            s->timeoutUser == message->timeoutUser) {
             break;
         }
 
-        if (s->flags.HasFlag(Message::Timeout) && s->timeoutUser == message->timeoutUser) {
-            if (message->flags.HasFlag(Message::PubSub) && !s->flags.HasFlag(Message::PubSub)) {
+        if (s->flags.has(MessageFlag::Timeout) &&
+            s->timeoutUser == message->timeoutUser)  //
+        {
+            if (message->flags.has(MessageFlag::PubSub) &&
+                !s->flags.has(MessageFlag::PubSub))  //
+            {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
-            if (!message->flags.HasFlag(Message::PubSub) && s->flags.HasFlag(Message::PubSub)) {
+            if (!message->flags.has(MessageFlag::PubSub) &&
+                s->flags.has(MessageFlag::PubSub))  //
+            {
                 addMessage = false;
                 break;
             }
 
             int count = s->count + 1;
 
-            MessagePtr replacement(Message::createSystemMessage(
-                message->searchText + QString(" (") + QString::number(count) + " times)"));
+            MessageBuilder replacement(systemMessage,
+                                       message->searchText + QString(" (") +
+                                           QString::number(count) + " times)");
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;
             replacement->flags = message->flags;
 
-            this->replaceMessage(s, replacement);
+            this->replaceMessage(s, replacement.release());
 
             return;
         }
@@ -129,9 +145,10 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     // disable the messages from the user
     for (int i = 0; i < snapshotLength; i++) {
         auto &s = snapshot[i];
-        if ((s->flags & (Message::Timeout | Message::Untimeout)) == 0 &&
+        if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
             s->loginName == message->timeoutUser) {
-            s->flags.EnableFlag(Message::Disabled);
+            // FOURTF: disabled for now
+            // s->flags.EnableFlag(MessageFlag::Disabled);
         }
     }
 
@@ -149,17 +166,19 @@ void Channel::disableAllMessages()
     int snapshotLength = snapshot.getLength();
     for (int i = 0; i < snapshotLength; i++) {
         auto &s = snapshot[i];
-        if (s->flags & Message::System || s->flags & Message::Timeout) {
+        if (s->flags.hasAny({MessageFlag::System, MessageFlag::Timeout})) {
             continue;
         }
 
-        s->flags.EnableFlag(Message::Disabled);
+        // FOURTF: disabled for now
+        // s->flags.EnableFlag(MessageFlag::Disabled);
     }
 }
 
 void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 {
-    std::vector<MessagePtr> addedMessages = this->messages_.pushFront(_messages);
+    std::vector<MessagePtr> addedMessages =
+        this->messages_.pushFront(_messages);
 
     if (addedMessages.size() != 0) {
         this->messagesAddedAtStart.invoke(addedMessages);
@@ -175,9 +194,8 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
-void Channel::addRecentChatter(const std::shared_ptr<Message> &message)
+void Channel::addRecentChatter(const MessagePtr &message)
 {
-    // Do nothing by default
 }
 
 bool Channel::canSendMessage() const
@@ -213,6 +231,47 @@ std::shared_ptr<Channel> Channel::getEmpty()
 
 void Channel::onConnected()
 {
+}
+
+//
+// Indirect channel
+//
+IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
+    : channel(_channel)
+    , type(_type)
+{
+}
+
+IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
+    : data_(std::make_unique<Data>(channel, type))
+{
+}
+
+ChannelPtr IndirectChannel::get()
+{
+    return data_->channel;
+}
+
+void IndirectChannel::reset(ChannelPtr channel)
+{
+    assert(this->data_->type != Channel::Type::Direct);
+
+    this->data_->channel = channel;
+    this->data_->changed.invoke();
+}
+
+pajlada::Signals::NoArgSignal &IndirectChannel::getChannelChanged()
+{
+    return this->data_->changed;
+}
+
+Channel::Type IndirectChannel::getType()
+{
+    if (this->data_->type == Channel::Type::Direct) {
+        return this->get()->getType();
+    } else {
+        return this->data_->type;
+    }
 }
 
 }  // namespace chatterino

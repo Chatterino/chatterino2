@@ -11,27 +11,32 @@
 namespace chatterino {
 
 UpdateDialog::UpdateDialog()
-    : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::TopMost |
-                                            BaseWindow::EnableCustomFrame))
+    : BaseWindow(nullptr,
+                 BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::TopMost |
+                                   BaseWindow::EnableCustomFrame))
 {
-    auto layout = LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
+    auto layout =
+        LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();
 
-    layout.emplace<Label>("You shouldn't be seeing this dialog.").assign(&this->ui_.label);
+    layout.emplace<Label>("You shouldn't be seeing this dialog.")
+        .assign(&this->ui_.label);
 
     auto buttons = layout.emplace<QDialogButtonBox>();
     auto install = buttons->addButton("Install", QDialogButtonBox::AcceptRole);
     this->ui_.installButton = install;
     auto dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
 
-    QObject::connect(install, &QPushButton::clicked, this, [this] { this->close(); });
+    QObject::connect(install, &QPushButton::clicked, this,
+                     [this] { this->close(); });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
         this->buttonClicked.invoke(Dismiss);
         this->close();
     });
 
     this->updateStatusChanged(Updates::getInstance().getStatus());
-    this->connections_.managedConnect(Updates::getInstance().statusUpdated,
-                                      [this](auto status) { this->updateStatusChanged(status); });
+    this->connections_.managedConnect(
+        Updates::getInstance().statusUpdated,
+        [this](auto status) { this->updateStatusChanged(status); });
 }
 
 void UpdateDialog::updateStatusChanged(Updates::Status status)
@@ -41,7 +46,8 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
     switch (status) {
         case Updates::UpdateAvailable: {
             this->ui_.label->setText(
-                QString("An update (%1) is available.\n\nDo you want to download and install it?")
+                QString("An update (%1) is available.\n\nDo you want to "
+                        "download and install it?")
                     .arg(Updates::getInstance().getOnlineVersion()));
         } break;
 
@@ -50,8 +56,9 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
         } break;
 
         case Updates::Downloading: {
-            this->ui_.label->setText("Downloading updates.\n\nChatterino will restart "
-                                     "automatically when the download is done.");
+            this->ui_.label->setText(
+                "Downloading updates.\n\nChatterino will restart "
+                "automatically when the download is done.");
         } break;
 
         case Updates::DownloadFailed: {

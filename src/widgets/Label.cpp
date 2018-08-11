@@ -18,7 +18,8 @@ Label::Label(BaseWidget *parent, QString text, FontStyle style)
 {
     auto app = getApp();
 
-    this->connections_.managedConnect(app->fonts->fontChanged, [this] { this->updateSize(); });
+    this->connections_.managedConnect(app->fonts->fontChanged,
+                                      [this] { this->updateSize(); });
 }
 
 const QString &Label::getText() const
@@ -88,11 +89,11 @@ void Label::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
     QFontMetrics metrics = app->fonts->getFontMetrics(
-        this->getFontStyle(),
-        this->getScale() * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
+        this->getFontStyle(), this->getScale() * 96.f / this->logicalDpiX() *
+                                  this->devicePixelRatioF());
     painter.setFont(app->fonts->getFont(
-        this->getFontStyle(),
-        this->getScale() * 96.f / this->logicalDpiX() * this->devicePixelRatioF()));
+        this->getFontStyle(), this->getScale() * 96.f / this->logicalDpiX() *
+                                  this->devicePixelRatioF()));
 
     int offset = this->getOffset();
 
@@ -118,7 +119,8 @@ void Label::updateSize()
 {
     auto app = getApp();
 
-    QFontMetrics metrics = app->fonts->getFontMetrics(this->fontStyle_, this->getScale());
+    QFontMetrics metrics =
+        app->fonts->getFontMetrics(this->fontStyle_, this->getScale());
 
     int width = metrics.width(this->text_) + (2 * this->getOffset());
     int height = metrics.height();

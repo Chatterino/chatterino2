@@ -31,14 +31,16 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     // add
     QPushButton *add = new QPushButton("Add");
     buttons->addWidget(add);
-    QObject::connect(add, &QPushButton::clicked, [this] { this->addButtonPressed.invoke(); });
+    QObject::connect(add, &QPushButton::clicked,
+                     [this] { this->addButtonPressed.invoke(); });
 
     // remove
     QPushButton *remove = new QPushButton("Remove");
     buttons->addWidget(remove);
     QObject::connect(remove, &QPushButton::clicked, [this] {
         QModelIndexList list;
-        while ((list = this->getTableView()->selectionModel()->selectedRows(0)).length() > 0) {
+        while ((list = this->getTableView()->selectionModel()->selectedRows(0))
+                   .length() > 0) {
             model_->removeRow(list[0].row());
         }
     });
@@ -55,7 +57,8 @@ void EditableModelView::setTitles(std::initializer_list<QString> titles)
             break;
         }
 
-        this->model_->setHeaderData(i++, Qt::Horizontal, title, Qt::DisplayRole);
+        this->model_->setHeaderData(i++, Qt::Horizontal, title,
+                                    Qt::DisplayRole);
     }
 }
 

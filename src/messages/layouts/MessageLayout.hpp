@@ -14,34 +14,33 @@
 
 namespace chatterino {
 
+enum class MessageLayoutFlag : uint8_t {
+    RequiresBufferUpdate = 1 << 1,
+    RequiresLayout = 1 << 2,
+    AlternateBackground = 1 << 3,
+    Collapsed = 1 << 4,
+    Expanded = 1 << 5,
+};
+using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
+
 class MessageLayout : boost::noncopyable
 {
 public:
-    enum Flags : uint8_t {
-        RequiresBufferUpdate = 1 << 1,
-        RequiresLayout = 1 << 2,
-        AlternateBackground = 1 << 3,
-        Collapsed = 1 << 4,
-        Expanded = 1 << 5,
-    };
-
     MessageLayout(MessagePtr message_);
     ~MessageLayout();
 
-    Message *getMessage();
+    const Message *getMessage();
 
-    // Height
     int getHeight() const;
 
-    // Flags
-    FlagsEnum<Flags> flags;
+    MessageLayoutFlags flags;
 
-    // Layout
-    bool layout(int width, float scale_, MessageElement::Flags flags);
+    bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting
-    void paint(QPainter &painter, int width, int y, int messageIndex, Selection &selection,
-               bool isLastReadMessage, bool isWindowFocused);
+    void paint(QPainter &painter, int width, int y, int messageIndex,
+               Selection &selection, bool isLastReadMessage,
+               bool isWindowFocused);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
@@ -69,12 +68,12 @@ private:
     float scale_ = -1;
     unsigned int bufferUpdatedCount_ = 0;
 
-    MessageElement::Flags currentWordFlags_ = MessageElement::None;
+    MessageElementFlags currentWordFlags_;
 
     int collapsedHeight_ = 32;
 
     // methods
-    void actuallyLayout(int width, MessageElement::Flags flags);
+    void actuallyLayout(int width, MessageElementFlags flags);
     void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
 };
 

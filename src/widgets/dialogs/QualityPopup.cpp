@@ -15,7 +15,8 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     QObject::connect(&this->ui_.cancelButton, &QPushButton::clicked, this,
                      &QualityPopup::cancelButtonClicked);
 
-    this->ui_.buttonBox.addButton(&this->ui_.okButton, QDialogButtonBox::ButtonRole::AcceptRole);
+    this->ui_.buttonBox.addButton(&this->ui_.okButton,
+                                  QDialogButtonBox::ButtonRole::AcceptRole);
     this->ui_.buttonBox.addButton(&this->ui_.cancelButton,
                                   QDialogButtonBox::ButtonRole::RejectRole);
 
@@ -46,7 +47,7 @@ void QualityPopup::okButtonClicked()
     try {
         openStreamlink(channelURL, this->ui_.selector.currentText());
     } catch (const Exception &ex) {
-        Log("Exception caught trying to open streamlink: {}", ex.what());
+        log("Exception caught trying to open streamlink: {}", ex.what());
     }
 
     this->close();

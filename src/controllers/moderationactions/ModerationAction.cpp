@@ -1,5 +1,6 @@
 #include "ModerationAction.hpp"
 
+#include <QRegularExpression>
 #include "Application.hpp"
 #include "singletons/Resources.hpp"
 
@@ -12,7 +13,8 @@ namespace chatterino {
 //{
 //}
 
-// ModerationAction::ModerationAction(const QString &_line1, const QString &_line2,
+// ModerationAction::ModerationAction(const QString &_line1, const QString
+// &_line2,
 //                                   const QString &_action)
 //    : _isImage(false)
 //    , image(nullptr)
@@ -32,8 +34,8 @@ ModerationAction::ModerationAction(const QString &action)
 
     if (timeoutMatch.hasMatch()) {
         // if (multipleTimeouts > 1) {
-        QString line1;
-        QString line2;
+        // QString line1;
+        // QString line2;
 
         int amount = timeoutMatch.captured(1).toInt();
 
@@ -51,13 +53,14 @@ ModerationAction::ModerationAction(const QString &action)
             this->line2_ = "d";
         }
 
-        this->line1_ = line1;
-        this->line2_ = line2;
+        // line1 = this->line1_;
+        // line2 = this->line2_;
         // } else {
-        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout, str);
+        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
+        //     str);
         // }
     } else if (action.startsWith("/ban ")) {
-        this->image_ = getApp()->resources->buttonBan;
+        this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
     } else {
         QString xD = action;
 
@@ -75,10 +78,10 @@ bool ModerationAction::operator==(const ModerationAction &other) const
 
 bool ModerationAction::isImage() const
 {
-    return this->image_ != nullptr;
+    return bool(this->image_);
 }
 
-Image *ModerationAction::getImage() const
+const boost::optional<ImagePtr> &ModerationAction::getImage() const
 {
     return this->image_;
 }

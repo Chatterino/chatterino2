@@ -1,6 +1,6 @@
 #define LOOKUP_COLOR_COUNT 360
 
-#include "Theme.hpp"
+#include "singletons/Theme.hpp"
 
 #include <QColor>
 
@@ -39,7 +39,8 @@ Theme::Theme()
 
 void Theme::update()
 {
-    this->actuallyUpdate(this->themeHue, detail::getMultiplierByTheme(this->themeName.getValue()));
+    this->actuallyUpdate(this->themeHue, detail::getMultiplierByTheme(
+                                             this->themeName.getValue()));
 }
 
 // hue: theme color (0 - 1)
@@ -88,32 +89,40 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         /// TABS
         if (lightWin) {
-            this->tabs.regular = {QColor("#444"),
-                                  {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                                  {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
-            this->tabs.newMessage = {QColor("#222"),
-                                     {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                                     {QColor("#bbb"), QColor("#bbb"), QColor("#bbb")}};
-            this->tabs.highlighted = {fg,
-                                      {QColor("#fff"), QColor("#eee"), QColor("#fff")},
-                                      {highlighted, highlighted, highlighted}};
-            this->tabs.selected = {QColor("#000"),
-                                   {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
-                                   {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+            this->tabs.regular = {
+                QColor("#444"),
+                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
+                {QColor("#fff"), QColor("#fff"), QColor("#fff")}};
+            this->tabs.newMessage = {
+                QColor("#222"),
+                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
+                {QColor("#bbb"), QColor("#bbb"), QColor("#bbb")}};
+            this->tabs.highlighted = {
+                fg,
+                {QColor("#fff"), QColor("#eee"), QColor("#fff")},
+                {highlighted, highlighted, highlighted}};
+            this->tabs.selected = {
+                QColor("#000"),
+                {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
+                {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
         } else {
-            this->tabs.regular = {QColor("#aaa"),
-                                  {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                                  {QColor("#444"), QColor("#444"), QColor("#444")}};
-            this->tabs.newMessage = {fg,
-                                     {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                                     {QColor("#888"), QColor("#888"), QColor("#888")}};
-            this->tabs.highlighted = {fg,
-                                      {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                                      {highlighted, highlighted, highlighted}};
+            this->tabs.regular = {
+                QColor("#aaa"),
+                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#444"), QColor("#444"), QColor("#444")}};
+            this->tabs.newMessage = {
+                fg,
+                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#888"), QColor("#888"), QColor("#888")}};
+            this->tabs.highlighted = {
+                fg,
+                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {highlighted, highlighted, highlighted}};
 
-            this->tabs.selected = {QColor("#fff"),
-                                   {QColor("#555555"), QColor("#555555"), QColor("#555555")},
-                                   {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+            this->tabs.selected = {
+                QColor("#fff"),
+                {QColor("#555555"), QColor("#555555"), QColor("#555555")},
+                {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
         }
 
         this->splits.input.focusedLine = highlighted;
@@ -126,16 +135,19 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         //     fg,
         //     {QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
         //      QBrush(blendColors(themeColor, "#ccc", 0.9), Qt::FDiagPattern),
-        //      QBrush(blendColors(themeColorNoSat, "#ccc", 0.9), Qt::FDiagPattern)}};
+        //      QBrush(blendColors(themeColorNoSat, "#ccc", 0.9),
+        //      Qt::FDiagPattern)}};
 
         //         this->tabs.newMessage = {
         //                fg,
-        //                {QBrush(blendColors(themeColor, "#666", 0.7), Qt::FDiagPattern),
-        //                 QBrush(blendColors(themeColor, "#666", 0.5), Qt::FDiagPattern),
+        //                {QBrush(blendColors(themeColor, "#666", 0.7),
+        //                Qt::FDiagPattern),
+        //                 QBrush(blendColors(themeColor, "#666", 0.5),
+        //                 Qt::FDiagPattern),
         //                 QBrush(blendColors(themeColorNoSat, "#666", 0.7),
         //                 Qt::FDiagPattern)}};
-        //            this->tabs.highlighted = {fg, {QColor("#777"), QColor("#777"),
-        //            QColor("#666")}};
+        //            this->tabs.highlighted = {fg, {QColor("#777"),
+        //            QColor("#777"), QColor("#666")}};
 
         this->tabs.bottomLine = this->tabs.selected.backgrounds.regular.color();
     }
@@ -143,7 +155,8 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     // Split
     bool flat = isLight_;
 
-    this->splits.messageSeperator = isLight_ ? QColor(127, 127, 127) : QColor(60, 60, 60);
+    this->splits.messageSeperator =
+        isLight_ ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
@@ -165,20 +178,23 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
-    this->splits.header.focusedText = isLight_ ? QColor("#198CFF") : QColor("#84C1FF");
+    this->splits.header.focusedText =
+        isLight_ ? QColor("#198CFF") : QColor("#84C1FF");
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
     this->splits.input.text = this->messages.textColors.regular;
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
-        "border:" + this->tabs.selected.backgrounds.regular.color().name() + ";" +
-        "color:" + this->messages.textColors.regular.name() + ";" +  //
+        "border:" + this->tabs.selected.backgrounds.regular.color().name() +
+        ";" + "color:" + this->messages.textColors.regular.name() + ";" +  //
         "selection-background-color:" +
-        (isLight_ ? "#68B1FF" : this->tabs.selected.backgrounds.regular.color().name());
+        (isLight_ ? "#68B1FF"
+                  : this->tabs.selected.backgrounds.regular.color().name());
 
     // Message
-    this->messages.textColors.link = isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
+    this->messages.textColors.link =
+        isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
@@ -204,20 +220,22 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->scrollbars.background = QColor(0, 0, 0, 0);
     //    this->scrollbars.background = splits.background;
     //    this->scrollbars.background.setAlphaF(qreal(0.2));
-    this->scrollbars.thumb = getColor(0, sat, 0.80);
-    this->scrollbars.thumbSelected = getColor(0, sat, 0.7);
+    this->scrollbars.thumb = getColor(0, sat, 0.70);
+    this->scrollbars.thumbSelected = getColor(0, sat, 0.65);
 
     // tooltip
     this->tooltip.background = QColor(0, 0, 0);
     this->tooltip.text = QColor(255, 255, 255);
 
     // Selection
-    this->messages.selection = isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
+    this->messages.selection =
+        isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     this->updated.invoke();
 }
 
-QColor Theme::blendColors(const QColor &color1, const QColor &color2, qreal ratio)
+QColor Theme::blendColors(const QColor &color1, const QColor &color2,
+                          qreal ratio)
 {
     int r = int(color1.red() * (1 - ratio) + color2.red() * ratio);
     int g = int(color1.green() * (1 - ratio) + color2.green() * ratio);
@@ -233,21 +251,24 @@ void Theme::normalizeColor(QColor &color)
             color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
-        if (color.lightnessF() > 0.4 && color.hueF() > 0.1 && color.hueF() < 0.33333) {
-            color.setHslF(
-                color.hueF(), color.saturationF(),
-                color.lightnessF() - sin((color.hueF() - 0.1) / (0.3333 - 0.1) * 3.14159) *
-                                         color.saturationF() * 0.4);
+        if (color.lightnessF() > 0.4 && color.hueF() > 0.1 &&
+            color.hueF() < 0.33333) {
+            color.setHslF(color.hueF(), color.saturationF(),
+                          color.lightnessF() - sin((color.hueF() - 0.1) /
+                                                   (0.3333 - 0.1) * 3.14159) *
+                                                   color.saturationF() * 0.4);
         }
     } else {
         if (color.lightnessF() < 0.5) {
             color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
-        if (color.lightnessF() < 0.6 && color.hueF() > 0.54444 && color.hueF() < 0.83333) {
+        if (color.lightnessF() < 0.6 && color.hueF() > 0.54444 &&
+            color.hueF() < 0.83333) {
             color.setHslF(
                 color.hueF(), color.saturationF(),
-                color.lightnessF() + sin((color.hueF() - 0.54444) / (0.8333 - 0.54444) * 3.14159) *
+                color.lightnessF() + sin((color.hueF() - 0.54444) /
+                                         (0.8333 - 0.54444) * 3.14159) *
                                          color.saturationF() * 0.4);
         }
     }

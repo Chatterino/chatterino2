@@ -4,7 +4,8 @@
 
 namespace chatterino {
 
-static void removeScrollAreaBackground(QScrollArea *scrollArea, QWidget *childWidget)
+static void removeScrollAreaBackground(QScrollArea *scrollArea,
+                                       QWidget *childWidget)
 {
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameStyle(0);

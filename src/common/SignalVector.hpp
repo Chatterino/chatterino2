@@ -88,7 +88,8 @@ template <typename TVectorItem>
 class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual int insertItem(const TVectorItem &item, int index = -1, void *caller = nullptr) override
+    virtual int insertItem(const TVectorItem &item, int index = -1,
+                           void *caller = nullptr) override
     {
         assertInGuiThread();
         if (index == -1) {
@@ -115,11 +116,13 @@ template <typename TVectorItem, typename Compare>
 class SortedSignalVector : public BaseSignalVector<TVectorItem>
 {
 public:
-    virtual int insertItem(const TVectorItem &item, int = -1, void *caller = nullptr) override
+    virtual int insertItem(const TVectorItem &item, int = -1,
+                           void *caller = nullptr) override
     {
         assertInGuiThread();
 
-        auto it = std::lower_bound(this->vector_.begin(), this->vector_.end(), item, Compare{});
+        auto it = std::lower_bound(this->vector_.begin(), this->vector_.end(),
+                                   item, Compare{});
         int index = it - this->vector_.begin();
         this->vector_.insert(it, item);
 

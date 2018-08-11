@@ -2,7 +2,8 @@
 
 // namespace chatterino {
 //
-// IrcAccount::IrcAccount(const QString &_userName, const QString &_nickName, const QString
+// IrcAccount::IrcAccount(const QString &_userName, const QString &_nickName,
+// const QString
 // &_realName,
 //                       const QString &_password)
 //    : userName(_userName)

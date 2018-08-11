@@ -9,7 +9,7 @@
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Shortcut.hpp"
 
 #include <QApplication>
@@ -41,7 +41,8 @@ namespace chatterino {
 
 BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     : BaseWidget(parent,
-                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint : Qt::WindowFlags()))
+                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint
+                                                  : Qt::WindowFlags()))
     , enableCustomFrame_(_flags & EnableCustomFrame)
     , frameless_(_flags & Frameless)
     , flags_(_flags)
@@ -59,7 +60,8 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     this->updateScale();
 
-    createWindowShortcut(this, "CTRL+0", [] { getApp()->settings->uiScale.setValue(0); });
+    createWindowShortcut(this, "CTRL+0",
+                         [] { getApp()->settings->uiScale.setValue(0); });
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }
@@ -88,19 +90,20 @@ void BaseWindow::init()
         this->setLayout(layout);
         {
             if (!this->frameless_) {
-                QHBoxLayout *buttonLayout = this->ui_.titlebarBox = new QHBoxLayout();
+                QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
+                    new QHBoxLayout();
                 buttonLayout->setMargin(0);
                 layout->addLayout(buttonLayout);
 
                 // title
                 Label *title = new Label("Chatterino");
-                QObject::connect(this, &QWidget::windowTitleChanged,
-                                 [title](const QString &text) { title->setText(text); });
+                QObject::connect(
+                    this, &QWidget::windowTitleChanged,
+                    [title](const QString &text) { title->setText(text); });
 
-                QSizePolicy policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+                QSizePolicy policy(QSizePolicy::Ignored,
+                                   QSizePolicy::Preferred);
                 policy.setHorizontalStretch(1);
-                //            title->setBaseSize(0, 0);
-                //                title->setScaledContents(true);
                 title->setSizePolicy(policy);
                 buttonLayout->addWidget(title);
                 this->ui_.titleLabel = title;
@@ -113,14 +116,18 @@ void BaseWindow::init()
                 TitleBarButton *_exitButton = new TitleBarButton;
                 _exitButton->setButtonStyle(TitleBarButton::Close);
 
-                QObject::connect(_minButton, &TitleBarButton::clicked, this, [this] {
-                    this->setWindowState(Qt::WindowMinimized | this->windowState());
-                });
-                QObject::connect(_maxButton, &TitleBarButton::clicked, this, [this] {
-                    this->setWindowState(this->windowState() == Qt::WindowMaximized
-                                             ? Qt::WindowActive
-                                             : Qt::WindowMaximized);
-                });
+                QObject::connect(_minButton, &TitleBarButton::clicked, this,
+                                 [this] {
+                                     this->setWindowState(Qt::WindowMinimized |
+                                                          this->windowState());
+                                 });
+                QObject::connect(
+                    _maxButton, &TitleBarButton::clicked, this, [this] {
+                        this->setWindowState(this->windowState() ==
+                                                     Qt::WindowMaximized
+                                                 ? Qt::WindowActive
+                                                 : Qt::WindowMaximized);
+                    });
                 QObject::connect(_exitButton, &TitleBarButton::clicked, this,
                                  [this] { this->close(); });
 
@@ -157,8 +164,10 @@ void BaseWindow::init()
         QTimer::singleShot(1, this, [this] {
             getApp()->settings->windowTopMost.connect(
                 [this](bool topMost, auto) {
-                    ::SetWindowPos(HWND(this->winId()), topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
-                                   0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                    ::SetWindowPos(HWND(this->winId()),
+                                   topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
+                                   0, 0, 0,
+                                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 },
                 this->managedConnections_);
         });
@@ -222,12 +231,13 @@ void BaseWindow::themeChangedEvent()
 
         if (this->ui_.titleLabel) {
             QPalette palette_title;
-            palette_title.setColor(QPalette::Foreground,
-                                   this->theme->isLightTheme() ? "#333" : "#ccc");
+            palette_title.setColor(
+                QPalette::Foreground,
+                this->theme->isLightTheme() ? "#333" : "#ccc");
             this->ui_.titleLabel->setPalette(palette_title);
         }
 
-        for (RippleEffectButton *button : this->ui_.buttons) {
+        for (Button *button : this->ui_.buttons) {
             button->setMouseEffectColor(this->theme->window.text);
         }
     } else {
@@ -240,7 +250,8 @@ void BaseWindow::themeChangedEvent()
 
 bool BaseWindow::event(QEvent *event)
 {
-    if (event->type() == QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
+    if (event->type() ==
+        QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
         this->onFocusLost();
     }
 
@@ -255,11 +266,11 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() - 1));
         }
     }
 }
@@ -288,7 +299,8 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_ & FramelessDraggable) {
         this->movingRelativePos = event->localPos();
-        if (auto widget = this->childAt(event->localPos().x(), event->localPos().y())) {
+        if (auto widget =
+                this->childAt(event->localPos().x(), event->localPos().y())) {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
                 if (widget == nullptr) {
@@ -341,8 +353,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     BaseWidget::mouseMoveEvent(event);
 }
 
-TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButton::Style &style,
-                                              std::function<void()> onClicked)
+TitleBarButton *BaseWindow::addTitleBarButton(
+    const TitleBarButton::Style &style, std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
     button->setScaleIndependantSize(30, 30);
@@ -351,20 +363,22 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButton::Style &style
     this->ui_.titlebarBox->insertWidget(1, button);
     button->setButtonStyle(style);
 
-    QObject::connect(button, &TitleBarButton::clicked, this, [onClicked] { onClicked(); });
+    QObject::connect(button, &TitleBarButton::clicked, this,
+                     [onClicked] { onClicked(); });
 
     return button;
 }
 
-RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
-    RippleEffectLabel *button = new RippleEffectLabel;
+    EffectLabel *button = new EffectLabel;
     button->setScaleIndependantHeight(30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
 
-    QObject::connect(button, &RippleEffectLabel::clicked, this, [onClicked] { onClicked(); });
+    QObject::connect(button, &EffectLabel::clicked, this,
+                     [onClicked] { onClicked(); });
 
     return button;
 }
@@ -375,7 +389,8 @@ void BaseWindow::changeEvent(QEvent *)
 
 #ifdef USEWINSDK
     if (this->ui_.maxButton) {
-        this->ui_.maxButton->setButtonStyle(this->windowState() & Qt::WindowMaximized
+        this->ui_.maxButton->setButtonStyle(this->windowState() &
+                                                    Qt::WindowMaximized
                                                 ? TitleBarButton::Unmaximize
                                                 : TitleBarButton::Maximize);
     }
@@ -416,8 +431,7 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 {
-    if (!this->stayInScreenRect_)
-        return;
+    if (!this->stayInScreenRect_) return;
 
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
@@ -438,14 +452,18 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
         p.setY(s.bottom() - this->height());
     }
 
-    if (p != this->pos())
-        this->move(p);
+    if (p != this->pos()) this->move(p);
 }
 
-bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
+                             long *result)
 {
 #ifdef USEWINSDK
+#if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
+    MSG *msg = *reinterpret_cast<MSG **>(message);
+#else
     MSG *msg = reinterpret_cast<MSG *>(message);
+#endif
 
     bool returnValue = false;
 
@@ -503,8 +521,10 @@ void BaseWindow::paintEvent(QPaintEvent *)
 
 void BaseWindow::updateScale()
 {
-    auto scale = this->nativeScale_ *
-                 (this->flags_ & DisableCustomScaling ? 1 : getApp()->windows->getUiScaleValue());
+    auto scale =
+        this->nativeScale_ * (this->flags_ & DisableCustomScaling
+                                  ? 1
+                                  : getApp()->windows->getUiScaleValue());
     this->setScale(scale);
 
     for (auto child : this->findChildren<BaseWidget *>()) {
@@ -541,9 +561,11 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
     if (this->hasCustomWindowFrame()) {
         QPainter painter(this);
 
-        QColor bg = this->overrideBackgroundColor_.value_or(this->theme->window.background);
+        QColor bg = this->overrideBackgroundColor_.value_or(
+            this->theme->window.background);
 
-        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0), bg);
+        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
+                         bg);
     }
 #endif
 }
@@ -561,7 +583,8 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
         auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
         SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
                      prcNewWindow->right - prcNewWindow->left,
-                     prcNewWindow->bottom - prcNewWindow->top, SWP_NOZORDER | SWP_NOACTIVATE);
+                     prcNewWindow->bottom - prcNewWindow->top,
+                     SWP_NOZORDER | SWP_NOACTIVATE);
     }
     firstResize = false;
 
@@ -605,7 +628,8 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
         // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
 
         if (msg->wParam == TRUE) {
-            NCCALCSIZE_PARAMS *ncp = (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
+            NCCALCSIZE_PARAMS *ncp =
+                (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
             ncp->lppos->flags |= SWP_NOREDRAW;
             RECT *clientRect = &ncp->rgrc[0];
 
@@ -634,7 +658,8 @@ bool BaseWindow::handleSIZE(MSG *msg)
             if (msg->wParam == SIZE_MAXIMIZED) {
                 auto offset = int(this->getScale() * 8);
 
-                this->ui_.windowLayout->setContentsMargins(offset, offset, offset, offset);
+                this->ui_.windowLayout->setContentsMargins(offset, offset,
+                                                           offset, offset);
             } else {
                 this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
             }
@@ -686,23 +711,23 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
         }
         if (resizeWidth && resizeHeight) {
             // bottom left corner
-            if (x >= winrect.left && x < winrect.left + border_width && y < winrect.bottom &&
-                y >= winrect.bottom - border_width) {
+            if (x >= winrect.left && x < winrect.left + border_width &&
+                y < winrect.bottom && y >= winrect.bottom - border_width) {
                 *result = HTBOTTOMLEFT;
             }
             // bottom right corner
-            if (x < winrect.right && x >= winrect.right - border_width && y < winrect.bottom &&
-                y >= winrect.bottom - border_width) {
+            if (x < winrect.right && x >= winrect.right - border_width &&
+                y < winrect.bottom && y >= winrect.bottom - border_width) {
                 *result = HTBOTTOMRIGHT;
             }
             // top left corner
-            if (x >= winrect.left && x < winrect.left + border_width && y >= winrect.top &&
-                y < winrect.top + border_width) {
+            if (x >= winrect.left && x < winrect.left + border_width &&
+                y >= winrect.top && y < winrect.top + border_width) {
                 *result = HTTOPLEFT;
             }
             // top right corner
-            if (x < winrect.right && x >= winrect.right - border_width && y >= winrect.top &&
-                y < winrect.top + border_width) {
+            if (x < winrect.right && x >= winrect.right - border_width &&
+                y >= winrect.top && y < winrect.top + border_width) {
                 *result = HTTOPRIGHT;
             }
         }

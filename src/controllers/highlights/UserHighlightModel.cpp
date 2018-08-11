@@ -13,14 +13,15 @@ UserHighlightModel::UserHighlightModel(QObject *parent)
 }
 
 // turn vector item into model row
-HighlightPhrase UserHighlightModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                                   const HighlightPhrase &original)
+HighlightPhrase UserHighlightModel::getItemFromRow(
+    std::vector<QStandardItem *> &row, const HighlightPhrase &original)
 {
     // key, regex
 
-    return HighlightPhrase{
-        row[0]->data(Qt::DisplayRole).toString(), row[1]->data(Qt::CheckStateRole).toBool(),
-        row[2]->data(Qt::CheckStateRole).toBool(), row[3]->data(Qt::CheckStateRole).toBool()};
+    return HighlightPhrase{row[0]->data(Qt::DisplayRole).toString(),
+                           row[1]->data(Qt::CheckStateRole).toBool(),
+                           row[2]->data(Qt::CheckStateRole).toBool(),
+                           row[3]->data(Qt::CheckStateRole).toBool()};
 }
 
 // row into vector item

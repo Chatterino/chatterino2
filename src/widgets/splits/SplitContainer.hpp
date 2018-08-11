@@ -23,8 +23,8 @@ class QJsonObject;
 namespace chatterino {
 
 //
-// Note: This class is a spaghetti container. There is a lot of spaghetti code inside but it doesn't
-// expose any of it publicly.
+// Note: This class is a spaghetti container. There is a lot of spaghetti code
+// inside but it doesn't expose any of it publicly.
 //
 
 class SplitContainer : public BaseWidget, pajlada::Signals::SignalHolder
@@ -103,7 +103,8 @@ public:
         qreal getFlex(bool isVertical);
         qreal getSize(bool isVertical);
         qreal getChildrensTotalFlex(bool isVertical);
-        void layout(bool addSpacing, float _scale, std::vector<DropRect> &dropRects_,
+        void layout(bool addSpacing, float _scale,
+                    std::vector<DropRect> &dropRects_,
                     std::vector<ResizeRect> &resizeRects);
 
         static Type toContainerType(Direction _dir);
@@ -160,6 +161,8 @@ private:
         friend class SplitContainer;
 
     private:
+        void resetFlex();
+
         bool vertical_;
         bool isMouseDown_ = false;
     };
@@ -171,7 +174,8 @@ public:
     void appendSplit(Split *split);
     void insertSplit(Split *split, const Position &position);
     void insertSplit(Split *split, Direction direction, Split *relativeTo);
-    void insertSplit(Split *split, Direction direction, Node *relativeTo = nullptr);
+    void insertSplit(Split *split, Direction direction,
+                     Node *relativeTo = nullptr);
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 

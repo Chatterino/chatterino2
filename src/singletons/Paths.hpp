@@ -7,14 +7,13 @@ namespace chatterino {
 
 class Paths
 {
+public:
+    static Paths *instance;
+
     Paths();
 
-public:
-    static void initInstance();
-    static Paths *getInstance();
-
-    // Root directory for the configuration files. %APPDATA%/chatterino or ExecutablePath for
-    // portable mode
+    // Root directory for the configuration files. %APPDATA%/chatterino or
+    // ExecutablePath for portable mode
     QString rootAppDataDirectory;
 
     // Directory for settings files. Same as <appDataDirectory>/Settings
@@ -41,10 +40,9 @@ private:
     void initAppDataDirectory();
     void initSubDirectories();
 
-    static Paths *instance;
     boost::optional<bool> portable_;
 };
 
-Paths *getPaths();
+[[deprecated]] Paths *getPaths();
 
 }  // namespace chatterino

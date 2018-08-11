@@ -8,7 +8,7 @@
 #include "messages/layouts/MessageLayout.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/Scrollbar.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -27,7 +27,6 @@ class ChannelView : public BaseWidget
 
 public:
     explicit ChannelView(BaseWidget *parent = nullptr);
-    virtual ~ChannelView() override;
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -36,8 +35,8 @@ public:
     void clearSelection();
     void setEnableScrollingToBottom(bool);
     bool getEnableScrollingToBottom() const;
-    void setOverrideFlags(boost::optional<MessageElement::Flags> value);
-    const boost::optional<MessageElement::Flags> &getOverrideFlags() const;
+    void setOverrideFlags(boost::optional<MessageElementFlags> value);
+    const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void pause(int msecTimeout);
     void updateLastReadMessage();
 
@@ -70,24 +69,35 @@ protected:
 
     void hideEvent(QHideEvent *) override;
 
-    void handleLinkClick(QMouseEvent *event, const Link &link, MessageLayout *layout);
+    void handleLinkClick(QMouseEvent *event, const Link &link,
+                         MessageLayout *layout);
 
-    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message, QPoint &relativePos,
-                         int &index);
+    bool tryGetMessageAt(QPoint p, std::shared_ptr<MessageLayout> &message,
+                         QPoint &relativePos, int &index);
 
 private:
+    void initializeLayout();
+    void initializeScrollbar();
+    void initializeSignals();
+
+    // void messageAppended(MessagePtr &message);
+    // void messageAddedAtStart(std::vector<MessagePtr> &messages);
+    // void messageRemoveFromStart(MessagePtr &message);
+
     void updatePauseStatus();
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);
 
     void drawMessages(QPainter &painter);
     void setSelection(const SelectionItem &start, const SelectionItem &end);
-    MessageElement::Flags getFlags() const;
+    MessageElementFlags getFlags() const;
     bool isPaused();
 
-    void handleMouseClick(QMouseEvent *event, const MessageLayoutElement *hoverLayoutElement,
+    void handleMouseClick(QMouseEvent *event,
+                          const MessageLayoutElement *hoverLayoutElement,
                           MessageLayout *layout);
-    void addContextMenuItems(const MessageLayoutElement *hoveredElement, MessageLayout *layout);
+    void addContextMenuItems(const MessageLayoutElement *hoveredElement,
+                             MessageLayout *layout);
     int getLayoutWidth() const;
 
     QTimer *layoutCooldown_;
@@ -104,7 +114,7 @@ private:
     int messagesAddedSinceSelectionPause_ = 0;
 
     QTimer pauseTimeout_;
-    boost::optional<MessageElement::Flags> overrideFlags_;
+    boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
@@ -112,10 +122,10 @@ private:
     ChannelPtr channel_;
 
     Scrollbar scrollBar_;
-    RippleEffectLabel *goToBottom_;
+    EffectLabel *goToBottom_;
 
-    // This variable can be used to decide whether or not we should render the "Show latest
-    // messages" button
+    // This variable can be used to decide whether or not we should render the
+    // "Show latest messages" button
     bool showingLatestMessages_ = true;
     bool enableScrollingToBottom_ = true;
 

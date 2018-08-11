@@ -1,4 +1,4 @@
-#include "WindowManager.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -11,11 +11,10 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-
-#include <QDebug>
 
 #define SETTINGS_FILENAME "/window-layout.json"
 
@@ -68,51 +67,61 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableEmojis);
     this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
     this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableUsernameBold);
+    this->wordFlagsListener_.addSetting(settings->enableLowercaseLink);
     this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
 }
 
-MessageElement::Flags WindowManager::getWordFlags()
+MessageElementFlags WindowManager::getWordFlags()
 {
     return this->wordFlags_;
 }
 
 void WindowManager::updateWordTypeMask()
 {
-    using MEF = MessageElement::Flags;
+    using MEF = MessageElementFlag;
     auto settings = getSettings();
 
     // text
-    auto flags = MEF::Text | MEF::Text;
+    auto flags = MessageElementFlags(MEF::Text);
 
     // timestamp
     if (settings->showTimestamps) {
-        flags |= MEF::Timestamp;
+        flags.set(MEF::Timestamp);
     }
 
     // emotes
-    flags |= settings->enableTwitchEmotes ? MEF::TwitchEmoteImage : MEF::TwitchEmoteText;
-    flags |= settings->enableFfzEmotes ? MEF::FfzEmoteImage : MEF::FfzEmoteText;
-    flags |= settings->enableBttvEmotes ? MEF::BttvEmoteImage : MEF::BttvEmoteText;
-    flags |= settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText;
+    flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
+                                           : MEF::TwitchEmoteText);
+    flags.set(settings->enableFfzEmotes ? MEF::FfzEmoteImage
+                                        : MEF::FfzEmoteText);
+    flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
+                                         : MEF::BttvEmoteText);
+    flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
 
     // bits
-    flags |= MEF::BitsAmount;
-    flags |= settings->enableGifAnimations ? MEF::BitsAnimated : MEF::BitsStatic;
+    flags.set(MEF::BitsAmount);
+    flags.set(settings->enableGifAnimations ? MEF::BitsAnimated
+                                            : MEF::BitsStatic);
 
     // badges
-    flags |= settings->showBadges ? MEF::Badges : MEF::None;
+    flags.set(settings->showBadges ? MEF::Badges : MEF::None);
 
     // username
-    flags |= MEF::Username;
+    flags.set(MEF::Username);
 
     // misc
-    flags |= MEF::AlwaysShow;
-    flags |= MEF::Collapsed;
+    flags.set(MEF::AlwaysShow);
+    flags.set(MEF::Collapsed);
+    flags.set(settings->enableUsernameBold ? MEF::BoldUsername
+                                           : MEF::NonBoldUsername);
+    flags.set(settings->enableLowercaseLink ? MEF::LowercaseLink
+                                            : MEF::OriginalLink);
 
     // update flags
-    MessageElement::Flags newFlags = static_cast<MessageElement::Flags>(flags);
+    MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
 
     if (newFlags != this->wordFlags_) {
         this->wordFlags_ = newFlags;
@@ -177,7 +186,8 @@ Window &WindowManager::createWindow(Window::Type type)
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
-            for (auto it = this->windows_.begin(); it != this->windows_.end(); it++) {
+            for (auto it = this->windows_.begin(); it != this->windows_.end();
+                 it++) {
                 if (*it == window) {
                     this->windows_.erase(it);
                     break;
@@ -201,16 +211,17 @@ Window *WindowManager::windowAt(int index)
     if (index < 0 || (size_t)index >= this->windows_.size()) {
         return nullptr;
     }
-    Log("getting window at bad index {}", index);
+    log("getting window at bad index {}", index);
 
     return this->windows_.at(index);
 }
 
-void WindowManager::initialize(Application &app)
+void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    app.themes->repaintVisibleChatWidgets_.connect([this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect(
+        [this] { this->repaintVisibleChatWidgets(); });
 
     assert(!this->initialized_);
 
@@ -228,7 +239,8 @@ void WindowManager::initialize(Application &app)
 
         // get type
         QString type_val = window_obj.value("type").toString();
-        Window::Type type = type_val == "main" ? Window::Type::Main : Window::Type::Popup;
+        Window::Type type =
+            type_val == "main" ? Window::Type::Main : Window::Type::Popup;
 
         if (type == Window::Type::Main && mainWindow_ != nullptr) {
             type = Window::Type::Popup;
@@ -300,20 +312,19 @@ void WindowManager::initialize(Application &app)
         mainWindow_->getNotebook().addPage(true);
     }
 
-    auto settings = getSettings();
+    settings.timestampFormat.connect(
+        [this](auto, auto) { this->layoutChannelViews(); });
 
-    settings->timestampFormat.connect([this](auto, auto) {
-        auto app = getApp();
-        this->layoutChannelViews();
-    });
-
-    settings->emoteScale.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-
-    settings->timestampFormat.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->alternateMessageBackground.connect(
+    settings.emoteScale.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->separateMessages.connect([this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings->collpseMessagesMinLines.connect(
+
+    settings.timestampFormat.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.alternateMessageBackground.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.separateMessages.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.collpseMessagesMinLines.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
 
     this->initialized_ = true;
@@ -353,10 +364,11 @@ void WindowManager::save()
         // window tabs
         QJsonArray tabs_arr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount(); tab_i++) {
+        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
+             tab_i++) {
             QJsonObject tab_obj;
-            SplitContainer *tab =
-                dynamic_cast<SplitContainer *>(window->getNotebook().getPageAt(tab_i));
+            SplitContainer *tab = dynamic_cast<SplitContainer *>(
+                window->getNotebook().getPageAt(tab_i));
             assert(tab != nullptr);
 
             // custom tab title
@@ -416,8 +428,9 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
         } break;
         case SplitNode::HorizontalContainer:
         case SplitNode::VerticalContainer: {
-            obj.insert("type", node->getType() == SplitNode::HorizontalContainer ? "horizontal"
-                                                                                 : "vertical");
+            obj.insert("type", node->getType() == SplitNode::HorizontalContainer
+                                   ? "horizontal"
+                                   : "vertical");
 
             QJsonArray items_arr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren()) {
@@ -437,7 +450,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
     switch (channel.getType()) {
         case Channel::Type::Twitch: {
             obj.insert("type", "twitch");
-            obj.insert("name", channel.get()->name);
+            obj.insert("name", channel.get()->getName());
         } break;
         case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
@@ -459,7 +472,8 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
 
     QString type = obj.value("type").toString();
     if (type == "twitch") {
-        return app->twitch.server->getOrAddChannel(obj.value("name").toString());
+        return app->twitch.server->getOrAddChannel(
+            obj.value("name").toString());
     } else if (type == "mentions") {
         return app->twitch.server->mentionsChannel;
     } else if (type == "watching") {

@@ -36,7 +36,8 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
-    this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+    this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
+                         Qt::X11BypassWindowManagerHint |
                          Qt::BypassWindowManagerHint);
 
     displayText_->setAlignment(Qt::AlignHCenter);
@@ -46,7 +47,8 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     layout->addWidget(displayText_);
     this->setLayout(layout);
 
-    this->fontChangedConnection_ = app->fonts->fontChanged.connect([this] { this->updateFont(); });
+    this->fontChangedConnection_ =
+        app->fonts->fontChanged.connect([this] { this->updateFont(); });
 }
 
 TooltipWidget::~TooltipWidget()
@@ -76,7 +78,8 @@ void TooltipWidget::updateFont()
 {
     auto app = getApp();
 
-    this->setFont(app->fonts->getFont(Fonts::Type::ChatMediumSmall, this->getScale()));
+    this->setFont(
+        app->fonts->getFont(Fonts::Type::ChatMediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)

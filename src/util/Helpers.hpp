@@ -6,7 +6,7 @@
 namespace chatterino {
 
 template <typename... Args>
-auto fS(Args &&... args) -> decltype(fmt::format(std::forward<Args>(args)...))
+auto fS(Args &&... args)
 {
     return fmt::format(std::forward<Args>(args)...);
 }

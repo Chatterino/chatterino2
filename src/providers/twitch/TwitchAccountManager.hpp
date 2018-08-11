@@ -11,7 +11,8 @@
 
 //
 // Warning: This class is not supposed to be created directly.
-// 			Get yourself an instance from our friends over at AccountManager.hpp
+// 			Get yourself an instance from our friends over at
+// AccountManager.hpp
 //
 
 namespace chatterino {
@@ -30,12 +31,14 @@ public:
         QString oauthToken;
     };
 
-    // Returns the current twitchUsers, or the anonymous user if we're not currently logged in
+    // Returns the current twitchUsers, or the anonymous user if we're not
+    // currently logged in
     std::shared_ptr<TwitchAccount> getCurrent();
 
     std::vector<QString> getUsernames() const;
 
-    std::shared_ptr<TwitchAccount> findUserByUsername(const QString &username) const;
+    std::shared_ptr<TwitchAccount> findUserByUsername(
+        const QString &username) const;
     bool userExists(const QString &username) const;
 
     void reloadUsers();
@@ -43,11 +46,13 @@ public:
 
     bool isLoggedIn() const;
 
-    pajlada::Settings::Setting<std::string> currentUsername = {"/accounts/current", ""};
+    pajlada::Settings::Setting<std::string> currentUsername = {
+        "/accounts/current", ""};
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
-    SortedSignalVector<std::shared_ptr<TwitchAccount>, SharedPtrElementLess<TwitchAccount>>
+    SortedSignalVector<std::shared_ptr<TwitchAccount>,
+                       SharedPtrElementLess<TwitchAccount>>
         accounts;
 
 private:

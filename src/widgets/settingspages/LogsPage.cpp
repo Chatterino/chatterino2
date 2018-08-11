@@ -15,11 +15,13 @@
 // inline QString CreateLink(const QString &url, bool file = false)
 //{
 //    if (file) {
-//        return QString("<a href=\"file:///" + url + "\"><span style=\"color: white;\">" + url +
+//        return QString("<a href=\"file:///" + url + "\"><span style=\"color:
+//        white;\">" + url +
 //                       "</span></a>");
 //    }
 
-//    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" + url +
+//    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
+//    url +
 //    "</span></a>");
 //}
 
@@ -36,10 +38,12 @@
 //    auto created = layout.emplace<QLabel>();
 //    created->setText("Logs are saved to " + CreateLink(logPath, true));
 //    created->setTextFormat(Qt::RichText);
-//    created->setTextInteractionFlags(Qt::TextBrowserInteraction | Qt::LinksAccessibleByKeyboard |
+//    created->setTextInteractionFlags(Qt::TextBrowserInteraction |
+//    Qt::LinksAccessibleByKeyboard |
 //                                     Qt::LinksAccessibleByKeyboard);
 //    created->setOpenExternalLinks(true);
-//    layout.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
+//    layout.append(this->createCheckBox("Enable logging",
+//    app->settings->enableLogging));
 
 //    layout->addStretch(1);
 //}

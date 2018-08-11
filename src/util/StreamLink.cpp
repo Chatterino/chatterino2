@@ -50,7 +50,8 @@ bool checkStreamlinkPath(const QString &path)
 
     if (!fileinfo.exists()) {
         return false;
-        // throw Exception(fS("Streamlink path ({}) is invalid, file does not exist", path));
+        // throw Exception(fS("Streamlink path ({}) is invalid, file does not
+        // exist", path));
     }
 
     return fileinfo.isExecutable();
@@ -63,11 +64,13 @@ void showStreamlinkNotFoundError()
     auto app = getApp();
     if (app->settings->streamlinkUseCustomPath) {
         msg->showMessage(
-            "Unable to find Streamlink executable\nMake sure your custom path is pointing "
+            "Unable to find Streamlink executable\nMake sure your custom path "
+            "is pointing "
             "to the DIRECTORY where the streamlink executable is located");
     } else {
-        msg->showMessage("Unable to find Streamlink executable.\nIf you have Streamlink "
-                         "installed, you might need to enable the custom path option");
+        msg->showMessage(
+            "Unable to find Streamlink executable.\nIf you have Streamlink "
+            "installed, you might need to enable the custom path option");
     }
 }
 
@@ -86,51 +89,58 @@ QProcess *createStreamlinkProcess()
         p->deleteLater();
     });
 
-    QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), [=](int res) {
-        p->deleteLater();  //
-    });
+    QObject::connect(p,
+                     static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+                     [=](int res) {
+                         p->deleteLater();  //
+                     });
 
     return p;
 }
 
 }  // namespace
 
-void getStreamQualities(const QString &channelURL, std::function<void(QStringList)> cb)
+void getStreamQualities(const QString &channelURL,
+                        std::function<void(QStringList)> cb)
 {
     auto p = createStreamlinkProcess();
 
-    QObject::connect(p, static_cast<void (QProcess::*)(int)>(&QProcess::finished), [=](int res) {
-        if (res != 0) {
-            qDebug() << "Got error code" << res;
-            // return;
-        }
-        QString lastLine = QString(p->readAllStandardOutput());
-        lastLine = lastLine.trimmed().split('\n').last().trimmed();
-        if (lastLine.startsWith("Available streams: ")) {
-            QStringList options;
-            QStringList split = lastLine.right(lastLine.length() - 19).split(", ");
-
-            for (int i = split.length() - 1; i >= 0; i--) {
-                QString option = split.at(i);
-                if (option.endsWith(" (worst)")) {
-                    options << option.left(option.length() - 8);
-                } else if (option.endsWith(" (best)")) {
-                    options << option.left(option.length() - 7);
-                } else {
-                    options << option;
-                }
+    QObject::connect(
+        p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+        [=](int res) {
+            if (res != 0) {
+                qDebug() << "Got error code" << res;
+                // return;
             }
+            QString lastLine = QString(p->readAllStandardOutput());
+            lastLine = lastLine.trimmed().split('\n').last().trimmed();
+            if (lastLine.startsWith("Available streams: ")) {
+                QStringList options;
+                QStringList split =
+                    lastLine.right(lastLine.length() - 19).split(", ");
 
-            cb(options);
-        }
-    });
+                for (int i = split.length() - 1; i >= 0; i--) {
+                    QString option = split.at(i);
+                    if (option.endsWith(" (worst)")) {
+                        options << option.left(option.length() - 8);
+                    } else if (option.endsWith(" (best)")) {
+                        options << option.left(option.length() - 7);
+                    } else {
+                        options << option;
+                    }
+                }
+
+                cb(options);
+            }
+        });
 
     p->setArguments({channelURL, "--default-stream=KKona"});
 
     p->start();
 }
 
-void openStreamlink(const QString &channelURL, const QString &quality, QStringList extraArguments)
+void openStreamlink(const QString &channelURL, const QString &quality,
+                    QStringList extraArguments)
 {
     auto app = getApp();
 
@@ -149,7 +159,8 @@ void openStreamlink(const QString &channelURL, const QString &quality, QStringLi
         arguments << quality;
     }
 
-    bool res = QProcess::startDetached(getStreamlinkProgram() + " " + QString(arguments.join(' ')));
+    bool res = QProcess::startDetached(getStreamlinkProgram() + " " +
+                                       QString(arguments.join(' ')));
 
     if (!res) {
         showStreamlinkNotFoundError();

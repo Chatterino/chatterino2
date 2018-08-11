@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
+#include "common/FlagsEnum.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
@@ -16,90 +17,101 @@
 
 namespace chatterino {
 class Channel;
-struct EmoteData;
 struct MessageLayoutContainer;
+
+enum class MessageElementFlag {
+    None = 0,
+    Misc = (1 << 0),
+    Text = (1 << 1),
+
+    Username = (1 << 2),
+    Timestamp = (1 << 3),
+
+    TwitchEmoteImage = (1 << 4),
+    TwitchEmoteText = (1 << 5),
+    TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
+    BttvEmoteImage = (1 << 6),
+    BttvEmoteText = (1 << 7),
+    BttvEmote = BttvEmoteImage | BttvEmoteText,
+    FfzEmoteImage = (1 << 10),
+    FfzEmoteText = (1 << 11),
+    FfzEmote = FfzEmoteImage | FfzEmoteText,
+    EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
+
+    BitsStatic = (1 << 12),
+    BitsAnimated = (1 << 13),
+
+    // Slot 1: Twitch
+    // - Staff badge
+    // - Admin badge
+    // - Global Moderator badge
+    BadgeGlobalAuthority = (1 << 14),
+
+    // Slot 2: Twitch
+    // - Moderator badge
+    // - Broadcaster badge
+    BadgeChannelAuthority = (1 << 15),
+
+    // Slot 3: Twitch
+    // - Subscription badges
+    BadgeSubscription = (1 << 16),
+
+    // Slot 4: Twitch
+    // - Turbo badge
+    // - Prime badge
+    // - Bit badges
+    // - Game badges
+    BadgeVanity = (1 << 17),
+
+    // Slot 5: Chatterino
+    // - Chatterino developer badge
+    // - Chatterino donator badge
+    // - Chatterino top donator badge
+    BadgeChatterino = (1 << 18),
+
+    // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke)
+    // custom badge?
+
+    Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
+             BadgeVanity | BadgeChatterino,
+
+    ChannelName = (1 << 19),
+
+    BitsAmount = (1 << 20),
+
+    ModeratorTools = (1 << 21),
+
+    EmojiImage = (1 << 23),
+    EmojiText = (1 << 24),
+    EmojiAll = EmojiImage | EmojiText,
+
+    AlwaysShow = (1 << 25),
+
+    // used in the ChannelView class to make the collapse buttons visible if
+    // needed
+    Collapsed = (1 << 26),
+
+    // used for dynamic bold usernames
+    BoldUsername = (1 << 27),
+    NonBoldUsername = (1 << 28),
+
+    // for links
+    LowercaseLink = (1 << 29),
+    OriginalLink = (1 << 30),
+
+    Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
+              BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
+              AlwaysShow,
+};
+using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class MessageElement : boost::noncopyable
 {
 public:
-    enum Flags : uint32_t {
-        None = 0,
-        Misc = (1 << 0),
-        Text = (1 << 1),
-
-        Username = (1 << 2),
-        Timestamp = (1 << 3),
-
-        TwitchEmoteImage = (1 << 4),
-        TwitchEmoteText = (1 << 5),
-        TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
-        BttvEmoteImage = (1 << 6),
-        BttvEmoteText = (1 << 7),
-        BttvEmote = BttvEmoteImage | BttvEmoteText,
-        FfzEmoteImage = (1 << 10),
-        FfzEmoteText = (1 << 11),
-        FfzEmote = FfzEmoteImage | FfzEmoteText,
-        EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
-
-        BitsStatic = (1 << 12),
-        BitsAnimated = (1 << 13),
-
-        // Slot 1: Twitch
-        // - Staff badge
-        // - Admin badge
-        // - Global Moderator badge
-        BadgeGlobalAuthority = (1 << 14),
-
-        // Slot 2: Twitch
-        // - Moderator badge
-        // - Broadcaster badge
-        BadgeChannelAuthority = (1 << 15),
-
-        // Slot 3: Twitch
-        // - Subscription badges
-        BadgeSubscription = (1 << 16),
-
-        // Slot 4: Twitch
-        // - Turbo badge
-        // - Prime badge
-        // - Bit badges
-        // - Game badges
-        BadgeVanity = (1 << 17),
-
-        // Slot 5: Chatterino
-        // - Chatterino developer badge
-        // - Chatterino donator badge
-        // - Chatterino top donator badge
-        BadgeChatterino = (1 << 18),
-
-        // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke) custom badge?
-
-        Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription | BadgeVanity |
-                 BadgeChatterino,
-
-        ChannelName = (1 << 19),
-
-        BitsAmount = (1 << 20),
-
-        ModeratorTools = (1 << 21),
-
-        EmojiImage = (1 << 23),
-        EmojiText = (1 << 24),
-        EmojiAll = EmojiImage | EmojiText,
-
-        AlwaysShow = (1 << 25),
-
-        // used in the ChannelView class to make the collapse buttons visible if needed
-        Collapsed = (1 << 26),
-
-        Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage | BttvEmoteImage |
-                  TwitchEmoteImage | BitsAmount | Text | AlwaysShow,
-    };
-
     enum UpdateFlags : char {
-        Update_Text,
-        Update_Emotes,
-        Update_Images,
+        Update_Text = 1,
+        Update_Emotes = 2,
+        Update_Images = 4,
         Update_All = Update_Text | Update_Emotes | Update_Images
     };
 
@@ -111,42 +123,45 @@ public:
     const QString &getTooltip() const;
     const Link &getLink() const;
     bool hasTrailingSpace() const;
-    Flags getFlags() const;
+    MessageElementFlags getFlags() const;
 
-    virtual void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) = 0;
+    virtual void addToContainer(MessageLayoutContainer &container,
+                                MessageElementFlags flags) = 0;
 
 protected:
-    MessageElement(Flags flags);
+    MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
 
 private:
     Link link_;
     QString tooltip_;
-    Flags flags_;
+    MessageElementFlags flags_;
 };
 
 // contains a simple image
 class ImageElement : public MessageElement
 {
 public:
-    ImageElement(Image *image, MessageElement::Flags flags);
+    ImageElement(ImagePtr image, MessageElementFlags flags);
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
 
 private:
-    Image *image_;
+    ImagePtr image_;
 };
 
 // contains a text, it will split it into words
 class TextElement : public MessageElement
 {
 public:
-    TextElement(const QString &text, MessageElement::Flags flags,
+    TextElement(const QString &text, MessageElementFlags flags,
                 const MessageColor &color = MessageColor::Text,
                 FontStyle style = FontStyle::ChatMedium);
     ~TextElement() override = default;
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
 
 private:
     MessageColor color_;
@@ -165,15 +180,15 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
-    EmoteElement(const EmoteData &data, MessageElement::Flags flags_);
-    ~EmoteElement() override = default;
+    EmoteElement(const EmotePtr &data, MessageElementFlags flags_);
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags_) override;
-
-    const EmoteData data;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags_) override;
+    EmotePtr getEmote() const;
 
 private:
     std::unique_ptr<TextElement> textElement_;
+    EmotePtr emote_;
 };
 
 // contains a text, formated depending on the preferences
@@ -183,7 +198,8 @@ public:
     TimestampElement(QTime time_ = QTime::currentTime());
     ~TimestampElement() override = default;
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
 
     TextElement *formatTime(const QTime &time);
 
@@ -193,14 +209,15 @@ private:
     QString format_;
 };
 
-// adds all the custom moderation buttons, adds a variable amount of items depending on settings
-// fourtf: implement
+// adds all the custom moderation buttons, adds a variable amount of items
+// depending on settings fourtf: implement
 class TwitchModerationElement : public MessageElement
 {
 public:
     TwitchModerationElement();
 
-    void addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags) override;
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
 };
 
 }  // namespace chatterino

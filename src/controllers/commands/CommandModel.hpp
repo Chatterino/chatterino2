@@ -19,7 +19,8 @@ protected:
                                    const Command &command) override;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const Command &item, std::vector<QStandardItem *> &row) override;
+    virtual void getRowFromItem(const Command &item,
+                                std::vector<QStandardItem *> &row) override;
 
     friend class CommandController;
 };

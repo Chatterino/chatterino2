@@ -13,7 +13,8 @@ ComboBoxItemDelegate::~ComboBoxItemDelegate()
 {
 }
 
-QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent,
+                                            const QStyleOptionViewItem &option,
                                             const QModelIndex &index) const
 {
     QVariant data = index.data(Qt::UserRole + 1);
@@ -27,10 +28,12 @@ QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent, const QStyleOptionV
     return combo;
 }
 
-void ComboBoxItemDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void ComboBoxItemDelegate::setEditorData(QWidget *editor,
+                                         const QModelIndex &index) const
 {
     if (QComboBox *cb = qobject_cast<QComboBox *>(editor)) {
-        // get the index of the text in the combobox that matches the current value of the itenm
+        // get the index of the text in the combobox that matches the current
+        // value of the itenm
         QString currentText = index.data(Qt::EditRole).toString();
         int cbIndex = cb->findText(currentText);
 
@@ -43,11 +46,13 @@ void ComboBoxItemDelegate::setEditorData(QWidget *editor, const QModelIndex &ind
     }
 }
 
-void ComboBoxItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+void ComboBoxItemDelegate::setModelData(QWidget *editor,
+                                        QAbstractItemModel *model,
                                         const QModelIndex &index) const
 {
     if (QComboBox *cb = qobject_cast<QComboBox *>(editor))
-        // save the current text of the combo box as the current value of the item
+        // save the current text of the combo box as the current value of the
+        // item
         model->setData(index, cb->currentText(), Qt::EditRole);
     else
         QStyledItemDelegate::setModelData(editor, model, index);

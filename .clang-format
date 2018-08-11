@@ -1,23 +1,14 @@
-IndentCaseLabels: true
-BasedOnStyle: Google
-IndentWidth: 4
-Standard: Auto
-PointerBindsToType: false
 Language: Cpp
-SpacesBeforeTrailingComments: 2
+
 AccessModifierOffset: -1
+AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: true
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
-BreakConstructorInitializersBeforeComma: true
-# BreakBeforeBraces: Linux
-BreakBeforeBraces: Custom
-AccessModifierOffset: -4
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-AllowShortFunctionsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-DerivePointerBinding: false
+BasedOnStyle: Google
 BraceWrapping: {
     AfterNamespace: 'false'
     AfterClass: 'true'
@@ -26,5 +17,14 @@ BraceWrapping: {
     AfterFunction: 'true'
     BeforeCatch: 'false'
 }
-ColumnLimit: 100
+BreakBeforeBraces: Custom
+BreakConstructorInitializersBeforeComma: true
+ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+DerivePointerBinding: false
 FixNamespaceComments: true
+IndentCaseLabels: true
+IndentWidth: 4
+PointerBindsToType: false
+SpacesBeforeTrailingComments: 2
+Standard: Auto

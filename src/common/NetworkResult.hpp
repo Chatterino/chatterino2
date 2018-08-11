@@ -7,14 +7,15 @@ namespace chatterino {
 
 class NetworkResult
 {
-    QByteArray data_;
-
 public:
     NetworkResult(const QByteArray &data);
 
     QJsonObject parseJson() const;
     rapidjson::Document parseRapidJson() const;
-    QByteArray getData() const;
+    const QByteArray &getData() const;
+
+private:
+    QByteArray data_;
 };
 
 }  // namespace chatterino

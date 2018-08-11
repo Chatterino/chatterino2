@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWindow>
+#include <QWidget>
 
 namespace chatterino {
 

@@ -17,12 +17,15 @@ protected:
                                       const TaggedUser &original) override;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const TaggedUser &item, std::vector<QStandardItem *> &row) override;
+    virtual void getRowFromItem(const TaggedUser &item,
+                                std::vector<QStandardItem *> &row) override;
 
     virtual void afterInit() override;
 
-    //    virtual void customRowSetData(const std::vector<QStandardItem *> &row, int column,
-    //                                  const QVariant &value, int role) override;
+    //    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
+    //    int column,
+    //                                  const QVariant &value, int role)
+    //                                  override;
 
     friend class TaggedUsersController;
 };

@@ -14,7 +14,8 @@ namespace chatterino {
 //    std::shared_ptr<IrcAccount> getAccount() const;
 
 // protected:
-//    virtual void initializeConnection(Communi::IrcConnection *connection, bool isReadConnection);
+//    virtual void initializeConnection(Communi::IrcConnection *connection, bool
+//    isReadConnection);
 
 //    virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
 //    virtual void messageReceived(Communi::IrcMessage *message);

@@ -1,11 +1,11 @@
 #include "singletons/Fonts.hpp"
 
+#include "Application.hpp"
+#include "debug/AssertInGuiThread.hpp"
+#include "singletons/WindowManager.hpp"
+
 #include <QDebug>
 #include <QtGlobal>
-
-#include "Application.hpp"
-#include "WindowManager.hpp"
-#include "debug/AssertInGuiThread.hpp"
 
 #ifdef Q_OS_WIN32
 #define DEFAULT_FONT_FAMILY "Segoe UI"
@@ -29,14 +29,10 @@ Fonts::Fonts()
     this->fontsByType_.resize(size_t(EndType));
 }
 
-void Fonts::initialize(Application &app)
+void Fonts::initialize(Settings &, Paths &)
 {
-    this->chatFontFamily.connect([this, &app](const std::string &, auto) {
+    this->chatFontFamily.connect([this](const std::string &, auto) {
         assertInGuiThread();
-
-        if (app.windows) {
-            app.windows->incGeneration();
-        }
 
         for (auto &map : this->fontsByType_) {
             map.clear();
@@ -44,12 +40,19 @@ void Fonts::initialize(Application &app)
         this->fontChanged.invoke();
     });
 
-    this->chatFontSize.connect([this, &app](const int &, auto) {
+    this->chatFontSize.connect([this](const int &, auto) {
         assertInGuiThread();
 
-        if (app.windows) {
-            app.windows->incGeneration();
+        for (auto &map : this->fontsByType_) {
+            map.clear();
         }
+        this->fontChanged.invoke();
+    });
+
+    getSettings()->boldScale.connect([this](const int &, auto) {
+        assertInGuiThread();
+
+        getApp()->windows->incGeneration();
 
         for (auto &map : this->fontsByType_) {
             map.clear();
@@ -99,16 +102,20 @@ Fonts::FontData Fonts::createFontData(Type type, float scale)
             {ChatSmall, {0.6f, false, QFont::Normal}},
             {ChatMediumSmall, {0.8f, false, QFont::Normal}},
             {ChatMedium, {1, false, QFont::Normal}},
-            {ChatMediumBold, {1, false, QFont::Medium}},
+            {ChatMediumBold,
+             {1, false,
+              QFont::Weight(getApp()->settings->boldScale.getValue())}},
             {ChatMediumItalic, {1, true, QFont::Normal}},
             {ChatLarge, {1.2f, false, QFont::Normal}},
             {ChatVeryLarge, {1.4f, false, QFont::Normal}},
         };
-
+        sizeScale[ChatMediumBold] = {
+            1, false, QFont::Weight(getApp()->settings->boldScale.getValue())};
         auto data = sizeScale[type];
-        return FontData(QFont(QString::fromStdString(this->chatFontFamily.getValue()),
-                              int(this->chatFontSize.getValue() * data.scale * scale), data.weight,
-                              data.italic));
+        return FontData(
+            QFont(QString::fromStdString(this->chatFontFamily.getValue()),
+                  int(this->chatFontSize.getValue() * data.scale * scale),
+                  data.weight, data.italic));
     }
 
     // normal Ui font (use pt size)
@@ -121,8 +128,10 @@ Fonts::FontData Fonts::createFontData(Type type, float scale)
 
         static std::unordered_map<Type, UiFontData> defaultSize{
             {Tiny, {8, "Monospace", false, QFont::Normal}},
-            {UiMedium, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
-            {UiTabs, {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {UiMedium,
+             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {UiTabs,
+             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
         };
 
         UiFontData &data = defaultSize[type];

@@ -2,7 +2,7 @@
 
 #include "common/Common.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -17,7 +17,7 @@ namespace chatterino {
 class Notebook;
 class SplitContainer;
 
-class NotebookTab : public RippleEffectButton
+class NotebookTab : public Button
 {
     Q_OBJECT
 

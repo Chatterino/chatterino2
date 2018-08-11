@@ -2,14 +2,14 @@
 
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "common/SerializeCustom.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 
@@ -24,9 +24,10 @@ class SplitContainer;
 class SplitOverlay;
 class SelectChannelDialog;
 
-// Each ChatWidget consists of three sub-elements that handle their own part of the chat widget:
-// ChatWidgetHeader
-//   - Responsible for rendering which channel the ChatWidget is in, and the menu in the top-left of
+// Each ChatWidget consists of three sub-elements that handle their own part of
+// the chat widget: ChatWidgetHeader
+//   - Responsible for rendering which channel the ChatWidget is in, and the
+//   menu in the top-left of
 //     the chat widget
 // ChatWidgetView
 //   - Responsible for rendering all chat messages, and the scrollbar
@@ -60,6 +61,8 @@ public:
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
+    void insertTextToInput(const QString &text);
+
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);
     void giveFocus(Qt::FocusReason reason);
@@ -74,7 +77,8 @@ public:
 
     void setContainer(SplitContainer *container);
 
-    static pajlada::Signals::Signal<Qt::KeyboardModifiers> modifierStatusChanged;
+    static pajlada::Signals::Signal<Qt::KeyboardModifiers>
+        modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;
 
 protected:
@@ -88,7 +92,11 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
 
 private:
-    void doOpenUserInfoPopup(const QString &user);
+    void showUserInfoPopup(const QString &userName)
+    {
+        this->showUserInfoPopup(UserName{userName});
+    }
+    void showUserInfoPopup(const UserName &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
 
@@ -117,40 +125,17 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
 public slots:
-    // Add new split to the notebook page that this chat widget is in
-    // This is only activated from the menu now. Hotkey is handled in Notebook
-    void doAddSplit();
-
-    // Close current split (chat widget)
-    void doCloseSplit();
-
-    // Show a dialog for changing the current splits/chat widgets channel
-    void doChangeChannel();
-
-    // Open popup copy of this chat widget
-    // XXX: maybe make current chatwidget a popup instead?
-    void doPopup();
-
-    // Clear chat from all messages
-    void doClearChat();
-
-    // Open link to twitch channel in default browser
-    void doOpenChannel();
-
-    // Open popup player of twitch channel in default browser
-    void doOpenPopupPlayer();
-
-    // Open twitch channel stream through streamlink
-    void doOpenStreamlink();
-
-    // Copy text from chat
-    void doCopy();
-
-    // Open a search popup
-    void doSearch();
-
-    // Open viewer list of the channel
-    void doOpenViewerList();
+    void addSibling();
+    void deleteFromContainer();
+    void changeChannel();
+    void popup();
+    void clear();
+    void openInBrowser();
+    void openBrowserPlayer();
+    void openInStreamlink();
+    void copyToClipboard();
+    void showSearch();
+    void showViewerList();
 };
 
 }  // namespace chatterino

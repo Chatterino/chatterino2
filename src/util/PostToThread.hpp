@@ -7,7 +7,8 @@
 
 #include <functional>
 
-#define async_exec(a) QThreadPool::globalInstance()->start(new LambdaRunnable(a));
+#define async_exec(a) \
+    QThreadPool::globalInstance()->start(new LambdaRunnable(a));
 
 namespace chatterino {
 

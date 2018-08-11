@@ -23,8 +23,6 @@ Before building run `git submodule update --init --recursive` to get required su
 ## Code style
 The code is formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
 
-To setup automatic code formating with QT Creator, see [this guide](https://gist.github.com/pajlada/0296454198eb8f8789fd6fe7ea660c5b).
-
 ### Get it automated with QT Creator + Beautifier + Clang Format
 1. Download LLVM: http://releases.llvm.org/6.0.1/LLVM-6.0.1-win64.exe
 2. During the installation, make sure to add it to your path

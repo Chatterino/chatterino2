@@ -2,11 +2,22 @@
 
 #include "Application.hpp"
 #include "singletons/Paths.hpp"
+#include "util/DebugCount.hpp"
 
 #include <QCryptographicHash>
 #include <QFile>
 
 namespace chatterino {
+
+NetworkData::NetworkData()
+{
+    DebugCount::increase("NetworkData");
+}
+
+NetworkData::~NetworkData()
+{
+    DebugCount::decrease("NetworkData");
+}
 
 QString NetworkData::getHash()
 {
@@ -19,7 +30,8 @@ QString NetworkData::getHash()
             bytes.append(header);
         }
 
-        QByteArray hashBytes(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
+        QByteArray hashBytes(
+            QCryptographicHash::hash(bytes, QCryptographicHash::Sha256));
 
         this->hash_ = hashBytes.toHex();
     }

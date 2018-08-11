@@ -44,10 +44,11 @@ void Updates::installUpdates()
     }
 
 #ifdef Q_OS_WIN
-    QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                       "Chatterino is downloading the update "
-                                       "in the background and will run the "
-                                       "updater once it is finished.");
+    QMessageBox *box =
+        new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                        "Chatterino is downloading the update "
+                        "in the background and will run the "
+                        "updater once it is finished.");
     box->setAttribute(Qt::WA_DeleteOnClose);
     box->show();
 
@@ -57,8 +58,9 @@ void Updates::installUpdates()
         this->setStatus_(DownloadFailed);
 
         postToThread([] {
-            QMessageBox *box = new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                               "Failed while trying to download the update.");
+            QMessageBox *box =
+                new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                                "Failed while trying to download the update.");
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->show();
             box->raise();
@@ -67,7 +69,7 @@ void Updates::installUpdates()
         return true;
     });
 
-    req.onSuccess([this](auto result) -> bool {
+    req.onSuccess([this](auto result) -> Outcome {
         QByteArray object = result.getData();
         auto filename = combinePath(getPaths()->miscDirectory, "update.zip");
 
@@ -76,15 +78,16 @@ void Updates::installUpdates()
 
         if (file.write(object) == -1) {
             this->setStatus_(WriteFileFailed);
-            return false;
+            return Failure;
         }
 
         QProcess::startDetached(
-            combinePath(QCoreApplication::applicationDirPath(), "updater.1/ChatterinoUpdater.exe"),
+            combinePath(QCoreApplication::applicationDirPath(),
+                        "updater.1/ChatterinoUpdater.exe"),
             {filename, "restart"});
 
         QApplication::exit(0);
-        return false;
+        return Success;
     });
     this->setStatus_(Downloading);
     req.execute();
@@ -94,11 +97,13 @@ void Updates::installUpdates()
 void Updates::checkForUpdates()
 {
 #ifdef Q_OS_WIN
-    QString url = "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/stable";
+    QString url =
+        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS
+        "/stable";
 
     NetworkRequest req(url);
     req.setTimeout(30000);
-    req.onSuccess([this](auto result) -> bool {
+    req.onSuccess([this](auto result) -> Outcome {
         auto object = result.parseJson();
         QJsonValue version_val = object.value("version");
         QJsonValue update_val = object.value("update");
@@ -110,13 +115,14 @@ void Updates::checkForUpdates()
             postToThread([] {
                 QMessageBox *box = new QMessageBox(
                     QMessageBox::Information, "Chatterino Update",
-                    "Error while searching for updates.\n\nEither the service is down "
+                    "Error while searching for updates.\n\nEither the service "
+                    "is down "
                     "temporarily or everything is broken.");
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->show();
                 box->raise();
             });
-            return false;
+            return Failure;
         }
 
         this->onlineVersion_ = version_val.toString();
@@ -125,11 +131,11 @@ void Updates::checkForUpdates()
         if (this->currentVersion_ != this->onlineVersion_) {
             this->setStatus_(UpdateAvailable);
             postToThread([this] {
-                QMessageBox *box =
-                    new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                                    "An update for chatterino is available.\n\nDo you "
-                                    "want to download and install it?",
-                                    QMessageBox::Yes | QMessageBox::No);
+                QMessageBox *box = new QMessageBox(
+                    QMessageBox::Information, "Chatterino Update",
+                    "An update for chatterino is available.\n\nDo you "
+                    "want to download and install it?",
+                    QMessageBox::Yes | QMessageBox::No);
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->show();
                 box->raise();
@@ -140,7 +146,7 @@ void Updates::checkForUpdates()
         } else {
             this->setStatus_(NoUpdateAvailable);
         }
-        return false;
+        return Failure;
     });
     this->setStatus_(Searching);
     req.execute();

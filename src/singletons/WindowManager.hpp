@@ -1,13 +1,15 @@
 #pragma once
 
-#include <common/Singleton.hpp>
-
+#include "common/Singleton.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 
-class WindowManager : public Singleton
+class Settings;
+class Paths;
+
+class WindowManager final : public Singleton
 {
 public:
     WindowManager();
@@ -37,14 +39,14 @@ public:
     int windowCount();
     Window *windowAt(int index);
 
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
 
     int getGeneration() const;
     void incGeneration();
 
-    MessageElement::Flags getWordFlags();
+    MessageElementFlags getWordFlags();
     void updateWordTypeMask();
 
     pajlada::Signals::NoArgSignal repaintGifs;
@@ -64,7 +66,7 @@ private:
     Window *mainWindow_ = nullptr;
     Window *selectedWindow_ = nullptr;
 
-    MessageElement::Flags wordFlags_ = MessageElement::Default;
+    MessageElementFlags wordFlags_ = MessageElementFlag::Default;
     pajlada::Settings::SettingListener wordFlagsListener_;
 };
 

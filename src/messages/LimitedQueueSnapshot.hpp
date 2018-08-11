@@ -12,8 +12,9 @@ class LimitedQueueSnapshot
 public:
     LimitedQueueSnapshot() = default;
 
-    LimitedQueueSnapshot(std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> chunks,
-                         size_t length, size_t firstChunkOffset, size_t lastChunkEnd)
+    LimitedQueueSnapshot(
+        std::shared_ptr<std::vector<std::shared_ptr<std::vector<T>>>> chunks,
+        size_t length, size_t firstChunkOffset, size_t lastChunkEnd)
         : chunks_(chunks)
         , length_(length)
         , firstChunkOffset_(firstChunkOffset)

@@ -64,7 +64,7 @@ void SearchPopup::setChannel(ChannelPtr channel)
     this->snapshot_ = channel->getMessageSnapshot();
     this->performSearch();
 
-    this->setWindowTitle("Searching in " + channel->name + "s history");
+    this->setWindowTitle("Searching in " + channel->getName() + "s history");
 }
 
 void SearchPopup::performSearch()
@@ -77,7 +77,8 @@ void SearchPopup::performSearch()
         MessagePtr message = this->snapshot_[i];
 
         if (text.isEmpty() ||
-            message->searchText.indexOf(this->searchInput_->text(), 0, Qt::CaseInsensitive) != -1) {
+            message->searchText.indexOf(this->searchInput_->text(), 0,
+                                        Qt::CaseInsensitive) != -1) {
             channel->addMessage(message);
         }
     }

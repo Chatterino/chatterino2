@@ -13,13 +13,15 @@ class IrcMessageHandler
 public:
     static IrcMessageHandler &getInstance();
 
-    void handlePrivMessage(Communi::IrcPrivateMessage *message, TwitchServer &server);
+    void handlePrivMessage(Communi::IrcPrivateMessage *message,
+                           TwitchServer &server);
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
-    void handleUserNoticeMessage(Communi::IrcMessage *message, TwitchServer &server);
+    void handleUserNoticeMessage(Communi::IrcMessage *message,
+                                 TwitchServer &server);
     void handleModeMessage(Communi::IrcMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
     void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
@@ -28,8 +30,9 @@ public:
     void handlePartMessage(Communi::IrcMessage *message);
 
 private:
-    void addMessage(Communi::IrcMessage *message, const QString &target, const QString &content,
-                    TwitchServer &server, bool isResub, bool isAction);
+    void addMessage(Communi::IrcMessage *message, const QString &target,
+                    const QString &content, TwitchServer &server, bool isResub,
+                    bool isAction);
 };
 
 }  // namespace chatterino

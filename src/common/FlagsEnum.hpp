@@ -4,62 +4,78 @@
 
 namespace chatterino {
 
-// = std::enable_if<std::is_enum<T>::value>::type
-
 template <typename T, typename Q = typename std::underlying_type<T>::type>
 class FlagsEnum
 {
 public:
     FlagsEnum()
-        : value(static_cast<T>(0))
+        : value_(static_cast<T>(0))
     {
     }
 
-    FlagsEnum(T _value)
-        : value(_value)
+    FlagsEnum(T value)
+        : value_(value)
     {
     }
 
-    inline T operator~() const
+    FlagsEnum(std::initializer_list<T> flags)
     {
-        return (T) ~(Q)this->value;
-    }
-    inline T operator|(Q a) const
-    {
-        return (T)((Q)a | (Q)this->value);
-    }
-    inline T operator&(Q a) const
-    {
-        return (T)((Q)a & (Q)this->value);
-    }
-    inline T operator^(Q a) const
-    {
-        return (T)((Q)a ^ (Q)this->value);
-    }
-    inline T &operator|=(const Q &a)
-    {
-        return (T &)((Q &)this->value |= (Q)a);
-    }
-    inline T &operator&=(const Q &a)
-    {
-        return (T &)((Q &)this->value &= (Q)a);
-    }
-    inline T &operator^=(const Q &a)
-    {
-        return (T &)((Q &)this->value ^= (Q)a);
+        for (auto flag : flags) {
+            this->set(flag);
+        }
     }
 
-    void EnableFlag(T flag)
+    bool operator==(const FlagsEnum<T> &other)
     {
-        reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
+        return this->value_ == other.value_;
     }
 
-    bool HasFlag(Q flag) const
+    bool operator!=(const FlagsEnum &other)
     {
-        return (this->value & flag) == flag;
+        return this->value_ != other.value_;
     }
 
-    T value;
+    void set(T flag)
+    {
+        reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flag);
+    }
+
+    void unset(T flag)
+    {
+        reinterpret_cast<Q &>(this->value_) &= ~static_cast<Q>(flag);
+    }
+
+    void set(T flag, bool value)
+    {
+        if (value)
+            this->set(flag);
+        else
+            this->unset(flag);
+    }
+
+    bool has(T flag) const
+    {
+        return static_cast<Q>(this->value_) & static_cast<Q>(flag);
+    }
+
+    bool hasAny(FlagsEnum flags) const
+    {
+        return static_cast<Q>(this->value_) & static_cast<Q>(flags.value_);
+    }
+
+    bool hasAll(FlagsEnum<T> flags) const
+    {
+        return (static_cast<Q>(this->value_) & static_cast<Q>(flags.value_)) &&
+               static_cast<Q>(flags->value);
+    }
+
+    bool hasNone(std::initializer_list<T> flags) const
+    {
+        return !this->hasAny(flags);
+    }
+
+private:
+    T value_{};
 };
 
 }  // namespace chatterino

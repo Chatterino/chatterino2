@@ -38,7 +38,8 @@ Window::Window(Type type)
     this->addShortcuts();
     this->addLayout();
 
-    getApp()->accounts->twitch.currentUserChanged.connect([this] { this->onAccountSelected(); });
+    getApp()->accounts->twitch.currentUserChanged.connect(
+        [this] { this->onAccountSelected(); });
     this->onAccountSelected();
 
     if (type == Type::Main) {
@@ -86,7 +87,8 @@ bool Window::event(QEvent *event)
                 }
             }
 
-            if (SplitContainer *container = dynamic_cast<SplitContainer *>(page)) {
+            if (SplitContainer *container =
+                    dynamic_cast<SplitContainer *>(page)) {
                 container->hideResizeHandles();
             }
         } break;
@@ -103,10 +105,11 @@ void Window::showEvent(QShowEvent *event)
     if (getApp()->settings->startUpNotification.getValue() < 1) {
         getApp()->settings->startUpNotification = 1;
 
-        auto box =
-            new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta",
-                            "Please note that this software is not stable yet. Things are rough "
-                            "around the edges and everything is subject to change.");
+        auto box = new QMessageBox(
+            QMessageBox::Information, "Chatterino 2 Beta",
+            "Please note that this software is not stable yet. Things are "
+            "rough "
+            "around the edges and everything is subject to change.");
         box->setAttribute(Qt::WA_DeleteOnClose);
         box->show();
     }
@@ -114,11 +117,13 @@ void Window::showEvent(QShowEvent *event)
     // Show changelog
     if (getApp()->settings->currentVersion.getValue() != "" &&
         getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2 Beta", "Show changelog?",
+        auto box = new QMessageBox(QMessageBox::Information,
+                                   "Chatterino 2 Beta", "Show changelog?",
                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (box->exec() == QMessageBox::Yes) {
-            QDesktopServices::openUrl(QUrl("https://fourtf.com/chatterino-changelog/"));
+            QDesktopServices::openUrl(
+                QUrl("https://fourtf.com/chatterino-changelog/"));
         }
     }
 
@@ -159,8 +164,8 @@ void Window::addLayout()
 
 void Window::addCustomTitlebarButtons()
 {
-    return_unless(this->hasCustomWindowFrame());
-    return_unless(this->type_ == Type::Main);
+    if (!this->hasCustomWindowFrame()) return;
+    if (this->type_ != Type::Main) return;
 
     // settings
     this->addTitleBarButton(TitleBarButton::Settings, [] {
@@ -174,9 +179,10 @@ void Window::addCustomTitlebarButtons()
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
-        getApp()->windows->showAccountSelectPopup(
-            this->userLabel_->mapToGlobal(this->userLabel_->rect().bottomLeft()));  //
+        getApp()->windows->showAccountSelectPopup(this->userLabel_->mapToGlobal(
+            this->userLabel_->rect().bottomLeft()));  //
     });
+    this->userLabel_->setMinimumWidth(20 * getScale());
 }
 
 void Window::addDebugStuff()
@@ -245,26 +251,36 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
 
     // Switch tab
-    createWindowShortcut(this, "CTRL+T",
-                         [this] { this->notebook_.getOrAddSelectedPage()->appendNewSplit(true); });
+    createWindowShortcut(this, "CTRL+T", [this] {
+        this->notebook_.getOrAddSelectedPage()->appendNewSplit(true);
+    });
 
-    createWindowShortcut(this, "CTRL+1", [this] { this->notebook_.selectIndex(0); });
-    createWindowShortcut(this, "CTRL+2", [this] { this->notebook_.selectIndex(1); });
-    createWindowShortcut(this, "CTRL+3", [this] { this->notebook_.selectIndex(2); });
-    createWindowShortcut(this, "CTRL+4", [this] { this->notebook_.selectIndex(3); });
-    createWindowShortcut(this, "CTRL+5", [this] { this->notebook_.selectIndex(4); });
-    createWindowShortcut(this, "CTRL+6", [this] { this->notebook_.selectIndex(5); });
-    createWindowShortcut(this, "CTRL+7", [this] { this->notebook_.selectIndex(6); });
-    createWindowShortcut(this, "CTRL+8", [this] { this->notebook_.selectIndex(7); });
-    createWindowShortcut(this, "CTRL+9", [this] { this->notebook_.selectIndex(8); });
+    createWindowShortcut(this, "CTRL+1",
+                         [this] { this->notebook_.selectIndex(0); });
+    createWindowShortcut(this, "CTRL+2",
+                         [this] { this->notebook_.selectIndex(1); });
+    createWindowShortcut(this, "CTRL+3",
+                         [this] { this->notebook_.selectIndex(2); });
+    createWindowShortcut(this, "CTRL+4",
+                         [this] { this->notebook_.selectIndex(3); });
+    createWindowShortcut(this, "CTRL+5",
+                         [this] { this->notebook_.selectIndex(4); });
+    createWindowShortcut(this, "CTRL+6",
+                         [this] { this->notebook_.selectIndex(5); });
+    createWindowShortcut(this, "CTRL+7",
+                         [this] { this->notebook_.selectIndex(6); });
+    createWindowShortcut(this, "CTRL+8",
+                         [this] { this->notebook_.selectIndex(7); });
+    createWindowShortcut(this, "CTRL+9",
+                         [this] { this->notebook_.selectIndex(8); });
 
     // Zoom in
     {
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() + 1));
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() + 1));
         });
     }
 
@@ -273,16 +289,18 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(
-                WindowManager::clampUiScale(getApp()->settings->uiScale.getValue() - 1));
+            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
+                getApp()->settings->uiScale.getValue() - 1));
         });
     }
 
     // New tab
-    createWindowShortcut(this, "CTRL+SHIFT+T", [this] { this->notebook_.addPage(true); });
+    createWindowShortcut(this, "CTRL+SHIFT+T",
+                         [this] { this->notebook_.addPage(true); });
 
     // Close tab
-    createWindowShortcut(this, "CTRL+SHIFT+W", [this] { this->notebook_.removeCurrentPage(); });
+    createWindowShortcut(this, "CTRL+SHIFT+W",
+                         [this] { this->notebook_.removeCurrentPage(); });
 }
 
 void Window::onAccountSelected()

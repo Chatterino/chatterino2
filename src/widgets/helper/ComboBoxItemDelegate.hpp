@@ -14,7 +14,8 @@ public:
     ComboBoxItemDelegate(QObject *parent = nullptr);
     ~ComboBoxItemDelegate();
 
-    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+    virtual QWidget *createEditor(QWidget *parent,
+                                  const QStyleOptionViewItem &option,
                                   const QModelIndex &index) const;
     virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
     virtual void setModelData(QWidget *editor, QAbstractItemModel *model,

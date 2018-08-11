@@ -10,15 +10,8 @@ class LinkParser
 public:
     explicit LinkParser(const QString &unparsedString);
 
-    bool hasMatch() const
-    {
-        return this->match_.hasMatch();
-    }
-
-    QString getCaptured() const
-    {
-        return this->match_.captured();
-    }
+    bool hasMatch() const;
+    QString getCaptured() const;
 
 private:
     QRegularExpressionMatch match_;

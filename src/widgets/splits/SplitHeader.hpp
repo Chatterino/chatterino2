@@ -1,37 +1,29 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
-#include "widgets/helper/SignalLabel.hpp"
 
-#include <QAction>
-#include <QHBoxLayout>
-#include <QLabel>
 #include <QMenu>
-#include <QMouseEvent>
-#include <QPaintEvent>
 #include <QPoint>
-#include <QWidget>
+#include <memory>
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/connection.hpp>
 #include <pajlada/signals/signalholder.hpp>
-
 #include <vector>
 
 namespace chatterino {
 
-class Split;
+class Button;
+class EffectLabel;
 class Label;
+class Split;
 
-class SplitHeader : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitHeader final : public BaseWidget, pajlada::Signals::SignalHolder
 {
     Q_OBJECT
 
 public:
     explicit SplitHeader(Split *_chatWidget);
-    virtual ~SplitHeader() override;
 
-    // Update channel text from chat widget
     void updateChannelText();
     void updateModerationModeIcon();
     void updateRoomModes();
@@ -49,42 +41,38 @@ protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    void rightButtonClicked();
-    void initializeChannelSignals();
-    void addModeActions(QMenu &menu);
-    void setupModeLabel(RippleEffectLabel &label);
-    void addDropdownItems(RippleEffectButton *label);
+    void initializeLayout();
+    void initializeModeSignals(EffectLabel &label);
+    std::unique_ptr<QMenu> createMainMenu();
+    std::unique_ptr<QMenu> createChatModeMenu();
+    void handleChannelChanged();
 
-    Split *const split_;
+    Split *const split_{};
+    QString tooltipText_{};
+    bool isLive_{false};
 
-    QPoint dragStart_;
-    bool dragging_ = false;
-    bool doubleClicked_ = false;
-    bool showingHelpTooltip_ = false;
+    // ui
+    Button *dropdownButton_{};
+    Label *titleLabel{};
+    EffectLabel *modeButton_{};
+    Button *moderationButton_{};
 
-    pajlada::Signals::Connection onlineStatusChangedConnection_;
+    // states
+    QPoint dragStart_{};
+    bool dragging_{false};
+    bool doubleClicked_{false};
+    bool showingHelpTooltip_{false};
+    bool menuVisible_{false};
 
-    RippleEffectButton *dropdownButton_ = nullptr;
-    //    Label *titleLabel;
-    Label *titleLabel = nullptr;
-    RippleEffectLabel *modeButton_ = nullptr;
-    RippleEffectButton *moderationButton_ = nullptr;
-
-    QMenu dropdownMenu_;
-    QMenu modeMenu_;
-
+    // signals
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
-
-    QString tooltip_;
-    bool isLive_;
-
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
 public slots:
-    void menuMoveSplit();
-    void menuReloadChannelEmotes();
-    void menuManualReconnect();
-    void menuShowChangelog();
+    void moveSplit();
+    void reloadChannelEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino

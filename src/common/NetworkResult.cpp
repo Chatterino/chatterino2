@@ -25,20 +25,21 @@ QJsonObject NetworkResult::parseJson() const
 
 rapidjson::Document NetworkResult::parseRapidJson() const
 {
-    rapidjson::Document ret(rapidjson::kNullType);
+    rapidjson::Document ret(rapidjson::kObjectType);
 
-    rapidjson::ParseResult result = ret.Parse(this->data_.data(), this->data_.length());
+    rapidjson::ParseResult result =
+        ret.Parse(this->data_.data(), this->data_.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})", rapidjson::GetParseError_En(result.Code()),
-            result.Offset());
+        log("JSON parse error: {} ({})",
+            rapidjson::GetParseError_En(result.Code()), result.Offset());
         return ret;
     }
 
     return ret;
 }
 
-QByteArray NetworkResult::getData() const
+const QByteArray &NetworkResult::getData() const
 {
     return this->data_;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace chatterino {
 
 template <typename T>
@@ -23,7 +25,7 @@ public:
         return element_;
     }
 
-    T &operator*() const
+    typename std::add_lvalue_reference<T>::type operator*() const
     {
         assert(this->hasElement());
 
@@ -50,6 +52,18 @@ public:
     operator bool() const
     {
         return this->hasElement();
+    }
+
+    bool operator!() const
+    {
+        return !this->hasElement();
+    }
+
+    template <typename X = T,
+              typename = std::enable_if_t<!std::is_const<X>::value>>
+    operator NullablePtr<const T>() const
+    {
+        return NullablePtr<const T>(this->element_);
     }
 
 private:

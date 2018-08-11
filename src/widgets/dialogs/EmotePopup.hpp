@@ -19,8 +19,10 @@ public:
     pajlada::Signals::Signal<Link> linkClicked;
 
 private:
-    ChannelView *viewEmotes_;
-    ChannelView *viewEmojis_;
+    ChannelView *globalEmotesView_{};
+    ChannelView *channelEmotesView_{};
+    ChannelView *subEmotesView_{};
+    ChannelView *viewEmojis_{};
 };
 
 }  // namespace chatterino

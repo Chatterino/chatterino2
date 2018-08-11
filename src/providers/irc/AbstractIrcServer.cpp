@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 
 #include <QCoreApplication>
 
@@ -12,49 +13,49 @@ AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
     this->writeConnection_.reset(new IrcConnection);
-    this->writeConnection_->moveToThread(QCoreApplication::instance()->thread());
+    this->writeConnection_->moveToThread(
+        QCoreApplication::instance()->thread());
 
-    QObject::connect(this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
-                     [this](auto msg) { this->writeConnectionMessageReceived(msg); });
+    QObject::connect(
+        this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
+        [this](auto msg) { this->writeConnectionMessageReceived(msg); });
 
     // Listen to read connection message signals
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::messageReceived,
                      [this](auto msg) { this->messageReceived(msg); });
-    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::privateMessageReceived,
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::privateMessageReceived,
                      [this](auto msg) { this->privateMessageReceived(msg); });
-    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::connected,
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::connected,
                      [this] { this->onConnected(); });
-    QObject::connect(this->readConnection_.get(), &Communi::IrcConnection::disconnected,
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
 
     // listen to reconnect request
-    this->readConnection_->reconnectRequested.connect([this] { this->connect(); });
-    //    this->writeConnection->reconnectRequested.connect([this] { this->connect(); });
-}
-
-IrcConnection *AbstractIrcServer::getReadConnection() const
-{
-    return this->readConnection_.get();
-}
-
-IrcConnection *AbstractIrcServer::getWriteConnection() const
-{
-    return this->writeConnection_.get();
+    this->readConnection_->reconnectRequested.connect(
+        [this] { this->connect(); });
+    //    this->writeConnection->reconnectRequested.connect([this] {
+    //    this->connect(); });
 }
 
 void AbstractIrcServer::connect()
 {
     this->disconnect();
 
-    //    if (this->hasSeparateWriteConnection()) {
-    this->initializeConnection(this->writeConnection_.get(), false, true);
-    this->initializeConnection(this->readConnection_.get(), true, false);
-    //    } else {
-    //        this->initializeConnection(this->readConnection.get(), true, true);
-    //    }
+    bool separateWriteConnection = this->hasSeparateWriteConnection();
+
+    if (separateWriteConnection) {
+        this->initializeConnection(this->writeConnection_.get(), false, true);
+        this->initializeConnection(this->readConnection_.get(), true, false);
+    } else {
+        this->initializeConnection(this->readConnection_.get(), true, true);
+    }
 
     // fourtf: this should be asynchronous
     {
@@ -62,13 +63,9 @@ void AbstractIrcServer::connect()
         std::lock_guard<std::mutex> lock2(this->channelMutex);
 
         for (std::weak_ptr<Channel> &weak : this->channels.values()) {
-            std::shared_ptr<Channel> chan = weak.lock();
-            if (!chan) {
-                continue;
+            if (auto channel = std::shared_ptr<Channel>(weak.lock())) {
+                this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
-
-            this->writeConnection_->sendRaw("JOIN #" + chan->name);
-            this->readConnection_->sendRaw("JOIN #" + chan->name);
         }
 
         this->writeConnection_->open();
@@ -87,22 +84,30 @@ void AbstractIrcServer::disconnect()
     this->writeConnection_->close();
 }
 
-void AbstractIrcServer::sendMessage(const QString &channelName, const QString &message)
+void AbstractIrcServer::sendMessage(const QString &channelName,
+                                    const QString &message)
+{
+    this->sendRawMessage("PRIVMSG #" + channelName + " :" + message);
+}
+
+void AbstractIrcServer::sendRawMessage(const QString &rawMessage)
 {
     std::lock_guard<std::mutex> locker(this->connectionMutex_);
 
-    // fourtf: trim the message if it's sent from twitch chat
-
-    if (this->writeConnection_) {
-        this->writeConnection_->sendRaw("PRIVMSG #" + channelName + " :" + message);
+    if (this->hasSeparateWriteConnection()) {
+        this->writeConnection_->sendRaw(rawMessage);
+    } else {
+        this->readConnection_->sendRaw(rawMessage);
     }
 }
 
-void AbstractIrcServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
+void AbstractIrcServer::writeConnectionMessageReceived(
+    Communi::IrcMessage *message)
 {
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
+std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
+    const QString &dirtyChannelName)
 {
     auto channelName = this->cleanChannelName(dirtyChannelName);
 
@@ -126,7 +131,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(const QString &dirty
     chan->destroyed.connect([this, clojuresInCppAreShit] {
         // fourtf: issues when the server itself is destroyed
 
-        Log("[AbstractIrcServer::addChannel] {} was destroyed", clojuresInCppAreShit);
+        log("[AbstractIrcServer::addChannel] {} was destroyed",
+            clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
 
         if (this->readConnection_) {
@@ -154,7 +160,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(const QString &dirty
     return chan;
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
+std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(
+    const QString &dirtyChannelName)
 {
     auto channelName = this->cleanChannelName(dirtyChannelName);
 
@@ -183,8 +190,8 @@ void AbstractIrcServer::onConnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    MessagePtr connMsg = Message::createSystemMessage("connected to chat");
-    MessagePtr reconnMsg = Message::createSystemMessage("reconnected to chat");
+    auto connected = makeSystemMessage("connected to chat");
+    auto reconnected = makeSystemMessage("reconnected to chat");
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {
         std::shared_ptr<Channel> chan = weak.lock();
@@ -194,16 +201,17 @@ void AbstractIrcServer::onConnected()
 
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
-        bool replaceMessage =
-            snapshot.getLength() > 0 &&
-            snapshot[snapshot.getLength() - 1]->flags & Message::DisconnectedMessage;
+        bool replaceMessage = snapshot.getLength() > 0 &&
+                              snapshot[snapshot.getLength() - 1]->flags.has(
+                                  MessageFlag::DisconnectedMessage);
 
         if (replaceMessage) {
-            chan->replaceMessage(snapshot[snapshot.getLength() - 1], reconnMsg);
+            chan->replaceMessage(snapshot[snapshot.getLength() - 1],
+                                 reconnected);
             continue;
         }
 
-        chan->addMessage(connMsg);
+        chan->addMessage(connected);
     }
 }
 
@@ -211,8 +219,9 @@ void AbstractIrcServer::onDisconnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    MessagePtr msg = Message::createSystemMessage("disconnected from chat");
-    msg->flags |= Message::DisconnectedMessage;
+    MessageBuilder b(systemMessage, "disconnected from chat");
+    b->flags.set(MessageFlag::DisconnectedMessage);
+    auto disconnected = b.release();
 
     for (std::weak_ptr<Channel> &weak : this->channels.values()) {
         std::shared_ptr<Channel> chan = weak.lock();
@@ -220,11 +229,12 @@ void AbstractIrcServer::onDisconnected()
             continue;
         }
 
-        chan->addMessage(msg);
+        chan->addMessage(disconnected);
     }
 }
 
-std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(const QString &channelName)
+std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
+    const QString &channelName)
 {
     return nullptr;
 }
@@ -236,16 +246,19 @@ QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 
 void AbstractIrcServer::addFakeMessage(const QString &data)
 {
-    auto fakeMessage = Communi::IrcMessage::fromData(data.toUtf8(), this->readConnection_.get());
+    auto fakeMessage = Communi::IrcMessage::fromData(
+        data.toUtf8(), this->readConnection_.get());
 
     if (fakeMessage->command() == "PRIVMSG") {
-        this->privateMessageReceived(static_cast<Communi::IrcPrivateMessage *>(fakeMessage));
+        this->privateMessageReceived(
+            static_cast<Communi::IrcPrivateMessage *>(fakeMessage));
     } else {
         this->messageReceived(fakeMessage);
     }
 }
 
-void AbstractIrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
+void AbstractIrcServer::privateMessageReceived(
+    Communi::IrcPrivateMessage *message)
 {
 }
 

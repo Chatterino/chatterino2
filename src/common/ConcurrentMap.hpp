@@ -65,7 +65,8 @@ public:
         this->data.insert(name, value);
     }
 
-    void each(std::function<void(const TKey &name, const TValue &value)> func) const
+    void each(
+        std::function<void(const TKey &name, const TValue &value)> func) const
     {
         QMutexLocker lock(&this->mutex);
 

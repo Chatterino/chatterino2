@@ -22,7 +22,8 @@ public:
     Scrollbar(ChannelView *parent = nullptr);
 
     void addHighlight(ScrollbarHighlight highlight);
-    void addHighlightsAtStart(const std::vector<ScrollbarHighlight> &highlights_);
+    void addHighlightsAtStart(
+        const std::vector<ScrollbarHighlight> &highlights_);
     void replaceHighlight(size_t index, ScrollbarHighlight replacement);
 
     void pauseHighlights();

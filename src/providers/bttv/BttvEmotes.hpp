@@ -1,27 +1,29 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
-#include "common/SimpleSignalVector.hpp"
-#include "util/ConcurrentMap.hpp"
-
-#include <map>
+#include <memory>
+#include "common/Atomic.hpp"
+#include "messages/Emote.hpp"
 
 namespace chatterino {
 
-class BTTVEmotes
+class BttvEmotes final
 {
+    static constexpr const char *globalEmoteApiUrl =
+        "https://api.betterttv.net/2/emotes";
+    static constexpr const char *bttvChannelEmoteApiUrl =
+        "https://api.betterttv.net/2/channels/";
+
 public:
-    EmoteMap globalEmotes;
-    SimpleSignalVector<QString> globalEmoteCodes;
+    BttvEmotes();
 
-    EmoteMap channelEmotes;
-    std::map<QString, SimpleSignalVector<QString>> channelEmoteCodes;
-
-    void loadGlobalEmotes();
-    void loadChannelEmotes(const QString &channelName, std::weak_ptr<EmoteMap> channelEmoteMap);
+    std::shared_ptr<const EmoteMap> global() const;
+    boost::optional<EmotePtr> global(const EmoteName &name) const;
+    void loadGlobal();
+    static void loadChannel(const QString &channelName,
+                            std::function<void(EmoteMap &&)> callback);
 
 private:
-    EmoteMap channelEmoteCache_;
+    Atomic<std::shared_ptr<const EmoteMap>> global_;
 };
 
 }  // namespace chatterino

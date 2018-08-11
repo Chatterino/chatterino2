@@ -19,13 +19,15 @@ class LoggingChannel : boost::noncopyable
 
 public:
     ~LoggingChannel();
-    void addMessage(std::shared_ptr<Message> message);
+    void addMessage(MessagePtr message);
 
 private:
     void openLogFile();
 
-    QString generateOpeningString(const QDateTime &now = QDateTime::currentDateTime()) const;
-    QString generateClosingString(const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateOpeningString(
+        const QDateTime &now = QDateTime::currentDateTime()) const;
+    QString generateClosingString(
+        const QDateTime &now = QDateTime::currentDateTime()) const;
 
     void appendLine(const QString &line);
 

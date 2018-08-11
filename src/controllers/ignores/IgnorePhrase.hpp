@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Application.hpp"
-#include "common/SerializeCustom.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "singletons/Settings.hpp"
+
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>
@@ -101,7 +102,7 @@ private:
     bool isBlock_;
     QString replace_;
     bool isCaseSensitive_;
-    std::map<QString, EmoteData> emotes;
+    std::map<QString, EmotePtr> emotes;
 };
 }  // namespace chatterino
 

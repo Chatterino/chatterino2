@@ -8,12 +8,15 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class IgnoreModel;
 
-class IgnoreController : public Singleton
+class IgnoreController final : public Singleton
 {
 public:
-    virtual void initialize(Application &app) override;
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     UnsortedSignalVector<IgnorePhrase> phrases;
 
@@ -22,7 +25,8 @@ public:
 private:
     bool initialized_ = false;
 
-    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {"/ignore/phrases"};
+    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {
+        "/ignore/phrases"};
 };
 
 }  // namespace chatterino

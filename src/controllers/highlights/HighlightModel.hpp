@@ -15,8 +15,9 @@ class HighlightModel : public SignalVectorModel<HighlightPhrase>
 
 protected:
     // turn a vector item into a model row
-    virtual HighlightPhrase getItemFromRow(std::vector<QStandardItem *> &row,
-                                           const HighlightPhrase &original) override;
+    virtual HighlightPhrase getItemFromRow(
+        std::vector<QStandardItem *> &row,
+        const HighlightPhrase &original) override;
 
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const HighlightPhrase &item,
@@ -24,8 +25,9 @@ protected:
 
     virtual void afterInit() override;
 
-    virtual void customRowSetData(const std::vector<QStandardItem *> &row, int column,
-                                  const QVariant &value, int role) override;
+    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
+                                  int column, const QVariant &value,
+                                  int role) override;
 
     friend class HighlightController;
 };

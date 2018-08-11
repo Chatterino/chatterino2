@@ -21,17 +21,66 @@
 #include <QTableView>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
 
 inline QString CreateLink(const QString &url, bool file = false)
 {
     if (file) {
-        return QString("<a href=\"file:///" + url + "\"><span style=\"color: white;\">" + url +
+        return QString("<a href=\"file:///" + url +
+                       "\"><span style=\"color: white;\">" + url +
                        "</span></a>");
     }
 
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" + url + "</span></a>");
+    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
+                   url + "</span></a>");
+}
+
+qint64 dirSize(QString dirPath)
+{
+    qint64 size = 0;
+    QDir dir(dirPath);
+    // calculate total size of current directories' files
+    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
+    for (QString filePath : dir.entryList(fileFilters)) {
+        QFileInfo fi(dir, filePath);
+        size += fi.size();
+    }
+    // add size of child directories recursively
+    QDir::Filters dirFilters =
+        QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
+    for (QString childDirPath : dir.entryList(dirFilters))
+        size += dirSize(dirPath + QDir::separator() + childDirPath);
+    return size;
+}
+
+QString formatSize(qint64 size)
+{
+    QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
+    int i;
+    double outputSize = size;
+    for (i = 0; i < units.size() - 1; i++) {
+        if (outputSize < 1024) break;
+        outputSize = outputSize / 1024;
+    }
+    return QString("%0 %1").arg(outputSize, 0, 'f', 2).arg(units[i]);
+}
+
+QString fetchLogDirectorySize()
+{
+    auto app = getApp();
+    QString logPathDirectory;
+    if (app->settings->logPath == "") {
+        logPathDirectory = app->paths->messageLogDirectory;
+    } else {
+        logPathDirectory = app->settings->logPath;
+    }
+    qint64 logsSize = dirSize(logPathDirectory);
+    QString logsSizeLabel = "Your logs currently take up ";
+    logsSizeLabel += formatSize(logsSize);
+    logsSizeLabel += " of space";
+    return logsSizeLabel;
 }
 
 ModerationPage::ModerationPage()
@@ -44,61 +93,79 @@ ModerationPage::ModerationPage()
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
-        // Logs (copied from LoggingMananger)
-
         auto logsPathLabel = logs.emplace<QLabel>();
 
-        app->settings->logPath.connect([app, logsPathLabel](const QString &logPath, auto) mutable {
+        // Show how big (size-wise) the logs are
+        auto logsPathSizeLabel = logs.emplace<QLabel>();
+        logsPathSizeLabel->setText(
+            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
-            QString pathOriginal;
+        // Logs (copied from LoggingMananger)
+        app->settings->logPath.connect(
+            [app, logsPathLabel](const QString &logPath, auto) mutable {
+                QString pathOriginal;
 
-            if (logPath == "") {
-                pathOriginal = app->paths->messageLogDirectory;
-            } else {
-                pathOriginal = logPath;
-            }
+                if (logPath == "") {
+                    pathOriginal = app->paths->messageLogDirectory;
+                } else {
+                    pathOriginal = logPath;
+                }
 
-            QString pathShortened;
+                QString pathShortened;
 
-            if (pathOriginal.size() > 50) {
-                pathShortened = pathOriginal;
-                pathShortened.resize(50);
-                pathShortened += "...";
-            } else {
-                pathShortened = pathOriginal;
-            }
+                if (pathOriginal.size() > 50) {
+                    pathShortened = pathOriginal;
+                    pathShortened.resize(50);
+                    pathShortened += "...";
+                } else {
+                    pathShortened = pathOriginal;
+                }
 
-            pathShortened = "Logs saved at <a href=\"file:///" + pathOriginal +
-                            "\"><span style=\"color: white;\">" + pathShortened + "</span></a>";
+                pathShortened = "Logs saved at <a href=\"file:///" +
+                                pathOriginal +
+                                "\"><span style=\"color: white;\">" +
+                                pathShortened + "</span></a>";
 
-            logsPathLabel->setText(pathShortened);
-            logsPathLabel->setToolTip(pathOriginal);
-        });
+                logsPathLabel->setText(pathShortened);
+                logsPathLabel->setToolTip(pathOriginal);
+            });
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                                Qt::LinksAccessibleByKeyboard |
                                                Qt::LinksAccessibleByKeyboard);
         logsPathLabel->setOpenExternalLinks(true);
-        logs.append(this->createCheckBox("Enable logging", app->settings->enableLogging));
+        logs.append(this->createCheckBox("Enable logging",
+                                         app->settings->enableLogging));
 
         logs->addStretch(1);
         auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
 
         // Setting custom logpath
-        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this, [this]() {
-            auto app = getApp();
-            auto dirName = QFileDialog::getExistingDirectory(this);
+        QObject::connect(
+            selectDir.getElement(), &QPushButton::clicked, this,
+            [this, logsPathSizeLabel]() mutable {
+                auto app = getApp();
+                auto dirName = QFileDialog::getExistingDirectory(this);
 
-            app->settings->logPath = dirName;
-        });
+                app->settings->logPath = dirName;
+
+                // Refresh: Show how big (size-wise) the logs are
+                logsPathSizeLabel->setText(
+                    QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+            });
 
         // Reset custom logpath
         auto resetDir = logs.emplace<QPushButton>("Reset logpath");
-        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this, []() {
-            auto app = getApp();
-            app->settings->logPath = "";
-        });
+        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
+                         [logsPathSizeLabel]() mutable {
+                             auto app = getApp();
+                             app->settings->logPath = "";
+
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(QtConcurrent::run(
+                                 [] { return fetchLogDirectorySize(); }));
+                         });
 
         // Logs end
     }
@@ -113,21 +180,27 @@ ModerationPage::ModerationPage()
 
         //        auto form = modMode.emplace<QFormLayout>();
         //        {
-        //            form->addRow("Action on timed out messages (unimplemented):",
+        //            form->addRow("Action on timed out messages
+        //            (unimplemented):",
         //                         this->createComboBox({"Disable", "Hide"},
         //                         app->settings->timeoutAction));
         //        }
 
         EditableModelView *view =
-            modMode.emplace<EditableModelView>(app->moderationActions->createModel(nullptr))
+            modMode
+                .emplace<EditableModelView>(
+                    app->moderationActions->createModel(nullptr))
                 .getElement();
 
         view->setTitles({"Actions"});
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
 
         view->addButtonPressed.connect([] {
-            getApp()->moderationActions->items.appendItem(ModerationAction("/timeout {user} 300"));
+            getApp()->moderationActions->items.appendItem(
+                ModerationAction("/timeout {user} 300"));
         });
 
         /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");

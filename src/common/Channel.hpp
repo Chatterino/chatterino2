@@ -4,7 +4,6 @@
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
-#include "util/ConcurrentMap.hpp"
 
 #include <QString>
 #include <QTimer>
@@ -32,7 +31,8 @@ public:
     explicit Channel(const QString &name, Type type);
     virtual ~Channel();
 
-    pajlada::Signals::Signal<const QString &, const QString &, bool &> sendMessageSignal;
+    pajlada::Signals::Signal<const QString &, const QString &, bool &>
+        sendMessageSignal;
 
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &> messageAppended;
@@ -41,6 +41,7 @@ public:
     pajlada::Signals::NoArgSignal destroyed;
 
     Type getType() const;
+    const QString &getName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
@@ -50,9 +51,8 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
-    virtual void addRecentChatter(const std::shared_ptr<Message> &message);
+    virtual void addRecentChatter(const MessagePtr &message);
 
-    QString name;
     QStringList modList;
 
     virtual bool canSendMessage() const;
@@ -69,6 +69,7 @@ protected:
     virtual void onConnected();
 
 private:
+    const QString name_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
     QTimer clearCompletionModelTimer_;
@@ -83,46 +84,17 @@ class IndirectChannel
         Channel::Type type;
         pajlada::Signals::NoArgSignal changed;
 
-        Data() = delete;
-        Data(ChannelPtr _channel, Channel::Type _type)
-            : channel(_channel)
-            , type(_type)
-        {
-        }
+        Data(ChannelPtr channel, Channel::Type type);
     };
 
 public:
-    IndirectChannel(ChannelPtr channel, Channel::Type type = Channel::Type::Direct)
-        : data_(new Data(channel, type))
-    {
-    }
+    IndirectChannel(ChannelPtr channel,
+                    Channel::Type type = Channel::Type::Direct);
 
-    ChannelPtr get()
-    {
-        return data_->channel;
-    }
-
-    void update(ChannelPtr ptr)
-    {
-        assert(this->data_->type != Channel::Type::Direct);
-
-        this->data_->channel = ptr;
-        this->data_->changed.invoke();
-    }
-
-    pajlada::Signals::NoArgSignal &getChannelChanged()
-    {
-        return this->data_->changed;
-    }
-
-    Channel::Type getType()
-    {
-        if (this->data_->type == Channel::Type::Direct) {
-            return this->get()->getType();
-        } else {
-            return this->data_->type;
-        }
-    }
+    ChannelPtr get();
+    void reset(ChannelPtr channel);
+    pajlada::Signals::NoArgSignal &getChannelChanged();
+    Channel::Type getType();
 
 private:
     std::shared_ptr<Data> data_;

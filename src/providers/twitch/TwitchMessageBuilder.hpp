@@ -1,7 +1,6 @@
 #pragma once
 
 #include "messages/MessageBuilder.hpp"
-#include "messages/MessageParseArgs.hpp"
 #include "singletons/Emotes.hpp"
 
 #include <IrcMessage>
@@ -48,17 +47,23 @@ private:
     void appendChannelName();
     void parseUsername();
     void appendUsername();
-    void parseHighlights();
+    void parseHighlights(bool isPastMsg);
 
     void appendTwitchEmote(const Communi::IrcMessage *ircMessage, const QString &emote,
-                           std::vector<std::tuple<long, EmoteData, QString> > &vec);
-    bool tryAppendEmote(QString &emoteString);
+                           std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec);
+    Outcome tryAppendEmote(const EmoteName &name);
+
+    void addWords(const QStringList &words,
+                  const std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
+    void addTextOrEmoji(EmotePtr emote);
+    void addTextOrEmoji(const QString &value);
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
-    bool tryParseCheermote(const QString &string);
+    Outcome tryParseCheermote(const QString &string);
 
     QString roomID_;
+    bool hasBits_ = false;
 
     QColor usernameColor_;
     QString originalMessage_;

@@ -28,8 +28,8 @@ public:
 
 protected:
     virtual void showEvent(QShowEvent *) override;
-    //    virtual void nativeEvent(const QByteArray &eventType, void *message, long *result)
-    //    override;
+    //    virtual void nativeEvent(const QByteArray &eventType, void *message,
+    //    long *result) override;
 
 private:
     struct {

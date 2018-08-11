@@ -40,7 +40,7 @@ private:
     std::shared_ptr<bool> hack_;
 
     struct {
-        RippleEffectButton *avatarButton = nullptr;
+        Button *avatarButton = nullptr;
         // RippleEffectLabel2 *viewLogs = nullptr;
 
         Label *nameLabel = nullptr;

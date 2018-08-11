@@ -1,16 +1,16 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "common/Emotemap.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "singletons/Settings.hpp"
+#include "util/DebugCount.hpp"
 
 namespace chatterino {
 
-MessageElement::MessageElement(Flags flags)
+MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
     DebugCount::increase("message elements");
@@ -54,92 +54,100 @@ bool MessageElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
-MessageElement::Flags MessageElement::getFlags() const
+MessageElementFlags MessageElement::getFlags() const
 {
     return this->flags_;
 }
 
 // IMAGE
-ImageElement::ImageElement(Image *image, MessageElement::Flags flags)
+ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
     , image_(image)
 {
-    this->setTooltip(image->getTooltip());
+    //    this->setTooltip(image->getTooltip());
 }
 
-void ImageElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags)
+void ImageElement::addToContainer(MessageLayoutContainer &container,
+                                  MessageElementFlags flags)
 {
-    if (flags & this->getFlags()) {
-        QSize size(this->image_->getScaledWidth() * container.getScale(),
-                   this->image_->getScaledHeight() * container.getScale());
+    if (flags.hasAny(this->getFlags())) {
+        auto size = QSize(this->image_->width() * container.getScale(),
+                          this->image_->height() * container.getScale());
 
-        container.addElement(
-            (new ImageLayoutElement(*this, this->image_, size))->setLink(this->getLink()));
+        container.addElement((new ImageLayoutElement(*this, this->image_, size))
+                                 ->setLink(this->getLink()));
     }
 }
 
 // EMOTE
-EmoteElement::EmoteElement(const EmoteData &data, MessageElement::Flags flags)
+EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
-    , data(data)
+    , emote_(emote)
 {
-    if (data.isValid()) {
-        this->setTooltip(data.image1x->getTooltip());
-        this->textElement_.reset(
-            new TextElement(data.image1x->getCopyString(), MessageElement::Misc));
-    }
+    this->textElement_.reset(
+        new TextElement(emote->getCopyString(), MessageElementFlag::Misc));
+
+    this->setTooltip(emote->tooltip.string);
 }
 
-void EmoteElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags)
+EmotePtr EmoteElement::getEmote() const
 {
-    if (flags & this->getFlags()) {
-        if (flags & MessageElement::EmoteImages) {
-            if (!this->data.isValid()) {
-                return;
-            }
+    return this->emote_;
+}
 
-            Image *image = this->data.getImage(container.getScale());
+void EmoteElement::addToContainer(MessageLayoutContainer &container,
+                                  MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags())) {
+        if (flags.has(MessageElementFlag::EmoteImages)) {
+            auto image = this->emote_->images.getImage(container.getScale());
+            if (image->isEmpty()) return;
 
-            QSize size(int(container.getScale() * image->getScaledWidth()),
-                       int(container.getScale() * image->getScaledHeight()));
+            auto size = QSize(int(container.getScale() * image->width()),
+                              int(container.getScale() * image->height()));
 
-            container.addElement(
-                (new ImageLayoutElement(*this, image, size))->setLink(this->getLink()));
+            container.addElement((new ImageLayoutElement(*this, image, size))
+                                     ->setLink(this->getLink()));
         } else {
             if (this->textElement_) {
-                this->textElement_->addToContainer(container, MessageElement::Misc);
+                this->textElement_->addToContainer(container,
+                                                   MessageElementFlag::Misc);
             }
         }
     }
 }
 
 // TEXT
-TextElement::TextElement(const QString &text, MessageElement::Flags flags,
+TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
     : MessageElement(flags)
     , color_(color)
     , style_(style)
 {
-    for (QString word : text.split(' ')) {
+    for (const auto &word : text.split(' ')) {
         this->words_.push_back({word, -1});
         // fourtf: add logic to store multiple spaces after message
     }
 }
 
-void TextElement::addToContainer(MessageLayoutContainer &container, MessageElement::Flags flags)
+void TextElement::addToContainer(MessageLayoutContainer &container,
+                                 MessageElementFlags flags)
 {
     auto app = getApp();
 
-    if (flags & this->getFlags()) {
-        QFontMetrics metrics = app->fonts->getFontMetrics(this->style_, container.getScale());
+    if (flags.hasAny(this->getFlags())) {
+        QFontMetrics metrics =
+            app->fonts->getFontMetrics(this->style_, container.getScale());
 
         for (Word &word : this->words_) {
-            auto getTextLayoutElement = [&](QString text, int width, bool trailingSpace) {
+            auto getTextLayoutElement = [&](QString text, int width,
+                                            bool trailingSpace) {
                 QColor color = this->color_.getColor(*app->themes);
                 app->themes->normalizeColor(color);
 
-                auto e = (new TextLayoutElement(*this, text, QSize(width, metrics.height()), color,
-                                                this->style_, container.getScale()))
+                auto e = (new TextLayoutElement(
+                              *this, text, QSize(width, metrics.height()),
+                              color, this->style_, container.getScale()))
                              ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
                 return e;
@@ -152,8 +160,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 
             // see if the text fits in the current line
             if (container.fitsInLine(word.width)) {
-                container.addElementNoLineBreak(
-                    getTextLayoutElement(word.text, word.width, this->hasTrailingSpace()));
+                container.addElementNoLineBreak(getTextLayoutElement(
+                    word.text, word.width, this->hasTrailingSpace()));
                 continue;
             }
 
@@ -162,8 +170,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 container.breakLine();
 
                 if (container.fitsInLine(word.width)) {
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(word.text, word.width, this->hasTrailingSpace()));
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        word.text, word.width, this->hasTrailingSpace()));
                     continue;
                 }
             }
@@ -173,18 +181,16 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
             int textLength = text.length();
             int wordStart = 0;
             int width = metrics.width(text[0]);
-            int lastWidth = 0;
 
             for (int i = 1; i < textLength; i++) {
                 int charWidth = metrics.width(text[i]);
 
                 if (!container.fitsInLine(width + charWidth)) {
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(text.mid(wordStart, i - wordStart), width, false));
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        text.mid(wordStart, i - wordStart), width, false));
                     container.breakLine();
 
                     wordStart = i;
-                    lastWidth = width;
                     width = 0;
                     if (textLength > i + 2) {
                         width += metrics.width(text[i]);
@@ -196,10 +202,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
                 width += charWidth;
             }
 
-            UNUSED(lastWidth);  // XXX: What should this be used for (if anything)? KKona
-
-            container.addElement(
-                getTextLayoutElement(text.mid(wordStart), width, this->hasTrailingSpace()));
+            container.addElement(getTextLayoutElement(
+                text.mid(wordStart), width, this->hasTrailingSpace()));
             container.breakLine();
         }
     }
@@ -207,7 +211,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container, MessageEleme
 
 // TIMESTAMP
 TimestampElement::TimestampElement(QTime time)
-    : MessageElement(MessageElement::Timestamp)
+    : MessageElement(MessageElementFlag::Timestamp)
     , time_(time)
     , element_(this->formatTime(time))
 {
@@ -215,9 +219,9 @@ TimestampElement::TimestampElement(QTime time)
 }
 
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
-                                      MessageElement::Flags flags)
+                                      MessageElementFlags flags)
 {
-    if (flags & this->getFlags()) {
+    if (flags.hasAny(this->getFlags())) {
         auto app = getApp();
         if (app->settings->timestampFormat != this->format_) {
             this->format_ = app->settings->timestampFormat.getValue();
@@ -234,29 +238,35 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 
     QString format = locale.toString(time, getApp()->settings->timestampFormat);
 
-    return new TextElement(format, Flags::Timestamp, MessageColor::System, FontStyle::ChatMedium);
+    return new TextElement(format, MessageElementFlag::Timestamp,
+                           MessageColor::System, FontStyle::ChatMedium);
 }
 
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
-    : MessageElement(MessageElement::ModeratorTools)
+    : MessageElement(MessageElementFlag::ModeratorTools)
 {
 }
 
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
-                                             MessageElement::Flags flags)
+                                             MessageElementFlags flags)
 {
-    if (flags & MessageElement::ModeratorTools) {
-        QSize size(int(container.getScale() * 16), int(container.getScale() * 16));
+    if (flags.has(MessageElementFlag::ModeratorTools)) {
+        QSize size(int(container.getScale() * 16),
+                   int(container.getScale() * 16));
 
-        for (const ModerationAction &m : getApp()->moderationActions->items.getVector()) {
-            if (m.isImage()) {
-                container.addElement((new ImageLayoutElement(*this, m.getImage(), size))
-                                         ->setLink(Link(Link::UserAction, m.getAction())));
+        for (const auto &action :
+             getApp()->moderationActions->items.getVector()) {
+            if (auto image = action.getImage()) {
+                container.addElement(
+                    (new ImageLayoutElement(*this, image.get(), size))
+                        ->setLink(Link(Link::UserAction, action.getAction())));
             } else {
-                container.addElement((new TextIconLayoutElement(*this, m.getLine1(), m.getLine2(),
-                                                                container.getScale(), size))
-                                         ->setLink(Link(Link::UserAction, m.getAction())));
+                container.addElement(
+                    (new TextIconLayoutElement(*this, action.getLine1(),
+                                               action.getLine2(),
+                                               container.getScale(), size))
+                        ->setLink(Link(Link::UserAction, action.getAction())));
             }
         }
     }

@@ -6,9 +6,11 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
@@ -24,69 +26,77 @@
 
 namespace chatterino {
 
-static std::atomic<bool> isAppConstructed{false};
 static std::atomic<bool> isAppInitialized{false};
 
-static Application *staticApp = nullptr;
+Application *Application::instance = nullptr;
 
 // this class is responsible for handling the workflow of Chatterino
-// It will create the instances of the major classes, and connect their signals to each other
+// It will create the instances of the major classes, and connect their signals
+// to each other
 
-Application::Application(int _argc, char **_argv)
-    : argc_(_argc)
-    , argv_(_argv)
+Application::Application(Settings &_settings, Paths &_paths)
+    : settings(&_settings)
+    , paths(&_paths)
+    , resources(&this->emplace<Resources2>())
+
+    , themes(&this->emplace<Theme>())
+    , fonts(&this->emplace<Fonts>())
+    , emotes(&this->emplace<Emotes>())
+    , windows(&this->emplace<WindowManager>())
+
+    , accounts(&this->emplace<AccountController>())
+    , commands(&this->emplace<CommandController>())
+    , highlights(&this->emplace<HighlightController>())
+    , ignores(&this->emplace<IgnoreController>())
+    , taggedUsers(&this->emplace<TaggedUsersController>())
+    , moderationActions(&this->emplace<ModerationActions>())
+    , twitch2(&this->emplace<TwitchServer>())
+    , logging(&this->emplace<Logging>())
 {
-    getSettings()->initialize();
-    getSettings()->load();
-}
+    this->instance = this;
 
-void Application::construct()
-{
-    assert(isAppConstructed == false);
-    isAppConstructed = true;
+    this->fonts->fontChanged.connect(
+        [this]() { this->windows->layoutChannelViews(); });
 
-    // 1. Instantiate all classes
-    this->settings = getSettings();
-    this->paths = getPaths();
-
-    this->addSingleton(this->themes = new Theme);
-    this->addSingleton(this->windows = new WindowManager);
-    this->addSingleton(this->logging = new Logging);
-    this->addSingleton(this->commands = new CommandController);
-    this->addSingleton(this->highlights = new HighlightController);
-    this->addSingleton(this->ignores = new IgnoreController);
-    this->addSingleton(this->taggedUsers = new TaggedUsersController);
-    this->addSingleton(this->accounts = new AccountController);
-    this->addSingleton(this->emotes = new Emotes);
-    this->addSingleton(this->fonts = new Fonts);
-    this->addSingleton(this->resources = new Resources);
-    this->addSingleton(this->moderationActions = new ModerationActions);
-
-    this->addSingleton(this->twitch2 = new TwitchServer);
     this->twitch.server = this->twitch2;
     this->twitch.pubsub = this->twitch2->pubsub;
 }
 
-void Application::instantiate(int argc, char **argv)
-{
-    assert(staticApp == nullptr);
-
-    staticApp = new Application(argc, argv);
-}
-
-void Application::initialize()
+void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
-    // 2. Initialize/load classes
-    for (Singleton *singleton : this->singletons_) {
-        singleton->initialize(*this);
+    for (auto &singleton : this->singletons_) {
+        singleton->initialize(settings, paths);
     }
 
-    // XXX
     this->windows->updateWordTypeMask();
 
+    this->initNm();
+    this->initPubsub();
+}
+
+int Application::run(QApplication &qtApp)
+{
+    assert(isAppInitialized);
+
+    this->twitch.server->connect();
+
+    this->windows->getMainWindow().show();
+
+    return qtApp.exec();
+}
+
+void Application::save()
+{
+    for (auto &singleton : this->singletons_) {
+        singleton->save();
+    }
+}
+
+void Application::initNm()
+{
 #ifdef Q_OS_WIN
 #ifdef QT_DEBUG
 #ifdef C_DEBUG_NM
@@ -98,49 +108,61 @@ void Application::initialize()
     this->nativeMessaging->openGuiMessageQueue();
 #endif
 #endif
+}
 
+void Application::initPubsub()
+{
     this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        Log("WHISPER SENT LOL");  //
+        log("WHISPER SENT LOL");  //
     });
 
     this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        Log("WHISPER RECEIVED LOL");  //
+        log("WHISPER RECEIVED LOL");  //
     });
 
-    this->twitch.pubsub->signals_.moderation.chatCleared.connect([this](const auto &action) {
-        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
-        if (chan->isEmpty()) {
-            return;
-        }
+    this->twitch.pubsub->signals_.moderation.chatCleared.connect(
+        [this](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+            if (chan->isEmpty()) {
+                return;
+            }
 
-        QString text = QString("%1 cleared the chat").arg(action.source.name);
+            QString text =
+                QString("%1 cleared the chat").arg(action.source.name);
 
-        auto msg = Message::createSystemMessage(text);
-        postToThread([chan, msg] { chan->addMessage(msg); });
-    });
+            auto msg = makeSystemMessage(text);
+            postToThread([chan, msg] { chan->addMessage(msg); });
+        });
 
-    this->twitch.pubsub->signals_.moderation.modeChanged.connect([this](const auto &action) {
-        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
-        if (chan->isEmpty()) {
-            return;
-        }
+    this->twitch.pubsub->signals_.moderation.modeChanged.connect(
+        [this](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+            if (chan->isEmpty()) {
+                return;
+            }
 
-        QString text = QString("%1 turned %2 %3 mode")  //
-                           .arg(action.source.name)
-                           .arg(action.state == ModeChangedAction::State::On ? "on" : "off")
-                           .arg(action.getModeName());
+            QString text =
+                QString("%1 turned %2 %3 mode")  //
+                    .arg(action.source.name)
+                    .arg(action.state == ModeChangedAction::State::On ? "on"
+                                                                      : "off")
+                    .arg(action.getModeName());
 
-        if (action.duration > 0) {
-            text.append(" (" + QString::number(action.duration) + " seconds)");
-        }
+            if (action.duration > 0) {
+                text.append(" (" + QString::number(action.duration) +
+                            " seconds)");
+            }
 
-        auto msg = Message::createSystemMessage(text);
-        postToThread([chan, msg] { chan->addMessage(msg); });
-    });
+            auto msg = makeSystemMessage(text);
+            postToThread([chan, msg] { chan->addMessage(msg); });
+        });
 
     this->twitch.pubsub->signals_.moderation.moderationStateChanged.connect(
         [this](const auto &action) {
-            auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
             if (chan->isEmpty()) {
                 return;
             }
@@ -148,48 +170,57 @@ void Application::initialize()
             QString text;
 
             if (action.modded) {
-                text = QString("%1 modded %2").arg(action.source.name, action.target.name);
+                text = QString("%1 modded %2")
+                           .arg(action.source.name, action.target.name);
             } else {
-                text = QString("%1 unmodded %2").arg(action.source.name, action.target.name);
+                text = QString("%1 unmodded %2")
+                           .arg(action.source.name, action.target.name);
             }
 
-            auto msg = Message::createSystemMessage(text);
+            auto msg = makeSystemMessage(text);
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
-    this->twitch.pubsub->signals_.moderation.userBanned.connect([&](const auto &action) {
-        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+    this->twitch.pubsub->signals_.moderation.userBanned.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
-        if (chan->isEmpty()) {
-            return;
-        }
+            if (chan->isEmpty()) {
+                return;
+            }
 
-        auto msg = Message::createTimeoutMessage(action);
-        msg->flags |= Message::PubSub;
+            MessageBuilder msg(action);
+            msg->flags.set(MessageFlag::PubSub);
 
-        postToThread([chan, msg] { chan->addOrReplaceTimeout(msg); });
-    });
+            postToThread([chan, msg = msg.release()] {
+                chan->addOrReplaceTimeout(msg);
+            });
+        });
 
-    this->twitch.pubsub->signals_.moderation.userUnbanned.connect([&](const auto &action) {
-        auto chan = this->twitch.server->getChannelOrEmptyByID(action.roomID);
+    this->twitch.pubsub->signals_.moderation.userUnbanned.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
-        if (chan->isEmpty()) {
-            return;
-        }
+            if (chan->isEmpty()) {
+                return;
+            }
 
-        auto msg = Message::createUntimeoutMessage(action);
+            auto msg = MessageBuilder(action).release();
 
-        postToThread([chan, msg] { chan->addMessage(msg); });
-    });
+            postToThread([chan, msg] { chan->addMessage(msg); });
+        });
 
     this->twitch.pubsub->start();
 
     auto RequestModerationActions = [=]() {
         this->twitch.server->pubsub->unlistenAllModerationActions();
-        // TODO(pajlada): Unlisten to all authed topics instead of only moderation topics
-        // this->twitch.pubsub->UnlistenAllAuthedTopics();
+        // TODO(pajlada): Unlisten to all authed topics instead of only
+        // moderation topics this->twitch.pubsub->UnlistenAllAuthedTopics();
 
-        this->twitch.server->pubsub->listenToWhispers(this->accounts->twitch.getCurrent());  //
+        this->twitch.server->pubsub->listenToWhispers(
+            this->accounts->twitch.getCurrent());  //
     };
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);
@@ -197,39 +228,11 @@ void Application::initialize()
     RequestModerationActions();
 }
 
-int Application::run(QApplication &qtApp)
-{
-    // Start connecting to the IRC Servers (Twitch only for now)
-    this->twitch.server->connect();
-
-    // Show main window
-    this->windows->getMainWindow().show();
-
-    return qtApp.exec();
-}
-
-void Application::save()
-{
-    for (Singleton *singleton : this->singletons_) {
-        singleton->save();
-    }
-}
-
-void Application::addSingleton(Singleton *singleton)
-{
-    this->singletons_.push_back(singleton);
-}
-
 Application *getApp()
 {
-    assert(staticApp != nullptr);
+    assert(Application::instance != nullptr);
 
-    return staticApp;
-}
-
-bool appInitialized()
-{
-    return isAppInitialized;
+    return Application::instance;
 }
 
 }  // namespace chatterino

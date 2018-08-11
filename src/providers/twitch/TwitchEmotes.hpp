@@ -1,14 +1,17 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
+#include <QString>
+#include <unordered_map>
+
+#include "common/UniqueAccess.hpp"
+#include "messages/Emote.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "util/ConcurrentMap.hpp"
 
-#include <map>
-
-#include <QString>
+#define TWITCH_EMOTE_TEMPLATE \
+    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
 namespace chatterino {
 
@@ -17,55 +20,14 @@ class TwitchEmotes
 public:
     TwitchEmotes();
 
-    EmoteData getEmoteById(const QString &id, const QString &emoteName);
-
-    /// Twitch emotes
-    void refresh(const std::shared_ptr<TwitchAccount> &user);
-
-    struct TwitchEmote {
-        TwitchEmote(const QString &_id, const QString &_code)
-            : id(_id)
-            , code(_code)
-        {
-        }
-
-        // i.e. "403921"
-        QString id;
-
-        // i.e. "forsenE"
-        QString code;
-    };
-
-    struct EmoteSet {
-        QString key;
-        QString channelName;
-        QString text;
-        std::vector<TwitchEmote> emotes;
-    };
-
-    std::map<QString, EmoteSet> staticEmoteSets;
-
-    struct TwitchAccountEmoteData {
-        std::vector<std::shared_ptr<EmoteSet>> emoteSets;
-
-        std::vector<QString> emoteCodes;
-
-        EmoteMap emotes;
-
-        bool filled = false;
-    };
-
-    // Key is the user ID
-    std::map<QString, TwitchAccountEmoteData> emotes;
+    EmotePtr getOrCreateEmote(const EmoteId &id, const EmoteName &name);
+    Url getEmoteLink(const EmoteId &id, const QString &emoteScale);
+    AccessGuard<std::unordered_map<EmoteName, EmotePtr>> accessAll();
 
 private:
-    void loadSetData(std::shared_ptr<TwitchEmotes::EmoteSet> emoteSet);
-
-    //            emote code
-    ConcurrentMap<QString, EmoteValue *> twitchEmotes_;
-
-    //            emote id
-    ConcurrentMap<QString, EmoteData> twitchEmoteFromCache_;
+    UniqueAccess<std::unordered_map<EmoteName, EmotePtr>> twitchEmotes_;
+    UniqueAccess<std::unordered_map<EmoteId, std::weak_ptr<Emote>>>
+        twitchEmotesCache_;
 };
 
 }  // namespace chatterino

@@ -23,7 +23,14 @@ protected:
 
 private:
     // fourtf: !!! preserve the order of left, up, right and down
-    enum HoveredElement { None, SplitMove, SplitLeft, SplitUp, SplitRight, SplitDown };
+    enum HoveredElement {
+        None,
+        SplitMove,
+        SplitLeft,
+        SplitUp,
+        SplitRight,
+        SplitDown
+    };
 
     class ButtonEventFilter : public QObject
     {

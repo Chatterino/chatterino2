@@ -48,7 +48,7 @@ private:
     Type type_;
 
     SplitNotebook notebook_;
-    RippleEffectLabel *userLabel_ = nullptr;
+    EffectLabel *userLabel_ = nullptr;
     std::unique_ptr<UpdateDialog> updateDialogHandle_;
 
     pajlada::Signals::SignalHolder signalHolder_;

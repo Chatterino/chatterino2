@@ -3,7 +3,7 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -50,7 +50,7 @@ private:
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
-        RippleEffectLabel *emoteButton;
+        EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
     } ui_;

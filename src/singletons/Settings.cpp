@@ -10,32 +10,26 @@ namespace chatterino {
 
 std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
 
-void _actuallyRegisterSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
+Settings *Settings::instance = nullptr;
+
+void _actuallyRegisterSetting(
+    std::weak_ptr<pajlada::Settings::ISettingData> setting)
 {
     _settings.push_back(setting);
 }
 
-Settings::Settings()
+Settings::Settings(Paths &paths)
 {
-    qDebug() << "init SettingManager";
+    instance = this;
+
+    QString settingsPath = paths.settingsDirectory + "/settings.json";
+
+    pajlada::Settings::SettingManager::gLoad(qPrintable(settingsPath));
 }
 
 Settings &Settings::getInstance()
 {
-    static Settings instance;
-
-    return instance;
-}
-
-void Settings::initialize()
-{
-}
-
-void Settings::load()
-{
-    QString settingsPath = getPaths()->settingsDirectory + "/settings.json";
-
-    pajlada::Settings::SettingManager::load(qPrintable(settingsPath));
+    return *instance;
 }
 
 void Settings::saveSnapshot()
@@ -56,7 +50,7 @@ void Settings::saveSnapshot()
 
     this->snapshot_.reset(d);
 
-    Log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
+    log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
 }
 
 void Settings::restoreSnapshot()
@@ -70,14 +64,14 @@ void Settings::restoreSnapshot()
     for (const auto &weakSetting : _settings) {
         auto setting = weakSetting.lock();
         if (!setting) {
-            Log("Error stage 1 of loading");
+            log("Error stage 1 of loading");
             continue;
         }
 
         const char *path = setting->getPath().c_str();
 
         if (!snapshotObject.HasMember(path)) {
-            Log("Error stage 2 of loading");
+            log("Error stage 2 of loading");
             continue;
         }
 

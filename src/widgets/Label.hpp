@@ -10,7 +10,8 @@ namespace chatterino {
 class Label : public BaseWidget
 {
 public:
-    explicit Label(QString text = QString(), FontStyle style = FontStyle::UiMedium);
+    explicit Label(QString text = QString(),
+                   FontStyle style = FontStyle::UiMedium);
     explicit Label(BaseWidget *parent, QString text = QString(),
                    FontStyle style = FontStyle::UiMedium);
 

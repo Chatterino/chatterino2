@@ -12,16 +12,21 @@
 
 namespace chatterino {
 
+class Settings;
+class Paths;
+
 class Emotes final : public Singleton
 {
 public:
-    virtual void initialize(Application &app) override;
+    Emotes();
+
+    virtual void initialize(Settings &settings, Paths &paths) override;
 
     bool isIgnoredEmote(const QString &emote);
 
     TwitchEmotes twitch;
-    BTTVEmotes bttv;
-    FFZEmotes ffz;
+    BttvEmotes bttv;
+    FfzEmotes ffz;
     Emojis emojis;
 
     GIFTimer gifTimer;

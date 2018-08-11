@@ -53,7 +53,8 @@ public:
     }
 
     template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QScrollArea, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QScrollArea, Q>::value,
+                                      int>::type = 0>
     LayoutCreator<QWidget> emplaceScrollAreaWidget()
     {
         QWidget *widget = new QWidget;
@@ -62,8 +63,10 @@ public:
     }
 
     template <typename T2, typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value, int>::type = 0,
-              typename std::enable_if<std::is_base_of<QLayout, T2>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
+                                      int>::type = 0,
+              typename std::enable_if<std::is_base_of<QLayout, T2>::value,
+                                      int>::type = 0>
     LayoutCreator<T2> setLayoutType()
     {
         T2 *layout = new T2;
@@ -81,7 +84,8 @@ public:
     }
 
     template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QLayout, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QLayout, Q>::value,
+                                      int>::type = 0>
     LayoutCreator<T> withoutMargin()
     {
         this->item_->setContentsMargins(0, 0, 0, 0);
@@ -90,7 +94,8 @@ public:
     }
 
     template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
+                                      int>::type = 0>
     LayoutCreator<T> hidden()
     {
         this->item_->setVisible(false);
@@ -99,10 +104,12 @@ public:
     }
 
     template <typename Q = T, typename T2,
-              typename std::enable_if<std::is_same<QTabWidget, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_same<QTabWidget, Q>::value,
+                                      int>::type = 0>
     LayoutCreator<T2> appendTab(T2 *item, const QString &title)
     {
-        static_assert(std::is_base_of<QLayout, T2>::value, "needs to be QLayout");
+        static_assert(std::is_base_of<QLayout, T2>::value,
+                      "needs to be QLayout");
 
         QWidget *widget = new QWidget;
         widget->setLayout(item);
@@ -116,14 +123,16 @@ private:
     T *item_;
 
     template <typename T2,
-              typename std::enable_if<std::is_base_of<QWidget, T2>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QWidget, T2>::value,
+                                      int>::type = 0>
     void addItem(QLayout *layout, T2 *item)
     {
         layout->addWidget(item);
     }
 
     template <typename T2,
-              typename std::enable_if<std::is_base_of<QLayout, T2>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QLayout, T2>::value,
+                                      int>::type = 0>
     void addItem(QLayout *layout, T2 *item)
     {
         QWidget *widget = new QWidget();
@@ -132,14 +141,16 @@ private:
     }
 
     template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QLayout, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QLayout, Q>::value,
+                                      int>::type = 0>
     QLayout *getOrCreateLayout()
     {
         return this->item_;
     }
 
     template <typename Q = T,
-              typename std::enable_if<std::is_base_of<QWidget, Q>::value, int>::type = 0>
+              typename std::enable_if<std::is_base_of<QWidget, Q>::value,
+                                      int>::type = 0>
     QLayout *getOrCreateLayout()
     {
         if (!this->item_->layout()) {
