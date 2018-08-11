@@ -270,7 +270,7 @@ HEADERS  += \
     src/common/NullablePtr.hpp \
     src/common/Property.hpp \
     src/common/ProviderId.hpp \
-    src/uril/RapidJsonSerializeQString.hpp \
+    src/util/RapidJsonSerializeQString.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
