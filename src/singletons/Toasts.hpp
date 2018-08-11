@@ -12,12 +12,16 @@ class Toasts final : public Singleton
 public:
     Toasts();
     virtual void initialize(Settings &settings, Paths &paths) override final;
+
+private:
     void updateLiveChannels(const QString &channelName);
     void removeFromLiveChannels(const QString &channelName);
 
-private:
     bool wasChannelLive(const QString &channelName);
+
+    void shouldChannelBeNotified(const QString &channelName);
     void sendChannelNotification(const QString &channelName);
+    void sendWindowsNotification(const QString &channelName);
     std::vector<QString> liveChannels;
     std::mutex mutex_;
 };

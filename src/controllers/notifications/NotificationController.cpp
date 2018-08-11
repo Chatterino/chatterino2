@@ -38,13 +38,19 @@ bool NotificationController::isChannelNotified(const QString &channelName)
 {
     for (std::vector<int>::size_type i = 0;
          i != notificationVector.getVector().size(); i++) {
+        qDebug() << notificationVector.getVector()[i]
+                 << " vector to the left channel to the right " << channelName
+                 << " vectorsize:" << notificationVector.getVector().size();
+    }
+    for (std::vector<int>::size_type i = 0;
+         i != notificationVector.getVector().size(); i++) {
         if (notificationVector.getVector()[i] == channelName) {
             return true;
         }
     }
     return false;
 }
-
+/*
 class CustomHandler : public WinToastLib::IWinToastHandler
 {
 public:
@@ -85,7 +91,7 @@ public:
         }
     }
 };
-
+*/
 void NotificationController::addChannelNotification(const QString &channelName)
 {
     notificationVector.appendItem(channelName);
@@ -93,7 +99,7 @@ void NotificationController::addChannelNotification(const QString &channelName)
     if (WinToastLib::WinToast::isCompatible()) {
         QDir dir;
         qDebug() << "NaM" << dir.absolutePath();
-        ;
+        /*
 
         WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
             WinToastLib::WinToastTemplate::ImageAndText02);
@@ -111,6 +117,7 @@ void NotificationController::addChannelNotification(const QString &channelName)
         WinToastLib::WinToast::instance()->initialize();
         WinToastLib::WinToast::instance()->showToast(templ,
                                                      new CustomHandler());
+                                                     */
     }
 }
 
