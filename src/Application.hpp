@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/Singleton.hpp"
-#include "singletons/Resources.hpp"
 
 #include <QApplication>
 #include <memory>
@@ -26,7 +25,7 @@ class AccountManager;
 class Emotes;
 class Settings;
 class Fonts;
-class Resources;
+class Resources2;
 
 class Application
 {

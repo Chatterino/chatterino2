@@ -3,9 +3,11 @@
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
 namespace chatterino {

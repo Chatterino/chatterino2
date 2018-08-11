@@ -3,13 +3,20 @@
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/NotebookTab.hpp"
+#include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QDebug>
 #include <QJsonArray>
@@ -174,7 +181,7 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(Window::Type type)
+Window &WindowManager::createWindow(WindowType type)
 {
     assertInGuiThread();
 
@@ -182,7 +189,7 @@ Window &WindowManager::createWindow(Window::Type type)
     this->windows_.push_back(window);
     window->show();
 
-    if (type != Window::Type::Main) {
+    if (type != WindowType::Main) {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
@@ -239,16 +246,16 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         // get type
         QString type_val = window_obj.value("type").toString();
-        Window::Type type =
-            type_val == "main" ? Window::Type::Main : Window::Type::Popup;
+        WindowType type =
+            type_val == "main" ? WindowType::Main : WindowType::Popup;
 
-        if (type == Window::Type::Main && mainWindow_ != nullptr) {
-            type = Window::Type::Popup;
+        if (type == WindowType::Main && mainWindow_ != nullptr) {
+            type = WindowType::Popup;
         }
 
         Window &window = createWindow(type);
 
-        if (type == Window::Type::Main) {
+        if (type == WindowType::Main) {
             mainWindow_ = &window;
         }
 
@@ -308,7 +315,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     }
 
     if (mainWindow_ == nullptr) {
-        mainWindow_ = &createWindow(Window::Type::Main);
+        mainWindow_ = &createWindow(WindowType::Main);
         mainWindow_->getNotebook().addPage(true);
     }
 
@@ -344,15 +351,15 @@ void WindowManager::save()
 
         // window type
         switch (window->getType()) {
-            case Window::Type::Main:
+            case WindowType::Main:
                 window_obj.insert("type", "main");
                 break;
 
-            case Window::Type::Popup:
+            case WindowType::Popup:
                 window_obj.insert("type", "popup");
                 break;
 
-            case Window::Type::Attached:;
+            case WindowType::Attached:;
         }
 
         // window geometry

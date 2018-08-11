@@ -1,9 +1,7 @@
 #pragma once
 
 #include "common/CompletionModel.hpp"
-#include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "messages/Message.hpp"
 
 #include <QString>
 #include <QTimer>
@@ -12,7 +10,9 @@
 #include <memory>
 
 namespace chatterino {
+
 struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class Channel : public std::enable_shared_from_this<Channel>
 {

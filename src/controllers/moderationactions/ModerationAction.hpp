@@ -4,10 +4,12 @@
 #include <boost/optional.hpp>
 #include <pajlada/settings/serialize.hpp>
 
-#include "messages/Image.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
+
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
 
 class ModerationAction
 {

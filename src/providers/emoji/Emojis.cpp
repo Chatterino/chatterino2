@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
+#include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 
 #include <rapidjson/error/en.h>

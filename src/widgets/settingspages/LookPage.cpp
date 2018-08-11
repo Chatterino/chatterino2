@@ -1,10 +1,14 @@
 #include "LookPage.hpp"
 
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/Line.hpp"
 
 #include <QFontDialog>
@@ -416,7 +420,7 @@ QLayout *LookPage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(Fonts::ChatMedium, 1.));
+        QFontDialog dialog(app->fonts->getFont(FontStyle::ChatMedium, 1.));
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 

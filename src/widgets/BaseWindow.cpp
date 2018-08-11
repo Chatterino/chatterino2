@@ -4,6 +4,7 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
@@ -110,11 +111,11 @@ void BaseWindow::init()
 
                 // buttons
                 TitleBarButton *_minButton = new TitleBarButton;
-                _minButton->setButtonStyle(TitleBarButton::Minimize);
+                _minButton->setButtonStyle(TitleBarButtonStyle::Minimize);
                 TitleBarButton *_maxButton = new TitleBarButton;
-                _maxButton->setButtonStyle(TitleBarButton::Maximize);
+                _maxButton->setButtonStyle(TitleBarButtonStyle::Maximize);
                 TitleBarButton *_exitButton = new TitleBarButton;
-                _exitButton->setButtonStyle(TitleBarButton::Close);
+                _exitButton->setButtonStyle(TitleBarButtonStyle::Close);
 
                 QObject::connect(_minButton, &TitleBarButton::clicked, this,
                                  [this] {
@@ -353,8 +354,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     BaseWidget::mouseMoveEvent(event);
 }
 
-TitleBarButton *BaseWindow::addTitleBarButton(
-    const TitleBarButton::Style &style, std::function<void()> onClicked)
+TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
+                                              std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
     button->setScaleIndependantSize(30, 30);
@@ -389,10 +390,10 @@ void BaseWindow::changeEvent(QEvent *)
 
 #ifdef USEWINSDK
     if (this->ui_.maxButton) {
-        this->ui_.maxButton->setButtonStyle(this->windowState() &
-                                                    Qt::WindowMaximized
-                                                ? TitleBarButton::Unmaximize
-                                                : TitleBarButton::Maximize);
+        this->ui_.maxButton->setButtonStyle(
+            this->windowState() & Qt::WindowMaximized
+                ? TitleBarButtonStyle::Unmaximize
+                : TitleBarButtonStyle::Maximize);
     }
 #endif
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BaseWidget.hpp"
-#include "widgets/helper/TitlebarButton.hpp"
 
 #include <functional>
 #include <pajlada/signals/signalholder.hpp>
@@ -15,6 +14,7 @@ namespace chatterino {
 class Button;
 class EffectLabel;
 class TitleBarButton;
+enum class TitleBarButtonStyle;
 
 class BaseWindow : public BaseWidget
 {
@@ -36,7 +36,7 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    TitleBarButton *addTitleBarButton(const TitleBarButton::Style &style,
+    TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
@@ -114,6 +114,6 @@ private:
 
     pajlada::Signals::SignalHolder connections_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-};
+};  // namespace chatterino
 
 }  // namespace chatterino

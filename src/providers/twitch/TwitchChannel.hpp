@@ -2,20 +2,22 @@
 
 #include <IrcConnection>
 
+#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
-#include "common/Common.hpp"
+#include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/Emote.hpp"
-#include "singletons/Emotes.hpp"
-#include "util/ConcurrentMap.hpp"
 
-#include <pajlada/signals/signalholder.hpp>
-
+#include <boost/optional.hpp>
 #include <mutex>
+#include <pajlada/signals/signalholder.hpp>
 #include <unordered_map>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+class EmoteMap;
 
 class TwitchServer;
 

@@ -3,17 +3,17 @@
 #include <QString>
 #include <unordered_map>
 
+#include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
-#include "messages/Emote.hpp"
-#include "providers/twitch/EmoteValue.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
-#include "util/ConcurrentMap.hpp"
 
 #define TWITCH_EMOTE_TEMPLATE \
     "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class TwitchEmotes
 {

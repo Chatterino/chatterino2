@@ -3,9 +3,12 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Emotes.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>

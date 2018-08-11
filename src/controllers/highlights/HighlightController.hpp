@@ -1,14 +1,15 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
+#include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
+#include "common/Singleton.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "messages/Message.hpp"
-#include "singletons/Settings.hpp"
 
 namespace chatterino {
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class Settings;
 class Paths;

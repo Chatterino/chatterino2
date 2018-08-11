@@ -2,6 +2,7 @@
 
 #include <QRegularExpression>
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
 
 namespace chatterino {

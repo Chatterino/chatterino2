@@ -1,18 +1,23 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "messages/Message.hpp"
-#include "messages/Selection.hpp"
-#include "messages/layouts/MessageLayoutContainer.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
 
 #include <QPixmap>
-
 #include <boost/noncopyable.hpp>
 #include <cinttypes>
 #include <memory>
 
 namespace chatterino {
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+
+struct Selection;
+struct MessageLayoutContainer;
+class MessageLayoutElement;
+
+enum class MessageElementFlag;
+using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 enum class MessageLayoutFlag : uint8_t {
     RequiresBufferUpdate = 1 << 1,
@@ -57,7 +62,7 @@ public:
 private:
     // variables
     MessagePtr message_;
-    MessageLayoutContainer container_;
+    std::shared_ptr<MessageLayoutContainer> container_;
     std::shared_ptr<QPixmap> buffer_ = nullptr;
     bool bufferValid_ = false;
 

@@ -14,8 +14,11 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Shortcut.hpp"
+#include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -28,10 +31,10 @@
 
 namespace chatterino {
 
-Window::Window(Type type)
+Window::Window(WindowType type)
     : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
     , type_(type)
-    , notebook_(this)
+    , notebook_(new SplitNotebook(this))
 {
     this->addCustomTitlebarButtons();
     this->addDebugStuff();
@@ -42,26 +45,26 @@ Window::Window(Type type)
         [this] { this->onAccountSelected(); });
     this->onAccountSelected();
 
-    if (type == Type::Main) {
+    if (type == WindowType::Main) {
         this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
     } else {
         this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
     }
 }
 
-Window::Type Window::getType()
+WindowType Window::getType()
 {
     return this->type_;
 }
 
 SplitNotebook &Window::getNotebook()
 {
-    return this->notebook_;
+    return *this->notebook_;
 }
 
 void Window::repaintVisibleChatWidgets(Channel *channel)
 {
-    auto page = this->notebook_.getOrAddSelectedPage();
+    auto page = this->notebook_->getOrAddSelectedPage();
 
     for (const auto &split : page->getSplits()) {
         if (channel == nullptr || channel == split->getChannel().get()) {
@@ -77,7 +80,7 @@ bool Window::event(QEvent *event)
             break;
 
         case QEvent::WindowDeactivate: {
-            auto page = this->notebook_.getOrAddSelectedPage();
+            auto page = this->notebook_->getOrAddSelectedPage();
 
             if (page != nullptr) {
                 std::vector<Split *> splits = page->getSplits();
@@ -135,7 +138,7 @@ void Window::showEvent(QShowEvent *event)
 
 void Window::closeEvent(QCloseEvent *)
 {
-    if (this->type_ == Type::Main) {
+    if (this->type_ == WindowType::Main) {
         auto app = getApp();
         app->windows->save();
         app->windows->closeAll();
@@ -143,7 +146,7 @@ void Window::closeEvent(QCloseEvent *)
 
     this->closed.invoke();
 
-    if (this->type_ == Type::Main) {
+    if (this->type_ == WindowType::Main) {
         QApplication::exit();
     }
 }
@@ -152,35 +155,34 @@ void Window::addLayout()
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    layout->addWidget(&this->notebook_);
+    layout->addWidget(this->notebook_);
     this->getLayoutContainer()->setLayout(layout);
 
     // set margin
     layout->setMargin(0);
 
-    this->notebook_.setAllowUserTabManagement(true);
-    this->notebook_.setShowAddButton(true);
+    this->notebook_->setAllowUserTabManagement(true);
+    this->notebook_->setShowAddButton(true);
 }
 
 void Window::addCustomTitlebarButtons()
 {
     if (!this->hasCustomWindowFrame()) return;
-    if (this->type_ != Type::Main) return;
+    if (this->type_ != WindowType::Main) return;
 
     // settings
-    this->addTitleBarButton(TitleBarButton::Settings, [] {
-        getApp()->windows->showSettingsDialog();  //
-    });
+    this->addTitleBarButton(TitleBarButtonStyle::Settings,
+                            [] { getApp()->windows->showSettingsDialog(); });
 
     // updates
-    auto update = this->addTitleBarButton(TitleBarButton::None, [] {});
+    auto update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
 
-    initUpdateButton(*update, this->updateDialogHandle_, this->signalHolder_);
+    initUpdateButton(*update, this->signalHolder_);
 
     // account
     this->userLabel_ = this->addTitleBarLabel([this] {
         getApp()->windows->showAccountSelectPopup(this->userLabel_->mapToGlobal(
-            this->userLabel_->rect().bottomLeft()));  //
+            this->userLabel_->rect().bottomLeft()));
     });
     this->userLabel_->setMinimumWidth(20 * getScale());
 }
@@ -252,27 +254,27 @@ void Window::addShortcuts()
 
     // Switch tab
     createWindowShortcut(this, "CTRL+T", [this] {
-        this->notebook_.getOrAddSelectedPage()->appendNewSplit(true);
+        this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
     });
 
     createWindowShortcut(this, "CTRL+1",
-                         [this] { this->notebook_.selectIndex(0); });
+                         [this] { this->notebook_->selectIndex(0); });
     createWindowShortcut(this, "CTRL+2",
-                         [this] { this->notebook_.selectIndex(1); });
+                         [this] { this->notebook_->selectIndex(1); });
     createWindowShortcut(this, "CTRL+3",
-                         [this] { this->notebook_.selectIndex(2); });
+                         [this] { this->notebook_->selectIndex(2); });
     createWindowShortcut(this, "CTRL+4",
-                         [this] { this->notebook_.selectIndex(3); });
+                         [this] { this->notebook_->selectIndex(3); });
     createWindowShortcut(this, "CTRL+5",
-                         [this] { this->notebook_.selectIndex(4); });
+                         [this] { this->notebook_->selectIndex(4); });
     createWindowShortcut(this, "CTRL+6",
-                         [this] { this->notebook_.selectIndex(5); });
+                         [this] { this->notebook_->selectIndex(5); });
     createWindowShortcut(this, "CTRL+7",
-                         [this] { this->notebook_.selectIndex(6); });
+                         [this] { this->notebook_->selectIndex(6); });
     createWindowShortcut(this, "CTRL+8",
-                         [this] { this->notebook_.selectIndex(7); });
+                         [this] { this->notebook_->selectIndex(7); });
     createWindowShortcut(this, "CTRL+9",
-                         [this] { this->notebook_.selectIndex(8); });
+                         [this] { this->notebook_->selectIndex(8); });
 
     // Zoom in
     {
@@ -296,11 +298,11 @@ void Window::addShortcuts()
 
     // New tab
     createWindowShortcut(this, "CTRL+SHIFT+T",
-                         [this] { this->notebook_.addPage(true); });
+                         [this] { this->notebook_->addPage(true); });
 
     // Close tab
     createWindowShortcut(this, "CTRL+SHIFT+W",
-                         [this] { this->notebook_.removeCurrentPage(); });
+                         [this] { this->notebook_->removeCurrentPage(); });
 }
 
 void Window::onAccountSelected()

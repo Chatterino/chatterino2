@@ -1,10 +1,9 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
+#include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
+#include "common/Singleton.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "singletons/Settings.hpp"
 
 namespace chatterino {
 

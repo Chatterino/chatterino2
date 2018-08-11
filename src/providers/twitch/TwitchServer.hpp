@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/Singleton.hpp"
+#include "pajlada/signals/signalholder.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 
 #include <chrono>
 #include <memory>

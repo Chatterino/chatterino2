@@ -3,19 +3,19 @@
 #include <QPoint>
 #include <QRect>
 #include <QString>
-
 #include <boost/noncopyable.hpp>
 #include <climits>
 
-#include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
-#include "singletons/Fonts.hpp"
 
 class QPainter;
 
 namespace chatterino {
 class MessageElement;
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
+enum class FontStyle : uint8_t;
 
 class MessageLayoutElement : boost::noncopyable
 {

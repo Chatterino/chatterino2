@@ -4,6 +4,7 @@
 
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchCommon.hpp"

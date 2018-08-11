@@ -1,5 +1,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <unordered_map>
-#include "common/Common.hpp"
-#include "common/UniqueAccess.hpp"
-#include "messages/Emote.hpp"
-#include "messages/EmoteCache.hpp"
+
+#include "common/Aliases.hpp"
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class ChatterinoBadges
 {
@@ -19,7 +19,7 @@ public:
 private:
     void loadChatterinoBadges();
 
-    UniqueAccess<EmoteCache<UserName>> badges;
+    // UniqueAccess<EmoteCache<UserName>> badges;
 };
 
 }  // namespace chatterino

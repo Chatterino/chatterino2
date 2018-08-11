@@ -7,9 +7,6 @@
 #include <memory>
 #include <unordered_map>
 
-QStringAlias(EmoteId);
-QStringAlias(EmoteName);
-
 namespace chatterino {
 
 struct Emote {

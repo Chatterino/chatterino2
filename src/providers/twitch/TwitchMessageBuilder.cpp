@@ -5,6 +5,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "debug/Log.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -12,6 +13,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IrcHelpers.hpp"
+#include "widgets/Window.hpp"
 
 #include <QApplication>
 #include <QDebug>

@@ -1,13 +1,20 @@
 #pragma once
 
+#include "common/Channel.hpp"
+#include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
-#include "widgets/Window.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 
 class Settings;
 class Paths;
+class Window;
+class SplitContainer;
+
+enum class MessageElementFlag;
+using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+enum class WindowType;
 
 class WindowManager final : public Singleton
 {
@@ -34,7 +41,7 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(Window::Type type);
+    Window &createWindow(WindowType type);
 
     int windowCount();
     Window *windowAt(int index);
@@ -63,10 +70,10 @@ private:
 
     std::vector<Window *> windows_;
 
-    Window *mainWindow_ = nullptr;
-    Window *selectedWindow_ = nullptr;
+    Window *mainWindow_{};
+    Window *selectedWindow_{};
 
-    MessageElementFlags wordFlags_ = MessageElementFlag::Default;
+    MessageElementFlags wordFlags_{};
     pajlada::Settings::SettingListener wordFlagsListener_;
 };
 

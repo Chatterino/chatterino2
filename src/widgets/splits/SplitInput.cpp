@@ -2,14 +2,20 @@
 
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/EmotePopup.hpp"
+#include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -70,11 +76,11 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+        app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+            app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
@@ -98,7 +104,7 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
                      [this](bool available) {
                          if (available) {
-                             this->split_->view_.clearSelection();
+                             this->split_->view_->clearSelection();
                          }
                      });
 
@@ -273,7 +279,7 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_C &&
                    event->modifiers() == Qt::ControlModifier) {
-            if (this->split_->view_.hasSelection()) {
+            if (this->split_->view_->hasSelection()) {
                 this->split_->copyToClipboard();
                 event->accept();
             }

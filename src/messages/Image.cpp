@@ -1,6 +1,7 @@
 #include "messages/Image.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"

@@ -10,6 +10,7 @@
 
 #include "Application.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "messages/LimitedQueue.hpp"
-#include "singletons/Settings.hpp"
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 

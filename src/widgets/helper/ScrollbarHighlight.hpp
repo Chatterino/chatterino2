@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QString>
-
 namespace chatterino {
 
 class ScrollbarHighlight

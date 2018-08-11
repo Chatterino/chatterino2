@@ -1,11 +1,13 @@
 #pragma once
 
 #include <QString>
-#include <messages/Emote.hpp>
 #include <unordered_map>
 #include "util/QStringHash.hpp"
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class Settings;
 class Paths;

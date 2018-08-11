@@ -1,18 +1,24 @@
 #include "ChannelView.hpp"
 
 #include "Application.hpp"
+#include "common/Common.hpp"
 #include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
+#include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QClipboard>
@@ -93,7 +99,7 @@ void addEmoteContextMenuItems(const Emote &emote,
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
-    , scrollBar_(this)
+    , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
 
@@ -124,7 +130,7 @@ void ChannelView::initializeLayout()
 
     QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
-            this->scrollBar_.scrollToBottom(
+            this->scrollBar_->scrollToBottom(
                 getApp()
                     ->settings->enableSmoothScrollingNewMessages.getValue());
         });
@@ -133,18 +139,18 @@ void ChannelView::initializeLayout()
 
 void ChannelView::initializeScrollbar()
 {
-    this->scrollBar_.getCurrentValueChanged().connect([this] {
+    this->scrollBar_->getCurrentValueChanged().connect([this] {
         this->actuallyLayoutMessages(true);
 
         this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
-                                      this->scrollBar_.isVisible() &&
-                                      !this->scrollBar_.isAtBottom());
+                                      this->scrollBar_->isVisible() &&
+                                      !this->scrollBar_->isAtBottom());
 
         this->queueUpdate();
     });
 
-    this->scrollBar_.getDesiredValueChanged().connect([this] {
-        this->pausedByScrollingUp_ = !this->scrollBar_.isAtBottom();
+    this->scrollBar_->getDesiredValueChanged().connect([this] {
+        this->pausedByScrollingUp_ = !this->scrollBar_->isAtBottom();
     });
 }
 
@@ -212,7 +218,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     if (messagesSnapshot.getLength() == 0) {
-        this->scrollBar_.setVisible(false);
+        this->scrollBar_->setVisible(false);
 
         return;
     }
@@ -225,9 +231,9 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     // The scrollbar was not visible
     // The scrollbar was visible and at the bottom
     this->showingLatestMessages_ =
-        this->scrollBar_.isAtBottom() || !this->scrollBar_.isVisible();
+        this->scrollBar_->isAtBottom() || !this->scrollBar_->isVisible();
 
-    size_t start = size_t(this->scrollBar_.getCurrentValue());
+    size_t start = size_t(this->scrollBar_->getCurrentValue());
     int layoutWidth = this->getLayoutWidth();
 
     MessageElementFlags flags = this->getFlags();
@@ -235,7 +241,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
     // layout the visible messages in the view
     if (messagesSnapshot.getLength() > start) {
         int y = int(-(messagesSnapshot[start]->getHeight() *
-                      (fmod(this->scrollBar_.getCurrentValue(), 1))));
+                      (fmod(this->scrollBar_->getCurrentValue(), 1))));
 
         for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
             auto message = messagesSnapshot[i];
@@ -262,8 +268,9 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         h -= message->getHeight();
 
         if (h < 0) {
-            this->scrollBar_.setLargeChange((messagesSnapshot.getLength() - i) +
-                                            qreal(h) / message->getHeight());
+            this->scrollBar_->setLargeChange(
+                (messagesSnapshot.getLength() - i) +
+                qreal(h) / message->getHeight());
             //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
 
             showScrollbar = true;
@@ -271,20 +278,20 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         }
     }
 
-    this->scrollBar_.setVisible(showScrollbar);
+    this->scrollBar_->setVisible(showScrollbar);
 
     if (!showScrollbar && !causedByScrollbar) {
-        this->scrollBar_.setDesiredValue(0);
+        this->scrollBar_->setDesiredValue(0);
     }
 
-    this->scrollBar_.setMaximum(messagesSnapshot.getLength());
+    this->scrollBar_->setMaximum(messagesSnapshot.getLength());
 
     // If we were showing the latest messages and the scrollbar now wants to be
     // rendered, scroll to bottom
     if (this->enableScrollingToBottom_ && this->showingLatestMessages_ &&
         showScrollbar) {
         if (!this->isPaused()) {
-            this->scrollBar_.scrollToBottom(
+            this->scrollBar_->scrollToBottom(
                 //                this->messageWasAdded &&
                 app->settings->enableSmoothScrollingNewMessages.getValue());
         }
@@ -309,7 +316,7 @@ void ChannelView::clearMessages()
 
 Scrollbar &ChannelView::getScrollBar()
 {
-    return this->scrollBar_;
+    return *this->scrollBar_;
 }
 
 QString ChannelView::getSelectedText()
@@ -378,7 +385,7 @@ const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
 
 LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
-    if (!this->isPaused() /*|| this->scrollBar_.isVisible()*/) {
+    if (!this->isPaused() /*|| this->scrollBar_->isVisible()*/) {
         this->snapshot_ = this->messages.getSnapshot();
     }
 
@@ -413,10 +420,10 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             if (this->messages.pushBack(MessageLayoutPtr(messageRef),
                                         deleted)) {
                 //                if (!this->isPaused()) {
-                if (this->scrollBar_.isAtBottom()) {
-                    this->scrollBar_.scrollToBottom();
+                if (this->scrollBar_->isAtBottom()) {
+                    this->scrollBar_->scrollToBottom();
                 } else {
-                    this->scrollBar_.offset(-1);
+                    this->scrollBar_->offset(-1);
                 }
                 //                }
             }
@@ -431,7 +438,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 }
             }
 
-            this->scrollBar_.addHighlight(message->getScrollBarHighlight());
+            this->scrollBar_->addHighlight(message->getScrollBarHighlight());
 
             this->messageWasAdded_ = true;
             this->layoutMessages();
@@ -449,10 +456,10 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
                 if (!this->isPaused()) {
                     if (this->messages.pushFront(messageRefs).size() > 0) {
-                        if (this->scrollBar_.isAtBottom()) {
-                            this->scrollBar_.scrollToBottom();
+                        if (this->scrollBar_->isAtBottom()) {
+                            this->scrollBar_->scrollToBottom();
                         } else {
-                            this->scrollBar_.offset(qreal(messages.size()));
+                            this->scrollBar_->offset(qreal(messages.size()));
                         }
                     }
                 }
@@ -464,7 +471,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                         messages.at(i)->getScrollBarHighlight());
                 }
 
-                this->scrollBar_.addHighlightsAtStart(highlights);
+                this->scrollBar_->addHighlightsAtStart(highlights);
 
                 this->messageWasAdded_ = true;
                 this->layoutMessages();
@@ -503,7 +510,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 newItem->flags.set(MessageLayoutFlag::AlternateBackground);
             }
 
-            this->scrollBar_.replaceHighlight(
+            this->scrollBar_->replaceHighlight(
                 index, replacement->getScrollBarHighlight());
 
             this->messages.replaceItem(message, newItem);
@@ -563,12 +570,12 @@ void ChannelView::updateLastReadMessage()
 
 void ChannelView::resizeEvent(QResizeEvent *)
 {
-    this->scrollBar_.setGeometry(this->width() - this->scrollBar_.width(), 0,
-                                 this->scrollBar_.width(), this->height());
+    this->scrollBar_->setGeometry(this->width() - this->scrollBar_->width(), 0,
+                                  this->scrollBar_->width(), this->height());
 
     this->goToBottom_->setGeometry(0, this->height() - 32, this->width(), 32);
 
-    this->scrollBar_.raise();
+    this->scrollBar_->raise();
 
     this->layoutMessages();
 
@@ -625,9 +632,9 @@ bool ChannelView::isPaused()
 void ChannelView::updatePauseStatus()
 {
     if (this->isPaused()) {
-        this->scrollBar_.pauseHighlights();
+        this->scrollBar_->pauseHighlights();
     } else {
-        this->scrollBar_.unpauseHighlights();
+        this->scrollBar_->unpauseHighlights();
     }
 }
 
@@ -651,14 +658,14 @@ void ChannelView::drawMessages(QPainter &painter)
 
     auto messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = size_t(this->scrollBar_.getCurrentValue());
+    size_t start = size_t(this->scrollBar_->getCurrentValue());
 
     if (start >= messagesSnapshot.getLength()) {
         return;
     }
 
     int y = int(-(messagesSnapshot[start].get()->getHeight() *
-                  (fmod(this->scrollBar_.getCurrentValue(), 1))));
+                  (fmod(this->scrollBar_->getCurrentValue(), 1))));
 
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
@@ -729,12 +736,12 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         return;
     }
 
-    if (this->scrollBar_.isVisible()) {
+    if (this->scrollBar_->isVisible()) {
         auto app = getApp();
 
         float mouseMultiplier = app->settings->mouseScrollMultiplier;
 
-        qreal desired = this->scrollBar_.getDesiredValue();
+        qreal desired = this->scrollBar_->getDesiredValue();
         qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
@@ -792,7 +799,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
             }
         }
 
-        this->scrollBar_.setDesiredValue(desired, true);
+        this->scrollBar_->setDesiredValue(desired, true);
     }
 }
 
@@ -1192,14 +1199,14 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 {
     auto messagesSnapshot = this->getMessagesSnapshot();
 
-    size_t start = this->scrollBar_.getCurrentValue();
+    size_t start = this->scrollBar_->getCurrentValue();
 
     if (start >= messagesSnapshot.getLength()) {
         return false;
     }
 
     int y = -(messagesSnapshot[start]->getHeight() *
-              (fmod(this->scrollBar_.getCurrentValue(), 1)));
+              (fmod(this->scrollBar_->getCurrentValue(), 1)));
 
     for (size_t i = start; i < messagesSnapshot.getLength(); ++i) {
         auto message = messagesSnapshot[i];
@@ -1219,7 +1226,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 
 int ChannelView::getLayoutWidth() const
 {
-    if (this->scrollBar_.isVisible())
+    if (this->scrollBar_->isVisible())
         return int(this->width() - 8 * this->getScale());
 
     return this->width();

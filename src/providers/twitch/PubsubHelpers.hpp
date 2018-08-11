@@ -1,16 +1,14 @@
 #pragma once
 
-#include "debug/Log.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-
 #include <memory>
 
 namespace chatterino {
 
+class TwitchAccount;
 struct ActionUser;
 
 const rapidjson::Value &getArgs(const rapidjson::Value &data);

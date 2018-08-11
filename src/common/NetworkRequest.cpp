@@ -1,7 +1,9 @@
 #include "common/NetworkRequest.hpp"
 
 #include "Application.hpp"
+#include "common/NetworkData.hpp"
 #include "common/NetworkManager.hpp"
+#include "common/Outcome.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"

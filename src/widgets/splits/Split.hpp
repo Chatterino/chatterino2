@@ -1,17 +1,9 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayout.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
-#include "util/RapidJsonSerializeQString.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/EffectLabel.hpp"
-#include "widgets/splits/SplitHeader.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <QFont>
 #include <QShortcut>
@@ -20,6 +12,9 @@
 
 namespace chatterino {
 
+class ChannelView;
+class SplitHeader;
+class SplitInput;
 class SplitContainer;
 class SplitOverlay;
 class SelectChannelDialog;
@@ -103,10 +98,10 @@ private:
     SplitContainer *container_;
     IndirectChannel channel_;
 
-    QVBoxLayout vbox_;
-    SplitHeader header_;
-    ChannelView view_;
-    SplitInput input_;
+    QVBoxLayout *vbox_;
+    SplitHeader *header_;
+    ChannelView *view_;
+    SplitInput *input_;
     SplitOverlay *overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;

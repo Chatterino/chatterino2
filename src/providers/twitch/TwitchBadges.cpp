@@ -5,6 +5,8 @@
 #include <QJsonValue>
 #include <QThread>
 #include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
+#include "messages/Emote.hpp"
 
 namespace chatterino {
 

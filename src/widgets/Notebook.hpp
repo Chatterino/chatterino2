@@ -2,10 +2,6 @@
 
 #include "pajlada/signals/signal.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/dialogs/UpdateDialog.hpp"
-#include "widgets/helper/NotebookButton.hpp"
-#include "widgets/helper/NotebookTab.hpp"
-#include "widgets/splits/SplitContainer.hpp"
 
 #include <QList>
 #include <QMessageBox>
@@ -15,6 +11,10 @@
 namespace chatterino {
 
 class Window;
+class UpdateDialog;
+class NotebookButton;
+class NotebookTab;
+class SplitContainer;
 
 class Notebook : public BaseWidget
 {
@@ -22,6 +22,7 @@ class Notebook : public BaseWidget
 
 public:
     explicit Notebook(QWidget *parent);
+    ~Notebook() override = default;
 
     NotebookTab *addPage(QWidget *page, QString title = QString(),
                          bool select = false);
@@ -74,7 +75,7 @@ private:
     QList<Item> items_;
     QWidget *selectedPage_ = nullptr;
 
-    NotebookButton addButton_;
+    NotebookButton *addButton_;
     std::vector<NotebookButton *> customButtons_;
 
     bool allowUserTabManagement_ = false;
@@ -94,7 +95,7 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::unique_ptr<UpdateDialog> updateDialogHandle_;
+    std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     std::vector<pajlada::Signals::ScopedConnection> connections_;
 };

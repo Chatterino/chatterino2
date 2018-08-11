@@ -1,6 +1,8 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <memory>
+
 #include "common/Atomic.hpp"
 #include "messages/Emote.hpp"
 
