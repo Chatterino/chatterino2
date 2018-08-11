@@ -113,11 +113,11 @@ void Application::initNm()
 void Application::initPubsub()
 {
     this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        Log("WHISPER SENT LOL");  //
+        log("WHISPER SENT LOL");  //
     });
 
     this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        Log("WHISPER RECEIVED LOL");  //
+        log("WHISPER RECEIVED LOL");  //
     });
 
     this->twitch.pubsub->signals_.moderation.chatCleared.connect(

@@ -126,9 +126,10 @@ void MessageLayoutContainer::breakLine()
     int xOffset = 0;
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0) {
-        xOffset = (width_ - this->elements_.at(this->elements_.size() - 1)
-                                ->getRect()
-                                .right()) /
+        xOffset = (width_ - this->elements_.at(0)->getRect().left() -
+                   this->elements_.at(this->elements_.size() - 1)
+                       ->getRect()
+                       .right()) /
                   2;
     }
 

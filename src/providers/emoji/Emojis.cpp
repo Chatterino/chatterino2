@@ -118,7 +118,7 @@ void Emojis::loadEmojis()
     rapidjson::ParseResult result = root.Parse(data.toUtf8(), data.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})",
+        log("JSON parse error: {} ({})",
             rapidjson::GetParseError_En(result.Code()), result.Offset());
         return;
     }
@@ -146,7 +146,7 @@ void Emojis::loadEmojis()
 
                 auto toneNameIt = toneNames.find(tone);
                 if (toneNameIt == toneNames.end()) {
-                    Log("Tone with key {} does not exist in tone names map",
+                    log("Tone with key {} does not exist in tone names map",
                         tone);
                     continue;
                 }
@@ -219,7 +219,7 @@ void Emojis::loadEmojiSet()
     auto app = getApp();
 
     app->settings->emojiSet.connect([=](const auto &emojiSet, auto) {
-        Log("Using emoji set {}", emojiSet);
+        log("Using emoji set {}", emojiSet);
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;

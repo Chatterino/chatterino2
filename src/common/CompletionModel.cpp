@@ -104,7 +104,7 @@ int CompletionModel::rowCount(const QModelIndex &) const
 
 void CompletionModel::refresh()
 {
-    Log("[CompletionModel:{}] Refreshing...]", this->channelName_);
+    log("[CompletionModel:{}] Refreshing...]", this->channelName_);
 
     auto app = getApp();
 

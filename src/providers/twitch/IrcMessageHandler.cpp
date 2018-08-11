@@ -145,7 +145,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty()) {
-        Log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not "
+        log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not "
             "found",
             chanName);
         return;
@@ -209,7 +209,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    Log("Received whisper!");
+    log("Received whisper!");
     MessageParseArgs args;
 
     args.isReceivedWhisper = true;
@@ -326,7 +326,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto channel = app->twitch.server->getChannelOrEmpty(channelName);
 
     if (channel->isEmpty()) {
-        Log("[IrcManager:handleNoticeMessage] Channel {} not found in channel "
+        log("[IrcManager:handleNoticeMessage] Channel {} not found in channel "
             "manager ",
             channelName);
         return;
@@ -366,7 +366,7 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(
             return;
         }
 
-        Log("Showing notice message from write connection with message id '{}'",
+        log("Showing notice message from write connection with message id '{}'",
             msgID);
     }
 

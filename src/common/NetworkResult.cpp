@@ -31,7 +31,7 @@ rapidjson::Document NetworkResult::parseRapidJson() const
         ret.Parse(this->data_.data(), this->data_.length());
 
     if (result.Code() != rapidjson::kParseErrorNone) {
-        Log("JSON parse error: {} ({})",
+        log("JSON parse error: {} ({})",
             rapidjson::GetParseError_En(result.Code()), result.Offset());
         return ret;
     }

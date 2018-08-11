@@ -131,7 +131,7 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
     chan->destroyed.connect([this, clojuresInCppAreShit] {
         // fourtf: issues when the server itself is destroyed
 
-        Log("[AbstractIrcServer::addChannel] {} was destroyed",
+        log("[AbstractIrcServer::addChannel] {} was destroyed",
             clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
 

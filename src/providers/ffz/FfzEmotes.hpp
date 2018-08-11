@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "common/UniqueAccess.hpp"
+#include "common/Atomic.hpp"
 #include "messages/Emote.hpp"
 #include "messages/EmoteCache.hpp"
 
@@ -16,24 +16,17 @@ class FfzEmotes final : std::enable_shared_from_this<FfzEmotes>
         "https://api.betterttv.net/2/channels/";
 
 public:
-    // FfzEmotes();
+    FfzEmotes();
 
-    static std::shared_ptr<FfzEmotes> create();
+    std::shared_ptr<const EmoteMap> global() const;
+    boost::optional<EmotePtr> global(const EmoteName &name) const;
 
-    AccessGuard<const EmoteCache<EmoteName>> accessGlobalEmotes() const;
-    boost::optional<EmotePtr> getGlobalEmote(const EmoteName &name);
-    boost::optional<EmotePtr> getEmote(const EmoteId &id);
+    void loadGlobal();
+    void loadChannel(const QString &channelName,
+                     std::function<void(EmoteMap &&)> callback);
 
-    void loadGlobalEmotes();
-    void loadChannelEmotes(const QString &channelName,
-                           std::function<void(EmoteMap &&)> callback);
-
-protected:
-    Outcome parseGlobalEmotes(const QJsonObject &jsonRoot);
-    Outcome parseChannelEmotes(const QJsonObject &jsonRoot);
-
-    UniqueAccess<EmoteCache<EmoteName>> globalEmotes_;
-    UniqueAccess<WeakEmoteIdMap> channelEmoteCache_;
+private:
+    Atomic<std::shared_ptr<const EmoteMap>> global_;
 };
 
 }  // namespace chatterino

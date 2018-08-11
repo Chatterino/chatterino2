@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/MutexValue.hpp"
+#include "common/Atomic.hpp"
 #include "common/Singleton.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -29,7 +29,7 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
-    MutexValue<QString> lastUserThatWhisperedMe;
+    Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;

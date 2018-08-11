@@ -19,7 +19,6 @@ Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
 
     return {"https:" + emote.toString()};
 }
-
 void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
                      const QString &tooltip, Emote &emoteData)
 {
@@ -34,52 +33,11 @@ void fillInEmoteData(const QJsonObject &urls, const EmoteName &name,
                  Image::fromUrl(url3x, 0.25)};
     emoteData.tooltip = {tooltip};
 }
-}  // namespace
-
-AccessGuard<const EmoteCache<EmoteName>> FfzEmotes::accessGlobalEmotes() const
-{
-    return this->globalEmotes_.accessConst();
-}
-
-boost::optional<EmotePtr> FfzEmotes::getEmote(const EmoteId &id)
-{
-    auto cache = this->channelEmoteCache_.access();
-    auto it = cache->find(id);
-
-    if (it != cache->end()) {
-        auto shared = it->second.lock();
-        if (shared) {
-            return shared;
-        }
-    }
-
-    return boost::none;
-}
-
-boost::optional<EmotePtr> FfzEmotes::getGlobalEmote(const EmoteName &name)
-{
-    return this->globalEmotes_.access()->get(name);
-}
-
-void FfzEmotes::loadGlobalEmotes()
-{
-    QString url("https://api.frankerfacez.com/v1/set/global");
-
-    NetworkRequest request(url);
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(30000);
-    request.onSuccess([this](auto result) -> Outcome {
-        return this->parseGlobalEmotes(result.parseJson());
-    });
-
-    request.execute();
-}
-
-Outcome FfzEmotes::parseGlobalEmotes(const QJsonObject &jsonRoot)
+std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonObject &jsonRoot,
+                                               const EmoteMap &currentEmotes)
 {
     auto jsonSets = jsonRoot.value("sets").toObject();
-    auto emotes = this->globalEmotes_.access();
-    auto replacement = emotes->makeReplacment();
+    auto emotes = EmoteMap();
 
     for (auto jsonSet : jsonSets) {
         auto jsonEmotes = jsonSet.toObject().value("emoticons").toArray();
@@ -99,15 +57,55 @@ Outcome FfzEmotes::parseGlobalEmotes(const QJsonObject &jsonRoot)
                         .arg(id.string)
                         .arg(name.string)};
 
-            replacement.add(name, emote);
+            emotes[name] =
+                cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
         }
     }
 
-    return Success;
+    return {Success, std::move(emotes)};
+}
+}  // namespace
+
+FfzEmotes::FfzEmotes()
+    : global_(std::make_shared<EmoteMap>())
+{
 }
 
-void FfzEmotes::loadChannelEmotes(const QString &channelName,
-                                  std::function<void(EmoteMap &&)> callback)
+std::shared_ptr<const EmoteMap> FfzEmotes::global() const
+{
+    return this->global_.get();
+}
+
+boost::optional<EmotePtr> FfzEmotes::global(const EmoteName &name) const
+{
+    auto emotes = this->global_.get();
+    auto it = emotes->find(name);
+    if (it != emotes->end()) return it->second;
+    return boost::none;
+}
+
+void FfzEmotes::loadGlobal()
+{
+    QString url("https://api.frankerfacez.com/v1/set/global");
+
+    NetworkRequest request(url);
+    request.setCaller(QThread::currentThread());
+    request.setTimeout(30000);
+
+    request.onSuccess([this](auto result) -> Outcome {
+        auto emotes = this->global();
+        auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
+        if (pair.first)
+            this->global_.set(
+                std::make_shared<EmoteMap>(std::move(pair.second)));
+        return pair.first;
+    });
+
+    request.execute();
+}
+
+void FfzEmotes::loadChannel(const QString &channelName,
+                            std::function<void(EmoteMap &&)> callback)
 {
     // printf("[FFZEmotes] Reload FFZ Channel Emotes for channel %s\n",
     // qPrintable(channelName));

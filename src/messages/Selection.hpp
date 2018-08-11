@@ -35,7 +35,7 @@ struct SelectionItem {
 
     bool operator>(const SelectionItem &b) const
     {
-        return b.operator<(*this);
+        return this->operator!=(b) && b.operator<(*this);
     }
 
     bool operator==(const SelectionItem &b) const

@@ -136,7 +136,7 @@ void NetworkRequest::execute()
         } break;
 
         default: {
-            Log("[Execute] Unhandled request type");
+            log("[Execute] Unhandled request type");
         } break;
     }
 }
@@ -190,10 +190,11 @@ void NetworkRequest::doRequest()
 
                 case NetworkRequestType::Put:
                     return NetworkManager::accessManager.put(data->request_,
-                                                   data->payload_);
+                                                             data->payload_);
 
                 case NetworkRequestType::Delete:
-                    return NetworkManager::accessManager.deleteResource(data->request_);
+                    return NetworkManager::accessManager.deleteResource(
+                        data->request_);
 
                 default:
                     return nullptr;
@@ -201,13 +202,13 @@ void NetworkRequest::doRequest()
         }();
 
         if (reply == nullptr) {
-            Log("Unhandled request type");
+            log("Unhandled request type");
             return;
         }
 
         if (timer->isStarted()) {
             timer->onTimeout(worker, [reply, data]() {
-                Log("Aborted!");
+                log("Aborted!");
                 reply->abort();
                 if (data->onError_) {
                     data->onError_(-2);
@@ -234,7 +235,7 @@ void NetworkRequest::doRequest()
             NetworkResult result(bytes);
 
             DebugCount::increase("http request success");
-            Log("starting {}", data->request_.url().toString());
+            // log("starting {}", data->request_.url().toString());
             if (data->onSuccess_) {
                 if (data->executeConcurrently)
                     QtConcurrent::run(
@@ -243,7 +244,7 @@ void NetworkRequest::doRequest()
                 else
                     data->onSuccess_(result);
             }
-            Log("finished {}", data->request_.url().toString());
+            // log("finished {}", data->request_.url().toString());
 
             reply->deleteLater();
         };

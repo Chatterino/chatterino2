@@ -5,13 +5,15 @@
 
 #include <QApplication>
 #include <QStringList>
-
-#include <messages/Image.hpp>
+#include <memory>
 
 using namespace chatterino;
 
 int main(int argc, char **argv)
 {
+    auto shared = std::make_shared<QString>();
+    log(std::atomic_is_lock_free(&shared));
+
     QApplication a(argc, argv);
 
     // convert char** to QStringList

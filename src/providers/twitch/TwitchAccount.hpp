@@ -44,6 +44,7 @@ public:
         QString key;
         QString channelName;
         QString text;
+        QString type;
         std::vector<TwitchEmote> emotes;
     };
 

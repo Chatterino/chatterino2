@@ -31,13 +31,10 @@ public:
 
     const Message *getMessage();
 
-    // Height
     int getHeight() const;
 
-    // Flags
     MessageLayoutFlags flags;
 
-    // Layout
     bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting

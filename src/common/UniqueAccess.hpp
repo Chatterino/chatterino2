@@ -46,16 +46,15 @@ public:
     }
 
 private:
-    T *element_;
-    std::mutex *mutex_;
-    bool isValid_ = true;
+    T *element_{};
+    std::mutex *mutex_{};
+    bool isValid_{true};
 };
 
 template <typename T>
 class UniqueAccess
 {
 public:
-    //    template <typename X = decltype(T())>
     UniqueAccess()
         : element_(T())
     {

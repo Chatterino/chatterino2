@@ -56,7 +56,7 @@ TwitchChannel::TwitchChannel(const QString &name)
     , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
     , mod_(false)
 {
-    Log("[TwitchChannel:{}] Opened", name);
+    log("[TwitchChannel:{}] Opened", name);
 
     // this->refreshChannelEmotes();
     // this->refreshViewerList();
@@ -116,7 +116,7 @@ void TwitchChannel::refreshChannelEmotes()
             if (auto shared = weak.lock())  //
                 *this->bttvEmotes_.access() = emoteMap;
         });
-    getApp()->emotes->ffz.loadChannelEmotes(
+    getApp()->emotes->ffz.loadChannel(
         this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 *this->ffzEmotes_.access() = emoteMap;
@@ -136,7 +136,7 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    Log("[TwitchChannel:{}] Send message: {}", this->getName(), message);
+    log("[TwitchChannel:{}] Send message: {}", this->getName(), message);
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -350,13 +350,13 @@ void TwitchChannel::refreshLiveStatus()
     auto roomID = this->getRoomId();
 
     if (roomID.isEmpty()) {
-        Log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
+        log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
             this->getName());
         this->setLive(false);
         return;
     }
 
-    Log("[TwitchChannel:{}] Refreshing live status", this->getName());
+    log("[TwitchChannel:{}] Refreshing live status", this->getName());
 
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
@@ -381,12 +381,12 @@ void TwitchChannel::refreshLiveStatus()
 Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 {
     if (!document.IsObject()) {
-        Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+        log("[TwitchChannel:refreshLiveStatus] root is not an object");
         return Failure;
     }
 
     if (!document.HasMember("stream")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+        log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
         return Failure;
     }
 
@@ -400,7 +400,7 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
     if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
         !stream.HasMember("channel") || !stream.HasMember("created_at")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
+        log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
         this->setLive(false);
         return Failure;
     }
@@ -408,7 +408,7 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     const rapidjson::Value &streamChannel = stream["channel"];
 
     if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
+        log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
             "channel");
         return Failure;
     }

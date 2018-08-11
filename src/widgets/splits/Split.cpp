@@ -429,7 +429,7 @@ void Split::openInStreamlink()
     try {
         openStreamlinkForChannel(this->getChannel()->getName());
     } catch (const Exception &ex) {
-        Log("Error in doOpenStreamlink: {}", ex.what());
+        log("Error in doOpenStreamlink: {}", ex.what());
     }
 }
 

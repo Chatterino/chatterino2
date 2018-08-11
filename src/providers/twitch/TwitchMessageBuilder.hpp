@@ -1,7 +1,6 @@
 #pragma once
 
 #include "messages/MessageBuilder.hpp"
-#include "messages/MessageParseArgs.hpp"
 #include "singletons/Emotes.hpp"
 
 #include <IrcMessage>

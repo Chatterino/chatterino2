@@ -143,7 +143,7 @@ void TwitchAccount::loadIgnores()
                 }
                 TwitchUser ignoredUser;
                 if (!rj::getSafe(userIt->value, ignoredUser)) {
-                    Log("Error parsing twitch user JSON {}",
+                    log("Error parsing twitch user JSON {}",
                         rj::stringify(userIt->value));
                     continue;
                 }
@@ -368,13 +368,13 @@ std::set<TwitchUser> TwitchAccount::getIgnores() const
 
 void TwitchAccount::loadEmotes()
 {
-    Log("Loading Twitch emotes for user {}", this->getUserName());
+    log("Loading Twitch emotes for user {}", this->getUserName());
 
     const auto &clientID = this->getOAuthClient();
     const auto &oauthToken = this->getOAuthToken();
 
     if (clientID.isEmpty() || oauthToken.isEmpty()) {
-        Log("Missing Client ID or OAuth token");
+        log("Missing Client ID or OAuth token");
         return;
     }
 
@@ -386,7 +386,7 @@ void TwitchAccount::loadEmotes()
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        Log("[TwitchAccount::loadEmotes] Error {}", errorCode);
+        log("[TwitchAccount::loadEmotes] Error {}", errorCode);
         if (errorCode == 203) {
             // onFinished(FollowResult_NotFollowing);
         } else {
@@ -420,7 +420,7 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 
     auto emoticonSets = root.FindMember("emoticon_sets");
     if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject()) {
-        Log("No emoticon_sets in load emotes response");
+        log("No emoticon_sets in load emotes response");
         return;
     }
 
@@ -434,19 +434,19 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
         for (const rapidjson::Value &emoteJSON :
              emoteSetJSON.value.GetArray()) {
             if (!emoteJSON.IsObject()) {
-                Log("Emote value was invalid");
+                log("Emote value was invalid");
                 return;
             }
 
             uint64_t idNumber;
             if (!rj::getSafe(emoteJSON, "id", idNumber)) {
-                Log("No ID key found in Emote value");
+                log("No ID key found in Emote value");
                 return;
             }
 
             QString _code;
             if (!rj::getSafe(emoteJSON, "code", _code)) {
-                Log("No code key found in Emote value");
+                log("No code key found in Emote value");
                 return;
             }
 
@@ -468,7 +468,7 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 {
     if (!emoteSet) {
-        Log("null emote set sent");
+        log("null emote set sent");
         return;
     }
 
@@ -486,7 +486,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     req.setUseQuickLoadCache(true);
 
     req.onError([](int errorCode) -> bool {
-        Log("Error code {} while loading emote set data", errorCode);
+        log("Error code {} while loading emote set data", errorCode);
         return true;
     });
 
@@ -507,16 +507,15 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
             return Failure;
         }
 
-        Log("Loaded twitch emote set data for {}!", emoteSet->key);
+        log("Loaded twitch emote set data for {}!", emoteSet->key);
 
-        if (type == "sub") {
-            emoteSet->text =
-                QString("Twitch Subscriber Emote (%1)").arg(channelName);
-        } else {
-            emoteSet->text =
-                QString("Twitch Account Emote (%1)").arg(channelName);
-        }
+        auto name = channelName;
+        name.detach();
+        name[0] = name[0].toUpper();
 
+        emoteSet->text = name;
+
+        emoteSet->type = type;
         emoteSet->channelName = channelName;
 
         return Success;

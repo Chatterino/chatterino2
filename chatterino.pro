@@ -233,7 +233,6 @@ SOURCES += \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/TwitchApi.cpp \
     src/messages/Emote.cpp \
-    src/messages/EmoteMap.cpp \
     src/messages/ImageSet.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/ffz/FfzEmotes.cpp \
@@ -250,7 +249,8 @@ SOURCES += \
     src/util/FunctionEventFilter.cpp \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/Button.cpp \
-    src/messages/MessageContainer.cpp
+    src/messages/MessageContainer.cpp \
+    src/debug/Benchmark.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -258,7 +258,7 @@ HEADERS  += \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
     src/common/FlagsEnum.hpp \
-    src/common/MutexValue.hpp \
+    src/common/Atomic.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkData.hpp \
     src/common/NetworkManager.hpp \
@@ -305,7 +305,6 @@ HEADERS  += \
     src/messages/MessageBuilder.hpp \
     src/messages/MessageColor.hpp \
     src/messages/MessageElement.hpp \
-    src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/emoji/Emojis.hpp \
@@ -414,7 +413,6 @@ HEADERS  += \
     src/singletons/Updates.hpp \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Theme.hpp \
-    src/common/SimpleSignalVector.hpp \
     src/common/SignalVector.hpp \
     src/widgets/dialogs/LogsPopup.hpp \
     src/common/Singleton.hpp \
@@ -427,7 +425,6 @@ HEADERS  += \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/TwitchApi.hpp \
     src/messages/Emote.hpp \
-    src/messages/EmoteMap.hpp \
     src/messages/EmoteCache.hpp \
     src/messages/ImageSet.hpp \
     src/common/Outcome.hpp \

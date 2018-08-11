@@ -6,7 +6,7 @@ namespace chatterino {
 bool trimChannelName(const QString &channelName, QString &outChannelName)
 {
     if (channelName.length() < 3) {
-        Log("channel name length below 3");
+        log("channel name length below 3");
         return false;
     }
 

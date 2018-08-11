@@ -78,7 +78,7 @@ QVector<Frame<QImage>> readFrames(QImageReader &reader, const Url &url)
     QVector<Frame<QImage>> frames;
 
     if (reader.imageCount() == 0) {
-        Log("Error while reading image {}: '{}'", url.string,
+        log("Error while reading image {}: '{}'", url.string,
             reader.errorString());
         return frames;
     }
@@ -94,7 +94,7 @@ QVector<Frame<QImage>> readFrames(QImageReader &reader, const Url &url)
     }
 
     if (frames.size() == 0) {
-        Log("Error while reading image {}: '{}'", url.string,
+        log("Error while reading image {}: '{}'", url.string,
             reader.errorString());
     }
 
@@ -200,7 +200,7 @@ Image::Image(const Url &url, qreal scale)
 
 Image::Image(const QPixmap &pixmap, qreal scale)
     : scale_(scale)
-    , frames_(QVector<Frame<QPixmap>>{Frame<QPixmap>{pixmap}})
+    , frames_(QVector<Frame<QPixmap>>{Frame<QPixmap>{pixmap, 1}})
 {
 }
 

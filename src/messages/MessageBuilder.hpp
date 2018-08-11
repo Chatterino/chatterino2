@@ -16,6 +16,14 @@ const TimeoutMessageTag timeoutMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
 
+struct MessageParseArgs {
+    bool disablePingSounds = false;
+    bool isReceivedWhisper = false;
+    bool isSentWhisper = false;
+    bool trimSubscriberUsername = false;
+    bool isStaffOrBroadcaster = false;
+};
+
 class MessageBuilder
 {
 public:

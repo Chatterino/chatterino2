@@ -55,7 +55,7 @@ bool TwitchMessageBuilder::isIgnored() const
     // TODO(pajlada): Do we need to check if the phrase is valid first?
     for (const auto &phrase : app->ignores->phrases.getVector()) {
         if (phrase.isMatch(this->originalMessage_)) {
-            Log("Blocking message because it contains ignored phrase {}",
+            log("Blocking message because it contains ignored phrase {}",
                 phrase.getPattern());
             return true;
         }
@@ -68,7 +68,7 @@ bool TwitchMessageBuilder::isIgnored() const
         for (const auto &user :
              app->accounts->twitch.getCurrent()->getIgnores()) {
             if (sourceUserID == user.id) {
-                Log("Blocking message because it's from blocked user {}",
+                log("Blocking message because it's from blocked user {}",
                     user.name);
                 return true;
             }
@@ -533,7 +533,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     if (!app->highlights->blacklistContains(this->ircMessage->nick())) {
         for (const HighlightPhrase &highlight : activeHighlights) {
             if (highlight.isMatch(this->originalMessage_)) {
-                Log("Highlight because {} matches {}", this->originalMessage_,
+                log("Highlight because {} matches {}", this->originalMessage_,
                     highlight.getPattern());
                 doHighlight = true;
 
@@ -555,7 +555,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
         }
         for (const HighlightPhrase &userHighlight : userHighlights) {
             if (userHighlight.isMatch(this->ircMessage->nick())) {
-                Log("Highlight because user {} sent a message",
+                log("Highlight because user {} sent a message",
                     this->ircMessage->nick());
                 doHighlight = true;
 
@@ -638,12 +638,12 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
 
-    if ((emote = getApp()->emotes->bttv.getGlobalEmote(name))) {
+    if ((emote = getApp()->emotes->bttv.global(name))) {
         flags = MessageElementFlag::BttvEmote;
     } else if (twitchChannel &&
                (emote = this->twitchChannel->getBttvEmote(name))) {
         flags = MessageElementFlag::BttvEmote;
-    } else if ((emote = getApp()->emotes->ffz.getGlobalEmote(name))) {
+    } else if ((emote = getApp()->emotes->ffz.global(name))) {
         flags = MessageElementFlag::FfzEmote;
     } else if (twitchChannel &&
                (emote = this->twitchChannel->getFfzEmote(name))) {

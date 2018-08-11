@@ -137,7 +137,7 @@ AboutPage::AboutPage()
                 QStringList contributorParts = line.split("|");
 
                 if (contributorParts.size() != 4) {
-                    Log("Missing parts in line '{}'", line);
+                    log("Missing parts in line '{}'", line);
                     continue;
                 }
 

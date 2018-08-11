@@ -35,7 +35,7 @@ void runAfter(boost::asio::io_service &ioService, Duration duration,
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            Log("Error in runAfter: {}", ec.message());
+            log("Error in runAfter: {}", ec.message());
             return;
         }
 
@@ -52,7 +52,7 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer,
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            Log("Error in runAfter: {}", ec.message());
+            log("Error in runAfter: {}", ec.message());
             return;
         }
 

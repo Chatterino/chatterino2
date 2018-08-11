@@ -1,33 +1,25 @@
 #pragma once
 
 #include <memory>
-
-#include "common/UniqueAccess.hpp"
+#include "common/Atomic.hpp"
 #include "messages/Emote.hpp"
-#include "messages/EmoteCache.hpp"
 
 namespace chatterino {
 
-class BttvEmotes final : std::enable_shared_from_this<BttvEmotes>
+class BttvEmotes final
 {
     static constexpr const char *globalEmoteApiUrl =
         "https://api.betterttv.net/2/emotes";
 
 public:
-    // BttvEmotes();
+    BttvEmotes();
 
-    AccessGuard<const EmoteMap> accessGlobalEmotes() const;
-    boost::optional<EmotePtr> getGlobalEmote(const EmoteName &name);
-    boost::optional<EmotePtr> getEmote(const EmoteId &id);
-
-    void loadGlobalEmotes();
+    std::shared_ptr<const EmoteMap> global() const;
+    boost::optional<EmotePtr> global(const EmoteName &name) const;
+    void loadGlobal();
 
 private:
-    std::pair<Outcome, EmoteMap> parseGlobalEmotes(
-        const QJsonObject &jsonRoot, const EmoteMap &currentEmotes);
-
-    UniqueAccess<EmoteMap> globalEmotes_;
-    // UniqueAccess<WeakEmoteIdMap> channelEmoteCache_;
+    Atomic<std::shared_ptr<const EmoteMap>> global_;
 };
 
 }  // namespace chatterino

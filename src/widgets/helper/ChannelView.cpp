@@ -492,7 +492,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             MessageLayoutPtr newItem(new MessageLayout(replacement));
             auto snapshot = this->messages.getSnapshot();
             if (index >= snapshot.getLength()) {
-                Log("Tried to replace out of bounds message. Index: {}. "
+                log("Tried to replace out of bounds message. Index: {}. "
                     "Length: {}",
                     index, snapshot.getLength());
                 return;
@@ -1169,19 +1169,18 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             userPopup->show();
 
             qDebug() << "Clicked " << user << "s message";
-            break;
-        }
+
+        } break;
 
         case Link::Url: {
             QDesktopServices::openUrl(QUrl(link.value));
-            break;
-        }
+        } break;
 
         case Link::UserAction: {
             QString value = link.value;
             value.replace("{user}", layout->getMessage()->loginName);
             this->channel_->sendMessage(value);
-        }
+        } break;
 
         default:;
     }

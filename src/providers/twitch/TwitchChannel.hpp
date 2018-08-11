@@ -4,7 +4,7 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "common/MutexValue.hpp"
+#include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Emotes.hpp"

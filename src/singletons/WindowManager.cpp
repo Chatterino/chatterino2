@@ -211,7 +211,7 @@ Window *WindowManager::windowAt(int index)
     if (index < 0 || (size_t)index >= this->windows_.size()) {
         return nullptr;
     }
-    Log("getting window at bad index {}", index);
+    log("getting window at bad index {}", index);
 
     return this->windows_.at(index);
 }

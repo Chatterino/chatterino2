@@ -65,13 +65,13 @@ void LoggingChannel::openLogFile()
         this->baseDirectory + QDir::separator() + this->subDirectory;
 
     if (!QDir().mkpath(directory)) {
-        Log("Unable to create logging path");
+        log("Unable to create logging path");
         return;
     }
 
     // Open file handle to log file of current date
     QString fileName = directory + QDir::separator() + baseFileName;
-    Log("Logging to {}", fileName);
+    log("Logging to {}", fileName);
     this->fileHandle.setFileName(fileName);
 
     this->fileHandle.open(QIODevice::Append);

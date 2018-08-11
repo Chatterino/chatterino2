@@ -78,7 +78,7 @@ void CommandController::save()
 {
     QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::WriteOnly)) {
-        Log("[CommandController::saveCommands] Unable to open {} for writing",
+        log("[CommandController::saveCommands] Unable to open {} for writing",
             this->filePath_);
         return;
     }
