@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -89,12 +90,12 @@ BttvEmotes::BttvEmotes()
 {
 }
 
-std::shared_ptr<const EmoteMap> BttvEmotes::global() const
+std::shared_ptr<const EmoteMap> BttvEmotes::emotes() const
 {
     return this->global_.get();
 }
 
-boost::optional<EmotePtr> BttvEmotes::global(const EmoteName &name) const
+boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
@@ -103,7 +104,7 @@ boost::optional<EmotePtr> BttvEmotes::global(const EmoteName &name) const
     return it->second;
 }
 
-void BttvEmotes::loadGlobal()
+void BttvEmotes::loadEmotes()
 {
     auto request = NetworkRequest(QString(globalEmoteApiUrl));
 

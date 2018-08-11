@@ -4,6 +4,8 @@
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
 #include "pajlada/signals/signalholder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
 
 #include <chrono>
@@ -66,6 +68,8 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
     bool singleConnection_ = false;
+    BttvEmotes bttv;
+    FfzEmotes ffz;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

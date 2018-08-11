@@ -25,8 +25,6 @@ public:
     bool isIgnoredEmote(const QString &emote);
 
     TwitchEmotes twitch;
-    BttvEmotes bttv;
-    FfzEmotes ffz;
     Emojis emojis;
 
     GIFTimer gifTimer;

@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "debug/Log.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 
 namespace chatterino {
@@ -109,12 +110,12 @@ FfzEmotes::FfzEmotes()
 {
 }
 
-std::shared_ptr<const EmoteMap> FfzEmotes::global() const
+std::shared_ptr<const EmoteMap> FfzEmotes::emotes() const
 {
     return this->global_.get();
 }
 
-boost::optional<EmotePtr> FfzEmotes::global(const EmoteName &name) const
+boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
@@ -122,7 +123,7 @@ boost::optional<EmotePtr> FfzEmotes::global(const EmoteName &name) const
     return boost::none;
 }
 
-void FfzEmotes::loadGlobal()
+void FfzEmotes::loadEmotes()
 {
     QString url("https://api.frankerfacez.com/v1/set/global");
 
@@ -131,7 +132,7 @@ void FfzEmotes::loadGlobal()
     request.setTimeout(30000);
 
     request.onSuccess([this](auto result) -> Outcome {
-        auto emotes = this->global();
+        auto emotes = this->emotes();
         auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
         if (pair.first)
             this->global_.set(

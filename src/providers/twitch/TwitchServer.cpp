@@ -40,6 +40,9 @@ void TwitchServer::initialize(Settings &settings, Paths &paths)
 {
     getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
+
+    this->bttv.loadEmotes();
+    this->ffz.loadEmotes();
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
@@ -80,8 +83,8 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    auto channel =
-        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
+    auto channel = std::shared_ptr<TwitchChannel>(
+        new TwitchChannel(channelName, this->bttv, this->ffz));
     channel->refreshChannelEmotes();
 
     channel->sendMessageSignal.connect(

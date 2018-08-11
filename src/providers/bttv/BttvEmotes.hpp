@@ -1,12 +1,15 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <memory>
-
+#include "boost/optional.hpp"
+#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+class EmoteMap;
 
 class BttvEmotes final
 {
@@ -18,9 +21,9 @@ class BttvEmotes final
 public:
     BttvEmotes();
 
-    std::shared_ptr<const EmoteMap> global() const;
-    boost::optional<EmotePtr> global(const EmoteName &name) const;
-    void loadGlobal();
+    std::shared_ptr<const EmoteMap> emotes() const;
+    boost::optional<EmotePtr> emote(const EmoteName &name) const;
+    void loadEmotes();
     static void loadChannel(const QString &channelName,
                             std::function<void(EmoteMap &&)> callback);
 

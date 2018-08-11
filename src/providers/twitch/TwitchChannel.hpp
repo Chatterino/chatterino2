@@ -19,6 +19,9 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 
+class FfzEmotes;
+class BttvEmotes;
+
 class TwitchServer;
 
 class TwitchChannel final : public Channel, pajlada::Signals::SignalHolder
@@ -60,25 +63,28 @@ public:
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
 
-    // Twitch data
     bool isLive() const;
     virtual bool isMod() const override;
     void setMod(bool value);
     virtual bool isBroadcaster() const override;
 
+    // Data
+    const QString &subscriptionUrl();
+    const QString &channelUrl();
+    const QString &popoutPlayerUrl();
     QString roomId() const;
     void setRoomId(const QString &id);
     AccessGuard<const RoomModes> accessRoomModes() const;
     void setRoomModes(const RoomModes &roomModes_);
     AccessGuard<const StreamStatus> accessStreamStatus() const;
 
+    // Emotes
+    const BttvEmotes &globalBttv() const;
+    const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
-    const QString &subscriptionUrl();
-    const QString &channelUrl();
-    const QString &popoutPlayerUrl();
 
     boost::optional<EmotePtr> getTwitchBadge(const QString &set,
                                              const QString &version) const;
@@ -109,7 +115,8 @@ private:
         std::vector<CheerEmote> cheerEmotes;
     };
 
-    explicit TwitchChannel(const QString &channelName);
+    explicit TwitchChannel(const QString &channelName, BttvEmotes &bttv,
+                           FfzEmotes &ffz);
 
     // Methods
     void refreshLiveStatus();
@@ -124,16 +131,19 @@ private:
     void loadBadges();
     void loadCheerEmotes();
 
-    // Twitch data
+    // Data
+    const QString subscriptionUrl_;
+    const QString channelUrl_;
+    const QString popoutPlayerUrl_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<UserState> userState_;
     UniqueAccess<RoomModes> roomModes_;
 
+    // Emotes
+    BttvEmotes &globalBttv_;
+    FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
-    const QString subscriptionUrl_;
-    const QString channelUrl_;
-    const QString popoutPlayerUrl_;
 
     bool mod_ = false;
     UniqueAccess<QString> roomID_;

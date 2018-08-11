@@ -51,13 +51,16 @@ auto parseRecentMessages(const QJsonObject &jsonRoot, TwitchChannel &channel)
 }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name)
+TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
+                             FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
-    , bttvEmotes_(std::make_shared<EmoteMap>())
-    , ffzEmotes_(std::make_shared<EmoteMap>())
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
+    , globalBttv_(bttv)
+    , globalFfz_(ffz)
+    , bttvEmotes_(std::make_shared<EmoteMap>())
+    , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
 {
     log("[TwitchChannel:{}] Opened", name);
@@ -288,6 +291,16 @@ AccessGuard<const TwitchChannel::StreamStatus>
 TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
+}
+
+const BttvEmotes &TwitchChannel::globalBttv() const
+{
+    return this->globalBttv_;
+}
+
+const FfzEmotes &TwitchChannel::globalFfz() const
+{
+    return this->globalFfz_;
 }
 
 boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const

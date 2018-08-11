@@ -17,12 +17,16 @@ void ModerationActions::initialize(Settings &settings, Paths &paths)
     assert(!this->initialized_);
     this->initialized_ = true;
 
-    for (auto &val : this->setting_.getValue()) {
+    this->setting_ =
+        std::make_unique<ChatterinoSetting<std::vector<ModerationAction>>>(
+            "/moderation/actions");
+
+    for (auto &val : this->setting_->getValue()) {
         this->items.insertItem(val);
     }
 
     this->items.delayedItemsChanged.connect([this] {  //
-        this->setting_.setValue(this->items.getVector());
+        this->setting_->setValue(this->items.getVector());
     });
 }
 

@@ -125,8 +125,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         *globalChannel, *subChannel);
 
     // global
-    addEmotes(*globalChannel, *getApp()->emotes->bttv.global(), "BetterTTV");
-    addEmotes(*globalChannel, *getApp()->emotes->ffz.global(), "FrankerFaceZ");
+    addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
+              "BetterTTV");
+    addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
+              "FrankerFaceZ");
 
     // channel
     addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV");

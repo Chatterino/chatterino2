@@ -104,12 +104,10 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    std::map<std::string, QString> toneNames;
-    toneNames["1F3FB"] = "tone1";
-    toneNames["1F3FC"] = "tone2";
-    toneNames["1F3FD"] = "tone3";
-    toneNames["1F3FE"] = "tone4";
-    toneNames["1F3FF"] = "tone5";
+    auto toneNames = std::map<std::string, QString>{
+        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+    };
 
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
@@ -234,27 +232,12 @@ void Emojis::loadEmojiSet()
                 // {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
                 // {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
 
-                // {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
-                // {"EmojiOne 3", "https://braize.pajlada.com/emoji/img/emojione/64/"},
-                // {"Twitter", "https://braize.pajlada.com/emoji/img/twitter/64/"},
-                // {"Facebook", "https://braize.pajlada.com/emoji/img/facebook/64/"},
-                // {"Apple", "https://braize.pajlada.com/emoji/img/apple/64/"},
-                // {"Google", "https://braize.pajlada.com/emoji/img/google/64/"},
-                // {"Messenger", "https://braize.pajlada.com/emoji/img/messenger/64/"},
-
                 {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
                 {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
                 {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
                 {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
                 {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
                 {"Messenger", "https://pajbot.com/static/emoji/img/messenger/64/"},
-
-//                {"EmojiOne 3", "https://cdn.fourtf.com/emoji/emojione/64/"},
-//                {"Twitter", "https://cdn.fourtf.com/emoji/twitter/64/"},
-//                {"Facebook", "https://cdn.fourtf.com/emoji/facebook/64/"},
-//                {"Apple", "https://cdn.fourtf.com/emoji/apple/64/"},
-//                {"Google", "https://cdn.fourtf.com/emoji/google/64/"},
-//                {"Messenger", "https://cdn.fourtf.com/emoji/messenger/64/"},
             };
             // clang-format on
 
