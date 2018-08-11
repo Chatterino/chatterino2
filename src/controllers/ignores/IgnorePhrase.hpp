@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Application.hpp"
 #include "common/SerializeCustom.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "singletons/Settings.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -38,6 +40,11 @@ public:
             regex_.setPatternOptions(QRegularExpression::CaseInsensitiveOption |
                                      QRegularExpression::UseUnicodePropertiesOption);
         }
+
+        /*const auto &accvec = getApp()->accounts->twitch.accounts.getVector();
+        for (const auto &acc : accvec) {
+            //
+        }*/
     }
 
     const QString &getPattern() const
@@ -94,6 +101,7 @@ private:
     bool isBlock_;
     QString replace_;
     bool isCaseSensitive_;
+    std::map<QString, EmoteData> emotes;
 };
 }  // namespace chatterino
 
