@@ -52,6 +52,7 @@ include(dependencies/libcommuni.pri)
 include(dependencies/websocketpp.pri)
 include(dependencies/openssl.pri)
 include(dependencies/boost.pri)
+include(dependencies/wintoast.pri)
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
@@ -256,7 +257,8 @@ SOURCES += \
     src/util/FunctionEventFilter.cpp \
     src/controllers/notifications/notificationcontroller.cpp \
     src/widgets/settingspages/NotificationPage.cpp \
-    src/controllers/notifications/NotificationModel.cpp
+    src/controllers/notifications/NotificationModel.cpp \
+    src/singletons/Toasts.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -460,7 +462,8 @@ HEADERS  += \
     src/util/FunctionEventFilter.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/controllers/notifications/NotificationModel.hpp \
-    src/controllers/notifications/NotificationPhrase.hpp
+    src/controllers/notifications/NotificationPhrase.hpp \
+    src/singletons/Toasts.hpp
 
 RESOURCES += \
     resources/resources.qrc \

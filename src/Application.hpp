@@ -28,6 +28,7 @@ class Emotes;
 class Settings;
 class Fonts;
 class Resources;
+class Toasts;
 
 class Application
 {
@@ -56,6 +57,7 @@ public:
     Fonts *const fonts{};
     Emotes *const emotes{};
     WindowManager *const windows{};
+    Toasts *const toasts{};
 
     AccountController *const accounts{};
     CommandController *const commands{};

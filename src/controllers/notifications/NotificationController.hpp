@@ -13,8 +13,6 @@ class NotificationModel;
 class NotificationController final : public Singleton
 {
 public:
-    NotificationController();
-
     virtual void initialize(Settings &settings, Paths &paths) override;
 
     bool isChannelNotified(const QString &channelName);

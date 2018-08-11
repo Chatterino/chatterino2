@@ -19,6 +19,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
@@ -54,6 +55,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchServer>())
     , logging(&this->emplace<Logging>())
+    , toasts(&this->emplace<Toasts>())
 {
     this->instance = this;
 

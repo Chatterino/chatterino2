@@ -3,11 +3,14 @@
 #include "Application.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
 
+#include <wintoastlib.h>
+
+#include <QDesktopServices>
+#include <QDir>
+#include <QUrl>
+
 namespace chatterino {
 
-NotificationController::NotificationController()
-{
-}
 void NotificationController::initialize(Settings &settings, Paths &paths)
 {
     this->initialized_ = true;
@@ -40,20 +43,75 @@ bool NotificationController::isChannelNotified(const QString &channelName)
         }
     }
     return false;
-    /*
-    const auto &vector = notificationSetting_.getValue();
-    return std::find(vector.begin(), vector.end(), channelName) != vector.end();
-    */
 }
+
+class CustomHandler : public WinToastLib::IWinToastHandler
+{
+public:
+    void toastActivated() const
+    {
+        std::wcout << L"The user clicked in this toast" << std::endl;
+    }
+
+    void toastActivated(int actionIndex) const
+    {
+        std::wcout << L"The user clicked on button #" << actionIndex
+                   << L" in this toast" << std::endl;
+        QDesktopServices::openUrl(
+            QUrl("http://www.google.com", QUrl::TolerantMode));
+    }
+
+    void toastFailed() const
+    {
+        std::wcout << L"Error showing current toast" << std::endl;
+    }
+    void toastDismissed(WinToastDismissalReason state) const
+    {
+        switch (state) {
+            case UserCanceled:
+                std::wcout << L"The user dismissed this toast" << std::endl;
+                break;
+            case ApplicationHidden:
+                std::wcout << L"The application hid the toast using "
+                              L"ToastNotifier.hide()"
+                           << std::endl;
+                break;
+            case TimedOut:
+                std::wcout << L"The toast has timed out" << std::endl;
+                break;
+            default:
+                std::wcout << L"Toast not activated" << std::endl;
+                break;
+        }
+    }
+};
 
 void NotificationController::addChannelNotification(const QString &channelName)
 {
     notificationVector.appendItem(channelName);
-    /*
-    auto vector = notificationSetting_.getValue();
-    vector.push_back(channelName);
-    notificationSetting_.setValue(vector);
-    */
+
+    if (WinToastLib::WinToast::isCompatible()) {
+        QDir dir;
+        qDebug() << "NaM" << dir.absolutePath();
+        ;
+
+        WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
+            WinToastLib::WinToastTemplate::ImageAndText02);
+        templ.setTextField(L"Your favorite streamer has gone live!",
+                           WinToastLib::WinToastTemplate::FirstLine);
+        templ.setTextField(L"NaM!", WinToastLib::WinToastTemplate::SecondLine);
+        // templ.setExpiration(10);
+        // templ.setImagePath();
+        // templ.setAudioOption(WinToastLib::WinToastTemplate::Silent);
+        // templ.setAudioPath(L"C:/ping2.wav");
+        WinToastLib::WinToast::instance()->setAppName(L"Chatterino2");
+        WinToastLib::WinToast::instance()->setAppUserModelId(
+            WinToastLib::WinToast::configureAUMI(
+                L"mohabouje", L"wintoast", L"wintoastexample", L"20161006"));
+        WinToastLib::WinToast::instance()->initialize();
+        WinToastLib::WinToast::instance()->showToast(templ,
+                                                     new CustomHandler());
+    }
 }
 
 void NotificationController::removeChannelNotification(
@@ -66,14 +124,6 @@ void NotificationController::removeChannelNotification(
             i--;
         }
     }
-
-    // notificationVector.removeItem(std::find(
-    //    notificationVector.begin(), notificationVector.end(), channelName));
-    /*
-    auto vector = notificationSetting_.getValue();
-    vector.erase(std::find(vector.begin(), vector.end(), channelName));
-    notificationSetting_.setValue(vector);
-    */
 }
 
 NotificationModel *NotificationController::createModel(QObject *parent)

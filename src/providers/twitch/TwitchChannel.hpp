@@ -153,6 +153,8 @@ private:
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
 
+    std::vector<QString> liveChannels;
+
     friend class TwitchServer;
 };
 
