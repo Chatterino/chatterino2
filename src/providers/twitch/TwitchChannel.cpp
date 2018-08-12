@@ -14,6 +14,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 
 #include <IrcConnection>
@@ -312,20 +313,20 @@ void TwitchChannel::setLive(bool newLiveStatus)
         auto guard = this->streamStatus_.access();
         if (guard->live != newLiveStatus) {
             gotNewLiveStatus = true;
-            if (Toasts::isEnabled() &&
-                getApp()->notifications->isChannelNotified(this->getName(),
+            if (getApp()->notifications->isChannelNotified(this->getName(),
                                                            Platform::Twitch)) {
-                getApp()->toasts->sendChannelNotification(this->getName(),
-                                                          Platform::Twitch);
+                if (Toasts::isEnabled()) {
+                    getApp()->toasts->sendChannelNotification(this->getName(),
+                                                              Platform::Twitch);
+                }
+                if (getApp()->settings->notificationPlaySound) {
+                    getApp()->notifications->playSound();
+                }
+                if (getApp()->settings->notificationFlashTaskbar) {
+                    QApplication::alert(
+                        getApp()->windows->getMainWindow().window(), 2500);
+                }
             }
-            /*
-            if (!guard->live && Toasts::isEnabled() &&
-            getApp()->notifications->isChannelNotified( this->getName(),
-            Platform::Twitch)) {
-                getApp()->toasts->sendChannelNotification(this->getName(),
-                                                          Platform::Twitch);
-            }
-            */
             guard->live = newLiveStatus;
         }
     }
@@ -351,7 +352,8 @@ void TwitchChannel::refreshLiveStatus()
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
     //<<<<<<< HEAD
-    //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
+    //    auto request = makeGetStreamRequest(roomID,
+    //    QThread::currentThread());
     //=======
     auto request = NetworkRequest::twitchRequest(url);
     request.setCaller(QThread::currentThread());
@@ -398,7 +400,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     const rapidjson::Value &streamChannel = stream["channel"];
 
     if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
+        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" "
+            "in "
             "channel");
         return Failure;
     }
@@ -407,15 +410,6 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
     {
         auto status = this->streamStatus_.access();
-        /*
-        if (!(status->live) && getApp()->toasts->isEnabled(this->getName())) {
-            qDebug() << " NaM xd NaM ";
-            int i = 0;
-            getApp()->toasts->sendChannelNotification(this->getName(), i);
-            // notifcation send
-        }
-*/
-        // status->live = true;
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();
         status->title = streamChannel["status"].GetString();
@@ -481,8 +475,8 @@ Outcome TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
 
     for (const auto jsonMessage : jsonMessages) {
         auto content = jsonMessage.toString().toUtf8();
-        // passing nullptr as the channel makes the message invalid but we don't
-        // check for that anyways
+        // passing nullptr as the channel makes the message invalid but we
+        // don't check for that anyways
         auto message = Communi::IrcMessage::fromData(content, nullptr);
         auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         assert(privMsg);

@@ -34,9 +34,10 @@ NotificationPage::NotificationPage()
                     "Flash taskbar",
                     getApp()->settings->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
-                    "Playsound", getApp()->settings->notificationPlaySound));
+                    "Playsound (doesn't mute the Windows 8.x sound of toasts)",
+                    getApp()->settings->notificationPlaySound));
                 settings.append(this->createCheckBox(
-                    "Enable toasts (currently only for windows)",
+                    "Enable toasts (currently only for windows 8.x or 10)",
                     getApp()->settings->notificationToast));
 
                 settings->addStretch(1);
@@ -62,7 +63,9 @@ NotificationPage::NotificationPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->notifications->twitchVector.appendItem("channel");
+                    getApp()
+                        ->notifications->channelMap[Platform::Twitch]
+                        .appendItem("channel");
                 });
             }
             auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
@@ -86,7 +89,9 @@ NotificationPage::NotificationPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->notifications->mixerVector.appendItem("channel");
+                    getApp()
+                        ->notifications->channelMap[Platform::Mixer]
+                        .appendItem("channel");
                 });
             }
         }

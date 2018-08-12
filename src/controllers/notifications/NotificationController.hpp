@@ -22,17 +22,17 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
     bool isChannelNotified(const QString &channelName, Platform p);
-
     void updateChannelNotification(const QString &channelName, Platform p);
-    void addChannelNotification(const QString &channelName,
-                                UnsortedSignalVector<QString> &vector);
-    void removeChannelNotification(const QString &channelName,
-                                   UnsortedSignalVector<QString> &vector);
+    void addChannelNotification(const QString &channelName, Platform p);
+    void removeChannelNotification(const QString &channelName, Platform p);
+
+    void playSound();
 
     UnsortedSignalVector<QString> getVector(Platform p);
 
-    UnsortedSignalVector<QString> twitchVector;
-    UnsortedSignalVector<QString> mixerVector;
+    std::map<Platform, UnsortedSignalVector<QString>> channelMap;
+    // UnsortedSignalVector<QString> twitchVector;
+    // UnsortedSignalVector<QString> mixerVector;
 
     NotificationModel *createModel(QObject *parent, Platform p);
 

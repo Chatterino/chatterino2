@@ -18,62 +18,6 @@
 
 namespace chatterino {
 
-/*
-Toasts::Toasts()
-{
-}
-*/
-/*
-void Toasts::initialize(Settings &settings, Paths &paths)
-{
-    getApp()->twitch2->forEachChannel([this](ChannelPtr chn) {
-        auto twchn = dynamic_cast<TwitchChannel *>(chn.get());
-        twchn->liveStatusChanged.connect([twchn, this]() {
-            const auto streamStatus = twchn->accessStreamStatus();
-            if (streamStatus->live) {
-                // is live
-                if (getApp()->notifications->isChannelNotified(
-                        twchn->getName()) &&
-                    !wasChannelLive(twchn->getName())) {
-                    sendChannelNotification(twchn->getName());
-                }
-                updateLiveChannels(twchn->getName());
-            } else {
-                // is Offline
-                removeFromLiveChannels(twchn->getName());
-            }
-        });
-    });
-}
-
-void Toasts::updateLiveChannels(const QString &channelName)
-{
-    if (!wasChannelLive(channelName)) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        liveChannels.push_back(channelName);
-    }
-}
-
-void Toasts::removeFromLiveChannels(const QString &channelName)
-{
-    if (wasChannelLive(channelName)) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        liveChannels.erase(
-            std::find(liveChannels.begin(), liveChannels.end(), channelName));
-    }
-}
-
-bool Toasts::wasChannelLive(const QString &channelName)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto &str : liveChannels) {
-        if (str == channelName) {
-            return true;
-        }
-    }
-    return false;
-}
-*/
 bool Toasts::isEnabled()
 {
     return WinToastLib::WinToast::isCompatible() &&
@@ -149,6 +93,10 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     templ.setTextField(widestr, WinToastLib::WinToastTemplate::FirstLine);
     templ.setTextField(L"Click here to open in browser",
                        WinToastLib::WinToastTemplate::SecondLine);
+    if (getApp()->settings->notificationPlaySound) {
+        templ.setAudioOption(
+            WinToastLib::WinToastTemplate::AudioOption::Silent);
+    }
     WinToastLib::WinToast::instance()->setAppName(L"Chatterino2");
     int mbstowcs(wchar_t * aumi_version, const char *CHATTERINO_VERSION,
                  size_t size);
