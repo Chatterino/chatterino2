@@ -305,19 +305,6 @@ const QString &TwitchChannel::getPopoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
-bool Toasts::isEnabled(const QString &channelName)
-{
-    int i = 0;
-    return getApp()->notifications->isChannelNotified(channelName, i);
-}
-/*
-bool toastIsEnabled()
-{
-    QString channelName = this->getName();
-    return getApp()->notifications->isChannelNotified(channelName);
-}
-*/
-
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     bool gotNewLiveStatus = false;
@@ -325,41 +312,21 @@ void TwitchChannel::setLive(bool newLiveStatus)
         auto guard = this->streamStatus_.access();
         if (guard->live != newLiveStatus) {
             gotNewLiveStatus = true;
-            guard->live = newLiveStatus;
-        }
-    }
-
-    if (gotNewLiveStatus) {
-        this->liveStatusChanged.invoke();
-    }
-}
-
-/*
-void TwitchChannel::setLive(bool newLiveStatus)
-{
-    // auto guard = this->streamStatus_.access();
-
-    if (toastIsEnabled() && guard->live != newLiveStatus && guard->live !=
-    newLiveStatus) { Toasts::show
-    }
-
-    // int i = 0;
-    // getApp()->toasts->sendChannelNotification(this->getName(), i);
-    qDebug() << "setLive called here and channel: " << this->getName()
-             << " status: " << newLiveStatus;
-
-    bool gotNewLiveStatus = false;
-    {
-        auto guard = this->streamStatus_.access();
-        if (guard->live != newLiveStatus) {
-            gotNewLiveStatus = true;
-            guard->live = newLiveStatus;
-
-            if (getApp()->toasts->isEnabled(this->getName()) &&
-                guard->live == true) {
-                int i = 0;
-                getApp()->toasts->sendChannelNotification(this->getName(), i);
+            if (Toasts::isEnabled() &&
+                getApp()->notifications->isChannelNotified(this->getName(),
+                                                           Platform::Twitch)) {
+                getApp()->toasts->sendChannelNotification(this->getName(),
+                                                          Platform::Twitch);
             }
+            /*
+            if (!guard->live && Toasts::isEnabled() &&
+            getApp()->notifications->isChannelNotified( this->getName(),
+            Platform::Twitch)) {
+                getApp()->toasts->sendChannelNotification(this->getName(),
+                                                          Platform::Twitch);
+            }
+            */
+            guard->live = newLiveStatus;
         }
     }
 
@@ -367,7 +334,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
         this->liveStatusChanged.invoke();
     }
 }
-*/
+
 void TwitchChannel::refreshLiveStatus()
 {
     auto roomID = this->getRoomId();
@@ -441,15 +408,13 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     {
         auto status = this->streamStatus_.access();
         /*
-        if (!status->live == false &&
-            getApp()->toasts->isEnabled(this->getName())) {
+        if (!(status->live) && getApp()->toasts->isEnabled(this->getName())) {
+            qDebug() << " NaM xd NaM ";
             int i = 0;
             getApp()->toasts->sendChannelNotification(this->getName(), i);
             // notifcation send
         }
-        status->live = true;
-        */
-        this->setLive(true);
+*/
         // status->live = true;
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();
@@ -479,7 +444,7 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
             }
         }
     }
-
+    setLive(true);
     // Signal all listeners that the stream status has been updated
     this->liveStatusChanged.invoke();
 

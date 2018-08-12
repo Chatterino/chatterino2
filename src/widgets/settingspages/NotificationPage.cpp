@@ -35,16 +35,19 @@ NotificationPage::NotificationPage()
                     getApp()->settings->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Playsound", getApp()->settings->notificationPlaySound));
+                settings.append(this->createCheckBox(
+                    "Enable toasts (currently only for windows)",
+                    getApp()->settings->notificationToast));
 
                 settings->addStretch(1);
             }
             auto twitchChannels = tabs.appendTab(new QVBoxLayout, "Twitch");
             {
-                int i = 0;
                 EditableModelView *view =
                     twitchChannels
                         .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(nullptr, i))
+                            getApp()->notifications->createModel(
+                                nullptr, Platform::Twitch))
                         .getElement();
                 view->setTitles({"Twitch channels"});
 
@@ -64,11 +67,11 @@ NotificationPage::NotificationPage()
             }
             auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
             {
-                int i = 1;
                 EditableModelView *view =
                     mixerChannels
                         .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(nullptr, i))
+                            getApp()->notifications->createModel(
+                                nullptr, Platform::Mixer))
                         .getElement();
                 view->setTitles({"Mixer channels"});
 

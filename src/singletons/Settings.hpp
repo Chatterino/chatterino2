@@ -144,6 +144,7 @@ public:
                                             false};
     BoolSetting notificationPlaySound = {"/notifications/enablePlaySound",
                                          false};
+    BoolSetting notificationToast = {"/notifications/enableToast", false};
 
     /// External tools
     // Streamlink

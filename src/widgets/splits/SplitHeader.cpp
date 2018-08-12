@@ -161,14 +161,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     action->setCheckable(true);
 
     QObject::connect(menu.get(), &QMenu::aboutToShow, this, [action, this]() {
-        int i = 0;
         action->setChecked(getApp()->notifications->isChannelNotified(
-            this->split_->getChannel()->getName(), i));
+            this->split_->getChannel()->getName(), Platform::Twitch));
     });
     action->connect(action, &QAction::triggered, this, [this]() {
-        int i = 0;
         getApp()->notifications->updateChannelNotification(
-            this->split_->getChannel()->getName(), i);
+            this->split_->getChannel()->getName(), Platform::Twitch);
     });
     menu->addAction(action);
 

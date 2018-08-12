@@ -7,18 +7,20 @@
 
 namespace chatterino {
 
+enum class Platform : uint8_t;
+
 class Toasts final : public Singleton
 {
 public:
-    void sendChannelNotification(const QString &channelName, int &platform);
-    bool isEnabled(const QString &channelName);
+    void sendChannelNotification(const QString &channelName, Platform p);
     /*
     Toasts();
     virtual void initialize(Settings &settings, Paths &paths) override final;
     */
+    static bool isEnabled();
 
 private:
-    void sendWindowsNotification(const QString &channelName, int &platform);
+    void sendWindowsNotification(const QString &channelName, Platform p);
     /*
     void updateLiveChannels(const QString &channelName);
     void removeFromLiveChannels(const QString &channelName);

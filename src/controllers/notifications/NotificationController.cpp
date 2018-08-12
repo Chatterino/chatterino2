@@ -32,18 +32,16 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 }
 
 void NotificationController::updateChannelNotification(
-    const QString &channelName, int &i)
+    const QString &channelName, Platform p)
 {
-    if (i == 0) {
-        int j = 0;
-        if (isChannelNotified(channelName, j)) {
+    if (p == Platform::Twitch) {
+        if (isChannelNotified(channelName, Platform::Twitch)) {
             removeChannelNotification(channelName, twitchVector);
         } else {
             addChannelNotification(channelName, twitchVector);
         }
-    } else if (i == 1) {
-        int k = 1;
-        if (isChannelNotified(channelName, k)) {
+    } else if (p == Platform::Mixer) {
+        if (isChannelNotified(channelName, Platform::Mixer)) {
             removeChannelNotification(channelName, mixerVector);
         } else {
             addChannelNotification(channelName, mixerVector);
@@ -52,7 +50,7 @@ void NotificationController::updateChannelNotification(
 }
 
 bool NotificationController::isChannelNotified(const QString &channelName,
-                                               int &i)
+                                               Platform p)
 {
     /*
     for (std::vector<int>::size_type i = 0;
@@ -62,15 +60,15 @@ bool NotificationController::isChannelNotified(const QString &channelName,
                  << " vectorsize:" << notificationVector.getVector().size();
     }
     */
-    qDebug() << channelName << " channel and now i: " << i;
-    if (i == 0) {
+    // qDebug() << channelName << " channel and now i: " << i;
+    if (p == Platform::Twitch) {
         for (std::vector<int>::size_type i = 0;
              i != twitchVector.getVector().size(); i++) {
             if (twitchVector.getVector()[i] == channelName) {
                 return true;
             }
         }
-    } else if (i == 1) {
+    } else if (p == Platform::Mixer) {
         for (std::vector<int>::size_type i = 0;
              i != mixerVector.getVector().size(); i++) {
             if (mixerVector.getVector()[i] == channelName) {
@@ -164,12 +162,13 @@ void NotificationController::removeChannelNotification(
     }
 }
 
-NotificationModel *NotificationController::createModel(QObject *parent, int &i)
+NotificationModel *NotificationController::createModel(QObject *parent,
+                                                       Platform p)
 {
     NotificationModel *model = new NotificationModel(parent);
-    if (i == 0) {
+    if (p == Platform::Twitch) {
         model->init(&this->twitchVector);
-    } else if (i == 1) {
+    } else if (p == Platform::Mixer) {
         model->init(&this->mixerVector);
     }
     return model;

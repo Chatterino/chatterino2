@@ -5,7 +5,11 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 
+#ifdef Q_OS_WIN
+
 #include <wintoastlib.h>
+
+#endif
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -70,12 +74,19 @@ bool Toasts::wasChannelLive(const QString &channelName)
     return false;
 }
 */
-void Toasts::sendChannelNotification(const QString &channelName, int &platform)
+bool Toasts::isEnabled()
+{
+    return WinToastLib::WinToast::isCompatible() &&
+           getApp()->settings->notificationToast;
+}
+
+void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
 #ifdef Q_OS_WIN
-    if (WinToastLib::WinToast::isCompatible()) {
-        sendWindowsNotification(channelName, platform);
-    }
+
+    sendWindowsNotification(channelName, p);
+    return;
+
 #endif
     // OSX
 
@@ -127,7 +138,7 @@ public:
     }
 };
 
-void Toasts::sendWindowsNotification(const QString &channelName, int &platform)
+void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
         WinToastLib::WinToastTemplate::ImageAndText02);
