@@ -225,8 +225,8 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags())) {
         auto app = getApp();
-        if (app->settings->timestampFormat != this->format_) {
-            this->format_ = app->settings->timestampFormat.getValue();
+        if (getSettings()->timestampFormat != this->format_) {
+            this->format_ = getSettings()->timestampFormat.getValue();
             this->element_.reset(this->formatTime(this->time_));
         }
 
@@ -238,7 +238,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
 {
     static QLocale locale("en_US");
 
-    QString format = locale.toString(time, getApp()->settings->timestampFormat);
+    QString format = locale.toString(time, getSettings()->timestampFormat);
 
     return new TextElement(format, MessageElementFlag::Timestamp,
                            MessageColor::System, FontStyle::ChatMedium);

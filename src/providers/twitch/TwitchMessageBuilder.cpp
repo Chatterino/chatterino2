@@ -63,7 +63,7 @@ bool TwitchMessageBuilder::isIgnored() const
         }
     }
 
-    if (app->settings->enableTwitchIgnoredUsers &&
+    if (getSettings()->enableTwitchIgnoredUsers &&
         this->tags.contains("user-id")) {
         auto sourceUserID = this->tags.value("user-id").toString();
 
@@ -289,7 +289,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
 
     // if (!linkString.isEmpty()) {
-    //    if (getApp()->settings->lowercaseLink) {
+    //    if (getSettings()->lowercaseLink) {
     //        QRegularExpression httpRegex("\\bhttps?://",
     //        QRegularExpression::CaseInsensitiveOption); QRegularExpression
     //        ftpRegex("\\bftps?://",
@@ -499,9 +499,9 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
     // update the media player url if necessary
     QUrl highlightSoundUrl;
-    if (app->settings->customHighlightSound) {
+    if (getSettings()->customHighlightSound) {
         highlightSoundUrl =
-            QUrl::fromLocalFile(app->settings->pathHighlightSound.getValue());
+            QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue());
     } else {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
@@ -519,10 +519,10 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     std::vector<HighlightPhrase> userHighlights =
         app->highlights->highlightedUsers.getVector();
 
-    if (app->settings->enableHighlightsSelf && currentUsername.size() > 0) {
+    if (getSettings()->enableHighlightsSelf && currentUsername.size() > 0) {
         HighlightPhrase selfHighlight(
-            currentUsername, app->settings->enableHighlightTaskbar,
-            app->settings->enableHighlightSound, false);
+            currentUsername, getSettings()->enableHighlightTaskbar,
+            getSettings()->enableHighlightSound, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -581,7 +581,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
         if (!isPastMsg) {
             if (playSound &&
-                (!hasFocus || app->settings->highlightAlwaysPlaySound)) {
+                (!hasFocus || getSettings()->highlightAlwaysPlaySound)) {
                 player->play();
             }
 

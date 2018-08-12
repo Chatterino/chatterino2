@@ -231,7 +231,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         c->addMessage(_message);
 
-        if (app->settings->inlineWhispers) {
+        if (getSettings()->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
                 channel->addMessage(_message);  //
             });

@@ -35,7 +35,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    app->settings->showTabCloseButton.connect(
+    getSettings()->showTabCloseButton.connect(
         boost::bind(&NotebookTab::hideTabXChanged, this, _1),
         this->managedConnections_);
 
@@ -286,7 +286,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (!app->settings->showTabCloseButton ? 0 : int(16 * scale));
+    int rectW = (!getSettings()->showTabCloseButton ? 0 : int(16 * scale));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -341,7 +341,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
 bool NotebookTab::hasXButton()
 {
-    return getApp()->settings->showTabCloseButton &&
+    return getSettings()->showTabCloseButton &&
            this->notebook_->getAllowUserTabManagement();
 }
 
@@ -434,7 +434,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
     auto app = getApp();
 
-    if (app->settings->showTabCloseButton &&
+    if (getSettings()->showTabCloseButton &&
         this->notebook_->getAllowUserTabManagement())  //
     {
         bool overX = this->getXRect().contains(event->pos());

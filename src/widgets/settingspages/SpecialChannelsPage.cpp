@@ -13,8 +13,6 @@ namespace chatterino {
 SpecialChannelsPage::SpecialChannelsPage()
     : SettingsPage("Special channels", "")
 {
-    auto app = getApp();
-
     LayoutCreator<SpecialChannelsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 

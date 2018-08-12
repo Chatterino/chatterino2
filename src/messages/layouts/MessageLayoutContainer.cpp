@@ -14,7 +14,7 @@
 
 #define COMPACT_EMOTES_OFFSET 6
 #define MAX_UNCOLLAPSED_LINES \
-    (getApp()->settings->collpseMessagesMinLines.getValue())
+    (getSettings()->collpseMessagesMinLines.getValue())
 
 namespace chatterino {
 
@@ -235,7 +235,7 @@ void MessageLayoutContainer::end()
 
 bool MessageLayoutContainer::canCollapse()
 {
-    return getApp()->settings->collpseMessagesMinLines.getValue() > 0 &&
+    return getSettings()->collpseMessagesMinLines.getValue() > 0 &&
            this->flags_.has(MessageFlag::Collapsed);
 }
 

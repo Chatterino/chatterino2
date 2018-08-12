@@ -10,7 +10,7 @@ void GIFTimer::initialize()
 {
     this->timer.setInterval(30);
 
-    getApp()->settings->enableGifAnimations.connect([this](bool enabled, auto) {
+    getSettings()->enableGifAnimations.connect([this](bool enabled, auto) {
         if (enabled) {
             this->timer.start();
         } else {

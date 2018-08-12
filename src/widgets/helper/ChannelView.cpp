@@ -131,8 +131,7 @@ void ChannelView::initializeLayout()
     QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
         QTimer::singleShot(180, [=] {
             this->scrollBar_->scrollToBottom(
-                getApp()
-                    ->settings->enableSmoothScrollingNewMessages.getValue());
+                getSettings()->enableSmoothScrollingNewMessages.getValue());
         });
     });
 }
@@ -162,7 +161,7 @@ void ChannelView::initializeSignals()
             this->update();
         }));
 
-    getApp()->settings->showLastMessageIndicator.connect(
+    getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) { this->update(); }, this->connections_);
 
     connections_.push_back(
@@ -212,8 +211,6 @@ void ChannelView::layoutMessages()
 void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
 {
     //    BenchmarkGuard benchmark("layout");
-
-    auto app = getApp();
 
     auto messagesSnapshot = this->getMessagesSnapshot();
 
@@ -293,7 +290,7 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         if (!this->isPaused()) {
             this->scrollBar_->scrollToBottom(
                 //                this->messageWasAdded &&
-                app->settings->enableSmoothScrollingNewMessages.getValue());
+                getSettings()->enableSmoothScrollingNewMessages.getValue());
         }
         this->messageWasAdded_ = false;
     }
@@ -654,8 +651,6 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 // such as the grey overlay when a message is disabled
 void ChannelView::drawMessages(QPainter &painter)
 {
-    auto app = getApp();
-
     auto messagesSnapshot = this->getMessagesSnapshot();
 
     size_t start = size_t(this->scrollBar_->getCurrentValue());
@@ -674,7 +669,7 @@ void ChannelView::drawMessages(QPainter &painter)
         MessageLayout *layout = messagesSnapshot[i].get();
 
         bool isLastMessage = false;
-        if (app->settings->showLastMessageIndicator) {
+        if (getSettings()->showLastMessageIndicator) {
             isLastMessage = this->lastReadMessage_.get() == layout;
         }
 
@@ -737,9 +732,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     }
 
     if (this->scrollBar_->isVisible()) {
-        auto app = getApp();
-
-        float mouseMultiplier = app->settings->mouseScrollMultiplier;
+        float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
         qreal desired = this->scrollBar_->getDesiredValue();
         qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
@@ -824,9 +817,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    auto app = getApp();
-
-    if (app->settings->pauseChatHover.getValue()) {
+    if (getSettings()->pauseChatHover.getValue()) {
         this->pause(CHAT_HOVER_PAUSE_DURATION);
     }
 
@@ -891,8 +882,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
 void ChannelView::mousePressEvent(QMouseEvent *event)
 {
-    auto app = getApp();
-
     this->mouseDown.invoke(event);
 
     std::shared_ptr<MessageLayout> layout;
@@ -929,7 +918,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 return;
             }
 
-            if (app->settings->linksDoubleClickOnly.getValue()) {
+            if (getSettings()->linksDoubleClickOnly.getValue()) {
                 this->pause(200);
             }
 
@@ -1034,7 +1023,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
 
             auto &link = hoveredElement->getLink();
-            if (!getApp()->settings->linksDoubleClickOnly) {
+            if (!getSettings()->linksDoubleClickOnly) {
                 this->handleLinkClick(event, link, layout);
 
                 this->linkClicked.invoke(link);
@@ -1119,9 +1108,7 @@ void ChannelView::addContextMenuItems(
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    auto app = getApp();
-
-    if (app->settings->linksDoubleClickOnly) {
+    if (getSettings()->linksDoubleClickOnly) {
         std::shared_ptr<MessageLayout> layout;
         QPoint relativePos;
         int messageIndex;

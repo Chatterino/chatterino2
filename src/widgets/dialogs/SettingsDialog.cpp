@@ -154,7 +154,7 @@ void SettingsDialog::showDialog(PreferredTab preferredTab)
 
 void SettingsDialog::refresh()
 {
-    getApp()->settings->saveSnapshot();
+    getSettings()->saveSnapshot();
 
     for (auto *tab : this->tabs_) {
         tab->getSettingsPage()->onShow();
@@ -199,7 +199,7 @@ void SettingsDialog::onCancelClicked()
         tab->getSettingsPage()->cancel();
     }
 
-    getApp()->settings->restoreSnapshot();
+    getSettings()->restoreSnapshot();
 
     this->close();
 }

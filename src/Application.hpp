@@ -46,8 +46,6 @@ public:
 
     friend void test();
 
-    Settings *const settings{};
-    Paths *const paths{};
     Resources2 *const resources;
 
     Theme *const themes{};

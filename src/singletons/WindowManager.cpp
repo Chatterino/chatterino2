@@ -406,7 +406,7 @@ void WindowManager::save()
     document.setObject(obj);
 
     // save file
-    QString settingsPath = app->paths->settingsDirectory + SETTINGS_FILENAME;
+    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
@@ -518,7 +518,7 @@ int WindowManager::clampUiScale(int scale)
 
 float WindowManager::getUiScaleValue()
 {
-    return getUiScaleValue(getApp()->settings->uiScale.getValue());
+    return getUiScaleValue(getSettings()->uiScale.getValue());
 }
 
 float WindowManager::getUiScaleValue(int scale)

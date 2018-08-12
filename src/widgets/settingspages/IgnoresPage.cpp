@@ -71,7 +71,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 {
     users.append(
         page.createCheckBox("Enable twitch ignored users",
-                            getApp()->settings->enableTwitchIgnoredUsers));
+                            getSettings()->enableTwitchIgnoredUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
     {

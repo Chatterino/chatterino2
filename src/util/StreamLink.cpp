@@ -37,8 +37,8 @@ QString getStreamlinkProgram()
 {
     auto app = getApp();
 
-    if (app->settings->streamlinkUseCustomPath) {
-        return app->settings->streamlinkPath + "/" + getBinaryName();
+    if (getSettings()->streamlinkUseCustomPath) {
+        return getSettings()->streamlinkPath + "/" + getBinaryName();
     } else {
         return getBinaryName();
     }
@@ -62,7 +62,7 @@ void showStreamlinkNotFoundError()
     static QErrorMessage *msg = new QErrorMessage;
 
     auto app = getApp();
-    if (app->settings->streamlinkUseCustomPath) {
+    if (getSettings()->streamlinkUseCustomPath) {
         msg->showMessage(
             "Unable to find Streamlink executable\nMake sure your custom path "
             "is pointing "
@@ -146,9 +146,9 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
     QStringList arguments;
 
-    QString additionalOptions = app->settings->streamlinkOpts.getValue();
+    QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     if (!additionalOptions.isEmpty()) {
-        arguments << app->settings->streamlinkOpts;
+        arguments << getSettings()->streamlinkOpts;
     }
 
     arguments.append(extraArguments);
@@ -173,7 +173,7 @@ void openStreamlinkForChannel(const QString &channel)
 
     QString channelURL = "twitch.tv/" + channel;
 
-    QString preferredQuality = app->settings->preferredQuality;
+    QString preferredQuality = getSettings()->preferredQuality;
     preferredQuality = preferredQuality.toLower();
 
     if (preferredQuality == "choose") {

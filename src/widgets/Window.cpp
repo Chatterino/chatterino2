@@ -105,8 +105,8 @@ bool Window::event(QEvent *event)
 void Window::showEvent(QShowEvent *event)
 {
     // Startup notification
-    if (getApp()->settings->startUpNotification.getValue() < 1) {
-        getApp()->settings->startUpNotification = 1;
+    if (getSettings()->startUpNotification.getValue() < 1) {
+        getSettings()->startUpNotification = 1;
 
         auto box = new QMessageBox(
             QMessageBox::Information, "Chatterino 2 Beta",
@@ -118,8 +118,8 @@ void Window::showEvent(QShowEvent *event)
     }
 
     // Show changelog
-    if (getApp()->settings->currentVersion.getValue() != "" &&
-        getApp()->settings->currentVersion.getValue() != CHATTERINO_VERSION) {
+    if (getSettings()->currentVersion.getValue() != "" &&
+        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION) {
         auto box = new QMessageBox(QMessageBox::Information,
                                    "Chatterino 2 Beta", "Show changelog?",
                                    QMessageBox::Yes | QMessageBox::No);
@@ -130,7 +130,7 @@ void Window::showEvent(QShowEvent *event)
         }
     }
 
-    getApp()->settings->currentVersion.setValue(CHATTERINO_VERSION);
+    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
     // --
     BaseWindow::showEvent(event);
@@ -281,8 +281,8 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() + 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() + 1));
         });
     }
 
@@ -291,8 +291,8 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() - 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() - 1));
         });
     }
 

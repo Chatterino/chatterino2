@@ -107,7 +107,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     chatterino::Updates::getInstance().checkForUpdates();
 
 #ifdef C_USE_BREAKPAD
-    QBreakpadInstance.setDumpPath(app->paths->settingsFolderPath + "/Crashes");
+    QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");
 #endif
 
     // Running file

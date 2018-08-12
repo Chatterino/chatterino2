@@ -208,13 +208,13 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
     /*
     emotes.append(
         this->createCheckBox("Enable Twitch emotes",
-    app->settings->enableTwitchEmotes));
+    getSettings()->enableTwitchEmotes));
     emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
-                                       app->settings->enableBttvEmotes));
+                                       getSettings()->enableBttvEmotes));
     emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                       app->settings->enableFfzEmotes));
+                                       getSettings()->enableFfzEmotes));
     emotes.append(this->createCheckBox("Enable emojis",
-    app->settings->enableEmojis));
+    getSettings()->enableEmojis));
     */
     layout.append(
         this->createCheckBox("Animations", getSettings()->enableGifAnimations));
@@ -285,7 +285,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     combo->addItems({"Dotted line", "Solid line"});
 
     const auto currentIndex = []() -> int {
-        switch (getApp()->settings->lastMessagePattern.getValue()) {
+        switch (getSettings()->lastMessagePattern.getValue()) {
             case Qt::SolidLine:
                 return 1;
             case Qt::VerPattern:

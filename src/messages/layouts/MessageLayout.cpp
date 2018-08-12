@@ -73,7 +73,7 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
     // check if work mask changed
     layoutRequired |= this->currentWordFlags_ != flags;
-    this->currentWordFlags_ = flags;  // app->settings->getWordTypeMask();
+    this->currentWordFlags_ = flags;  // getSettings()->getWordTypeMask();
 
     // check if layout was requested manually
     layoutRequired |= this->flags.has(MessageLayoutFlag::RequiresLayout);
@@ -177,7 +177,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     }
 
     // draw message seperation line
-    if (app->settings->separateMessages.getValue()) {
+    if (getSettings()->separateMessages.getValue()) {
         painter.fillRect(0, y, this->container_->getWidth(), 1,
                          app->themes->splits.messageSeperator);
     }
@@ -190,7 +190,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                 : app->themes->tabs.selected.backgrounds.unfocused.color();
 
         QBrush brush(color, static_cast<Qt::BrushStyle>(
-                                app->settings->lastMessagePattern.getValue()));
+                                getSettings()->lastMessagePattern.getValue()));
 
         painter.fillRect(0, y + this->container_->getHeight() - 1,
                          pixmap->width(), 1, brush);
@@ -214,7 +214,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         backgroundColor = app->themes->messages.backgrounds.highlighted;
     } else if (this->message_->flags.has(MessageFlag::Subscription)) {
         backgroundColor = app->themes->messages.backgrounds.subscription;
-    } else if (app->settings->alternateMessageBackground.getValue() &&
+    } else if (getSettings()->alternateMessageBackground.getValue() &&
                this->flags.has(MessageLayoutFlag::AlternateBackground)) {
         backgroundColor = app->themes->messages.backgrounds.alternate;
     } else {

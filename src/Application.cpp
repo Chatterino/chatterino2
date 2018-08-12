@@ -38,9 +38,7 @@ Application *Application::instance = nullptr;
 // to each other
 
 Application::Application(Settings &_settings, Paths &_paths)
-    : settings(&_settings)
-    , paths(&_paths)
-    , resources(&this->emplace<Resources2>())
+    : resources(&this->emplace<Resources2>())
 
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())

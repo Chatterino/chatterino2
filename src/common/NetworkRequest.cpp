@@ -147,7 +147,7 @@ Outcome NetworkRequest::tryLoadCachedFile()
 {
     auto app = getApp();
 
-    QFile cachedFile(app->paths->cacheDirectory + "/" + this->data->getHash());
+    QFile cachedFile(getPaths()->cacheDirectory + "/" + this->data->getHash());
 
     if (!cachedFile.exists()) {
         // File didn't exist

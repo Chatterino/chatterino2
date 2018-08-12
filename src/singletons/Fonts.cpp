@@ -105,13 +105,13 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             {FontStyle::ChatMedium, {1, false, QFont::Normal}},
             {FontStyle::ChatMediumBold,
              {1, false,
-              QFont::Weight(getApp()->settings->boldScale.getValue())}},
+              QFont::Weight(getSettings()->boldScale.getValue())}},
             {FontStyle::ChatMediumItalic, {1, true, QFont::Normal}},
             {FontStyle::ChatLarge, {1.2f, false, QFont::Normal}},
             {FontStyle::ChatVeryLarge, {1.4f, false, QFont::Normal}},
         };
         sizeScale[FontStyle::ChatMediumBold] = {
-            1, false, QFont::Weight(getApp()->settings->boldScale.getValue())};
+            1, false, QFont::Weight(getSettings()->boldScale.getValue())};
         auto data = sizeScale[type];
         return FontData(
             QFont(QString::fromStdString(this->chatFontFamily.getValue()),

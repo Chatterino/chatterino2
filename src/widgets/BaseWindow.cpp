@@ -56,13 +56,13 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->init();
 
     this->connections_.managedConnect(
-        getApp()->settings->uiScale.getValueChangedSignal(),
+        getSettings()->uiScale.getValueChangedSignal(),
         [this](auto, auto) { postToThread([this] { this->updateScale(); }); });
 
     this->updateScale();
 
     createWindowShortcut(this, "CTRL+0",
-                         [] { getApp()->settings->uiScale.setValue(0); });
+                         [] { getSettings()->uiScale.setValue(0); });
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }
@@ -163,7 +163,7 @@ void BaseWindow::init()
     // fourtf: don't ask me why we need to delay this
     if (!(this->flags_ & Flags::TopMost)) {
         QTimer::singleShot(1, this, [this] {
-            getApp()->settings->windowTopMost.connect(
+            getSettings()->windowTopMost.connect(
                 [this](bool topMost, auto) {
                     ::SetWindowPos(HWND(this->winId()),
                                    topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
@@ -174,7 +174,7 @@ void BaseWindow::init()
         });
     }
 #else
-//    if (getApp()->settings->windowTopMost.getValue()) {
+//    if (getSettings()->windowTopMost.getValue()) {
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
 //    }
 #endif
@@ -267,11 +267,11 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() + 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() - 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() - 1));
         }
     }
 }

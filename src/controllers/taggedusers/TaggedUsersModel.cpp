@@ -29,12 +29,12 @@ void TaggedUsersModel::afterInit()
 {
     //    std::vector<QStandardItem *> row = this->createRow();
     //    setBoolItem(row[0],
-    //    getApp()->settings->enableHighlightsSelf.getValue(), true, false);
+    //    getSettings()->enableHighlightsSelf.getValue(), true, false);
     //    row[0]->setData("Your username (automatic)", Qt::DisplayRole);
     //    setBoolItem(row[1],
-    //    getApp()->settings->enableHighlightTaskbar.getValue(), true, false);
+    //    getSettings()->enableHighlightTaskbar.getValue(), true, false);
     //    setBoolItem(row[2],
-    //    getApp()->settings->enableHighlightSound.getValue(), true, false);
+    //    getSettings()->enableHighlightSound.getValue(), true, false);
     //    row[3]->setFlags(0); this->insertCustomRow(row, 0);
 }
 
@@ -45,17 +45,17 @@ void TaggedUsersModel::afterInit()
 //    switch (column) {
 //        case 0: {
 //            if (role == Qt::CheckStateRole) {
-//                getApp()->settings->enableHighlightsSelf.setValue(value.toBool());
+//                getSettings()->enableHighlightsSelf.setValue(value.toBool());
 //            }
 //        } break;
 //        case 1: {
 //            if (role == Qt::CheckStateRole) {
-//                getApp()->settings->enableHighlightTaskbar.setValue(value.toBool());
+//                getSettings()->enableHighlightTaskbar.setValue(value.toBool());
 //            }
 //        } break;
 //        case 2: {
 //            if (role == Qt::CheckStateRole) {
-//                getApp()->settings->enableHighlightSound.setValue(value.toBool());
+//                getSettings()->enableHighlightSound.setValue(value.toBool());
 //            }
 //        } break;
 //        case 3: {

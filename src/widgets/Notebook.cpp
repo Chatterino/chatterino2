@@ -434,9 +434,9 @@ void SplitNotebook::addCustomButtons()
     auto settingsBtn = this->addCustomButton();
 
     settingsBtn->setVisible(
-        !getApp()->settings->hidePreferencesButton.getValue());
+        !getSettings()->hidePreferencesButton.getValue());
 
-    getApp()->settings->hidePreferencesButton.connect(
+    getSettings()->hidePreferencesButton.connect(
         [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },
         this->connections_);
 
@@ -447,8 +447,8 @@ void SplitNotebook::addCustomButtons()
 
     // account
     auto userBtn = this->addCustomButton();
-    userBtn->setVisible(!getApp()->settings->hideUserButton.getValue());
-    getApp()->settings->hideUserButton.connect(
+    userBtn->setVisible(!getSettings()->hideUserButton.getValue());
+    getSettings()->hideUserButton.connect(
         [userBtn](bool hide, auto) { userBtn->setVisible(!hide); },
         this->connections_);
 

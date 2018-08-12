@@ -57,22 +57,22 @@ ExternalToolsPage::ExternalToolsPage()
         auto customPathCb =
             this->createCheckBox("Use custom path (Enable if using "
                                  "non-standard streamlink installation path)",
-                                 app->settings->streamlinkUseCustomPath);
+                                 getSettings()->streamlinkUseCustomPath);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
 
-        auto customPath = this->createLineEdit(app->settings->streamlinkPath);
+        auto customPath = this->createLineEdit(getSettings()->streamlinkPath);
         customPath->setPlaceholderText(
             "Path to folder where Streamlink executable can be found");
         groupLayout->addRow("Custom streamlink path:", customPath);
         groupLayout->addRow(
             "Preferred quality:",
             this->createComboBox({STREAMLINK_QUALITY},
-                                 app->settings->preferredQuality));
+                                 getSettings()->preferredQuality));
         groupLayout->addRow(
             "Additional options:",
-            this->createLineEdit(app->settings->streamlinkOpts));
+            this->createLineEdit(getSettings()->streamlinkOpts));
 
-        app->settings->streamlinkUseCustomPath.connect(
+        getSettings()->streamlinkUseCustomPath.connect(
             [=](const auto &value, auto) {
                 customPath->setEnabled(value);  //
             },
