@@ -118,8 +118,6 @@ private:
     void loadRecentMessages();
     Outcome parseRecentMessages(const QJsonObject &jsonRoot);
 
-    bool toastIsEnabled();
-
     void setLive(bool newLiveStatus);
 
     void loadBadges();
@@ -154,8 +152,6 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-
-    std::vector<QString> liveChannels;
 
     friend class TwitchServer;
 };

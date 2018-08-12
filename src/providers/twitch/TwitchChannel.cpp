@@ -352,8 +352,7 @@ void TwitchChannel::refreshLiveStatus()
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
     //<<<<<<< HEAD
-    //    auto request = makeGetStreamRequest(roomID,
-    //    QThread::currentThread());
+    //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
     //=======
     auto request = NetworkRequest::twitchRequest(url);
     request.setCaller(QThread::currentThread());
@@ -400,8 +399,7 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     const rapidjson::Value &streamChannel = stream["channel"];
 
     if (!streamChannel.IsObject() || !streamChannel.HasMember("status")) {
-        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" "
-            "in "
+        Log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
             "channel");
         return Failure;
     }
@@ -475,8 +473,8 @@ Outcome TwitchChannel::parseRecentMessages(const QJsonObject &jsonRoot)
 
     for (const auto jsonMessage : jsonMessages) {
         auto content = jsonMessage.toString().toUtf8();
-        // passing nullptr as the channel makes the message invalid but we
-        // don't check for that anyways
+        // passing nullptr as the channel makes the message invalid but we don't
+        // check for that anyways
         auto message = Communi::IrcMessage::fromData(content, nullptr);
         auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
         assert(privMsg);

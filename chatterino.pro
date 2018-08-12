@@ -231,7 +231,6 @@ SOURCES += \
     src/singletons/Updates.cpp \
     src/singletons/Theme.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
-    src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/FeelPage.cpp \
     src/util/InitUpdateButton.cpp \
@@ -255,8 +254,6 @@ SOURCES += \
     src/BrowserExtension.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
-    src/controllers/notifications/notificationcontroller.cpp \
-    src/widgets/settingspages/NotificationPage.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp
 
@@ -433,7 +430,6 @@ HEADERS  += \
     src/widgets/dialogs/LogsPopup.hpp \
     src/common/Singleton.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
-    src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/FeelPage.hpp \
     src/util/InitUpdateButton.hpp \
@@ -460,7 +456,6 @@ HEADERS  += \
     src/BrowserExtension.hpp \
     src/util/FormatTime.hpp \
     src/util/FunctionEventFilter.hpp \
-    src/widgets/settingspages/NotificationPage.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/notifications/NotificationPhrase.hpp \
     src/singletons/Toasts.hpp

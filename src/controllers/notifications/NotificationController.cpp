@@ -23,7 +23,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->twitchSetting_.setValue(
             this->channelMap[Platform::Twitch].getVector());
     });
-
+    /*
     for (const QString &channelName : this->mixerSetting_.getValue()) {
         this->channelMap[Platform::Mixer].appendItem(channelName);
     }
@@ -32,6 +32,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->mixerSetting_.setValue(
             this->channelMap[Platform::Mixer].getVector());
     });
+    */
 }
 
 void NotificationController::updateChannelNotification(
@@ -52,24 +53,6 @@ bool NotificationController::isChannelNotified(const QString &channelName,
             return true;
         }
     }
-    // for (std::vector<int>::size_type i = 0; i != channelMap[p])
-    /*
-    if (p == Platform::Twitch) {
-        for (std::vector<int>::size_type i = 0;
-             i != twitchVector.getVector().size(); i++) {
-            if (twitchVector.getVector()[i].toLower() ==
-    channelName.toLowercase()) { return true;
-            }
-        }
-    } else if (p == Platform::Mixer) {
-        for (std::vector<int>::size_type i = 0;
-             i != mixerVector.getVector().size(); i++) {
-            if (mixerVector.getVector()[i].toLower() ==
-    channelName.toLowercase()) { return true;
-            }
-        }
-    }
-    */
     return false;
 }
 
@@ -84,7 +67,7 @@ void NotificationController::removeChannelNotification(
 {
     for (std::vector<int>::size_type i = 0;
          i != channelMap[p].getVector().size(); i++) {
-        if (channelMap[p].getVector()[i].toLower() == channelName) {
+        if (channelMap[p].getVector()[i].toLower() == channelName.toLower()) {
             channelMap[p].removeItem(i);
             i--;
         }
@@ -116,13 +99,6 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 {
     NotificationModel *model = new NotificationModel(parent);
     model->init(&this->channelMap[p]);
-    /*
-    if (p == Platform::Twitch) {
-        model->init(&this->twitchVector);
-    } else if (p == Platform::Mixer) {
-        model->init(&this->mixerVector);
-    }
-    */
     return model;
 }
 

@@ -68,6 +68,7 @@ NotificationPage::NotificationPage()
                         .appendItem("channel");
                 });
             }
+            /*
             auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
             {
                 EditableModelView *view =
@@ -94,6 +95,7 @@ NotificationPage::NotificationPage()
                         .appendItem("channel");
                 });
             }
+            */
         }
     }
 }

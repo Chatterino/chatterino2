@@ -11,9 +11,8 @@ class Paths;
 class NotificationModel;
 
 enum class Platform : uint8_t {
-    Twitch = 0,  // 0
-    Mixer = 1,   // 1
-    HitBox = 2,  // 2
+    Twitch,  // 0
+    // Mixer,   // 1
 };
 
 class NotificationController final : public Singleton
@@ -31,8 +30,6 @@ public:
     UnsortedSignalVector<QString> getVector(Platform p);
 
     std::map<Platform, UnsortedSignalVector<QString>> channelMap;
-    // UnsortedSignalVector<QString> twitchVector;
-    // UnsortedSignalVector<QString> mixerVector;
 
     NotificationModel *createModel(QObject *parent, Platform p);
 
@@ -40,8 +37,10 @@ private:
     bool initialized_ = false;
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
+    /*
     ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
         "/notifications/mixer"};
+    */
 };
 
 }  // namespace chatterino
