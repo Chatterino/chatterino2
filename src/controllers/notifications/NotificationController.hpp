@@ -15,21 +15,27 @@ class NotificationController final : public Singleton
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    bool isChannelNotified(const QString &channelName);
+    bool isChannelNotified(const QString &channelName, int &i);
 
-    void updateChannelNotification(const QString &channelName);
-    void addChannelNotification(const QString &channelName);
-    void removeChannelNotification(const QString &channelName);
+    void updateChannelNotification(const QString &channelName, int &i);
+    void addChannelNotification(const QString &channelName,
+                                UnsortedSignalVector<QString> &vector);
+    void removeChannelNotification(const QString &channelName,
+                                   UnsortedSignalVector<QString> &vector);
 
-    UnsortedSignalVector<QString> notificationVector;
+    UnsortedSignalVector<QString> getVector(int &i);
 
-    NotificationModel *createModel(QObject *parent);
+    UnsortedSignalVector<QString> twitchVector;
+    UnsortedSignalVector<QString> mixerVector;
+
+    NotificationModel *createModel(QObject *parent, int &i);
 
 private:
     bool initialized_ = false;
-
-    ChatterinoSetting<std::vector<QString>> notificationSetting_ = {
-        "/notifications/channels"};
+    ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
+        "/notifications/twitch"};
+    ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
+        "/notifications/mixer"};
 };
 
 }  // namespace chatterino

@@ -14,10 +14,12 @@
 
 namespace chatterino {
 
+/*
 Toasts::Toasts()
 {
 }
-
+*/
+/*
 void Toasts::initialize(Settings &settings, Paths &paths)
 {
     getApp()->twitch2->forEachChannel([this](ChannelPtr chn) {
@@ -67,12 +69,12 @@ bool Toasts::wasChannelLive(const QString &channelName)
     }
     return false;
 }
-
-void Toasts::sendChannelNotification(const QString &channelName)
+*/
+void Toasts::sendChannelNotification(const QString &channelName, int &platform)
 {
 #ifdef Q_OS_WIN
     if (WinToastLib::WinToast::isCompatible()) {
-        sendWindowsNotification(channelName);
+        sendWindowsNotification(channelName, platform);
     }
 #endif
     // OSX
@@ -125,7 +127,7 @@ public:
     }
 };
 
-void Toasts::sendWindowsNotification(const QString &channelName)
+void Toasts::sendWindowsNotification(const QString &channelName, int &platform)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
         WinToastLib::WinToastTemplate::ImageAndText02);

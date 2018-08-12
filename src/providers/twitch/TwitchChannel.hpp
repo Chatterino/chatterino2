@@ -118,6 +118,8 @@ private:
     void loadRecentMessages();
     Outcome parseRecentMessages(const QJsonObject &jsonRoot);
 
+    bool toastIsEnabled();
+
     void setLive(bool newLiveStatus);
 
     void loadBadges();

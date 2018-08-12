@@ -14,38 +14,68 @@ namespace chatterino {
 void NotificationController::initialize(Settings &settings, Paths &paths)
 {
     this->initialized_ = true;
-    for (const QString &channelName : this->notificationSetting_.getValue()) {
-        this->notificationVector.appendItem(channelName);
+    for (const QString &channelName : this->twitchSetting_.getValue()) {
+        this->twitchVector.appendItem(channelName);
     }
 
-    this->notificationVector.delayedItemsChanged.connect([this] {  //
-        this->notificationSetting_.setValue(
-            this->notificationVector.getVector());
+    this->twitchVector.delayedItemsChanged.connect([this] {  //
+        this->twitchSetting_.setValue(this->twitchVector.getVector());
+    });
+
+    for (const QString &channelName : this->mixerSetting_.getValue()) {
+        this->mixerVector.appendItem(channelName);
+    }
+
+    this->mixerVector.delayedItemsChanged.connect([this] {  //
+        this->mixerSetting_.setValue(this->mixerVector.getVector());
     });
 }
 
 void NotificationController::updateChannelNotification(
-    const QString &channelName)
+    const QString &channelName, int &i)
 {
-    if (isChannelNotified(channelName)) {
-        removeChannelNotification(channelName);
-    } else {
-        addChannelNotification(channelName);
+    if (i == 0) {
+        int j = 0;
+        if (isChannelNotified(channelName, j)) {
+            removeChannelNotification(channelName, twitchVector);
+        } else {
+            addChannelNotification(channelName, twitchVector);
+        }
+    } else if (i == 1) {
+        int k = 1;
+        if (isChannelNotified(channelName, k)) {
+            removeChannelNotification(channelName, mixerVector);
+        } else {
+            addChannelNotification(channelName, mixerVector);
+        }
     }
 }
 
-bool NotificationController::isChannelNotified(const QString &channelName)
+bool NotificationController::isChannelNotified(const QString &channelName,
+                                               int &i)
 {
+    /*
     for (std::vector<int>::size_type i = 0;
          i != notificationVector.getVector().size(); i++) {
         qDebug() << notificationVector.getVector()[i]
                  << " vector to the left channel to the right " << channelName
                  << " vectorsize:" << notificationVector.getVector().size();
     }
-    for (std::vector<int>::size_type i = 0;
-         i != notificationVector.getVector().size(); i++) {
-        if (notificationVector.getVector()[i] == channelName) {
-            return true;
+    */
+    qDebug() << channelName << " channel and now i: " << i;
+    if (i == 0) {
+        for (std::vector<int>::size_type i = 0;
+             i != twitchVector.getVector().size(); i++) {
+            if (twitchVector.getVector()[i] == channelName) {
+                return true;
+            }
+        }
+    } else if (i == 1) {
+        for (std::vector<int>::size_type i = 0;
+             i != mixerVector.getVector().size(); i++) {
+            if (mixerVector.getVector()[i] == channelName) {
+                return true;
+            }
         }
     }
     return false;
@@ -92,13 +122,14 @@ public:
     }
 };
 */
-void NotificationController::addChannelNotification(const QString &channelName)
+void NotificationController::addChannelNotification(
+    const QString &channelName, UnsortedSignalVector<QString> &vector)
 {
-    notificationVector.appendItem(channelName);
+    vector.appendItem(channelName);
 
     if (WinToastLib::WinToast::isCompatible()) {
-        QDir dir;
-        qDebug() << "NaM" << dir.absolutePath();
+        // QDir dir;
+        // qDebug() << "NaM" << dir.absolutePath();
         /*
 
         WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
@@ -122,21 +153,25 @@ void NotificationController::addChannelNotification(const QString &channelName)
 }
 
 void NotificationController::removeChannelNotification(
-    const QString &channelName)
+    const QString &channelName, UnsortedSignalVector<QString> &vector)
 {
-    for (std::vector<int>::size_type i = 0;
-         i != notificationVector.getVector().size(); i++) {
-        if (notificationVector.getVector()[i] == channelName) {
-            notificationVector.removeItem(i);
+    for (std::vector<int>::size_type i = 0; i != vector.getVector().size();
+         i++) {
+        if (vector.getVector()[i] == channelName) {
+            vector.removeItem(i);
             i--;
         }
     }
 }
 
-NotificationModel *NotificationController::createModel(QObject *parent)
+NotificationModel *NotificationController::createModel(QObject *parent, int &i)
 {
     NotificationModel *model = new NotificationModel(parent);
-    model->init(&this->notificationVector);
+    if (i == 0) {
+        model->init(&this->twitchVector);
+    } else if (i == 1) {
+        model->init(&this->mixerVector);
+    }
     return model;
 }
 

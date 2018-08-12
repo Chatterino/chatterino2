@@ -38,14 +38,15 @@ NotificationPage::NotificationPage()
 
                 settings->addStretch(1);
             }
-            auto channels = tabs.appendTab(new QVBoxLayout, "Channels");
+            auto twitchChannels = tabs.appendTab(new QVBoxLayout, "Twitch");
             {
+                int i = 0;
                 EditableModelView *view =
-                    channels
+                    twitchChannels
                         .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(nullptr))
+                            getApp()->notifications->createModel(nullptr, i))
                         .getElement();
-                view->setTitles({"Channels"});
+                view->setTitles({"Twitch channels"});
 
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
@@ -58,8 +59,31 @@ NotificationPage::NotificationPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->notifications->notificationVector.appendItem(
-                        "channel");
+                    getApp()->notifications->twitchVector.appendItem("channel");
+                });
+            }
+            auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
+            {
+                int i = 1;
+                EditableModelView *view =
+                    mixerChannels
+                        .emplace<EditableModelView>(
+                            getApp()->notifications->createModel(nullptr, i))
+                        .getElement();
+                view->setTitles({"Mixer channels"});
+
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
+
+                view->addButtonPressed.connect([] {
+                    getApp()->notifications->mixerVector.appendItem("channel");
                 });
             }
         }

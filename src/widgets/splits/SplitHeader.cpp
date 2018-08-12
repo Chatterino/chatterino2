@@ -159,13 +159,16 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     auto action = new QAction(this);
     action->setText("Notify when live");
     action->setCheckable(true);
+
     QObject::connect(menu.get(), &QMenu::aboutToShow, this, [action, this]() {
+        int i = 0;
         action->setChecked(getApp()->notifications->isChannelNotified(
-            this->split_->getChannel()->getName()));
+            this->split_->getChannel()->getName(), i));
     });
     action->connect(action, &QAction::triggered, this, [this]() {
+        int i = 0;
         getApp()->notifications->updateChannelNotification(
-            this->split_->getChannel()->getName());
+            this->split_->getChannel()->getName(), i);
     });
     menu->addAction(action);
 
