@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/RapidjsonHelpers.hpp"
-
+#include "debug/Log.hpp"
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
