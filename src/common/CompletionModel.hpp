@@ -8,7 +8,7 @@
 
 namespace chatterino {
 
-class TwitchChannel;
+class Channel;
 
 class CompletionModel : public QAbstractListModel
 {
@@ -31,39 +31,30 @@ class CompletionModel : public QAbstractListModel
             Command,
         };
 
-        TaggedString(const QString &_str, Type _type);
+        TaggedString(const QString &string, Type type);
 
-        bool isExpired(const std::chrono::steady_clock::time_point &now) const;
         bool isEmote() const;
         bool operator<(const TaggedString &that) const;
 
-        QString str;
-        // Type will help decide the lifetime of the tagged strings
+        QString string;
         Type type;
-
-        mutable std::chrono::steady_clock::time_point timeAdded;
     };
 
 public:
-    CompletionModel(const QString &channelName);
+    CompletionModel(Channel &channel);
 
     virtual int columnCount(const QModelIndex &) const override;
     virtual QVariant data(const QModelIndex &index, int) const override;
     virtual int rowCount(const QModelIndex &) const override;
 
     void refresh(const QString &prefix);
-    void addString(const QString &str, TaggedString::Type type);
-    void addUser(const QString &str);
-
-    void clearExpiredStrings();
 
 private:
     TaggedString createUser(const QString &str);
 
-    mutable std::mutex emotesMutex_;
-    std::set<TaggedString> emotes_;
-
-    QString channelName_;
+    std::set<TaggedString> items_;
+    mutable std::mutex itemsMutex_;
+    Channel &channel_;
 };
 
 }  // namespace chatterino

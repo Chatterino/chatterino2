@@ -83,9 +83,6 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
 {
     log("[TwitchChannel:{}] Opened", name);
 
-    // this->refreshChannelEmotes();
-    // this->refreshViewerList();
-
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->setMod(false); });
 
@@ -220,9 +217,7 @@ bool TwitchChannel::isBroadcaster() const
 
 void TwitchChannel::addRecentChatter(const MessagePtr &message)
 {
-    assert(!message->loginName.isEmpty());
-
-    this->completionModel.addUser(message->displayName);
+    this->chatters_.access()->insert(message->displayName);
 }
 
 void TwitchChannel::addJoinedUser(const QString &user)

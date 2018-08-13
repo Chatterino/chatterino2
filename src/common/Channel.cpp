@@ -22,15 +22,10 @@ namespace chatterino {
 // Channel
 //
 Channel::Channel(const QString &name, Type type)
-    : completionModel(name)
+    : completionModel(*this)
     , name_(name)
     , type_(type)
 {
-    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout,
-                     [this]() {
-                         this->completionModel.clearExpiredStrings();  //
-                     });
-    this->clearCompletionModelTimer_.start(60 * 1000);
 }
 
 Channel::~Channel()

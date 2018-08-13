@@ -12,36 +12,18 @@
 #include "singletons/Emotes.hpp"
 
 #include <QtAlgorithms>
-
 #include <utility>
 
 namespace chatterino {
 
-// -- TaggedString
+//
+// TaggedString
+//
 
-CompletionModel::TaggedString::TaggedString(const QString &_str, Type _type)
-    : str(_str)
+CompletionModel::TaggedString::TaggedString(const QString &_string, Type _type)
+    : string(_string)
     , type(_type)
-    , timeAdded(std::chrono::steady_clock::now())
 {
-}
-
-bool CompletionModel::TaggedString::isExpired(
-    const std::chrono::steady_clock::time_point &now) const
-{
-    switch (this->type) {
-        case Type::Username: {
-            static std::chrono::minutes expirationTimer(10);
-
-            return (this->timeAdded + expirationTimer < now);
-        } break;
-
-        default: {
-            return false;
-        } break;
-    }
-
-    return false;
 }
 
 bool CompletionModel::TaggedString::isEmote() const
@@ -51,35 +33,23 @@ bool CompletionModel::TaggedString::isEmote() const
 
 bool CompletionModel::TaggedString::operator<(const TaggedString &that) const
 {
-    if (this->isEmote()) {
-        if (that.isEmote()) {
-            int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-            if (k == 0) {
-                return this->str > that.str;
-            }
-
-            return k < 0;
-        }
-
-        return true;
+    if (this->isEmote() != that.isEmote()) {
+        return this->isEmote();
     }
 
-    if (that.isEmote()) {
-        return false;
-    }
-
-    int k = QString::compare(this->str, that.str, Qt::CaseInsensitive);
-    if (k == 0) {
-        return false;
-    }
+    // try comparing insensitively, if they are the same then senstively
+    // (fixes order of LuL and LUL)
+    int k = QString::compare(this->string, that.string, Qt::CaseInsensitive);
+    if (k == 0) return this->string > that.string;
 
     return k < 0;
 }
 
-// -- CompletionModel
-
-CompletionModel::CompletionModel(const QString &channelName)
-    : channelName_(channelName)
+//
+// CompletionModel
+//
+CompletionModel::CompletionModel(Channel &channel)
+    : channel_(channel)
 {
 }
 
@@ -90,39 +60,32 @@ int CompletionModel::columnCount(const QModelIndex &) const
 
 QVariant CompletionModel::data(const QModelIndex &index, int) const
 {
-    std::lock_guard<std::mutex> lock(this->emotesMutex_);
+    std::lock_guard<std::mutex> lock(this->itemsMutex_);
 
-    // TODO: Implement more safely
-    auto it = this->emotes_.begin();
+    auto it = this->items_.begin();
     std::advance(it, index.row());
-    return QVariant(it->str);
+    return QVariant(it->string);
 }
 
 int CompletionModel::rowCount(const QModelIndex &) const
 {
-    std::lock_guard<std::mutex> lock(this->emotesMutex_);
+    std::lock_guard<std::mutex> lock(this->itemsMutex_);
 
-    return this->emotes_.size();
+    return this->items_.size();
 }
 
 void CompletionModel::refresh(const QString &prefix)
 {
-    {
-        std::lock_guard<std::mutex> guard(this->emotesMutex_);
-        this->emotes_.clear();
-    }
+    std::lock_guard<std::mutex> guard(this->itemsMutex_);
+    this->items_.clear();
 
     if (prefix.length() < 2) return;
 
-    BenchmarkGuard guard("CompletionModel::refresh");
-
     auto addString = [&](const QString &str, TaggedString::Type type) {
-        if (str.startsWith(prefix)) this->emotes_.emplace(str + " ", type);
+        if (str.startsWith(prefix)) this->items_.emplace(str + " ", type);
     };
 
-    auto _channel = getApp()->twitch2->getChannelOrEmpty(this->channelName_);
-
-    if (auto channel = dynamic_cast<TwitchChannel *>(_channel.get())) {
+    if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_)) {
         // account emotes
         if (auto account = getApp()->accounts->twitch.getCurrent()) {
             for (const auto &emote : account->accessEmotes()->allEmoteNames) {
@@ -180,62 +143,6 @@ void CompletionModel::refresh(const QString &prefix)
             addString(command, TaggedString::Command);
         }
     }
-}
-
-void CompletionModel::addString(const QString &str, TaggedString::Type type)
-{
-    std::lock_guard<std::mutex> lock(this->emotesMutex_);
-
-    // Always add a space at the end of completions
-    this->emotes_.insert({str + " ", type});
-}
-
-void CompletionModel::addUser(const QString &username)
-{
-    auto add = [this](const QString &str) {
-        auto ts = this->createUser(str + " ");
-        // Always add a space at the end of completions
-        auto p = this->emotes_.insert(ts);
-        if (!p.second) {
-            // No inseration was made, figure out if we need to replace the
-            // username.
-
-            if (p.first->str > ts.str) {
-                // Replace lowercase version of name with mixed-case version
-                this->emotes_.erase(p.first);
-                auto result2 = this->emotes_.insert(ts);
-                assert(result2.second);
-            } else {
-                p.first->timeAdded = std::chrono::steady_clock::now();
-            }
-        }
-    };
-
-    add(username);
-    add("@" + username);
-}
-
-void CompletionModel::clearExpiredStrings()
-{
-    std::lock_guard<std::mutex> lock(this->emotesMutex_);
-
-    auto now = std::chrono::steady_clock::now();
-
-    for (auto it = this->emotes_.begin(); it != this->emotes_.end();) {
-        const auto &taggedString = *it;
-
-        if (taggedString.isExpired(now)) {
-            // Log("String {} expired", taggedString.str);
-            it = this->emotes_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-}
-
-CompletionModel::TaggedString CompletionModel::createUser(const QString &str)
-{
-    return TaggedString{str, TaggedString::Type::Username};
 }
 
 }  // namespace chatterino

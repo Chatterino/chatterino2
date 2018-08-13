@@ -16,8 +16,8 @@ namespace chatterino {
 
 class Settings;
 class Paths;
-
 class PubSub;
+class TwitchChannel;
 
 class TwitchServer final : public AbstractIrcServer, public Singleton
 {
