@@ -33,7 +33,7 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 }
 
 # Icons
-macx:ICON = resources/images/chatterino2.icns
+#macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
 
@@ -71,6 +71,8 @@ win32 {
 # OSX include directory
 macx {
     INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/opt/openssl/include
+    LIBS += -L/usr/local/opt/openssl/lib
 }
 
 # Optional dependency on Windows SDK 7

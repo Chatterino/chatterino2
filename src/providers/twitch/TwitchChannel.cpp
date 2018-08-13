@@ -409,7 +409,7 @@ void TwitchChannel::refreshLiveStatus()
     //>>>>>>> 9bfbdefd2f0972a738230d5b95a009f73b1dd933
 
     request.onSuccess(
-        [this, weak = this->weak_from_this()](auto result) -> Outcome {
+        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
             ChannelPtr shared = weak.lock();
             if (!shared) return Failure;
 
@@ -550,7 +550,7 @@ void TwitchChannel::refreshChatters()
 
     request.setCaller(QThread::currentThread());
     request.onSuccess(
-        [this, weak = this->weak_from_this()](auto result) -> Outcome {
+        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
             // channel still exists?
             auto shared = weak.lock();
             if (!shared) return Failure;

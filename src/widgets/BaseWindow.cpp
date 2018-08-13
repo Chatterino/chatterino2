@@ -316,7 +316,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
             };
 
             if (!recursiveCheckMouseTracking(widget)) {
-                Log("Start moving");
+                log("Start moving");
                 this->moving = true;
             }
         }
@@ -331,7 +331,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_ & FramelessDraggable) {
         if (this->moving) {
-            Log("Stop moving");
+            log("Stop moving");
             this->moving = false;
         }
     }
