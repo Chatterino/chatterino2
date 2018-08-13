@@ -2,8 +2,10 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/UsernameSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -103,88 +105,81 @@ int CompletionModel::rowCount(const QModelIndex &) const
     return this->emotes_.size();
 }
 
-void CompletionModel::refresh()
+void CompletionModel::refresh(const QString &prefix)
 {
-    log("[CompletionModel:{}] Refreshing...]", this->channelName_);
+    {
+        std::lock_guard<std::mutex> guard(this->emotesMutex_);
+        this->emotes_.clear();
+    }
 
-    auto app = getApp();
+    if (prefix.length() < 2) return;
 
-    // User-specific: Twitch Emotes
-    if (auto account = app->accounts->twitch.getCurrent()) {
-        for (const auto &emote : account->accessEmotes()->allEmoteNames) {
-            // XXX: No way to discern between a twitch global emote and sub
-            // emote right now
-            this->addString(emote.string,
-                            TaggedString::Type::TwitchGlobalEmote);
+    BenchmarkGuard guard("CompletionModel::refresh");
+
+    auto addString = [&](const QString &str, TaggedString::Type type) {
+        if (str.startsWith(prefix)) this->emotes_.emplace(str + " ", type);
+    };
+
+    auto _channel = getApp()->twitch2->getChannelOrEmpty(this->channelName_);
+
+    if (auto channel = dynamic_cast<TwitchChannel *>(_channel.get())) {
+        // account emotes
+        if (auto account = getApp()->accounts->twitch.getCurrent()) {
+            for (const auto &emote : account->accessEmotes()->allEmoteNames) {
+                // XXX: No way to discern between a twitch global emote and sub
+                // emote right now
+                addString(emote.string, TaggedString::Type::TwitchGlobalEmote);
+            }
+        }
+
+        // Usernames
+        if (prefix.length() >= UsernameSet::PrefixLength) {
+            auto usernames = channel->accessChatters();
+
+            for (const auto &name : usernames->subrange(Prefix(prefix))) {
+                addString(name, TaggedString::Type::Username);
+                addString("@" + name, TaggedString::Type::Username);
+            }
+        }
+
+        // Bttv Global
+        for (auto &emote : *channel->globalBttv().emotes()) {
+            addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
+        }
+
+        // Ffz Global
+        for (auto &emote : *channel->globalFfz().emotes()) {
+            addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
+        }
+
+        // Bttv Channel
+        for (auto &emote : *channel->bttvEmotes()) {
+            addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
+        }
+
+        // Ffz Channel
+        for (auto &emote : *channel->ffzEmotes()) {
+            addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
+        }
+
+        // Emojis
+        if (prefix.startsWith(":")) {
+            const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
+            for (auto &m : emojiShortCodes) {
+                addString(":" + m + ":", TaggedString::Type::Emoji);
+            }
+        }
+
+        // Commands
+        for (auto &command : getApp()->commands->items.getVector()) {
+            addString(command.name, TaggedString::Command);
+        }
+
+        for (auto &command :
+             getApp()->commands->getDefaultTwitchCommandList()) {
+            addString(command, TaggedString::Command);
         }
     }
-
-    //    // Global: BTTV Global Emotes
-    //    std::vector<QString> &bttvGlobalEmoteCodes =
-    //    app->emotes->bttv.globalEmoteNames_; for (const auto &m :
-    //    bttvGlobalEmoteCodes) {
-    //        this->addString(m, TaggedString::Type::BTTVGlobalEmote);
-    //    }
-
-    //    // Global: FFZ Global Emotes
-    //    std::vector<QString> &ffzGlobalEmoteCodes =
-    //    app->emotes->ffz.globalEmoteCodes; for (const auto &m :
-    //    ffzGlobalEmoteCodes) {
-    //        this->addString(m, TaggedString::Type::FFZGlobalEmote);
-    //    }
-
-    // Channel emotes
-    if (auto channel = dynamic_cast<TwitchChannel *>(
-            getApp()
-                ->twitch2->getChannelOrEmptyByID(this->channelName_)
-                .get())) {
-        auto bttv = channel->bttvEmotes();
-        //        auto it = bttv->begin();
-        //        for (const auto &emote : *bttv) {
-        //        }
-        //            std::vector<QString> &bttvChannelEmoteCodes =
-        //                app->emotes->bttv.channelEmoteName_[this->channelName_];
-        //        for (const auto &m : bttvChannelEmoteCodes) {
-        //            this->addString(m, TaggedString::Type::BTTVChannelEmote);
-        //        }
-
-        // Channel-specific: FFZ Channel Emotes
-        for (const auto &emote : *channel->ffzEmotes()) {
-            this->addString(emote.second->name.string,
-                            TaggedString::Type::FFZChannelEmote);
-        }
-    }
-
-    // Emojis
-    const auto &emojiShortCodes = app->emotes->emojis.shortCodes;
-    for (const auto &m : emojiShortCodes) {
-        this->addString(":" + m + ":", TaggedString::Type::Emoji);
-    }
-
-    // Commands
-    for (auto &command : app->commands->items.getVector()) {
-        this->addString(command.name, TaggedString::Command);
-    }
-
-    for (auto &command : app->commands->getDefaultTwitchCommandList()) {
-        this->addString(command, TaggedString::Command);
-    }
-
-    // Channel-specific: Usernames
-    // fourtf: only works with twitch chat
-    //    auto c =
-    //    ChannelManager::getInstance().getTwitchChannel(this->channelName);
-    //    auto usernames = c->getUsernamesForCompletions();
-    //    for (const auto &name : usernames) {
-    //        assert(!name.displayName.isEmpty());
-    //        this->addString(name.displayName);
-    //        this->addString('@' + name.displayName);
-
-    //        if (!name.localizedName.isEmpty()) {
-    //            this->addString(name.localizedName);
-    //            this->addString('@' + name.localizedName);
-    //        }
-    //    }
 }
 
 void CompletionModel::addString(const QString &str, TaggedString::Type type)
@@ -200,8 +195,7 @@ void CompletionModel::addUser(const QString &username)
     auto add = [this](const QString &str) {
         auto ts = this->createUser(str + " ");
         // Always add a space at the end of completions
-        std::pair<std::set<TaggedString>::iterator, bool> p =
-            this->emotes_.insert(ts);
+        auto p = this->emotes_.insert(ts);
         if (!p.second) {
             // No inseration was made, figure out if we need to replace the
             // username.

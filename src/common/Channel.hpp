@@ -51,7 +51,6 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
-    virtual void addRecentChatter(const MessagePtr &message);
 
     QStringList modList;
 
@@ -67,6 +66,7 @@ public:
 
 protected:
     virtual void onConnected();
+    virtual void addRecentChatter(const MessagePtr &message);
 
 private:
     const QString name_;

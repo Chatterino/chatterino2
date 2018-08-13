@@ -85,7 +85,7 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
     auto channel = std::shared_ptr<TwitchChannel>(
         new TwitchChannel(channelName, this->bttv, this->ffz));
-    channel->refreshChannelEmotes();
+    channel->initialize();
 
     channel->sendMessageSignal.connect(
         [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {

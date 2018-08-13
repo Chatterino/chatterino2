@@ -51,7 +51,7 @@ public:
     virtual QVariant data(const QModelIndex &index, int) const override;
     virtual int rowCount(const QModelIndex &) const override;
 
-    void refresh();
+    void refresh(const QString &prefix);
     void addString(const QString &str, TaggedString::Type type);
     void addUser(const QString &str);
 

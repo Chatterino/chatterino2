@@ -49,6 +49,24 @@ auto parseRecentMessages(const QJsonObject &jsonRoot, TwitchChannel &channel)
 
     return messages;
 }
+std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
+{
+    static QStringList categories = {"moderators", "staff", "admins",
+                                     "global_mods", "viewers"};
+
+    auto usernames = UsernameSet();
+
+    // parse json
+    QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
+
+    for (const auto &category : categories) {
+        for (auto jsonCategory : jsonCategories.value(category).toArray()) {
+            usernames.insert(jsonCategory.toString());
+        }
+    }
+
+    return {Success, std::move(usernames)};
+}
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
@@ -72,22 +90,22 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
                          [=] { this->setMod(false); });
 
     // pubsub
-    this->userStateChanged.connect([=] { this->refreshPubsub(); });
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->refreshPubsub(); });
     this->refreshPubsub();
+    this->userStateChanged.connect([this] { this->refreshPubsub(); });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubsub();
         this->refreshLiveStatus();
-        this->loadBadges();
-        this->loadCheerEmotes();
+        this->refreshBadges();
+        this->refreshCheerEmotes();
     });
 
     // timers
     QObject::connect(&this->chattersListTimer_, &QTimer::timeout,
-                     [=] { this->refreshViewerList(); });
+                     [=] { this->refreshChatters(); });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
@@ -101,9 +119,15 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
-        this->addMessage(makeSystemMessage("asdf"));
+        this->addMessage(makeSystemMessage("asef"));
     }
 #endif
+}
+
+void TwitchChannel::initialize()
+{
+    this->refreshChatters();
+    this->refreshChannelEmotes();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -293,6 +317,11 @@ TwitchChannel::accessStreamStatus() const
     return this->streamStatus_.accessConst();
 }
 
+AccessGuard<const UsernameSet> TwitchChannel::accessChatters() const
+{
+    return this->chatters_.accessConst();
+}
+
 const BttvEmotes &TwitchChannel::globalBttv() const
 {
     return this->globalBttv_;
@@ -314,7 +343,7 @@ boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
 
 boost::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
 {
-    auto emotes = this->bttvEmotes_.get();
+    auto emotes = this->ffzEmotes_.get();
     auto it = emotes->find(name);
 
     if (it == emotes->end()) return boost::none;
@@ -508,7 +537,7 @@ void TwitchChannel::refreshPubsub()
                                                                 account);
 }
 
-void TwitchChannel::refreshViewerList()
+void TwitchChannel::refreshChatters()
 {
     // setting?
     const auto streamStatus = this->accessStreamStatus();
@@ -531,31 +560,18 @@ void TwitchChannel::refreshViewerList()
             auto shared = weak.lock();
             if (!shared) return Failure;
 
-            return this->parseViewerList(result.parseJson());
+            auto pair = parseChatters(result.parseJson());
+            if (pair.first) {
+                *this->chatters_.access() = std::move(pair.second);
+            }
+
+            return pair.first;
         });
 
     request.execute();
 }
 
-Outcome TwitchChannel::parseViewerList(const QJsonObject &jsonRoot)
-{
-    static QStringList categories = {"moderators", "staff", "admins",
-                                     "global_mods", "viewers"};
-
-    // parse json
-    QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
-
-    for (const auto &category : categories) {
-        for (const auto jsonCategory :
-             jsonCategories.value(category).toArray()) {
-            this->completionModel.addUser(jsonCategory.toString());
-        }
-    }
-
-    return Success;
-}
-
-void TwitchChannel::loadBadges()
+void TwitchChannel::refreshBadges()
 {
     auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
                    this->roomId() + "/display?language=en"};
@@ -600,7 +616,7 @@ void TwitchChannel::loadBadges()
     req.execute();
 }
 
-void TwitchChannel::loadCheerEmotes()
+void TwitchChannel::refreshCheerEmotes()
 {
     /*auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" +
                    this->getRoomId()};
@@ -664,7 +680,7 @@ void TwitchChannel::loadCheerEmotes()
     */
 }
 
-boost::optional<EmotePtr> TwitchChannel::getTwitchBadge(
+boost::optional<EmotePtr> TwitchChannel::twitchBadge(
     const QString &set, const QString &version) const
 {
     auto badgeSets = this->badgeSets_.access();

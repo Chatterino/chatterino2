@@ -250,7 +250,8 @@ SOURCES += \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
-    src/debug/Benchmark.cpp
+    src/debug/Benchmark.cpp \
+    src/common/UsernameSet.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -445,7 +446,8 @@ HEADERS  += \
     src/widgets/helper/EffectLabel.hpp \
     src/util/LayoutHelper.hpp \
     src/widgets/helper/Button.hpp \
-    src/messages/MessageContainer.hpp
+    src/messages/MessageContainer.hpp \
+    src/common/UsernameSet.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

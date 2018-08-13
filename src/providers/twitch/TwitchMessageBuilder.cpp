@@ -646,7 +646,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::BttvEmote;
     } else if ((emote = this->twitchChannel->globalFfz().emote(name))) {
         flags = MessageElementFlag::FfzEmote;
-    } else if (twitchChannel && (emote = this->twitchChannel->ffzEmote(name))) {
+    } else if ((emote = this->twitchChannel->ffzEmote(name))) {
         flags = MessageElementFlag::FfzEmote;
     }
 
@@ -691,7 +691,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             // Try to fetch channel-specific bit badge
             try {
                 if (twitchChannel)
-                    if (const auto &badge = this->twitchChannel->getTwitchBadge(
+                    if (const auto &badge = this->twitchChannel->twitchBadge(
                             "bits", cheerAmount)) {
                         this->emplace<EmoteElement>(
                                 badge.get(), MessageElementFlag::BadgeVanity)
