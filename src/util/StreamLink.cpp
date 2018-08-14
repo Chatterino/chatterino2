@@ -4,6 +4,7 @@
 #include "Helpers.hpp"
 #include "singletons/Settings.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
+#include "debug/Log.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
@@ -83,7 +84,7 @@ QProcess *createStreamlinkProcess()
         if (err == QProcess::FailedToStart) {
             showStreamlinkNotFoundError();
         } else {
-            qDebug() << "Error occured: " << err;  //
+            log("Error occured {}", err);
         }
 
         p->deleteLater();
@@ -109,7 +110,7 @@ void getStreamQualities(const QString &channelURL,
         p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
         [=](int res) {
             if (res != 0) {
-                qDebug() << "Got error code" << res;
+                log("Got error code {}", res);
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
@@ -121,7 +122,15 @@ void getStreamQualities(const QString &channelURL,
 
                 for (int i = split.length() - 1; i >= 0; i--) {
                     QString option = split.at(i);
-                    if (option.endsWith(" (worst)")) {
+                    if (option == "best)") {
+                        // As it turns out, sometimes, one quality option can
+                        // be the best and worst quality at the same time.
+                        // Since we start loop from the end, we can check
+                        // that and act accordingly
+                        option = split.at(--i);
+                        // "900p60 (worst"
+                        options << option.left(option.length() - 7);
+                    } else if (option.endsWith(" (worst)")) {
                         options << option.left(option.length() - 8);
                     } else if (option.endsWith(" (best)")) {
                         options << option.left(option.length() - 7);
