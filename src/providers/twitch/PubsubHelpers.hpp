@@ -1,5 +1,6 @@
 #pragma once
 
+#include "debug/Log.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "debug/Log.hpp"
 #include <boost/asio.hpp>

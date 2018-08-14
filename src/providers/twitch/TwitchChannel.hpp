@@ -23,6 +23,7 @@ struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 
+class TwitchBadges;
 class FfzEmotes;
 class BttvEmotes;
 
@@ -70,6 +71,7 @@ public:
     AccessGuard<const UsernameSet> accessChatters() const;
 
     // Emotes
+    const TwitchBadges &globalTwitchBadges() const;
     const BttvEmotes &globalBttv() const;
     const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -98,8 +100,9 @@ private:
         QString localizedName;
     };
 
-    explicit TwitchChannel(const QString &channelName, BttvEmotes &globalBttv,
-                           FfzEmotes &globalFfz);
+    explicit TwitchChannel(const QString &channelName,
+                           TwitchBadges &globalTwitchBadges,
+                           BttvEmotes &globalBttv, FfzEmotes &globalFfz);
 
     // Methods
     void refreshLiveStatus();
@@ -126,6 +129,7 @@ private:
     UniqueAccess<UsernameSet> chatters_;  // maps 2 char prefix to set of names
 
     // Emotes
+    TwitchBadges &globalTwitchBadges_;
     BttvEmotes &globalBttv_;
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;

@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -91,13 +92,6 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
-    //#ifdef XD
-    //    if (this->originalMessage.length() > 100) {
-    //        this->message->flags.has(MessageFlag::Collapsed);
-    //        this->emplace<EmoteElement>(getApp()->resources->badgeCollapsed,
-    //        MessageElementFlag::Collapsed);
-    //    }
-    //#endif
     this->message().flags.has(MessageFlag::Collapsed);
 
     // PARSING
@@ -203,11 +197,7 @@ void TwitchMessageBuilder::addWords(
 
         // split words
         for (auto &variant : getApp()->emotes->emojis.parse(word)) {
-            boost::apply_visitor(/*overloaded{[&](EmotePtr arg) {
-                                    this->addTextOrEmoji(arg); },
-                                    [&](const QString &arg) {
-                                    this->addTextOrEmoji(arg); }}*/
-                                 [&](auto &&arg) { this->addTextOrEmoji(arg); },
+            boost::apply_visitor([&](auto &&arg) { this->addTextOrEmoji(arg); },
                                  variant);
         }
 
@@ -659,32 +649,15 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 }
 
 // fourtf: this is ugly
-//		   maybe put the individual badges into a map instead of this
-// mess
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     auto app = getApp();
 
     auto iterator = this->tags.find("badges");
+    if (iterator == this->tags.end()) return;
 
-    if (iterator == this->tags.end()) {
-        // No badges in this message
-        return;
-    }
-
-    QStringList badges = iterator.value().toString().split(',');
-
-    for (QString badge : badges) {
-        if (badge.isEmpty()) {
-            continue;
-        }
-
+    for (QString badge : iterator.value().toString().split(',')) {
         if (badge.startsWith("bits/")) {
-            // if (!app->resources->dynamicBadgesLoaded) {
-            //     // Do nothing
-            //     continue;
-            // }
-
             QString cheerAmount = badge.mid(5);
             QString tooltip = QString("Twitch cheer ") + cheerAmount;
 
@@ -703,16 +676,12 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
 
             // Use default bit badge
-            // try {
-            //    const auto &badge =
-            //    app->resources->badgeSets.at("bits").versions.at(cheerAmount);
-            //    this->emplace<ImageElement>(badge.badgeImage1x,
-            //    MessageElementFlag::BadgeVanity)
-            //        ->setTooltip(tooltip);
-            //} catch (const std::out_of_range &) {
-            //    Log("No default bit badge for version {} found", cheerAmount);
-            //    continue;
-            //}
+            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+                    "bits", cheerAmount)) {
+                this->emplace<EmoteElement>(badge.get(),
+                                            MessageElementFlag::BadgeVanity)
+                    ->setTooltip(tooltip);
+            }
         } else if (badge == "staff/1") {
             this->emplace<ImageElement>(
                     Image::fromPixmap(app->resources->twitch.staff),
@@ -766,80 +735,30 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 } break;
             }
         } else if (badge.startsWith("subscriber/")) {
-            //            if (channelResources.loaded == false) {
-            //                // qDebug() << "Channel resources are not loaded,
-            //                can't add the subscriber
-            //                // badge";
-            //                continue;
-            //            }
+            if (auto badgeEmote = this->twitchChannel->twitchBadge(
+                    "subscriber", badge.mid(11))) {
+                this->emplace<EmoteElement>(
+                        badgeEmote.get(), MessageElementFlag::BadgeSubscription)
+                    ->setTooltip((*badgeEmote)->tooltip.string);
+                continue;
+            }
 
-            // auto badgeSetIt = channelResources.badgeSets.find("subscriber");
-            // if (badgeSetIt == channelResources.badgeSets.end()) {
-            //    // Fall back to default badge
-            //    this->emplace<ImageElement>(app->resources->badgeSubscriber,
-            //                                MessageElementFlag::BadgeSubscription)
-            //        ->setTooltip("Twitch Subscriber");
-            //    continue;
-            //}
-
-            // const auto &badgeSet = badgeSetIt->second;
-
-            // std::string versionKey = badge.mid(11).toStdString();
-
-            // auto badgeVersionIt = badgeSet.versions.find(versionKey);
-
-            // if (badgeVersionIt == badgeSet.versions.end()) {
-            //    // Fall back to default badge
-            //    this->emplace<ImageElement>(app->resources->badgeSubscriber,
-            //                                MessageElementFlag::BadgeSubscription)
-            //        ->setTooltip("Twitch Subscriber");
-            //    continue;
-            //}
-
-            // auto &badgeVersion = badgeVersionIt->second;
-
-            // this->emplace<ImageElement>(badgeVersion.badgeImage1x,
-            //                            MessageElementFlag::BadgeSubscription)
-            //    ->setTooltip("Twitch " +
-            //    QString::fromStdString(badgeVersion.title));
+            // use default subscriber badge if custom one not found
+            this->emplace<ImageElement>(
+                    Image::fromPixmap(app->resources->twitch.subscriber, 0.25),
+                    MessageElementFlag::BadgeSubscription)
+                ->setTooltip("Twitch Subscriber");
         } else {
-            // if (!app->resources->dynamicBadgesLoaded) {
-            //    // Do nothing
-            //    continue;
-            //}
+            auto splits = badge.split('/');
+            if (splits.size() != 2) continue;
 
-            // QStringList parts = badge.split('/');
-
-            // if (parts.length() != 2) {
-            //    qDebug() << "Bad number of parts: " << parts.length() << " in
-            //    " << parts; continue;
-            //}
-
-            // MessageElementFlags badgeType =
-            // MessageElementFlag::BadgeVanity;
-
-            // std::string badgeSetKey = parts[0].toStdString();
-            // std::string versionKey = parts[1].toStdString();
-
-            // try {
-            //    auto &badgeSet = app->resources->badgeSets.at(badgeSetKey);
-
-            //    try {
-            //        auto &badgeVersion = badgeSet.versions.at(versionKey);
-
-            //        this->emplace<ImageElement>(badgeVersion.badgeImage1x,
-            //        badgeType)
-            //            ->setTooltip("Twitch " +
-            //            QString::fromStdString(badgeVersion.title));
-            //    } catch (const std::exception &e) {
-            //        qDebug() << "Exception caught:" << e.what()
-            //                 << "when trying to fetch badge version " <<
-            //                 versionKey.c_str();
-            //    }
-            //} catch (const std::exception &e) {
-            //    qDebug() << "No badge set with key" << badgeSetKey.c_str()
-            //             << ". Exception: " << e.what();
-            //}
+            if (auto badgeEmote =
+                    this->twitchChannel->twitchBadge(splits[0], splits[1])) {
+                this->emplace<EmoteElement>(badgeEmote.get(),
+                                            MessageElementFlag::BadgeVanity)
+                    ->setTooltip((*badgeEmote)->tooltip.string);
+                continue;
+            }
         }
     }
 }

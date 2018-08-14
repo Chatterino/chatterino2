@@ -92,10 +92,10 @@ auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
 
     // description
     if (settings.showViewerCount)
-        title += " - " + QString::number(s.viewerCount) + " viewers";
+        title += " - " + QString::number(s.viewerCount);
     if (settings.showTitle) title += " - " + s.title;
     if (settings.showGame) title += " - " + s.game;
-    if (settings.showUptime) title += "  - uptime: " + s.uptime;
+    if (settings.showUptime) title += " - " + s.uptime;
 
     return title;
 }

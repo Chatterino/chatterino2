@@ -4,20 +4,13 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
+
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 
 namespace chatterino {
-
-TwitchBadges::TwitchBadges()
-{
-}
-
-void TwitchBadges::initialize(Settings &settings, Paths &paths)
-{
-    this->loadTwitchBadges();
-}
 
 void TwitchBadges::loadTwitchBadges()
 {
@@ -28,32 +21,34 @@ void TwitchBadges::loadTwitchBadges()
     req.setCaller(QThread::currentThread());
     req.onSuccess([this](auto result) -> Outcome {
         auto root = result.parseJson();
-        QJsonObject sets = root.value("badge_sets").toObject();
+        auto badgeSets = this->badgeSets_.access();
 
-        for (QJsonObject::iterator it = sets.begin(); it != sets.end(); ++it) {
-            QJsonObject versions =
-                it.value().toObject().value("versions").toObject();
+        auto jsonSets = root.value("badge_sets").toObject();
+        for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt) {
+            auto key = sIt.key();
+            auto versions = sIt.value().toObject().value("versions").toObject();
 
-            for (auto versionIt = std::begin(versions);
-                 versionIt != std::end(versions); ++versionIt) {
+            for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt) {
+                auto versionObj = vIt.value().toObject();
+
                 auto emote = Emote{
                     {""},
                     ImageSet{
-                        Image::fromUrl({root.value("image_url_1x").toString()},
-                                       1),
-                        Image::fromUrl({root.value("image_url_2x").toString()},
-                                       0.5),
-                        Image::fromUrl({root.value("image_url_4x").toString()},
-                                       0.25),
+                        Image::fromUrl(
+                            {versionObj.value("image_url_1x").toString()}, 1),
+                        Image::fromUrl(
+                            {versionObj.value("image_url_2x").toString()}, .5),
+                        Image::fromUrl(
+                            {versionObj.value("image_url_4x").toString()}, .25),
                     },
                     Tooltip{root.value("description").toString()},
                     Url{root.value("clickURL").toString()}};
                 // "title"
                 // "clickAction"
 
-                QJsonObject versionObj = versionIt.value().toObject();
-                this->badges.emplace(versionIt.key(),
-                                     std::make_shared<Emote>(emote));
+                log("{} {}", key, vIt.key());
+
+                (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
             }
         }
 
@@ -61,6 +56,20 @@ void TwitchBadges::loadTwitchBadges()
     });
 
     req.execute();
+}
+
+boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
+                                              const QString &version) const
+{
+    auto badgeSets = this->badgeSets_.access();
+    auto it = badgeSets->find(set);
+    if (it != badgeSets->end()) {
+        auto it2 = it->second.find(version);
+        if (it2 != it->second.end()) {
+            return it2->second;
+        }
+    }
+    return boost::none;
 }
 
 }  // namespace chatterino

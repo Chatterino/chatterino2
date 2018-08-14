@@ -13,7 +13,6 @@
 #include "util/PostToThread.hpp"
 
 #include <IrcCommand>
-
 #include <cassert>
 
 // using namespace Communi;
@@ -41,6 +40,7 @@ void TwitchServer::initialize(Settings &settings, Paths &paths)
     getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
 
+    this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
 }
@@ -83,8 +83,8 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(
-        new TwitchChannel(channelName, this->bttv, this->ffz));
+    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
+        channelName, this->twitchBadges, this->bttv, this->ffz));
     channel->initialize();
 
     channel->sendMessageSignal.connect(

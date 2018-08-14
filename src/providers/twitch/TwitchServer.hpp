@@ -7,6 +7,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 
 #include <chrono>
 #include <memory>
@@ -68,6 +69,7 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
     bool singleConnection_ = false;
+    TwitchBadges twitchBadges;
     BttvEmotes bttv;
     FfzEmotes ffz;
 

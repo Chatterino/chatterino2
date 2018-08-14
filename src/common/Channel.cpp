@@ -160,13 +160,14 @@ void Channel::disableAllMessages()
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.getLength();
     for (int i = 0; i < snapshotLength; i++) {
-        auto &s = snapshot[i];
-        if (s->flags.hasAny({MessageFlag::System, MessageFlag::Timeout})) {
+        auto &message = snapshot[i];
+        if (message->flags.hasAny(
+                {MessageFlag::System, MessageFlag::Timeout})) {
             continue;
         }
 
         // FOURTF: disabled for now
-        // s->flags.EnableFlag(MessageFlag::Disabled);
+        const_cast<Message *>(message.get())->flags.set(MessageFlag::Disabled);
     }
 }
 
