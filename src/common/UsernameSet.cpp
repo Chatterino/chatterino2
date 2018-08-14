@@ -85,8 +85,8 @@ UsernameSet::ConstIterator UsernameSet::Range::end()
 //
 
 Prefix::Prefix(const QString &string)
-    : first(string.size() >= 1 ? string[0] : '\0')
-    , second(string.size() >= 2 ? string[1] : '\0')
+    : first(string.size() >= 1 ? string[0].toLower() : '\0')
+    , second(string.size() >= 2 ? string[1].toLower() : '\0')
 {
 }
 
@@ -101,9 +101,11 @@ bool Prefix::isStartOf(const QString &string) const
     if (string.size() == 0) {
         return this->first == QChar('\0') && this->second == QChar('\0');
     } else if (string.size() == 1) {
-        return this->first == string[0] && this->second == QChar('\0');
+        return this->first == string[0].toLower() &&
+               this->second == QChar('\0');
     } else {
-        return this->first == string[0] && this->second == string[1];
+        return this->first == string[0].toLower() &&
+               this->second == string[1].toLower();
     }
 }
 

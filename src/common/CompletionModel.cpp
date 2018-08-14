@@ -82,7 +82,8 @@ void CompletionModel::refresh(const QString &prefix)
     if (prefix.length() < 2) return;
 
     auto addString = [&](const QString &str, TaggedString::Type type) {
-        if (str.startsWith(prefix)) this->items_.emplace(str + " ", type);
+        if (str.startsWith(prefix, Qt::CaseInsensitive))
+            this->items_.emplace(str + " ", type);
     };
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_)) {
