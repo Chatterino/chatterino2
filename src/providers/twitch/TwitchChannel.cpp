@@ -326,6 +326,8 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     QApplication::alert(
                         getApp()->windows->getMainWindow().window(), 2500);
                 }
+                this->tabHighlightRequested.invoke(
+                    HighlightState::Notification);
             }
             guard->live = newLiveStatus;
         }

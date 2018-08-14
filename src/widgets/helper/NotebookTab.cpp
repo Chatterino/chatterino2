@@ -169,8 +169,8 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     if (this->isSelected()) {
         return;
     }
-
-    if (this->highlightState_ != HighlightState::Highlighted) {
+    if (this->highlightState_ != HighlightState::Highlighted &&
+        this->highlightState_ != HighlightState::Notification) {
         this->highlightState_ = newHighlightStyle;
 
         this->update();
@@ -237,6 +237,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
         colors = this->theme->tabs.selected;
     } else if (this->highlightState_ == HighlightState::Highlighted) {
         colors = this->theme->tabs.highlighted;
+    } else if (this->highlightState_ == HighlightState::Notification) {
+        colors = this->theme->tabs.notified;
     } else if (this->highlightState_ == HighlightState::NewMessage) {
         colors = this->theme->tabs.newMessage;
     } else {

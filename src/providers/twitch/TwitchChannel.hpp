@@ -86,6 +86,7 @@ public:
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal userStateChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
+    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
 
 private:
     struct NameOptions {

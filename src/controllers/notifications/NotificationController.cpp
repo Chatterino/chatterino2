@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
+#include "singletons/Toasts.hpp"
 
 #include <wintoastlib.h>
 
@@ -73,7 +74,7 @@ void NotificationController::removeChannelNotification(
         }
     }
 }
-
+///////////////////////////////////////////////////
 void NotificationController::playSound()
 {
     static auto player = new QMediaPlayer;
@@ -93,7 +94,7 @@ void NotificationController::playSound()
     }
     player->play();
 }
-
+///////////////////////////////////////////////////
 NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {
