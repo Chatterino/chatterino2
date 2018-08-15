@@ -9,15 +9,13 @@
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
-
 namespace {
-
-QString CreateLink(const QString &url, const QString &name)
-{
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   name + "</span></a>");
-}
-
+    QString createLink(const QString &url, const QString &name)
+    {
+        return QString("<a href=\"" + url +
+                       "\"><span style=\"color: white;\">" + name +
+                       "</span></a>");
+    }
 }  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
@@ -41,8 +39,8 @@ ExternalToolsPage::ExternalToolsPage()
         description->setStyleSheet("color: #bbb");
 
         auto links = new QLabel(
-            CreateLink("https://streamlink.github.io/", "Website") + " " +
-            CreateLink(
+            createLink("https://streamlink.github.io/", "Website") + " " +
+            createLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
                 "Download"));
         links->setTextFormat(Qt::RichText);

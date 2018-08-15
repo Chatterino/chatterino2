@@ -69,9 +69,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                  QStringListModel &userModel)
 {
-    users.append(
-        page.createCheckBox("Enable twitch ignored users",
-                            getSettings()->enableTwitchIgnoredUsers));
+    users.append(page.createCheckBox("Enable twitch ignored users",
+                                     getSettings()->enableTwitchIgnoredUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
     {

@@ -7,7 +7,7 @@
 #include "widgets/splits/Split.hpp"
 
 #ifdef USEWEBENGINE
-#include <QtWebEngineWidgets>
+#    include <QtWebEngineWidgets>
 #endif
 
 namespace chatterino {

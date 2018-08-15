@@ -2,11 +2,11 @@
 
 namespace chatterino {
 namespace {
-void appendDuration(int count, QChar &&order, QString &outString)
-{
-    outString.append(QString::number(count));
-    outString.append(order);
-}
+    void appendDuration(int count, QChar &&order, QString &outString)
+    {
+        outString.append(QString::number(count));
+        outString.append(order);
+    }
 }  // namespace
 
 QString formatTime(int totalSeconds)

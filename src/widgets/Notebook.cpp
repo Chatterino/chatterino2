@@ -433,8 +433,7 @@ void SplitNotebook::addCustomButtons()
     // settings
     auto settingsBtn = this->addCustomButton();
 
-    settingsBtn->setVisible(
-        !getSettings()->hidePreferencesButton.getValue());
+    settingsBtn->setVisible(!getSettings()->hidePreferencesButton.getValue());
 
     getSettings()->hidePreferencesButton.connect(
         [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },

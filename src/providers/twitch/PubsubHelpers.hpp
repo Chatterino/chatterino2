@@ -1,11 +1,10 @@
 #pragma once
 
-#include "debug/Log.hpp"
-#include "util/RapidjsonHelpers.hpp"
-#include "debug/Log.hpp"
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
+#include "debug/Log.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 

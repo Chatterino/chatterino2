@@ -39,62 +39,62 @@
 
 namespace chatterino {
 namespace {
-void addEmoteContextMenuItems(const Emote &emote,
-                              MessageElementFlags creatorFlags, QMenu &menu)
-{
-    auto openAction = menu.addAction("Open");
-    auto openMenu = new QMenu;
-    openAction->setMenu(openMenu);
+    void addEmoteContextMenuItems(const Emote &emote,
+                                  MessageElementFlags creatorFlags, QMenu &menu)
+    {
+        auto openAction = menu.addAction("Open");
+        auto openMenu = new QMenu;
+        openAction->setMenu(openMenu);
 
-    auto copyAction = menu.addAction("Copy");
-    auto copyMenu = new QMenu;
-    copyAction->setMenu(copyMenu);
+        auto copyAction = menu.addAction("Copy");
+        auto copyMenu = new QMenu;
+        copyAction->setMenu(copyMenu);
 
-    // see if the QMenu actually gets destroyed
-    QObject::connect(openMenu, &QMenu::destroyed, [] {
-        QMessageBox(QMessageBox::Information, "xD", "the menu got deleted")
-            .exec();
-    });
+        // see if the QMenu actually gets destroyed
+        QObject::connect(openMenu, &QMenu::destroyed, [] {
+            QMessageBox(QMessageBox::Information, "xD", "the menu got deleted")
+                .exec();
+        });
 
-    // Add copy and open links for 1x, 2x, 3x
-    auto addImageLink = [&](const ImagePtr &image, char scale) {
-        if (!image->isEmpty()) {
+        // Add copy and open links for 1x, 2x, 3x
+        auto addImageLink = [&](const ImagePtr &image, char scale) {
+            if (!image->isEmpty()) {
+                copyMenu->addAction(
+                    QString(scale) + "x link", [url = image->url()] {
+                        QApplication::clipboard()->setText(url.string);
+                    });
+                openMenu->addAction(
+                    QString(scale) + "x link", [url = image->url()] {
+                        QDesktopServices::openUrl(QUrl(url.string));
+                    });
+            }
+        };
+
+        addImageLink(emote.images.getImage1(), '1');
+        addImageLink(emote.images.getImage2(), '2');
+        addImageLink(emote.images.getImage3(), '3');
+
+        // Copy and open emote page link
+        auto addPageLink = [&](const QString &name) {
+            copyMenu->addSeparator();
+            openMenu->addSeparator();
+
             copyMenu->addAction(
-                QString(scale) + "x link", [url = image->url()] {
-                    QApplication::clipboard()->setText(url.string);
+                "Copy " + name + " emote link", [url = emote.homePage] {
+                    QApplication::clipboard()->setText(url.string);  //
                 });
-            openMenu->addAction(QString(scale) + "x link",
-                                [url = image->url()] {
-                                    QDesktopServices::openUrl(QUrl(url.string));
-                                });
+            openMenu->addAction(
+                "Open " + name + " emote link", [url = emote.homePage] {
+                    QDesktopServices::openUrl(QUrl(url.string));  //
+                });
+        };
+
+        if (creatorFlags.has(MessageElementFlag::BttvEmote)) {
+            addPageLink("BTTV");
+        } else if (creatorFlags.has(MessageElementFlag::FfzEmote)) {
+            addPageLink("FFZ");
         }
-    };
-
-    addImageLink(emote.images.getImage1(), '1');
-    addImageLink(emote.images.getImage2(), '2');
-    addImageLink(emote.images.getImage3(), '3');
-
-    // Copy and open emote page link
-    auto addPageLink = [&](const QString &name) {
-        copyMenu->addSeparator();
-        openMenu->addSeparator();
-
-        copyMenu->addAction(
-            "Copy " + name + " emote link", [url = emote.homePage] {
-                QApplication::clipboard()->setText(url.string);  //
-            });
-        openMenu->addAction("Open " + name + " emote link",
-                            [url = emote.homePage] {
-                                QDesktopServices::openUrl(QUrl(url.string));  //
-                            });
-    };
-
-    if (creatorFlags.has(MessageElementFlag::BttvEmote)) {
-        addPageLink("BTTV");
-    } else if (creatorFlags.has(MessageElementFlag::FfzEmote)) {
-        addPageLink("FFZ");
     }
-}
 }  // namespace
 
 ChannelView::ChannelView(BaseWidget *parent)

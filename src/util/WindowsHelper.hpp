@@ -2,8 +2,8 @@
 
 #ifdef USEWINSDK
 
-#include <Windows.h>
-#include <boost/optional.hpp>
+#    include <Windows.h>
+#    include <boost/optional.hpp>
 
 namespace chatterino {
 

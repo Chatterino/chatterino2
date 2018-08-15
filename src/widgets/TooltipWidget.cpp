@@ -10,7 +10,7 @@
 #include <QVBoxLayout>
 
 #ifdef USEWINSDK
-#include <Windows.h>
+#    include <Windows.h>
 #endif
 
 namespace chatterino {

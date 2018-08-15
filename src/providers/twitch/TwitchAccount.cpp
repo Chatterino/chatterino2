@@ -15,31 +15,31 @@ namespace chatterino {
 
 namespace {
 
-EmoteName cleanUpCode(const EmoteName &dirtyEmoteCode)
-{
-    auto cleanCode = dirtyEmoteCode.string;
-    cleanCode.detach();
+    EmoteName cleanUpCode(const EmoteName &dirtyEmoteCode)
+    {
+        auto cleanCode = dirtyEmoteCode.string;
+        cleanCode.detach();
 
-    static QMap<QString, QString> emoteNameReplacements{
-        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
-        {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
-        {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
-        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
-        {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
-        {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
-        {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
-    };
+        static QMap<QString, QString> emoteNameReplacements{
+            {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
+            {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
+            {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
+            {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
+            {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
+            {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
+            {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
+        };
 
-    auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
-    if (it != emoteNameReplacements.end()) {
-        cleanCode = it.value();
+        auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
+        if (it != emoteNameReplacements.end()) {
+            cleanCode = it.value();
+        }
+
+        cleanCode.replace("&lt;", "<");
+        cleanCode.replace("&gt;", ">");
+
+        return {cleanCode};
     }
-
-    cleanCode.replace("&lt;", "<");
-    cleanCode.replace("&gt;", ">");
-
-    return {cleanCode};
-}
 
 }  // namespace
 
@@ -417,7 +417,7 @@ void TwitchAccount::loadEmotes()
 }
 
 AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
-TwitchAccount::accessEmotes() const
+    TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
 }

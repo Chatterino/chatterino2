@@ -20,20 +20,20 @@
 #include <functional>
 
 #ifdef USEWINSDK
-#include <ObjIdl.h>
-#include <VersionHelpers.h>
-#include <Windows.h>
-#include <dwmapi.h>
-#include <gdiplus.h>
-#include <windowsx.h>
+#    include <ObjIdl.h>
+#    include <VersionHelpers.h>
+#    include <Windows.h>
+#    include <dwmapi.h>
+#    include <gdiplus.h>
+#    include <windowsx.h>
 
 //#include <ShellScalingApi.h>
-#pragma comment(lib, "Dwmapi.lib")
+#    pragma comment(lib, "Dwmapi.lib")
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#    include <QHBoxLayout>
+#    include <QVBoxLayout>
 
-#define WM_DPICHANGED 0x02E0
+#    define WM_DPICHANGED 0x02E0
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -460,11 +460,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
-#if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
+#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
     MSG *msg = *reinterpret_cast<MSG **>(message);
-#else
+#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
-#endif
+#    endif
 
     bool returnValue = false;
 

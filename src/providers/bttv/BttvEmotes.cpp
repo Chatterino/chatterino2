@@ -13,73 +13,76 @@
 
 namespace chatterino {
 namespace {
-Url getEmoteLink(QString urlTemplate, const EmoteId &id,
-                 const QString &emoteScale)
-{
-    urlTemplate.detach();
+    Url getEmoteLink(QString urlTemplate, const EmoteId &id,
+                     const QString &emoteScale)
+    {
+        urlTemplate.detach();
 
-    return {urlTemplate.replace("{{id}}", id.string)
-                .replace("{{image}}", emoteScale)};
-}
-std::pair<Outcome, EmoteMap> parseGlobalEmotes(const QJsonObject &jsonRoot,
-                                               const EmoteMap &currentEmotes)
-{
-    auto emotes = EmoteMap();
-    auto jsonEmotes = jsonRoot.value("emotes").toArray();
-    auto urlTemplate = qS("https:") + jsonRoot.value("urlTemplate").toString();
-
-    for (auto jsonEmote : jsonEmotes) {
-        auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
-        auto name = EmoteName{jsonEmote.toObject().value("code").toString()};
-
-        auto emote = Emote(
-            {name,
-             ImageSet{
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-             Tooltip{name.string + "<br />Global Bttv Emote"},
-             Url{"https://manage.betterttv.net/emotes/" + id.string}});
-
-        emotes[name] = cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
+        return {urlTemplate.replace("{{id}}", id.string)
+                    .replace("{{image}}", emoteScale)};
     }
+    std::pair<Outcome, EmoteMap> parseGlobalEmotes(
+        const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
+    {
+        auto emotes = EmoteMap();
+        auto jsonEmotes = jsonRoot.value("emotes").toArray();
+        auto urlTemplate =
+            qS("https:") + jsonRoot.value("urlTemplate").toString();
 
-    return {Success, std::move(emotes)};
-}
-EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
-{
-    static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-    static std::mutex mutex;
+        for (auto jsonEmote : jsonEmotes) {
+            auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
+            auto name =
+                EmoteName{jsonEmote.toObject().value("code").toString()};
 
-    return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
-}
-std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
-{
-    auto emotes = EmoteMap();
-    auto jsonEmotes = jsonRoot.value("emotes").toArray();
-    auto urlTemplate = "https:" + jsonRoot.value("urlTemplate").toString();
+            auto emote = Emote(
+                {name,
+                 ImageSet{
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+                 Tooltip{name.string + "<br />Global Bttv Emote"},
+                 Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
-    for (auto jsonEmote_ : jsonEmotes) {
-        auto jsonEmote = jsonEmote_.toObject();
+            emotes[name] =
+                cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
+        }
 
-        auto id = EmoteId{jsonEmote.value("id").toString()};
-        auto name = EmoteName{jsonEmote.value("code").toString()};
-        // emoteObject.value("imageType").toString();
-
-        auto emote = Emote(
-            {name,
-             ImageSet{
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
-                 Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-             Tooltip{name.string + "<br />Channel Bttv Emote"},
-             Url{"https://manage.betterttv.net/emotes/" + id.string}});
-
-        emotes[name] = cachedOrMake(std::move(emote), id);
+        return {Success, std::move(emotes)};
     }
+    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+    {
+        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+        static std::mutex mutex;
 
-    return {Success, std::move(emotes)};
-}
+        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+    }
+    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
+    {
+        auto emotes = EmoteMap();
+        auto jsonEmotes = jsonRoot.value("emotes").toArray();
+        auto urlTemplate = "https:" + jsonRoot.value("urlTemplate").toString();
+
+        for (auto jsonEmote_ : jsonEmotes) {
+            auto jsonEmote = jsonEmote_.toObject();
+
+            auto id = EmoteId{jsonEmote.value("id").toString()};
+            auto name = EmoteName{jsonEmote.value("code").toString()};
+            // emoteObject.value("imageType").toString();
+
+            auto emote = Emote(
+                {name,
+                 ImageSet{
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
+                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+                 Tooltip{name.string + "<br />Channel Bttv Emote"},
+                 Url{"https://manage.betterttv.net/emotes/" + id.string}});
+
+            emotes[name] = cachedOrMake(std::move(emote), id);
+        }
+
+        return {Success, std::move(emotes)};
+    }
 }  // namespace
 
 //

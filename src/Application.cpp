@@ -99,15 +99,15 @@ void Application::save()
 void Application::initNm()
 {
 #ifdef Q_OS_WIN
-#ifdef QT_DEBUG
-#ifdef C_DEBUG_NM
+#    ifdef QT_DEBUG
+#        ifdef C_DEBUG_NM
     this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
-#endif
-#else
+#        endif
+#    else
     this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
-#endif
+#    endif
 #endif
 }
 

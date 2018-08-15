@@ -8,12 +8,12 @@
 #include <QVBoxLayout>
 
 #ifdef USEWINSDK
-#include "util/WindowsHelper.hpp"
+#    include "util/WindowsHelper.hpp"
 
-#include "Windows.h"
+#    include "Windows.h"
 // don't even think about reordering these
-#include "Psapi.h"
-#pragma comment(lib, "Dwmapi.lib")
+#    include "Psapi.h"
+#    pragma comment(lib, "Dwmapi.lib")
 #endif
 
 namespace chatterino {

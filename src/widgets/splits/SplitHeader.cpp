@@ -26,86 +26,87 @@
 #include <cmath>
 
 #ifdef USEWEBENGINE
-#include "widgets/StreamView.hpp"
+#    include "widgets/StreamView.hpp"
 #endif
 
 namespace chatterino {
 namespace {
-auto formatRoomMode(TwitchChannel &channel) -> QString
-{
-    QString text;
-
+    auto formatRoomMode(TwitchChannel &channel) -> QString
     {
-        auto modes = channel.accessRoomModes();
+        QString text;
 
-        if (modes->r9k) text += "r9k, ";
-        if (modes->slowMode)
-            text += QString("slow(%1), ").arg(QString::number(modes->slowMode));
-        if (modes->emoteOnly) text += "emote, ";
-        if (modes->submode) text += "sub, ";
+        {
+            auto modes = channel.accessRoomModes();
+
+            if (modes->r9k) text += "r9k, ";
+            if (modes->slowMode)
+                text +=
+                    QString("slow(%1), ").arg(QString::number(modes->slowMode));
+            if (modes->emoteOnly) text += "emote, ";
+            if (modes->submode) text += "sub, ";
+        }
+
+        if (text.length() > 2) {
+            text = text.mid(0, text.size() - 2);
+        }
+
+        if (!text.isEmpty()) {
+            static QRegularExpression commaReplacement("^(.+?, .+?,) (.+)$");
+
+            auto match = commaReplacement.match(text);
+            if (match.hasMatch())
+                text = match.captured(1) + '\n' + match.captured(2);
+        }
+
+        if (text.isEmpty() && channel.hasModRights()) return "none";
+
+        return text;
     }
-
-    if (text.length() > 2) {
-        text = text.mid(0, text.size() - 2);
+    auto formatTooltip(const TwitchChannel::StreamStatus &s)
+    {
+        return QStringList{"<style>.center { text-align: center; }</style>",
+                           "<p class=\"center\">",
+                           s.title,
+                           "<br><br>",
+                           s.game,
+                           "<br>",
+                           s.rerun ? "Vod-casting" : "Live",
+                           " for ",
+                           s.uptime,
+                           " with ",
+                           QString::number(s.viewerCount),
+                           " viewers",
+                           "</p>"}
+            .join("");
     }
+    auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
+    {
+        auto title = QString();
 
-    if (!text.isEmpty()) {
-        static QRegularExpression commaReplacement("^(.+?, .+?,) (.+)$");
+        // live
+        if (s.rerun)
+            title += " (rerun)";
+        else if (s.streamType.isEmpty())
+            title += " (" + s.streamType + ")";
+        else
+            title += " (live)";
 
-        auto match = commaReplacement.match(text);
-        if (match.hasMatch())
-            text = match.captured(1) + '\n' + match.captured(2);
+        // description
+        if (settings.showViewerCount)
+            title += " - " + QString::number(s.viewerCount);
+        if (settings.showTitle) title += " - " + s.title;
+        if (settings.showGame) title += " - " + s.game;
+        if (settings.showUptime) title += " - " + s.uptime;
+
+        return title;
     }
+    auto distance(QPoint a, QPoint b)
+    {
+        auto x = std::abs(a.x() - b.x());
+        auto y = std::abs(a.y() - b.y());
 
-    if (text.isEmpty() && channel.hasModRights()) return "none";
-
-    return text;
-}
-auto formatTooltip(const TwitchChannel::StreamStatus &s)
-{
-    return QStringList{"<style>.center { text-align: center; }</style>",
-                       "<p class=\"center\">",
-                       s.title,
-                       "<br><br>",
-                       s.game,
-                       "<br>",
-                       s.rerun ? "Vod-casting" : "Live",
-                       " for ",
-                       s.uptime,
-                       " with ",
-                       QString::number(s.viewerCount),
-                       " viewers",
-                       "</p>"}
-        .join("");
-}
-auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
-{
-    auto title = QString();
-
-    // live
-    if (s.rerun)
-        title += " (rerun)";
-    else if (s.streamType.isEmpty())
-        title += " (" + s.streamType + ")";
-    else
-        title += " (live)";
-
-    // description
-    if (settings.showViewerCount)
-        title += " - " + QString::number(s.viewerCount);
-    if (settings.showTitle) title += " - " + s.title;
-    if (settings.showGame) title += " - " + s.game;
-    if (settings.showUptime) title += " - " + s.uptime;
-
-    return title;
-}
-auto distance(QPoint a, QPoint b)
-{
-    auto x = std::abs(a.x() - b.x());
-    auto y = std::abs(a.y() - b.y());
-
-    return std::sqrt(x * x + y * y);
-}
+        return std::sqrt(x * x + y * y);
+    }
 }  // namespace
 
 SplitHeader::SplitHeader(Split *_split)

@@ -2,9 +2,9 @@
 
 #include "Application.hpp"
 #include "Helpers.hpp"
+#include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
-#include "debug/Log.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
@@ -16,88 +16,89 @@ namespace chatterino {
 
 namespace {
 
-const char *getBinaryName()
-{
+    const char *getBinaryName()
+    {
 #ifdef _WIN32
-    return "streamlink.exe";
+        return "streamlink.exe";
 #else
-    return "streamlink";
+        return "streamlink";
 #endif
-}
+    }
 
-const char *getDefaultBinaryPath()
-{
+    const char *getDefaultBinaryPath()
+    {
 #ifdef _WIN32
-    return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
+        return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
 #else
-    return "/usr/bin/streamlink";
+        return "/usr/bin/streamlink";
 #endif
-}
-
-QString getStreamlinkProgram()
-{
-    auto app = getApp();
-
-    if (getSettings()->streamlinkUseCustomPath) {
-        return getSettings()->streamlinkPath + "/" + getBinaryName();
-    } else {
-        return getBinaryName();
-    }
-}
-
-bool checkStreamlinkPath(const QString &path)
-{
-    QFileInfo fileinfo(path);
-
-    if (!fileinfo.exists()) {
-        return false;
-        // throw Exception(fS("Streamlink path ({}) is invalid, file does not
-        // exist", path));
     }
 
-    return fileinfo.isExecutable();
-}
+    QString getStreamlinkProgram()
+    {
+        auto app = getApp();
 
-void showStreamlinkNotFoundError()
-{
-    static QErrorMessage *msg = new QErrorMessage;
-
-    auto app = getApp();
-    if (getSettings()->streamlinkUseCustomPath) {
-        msg->showMessage(
-            "Unable to find Streamlink executable\nMake sure your custom path "
-            "is pointing "
-            "to the DIRECTORY where the streamlink executable is located");
-    } else {
-        msg->showMessage(
-            "Unable to find Streamlink executable.\nIf you have Streamlink "
-            "installed, you might need to enable the custom path option");
-    }
-}
-
-QProcess *createStreamlinkProcess()
-{
-    auto p = new QProcess;
-    p->setProgram(getStreamlinkProgram());
-
-    QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
-        if (err == QProcess::FailedToStart) {
-            showStreamlinkNotFoundError();
+        if (getSettings()->streamlinkUseCustomPath) {
+            return getSettings()->streamlinkPath + "/" + getBinaryName();
         } else {
-            log("Error occured {}", err);
+            return getBinaryName();
+        }
+    }
+
+    bool checkStreamlinkPath(const QString &path)
+    {
+        QFileInfo fileinfo(path);
+
+        if (!fileinfo.exists()) {
+            return false;
+            // throw Exception(fS("Streamlink path ({}) is invalid, file does
+            // not exist", path));
         }
 
-        p->deleteLater();
-    });
+        return fileinfo.isExecutable();
+    }
 
-    QObject::connect(p,
-                     static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-                     [=](int res) {
-                         p->deleteLater();  //
-                     });
+    void showStreamlinkNotFoundError()
+    {
+        static QErrorMessage *msg = new QErrorMessage;
 
-    return p;
-}
+        auto app = getApp();
+        if (getSettings()->streamlinkUseCustomPath) {
+            msg->showMessage(
+                "Unable to find Streamlink executable\nMake sure your custom "
+                "path "
+                "is pointing "
+                "to the DIRECTORY where the streamlink executable is located");
+        } else {
+            msg->showMessage(
+                "Unable to find Streamlink executable.\nIf you have Streamlink "
+                "installed, you might need to enable the custom path option");
+        }
+    }
+
+    QProcess *createStreamlinkProcess()
+    {
+        auto p = new QProcess;
+        p->setProgram(getStreamlinkProgram());
+
+        QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
+            if (err == QProcess::FailedToStart) {
+                showStreamlinkNotFoundError();
+            } else {
+                log("Error occured {}", err);
+            }
+
+            p->deleteLater();
+        });
+
+        QObject::connect(
+            p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+            [=](int res) {
+                p->deleteLater();  //
+            });
+
+        return p;
+    }
 
 }  // namespace
 

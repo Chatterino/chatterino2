@@ -17,11 +17,11 @@
 namespace ipc = boost::interprocess;
 
 #ifdef Q_OS_WIN
-#include <QProcess>
+#    include <QProcess>
 
-#include <Windows.h>
-#include "singletons/WindowManager.hpp"
-#include "widgets/AttachedWindow.hpp"
+#    include <Windows.h>
+#    include "singletons/WindowManager.hpp"
+#    include "widgets/AttachedWindow.hpp"
 #endif
 
 #include <iostream>

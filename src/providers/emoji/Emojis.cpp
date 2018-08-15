@@ -13,82 +13,81 @@
 #include <memory>
 
 namespace chatterino {
-
 namespace {
+    void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
+                    const rapidjson::Value &unparsedEmoji,
+                    QString shortCode = QString())
+    {
+        static uint unicodeBytes[4];
 
-void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
-                const rapidjson::Value &unparsedEmoji,
-                QString shortCode = QString())
-{
-    static uint unicodeBytes[4];
+        struct {
+            bool apple;
+            bool google;
+            bool twitter;
+            bool emojione;
+            bool facebook;
+            bool messenger;
+        } capabilities;
 
-    struct {
-        bool apple;
-        bool google;
-        bool twitter;
-        bool emojione;
-        bool facebook;
-        bool messenger;
-    } capabilities;
-
-    if (!shortCode.isEmpty()) {
-        emojiData->shortCodes.push_back(shortCode);
-    } else {
-        const auto &shortCodes = unparsedEmoji["short_names"];
-        for (const auto &shortCode : shortCodes.GetArray()) {
-            emojiData->shortCodes.emplace_back(shortCode.GetString());
+        if (!shortCode.isEmpty()) {
+            emojiData->shortCodes.push_back(shortCode);
+        } else {
+            const auto &shortCodes = unparsedEmoji["short_names"];
+            for (const auto &shortCode : shortCodes.GetArray()) {
+                emojiData->shortCodes.emplace_back(shortCode.GetString());
+            }
         }
-    }
 
-    rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
-    rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+        rj::getSafe(unparsedEmoji, "non_qualified",
+                    emojiData->nonQualifiedCode);
+        rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
 
-    rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
-    rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
-    rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
-    rj::getSafe(unparsedEmoji, "has_img_emojione", capabilities.emojione);
-    rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
-    rj::getSafe(unparsedEmoji, "has_img_messenger", capabilities.messenger);
+        rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
+        rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
+        rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
+        rj::getSafe(unparsedEmoji, "has_img_emojione", capabilities.emojione);
+        rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
+        rj::getSafe(unparsedEmoji, "has_img_messenger", capabilities.messenger);
 
-    if (capabilities.apple) {
-        emojiData->capabilities.insert("Apple");
-    }
-    if (capabilities.google) {
-        emojiData->capabilities.insert("Google");
-    }
-    if (capabilities.twitter) {
-        emojiData->capabilities.insert("Twitter");
-    }
-    if (capabilities.emojione) {
-        emojiData->capabilities.insert("EmojiOne 3");
-    }
-    if (capabilities.facebook) {
-        emojiData->capabilities.insert("Facebook");
-    }
-    if (capabilities.messenger) {
-        emojiData->capabilities.insert("Messenger");
-    }
+        if (capabilities.apple) {
+            emojiData->capabilities.insert("Apple");
+        }
+        if (capabilities.google) {
+            emojiData->capabilities.insert("Google");
+        }
+        if (capabilities.twitter) {
+            emojiData->capabilities.insert("Twitter");
+        }
+        if (capabilities.emojione) {
+            emojiData->capabilities.insert("EmojiOne 3");
+        }
+        if (capabilities.facebook) {
+            emojiData->capabilities.insert("Facebook");
+        }
+        if (capabilities.messenger) {
+            emojiData->capabilities.insert("Messenger");
+        }
 
-    QStringList unicodeCharacters;
-    if (!emojiData->nonQualifiedCode.isEmpty()) {
-        unicodeCharacters = emojiData->nonQualifiedCode.toLower().split('-');
-    } else {
-        unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
+        QStringList unicodeCharacters;
+        if (!emojiData->nonQualifiedCode.isEmpty()) {
+            unicodeCharacters =
+                emojiData->nonQualifiedCode.toLower().split('-');
+        } else {
+            unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
+        }
+        if (unicodeCharacters.length() < 1) {
+            return;
+        }
+
+        int numUnicodeBytes = 0;
+
+        for (const QString &unicodeCharacter : unicodeCharacters) {
+            unicodeBytes[numUnicodeBytes++] =
+                QString(unicodeCharacter).toUInt(nullptr, 16);
+        }
+
+        emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
     }
-    if (unicodeCharacters.length() < 1) {
-        return;
-    }
-
-    int numUnicodeBytes = 0;
-
-    for (const QString &unicodeCharacter : unicodeCharacters) {
-        unicodeBytes[numUnicodeBytes++] =
-            QString(unicodeCharacter).toUInt(nullptr, 16);
-    }
-
-    emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
-}
-
 }  // namespace
 
 void Emojis::load()

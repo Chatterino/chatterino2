@@ -25,7 +25,7 @@
 
 namespace chatterino {
 
-inline QString CreateLink(const QString &url, bool file = false)
+inline QString createLink(const QString &url, bool file = false)
 {
     if (file) {
         return QString("<a href=\"file:///" + url +

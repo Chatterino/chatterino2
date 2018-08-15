@@ -9,16 +9,16 @@
 #include <QtGlobal>
 
 #ifdef Q_OS_WIN32
-#define DEFAULT_FONT_FAMILY "Segoe UI"
-#define DEFAULT_FONT_SIZE 10
+#    define DEFAULT_FONT_FAMILY "Segoe UI"
+#    define DEFAULT_FONT_SIZE 10
 #else
-#ifdef Q_OS_MACOS
-#define DEFAULT_FONT_FAMILY "Helvetica Neue"
-#define DEFAULT_FONT_SIZE 12
-#else
-#define DEFAULT_FONT_FAMILY "Arial"
-#define DEFAULT_FONT_SIZE 11
-#endif
+#    ifdef Q_OS_MACOS
+#        define DEFAULT_FONT_FAMILY "Helvetica Neue"
+#        define DEFAULT_FONT_SIZE 12
+#    else
+#        define DEFAULT_FONT_FAMILY "Arial"
+#        define DEFAULT_FONT_SIZE 11
+#    endif
 #endif
 
 namespace chatterino {
@@ -104,8 +104,7 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             {FontStyle::ChatMediumSmall, {0.8f, false, QFont::Normal}},
             {FontStyle::ChatMedium, {1, false, QFont::Normal}},
             {FontStyle::ChatMediumBold,
-             {1, false,
-              QFont::Weight(getSettings()->boldScale.getValue())}},
+             {1, false, QFont::Weight(getSettings()->boldScale.getValue())}},
             {FontStyle::ChatMediumItalic, {1, true, QFont::Normal}},
             {FontStyle::ChatLarge, {1.2f, false, QFont::Normal}},
             {FontStyle::ChatVeryLarge, {1.4f, false, QFont::Normal}},

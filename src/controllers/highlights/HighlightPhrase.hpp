@@ -72,43 +72,45 @@ private:
 namespace pajlada {
 namespace Settings {
 
-template <>
-struct Serialize<chatterino::HighlightPhrase> {
-    static rapidjson::Value get(const chatterino::HighlightPhrase &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
+    template <>
+    struct Serialize<chatterino::HighlightPhrase> {
+        static rapidjson::Value get(const chatterino::HighlightPhrase &value,
+                                    rapidjson::Document::AllocatorType &a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "pattern", value.getPattern(), a);
-        AddMember(ret, "alert", value.getAlert(), a);
-        AddMember(ret, "sound", value.getSound(), a);
-        AddMember(ret, "regex", value.isRegex(), a);
+            AddMember(ret, "pattern", value.getPattern(), a);
+            AddMember(ret, "alert", value.getAlert(), a);
+            AddMember(ret, "sound", value.getSound(), a);
+            AddMember(ret, "regex", value.isRegex(), a);
 
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::HighlightPhrase> {
-    static chatterino::HighlightPhrase get(const rapidjson::Value &value)
-    {
-        if (!value.IsObject()) {
-            return chatterino::HighlightPhrase(QString(), true, false, false);
+            return ret;
         }
+    };
 
-        QString _pattern;
-        bool _alert = true;
-        bool _sound = false;
-        bool _isRegex = false;
+    template <>
+    struct Deserialize<chatterino::HighlightPhrase> {
+        static chatterino::HighlightPhrase get(const rapidjson::Value &value)
+        {
+            if (!value.IsObject()) {
+                return chatterino::HighlightPhrase(QString(), true, false,
+                                                   false);
+            }
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "alert", _alert);
-        chatterino::rj::getSafe(value, "sound", _sound);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
+            QString _pattern;
+            bool _alert = true;
+            bool _sound = false;
+            bool _isRegex = false;
 
-        return chatterino::HighlightPhrase(_pattern, _alert, _sound, _isRegex);
-    }
-};
+            chatterino::rj::getSafe(value, "pattern", _pattern);
+            chatterino::rj::getSafe(value, "alert", _alert);
+            chatterino::rj::getSafe(value, "sound", _sound);
+            chatterino::rj::getSafe(value, "regex", _isRegex);
+
+            return chatterino::HighlightPhrase(_pattern, _alert, _sound,
+                                               _isRegex);
+        }
+    };
 
 }  // namespace Settings
 }  // namespace pajlada

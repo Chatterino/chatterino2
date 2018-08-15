@@ -4,7 +4,7 @@
 
 namespace pajlada {
 namespace Signals {
-class SignalHolder;
+    class SignalHolder;
 }
 }  // namespace pajlada
 

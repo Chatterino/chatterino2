@@ -25,48 +25,49 @@
 
 namespace chatterino {
 namespace {
-auto parseRecentMessages(const QJsonObject &jsonRoot, TwitchChannel &channel)
-{
-    QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
-    std::vector<MessagePtr> messages;
+    auto parseRecentMessages(const QJsonObject &jsonRoot,
+                             TwitchChannel &channel)
+    {
+        QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
+        std::vector<MessagePtr> messages;
 
-    if (jsonMessages.empty()) return messages;
+        if (jsonMessages.empty()) return messages;
 
-    for (const auto jsonMessage : jsonMessages) {
-        auto content = jsonMessage.toString().toUtf8();
-        // passing nullptr as the channel makes the message invalid but we don't
-        // check for that anyways
-        auto message = Communi::IrcMessage::fromData(content, nullptr);
-        auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
-        assert(privMsg);
+        for (const auto jsonMessage : jsonMessages) {
+            auto content = jsonMessage.toString().toUtf8();
+            // passing nullptr as the channel makes the message invalid but we
+            // don't check for that anyways
+            auto message = Communi::IrcMessage::fromData(content, nullptr);
+            auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
+            assert(privMsg);
 
-        MessageParseArgs args;
-        TwitchMessageBuilder builder(&channel, privMsg, args);
-        if (!builder.isIgnored()) {
-            messages.push_back(builder.build());
+            MessageParseArgs args;
+            TwitchMessageBuilder builder(&channel, privMsg, args);
+            if (!builder.isIgnored()) {
+                messages.push_back(builder.build());
+            }
         }
+
+        return messages;
     }
+    std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
+    {
+        static QStringList categories = {"moderators", "staff", "admins",
+                                         "global_mods", "viewers"};
 
-    return messages;
-}
-std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
-{
-    static QStringList categories = {"moderators", "staff", "admins",
-                                     "global_mods", "viewers"};
+        auto usernames = UsernameSet();
 
-    auto usernames = UsernameSet();
+        // parse json
+        QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
 
-    // parse json
-    QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
-
-    for (const auto &category : categories) {
-        for (auto jsonCategory : jsonCategories.value(category).toArray()) {
-            usernames.insert(jsonCategory.toString());
+        for (const auto &category : categories) {
+            for (auto jsonCategory : jsonCategories.value(category).toArray()) {
+                usernames.insert(jsonCategory.toString());
+            }
         }
-    }
 
-    return {Success, std::move(usernames)};
-}
+        return {Success, std::move(usernames)};
+    }
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name,
@@ -309,7 +310,7 @@ bool TwitchChannel::isLive() const
 }
 
 AccessGuard<const TwitchChannel::StreamStatus>
-TwitchChannel::accessStreamStatus() const
+    TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
 }

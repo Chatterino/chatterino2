@@ -31,9 +31,9 @@
 // clang-format on
 
 #ifdef USEWINSDK
-#define WINDOW_TOPMOST "Window always on top"
+#    define WINDOW_TOPMOST "Window always on top"
 #else
-#define WINDOW_TOPMOST "Window always on top (requires restart)"
+#    define WINDOW_TOPMOST "Window always on top (requires restart)"
 #endif
 #define INPUT_EMPTY "Show input box when empty"
 #define LAST_MSG "Mark the last message you read"
