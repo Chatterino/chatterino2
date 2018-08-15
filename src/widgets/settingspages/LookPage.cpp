@@ -218,6 +218,9 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
     */
     layout.append(
         this->createCheckBox("Animations", getSettings()->enableGifAnimations));
+    layout.append(
+        this->createCheckBox("Animations only when chatterino has focus",
+                             getSettings()->enableAnimationsWhenFocused));
 
     auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
