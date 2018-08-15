@@ -505,33 +505,41 @@ int MessageLayoutContainer::getLastCharacterIndex() const
     return this->lines_.back().endCharIndex;
 }
 
-void MessageLayoutContainer::addSelectionText(QString &str, int from, int to)
+void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
+                                              CopyMode copymode)
 {
     int index = 0;
     bool first = true;
 
-    for (std::unique_ptr<MessageLayoutElement> &ele : this->elements_) {
-        int c = ele->getSelectionIndexCount();
+    for (auto &element : this->elements_) {
+        if (copymode == CopyMode::OnlyTextAndEmotes) {
+            if (element->getCreator().getFlags().hasAny(
+                    {MessageElementFlag::Timestamp,
+                     MessageElementFlag::Username, MessageElementFlag::Badges}))
+                continue;
+        }
+
+        auto indexCount = element->getSelectionIndexCount();
 
         if (first) {
-            if (index + c > from) {
-                ele->addCopyTextToString(str, from - index, to - index);
+            if (index + indexCount > from) {
+                element->addCopyTextToString(str, from - index, to - index);
                 first = false;
 
-                if (index + c > to) {
+                if (index + indexCount > to) {
                     break;
                 }
             }
         } else {
-            if (index + c > to) {
-                ele->addCopyTextToString(str, 0, to - index);
+            if (index + indexCount > to) {
+                element->addCopyTextToString(str, 0, to - index);
                 break;
             } else {
-                ele->addCopyTextToString(str);
+                element->addCopyTextToString(str);
             }
         }
 
-        index += c;
+        index += indexCount;
     }
 }
 

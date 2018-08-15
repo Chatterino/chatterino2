@@ -83,8 +83,6 @@ bool TwitchMessageBuilder::isIgnored() const
 
 MessagePtr TwitchMessageBuilder::build()
 {
-    auto app = getApp();
-
     // PARSING
     this->parseUsername();
 
@@ -437,7 +435,7 @@ void TwitchMessageBuilder::appendUsername()
         // IrcManager::getInstance().getUser().getUserName();
     } else if (this->args.isReceivedWhisper) {
         // Sender username
-        this->emplace<TextElement>(usernameText, MessageElementFlag::Text,
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
                                    this->usernameColor_,
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});
@@ -445,7 +443,7 @@ void TwitchMessageBuilder::appendUsername()
         auto currentUser = app->accounts->twitch.getCurrent();
 
         // Separator
-        this->emplace<TextElement>("->", MessageElementFlag::Text,
+        this->emplace<TextElement>("->", MessageElementFlag::Username,
                                    app->themes->messages.textColors.system,
                                    FontStyle::ChatMedium);
 
@@ -456,14 +454,14 @@ void TwitchMessageBuilder::appendUsername()
 
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
-                                   MessageElementFlag::Text, selfColor,
+                                   MessageElementFlag::Username, selfColor,
                                    FontStyle::ChatMediumBold);
     } else {
         if (!this->action_) {
             usernameText += ":";
         }
 
-        this->emplace<TextElement>(usernameText, MessageElementFlag::Text,
+        this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
                                    this->usernameColor_,
                                    FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, this->userName});

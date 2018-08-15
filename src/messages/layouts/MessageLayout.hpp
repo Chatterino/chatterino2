@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 
 #include <QPixmap>
@@ -54,7 +55,8 @@ public:
     const MessageLayoutElement *getElementAt(QPoint point);
     int getLastCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX);
+    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+                          CopyMode copymode = CopyMode::Everything);
 
     // Misc
     bool isDisabled() const;

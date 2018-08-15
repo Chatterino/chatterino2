@@ -284,9 +284,10 @@ int MessageLayout::getSelectionIndex(QPoint position)
     return this->container_->getSelectionIndex(position);
 }
 
-void MessageLayout::addSelectionText(QString &str, int from, int to)
+void MessageLayout::addSelectionText(QString &str, int from, int to,
+                                     CopyMode copymode)
 {
-    this->container_->addSelectionText(str, from, to);
+    this->container_->addSelectionText(str, from, to, copymode);
 }
 
 }  // namespace chatterino

@@ -41,4 +41,9 @@ std::weak_ptr<T> weakOf(T *element)
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
+enum class CopyMode {
+    Everything,
+    OnlyTextAndEmotes,
+};
+
 }  // namespace chatterino

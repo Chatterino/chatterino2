@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
 #include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -74,7 +75,7 @@ struct MessageLayoutContainer {
     // selection
     int getSelectionIndex(QPoint point);
     int getLastCharacterIndex() const;
-    void addSelectionText(QString &str, int from, int to);
+    void addSelectionText(QString &str, int from, int to, CopyMode copymode);
 
     bool isCollapsed();
 

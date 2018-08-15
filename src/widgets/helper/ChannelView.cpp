@@ -1088,17 +1088,18 @@ void ChannelView::addContextMenuItems(
 
     menu->addAction("Copy message", [layout] {
         QString copyString;
-        layout->addSelectionText(copyString);
+        layout->addSelectionText(copyString, 0, INT_MAX,
+                                 CopyMode::OnlyTextAndEmotes);
 
         QGuiApplication::clipboard()->setText(copyString);
     });
 
-    //        menu->addAction("Quote message", [layout] {
-    //            QString copyString;
-    //            layout->addSelectionText(copyString);
+    menu->addAction("Copy full message", [layout] {
+        QString copyString;
+        layout->addSelectionText(copyString);
 
-    //            // insert into input
-    //        });
+        QGuiApplication::clipboard()->setText(copyString);
+    });
 
     menu->popup(QCursor::pos());
     menu->raise();
