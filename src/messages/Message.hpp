@@ -26,6 +26,7 @@ enum class MessageFlag : uint16_t {
     Untimeout = (1 << 9),
     PubSub = (1 << 10),
     Subscription = (1 << 11),
+    Notification = (1 << 12),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

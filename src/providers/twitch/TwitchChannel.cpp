@@ -38,6 +38,8 @@ TwitchChannel::TwitchChannel(const QString &name)
     // this->refreshChannelEmotes();
     // this->refreshViewerList();
 
+    this->tabHighlightRequested.connect([](HighlightState state) {});
+
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->setMod(false); });
 
@@ -326,9 +328,10 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     QApplication::alert(
                         getApp()->windows->getMainWindow().window(), 2500);
                 }
-                this->tabHighlightRequested.invoke(
-                    HighlightState::Notification);
             }
+            auto live = makeSystemMessage(this->getName() + " is live");
+            this->addMessage(live);
+            this->tabHighlightRequested.invoke(HighlightState::Notification);
             guard->live = newLiveStatus;
         }
     }
