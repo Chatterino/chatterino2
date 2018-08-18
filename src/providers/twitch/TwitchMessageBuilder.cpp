@@ -154,7 +154,7 @@ MessagePtr TwitchMessageBuilder::build()
             this->appendTwitchEmote(ircMessage, emote, twitchEmotes);
         }
     }
-
+    auto app = getApp();
     const auto &phrases = app->ignores->phrases.getVector();
     auto removeEmotesInRange = [&twitchEmotes](int pos, int len) mutable {
         auto it = std::remove_if(
