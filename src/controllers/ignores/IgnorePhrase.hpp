@@ -42,10 +42,15 @@ public:
                                      QRegularExpression::UseUnicodePropertiesOption);
         }
 
-        /*const auto &accvec = getApp()->accounts->twitch.accounts.getVector();
+        const auto &accvec = getApp()->accounts->twitch.accounts.getVector();
         for (const auto &acc : accvec) {
-            //
-        }*/
+            const auto &accemotes = *acc->accessEmotes();
+            for (const auto &emote : accemotes.emotes) {
+                if (this->replace_.contains(emote.first.string, Qt::CaseSensitive)) {
+                    this->emotes_.emplace(emote.first, emote.second);
+                }
+            }
+        }
     }
 
     const QString &getPattern() const
@@ -95,6 +100,16 @@ public:
         return this->isCaseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive;
     }
 
+    const std::unordered_map<EmoteName, EmotePtr> &getEmotes() const
+    {
+        return this->emotes_;
+    }
+
+    bool containsEmote() const
+    {
+        return !this->emotes_.empty();
+    }
+
 private:
     QString pattern_;
     bool isRegex_;
@@ -102,7 +117,7 @@ private:
     bool isBlock_;
     QString replace_;
     bool isCaseSensitive_;
-    std::map<QString, EmotePtr> emotes;
+    std::unordered_map<EmoteName, EmotePtr> emotes_;
 };
 }  // namespace chatterino
 

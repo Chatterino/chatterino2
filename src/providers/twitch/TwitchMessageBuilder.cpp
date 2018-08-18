@@ -167,7 +167,11 @@ MessagePtr TwitchMessageBuilder::build()
             twitchEmotes.begin(), twitchEmotes.end(), [&pos, &len](const auto &item) {
                 return ((std::get<0>(item) >= pos) && std::get<0>(item) < (pos + len));
             });
-
+        for (; it != twitchEmotes.end(); ++it) {
+            if (std::get<1>(*it) == nullptr) {
+                log("remem nullptr {}", std::get<2>(*it).string);
+            }
+        }
         std::vector<std::tuple<int, EmotePtr, EmoteName>> v(it, twitchEmotes.end());
         twitchEmotes.erase(it, twitchEmotes.end());
         return v;
@@ -179,6 +183,27 @@ MessagePtr TwitchMessageBuilder::build()
         while (it != twitchEmotes.end()) {
             std::get<0>(*it) += by;
             ++it;
+        }
+    };
+
+    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase, const QString &midrepl,
+                                         int startIndex) mutable {
+        if (!phrase.containsEmote()) {
+            return;
+        }
+        QStringList words = midrepl.split(' ');
+        int pos = 0;
+        for (const auto &word : words) {
+            for (const auto &emote : phrase.getEmotes()) {
+                if (word == emote.first.string) {
+                    if (emote.second == nullptr) {
+                        log("emote null {}", emote.first.string);
+                    }
+                    twitchEmotes.push_back(std::tuple<int, EmotePtr, EmoteName>{
+                        startIndex + pos, emote.second, emote.first});
+                }
+            }
+            pos += word.length() + 1;
         }
     };
 
@@ -204,6 +229,9 @@ MessagePtr TwitchMessageBuilder::build()
                 // mb in IgnoredPhrase ??
 
                 for (auto &tup : vret) {
+                    if (std::get<1>(tup) == nullptr) {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                    }
                     int index = 0;
                     const auto &emote = std::get<2>(tup);
                     while ((index = mid.indexOf(emote.string, index)) != -1) {
@@ -212,6 +240,9 @@ MessagePtr TwitchMessageBuilder::build()
                         twitchEmotes.push_back(tup);
                     }
                 }
+
+                addReplEmotes(phrase, mid, from);
+
                 this->originalMessage_.replace(from, len, mid);
                 int midsize = mid.size();
                 from += midsize;
@@ -234,6 +265,9 @@ MessagePtr TwitchMessageBuilder::build()
                 // mb in IgnoredPhrase ??
 
                 for (auto &tup : vret) {
+                    if (std::get<1>(tup) == nullptr) {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                    }
                     int index = 0;
                     const auto &emote = std::get<2>(tup);
                     while ((index = replace.indexOf(emote.string, index)) != -1) {
@@ -242,6 +276,9 @@ MessagePtr TwitchMessageBuilder::build()
                         twitchEmotes.push_back(tup);
                     }
                 }
+
+                addReplEmotes(phrase, replace, from);
+
                 this->originalMessage_.replace(from, len, replace);
                 int replacesize = replace.size();
                 from += replacesize;
@@ -252,6 +289,11 @@ MessagePtr TwitchMessageBuilder::build()
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) { return std::get<0>(a) < std::get<0>(b); });
+    twitchEmotes.erase(std::unique(twitchEmotes.begin(), twitchEmotes.end(),
+                                   [](const auto &first, const auto &second) {
+                                       return std::get<0>(first) == std::get<0>(second);
+                                   }),
+                       twitchEmotes.end());
     auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
@@ -274,6 +316,9 @@ void TwitchMessageBuilder::addWords(
         // check if it's a twitch emote twitch emote
         if (currentTwitchEmote != twitchEmotes.end() && std::get<0>(*currentTwitchEmote) == i) {
             auto emoteImage = std::get<1>(*currentTwitchEmote);
+            if (emoteImage == nullptr) {
+                log("emoteImage nullptr {}", std::get<2>(*currentTwitchEmote).string);
+            }
             this->emplace<EmoteElement>(emoteImage, MessageElementFlag::TwitchEmote);
 
             i += word.length() + 1;
@@ -689,9 +734,12 @@ void TwitchMessageBuilder::appendTwitchEmote(const Communi::IrcMessage *ircMessa
         }
 
         auto name = EmoteName{this->originalMessage_.mid(start, end - start + 1)};
-
-        vec.push_back(std::tuple<int, EmotePtr, EmoteName>{
-            start, app->emotes->twitch.getOrCreateEmote(id, name), name});
+        auto tup = std::tuple<int, EmotePtr, EmoteName>{
+            start, app->emotes->twitch.getOrCreateEmote(id, name), name};
+        if (std::get<1>(tup) == nullptr) {
+            log("nullptr {}", std::get<2>(tup).string);
+        }
+        vec.push_back(std::move(tup));
     }
 }
 
