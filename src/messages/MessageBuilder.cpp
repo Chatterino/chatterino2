@@ -1,6 +1,9 @@
 #include "MessageBuilder.hpp"
 
 #include "common/LinkParser.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
@@ -17,7 +20,7 @@ MessagePtr makeSystemMessage(const QString &text)
 }
 
 MessageBuilder::MessageBuilder()
-    : message_(std::make_unique<Message>())
+    : message_(std::make_shared<Message>())
 {
 }
 
@@ -165,7 +168,9 @@ Message &MessageBuilder::message()
 
 MessagePtr MessageBuilder::release()
 {
-    return MessagePtr(this->message_.release());
+    std::shared_ptr<Message> ptr;
+    this->message_.swap(ptr);
+    return ptr;
 }
 
 void MessageBuilder::append(std::unique_ptr<MessageElement> element)

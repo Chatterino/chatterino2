@@ -32,41 +32,42 @@ using WebsocketErrorCode = websocketpp::lib::error_code;
 
 namespace detail {
 
-struct Listener {
-    std::string topic;
-    bool authed;
-    bool persistent;
-    bool confirmed = false;
-};
+    struct Listener {
+        std::string topic;
+        bool authed;
+        bool persistent;
+        bool confirmed = false;
+    };
 
-class PubSubClient : public std::enable_shared_from_this<PubSubClient>
-{
-public:
-    PubSubClient(WebsocketClient &_websocketClient, WebsocketHandle _handle);
+    class PubSubClient : public std::enable_shared_from_this<PubSubClient>
+    {
+    public:
+        PubSubClient(WebsocketClient &_websocketClient,
+                     WebsocketHandle _handle);
 
-    void start();
-    void stop();
+        void start();
+        void stop();
 
-    bool listen(rapidjson::Document &message);
-    void unlistenPrefix(const std::string &prefix);
+        bool listen(rapidjson::Document &message);
+        void unlistenPrefix(const std::string &prefix);
 
-    void handlePong();
+        void handlePong();
 
-    bool isListeningToTopic(const std::string &topic);
+        bool isListeningToTopic(const std::string &topic);
 
-private:
-    void ping();
-    bool send(const char *payload);
+    private:
+        void ping();
+        bool send(const char *payload);
 
-    WebsocketClient &websocketClient_;
-    WebsocketHandle handle_;
-    uint16_t numListens_ = 0;
+        WebsocketClient &websocketClient_;
+        WebsocketHandle handle_;
+        uint16_t numListens_ = 0;
 
-    std::vector<Listener> listeners_;
+        std::vector<Listener> listeners_;
 
-    std::atomic<bool> awaitingPong_{false};
-    std::atomic<bool> started_{false};
-};
+        std::atomic<bool> awaitingPong_{false};
+        std::atomic<bool> started_{false};
+    };
 
 }  // namespace detail
 

@@ -2,8 +2,12 @@
 
 #include "Application.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
+#include "messages/layouts/MessageLayoutContainer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 
@@ -24,6 +28,7 @@ namespace chatterino {
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(message)
     , buffer_(nullptr)
+    , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");
 }
@@ -41,7 +46,7 @@ const Message *MessageLayout::getMessage()
 // Height
 int MessageLayout::getHeight() const
 {
-    return container_.getHeight();
+    return container_->getHeight();
 }
 
 // Layout
@@ -68,7 +73,7 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
     // check if work mask changed
     layoutRequired |= this->currentWordFlags_ != flags;
-    this->currentWordFlags_ = flags;  // app->settings->getWordTypeMask();
+    this->currentWordFlags_ = flags;  // getSettings()->getWordTypeMask();
 
     // check if layout was requested manually
     layoutRequired |= this->flags.has(MessageLayoutFlag::RequiresLayout);
@@ -82,9 +87,9 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
         return false;
     }
 
-    int oldHeight = this->container_.getHeight();
+    int oldHeight = this->container_->getHeight();
     this->actuallyLayout(width, flags);
-    if (widthChanged || this->container_.getHeight() != oldHeight) {
+    if (widthChanged || this->container_->getHeight() != oldHeight) {
         this->deleteBuffer();
     }
     this->invalidateBuffer();
@@ -103,22 +108,22 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
         messageFlags.unset(MessageFlag::Collapsed);
     }
 
-    this->container_.begin(width, this->scale_, messageFlags);
+    this->container_->begin(width, this->scale_, messageFlags);
 
     for (const auto &element : this->message_->elements) {
-        element->addToContainer(this->container_, _flags);
+        element->addToContainer(*this->container_, _flags);
     }
 
-    if (this->height_ != this->container_.getHeight()) {
+    if (this->height_ != this->container_->getHeight()) {
         this->deleteBuffer();
     }
 
-    this->container_.end();
-    this->height_ = this->container_.getHeight();
+    this->container_->end();
+    this->height_ = this->container_->getHeight();
 
     // collapsed state
     this->flags.unset(MessageLayoutFlag::Collapsed);
-    if (this->container_.isCollapsed()) {
+    if (this->container_->isCollapsed()) {
         this->flags.set(MessageLayoutFlag::Collapsed);
     }
 }
@@ -135,11 +140,12 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     if (!pixmap) {
 #ifdef Q_OS_MACOS
         pixmap = new QPixmap(int(width * painter.device()->devicePixelRatioF()),
-                             int(container_.getHeight() *
+                             int(container_->getHeight() *
                                  painter.device()->devicePixelRatioF()));
         pixmap->setDevicePixelRatio(painter.device()->devicePixelRatioF());
 #else
-        pixmap = new QPixmap(width, std::max(16, this->container_.getHeight()));
+        pixmap =
+            new QPixmap(width, std::max(16, this->container_->getHeight()));
 #endif
 
         this->buffer_ = std::shared_ptr<QPixmap>(pixmap);
@@ -157,7 +163,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     //    this->container.getHeight(), *pixmap);
 
     // draw gif emotes
-    this->container_.paintAnimatedElements(painter, y);
+    this->container_->paintAnimatedElements(painter, y);
 
     // draw disabled
     if (this->message_->flags.has(MessageFlag::Disabled)) {
@@ -167,12 +173,12 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 
     // draw selection
     if (!selection.isEmpty()) {
-        this->container_.paintSelection(painter, messageIndex, selection, y);
+        this->container_->paintSelection(painter, messageIndex, selection, y);
     }
 
     // draw message seperation line
-    if (app->settings->separateMessages.getValue()) {
-        painter.fillRect(0, y, this->container_.getWidth(), 1,
+    if (getSettings()->separateMessages.getValue()) {
+        painter.fillRect(0, y, this->container_->getWidth(), 1,
                          app->themes->splits.messageSeperator);
     }
 
@@ -184,9 +190,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                 : app->themes->tabs.selected.backgrounds.unfocused.color();
 
         QBrush brush(color, static_cast<Qt::BrushStyle>(
-                                app->settings->lastMessagePattern.getValue()));
+                                getSettings()->lastMessagePattern.getValue()));
 
-        painter.fillRect(0, y + this->container_.getHeight() - 1,
+        painter.fillRect(0, y + this->container_->getHeight() - 1,
                          pixmap->width(), 1, brush);
     }
 
@@ -208,7 +214,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         backgroundColor = app->themes->messages.backgrounds.highlighted;
     } else if (this->message_->flags.has(MessageFlag::Subscription)) {
         backgroundColor = app->themes->messages.backgrounds.subscription;
-    } else if (app->settings->alternateMessageBackground.getValue() &&
+    } else if (getSettings()->alternateMessageBackground.getValue() &&
                this->flags.has(MessageLayoutFlag::AlternateBackground)) {
         backgroundColor = app->themes->messages.backgrounds.alternate;
     } else {
@@ -217,7 +223,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     painter.fillRect(buffer->rect(), backgroundColor);
 
     // draw message
-    this->container_.paintElements(painter);
+    this->container_->paintElements(painter);
 
 #ifdef FOURTF
     // debug
@@ -252,7 +258,7 @@ void MessageLayout::deleteCache()
     this->deleteBuffer();
 
 #ifdef XD
-    this->container_.clear();
+    this->container_->clear();
 #endif
 }
 
@@ -265,22 +271,23 @@ void MessageLayout::deleteCache()
 const MessageLayoutElement *MessageLayout::getElementAt(QPoint point)
 {
     // go through all words and return the first one that contains the point.
-    return this->container_.getElementAt(point);
+    return this->container_->getElementAt(point);
 }
 
 int MessageLayout::getLastCharacterIndex() const
 {
-    return this->container_.getLastCharacterIndex();
+    return this->container_->getLastCharacterIndex();
 }
 
 int MessageLayout::getSelectionIndex(QPoint position)
 {
-    return this->container_.getSelectionIndex(position);
+    return this->container_->getSelectionIndex(position);
 }
 
-void MessageLayout::addSelectionText(QString &str, int from, int to)
+void MessageLayout::addSelectionText(QString &str, int from, int to,
+                                     CopyMode copymode)
 {
-    this->container_.addSelectionText(str, from, to);
+    this->container_->addSelectionText(str, from, to, copymode);
 }
 
 }  // namespace chatterino

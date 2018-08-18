@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "messages/Emote.hpp"
-#include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
@@ -11,13 +9,19 @@
 #include <QString>
 #include <QTime>
 #include <boost/noncopyable.hpp>
-
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace chatterino {
 class Channel;
 struct MessageLayoutContainer;
+
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 enum class MessageElementFlag {
     None = 0,

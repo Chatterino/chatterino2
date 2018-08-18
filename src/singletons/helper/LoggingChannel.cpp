@@ -30,11 +30,11 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
 
     auto app = getApp();
 
-    app->settings->logPath.connect([this](const QString &logPath, auto) {
+    getSettings()->logPath.connect([this](const QString &logPath, auto) {
         auto app = getApp();
 
         if (logPath.isEmpty()) {
-            this->baseDirectory = app->paths->messageLogDirectory;
+            this->baseDirectory = getPaths()->messageLogDirectory;
         } else {
             this->baseDirectory = logPath;
         }

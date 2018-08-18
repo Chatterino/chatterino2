@@ -1,45 +1,45 @@
 #pragma once
 
-#include "common/Common.hpp"
-
 #include <QPixmap>
 #include <QString>
 #include <QThread>
 #include <QVector>
 #include <atomic>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <memory>
 #include <mutex>
 #include <pajlada/signals/signal.hpp>
 
+#include "common/Aliases.hpp"
 #include "common/NullablePtr.hpp"
 
 namespace chatterino {
 namespace {
-template <typename Image>
-struct Frame {
-    Image image;
-    int duration;
-};
-class Frames : boost::noncopyable
-{
-public:
-    Frames();
-    Frames(const QVector<Frame<QPixmap>> &frames);
-    ~Frames();
+    template <typename Image>
+    struct Frame {
+        Image image;
+        int duration;
+    };
+    class Frames : boost::noncopyable
+    {
+    public:
+        Frames();
+        Frames(const QVector<Frame<QPixmap>> &frames);
+        ~Frames();
 
-    bool animated() const;
-    void advance();
-    boost::optional<QPixmap> current() const;
-    boost::optional<QPixmap> first() const;
+        bool animated() const;
+        void advance();
+        boost::optional<QPixmap> current() const;
+        boost::optional<QPixmap> first() const;
 
-private:
-    QVector<Frame<QPixmap>> items_;
-    int index_{0};
-    int durationOffset_{0};
-    pajlada::Signals::Connection gifTimerConnection_;
-};
+    private:
+        QVector<Frame<QPixmap>> items_;
+        int index_{0};
+        int durationOffset_{0};
+        pajlada::Signals::Connection gifTimerConnection_;
+    };
 }  // namespace
 
 class Image;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "providers/irc/IrcConnection2.hpp"
 
 #include <IrcMessage>
@@ -10,6 +9,9 @@
 #include <mutex>
 
 namespace chatterino {
+
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class AbstractIrcServer
 {

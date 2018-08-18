@@ -3,10 +3,11 @@
 #include "common/Channel.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/splits/Split.hpp"
 
 #ifdef USEWEBENGINE
-#include <QtWebEngineWidgets>
+#    include <QtWebEngineWidgets>
 #endif
 
 namespace chatterino {

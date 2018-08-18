@@ -9,15 +9,13 @@
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
-
 namespace {
-
-QString CreateLink(const QString &url, const QString &name)
-{
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   name + "</span></a>");
-}
-
+    QString createLink(const QString &url, const QString &name)
+    {
+        return QString("<a href=\"" + url +
+                       "\"><span style=\"color: white;\">" + name +
+                       "</span></a>");
+    }
 }  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
@@ -41,8 +39,8 @@ ExternalToolsPage::ExternalToolsPage()
         description->setStyleSheet("color: #bbb");
 
         auto links = new QLabel(
-            CreateLink("https://streamlink.github.io/", "Website") + " " +
-            CreateLink(
+            createLink("https://streamlink.github.io/", "Website") + " " +
+            createLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
                 "Download"));
         links->setTextFormat(Qt::RichText);
@@ -57,22 +55,22 @@ ExternalToolsPage::ExternalToolsPage()
         auto customPathCb =
             this->createCheckBox("Use custom path (Enable if using "
                                  "non-standard streamlink installation path)",
-                                 app->settings->streamlinkUseCustomPath);
+                                 getSettings()->streamlinkUseCustomPath);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, customPathCb);
 
-        auto customPath = this->createLineEdit(app->settings->streamlinkPath);
+        auto customPath = this->createLineEdit(getSettings()->streamlinkPath);
         customPath->setPlaceholderText(
             "Path to folder where Streamlink executable can be found");
         groupLayout->addRow("Custom streamlink path:", customPath);
         groupLayout->addRow(
             "Preferred quality:",
             this->createComboBox({STREAMLINK_QUALITY},
-                                 app->settings->preferredQuality));
+                                 getSettings()->preferredQuality));
         groupLayout->addRow(
             "Additional options:",
-            this->createLineEdit(app->settings->streamlinkOpts));
+            this->createLineEdit(getSettings()->streamlinkOpts));
 
-        app->settings->streamlinkUseCustomPath.connect(
+        getSettings()->streamlinkUseCustomPath.connect(
             [=](const auto &value, auto) {
                 customPath->setEnabled(value);  //
             },

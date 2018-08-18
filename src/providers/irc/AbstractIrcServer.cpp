@@ -1,6 +1,8 @@
 #include "AbstractIrcServer.hpp"
 
+#include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "debug/Log.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"

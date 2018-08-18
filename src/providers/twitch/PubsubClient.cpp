@@ -24,157 +24,159 @@ static std::map<QString, std::string> sentMessages;
 
 namespace detail {
 
-PubSubClient::PubSubClient(WebsocketClient &websocketClient,
-                           WebsocketHandle handle)
-    : websocketClient_(websocketClient)
-    , handle_(handle)
-{
-}
-
-void PubSubClient::start()
-{
-    assert(!this->started_);
-
-    this->started_ = true;
-
-    this->ping();
-}
-
-void PubSubClient::stop()
-{
-    assert(this->started_);
-
-    this->started_ = false;
-}
-
-bool PubSubClient::listen(rapidjson::Document &message)
-{
-    int numRequestedListens = message["data"]["topics"].Size();
-
-    if (this->numListens_ + numRequestedListens > MAX_PUBSUB_LISTENS) {
-        // This PubSubClient is already at its peak listens
-        return false;
+    PubSubClient::PubSubClient(WebsocketClient &websocketClient,
+                               WebsocketHandle handle)
+        : websocketClient_(websocketClient)
+        , handle_(handle)
+    {
     }
 
-    this->numListens_ += numRequestedListens;
+    void PubSubClient::start()
+    {
+        assert(!this->started_);
 
-    for (const auto &topic : message["data"]["topics"].GetArray()) {
-        this->listeners_.emplace_back(
-            Listener{topic.GetString(), false, false, false});
+        this->started_ = true;
+
+        this->ping();
     }
 
-    auto uuid = CreateUUID();
+    void PubSubClient::stop()
+    {
+        assert(this->started_);
 
-    rj::set(message, "nonce", uuid);
+        this->started_ = false;
+    }
 
-    std::string payload = rj::stringify(message);
-    sentMessages[uuid] = payload;
+    bool PubSubClient::listen(rapidjson::Document &message)
+    {
+        int numRequestedListens = message["data"]["topics"].Size();
 
-    this->send(payload.c_str());
-
-    return true;
-}
-
-void PubSubClient::unlistenPrefix(const std::string &prefix)
-{
-    std::vector<std::string> topics;
-
-    for (auto it = this->listeners_.begin(); it != this->listeners_.end();) {
-        const auto &listener = *it;
-        if (listener.topic.find(prefix) == 0) {
-            topics.push_back(listener.topic);
-            it = this->listeners_.erase(it);
-        } else {
-            ++it;
+        if (this->numListens_ + numRequestedListens > MAX_PUBSUB_LISTENS) {
+            // This PubSubClient is already at its peak listens
+            return false;
         }
-    }
 
-    if (topics.empty()) {
-        return;
-    }
+        this->numListens_ += numRequestedListens;
 
-    auto message = createUnlistenMessage(topics);
-
-    auto uuid = CreateUUID();
-
-    rj::set(message, "nonce", CreateUUID());
-
-    std::string payload = rj::stringify(message);
-    sentMessages[uuid] = payload;
-
-    this->send(payload.c_str());
-}
-
-void PubSubClient::handlePong()
-{
-    assert(this->awaitingPong_);
-
-    log("Got pong!");
-
-    this->awaitingPong_ = false;
-}
-
-bool PubSubClient::isListeningToTopic(const std::string &payload)
-{
-    for (const auto &listener : this->listeners_) {
-        if (listener.topic == payload) {
-            return true;
+        for (const auto &topic : message["data"]["topics"].GetArray()) {
+            this->listeners_.emplace_back(
+                Listener{topic.GetString(), false, false, false});
         }
+
+        auto uuid = CreateUUID();
+
+        rj::set(message, "nonce", uuid);
+
+        std::string payload = rj::stringify(message);
+        sentMessages[uuid] = payload;
+
+        this->send(payload.c_str());
+
+        return true;
     }
 
-    return false;
-}
+    void PubSubClient::unlistenPrefix(const std::string &prefix)
+    {
+        std::vector<std::string> topics;
 
-void PubSubClient::ping()
-{
-    assert(this->started_);
+        for (auto it = this->listeners_.begin();
+             it != this->listeners_.end();) {
+            const auto &listener = *it;
+            if (listener.topic.find(prefix) == 0) {
+                topics.push_back(listener.topic);
+                it = this->listeners_.erase(it);
+            } else {
+                ++it;
+            }
+        }
 
-    if (!this->send(pingPayload)) {
-        return;
+        if (topics.empty()) {
+            return;
+        }
+
+        auto message = createUnlistenMessage(topics);
+
+        auto uuid = CreateUUID();
+
+        rj::set(message, "nonce", CreateUUID());
+
+        std::string payload = rj::stringify(message);
+        sentMessages[uuid] = payload;
+
+        this->send(payload.c_str());
     }
 
-    this->awaitingPong_ = true;
+    void PubSubClient::handlePong()
+    {
+        assert(this->awaitingPong_);
 
-    auto self = this->shared_from_this();
+        log("Got pong!");
 
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::seconds(15),
-             [self](auto timer) {
-                 if (!self->started_) {
-                     return;
-                 }
+        this->awaitingPong_ = false;
+    }
 
-                 if (self->awaitingPong_) {
-                     log("No pong respnose, disconnect!");
-                     // TODO(pajlada): Label this connection as "disconnect me"
-                 }
-             });
-
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::minutes(5),
-             [self](auto timer) {
-                 if (!self->started_) {
-                     return;
-                 }
-
-                 self->ping();  //
-             });
-}
-
-bool PubSubClient::send(const char *payload)
-{
-    WebsocketErrorCode ec;
-    this->websocketClient_.send(this->handle_, payload,
-                                websocketpp::frame::opcode::text, ec);
-
-    if (ec) {
-        log("Error sending message {}: {}", payload, ec.message());
-        // TODO(pajlada): Check which error code happened and maybe gracefully
-        // handle it
+    bool PubSubClient::isListeningToTopic(const std::string &payload)
+    {
+        for (const auto &listener : this->listeners_) {
+            if (listener.topic == payload) {
+                return true;
+            }
+        }
 
         return false;
     }
 
-    return true;
-}
+    void PubSubClient::ping()
+    {
+        assert(this->started_);
+
+        if (!this->send(pingPayload)) {
+            return;
+        }
+
+        this->awaitingPong_ = true;
+
+        auto self = this->shared_from_this();
+
+        runAfter(this->websocketClient_.get_io_service(),
+                 std::chrono::seconds(15), [self](auto timer) {
+                     if (!self->started_) {
+                         return;
+                     }
+
+                     if (self->awaitingPong_) {
+                         log("No pong respnose, disconnect!");
+                         // TODO(pajlada): Label this connection as "disconnect
+                         // me"
+                     }
+                 });
+
+        runAfter(this->websocketClient_.get_io_service(),
+                 std::chrono::minutes(5), [self](auto timer) {
+                     if (!self->started_) {
+                         return;
+                     }
+
+                     self->ping();  //
+                 });
+    }
+
+    bool PubSubClient::send(const char *payload)
+    {
+        WebsocketErrorCode ec;
+        this->websocketClient_.send(this->handle_, payload,
+                                    websocketpp::frame::opcode::text, ec);
+
+        if (ec) {
+            log("Error sending message {}: {}", payload, ec.message());
+            // TODO(pajlada): Check which error code happened and maybe
+            // gracefully handle it
+
+            return false;
+        }
+
+        return true;
+    }
 
 }  // namespace detail
 

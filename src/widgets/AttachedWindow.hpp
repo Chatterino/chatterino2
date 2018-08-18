@@ -1,11 +1,13 @@
 #pragma once
 
+#include <QTimer>
 #include <QWidget>
 
-#include "common/Channel.hpp"
-#include "widgets/splits/Split.hpp"
-
 namespace chatterino {
+
+class Split;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class AttachedWindow : public QWidget
 {

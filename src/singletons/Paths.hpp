@@ -43,6 +43,6 @@ private:
     boost::optional<bool> portable_;
 };
 
-[[deprecated]] Paths *getPaths();
+Paths *getPaths();
 
 }  // namespace chatterino

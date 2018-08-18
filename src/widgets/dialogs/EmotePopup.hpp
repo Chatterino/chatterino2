@@ -1,12 +1,15 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
 namespace chatterino {
+
+class Link;
+class ChannelView;
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 
 class EmotePopup : public BaseWindow
 {

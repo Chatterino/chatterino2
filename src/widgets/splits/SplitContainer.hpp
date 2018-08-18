@@ -1,8 +1,6 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/NotebookTab.hpp"
-#include "widgets/splits/Split.hpp"
 
 #include <QDragEnterEvent>
 #include <QHBoxLayout>
@@ -13,21 +11,24 @@
 
 #include <algorithm>
 #include <functional>
-#include <vector>
-
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
+#include <vector>
 
 class QJsonObject;
 
 namespace chatterino {
+
+class Split;
+class NotebookTab;
+class Notebook;
 
 //
 // Note: This class is a spaghetti container. There is a lot of spaghetti code
 // inside but it doesn't expose any of it publicly.
 //
 
-class SplitContainer : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitContainer final : public BaseWidget, pajlada::Signals::SignalHolder
 {
     Q_OBJECT
 

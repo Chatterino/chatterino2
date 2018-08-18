@@ -10,7 +10,7 @@
 #include <QVBoxLayout>
 
 #ifdef USEWINSDK
-#include <Windows.h>
+#    include <Windows.h>
 #endif
 
 namespace chatterino {
@@ -79,7 +79,7 @@ void TooltipWidget::updateFont()
     auto app = getApp();
 
     this->setFont(
-        app->fonts->getFont(Fonts::Type::ChatMediumSmall, this->getScale()));
+        app->fonts->getFont(FontStyle::ChatMediumSmall, this->getScale()));
 }
 
 void TooltipWidget::setText(QString text)

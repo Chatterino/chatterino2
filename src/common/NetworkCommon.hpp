@@ -2,12 +2,11 @@
 
 #include <functional>
 
-#include "Common.hpp"
-
 class QNetworkReply;
 
 namespace chatterino {
 
+class Outcome;
 class NetworkResult;
 
 using NetworkSuccessCallback = std::function<Outcome(NetworkResult)>;

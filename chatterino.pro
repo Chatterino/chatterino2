@@ -33,7 +33,7 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 }
 
 # Icons
-macx:ICON = resources/images/chatterino2.icns
+#macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
 
@@ -71,6 +71,8 @@ win32 {
 # OSX include directory
 macx {
     INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/opt/openssl/include
+    LIBS += -L/usr/local/opt/openssl/lib
 }
 
 # Optional dependency on Windows SDK 7
@@ -250,7 +252,8 @@ SOURCES += \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
-    src/debug/Benchmark.cpp
+    src/debug/Benchmark.cpp \
+    src/common/UsernameSet.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -445,7 +448,8 @@ HEADERS  += \
     src/widgets/helper/EffectLabel.hpp \
     src/util/LayoutHelper.hpp \
     src/widgets/helper/Button.hpp \
-    src/messages/MessageContainer.hpp
+    src/messages/MessageContainer.hpp \
+    src/common/UsernameSet.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

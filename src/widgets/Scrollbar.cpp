@@ -1,6 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -103,8 +104,7 @@ void Scrollbar::setSmallChange(qreal value)
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    auto app = getApp();
-    animated &= app->settings->enableSmoothScrolling.getValue();
+    animated &= getSettings()->enableSmoothScrolling.getValue();
     value = std::max(this->minimum_,
                      std::min(this->maximum_ - this->largeChange_, value));
 
@@ -221,8 +221,6 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 
 void Scrollbar::paintEvent(QPaintEvent *)
 {
-    auto *app = getApp();
-
     bool mouseOver = this->mouseOverIndex_ != -1;
     int xOffset = mouseOver ? 0 : width() - int(4 * this->getScale());
 
@@ -267,9 +265,11 @@ void Scrollbar::paintEvent(QPaintEvent *)
             QColor color = [&] {
                 switch (highlight.getColor()) {
                     case ScrollbarHighlight::Highlight:
-                        return app->themes->scrollbars.highlights.highlight;
+                        return getApp()
+                            ->themes->scrollbars.highlights.highlight;
                     case ScrollbarHighlight::Subscription:
-                        return app->themes->scrollbars.highlights.subscription;
+                        return getApp()
+                            ->themes->scrollbars.highlights.subscription;
                 }
                 return QColor();
             }();

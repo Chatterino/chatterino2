@@ -8,6 +8,7 @@
 
 namespace chatterino {
 
+class Account;
 class AccountController;
 
 class AccountModel : public SignalVectorModel<std::shared_ptr<Account>>

@@ -1,5 +1,6 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 
+#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"

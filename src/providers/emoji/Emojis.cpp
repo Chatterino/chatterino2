@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
+#include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 
 #include <rapidjson/error/en.h>
@@ -12,82 +13,81 @@
 #include <memory>
 
 namespace chatterino {
-
 namespace {
+    void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
+                    const rapidjson::Value &unparsedEmoji,
+                    QString shortCode = QString())
+    {
+        static uint unicodeBytes[4];
 
-void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
-                const rapidjson::Value &unparsedEmoji,
-                QString shortCode = QString())
-{
-    static uint unicodeBytes[4];
+        struct {
+            bool apple;
+            bool google;
+            bool twitter;
+            bool emojione;
+            bool facebook;
+            bool messenger;
+        } capabilities;
 
-    struct {
-        bool apple;
-        bool google;
-        bool twitter;
-        bool emojione;
-        bool facebook;
-        bool messenger;
-    } capabilities;
-
-    if (!shortCode.isEmpty()) {
-        emojiData->shortCodes.push_back(shortCode);
-    } else {
-        const auto &shortCodes = unparsedEmoji["short_names"];
-        for (const auto &shortCode : shortCodes.GetArray()) {
-            emojiData->shortCodes.emplace_back(shortCode.GetString());
+        if (!shortCode.isEmpty()) {
+            emojiData->shortCodes.push_back(shortCode);
+        } else {
+            const auto &shortCodes = unparsedEmoji["short_names"];
+            for (const auto &shortCode : shortCodes.GetArray()) {
+                emojiData->shortCodes.emplace_back(shortCode.GetString());
+            }
         }
-    }
 
-    rj::getSafe(unparsedEmoji, "non_qualified", emojiData->nonQualifiedCode);
-    rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
+        rj::getSafe(unparsedEmoji, "non_qualified",
+                    emojiData->nonQualifiedCode);
+        rj::getSafe(unparsedEmoji, "unified", emojiData->unifiedCode);
 
-    rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
-    rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
-    rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
-    rj::getSafe(unparsedEmoji, "has_img_emojione", capabilities.emojione);
-    rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
-    rj::getSafe(unparsedEmoji, "has_img_messenger", capabilities.messenger);
+        rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
+        rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
+        rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
+        rj::getSafe(unparsedEmoji, "has_img_emojione", capabilities.emojione);
+        rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
+        rj::getSafe(unparsedEmoji, "has_img_messenger", capabilities.messenger);
 
-    if (capabilities.apple) {
-        emojiData->capabilities.insert("Apple");
-    }
-    if (capabilities.google) {
-        emojiData->capabilities.insert("Google");
-    }
-    if (capabilities.twitter) {
-        emojiData->capabilities.insert("Twitter");
-    }
-    if (capabilities.emojione) {
-        emojiData->capabilities.insert("EmojiOne 3");
-    }
-    if (capabilities.facebook) {
-        emojiData->capabilities.insert("Facebook");
-    }
-    if (capabilities.messenger) {
-        emojiData->capabilities.insert("Messenger");
-    }
+        if (capabilities.apple) {
+            emojiData->capabilities.insert("Apple");
+        }
+        if (capabilities.google) {
+            emojiData->capabilities.insert("Google");
+        }
+        if (capabilities.twitter) {
+            emojiData->capabilities.insert("Twitter");
+        }
+        if (capabilities.emojione) {
+            emojiData->capabilities.insert("EmojiOne 3");
+        }
+        if (capabilities.facebook) {
+            emojiData->capabilities.insert("Facebook");
+        }
+        if (capabilities.messenger) {
+            emojiData->capabilities.insert("Messenger");
+        }
 
-    QStringList unicodeCharacters;
-    if (!emojiData->nonQualifiedCode.isEmpty()) {
-        unicodeCharacters = emojiData->nonQualifiedCode.toLower().split('-');
-    } else {
-        unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
+        QStringList unicodeCharacters;
+        if (!emojiData->nonQualifiedCode.isEmpty()) {
+            unicodeCharacters =
+                emojiData->nonQualifiedCode.toLower().split('-');
+        } else {
+            unicodeCharacters = emojiData->unifiedCode.toLower().split('-');
+        }
+        if (unicodeCharacters.length() < 1) {
+            return;
+        }
+
+        int numUnicodeBytes = 0;
+
+        for (const QString &unicodeCharacter : unicodeCharacters) {
+            unicodeBytes[numUnicodeBytes++] =
+                QString(unicodeCharacter).toUInt(nullptr, 16);
+        }
+
+        emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
     }
-    if (unicodeCharacters.length() < 1) {
-        return;
-    }
-
-    int numUnicodeBytes = 0;
-
-    for (const QString &unicodeCharacter : unicodeCharacters) {
-        unicodeBytes[numUnicodeBytes++] =
-            QString(unicodeCharacter).toUInt(nullptr, 16);
-    }
-
-    emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
-}
-
 }  // namespace
 
 void Emojis::load()
@@ -103,12 +103,10 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    std::map<std::string, QString> toneNames;
-    toneNames["1F3FB"] = "tone1";
-    toneNames["1F3FC"] = "tone2";
-    toneNames["1F3FD"] = "tone3";
-    toneNames["1F3FE"] = "tone4";
-    toneNames["1F3FF"] = "tone5";
+    auto toneNames = std::map<std::string, QString>{
+        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+    };
 
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
@@ -218,7 +216,7 @@ void Emojis::loadEmojiSet()
 {
     auto app = getApp();
 
-    app->settings->emojiSet.connect([=](const auto &emojiSet, auto) {
+    getSettings()->emojiSet.connect([=](const auto &emojiSet, auto) {
         log("Using emoji set {}", emojiSet);
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
@@ -233,27 +231,12 @@ void Emojis::loadEmojiSet()
                 // {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
                 // {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
 
-                // {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
-                // {"EmojiOne 3", "https://braize.pajlada.com/emoji/img/emojione/64/"},
-                // {"Twitter", "https://braize.pajlada.com/emoji/img/twitter/64/"},
-                // {"Facebook", "https://braize.pajlada.com/emoji/img/facebook/64/"},
-                // {"Apple", "https://braize.pajlada.com/emoji/img/apple/64/"},
-                // {"Google", "https://braize.pajlada.com/emoji/img/google/64/"},
-                // {"Messenger", "https://braize.pajlada.com/emoji/img/messenger/64/"},
-
                 {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
                 {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
                 {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
                 {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
                 {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
                 {"Messenger", "https://pajbot.com/static/emoji/img/messenger/64/"},
-
-//                {"EmojiOne 3", "https://cdn.fourtf.com/emoji/emojione/64/"},
-//                {"Twitter", "https://cdn.fourtf.com/emoji/twitter/64/"},
-//                {"Facebook", "https://cdn.fourtf.com/emoji/facebook/64/"},
-//                {"Apple", "https://cdn.fourtf.com/emoji/apple/64/"},
-//                {"Google", "https://cdn.fourtf.com/emoji/google/64/"},
-//                {"Messenger", "https://cdn.fourtf.com/emoji/messenger/64/"},
             };
             // clang-format on
 

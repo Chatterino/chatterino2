@@ -1,5 +1,7 @@
 #include "MessageColor.hpp"
 
+#include "singletons/Theme.hpp"
+
 namespace chatterino {
 
 MessageColor::MessageColor(const QColor &color)

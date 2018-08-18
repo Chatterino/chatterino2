@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkData.hpp"
 #include "common/NetworkRequester.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/NetworkTimer.hpp"
 #include "common/NetworkWorker.hpp"
 
 namespace chatterino {
+class NetworkData;
 
 class NetworkRequest
 {

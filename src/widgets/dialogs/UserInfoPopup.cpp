@@ -1,6 +1,7 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"

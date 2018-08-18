@@ -33,7 +33,7 @@
 //    LayoutCreator<LogsPage> layoutCreator(this);
 //    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-//    auto logPath = app->paths->logsFolderPath;
+//    auto logPath = getPaths()->logsFolderPath;
 
 //    auto created = layout.emplace<QLabel>();
 //    created->setText("Logs are saved to " + CreateLink(logPath, true));
@@ -43,7 +43,7 @@
 //                                     Qt::LinksAccessibleByKeyboard);
 //    created->setOpenExternalLinks(true);
 //    layout.append(this->createCheckBox("Enable logging",
-//    app->settings->enableLogging));
+//    getSettings()->enableLogging));
 
 //    layout->addStretch(1);
 //}

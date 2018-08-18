@@ -10,19 +10,20 @@ void GIFTimer::initialize()
 {
     this->timer.setInterval(30);
 
-    getApp()->settings->enableGifAnimations.connect([this](bool enabled, auto) {
-        if (enabled) {
+    getSettings()->enableGifAnimations.connect([this](bool enabled, auto) {
+        if (enabled)
             this->timer.start();
-        } else {
+        else
             this->timer.stop();
-        }
     });
 
     QObject::connect(&this->timer, &QTimer::timeout, [this] {
+        if (getSettings()->enableAnimationsWhenFocused &&
+            qApp->activeWindow() == nullptr)
+            return;
+
         this->signal.invoke();
-        // fourtf:
-        auto app = getApp();
-        app->windows->repaintGifEmotes();
+        getApp()->windows->repaintGifEmotes();
     });
 }
 

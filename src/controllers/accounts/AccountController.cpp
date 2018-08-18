@@ -1,6 +1,8 @@
 #include "AccountController.hpp"
 
+#include "controllers/accounts/Account.hpp"
 #include "controllers/accounts/AccountModel.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 
 namespace chatterino {
 

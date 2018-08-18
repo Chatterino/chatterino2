@@ -22,15 +22,10 @@ namespace chatterino {
 // Channel
 //
 Channel::Channel(const QString &name, Type type)
-    : completionModel(name)
+    : completionModel(*this)
     , name_(name)
     , type_(type)
 {
-    QObject::connect(&this->clearCompletionModelTimer_, &QTimer::timeout,
-                     [this]() {
-                         this->completionModel.clearExpiredStrings();  //
-                     });
-    this->clearCompletionModelTimer_.start(60 * 1000);
 }
 
 Channel::~Channel()
@@ -165,13 +160,14 @@ void Channel::disableAllMessages()
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.getLength();
     for (int i = 0; i < snapshotLength; i++) {
-        auto &s = snapshot[i];
-        if (s->flags.hasAny({MessageFlag::System, MessageFlag::Timeout})) {
+        auto &message = snapshot[i];
+        if (message->flags.hasAny(
+                {MessageFlag::System, MessageFlag::Timeout})) {
             continue;
         }
 
         // FOURTF: disabled for now
-        // s->flags.EnableFlag(MessageFlag::Disabled);
+        const_cast<Message *>(message.get())->flags.set(MessageFlag::Disabled);
     }
 }
 

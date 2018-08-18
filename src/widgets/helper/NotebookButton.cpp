@@ -2,6 +2,7 @@
 #include "singletons/Theme.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/Button.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QMouseEvent>

@@ -6,15 +6,12 @@
 namespace chatterino {
 
 void initUpdateButton(Button &button,
-                      std::unique_ptr<UpdateDialog> &handle,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();
 
     // show update prompt when clicking the button
-    QObject::connect(&button, &Button::clicked, [&button, &handle] {
-        (void)(handle);
-
+    QObject::connect(&button, &Button::clicked, [&button] {
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(

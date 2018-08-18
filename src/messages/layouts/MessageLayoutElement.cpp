@@ -1,7 +1,9 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
+#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QDebug>

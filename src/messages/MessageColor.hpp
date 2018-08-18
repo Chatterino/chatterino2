@@ -1,10 +1,9 @@
 #pragma once
 
-#include "singletons/Theme.hpp"
-
 #include <QColor>
 
 namespace chatterino {
+class Theme;
 
 struct MessageColor {
     enum Type { Custom, Text, Link, System };

@@ -1,10 +1,14 @@
 #include "LookPage.hpp"
 
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/Line.hpp"
 
 #include <QFontDialog>
@@ -27,9 +31,9 @@
 // clang-format on
 
 #ifdef USEWINSDK
-#define WINDOW_TOPMOST "Window always on top"
+#    define WINDOW_TOPMOST "Window always on top"
 #else
-#define WINDOW_TOPMOST "Window always on top (requires restart)"
+#    define WINDOW_TOPMOST "Window always on top (requires restart)"
 #endif
 #define INPUT_EMPTY "Show input box when empty"
 #define LAST_MSG "Mark the last message you read"
@@ -204,16 +208,19 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
     /*
     emotes.append(
         this->createCheckBox("Enable Twitch emotes",
-    app->settings->enableTwitchEmotes));
+    getSettings()->enableTwitchEmotes));
     emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
-                                       app->settings->enableBttvEmotes));
+                                       getSettings()->enableBttvEmotes));
     emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                       app->settings->enableFfzEmotes));
+                                       getSettings()->enableFfzEmotes));
     emotes.append(this->createCheckBox("Enable emojis",
-    app->settings->enableEmojis));
+    getSettings()->enableEmojis));
     */
     layout.append(
         this->createCheckBox("Animations", getSettings()->enableGifAnimations));
+    layout.append(
+        this->createCheckBox("Animations only when chatterino has focus",
+                             getSettings()->enableAnimationsWhenFocused));
 
     auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
@@ -281,7 +288,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     combo->addItems({"Dotted line", "Solid line"});
 
     const auto currentIndex = []() -> int {
-        switch (getApp()->settings->lastMessagePattern.getValue()) {
+        switch (getSettings()->lastMessagePattern.getValue()) {
             case Qt::SolidLine:
                 return 1;
             case Qt::VerPattern:
@@ -416,7 +423,7 @@ QLayout *LookPage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(Fonts::ChatMedium, 1.));
+        QFontDialog dialog(app->fonts->getFont(FontStyle::ChatMedium, 1.));
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 

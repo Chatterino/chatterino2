@@ -76,7 +76,7 @@ const ImagePtr &ImageSet::getImage(float scale) const
     }
 
     if (!this->imageX2_->isEmpty() && quality == 2) {
-        return this->imageX3_;
+        return this->imageX2_;
     }
 
     return this->imageX1_;

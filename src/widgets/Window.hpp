@@ -1,13 +1,6 @@
 #pragma once
 
-#include "util/Helpers.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/dialogs/UpdateDialog.hpp"
-
-//#ifdef USEWINSDK
-//#include <platform/borderless/qwinwidget.h>
-//#endif
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -16,17 +9,20 @@
 namespace chatterino {
 
 class Theme;
+class UpdateDialog;
+class SplitNotebook;
+class Channel;
+
+enum class WindowType { Main, Popup, Attached };
 
 class Window : public BaseWindow
 {
     Q_OBJECT
 
 public:
-    enum class Type { Main, Popup, Attached };
+    explicit Window(WindowType type);
 
-    explicit Window(Window::Type type);
-
-    Type getType();
+    WindowType getType();
     SplitNotebook &getNotebook();
 
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
@@ -45,11 +41,11 @@ private:
     void addLayout();
     void onAccountSelected();
 
-    Type type_;
+    WindowType type_;
 
-    SplitNotebook notebook_;
+    SplitNotebook *notebook_;
     EffectLabel *userLabel_ = nullptr;
-    std::unique_ptr<UpdateDialog> updateDialogHandle_;
+    std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     pajlada::Signals::SignalHolder signalHolder_;
 

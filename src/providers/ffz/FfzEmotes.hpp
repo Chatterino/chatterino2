@@ -1,24 +1,27 @@
 #pragma once
 
 #include <memory>
+#include "boost/optional.hpp"
+#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
-#include "messages/Emote.hpp"
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+class EmoteMap;
 
 class FfzEmotes final
 {
     static constexpr const char *globalEmoteApiUrl =
         "https://api.frankerfacez.com/v1/set/global";
-    static constexpr const char *channelEmoteApiUrl =
-        "https://api.betterttv.net/2/channels/";
 
 public:
     FfzEmotes();
 
-    std::shared_ptr<const EmoteMap> global() const;
-    boost::optional<EmotePtr> global(const EmoteName &name) const;
-    void loadGlobal();
+    std::shared_ptr<const EmoteMap> emotes() const;
+    boost::optional<EmotePtr> emote(const EmoteName &name) const;
+    void loadEmotes();
     static void loadChannel(const QString &channelName,
                             std::function<void(EmoteMap &&)> callback);
 

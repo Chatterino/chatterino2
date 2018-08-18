@@ -150,22 +150,23 @@ struct Deserialize<chatterino::IgnorePhrase> {
                 QString(), false, false,
                 ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), true);
         }
+    };
 
-        QString _pattern;
-        bool _isRegex = false;
-        bool _isBlock = false;
-        QString _replace;
-        bool _caseSens = true;
+    QString _pattern;
+    bool _isRegex = false;
+    bool _isBlock = false;
+    QString _replace;
+    bool _caseSens = true;
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
-        chatterino::rj::getSafe(value, "isBlock", _isBlock);
-        chatterino::rj::getSafe(value, "replaceWith", _replace);
-        chatterino::rj::getSafe(value, "caseSensitive", _caseSens);
+    chatterino::rj::getSafe(value, "pattern", _pattern);
+    chatterino::rj::getSafe(value, "regex", _isRegex);
+    chatterino::rj::getSafe(value, "isBlock", _isBlock);
+    chatterino::rj::getSafe(value, "replaceWith", _replace);
+    chatterino::rj::getSafe(value, "caseSensitive", _caseSens);
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex, _isBlock, _replace, _caseSens);
-    }
-};
+    return chatterino::IgnorePhrase(_pattern, _isRegex, _isBlock, _replace, _caseSens);
+}
+};  // namespace Settings
 
-}  // namespace Settings
+}  // namespace pajlada
 }  // namespace pajlada

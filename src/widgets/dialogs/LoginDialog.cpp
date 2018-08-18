@@ -1,12 +1,13 @@
 #include "widgets/dialogs/LoginDialog.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 
 #ifdef USEWINSDK
-#include <Windows.h>
+#    include <Windows.h>
 #endif
 
 #include <QClipboard>
@@ -20,54 +21,54 @@ namespace chatterino {
 
 namespace {
 
-void LogInWithCredentials(const std::string &userID,
-                          const std::string &username,
-                          const std::string &clientID,
-                          const std::string &oauthToken)
-{
-    QStringList errors;
+    void LogInWithCredentials(const std::string &userID,
+                              const std::string &username,
+                              const std::string &clientID,
+                              const std::string &oauthToken)
+    {
+        QStringList errors;
 
-    if (userID.empty()) {
-        errors.append("Missing user ID");
+        if (userID.empty()) {
+            errors.append("Missing user ID");
+        }
+        if (username.empty()) {
+            errors.append("Missing username");
+        }
+        if (clientID.empty()) {
+            errors.append("Missing Client ID");
+        }
+        if (oauthToken.empty()) {
+            errors.append("Missing OAuth Token");
+        }
+
+        if (errors.length() > 0) {
+            QMessageBox messageBox;
+            messageBox.setIcon(QMessageBox::Critical);
+            messageBox.setText(errors.join("<br />"));
+            messageBox.setStandardButtons(QMessageBox::Ok);
+            messageBox.exec();
+            return;
+        }
+
+        //    QMessageBox messageBox;
+        //    messageBox.setIcon(QMessageBox::Information);
+        //    messageBox.setText("Successfully logged in with user <b>" +
+        //    qS(username) + "</b>!");
+        pajlada::Settings::Setting<std::string>::set(
+            "/accounts/uid" + userID + "/username", username);
+        pajlada::Settings::Setting<std::string>::set(
+            "/accounts/uid" + userID + "/userID", userID);
+        pajlada::Settings::Setting<std::string>::set(
+            "/accounts/uid" + userID + "/clientID", clientID);
+        pajlada::Settings::Setting<std::string>::set(
+            "/accounts/uid" + userID + "/oauthToken", oauthToken);
+
+        getApp()->accounts->twitch.reloadUsers();
+
+        //    messageBox.exec();
+
+        getApp()->accounts->twitch.currentUsername = username;
     }
-    if (username.empty()) {
-        errors.append("Missing username");
-    }
-    if (clientID.empty()) {
-        errors.append("Missing Client ID");
-    }
-    if (oauthToken.empty()) {
-        errors.append("Missing OAuth Token");
-    }
-
-    if (errors.length() > 0) {
-        QMessageBox messageBox;
-        messageBox.setIcon(QMessageBox::Critical);
-        messageBox.setText(errors.join("<br />"));
-        messageBox.setStandardButtons(QMessageBox::Ok);
-        messageBox.exec();
-        return;
-    }
-
-    //    QMessageBox messageBox;
-    //    messageBox.setIcon(QMessageBox::Information);
-    //    messageBox.setText("Successfully logged in with user <b>" +
-    //    qS(username) + "</b>!");
-    pajlada::Settings::Setting<std::string>::set(
-        "/accounts/uid" + userID + "/username", username);
-    pajlada::Settings::Setting<std::string>::set(
-        "/accounts/uid" + userID + "/userID", userID);
-    pajlada::Settings::Setting<std::string>::set(
-        "/accounts/uid" + userID + "/clientID", clientID);
-    pajlada::Settings::Setting<std::string>::set(
-        "/accounts/uid" + userID + "/oauthToken", oauthToken);
-
-    getApp()->accounts->twitch.reloadUsers();
-
-    //    messageBox.exec();
-
-    getApp()->accounts->twitch.currentUsername = username;
-}
 
 }  // namespace
 

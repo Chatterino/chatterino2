@@ -1,16 +1,15 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-
 #include <QObject>
 
 #include "common/SignalVector.hpp"
-#include "controllers/accounts/Account.hpp"
+#include "common/Singleton.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
 namespace chatterino {
 
+class Account;
 class Settings;
 class Paths;
 

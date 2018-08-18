@@ -1,6 +1,7 @@
 #include "providers/twitch/PubsubHelpers.hpp"
 
 #include "providers/twitch/PubsubActions.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {

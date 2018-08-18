@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/Log.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
@@ -27,11 +28,11 @@ namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
-    , addButton_(this)
+    , addButton_(new NotebookButton(this))
 {
-    this->addButton_.setIcon(NotebookButton::Icon::Plus);
+    this->addButton_->setIcon(NotebookButton::Icon::Plus);
 
-    this->addButton_.setHidden(true);
+    this->addButton_->setHidden(true);
 
     auto *shortcut_next = new QShortcut(QKeySequence("Ctrl+Tab"), this);
     QObject::connect(shortcut_next, &QShortcut::activated,
@@ -290,14 +291,14 @@ void Notebook::setShowAddButton(bool value)
 {
     this->showAddButton_ = value;
 
-    this->addButton_.setHidden(!value);
+    this->addButton_->setHidden(!value);
 }
 
 void Notebook::scaleChangedEvent(float scale)
 {
     float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
 
-    this->addButton_.setFixedSize(h, h);
+    this->addButton_->setFixedSize(h, h);
 
     for (auto &i : this->items_) {
         i.tab->updateSize();
@@ -353,7 +354,7 @@ void Notebook::performLayout(bool animated)
     }
 
     if (this->showAddButton_) {
-        this->addButton_.move(x, y);
+        this->addButton_->move(x, y);
     }
 
     if (this->lineY_ != y + tabHeight) {
@@ -368,7 +369,7 @@ void Notebook::performLayout(bool animated)
     }
 
     if (this->showAddButton_) {
-        this->addButton_.raise();
+        this->addButton_->raise();
     }
 
     if (this->selectedPage_ != nullptr) {
@@ -389,7 +390,7 @@ void Notebook::paintEvent(QPaintEvent *event)
 
 NotebookButton *Notebook::getAddButton()
 {
-    return &this->addButton_;
+    return this->addButton_;
 }
 
 NotebookButton *Notebook::addCustomButton()
@@ -432,10 +433,9 @@ void SplitNotebook::addCustomButtons()
     // settings
     auto settingsBtn = this->addCustomButton();
 
-    settingsBtn->setVisible(
-        !getApp()->settings->hidePreferencesButton.getValue());
+    settingsBtn->setVisible(!getSettings()->hidePreferencesButton.getValue());
 
-    getApp()->settings->hidePreferencesButton.connect(
+    getSettings()->hidePreferencesButton.connect(
         [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },
         this->connections_);
 
@@ -446,8 +446,8 @@ void SplitNotebook::addCustomButtons()
 
     // account
     auto userBtn = this->addCustomButton();
-    userBtn->setVisible(!getApp()->settings->hideUserButton.getValue());
-    getApp()->settings->hideUserButton.connect(
+    userBtn->setVisible(!getSettings()->hideUserButton.getValue());
+    getSettings()->hideUserButton.connect(
         [userBtn](bool hide, auto) { userBtn->setVisible(!hide); },
         this->connections_);
 
@@ -460,8 +460,7 @@ void SplitNotebook::addCustomButtons()
     // updates
     auto updateBtn = this->addCustomButton();
 
-    initUpdateButton(*updateBtn, this->updateDialogHandle_,
-                     this->signalHolder_);
+    initUpdateButton(*updateBtn, this->signalHolder_);
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)

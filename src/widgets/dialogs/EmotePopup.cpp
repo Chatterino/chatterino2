@@ -3,9 +3,12 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "singletons/Emotes.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>
@@ -13,55 +16,57 @@
 
 namespace chatterino {
 namespace {
-auto makeTitleMessage(const QString &title)
-{
-    MessageBuilder builder;
-    builder.emplace<TextElement>(title, MessageElementFlag::Text);
-    builder->flags.set(MessageFlag::Centered);
-    return builder.release();
-}
-auto makeEmoteMessage(const EmoteMap &map)
-{
-    MessageBuilder builder;
-    builder->flags.set(MessageFlag::Centered);
-    builder->flags.set(MessageFlag::DisableCompactEmotes);
-
-    for (const auto &emote : map) {
-        builder
-            .emplace<EmoteElement>(emote.second, MessageElementFlag::AlwaysShow)
-            ->setLink(Link(Link::InsertText, emote.first.string));
+    auto makeTitleMessage(const QString &title)
+    {
+        MessageBuilder builder;
+        builder.emplace<TextElement>(title, MessageElementFlag::Text);
+        builder->flags.set(MessageFlag::Centered);
+        return builder.release();
     }
-
-    return builder.release();
-}
-void addEmoteSets(std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-                  Channel &globalChannel, Channel &subChannel)
-{
-    for (const auto &set : sets) {
-        auto &channel = set->key == "0" ? globalChannel : subChannel;
-
-        // TITLE
-        auto text =
-            set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
-        channel.addMessage(makeTitleMessage(text));
-
-        // EMOTES
+    auto makeEmoteMessage(const EmoteMap &map)
+    {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        for (const auto &emote : set->emotes) {
+        for (const auto &emote : map) {
             builder
-                .emplace<EmoteElement>(
-                    getApp()->emotes->twitch.getOrCreateEmote(emote.id,
-                                                              emote.name),
-                    MessageElementFlag::AlwaysShow)
-                ->setLink(Link(Link::InsertText, emote.name.string));
+                .emplace<EmoteElement>(emote.second,
+                                       MessageElementFlag::AlwaysShow)
+                ->setLink(Link(Link::InsertText, emote.first.string));
         }
 
-        channel.addMessage(builder.release());
+        return builder.release();
     }
-}
+    void addEmoteSets(
+        std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
+        Channel &globalChannel, Channel &subChannel)
+    {
+        for (const auto &set : sets) {
+            auto &channel = set->key == "0" ? globalChannel : subChannel;
+
+            // TITLE
+            auto text =
+                set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
+            channel.addMessage(makeTitleMessage(text));
+
+            // EMOTES
+            MessageBuilder builder;
+            builder->flags.set(MessageFlag::Centered);
+            builder->flags.set(MessageFlag::DisableCompactEmotes);
+
+            for (const auto &emote : set->emotes) {
+                builder
+                    .emplace<EmoteElement>(
+                        getApp()->emotes->twitch.getOrCreateEmote(emote.id,
+                                                                  emote.name),
+                        MessageElementFlag::AlwaysShow)
+                    ->setLink(Link(Link::InsertText, emote.name.string));
+            }
+
+            channel.addMessage(builder.release());
+        }
+    }
 }  // namespace
 
 EmotePopup::EmotePopup()
@@ -122,8 +127,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         *globalChannel, *subChannel);
 
     // global
-    addEmotes(*globalChannel, *getApp()->emotes->bttv.global(), "BetterTTV");
-    addEmotes(*globalChannel, *getApp()->emotes->ffz.global(), "FrankerFaceZ");
+    addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
+              "BetterTTV");
+    addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),
+              "FrankerFaceZ");
 
     // channel
     addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV");

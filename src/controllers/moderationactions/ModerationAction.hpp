@@ -4,10 +4,12 @@
 #include <boost/optional.hpp>
 #include <pajlada/settings/serialize.hpp>
 
-#include "messages/Image.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
+
+class Image;
+using ImagePtr = std::shared_ptr<Image>;
 
 class ModerationAction
 {
@@ -34,34 +36,34 @@ private:
 namespace pajlada {
 namespace Settings {
 
-template <>
-struct Serialize<chatterino::ModerationAction> {
-    static rapidjson::Value get(const chatterino::ModerationAction &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
+    template <>
+    struct Serialize<chatterino::ModerationAction> {
+        static rapidjson::Value get(const chatterino::ModerationAction &value,
+                                    rapidjson::Document::AllocatorType &a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "pattern", value.getAction(), a);
+            AddMember(ret, "pattern", value.getAction(), a);
 
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::ModerationAction> {
-    static chatterino::ModerationAction get(const rapidjson::Value &value)
-    {
-        if (!value.IsObject()) {
-            return chatterino::ModerationAction(QString());
+            return ret;
         }
+    };
 
-        QString pattern;
+    template <>
+    struct Deserialize<chatterino::ModerationAction> {
+        static chatterino::ModerationAction get(const rapidjson::Value &value)
+        {
+            if (!value.IsObject()) {
+                return chatterino::ModerationAction(QString());
+            }
 
-        chatterino::rj::getSafe(value, "pattern", pattern);
+            QString pattern;
 
-        return chatterino::ModerationAction(pattern);
-    }
-};
+            chatterino::rj::getSafe(value, "pattern", pattern);
+
+            return chatterino::ModerationAction(pattern);
+        }
+    };
 
 }  // namespace Settings
 }  // namespace pajlada

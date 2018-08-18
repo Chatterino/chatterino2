@@ -39,7 +39,7 @@ HighlightingPage::HighlightingPage()
     {
         // GENERAL
         // layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS,
-        // app->settings->enableHighlights));
+        // getSettings()->enableHighlights));
 
         // TABS
         auto tabs = layout.emplace<QTabWidget>();
@@ -135,7 +135,7 @@ HighlightingPage::HighlightingPage()
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
             customSound.append(this->createCheckBox(
-                "Custom sound", app->settings->customHighlightSound));
+                "Custom sound", getSettings()->customHighlightSound));
             auto selectFile =
                 customSound.emplace<QPushButton>("Select custom sound file");
             QObject::connect(selectFile.getElement(), &QPushButton::clicked,
@@ -143,12 +143,12 @@ HighlightingPage::HighlightingPage()
                                  auto fileName = QFileDialog::getOpenFileName(
                                      this, tr("Open Sound"), "",
                                      tr("Audio Files (*.mp3 *.wav)"));
-                                 app->settings->pathHighlightSound = fileName;
+                                 getSettings()->pathHighlightSound = fileName;
                              });
         }
 
         layout.append(createCheckBox(ALWAYS_PLAY,
-                                     app->settings->highlightAlwaysPlaySound));
+                                     getSettings()->highlightAlwaysPlaySound));
     }
 
     // ---- misc

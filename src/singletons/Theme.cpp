@@ -10,20 +10,20 @@ namespace chatterino {
 
 namespace detail {
 
-double getMultiplierByTheme(const QString &themeName)
-{
-    if (themeName == "Light") {
-        return 0.8;
-    } else if (themeName == "White") {
-        return 1.0;
-    } else if (themeName == "Black") {
-        return -1.0;
-    } else if (themeName == "Dark") {
+    double getMultiplierByTheme(const QString &themeName)
+    {
+        if (themeName == "Light") {
+            return 0.8;
+        } else if (themeName == "White") {
+            return 1.0;
+        } else if (themeName == "Black") {
+            return -1.0;
+        } else if (themeName == "Dark") {
+            return -0.8;
+        }
+
         return -0.8;
     }
-
-    return -0.8;
-}
 
 }  // namespace detail
 

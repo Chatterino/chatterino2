@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IrcHelpers.hpp"
 
@@ -230,7 +231,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         c->addMessage(_message);
 
-        if (app->settings->inlineWhispers) {
+        if (getSettings()->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
                 channel->addMessage(_message);  //
             });

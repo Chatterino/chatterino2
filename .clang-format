@@ -25,6 +25,9 @@ DerivePointerBinding: false
 FixNamespaceComments: true
 IndentCaseLabels: true
 IndentWidth: 4
+IndentWrappedFunctionNames: true
+IndentPPDirectives: AfterHash
+NamespaceIndentation: Inner
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Standard: Auto

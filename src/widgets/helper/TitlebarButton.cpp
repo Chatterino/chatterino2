@@ -9,12 +9,12 @@ TitleBarButton::TitleBarButton()
 {
 }
 
-TitleBarButton::Style TitleBarButton::getButtonStyle() const
+TitleBarButtonStyle TitleBarButton::getButtonStyle() const
 {
     return this->style_;
 }
 
-void TitleBarButton::setButtonStyle(Style _style)
+void TitleBarButton::setButtonStyle(TitleBarButtonStyle _style)
 {
     this->style_ = _style;
     this->update();
@@ -35,16 +35,16 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing, false);
 
     switch (this->style_) {
-        case Minimize: {
+        case TitleBarButtonStyle::Minimize: {
             painter.fillRect(centerX - xD / 2, xD * 3 / 2, xD, 1, color);
             break;
         }
-        case Maximize: {
+        case TitleBarButtonStyle::Maximize: {
             painter.setPen(color);
             painter.drawRect(centerX - xD / 2, xD, xD - 1, xD - 1);
             break;
         }
-        case Unmaximize: {
+        case TitleBarButtonStyle::Unmaximize: {
             int xD2 = xD * 1 / 5;
             int xD3 = xD * 4 / 5;
 
@@ -54,7 +54,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             painter.drawRect(centerX - xD / 2, xD + xD2, xD3, xD3);
             break;
         }
-        case Close: {
+        case TitleBarButtonStyle::Close: {
             QRect rect(centerX - xD / 2, xD, xD - 1, xD - 1);
             painter.setPen(QPen(color, 1));
 
@@ -62,7 +62,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             painter.drawLine(rect.topRight(), rect.bottomLeft());
             break;
         }
-        case User: {
+        case TitleBarButtonStyle::User: {
             color = "#999";
 
             painter.setRenderHint(QPainter::Antialiasing);
@@ -88,7 +88,7 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
             break;
         }
-        case Settings: {
+        case TitleBarButtonStyle::Settings: {
             color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
