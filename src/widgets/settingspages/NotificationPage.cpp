@@ -28,8 +28,7 @@ NotificationPage::NotificationPage()
         {
             auto settings = tabs.appendTab(new QVBoxLayout, "Options");
             {
-                settings.emplace<QLabel>(
-                    "Enable for channel next to channel name");
+                settings.emplace<QLabel>("Enable for selected channels");
                 settings.append(this->createCheckBox(
                     "Flash taskbar",
                     getApp()->settings->notificationFlashTaskbar));
@@ -39,6 +38,9 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Enable toasts (currently only for windows 8.x or 10)",
                     getApp()->settings->notificationToast));
+                settings.append(
+                    this->createCheckBox("Red dot next to live splits",
+                                         getApp()->settings->notificationDot));
 
                 settings->addStretch(1);
             }
