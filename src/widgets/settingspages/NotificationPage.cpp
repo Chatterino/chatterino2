@@ -41,6 +41,9 @@ NotificationPage::NotificationPage()
                 settings.append(
                     this->createCheckBox("Red dot next to live splits",
                                          getApp()->settings->notificationDot));
+                settings.append(this->createCheckBox(
+                    "Change color of Splitheader (click to remove)",
+                    getApp()->settings->notificationSplitheaderHighlight));
 
                 settings->addStretch(1);
             }

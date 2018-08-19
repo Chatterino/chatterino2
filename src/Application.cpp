@@ -12,7 +12,6 @@
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
-#include "singletons/DownloadManager.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
@@ -46,8 +45,8 @@ Application::Application(Settings &_settings, Paths &_paths)
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , windows(&this->emplace<WindowManager>())
-
     , toasts(&this->emplace<Toasts>())
+
     , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
     , highlights(&this->emplace<HighlightController>())
@@ -57,7 +56,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchServer>())
     , logging(&this->emplace<Logging>())
-    , downloads(&this->emplace<DownloadManager>())
+
 {
     this->instance = this;
 

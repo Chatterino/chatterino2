@@ -1,6 +1,7 @@
 #include "Toasts.hpp"
 
 #include "Application.hpp"
+#include "common/DownloadManager.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -15,7 +16,6 @@
 
 #include <QDesktopServices>
 #include <QFileInfo>
-//#include <QtNetwork>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
@@ -32,15 +32,38 @@ bool Toasts::isEnabled()
 
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
+    // Fetch user profile avatar
+    if (p == Platform::Twitch) {
+        QFileInfo check_file(
+            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+            "2/cache/profileAvatars/twitch/" + channelName + ".png");
+        if (check_file.exists() && check_file.isFile()) {
 #ifdef Q_OS_WIN
-
-    sendWindowsNotification(channelName, p);
-    return;
-
+            this->sendWindowsNotification(channelName, p);
 #endif
-    // OSX
+            // OSX
 
-    // LINUX
+            // LINUX
+
+        } else {
+            this->fetchChannelAvatar(
+                channelName, [this, channelName, p](QString avatarLink) {
+                    DownloadManager *manager = new DownloadManager();
+                    manager->setFile(avatarLink, channelName);
+                    manager->connect(
+                        manager, &DownloadManager::downloadComplete,
+                        [this, channelName, p]() {
+#ifdef Q_OS_WIN
+                            this->sendWindowsNotification(channelName, p);
+#endif
+                            // OSX
+
+                            // LINUX
+                        });
+                });
+        }
+    }
+    return;
 }
 
 #ifdef Q_OS_WIN
@@ -85,29 +108,6 @@ public:
 
 void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
 {
-    // Fetch user profile avatar
-    if (p == Platform::Twitch) {
-        QFileInfo check_file(
-            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-            "2/cache/profileAvatars/twitch/" + channelName + ".png");
-        if (check_file.exists() && check_file.isFile()) {
-            qDebug() << " OMEGA2NAM ";
-            this->sendActualWindowsNotification(channelName, p);
-        } else {
-            qDebug() << " OMEGA1NAM ";
-            this->fetchChannelAvatar(
-                channelName, [this, channelName, p](QString avatarLink) {
-                    qDebug() << " OMEGANAM " << avatarLink;
-                    this->sendActualWindowsNotification(channelName, p);
-                });
-        }
-    }
-    qDebug() << " YOU'RE TOO SLOW! ";
-}
-
-void Toasts::sendActualWindowsNotification(const QString &channelName,
-                                           Platform p)
-{
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
         WinToastLib::WinToastTemplate::ImageAndText02);
     QString str = channelName + " is live!";
@@ -145,51 +145,7 @@ void Toasts::sendActualWindowsNotification(const QString &channelName,
 }
 
 #endif
-/*
-void Toasts::fetchChannelAvatar(const QString &channelName,
-                                std::function<void(QString)> successCallback)
-{
-    QString requestUrl("https://api.twitch.tv/kraken/users?login=" +
-                       channelName);
-    NetworkRequest request(requestUrl, NetworkRequestType::Put);
-    request.setCaller(QThread::currentThread());
-    request.makeAuthorizedV5(getDefaultClientID());
-    request.setTimeout(30000);
-    request.onSuccess([successCallback](auto result) -> Outcome {
-        auto root = result.parseJson();
-        if (!root.value("users").isArray()) {
-            Log("API Error while getting user id, users is not an array");
-            successCallback("");
-            return Failure;
-        }
-        auto users = root.value("users").toArray();
-        if (users.size() != 1) {
-            Log("API Error while getting user id, users array size is not 1");
-            successCallback("");
-            return Failure;
-        }
-        if (!users[0].isObject()) {
-            Log("API Error while getting user id, first user is not an object");
-            successCallback("");
-            return Failure;
-        }
-        auto firstUser = users[0].toObject();
-        auto avatar = firstUser.value("logo");
-        if (!avatar.isString()) {
-            Log("API Error: while getting user logo, first user object `logo` "
-                "key "
-                "is not a "
-                "string");
-            successCallback("");
-            return Failure;
-        }
-        successCallback(avatar.toString());
-        return Success;
-    });
 
-    request.execute();
-}
-*/
 void Toasts::fetchChannelAvatar(const QString channelName,
                                 std::function<void(QString)> successCallback)
 {

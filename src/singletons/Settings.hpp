@@ -146,6 +146,8 @@ public:
                                          false};
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     BoolSetting notificationDot = {"/notifications/enableDot", false};
+    BoolSetting notificationSplitheaderHighlight = {
+        "/notifications/enableSplitheaderHighlight", false};
 
     /// External tools
     // Streamlink
