@@ -255,7 +255,8 @@ SOURCES += \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
     src/controllers/notifications/NotificationModel.cpp \
-    src/singletons/Toasts.cpp
+    src/singletons/Toasts.cpp \
+    src/singletons/DownloadManager.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -458,7 +459,8 @@ HEADERS  += \
     src/util/FunctionEventFilter.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/notifications/NotificationPhrase.hpp \
-    src/singletons/Toasts.hpp
+    src/singletons/Toasts.hpp \
+    src/singletons/DownloadManager.hpp
 
 RESOURCES += \
     resources/resources.qrc \
