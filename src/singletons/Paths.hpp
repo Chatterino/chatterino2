@@ -19,9 +19,6 @@ public:
     // Directory for settings files. Same as <appDataDirectory>/Settings
     QString settingsDirectory;
 
-    // Directory for cache files. Same as <appDataDirectory>/Misc
-    QString cacheDirectory;
-
     // Directory for message log files. Same as <appDataDirectory>/Misc
     QString messageLogDirectory;
 
@@ -34,6 +31,8 @@ public:
     bool createFolder(const QString &folderPath);
     bool isPortable();
 
+    QString cacheDirectory();
+
 private:
     void initAppFilePathHash();
     void initCheckPortable();
@@ -41,6 +40,9 @@ private:
     void initSubDirectories();
 
     boost::optional<bool> portable_;
+
+    // Directory for cache files. Same as <appDataDirectory>/Misc
+    QString cacheDirectory_;
 };
 
 Paths *getPaths();

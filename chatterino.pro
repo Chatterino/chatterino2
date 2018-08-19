@@ -253,7 +253,8 @@ SOURCES += \
     src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
     src/debug/Benchmark.cpp \
-    src/common/UsernameSet.cpp
+    src/common/UsernameSet.cpp \
+    src/widgets/settingspages/AdvancedPage.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -449,7 +450,8 @@ HEADERS  += \
     src/util/LayoutHelper.hpp \
     src/widgets/helper/Button.hpp \
     src/messages/MessageContainer.hpp \
-    src/common/UsernameSet.hpp
+    src/common/UsernameSet.hpp \
+    src/widgets/settingspages/AdvancedPage.hpp
 
 RESOURCES += \ 
     resources/resources.qrc \

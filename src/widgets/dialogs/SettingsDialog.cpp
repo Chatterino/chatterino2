@@ -5,6 +5,7 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
+#include "widgets/settingspages/AdvancedPage.hpp"
 #include "widgets/settingspages/BrowserExtensionPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
 #include "widgets/settingspages/EmotesPage.hpp"
@@ -103,6 +104,7 @@ void SettingsDialog::addTabs()
     //    this->addTab(new SpecialChannelsPage);
     this->addTab(new BrowserExtensionPage);
     this->addTab(new ExternalToolsPage);
+    this->addTab(new AdvancedPage);
 
     this->ui_.tabContainer->addStretch(1);
     this->addTab(new AboutPage, Qt::AlignBottom);

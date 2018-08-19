@@ -1,6 +1,5 @@
 #include "common/NetworkRequest.hpp"
 
-#include "Application.hpp"
 #include "common/NetworkData.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/Outcome.hpp"
@@ -11,6 +10,7 @@
 
 #include <QFile>
 #include <QtConcurrent>
+
 #include <cassert>
 
 namespace chatterino {
@@ -145,9 +145,8 @@ void NetworkRequest::execute()
 
 Outcome NetworkRequest::tryLoadCachedFile()
 {
-    auto app = getApp();
-
-    QFile cachedFile(getPaths()->cacheDirectory + "/" + this->data->getHash());
+    QFile cachedFile(getPaths()->cacheDirectory() + "/" +
+                     this->data->getHash());
 
     if (!cachedFile.exists()) {
         // File didn't exist

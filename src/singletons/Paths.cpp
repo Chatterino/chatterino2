@@ -1,5 +1,7 @@
 #include "singletons/Paths.hpp"
 
+#include "singletons/Settings.hpp"
+
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDir>
@@ -31,6 +33,27 @@ bool Paths::createFolder(const QString &folderPath)
 bool Paths::isPortable()
 {
     return this->portable_.get();
+}
+
+QString Paths::cacheDirectory()
+{
+    static QStringSetting cachePathSetting = [] {
+        QStringSetting cachePathSetting("/cache/path");
+
+        cachePathSetting.connect([](const auto &newPath, auto) {
+            QDir().mkpath(newPath);  //
+        });
+
+        return cachePathSetting;
+    }();
+
+    auto path = cachePathSetting.getValue();
+
+    if (path == "") {
+        return this->cacheDirectory_;
+    }
+
+    return path;
 }
 
 void Paths::initAppFilePathHash()
@@ -104,7 +127,7 @@ void Paths::initSubDirectories()
 
     makePath("");
     this->settingsDirectory = makePath("Settings");
-    this->cacheDirectory = makePath("Cache");
+    this->cacheDirectory_ = makePath("Cache");
     this->messageLogDirectory = makePath("Logs");
     this->miscDirectory = makePath("Misc");
 }

@@ -1,6 +1,5 @@
 #include "common/NetworkData.hpp"
 
-#include "Application.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 
@@ -42,9 +41,7 @@ QString NetworkData::getHash()
 void NetworkData::writeToCache(const QByteArray &bytes)
 {
     if (this->useQuickLoadCache_) {
-        auto app = getApp();
-
-        QFile cachedFile(getPaths()->cacheDirectory + "/" + this->getHash());
+        QFile cachedFile(getPaths()->cacheDirectory() + "/" + this->getHash());
 
         if (cachedFile.open(QIODevice::WriteOnly)) {
             cachedFile.write(bytes);
