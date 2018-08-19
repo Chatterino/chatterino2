@@ -1,6 +1,7 @@
 #include "ExternalToolsPage.hpp"
 
 #include "Application.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 
 #include <QGroupBox>
@@ -9,14 +10,6 @@
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
 
 namespace chatterino {
-namespace {
-    QString createLink(const QString &url, const QString &name)
-    {
-        return QString("<a href=\"" + url +
-                       "\"><span style=\"color: white;\">" + name +
-                       "</span></a>");
-    }
-}  // namespace
 
 ExternalToolsPage::ExternalToolsPage()
     : SettingsPage("External tools", "")
@@ -39,8 +32,8 @@ ExternalToolsPage::ExternalToolsPage()
         description->setStyleSheet("color: #bbb");
 
         auto links = new QLabel(
-            createLink("https://streamlink.github.io/", "Website") + " " +
-            createLink(
+            createNamedLink("https://streamlink.github.io/", "Website") + " " +
+            createNamedLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
                 "Download"));
         links->setTextFormat(Qt::RichText);

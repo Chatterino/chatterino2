@@ -7,6 +7,7 @@
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -24,18 +25,6 @@
 #include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
-
-inline QString createLink(const QString &url, bool file = false)
-{
-    if (file) {
-        return QString("<a href=\"file:///" + url +
-                       "\"><span style=\"color: white;\">" + url +
-                       "</span></a>");
-    }
-
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   url + "</span></a>");
-}
 
 qint64 dirSize(QString dirPath)
 {
@@ -110,20 +99,10 @@ ModerationPage::ModerationPage()
                     pathOriginal = logPath;
                 }
 
-                QString pathShortened;
-
-                if (pathOriginal.size() > 50) {
-                    pathShortened = pathOriginal;
-                    pathShortened.resize(50);
-                    pathShortened += "...";
-                } else {
-                    pathShortened = pathOriginal;
-                }
-
-                pathShortened = "Logs saved at <a href=\"file:///" +
-                                pathOriginal +
-                                "\"><span style=\"color: white;\">" +
-                                pathShortened + "</span></a>";
+                QString pathShortened =
+                    "Logs saved at <a href=\"file:///" + pathOriginal +
+                    "\"><span style=\"color: white;\">" +
+                    shortenString(pathOriginal, 50) + "</span></a>";
 
                 logsPathLabel->setText(pathShortened);
                 logsPathLabel->setToolTip(pathOriginal);
