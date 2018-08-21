@@ -176,8 +176,9 @@ void SplitInput::installKeyPressedEvent()
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
-            // don't add duplicate messages to message history
-            if (this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message))
+            // don't add duplicate messages and empty message to message history
+            if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
+                !message.trimmed().isEmpty())
                 this->prevMsg_.append(message);
 
             event->accept();
