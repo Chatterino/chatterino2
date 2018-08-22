@@ -10,11 +10,11 @@
 
 ### OpenSSL
 #### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL development library: https://slproweb.com/download/Win64OpenSSL-1_1_0h.exe
+1. Download OpenSSL development library: https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe
 2. When prompted, install openssl to C:\local\openssl
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory"
 #### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL light: https://slproweb.com/download/Win64OpenSSL_Light-1_0_2o.exe
+1. Download OpenSSL light: https://slproweb.com/download/Win64OpenSSL_Light-1_0_2p.exe
 2. When prompted, install it anywhere
 3. When prompted, copy the OpenSSL DLLS to "The OpenSSL binaries (/bin) directory"
 4. Copy the OpenSSL 1.0 files from its /bin folder to C:/local/bin (You will need to create the folder)
