@@ -52,7 +52,7 @@ UserInfoPopup::UserInfoPopup()
         avatar->setScaleIndependantSize(100, 100);
         QObject::connect(avatar.getElement(), &Button::clicked, [this] {
             QDesktopServices::openUrl(
-                QUrl("https://twitch.tv/" + this->userName_));
+                QUrl("https://twitch.tv/" + this->userName_.toLower()));
         });
 
         // items on the right
