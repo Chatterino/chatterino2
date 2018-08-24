@@ -8,6 +8,7 @@
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/bttv/BttvTooltip.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -268,12 +269,19 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         link = Link(Link::Url, linkString);
 
         textColor = MessageColor(MessageColor::Link);
-        this->emplace<TextElement>(lowercaseLinkString,
+        auto linkMessageElement = this->emplace<TextElement>(lowercaseLinkString,
                                    MessageElementFlag::LowercaseLink, textColor)
             ->setLink(link);
         this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
                                    textColor)
             ->setLink(link);
+
+        BttvTooltip::getUrlTooltip(
+            linkString, [linkMessageElement](QString tooltipText) {
+                if (!tooltipText.isEmpty()) {
+                    linkMessageElement->setTooltip(tooltipText);
+                }
+            });
     }
 
     // if (!linkString.isEmpty()) {

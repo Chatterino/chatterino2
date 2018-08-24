@@ -866,6 +866,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->hide();
     } else {
         tooltipWidget->moveTo(this, event->globalPos());
+        tooltipWidget->setWordWrap(hoverLayoutElement->getLink().isValid());
         tooltipWidget->setText(tooltip);
         tooltipWidget->adjustSize();
         tooltipWidget->show();

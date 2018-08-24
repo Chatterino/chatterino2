@@ -458,6 +458,8 @@ void SplitHeader::enterEvent(QEvent *event)
         tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
                         false);
         tooltip->setText(this->tooltipText_);
+        tooltip->setWordWrap(false);
+        tooltip->adjustSize();
         tooltip->show();
         tooltip->raise();
     }
