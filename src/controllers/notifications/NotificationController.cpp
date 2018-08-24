@@ -74,7 +74,6 @@ void NotificationController::removeChannelNotification(
         }
     }
 }
-///////////////////////////////////////////////////
 void NotificationController::playSound()
 {
     static auto player = new QMediaPlayer;
@@ -94,7 +93,7 @@ void NotificationController::playSound()
     }
     player->play();
 }
-///////////////////////////////////////////////////
+
 NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {

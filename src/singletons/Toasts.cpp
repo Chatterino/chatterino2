@@ -68,10 +68,6 @@ void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 
 #ifdef Q_OS_WIN
 
-/*const override void CustomToastHandler::toastActivated()
-{
-}*/
-
 class CustomHandler : public WinToastLib::IWinToastHandler
 {
 private:
@@ -122,6 +118,9 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
         Path =
             QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
             "2/cache/profileAvatars/twitch/" + channelName + ".png";
+        // Change it to this below v
+        // Path = getApp()->paths->cacheDirectory() + "profileAvatars/twitch/" +
+        // channelName + ".png";
     }
     std::string temp_Utf8 = Path.toUtf8().constData();
     std::wstring imagePath = std::wstring(temp_Utf8.begin(), temp_Utf8.end());
