@@ -8,10 +8,12 @@
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QCheckBox>
+#include <QFileDialog>
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QLabel>
 #include <QListView>
+#include <QPushButton>
 #include <QTableView>
 #include <QTimer>
 
@@ -35,15 +37,32 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Playsound (doesn't mute the Windows 8.x sound of toasts)",
                     getApp()->settings->notificationPlaySound));
+#ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Enable toasts (currently only for windows 8.x or 10)",
                     getApp()->settings->notificationToast));
+#endif
                 settings.append(
                     this->createCheckBox("Red dot next to live splits",
                                          getApp()->settings->notificationDot));
-                settings.append(this->createCheckBox(
-                    "Change color of Splitheader (click to remove)",
-                    getApp()->settings->notificationSplitheaderHighlight));
+                auto customSound =
+                    layout.emplace<QHBoxLayout>().withoutMargin();
+                {
+                    customSound.append(this->createCheckBox(
+                        "Custom sound",
+                        getApp()->settings->notificationCustomSound));
+                    auto selectFile = customSound.emplace<QPushButton>(
+                        "Select custom sound file");
+                    QObject::connect(
+                        selectFile.getElement(), &QPushButton::clicked, this,
+                        [this] {
+                            auto fileName = QFileDialog::getOpenFileName(
+                                this, tr("Open Sound"), "",
+                                tr("Audio Files (*.mp3 *.wav)"));
+                            getApp()->settings->notificationPathSound =
+                                fileName;
+                        });
+                }
 
                 settings->addStretch(1);
             }

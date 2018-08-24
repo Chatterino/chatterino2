@@ -144,10 +144,13 @@ public:
                                             false};
     BoolSetting notificationPlaySound = {"/notifications/enablePlaySound",
                                          false};
+    BoolSetting notificationCustomSound = {"/notifications/customPlaySound",
+                                           false};
+    QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
+                                            "qrc:/sounds/ping3.wav"};
+
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     BoolSetting notificationDot = {"/notifications/enableDot", false};
-    BoolSetting notificationSplitheaderHighlight = {
-        "/notifications/enableSplitheaderHighlight", false};
 
     /// External tools
     // Streamlink

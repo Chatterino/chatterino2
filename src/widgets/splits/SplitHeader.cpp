@@ -168,6 +168,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         getApp()->notifications->updateChannelNotification(
             this->split_->getChannel()->getName(), Platform::Twitch);
     });
+
     menu->addAction(action);
 
     menu->addSeparator();
@@ -549,21 +550,7 @@ void SplitHeader::themeChangedEvent()
             getApp()->resources->buttons.menuLight);
     }
 
-    // this->titleLabel->setPalette(palette);
-    auto darkPalette = palette;
-    darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::WindowText, Qt::white);
-    darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
-    darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-    darkPalette.setColor(QPalette::Text, Qt::white);
-    darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::ButtonText, Qt::white);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-
-    this->titleLabel->setPalette(darkPalette);
+    this->titleLabel->setPalette(palette);
 }
 
 void SplitHeader::menuMoveSplit()
