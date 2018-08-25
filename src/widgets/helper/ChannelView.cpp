@@ -1025,7 +1025,10 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly) {
                 this->handleLinkClick(event, link, layout);
+            }
 
+            // Invoke to signal from EmotePopup.
+            if (link.type == Link::InsertText) {
                 this->linkClicked.invoke(link);
             }
         } break;
