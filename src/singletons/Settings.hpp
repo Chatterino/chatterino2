@@ -99,12 +99,6 @@ public:
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    // 0 = No preference
-    // 1 = 1x
-    // 2 = 2x
-    // 3 = 3x
-    IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
-
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
     /// Links
