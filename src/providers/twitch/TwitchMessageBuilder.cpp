@@ -269,17 +269,18 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         link = Link(Link::Url, linkString);
 
         textColor = MessageColor(MessageColor::Link);
-        auto linkMessageElement = this->emplace<TextElement>(lowercaseLinkString,
+        auto linkMELowercase = this->emplace<TextElement>(lowercaseLinkString,
                                    MessageElementFlag::LowercaseLink, textColor)
             ->setLink(link);
-        this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
-                                   textColor)
+        auto linkMEOriginal = this->emplace<TextElement>(string, 
+                                   MessageElementFlag::OriginalLink, textColor)
             ->setLink(link);
 
         LinkResolver::getLinkInfo(
-            linkString, [linkMessageElement](QString tooltipText) {
+            linkString, [linkMELowercase, linkMEOriginal](QString tooltipText) {
                 if (!tooltipText.isEmpty()) {
-                    linkMessageElement->setTooltip(tooltipText);
+                    linkMELowercase->setTooltip(tooltipText);
+                    linkMEOriginal->setTooltip(tooltipText);
                 }
             });
     }
