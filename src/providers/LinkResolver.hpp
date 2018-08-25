@@ -5,10 +5,10 @@
 
 namespace chatterino {
 
-class BttvTooltip
+class LinkResolver
 {
 public:
-    static void getUrlTooltip(const QString url,
+    static void getLinkInfo(const QString url,
                            std::function<void(QString)> callback);
 
 private:

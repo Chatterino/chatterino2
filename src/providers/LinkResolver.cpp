@@ -1,4 +1,4 @@
-#include "providers/bttv/BttvTooltip.hpp"
+#include "providers/LinkResolver.hpp"
 
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
@@ -7,7 +7,7 @@
 
 namespace chatterino {
 
-void BttvTooltip::getUrlTooltip(const QString url,
+void LinkResolver::getLinkInfo(const QString url,
                            std::function<void(QString)> successCallback)
 {
     QString requestUrl("https://api.betterttv.net/2/link_resolver/" + 

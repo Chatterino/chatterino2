@@ -8,7 +8,7 @@
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/bttv/BttvTooltip.hpp"
+#include "providers/LinkResolver.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -276,7 +276,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                                    textColor)
             ->setLink(link);
 
-        BttvTooltip::getUrlTooltip(
+        LinkResolver::getLinkInfo(
             linkString, [linkMessageElement](QString tooltipText) {
                 if (!tooltipText.isEmpty()) {
                     linkMessageElement->setTooltip(tooltipText);
