@@ -42,9 +42,6 @@ NotificationPage::NotificationPage()
                     "Enable toasts (currently only for windows 8.x or 10)",
                     getApp()->settings->notificationToast));
 #endif
-                settings.append(
-                    this->createCheckBox("Red dot next to live splits",
-                                         getApp()->settings->notificationDot));
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
                 {

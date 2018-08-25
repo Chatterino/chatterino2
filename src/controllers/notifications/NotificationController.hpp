@@ -3,6 +3,8 @@
 #include "common/SignalVector.hpp"
 #include "singletons/Settings.hpp"
 
+#include <QTimer>
+
 namespace chatterino {
 
 class Settings;
@@ -35,12 +37,19 @@ public:
 
 private:
     bool initialized_ = false;
+    QTimer *liveStatusTimer_;
+    void removeFakeChannel(const QString channelName);
+    std::vector<QString> fakeTwitchChannels;
+    void getFakeTwitchChannelLiveStatus(const QString &channelName);
+
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
     /*
     ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
         "/notifications/mixer"};
     */
+private slots:
+    void fetchFakeChannels();
 };
 
 }  // namespace chatterino

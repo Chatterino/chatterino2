@@ -150,7 +150,6 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    BoolSetting notificationDot = {"/notifications/enableDot", false};
 
     /// External tools
     // Streamlink

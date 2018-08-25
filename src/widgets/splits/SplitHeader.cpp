@@ -383,9 +383,6 @@ void SplitHeader::updateChannelText()
             } else {
                 title += " (live)";
             }
-            if (getSettings()->notificationDot) {
-                title += QByteArray(" 🔴 ");
-            }
             if (getSettings()->showViewerCount) {
                 title += " - " + QString::number(streamStatus->viewerCount) +
                          " viewers";

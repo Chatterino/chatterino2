@@ -1,8 +1,12 @@
 #include "controllers/notifications/NotificationController.hpp"
 
 #include "Application.hpp"
+#include "common/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
+#include "providers/twitch/TwitchApi.hpp"
+#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/WindowManager.hpp"
 
 #include <wintoastlib.h>
 
@@ -34,6 +38,16 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
             this->channelMap[Platform::Mixer].getVector());
     });
     */
+
+    /*
+    connect(liveStatusTimer_, SIGNAL(timeout()), this, SLOT());
+    liveStatusTimer_.start(60 * 1000);
+    */
+    liveStatusTimer_ = new QTimer();
+    QObject::connect(liveStatusTimer_, this, SIGNAL(timeout()),
+                     SLOT(fetchFakeChannels()));
+    connect(liveStatusTimer_, SIGNAL(timeout()), SLOT(fetchFakeChannels()));
+    liveStatusTimer_->start(1000);
 }
 
 void NotificationController::updateChannelNotification(
@@ -100,6 +114,91 @@ NotificationModel *NotificationController::createModel(QObject *parent,
     NotificationModel *model = new NotificationModel(parent);
     model->init(&this->channelMap[p]);
     return model;
+}
+
+void NotificationController::fetchFakeChannels()
+{
+    for (std::vector<int>::size_type i = 0;
+         i != channelMap[Platform::Twitch].getVector().size(); i++) {
+        auto chan = getApp()->twitch.server->getChannelOrEmpty(
+            channelMap[Platform::Twitch].getVector()[i]);
+
+        /*
+        auto chan = getApp()->twitch.server->getChannelOrEmpty(chanName);
+        if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get())) {
+        if (channelMap[Platform::Twitch].getVector()[i].toLower() ==
+        channelName.toLower()) { channelMap[Platform::Twitch].removeItem(i);
+            i--;
+        }
+        }*/
+    }
+}
+
+void NotificationController::getFakeTwitchChannelLiveStatus(
+    const QString &channelName)
+{
+    TwitchApi::findUserId(channelName, [channelName, this](QString roomID) {
+        if (roomID.isEmpty()) {
+            Log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
+                channelName);
+            removeFakeChannel(channelName);
+            return;
+        }
+        Log("[TwitchChannel:{}] Refreshing live status", channelName);
+
+        QString url("https://api.twitch.tv/kraken/streams/" + roomID);
+        auto request = NetworkRequest::twitchRequest(url);
+        request.setCaller(QThread::currentThread());
+
+        request.onSuccess([this, channelName](auto result) -> Outcome {
+            rapidjson::Document document = result.parseRapidJson();
+            if (!document.IsObject()) {
+                Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+                return Failure;
+            }
+
+            if (!document.HasMember("stream")) {
+                Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+                return Failure;
+            }
+
+            const auto &stream = document["stream"];
+
+            if (!stream.IsObject()) {
+                // Stream is offline (stream is most likely null)
+                removeFakeChannel(channelName);
+                return Failure;
+            }
+            // Stream is live
+            auto i = std::find(fakeTwitchChannels.begin(),
+                               fakeTwitchChannels.end(), channelName);
+            if (i != fakeTwitchChannels.end()) {
+                fakeTwitchChannels.push_back(channelName);
+                if (Toasts::isEnabled()) {
+                    getApp()->toasts->sendChannelNotification(channelName,
+                                                              Platform::Twitch);
+                }
+                if (getApp()->settings->notificationPlaySound) {
+                    getApp()->notifications->playSound();
+                }
+                if (getApp()->settings->notificationFlashTaskbar) {
+                    QApplication::alert(
+                        getApp()->windows->getMainWindow().window(), 2500);
+                }
+            }
+        });
+
+        request.execute();
+    });
+}
+
+void NotificationController::removeFakeChannel(const QString channelName)
+{
+    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                       channelName);
+    if (i != fakeTwitchChannels.end()) {
+        fakeTwitchChannels.erase(i);
+    }
 }
 
 }  // namespace chatterino
