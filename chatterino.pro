@@ -272,7 +272,6 @@ HEADERS  += \
     src/common/NetworkTimer.hpp \
     src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
-    src/common/Property.hpp \
     src/common/ProviderId.hpp \
     src/util/RapidJsonSerializeQString.hpp \
     src/common/SignalVectorModel.hpp \
@@ -429,7 +428,6 @@ HEADERS  += \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/TwitchApi.hpp \
     src/messages/Emote.hpp \
-    src/messages/EmoteCache.hpp \
     src/messages/ImageSet.hpp \
     src/common/Outcome.hpp \
     src/providers/bttv/BttvEmotes.hpp \
