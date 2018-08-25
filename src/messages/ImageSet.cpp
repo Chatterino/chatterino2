@@ -1,7 +1,5 @@
-#include "ImageSet.hpp"
+#include "messages/ImageSet.hpp"
 
-#include "Application.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
@@ -60,16 +58,12 @@ const ImagePtr &ImageSet::getImage3() const
 
 const ImagePtr &ImageSet::getImage(float scale) const
 {
-    int quality = getSettings()->preferredEmoteQuality;
+    int quality = 1;
 
-    if (!quality) {
-        if (scale > 3.999)
-            quality = 3;
-        else if (scale > 1.999)
-            quality = 2;
-        else
-            scale = 1;
-    }
+    if (scale > 2.999)
+        quality = 3;
+    else if (scale > 1.5)
+        quality = 2;
 
     if (!this->imageX3_->isEmpty() && quality == 3) {
         return this->imageX3_;
