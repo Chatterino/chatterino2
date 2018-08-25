@@ -625,6 +625,12 @@ void TwitchMessageBuilder::appendTwitchEmote(
 
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
+    // Special channels, like /whispers and /channels return here
+    // This means they will not render any BTTV or FFZ emotes
+    if (this->twitchChannel == nullptr) {
+        return Failure;
+    }
+
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
 
