@@ -864,6 +864,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
     if (tooltip.isEmpty()) {
         tooltipWidget->hide();
+    } else if (hoverLayoutElement->getLink().isValid() && !getSettings()->enableLinkInfoTooltip) {
+        tooltipWidget->hide();
     } else {
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(hoverLayoutElement->getLink().isValid());
