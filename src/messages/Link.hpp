@@ -13,6 +13,7 @@ public:
         UserInfo,
         UserTimeout,
         UserBan,
+        UserWhisper,
         InsertText,
         ShowMessage,
         UserAction,

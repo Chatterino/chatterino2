@@ -1033,12 +1033,18 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         } break;
         case Qt::RightButton: {
+
+            auto insertText = [=](QString text) {
+                if (auto split = dynamic_cast<Split *>(this->parentWidget())) {
+                    split->insertTextToInput(text);
+                }
+            };
+
             auto &link = hoveredElement->getLink();
             if (link.type == Link::UserInfo) {
-                Split *split = dynamic_cast<Split *>(this->parentWidget());
-                if (split != nullptr) {
-                    split->insertTextToInput("@" + link.value + ", ");
-                }
+                insertText("@" + link.value + ", ");
+            } else if (link.type == Link::UserWhisper) {
+                insertText("/w " + link.value + " ");
             } else {
                 this->addContextMenuItems(hoveredElement, layout);
             }
@@ -1155,6 +1161,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     }
 
     switch (link.type) {
+        case Link::UserWhisper:
         case Link::UserInfo: {
             auto user = link.value;
 
