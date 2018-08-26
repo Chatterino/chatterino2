@@ -438,7 +438,7 @@ void TwitchMessageBuilder::appendUsername()
         this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
                                    this->usernameColor_,
                                    FontStyle::ChatMediumBold)
-            ->setLink({Link::UserInfo, this->message().displayName});
+            ->setLink({Link::UserWhisper, this->message().displayName});
 
         auto currentUser = app->accounts->twitch.getCurrent();
 
