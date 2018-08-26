@@ -36,18 +36,17 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {  //
         this->mixerSetting_.setValue(
             this->channelMap[Platform::Mixer].getVector());
-    });
-    */
+    });*/
 
-    /*
-    connect(liveStatusTimer_, SIGNAL(timeout()), this, SLOT());
-    liveStatusTimer_.start(60 * 1000);
-    */
     liveStatusTimer_ = new QTimer();
-    QObject::connect(liveStatusTimer_, this, SIGNAL(timeout()),
-                     SLOT(fetchFakeChannels()));
-    connect(liveStatusTimer_, SIGNAL(timeout()), SLOT(fetchFakeChannels()));
-    liveStatusTimer_->start(1000);
+
+    this->fetchFakeChannels();
+
+    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->fetchFakeChannels();
+        qDebug() << " MY CODE IS SHIT OMEGALUL ";
+    });
+    this->liveStatusTimer_->start(60 * 1000);
 }
 
 void NotificationController::updateChannelNotification(
@@ -118,19 +117,15 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 
 void NotificationController::fetchFakeChannels()
 {
+    qDebug() << " USING DEBUGGER ";
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].getVector().size(); i++) {
         auto chan = getApp()->twitch.server->getChannelOrEmpty(
             channelMap[Platform::Twitch].getVector()[i]);
-
-        /*
-        auto chan = getApp()->twitch.server->getChannelOrEmpty(chanName);
-        if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get())) {
-        if (channelMap[Platform::Twitch].getVector()[i].toLower() ==
-        channelName.toLower()) { channelMap[Platform::Twitch].removeItem(i);
-            i--;
+        if (chan->isEmpty()) {
+            getFakeTwitchChannelLiveStatus(
+                channelMap[Platform::Twitch].getVector()[i]);
         }
-        }*/
     }
 }
 
@@ -172,7 +167,8 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             // Stream is live
             auto i = std::find(fakeTwitchChannels.begin(),
                                fakeTwitchChannels.end(), channelName);
-            if (i != fakeTwitchChannels.end()) {
+
+            if (!(i != fakeTwitchChannels.end())) {
                 fakeTwitchChannels.push_back(channelName);
                 if (Toasts::isEnabled()) {
                     getApp()->toasts->sendChannelNotification(channelName,

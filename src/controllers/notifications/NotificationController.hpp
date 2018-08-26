@@ -17,7 +17,7 @@ enum class Platform : uint8_t {
     // Mixer,   // 1
 };
 
-class NotificationController final : public Singleton
+class NotificationController final : public Singleton, private QObject
 {
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
@@ -37,10 +37,13 @@ public:
 
 private:
     bool initialized_ = false;
-    QTimer *liveStatusTimer_;
+
+    void fetchFakeChannels();
     void removeFakeChannel(const QString channelName);
-    std::vector<QString> fakeTwitchChannels;
     void getFakeTwitchChannelLiveStatus(const QString &channelName);
+
+    std::vector<QString> fakeTwitchChannels;
+    QTimer *liveStatusTimer_;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
@@ -48,8 +51,6 @@ private:
     ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
         "/notifications/mixer"};
     */
-private slots:
-    void fetchFakeChannels();
 };
 
 }  // namespace chatterino
