@@ -10,7 +10,7 @@ namespace chatterino {
 void LinkResolver::getLinkInfo(const QString url,
                            std::function<void(QString)> successCallback)
 {
-    QString requestUrl("https://api.betterttv.net/2/link_resolver/" + 
+    QString requestUrl("https://braize.pajlada.com/chatterino/link_resolver/" + 
         QUrl::toPercentEncoding(url, "", "/:"));
 
     NetworkRequest request(requestUrl);
