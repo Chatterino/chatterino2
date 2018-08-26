@@ -18,11 +18,14 @@ void LinkResolver::getLinkInfo(const QString url,
     request.setTimeout(30000);
     request.onSuccess([successCallback](auto result) mutable -> Outcome {
         auto root = result.parseJson();
-        /* When tooltip is not a string, in this case, 
-        onError runs before onSuccess, 
-        so there is no point in doing "if" condition. */
-        auto tooltip = root.value("tooltip").toString();
-        successCallback(QUrl::fromPercentEncoding(tooltip.toUtf8()));
+        auto statusCode = root.value("status").toInt();
+        QString response = QString();
+        if (statusCode == 200) {
+            response = root.value("tooltip").toString();
+        } else {
+            response = root.value("message").toString();
+        }
+        successCallback(QUrl::fromPercentEncoding(response.toUtf8()));
 
         return Success;
     });
