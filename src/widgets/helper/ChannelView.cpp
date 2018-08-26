@@ -559,18 +559,6 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     if (tc != nullptr) {
         tc->tabHighlightRequested.connect([this](HighlightState state) {
             this->tabHighlightRequested.invoke(HighlightState::Notification);
-            /*
-            QPainter painter(this);
-            painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.translate(2, 2);
-            painter.setPen(QColor("#6441A4"));
-            painter.drawEllipse(QRectF(10, 10, 5, 5));
-*/
-
-            QPainter painter(this);
-            auto radius = 10;
-            painter.setPen(QColor("#6441A4"));
-            painter.drawEllipse(this->rect().center(), radius, radius);
         });
     }
 }

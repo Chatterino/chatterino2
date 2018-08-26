@@ -20,7 +20,6 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
     QString filePath = fileURL;
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
-    // QString fileName = filePathList.at(filePathList.count() - 1);
     saveFilePath = QString(
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
         "2/cache/profileAvatars/twitch/" + channelName + ".png");
