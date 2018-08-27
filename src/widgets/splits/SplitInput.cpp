@@ -245,16 +245,14 @@ void SplitInput::installKeyPressedEvent()
                         // Then simply get currMsg_.
                         this->ui_.textEdit->setText(this->currMsg_);
                     } else if (message != this->currMsg_) {
-                        // If user is already in current message 
+                        // If user are already in current message 
                         // And type something new
                         // Then replace currMsg_ with new one.
                         this->currMsg_ = message;
-                    } else {
-                        // If user is already in current message 
-                        // And no changed text
-                        // Then don't touch cursos.
-                        cursorToEnd = false;
                     }
+                    // If user is already in current message
+                    // Then don't touch cursos.
+                    cursorToEnd = (message == this->prevMsg_.at(this->prevIndex_ - 1));
                 }
 
                 if (cursorToEnd) {
