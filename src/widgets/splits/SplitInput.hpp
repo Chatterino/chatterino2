@@ -43,6 +43,7 @@ private:
     void initLayout();
     void installKeyPressedEvent();
     void updateEmoteButton();
+    void openEmotePopup();
 
     Split *const split_;
     std::shared_ptr<EmotePopup> emotePopup_;

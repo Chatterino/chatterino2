@@ -84,21 +84,7 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [this] {
-        if (!this->emotePopup_) {
-            this->emotePopup_ = std::make_unique<EmotePopup>();
-            this->emotePopup_->linkClicked.connect([this](const Link &link) {
-                if (link.type == Link::InsertText) {
-                    this->insertText(link.value + " ");
-                }
-            });
-        }
-
-        this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                                  int(500 * this->emotePopup_->getScale()));
-        this->emotePopup_->loadChannel(this->split_->getChannel());
-        this->emotePopup_->show();
-    });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [=] { this->openEmotePopup(); });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -157,6 +143,23 @@ void SplitInput::updateEmoteButton()
 
     this->ui_.emoteButton->getLabel().setText(text);
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
+}
+
+void SplitInput::openEmotePopup()
+{
+    if (!this->emotePopup_) {
+        this->emotePopup_ = std::make_unique<EmotePopup>();
+        this->emotePopup_->linkClicked.connect([this](const Link &link) {
+            if (link.type == Link::InsertText) {
+                this->insertText(link.value + " ");
+            }
+        });
+    }
+
+    this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
+                              int(500 * this->emotePopup_->getScale()));
+    this->emotePopup_->loadChannel(this->split_->getChannel());
+    this->emotePopup_->show();
 }
 
 void SplitInput::installKeyPressedEvent()
@@ -284,6 +287,9 @@ void SplitInput::installKeyPressedEvent()
                 this->split_->copyToClipboard();
                 event->accept();
             }
+        } else if (event->key() == Qt::Key_E &&
+                   event->modifiers() == Qt::ControlModifier) {
+            openEmotePopup();
         }
     });
 }
