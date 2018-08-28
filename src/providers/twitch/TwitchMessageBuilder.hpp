@@ -1,15 +1,17 @@
 #pragma once
 
+#include "common/Aliases.hpp"
+#include "common/Outcome.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "messages/MessageParseArgs.hpp"
-#include "singletons/Emotes.hpp"
 
 #include <IrcMessage>
-
 #include <QString>
 #include <QVariant>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 class Channel;
 class TwitchChannel;

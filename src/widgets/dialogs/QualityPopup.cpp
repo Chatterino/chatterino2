@@ -47,7 +47,7 @@ void QualityPopup::okButtonClicked()
     try {
         openStreamlink(channelURL, this->ui_.selector.currentText());
     } catch (const Exception &ex) {
-        Log("Exception caught trying to open streamlink: {}", ex.what());
+        log("Exception caught trying to open streamlink: {}", ex.what());
     }
 
     this->close();

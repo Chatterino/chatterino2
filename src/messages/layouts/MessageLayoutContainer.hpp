@@ -1,18 +1,21 @@
 #pragma once
 
+#include <QPoint>
+#include <QRect>
 #include <memory>
 #include <vector>
 
-#include <QPoint>
-#include <QRect>
-
-#include "messages/Message.hpp"
+#include "common/Common.hpp"
+#include "common/FlagsEnum.hpp"
 #include "messages/Selection.hpp"
+#include "messages/layouts/MessageLayoutElement.hpp"
 
 class QPainter;
 
 namespace chatterino {
-class MessageLayoutElement;
+
+enum class MessageFlag : uint16_t;
+using MessageFlags = FlagsEnum<MessageFlag>;
 
 struct Margin {
     int top;
@@ -72,7 +75,7 @@ struct MessageLayoutContainer {
     // selection
     int getSelectionIndex(QPoint point);
     int getLastCharacterIndex() const;
-    void addSelectionText(QString &str, int from, int to);
+    void addSelectionText(QString &str, int from, int to, CopyMode copymode);
 
     bool isCollapsed();
 
@@ -92,7 +95,7 @@ private:
     // variables
     float scale_ = 1.f;
     int width_ = 0;
-    MessageFlags flags_ = MessageFlag::None;
+    MessageFlags flags_{};
     int line_ = 0;
     int height_ = 0;
     int currentX_ = 0;

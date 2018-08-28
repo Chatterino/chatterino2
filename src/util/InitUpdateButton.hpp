@@ -4,17 +4,16 @@
 
 namespace pajlada {
 namespace Signals {
-class SignalHolder;
+    class SignalHolder;
 }
 }  // namespace pajlada
 
 namespace chatterino {
 
-class RippleEffectButton;
+class Button;
 class UpdateDialog;
 
-void initUpdateButton(RippleEffectButton &button,
-                      std::unique_ptr<UpdateDialog> &handle,
+void initUpdateButton(Button &button,
                       pajlada::Signals::SignalHolder &signalHolder);
 
 }  // namespace chatterino

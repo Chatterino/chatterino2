@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BaseWidget.hpp"
-#include "widgets/helper/TitlebarButton.hpp"
 
 #include <functional>
 #include <pajlada/signals/signalholder.hpp>
@@ -12,9 +11,10 @@ typedef struct tagMSG MSG;
 
 namespace chatterino {
 
-class RippleEffectButton;
-class RippleEffectLabel;
+class Button;
+class EffectLabel;
 class TitleBarButton;
+enum class TitleBarButtonStyle;
 
 class BaseWindow : public BaseWidget
 {
@@ -36,9 +36,9 @@ public:
 
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
-    TitleBarButton *addTitleBarButton(const TitleBarButton::Style &style,
+    TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
                                       std::function<void()> onClicked);
-    RippleEffectLabel *addTitleBarLabel(std::function<void()> onClicked);
+    EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
     void setStayInScreenRect(bool value);
     bool getStayInScreenRect() const;
@@ -109,11 +109,11 @@ private:
         TitleBarButton *maxButton = nullptr;
         TitleBarButton *exitButton = nullptr;
         QWidget *layoutBase = nullptr;
-        std::vector<RippleEffectButton *> buttons;
+        std::vector<Button *> buttons;
     } ui_;
 
     pajlada::Signals::SignalHolder connections_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-};
+};  // namespace chatterino
 
 }  // namespace chatterino

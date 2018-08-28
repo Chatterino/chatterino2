@@ -16,6 +16,27 @@ namespace chatterino {
 class Settings;
 class Paths;
 
+enum class FontStyle : uint8_t {
+    Tiny,
+    ChatSmall,
+    ChatMediumSmall,
+    ChatMedium,
+    ChatMediumBold,
+    ChatMediumItalic,
+    ChatLarge,
+    ChatVeryLarge,
+
+    UiMedium,
+    UiTabs,
+
+    // don't remove this value
+    EndType,
+
+    // make sure to update these values accordingly!
+    ChatStart = ChatSmall,
+    ChatEnd = ChatVeryLarge,
+};
+
 class Fonts final : public Singleton
 {
 public:
@@ -24,29 +45,9 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
     // font data gets set in createFontData(...)
-    enum Type : uint8_t {
-        Tiny,
-        ChatSmall,
-        ChatMediumSmall,
-        ChatMedium,
-        ChatMediumBold,
-        ChatMediumItalic,
-        ChatLarge,
-        ChatVeryLarge,
 
-        UiMedium,
-        UiTabs,
-
-        // don't remove this value
-        EndType,
-
-        // make sure to update these values accordingly!
-        ChatStart = ChatSmall,
-        ChatEnd = ChatVeryLarge,
-    };
-
-    QFont getFont(Type type, float scale);
-    QFontMetrics getFontMetrics(Type type, float scale);
+    QFont getFont(FontStyle type, float scale);
+    QFontMetrics getFontMetrics(FontStyle type, float scale);
 
     pajlada::Settings::Setting<std::string> chatFontFamily;
     pajlada::Settings::Setting<int> chatFontSize;
@@ -78,12 +79,10 @@ private:
         QFont::Weight weight;
     };
 
-    FontData &getOrCreateFontData(Type type, float scale);
-    FontData createFontData(Type type, float scale);
+    FontData &getOrCreateFontData(FontStyle type, float scale);
+    FontData createFontData(FontStyle type, float scale);
 
     std::vector<std::unordered_map<float, FontData>> fontsByType_;
 };
-
-using FontStyle = Fonts::Type;
 
 }  // namespace chatterino

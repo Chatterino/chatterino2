@@ -1,14 +1,10 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "messages/Image.hpp"
+#include "common/FlagsEnum.hpp"
+#include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
-#include "messages/layouts/MessageLayout.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/Scrollbar.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -20,14 +16,28 @@
 #include <unordered_set>
 
 namespace chatterino {
+enum class HighlightState;
 
-class ChannelView : public BaseWidget
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+
+class MessageLayout;
+using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
+
+enum class MessageElementFlag;
+using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+
+class Scrollbar;
+class EffectLabel;
+struct Link;
+class MessageLayoutElement;
+
+class ChannelView final : public BaseWidget
 {
     Q_OBJECT
 
 public:
     explicit ChannelView(BaseWidget *parent = nullptr);
-    virtual ~ChannelView() override;
 
     void queueUpdate();
     Scrollbar &getScrollBar();
@@ -77,6 +87,14 @@ protected:
                          QPoint &relativePos, int &index);
 
 private:
+    void initializeLayout();
+    void initializeScrollbar();
+    void initializeSignals();
+
+    // void messageAppended(MessagePtr &message);
+    // void messageAddedAtStart(std::vector<MessagePtr> &messages);
+    // void messageRemoveFromStart(MessagePtr &message);
+
     void updatePauseStatus();
     void detachChannel();
     void actuallyLayoutMessages(bool causedByScollbar = false);
@@ -114,8 +132,8 @@ private:
 
     ChannelPtr channel_;
 
-    Scrollbar scrollBar_;
-    RippleEffectLabel *goToBottom_;
+    Scrollbar *scrollBar_;
+    EffectLabel *goToBottom_;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

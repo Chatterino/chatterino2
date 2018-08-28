@@ -6,7 +6,7 @@
 
 message(----)
 
-QT                += widgets core gui network multimedia svg
+QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
 CONFIG            += c++14
@@ -33,7 +33,7 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 }
 
 # Icons
-macx:ICON = resources/images/chatterino2.icns
+#macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
 
@@ -72,6 +72,8 @@ win32 {
 # OSX include directory
 macx {
     INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/opt/openssl/include
+    LIBS += -L/usr/local/opt/openssl/lib
 }
 
 # Optional dependency on Windows SDK 7
@@ -106,7 +108,6 @@ SOURCES += \
     src/Application.cpp \
     src/common/Channel.cpp \
     src/common/CompletionModel.cpp \
-    src/common/Emotemap.cpp \
     src/common/NetworkData.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkRequest.cpp \
@@ -188,8 +189,6 @@ SOURCES += \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
-    src/widgets/helper/RippleEffectButton.cpp \
-    src/widgets/helper/RippleEffectLabel.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
@@ -239,7 +238,6 @@ SOURCES += \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/TwitchApi.cpp \
     src/messages/Emote.cpp \
-    src/messages/EmoteMap.cpp \
     src/messages/ImageSet.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/ffz/FfzEmotes.cpp \
@@ -257,16 +255,20 @@ SOURCES += \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp \
     src/common/DownloadManager.cpp
+    src/widgets/helper/EffectLabel.cpp \
+    src/widgets/helper/Button.cpp \
+    src/messages/MessageContainer.cpp \
+    src/debug/Benchmark.cpp \
+    src/common/UsernameSet.cpp \
+    src/widgets/settingspages/AdvancedPage.cpp
 
 HEADERS  += \
     src/Application.hpp \
     src/common/Channel.hpp \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
-    src/common/Emotemap.hpp \
     src/common/FlagsEnum.hpp \
-    src/common/LockedObject.hpp \
-    src/common/MutexValue.hpp \
+    src/common/Atomic.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkData.hpp \
     src/common/NetworkManager.hpp \
@@ -276,9 +278,8 @@ HEADERS  += \
     src/common/NetworkTimer.hpp \
     src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
-    src/common/Property.hpp \
     src/common/ProviderId.hpp \
-    src/common/SerializeCustom.hpp \
+    src/util/RapidJsonSerializeQString.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
@@ -314,7 +315,6 @@ HEADERS  += \
     src/messages/MessageBuilder.hpp \
     src/messages/MessageColor.hpp \
     src/messages/MessageElement.hpp \
-    src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/emoji/Emojis.hpp \
@@ -381,8 +381,6 @@ HEADERS  += \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
-    src/widgets/helper/RippleEffectButton.hpp \
-    src/widgets/helper/RippleEffectLabel.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
@@ -426,7 +424,6 @@ HEADERS  += \
     src/singletons/Updates.hpp \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Theme.hpp \
-    src/common/SimpleSignalVector.hpp \
     src/common/SignalVector.hpp \
     src/widgets/dialogs/LogsPopup.hpp \
     src/common/Singleton.hpp \
@@ -439,8 +436,6 @@ HEADERS  += \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/TwitchApi.hpp \
     src/messages/Emote.hpp \
-    src/messages/EmoteMap.hpp \
-    src/messages/EmoteCache.hpp \
     src/messages/ImageSet.hpp \
     src/common/Outcome.hpp \
     src/providers/bttv/BttvEmotes.hpp \
@@ -460,6 +455,12 @@ HEADERS  += \
     src/controllers/notifications/NotificationModel.hpp \
     src/singletons/Toasts.hpp \
     src/common/DownloadManager.hpp
+    src/widgets/helper/EffectLabel.hpp \
+    src/util/LayoutHelper.hpp \
+    src/widgets/helper/Button.hpp \
+    src/messages/MessageContainer.hpp \
+    src/common/UsernameSet.hpp \
+    src/widgets/settingspages/AdvancedPage.hpp
 
 RESOURCES += \
     resources/resources.qrc \

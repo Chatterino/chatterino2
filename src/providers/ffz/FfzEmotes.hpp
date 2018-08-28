@@ -1,39 +1,32 @@
 #pragma once
 
 #include <memory>
-
-#include "common/UniqueAccess.hpp"
-#include "messages/Emote.hpp"
-#include "messages/EmoteCache.hpp"
+#include "boost/optional.hpp"
+#include "common/Aliases.hpp"
+#include "common/Atomic.hpp"
 
 namespace chatterino {
 
-class FfzEmotes final : std::enable_shared_from_this<FfzEmotes>
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
+class EmoteMap;
+
+class FfzEmotes final
 {
     static constexpr const char *globalEmoteApiUrl =
         "https://api.frankerfacez.com/v1/set/global";
-    static constexpr const char *channelEmoteApiUrl =
-        "https://api.betterttv.net/2/channels/";
 
 public:
-    // FfzEmotes();
+    FfzEmotes();
 
-    static std::shared_ptr<FfzEmotes> create();
+    std::shared_ptr<const EmoteMap> emotes() const;
+    boost::optional<EmotePtr> emote(const EmoteName &name) const;
+    void loadEmotes();
+    static void loadChannel(const QString &channelName,
+                            std::function<void(EmoteMap &&)> callback);
 
-    AccessGuard<const EmoteCache<EmoteName>> accessGlobalEmotes() const;
-    boost::optional<EmotePtr> getGlobalEmote(const EmoteName &name);
-    boost::optional<EmotePtr> getEmote(const EmoteId &id);
-
-    void loadGlobalEmotes();
-    void loadChannelEmotes(const QString &channelName,
-                           std::function<void(EmoteMap &&)> callback);
-
-protected:
-    Outcome parseGlobalEmotes(const QJsonObject &jsonRoot);
-    Outcome parseChannelEmotes(const QJsonObject &jsonRoot);
-
-    UniqueAccess<EmoteCache<EmoteName>> globalEmotes_;
-    UniqueAccess<WeakEmoteIdMap> channelEmoteCache_;
+private:
+    Atomic<std::shared_ptr<const EmoteMap>> global_;
 };
 
 }  // namespace chatterino

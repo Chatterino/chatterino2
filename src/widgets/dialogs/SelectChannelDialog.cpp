@@ -2,8 +2,10 @@
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchServer.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 
 #include <QDialogButtonBox>
 #include <QGroupBox>

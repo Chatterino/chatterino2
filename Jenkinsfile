@@ -6,12 +6,12 @@ pipeline {
             parallel {
                 stage('GCC') {
                     steps {
-                        sh 'mkdir -p build-linux-gcc && cd build-linux-gcc && qmake .. && make'
+                        sh 'mkdir -p build-linux-gcc && cd build-linux-gcc && make distclean; qmake .. && make'
                     }
                 }
                 stage('Clang') {
                     steps {
-                        sh 'mkdir -p build-linux-clang && cd build-linux-clang && qmake -spec linux-clang .. && make'
+                        sh 'mkdir -p build-linux-clang && cd build-linux-clang && make distclean; qmake -spec linux-clang .. && make'
                     }
                 }
             }

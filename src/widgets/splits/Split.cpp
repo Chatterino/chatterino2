@@ -1,8 +1,8 @@
 #include "widgets/splits/Split.hpp"
 
-#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "debug/Log.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -11,15 +11,20 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/DebugPopup.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/splits/SplitHeader.hpp"
+#include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
 
 #include <QApplication>
@@ -37,7 +42,6 @@
 #include <random>
 
 namespace chatterino {
-
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
@@ -51,32 +55,30 @@ Split::Split(QWidget *parent)
     : BaseWidget(parent)
     , container_(nullptr)
     , channel_(Channel::getEmpty())
-    , vbox_(this)
-    , header_(this)
-    , view_(this)
-    , input_(this)
+    , vbox_(new QVBoxLayout(this))
+    , header_(new SplitHeader(this))
+    , view_(new ChannelView(this))
+    , input_(new SplitInput(this))
     , overlay_(new SplitOverlay(this))
 {
-    auto app = getApp();
-
     this->setMouseTracking(true);
 
-    this->vbox_.setSpacing(0);
-    this->vbox_.setMargin(1);
+    this->vbox_->setSpacing(0);
+    this->vbox_->setMargin(1);
 
-    this->vbox_.addWidget(&this->header_);
-    this->vbox_.addWidget(&this->view_, 1);
-    this->vbox_.addWidget(&this->input_);
+    this->vbox_->addWidget(this->header_);
+    this->vbox_->addWidget(this->view_, 1);
+    this->vbox_->addWidget(this->input_);
 
     // Initialize chat widget-wide hotkeys
     // CTRL+W: Close Split
-    createShortcut(this, "CTRL+W", &Split::doCloseSplit);
+    createShortcut(this, "CTRL+W", &Split::deleteFromContainer);
 
     // CTRL+R: Change Channel
-    createShortcut(this, "CTRL+R", &Split::doChangeChannel);
+    createShortcut(this, "CTRL+R", &Split::changeChannel);
 
     // CTRL+F: Search
-    createShortcut(this, "CTRL+F", &Split::showSearchPopup);
+    createShortcut(this, "CTRL+F", &Split::showSearch);
 
     // F12
     createShortcut(this, "F10", [] {
@@ -91,41 +93,41 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
-    this->input_.ui_.textEdit->installEventFilter(parent);
+    this->input_->ui_.textEdit->installEventFilter(parent);
 
-    this->view_.mouseDown.connect([this](QMouseEvent *) {
+    this->view_->mouseDown.connect([this](QMouseEvent *) {
         //
         this->giveFocus(Qt::MouseFocusReason);
     });
-    this->view_.selectionChanged.connect([this]() {
-        if (view_.hasSelection()) {
-            this->input_.clearSelection();
+    this->view_->selectionChanged.connect([this]() {
+        if (view_->hasSelection()) {
+            this->input_->clearSelection();
         }
     });
 
-    this->input_.textChanged.connect([=](const QString &newText) {
-        if (app->settings->showEmptyInput) {
+    this->input_->textChanged.connect([=](const QString &newText) {
+        if (getSettings()->showEmptyInput) {
             return;
         }
 
         if (newText.length() == 0) {
-            this->input_.hide();
-        } else if (this->input_.isHidden()) {
-            this->input_.show();
+            this->input_->hide();
+        } else if (this->input_->isHidden()) {
+            this->input_->show();
         }
     });
 
-    app->settings->showEmptyInput.connect(
+    getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
-            if (!showEmptyInput && this->input_.getInputText().length() == 0) {
-                this->input_.hide();
+            if (!showEmptyInput && this->input_->getInputText().length() == 0) {
+                this->input_->hide();
             } else {
-                this->input_.show();
+                this->input_->show();
             }
         },
         this->managedConnections_);
 
-    this->header_.updateModerationModeIcon();
+    this->header_->updateModerationModeIcon();
     this->overlay_->hide();
 
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -141,9 +143,9 @@ Split::Split(QWidget *parent)
                              }
                          });
 
-    this->input_.ui_.textEdit->focused.connect(
+    this->input_->ui_.textEdit->focused.connect(
         [this] { this->focused.invoke(); });
-    this->input_.ui_.textEdit->focusLost.connect(
+    this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
 }
 
@@ -157,7 +159,7 @@ Split::~Split()
 
 ChannelView &Split::getChannelView()
 {
-    return this->view_;
+    return *this->view_;
 }
 
 SplitContainer *Split::getContainer()
@@ -189,7 +191,7 @@ void Split::setChannel(IndirectChannel newChannel)
 {
     this->channel_ = newChannel;
 
-    this->view_.setChannel(newChannel.get());
+    this->view_->setChannel(newChannel.get());
 
     this->usermodeChangedConnection_.disconnect();
     this->roomModeChangedConnection_.disconnect();
@@ -199,12 +201,12 @@ void Split::setChannel(IndirectChannel newChannel)
 
     if (tc != nullptr) {
         this->usermodeChangedConnection_ = tc->userStateChanged.connect([this] {
-            this->header_.updateModerationModeIcon();
-            this->header_.updateRoomModes();
+            this->header_->updateModerationModeIcon();
+            this->header_->updateRoomModes();
         });
 
         this->roomModeChangedConnection_ = tc->roomModesChanged.connect(
-            [this] { this->header_.updateRoomModes(); });
+            [this] { this->header_->updateRoomModes(); });
     }
 
     this->indirectChannelChangedConnection_ =
@@ -212,9 +214,9 @@ void Split::setChannel(IndirectChannel newChannel)
             QTimer::singleShot(0, [this] { this->setChannel(this->channel_); });
         });
 
-    this->header_.updateModerationModeIcon();
-    this->header_.updateChannelText();
-    this->header_.updateRoomModes();
+    this->header_->updateModerationModeIcon();
+    this->header_->updateChannelText();
+    this->header_->updateRoomModes();
 
     this->channelChanged.invoke();
 }
@@ -223,8 +225,8 @@ void Split::setModerationMode(bool value)
 {
     if (value != this->moderationMode_) {
         this->moderationMode_ = value;
-        this->header_.updateModerationModeIcon();
-        this->view_.layoutMessages();
+        this->header_->updateModerationModeIcon();
+        this->view_->layoutMessages();
     }
 }
 
@@ -235,7 +237,7 @@ bool Split::getModerationMode() const
 
 void Split::insertTextToInput(const QString &text)
 {
-    this->input_.insertText(text);
+    this->input_->insertText(text);
 }
 
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
@@ -269,27 +271,27 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
 
 void Split::layoutMessages()
 {
-    this->view_.layoutMessages();
+    this->view_->layoutMessages();
 }
 
 void Split::updateGifEmotes()
 {
-    this->view_.queueUpdate();
+    this->view_->queueUpdate();
 }
 
 void Split::updateLastReadMessage()
 {
-    this->view_.updateLastReadMessage();
+    this->view_->updateLastReadMessage();
 }
 
 void Split::giveFocus(Qt::FocusReason reason)
 {
-    this->input_.ui_.textEdit->setFocus(reason);
+    this->input_->ui_.textEdit->setFocus(reason);
 }
 
 bool Split::hasFocus() const
 {
-    return this->input_.ui_.textEdit->hasFocus();
+    return this->input_->ui_.textEdit->hasFocus();
 }
 
 void Split::paintEvent(QPaintEvent *)
@@ -307,13 +309,13 @@ void Split::mouseMoveEvent(QMouseEvent *event)
 
 void Split::keyPressEvent(QKeyEvent *event)
 {
-    this->view_.unsetCursor();
+    this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
 void Split::keyReleaseEvent(QKeyEvent *event)
 {
-    this->view_.unsetCursor();
+    this->view_->unsetCursor();
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }
 
@@ -362,21 +364,21 @@ void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
 }
 
 /// Slots
-void Split::doAddSplit()
+void Split::addSibling()
 {
     if (this->container_) {
         this->container_->appendNewSplit(true);
     }
 }
 
-void Split::doCloseSplit()
+void Split::deleteFromContainer()
 {
     if (this->container_) {
         this->container_->deleteSplit(this);
     }
 }
 
-void Split::doChangeChannel()
+void Split::changeChannel()
 {
     this->showChangeChannelPopup("Change channel", false, [](bool) {});
 
@@ -388,10 +390,10 @@ void Split::doChangeChannel()
     }
 }
 
-void Split::doPopup()
+void Split::popup()
 {
     auto app = getApp();
-    Window &window = app->windows->createWindow(Window::Type::Popup);
+    Window &window = app->windows->createWindow(WindowType::Popup);
 
     Split *split = new Split(static_cast<SplitContainer *>(
         window.getNotebook().getOrAddSelectedPage()));
@@ -402,9 +404,9 @@ void Split::doPopup()
     window.show();
 }
 
-void Split::doClearChat()
+void Split::clear()
 {
-    this->view_.clearMessages();
+    this->view_->clearMessages();
 }
 
 void Split::openInBrowser()
@@ -417,7 +419,7 @@ void Split::openInBrowser()
     }
 }
 
-void Split::openInPopupPlayer()
+void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
@@ -431,7 +433,7 @@ void Split::openInStreamlink()
     try {
         openStreamlinkForChannel(this->getChannel()->getName());
     } catch (const Exception &ex) {
-        Log("Error in doOpenStreamlink: {}", ex.what());
+        log("Error in doOpenStreamlink: {}", ex.what());
     }
 }
 
@@ -444,8 +446,8 @@ void Split::showViewerList()
                             QDockWidget::DockWidgetFloatable);
     viewerDock->resize(
         0.5 * this->width(),
-        this->height() - this->header_.height() - this->input_.height());
-    viewerDock->move(0, this->header_.height());
+        this->height() - this->header_->height() - this->input_->height());
+    viewerDock->move(0, this->header_->height());
 
     auto multiWidget = new QWidget(viewerDock);
     auto dockVbox = new QVBoxLayout(viewerDock);
@@ -545,10 +547,10 @@ void Split::showUserInfoPopup(const UserName &user)
 
 void Split::copyToClipboard()
 {
-    QApplication::clipboard()->setText(this->view_.getSelectedText());
+    QApplication::clipboard()->setText(this->view_->getSelectedText());
 }
 
-void Split::showSearchPopup()
+void Split::showSearch()
 {
     SearchPopup *popup = new SearchPopup();
 

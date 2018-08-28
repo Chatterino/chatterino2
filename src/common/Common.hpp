@@ -3,7 +3,6 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "common/ProviderId.hpp"
-#include "debug/Log.hpp"
 
 #include <QString>
 #include <QWidget>
@@ -39,5 +38,13 @@ std::weak_ptr<T> weakOf(T *element)
 {
     return element->shared_from_this();
 }
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+
+enum class CopyMode {
+    Everything,
+    OnlyTextAndEmotes,
+};
 
 }  // namespace chatterino

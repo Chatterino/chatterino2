@@ -2,6 +2,7 @@
 
 #include <QRegularExpression>
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
 
 namespace chatterino {
@@ -60,8 +61,7 @@ ModerationAction::ModerationAction(const QString &action)
         //     str);
         // }
     } else if (action.startsWith("/ban ")) {
-        this->image_ =
-            Image::fromNonOwningPixmap(&getApp()->resources->buttons.ban);
+        this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
     } else {
         QString xD = action;
 

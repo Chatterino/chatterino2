@@ -27,7 +27,7 @@
 namespace chatterino {
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/images/commands.svg")
+    : SettingsPage("Commands", ":/settings/commands.svg")
 {
     auto app = getApp();
 
@@ -47,7 +47,7 @@ CommandPage::CommandPage()
 
     layout.append(
         this->createCheckBox("Also match the trigger at the end of the message",
-                             app->settings->allowCommandsAtEnd));
+                             getSettings()->allowCommandsAtEnd));
 
     QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
     text->setWordWrap(true);

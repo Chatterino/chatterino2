@@ -1,10 +1,7 @@
 #pragma once
 
 #include "common/CompletionModel.hpp"
-#include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
-#include "messages/Message.hpp"
-#include "util/ConcurrentMap.hpp"
 
 #include <QString>
 #include <QTimer>
@@ -13,7 +10,9 @@
 #include <memory>
 
 namespace chatterino {
+
 struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class Channel : public std::enable_shared_from_this<Channel>
 {
@@ -52,7 +51,6 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
-    virtual void addRecentChatter(const MessagePtr &message);
 
     QStringList modList;
 
@@ -66,11 +64,9 @@ public:
 
     CompletionModel completionModel;
 
-    // pre c++17 polyfill
-    std::weak_ptr<Channel> weak_from_this();
-
 protected:
     virtual void onConnected();
+    virtual void addRecentChatter(const MessagePtr &message);
 
 private:
     const QString name_;
@@ -88,47 +84,17 @@ class IndirectChannel
         Channel::Type type;
         pajlada::Signals::NoArgSignal changed;
 
-        Data() = delete;
-        Data(ChannelPtr _channel, Channel::Type _type)
-            : channel(_channel)
-            , type(_type)
-        {
-        }
+        Data(ChannelPtr channel, Channel::Type type);
     };
 
 public:
     IndirectChannel(ChannelPtr channel,
-                    Channel::Type type = Channel::Type::Direct)
-        : data_(new Data(channel, type))
-    {
-    }
+                    Channel::Type type = Channel::Type::Direct);
 
-    ChannelPtr get()
-    {
-        return data_->channel;
-    }
-
-    void update(ChannelPtr ptr)
-    {
-        assert(this->data_->type != Channel::Type::Direct);
-
-        this->data_->channel = ptr;
-        this->data_->changed.invoke();
-    }
-
-    pajlada::Signals::NoArgSignal &getChannelChanged()
-    {
-        return this->data_->changed;
-    }
-
-    Channel::Type getType()
-    {
-        if (this->data_->type == Channel::Type::Direct) {
-            return this->get()->getType();
-        } else {
-            return this->data_->type;
-        }
-    }
+    ChannelPtr get();
+    void reset(ChannelPtr channel);
+    pajlada::Signals::NoArgSignal &getChannelChanged();
+    Channel::Type getType();
 
 private:
     std::shared_ptr<Data> data_;

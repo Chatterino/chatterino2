@@ -1,20 +1,17 @@
 #include "InitUpdateButton.hpp"
 
 #include "widgets/dialogs/UpdateDialog.hpp"
-#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/helper/Button.hpp"
 
 namespace chatterino {
 
-void initUpdateButton(RippleEffectButton &button,
-                      std::unique_ptr<UpdateDialog> &handle,
+void initUpdateButton(Button &button,
                       pajlada::Signals::SignalHolder &signalHolder)
 {
     button.hide();
 
     // show update prompt when clicking the button
-    QObject::connect(&button, &RippleEffectButton::clicked, [&button, &handle] {
-        (void)(handle);
-
+    QObject::connect(&button, &Button::clicked, [&button] {
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(

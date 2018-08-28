@@ -1,6 +1,7 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -11,8 +12,8 @@
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -46,14 +47,13 @@ UserInfoPopup::UserInfoPopup()
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
     {
         // avatar
-        auto avatar = head.emplace<RippleEffectButton>(nullptr).assign(
-            &this->ui_.avatarButton);
+        auto avatar =
+            head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
-        QObject::connect(avatar.getElement(), &RippleEffectButton::clicked,
-                         [this] {
-                             QDesktopServices::openUrl(
-                                 QUrl("https://twitch.tv/" + this->userName_));
-                         });
+        QObject::connect(avatar.getElement(), &Button::clicked, [this] {
+            QDesktopServices::openUrl(
+                QUrl("https://twitch.tv/" + this->userName_.toLower()));
+        });
 
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
@@ -82,33 +82,31 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
-        auto viewLogs = user.emplace<RippleEffectLabel2>(this);
+        auto viewLogs = user.emplace<EffectLabel2>(this);
         viewLogs->getLabel().setText("Online logs");
 
-        auto mod = user.emplace<RippleEffectButton>(this);
+        auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
         mod->setScaleIndependantSize(30, 30);
-        auto unmod = user.emplace<RippleEffectButton>(this);
+        auto unmod = user.emplace<Button>(this);
         unmod->setPixmap(app->resources->buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
 
-        QObject::connect(viewLogs.getElement(), &RippleEffectButton::clicked,
-                         [this] {
-                             auto logs = new LogsPopup();
-                             logs->setInfo(this->channel_, this->userName_);
-                             logs->setAttribute(Qt::WA_DeleteOnClose);
-                             logs->show();
-                         });
+        QObject::connect(viewLogs.getElement(), &Button::clicked, [this] {
+            auto logs = new LogsPopup();
+            logs->setInfo(this->channel_, this->userName_);
+            logs->setAttribute(Qt::WA_DeleteOnClose);
+            logs->show();
+        });
 
-        QObject::connect(
-            mod.getElement(), &RippleEffectButton::clicked,
-            [this] { this->channel_->sendMessage("/mod " + this->userName_); });
-        QObject::connect(
-            unmod.getElement(), &RippleEffectButton::clicked, [this] {
-                this->channel_->sendMessage("/unmod " + this->userName_);
-            });
+        QObject::connect(mod.getElement(), &Button::clicked, [this] {
+            this->channel_->sendMessage("/mod " + this->userName_);
+        });
+        QObject::connect(unmod.getElement(), &Button::clicked, [this] {
+            this->channel_->sendMessage("/unmod " + this->userName_);
+        });
 
         // userstate
         this->userStateChanged_.connect([this, mod, unmod]() mutable {
@@ -429,14 +427,13 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
             hbox->setSpacing(0);
             {
-                auto button = hbox.emplace<RippleEffectButton>(nullptr);
+                auto button = hbox.emplace<Button>(nullptr);
                 button->setPixmap(pixmap);
                 button->setScaleIndependantSize(buttonHeight, buttonHeight);
                 button->setBorderColor(QColor(255, 255, 255, 127));
 
                 QObject::connect(
-                    button.getElement(), &RippleEffectButton::clicked,
-                    [this, action] {
+                    button.getElement(), &Button::clicked, [this, action] {
                         this->buttonClicked.invoke(std::make_pair(action, -1));
                     });
             }
@@ -458,7 +455,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             hbox->setSpacing(0);
 
             for (const auto &item : items) {
-                auto a = hbox.emplace<RippleEffectLabel2>();
+                auto a = hbox.emplace<EffectLabel2>();
                 a->getLabel().setText(std::get<0>(item));
 
                 if (std::get<0>(item).length() > 1) {
@@ -468,7 +465,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 }
                 a->setBorderColor(color1);
 
-                QObject::connect(a.getElement(), &RippleEffectLabel2::clicked,
+                QObject::connect(a.getElement(), &EffectLabel2::clicked,
                                  [this, timeout = std::get<1>(item)] {
                                      this->buttonClicked.invoke(std::make_pair(
                                          Action::Timeout, timeout));

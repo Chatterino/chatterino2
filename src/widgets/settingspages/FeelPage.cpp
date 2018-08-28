@@ -18,9 +18,8 @@
 namespace chatterino {
 
 FeelPage::FeelPage()
-    : SettingsPage("Feel", ":/images/behave.svg")
+    : SettingsPage("Feel", ":/settings/behave.svg")
 {
-    auto app = getApp();
     LayoutCreator<FeelPage> layoutCreator(this);
 
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
@@ -37,20 +36,20 @@ FeelPage::FeelPage()
         form->addRow(
             "", this->createCheckBox(
                     "Show which users joined the channel (up to 1000 chatters)",
-                    app->settings->showJoins));
+                    getSettings()->showJoins));
         form->addRow(
             "", this->createCheckBox(
                     "Show which users parted the channel (up to 1000 chatters)",
-                    app->settings->showParts));
+                    getSettings()->showParts));
 
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING,
-                                          app->settings->pauseChatHover));
+                                          getSettings()->pauseChatHover));
 
         form->addRow("Mouse scroll speed:", this->createMouseScrollSlider());
         form->addRow("Links:",
                      this->createCheckBox("Open links only on double click",
-                                          app->settings->linksDoubleClickOnly));
+                                          getSettings()->linksDoubleClickOnly));
     }
 
     layout->addSpacing(16);
@@ -61,11 +60,11 @@ FeelPage::FeelPage()
         groupLayout->addRow(
             LIMIT_CHATTERS_FOR_SMALLER_STREAMERS,
             this->createCheckBox(
-                "", app->settings->onlyFetchChattersForSmallerStreamers));
+                "", getSettings()->onlyFetchChattersForSmallerStreamers));
 
         groupLayout->addRow(
             "What viewer count counts as a \"smaller streamer\"",
-            this->createSpinBox(app->settings->smallStreamerLimit, 10, 50000));
+            this->createSpinBox(getSettings()->smallStreamerLimit, 10, 50000));
     }
 
     {
@@ -73,7 +72,7 @@ FeelPage::FeelPage()
         auto groupLayout = group.setLayoutType<QVBoxLayout>();
 
         groupLayout.append(this->createCheckBox("Show whispers inline",
-                                                app->settings->inlineWhispers));
+                                                getSettings()->inlineWhispers));
     }
 
     layout->addStretch(1);
@@ -81,17 +80,16 @@ FeelPage::FeelPage()
 
 QSlider *FeelPage::createMouseScrollSlider()
 {
-    auto app = getApp();
     auto slider = new QSlider(Qt::Horizontal);
 
-    float currentValue = app->settings->mouseScrollMultiplier;
+    float currentValue = getSettings()->mouseScrollMultiplier;
     int sliderValue = int(((currentValue - 0.1f) / 2.f) * 99.f);
     slider->setValue(sliderValue);
 
     QObject::connect(slider, &QSlider::valueChanged, [=](int newValue) {
         float mul = static_cast<float>(newValue) / 99.f;
         float newSliderValue = (mul * 2.1f) + 0.1f;
-        app->settings->mouseScrollMultiplier = newSliderValue;
+        getSettings()->mouseScrollMultiplier = newSliderValue;
     });
 
     return slider;

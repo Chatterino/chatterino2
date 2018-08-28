@@ -5,7 +5,7 @@
 namespace chatterino {
 
 EmotesPage::EmotesPage()
-    : SettingsPage("Emotes", ":/images/emote.svg")
+    : SettingsPage("Emotes", ":/settings/emote.svg")
 {
     //    SettingManager &settings = SettingManager::getInstance();
     //    LayoutCreator<EmotesPage> layoutCreator(this);

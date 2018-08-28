@@ -1,8 +1,5 @@
 #pragma once
 
-#include "common/Emotemap.hpp"
-#include "common/SimpleSignalVector.hpp"
-#include "messages/Emote.hpp"
 #include "util/ConcurrentMap.hpp"
 
 #include <QMap>
@@ -13,6 +10,9 @@
 #include <vector>
 
 namespace chatterino {
+
+struct Emote;
+using EmotePtr = std::shared_ptr<const Emote>;
 
 struct EmojiData {
     // actual byte-representation of the emoji (i.e. \154075\156150 which is

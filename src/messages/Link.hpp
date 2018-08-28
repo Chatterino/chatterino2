@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QString>
-#include <common/Common.hpp>
 
 namespace chatterino {
 
@@ -14,6 +13,7 @@ public:
         UserInfo,
         UserTimeout,
         UserBan,
+        UserWhisper,
         InsertText,
         ShowMessage,
         UserAction,

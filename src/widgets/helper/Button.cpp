@@ -1,4 +1,4 @@
-#include "RippleEffectButton.hpp"
+#include "Button.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -10,11 +10,11 @@
 
 namespace chatterino {
 
-RippleEffectButton::RippleEffectButton(BaseWidget *parent)
+Button::Button(BaseWidget *parent)
     : BaseWidget(parent)
 {
     connect(&effectTimer_, &QTimer::timeout, this,
-            &RippleEffectButton::onMouseEffectTimeout);
+            &Button::onMouseEffectTimeout);
 
     this->effectTimer_.setInterval(20);
     this->effectTimer_.start();
@@ -22,64 +22,64 @@ RippleEffectButton::RippleEffectButton(BaseWidget *parent)
     this->setMouseTracking(true);
 }
 
-void RippleEffectButton::setMouseEffectColor(boost::optional<QColor> color)
+void Button::setMouseEffectColor(boost::optional<QColor> color)
 {
     this->mouseEffectColor_ = color;
 }
 
-void RippleEffectButton::setPixmap(const QPixmap &_pixmap)
+void Button::setPixmap(const QPixmap &_pixmap)
 {
     this->pixmap_ = _pixmap;
     this->update();
 }
 
-const QPixmap &RippleEffectButton::getPixmap() const
+const QPixmap &Button::getPixmap() const
 {
     return this->pixmap_;
 }
 
-void RippleEffectButton::setDim(bool value)
+void Button::setDim(bool value)
 {
     this->dimPixmap_ = value;
 
     this->update();
 }
 
-bool RippleEffectButton::getDim() const
+bool Button::getDim() const
 {
     return this->dimPixmap_;
 }
 
-void RippleEffectButton::setEnable(bool value)
+void Button::setEnable(bool value)
 {
     this->enabled_ = value;
 
     this->update();
 }
 
-bool RippleEffectButton::getEnable() const
+bool Button::getEnable() const
 {
     return this->enabled_;
 }
 
-qreal RippleEffectButton::getCurrentDimAmount() const
+qreal Button::getCurrentDimAmount() const
 {
     return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
 }
 
-void RippleEffectButton::setBorderColor(const QColor &color)
+void Button::setBorderColor(const QColor &color)
 {
     this->borderColor_ = color;
 
     this->update();
 }
 
-const QColor &RippleEffectButton::getBorderColor() const
+const QColor &Button::getBorderColor() const
 {
     return this->borderColor_;
 }
 
-void RippleEffectButton::setMenu(std::unique_ptr<QMenu> menu)
+void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
     this->menu_ = std::move(menu);
 
@@ -93,7 +93,7 @@ void RippleEffectButton::setMenu(std::unique_ptr<QMenu> menu)
         }));
 }
 
-void RippleEffectButton::paintEvent(QPaintEvent *)
+void Button::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -126,7 +126,7 @@ void RippleEffectButton::paintEvent(QPaintEvent *)
     }
 }
 
-void RippleEffectButton::fancyPaint(QPainter &painter)
+void Button::fancyPaint(QPainter &painter)
 {
     if (!this->enabled_) {
         return;
@@ -169,17 +169,17 @@ void RippleEffectButton::fancyPaint(QPainter &painter)
     }
 }
 
-void RippleEffectButton::enterEvent(QEvent *)
+void Button::enterEvent(QEvent *)
 {
     this->mouseOver_ = true;
 }
 
-void RippleEffectButton::leaveEvent(QEvent *)
+void Button::leaveEvent(QEvent *)
 {
     this->mouseOver_ = false;
 }
 
-void RippleEffectButton::mousePressEvent(QMouseEvent *event)
+void Button::mousePressEvent(QMouseEvent *event)
 {
     if (!this->enabled_) {
         return;
@@ -197,10 +197,12 @@ void RippleEffectButton::mousePressEvent(QMouseEvent *event)
 
     if (this->menu_ && !this->menuVisible_) {
         QTimer::singleShot(80, this, [this] { this->showMenu(); });
+        this->mouseDown_ = false;
+        this->mouseOver_ = false;
     }
 }
 
-void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
+void Button::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!this->enabled_) {
         return;
@@ -217,7 +219,7 @@ void RippleEffectButton::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void RippleEffectButton::mouseMoveEvent(QMouseEvent *event)
+void Button::mouseMoveEvent(QMouseEvent *event)
 {
     if (!this->enabled_) {
         return;
@@ -228,7 +230,7 @@ void RippleEffectButton::mouseMoveEvent(QMouseEvent *event)
     this->update();
 }
 
-void RippleEffectButton::onMouseEffectTimeout()
+void Button::onMouseEffectTimeout()
 {
     bool performUpdate = false;
 
@@ -272,7 +274,7 @@ void RippleEffectButton::onMouseEffectTimeout()
     }
 }
 
-void RippleEffectButton::showMenu()
+void Button::showMenu()
 {
     if (!this->menu_) return;
 

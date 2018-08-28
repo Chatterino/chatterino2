@@ -1,10 +1,14 @@
 #include "LookPage.hpp"
 
 #include "Application.hpp"
+#include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/Line.hpp"
 
 #include <QFontDialog>
@@ -27,9 +31,9 @@
 // clang-format on
 
 #ifdef USEWINSDK
-#define WINDOW_TOPMOST "Window always on top"
+#    define WINDOW_TOPMOST "Window always on top"
 #else
-#define WINDOW_TOPMOST "Window always on top (requires restart)"
+#    define WINDOW_TOPMOST "Window always on top (requires restart)"
 #endif
 #define INPUT_EMPTY "Show input box when empty"
 #define LAST_MSG "Mark the last message you read"
@@ -37,7 +41,7 @@
 namespace chatterino {
 
 LookPage::LookPage()
-    : SettingsPage("Look", ":/images/theme.svg")
+    : SettingsPage("Look", ":/settings/theme.svg")
 {
     this->initializeUi();
 }
@@ -204,16 +208,19 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
     /*
     emotes.append(
         this->createCheckBox("Enable Twitch emotes",
-    app->settings->enableTwitchEmotes));
+    getSettings()->enableTwitchEmotes));
     emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
-                                       app->settings->enableBttvEmotes));
+                                       getSettings()->enableBttvEmotes));
     emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                       app->settings->enableFfzEmotes));
+                                       getSettings()->enableFfzEmotes));
     emotes.append(this->createCheckBox("Enable emojis",
-    app->settings->enableEmojis));
+    getSettings()->enableEmojis));
     */
     layout.append(
         this->createCheckBox("Animations", getSettings()->enableGifAnimations));
+    layout.append(
+        this->createCheckBox("Animations only when chatterino has focus",
+                             getSettings()->enableAnimationsWhenFocused));
 
     auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
@@ -281,7 +288,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     combo->addItems({"Dotted line", "Solid line"});
 
     const auto currentIndex = []() -> int {
-        switch (getApp()->settings->lastMessagePattern.getValue()) {
+        switch (getSettings()->lastMessagePattern.getValue()) {
             case Qt::SolidLine:
                 return 1;
             case Qt::VerPattern:
@@ -322,11 +329,11 @@ ChannelPtr LookPage::createPreviewChannel()
     {
         MessageBuilder builder;
         builder.emplace<TimestampElement>(QTime(8, 13, 42));
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.subscriber), MessageElementFlag::BadgeSubscription);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
         builder.emplace<TextElement>("username1:", MessageElementFlag::Username, QColor("#0094FF"), FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("This is a preview message", MessageElementFlag::Text);
-        builder.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->pajaDank), MessageElementFlag::AlwaysShow);
+        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->pajaDank, 0.25), MessageElementFlag::AlwaysShow);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::BoldUsername, MessageColor::Text, FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::NonBoldUsername);
         channel->addMessage(builder.release());
@@ -334,7 +341,7 @@ ChannelPtr LookPage::createPreviewChannel()
     {
         MessageBuilder message;
         message.emplace<TimestampElement>(QTime(8, 15, 21));
-        message.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
+        message.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
         message.emplace<TextElement>("username2:", MessageElementFlag::Username, QColor("#FF6A00"), FontStyle::ChatMediumBold);
         message.emplace<TextElement>("This is another one", MessageElementFlag::Text);
         // message.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->ppHop), MessageElementFlag::BttvEmote);
@@ -416,7 +423,7 @@ QLayout *LookPage::createFontChanger()
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(button, &QPushButton::clicked, [=]() {
-        QFontDialog dialog(app->fonts->getFont(Fonts::ChatMedium, 1.));
+        QFontDialog dialog(app->fonts->getFont(FontStyle::ChatMedium, 1.));
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 

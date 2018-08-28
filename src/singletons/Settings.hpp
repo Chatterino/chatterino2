@@ -5,7 +5,6 @@
 #include "common/ChatterinoSetting.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "messages/MessageElement.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -26,6 +25,8 @@ public:
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
+    BoolSetting enableAnimationsWhenFocused = {
+        "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
     BoolSetting showBadges = {"/appearance/messages/showBadges", true};
@@ -98,12 +99,6 @@ public:
     BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    // 0 = No preference
-    // 1 = 1x
-    // 2 = 2x
-    // 3 = 3x
-    IntSetting preferredEmoteQuality = {"/emotes/preferredEmoteQuality", 0};
-
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
     /// Links
@@ -164,6 +159,8 @@ public:
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
 
+    QStringSetting cachePath = {"/cache/path", ""};
+
     void saveSnapshot();
     void restoreSnapshot();
 
@@ -173,6 +170,6 @@ private:
     std::unique_ptr<rapidjson::Document> snapshot_;
 };
 
-[[deprecated]] Settings *getSettings();
+Settings *getSettings();
 
 }  // namespace chatterino

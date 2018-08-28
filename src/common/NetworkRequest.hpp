@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Application.hpp"
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkData.hpp"
 #include "common/NetworkRequester.hpp"
 #include "common/NetworkResult.hpp"
 #include "common/NetworkTimer.hpp"
 #include "common/NetworkWorker.hpp"
 
 namespace chatterino {
+class NetworkData;
 
 class NetworkRequest
 {
@@ -27,18 +26,14 @@ class NetworkRequest
     bool executed_ = false;
 
 public:
-    NetworkRequest() = delete;
-    NetworkRequest(const NetworkRequest &other) = delete;
-    NetworkRequest &operator=(const NetworkRequest &other) = delete;
-
-    NetworkRequest(NetworkRequest &&other) = default;
-    NetworkRequest &operator=(NetworkRequest &&other) = default;
-
     explicit NetworkRequest(
         const std::string &url,
         NetworkRequestType requestType = NetworkRequestType::Get);
     explicit NetworkRequest(
         QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+
+    NetworkRequest(NetworkRequest &&other) = default;
+    NetworkRequest &operator=(NetworkRequest &&other) = default;
 
     ~NetworkRequest();
 
@@ -55,14 +50,13 @@ public:
     void setRawHeader(const char *headerName, const QByteArray &value);
     void setRawHeader(const char *headerName, const QString &value);
     void setTimeout(int ms);
+    void setExecuteConcurrently(bool value);
     void makeAuthorizedV5(const QString &clientID,
                           const QString &oauthToken = QString());
 
     void execute();
 
 private:
-    // Returns true if the file was successfully loaded from cache
-    // Returns false if the cache file either didn't exist, or it contained
     // "invalid" data "invalid" is specified by the onSuccess callback
     Outcome tryLoadCachedFile();
 

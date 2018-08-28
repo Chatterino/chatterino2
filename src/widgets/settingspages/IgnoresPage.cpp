@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
@@ -68,9 +69,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                  QStringListModel &userModel)
 {
-    users.append(
-        page.createCheckBox("Enable twitch ignored users",
-                            getApp()->settings->enableTwitchIgnoredUsers));
+    users.append(page.createCheckBox("Enable twitch ignored users",
+                                     getSettings()->enableTwitchIgnoredUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
     {

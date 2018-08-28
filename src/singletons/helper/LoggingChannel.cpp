@@ -30,11 +30,11 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
 
     auto app = getApp();
 
-    app->settings->logPath.connect([this](const QString &logPath, auto) {
+    getSettings()->logPath.connect([this](const QString &logPath, auto) {
         auto app = getApp();
 
         if (logPath.isEmpty()) {
-            this->baseDirectory = app->paths->messageLogDirectory;
+            this->baseDirectory = getPaths()->messageLogDirectory;
         } else {
             this->baseDirectory = logPath;
         }
@@ -65,13 +65,13 @@ void LoggingChannel::openLogFile()
         this->baseDirectory + QDir::separator() + this->subDirectory;
 
     if (!QDir().mkpath(directory)) {
-        Log("Unable to create logging path");
+        log("Unable to create logging path");
         return;
     }
 
     // Open file handle to log file of current date
     QString fileName = directory + QDir::separator() + baseFileName;
-    Log("Logging to {}", fileName);
+    log("Logging to {}", fileName);
     this->fileHandle.setFileName(fileName);
 
     this->fileHandle.open(QIODevice::Append);

@@ -7,11 +7,13 @@
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
+#include "debug/Log.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
@@ -23,6 +25,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/Window.hpp"
 
 #include <atomic>
 
@@ -37,9 +40,7 @@ Application *Application::instance = nullptr;
 // to each other
 
 Application::Application(Settings &_settings, Paths &_paths)
-    : settings(&_settings)
-    , paths(&_paths)
-    , resources(&this->emplace<Resources2>())
+    : resources(&this->emplace<Resources2>())
 
     , themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
@@ -103,26 +104,26 @@ void Application::save()
 void Application::initNm()
 {
 #ifdef Q_OS_WIN
-#ifdef QT_DEBUG
-#ifdef C_DEBUG_NM
+#    ifdef QT_DEBUG
+#        ifdef C_DEBUG_NM
     this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
-#endif
-#else
+#        endif
+#    else
     this->nativeMessaging->registerHost();
     this->nativeMessaging->openGuiMessageQueue();
-#endif
+#    endif
 #endif
 }
 
 void Application::initPubsub()
 {
     this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        Log("WHISPER SENT LOL");  //
+        log("WHISPER SENT LOL");  //
     });
 
     this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        Log("WHISPER RECEIVED LOL");  //
+        log("WHISPER RECEIVED LOL");  //
     });
 
     this->twitch.pubsub->signals_.moderation.chatCleared.connect(

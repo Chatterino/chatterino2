@@ -7,9 +7,6 @@
 #include <memory>
 #include <unordered_map>
 
-QStringAlias(EmoteId);
-QStringAlias(EmoteName);
-
 namespace chatterino {
 
 struct Emote {
@@ -37,29 +34,10 @@ using EmoteIdMap = std::unordered_map<EmoteId, EmotePtr>;
 using WeakEmoteMap = std::unordered_map<EmoteName, std::weak_ptr<const Emote>>;
 using WeakEmoteIdMap = std::unordered_map<EmoteId, std::weak_ptr<const Emote>>;
 
-// struct EmoteData2 {
-//    EmoteName name;
-//    ImageSet images;
-//    Tooltip tooltip;
-//    Url homePage;
-//};
-//
-// class Emote
-//{
-// public:
-//    Emote(EmoteData2 &&data);
-//    Emote(const EmoteData2 &data);
-//
-//    const Url &getHomePage() const;
-//    const EmoteName &getName() const;
-//    const Tooltip &getTooltip() const;
-//    const ImageSet &getImages() const;
-//    const QString &getCopyString() const;
-//    bool operator==(const Emote &other) const;
-//    bool operator!=(const Emote &other) const;
-//
-// private:
-//    EmoteData2 data_;
-//};
+EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache);
+EmotePtr cachedOrMakeEmotePtr(
+    Emote &&emote,
+    std::unordered_map<EmoteId, std::weak_ptr<const Emote>> &cache,
+    std::mutex &mutex, const EmoteId &id);
 
 }  // namespace chatterino

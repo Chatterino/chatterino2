@@ -6,14 +6,14 @@
 namespace chatterino {
 
 template <typename T>
-class MutexValue : boost::noncopyable
+class Atomic : boost::noncopyable
 {
 public:
-    MutexValue()
+    Atomic()
     {
     }
 
-    MutexValue(T &&val)
+    Atomic(T &&val)
         : value_(val)
     {
     }
@@ -30,6 +30,13 @@ public:
         std::lock_guard<std::mutex> guard(this->mutex_);
 
         this->value_ = val;
+    }
+
+    void set(T &&val)
+    {
+        std::lock_guard<std::mutex> guard(this->mutex_);
+
+        this->value_ = std::move(val);
     }
 
 private:

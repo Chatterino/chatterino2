@@ -24,157 +24,159 @@ static std::map<QString, std::string> sentMessages;
 
 namespace detail {
 
-PubSubClient::PubSubClient(WebsocketClient &websocketClient,
-                           WebsocketHandle handle)
-    : websocketClient_(websocketClient)
-    , handle_(handle)
-{
-}
-
-void PubSubClient::start()
-{
-    assert(!this->started_);
-
-    this->started_ = true;
-
-    this->ping();
-}
-
-void PubSubClient::stop()
-{
-    assert(this->started_);
-
-    this->started_ = false;
-}
-
-bool PubSubClient::listen(rapidjson::Document &message)
-{
-    int numRequestedListens = message["data"]["topics"].Size();
-
-    if (this->numListens_ + numRequestedListens > MAX_PUBSUB_LISTENS) {
-        // This PubSubClient is already at its peak listens
-        return false;
+    PubSubClient::PubSubClient(WebsocketClient &websocketClient,
+                               WebsocketHandle handle)
+        : websocketClient_(websocketClient)
+        , handle_(handle)
+    {
     }
 
-    this->numListens_ += numRequestedListens;
+    void PubSubClient::start()
+    {
+        assert(!this->started_);
 
-    for (const auto &topic : message["data"]["topics"].GetArray()) {
-        this->listeners_.emplace_back(
-            Listener{topic.GetString(), false, false, false});
+        this->started_ = true;
+
+        this->ping();
     }
 
-    auto uuid = CreateUUID();
+    void PubSubClient::stop()
+    {
+        assert(this->started_);
 
-    rj::set(message, "nonce", uuid);
+        this->started_ = false;
+    }
 
-    std::string payload = rj::stringify(message);
-    sentMessages[uuid] = payload;
+    bool PubSubClient::listen(rapidjson::Document &message)
+    {
+        int numRequestedListens = message["data"]["topics"].Size();
 
-    this->send(payload.c_str());
-
-    return true;
-}
-
-void PubSubClient::unlistenPrefix(const std::string &prefix)
-{
-    std::vector<std::string> topics;
-
-    for (auto it = this->listeners_.begin(); it != this->listeners_.end();) {
-        const auto &listener = *it;
-        if (listener.topic.find(prefix) == 0) {
-            topics.push_back(listener.topic);
-            it = this->listeners_.erase(it);
-        } else {
-            ++it;
+        if (this->numListens_ + numRequestedListens > MAX_PUBSUB_LISTENS) {
+            // This PubSubClient is already at its peak listens
+            return false;
         }
-    }
 
-    if (topics.empty()) {
-        return;
-    }
+        this->numListens_ += numRequestedListens;
 
-    auto message = createUnlistenMessage(topics);
-
-    auto uuid = CreateUUID();
-
-    rj::set(message, "nonce", CreateUUID());
-
-    std::string payload = rj::stringify(message);
-    sentMessages[uuid] = payload;
-
-    this->send(payload.c_str());
-}
-
-void PubSubClient::handlePong()
-{
-    assert(this->awaitingPong_);
-
-    Log("Got pong!");
-
-    this->awaitingPong_ = false;
-}
-
-bool PubSubClient::isListeningToTopic(const std::string &payload)
-{
-    for (const auto &listener : this->listeners_) {
-        if (listener.topic == payload) {
-            return true;
+        for (const auto &topic : message["data"]["topics"].GetArray()) {
+            this->listeners_.emplace_back(
+                Listener{topic.GetString(), false, false, false});
         }
+
+        auto uuid = CreateUUID();
+
+        rj::set(message, "nonce", uuid);
+
+        std::string payload = rj::stringify(message);
+        sentMessages[uuid] = payload;
+
+        this->send(payload.c_str());
+
+        return true;
     }
 
-    return false;
-}
+    void PubSubClient::unlistenPrefix(const std::string &prefix)
+    {
+        std::vector<std::string> topics;
 
-void PubSubClient::ping()
-{
-    assert(this->started_);
+        for (auto it = this->listeners_.begin();
+             it != this->listeners_.end();) {
+            const auto &listener = *it;
+            if (listener.topic.find(prefix) == 0) {
+                topics.push_back(listener.topic);
+                it = this->listeners_.erase(it);
+            } else {
+                ++it;
+            }
+        }
 
-    if (!this->send(pingPayload)) {
-        return;
+        if (topics.empty()) {
+            return;
+        }
+
+        auto message = createUnlistenMessage(topics);
+
+        auto uuid = CreateUUID();
+
+        rj::set(message, "nonce", CreateUUID());
+
+        std::string payload = rj::stringify(message);
+        sentMessages[uuid] = payload;
+
+        this->send(payload.c_str());
     }
 
-    this->awaitingPong_ = true;
+    void PubSubClient::handlePong()
+    {
+        assert(this->awaitingPong_);
 
-    auto self = this->shared_from_this();
+        log("Got pong!");
 
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::seconds(15),
-             [self](auto timer) {
-                 if (!self->started_) {
-                     return;
-                 }
+        this->awaitingPong_ = false;
+    }
 
-                 if (self->awaitingPong_) {
-                     Log("No pong respnose, disconnect!");
-                     // TODO(pajlada): Label this connection as "disconnect me"
-                 }
-             });
-
-    runAfter(this->websocketClient_.get_io_service(), std::chrono::minutes(5),
-             [self](auto timer) {
-                 if (!self->started_) {
-                     return;
-                 }
-
-                 self->ping();  //
-             });
-}
-
-bool PubSubClient::send(const char *payload)
-{
-    WebsocketErrorCode ec;
-    this->websocketClient_.send(this->handle_, payload,
-                                websocketpp::frame::opcode::text, ec);
-
-    if (ec) {
-        Log("Error sending message {}: {}", payload, ec.message());
-        // TODO(pajlada): Check which error code happened and maybe gracefully
-        // handle it
+    bool PubSubClient::isListeningToTopic(const std::string &payload)
+    {
+        for (const auto &listener : this->listeners_) {
+            if (listener.topic == payload) {
+                return true;
+            }
+        }
 
         return false;
     }
 
-    return true;
-}
+    void PubSubClient::ping()
+    {
+        assert(this->started_);
+
+        if (!this->send(pingPayload)) {
+            return;
+        }
+
+        this->awaitingPong_ = true;
+
+        auto self = this->shared_from_this();
+
+        runAfter(this->websocketClient_.get_io_service(),
+                 std::chrono::seconds(15), [self](auto timer) {
+                     if (!self->started_) {
+                         return;
+                     }
+
+                     if (self->awaitingPong_) {
+                         log("No pong respnose, disconnect!");
+                         // TODO(pajlada): Label this connection as "disconnect
+                         // me"
+                     }
+                 });
+
+        runAfter(this->websocketClient_.get_io_service(),
+                 std::chrono::minutes(5), [self](auto timer) {
+                     if (!self->started_) {
+                         return;
+                     }
+
+                     self->ping();  //
+                 });
+    }
+
+    bool PubSubClient::send(const char *payload)
+    {
+        WebsocketErrorCode ec;
+        this->websocketClient_.send(this->handle_, payload,
+                                    websocketpp::frame::opcode::text, ec);
+
+        if (ec) {
+            log("Error sending message {}: {}", payload, ec.message());
+            // TODO(pajlada): Check which error code happened and maybe
+            // gracefully handle it
+
+            return false;
+        }
+
+        return true;
+    }
 
 }  // namespace detail
 
@@ -207,26 +209,26 @@ PubSub::PubSub()
         action.state = ModeChangedAction::State::On;
 
         if (!data.HasMember("args")) {
-            Log("Missing required args member");
+            log("Missing required args member");
             return;
         }
 
         const auto &args = data["args"];
 
         if (!args.IsArray()) {
-            Log("args member must be an array");
+            log("args member must be an array");
             return;
         }
 
         if (args.Size() == 0) {
-            Log("Missing duration argument in slowmode on");
+            log("Missing duration argument in slowmode on");
             return;
         }
 
         const auto &durationArg = args[0];
 
         if (!durationArg.IsString()) {
-            Log("Duration arg must be a string");
+            log("Duration arg must be a string");
             return;
         }
 
@@ -314,7 +316,7 @@ PubSub::PubSub()
                 return;
             }
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
 
         action.modded = false;
@@ -339,7 +341,7 @@ PubSub::PubSub()
                 return;
             }
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
 
         action.modded = true;
@@ -380,7 +382,7 @@ PubSub::PubSub()
 
             this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
@@ -410,7 +412,7 @@ PubSub::PubSub()
 
             this->signals_.moderation.userBanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
@@ -436,7 +438,7 @@ PubSub::PubSub()
 
             this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
@@ -462,7 +464,7 @@ PubSub::PubSub()
 
             this->signals_.moderation.userUnbanned.invoke(action);
         } catch (const std::runtime_error &ex) {
-            Log("Error parsing moderation action: {}", ex.what());
+            log("Error parsing moderation action: {}", ex.what());
         }
     };
 
@@ -493,7 +495,7 @@ void PubSub::addClient()
     auto con = this->websocketClient.get_connection(TWITCH_PUBSUB_URL, ec);
 
     if (ec) {
-        Log("Unable to establish connection: {}", ec.message());
+        log("Unable to establish connection: {}", ec.message());
         return;
     }
 
@@ -512,7 +514,7 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
 
     std::string userID = account->getUserId().toStdString();
 
-    Log("Connection open!");
+    log("Connection open!");
     websocketpp::lib::error_code ec;
 
     std::vector<std::string> topics({"whispers." + userID});
@@ -520,7 +522,7 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
     this->listen(createListenMessage(topics, account));
 
     if (ec) {
-        Log("Unable to send message to websocket server: {}", ec.message());
+        log("Unable to send message to websocket server: {}", ec.message());
         return;
     }
 }
@@ -544,11 +546,11 @@ void PubSub::listenToChannelModerationActions(
     std::string topic(fS("chat_moderator_actions.{}.{}", userID, channelID));
 
     if (this->isListeningToTopic(topic)) {
-        Log("We are already listening to topic {}", topic);
+        log("We are already listening to topic {}", topic);
         return;
     }
 
-    Log("Listen to topic {}", topic);
+    log("Listen to topic {}", topic);
 
     this->listenToTopic(topic, account);
 }
@@ -564,18 +566,18 @@ void PubSub::listenToTopic(const std::string &topic,
 void PubSub::listen(rapidjson::Document &&msg)
 {
     if (this->tryListen(msg)) {
-        Log("Successfully listened!");
+        log("Successfully listened!");
         return;
     }
 
-    Log("Added to the back of the queue");
+    log("Added to the back of the queue");
     this->requests.emplace_back(
         std::make_unique<rapidjson::Document>(std::move(msg)));
 }
 
 bool PubSub::tryListen(rapidjson::Document &msg)
 {
-    Log("tryListen with {} clients", this->clients.size());
+    log("tryListen with {} clients", this->clients.size());
     for (const auto &p : this->clients) {
         const auto &client = p.second;
         if (client->listen(msg)) {
@@ -608,13 +610,13 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     rapidjson::ParseResult res = msg.Parse(payload.c_str());
 
     if (!res) {
-        Log("Error parsing message '{}' from PubSub: {}", payload,
+        log("Error parsing message '{}' from PubSub: {}", payload,
             rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (!msg.IsObject()) {
-        Log("Error parsing message '{}' from PubSub. Root object is not an "
+        log("Error parsing message '{}' from PubSub. Root object is not an "
             "object",
             payload);
         return;
@@ -623,7 +625,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     std::string type;
 
     if (!rj::getSafe(msg, "type", type)) {
-        Log("Missing required string member `type` in message root");
+        log("Missing required string member `type` in message root");
         return;
     }
 
@@ -631,14 +633,14 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
         this->handleListenResponse(msg);
     } else if (type == "MESSAGE") {
         if (!msg.HasMember("data")) {
-            Log("Missing required object member `data` in message root");
+            log("Missing required object member `data` in message root");
             return;
         }
 
         const auto &data = msg["data"];
 
         if (!data.IsObject()) {
-            Log("Member `data` must be an object");
+            log("Member `data` must be an object");
             return;
         }
 
@@ -654,7 +656,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
         client.second->handlePong();
     } else {
-        Log("Unknown message type: {}", type);
+        log("Unknown message type: {}", type);
     }
 }
 
@@ -699,7 +701,7 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
                          boost::asio::ssl::context::no_sslv2 |
                          boost::asio::ssl::context::single_dh_use);
     } catch (const std::exception &e) {
-        Log("Exception caught in OnTLSInit: {}", e.what());
+        log("Exception caught in OnTLSInit: {}", e.what());
     }
 
     return ctx;
@@ -714,12 +716,12 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
         rj::getSafe(msg, "nonce", nonce);
 
         if (error.empty()) {
-            Log("Successfully listened to nonce {}", nonce);
+            log("Successfully listened to nonce {}", nonce);
             // Nothing went wrong
             return;
         }
 
-        Log("PubSub error: {} on nonce {}", error, nonce);
+        log("PubSub error: {} on nonce {}", error, nonce);
         return;
     }
 }
@@ -729,14 +731,14 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     QString topic;
 
     if (!rj::getSafe(outerData, "topic", topic)) {
-        Log("Missing required string member `topic` in outerData");
+        log("Missing required string member `topic` in outerData");
         return;
     }
 
     std::string payload;
 
     if (!rj::getSafe(outerData, "message", payload)) {
-        Log("Expected string message in outerData");
+        log("Expected string message in outerData");
         return;
     }
 
@@ -745,7 +747,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     rapidjson::ParseResult res = msg.Parse(payload.c_str());
 
     if (!res) {
-        Log("Error parsing message '{}' from PubSub: {}", payload,
+        log("Error parsing message '{}' from PubSub: {}", payload,
             rapidjson::GetParseError_En(res.Code()));
         return;
     }
@@ -754,7 +756,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         std::string whisperType;
 
         if (!rj::getSafe(msg, "type", whisperType)) {
-            Log("Bad whisper data");
+            log("Bad whisper data");
             return;
         }
 
@@ -765,7 +767,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         } else if (whisperType == "thread") {
             // Handle thread?
         } else {
-            Log("Invalid whisper type: {}", whisperType);
+            log("Invalid whisper type: {}", whisperType);
             assert(false);
             return;
         }
@@ -777,30 +779,30 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         std::string moderationAction;
 
         if (!rj::getSafe(data, "moderation_action", moderationAction)) {
-            Log("Missing moderation action in data: {}", rj::stringify(data));
+            log("Missing moderation action in data: {}", rj::stringify(data));
             return;
         }
 
         auto handlerIt = this->moderationActionHandlers.find(moderationAction);
 
         if (handlerIt == this->moderationActionHandlers.end()) {
-            Log("No handler found for moderation action {}", moderationAction);
+            log("No handler found for moderation action {}", moderationAction);
             return;
         }
 
         // Invoke handler function
         handlerIt->second(data, topicParts[2]);
     } else {
-        Log("Unknown topic: {}", topic);
+        log("Unknown topic: {}", topic);
         return;
     }
 }
 
 void PubSub::runThread()
 {
-    Log("Start pubsub manager thread");
+    log("Start pubsub manager thread");
     this->websocketClient.run();
-    Log("Done with pubsub manager thread");
+    log("Done with pubsub manager thread");
 }
 
 }  // namespace chatterino

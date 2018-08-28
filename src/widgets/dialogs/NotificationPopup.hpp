@@ -1,12 +1,16 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "messages/Message.hpp"
 #include "widgets/BaseWindow.hpp"
 
 namespace chatterino {
 
 class ChannelView;
+
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 class NotificationPopup : public BaseWindow
 {

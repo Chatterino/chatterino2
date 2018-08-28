@@ -17,6 +17,7 @@
 
 namespace chatterino {
 
+class TwitchAccount;
 class AccountController;
 
 class TwitchAccountManager

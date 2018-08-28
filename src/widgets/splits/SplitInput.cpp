@@ -2,14 +2,20 @@
 
 #include "Application.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/EmotePopup.hpp"
+#include "widgets/helper/ChannelView.hpp"
+#include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -61,7 +67,7 @@ void SplitInput::initLayout()
         textEditLength->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
-        box.emplace<RippleEffectLabel>().assign(&this->ui_.emoteButton);
+        box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
     }
 
     this->ui_.emoteButton->getLabel().setTextFormat(Qt::RichText);
@@ -70,42 +76,40 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+        app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(Fonts::Type::ChatMedium, this->getScale()));
+            app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
     }));
 
     // open emote popup
-    QObject::connect(
-        this->ui_.emoteButton, &RippleEffectLabel::clicked, [this] {
-            if (!this->emotePopup_) {
-                this->emotePopup_ = std::make_unique<EmotePopup>();
-                this->emotePopup_->linkClicked.connect(
-                    [this](const Link &link) {
-                        if (link.type == Link::InsertText) {
-                            this->insertText(link.value + " ");
-                        }
-                    });
-            }
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [this] {
+        if (!this->emotePopup_) {
+            this->emotePopup_ = std::make_unique<EmotePopup>();
+            this->emotePopup_->linkClicked.connect([this](const Link &link) {
+                if (link.type == Link::InsertText) {
+                    this->insertText(link.value + " ");
+                }
+            });
+        }
 
-            this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                                      int(500 * this->emotePopup_->getScale()));
-            this->emotePopup_->loadChannel(this->split_->getChannel());
-            this->emotePopup_->show();
-        });
+        this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
+                                  int(500 * this->emotePopup_->getScale()));
+        this->emotePopup_->loadChannel(this->split_->getChannel());
+        this->emotePopup_->show();
+    });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
                      [this](bool available) {
                          if (available) {
-                             this->split_->view_.clearSelection();
+                             this->split_->view_->clearSelection();
                          }
                      });
 
     // textEditLength visibility
-    app->settings->showMessageLength.connect(
+    getSettings()->showMessageLength.connect(
         [this](const bool &value, auto) {
             this->ui_.textEditLength->setHidden(!value);
         },
@@ -172,8 +176,9 @@ void SplitInput::installKeyPressedEvent()
             sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
-            // don't add duplicate messages to message history
-            if (this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message))
+            // don't add duplicate messages and empty message to message history
+            if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
+                !message.trimmed().isEmpty())
                 this->prevMsg_.append(message);
 
             event->accept();
@@ -275,7 +280,7 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_C &&
                    event->modifiers() == Qt::ControlModifier) {
-            if (this->split_->view_.hasSelection()) {
+            if (this->split_->view_->hasSelection()) {
                 this->split_->copyToClipboard();
                 event->accept();
             }
@@ -346,7 +351,7 @@ void SplitInput::paintEvent(QPaintEvent *)
 
     if (this->theme->isLightTheme()) {
         int s = int(3 * this->getScale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);
 
@@ -354,7 +359,7 @@ void SplitInput::paintEvent(QPaintEvent *)
         painter.drawRect(rect);
     } else {
         int s = int(1 * this->getScale());
-        QRect rect = this->rect().marginsRemoved(QMargins(s, s, s, s));
+        QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);
 

@@ -4,12 +4,13 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
+#include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Shortcut.hpp"
 
 #include <QApplication>
@@ -19,20 +20,20 @@
 #include <functional>
 
 #ifdef USEWINSDK
-#include <ObjIdl.h>
-#include <VersionHelpers.h>
-#include <Windows.h>
-#include <dwmapi.h>
-#include <gdiplus.h>
-#include <windowsx.h>
+#    include <ObjIdl.h>
+#    include <VersionHelpers.h>
+#    include <Windows.h>
+#    include <dwmapi.h>
+#    include <gdiplus.h>
+#    include <windowsx.h>
 
 //#include <ShellScalingApi.h>
-#pragma comment(lib, "Dwmapi.lib")
+#    pragma comment(lib, "Dwmapi.lib")
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
+#    include <QHBoxLayout>
+#    include <QVBoxLayout>
 
-#define WM_DPICHANGED 0x02E0
+#    define WM_DPICHANGED 0x02E0
 #endif
 
 #include "widgets/helper/TitlebarButton.hpp"
@@ -55,13 +56,13 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->init();
 
     this->connections_.managedConnect(
-        getApp()->settings->uiScale.getValueChangedSignal(),
+        getSettings()->uiScale.getValueChangedSignal(),
         [this](auto, auto) { postToThread([this] { this->updateScale(); }); });
 
     this->updateScale();
 
     createWindowShortcut(this, "CTRL+0",
-                         [] { getApp()->settings->uiScale.setValue(0); });
+                         [] { getSettings()->uiScale.setValue(0); });
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }
@@ -104,19 +105,17 @@ void BaseWindow::init()
                 QSizePolicy policy(QSizePolicy::Ignored,
                                    QSizePolicy::Preferred);
                 policy.setHorizontalStretch(1);
-                //            title->setBaseSize(0, 0);
-                //                title->setScaledContents(true);
                 title->setSizePolicy(policy);
                 buttonLayout->addWidget(title);
                 this->ui_.titleLabel = title;
 
                 // buttons
                 TitleBarButton *_minButton = new TitleBarButton;
-                _minButton->setButtonStyle(TitleBarButton::Minimize);
+                _minButton->setButtonStyle(TitleBarButtonStyle::Minimize);
                 TitleBarButton *_maxButton = new TitleBarButton;
-                _maxButton->setButtonStyle(TitleBarButton::Maximize);
+                _maxButton->setButtonStyle(TitleBarButtonStyle::Maximize);
                 TitleBarButton *_exitButton = new TitleBarButton;
-                _exitButton->setButtonStyle(TitleBarButton::Close);
+                _exitButton->setButtonStyle(TitleBarButtonStyle::Close);
 
                 QObject::connect(_minButton, &TitleBarButton::clicked, this,
                                  [this] {
@@ -164,7 +163,7 @@ void BaseWindow::init()
     // fourtf: don't ask me why we need to delay this
     if (!(this->flags_ & Flags::TopMost)) {
         QTimer::singleShot(1, this, [this] {
-            getApp()->settings->windowTopMost.connect(
+            getSettings()->windowTopMost.connect(
                 [this](bool topMost, auto) {
                     ::SetWindowPos(HWND(this->winId()),
                                    topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0,
@@ -175,7 +174,7 @@ void BaseWindow::init()
         });
     }
 #else
-//    if (getApp()->settings->windowTopMost.getValue()) {
+//    if (getSettings()->windowTopMost.getValue()) {
 //        this->setWindowFlag(Qt::WindowStaysOnTopHint);
 //    }
 #endif
@@ -239,7 +238,7 @@ void BaseWindow::themeChangedEvent()
             this->ui_.titleLabel->setPalette(palette_title);
         }
 
-        for (RippleEffectButton *button : this->ui_.buttons) {
+        for (Button *button : this->ui_.buttons) {
             button->setMouseEffectColor(this->theme->window.text);
         }
     } else {
@@ -268,11 +267,11 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->delta() > 0) {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() + 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() + 1));
         } else {
-            getApp()->settings->uiScale.setValue(WindowManager::clampUiScale(
-                getApp()->settings->uiScale.getValue() - 1));
+            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
+                getSettings()->uiScale.getValue() - 1));
         }
     }
 }
@@ -317,7 +316,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
             };
 
             if (!recursiveCheckMouseTracking(widget)) {
-                Log("Start moving");
+                log("Start moving");
                 this->moving = true;
             }
         }
@@ -332,7 +331,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 #ifndef Q_OS_WIN
     if (this->flags_ & FramelessDraggable) {
         if (this->moving) {
-            Log("Stop moving");
+            log("Stop moving");
             this->moving = false;
         }
     }
@@ -355,8 +354,8 @@ void BaseWindow::mouseMoveEvent(QMouseEvent *event)
     BaseWidget::mouseMoveEvent(event);
 }
 
-TitleBarButton *BaseWindow::addTitleBarButton(
-    const TitleBarButton::Style &style, std::function<void()> onClicked)
+TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
+                                              std::function<void()> onClicked)
 {
     TitleBarButton *button = new TitleBarButton;
     button->setScaleIndependantSize(30, 30);
@@ -371,15 +370,15 @@ TitleBarButton *BaseWindow::addTitleBarButton(
     return button;
 }
 
-RippleEffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
+EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
 {
-    RippleEffectLabel *button = new RippleEffectLabel;
+    EffectLabel *button = new EffectLabel;
     button->setScaleIndependantHeight(30);
 
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
 
-    QObject::connect(button, &RippleEffectLabel::clicked, this,
+    QObject::connect(button, &EffectLabel::clicked, this,
                      [onClicked] { onClicked(); });
 
     return button;
@@ -391,10 +390,10 @@ void BaseWindow::changeEvent(QEvent *)
 
 #ifdef USEWINSDK
     if (this->ui_.maxButton) {
-        this->ui_.maxButton->setButtonStyle(this->windowState() &
-                                                    Qt::WindowMaximized
-                                                ? TitleBarButton::Unmaximize
-                                                : TitleBarButton::Maximize);
+        this->ui_.maxButton->setButtonStyle(
+            this->windowState() & Qt::WindowMaximized
+                ? TitleBarButtonStyle::Unmaximize
+                : TitleBarButtonStyle::Maximize);
     }
 #endif
 
@@ -461,7 +460,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
+#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
+    MSG *msg = *reinterpret_cast<MSG **>(message);
+#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
+#    endif
 
     bool returnValue = false;
 

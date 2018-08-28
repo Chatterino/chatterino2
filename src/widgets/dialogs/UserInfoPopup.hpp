@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
@@ -9,6 +8,8 @@ class QCheckBox;
 
 namespace chatterino {
 
+class Channel;
+using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
 
 class UserInfoPopup final : public BaseWindow
@@ -40,7 +41,7 @@ private:
     std::shared_ptr<bool> hack_;
 
     struct {
-        RippleEffectButton *avatarButton = nullptr;
+        Button *avatarButton = nullptr;
         // RippleEffectLabel2 *viewLogs = nullptr;
 
         Label *nameLabel = nullptr;

@@ -1,17 +1,9 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
-#include "common/SerializeCustom.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/MessageElement.hpp"
-#include "messages/layouts/MessageLayout.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "widgets/helper/ChannelView.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
-#include "widgets/splits/SplitHeader.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <QFont>
 #include <QShortcut>
@@ -20,6 +12,9 @@
 
 namespace chatterino {
 
+class ChannelView;
+class SplitHeader;
+class SplitInput;
 class SplitContainer;
 class SplitOverlay;
 class SelectChannelDialog;
@@ -103,10 +98,10 @@ private:
     SplitContainer *container_;
     IndirectChannel channel_;
 
-    QVBoxLayout vbox_;
-    SplitHeader header_;
-    ChannelView view_;
-    SplitInput input_;
+    QVBoxLayout *vbox_;
+    SplitHeader *header_;
+    ChannelView *view_;
+    SplitInput *input_;
     SplitOverlay *overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
@@ -125,39 +120,16 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
 public slots:
-    // Add new split to the notebook page that this chat widget is in
-    // This is only activated from the menu now. Hotkey is handled in Notebook
-    void doAddSplit();
-
-    // Close current split (chat widget)
-    void doCloseSplit();
-
-    // Show a dialog for changing the current splits/chat widgets channel
-    void doChangeChannel();
-
-    // Open popup copy of this chat widget
-    // XXX: maybe make current chatwidget a popup instead?
-    void doPopup();
-
-    // Clear chat from all messages
-    void doClearChat();
-
-    // Open link to twitch channel in default browser
+    void addSibling();
+    void deleteFromContainer();
+    void changeChannel();
+    void popup();
+    void clear();
     void openInBrowser();
-
-    // Open popup player of twitch channel in default browser
-    void openInPopupPlayer();
-
-    // Open twitch channel stream through streamlink
+    void openBrowserPlayer();
     void openInStreamlink();
-
-    // Copy text from chat
     void copyToClipboard();
-
-    // Open a search popup
-    void showSearchPopup();
-
-    // Open viewer list of the channel
+    void showSearch();
     void showViewerList();
 };
 

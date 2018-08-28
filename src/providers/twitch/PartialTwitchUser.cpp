@@ -1,5 +1,6 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 
+#include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -42,23 +43,23 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
     request.onSuccess([successCallback](auto result) -> Outcome {
         auto root = result.parseJson();
         if (!root.value("users").isArray()) {
-            Log("API Error while getting user id, users is not an array");
+            log("API Error while getting user id, users is not an array");
             return Failure;
         }
 
         auto users = root.value("users").toArray();
         if (users.size() != 1) {
-            Log("API Error while getting user id, users array size is not 1");
+            log("API Error while getting user id, users array size is not 1");
             return Failure;
         }
         if (!users[0].isObject()) {
-            Log("API Error while getting user id, first user is not an object");
+            log("API Error while getting user id, first user is not an object");
             return Failure;
         }
         auto firstUser = users[0].toObject();
         auto id = firstUser.value("_id");
         if (!id.isString()) {
-            Log("API Error: while getting user id, first user object `_id` key "
+            log("API Error: while getting user id, first user object `_id` key "
                 "is not a "
                 "string");
             return Failure;

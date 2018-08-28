@@ -1,9 +1,6 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
-#include "widgets/dialogs/EmotePopup.hpp"
-#include "widgets/helper/ResizingTextEdit.hpp"
-#include "widgets/helper/RippleEffectLabel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -16,6 +13,9 @@
 namespace chatterino {
 
 class Split;
+class EmotePopup;
+class EffectLabel;
+class ResizingTextEdit;
 
 class SplitInput : public BaseWidget
 {
@@ -45,12 +45,12 @@ private:
     void updateEmoteButton();
 
     Split *const split_;
-    std::unique_ptr<EmotePopup> emotePopup_;
+    std::shared_ptr<EmotePopup> emotePopup_;
 
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
-        RippleEffectLabel *emoteButton;
+        EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;
     } ui_;

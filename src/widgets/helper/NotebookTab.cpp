@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/Log.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
@@ -10,6 +11,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/TextInputDialog.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -21,7 +23,7 @@
 namespace chatterino {
 
 NotebookTab::NotebookTab(Notebook *notebook)
-    : RippleEffectButton(notebook)
+    : Button(notebook)
     , positionChangedAnimation_(this, "pos")
     , notebook_(notebook)
     , menu_(this)
@@ -33,7 +35,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    app->settings->showTabCloseButton.connect(
+    getSettings()->showTabCloseButton.connect(
         boost::bind(&NotebookTab::hideTabXChanged, this, _1),
         this->managedConnections_);
 
@@ -286,7 +288,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     painter.setPen(colors.text);
 
     // set area for text
-    int rectW = (!app->settings->showTabCloseButton ? 0 : int(16 * scale));
+    int rectW = (!getSettings()->showTabCloseButton ? 0 : int(16 * scale));
     QRect rect(0, 0, this->width() - rectW, height);
 
     // draw text
@@ -341,7 +343,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
 bool NotebookTab::hasXButton()
 {
-    return getApp()->settings->showTabCloseButton &&
+    return getSettings()->showTabCloseButton &&
            this->notebook_->getAllowUserTabManagement();
 }
 
@@ -406,7 +408,7 @@ void NotebookTab::enterEvent(QEvent *event)
 
     this->update();
 
-    RippleEffectButton::enterEvent(event);
+    Button::enterEvent(event);
 }
 
 void NotebookTab::leaveEvent(QEvent *event)
@@ -416,7 +418,7 @@ void NotebookTab::leaveEvent(QEvent *event)
 
     this->update();
 
-    RippleEffectButton::leaveEvent(event);
+    Button::leaveEvent(event);
 }
 
 void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
@@ -434,7 +436,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
     auto app = getApp();
 
-    if (app->settings->showTabCloseButton &&
+    if (getSettings()->showTabCloseButton &&
         this->notebook_->getAllowUserTabManagement())  //
     {
         bool overX = this->getXRect().contains(event->pos());
@@ -461,7 +463,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    RippleEffectButton::mouseMoveEvent(event);
+    Button::mouseMoveEvent(event);
 }
 
 QRect NotebookTab::getXRect()

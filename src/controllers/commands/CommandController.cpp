@@ -5,7 +5,10 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
+#include "debug/Log.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -78,7 +81,7 @@ void CommandController::save()
 {
     QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::WriteOnly)) {
-        Log("[CommandController::saveCommands] Unable to open {} for writing",
+        log("[CommandController::saveCommands] Unable to open {} for writing",
             this->filePath_);
         return;
     }

@@ -1,6 +1,9 @@
 #include "MessageBuilder.hpp"
 
 #include "common/LinkParser.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
@@ -17,7 +20,7 @@ MessagePtr makeSystemMessage(const QString &text)
 }
 
 MessageBuilder::MessageBuilder()
-    : message_(std::make_unique<Message>())
+    : message_(std::make_shared<Message>())
 {
 }
 
@@ -82,6 +85,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
 }
 
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
+    : MessageBuilder()
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -127,6 +131,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 }
 
 MessageBuilder::MessageBuilder(const UnbanAction &action)
+    : MessageBuilder()
 {
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
@@ -163,7 +168,9 @@ Message &MessageBuilder::message()
 
 MessagePtr MessageBuilder::release()
 {
-    return MessagePtr(this->message_.release());
+    std::shared_ptr<Message> ptr;
+    this->message_.swap(ptr);
+    return ptr;
 }
 
 void MessageBuilder::append(std::unique_ptr<MessageElement> element)

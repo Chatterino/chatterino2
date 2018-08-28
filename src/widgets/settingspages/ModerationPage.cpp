@@ -7,6 +7,7 @@
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -24,18 +25,6 @@
 #include <QtConcurrent/QtConcurrent>
 
 namespace chatterino {
-
-inline QString CreateLink(const QString &url, bool file = false)
-{
-    if (file) {
-        return QString("<a href=\"file:///" + url +
-                       "\"><span style=\"color: white;\">" + url +
-                       "</span></a>");
-    }
-
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   url + "</span></a>");
-}
 
 qint64 dirSize(QString dirPath)
 {
@@ -69,12 +58,11 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    auto app = getApp();
     QString logPathDirectory;
-    if (app->settings->logPath == "") {
-        logPathDirectory = app->paths->messageLogDirectory;
+    if (getSettings()->logPath == "") {
+        logPathDirectory = getPaths()->messageLogDirectory;
     } else {
-        logPathDirectory = app->settings->logPath;
+        logPathDirectory = getSettings()->logPath;
     }
     qint64 logsSize = dirSize(logPathDirectory);
     QString logsSizeLabel = "Your logs currently take up ";
@@ -101,30 +89,20 @@ ModerationPage::ModerationPage()
             QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
         // Logs (copied from LoggingMananger)
-        app->settings->logPath.connect(
+        getSettings()->logPath.connect(
             [app, logsPathLabel](const QString &logPath, auto) mutable {
                 QString pathOriginal;
 
                 if (logPath == "") {
-                    pathOriginal = app->paths->messageLogDirectory;
+                    pathOriginal = getPaths()->messageLogDirectory;
                 } else {
                     pathOriginal = logPath;
                 }
 
-                QString pathShortened;
-
-                if (pathOriginal.size() > 50) {
-                    pathShortened = pathOriginal;
-                    pathShortened.resize(50);
-                    pathShortened += "...";
-                } else {
-                    pathShortened = pathOriginal;
-                }
-
-                pathShortened = "Logs saved at <a href=\"file:///" +
-                                pathOriginal +
-                                "\"><span style=\"color: white;\">" +
-                                pathShortened + "</span></a>";
+                QString pathShortened =
+                    "Logs saved at <a href=\"file:///" + pathOriginal +
+                    "\"><span style=\"color: white;\">" +
+                    shortenString(pathOriginal, 50) + "</span></a>";
 
                 logsPathLabel->setText(pathShortened);
                 logsPathLabel->setToolTip(pathOriginal);
@@ -136,7 +114,7 @@ ModerationPage::ModerationPage()
                                                Qt::LinksAccessibleByKeyboard);
         logsPathLabel->setOpenExternalLinks(true);
         logs.append(this->createCheckBox("Enable logging",
-                                         app->settings->enableLogging));
+                                         getSettings()->enableLogging));
 
         logs->addStretch(1);
         auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
@@ -145,10 +123,9 @@ ModerationPage::ModerationPage()
         QObject::connect(
             selectDir.getElement(), &QPushButton::clicked, this,
             [this, logsPathSizeLabel]() mutable {
-                auto app = getApp();
                 auto dirName = QFileDialog::getExistingDirectory(this);
 
-                app->settings->logPath = dirName;
+                getSettings()->logPath = dirName;
 
                 // Refresh: Show how big (size-wise) the logs are
                 logsPathSizeLabel->setText(
@@ -159,8 +136,7 @@ ModerationPage::ModerationPage()
         auto resetDir = logs.emplace<QPushButton>("Reset logpath");
         QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
                          [logsPathSizeLabel]() mutable {
-                             auto app = getApp();
-                             app->settings->logPath = "";
+                             getSettings()->logPath = "";
 
                              // Refresh: Show how big (size-wise) the logs are
                              logsPathSizeLabel->setText(QtConcurrent::run(
@@ -183,7 +159,7 @@ ModerationPage::ModerationPage()
         //            form->addRow("Action on timed out messages
         //            (unimplemented):",
         //                         this->createComboBox({"Disable", "Hide"},
-        //                         app->settings->timeoutAction));
+        //                         getSettings()->timeoutAction));
         //        }
 
         EditableModelView *view =

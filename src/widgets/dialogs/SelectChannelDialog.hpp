@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Application.hpp"
 #include "common/Channel.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -11,7 +11,9 @@
 
 namespace chatterino {
 
-class SelectChannelDialog : public BaseWindow
+class Notebook;
+
+class SelectChannelDialog final : public BaseWindow
 {
 public:
     SelectChannelDialog(QWidget *parent = nullptr);

@@ -7,12 +7,12 @@
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/PostToThread.hpp"
 
 #include <IrcCommand>
-
 #include <cassert>
 
 // using namespace Communi;
@@ -39,6 +39,10 @@ void TwitchServer::initialize(Settings &settings, Paths &paths)
 {
     getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
+
+    this->twitchBadges.loadTwitchBadges();
+    this->bttv.loadEmotes();
+    this->ffz.loadEmotes();
 }
 
 void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
@@ -79,10 +83,12 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    TwitchChannel *channel = new TwitchChannel(channelName);
+    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
+        channelName, this->twitchBadges, this->bttv, this->ffz));
+    channel->initialize();
 
     channel->sendMessageSignal.connect(
-        [this, channel](auto &chan, auto &msg, bool &sent) {
+        [this, channel = channel.get()](auto &chan, auto &msg, bool &sent) {
             this->onMessageSendRequested(channel, msg, sent);
         });
 
@@ -175,7 +181,7 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
         if (!twitchChannel) continue;
 
-        if (twitchChannel->getRoomId() == channelId) {
+        if (twitchChannel->roomId() == channelId) {
             return twitchChannel;
         }
     }

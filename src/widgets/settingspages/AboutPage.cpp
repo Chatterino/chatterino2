@@ -17,7 +17,7 @@
 namespace chatterino {
 
 AboutPage::AboutPage()
-    : SettingsPage("About", ":/images/about.svg")
+    : SettingsPage("About", ":/settings/about.svg")
 {
     LayoutCreator<AboutPage> layoutCreator(this);
 
@@ -111,7 +111,8 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Apple emojis provided by <a href=\"https://apple.com\">Apple</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Google emojis provided by <a href=\"https://google.com\">Google</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Messenger emojis provided by <a href=\"https://facebook.com\">Facebook</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>"
+                              "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
             // clang-format on
         }
 
@@ -136,7 +137,7 @@ AboutPage::AboutPage()
                 QStringList contributorParts = line.split("|");
 
                 if (contributorParts.size() != 4) {
-                    Log("Missing parts in line '{}'", line);
+                    log("Missing parts in line '{}'", line);
                     continue;
                 }
 
@@ -178,6 +179,18 @@ AboutPage::AboutPage()
             }
         }
     }
+
+    auto buildInfo = QStringList();
+    buildInfo += "Qt " QT_VERSION_STR;
+#ifdef USEWINSDK
+    buildInfo += "Windows SDK";
+#endif
+#ifdef _MSC_FULL_VER
+    buildInfo += "MSVC " + QString::number(_MSC_FULL_VER, 10);
+#endif
+
+    auto buildText = QString("Built with " + buildInfo.join(", "));
+    layout.emplace<QLabel>(buildText);
 
     layout->addStretch(1);
 }

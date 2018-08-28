@@ -1,16 +1,14 @@
 #pragma once
 
-#include "debug/Log.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "util/RapidjsonHelpers.hpp"
-
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-
 #include <memory>
+#include "debug/Log.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 
+class TwitchAccount;
 struct ActionUser;
 
 const rapidjson::Value &getArgs(const rapidjson::Value &data);
@@ -35,7 +33,7 @@ void runAfter(boost::asio::io_service &ioService, Duration duration,
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            Log("Error in runAfter: {}", ec.message());
+            log("Error in runAfter: {}", ec.message());
             return;
         }
 
@@ -52,7 +50,7 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer,
 
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec) {
-            Log("Error in runAfter: {}", ec.message());
+            log("Error in runAfter: {}", ec.message());
             return;
         }
 

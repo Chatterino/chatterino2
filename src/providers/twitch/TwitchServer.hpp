@@ -1,10 +1,13 @@
 #pragma once
 
-#include "common/MutexValue.hpp"
+#include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/Singleton.hpp"
+#include "pajlada/signals/signalholder.hpp"
+#include "providers/bttv/BttvEmotes.hpp"
+#include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 
 #include <chrono>
 #include <memory>
@@ -14,8 +17,8 @@ namespace chatterino {
 
 class Settings;
 class Paths;
-
 class PubSub;
+class TwitchChannel;
 
 class TwitchServer final : public AbstractIrcServer, public Singleton
 {
@@ -29,7 +32,7 @@ public:
 
     std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
 
-    MutexValue<QString> lastUserThatWhisperedMe;
+    Atomic<QString> lastUserThatWhisperedMe;
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
@@ -66,6 +69,9 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
     bool singleConnection_ = false;
+    TwitchBadges twitchBadges;
+    BttvEmotes bttv;
+    FfzEmotes ffz;
 
     pajlada::Signals::SignalHolder signalHolder_;
 };

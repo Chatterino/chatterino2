@@ -1,11 +1,15 @@
 #pragma once
 
-#include "messages/Message.hpp"
+#include "messages/MessageElement.hpp"
 
 #include <QRegularExpression>
 #include <ctime>
 
 namespace chatterino {
+struct BanAction;
+struct UnbanAction;
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
 
 struct SystemMessageTag {
 };
@@ -15,6 +19,14 @@ const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
+
+struct MessageParseArgs {
+    bool disablePingSounds = false;
+    bool isReceivedWhisper = false;
+    bool isSentWhisper = false;
+    bool trimSubscriberUsername = false;
+    bool isStaffOrBroadcaster = false;
+};
 
 class MessageBuilder
 {
@@ -48,7 +60,7 @@ public:
     }
 
 private:
-    std::unique_ptr<Message> message_;
+    std::shared_ptr<Message> message_;
 };
 
 }  // namespace chatterino

@@ -46,16 +46,15 @@ public:
     }
 
 private:
-    T *element_;
-    std::mutex *mutex_;
-    bool isValid_ = true;
+    T *element_{};
+    std::mutex *mutex_{};
+    bool isValid_{true};
 };
 
 template <typename T>
 class UniqueAccess
 {
 public:
-    //    template <typename X = decltype(T())>
     UniqueAccess()
         : element_(T())
     {
@@ -88,7 +87,8 @@ public:
         return AccessGuard<T>(this->element_, this->mutex_);
     }
 
-    template <typename X = T, typename = std::enable_if_t<!std::is_const_v<X>>>
+    template <typename X = T,
+              typename = std::enable_if_t<!std::is_const<X>::value>>
     AccessGuard<const X> accessConst() const
     {
         return AccessGuard<const T>(this->element_, this->mutex_);

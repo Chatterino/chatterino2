@@ -1,6 +1,7 @@
 #include "Updates.hpp"
 
 #include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
 #include "common/Version.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"

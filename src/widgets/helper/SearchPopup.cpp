@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 
 #include "common/Channel.hpp"
+#include "messages/Message.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {

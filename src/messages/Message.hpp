@@ -1,16 +1,16 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
-#include "messages/MessageElement.hpp"
-#include "providers/twitch/PubsubActions.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
+#include <boost/noncopyable.hpp>
 #include <cinttypes>
 #include <memory>
 #include <vector>
 
 namespace chatterino {
+class MessageElement;
 
 enum class MessageFlag : uint16_t {
     None = 0,

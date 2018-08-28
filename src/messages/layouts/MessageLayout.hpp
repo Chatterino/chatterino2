@@ -1,18 +1,24 @@
 #pragma once
 
+#include "common/Common.hpp"
 #include "common/FlagsEnum.hpp"
-#include "messages/Message.hpp"
-#include "messages/Selection.hpp"
-#include "messages/layouts/MessageLayoutContainer.hpp"
-#include "messages/layouts/MessageLayoutElement.hpp"
 
 #include <QPixmap>
-
 #include <boost/noncopyable.hpp>
 #include <cinttypes>
 #include <memory>
 
 namespace chatterino {
+
+struct Message;
+using MessagePtr = std::shared_ptr<const Message>;
+
+struct Selection;
+struct MessageLayoutContainer;
+class MessageLayoutElement;
+
+enum class MessageElementFlag;
+using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 enum class MessageLayoutFlag : uint8_t {
     RequiresBufferUpdate = 1 << 1,
@@ -31,13 +37,10 @@ public:
 
     const Message *getMessage();
 
-    // Height
     int getHeight() const;
 
-    // Flags
     MessageLayoutFlags flags;
 
-    // Layout
     bool layout(int width, float scale_, MessageElementFlags flags);
 
     // Painting
@@ -52,7 +55,8 @@ public:
     const MessageLayoutElement *getElementAt(QPoint point);
     int getLastCharacterIndex() const;
     int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX);
+    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
+                          CopyMode copymode = CopyMode::Everything);
 
     // Misc
     bool isDisabled() const;
@@ -60,7 +64,7 @@ public:
 private:
     // variables
     MessagePtr message_;
-    MessageLayoutContainer container_;
+    std::shared_ptr<MessageLayoutContainer> container_;
     std::shared_ptr<QPixmap> buffer_ = nullptr;
     bool bufferValid_ = false;
 

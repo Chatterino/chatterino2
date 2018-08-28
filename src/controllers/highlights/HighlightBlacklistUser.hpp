@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SerializeCustom.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>
@@ -68,37 +68,39 @@ private:
 namespace pajlada {
 namespace Settings {
 
-template <>
-struct Serialize<chatterino::HighlightBlacklistUser> {
-    static rapidjson::Value get(const chatterino::HighlightBlacklistUser &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
+    template <>
+    struct Serialize<chatterino::HighlightBlacklistUser> {
+        static rapidjson::Value get(
+            const chatterino::HighlightBlacklistUser &value,
+            rapidjson::Document::AllocatorType &a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "pattern", value.getPattern(), a);
-        AddMember(ret, "regex", value.isRegex(), a);
+            AddMember(ret, "pattern", value.getPattern(), a);
+            AddMember(ret, "regex", value.isRegex(), a);
 
-        return ret;
-    }
-};
+            return ret;
+        }
+    };
 
-template <>
-struct Deserialize<chatterino::HighlightBlacklistUser> {
-    static chatterino::HighlightBlacklistUser get(const rapidjson::Value &value)
-    {
-        QString pattern;
-        bool isRegex = false;
+    template <>
+    struct Deserialize<chatterino::HighlightBlacklistUser> {
+        static chatterino::HighlightBlacklistUser get(
+            const rapidjson::Value &value)
+        {
+            QString pattern;
+            bool isRegex = false;
 
-        if (!value.IsObject()) {
+            if (!value.IsObject()) {
+                return chatterino::HighlightBlacklistUser(pattern, isRegex);
+            }
+
+            chatterino::rj::getSafe(value, "pattern", pattern);
+            chatterino::rj::getSafe(value, "regex", isRegex);
+
             return chatterino::HighlightBlacklistUser(pattern, isRegex);
         }
-
-        chatterino::rj::getSafe(value, "pattern", pattern);
-        chatterino::rj::getSafe(value, "regex", isRegex);
-
-        return chatterino::HighlightBlacklistUser(pattern, isRegex);
-    }
-};
+    };
 
 }  // namespace Settings
 }  // namespace pajlada

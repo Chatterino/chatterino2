@@ -4,19 +4,17 @@
 
 namespace chatterino {
 
-// = std::enable_if<std::is_enum<T>::value>::type
-
 template <typename T, typename Q = typename std::underlying_type<T>::type>
 class FlagsEnum
 {
 public:
     FlagsEnum()
-        : value(static_cast<T>(0))
+        : value_(static_cast<T>(0))
     {
     }
 
     FlagsEnum(T value)
-        : value(value)
+        : value_(value)
     {
     }
 
@@ -29,22 +27,22 @@ public:
 
     bool operator==(const FlagsEnum<T> &other)
     {
-        return this->value == other.value;
+        return this->value_ == other.value_;
     }
 
     bool operator!=(const FlagsEnum &other)
     {
-        return this->value != other.value;
+        return this->value_ != other.value_;
     }
 
     void set(T flag)
     {
-        reinterpret_cast<Q &>(this->value) |= static_cast<Q>(flag);
+        reinterpret_cast<Q &>(this->value_) |= static_cast<Q>(flag);
     }
 
     void unset(T flag)
     {
-        reinterpret_cast<Q &>(this->value) &= ~static_cast<Q>(flag);
+        reinterpret_cast<Q &>(this->value_) &= ~static_cast<Q>(flag);
     }
 
     void set(T flag, bool value)
@@ -57,33 +55,17 @@ public:
 
     bool has(T flag) const
     {
-        return static_cast<Q>(this->value) & static_cast<Q>(flag);
+        return static_cast<Q>(this->value_) & static_cast<Q>(flag);
     }
-
-    // bool hasAny(std::initializer_list<T> flags) const
-    //{
-    //    for (auto flag : flags) {
-    //        if (this->has(flag)) return true;
-    //    }
-    //    return false;
-    //}
 
     bool hasAny(FlagsEnum flags) const
     {
-        return static_cast<Q>(this->value) & static_cast<Q>(flags.value);
+        return static_cast<Q>(this->value_) & static_cast<Q>(flags.value_);
     }
-
-    // bool hasAll(std::initializer_list<T> flags) const
-    //{
-    //    for (auto flag : flags) {
-    //        if (!this->has(flag)) return false;
-    //    }
-    //    return true;
-    //}
 
     bool hasAll(FlagsEnum<T> flags) const
     {
-        return (static_cast<Q>(this->value) & static_cast<Q>(flags.value)) &&
+        return (static_cast<Q>(this->value_) & static_cast<Q>(flags.value_)) &&
                static_cast<Q>(flags->value);
     }
 
@@ -93,7 +75,7 @@ public:
     }
 
 private:
-    T value;
+    T value_{};
 };
 
 }  // namespace chatterino

@@ -1,7 +1,8 @@
 #include "widgets/helper/NotebookButton.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/helper/RippleEffectButton.hpp"
+#include "widgets/helper/Button.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QMouseEvent>
@@ -14,7 +15,7 @@
 namespace chatterino {
 
 NotebookButton::NotebookButton(Notebook *parent)
-    : RippleEffectButton(parent)
+    : Button(parent)
     , parent_(parent)
 {
     this->setAcceptDrops(true);
@@ -122,7 +123,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         default:;
     }
 
-    RippleEffectButton::paintEvent(event);
+    Button::paintEvent(event);
 }
 
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
@@ -135,7 +136,7 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
         emit clicked();
     }
 
-    RippleEffectButton::mouseReleaseEvent(event);
+    Button::mouseReleaseEvent(event);
 }
 
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
@@ -149,7 +150,7 @@ void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
     auto e = new QMouseEvent(QMouseEvent::MouseButtonPress,
                              QPointF(this->width() / 2, this->height() / 2),
                              Qt::LeftButton, Qt::LeftButton, 0);
-    RippleEffectButton::mousePressEvent(e);
+    Button::mousePressEvent(e);
     delete e;
 }
 
@@ -161,7 +162,7 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
     auto e = new QMouseEvent(QMouseEvent::MouseButtonRelease,
                              QPointF(this->width() / 2, this->height() / 2),
                              Qt::LeftButton, Qt::LeftButton, 0);
-    RippleEffectButton::mouseReleaseEvent(e);
+    Button::mouseReleaseEvent(e);
     delete e;
 }
 

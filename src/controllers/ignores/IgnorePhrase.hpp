@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SerializeCustom.hpp"
+#include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <QRegularExpression>
@@ -59,37 +59,37 @@ private:
 namespace pajlada {
 namespace Settings {
 
-template <>
-struct Serialize<chatterino::IgnorePhrase> {
-    static rapidjson::Value get(const chatterino::IgnorePhrase &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
+    template <>
+    struct Serialize<chatterino::IgnorePhrase> {
+        static rapidjson::Value get(const chatterino::IgnorePhrase &value,
+                                    rapidjson::Document::AllocatorType &a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "pattern", value.getPattern(), a);
-        AddMember(ret, "regex", value.isRegex(), a);
+            AddMember(ret, "pattern", value.getPattern(), a);
+            AddMember(ret, "regex", value.isRegex(), a);
 
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::IgnorePhrase> {
-    static chatterino::IgnorePhrase get(const rapidjson::Value &value)
-    {
-        if (!value.IsObject()) {
-            return chatterino::IgnorePhrase(QString(), false);
+            return ret;
         }
+    };
 
-        QString _pattern;
-        bool _isRegex = false;
+    template <>
+    struct Deserialize<chatterino::IgnorePhrase> {
+        static chatterino::IgnorePhrase get(const rapidjson::Value &value)
+        {
+            if (!value.IsObject()) {
+                return chatterino::IgnorePhrase(QString(), false);
+            }
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
+            QString _pattern;
+            bool _isRegex = false;
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex);
-    }
-};
+            chatterino::rj::getSafe(value, "pattern", _pattern);
+            chatterino::rj::getSafe(value, "regex", _isRegex);
+
+            return chatterino::IgnorePhrase(_pattern, _isRegex);
+        }
+    };
 
 }  // namespace Settings
 }  // namespace pajlada

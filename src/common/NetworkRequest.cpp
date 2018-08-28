@@ -1,13 +1,16 @@
 #include "common/NetworkRequest.hpp"
 
-#include "Application.hpp"
+#include "common/NetworkData.hpp"
 #include "common/NetworkManager.hpp"
+#include "common/Outcome.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QFile>
+#include <QtConcurrent>
+
 #include <cassert>
 
 namespace chatterino {
@@ -80,6 +83,11 @@ void NetworkRequest::setTimeout(int ms)
     this->timer->timeoutMS_ = ms;
 }
 
+void NetworkRequest::setExecuteConcurrently(bool value)
+{
+    this->data->executeConcurrently = value;
+}
+
 void NetworkRequest::makeAuthorizedV5(const QString &clientID,
                                       const QString &oauthToken)
 {
@@ -130,16 +138,15 @@ void NetworkRequest::execute()
         } break;
 
         default: {
-            Log("[Execute] Unhandled request type");
+            log("[Execute] Unhandled request type");
         } break;
     }
 }
 
 Outcome NetworkRequest::tryLoadCachedFile()
 {
-    auto app = getApp();
-
-    QFile cachedFile(app->paths->cacheDirectory + "/" + this->data->getHash());
+    QFile cachedFile(getPaths()->cacheDirectory() + "/" +
+                     this->data->getHash());
 
     if (!cachedFile.exists()) {
         // File didn't exist
@@ -180,14 +187,15 @@ void NetworkRequest::doRequest()
         auto reply = [&]() -> QNetworkReply * {
             switch (data->requestType_) {
                 case NetworkRequestType::Get:
-                    return NetworkManager::NaM.get(data->request_);
+                    return NetworkManager::accessManager.get(data->request_);
 
                 case NetworkRequestType::Put:
-                    return NetworkManager::NaM.put(data->request_,
-                                                   data->payload_);
+                    return NetworkManager::accessManager.put(data->request_,
+                                                             data->payload_);
 
                 case NetworkRequestType::Delete:
-                    return NetworkManager::NaM.deleteResource(data->request_);
+                    return NetworkManager::accessManager.deleteResource(
+                        data->request_);
 
                 default:
                     return nullptr;
@@ -195,13 +203,13 @@ void NetworkRequest::doRequest()
         }();
 
         if (reply == nullptr) {
-            Log("Unhandled request type");
+            log("Unhandled request type");
             return;
         }
 
         if (timer->isStarted()) {
             timer->onTimeout(worker, [reply, data]() {
-                Log("Aborted!");
+                log("Aborted!");
                 reply->abort();
                 if (data->onError_) {
                     data->onError_(-2);
@@ -228,7 +236,16 @@ void NetworkRequest::doRequest()
             NetworkResult result(bytes);
 
             DebugCount::increase("http request success");
-            data->onSuccess_(result);
+            // log("starting {}", data->request_.url().toString());
+            if (data->onSuccess_) {
+                if (data->executeConcurrently)
+                    QtConcurrent::run(
+                        [onSuccess = std::move(data->onSuccess_),
+                         result = std::move(result)] { onSuccess(result); });
+                else
+                    data->onSuccess_(result);
+            }
+            // log("finished {}", data->request_.url().toString());
 
             reply->deleteLater();
         };

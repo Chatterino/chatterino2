@@ -1,6 +1,7 @@
 #include "LogsPopup.hpp"
 
 #include "IrcMessage"
+#include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -14,6 +15,7 @@
 namespace chatterino {
 
 LogsPopup::LogsPopup()
+    : channel_(Channel::getEmpty())
 {
     this->initLayout();
     this->resize(400, 600);
