@@ -1,6 +1,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
 #include "singletons/Theme.hpp"
@@ -77,8 +78,12 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
 void ImageLayoutElement::addCopyTextToString(QString &str, int from,
                                              int to) const
 {
-    //    str += this->image_->getCopyString();
-    str += "not implemented";
+    const auto *emoteElement = dynamic_cast<EmoteElement *>(&this->getCreator());
+    if (emoteElement) {
+        str += emoteElement->getEmote()->getCopyString();
+    } else {
+        str += "not implemented";
+    }
 
     if (this->hasTrailingSpace()) {
         str += " ";
