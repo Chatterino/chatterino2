@@ -573,7 +573,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
             if (getSettings()->enableWhisperHighlightTaskbar) {
                 doAlert = true;
             }
-            if (getSettings()->enableSelfHighlightSound) {
+            if (getSettings()->enableWhisperHighlightSound) {
                 playSound = true;
             }
         }
