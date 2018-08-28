@@ -578,6 +578,12 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
                                     2500);
             }
         }
+        if (this->args.isReceivedWhisper &&
+            getSettings()->highlightSoundOnWhisper) {
+            if (!hasFocus || getSettings()->highlightAlwaysPlaySound) {
+                player->play();
+            }
+        }
     }
 }
 

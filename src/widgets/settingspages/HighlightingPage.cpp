@@ -149,6 +149,8 @@ HighlightingPage::HighlightingPage()
 
         layout.append(createCheckBox(ALWAYS_PLAY,
                                      getSettings()->highlightAlwaysPlaySound));
+        layout.append(createCheckBox(("Notification on whisper"),
+                                     getSettings()->highlightSoundOnWhisper));
     }
 
     // ---- misc
