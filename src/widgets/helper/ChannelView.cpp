@@ -861,11 +861,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
+    bool isLinkValid = hoverLayoutElement->getLink().isValid();
 
     if (tooltip.isEmpty()) {
         tooltipWidget->hide();
+    } else if (isLinkValid && !getSettings()->enableLinkInfoTooltip) {
+        tooltipWidget->hide();
     } else {
         tooltipWidget->moveTo(this, event->globalPos());
+        tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(tooltip);
         tooltipWidget->adjustSize();
         tooltipWidget->show();
@@ -873,7 +877,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // check if word has a link
-    if (hoverLayoutElement->getLink().isValid()) {
+    if (isLinkValid) {
         this->setCursor(Qt::PointingHandCursor);
     } else {
         this->setCursor(Qt::ArrowCursor);

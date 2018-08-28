@@ -50,6 +50,9 @@ FeelPage::FeelPage()
         form->addRow("Links:",
                      this->createCheckBox("Open links only on double click",
                                           getSettings()->linksDoubleClickOnly));
+        form->addRow("",
+                     this->createCheckBox("Show link info in tooltips",
+                                          getSettings()->enableLinkInfoTooltip));
     }
 
     layout->addSpacing(16);
