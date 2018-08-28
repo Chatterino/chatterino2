@@ -120,6 +120,8 @@ public:
     BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing",
                                           true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
+    BoolSetting highlightSoundOnWhisper = {
+        "/highlighting/highlightSoundOnWhisper", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
