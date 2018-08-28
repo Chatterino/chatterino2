@@ -564,12 +564,8 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
                 }
             }
         }
-        if (this->args.isReceivedWhisper) {
-            if (getSettings()->enableWhisperHighlight) {
-                log("Highlight because it's a whisper",
-                    this->args.isReceivedWhisper);
-                doHighlight = true;
-            }
+        if (this->args.isReceivedWhisper &&
+            getSettings()->enableWhisperHighlight) {
             if (getSettings()->enableWhisperHighlightTaskbar) {
                 doAlert = true;
             }
