@@ -81,12 +81,9 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     const auto *emoteElement = dynamic_cast<EmoteElement *>(&this->getCreator());
     if (emoteElement) {
         str += emoteElement->getEmote()->getCopyString();
-    } else {
-        str += "not implemented";
-    }
-
-    if (this->hasTrailingSpace()) {
-        str += " ";
+        if (this->hasTrailingSpace()) {
+            str += " ";
+        }
     }
 }
 
