@@ -507,10 +507,10 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     std::vector<HighlightPhrase> userHighlights =
         app->highlights->highlightedUsers.getVector();
 
-    if (getSettings()->enableHighlightsSelf && currentUsername.size() > 0) {
+    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0) {
         HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->enableHighlightTaskbar,
-            getSettings()->enableHighlightSound, false);
+            currentUsername, getSettings()->enableSelfHighlightTaskbar,
+            getSettings()->enableSelfHighlightSound, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -564,6 +564,19 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
                 }
             }
         }
+        if (this->args.isReceivedWhisper) {
+            if (getSettings()->enableWhisperHighlight) {
+                log("Highlight because it's a whisper",
+                    this->args.isReceivedWhisper);
+                doHighlight = true;
+            }
+            if (getSettings()->enableWhisperHighlightTaskbar) {
+                doAlert = true;
+            }
+            if (getSettings()->enableSelfHighlightSound) {
+                playSound = true;
+            }
+        }
 
         this->message().flags.set(MessageFlag::Highlighted, doHighlight);
 
@@ -576,12 +589,6 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
             if (doAlert) {
                 QApplication::alert(getApp()->windows->getMainWindow().window(),
                                     2500);
-            }
-        }
-        if (this->args.isReceivedWhisper &&
-            getSettings()->highlightSoundOnWhisper) {
-            if (!hasFocus || getSettings()->highlightAlwaysPlaySound) {
-                player->play();
             }
         }
     }

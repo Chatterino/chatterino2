@@ -26,8 +26,8 @@ protected:
     virtual void afterInit() override;
 
     virtual void customRowSetData(const std::vector<QStandardItem *> &row,
-                                  int column, const QVariant &value,
-                                  int role) override;
+                                  int column, const QVariant &value, int role,
+                                  int rowIndex) override;
 
     friend class HighlightController;
 };
