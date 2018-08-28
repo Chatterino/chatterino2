@@ -289,7 +289,7 @@ void SplitInput::installKeyPressedEvent()
             }
         } else if (event->key() == Qt::Key_E &&
                    event->modifiers() == Qt::ControlModifier) {
-            openEmotePopup();
+            this->openEmotePopup();
         }
     });
 }
