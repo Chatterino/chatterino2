@@ -105,7 +105,7 @@ public:
 void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
-        WinToastLib::WinToastTemplate::ImageAndText02);
+        WinToastLib::WinToastTemplate::ImageAndText03);
     QString str = channelName + " is live!";
     std::string utf8_text = str.toUtf8().constData();
     std::wstring widestr = std::wstring(utf8_text.begin(), utf8_text.end());
@@ -115,8 +115,8 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
                        WinToastLib::WinToastTemplate::SecondLine);
     QString Path;
     if (p == Platform::Twitch) {
-        Path = Path = getPaths()->cacheDirectory() + "/" +
-                      "profileAvatars/twitch/" + channelName + ".png";
+        Path = getPaths()->twitchProfileAvatars + "/twitch/" + channelName +
+               ".png";
     }
     std::string temp_Utf8 = Path.toUtf8().constData();
     std::wstring imagePath = std::wstring(temp_Utf8.begin(), temp_Utf8.end());

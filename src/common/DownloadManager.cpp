@@ -1,6 +1,9 @@
 #include "DownloadManager.hpp"
 
+#include "singletons/Paths.hpp"
+
 #include <QDesktopServices>
+#include <QDir>
 
 namespace chatterino {
 
@@ -20,10 +23,8 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
     QString filePath = fileURL;
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
-    saveFilePath = QString(
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-        "2/cache/profileAvatars/twitch/" + channelName + ".png");
-
+    saveFilePath =
+        getPaths()->twitchProfileAvatars + "/twitch/" + channelName + ".png";
     QNetworkRequest request;
     request.setUrl(QUrl(fileURL));
     reply = manager->get(request);
