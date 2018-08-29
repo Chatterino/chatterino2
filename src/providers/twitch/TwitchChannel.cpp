@@ -395,23 +395,30 @@ void TwitchChannel::setLive(bool newLiveStatus)
         auto guard = this->streamStatus_.access();
         if (guard->live != newLiveStatus) {
             gotNewLiveStatus = true;
-            if (getApp()->notifications->isChannelNotified(this->getName(),
-                                                           Platform::Twitch)) {
-                if (Toasts::isEnabled()) {
-                    getApp()->toasts->sendChannelNotification(this->getName(),
-                                                              Platform::Twitch);
+            if (newLiveStatus) {
+                if (getApp()->notifications->isChannelNotified(
+                        this->getName(), Platform::Twitch)) {
+                    if (Toasts::isEnabled()) {
+                        getApp()->toasts->sendChannelNotification(
+                            this->getName(), Platform::Twitch);
+                    }
+                    if (getSettings()->notificationPlaySound) {
+                        getApp()->notifications->playSound();
+                    }
+                    if (getSettings()->notificationFlashTaskbar) {
+                        QApplication::alert(
+                            getApp()->windows->getMainWindow().window(), 2500);
+                    }
                 }
-                if (getSettings()->notificationPlaySound) {
-                    getApp()->notifications->playSound();
-                }
-                if (getSettings()->notificationFlashTaskbar) {
-                    QApplication::alert(
-                        getApp()->windows->getMainWindow().window(), 2500);
-                }
+                auto live = makeSystemMessage(this->getName() + " is live");
+                this->addMessage(live);
+                this->tabHighlightRequested.invoke(
+                    HighlightState::Notification);
+            } else {
+                auto offline =
+                    makeSystemMessage(this->getName() + " is offline");
+                this->addMessage(offline);
             }
-            auto live = makeSystemMessage(this->getName() + " is live");
-            this->addMessage(live);
-            this->tabHighlightRequested.invoke(HighlightState::Notification);
             guard->live = newLiveStatus;
         }
     }

@@ -45,10 +45,8 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->fetchFakeChannels();
 
-    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [=] {
-        this->fetchFakeChannels();
-        qDebug() << " MY CODE IS SHIT OMEGALUL ";
-    });
+    QObject::connect(this->liveStatusTimer_, &QTimer::timeout,
+                     [=] { this->fetchFakeChannels(); });
     this->liveStatusTimer_->start(60 * 1000);
 }
 
@@ -120,7 +118,6 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 
 void NotificationController::fetchFakeChannels()
 {
-    qDebug() << " USING DEBUGGER ";
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].getVector().size(); i++) {
         auto chan = getApp()->twitch.server->getChannelOrEmpty(
