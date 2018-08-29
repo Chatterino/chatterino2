@@ -3,7 +3,6 @@
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
-#include <QDir>
 
 namespace chatterino {
 
