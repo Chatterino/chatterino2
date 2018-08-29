@@ -254,7 +254,7 @@ SOURCES += \
     src/util/FunctionEventFilter.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp \
-    src/common/DownloadManager.cpp
+    src/common/DownloadManager.cpp \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
@@ -454,7 +454,7 @@ HEADERS  += \
     src/util/FunctionEventFilter.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/singletons/Toasts.hpp \
-    src/common/DownloadManager.hpp
+    src/common/DownloadManager.hpp \
     src/widgets/helper/EffectLabel.hpp \
     src/util/LayoutHelper.hpp \
     src/widgets/helper/Button.hpp \
