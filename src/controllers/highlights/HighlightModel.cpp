@@ -36,36 +36,67 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
 
 void HighlightModel::afterInit()
 {
-    std::vector<QStandardItem *> row = this->createRow();
-    setBoolItem(row[0], getSettings()->enableHighlightsSelf.getValue(), true,
+    std::vector<QStandardItem *> usernameRow = this->createRow();
+    setBoolItem(usernameRow[0], getSettings()->enableSelfHighlight.getValue(),
+                true, false);
+    usernameRow[0]->setData("Your username (automatic)", Qt::DisplayRole);
+    setBoolItem(usernameRow[1],
+                getSettings()->enableSelfHighlightTaskbar.getValue(), true,
                 false);
-    row[0]->setData("Your username (automatic)", Qt::DisplayRole);
-    setBoolItem(row[1], getSettings()->enableHighlightTaskbar.getValue(), true,
+    setBoolItem(usernameRow[2],
+                getSettings()->enableSelfHighlightSound.getValue(), true,
                 false);
-    setBoolItem(row[2], getSettings()->enableHighlightSound.getValue(), true,
+    usernameRow[3]->setFlags(0);
+    this->insertCustomRow(usernameRow, 0);
+    std::vector<QStandardItem *> whisperRow = this->createRow();
+    setBoolItem(whisperRow[0], getSettings()->enableWhisperHighlight.getValue(),
+                true, false);
+    whisperRow[0]->setData("Whispers", Qt::DisplayRole);
+    setBoolItem(whisperRow[1],
+                getSettings()->enableWhisperHighlightTaskbar.getValue(), true,
                 false);
-    row[3]->setFlags(0);
-    this->insertCustomRow(row, 0);
+    setBoolItem(whisperRow[2],
+                getSettings()->enableWhisperHighlightSound.getValue(), true,
+                false);
+    whisperRow[3]->setFlags(0);
+    this->insertCustomRow(whisperRow, 1);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                                       int column, const QVariant &value,
-                                      int role)
+                                      int role, int rowIndex)
 {
     switch (column) {
         case 0: {
             if (role == Qt::CheckStateRole) {
-                getSettings()->enableHighlightsSelf.setValue(value.toBool());
+                if (rowIndex == 0) {
+                    getSettings()->enableSelfHighlight.setValue(value.toBool());
+                } else if (rowIndex == 1) {
+                    getSettings()->enableWhisperHighlight.setValue(
+                        value.toBool());
+                }
             }
         } break;
         case 1: {
             if (role == Qt::CheckStateRole) {
-                getSettings()->enableHighlightTaskbar.setValue(value.toBool());
+                if (rowIndex == 0) {
+                    getSettings()->enableSelfHighlightTaskbar.setValue(
+                        value.toBool());
+                } else if (rowIndex == 1) {
+                    getSettings()->enableWhisperHighlightTaskbar.setValue(
+                        value.toBool());
+                }
             }
         } break;
         case 2: {
             if (role == Qt::CheckStateRole) {
-                getSettings()->enableHighlightSound.setValue(value.toBool());
+                if (rowIndex == 0) {
+                    getSettings()->enableSelfHighlightSound.setValue(
+                        value.toBool());
+                } else if (rowIndex == 1) {
+                    getSettings()->enableWhisperHighlightSound.setValue(
+                        value.toBool());
+                }
             }
         } break;
         case 3: {

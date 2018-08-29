@@ -115,14 +115,19 @@ public:
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
-    BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword",
-                                        true};
-    BoolSetting enableHighlightSound = {"/highlighting/enableSound", true};
-    BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing",
-                                          true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
-    BoolSetting highlightSoundOnWhisper = {
-        "/highlighting/highlightSoundOnWhisper", false};
+    BoolSetting enableSelfHighlight = {
+        "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting enableSelfHighlightSound = {
+        "/highlighting/selfHighlight/enableSound", true};
+    BoolSetting enableSelfHighlightTaskbar = {
+        "/highlighting/selfHighlight/enableTaskbarFlashing", true};
+    BoolSetting enableWhisperHighlight = {
+        "/highlighting/whisperHighlight/whispersHighlighted", true};
+    BoolSetting enableWhisperHighlightSound = {
+        "/highlighting/whisperHighlight/enableSound", false};
+    BoolSetting enableWhisperHighlightTaskbar = {
+        "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
