@@ -33,21 +33,21 @@ NotificationPage::NotificationPage()
                 settings.emplace<QLabel>("Enable for selected channels");
                 settings.append(this->createCheckBox(
                     "Flash taskbar",
-                    getApp()->settings->notificationFlashTaskbar));
+                    getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Playsound (doesn't mute the Windows 8.x sound of toasts)",
-                    getApp()->settings->notificationPlaySound));
+                    getSettings()->notificationPlaySound));
 #ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Enable toasts (currently only for windows 8.x or 10)",
-                    getApp()->settings->notificationToast));
+                    getSettings()->notificationToast));
 #endif
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
                 {
                     customSound.append(this->createCheckBox(
                         "Custom sound",
-                        getApp()->settings->notificationCustomSound));
+                        getSettings()->notificationCustomSound));
                     auto selectFile = customSound.emplace<QPushButton>(
                         "Select custom sound file");
                     QObject::connect(
@@ -56,7 +56,7 @@ NotificationPage::NotificationPage()
                             auto fileName = QFileDialog::getOpenFileName(
                                 this, tr("Open Sound"), "",
                                 tr("Audio Files (*.mp3 *.wav)"));
-                            getApp()->settings->notificationPathSound =
+                            getSettings()->notificationPathSound =
                                 fileName;
                         });
                 }

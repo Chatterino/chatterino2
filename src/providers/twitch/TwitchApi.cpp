@@ -6,6 +6,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 
 #include <QString>
+#include <QThread>
 
 namespace chatterino {
 

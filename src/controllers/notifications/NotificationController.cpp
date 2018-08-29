@@ -2,11 +2,14 @@
 
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
+#include "debug/Log.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/Window.hpp"
 
 #include <wintoastlib.h>
 
@@ -93,9 +96,9 @@ void NotificationController::playSound()
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl;
-    if (getApp()->settings->notificationCustomSound) {
+    if (getSettings()->notificationCustomSound) {
         highlightSoundUrl = QUrl::fromLocalFile(
-            getApp()->settings->notificationPathSound.getValue());
+            getSettings()->notificationPathSound.getValue());
     } else {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
@@ -134,12 +137,12 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 {
     TwitchApi::findUserId(channelName, [channelName, this](QString roomID) {
         if (roomID.isEmpty()) {
-            Log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
+            log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
                 channelName);
             removeFakeChannel(channelName);
             return;
         }
-        Log("[TwitchChannel:{}] Refreshing live status", channelName);
+        log("[TwitchChannel:{}] Refreshing live status", channelName);
 
         QString url("https://api.twitch.tv/kraken/streams/" + roomID);
         auto request = NetworkRequest::twitchRequest(url);
@@ -148,12 +151,12 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
         request.onSuccess([this, channelName](auto result) -> Outcome {
             rapidjson::Document document = result.parseRapidJson();
             if (!document.IsObject()) {
-                Log("[TwitchChannel:refreshLiveStatus] root is not an object");
+                log("[TwitchChannel:refreshLiveStatus]root is not an object");
                 return Failure;
             }
 
             if (!document.HasMember("stream")) {
-                Log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+                log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
                 return Failure;
             }
 
@@ -161,7 +164,7 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 
             if (!stream.IsObject()) {
                 // Stream is offline (stream is most likely null)
-                removeFakeChannel(channelName);
+                // removeFakeChannel(channelName);
                 return Failure;
             }
             // Stream is live
@@ -174,14 +177,15 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                     getApp()->toasts->sendChannelNotification(channelName,
                                                               Platform::Twitch);
                 }
-                if (getApp()->settings->notificationPlaySound) {
+                if (getSettings()->notificationPlaySound) {
                     getApp()->notifications->playSound();
                 }
-                if (getApp()->settings->notificationFlashTaskbar) {
+                if (getSettings()->notificationFlashTaskbar) {
                     QApplication::alert(
                         getApp()->windows->getMainWindow().window(), 2500);
                 }
             }
+            return Success;
         });
 
         request.execute();

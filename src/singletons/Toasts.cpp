@@ -10,7 +10,7 @@
 
 #ifdef Q_OS_WIN
 
-#include <wintoastlib.h>
+#    include <wintoastlib.h>
 
 #endif
 
@@ -27,7 +27,7 @@ namespace chatterino {
 bool Toasts::isEnabled()
 {
     return WinToastLib::WinToast::isCompatible() &&
-           getApp()->settings->notificationToast;
+           getSettings()->notificationToast;
 }
 
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
@@ -115,13 +115,13 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
                        WinToastLib::WinToastTemplate::SecondLine);
     QString Path;
     if (p == Platform::Twitch) {
-        Path = getApp()->paths->cacheDirectory() + "/" +
-               "profileAvatars/twitch/" + channelName + ".png";
+        Path = Path = getPaths()->cacheDirectory() + "/" +
+                      "profileAvatars/twitch/" + channelName + ".png";
     }
     std::string temp_Utf8 = Path.toUtf8().constData();
     std::wstring imagePath = std::wstring(temp_Utf8.begin(), temp_Utf8.end());
     templ.setImagePath(imagePath);
-    if (getApp()->settings->notificationPlaySound) {
+    if (getSettings()->notificationPlaySound) {
         templ.setAudioOption(
             WinToastLib::WinToastTemplate::AudioOption::Silent);
     }
@@ -154,28 +154,30 @@ void Toasts::fetchChannelAvatar(const QString channelName,
     request.onSuccess([successCallback](auto result) mutable -> Outcome {
         auto root = result.parseJson();
         if (!root.value("users").isArray()) {
-            Log("API Error while getting user id, users is not an array");
+            // log("API Error while getting user id, users is not an array");
             successCallback("");
             return Failure;
         }
         auto users = root.value("users").toArray();
         if (users.size() != 1) {
-            Log("API Error while getting user id, users array size is not 1");
+            // log("API Error while getting user id, users array size is not
+            // 1");
             successCallback("");
             return Failure;
         }
         if (!users[0].isObject()) {
-            Log("API Error while getting user id, first user is not an object");
+            // log("API Error while getting user id, first user is not an
+            // object");
             successCallback("");
             return Failure;
         }
         auto firstUser = users[0].toObject();
         auto avatar = firstUser.value("logo");
         if (!avatar.isString()) {
-            Log("API Error: while getting user avatar, first user object "
-                "`avatar` key "
-                "is not a "
-                "string");
+            // log("API Error: while getting user avatar, first user object "
+            //    "`avatar` key "
+            //    "is not a "
+            //    "string");
             successCallback("");
             return Failure;
         }

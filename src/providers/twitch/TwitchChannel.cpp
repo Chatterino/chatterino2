@@ -18,6 +18,7 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/Window.hpp"
 
 #include <IrcConnection>
 #include <QJsonArray>
@@ -400,10 +401,10 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     getApp()->toasts->sendChannelNotification(this->getName(),
                                                               Platform::Twitch);
                 }
-                if (getApp()->settings->notificationPlaySound) {
+                if (getSettings()->notificationPlaySound) {
                     getApp()->notifications->playSound();
                 }
-                if (getApp()->settings->notificationFlashTaskbar) {
+                if (getSettings()->notificationFlashTaskbar) {
                     QApplication::alert(
                         getApp()->windows->getMainWindow().window(), 2500);
                 }

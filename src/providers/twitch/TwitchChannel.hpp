@@ -19,6 +19,8 @@
 
 namespace chatterino {
 
+enum class HighlightState;
+
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
