@@ -189,8 +189,7 @@ void SplitInput::installKeyPressedEvent()
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
                 this->prevIndex_ = 0;
-            } else if (this->ui_.textEdit->toPlainText() ==
-                       this->prevMsg_.at(this->prevMsg_.size() - 1)) {
+            } else if (message == this->prevMsg_.at(this->prevMsg_.size() - 1)) {
                 this->prevMsg_.removeLast();
             }
             this->prevIndex_ = this->prevMsg_.size();
@@ -230,6 +229,13 @@ void SplitInput::installKeyPressedEvent()
                     page->selectNextSplit(SplitContainer::Below);
                 }
             } else {
+                // If user did not write anything before then just do nothing.
+                if (this->prevMsg_.isEmpty()) {
+                    return;
+                }
+                bool cursorToEnd = true;
+                QString message = ui_.textEdit->toPlainText();
+
                 if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                     this->prevIndex_ != this->prevMsg_.size()) {
                     this->prevIndex_++;
@@ -237,12 +243,26 @@ void SplitInput::installKeyPressedEvent()
                         this->prevMsg_.at(this->prevIndex_));
                 } else {
                     this->prevIndex_ = this->prevMsg_.size();
-                    this->ui_.textEdit->setText(this->currMsg_);
+                    if (message == this->prevMsg_.at(this->prevIndex_ - 1)) {
+                        // If user has just come from a message history
+                        // Then simply get currMsg_.
+                        this->ui_.textEdit->setText(this->currMsg_);
+                    } else if (message != this->currMsg_) {
+                        // If user are already in current message 
+                        // And type something new
+                        // Then replace currMsg_ with new one.
+                        this->currMsg_ = message;
+                    }
+                    // If user is already in current message
+                    // Then don't touch cursos.
+                    cursorToEnd = (message == this->prevMsg_.at(this->prevIndex_ - 1));
                 }
 
-                QTextCursor cursor = this->ui_.textEdit->textCursor();
-                cursor.movePosition(QTextCursor::End);
-                this->ui_.textEdit->setTextCursor(cursor);
+                if (cursorToEnd) {
+                    QTextCursor cursor = this->ui_.textEdit->textCursor();
+                    cursor.movePosition(QTextCursor::End);
+                    this->ui_.textEdit->setTextCursor(cursor);
+                }
             }
         } else if (event->key() == Qt::Key_Left) {
             if (event->modifiers() == Qt::AltModifier) {
