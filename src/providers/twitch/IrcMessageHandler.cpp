@@ -66,8 +66,8 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             builder->flags.unset(MessageFlag::Highlighted);
         }
 
-        auto highlighted = builder->flags.has(MessageFlag::Highlighted);
         auto msg = builder.build();
+        auto highlighted = msg->flags.has(MessageFlag::Highlighted);
 
         if (!isSub) {
             if (highlighted) {
