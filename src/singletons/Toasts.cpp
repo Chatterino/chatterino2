@@ -34,9 +34,8 @@ void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
     // Fetch user profile avatar
     if (p == Platform::Twitch) {
-        QFileInfo check_file(
-            QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-            "2/cache/profileAvatars/twitch/" + channelName + ".png");
+        QFileInfo check_file(getPaths()->twitchProfileAvatars + "/twitch/" +
+                             channelName + ".png");
         if (check_file.exists() && check_file.isFile()) {
 #ifdef Q_OS_WIN
             this->sendWindowsNotification(channelName, p);
