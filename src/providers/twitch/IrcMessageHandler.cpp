@@ -223,7 +223,10 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     if (!builder.isIgnored()) {
         app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 
-        MessagePtr _message = builder.build();
+        // (hemirt) the underlying message is non const declared, but then
+        // returned by the builder as ptr to const
+        std::shared_ptr<Message> _message =
+            std::const_pointer_cast<Message>(builder.build());
 
         if (_message->flags.has(MessageFlag::Highlighted)) {
             app->twitch.server->mentionsChannel->addMessage(_message);
@@ -233,6 +236,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         if (getSettings()->inlineWhispers) {
             app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
+                _message->flags.set(MessageFlag::DoNotTriggerNotification);
                 channel->addMessage(_message);  //
             });
         }
