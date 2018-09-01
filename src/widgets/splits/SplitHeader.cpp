@@ -207,7 +207,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addSeparator();
     menu->addAction("Reload channel emotes", this, SLOT(reloadChannelEmotes()));
     menu->addAction("Reconnect", this, SLOT(reconnect()));
-    //    menu->addAction("Clear messages", this->split_, &Split::doClearChat);
+    menu->addAction("Clear messages", this->split_, &Split::clear);
     //    menu->addSeparator();
     //    menu->addAction("Show changelog", this, SLOT(menuShowChangelog()));
 
