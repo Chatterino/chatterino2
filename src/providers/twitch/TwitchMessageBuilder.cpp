@@ -6,9 +6,9 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
+#include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/LinkResolver.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -269,12 +269,15 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         link = Link(Link::Url, linkString);
 
         textColor = MessageColor(MessageColor::Link);
-        auto linkMELowercase = this->emplace<TextElement>(lowercaseLinkString,
-                                   MessageElementFlag::LowercaseLink, textColor)
-            ->setLink(link);
-        auto linkMEOriginal = this->emplace<TextElement>(string, 
-                                   MessageElementFlag::OriginalLink, textColor)
-            ->setLink(link);
+        auto linkMELowercase =
+            this->emplace<TextElement>(lowercaseLinkString,
+                                       MessageElementFlag::LowercaseLink,
+                                       textColor)
+                ->setLink(link);
+        auto linkMEOriginal =
+            this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
+                                       textColor)
+                ->setLink(link);
 
         LinkResolver::getLinkInfo(
             linkString, [linkMELowercase, linkMEOriginal](QString tooltipText) {
