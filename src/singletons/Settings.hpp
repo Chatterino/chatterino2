@@ -29,7 +29,6 @@ public:
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
-    BoolSetting showBadges = {"/appearance/messages/showBadges", true};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
@@ -66,6 +65,16 @@ public:
 
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
+
+    // Badges
+    BoolSetting showBadgesGlobalAuthority = {
+        "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesChannelAuthority = {
+        "/appearance/badges/ChannelAuthority", true};
+    BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",
+                                          true};
+    BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
+    BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
