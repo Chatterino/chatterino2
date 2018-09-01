@@ -310,6 +310,14 @@ void Image::load()
 
         return Success;
     });
+    req.onError([that = this, weak = weakOf(this)](auto result) -> bool {
+        auto shared = weak.lock();
+        if (!shared) return false;
+
+        shared->empty_ = true;
+
+        return true;
+    });
 
     req.execute();
 }
