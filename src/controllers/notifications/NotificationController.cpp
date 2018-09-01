@@ -11,7 +11,9 @@
 #include "singletons/WindowManager.hpp"
 #include "widgets/Window.hpp"
 
-#include <wintoastlib.h>
+#ifdef Q_OS_WIN
+#    include <wintoastlib.h>
+#endif
 
 #include <QDesktopServices>
 #include <QDir>

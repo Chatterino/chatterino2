@@ -26,8 +26,11 @@ namespace chatterino {
 
 bool Toasts::isEnabled()
 {
+#ifdef Q_OS_WIN
     return WinToastLib::WinToast::isCompatible() &&
            getSettings()->notificationToast;
+#endif
+    return false;
 }
 
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
