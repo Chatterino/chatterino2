@@ -600,12 +600,13 @@ void TwitchChannel::refreshBadges()
                 auto jsonVersion = jsonVersion_->toObject();
                 auto emote = std::make_shared<Emote>(Emote{
                     EmoteName{},
-                    ImageSet{Image::fromUrl(
-                                 {jsonVersion["image_url_1x"].toString()}),
-                             Image::fromUrl(
-                                 {jsonVersion["image_url_2x"].toString()}),
-                             Image::fromUrl(
-                                 {jsonVersion["image_url_4x"].toString()})},
+                    ImageSet{
+                        Image::fromUrl({jsonVersion["image_url_1x"].toString()},
+                                       1),
+                        Image::fromUrl({jsonVersion["image_url_2x"].toString()},
+                                       .5),
+                        Image::fromUrl({jsonVersion["image_url_4x"].toString()},
+                                       .25)},
                     Tooltip{jsonRoot["description"].toString()},
                     Url{jsonVersion["clickURL"].toString()}});
 
