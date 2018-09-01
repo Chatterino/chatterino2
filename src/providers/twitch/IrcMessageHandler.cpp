@@ -221,9 +221,9 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
                                  false);
 
     if (!builder.isIgnored()) {
-        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
-
         MessagePtr _message = builder.build();
+
+        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 
         if (_message->flags.has(MessageFlag::Highlighted)) {
             app->twitch.server->mentionsChannel->addMessage(_message);
