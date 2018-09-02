@@ -27,6 +27,7 @@ public:
 
     void pauseHighlights();
     void unpauseHighlights();
+    void clearHighlights();
 
     void scrollToBottom(bool animate = false);
     bool isAtBottom() const;
