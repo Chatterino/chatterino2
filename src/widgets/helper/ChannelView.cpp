@@ -304,6 +304,7 @@ void ChannelView::clearMessages()
 {
     // Clear all stored messages in this chat widget
     this->messages.clear();
+    this->scrollBar_->clearHighlights();
 
     // Layout chat widget messages, and force an update regardless if there are
     // no messages
