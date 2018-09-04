@@ -173,9 +173,9 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     auto menu = std::make_unique<QMenu>();
-    menu->addAction("New split", this->split_, &Split::addSibling,
+    menu->addAction("Add new", this->split_, &Split::addSibling,
                     QKeySequence("Ctrl+T"));
-    menu->addAction("Close split", this->split_, &Split::deleteFromContainer,
+    menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addAction("Change channel", this->split_, &Split::changeChannel,
                     QKeySequence("Ctrl+R"));

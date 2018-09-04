@@ -29,11 +29,17 @@ namespace {
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        for (const auto &emote : map) {
-            builder
-                .emplace<EmoteElement>(emote.second,
-                                       MessageElementFlag::AlwaysShow)
-                ->setLink(Link(Link::InsertText, emote.first.string));
+        if (!map.empty()) {
+            for (const auto &emote : map) {
+                builder
+                    .emplace<EmoteElement>(emote.second,
+                                           MessageElementFlag::AlwaysShow)
+                    ->setLink(Link(Link::InsertText, emote.first.string));
+            }
+        } else {
+            builder.emplace<TextElement>("no emotes available",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
         }
 
         return builder.release();
@@ -139,6 +145,16 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);
     this->channelEmotesView_->setChannel(channelChannel);
+
+    if (subChannel->getMessageSnapshot().getLength() == 0) {
+        MessageBuilder builder;
+        builder->flags.set(MessageFlag::Centered);
+        builder->flags.set(MessageFlag::DisableCompactEmotes);
+        builder.emplace<TextElement>("no subscription emotes available",
+                                     MessageElementFlag::Text,
+                                     MessageColor::System);
+        subChannel->addMessage(builder.release());
+    }
 }
 
 void EmotePopup::loadEmojis()
