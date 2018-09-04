@@ -363,6 +363,12 @@ void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
     }
 }
 
+void Split::setIsTopRightSplit(bool value)
+{
+    this->isTopRightSplit_ = value;
+    this->header_->setAddButtonVisible(value);
+}
+
 /// Slots
 void Split::addSibling()
 {

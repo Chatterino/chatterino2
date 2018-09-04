@@ -65,6 +65,7 @@ public:
     void layoutMessages();
     void updateGifEmotes();
     void updateLastReadMessage();
+    void setIsTopRightSplit(bool value);
 
     void drag();
 
@@ -106,10 +107,11 @@ private:
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
 
-    bool moderationMode_ = false;
+    bool moderationMode_{};
+    bool isTopRightSplit_{};
 
-    bool isMouseOver_ = false;
-    bool isDragging_ = false;
+    bool isMouseOver_{};
+    bool isDragging_{};
 
     pajlada::Signals::Connection channelIDChangedConnection_;
     pajlada::Signals::Connection usermodeChangedConnection_;

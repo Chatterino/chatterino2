@@ -92,11 +92,11 @@ namespace {
             title += " (live)";
 
         // description
+        if (settings.showUptime) title += " - " + s.uptime;
         if (settings.showViewerCount)
             title += " - " + QString::number(s.viewerCount);
-        if (settings.showTitle) title += " - " + s.title;
         if (settings.showGame) title += " - " + s.game;
-        if (settings.showUptime) title += " - " + s.uptime;
+        if (settings.showTitle) title += " - " + s.title;
 
         return title;
     }
@@ -137,33 +137,42 @@ SplitHeader::SplitHeader(Split *_split)
 
 void SplitHeader::initializeLayout()
 {
-    auto layout = makeLayout<QHBoxLayout>(
-        {// title
-         this->titleLabel = makeWidget<Label>([](auto w) {
-             w->setSizePolicy(QSizePolicy::MinimumExpanding,
-                              QSizePolicy::Preferred);
-             w->setCentered(true);
-             w->setHasOffset(false);
-         }),
-         // mode
-         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
-             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-             w->hide();
-             this->initializeModeSignals(*w);
-             w->setMenu(this->createChatModeMenu());
-         }),
-         // moderator
-         this->moderationButton_ = makeWidget<Button>([&](auto w) {
-             QObject::connect(w, &Button::clicked, this, [this, w]() mutable {
-                 this->split_->setModerationMode(
-                     !this->split_->getModerationMode());
+    auto layout = makeLayout<QHBoxLayout>({
+        // title
+        this->titleLabel_ = makeWidget<Label>([](auto w) {
+            w->setSizePolicy(QSizePolicy::MinimumExpanding,
+                             QSizePolicy::Preferred);
+            w->setCentered(true);
+            w->setHasOffset(false);
+        }),
+        // mode
+        this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
+            w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+            w->hide();
+            this->initializeModeSignals(*w);
+            w->setMenu(this->createChatModeMenu());
+        }),
+        // moderator
+        this->moderationButton_ = makeWidget<Button>([&](auto w) {
+            QObject::connect(w, &Button::clicked, this, [this, w]() mutable {
+                this->split_->setModerationMode(
+                    !this->split_->getModerationMode());
 
-                 w->setDim(!this->split_->getModerationMode());
-             });
-         }),
-         // dropdown
-         this->dropdownButton_ = makeWidget<Button>(
-             [&](auto w) { w->setMenu(this->createMainMenu()); })});
+                w->setDim(!this->split_->getModerationMode());
+            });
+        }),
+        // dropdown
+        this->dropdownButton_ = makeWidget<Button>(
+            [&](auto w) { w->setMenu(this->createMainMenu()); }),
+        // add split
+        this->addButton_ = makeWidget<Button>([&](auto w) {
+            w->setPixmap(getApp()->resources->buttons.addSplitDark);
+            w->setEnableMargin(false);
+
+            QObject::connect(w, &Button::clicked, this,
+                             [this]() { this->split_->addSibling(); });
+        }),
+    });
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -173,18 +182,16 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     auto menu = std::make_unique<QMenu>();
-    menu->addAction("Add new", this->split_, &Split::addSibling,
-                    QKeySequence("Ctrl+T"));
-    menu->addAction("Close", this->split_, &Split::deleteFromContainer,
+    menu->addAction("Close channel", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addAction("Change channel", this->split_, &Split::changeChannel,
                     QKeySequence("Ctrl+R"));
     menu->addSeparator();
+    menu->addAction("Popup", this->split_, &Split::popup);
     menu->addAction("Viewer list", this->split_, &Split::showViewerList);
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
     menu->addSeparator();
-    menu->addAction("Popup", this->split_, &Split::popup);
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this] {
         ChannelPtr _channel = this->split->getChannel();
@@ -334,6 +341,12 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
+    this->addButton_->setFixedWidth(w * 5 / 8);
+}
+
+void SplitHeader::setAddButtonVisible(bool value)
+{
+    this->addButton_->setVisible(value);
 }
 
 void SplitHeader::updateChannelText()
@@ -358,7 +371,7 @@ void SplitHeader::updateChannelText()
         }
     }
 
-    this->titleLabel->setText(title.isEmpty() ? "<empty>" : title);
+    this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
 }
 
 void SplitHeader::updateModerationModeIcon()
@@ -484,7 +497,7 @@ void SplitHeader::themeChangedEvent()
     } else {
         palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
     }
-    this->titleLabel->setPalette(palette);
+    this->titleLabel_->setPalette(palette);
 
     // --
     if (this->theme->isLightTheme()) {

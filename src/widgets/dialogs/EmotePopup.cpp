@@ -112,7 +112,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 {
     BenchmarkGuard guard("loadChannel");
 
-    this->setWindowTitle("Emotes from " + _channel->getName());
+    this->setWindowTitle("Emotes in #" + _channel->getName());
 
     auto twitchChannel = dynamic_cast<TwitchChannel *>(_channel.get());
     if (twitchChannel == nullptr) return;

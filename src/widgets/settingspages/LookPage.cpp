@@ -270,12 +270,12 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 
 void LookPage::addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout)
 {
-    layout.append(this->createCheckBox("Show viewer count",
-                                       getSettings()->showViewerCount));
-    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
-    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
     layout.append(
         this->createCheckBox("Show uptime", getSettings()->showUptime));
+    layout.append(this->createCheckBox("Show viewer count",
+                                       getSettings()->showViewerCount));
+    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
+    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
 
     layout->addStretch(1);
 }
