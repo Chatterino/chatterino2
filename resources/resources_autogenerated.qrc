@@ -62,6 +62,5 @@
     <file>twitch/subscriber.png</file>
     <file>twitch/turbo.png</file>
     <file>twitch/verified.png</file>
-    <file>__pycache__/_generate_resources.cpython-36.pyc</file>
   </qresource>
 </RCC>
