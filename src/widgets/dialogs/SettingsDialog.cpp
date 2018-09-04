@@ -34,6 +34,7 @@ SettingsDialog::SettingsDialog()
     this->scaleChangedEvent(this->getScale());
 
     this->overrideBackgroundColor_ = QColor("#282828");
+    this->themeChangedEvent();
 }
 
 void SettingsDialog::initUi()
@@ -185,7 +186,7 @@ void SettingsDialog::themeChangedEvent()
     BaseWindow::themeChangedEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#444"));
+    palette.setColor(QPalette::Background, QColor("#222"));
     this->setPalette(palette);
 }
 

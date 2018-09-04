@@ -1,6 +1,7 @@
 #include "SettingsPage.hpp"
 
 #include <QDebug>
+#include <QPainter>
 
 namespace chatterino {
 

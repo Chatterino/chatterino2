@@ -149,7 +149,7 @@ ModerationPage::ModerationPage()
     auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation buttons");
     {
         // clang-format off
-        auto label = modMode.emplace<QLabel>("Click the moderation mod button (<img width='18' height='18' src=':/images/moderatormode_disabled.png'>) in a channel that you moderate to enable moderator mode.<br>");
+        auto label = modMode.emplace<QLabel>("Click the moderation mod button (<img width='18' height='18' src=':/buttons/modModeDisabled.png'>) in a channel that you moderate to enable moderator mode.<br>");
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on
