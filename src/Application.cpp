@@ -53,8 +53,8 @@ Application::Application(Settings &_settings, Paths &_paths)
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchServer>())
+    , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
-    , badges(&this->emplace<ChatterinoBadges>())
 {
     this->instance = this;
 

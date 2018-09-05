@@ -791,7 +791,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    auto chatterinoBadgePtr = getApp()->badges->getBadge({this->userName});
+    auto chatterinoBadgePtr =
+        getApp()->chatterinoBadges->getBadge({this->userName});
     if (chatterinoBadgePtr) {
         this->emplace<EmoteElement>(*chatterinoBadgePtr,
                                     MessageElementFlag::BadgeChatterino);

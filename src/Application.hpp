@@ -61,7 +61,7 @@ public:
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};
     TwitchServer *const twitch2{};
-    ChatterinoBadges *const badges{};
+    ChatterinoBadges *const chatterinoBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
