@@ -22,10 +22,11 @@ void LinkResolver::getLinkInfo(const QString url,
         QString response = QString();
         if (statusCode == 200) {
             response = root.value("tooltip").toString();
+            url = root.value("link").toString();
         } else {
             response = root.value("message").toString();
         }
-        successCallback(QUrl::fromPercentEncoding(response.toUtf8()));
+        successCallback(QUrl::fromPercentEncoding(response.toUtf8()), url);
 
         return Success;
     });
