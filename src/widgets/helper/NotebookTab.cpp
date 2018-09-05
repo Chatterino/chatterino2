@@ -311,6 +311,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     if (this->shouldDrawXButton()) {
         QRect xRect = this->getXRect();
         if (!xRect.isNull()) {
+            if (this->selected_) xRect.moveTop(xRect.top() - 1);
+
             painter.setBrush(QColor("#fff"));
 
             if (this->mouseOverX_) {
@@ -472,7 +474,7 @@ QRect NotebookTab::getXRect()
 
     float s = this->getScale();
     return QRect(this->width() - static_cast<int>(20 * s),
-                 static_cast<int>(6 * s), static_cast<int>(16 * s),
+                 static_cast<int>(9 * s), static_cast<int>(16 * s),
                  static_cast<int>(16 * s));
 }
 

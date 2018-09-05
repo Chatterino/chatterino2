@@ -84,7 +84,8 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [=] { this->openEmotePopup(); });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked,
+                     [=] { this->openEmotePopup(); });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -180,7 +181,8 @@ void SplitInput::installKeyPressedEvent()
 
             c->sendMessage(sendMessage);
             // don't add duplicate messages and empty message to message history
-            if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
+            if ((this->prevMsg_.isEmpty() ||
+                 !this->prevMsg_.endsWith(message)) &&
                 !message.trimmed().isEmpty())
                 this->prevMsg_.append(message);
 
@@ -189,7 +191,8 @@ void SplitInput::installKeyPressedEvent()
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
                 this->prevIndex_ = 0;
-            } else if (message == this->prevMsg_.at(this->prevMsg_.size() - 1)) {
+            } else if (message ==
+                       this->prevMsg_.at(this->prevMsg_.size() - 1)) {
                 this->prevMsg_.removeLast();
             }
             this->prevIndex_ = this->prevMsg_.size();
@@ -248,14 +251,15 @@ void SplitInput::installKeyPressedEvent()
                         // Then simply get currMsg_.
                         this->ui_.textEdit->setText(this->currMsg_);
                     } else if (message != this->currMsg_) {
-                        // If user are already in current message 
+                        // If user are already in current message
                         // And type something new
                         // Then replace currMsg_ with new one.
                         this->currMsg_ = message;
                     }
                     // If user is already in current message
                     // Then don't touch cursos.
-                    cursorToEnd = (message == this->prevMsg_.at(this->prevIndex_ - 1));
+                    cursorToEnd =
+                        (message == this->prevMsg_.at(this->prevIndex_ - 1));
                 }
 
                 if (cursorToEnd) {

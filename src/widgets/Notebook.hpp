@@ -61,9 +61,9 @@ protected:
 
 private:
     struct Item {
-        NotebookTab *tab;
-        QWidget *page;
-        QWidget *selectedWidget = nullptr;
+        NotebookTab *tab{};
+        QWidget *page{};
+        QWidget *selectedWidget{};
     };
 
     bool containsPage(QWidget *page);

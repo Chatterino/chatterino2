@@ -24,6 +24,8 @@ class SplitHeader final : public BaseWidget, pajlada::Signals::SignalHolder
 public:
     explicit SplitHeader(Split *_chatWidget);
 
+    void setAddButtonVisible(bool value);
+
     void updateChannelText();
     void updateModerationModeIcon();
     void updateRoomModes();
@@ -53,9 +55,10 @@ private:
 
     // ui
     Button *dropdownButton_{};
-    Label *titleLabel{};
+    Label *titleLabel_{};
     EffectLabel *modeButton_{};
     Button *moderationButton_{};
+    Button *addButton_{};
 
     // states
     QPoint dragStart_{};

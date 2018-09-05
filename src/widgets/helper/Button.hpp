@@ -41,6 +41,9 @@ public:
     void setEnable(bool value);
     bool getEnable() const;
 
+    void setEnableMargin(bool value);
+    bool getEnableMargin() const;
+
     void setBorderColor(const QColor &color);
     const QColor &getBorderColor() const;
 
@@ -73,6 +76,7 @@ private:
     QColor borderColor_{};
     QPixmap pixmap_{};
     bool dimPixmap_{true};
+    bool enableMargin_{true};
     QPoint mousePos_{};
     double hoverMultiplier_{0.0};
     QTimer effectTimer_{};

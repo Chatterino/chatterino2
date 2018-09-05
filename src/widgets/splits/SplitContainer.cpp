@@ -310,8 +310,33 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
     }
 }
 
+Split *SplitContainer::getTopRightSplit(Node &node)
+{
+    switch (node.getType()) {
+        case Node::_Split:
+            return node.getSplit();
+        case Node::VerticalContainer:
+            if (!node.getChildren().empty())
+                return getTopRightSplit(*node.getChildren().front());
+            break;
+        case Node::HorizontalContainer:
+            if (!node.getChildren().empty())
+                return getTopRightSplit(*node.getChildren().back());
+            break;
+        default:;
+    }
+    return nullptr;
+}
+
 void SplitContainer::layout()
 {
+    // update top right split
+    auto topRight = this->getTopRightSplit(this->baseNode_);
+    if (this->topRight_) this->topRight_->setIsTopRightSplit(false);
+    this->topRight_ = topRight;
+    if (topRight) this->topRight_->setIsTopRightSplit(true);
+
+    // layout
     this->baseNode_.geometry_ = this->rect().adjusted(-1, -1, 0, 0);
 
     std::vector<DropRect> _dropRects;
@@ -431,9 +456,10 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         if (notebook != nullptr) {
             if (notebook->getPageCount() > 1) {
-                text += "\n\nTip: After adding a split you can hold <Alt> to "
-                        "move it or split it "
-                        "further.";
+                text +=
+                    "\n\nTip: After adding a split you can hold <Ctrl+Alt> to "
+                    "move it or split it "
+                    "further.";
             }
         }
 

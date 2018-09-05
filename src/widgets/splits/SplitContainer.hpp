@@ -219,6 +219,7 @@ private:
     void addSplit(Split *split);
 
     void decodeNodeRecusively(QJsonObject &obj, Node *node);
+    Split *getTopRightSplit(Node &node);
 
     struct DropRegion {
         QRect rect;
@@ -239,6 +240,7 @@ private:
 
     Node baseNode_;
     Split *selected_;
+    Split *topRight_{};
 
     NotebookTab *tab_;
     std::vector<Split *> splits_;
