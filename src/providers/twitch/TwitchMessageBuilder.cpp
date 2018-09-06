@@ -281,7 +281,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
         LinkResolver::getLinkInfo(
             linkString, [linkMELowercase, linkMEOriginal](QString tooltipText,
-                                                        QString originalLink) {
+                                                        Link originalLink) {
                 if (!tooltipText.isEmpty()) {
                     linkMELowercase->setTooltip(tooltipText)
                                     ->setLink(originalLink);
