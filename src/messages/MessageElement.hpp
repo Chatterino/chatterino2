@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 class Channel;
@@ -128,6 +129,7 @@ public:
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
+    MessageElement *updateLink();
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
@@ -135,6 +137,7 @@ public:
 protected:
     MessageElement(MessageElementFlags flags);
     bool trailingSpace = true;
+    pajlada::Signals::NoArgSignal linkChanged;
 
 private:
     Link link_;
