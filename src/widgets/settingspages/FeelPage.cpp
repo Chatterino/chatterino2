@@ -53,6 +53,9 @@ FeelPage::FeelPage()
         form->addRow("",
                      this->createCheckBox("Show link info in tooltips",
                                           getSettings()->enableLinkInfoTooltip));
+        form->addRow("",
+                     this->createCheckBox("Auto unshort links (requires restart)",
+                                          getSettings()->enableUnshortLinks));
     }
 
     layout->addSpacing(16);

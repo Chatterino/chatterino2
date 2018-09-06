@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QString>
 
@@ -24,7 +25,9 @@ void LinkResolver::getLinkInfo(const QString url,
         QString linkString = url;
         if (statusCode == 200) {
             response = root.value("tooltip").toString();
-            linkString = root.value("link").toString();
+            if (getSettings()->enableUnshortLinks) {
+                linkString = root.value("link").toString();
+            }
         } else {
             response = root.value("message").toString();
         }
