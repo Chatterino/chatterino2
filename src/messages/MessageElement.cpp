@@ -61,6 +61,12 @@ MessageElementFlags MessageElement::getFlags() const
     return this->flags_;
 }
 
+MessageElement *MessageElement::updateLink()
+{
+    this->linkChanged.invoke();
+    return this;
+}
+
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)
@@ -152,6 +158,15 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                               color, this->style_, container.getScale()))
                              ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
+
+                // If URL link was changed, 
+                // Should update it in MessageLayoutElement too!
+                if (this->getLink().type == Link::Url) {
+                    this->linkChanged.connect(
+                        [this, e]() {
+                            e->setLink(this->getLink());
+                        });
+                }
                 return e;
             };
 

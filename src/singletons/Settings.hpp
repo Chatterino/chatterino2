@@ -104,6 +104,7 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting enableLinkInfoTooltip = {"/links/linkInfoTooltip", false};
+    BoolSetting enableUnshortLinks = {"/links/unshortLinks", false};
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
     /// Ingored Users
