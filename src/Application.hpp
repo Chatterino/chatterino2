@@ -26,6 +26,7 @@ class Emotes;
 class Settings;
 class Fonts;
 class Resources2;
+class ChatterinoBadges;
 
 class Application
 {
@@ -60,6 +61,7 @@ public:
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};
     TwitchServer *const twitch2{};
+    ChatterinoBadges *const chatterinoBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 

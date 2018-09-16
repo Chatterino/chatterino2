@@ -7,6 +7,7 @@
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/LinkResolver.hpp"
+#include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
@@ -796,20 +797,12 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    //    auto app = getApp();
-
-    //    auto &badges = app->resources->chatterinoBadges;
-    //    auto it = badges.find(this->userName.toStdString());
-
-    //    if (it == badges.end()) {
-    //        return;
-    //    }
-
-    //    const auto badge = it->second;
-
-    //    this->emplace<ImageElement>(badge->image,
-    //    MessageElementFlag::BadgeChatterino)
-    //        ->setTooltip(QString::fromStdString(badge->tooltip));
+    auto chatterinoBadgePtr =
+        getApp()->chatterinoBadges->getBadge({this->userName});
+    if (chatterinoBadgePtr) {
+        this->emplace<EmoteElement>(*chatterinoBadgePtr,
+                                    MessageElementFlag::BadgeChatterino);
+    }
 }
 
 Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
