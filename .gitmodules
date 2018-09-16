@@ -22,5 +22,5 @@
 	url = https://github.com/jiakuan/qBreakpad.git
 [submodule "lib/WinToast"]
 	path = lib/WinToast
-	url = https://github.com/mohabouje/WinToast
+	url = https://github.com/mohabouje/WinToast.git
 	
