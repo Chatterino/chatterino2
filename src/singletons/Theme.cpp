@@ -105,6 +105,10 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#000"),
                 {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+            this->tabs.notified = {
+                fg,
+                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         } else {
             this->tabs.regular = {
                 QColor("#aaa"),
@@ -123,6 +127,10 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#fff"),
                 {QColor("#555555"), QColor("#555555"), QColor("#555555")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+            this->tabs.notified = {
+                fg,
+                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         }
 
         this->splits.input.focusedLine = highlighted;
@@ -150,7 +158,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         //            QColor("#777"), QColor("#666")}};
 
         this->tabs.bottomLine = this->tabs.selected.backgrounds.regular.color();
-    }
+    }  // namespace chatterino
 
     // Split
     bool flat = isLight_;
@@ -232,7 +240,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         isLightTheme() ? QColor(0, 0, 0, 64) : QColor(255, 255, 255, 64);
 
     this->updated.invoke();
-}
+}  // namespace chatterino
 
 QColor Theme::blendColors(const QColor &color1, const QColor &color2,
                           qreal ratio)

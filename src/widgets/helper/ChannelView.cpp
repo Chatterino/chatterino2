@@ -9,6 +9,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
@@ -535,6 +536,14 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
     this->layoutMessages();
     this->queueUpdate();
+
+    // Notifications
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get());
+    if (tc != nullptr) {
+        tc->tabHighlightRequested.connect([this](HighlightState state) {
+            this->tabHighlightRequested.invoke(HighlightState::Notification);
+        });
+    }
 }
 
 void ChannelView::detachChannel()

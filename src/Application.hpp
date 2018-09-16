@@ -16,6 +16,7 @@ class IgnoreController;
 class TaggedUsersController;
 class AccountController;
 class ModerationActions;
+class NotificationController;
 
 class Theme;
 class WindowManager;
@@ -26,6 +27,7 @@ class Emotes;
 class Settings;
 class Fonts;
 class Resources2;
+class Toasts;
 class ChatterinoBadges;
 
 class Application
@@ -53,10 +55,12 @@ public:
     Fonts *const fonts{};
     Emotes *const emotes{};
     WindowManager *const windows{};
+    Toasts *const toasts{};
 
     AccountController *const accounts{};
     CommandController *const commands{};
     HighlightController *const highlights{};
+    NotificationController *const notifications{};
     IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};

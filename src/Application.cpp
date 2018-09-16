@@ -5,6 +5,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
+#include "controllers/notifications/NotificationController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "debug/Log.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -21,6 +22,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
@@ -45,16 +47,19 @@ Application::Application(Settings &_settings, Paths &_paths)
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , windows(&this->emplace<WindowManager>())
+    , toasts(&this->emplace<Toasts>())
 
     , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
     , highlights(&this->emplace<HighlightController>())
+    , notifications(&this->emplace<NotificationController>())
     , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
+
 {
     this->instance = this;
 

@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/notifications/NotificationController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -14,7 +15,10 @@
 #include "providers/twitch/TwitchParseCheerEmotes.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Toasts.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/Window.hpp"
 
 #include <IrcConnection>
 #include <QJsonArray>
@@ -85,6 +89,12 @@ TwitchChannel::TwitchChannel(const QString &name,
     , mod_(false)
 {
     log("[TwitchChannel:{}] Opened", name);
+
+    this->tabHighlightRequested.connect([](HighlightState state) {});
+    this->liveStatusChanged.connect([this]() {
+        if (this->isLive() == 1) {
+        }
+    });
 
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->setMod(false); });
@@ -385,6 +395,30 @@ void TwitchChannel::setLive(bool newLiveStatus)
         auto guard = this->streamStatus_.access();
         if (guard->live != newLiveStatus) {
             gotNewLiveStatus = true;
+            if (newLiveStatus) {
+                if (getApp()->notifications->isChannelNotified(
+                        this->getName(), Platform::Twitch)) {
+                    if (Toasts::isEnabled()) {
+                        getApp()->toasts->sendChannelNotification(
+                            this->getName(), Platform::Twitch);
+                    }
+                    if (getSettings()->notificationPlaySound) {
+                        getApp()->notifications->playSound();
+                    }
+                    if (getSettings()->notificationFlashTaskbar) {
+                        QApplication::alert(
+                            getApp()->windows->getMainWindow().window(), 2500);
+                    }
+                }
+                auto live = makeSystemMessage(this->getName() + " is live");
+                this->addMessage(live);
+                this->tabHighlightRequested.invoke(
+                    HighlightState::Notification);
+            } else {
+                auto offline =
+                    makeSystemMessage(this->getName() + " is offline");
+                this->addMessage(offline);
+            }
             guard->live = newLiveStatus;
         }
     }
@@ -466,7 +500,6 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
     {
         auto status = this->streamStatus_.access();
-        status->live = true;
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();
         status->title = streamChannel["status"].GetString();
@@ -495,7 +528,7 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
             }
         }
     }
-
+    setLive(true);
     // Signal all listeners that the stream status has been updated
     this->liveStatusChanged.invoke();
 
