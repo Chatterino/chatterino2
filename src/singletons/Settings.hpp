@@ -29,7 +29,6 @@ public:
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
-    BoolSetting showBadges = {"/appearance/messages/showBadges", true};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
@@ -67,6 +66,16 @@ public:
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
+    // Badges
+    BoolSetting showBadgesGlobalAuthority = {
+        "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesChannelAuthority = {
+        "/appearance/badges/ChannelAuthority", true};
+    BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",
+                                          true};
+    BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
+    BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
+
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
                                           true};
@@ -103,6 +112,8 @@ public:
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
+    BoolSetting enableLinkInfoTooltip = {"/links/linkInfoTooltip", false};
+    BoolSetting enableUnshortLinks = {"/links/unshortLinks", false};
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
     /// Ingored Users
@@ -114,12 +125,19 @@ public:
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
-    BoolSetting enableHighlightsSelf = {"/highlighting/nameIsHighlightKeyword",
-                                        true};
-    BoolSetting enableHighlightSound = {"/highlighting/enableSound", true};
-    BoolSetting enableHighlightTaskbar = {"/highlighting/enableTaskbarFlashing",
-                                          true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
+    BoolSetting enableSelfHighlight = {
+        "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting enableSelfHighlightSound = {
+        "/highlighting/selfHighlight/enableSound", true};
+    BoolSetting enableSelfHighlightTaskbar = {
+        "/highlighting/selfHighlight/enableTaskbarFlashing", true};
+    BoolSetting enableWhisperHighlight = {
+        "/highlighting/whisperHighlight/whispersHighlighted", true};
+    BoolSetting enableWhisperHighlightSound = {
+        "/highlighting/whisperHighlight/enableSound", false};
+    BoolSetting enableWhisperHighlightTaskbar = {
+        "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};

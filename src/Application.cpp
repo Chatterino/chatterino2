@@ -10,6 +10,7 @@
 #include "debug/Log.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
+#include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -56,6 +57,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchServer>())
+    , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
 
 {

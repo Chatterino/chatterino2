@@ -34,7 +34,13 @@ struct Message : boost::noncopyable {
     Message();
     ~Message();
 
-    MessageFlags flags;
+    // Making this a mutable means that we can update a messages flags,
+    // while still keeping Message constant. This means that a message's flag
+    // can be updated without the renderer being made aware, which might be bad.
+    // This is a temporary effort until we can figure out what the right
+    // const-correct way to deal with this is.
+    // This might bring race conditions with it
+    mutable MessageFlags flags;
     QTime parseTime;
     QString id;
     QString searchText;

@@ -84,21 +84,8 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked, [this] {
-        if (!this->emotePopup_) {
-            this->emotePopup_ = std::make_unique<EmotePopup>();
-            this->emotePopup_->linkClicked.connect([this](const Link &link) {
-                if (link.type == Link::InsertText) {
-                    this->insertText(link.value + " ");
-                }
-            });
-        }
-
-        this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                                  int(500 * this->emotePopup_->getScale()));
-        this->emotePopup_->loadChannel(this->split_->getChannel());
-        this->emotePopup_->show();
-    });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked,
+                     [=] { this->openEmotePopup(); });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -159,6 +146,23 @@ void SplitInput::updateEmoteButton()
     this->ui_.emoteButton->setFixedHeight(int(18 * scale));
 }
 
+void SplitInput::openEmotePopup()
+{
+    if (!this->emotePopup_) {
+        this->emotePopup_ = std::make_unique<EmotePopup>();
+        this->emotePopup_->linkClicked.connect([this](const Link &link) {
+            if (link.type == Link::InsertText) {
+                this->insertText(link.value + " ");
+            }
+        });
+    }
+
+    this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
+                              int(500 * this->emotePopup_->getScale()));
+    this->emotePopup_->loadChannel(this->split_->getChannel());
+    this->emotePopup_->show();
+}
+
 void SplitInput::installKeyPressedEvent()
 {
     auto app = getApp();
@@ -177,7 +181,8 @@ void SplitInput::installKeyPressedEvent()
 
             c->sendMessage(sendMessage);
             // don't add duplicate messages and empty message to message history
-            if ((this->prevMsg_.isEmpty() || !this->prevMsg_.endsWith(message)) &&
+            if ((this->prevMsg_.isEmpty() ||
+                 !this->prevMsg_.endsWith(message)) &&
                 !message.trimmed().isEmpty())
                 this->prevMsg_.append(message);
 
@@ -186,7 +191,7 @@ void SplitInput::installKeyPressedEvent()
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
                 this->prevIndex_ = 0;
-            } else if (this->ui_.textEdit->toPlainText() ==
+            } else if (message ==
                        this->prevMsg_.at(this->prevMsg_.size() - 1)) {
                 this->prevMsg_.removeLast();
             }
@@ -227,6 +232,13 @@ void SplitInput::installKeyPressedEvent()
                     page->selectNextSplit(SplitContainer::Below);
                 }
             } else {
+                // If user did not write anything before then just do nothing.
+                if (this->prevMsg_.isEmpty()) {
+                    return;
+                }
+                bool cursorToEnd = true;
+                QString message = ui_.textEdit->toPlainText();
+
                 if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
                     this->prevIndex_ != this->prevMsg_.size()) {
                     this->prevIndex_++;
@@ -234,12 +246,27 @@ void SplitInput::installKeyPressedEvent()
                         this->prevMsg_.at(this->prevIndex_));
                 } else {
                     this->prevIndex_ = this->prevMsg_.size();
-                    this->ui_.textEdit->setText(this->currMsg_);
+                    if (message == this->prevMsg_.at(this->prevIndex_ - 1)) {
+                        // If user has just come from a message history
+                        // Then simply get currMsg_.
+                        this->ui_.textEdit->setText(this->currMsg_);
+                    } else if (message != this->currMsg_) {
+                        // If user are already in current message
+                        // And type something new
+                        // Then replace currMsg_ with new one.
+                        this->currMsg_ = message;
+                    }
+                    // If user is already in current message
+                    // Then don't touch cursos.
+                    cursorToEnd =
+                        (message == this->prevMsg_.at(this->prevIndex_ - 1));
                 }
 
-                QTextCursor cursor = this->ui_.textEdit->textCursor();
-                cursor.movePosition(QTextCursor::End);
-                this->ui_.textEdit->setTextCursor(cursor);
+                if (cursorToEnd) {
+                    QTextCursor cursor = this->ui_.textEdit->textCursor();
+                    cursor.movePosition(QTextCursor::End);
+                    this->ui_.textEdit->setTextCursor(cursor);
+                }
             }
         } else if (event->key() == Qt::Key_Left) {
             if (event->modifiers() == Qt::AltModifier) {
@@ -284,6 +311,9 @@ void SplitInput::installKeyPressedEvent()
                 this->split_->copyToClipboard();
                 event->accept();
             }
+        } else if (event->key() == Qt::Key_E &&
+                   event->modifiers() == Qt::ControlModifier) {
+            this->openEmotePopup();
         }
     });
 }

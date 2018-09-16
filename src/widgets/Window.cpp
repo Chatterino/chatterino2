@@ -41,7 +41,8 @@ Window::Window(WindowType type)
     this->addShortcuts();
     this->addLayout();
 
-    getApp()->accounts->twitch.currentUserChanged.connect(
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged,
         [this] { this->onAccountSelected(); });
     this->onAccountSelected();
 

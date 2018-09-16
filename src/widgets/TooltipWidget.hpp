@@ -19,6 +19,7 @@ public:
     virtual ~TooltipWidget() override;
 
     void setText(QString text);
+    void setWordWrap(bool wrap);
 
 #ifdef USEWINSDK
     void raise();

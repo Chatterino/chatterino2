@@ -59,6 +59,7 @@ void LookPage::initializeUi()
     this->addMessageTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     this->addEmoteTab(tabs.appendTab(new QVBoxLayout, "Emotes"));
     this->addSplitHeaderTab(tabs.appendTab(new QVBoxLayout, "Split header"));
+    this->addBadgesTab(tabs.appendTab(new QVBoxLayout, "Badges"));
 
     layout->addStretch(1);
 
@@ -144,10 +145,6 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
                                         getSettings()->timestampFormat));
         box->addStretch(1);
     }
-
-    // badges
-    layout.append(
-        this->createCheckBox("Show badges", getSettings()->showBadges));
 
     // --
     layout.emplace<Line>(false);
@@ -270,13 +267,54 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 
 void LookPage::addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout)
 {
-    layout.append(this->createCheckBox("Show viewer count",
-                                       getSettings()->showViewerCount));
-    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
-    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
     layout.append(
         this->createCheckBox("Show uptime", getSettings()->showUptime));
+    layout.append(this->createCheckBox("Show viewer count",
+                                       getSettings()->showViewerCount));
+    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
+    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
 
+    layout->addStretch(1);
+}
+
+void LookPage::addBadgesTab(LayoutCreator<QVBoxLayout> layout)
+{
+    // layout.append(
+    //    this->createCheckBox(("Show all badges"), getSettings()->showBadges));
+    auto fastSelection = layout.emplace<QHBoxLayout>();
+    {
+        auto addAll = fastSelection.emplace<QPushButton>("Enable all");
+        QObject::connect(addAll.getElement(), &QPushButton::clicked, this, [] {
+            getSettings()->showBadgesGlobalAuthority = true;
+            getSettings()->showBadgesChannelAuthority = true;
+            getSettings()->showBadgesSubscription = true;
+            getSettings()->showBadgesVanity = true;
+            getSettings()->showBadgesChatterino = true;
+        });
+        auto removeAll = fastSelection.emplace<QPushButton>("Disable all");
+        QObject::connect(removeAll.getElement(), &QPushButton::clicked, this,
+                         [] {
+                             getSettings()->showBadgesGlobalAuthority = false;
+                             getSettings()->showBadgesChannelAuthority = false;
+                             getSettings()->showBadgesSubscription = false;
+                             getSettings()->showBadgesVanity = false;
+                             getSettings()->showBadgesChatterino = false;
+                         });
+    }
+    layout.emplace<Line>(false);
+    layout.append(this->createCheckBox(
+        ("Show authorty badges (staff, admin, turbo, etc)"),
+        getSettings()->showBadgesGlobalAuthority));
+    layout.append(
+        this->createCheckBox(("Show channel badges (broadcaster, moderator)"),
+                             getSettings()->showBadgesChannelAuthority));
+    layout.append(this->createCheckBox(("Show subscriber badges "),
+                                       getSettings()->showBadgesSubscription));
+    layout.append(
+        this->createCheckBox(("Show vanity badges (prime, bits, subgifter)"),
+                             getSettings()->showBadgesVanity));
+    layout.append(this->createCheckBox(("Show chatterino badges"),
+                                       getSettings()->showBadgesChatterino));
     layout->addStretch(1);
 }
 

@@ -87,6 +87,11 @@ void TooltipWidget::setText(QString text)
     this->displayText_->setText(text);
 }
 
+void TooltipWidget::setWordWrap(bool wrap)
+{
+    this->displayText_->setWordWrap(wrap);
+}
+
 void TooltipWidget::changeEvent(QEvent *)
 {
     // clear parents event

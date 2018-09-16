@@ -3,8 +3,7 @@
 
 namespace chatterino {
 
-class Resources2 : public Singleton
-{
+class Resources2 : public Singleton {
 public:
     Resources2();
 
@@ -13,6 +12,7 @@ public:
         QPixmap pajlada;
     } avatars;
     struct {
+        QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
         QPixmap menuDark;

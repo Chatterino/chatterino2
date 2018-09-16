@@ -62,6 +62,18 @@ bool Button::getEnable() const
     return this->enabled_;
 }
 
+void Button::setEnableMargin(bool value)
+{
+    this->enableMargin_ = value;
+
+    this->update();
+}
+
+bool Button::getEnableMargin() const
+{
+    return this->enableMargin_;
+}
+
 qreal Button::getCurrentDimAmount() const
 {
     return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
@@ -105,7 +117,7 @@ void Button::paintEvent(QPaintEvent *)
         }
 
         QRect rect = this->rect();
-        int s = int(6 * this->getScale());
+        int s = this->enableMargin_ ? int(6 * this->getScale()) : 0;
 
         rect.moveLeft(s);
         rect.setRight(rect.right() - s - s);

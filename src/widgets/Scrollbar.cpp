@@ -55,6 +55,11 @@ void Scrollbar::unpauseHighlights()
     this->highlightsPaused_ = false;
 }
 
+void Scrollbar::clearHighlights()
+{
+    this->highlights_.clear();
+}
+
 LimitedQueueSnapshot<ScrollbarHighlight> Scrollbar::getHighlightSnapshot()
 {
     if (!this->highlightsPaused_) {

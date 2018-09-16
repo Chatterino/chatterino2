@@ -69,7 +69,11 @@ WindowManager::WindowManager()
     auto settings = getSettings();
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
-    this->wordFlagsListener_.addSetting(settings->showBadges);
+    this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
+    this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
+    this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
+    this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
+    this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
     this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
     this->wordFlagsListener_.addSetting(settings->enableEmojis);
     this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
@@ -114,7 +118,15 @@ void WindowManager::updateWordTypeMask()
                                             : MEF::BitsStatic);
 
     // badges
-    flags.set(settings->showBadges ? MEF::Badges : MEF::None);
+    flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
+                                                  : MEF::None);
+    flags.set(settings->showBadgesChannelAuthority ? MEF::BadgeChannelAuthority
+                                                   : MEF::None);
+    flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription
+                                               : MEF::None);
+    flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
+    flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
+                                             : MEF::None);
 
     // username
     flags.set(MEF::Username);

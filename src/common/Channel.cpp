@@ -143,7 +143,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
             s->loginName == message->timeoutUser) {
             // FOURTF: disabled for now
-            // s->flags.EnableFlag(MessageFlag::Disabled);
+            // PAJLADA: Shitty solution described in Message.hpp
+            s->flags.set(MessageFlag::Disabled);
         }
     }
 

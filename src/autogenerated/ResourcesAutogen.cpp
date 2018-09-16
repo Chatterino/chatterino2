@@ -6,6 +6,7 @@ Resources2::Resources2()
 {
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
     this->avatars.pajlada = QPixmap(":/avatars/pajlada.png");
+    this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
