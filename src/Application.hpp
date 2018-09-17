@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/Singleton.hpp"
+#include "singletons/NativeMessaging.hpp"
 
 #include <QApplication>
 #include <memory>
@@ -78,7 +79,7 @@ public:
 private:
     void addSingleton(Singleton *singleton);
     void initPubsub();
-    void initNm();
+    void initNm(Paths &paths);
 
     template <typename T,
               typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
@@ -88,6 +89,8 @@ private:
         this->singletons_.push_back(std::unique_ptr<T>(t));
         return *t;
     }
+
+    NativeMessagingServer nmServer{};
 };
 
 Application *getApp();

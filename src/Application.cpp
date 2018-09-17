@@ -81,7 +81,7 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->windows->updateWordTypeMask();
 
-    this->initNm();
+    this->initNm(paths);
     this->initPubsub();
 }
 
@@ -103,17 +103,17 @@ void Application::save()
     }
 }
 
-void Application::initNm()
+void Application::initNm(Paths &paths)
 {
 #ifdef Q_OS_WIN
 #    ifdef QT_DEBUG
 #        ifdef C_DEBUG_NM
-    this->nativeMessaging->registerHost();
-    this->nativeMessaging->openGuiMessageQueue();
+    registerNmHost(paths);
+    this->nmServer.start();
 #        endif
 #    else
-    this->nativeMessaging->registerHost();
-    this->nativeMessaging->openGuiMessageQueue();
+    registerNmHost(paths);
+    this->nmServer.start();
 #    endif
 #endif
 }

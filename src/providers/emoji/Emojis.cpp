@@ -217,7 +217,6 @@ void Emojis::loadEmojiSet()
     auto app = getApp();
 
     getSettings()->emojiSet.connect([=](const auto &emojiSet, auto) {
-        log("Using emoji set {}", emojiSet);
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;

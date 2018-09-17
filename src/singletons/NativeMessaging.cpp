@@ -141,19 +141,18 @@ void NativeMessagingServer::start()
 void NativeMessagingServer::ReceiverThread::run()
 {
     ipc::message_queue::remove("chatterino_gui");
-
     ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
                                     MESSAGE_SIZE);
 
     while (true) {
         try {
-            std::unique_ptr<char> buf = std::make_unique<char>(MESSAGE_SIZE);
-            ipc::message_queue::size_type retSize;
-            unsigned int priority;
+            auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
+            auto retSize = ipc::message_queue::size_type();
+            auto priority = static_cast<unsigned int>(0);
 
             messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
 
-            QJsonDocument document = QJsonDocument::fromJson(
+            auto document = QJsonDocument::fromJson(
                 QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());

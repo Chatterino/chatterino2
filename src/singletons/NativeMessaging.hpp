@@ -2,12 +2,12 @@
 
 #include <QThread>
 
+namespace chatterino {
+
 class Application;
 class Paths;
 
-namespace chatterino {
-
-void registerNmHost(Application &app);
+void registerNmHost(Paths &paths);
 std::string &getNmQueueName(Paths &paths);
 
 class NativeMessagingClient final

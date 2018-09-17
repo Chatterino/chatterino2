@@ -46,8 +46,6 @@ void TwitchBadges::loadTwitchBadges()
                 // "title"
                 // "clickAction"
 
-                log("{} {}", key, vIt.key());
-
                 (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
             }
         }
