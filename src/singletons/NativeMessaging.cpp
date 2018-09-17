@@ -147,8 +147,7 @@ void NativeMessagingServer::ReceiverThread::run()
 
     while (true) {
         try {
-            std::unique_ptr<char> buf(
-                static_cast<char *>(malloc(MESSAGE_SIZE)));
+            std::unique_ptr<char> buf = std::make_unique<char>(MESSAGE_SIZE);
             ipc::message_queue::size_type retSize;
             unsigned int priority;
 
