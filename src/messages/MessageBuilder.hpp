@@ -55,7 +55,7 @@ public:
 
         auto unique = std::make_unique<T>(std::forward<Args>(args)...);
         auto pointer = unique.get();
-        this->append(std::move(unique));
+        this->append(unique);
         return pointer;
     }
 
