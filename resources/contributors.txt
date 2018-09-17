@@ -2,6 +2,9 @@
 # This list is displayed in the About section of the preferences window
 # TODO: Parse this into a CONTRIBUTORS.md too
 
+# Adding yourself? Copy and paste this template at the bottom of this file and fill in the fields in a PR!
+# Name | Link | Avatar (Loaded as a resource) | Title (description of work done). Contributor is what we use for someone who has contributed in general (like sent a programming-related PR)
+
 fourtf | https://fourtf.com | avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | avatars/pajlada.png | Collaborator, co-developer
 
@@ -20,7 +23,6 @@ Ckath | https://github.com/Ckath |  | Contributor
 matijakevic | https://github.com/matijakevic |  | Contributor
 nforro | https://github.com/nforro |  | Contributor
 vanolpfan | https://github.com/vanolpfan |  | Contributor
-
 Defman21 | https://github.com/Defman21 |  | Documentation
 Jarel1337 | https://github.com/Jarel1337 |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
@@ -30,5 +32,4 @@ chrisduerr | https://github.com/chrisduerr |  | Documentation
 23rd | https://github.com/23rd |  | Documentation
 TranRed | https://github.com/TranRed |  | Documentation
 
-# Template
-# Name | Link | Avatar (Loaded as a resource) | Title (description of work done). Contributor is what we use for someone who has contributed in general (like sent a programming-related PR)
+# Add yourself right above this line
