@@ -487,7 +487,7 @@ void Split::showViewerList()
         for (int i = 0; i < jsonLabels.size(); i++) {
             auto currentCategory = chattersObj.value(jsonLabels.at(i)).toArray();
             // If current category of chatters is empty, dont show this category.
-            if (currentCategory.size() == 0) continue;
+            if (currentCategory.empty()) continue;
             
             chattersList->addItem(labelList.at(i));
             foreach (const QJsonValue &v, currentCategory)
