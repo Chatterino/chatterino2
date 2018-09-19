@@ -55,8 +55,7 @@ private:
     void appendUsername();
     void parseHighlights(bool isPastMsg);
 
-    void appendTwitchEmote(const Communi::IrcMessage *ircMessage,
-                           const QString &emote,
+    void appendTwitchEmote(const QString &emote,
                            std::vector<std::pair<int, EmotePtr>> &vec);
     Outcome tryAppendEmote(const EmoteName &name);
 
