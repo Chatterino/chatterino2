@@ -156,7 +156,7 @@ MessagePtr TwitchMessageBuilder::build()
         QStringList emoteString = iterator.value().toString().split('/');
 
         for (QString emote : emoteString) {
-            this->appendTwitchEmote(ircMessage, emote, twitchEmotes);
+            this->appendTwitchEmote(emote, twitchEmotes);
         }
 
         std::sort(
@@ -610,7 +610,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(
-    const Communi::IrcMessage *ircMessage, const QString &emote,
+    const QString &emote,
     std::vector<std::pair<int, EmotePtr>> &vec)
 {
     auto app = getApp();
