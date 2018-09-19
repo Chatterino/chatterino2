@@ -152,7 +152,18 @@ void SplitInput::openEmotePopup()
         this->emotePopup_ = std::make_unique<EmotePopup>();
         this->emotePopup_->linkClicked.connect([this](const Link &link) {
             if (link.type == Link::InsertText) {
-                this->insertText(link.value + " ");
+                QTextCursor cursor = this->ui_.textEdit->textCursor();
+                QString textToInsert(link.value + " ");
+
+                auto symbolBeforeCursor = 
+                    getInputText()[cursor.position() - 1];
+                // If symbol before cursor isn't space or empty
+                // Then insert space before emote.
+                if (!symbolBeforeCursor.isSpace() &&
+                    !symbolBeforeCursor.isNull()) {
+                    textToInsert = " " + textToInsert;
+                }
+                this->insertText(textToInsert);
             }
         });
     }
