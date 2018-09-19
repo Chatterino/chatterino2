@@ -23,13 +23,13 @@ Ckath | https://github.com/Ckath |  | Contributor
 matijakevic | https://github.com/matijakevic |  | Contributor
 nforro | https://github.com/nforro |  | Contributor
 vanolpfan | https://github.com/vanolpfan |  | Contributor
+23rd | https://github.com/23rd |  | Contributor
 Defman21 | https://github.com/Defman21 |  | Documentation
 Jarel1337 | https://github.com/Jarel1337 |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
 Yardanico | https://github.com/Yardanico |  | Documentation
 huti26 | https://github.com/huti26 |  | Documentation
 chrisduerr | https://github.com/chrisduerr |  | Documentation
-23rd | https://github.com/23rd |  | Documentation
 TranRed | https://github.com/TranRed |  | Documentation
 
 # Add yourself right above this line
