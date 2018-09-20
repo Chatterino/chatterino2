@@ -56,6 +56,8 @@ public:
 
     void execute();
 
+    QString urlString() const;
+
 private:
     // "invalid" data "invalid" is specified by the onSuccess callback
     Outcome tryLoadCachedFile();

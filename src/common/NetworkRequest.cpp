@@ -143,6 +143,11 @@ void NetworkRequest::execute()
     }
 }
 
+QString NetworkRequest::urlString() const
+{
+    return this->data->request_.url().toString();
+}
+
 Outcome NetworkRequest::tryLoadCachedFile()
 {
     QFile cachedFile(getPaths()->cacheDirectory() + "/" +
