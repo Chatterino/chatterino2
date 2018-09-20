@@ -152,12 +152,31 @@ void FfzEmotes::loadChannel(const QString &channelName,
     NetworkRequest request("https://api.frankerfacez.com/v1/room/" +
                            channelName);
     request.setCaller(QThread::currentThread());
-    request.setTimeout(3000);
+    request.setTimeout(20000);
 
     request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
         auto pair = parseChannelEmotes(result.parseJson());
         if (pair.first) callback(std::move(pair.second));
         return pair.first;
+    });
+
+    request.onError([channelName](int result) {
+        if (result == 203) {
+            // User does not have any FFZ emotes
+            return true;
+        }
+
+        if (result == -2) {
+            // TODO: Auto retry in case of a timeout, with a delay
+            log("Fetching FFZ emotes for channel {} failed due to timeout",
+                channelName);
+            return true;
+        }
+
+        log("Error fetching FFZ emotes for channel {}, error {}", channelName,
+            result);
+
+        return true;
     });
 
     request.execute();
