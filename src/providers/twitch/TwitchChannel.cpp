@@ -640,7 +640,7 @@ void TwitchChannel::refreshBadges()
                                        .5),
                         Image::fromUrl({jsonVersion["image_url_4x"].toString()},
                                        .25)},
-                    Tooltip{jsonRoot["description"].toString()},
+                    Tooltip{jsonVersion["description"].toString()},
                     Url{jsonVersion["clickURL"].toString()}});
 
                 versions.emplace(jsonVersion_.key(), emote);
