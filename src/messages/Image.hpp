@@ -16,7 +16,7 @@
 #include "common/NullablePtr.hpp"
 
 namespace chatterino {
-namespace {
+namespace detail {
     template <typename Image>
     struct Frame {
         Image image;
@@ -40,7 +40,7 @@ namespace {
         int durationOffset_{0};
         pajlada::Signals::Connection gifTimerConnection_;
     };
-}  // namespace
+}  // namespace detail
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
@@ -74,7 +74,7 @@ private:
     qreal scale_{1};
     bool empty_{false};
     bool shouldLoad_{false};
-    std::unique_ptr<Frames> frames_{};
+    std::unique_ptr<detail::Frames> frames_{};
     QObject object_{};
 };
 }  // namespace chatterino

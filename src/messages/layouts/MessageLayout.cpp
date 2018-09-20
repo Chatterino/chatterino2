@@ -27,7 +27,6 @@ namespace chatterino {
 
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(message)
-    , buffer_(nullptr)
     , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");

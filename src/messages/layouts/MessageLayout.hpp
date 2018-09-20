@@ -65,7 +65,7 @@ private:
     // variables
     MessagePtr message_;
     std::shared_ptr<MessageLayoutContainer> container_;
-    std::shared_ptr<QPixmap> buffer_ = nullptr;
+    std::shared_ptr<QPixmap> buffer_{};
     bool bufferValid_ = false;
 
     int height_ = 0;

@@ -21,7 +21,7 @@
 #include <thread>
 
 namespace chatterino {
-namespace {
+namespace detail {
     // Frames
     Frames::Frames()
     {
@@ -179,7 +179,7 @@ namespace {
             }
         };
     }
-}  // namespace
+}  // namespace detail
 
 // IMAGE2
 ImagePtr Image::fromUrl(const Url &url, qreal scale)
@@ -220,14 +220,14 @@ Image::Image(const Url &url, qreal scale)
     : url_(url)
     , scale_(scale)
     , shouldLoad_(true)
-    , frames_(std::make_unique<Frames>())
+    , frames_(std::make_unique<detail::Frames>())
 {
 }
 
 Image::Image(const QPixmap &pixmap, qreal scale)
     : scale_(scale)
-    , frames_(std::make_unique<Frames>(
-          QVector<Frame<QPixmap>>{Frame<QPixmap>{pixmap, 1}}))
+    , frames_(std::make_unique<detail::Frames>(
+          QVector<detail::Frame<QPixmap>>{detail::Frame<QPixmap>{pixmap, 1}}))
 {
 }
 
@@ -301,11 +301,11 @@ void Image::load()
         QBuffer buffer(const_cast<QByteArray *>(&data));
         buffer.open(QIODevice::ReadOnly);
         QImageReader reader(&buffer);
-        auto parsed = readFrames(reader, that->url());
+        auto parsed = detail::readFrames(reader, that->url());
 
         postToThread(makeConvertCallback(parsed, [weak](auto frames) {
             if (auto shared = weak.lock())
-                shared->frames_ = std::make_unique<Frames>(frames);
+                shared->frames_ = std::make_unique<detail::Frames>(frames);
         }));
 
         return Success;
