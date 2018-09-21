@@ -155,12 +155,10 @@ void SplitInput::openEmotePopup()
                 QTextCursor cursor = this->ui_.textEdit->textCursor();
                 QString textToInsert(link.value + " ");
 
-                auto symbolBeforeCursor = 
-                    getInputText()[cursor.position() - 1];
                 // If symbol before cursor isn't space or empty
                 // Then insert space before emote.
-                if (!symbolBeforeCursor.isSpace() &&
-                    !symbolBeforeCursor.isNull()) {
+                if (cursor.position() > 0 &&
+                    !this->getInputText()[cursor.position() - 1].isSpace()) {
                     textToInsert = " " + textToInsert;
                 }
                 this->insertText(textToInsert);
