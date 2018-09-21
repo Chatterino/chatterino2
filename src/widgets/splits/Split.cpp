@@ -105,6 +105,11 @@ Split::Split(QWidget *parent)
         }
     });
 
+    this->view_->joinToChannel.connect([this](QString twitchChannel) {
+        this->container_->appendNewSplit(false)->setChannel(
+            getApp()->twitch.server->getOrAddChannel(twitchChannel));        
+    });
+
     this->input_->textChanged.connect([=](const QString &newText) {
         if (getSettings()->showEmptyInput) {
             return;

@@ -101,7 +101,7 @@ void SplitContainer::resetMouseStatus()
     this->update();
 }
 
-void SplitContainer::appendNewSplit(bool openChannelNameDialog)
+Split* SplitContainer::appendNewSplit(bool openChannelNameDialog)
 {
     assertInGuiThread();
 
@@ -115,6 +115,8 @@ void SplitContainer::appendNewSplit(bool openChannelNameDialog)
             }
         });
     }
+
+    return split;
 }
 
 void SplitContainer::appendSplit(Split *split)

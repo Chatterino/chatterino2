@@ -1126,6 +1126,25 @@ void ChannelView::addContextMenuItems(
         QGuiApplication::clipboard()->setText(copyString);
     });
 
+    // Join to channel
+    if (hoveredElement->getLink().type == Link::Url) {
+        static QRegularExpression twitchChannelRegex(
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]+))",
+            QRegularExpression::CaseInsensitiveOption);
+
+        auto twitchMatch = twitchChannelRegex.match(
+                            hoveredElement->getLink().value);
+        auto twitchUsername = twitchMatch.captured("username");
+        if (!twitchUsername.isEmpty() &&
+            twitchUsername != "settings" &&
+            twitchUsername != "videos") {
+            menu->addSeparator();
+            menu->addAction("Join to channel", [twitchUsername, this] {
+                this->joinToChannel.invoke(twitchUsername);
+            });
+        }
+    }
+
     menu->popup(QCursor::pos());
     menu->raise();
 
