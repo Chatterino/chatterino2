@@ -171,7 +171,7 @@ private:
 public:
     SplitContainer(Notebook *parent);
 
-    void appendNewSplit(bool openChannelNameDialog);
+    Split* appendNewSplit(bool openChannelNameDialog);
     void appendSplit(Split *split);
     void insertSplit(Split *split, const Position &position);
     void insertSplit(Split *split, Direction direction, Split *relativeTo);

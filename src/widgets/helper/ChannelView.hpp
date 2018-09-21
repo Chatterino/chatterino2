@@ -61,6 +61,7 @@ public:
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::Signal<const Link &> linkClicked;
+    pajlada::Signals::Signal<QString> joinToChannel;
 
 protected:
     void themeChangedEvent() override;
