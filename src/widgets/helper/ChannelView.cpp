@@ -9,8 +9,8 @@
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -438,7 +438,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             }
 
             if (this->channel_->getType() != Channel::Type::TwitchMentions) {
-                this->scrollBar_->addHighlight(message->getScrollBarHighlight());
+                this->scrollBar_->addHighlight(
+                    message->getScrollBarHighlight());
             }
 
             this->messageWasAdded_ = true;
@@ -1049,7 +1050,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         } break;
         case Qt::RightButton: {
-
             auto insertText = [=](QString text) {
                 if (auto split = dynamic_cast<Split *>(this->parentWidget())) {
                     split->insertTextToInput(text);
@@ -1131,15 +1131,18 @@ void ChannelView::addContextMenuItems(
         static QRegularExpression twitchChannelRegex(
             R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]+))",
             QRegularExpression::CaseInsensitiveOption);
+        static QSet<QString> ignoredUsernames{
+            "videos",
+            "settings",
+        };
 
-        auto twitchMatch = twitchChannelRegex.match(
-                            hoveredElement->getLink().value);
+        auto twitchMatch =
+            twitchChannelRegex.match(hoveredElement->getLink().value);
         auto twitchUsername = twitchMatch.captured("username");
         if (!twitchUsername.isEmpty() &&
-            twitchUsername != "settings" &&
-            twitchUsername != "videos") {
+            !ignoredUsernames.contains(twitchUsername)) {
             menu->addSeparator();
-            menu->addAction("Join to channel", [twitchUsername, this] {
+            menu->addAction("Open in new split", [twitchUsername, this] {
                 this->joinToChannel.invoke(twitchUsername);
             });
         }
