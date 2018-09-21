@@ -437,7 +437,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 }
             }
 
-            this->scrollBar_->addHighlight(message->getScrollBarHighlight());
+            if (this->channel_->getType() != Channel::Type::TwitchMentions) {
+                this->scrollBar_->addHighlight(message->getScrollBarHighlight());
+            }
 
             this->messageWasAdded_ = true;
             this->layoutMessages();

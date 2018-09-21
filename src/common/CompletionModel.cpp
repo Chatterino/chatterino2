@@ -100,9 +100,19 @@ void CompletionModel::refresh(const QString &prefix)
         if (prefix.length() >= UsernameSet::PrefixLength) {
             auto usernames = channel->accessChatters();
 
-            for (const auto &name : usernames->subrange(Prefix(prefix))) {
-                addString(name, TaggedString::Type::Username);
-                addString("@" + name, TaggedString::Type::Username);
+            QString usernamePrefix = prefix;
+
+            if (usernamePrefix.startsWith("@")) {
+                usernamePrefix.remove(0, 1);
+                for (const auto &name :
+                     usernames->subrange(Prefix(usernamePrefix))) {
+                    addString("@" + name, TaggedString::Type::Username);
+                }
+            } else {
+                for (const auto &name :
+                     usernames->subrange(Prefix(usernamePrefix))) {
+                    addString(name, TaggedString::Type::Username);
+                }
             }
         }
 
