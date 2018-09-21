@@ -12,6 +12,7 @@ public:
         QPixmap pajlada;
     } avatars;
     struct {
+        QPixmap addSplit;
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;

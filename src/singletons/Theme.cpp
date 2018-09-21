@@ -63,14 +63,12 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
     /// WINDOW
     {
-        /*
         QColor bg =
 #ifdef Q_OS_LINUX
             this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
 #else
             this->window.background = lightWin ? "#fff" : "#111";
 #endif
-        */
 
         QColor fg = this->window.text = lightWin ? "#000" : "#eee";
         this->window.borderFocused = lightWin ? "#ccc" : themeColor;
@@ -109,7 +107,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
             this->tabs.notified = {
                 fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#fff"), QColor("#fff"), QColor("#fff")},
                 {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         } else {
             this->tabs.regular = {

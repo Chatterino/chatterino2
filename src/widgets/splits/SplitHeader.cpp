@@ -519,9 +519,11 @@ void SplitHeader::themeChangedEvent()
     // --
     if (this->theme->isLightTheme()) {
         this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuDark);
+        this->addButton_->setPixmap(getApp()->resources->buttons.addSplit);
     } else {
         this->dropdownButton_->setPixmap(
             getApp()->resources->buttons.menuLight);
+        this->addButton_->setPixmap(getApp()->resources->buttons.addSplitDark);
     }
 }
 

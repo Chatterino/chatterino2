@@ -139,7 +139,7 @@ void SplitInput::updateEmoteButton()
     text.replace("xD", QString::number(int(12 * scale)));
 
     if (this->theme->isLightTheme()) {
-        text.replace("emote", "emote_dark");
+        text.replace("emote", "emoteDark");
     }
 
     this->ui_.emoteButton->getLabel().setText(text);
