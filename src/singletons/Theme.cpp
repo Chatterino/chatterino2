@@ -109,7 +109,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
             this->tabs.notified = {
                 fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
+                {QColor("#fff"), QColor("#fff"), QColor("#fff")},
                 {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         } else {
             this->tabs.regular = {
