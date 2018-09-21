@@ -139,7 +139,7 @@ void SplitInput::updateEmoteButton()
     text.replace("xD", QString::number(int(12 * scale)));
 
     if (this->theme->isLightTheme()) {
-        text.replace("emote", "emote_dark");
+        text.replace("emote", "emoteDark");
     }
 
     this->ui_.emoteButton->getLabel().setText(text);
@@ -155,8 +155,7 @@ void SplitInput::openEmotePopup()
                 QTextCursor cursor = this->ui_.textEdit->textCursor();
                 QString textToInsert(link.value + " ");
 
-                auto symbolBeforeCursor = 
-                    getInputText()[cursor.position() - 1];
+                auto symbolBeforeCursor = getInputText()[cursor.position() - 1];
                 // If symbol before cursor isn't space or empty
                 // Then insert space before emote.
                 if (!symbolBeforeCursor.isSpace() &&
