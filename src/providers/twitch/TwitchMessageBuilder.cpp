@@ -222,19 +222,6 @@ MessagePtr TwitchMessageBuilder::build()
                 auto mid = this->originalMessage_.mid(from, len);
                 mid.replace(regex, phrase.getReplace());
 
-                /*for (auto &tup : vret) {
-                    if (std::get<1>(tup) == nullptr) {
-                        log("v nullptr {}", std::get<2>(tup).string);
-                        continue;
-                    }
-                    int index = 0;
-                    const auto &emote = std::get<2>(tup);
-                    while ((index = mid.indexOf(emote.string, index)) != -1) {
-                        std::get<0>(tup) = from + index;
-                        index += emote.string.size();
-                        twitchEmotes.push_back(tup);
-                    }
-                }*/
                 int midsize = mid.size();
                 this->originalMessage_.replace(from, len, mid);
                 int pos1 = from;
@@ -285,20 +272,6 @@ MessagePtr TwitchMessageBuilder::build()
                 int len = pattern.size();
                 auto vret = removeEmotesInRange(from, len, twitchEmotes);
                 auto replace = phrase.getReplace();
-
-                /*for (auto &tup : vret) {
-                    if (std::get<1>(tup) == nullptr) {
-                        log("v nullptr {}", std::get<2>(tup).string);
-                        continue;
-                    }
-                    int index = 0;
-                    const auto &emote = std::get<2>(tup);
-                    while ((index = replace.indexOf(emote.string, index)) != -1) {
-                        std::get<0>(tup) = from + index;
-                        index += emote.string.size();
-                        twitchEmotes.push_back(tup);
-                    }
-                }*/
 
                 int replacesize = replace.size();
                 this->originalMessage_.replace(from, len, replace);
