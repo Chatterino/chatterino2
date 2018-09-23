@@ -27,13 +27,10 @@ public:
 
     TwitchMessageBuilder() = delete;
 
-    explicit TwitchMessageBuilder(Channel *_channel,
-                                  const Communi::IrcPrivateMessage *_ircMessage,
+    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
                                   const MessageParseArgs &_args);
-    explicit TwitchMessageBuilder(Channel *_channel,
-                                  const Communi::IrcMessage *_ircMessage,
-                                  const MessageParseArgs &_args,
-                                  QString content, bool isAction);
+    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
+                                  const MessageParseArgs &_args, QString content, bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
@@ -56,11 +53,11 @@ private:
     void parseHighlights(bool isPastMsg);
 
     void appendTwitchEmote(const QString &emote,
-                           std::vector<std::pair<int, EmotePtr>> &vec);
+                           std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec);
     Outcome tryAppendEmote(const EmoteName &name);
 
     void addWords(const QStringList &words,
-                  const std::vector<std::pair<int, EmotePtr>> &twitchEmotes);
+                  const std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
     void addTextOrEmoji(EmotePtr emote);
     void addTextOrEmoji(const QString &value);
 
@@ -72,7 +69,7 @@ private:
     bool hasBits_ = false;
 
     QColor usernameColor_;
-    const QString originalMessage_;
+    QString originalMessage_;
     bool senderIsBroadcaster{};
 
     const bool action_ = false;
