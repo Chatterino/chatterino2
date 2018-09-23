@@ -116,6 +116,9 @@ public:
     BoolSetting enableUnshortLinks = {"/links/unshortLinks", false};
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
+    /// Ignored phrases
+    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace", "***"};
+
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
                                             true};
