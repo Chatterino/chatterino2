@@ -46,7 +46,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
     EditableModelView *view =
         layout.emplace<EditableModelView>(getApp()->ignores->createModel(nullptr)).getElement();
-    view->setTitles({"Pattern", "Regex", "Case Sensitive", "Block", "Pattern"});
+    view->setTitles({"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
 
