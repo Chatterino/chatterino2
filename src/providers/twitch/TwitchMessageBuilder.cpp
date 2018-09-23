@@ -325,7 +325,6 @@ MessagePtr TwitchMessageBuilder::build()
                                        return std::get<0>(first) == std::get<0>(second);
                                    }),
                        twitchEmotes.end());
-    auto currentTwitchEmote = twitchEmotes.begin();
 
     // words
     QStringList splits = this->originalMessage_.split(' ');
