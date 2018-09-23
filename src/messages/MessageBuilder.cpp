@@ -82,6 +82,10 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->message().flags.set(MessageFlag::Timeout);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
     this->message().timeoutUser = username;
+    this->emplace<TimestampElement>();
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
+    this->message().searchText = text;
 }
 
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
