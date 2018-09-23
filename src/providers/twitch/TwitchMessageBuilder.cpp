@@ -19,6 +19,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QMediaPlayer>
+#include <QStringRef>
 #include <boost/variant.hpp>
 
 namespace chatterino {
@@ -156,36 +157,39 @@ MessagePtr TwitchMessageBuilder::build()
     }
     auto app = getApp();
     const auto &phrases = app->ignores->phrases.getVector();
-    auto removeEmotesInRange = [&twitchEmotes](int pos, int len) mutable {
-        auto it = std::remove_if(
-            twitchEmotes.begin(), twitchEmotes.end(), [&pos, &len](const auto &item) {
-                return ((std::get<0>(item) >= pos) && std::get<0>(item) < (pos + len));
-            });
-        for (; it != twitchEmotes.end(); ++it) {
-            if (std::get<1>(*it) == nullptr) {
-                log("remem nullptr {}", std::get<2>(*it).string);
+    auto removeEmotesInRange =
+        [](int pos, int len,
+           std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes) mutable {
+            auto it = std::partition(
+                twitchEmotes.begin(), twitchEmotes.end(), [pos, len](const auto &item) {
+                    return !((std::get<0>(item) >= pos) && std::get<0>(item) < (pos + len));
+                });
+            for (auto copy = it; copy != twitchEmotes.end(); ++copy) {
+                if (std::get<1>(*copy) == nullptr) {
+                    log("remem nullptr {}", std::get<2>(*copy).string);
+                }
             }
-        }
-        std::vector<std::tuple<int, EmotePtr, EmoteName>> v(it, twitchEmotes.end());
-        twitchEmotes.erase(it, twitchEmotes.end());
-        return v;
-    };
+            std::vector<std::tuple<int, EmotePtr, EmoteName>> v(it, twitchEmotes.end());
+            twitchEmotes.erase(it, twitchEmotes.end());
+            return v;
+        };
 
     auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
-        auto it = std::find_if(twitchEmotes.begin(), twitchEmotes.end(),
-                               [&pos](const auto &item) { return std::get<0>(item) >= pos; });
-        while (it != twitchEmotes.end()) {
-            std::get<0>(*it) += by;
-            ++it;
+        for (auto &item : twitchEmotes) {
+            auto &index = std::get<0>(item);
+            if (index >= pos) {
+                index += by;
+            }
         }
     };
 
-    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase, const QString &midrepl,
+    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase, const QStringRef &midrepl,
                                          int startIndex) mutable {
         if (!phrase.containsEmote()) {
             return;
         }
-        QStringList words = midrepl.split(' ');
+
+        QVector<QStringRef> words = midrepl.split(' ');
         int pos = 0;
         for (const auto &word : words) {
             for (const auto &emote : phrase.getEmotes()) {
@@ -214,17 +218,14 @@ MessagePtr TwitchMessageBuilder::build()
             int from = 0;
             while ((from = this->originalMessage_.indexOf(regex, from, &match)) != -1) {
                 int len = match.capturedLength();
-                auto vret = removeEmotesInRange(from, len);
+                auto vret = removeEmotesInRange(from, len, twitchEmotes);
                 auto mid = this->originalMessage_.mid(from, len);
                 mid.replace(regex, phrase.getReplace());
 
-                // hemirt
-                // doesnt check for own emotes in the Replace part
-                // mb in IgnoredPhrase ??
-
-                for (auto &tup : vret) {
+                /*for (auto &tup : vret) {
                     if (std::get<1>(tup) == nullptr) {
                         log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
                     }
                     int index = 0;
                     const auto &emote = std::get<2>(tup);
@@ -233,14 +234,45 @@ MessagePtr TwitchMessageBuilder::build()
                         index += emote.string.size();
                         twitchEmotes.push_back(tup);
                     }
+                }*/
+                int midsize = mid.size();
+                this->originalMessage_.replace(from, len, mid);
+                int pos1 = from;
+                while (pos1 > 0) {
+                    if (this->originalMessage_[pos1 - 1] == ' ') {
+                        break;
+                    }
+                    --pos1;
+                }
+                int pos2 = from + midsize;
+                while (pos2 < this->originalMessage_.length()) {
+                    if (this->originalMessage_[pos2] == ' ') {
+                        break;
+                    }
+                    ++pos2;
                 }
 
-                addReplEmotes(phrase, mid, from);
+                shiftIndicesAfter(from + len, midsize - len);
 
-                this->originalMessage_.replace(from, len, mid);
-                int midsize = mid.size();
+                auto midExtendedRef = this->originalMessage_.midRef(pos1, pos2 - pos1);
+
+                for (auto &tup : vret) {
+                    if (std::get<1>(tup) == nullptr) {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
+                    }
+                    int index = 0;
+                    QString emote = " " + std::get<2>(tup).string + " ";
+                    while ((index = midExtendedRef.indexOf(emote, index)) != -1) {
+                        std::get<0>(tup) = from + index + 1;
+                        index += emote.size() - 1;
+                        twitchEmotes.push_back(tup);
+                    }
+                }
+
+                addReplEmotes(phrase, midExtendedRef, pos1);
+
                 from += midsize;
-                shiftIndicesAfter(from, midsize - len);
             }
         } else {
             const auto &pattern = phrase.getPattern();
@@ -251,16 +283,13 @@ MessagePtr TwitchMessageBuilder::build()
             while ((from = this->originalMessage_.indexOf(pattern, from,
                                                           phrase.caseSensitivity())) != -1) {
                 int len = pattern.size();
-                auto vret = removeEmotesInRange(from, len);
+                auto vret = removeEmotesInRange(from, len, twitchEmotes);
                 auto replace = phrase.getReplace();
 
-                // hemirt
-                // doesnt check for own emotes in the Replace part
-                // mb in IgnoredPhrase ??
-
-                for (auto &tup : vret) {
+                /*for (auto &tup : vret) {
                     if (std::get<1>(tup) == nullptr) {
                         log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
                     }
                     int index = 0;
                     const auto &emote = std::get<2>(tup);
@@ -269,14 +298,47 @@ MessagePtr TwitchMessageBuilder::build()
                         index += emote.string.size();
                         twitchEmotes.push_back(tup);
                     }
+                }*/
+
+                int replacesize = replace.size();
+                this->originalMessage_.replace(from, len, replace);
+
+                int pos1 = from;
+                while (pos1 > 0) {
+                    if (this->originalMessage_[pos1 - 1] == ' ') {
+                        break;
+                    }
+                    --pos1;
+                }
+                int pos2 = from + replacesize;
+                while (pos2 < this->originalMessage_.length()) {
+                    if (this->originalMessage_[pos2] == ' ') {
+                        break;
+                    }
+                    ++pos2;
                 }
 
-                addReplEmotes(phrase, replace, from);
+                shiftIndicesAfter(from + len, replacesize - len);
 
-                this->originalMessage_.replace(from, len, replace);
-                int replacesize = replace.size();
+                auto midExtendedRef = this->originalMessage_.midRef(pos1, pos2 - pos1);
+
+                for (auto &tup : vret) {
+                    if (std::get<1>(tup) == nullptr) {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
+                    }
+                    int index = 0;
+                    QString emote = " " + std::get<2>(tup).string + " ";
+                    while ((index = midExtendedRef.indexOf(emote, index)) != -1) {
+                        std::get<0>(tup) = from + index + 1;
+                        index += emote.size() - 1;
+                        twitchEmotes.push_back(tup);
+                    }
+                }
+
+                addReplEmotes(phrase, midExtendedRef, pos1);
+
                 from += replacesize;
-                shiftIndicesAfter(from, replacesize - len);
             }
         }
     }
@@ -308,6 +370,9 @@ void TwitchMessageBuilder::addWords(
 
     for (const auto &word : words) {
         // check if it's a twitch emote twitch emote
+        while (currentTwitchEmote != twitchEmotes.end() && std::get<0>(*currentTwitchEmote) < i) {
+            ++currentTwitchEmote;
+        }
         if (currentTwitchEmote != twitchEmotes.end() && std::get<0>(*currentTwitchEmote) == i) {
             auto emoteImage = std::get<1>(*currentTwitchEmote);
             if (emoteImage == nullptr) {
