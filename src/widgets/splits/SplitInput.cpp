@@ -170,6 +170,7 @@ void SplitInput::openEmotePopup()
                               int(500 * this->emotePopup_->getScale()));
     this->emotePopup_->loadChannel(this->split_->getChannel());
     this->emotePopup_->show();
+    this->emotePopup_->activateWindow();
 }
 
 void SplitInput::installKeyPressedEvent()
