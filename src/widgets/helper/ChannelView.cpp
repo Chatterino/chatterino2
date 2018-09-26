@@ -397,7 +397,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
         this->detachChannel();
     }
 
-    this->messages.clear();
+    this->clearMessages();
 
     // on new message
     this->channelConnections_.push_back(
