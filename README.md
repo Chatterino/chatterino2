@@ -7,7 +7,9 @@ Chatterino 2 is the second installment of the Twitch chat client series "Chatter
 ## Downloading
 You can download the Chatterino 2 Beta over [here](https://chatterino.com/download/Chatterino2BetaInstaller.exe)
 
-You might also need to install the [VC++ 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.
+You might also need to install the [VC++ 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.  
+If you still receive an error about `MSVCR120.dll missing`, then you should install the [VC++ 2017 Restributable](https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe
+).
 
 Releases for linux and mac will follow soon™
 
