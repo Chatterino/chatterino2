@@ -361,10 +361,10 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
         this->mouseDown_ = true;
         this->mouseDownX_ = this->getXRect().contains(event->pos());
 
-        this->update();
-
         this->notebook_->select(page);
     }
+
+    this->update();
 
     if (this->notebook_->getAllowUserTabManagement()) {
         switch (event->button()) {
