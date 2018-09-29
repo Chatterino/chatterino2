@@ -357,12 +357,14 @@ bool NotebookTab::shouldDrawXButton()
 
 void NotebookTab::mousePressEvent(QMouseEvent *event)
 {
-    this->mouseDown_ = true;
-    this->mouseDownX_ = this->getXRect().contains(event->pos());
+    if (event->button() == Qt::LeftButton) {
+        this->mouseDown_ = true;
+        this->mouseDownX_ = this->getXRect().contains(event->pos());
 
-    this->update();
+        this->update();
 
-    this->notebook_->select(page);
+        this->notebook_->select(page);
+    }
 
     if (this->notebook_->getAllowUserTabManagement()) {
         switch (event->button()) {
