@@ -296,9 +296,11 @@ QString TwitchChannel::roomId() const
 
 void TwitchChannel::setRoomId(const QString &id)
 {
-    (*this->roomID_.access()) = id;
-    this->roomIdChanged.invoke();
-    this->loadRecentMessages();
+    if (*this->roomID_.accessConst() != id) {
+        *this->roomID_.access() = id;
+        this->roomIdChanged.invoke();
+        this->loadRecentMessages();
+    }
 }
 
 AccessGuard<const TwitchChannel::RoomModes> TwitchChannel::accessRoomModes()
