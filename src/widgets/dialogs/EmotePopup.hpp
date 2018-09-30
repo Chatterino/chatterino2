@@ -6,7 +6,7 @@
 
 namespace chatterino {
 
-class Link;
+struct Link;
 class ChannelView;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;

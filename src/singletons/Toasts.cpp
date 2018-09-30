@@ -35,37 +35,33 @@ bool Toasts::isEnabled()
 
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
+#ifdef Q_OS_WIN
+    auto sendChannelNotification = [this, channelName, p] {
+        this->sendWindowsNotification(channelName, p);
+    };
+#else
+    auto sendChannelNotification = [] {
+        // Unimplemented for OSX and Linux
+    };
+#endif
     // Fetch user profile avatar
     if (p == Platform::Twitch) {
         QFileInfo check_file(getPaths()->twitchProfileAvatars + "/twitch/" +
                              channelName + ".png");
         if (check_file.exists() && check_file.isFile()) {
-#ifdef Q_OS_WIN
-            this->sendWindowsNotification(channelName, p);
-#endif
-            // OSX
-
-            // LINUX
-
+            sendChannelNotification();
         } else {
             this->fetchChannelAvatar(
-                channelName, [this, channelName, p](QString avatarLink) {
+                channelName,
+                [channelName, sendChannelNotification](QString avatarLink) {
                     DownloadManager *manager = new DownloadManager();
                     manager->setFile(avatarLink, channelName);
-                    manager->connect(
-                        manager, &DownloadManager::downloadComplete,
-                        [this, channelName, p]() {
-#ifdef Q_OS_WIN
-                            this->sendWindowsNotification(channelName, p);
-#endif
-                            // OSX
-
-                            // LINUX
-                        });
+                    manager->connect(manager,
+                                     &DownloadManager::downloadComplete,
+                                     sendChannelNotification);
                 });
         }
     }
-    return;
 }
 
 #ifdef Q_OS_WIN

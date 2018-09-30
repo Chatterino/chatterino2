@@ -1,5 +1,6 @@
 #include "DownloadManager.hpp"
 
+#include "debug/Log.hpp"
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
@@ -42,8 +43,7 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
 {
-    qDebug(QString::number(bytesRead).toLatin1() + " - " +
-           QString::number(bytesTotal).toLatin1());
+    log("Download progress: {}/{}", bytesRead, bytesTotal);
 }
 
 void DownloadManager::onFinished(QNetworkReply *reply)
@@ -53,7 +53,7 @@ void DownloadManager::onFinished(QNetworkReply *reply)
             qDebug("file is downloaded successfully.");
         } break;
         default: {
-            qDebug(reply->errorString().toLatin1());
+            qDebug() << reply->errorString().toLatin1();
         };
     }
 
