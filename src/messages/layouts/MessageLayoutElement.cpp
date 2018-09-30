@@ -58,9 +58,20 @@ MessageLayoutElement *MessageLayoutElement::setLink(const Link &_link)
     return this;
 }
 
+MessageLayoutElement *MessageLayoutElement::setText(const QString &_text)
+{
+    this->text_ = _text;
+    return this;
+}
+
 const Link &MessageLayoutElement::getLink() const
 {
     return this->link_;
+}
+
+const QString &MessageLayoutElement::getText() const
+{
+    return this->text_;
 }
 
 //
@@ -78,7 +89,8 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
 void ImageLayoutElement::addCopyTextToString(QString &str, int from,
                                              int to) const
 {
-    const auto *emoteElement = dynamic_cast<EmoteElement *>(&this->getCreator());
+    const auto *emoteElement =
+        dynamic_cast<EmoteElement *>(&this->getCreator());
     if (emoteElement) {
         str += emoteElement->getEmote()->getCopyString();
         if (this->hasTrailingSpace()) {
@@ -87,7 +99,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     }
 }
 
-int ImageLayoutElement::getSelectionIndexCount()
+int ImageLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
@@ -120,7 +132,7 @@ void ImageLayoutElement::paintAnimated(QPainter &painter, int yOffset)
     }
 }
 
-int ImageLayoutElement::getMouseOverIndex(const QPoint &abs)
+int ImageLayoutElement::getMouseOverIndex(const QPoint &abs) const
 {
     return 0;
 }
@@ -162,7 +174,7 @@ void TextLayoutElement::addCopyTextToString(QString &str, int from,
     }
 }
 
-int TextLayoutElement::getSelectionIndexCount()
+int TextLayoutElement::getSelectionIndexCount() const
 {
     return this->text.length() + (this->trailingSpace ? 1 : 0);
 }
@@ -184,7 +196,7 @@ void TextLayoutElement::paintAnimated(QPainter &, int)
 {
 }
 
-int TextLayoutElement::getMouseOverIndex(const QPoint &abs)
+int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 {
     if (abs.x() < this->getRect().left()) {
         return 0;
@@ -245,7 +257,7 @@ void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
 {
 }
 
-int TextIconLayoutElement::getSelectionIndexCount()
+int TextIconLayoutElement::getSelectionIndexCount() const
 {
     return this->trailingSpace ? 2 : 1;
 }
@@ -280,7 +292,7 @@ void TextIconLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
 }
 
-int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs)
+int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
 {
     return 0;
 }
