@@ -27,10 +27,13 @@ public:
 
     TwitchMessageBuilder() = delete;
 
-    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
+    explicit TwitchMessageBuilder(Channel *_channel,
+                                  const Communi::IrcPrivateMessage *_ircMessage,
                                   const MessageParseArgs &_args);
-    explicit TwitchMessageBuilder(Channel *_channel, const Communi::IrcMessage *_ircMessage,
-                                  const MessageParseArgs &_args, QString content, bool isAction);
+    explicit TwitchMessageBuilder(Channel *_channel,
+                                  const Communi::IrcMessage *_ircMessage,
+                                  const MessageParseArgs &_args,
+                                  QString content, bool isAction);
 
     Channel *channel;
     TwitchChannel *twitchChannel;
@@ -52,12 +55,14 @@ private:
     void appendUsername();
     void parseHighlights(bool isPastMsg);
 
-    void appendTwitchEmote(const QString &emote,
-                           std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec);
+    void appendTwitchEmote(
+        const QString &emote,
+        std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec);
     Outcome tryAppendEmote(const EmoteName &name);
 
-    void addWords(const QStringList &words,
-                  const std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
+    void addWords(
+        const QStringList &words,
+        const std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
     void addTextOrEmoji(EmotePtr emote);
     void addTextOrEmoji(const QString &value);
 
