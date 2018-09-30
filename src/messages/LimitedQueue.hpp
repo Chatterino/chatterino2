@@ -32,7 +32,7 @@ protected:
     typedef std::shared_ptr<std::vector<Chunk>> ChunkVector;
 
 public:
-    LimitedQueue(int limit = 1000)
+    LimitedQueue(size_t limit = 1000)
         : limit_(limit)
     {
         this->clear();
@@ -106,7 +106,7 @@ public:
             }
 
             // create new chunk for the first one
-            size_t offset = std::min(this->space(), items.size());
+            size_t offset = std::min(this->space(), static_cast<qsizetype>(items.size()));
             Chunk newFirstChunk = std::make_shared<std::vector<T>>();
             newFirstChunk->resize(this->chunks_->front()->size() + offset);
 
@@ -214,7 +214,7 @@ public:
     }
 
 private:
-    size_t space()
+    qsizetype space()
     {
         size_t totalSize = 0;
         for (Chunk &chunk : *this->chunks_) {
