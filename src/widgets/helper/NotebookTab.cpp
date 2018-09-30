@@ -62,12 +62,14 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->menu_.addAction("Close",
                           [=]() { this->notebook_->removePage(this->page); });
 
-    //    this->menu.addAction(enableHighlightsOnNewMessageAction);
-
-    //    QObject::connect(enableHighlightsOnNewMessageAction,
-    //    &QAction::toggled, [this](bool newValue) {
-    //        Log("New value is {}", newValue);  //
-    //    });
+    auto highlightNewMessagesAction =
+        new QAction("Enable highlights on new messages", &this->menu_);
+    highlightNewMessagesAction->setCheckable(true);
+    highlightNewMessagesAction->setChecked(true);
+    QObject::connect(
+        highlightNewMessagesAction, &QAction::triggered,
+        [this](bool checked) { this->highlightEnabled_ = checked; });
+    this->menu_.addAction(highlightNewMessagesAction);
 }
 
 void NotebookTab::themeChangedEvent()
@@ -168,7 +170,7 @@ void NotebookTab::setSelected(bool value)
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    if (this->isSelected()) {
+    if (this->isSelected() || !this->highlightEnabled_) {
         return;
     }
     if (this->highlightState_ != HighlightState::Highlighted &&
@@ -356,12 +358,14 @@ bool NotebookTab::shouldDrawXButton()
 
 void NotebookTab::mousePressEvent(QMouseEvent *event)
 {
-    this->mouseDown_ = true;
-    this->mouseDownX_ = this->getXRect().contains(event->pos());
+    if (event->button() == Qt::LeftButton) {
+        this->mouseDown_ = true;
+        this->mouseDownX_ = this->getXRect().contains(event->pos());
+
+        this->notebook_->select(page);
+    }
 
     this->update();
-
-    this->notebook_->select(page);
 
     if (this->notebook_->getAllowUserTabManagement()) {
         switch (event->button()) {
