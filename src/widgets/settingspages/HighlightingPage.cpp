@@ -139,7 +139,7 @@ HighlightingPage::HighlightingPage()
             auto selectFile =
                 customSound.emplace<QPushButton>("Select custom sound file");
             QObject::connect(selectFile.getElement(), &QPushButton::clicked,
-                             this, [this, app] {
+                             this, [this] {
                                  auto fileName = QFileDialog::getOpenFileName(
                                      this, tr("Open Sound"), "",
                                      tr("Audio Files (*.mp3 *.wav)"));

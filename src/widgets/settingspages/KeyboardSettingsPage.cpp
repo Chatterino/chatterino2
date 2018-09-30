@@ -41,8 +41,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + R"), new QLabel("Change channel"));
     form->addRow(new QLabel("Ctrl + F"),
                  new QLabel("Search in current channel"));
-    form->addRow(new QLabel("Ctrl + E"),
-                 new QLabel("Open Emote menu"));
+    form->addRow(new QLabel("Ctrl + E"), new QLabel("Open Emote menu"));
 }
 
 }  // namespace chatterino

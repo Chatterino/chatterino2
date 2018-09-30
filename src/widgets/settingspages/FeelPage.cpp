@@ -50,12 +50,12 @@ FeelPage::FeelPage()
         form->addRow("Links:",
                      this->createCheckBox("Open links only on double click",
                                           getSettings()->linksDoubleClickOnly));
-        form->addRow("",
-                     this->createCheckBox("Show link info in tooltips",
-                                          getSettings()->enableLinkInfoTooltip));
-        form->addRow("",
-                     this->createCheckBox("Auto unshort links (requires restart)",
-                                          getSettings()->enableUnshortLinks));
+        form->addRow(
+            "", this->createCheckBox("Show link info in tooltips",
+                                     getSettings()->enableLinkInfoTooltip));
+        form->addRow(
+            "", this->createCheckBox("Auto unshort links (requires restart)",
+                                     getSettings()->enableUnshortLinks));
     }
 
     layout->addSpacing(16);

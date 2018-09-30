@@ -301,6 +301,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
                 window.getNotebook().select(page);
             }
 
+            // highlighting on new messages
+            bool val = tab_obj.value("highlightsEnabled").toBool(true);
+            page->getTab()->setHighlightsEnabled(val);
+
             // load splits
             QJsonObject splitRoot = tab_obj.value("splits2").toObject();
 
@@ -399,6 +403,10 @@ void WindowManager::save()
             if (window->getNotebook().getSelectedPage() == tab) {
                 tab_obj.insert("selected", true);
             }
+
+            // highlighting on new messages
+            tab_obj.insert("highlightsEnabled",
+                           tab->getTab()->hasHighlightsEnabled());
 
             // splits
             QJsonObject splits;

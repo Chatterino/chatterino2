@@ -7,7 +7,8 @@
 #include "common/NetworkWorker.hpp"
 
 namespace chatterino {
-class NetworkData;
+
+struct NetworkData;
 
 class NetworkRequest
 {

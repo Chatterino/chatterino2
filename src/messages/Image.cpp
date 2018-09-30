@@ -62,9 +62,10 @@ namespace detail {
         while (true) {
             this->index_ %= this->items_.size();
 
-            if (this->index_ >= this->items_.size()) {
-                this->index_ = this->index_;
-            }
+            // TODO: Figure out what this was supposed to achieve
+            // if (this->index_ >= this->items_.size()) {
+            //     this->index_ = this->index_;
+            // }
 
             if (this->durationOffset_ > this->items_[this->index_].duration) {
                 this->durationOffset_ -= this->items_[this->index_].duration;
@@ -310,7 +311,7 @@ void Image::load()
 
         return Success;
     });
-    req.onError([that = this, weak = weakOf(this)](auto result) -> bool {
+    req.onError([weak = weakOf(this)](auto result) -> bool {
         auto shared = weak.lock();
         if (!shared) return false;
 
