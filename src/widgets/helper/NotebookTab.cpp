@@ -55,21 +55,17 @@ NotebookTab::NotebookTab(Notebook *notebook)
         }
     });
 
-    //    QAction *enableHighlightsOnNewMessageAction =
-    //        new QAction("Enable highlights on new message", &this->menu);
-    //    enableHighlightsOnNewMessageAction->setCheckable(true);
-
     this->menu_.addAction("Close",
                           [=]() { this->notebook_->removePage(this->page); });
 
-    auto highlightNewMessagesAction =
+    highlightNewMessagesAction_ =
         new QAction("Enable highlights on new messages", &this->menu_);
-    highlightNewMessagesAction->setCheckable(true);
-    highlightNewMessagesAction->setChecked(true);
+    highlightNewMessagesAction_->setCheckable(true);
+    highlightNewMessagesAction_->setChecked(highlightEnabled_);
     QObject::connect(
-        highlightNewMessagesAction, &QAction::triggered,
+        highlightNewMessagesAction_, &QAction::triggered,
         [this](bool checked) { this->highlightEnabled_ = checked; });
-    this->menu_.addAction(highlightNewMessagesAction);
+    this->menu_.addAction(highlightNewMessagesAction_);
 }
 
 void NotebookTab::themeChangedEvent()
@@ -179,6 +175,17 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 
         this->update();
     }
+}
+
+void NotebookTab::setHighlightsEnabled(const bool &newVal)
+{
+    this->highlightNewMessagesAction_->setChecked(newVal);
+    this->highlightEnabled_ = newVal;
+}
+
+bool NotebookTab::hasHighlightsEnabled() const
+{
+    return this->highlightEnabled_;
 }
 
 QRect NotebookTab::getDesiredRect() const
