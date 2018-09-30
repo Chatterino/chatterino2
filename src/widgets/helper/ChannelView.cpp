@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
+#include <QMessageBox>
 #include <QPainter>
 
 #include <algorithm>
@@ -1162,27 +1163,40 @@ void ChannelView::addContextMenuItems(
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    std::shared_ptr<MessageLayout> layout;
+    QPoint relativePos;
+    int messageIndex;
+
+    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
+        return;
+    }
+
+    // message under cursor is collapsed
+    if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
+        return;
+    }
+
+    const MessageLayoutElement *hoverLayoutElement =
+        layout->getElementAt(relativePos);
+
+    if (hoverLayoutElement == nullptr) {
+        return;
+    }
+    if (!this->isMouseDown_) {
+        this->isMouseDown_ = true;
+
+        const int mouseInWordIndex =
+            hoverLayoutElement->getMouseOverIndex(relativePos);
+        const int wordStart =
+            layout->getSelectionIndex(relativePos) - mouseInWordIndex;
+        const int wordEnd = wordStart + hoverLayoutElement->getText().length();
+
+        SelectionItem wordMin(messageIndex, wordStart);
+        SelectionItem wordMax(messageIndex, wordEnd);
+        this->setSelection(wordMin, wordMax);
+    }
+
     if (getSettings()->linksDoubleClickOnly) {
-        std::shared_ptr<MessageLayout> layout;
-        QPoint relativePos;
-        int messageIndex;
-
-        if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
-            return;
-        }
-
-        // message under cursor is collapsed
-        if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
-            return;
-        }
-
-        const MessageLayoutElement *hoverLayoutElement =
-            layout->getElementAt(relativePos);
-
-        if (hoverLayoutElement == nullptr) {
-            return;
-        }
-
         auto &link = hoverLayoutElement->getLink();
         this->handleLinkClick(event, link, layout.get());
     }

@@ -30,20 +30,23 @@ public:
 
     MessageLayoutElement *setTrailingSpace(bool value);
     MessageLayoutElement *setLink(const Link &link_);
+    MessageLayoutElement *setText(const QString &text_);
 
     virtual void addCopyTextToString(QString &str, int from = 0,
                                      int to = INT_MAX) const = 0;
-    virtual int getSelectionIndexCount() = 0;
+    virtual int getSelectionIndexCount() const = 0;
     virtual void paint(QPainter &painter) = 0;
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
-    virtual int getMouseOverIndex(const QPoint &abs) = 0;
+    virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(int index) = 0;
     const Link &getLink() const;
+    const QString &getText() const;
 
 protected:
     bool trailingSpace = true;
 
 private:
+    QString text_;
     QRect rect_;
     Link link_;
     MessageElement &creator_;
@@ -59,10 +62,10 @@ public:
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
-    int getSelectionIndexCount() override;
+    int getSelectionIndexCount() const override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
 private:
@@ -80,10 +83,10 @@ public:
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
-    int getSelectionIndexCount() override;
+    int getSelectionIndexCount() const override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
 private:
@@ -104,10 +107,10 @@ public:
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
-    int getSelectionIndexCount() override;
+    int getSelectionIndexCount() const override;
     void paint(QPainter &painter) override;
     void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
 private:
