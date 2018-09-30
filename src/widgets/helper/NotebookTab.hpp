@@ -40,6 +40,8 @@ public:
     void setSelected(bool value);
 
     void setHighlightState(HighlightState style);
+    void setHighlightsEnabled(const bool &newVal);
+    bool hasHighlightsEnabled() const;
 
     void moveAnimated(QPoint pos, bool animated = true);
 
@@ -83,6 +85,7 @@ private:
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
+    QAction *highlightNewMessagesAction_;
 
     QMenu menu_;
 
