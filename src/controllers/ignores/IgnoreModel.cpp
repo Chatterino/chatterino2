@@ -18,10 +18,11 @@ IgnorePhrase IgnoreModel::getItemFromRow(std::vector<QStandardItem *> &row,
 {
     // key, regex
 
-    return IgnorePhrase{
-        row[0]->data(Qt::DisplayRole).toString(), row[1]->data(Qt::CheckStateRole).toBool(),
-        row[3]->data(Qt::CheckStateRole).toBool(), row[4]->data(Qt::DisplayRole).toString(),
-        row[2]->data(Qt::CheckStateRole).toBool()};
+    return IgnorePhrase{row[0]->data(Qt::DisplayRole).toString(),
+                        row[1]->data(Qt::CheckStateRole).toBool(),
+                        row[3]->data(Qt::CheckStateRole).toBool(),
+                        row[4]->data(Qt::DisplayRole).toString(),
+                        row[2]->data(Qt::CheckStateRole).toBool()};
 }
 
 // turns a row in the model into a vector item

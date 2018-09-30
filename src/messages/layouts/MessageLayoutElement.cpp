@@ -78,7 +78,8 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
 void ImageLayoutElement::addCopyTextToString(QString &str, int from,
                                              int to) const
 {
-    const auto *emoteElement = dynamic_cast<EmoteElement *>(&this->getCreator());
+    const auto *emoteElement =
+        dynamic_cast<EmoteElement *>(&this->getCreator());
     if (emoteElement) {
         str += emoteElement->getEmote()->getCopyString();
         if (this->hasTrailingSpace()) {

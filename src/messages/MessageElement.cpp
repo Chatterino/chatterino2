@@ -159,13 +159,11 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                              ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
 
-                // If URL link was changed, 
+                // If URL link was changed,
                 // Should update it in MessageLayoutElement too!
                 if (this->getLink().type == Link::Url) {
                     this->linkChanged.connect(
-                        [this, e]() {
-                            e->setLink(this->getLink());
-                        });
+                        [this, e]() { e->setLink(this->getLink()); });
                 }
                 return e;
             };
