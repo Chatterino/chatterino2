@@ -162,8 +162,9 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 auto e = (new TextLayoutElement(
                               *this, text, QSize(width, metrics.height()),
                               color, this->style_, container.getScale()))
-                             ->setText(text);
+                             ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
+                e->setText(text);
 
                 // If URL link was changed,
                 // Should update it in MessageLayoutElement too!

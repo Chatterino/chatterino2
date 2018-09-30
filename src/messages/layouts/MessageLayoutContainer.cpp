@@ -321,7 +321,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             int x = this->elements_[line.startIndex]->getRect().left();
             int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-            if (line.endCharIndex < selection.selectionMin.charIndex) {
+            if (line.endCharIndex <= selection.selectionMin.charIndex) {
                 continue;
             }
 
