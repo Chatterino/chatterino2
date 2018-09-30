@@ -20,14 +20,14 @@ class IgnorePhrase
 public:
     bool operator==(const IgnorePhrase &other) const
     {
-        return std::tie(this->pattern_, this->isRegex_, this->isBlock_, this->replace_,
-                        this->isCaseSensitive_) == std::tie(other.pattern_, other.isRegex_,
-                                                            other.isBlock_, other.replace_,
-                                                            other.isCaseSensitive_);
+        return std::tie(this->pattern_, this->isRegex_, this->isBlock_,
+                        this->replace_, this->isCaseSensitive_) ==
+               std::tie(other.pattern_, other.isRegex_, other.isBlock_,
+                        other.replace_, other.isCaseSensitive_);
     }
 
-    IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock, const QString &replace,
-                 bool isCaseSensitive)
+    IgnorePhrase(const QString &pattern, bool isRegex, bool isBlock,
+                 const QString &replace, bool isCaseSensitive)
         : pattern_(pattern)
         , isRegex_(isRegex)
         , regex_(pattern)
@@ -36,10 +36,12 @@ public:
         , isCaseSensitive_(isCaseSensitive)
     {
         if (this->isCaseSensitive_) {
-            regex_.setPatternOptions(QRegularExpression::UseUnicodePropertiesOption);
+            regex_.setPatternOptions(
+                QRegularExpression::UseUnicodePropertiesOption);
         } else {
-            regex_.setPatternOptions(QRegularExpression::CaseInsensitiveOption |
-                                     QRegularExpression::UseUnicodePropertiesOption);
+            regex_.setPatternOptions(
+                QRegularExpression::CaseInsensitiveOption |
+                QRegularExpression::UseUnicodePropertiesOption);
         }
     }
 
@@ -61,8 +63,10 @@ public:
     bool isMatch(const QString &subject) const
     {
         return !this->pattern_.isEmpty() &&
-               (this->isRegex() ? (this->regex_.isValid() && this->regex_.match(subject).hasMatch())
-                                : subject.contains(this->pattern_, this->caseSensitivity()));
+               (this->isRegex() ? (this->regex_.isValid() &&
+                                   this->regex_.match(subject).hasMatch())
+                                : subject.contains(this->pattern_,
+                                                   this->caseSensitivity()));
     }
 
     const QRegularExpression &getRegex() const
@@ -98,11 +102,13 @@ public:
     bool containsEmote() const
     {
         if (!this->emotesChecked_) {
-            const auto &accvec = getApp()->accounts->twitch.accounts.getVector();
+            const auto &accvec =
+                getApp()->accounts->twitch.accounts.getVector();
             for (const auto &acc : accvec) {
                 const auto &accemotes = *acc->accessEmotes();
                 for (const auto &emote : accemotes.emotes) {
-                    if (this->replace_.contains(emote.first.string, Qt::CaseSensitive)) {
+                    if (this->replace_.contains(emote.first.string,
+                                                Qt::CaseSensitive)) {
                         this->emotes_.emplace(emote.first, emote.second);
                     }
                 }
@@ -127,47 +133,50 @@ private:
 namespace pajlada {
 namespace Settings {
 
-template <>
-struct Serialize<chatterino::IgnorePhrase> {
-    static rapidjson::Value get(const chatterino::IgnorePhrase &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
+    template <>
+    struct Serialize<chatterino::IgnorePhrase> {
+        static rapidjson::Value get(const chatterino::IgnorePhrase &value,
+                                    rapidjson::Document::AllocatorType &a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
 
-        AddMember(ret, "pattern", value.getPattern(), a);
-        AddMember(ret, "regex", value.isRegex(), a);
-        AddMember(ret, "isBlock", value.isBlock(), a);
-        AddMember(ret, "replaceWith", value.getReplace(), a);
-        AddMember(ret, "caseSensitive", value.isCaseSensitive(), a);
+            AddMember(ret, "pattern", value.getPattern(), a);
+            AddMember(ret, "regex", value.isRegex(), a);
+            AddMember(ret, "isBlock", value.isBlock(), a);
+            AddMember(ret, "replaceWith", value.getReplace(), a);
+            AddMember(ret, "caseSensitive", value.isCaseSensitive(), a);
 
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::IgnorePhrase> {
-    static chatterino::IgnorePhrase get(const rapidjson::Value &value)
-    {
-        if (!value.IsObject()) {
-            return chatterino::IgnorePhrase(
-                QString(), false, false,
-                ::chatterino::getSettings()->ignoredPhraseReplace.getValue(), true);
+            return ret;
         }
+    };
 
-        QString _pattern;
-        bool _isRegex = false;
-        bool _isBlock = false;
-        QString _replace;
-        bool _caseSens = true;
+    template <>
+    struct Deserialize<chatterino::IgnorePhrase> {
+        static chatterino::IgnorePhrase get(const rapidjson::Value &value)
+        {
+            if (!value.IsObject()) {
+                return chatterino::IgnorePhrase(
+                    QString(), false, false,
+                    ::chatterino::getSettings()
+                        ->ignoredPhraseReplace.getValue(),
+                    true);
+            }
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
-        chatterino::rj::getSafe(value, "isBlock", _isBlock);
-        chatterino::rj::getSafe(value, "replaceWith", _replace);
-        chatterino::rj::getSafe(value, "caseSensitive", _caseSens);
+            QString _pattern;
+            bool _isRegex = false;
+            bool _isBlock = false;
+            QString _replace;
+            bool _caseSens = true;
 
-        return chatterino::IgnorePhrase(_pattern, _isRegex, _isBlock, _replace, _caseSens);
-    }
-};
+            chatterino::rj::getSafe(value, "pattern", _pattern);
+            chatterino::rj::getSafe(value, "regex", _isRegex);
+            chatterino::rj::getSafe(value, "isBlock", _isBlock);
+            chatterino::rj::getSafe(value, "replaceWith", _replace);
+            chatterino::rj::getSafe(value, "caseSensitive", _caseSens);
+
+            return chatterino::IgnorePhrase(_pattern, _isRegex, _isBlock,
+                                            _replace, _caseSens);
+        }
+    };
 }  // namespace Settings
 }  // namespace pajlada
