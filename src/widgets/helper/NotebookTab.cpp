@@ -68,7 +68,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
     highlightNewMessagesAction->setChecked(true);
     QObject::connect(
         highlightNewMessagesAction, &QAction::triggered,
-        [this](bool checked) { this->highlightEnabled = checked; });
+        [this](bool checked) { this->highlightEnabled_ = checked; });
     this->menu_.addAction(highlightNewMessagesAction);
 }
 
@@ -170,7 +170,7 @@ void NotebookTab::setSelected(bool value)
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    if (this->isSelected() || !this->highlightEnabled) {
+    if (this->isSelected() || !this->highlightEnabled_) {
         return;
     }
     if (this->highlightState_ != HighlightState::Highlighted &&

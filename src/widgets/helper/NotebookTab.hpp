@@ -82,7 +82,7 @@ private:
     bool mouseDownX_ = false;
 
     HighlightState highlightState_ = HighlightState::None;
-    bool highlightEnabled = true;
+    bool highlightEnabled_ = true;
 
     QMenu menu_;
 
