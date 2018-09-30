@@ -62,12 +62,13 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->menu_.addAction("Close",
                           [=]() { this->notebook_->removePage(this->page); });
 
-    auto highlightNewMessagesAction = new QAction("Enable highlights on new messages", &this->menu_);
+    auto highlightNewMessagesAction =
+        new QAction("Enable highlights on new messages", &this->menu_);
     highlightNewMessagesAction->setCheckable(true);
     highlightNewMessagesAction->setChecked(true);
-    QObject::connect(highlightNewMessagesAction, &QAction::triggered, [this] (bool checked) {
-        this->highlightEnabled = checked;
-    });
+    QObject::connect(
+        highlightNewMessagesAction, &QAction::triggered,
+        [this](bool checked) { this->highlightEnabled = checked; });
     this->menu_.addAction(highlightNewMessagesAction);
 }
 
