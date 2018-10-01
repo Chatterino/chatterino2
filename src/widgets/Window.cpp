@@ -306,10 +306,18 @@ void Window::addShortcuts()
                          [this] { this->notebook_->removeCurrentPage(); });
 }
 
+#define UGLYMACROHACK1(s) #s
+#define UGLYMACROHACK(s) UGLYMACROHACK1(s)
+
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
+
+#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+    auto windowTitleEnd = QString(" - Chatterino Nightly " CHATTERINO_VERSION " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
+#else
     auto windowTitleEnd = QString(" - Chatterino Beta " CHATTERINO_VERSION);
+#endif
 
     if (user->isAnon()) {
         this->setWindowTitle("Not logged in" + windowTitleEnd);
