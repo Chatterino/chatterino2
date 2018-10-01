@@ -12,6 +12,7 @@
 namespace chatterino {
 
 #define NOTEBOOK_TAB_HEIGHT 28
+#define WHEEL_STEP 240
 
 // class Notebook;
 class Notebook;
@@ -61,6 +62,7 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
 
 private:
     bool hasXButton();
@@ -82,6 +84,8 @@ private:
     bool mouseDown_ = false;
     bool mouseOverX_ = false;
     bool mouseDownX_ = false;
+
+    float wheelValue = 0;
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
