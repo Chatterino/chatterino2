@@ -212,7 +212,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->messages.backgrounds.highlighted =
             blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
     } else {
-        this->messages.backgrounds.highlighted = QColor(75, 40, 44);
+        this->messages.backgrounds.highlighted = QColor(getSettings()->highlightColor);
     }
 
     this->messages.backgrounds.subscription =
