@@ -505,6 +505,26 @@ int MessageLayoutContainer::getLastCharacterIndex() const
     return this->lines_.back().endCharIndex;
 }
 
+int MessageLayoutContainer::getFirstMessageCharacterIndex() const
+{
+    static FlagsEnum<MessageElementFlag> flags;
+    flags.set(MessageElementFlag::Username);
+    flags.set(MessageElementFlag::Timestamp);
+    flags.set(MessageElementFlag::Badges);
+
+    // Get the index of the first character of the real message
+    // (no badges/timestamps/username)
+    int index = 0;
+    for (auto &element : this->elements_) {
+        if (element.get()->getFlags().hasAny(flags)) {
+            index += element.get()->getSelectionIndexCount();
+        } else {
+            break;
+        }
+    }
+    return index;
+}
+
 void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
                                               CopyMode copymode)
 {

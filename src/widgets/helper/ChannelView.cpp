@@ -120,6 +120,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     QObject::connect(shortcut, &QShortcut::activated, [this] {
         QGuiApplication::clipboard()->setText(this->getSelectedText());
     });
+
+    this->clickTimer_ = new QTimer(this);
+    this->clickTimer_->setSingleShot(true);
+    this->clickTimer_->setInterval(500);
 }
 
 void ChannelView::initializeLayout()
@@ -1023,12 +1027,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+    this->handleMouseClick(event, hoverLayoutElement, layout.get(),
+                           messageIndex);
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout)
+                                   MessageLayout *layout, int &messageIndex)
 {
     switch (event->button()) {
         case Qt::LeftButton: {
@@ -1036,6 +1041,16 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 if (this->messagesAddedSinceSelectionPause_ >
                     SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
                     this->showingLatestMessages_ = false;
+                }
+
+                if (this->clickTimer_->isActive()) {
+                    auto firstRealCharacterIndex =
+                        layout->getFirstMessageCharacterIndex();
+                    SelectionItem msgStart(messageIndex,
+                                           firstRealCharacterIndex);
+                    SelectionItem msgEnd(messageIndex,
+                                         layout->getLastCharacterIndex());
+                    this->setSelection(msgStart, msgEnd);
                 }
 
                 // this->pausedBySelection = false;
@@ -1190,6 +1205,8 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         const int wordStart =
             layout->getSelectionIndex(relativePos) - mouseInWordIndex;
         const int wordEnd = wordStart + hoverLayoutElement->getText().length();
+
+        this->clickTimer_->start();
 
         SelectionItem wordMin(messageIndex, wordStart);
         SelectionItem wordMax(messageIndex, wordEnd);

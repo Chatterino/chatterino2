@@ -278,6 +278,11 @@ int MessageLayout::getLastCharacterIndex() const
     return this->container_->getLastCharacterIndex();
 }
 
+int MessageLayout::getFirstMessageCharacterIndex() const
+{
+    return this->container_->getFirstMessageCharacterIndex();
+}
+
 int MessageLayout::getSelectionIndex(QPoint position)
 {
     return this->container_->getSelectionIndex(position);

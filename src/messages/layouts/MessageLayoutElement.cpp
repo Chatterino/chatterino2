@@ -74,6 +74,11 @@ const QString &MessageLayoutElement::getText() const
     return this->text_;
 }
 
+FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
+{
+    return this->creator_.getFlags();
+}
+
 //
 // IMAGE
 //
@@ -157,17 +162,17 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
                                      const QSize &_size, QColor _color,
                                      FontStyle _style, float _scale)
     : MessageLayoutElement(_creator, _size)
-    , text(_text)
     , color(_color)
     , style(_style)
     , scale(_scale)
 {
+    this->setText(_text);
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, int from,
                                             int to) const
 {
-    str += this->text.mid(from, to - from);
+    str += this->getText().mid(from, to - from);
 
     if (this->hasTrailingSpace()) {
         str += " ";
@@ -176,7 +181,7 @@ void TextLayoutElement::addCopyTextToString(QString &str, int from,
 
 int TextLayoutElement::getSelectionIndexCount() const
 {
-    return this->text.length() + (this->trailingSpace ? 1 : 0);
+    return this->getText().length() + (this->trailingSpace ? 1 : 0);
 }
 
 void TextLayoutElement::paint(QPainter &painter)
@@ -189,7 +194,7 @@ void TextLayoutElement::paint(QPainter &painter)
 
     painter.drawText(
         QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
-        this->text, QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        this->getText(), QTextOption(Qt::AlignLeft | Qt::AlignTop));
 }
 
 void TextLayoutElement::paintAnimated(QPainter &, int)
@@ -208,8 +213,8 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 
     int x = this->getRect().left();
 
-    for (int i = 0; i < this->text.size(); i++) {
-        int w = metrics.width(this->text[i]);
+    for (int i = 0; i < this->getText().size(); i++) {
+        int w = metrics.width(this->getText()[i]);
 
         if (x + w > abs.x()) {
             return i;
@@ -229,10 +234,10 @@ int TextLayoutElement::getXFromIndex(int index)
 
     if (index <= 0) {
         return this->getRect().left();
-    } else if (index < this->text.size()) {
+    } else if (index < this->getText().size()) {
         int x = 0;
         for (int i = 0; i < index; i++) {
-            x += metrics.width(this->text[i]);
+            x += metrics.width(this->getText()[i]);
         }
         return x + this->getRect().left();
     } else {
