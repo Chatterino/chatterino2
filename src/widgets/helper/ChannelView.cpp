@@ -951,7 +951,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             }
 
             int index = layout->getSelectionIndex(relativePos);
-
             auto selectionItem = SelectionItem(messageIndex, index);
             this->setSelection(selectionItem, selectionItem);
         } break;
@@ -1022,18 +1021,22 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
 
+    // Triple-click next to message selects whole message
+    if (this->clickTimer_->isActive() && this->selecting_) {
+        this->selectWholeMessage(layout.get(), messageIndex);
+    }
+
     if (hoverLayoutElement == nullptr) {
         return;
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get(),
-                           messageIndex);
+    this->handleMouseClick(event, hoverLayoutElement, layout.get());
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout, int &messageIndex)
+                                   MessageLayout *layout)
 {
     switch (event->button()) {
         case Qt::LeftButton: {
@@ -1041,16 +1044,6 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
                 if (this->messagesAddedSinceSelectionPause_ >
                     SELECTION_RESUME_SCROLLING_MSG_THRESHOLD) {
                     this->showingLatestMessages_ = false;
-                }
-
-                if (this->clickTimer_->isActive()) {
-                    auto firstRealCharacterIndex =
-                        layout->getFirstMessageCharacterIndex();
-                    SelectionItem msgStart(messageIndex,
-                                           firstRealCharacterIndex);
-                    SelectionItem msgEnd(messageIndex,
-                                         layout->getLastCharacterIndex());
-                    this->setSelection(msgStart, msgEnd);
                 }
 
                 // this->pausedBySelection = false;
@@ -1195,6 +1188,9 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         layout->getElementAt(relativePos);
 
     if (hoverLayoutElement == nullptr) {
+        // Possibility for triple click which doesn't have to be over an
+        // existing layout element
+        this->clickTimer_->start();
         return;
     }
     if (!this->isMouseDown_) {
@@ -1305,6 +1301,14 @@ int ChannelView::getLayoutWidth() const
         return int(this->width() - 8 * this->getScale());
 
     return this->width();
+}
+
+void ChannelView::selectWholeMessage(MessageLayout *layout, int &messageIndex)
+{
+    SelectionItem msgStart(messageIndex,
+                           layout->getFirstMessageCharacterIndex());
+    SelectionItem msgEnd(messageIndex, layout->getLastCharacterIndex());
+    this->setSelection(msgStart, msgEnd);
 }
 
 }  // namespace chatterino

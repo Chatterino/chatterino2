@@ -105,10 +105,11 @@ private:
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     MessageElementFlags getFlags() const;
     bool isPaused();
+    void selectWholeMessage(MessageLayout *layout, int &messageIndex);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout, int &messageIndex);
+                          MessageLayout *layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayout *layout);
     int getLayoutWidth() const;
