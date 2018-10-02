@@ -1021,7 +1021,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
 
-    // Triple-click next to message selects whole message
+    // Triple-clicking a message selects the whole message
     if (this->clickTimer_->isActive() && this->selecting_) {
         this->selectWholeMessage(layout.get(), messageIndex);
     }
@@ -1200,7 +1200,12 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
             hoverLayoutElement->getMouseOverIndex(relativePos);
         const int wordStart =
             layout->getSelectionIndex(relativePos) - mouseInWordIndex;
-        const int wordEnd = wordStart + hoverLayoutElement->getText().length();
+        const int selectionLength =
+            hoverLayoutElement->getSelectionIndexCount();
+        const int length = hoverLayoutElement->hasTrailingSpace()
+                               ? selectionLength - 1
+                               : selectionLength;
+        const int wordEnd = wordStart + length;
 
         this->clickTimer_->start();
 
