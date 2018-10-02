@@ -107,7 +107,7 @@ private:
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout);
+                          MessageLayout *layout, int &messageIndex);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayout *layout);
     int getLayoutWidth() const;
@@ -148,6 +148,7 @@ private:
     bool isRightMouseDown_ = false;
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
+    QTimer *clickTimer_;
 
     Selection selection_;
     bool selecting_ = false;

@@ -6,8 +6,10 @@
 #include <boost/noncopyable.hpp>
 #include <climits>
 
+#include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
+#include "messages/MessageElement.hpp"
 
 class QPainter;
 
@@ -41,6 +43,7 @@ public:
     virtual int getXFromIndex(int index) = 0;
     const Link &getLink() const;
     const QString &getText() const;
+    FlagsEnum<MessageElementFlag> getFlags() const;
 
 protected:
     bool trailingSpace = true;
@@ -90,7 +93,6 @@ protected:
     int getXFromIndex(int index) override;
 
 private:
-    QString text;
     QColor color;
     FontStyle style;
     float scale;
