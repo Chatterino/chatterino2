@@ -872,6 +872,10 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 // fourtf: this is ugly
 void TwitchMessageBuilder::appendTwitchBadges()
 {
+    if (this->twitchChannel == nullptr) {
+        return;
+    }
+
     auto app = getApp();
 
     auto iterator = this->tags.find("badges");
