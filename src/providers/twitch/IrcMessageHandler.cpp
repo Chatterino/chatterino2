@@ -229,6 +229,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
+        _message->flags.set(MessageFlag::DoNotTriggerNotification);
         c->addMessage(_message);
 
         if (getSettings()->inlineWhispers) {
