@@ -279,7 +279,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             int height = window_obj.value("height").toInt(-1);
 
             if (x != -1 && y != -1 && width != -1 && height != -1) {
-                window.setGeometry(x, y, width, height);
+                // Have to offset x by one because qt moves the window 1px too
+                // far to the left
+                window.setGeometry(x + 1, y, width, height);
             }
         }
 
