@@ -303,7 +303,7 @@ void LookPage::addBadgesTab(LayoutCreator<QVBoxLayout> layout)
     }
     layout.emplace<Line>(false);
     layout.append(this->createCheckBox(
-        ("Show authorty badges (staff, admin, turbo, etc)"),
+        ("Show authority badges (staff, admin, turbo, etc)"),
         getSettings()->showBadgesGlobalAuthority));
     layout.append(
         this->createCheckBox(("Show channel badges (broadcaster, moderator)"),
