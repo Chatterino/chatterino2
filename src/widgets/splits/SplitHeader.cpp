@@ -230,6 +230,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     menu->addSeparator();
     menu->addAction("Reload channel emotes", this, SLOT(reloadChannelEmotes()));
+    menu->addAction("Reload subscriber emotes", this, SLOT(reloadSubscriberEmotes()));
     menu->addAction("Reconnect", this, SLOT(reconnect()));
     menu->addAction("Clear messages", this->split_, &Split::clear);
     //    menu->addSeparator();
@@ -537,6 +538,11 @@ void SplitHeader::reloadChannelEmotes()
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
         twitchChannel->refreshChannelEmotes();
+}
+
+void SplitHeader::reloadSubscriberEmotes()
+{
+    getApp()->accounts->twitch.getCurrent()->loadEmotes();
 }
 
 void SplitHeader::reconnect()

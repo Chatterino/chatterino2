@@ -75,6 +75,7 @@ private:
 public slots:
     void moveSplit();
     void reloadChannelEmotes();
+    void reloadSubscriberEmotes();
     void reconnect();
 };
 
