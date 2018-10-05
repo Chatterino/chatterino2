@@ -1213,9 +1213,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserWhisper:
         case Link::UserInfo: {
             auto user = link.value;
-            showUserInfoPopup(user);
+            this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
-
         } break;
 
         case Link::Url: {
