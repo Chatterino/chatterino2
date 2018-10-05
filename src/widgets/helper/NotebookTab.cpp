@@ -481,15 +481,10 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 
 void NotebookTab::wheelEvent(QWheelEvent *event)
 {
-    float mouseMultiplier = getSettings()->mouseScrollMultiplier;
-    wheelValue += event->delta() * mouseMultiplier;
-
-    if (wheelValue > WHEEL_STEP) {
+    if (event->delta() > 0) {
         this->notebook_->selectNextTab();
-        wheelValue = 0;
-    } else if (wheelValue < -WHEEL_STEP) {
+    } else {
         this->notebook_->selectPreviousTab();
-        wheelValue = 0;
     }
 }
 

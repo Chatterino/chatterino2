@@ -12,7 +12,6 @@
 namespace chatterino {
 
 #define NOTEBOOK_TAB_HEIGHT 28
-#define WHEEL_STEP 240
 
 // class Notebook;
 class Notebook;
@@ -84,8 +83,6 @@ private:
     bool mouseDown_ = false;
     bool mouseOverX_ = false;
     bool mouseDownX_ = false;
-
-    float wheelValue = 0;
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
