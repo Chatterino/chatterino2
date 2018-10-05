@@ -527,16 +527,18 @@ void Split::showViewerList()
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this,
                      [=]() { viewerDock->setMinimumWidth(300); });
 
-    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
-        if (!labels.contains(chattersList->currentItem()->text())) {
-            showUserInfoPopup(chattersList->currentItem()->text());
+    auto listDoubleClick = [=](QString userName) {
+        if (!labels.contains(userName)) {
+            this->view_->showUserInfoPopup(userName);
         }
+    };
+
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
+        listDoubleClick(chattersList->currentItem()->text());
     });
 
     QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
-        if (!labels.contains(resultList->currentItem()->text())) {
-            showUserInfoPopup(resultList->currentItem()->text());
-        }
+        listDoubleClick(resultList->currentItem()->text());
     });
 
     dockVbox->addWidget(searchBar);
@@ -549,16 +551,6 @@ void Split::showViewerList()
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();
-}
-
-void Split::showUserInfoPopup(const UserName &user)
-{
-    auto *userPopup = new UserInfoPopup;
-    userPopup->setData(user.string, this->getChannel());
-    userPopup->setAttribute(Qt::WA_DeleteOnClose);
-    userPopup->move(QCursor::pos() - QPoint(int(150 * this->getScale()),
-                                            int(70 * this->getScale())));
-    userPopup->show();
 }
 
 void Split::copyToClipboard()
