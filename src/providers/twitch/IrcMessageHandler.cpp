@@ -229,13 +229,16 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
             app->twitch.server->mentionsChannel->addMessage(_message);
         }
 
-        _message->flags.set(MessageFlag::DoNotTriggerNotification);
         c->addMessage(_message);
 
+        auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
+        overrideFlags->set(MessageFlag::DoNotTriggerNotification);
+
         if (getSettings()->inlineWhispers) {
-            app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
-                channel->addMessage(_message);  //
-            });
+            app->twitch.server->forEachChannel(
+                [_message, overrideFlags](ChannelPtr channel) {
+                    channel->addMessage(_message, overrideFlags);  //
+                });
         }
     }
 }

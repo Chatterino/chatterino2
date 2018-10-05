@@ -400,9 +400,15 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->clearMessages();
 
     // on new message
-    this->channelConnections_.push_back(
-        newChannel->messageAppended.connect([this](MessagePtr &message) {
+    this->channelConnections_.push_back(newChannel->messageAppended.connect(
+        [this](MessagePtr &message,
+               boost::optional<MessageFlags> overridingFlags) {
             MessageLayoutPtr deleted;
+
+            auto *messageFlags = &message->flags;
+            if (overridingFlags) {
+                messageFlags = overridingFlags.get_ptr();
+            }
 
             auto messageRef = new MessageLayout(message);
 
@@ -427,8 +433,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 //                }
             }
 
-            if (!message->flags.has(MessageFlag::DoNotTriggerNotification)) {
-                if (message->flags.has(MessageFlag::Highlighted)) {
+            if (!messageFlags->has(MessageFlag::DoNotTriggerNotification)) {
+                if (messageFlags->has(MessageFlag::Highlighted)) {
                     this->tabHighlightRequested.invoke(
                         HighlightState::Highlighted);
                 } else {
