@@ -6,6 +6,7 @@
 #include <QBrush>
 #include <QColor>
 #include <pajlada/settings/setting.hpp>
+#include <singletons/Settings.hpp>
 
 namespace chatterino {
 
