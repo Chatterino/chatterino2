@@ -1,10 +1,12 @@
 #pragma once
 
 #include "common/CompletionModel.hpp"
+#include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
 #include <QString>
 #include <QTimer>
+#include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
 
 #include <memory>
@@ -13,6 +15,8 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
+enum class MessageFlag : uint16_t;
+using MessageFlags = FlagsEnum<MessageFlag>;
 
 class Channel : public std::enable_shared_from_this<Channel>
 {
@@ -35,7 +39,8 @@ public:
         sendMessageSignal;
 
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
-    pajlada::Signals::Signal<MessagePtr &> messageAppended;
+    pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
+        messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
@@ -46,7 +51,12 @@ public:
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
 
-    void addMessage(MessagePtr message);
+    // overridingFlags can be filled in with flags that should be used instead
+    // of the message's flags. This is useful in case a flag is specific to a
+    // type of split
+    void addMessage(
+        MessagePtr message,
+        boost::optional<MessageFlags> overridingFlags = boost::none);
     void addMessagesAtStart(std::vector<MessagePtr> &messages_);
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
