@@ -444,6 +444,16 @@ void WindowManager::save()
     file.flush();
 }
 
+void WindowManager::sendAlert()
+{
+    int flashDuration = 2500;
+    if (getSettings()->longAlerts) {
+        flashDuration = 0;
+    }
+    QApplication::alert(getApp()->windows->getMainWindow().window(),
+                        flashDuration);
+}
+
 void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType()) {
