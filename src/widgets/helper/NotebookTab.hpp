@@ -61,6 +61,7 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
 
     virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
 
 private:
     bool hasXButton();

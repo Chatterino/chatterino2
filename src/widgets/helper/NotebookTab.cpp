@@ -479,6 +479,15 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
     Button::mouseMoveEvent(event);
 }
 
+void NotebookTab::wheelEvent(QWheelEvent *event)
+{
+    if (event->delta() > 0) {
+        this->notebook_->selectPreviousTab();
+    } else {
+        this->notebook_->selectNextTab();
+    }
+}
+
 QRect NotebookTab::getXRect()
 {
     //    if (!this->notebook->getAllowUserTabManagement()) {
