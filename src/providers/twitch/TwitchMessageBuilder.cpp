@@ -261,10 +261,10 @@ MessagePtr TwitchMessageBuilder::build()
                         continue;
                     }
                     QRegularExpression emoteregex(
-                        "\b" + std::get<2>(tup).string + "\b",
+                        "\\b" + std::get<2>(tup).string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
                     auto match = emoteregex.match(midExtendedRef);
-                    while (match.hasMatch()) {
+                    if (match.hasMatch()) {
                         int last = match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i) {
                             std::get<0>(tup) = from + match.capturedStart();
@@ -318,10 +318,10 @@ MessagePtr TwitchMessageBuilder::build()
                         continue;
                     }
                     QRegularExpression emoteregex(
-                        "\b" + std::get<2>(tup).string + "\b",
+                        "\\b" + std::get<2>(tup).string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
                     auto match = emoteregex.match(midExtendedRef);
-                    while (match.hasMatch()) {
+                    if (match.hasMatch()) {
                         int last = match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i) {
                             std::get<0>(tup) = from + match.capturedStart();
