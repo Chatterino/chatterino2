@@ -408,7 +408,17 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->notifications->playSound();
                     }
                     if (getSettings()->notificationFlashTaskbar) {
+<<<<<<< HEAD
                         getApp()->windows->sendAlert();
+=======
+                        int flashDuration = 2500;
+                        if (getSettings()->longAlerts) {
+                            flashDuration = 0;
+                        }
+                        QApplication::alert(
+                            getApp()->windows->getMainWindow().window(),
+                            flashDuration);
+>>>>>>> 1937e698303a0a40ec91c792ad0dfb72408a1654
                     }
                 }
                 auto live = makeSystemMessage(this->getName() + " is live");
