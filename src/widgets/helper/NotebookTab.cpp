@@ -482,9 +482,9 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 void NotebookTab::wheelEvent(QWheelEvent *event)
 {
     if (event->delta() > 0) {
-        this->notebook_->selectNextTab();
-    } else {
         this->notebook_->selectPreviousTab();
+    } else {
+        this->notebook_->selectNextTab();
     }
 }
 
