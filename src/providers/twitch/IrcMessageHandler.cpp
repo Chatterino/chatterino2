@@ -361,6 +361,9 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(
         // a better message from there
         "timeout_success",
         "ban_success",
+
+        // Channel suspended notices
+        "msg_channel_suspended",
     };
 
     QVariant v = message->tag("msg-id");
