@@ -149,6 +149,9 @@ HighlightingPage::HighlightingPage()
 
         layout.append(createCheckBox(ALWAYS_PLAY,
                                      getSettings()->highlightAlwaysPlaySound));
+        layout.append(createCheckBox(
+            "Flash taskbar only stops highlighting when chatterino is focused",
+            getSettings()->longAlerts));
     }
 
     // ---- misc

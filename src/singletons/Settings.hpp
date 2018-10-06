@@ -117,7 +117,8 @@ public:
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
     /// Ignored phrases
-    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace", "***"};
+    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
+                                           "***"};
 
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
@@ -142,6 +143,8 @@ public:
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
     QStringSetting highlightColor = {"/highlighting/color", "#4B282C"};
+
+    BoolSetting longAlerts = {"/highlighting/alerts", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
