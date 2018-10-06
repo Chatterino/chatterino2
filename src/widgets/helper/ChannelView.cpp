@@ -1012,7 +1012,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
-
         auto messagesSnapshot = this->getMessagesSnapshot();
         if (messagesSnapshot.getLength() == 0) {
             return;
@@ -1066,18 +1065,19 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         this->dCSelection_.selectingLeft = this->dCSelection_.selectingRight =
             false;
-        if (this->isMouseDown_) {
-            this->isMouseDown_ = false;
-
-            if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
-                                            event->screenPos())) > 15.f) {
-                return;
-            }
-        } else if (this->isDoubleClick_) {
+        if (this->isDoubleClick_) {
             this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
             if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
                                             event->screenPos())) > 10.f) {
+                this->clickTimer_->stop();
+                return;
+            }
+        } else if (this->isMouseDown_) {
+            this->isMouseDown_ = false;
+
+            if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
+                                            event->screenPos())) > 15.f) {
                 return;
             }
         } else {
@@ -1098,7 +1098,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         // not left or right button
         return;
     }
-
     // find message
     this->layoutMessages();
 
@@ -1123,10 +1122,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
-
     // Triple-clicking a message selects the whole message
     if (this->clickTimer_->isActive() && this->selecting_) {
-        this->selectWholeMessage(layout.get(), messageIndex);
+        if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                        event->screenPos())) < 10.f) {
+            this->selectWholeMessage(layout.get(), messageIndex);
+        }
     }
 
     if (hoverLayoutElement == nullptr) {
