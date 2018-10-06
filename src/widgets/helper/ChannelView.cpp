@@ -893,6 +893,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             if (wordStart < this->selection_.start.charIndex &&
                 !this->dCSelection_.selectingRight) {
                 this->dCSelection_.selectingLeft = true;
+                // Ensure that the original word stays selected(Edge case)
                 if (wordStart > this->dCSelection_.originalEnd) {
                     this->setSelection(this->dCSelection_.origStartItem,
                                        newEnd);
@@ -903,6 +904,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             } else if (wordEnd > this->selection_.end.charIndex &&
                        !this->dCSelection_.selectingLeft) {
                 this->dCSelection_.selectingRight = true;
+                // Ensure that the original word stays selected(Edge case)
                 if (wordEnd < this->dCSelection_.originalStart) {
                     this->setSelection(newStart,
                                        this->dCSelection_.origEndItem);
@@ -1062,13 +1064,19 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton) {
-        this->isDoubleClick_ = this->dCSelection_.selectingLeft =
-            this->dCSelection_.selectingRight = false;
-        if (this->isMouseDown_) {
+        this->dCSelection_.selectingLeft = this->dCSelection_.selectingRight =
+            false;
+        if (this->isMouseDown_ || this->isDoubleClick_) {
             this->isMouseDown_ = false;
+            this->isDoubleClick_ = false;
 
             if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
                                             event->screenPos())) > 15.f) {
+                return;
+            }
+            // Was actually not a wanted triple-click
+            if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                            event->screenPos())) > 10.f) {
                 return;
             }
         } else {
@@ -1280,6 +1288,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
+    this->lastDClickPosition_ = event->screenPos();
 
     if (hoverLayoutElement == nullptr) {
         // Possibility for triple click which doesn't have to be over an
