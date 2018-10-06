@@ -893,12 +893,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             if (wordStart < this->selection_.start.charIndex &&
                 !this->dCSelection_.selectingRight) {
                 this->dCSelection_.selectingLeft = true;
-                this->setSelection(newStart, this->selection_.end);
+                if (wordStart > this->dCSelection_.originalEnd) {
+                    this->setSelection(this->dCSelection_.origStartItem,
+                                       newEnd);
+                } else {
+                    this->setSelection(newStart, this->selection_.end);
+                }
                 // Selecting to the right
             } else if (wordEnd > this->selection_.end.charIndex &&
                        !this->dCSelection_.selectingLeft) {
                 this->dCSelection_.selectingRight = true;
-                this->setSelection(this->selection_.start, newEnd);
+                if (wordEnd < this->dCSelection_.originalStart) {
+                    this->setSelection(newStart,
+                                       this->dCSelection_.origEndItem);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
             }
             // Swapping from selecting left to selecting right
             if (wordStart > this->selection_.start.charIndex &&
