@@ -155,6 +155,7 @@ private:
     DoubleClickSelection dCSelection_;
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
+    QPointF lastDClickPosition_;
     QTimer *clickTimer_;
 
     Selection selection_;
