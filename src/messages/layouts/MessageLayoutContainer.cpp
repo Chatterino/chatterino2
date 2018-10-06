@@ -516,8 +516,8 @@ int MessageLayoutContainer::getFirstMessageCharacterIndex() const
     // (no badges/timestamps/username)
     int index = 0;
     for (auto &element : this->elements_) {
-        if (element.get()->getFlags().hasAny(flags)) {
-            index += element.get()->getSelectionIndexCount();
+        if (element->getFlags().hasAny(flags)) {
+            index += element->getSelectionIndexCount();
         } else {
             break;
         }
