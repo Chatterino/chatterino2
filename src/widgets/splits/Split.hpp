@@ -94,6 +94,12 @@ private:
     SplitContainer *container_;
     IndirectChannel channel_;
 
+    bool moderationMode_{};
+    bool isTopRightSplit_{};
+
+    bool isMouseOver_{};
+    bool isDragging_{};
+
     QVBoxLayout *vbox_;
     SplitHeader *header_;
     ChannelView *view_;
@@ -101,12 +107,6 @@ private:
     SplitOverlay *overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
-
-    bool moderationMode_{};
-    bool isTopRightSplit_{};
-
-    bool isMouseOver_{};
-    bool isDragging_{};
 
     pajlada::Signals::Connection channelIDChangedConnection_;
     pajlada::Signals::Connection usermodeChangedConnection_;
