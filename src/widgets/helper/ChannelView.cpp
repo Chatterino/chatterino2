@@ -1072,14 +1072,15 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton) {
         this->dCSelection_.selectingLeft = this->dCSelection_.selectingRight =
             false;
-        if (this->isMouseDown_ || this->isDoubleClick_) {
+        if (this->isMouseDown_) {
             this->isMouseDown_ = false;
-            this->isDoubleClick_ = false;
 
             if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
                                             event->screenPos())) > 15.f) {
                 return;
             }
+        } else if (this->isDoubleClick_) {
+            this->isDoubleClick_ = false;
             // Was actually not a wanted triple-click
             if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
                                             event->screenPos())) > 10.f) {
