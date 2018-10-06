@@ -88,11 +88,6 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
 
 private:
-    void showUserInfoPopup(const QString &userName)
-    {
-        this->showUserInfoPopup(UserName{userName});
-    }
-    void showUserInfoPopup(const UserName &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
 

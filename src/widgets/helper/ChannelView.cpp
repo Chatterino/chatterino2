@@ -1197,6 +1197,17 @@ void ChannelView::hideEvent(QHideEvent *)
     this->messagesOnScreen_.clear();
 }
 
+void ChannelView::showUserInfoPopup(const QString &userName)
+{
+    auto *userPopup = new UserInfoPopup;
+    userPopup->setData(userName, this->channel_);
+    userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    QPoint offset(int(150 * this->getScale()),
+                  int(70 * this->getScale()));
+    userPopup->move(QCursor::pos() - offset);
+    userPopup->show();
+}
+
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
@@ -1208,17 +1219,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserWhisper:
         case Link::UserInfo: {
             auto user = link.value;
-
-            auto *userPopup = new UserInfoPopup;
-            userPopup->setData(user, this->channel_);
-            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
-            QPoint offset(int(150 * this->getScale()),
-                          int(70 * this->getScale()));
-            userPopup->move(QCursor::pos() - offset);
-            userPopup->show();
-
+            this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
-
         } break;
 
         case Link::Url: {

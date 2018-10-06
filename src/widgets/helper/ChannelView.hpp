@@ -56,6 +56,7 @@ public:
     void layoutMessages();
 
     void clearMessages();
+    void showUserInfoPopup(const QString &userName);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
