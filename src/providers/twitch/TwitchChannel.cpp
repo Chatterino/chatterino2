@@ -554,6 +554,15 @@ void TwitchChannel::loadRecentMessages()
 
         //        postToThread([that, weak = weakOf<Channel>(that),
         //                      messages = std::move(messages)]() mutable {
+        for (int i = 0; i < 5 && !that->badgesLoaded; i++) {
+#ifdef Q_OS_WIN
+            Sleep(uint(100));
+#else
+            struct timespec ts = {ms / 1000, (ms % 1000) * 1000 * 1000};
+            nanosleep(&ts, NULL);
+#endif
+        }
+
         that->addMessagesAtStart(messages);
         //        });
 
@@ -648,6 +657,7 @@ void TwitchChannel::refreshBadges()
                 versions.emplace(jsonVersion_.key(), emote);
             };
         }
+        this->badgesLoaded = true;
 
         return Success;
     });

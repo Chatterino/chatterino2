@@ -142,6 +142,7 @@ private:
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
+    bool badgesLoaded = false;
 
     bool mod_ = false;
     UniqueAccess<QString> roomID_;
