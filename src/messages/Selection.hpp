@@ -76,4 +76,14 @@ struct Selection {
     }
 };
 
+struct DoubleClickSelection {
+    int originalStart = 0;
+    int originalEnd = 0;
+    int origMessageIndex;
+    bool selectingLeft = false;
+    bool selectingRight = false;
+    SelectionItem origStartItem;
+    SelectionItem origEndItem;
+};
+
 }  // namespace chatterino

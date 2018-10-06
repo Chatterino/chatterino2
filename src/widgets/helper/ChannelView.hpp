@@ -105,6 +105,9 @@ private:
     MessageElementFlags getFlags() const;
     bool isPaused();
     void selectWholeMessage(MessageLayout *layout, int &messageIndex);
+    void getWordBounds(MessageLayout *layout,
+                       const MessageLayoutElement *element,
+                       const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
@@ -147,6 +150,8 @@ private:
     // Mouse event variables
     bool isMouseDown_ = false;
     bool isRightMouseDown_ = false;
+    bool isDoubleClick_ = false;
+    DoubleClickSelection dCSelection_;
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
     QTimer *clickTimer_;

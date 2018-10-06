@@ -878,6 +878,94 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->hide();
         return;
     }
+
+    if (this->isDoubleClick_) {
+        int wordStart;
+        int wordEnd;
+        this->getWordBounds(layout.get(), hoverLayoutElement, relativePos,
+                            wordStart, wordEnd);
+        SelectionItem newStart(messageIndex, wordStart);
+        SelectionItem newEnd(messageIndex, wordEnd);
+
+        // Selection changed in same message
+        if (messageIndex == this->dCSelection_.origMessageIndex) {
+            // Selecting to the left
+            if (wordStart < this->selection_.start.charIndex &&
+                !this->dCSelection_.selectingRight) {
+                this->dCSelection_.selectingLeft = true;
+                this->setSelection(newStart, this->selection_.end);
+                // Selecting to the right
+            } else if (wordEnd > this->selection_.end.charIndex &&
+                       !this->dCSelection_.selectingLeft) {
+                this->dCSelection_.selectingRight = true;
+                this->setSelection(this->selection_.start, newEnd);
+            }
+            // Swapping from selecting left to selecting right
+            if (wordStart > this->selection_.start.charIndex &&
+                !this->dCSelection_.selectingRight) {
+                if (wordStart > this->dCSelection_.originalEnd) {
+                    this->dCSelection_.selectingLeft = false;
+                    this->dCSelection_.selectingRight = true;
+                    this->setSelection(this->dCSelection_.origStartItem,
+                                       newEnd);
+                } else {
+                    this->setSelection(newStart, this->selection_.end);
+                }
+                // Swapping from selecting right to selecting left
+            } else if (wordEnd < this->selection_.end.charIndex &&
+                       !this->dCSelection_.selectingLeft) {
+                if (wordEnd < this->dCSelection_.originalStart) {
+                    this->dCSelection_.selectingLeft = true;
+                    this->dCSelection_.selectingRight = false;
+                    this->setSelection(newStart,
+                                       this->dCSelection_.origEndItem);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
+            }
+            // Selection changed in a different message
+        } else {
+            // Message over the original
+            if (messageIndex < this->selection_.start.messageIndex) {
+                // Swapping from left to right selecting
+                if (!this->dCSelection_.selectingLeft) {
+                    this->dCSelection_.selectingLeft = true;
+                    this->dCSelection_.selectingRight = false;
+                }
+                if (wordStart < this->selection_.start.charIndex &&
+                    !this->dCSelection_.selectingRight) {
+                    this->dCSelection_.selectingLeft = true;
+                }
+                this->setSelection(newStart, this->dCSelection_.origEndItem);
+                // Message under the original
+            } else if (messageIndex > this->selection_.end.messageIndex) {
+                // Swapping from right to left selecting
+                if (!this->dCSelection_.selectingRight) {
+                    this->dCSelection_.selectingLeft = false;
+                    this->dCSelection_.selectingRight = true;
+                }
+                if (wordEnd > this->selection_.end.charIndex &&
+                    !this->dCSelection_.selectingLeft) {
+                    this->dCSelection_.selectingRight = true;
+                }
+                this->setSelection(this->dCSelection_.origStartItem, newEnd);
+                // Selection changed in non original message
+            } else {
+                if (this->dCSelection_.selectingLeft) {
+                    this->setSelection(newStart, this->selection_.end);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
+            }
+        }
+        // Reset direction of selection
+        if (wordStart == this->dCSelection_.originalStart &&
+            wordEnd == this->dCSelection_.originalEnd) {
+            this->dCSelection_.selectingLeft =
+                this->dCSelection_.selectingRight = false;
+        }
+    }
+
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
 
@@ -964,6 +1052,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton) {
+        this->isDoubleClick_ = this->dCSelection_.selectingLeft =
+            this->dCSelection_.selectingRight = false;
         if (this->isMouseDown_) {
             this->isMouseDown_ = false;
 
@@ -1188,23 +1278,24 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
     if (!this->isMouseDown_) {
-        this->isMouseDown_ = true;
+        this->isDoubleClick_ = true;
 
-        const int mouseInWordIndex =
-            hoverLayoutElement->getMouseOverIndex(relativePos);
-        const int wordStart =
-            layout->getSelectionIndex(relativePos) - mouseInWordIndex;
-        const int selectionLength =
-            hoverLayoutElement->getSelectionIndexCount();
-        const int length = hoverLayoutElement->hasTrailingSpace()
-                               ? selectionLength - 1
-                               : selectionLength;
-        const int wordEnd = wordStart + length;
+        int wordStart;
+        int wordEnd;
+        this->getWordBounds(layout.get(), hoverLayoutElement, relativePos,
+                            wordStart, wordEnd);
 
         this->clickTimer_->start();
 
         SelectionItem wordMin(messageIndex, wordStart);
         SelectionItem wordMax(messageIndex, wordEnd);
+
+        this->dCSelection_.originalStart = wordStart;
+        this->dCSelection_.originalEnd = wordEnd;
+        this->dCSelection_.origMessageIndex = messageIndex;
+        this->dCSelection_.origStartItem = wordMin;
+        this->dCSelection_.origEndItem = wordMax;
+
         this->setSelection(wordMin, wordMax);
     }
 
@@ -1306,6 +1397,19 @@ void ChannelView::selectWholeMessage(MessageLayout *layout, int &messageIndex)
                            layout->getFirstMessageCharacterIndex());
     SelectionItem msgEnd(messageIndex, layout->getLastCharacterIndex());
     this->setSelection(msgStart, msgEnd);
+}
+
+void ChannelView::getWordBounds(MessageLayout *layout,
+                                const MessageLayoutElement *element,
+                                const QPoint &relativePos, int &wordStart,
+                                int &wordEnd)
+{
+    const int mouseInWordIndex = element->getMouseOverIndex(relativePos);
+    wordStart = layout->getSelectionIndex(relativePos) - mouseInWordIndex;
+    const int selectionLength = element->getSelectionIndexCount();
+    const int length =
+        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
+    wordEnd = wordStart + length;
 }
 
 }  // namespace chatterino

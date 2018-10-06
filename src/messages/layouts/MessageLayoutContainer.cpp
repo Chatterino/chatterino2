@@ -485,7 +485,7 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         }
 
         // this is the word
-        if (point.x() < this->elements_[i]->getRect().right()) {
+        if (point.x() <= this->elements_[i]->getRect().right()) {
             index += this->elements_[i]->getMouseOverIndex(point);
             break;
         }
