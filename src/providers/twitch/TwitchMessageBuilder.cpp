@@ -788,16 +788,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
             }
 
             if (doAlert) {
-<<<<<<< HEAD
                 getApp()->windows->sendAlert();
-=======
-                int flashDuration = 2500;
-                if (getSettings()->longAlerts) {
-                    flashDuration = 0;
-                }
-                QApplication::alert(getApp()->windows->getMainWindow().window(),
-                                    flashDuration);
->>>>>>> 1937e698303a0a40ec91c792ad0dfb72408a1654
             }
         }
     }
