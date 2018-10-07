@@ -178,6 +178,8 @@ void SplitHeader::initializeLayout()
     layout->setMargin(0);
     layout->setSpacing(0);
     this->setLayout(layout);
+
+    this->setAddButtonVisible(false);
 }
 
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
