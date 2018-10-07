@@ -61,6 +61,8 @@ public:
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
 
+    void sendAlert();
+
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
