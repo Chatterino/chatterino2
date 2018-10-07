@@ -352,11 +352,18 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     settings.collpseMessagesMinLines.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
 
+    // timer for periodically saving tabs
+    QObject::connect(&this->saveTimer_, &QTimer::timeout,
+                     [=] { this->save(); });
+    this->saveTimer_.start(60 * 1000);
+
     this->initialized_ = true;
 }
 
 void WindowManager::save()
 {
+    log("[WindowManager] Saving");
+
     assertInGuiThread();
     auto app = getApp();
 

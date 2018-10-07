@@ -77,6 +77,8 @@ private:
 
     MessageElementFlags wordFlags_{};
     pajlada::Settings::SettingListener wordFlagsListener_;
+
+    QTimer saveTimer_;
 };
 
 }  // namespace chatterino
