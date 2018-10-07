@@ -450,8 +450,7 @@ void WindowManager::sendAlert()
     if (getSettings()->longAlerts) {
         flashDuration = 0;
     }
-    QApplication::alert(getApp()->windows->getMainWindow().window(),
-                        flashDuration);
+    QApplication::alert(this->getMainWindow().window(), flashDuration);
 }
 
 void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
