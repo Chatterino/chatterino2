@@ -260,13 +260,16 @@ MessagePtr TwitchMessageBuilder::build()
                         log("v nullptr {}", std::get<2>(tup).string);
                         continue;
                     }
-                    int index = 0;
-                    QString emote = " " + std::get<2>(tup).string + " ";
-                    while ((index = midExtendedRef.indexOf(emote, index)) !=
-                           -1) {
-                        std::get<0>(tup) = from + index + 1;
-                        index += emote.size() - 1;
-                        twitchEmotes.push_back(tup);
+                    QRegularExpression emoteregex(
+                        "\\b" + std::get<2>(tup).string + "\\b",
+                        QRegularExpression::UseUnicodePropertiesOption);
+                    auto match = emoteregex.match(midExtendedRef);
+                    if (match.hasMatch()) {
+                        int last = match.lastCapturedIndex();
+                        for (int i = 0; i <= last; ++i) {
+                            std::get<0>(tup) = from + match.capturedStart();
+                            twitchEmotes.push_back(std::move(tup));
+                        }
                     }
                 }
 
@@ -314,13 +317,16 @@ MessagePtr TwitchMessageBuilder::build()
                         log("v nullptr {}", std::get<2>(tup).string);
                         continue;
                     }
-                    int index = 0;
-                    QString emote = " " + std::get<2>(tup).string + " ";
-                    while ((index = midExtendedRef.indexOf(emote, index)) !=
-                           -1) {
-                        std::get<0>(tup) = from + index + 1;
-                        index += emote.size() - 1;
-                        twitchEmotes.push_back(tup);
+                    QRegularExpression emoteregex(
+                        "\\b" + std::get<2>(tup).string + "\\b",
+                        QRegularExpression::UseUnicodePropertiesOption);
+                    auto match = emoteregex.match(midExtendedRef);
+                    if (match.hasMatch()) {
+                        int last = match.lastCapturedIndex();
+                        for (int i = 0; i <= last; ++i) {
+                            std::get<0>(tup) = from + match.capturedStart();
+                            twitchEmotes.push_back(std::move(tup));
+                        }
                     }
                 }
 
