@@ -224,6 +224,9 @@ void Split::setChannel(IndirectChannel newChannel)
     this->header_->updateRoomModes();
 
     this->channelChanged.invoke();
+
+    // Queue up save because: Split channel changed
+    getApp()->windows->queueSave();
 }
 
 void Split::setModerationMode(bool value)
@@ -326,6 +329,9 @@ void Split::keyReleaseEvent(QKeyEvent *event)
 
 void Split::resizeEvent(QResizeEvent *event)
 {
+    // Queue up save because: Split resized
+    getApp()->windows->queueSave();
+
     BaseWidget::resizeEvent(event);
 
     this->overlay_->setGeometry(this->rect());

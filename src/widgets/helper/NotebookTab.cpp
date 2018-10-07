@@ -6,6 +6,7 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
@@ -146,6 +147,9 @@ const QString &NotebookTab::getTitle() const
 
 void NotebookTab::titleUpdated()
 {
+    // Queue up save because: Tab title changed
+    getApp()->windows->queueSave();
+
     this->updateSize();
     this->update();
 }

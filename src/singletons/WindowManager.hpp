@@ -77,6 +77,11 @@ public:
     // or not
     void sendAlert();
 
+    // Queue up a save in the next 10 seconds
+    // If a save was already queued up, we reset the to happen in 10 seconds
+    // again
+    void queueSave();
+
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
@@ -91,6 +96,8 @@ private:
 
     MessageElementFlags wordFlags_{};
     pajlada::Settings::SettingListener wordFlagsListener_;
+
+    QTimer *saveTimer;
 };
 
 }  // namespace chatterino

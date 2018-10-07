@@ -1,4 +1,5 @@
 #include "widgets/splits/SplitContainer.hpp"
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -142,6 +143,9 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
 void SplitContainer::insertSplit(Split *split, Direction direction,
                                  Node *relativeTo)
 {
+    // Queue up save because: Split added
+    getApp()->windows->queueSave();
+
     assertInGuiThread();
 
     split->setContainer(this);
@@ -236,6 +240,9 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
 SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 {
+    // Queue up save because: Split removed
+    getApp()->windows->queueSave();
+
     assertInGuiThread();
     assert(split != nullptr);
 

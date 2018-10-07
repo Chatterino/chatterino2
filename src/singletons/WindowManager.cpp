@@ -23,6 +23,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <chrono>
+
 #define SETTINGS_FILENAME "/window-layout.json"
 
 namespace chatterino {
@@ -83,6 +85,14 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
+
+    this->saveTimer = new QTimer;
+
+    this->saveTimer->setSingleShot(true);
+
+    QObject::connect(this->saveTimer, &QTimer::timeout, [] {
+        getApp()->windows->save();  //
+    });
 }
 
 MessageElementFlags WindowManager::getWordFlags()
@@ -357,6 +367,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
+    log("[WindowManager] Saving");
+
     assertInGuiThread();
     auto app = getApp();
 
@@ -451,6 +463,13 @@ void WindowManager::sendAlert()
         flashDuration = 0;
     }
     QApplication::alert(this->getMainWindow().window(), flashDuration);
+}
+
+void WindowManager::queueSave()
+{
+    using namespace std::chrono_literals;
+
+    this->saveTimer->start(10s);
 }
 
 void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
