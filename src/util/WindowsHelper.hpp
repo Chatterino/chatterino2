@@ -8,6 +8,8 @@
 namespace chatterino {
 
 boost::optional<UINT> getWindowDpi(HWND hwnd);
+void flushClipboard();
+
 
 }  // namespace chatterino
 
