@@ -1346,8 +1346,7 @@ void ChannelView::showUserInfoPopup(const QString &userName)
     auto *userPopup = new UserInfoPopup;
     userPopup->setData(userName, this->channel_);
     userPopup->setActionOnFocusLoss(BaseWindow::Delete);
-    QPoint offset(int(150 * this->getScale()),
-                  int(70 * this->getScale()));
+    QPoint offset(int(150 * this->getScale()), int(70 * this->getScale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
 }
