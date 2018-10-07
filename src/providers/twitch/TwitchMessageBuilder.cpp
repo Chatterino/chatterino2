@@ -447,7 +447,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         }
     } else {
         static QRegularExpression domainRegex(
-            R"(^(?:(?:ftp|http)s?:\/\/)?([^\/:]+)(?:\/.*)?$)",
+            R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
             QRegularExpression::CaseInsensitiveOption);
 
         QString lowercaseLinkString;
