@@ -93,7 +93,7 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
-    this->message().flags.has(MessageFlag::Collapsed);
+    this->message().flags.set(MessageFlag::Collapsed);
 
     // PARSING
     this->parseMessageID();
