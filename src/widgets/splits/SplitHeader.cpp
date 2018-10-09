@@ -185,10 +185,12 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     auto menu = std::make_unique<QMenu>();
-    menu->addAction("Close channel", this->split_, &Split::deleteFromContainer,
-                    QKeySequence("Ctrl+W"));
     menu->addAction("Change channel", this->split_, &Split::changeChannel,
                     QKeySequence("Ctrl+R"));
+    menu->addAction("Move", this->split_, &Split::explainMoving);
+    menu->addAction("Add/Split", this->split_, &Split::explainSplitting);
+    menu->addAction("Close", this->split_, &Split::deleteFromContainer,
+                    QKeySequence("Ctrl+W"));
     menu->addSeparator();
     menu->addAction("Popup", this->split_, &Split::popup);
     menu->addAction("Viewer list", this->split_, &Split::showViewerList);

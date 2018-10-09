@@ -120,6 +120,8 @@ public slots:
     void addSibling();
     void deleteFromContainer();
     void changeChannel();
+    void explainMoving();
+    void explainSplitting();
     void popup();
     void clear();
     void openInBrowser();

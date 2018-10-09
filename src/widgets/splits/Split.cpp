@@ -33,8 +33,10 @@
 #include <QDockWidget>
 #include <QDrag>
 #include <QJsonArray>
+#include <QLabel>
 #include <QListWidget>
 #include <QMimeData>
+#include <QMovie>
 #include <QPainter>
 #include <QVBoxLayout>
 
@@ -42,6 +44,27 @@
 #include <random>
 
 namespace chatterino {
+namespace {
+    void showTutorialVideo(QWidget *parent, const QString &source,
+                           const QString &title, const QString &description)
+    {
+        auto window =
+            new BaseWindow(parent, BaseWindow::Flags::EnableCustomFrame);
+        window->setWindowTitle("Chatterino - " + title);
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        auto layout = new QVBoxLayout();
+        layout->addWidget(new QLabel(description));
+        auto label = new QLabel(window);
+        layout->addWidget(label);
+        auto movie = new QMovie(label);
+        movie->setFileName(source);
+        label->setMovie(movie);
+        movie->start();
+        window->getLayoutContainer()->setLayout(layout);
+        window->show();
+    }
+}  // namespace
+
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
@@ -405,6 +428,18 @@ void Split::changeChannel()
         popup.at(0)->hide();
         showViewerList();
     }
+}
+
+void Split::explainMoving()
+{
+    showTutorialVideo(this, ":/examples/moving.gif", "Moving",
+                      "Hold <Ctrl+Alt> to move splits.\n\nExample:");
+}
+
+void Split::explainSplitting()
+{
+    showTutorialVideo(this, ":/examples/splitting.gif", "Splitting",
+                      "Hold <Ctrl+Alt> to add new splits.\n\nExample:");
 }
 
 void Split::popup()
