@@ -184,16 +184,17 @@ void SplitHeader::initializeLayout()
 
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
+    // top level menu
     auto menu = std::make_unique<QMenu>();
     menu->addAction("Change channel", this->split_, &Split::changeChannel,
                     QKeySequence("Ctrl+R"));
-    menu->addAction("Move", this->split_, &Split::explainMoving);
-    menu->addAction("Add/Split", this->split_, &Split::explainSplitting);
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addSeparator();
+    menu->addAction("How to move", this->split_, &Split::explainMoving);
+    menu->addAction("How to add/split", this->split_, &Split::explainSplitting);
+    menu->addSeparator();
     menu->addAction("Popup", this->split_, &Split::popup);
-    menu->addAction("Viewer list", this->split_, &Split::showViewerList);
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
     menu->addSeparator();
@@ -210,18 +211,26 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         }
     });
 #endif
+
     menu->addAction("Open in browser", this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
     menu->addAction("Open player in browser", this->split_,
                     &Split::openBrowserPlayer);
 #endif
-    menu->addAction("Open streamlink", this->split_, &Split::openInStreamlink);
+    menu->addAction("Open in streamlink", this->split_,
+                    &Split::openInStreamlink);
+    menu->addSeparator();
+
+    // sub menu
+    auto moreMenu = new QMenu("More", this);
+    moreMenu->addAction("Show viewer list", this->split_,
+                        &Split::showViewerList);
 
     auto action = new QAction(this);
     action->setText("Notify when live");
     action->setCheckable(true);
 
-    QObject::connect(menu.get(), &QMenu::aboutToShow, this, [action, this]() {
+    QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
         action->setChecked(getApp()->notifications->isChannelNotified(
             this->split_->getChannel()->getName(), Platform::Twitch));
     });
@@ -230,16 +239,20 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             this->split_->getChannel()->getName(), Platform::Twitch);
     });
 
-    menu->addAction(action);
+    moreMenu->addAction(action);
 
-    menu->addSeparator();
-    menu->addAction("Reload channel emotes", this, SLOT(reloadChannelEmotes()));
-    menu->addAction("Reload subscriber emotes", this,
-                    SLOT(reloadSubscriberEmotes()));
-    menu->addAction("Reconnect", this, SLOT(reconnect()));
-    menu->addAction("Clear messages", this->split_, &Split::clear);
-    //    menu->addSeparator();
-    //    menu->addAction("Show changelog", this, SLOT(menuShowChangelog()));
+    moreMenu->addSeparator();
+    moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
+    moreMenu->addAction("Reload channel emotes", this,
+                        SLOT(reloadChannelEmotes()));
+    moreMenu->addAction("Reload subscriber emotes", this,
+                        SLOT(reloadSubscriberEmotes()));
+    moreMenu->addSeparator();
+    moreMenu->addAction("Clear messages", this->split_, &Split::clear);
+    //    moreMenu->addSeparator();
+    //    moreMenu->addAction("Show changelog", this,
+    //    SLOT(moreMenuShowChangelog()));
+    menu->addMenu(moreMenu);
 
     return menu;
 }
