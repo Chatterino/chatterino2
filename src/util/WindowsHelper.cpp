@@ -34,6 +34,18 @@ boost::optional<UINT> getWindowDpi(HWND hwnd)
     return boost::none;
 }
 
+typedef HRESULT(CALLBACK *OleFlushClipboard_)();
+
+void flushClipboard()
+{
+    static HINSTANCE ole32 = LoadLibrary(L"Ole32.dll");
+    if (ole32 != nullptr) {
+        if (auto oleFlushClipboard = OleFlushClipboard_(GetProcAddress(ole32, "OleFlushClipboard"))) {
+            oleFlushClipboard();
+        }
+    }
+}
+
 }  // namespace chatterino
 
 #endif

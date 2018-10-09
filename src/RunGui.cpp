@@ -11,6 +11,10 @@
 #include "singletons/Updates.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
+#ifdef USEWINSDK
+#    include "util/WindowsHelper.hpp"
+#endif
+
 #ifdef C_USE_BREAKPAD
 #    include <QBreakpadHandler.h>
 #endif
@@ -132,6 +136,11 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     pajlada::Settings::SettingManager::gSave();
 
     chatterino::NetworkManager::deinit();
+
+#ifdef USEWINSDK
+	// flushing windows clipboard to keep copied messages
+    flushClipboard();
+#endif
 
     _exit(0);
 }
