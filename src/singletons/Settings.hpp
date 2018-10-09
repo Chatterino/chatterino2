@@ -54,7 +54,7 @@ public:
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
-    BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames",
+    BoolSetting enableUsernameBold = {"/appearance/messages/boldUsernames",
                                       false};
     // BoolSetting customizable splitheader
     BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount",
