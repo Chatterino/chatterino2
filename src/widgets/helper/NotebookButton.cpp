@@ -61,7 +61,9 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         case Plus: {
             painter.setPen([&] {
                 QColor tmp = foreground;
-                if (!this->mouseOver_) {
+                if (SplitContainer::isDraggingSplit) {
+                    tmp = this->theme->tabs.selected.line.regular;
+                } else if (!this->mouseOver_) {
                     tmp.setAlpha(180);
                 }
                 return tmp;
