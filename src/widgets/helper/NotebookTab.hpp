@@ -85,6 +85,7 @@ private:
     bool mouseDownX_ = false;
 
     HighlightState highlightState_ = HighlightState::None;
+    HighlightState lastHighlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
     QAction *highlightNewMessagesAction_;
 
