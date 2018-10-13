@@ -89,7 +89,6 @@ TwitchChannel::TwitchChannel(const QString &name,
 {
     log("[TwitchChannel:{}] Opened", name);
 
-    this->tabHighlightRequested.connect([](HighlightState state) {});
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1) {
         }

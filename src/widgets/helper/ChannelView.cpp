@@ -552,11 +552,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->queueUpdate();
 
     // Notifications
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get());
-    if (tc != nullptr) {
-        tc->tabHighlightRequested.connect([this](HighlightState state) {
-            this->tabHighlightRequested.invoke(state);
-        });
+    if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get())) {
         tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();  //
         });
