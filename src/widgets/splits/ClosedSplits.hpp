@@ -1,5 +1,4 @@
-#ifndef CLOSEDSPLITS_HPP
-#define CLOSEDSPLITS_HPP
+#pragma once
 
 #include "common/Channel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -31,5 +30,3 @@ private:
 };
 
 }  // namespace chatterino
-
-#endif  // CLOSEDSPLITS_HPP
