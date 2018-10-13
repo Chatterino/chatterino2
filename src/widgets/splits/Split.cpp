@@ -19,9 +19,11 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/DebugPopup.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
+#include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -415,6 +417,10 @@ void Split::deleteFromContainer()
 {
     if (this->container_) {
         this->container_->deleteSplit(this);
+        auto *tab = this->getContainer()->getTab();
+        tab->connect(tab, &QWidget::destroyed,
+                     [tab]() mutable { ClosedSplits::invalidateTab(tab); });
+        ClosedSplits::push({this->getChannel()->getName(), tab});
     }
 }
 
