@@ -18,6 +18,7 @@ enum class HighlightState {
     Highlighted,
     NewMessage,
     Notification,
+    Offline,
 };
 
 inline QString qS(const std::string &string)

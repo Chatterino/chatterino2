@@ -164,6 +164,7 @@ void NotebookTab::setSelected(bool value)
     this->selected_ = value;
 
     this->highlightState_ = HighlightState::None;
+    this->lastHighlightState_ = HighlightState::None;
 
     this->update();
 }
@@ -178,6 +179,13 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
         this->highlightState_ = newHighlightStyle;
 
         this->update();
+    } else if (newHighlightStyle == HighlightState::Offline) {
+        this->highlightState_ = this->lastHighlightState_;
+        this->update();
+    }
+
+    if (newHighlightStyle != HighlightState::Notification) {
+        this->lastHighlightState_ = newHighlightStyle;
     }
 }
 

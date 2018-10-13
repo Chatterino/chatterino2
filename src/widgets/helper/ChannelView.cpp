@@ -555,7 +555,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get());
     if (tc != nullptr) {
         tc->tabHighlightRequested.connect([this](HighlightState state) {
-            this->tabHighlightRequested.invoke(HighlightState::Notification);
+            this->tabHighlightRequested.invoke(state);
         });
     }
 }

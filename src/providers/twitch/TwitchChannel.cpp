@@ -419,6 +419,8 @@ void TwitchChannel::setLive(bool newLiveStatus)
                 auto offline =
                     makeSystemMessage(this->getName() + " is offline");
                 this->addMessage(offline);
+                this->tabHighlightRequested.invoke(
+                    HighlightState::Offline);
             }
             guard->live = newLiveStatus;
         }
