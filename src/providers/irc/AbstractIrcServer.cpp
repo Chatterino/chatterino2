@@ -11,6 +11,10 @@
 
 namespace chatterino {
 
+const int RECONNECT_BASE_INTERVAL = 2000;
+// 60 falloff counter means it will try to reconnect at most every 60*2 seconds
+const int MAX_FALLOFF_COUNTER = 60;
+
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
@@ -38,12 +42,29 @@ AbstractIrcServer::AbstractIrcServer()
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::socketError,
+                     [this] { this->onSocketError(); });
 
     // listen to reconnect request
     this->readConnection_->reconnectRequested.connect(
         [this] { this->connect(); });
     //    this->writeConnection->reconnectRequested.connect([this] {
     //    this->connect(); });
+    this->reconnectTimer_.setInterval(RECONNECT_BASE_INTERVAL);
+    this->reconnectTimer_.setSingleShot(true);
+    QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
+        this->reconnectTimer_.setInterval(RECONNECT_BASE_INTERVAL *
+                                          this->falloffCounter_);
+
+        this->falloffCounter_ =
+            std::min(MAX_FALLOFF_COUNTER, this->falloffCounter_ + 1);
+
+        if (!this->readConnection_->isConnected()) {
+            log("Trying to reconnect... {}", this->falloffCounter_);
+            this->connect();
+        }
+    });
 }
 
 void AbstractIrcServer::connect()
@@ -215,6 +236,8 @@ void AbstractIrcServer::onConnected()
 
         chan->addMessage(connected);
     }
+
+    this->falloffCounter_ = 1;
 }
 
 void AbstractIrcServer::onDisconnected()
@@ -233,6 +256,11 @@ void AbstractIrcServer::onDisconnected()
 
         chan->addMessage(disconnected);
     }
+}
+
+void AbstractIrcServer::onSocketError()
+{
+    this->reconnectTimer_.start();
 }
 
 std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
