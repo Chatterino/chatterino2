@@ -29,8 +29,7 @@
 
 namespace chatterino {
 namespace {
-    auto parseRecentMessages(const QJsonObject &jsonRoot,
-                             TwitchChannel &channel)
+    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
         std::vector<MessagePtr> messages;
@@ -46,7 +45,7 @@ namespace {
             assert(privMsg);
 
             MessageParseArgs args;
-            TwitchMessageBuilder builder(&channel, privMsg, args);
+            TwitchMessageBuilder builder(channel.get(), privMsg, args);
             if (!builder.isIgnored()) {
                 messages.push_back(builder.build());
             }
@@ -546,13 +545,13 @@ void TwitchChannel::loadRecentMessages()
     // can't be concurrent right now due to SignalVector
     //    request.setExecuteConcurrently(true);
 
-    request.onSuccess([that = this](auto result) -> Outcome {
-        auto messages = parseRecentMessages(result.parseJson(), *that);
+    request.onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+        auto shared = weak.lock();
+        if (!shared) return Failure;
 
-        //        postToThread([that, weak = weakOf<Channel>(that),
-        //                      messages = std::move(messages)]() mutable {
-        that->addMessagesAtStart(messages);
-        //        });
+        auto messages = parseRecentMessages(result.parseJson(), shared);
+
+        shared->addMessagesAtStart(messages);
 
         return Success;
     });
