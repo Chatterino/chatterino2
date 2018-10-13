@@ -1254,7 +1254,7 @@ void ChannelView::addContextMenuItems(
         QGuiApplication::clipboard()->setText(copyString);
     });
 
-    // Join to channel
+    // Open in new split.
     if (hoveredElement->getLink().type == Link::Url) {
         static QRegularExpression twitchChannelRegex(
             R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]+))",
@@ -1262,6 +1262,13 @@ void ChannelView::addContextMenuItems(
         static QSet<QString> ignoredUsernames{
             "videos",
             "settings",
+            "directory",
+            "jobs",
+            "friends",
+            "inventory",
+            "payments",
+            "subscriptions",
+            "messages",
         };
 
         auto twitchMatch =
