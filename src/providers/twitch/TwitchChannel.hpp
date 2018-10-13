@@ -92,7 +92,6 @@ public:
     pajlada::Signals::NoArgSignal userStateChanged;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
-    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
 
 protected:
     void addRecentChatter(const MessagePtr &message) override;
