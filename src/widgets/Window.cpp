@@ -322,9 +322,9 @@ void Window::addShortcuts()
         }
         this->notebook_->select(splitContainer);
         Split *split = new Split(splitContainer);
-        splitContainer->appendSplit(split);
         split->setChannel(
             getApp()->twitch.server->getOrAddChannel(si.channelName));
+        splitContainer->appendSplit(split);
     });
 }
 
