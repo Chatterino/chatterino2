@@ -171,7 +171,7 @@ private:
 public:
     SplitContainer(Notebook *parent);
 
-    Split* appendNewSplit(bool openChannelNameDialog);
+    Split *appendNewSplit(bool openChannelNameDialog);
     void appendSplit(Split *split);
     void insertSplit(Split *split, const Position &position);
     void insertSplit(Split *split, Direction direction, Split *relativeTo);
@@ -186,7 +186,9 @@ public:
 
     int getSplitCount();
     const std::vector<Split *> getSplits() const;
-    void refreshTabTitle();
+
+    void refreshTab();
+
     NotebookTab *getTab() const;
     Node *getBaseNode();
 
@@ -220,6 +222,9 @@ private:
 
     void decodeNodeRecusively(QJsonObject &obj, Node *node);
     Split *getTopRightSplit(Node &node);
+
+    void refreshTabTitle();
+    void refreshTabLiveStatus();
 
     struct DropRegion {
         QRect rect;

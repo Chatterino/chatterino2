@@ -39,6 +39,7 @@ public:
     bool isSelected() const;
     void setSelected(bool value);
 
+    void setLive(bool isLive);
     void setHighlightState(HighlightState style);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
@@ -87,6 +88,8 @@ private:
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
     QAction *highlightNewMessagesAction_;
+
+    bool isLive_{};
 
     QMenu menu_;
 

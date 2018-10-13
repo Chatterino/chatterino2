@@ -290,7 +290,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         if (dialog->hasSeletedChannel()) {
             this->setChannel(dialog->getSelectedChannel());
             if (this->isInContainer()) {
-                this->container_->refreshTabTitle();
+                this->container_->refreshTab();
             }
         }
 

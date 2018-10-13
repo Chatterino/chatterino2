@@ -84,7 +84,7 @@ void SplitContainer::setTab(NotebookTab *_tab)
 
     this->tab_->page = this;
 
-    this->refreshTabTitle();
+    this->refreshTab();
 }
 
 void SplitContainer::hideResizeHandles()
@@ -177,7 +177,7 @@ void SplitContainer::addSplit(Split *split)
     this->unsetCursor();
     this->splits_.push_back(split);
 
-    this->refreshTabTitle();
+    this->refreshTab();
 
     split->getChannelView().tabHighlightRequested.connect(
         [this](HighlightState state) {
@@ -185,6 +185,10 @@ void SplitContainer::addSplit(Split *split)
                 this->tab_->setHighlightState(state);
             }
         });
+
+    split->getChannelView().liveStatusChanged.connect([this]() {
+        this->refreshTabLiveStatus();  //
+    });
 
     split->focused.connect([this, split] { this->setSelected(split); });
 
@@ -228,7 +232,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
         this->splits_.front()->giveFocus(Qt::MouseFocusReason);
     }
 
-    this->refreshTabTitle();
+    this->refreshTab();
 
     // fourtf: really bad
     split->getChannelView().tabHighlightRequested.disconnectAll();
@@ -568,34 +572,10 @@ void SplitContainer::focusInEvent(QFocusEvent *)
     }
 }
 
-void SplitContainer::refreshTabTitle()
+void SplitContainer::refreshTab()
 {
-    if (this->tab_ == nullptr) {
-        return;
-    }
-
-    QString newTitle = "";
-    bool first = true;
-
-    for (const auto &chatWidget : this->splits_) {
-        auto channelName = chatWidget->getChannel()->getName();
-        if (channelName.isEmpty()) {
-            continue;
-        }
-
-        if (!first) {
-            newTitle += ", ";
-        }
-        newTitle += channelName;
-
-        first = false;
-    }
-
-    if (newTitle.isEmpty()) {
-        newTitle = "empty";
-    }
-
-    this->tab_->setDefaultTitle(newTitle);
+    this->refreshTabTitle();
+    this->refreshTabLiveStatus();
 }
 
 int SplitContainer::getSplitCount()
@@ -675,6 +655,54 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             }
         }
     }
+}
+
+void SplitContainer::refreshTabTitle()
+{
+    if (this->tab_ == nullptr) {
+        return;
+    }
+
+    QString newTitle = "";
+    bool first = true;
+
+    for (const auto &chatWidget : this->splits_) {
+        auto channelName = chatWidget->getChannel()->getName();
+        if (channelName.isEmpty()) {
+            continue;
+        }
+
+        if (!first) {
+            newTitle += ", ";
+        }
+        newTitle += channelName;
+
+        first = false;
+    }
+
+    if (newTitle.isEmpty()) {
+        newTitle = "empty";
+    }
+
+    this->tab_->setDefaultTitle(newTitle);
+}
+
+void SplitContainer::refreshTabLiveStatus()
+{
+    if (this->tab_ == nullptr) {
+        return;
+    }
+
+    bool liveStatus = false;
+    for (const auto &s : this->splits_) {
+        auto c = s->getChannel();
+        if (c->isLive()) {
+            liveStatus = true;
+            break;
+        }
+    }
+
+    this->tab_->setLive(liveStatus);
 }
 
 //

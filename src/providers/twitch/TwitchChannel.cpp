@@ -413,8 +413,6 @@ void TwitchChannel::setLive(bool newLiveStatus)
                 }
                 auto live = makeSystemMessage(this->getName() + " is live");
                 this->addMessage(live);
-                this->tabHighlightRequested.invoke(
-                    HighlightState::Notification);
             } else {
                 auto offline =
                     makeSystemMessage(this->getName() + " is offline");

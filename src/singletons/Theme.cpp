@@ -105,10 +105,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#000"),
                 {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
-            this->tabs.notified = {
-                fg,
-                {QColor("#fff"), QColor("#fff"), QColor("#fff")},
-                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         } else {
             this->tabs.regular = {
                 QColor("#aaa"),
@@ -127,10 +123,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#fff"),
                 {QColor("#555555"), QColor("#555555"), QColor("#555555")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
-            this->tabs.notified = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         }
 
         this->splits.input.focusedLine = highlighted;
