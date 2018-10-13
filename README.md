@@ -14,7 +14,15 @@ If you still receive an error about `MSVCR120.dll missing`, then you should inst
 Releases for linux and mac will follow soon™
 
 ## Building
-Before building run `git submodule update --init --recursive` to get required submodules.
+To get source code with required submodules run:
+```
+git clone --recursive https://github.com/fourtf/chatterino2.git
+```
+or
+```
+git clone https://github.com/fourtf/chatterino2.git
+git submodule update --init --recursive
+```
 
 [Building on Windows](../master/BUILDING_ON_WINDOWS.md)
 
