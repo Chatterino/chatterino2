@@ -23,8 +23,8 @@
 #define THEME_ITEMS "White", "Light", "Dark", "Black"
 
 #define TAB_X "Show tab close button"
-#define TAB_PREF "Preferences button (ctrl+p to show)"
-#define TAB_USER "User button"
+#define TAB_PREF "Hide preferences button (ctrl+p to show)"
+#define TAB_USER "Hide user button"
 
 // clang-format off
 #define TIMESTAMP_FORMATS "hh:mm a", "h:mm a", "hh:mm:ss a", "h:mm:ss a", "HH:mm", "H:mm", "HH:mm:ss", "H:mm:ss"

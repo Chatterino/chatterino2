@@ -552,10 +552,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->queueUpdate();
 
     // Notifications
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get());
-    if (tc != nullptr) {
-        tc->tabHighlightRequested.connect([this](HighlightState state) {
-            this->tabHighlightRequested.invoke(HighlightState::Notification);
+    if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get())) {
+        tc->liveStatusChanged.connect([this]() {
+            this->liveStatusChanged.invoke();  //
         });
     }
 }
@@ -1251,14 +1250,21 @@ void ChannelView::addContextMenuItems(
         QGuiApplication::clipboard()->setText(copyString);
     });
 
-    // Join to channel
+    // Open in new split.
     if (hoveredElement->getLink().type == Link::Url) {
         static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]+))",
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
             "videos",
             "settings",
+            "directory",
+            "jobs",
+            "friends",
+            "inventory",
+            "payments",
+            "subscriptions",
+            "messages",
         };
 
         auto twitchMatch =

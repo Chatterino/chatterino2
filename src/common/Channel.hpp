@@ -69,6 +69,7 @@ public:
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;
     virtual bool hasModRights() const;
+    virtual bool isLive() const;
 
     static std::shared_ptr<Channel> getEmpty();
 

@@ -221,6 +221,11 @@ bool Channel::hasModRights() const
     return this->isMod() || this->isBroadcaster();
 }
 
+bool Channel::isLive() const
+{
+    return false;
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
     static std::shared_ptr<Channel> channel(new Channel("", Type::None));
