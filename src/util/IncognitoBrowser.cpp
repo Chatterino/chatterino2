@@ -14,19 +14,18 @@ namespace {
     {
         // list of command line switches to turn on private browsing in browsers
         static auto switches = std::vector<std::pair<QString, QString>>{
-            {"firefox", "-private-window"}, {"chrome", "-incognito"},
-            {"vivaldi", "--private"},       {"opera", "-newprivatetab"},
-            {"iexplore", "-private"},
+            {"firefox", "-private-window"},     {"chrome", "-incognito"},
+            {"vivaldi", "-incognito"},          {"opera", "-newprivatetab"},
+            {"opera\\\\launcher", "--private"}, {"iexplore", "-private"},
         };
 
         // transform into regex and replacement string
         std::vector<std::pair<QRegularExpression, QString>> replacers;
         for (const auto &switch_ : switches) {
             replacers.emplace_back(
-                QRegularExpression("(" + switch_.first + "\\.exe\"?).*"),
+                QRegularExpression("(" + switch_.first + "\\.exe\"?).*",
+                                   QRegularExpression::CaseInsensitiveOption),
                 "\\1 " + switch_.second);
-
-            log("(" + switch_.first + "\\.exe\"?).*");
         }
 
         // try to find matching regex and apply it
