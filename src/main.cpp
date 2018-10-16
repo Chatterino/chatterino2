@@ -2,6 +2,7 @@
 #include "RunGui.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/IncognitoBrowser.hpp"
 
 #include <QApplication>
 #include <QStringList>
@@ -11,9 +12,6 @@ using namespace chatterino;
 
 int main(int argc, char **argv)
 {
-    auto shared = std::make_shared<QString>();
-    log(std::atomic_is_lock_free(&shared));
-
     QApplication a(argc, argv);
 
     // convert char** to QStringList
