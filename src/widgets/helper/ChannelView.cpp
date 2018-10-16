@@ -1221,8 +1221,16 @@ void ChannelView::addContextMenuItems(
     if (hoveredElement->getLink().type == Link::Url) {
         QString url = hoveredElement->getLink().value;
 
-        menu->addAction("Open link",
-                        [url] { QDesktopServices::openUrl(QUrl(url)); });
+        // open link
+        bool incognitoByDefault = supportsIncognitoLinks() &&
+                                  layout->getMessage()->loginName == "hemirt";
+        menu->addAction("Open link", [url, incognitoByDefault] {
+            if (incognitoByDefault)
+                openLinkIncognito(url);
+            else
+                QDesktopServices::openUrl(QUrl(url));
+        });
+        // open link default
         if (supportsIncognitoLinks()) {
             menu->addAction("Open link incognito",
                             [url] { openLinkIncognito(url); });
