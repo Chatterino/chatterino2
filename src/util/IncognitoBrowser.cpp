@@ -1,40 +1,50 @@
-#include "incognitobrowser.hpp"
+#include "IncognitoBrowser.hpp"
 
 #include <QProcess>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QVariant>
 
 #include "debug/Log.hpp"
 
-#ifdef Q_OS_WIN
-
 namespace chatterino {
 namespace {
-    QString getAppPath(const QString &executableName)
+#ifdef Q_OS_WIN
+    QString injectPrivateSwitch(QString command)
     {
-        auto paths = QStringList{
-            // clang-format off
-            "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" + executableName,
-            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\" + executableName
-            // clang-format on
+        // list of command line switches to turn on private browsing in browsers
+        static auto switches = std::vector<std::pair<QString, QString>>{
+            {"firefox", "-private-window"}, {"chrome", "-incognito"},
+            {"vivaldi", "--private"},       {"opera", "-newprivatetab"},
+            {"iexplore", "-private"},
         };
 
-        for (const auto &path : paths) {
-            auto val = QSettings(path, QSettings::NativeFormat)
-                           .value("Default")
-                           .toString();
-            if (!val.isNull()) {
-                return val;
+        // transform into regex and replacement string
+        std::vector<std::pair<QRegularExpression, QString>> replacers;
+        for (const auto &switch_ : switches) {
+            replacers.emplace_back(
+                QRegularExpression("(" + switch_.first + "\\.exe\"?).*"),
+                "\\1 " + switch_.second);
+
+            log("(" + switch_.first + "\\.exe\"?).*");
+        }
+
+        // try to find matching regex and apply it
+        for (const auto &replacement : replacers) {
+            if (replacement.first.match(command).hasMatch()) {
+                command.replace(replacement.first, replacement.second);
+                return command;
             }
         }
 
+        // couldn't match any browser -> unknown browser
         return QString();
     }
-}  // namespace
 
-void openLinkIncognito(const QString &link)
-{
-    auto browserChoice = QSettings("HKEY_CURRENT_"
+    QString getCommand(const QString &link)
+    {
+        // get default browser prog id
+        auto browserId = QSettings("HKEY_CURRENT_"
                                    "USER\\Software\\Microsoft\\Windows\\Shell\\"
                                    "Associations\\UrlAssociatio"
                                    "ns\\http\\UserChoice",
@@ -42,33 +52,44 @@ void openLinkIncognito(const QString &link)
                              .value("Progid")
                              .toString();
 
-    if (!browserChoice.isNull()) {
-        if (browserChoice == "FirefoxURL") {
-            // Firefox
-            auto path = getAppPath("firefox.exe");
+        // get default browser start command
+        auto command = QSettings("HKEY_CLASSES_ROOT\\" + browserId +
+                                     "\\shell\\open\\command",
+                                 QSettings::NativeFormat)
+                           .value("Default")
+                           .toString();
+        if (command.isNull()) return QString();
 
-            QProcess::startDetached(path, {"-private-window", link});
-        } else if (browserChoice == "ChromeHTML") {
-            // Chrome
-            auto path = getAppPath("chrome.exe");
+        log(command);
 
-            QProcess::startDetached(path, {"-incognito", link});
-        }
-        // Possible implementation for MS Edge.
-        // Doesn't quite work yet.
-        /*
-            else if (browserChoice == "AppXq0fevzme2pys62n3e0fbqa7peapykr8v") {
-                // Edge
-                 QProcess::startDetached("C:\\Windows\\System32\\cmd.exe",
-                                                    {"/c", "start",
-                 "shell:AppsFolder\Microsoft.MicrosoftEdge_"
-                 "8wekyb3d8bbwe!MicrosoftEdge",
-                                                     "-private", link});
-            }
-            */
+        // inject switch to enable private browsing
+        command = injectPrivateSwitch(command);
+        if (command.isNull()) return QString();
+
+        // link
+        command += " " + link;
+
+        return command;
     }
+#endif
+}  // namespace
+
+bool supportsIncognitoLinks()
+{
+#ifdef Q_OS_WIN
+    return !getCommand("").isNull();
+#else
+    return false;
+#endif
+}
+
+void openLinkIncognito(const QString &link)
+{
+#ifdef Q_OS_WIN
+    auto command = getCommand(link);
+
+    QProcess::startDetached(command);
+#endif
 }
 
 }  // namespace chatterino
-
-#endif

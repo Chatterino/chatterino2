@@ -469,10 +469,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         if (notebook != nullptr) {
             if (notebook->getPageCount() > 1) {
-                text +=
-                    "\n\nTip: After adding a split you can hold <Ctrl+Alt> to "
-                    "move it or split it "
-                    "further.";
+                text += "\n\nAfter adding hold <Ctrl+Alt> to move or split it.";
             }
         }
 

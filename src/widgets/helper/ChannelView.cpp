@@ -16,6 +16,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -1222,6 +1223,10 @@ void ChannelView::addContextMenuItems(
 
         menu->addAction("Open link",
                         [url] { QDesktopServices::openUrl(QUrl(url)); });
+        if (supportsIncognitoLinks()) {
+            menu->addAction("Open link incognito",
+                            [url] { openLinkIncognito(url); });
+        }
         menu->addAction("Copy link",
                         [url] { QApplication::clipboard()->setText(url); });
 
@@ -1256,15 +1261,8 @@ void ChannelView::addContextMenuItems(
             R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
-            "videos",
-            "settings",
-            "directory",
-            "jobs",
-            "friends",
-            "inventory",
-            "payments",
-            "subscriptions",
-            "messages",
+            "videos",    "settings", "directory",     "jobs",     "friends",
+            "inventory", "payments", "subscriptions", "messages",
         };
 
         auto twitchMatch =
