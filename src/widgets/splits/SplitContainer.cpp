@@ -195,8 +195,34 @@ void SplitContainer::addSplit(Split *split)
     this->layout();
 }
 
+// i dont know where to put it
+void traverseAndApply(SplitContainer::Node *node,
+                      std::function<void(Split *)> func)
+{
+    switch (node->getType()) {
+        case SplitContainer::Node::EmptyRoot:
+            return;
+        case SplitContainer::Node::_Split:
+            func(node->getSplit());
+            break;
+        case SplitContainer::Node::VerticalContainer:
+        case SplitContainer::Node::HorizontalContainer:
+            for (auto &child : node->getChildren()) {
+                traverseAndApply(child.get(), func);
+            }
+    }
+}
+
 void SplitContainer::setSelected(Split *split)
 {
+    // i couldnt think of a better way
+    static SplitContainer *previousSplitContainer;
+    if (previousSplitContainer && previousSplitContainer != this) {
+        traverseAndApply(previousSplitContainer->getBaseNode(),
+                         [](Split *split) { split->updateLastReadMessage(); });
+    }
+    previousSplitContainer = this;
+
     this->selected_ = split;
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split)) {

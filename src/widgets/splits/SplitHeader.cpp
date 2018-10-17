@@ -110,24 +110,6 @@ namespace {
     }
 }  // namespace
 
-// i dont know where to put it
-void traverseAndApply(SplitContainer::Node *node,
-                      std::function<void(Split *)> func)
-{
-    switch (node->getType()) {
-        case SplitContainer::Node::EmptyRoot:
-            return;
-        case SplitContainer::Node::_Split:
-            func(node->getSplit());
-            break;
-        case SplitContainer::Node::VerticalContainer:
-        case SplitContainer::Node::HorizontalContainer:
-            for (auto &child : node->getChildren()) {
-                traverseAndApply(child.get(), func);
-            }
-    }
-}
-
 SplitHeader::SplitHeader(Split *_split)
     : BaseWidget(_split)
     , split_(_split)
@@ -140,14 +122,7 @@ SplitHeader::SplitHeader(Split *_split)
     this->updateModerationModeIcon();
 
     this->split_->focused.connect([this]() { this->themeChangedEvent(); });
-    this->split_->focusLost.connect([this]() {
-        this->themeChangedEvent();
-
-        SplitContainer::Node *base =
-            this->split_->getContainer()->getBaseNode();
-        traverseAndApply(base,
-                         [](Split *split) { split->updateLastReadMessage(); });
-    });
+    this->split_->focusLost.connect([this]() { this->themeChangedEvent(); });
     this->split_->channelChanged.connect(
         [this]() { this->handleChannelChanged(); });
 
