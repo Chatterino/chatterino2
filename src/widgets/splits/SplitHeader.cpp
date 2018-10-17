@@ -122,7 +122,10 @@ SplitHeader::SplitHeader(Split *_split)
     this->updateModerationModeIcon();
 
     this->split_->focused.connect([this]() { this->themeChangedEvent(); });
-    this->split_->focusLost.connect([this]() { this->themeChangedEvent(); });
+    this->split_->focusLost.connect([this]() {
+        this->themeChangedEvent();
+        this->split_->updateLastReadMessage();
+    });
     this->split_->channelChanged.connect(
         [this]() { this->handleChannelChanged(); });
 
