@@ -33,6 +33,7 @@ public:
         "/appearance/messages/showLastMessageIndicator", false};
     IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
                                      Qt::VerPattern};
+    IntSetting lastMessageColor = {"/appearance/messages/lastMessageColor", 0};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
