@@ -2,6 +2,8 @@
 
 **Note that installing all the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
+This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build chatterino on a 32-bit system.
+
 ## Visual Studio 2017
 
 Download and install [Visual Studio 2017 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++" and "Universal Windows Platform development".
@@ -16,10 +18,10 @@ Notes:
 1. First, download a boost installer appropriate for your version of Visual Studio.
      -  Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
 	 -  Select the latest version from the list and navigate into the `binaries/` directory.
-	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (`x64` for 64-bit systems, `x86` for 32-bit systems).
+	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
 	    Visual Studio versions map as follows: `14.1` in the filename corresponds to MSVC 2017, `14.0` to 2015, `12.0` to 2013, `11` to 2012, `10` to 2010, `9` to 2008 and `8` to 2008. _Only Visual Studio 2015 and 2017 are supported. Please upgrade should you have an older installation._
 		
-		**Convenience link for 64-bit Visual Studio 2017: [Boost 1.68.0-MSVC-14.1-x64](https://dl.bintray.com/boostorg/release/1.68.0/binaries/boost_1_68_0-msvc-14.1-64.exe)**
+		**Convenience link for Visual Studio 2017: [Boost 1.68.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.68.0/binaries/boost_1_68_0-msvc-14.1-64.exe)**
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
@@ -27,12 +29,12 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ## OpenSSL
 ### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL for windows, version `1.1.0i`: [32-bit download](https://slproweb.com/download/Win32OpenSSL-1_1_0i.exe), **[64-bit download](https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe)**
+1. Download OpenSSL for windows, version `1.1.0i`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL for windows, version `1.0.2p`: [32-bit download](https://slproweb.com/download/Win32OpenSSL-1_0_2p.exe), **[64-bit download](https://slproweb.com/download/Win64OpenSSL-1_0_2p.exe)**
+1. Download OpenSSL for windows, version `1.0.2p`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2p.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `/bin` folder to `C:/local/bin` (You will need to create the folder)
@@ -53,7 +55,7 @@ Note that creating/linking an account with your Qt installation is entirely opti
 1. Unfold the tree element that says "Qt"
 2. Unfold the top most tree element (latest Qt version, e.g. `Qt 5.11.2`)
 3. Under this version, select the following entries:
-     -  `MSVC 2017 64-bit` (or alternative bitness/version variants if you are using those)
+     -  `MSVC 2017 64-bit` (or alternative version if you are using that)
      -  `Qt WebEngine` (optional)
 4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Qt Creator X.X.X CDB Debugger Support` are selected. (they should be checked by default)
 5. Continue through the installer and let the installer finish installing Qt.
