@@ -48,7 +48,9 @@ Note: This installation will take about 200 MB of disk space.
 2. Select "Open source" at the bottom of this page
 3. Then select "Download"
 
-Note that creating/linking an account with your Qt installation is entirely optional, you may simply click "Skip" in the installer instead of entering any information.
+Notes:
+  - Creating/linking an account with your Qt installation is entirely optional, you may simply click "Skip" in the installer instead of entering any information.
+  - Installing the latest Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.10 or later**.
 
 ### When prompted which components to install:
 
