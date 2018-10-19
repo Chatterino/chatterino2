@@ -8,7 +8,7 @@
 namespace chatterino {
 
 KeyboardSettingsPage::KeyboardSettingsPage()
-    : SettingsPage("Keybindings", "")
+    : SettingsPage("Keybindings", ":/settings/keybinds.svg")
 {
     auto layout =
         LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();

@@ -13,7 +13,7 @@
 namespace chatterino {
 
 BrowserExtensionPage::BrowserExtensionPage()
-    : SettingsPage("Browser integration", "")
+    : SettingsPage("Browser integration", ":/settings/browser.svg")
 {
     auto layout =
         LayoutCreator<BrowserExtensionPage>(this).setLayoutType<QVBoxLayout>();

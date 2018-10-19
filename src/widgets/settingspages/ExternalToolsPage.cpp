@@ -12,7 +12,7 @@
 namespace chatterino {
 
 ExternalToolsPage::ExternalToolsPage()
-    : SettingsPage("External tools", "")
+    : SettingsPage("External tools", ":/settings/externaltools.svg")
 {
     auto app = getApp();
 

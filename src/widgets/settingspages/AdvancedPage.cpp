@@ -24,7 +24,7 @@
 namespace chatterino {
 
 AdvancedPage::AdvancedPage()
-    : SettingsPage("Advanced", "")
+    : SettingsPage("Advanced", ":/settings/advanced.svg")
 {
     auto app = getApp();
     LayoutCreator<AdvancedPage> layoutCreator(this);

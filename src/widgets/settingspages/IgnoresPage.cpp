@@ -29,7 +29,7 @@ static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,
                         QStringListModel &model);
 
 IgnoresPage::IgnoresPage()
-    : SettingsPage("Ignores", "")
+    : SettingsPage("Ignores", ":/settings/ignore.svg")
 {
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();

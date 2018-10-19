@@ -20,7 +20,7 @@
 namespace chatterino {
 
 NotificationPage::NotificationPage()
-    : SettingsPage("Notifications", "")
+    : SettingsPage("Notifications", ":/settings/notification2.svg")
 {
     LayoutCreator<NotificationPage> layoutCreator(this);
 
