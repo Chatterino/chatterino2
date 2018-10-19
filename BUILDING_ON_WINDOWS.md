@@ -78,18 +78,18 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 ### How to run and produce builds
 
   - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
-  - Click the hammer on the bottom left to generate a build (dont run the build though).
+  - Click the hammer on the bottom left to generate a build (does not run the build though).
 
 Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2017_64bit-Release`.)
 
-  - Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug."
+  - Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
   - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
 
 ## Producing standalone builds
 
-If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various QT runtimes.
+If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
-To produce a standalone package, the required tool is called `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.11.2\msvc2017_64\bin\windeployqt.exe`.
+To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.11.2\msvc2017_64\bin\windeployqt.exe`.
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
@@ -103,4 +103,4 @@ To produce all supplement files for a standalone build, follow these steps (adju
  
  5. The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
-You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist packages must be present, as usual - see the [README](REAMDE.md)).
+You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](REAMDE.md)).
