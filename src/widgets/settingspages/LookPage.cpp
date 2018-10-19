@@ -356,12 +356,12 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
 
     QLabel *colorPreview = new QLabel();
 
-    auto colorUpdater = [colorPreview](std::function<QColor()> func) {
-        return [colorPreview, func]() {
+    auto colorUpdater = [colorPreview](std::function<QColor()> getNewColor) {
+        return [colorPreview, getNewColor]() {
             QPixmap pixmap(16, 16);
             pixmap.fill(QColor(0, 0, 0, 255));
 
-            QColor color = func();
+            QColor color = getNewColor();
             QPainter painter(&pixmap);
             QBrush brush(color);
             painter.fillRect(1, 1, pixmap.width() - 2, pixmap.height() - 2,

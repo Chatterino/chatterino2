@@ -195,31 +195,12 @@ void SplitContainer::addSplit(Split *split)
     this->layout();
 }
 
-// i dont know where to put it
-void traverseAndApply(SplitContainer::Node *node,
-                      std::function<void(Split *)> func)
-{
-    switch (node->getType()) {
-        case SplitContainer::Node::EmptyRoot:
-            return;
-        case SplitContainer::Node::_Split:
-            func(node->getSplit());
-            break;
-        case SplitContainer::Node::VerticalContainer:
-        case SplitContainer::Node::HorizontalContainer:
-            for (auto &child : node->getChildren()) {
-                traverseAndApply(child.get(), func);
-            }
-    }
-}
-
 void SplitContainer::setSelected(Split *split)
 {
-    // i couldnt think of a better way
     static SplitContainer *previousSplitContainer;
     if (previousSplitContainer && previousSplitContainer != this) {
-        traverseAndApply(previousSplitContainer->getBaseNode(),
-                         [](Split *split) { split->updateLastReadMessage(); });
+        previousSplitContainer->getBaseNode()->traverseAndApply(
+            [](Split *split) { split->updateLastReadMessage(); });
     }
     previousSplitContainer = this;
 
@@ -760,6 +741,22 @@ const std::vector<std::unique_ptr<SplitContainer::Node>>
     &SplitContainer::Node::getChildren()
 {
     return this->children_;
+}
+
+void SplitContainer::Node::traverseAndApply(std::function<void(Split *)> func)
+{
+    switch (this->getType()) {
+        case SplitContainer::Node::EmptyRoot:
+            return;
+        case SplitContainer::Node::_Split:
+            func(this->getSplit());
+            return;
+        case SplitContainer::Node::VerticalContainer:
+        case SplitContainer::Node::HorizontalContainer:
+            for (auto &child : this->getChildren()) {
+                child->traverseAndApply(func);
+            }
+    }
 }
 
 SplitContainer::Node::Node()
