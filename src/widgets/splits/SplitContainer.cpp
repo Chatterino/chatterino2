@@ -577,7 +577,7 @@ void SplitContainer::refreshTab()
 
 int SplitContainer::getSplitCount()
 {
-    return 0;
+    return this->splits_.size();
 }
 
 const std::vector<Split *> SplitContainer::getSplits() const
