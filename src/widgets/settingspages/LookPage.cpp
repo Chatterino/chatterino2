@@ -381,8 +381,10 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     QObject::connect(
         button, &QPushButton::clicked, [updatePreviewColor, getCurrentColor]() {
             QColor newColor = QColorDialog::getColor(getCurrentColor());
-            updatePreviewColor(newColor);
-            getSettings()->lastMessageColor = newColor.name();
+            if (newColor.isValid()) {
+                updatePreviewColor(newColor);
+                getSettings()->lastMessageColor = newColor.name();
+            }
         });
 
     QPushButton *resetButton = new QPushButton("Reset Color");
