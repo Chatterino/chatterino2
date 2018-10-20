@@ -1,52 +1,108 @@
-# Building on Windows (Recommended)
-## Using Qt Creator
-### Visual Studio 2017
-1. Install Visual Studio 2017 and select "Desktop development with C++" and "Universal Windows Platform development.
+# Building on Windows
 
-### Boost
-1. Visual Studio 2017 64-bit: https://dl.bintray.com/boostorg/release/1.66.0/binaries/boost_1_66_0-msvc-14.1-64.exe
-2. When prompted, install boost to C:\local\boost
-3. When the installation is finished, go to C:\local\boost and rename the "lib64-msvc-14.1" folder to "lib"
+**Note that installing all the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
-### OpenSSL
-#### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL development library: https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe
-2. When prompted, install openssl to C:\local\openssl
-3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory"
-#### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL light: https://slproweb.com/download/Win64OpenSSL_Light-1_0_2p.exe
-2. When prompted, install it anywhere
-3. When prompted, copy the OpenSSL DLLS to "The OpenSSL binaries (/bin) directory"
-4. Copy the OpenSSL 1.0 files from its /bin folder to C:/local/bin (You will need to create the folder)
-5. Then copy the OpenSSL 1.1 files from its /bin folder to C:/local/bin (Overwrite any duplicate files)
-6. Add C:/local/bin to your path folder (Follow guide here if you don't know how to do it: https://www.computerhope.com/issues/ch000549.htm#windows8 )
+This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build chatterino on a 32-bit system.
 
-### Qt
-1. Download Qt: https://www.qt.io/download
+## Visual Studio 2017
+
+Download and install [Visual Studio 2017 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++" and "Universal Windows Platform development".
+
+Notes:
+
+  - This installation will take about 17 GB of disk space
+  - You do not need to sign in with a Microsoft account after setup completes. You may simply exit the login dialog.
+
+## Boost
+
+1. First, download a boost installer appropriate for your version of Visual Studio.
+     -  Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
+	 -  Select the latest version from the list and navigate into the `binaries/` directory.
+	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
+	    Visual Studio versions map as follows: `14.1` in the filename corresponds to MSVC 2017, `14.0` to 2015, `12.0` to 2013, `11` to 2012, `10` to 2010, `9` to 2008 and `8` to 2005. _Only Visual Studio 2015 and 2017 are supported. Please upgrade should you have an older installation._
+		
+		**Convenience link for Visual Studio 2017: [Boost 1.68.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.68.0/binaries/boost_1_68_0-msvc-14.1-64.exe)**
+2. When prompted where to install Boost, set the location to `C:\local\boost`.
+3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
+
+Note: This installation will take about 1.5 GB of disk space.
+
+## OpenSSL
+### For our websocket library, we need OpenSSL 1.1
+1. Download OpenSSL for windows, version `1.1.0i`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe)**
+2. When prompted, install OpenSSL to `C:\local\openssl`
+3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
+
+### For Qt SSL, we need OpenSSL 1.0
+1. Download OpenSSL for windows, version `1.0.2p`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2p.exe)**
+2. When prompted, install it to any arbitrary empty directory.
+3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
+4. Copy the OpenSSL 1.0 files from its `/bin` folder to `C:/local/bin` (You will need to create the folder)
+5. Then copy the OpenSSL 1.1 files from its `/bin` folder to `C:/local/bin` (Overwrite any duplicate files)
+6. Add `C:/local/bin` to your path folder ([Follow guide here if you don't know how to do it]( https://www.computerhope.com/issues/ch000549.htm#windows8))
+
+Note: This installation will take about 200 MB of disk space.
+
+## Qt
+1. Visit the [Qt download page](https://www.qt.io/download).
 2. Select "Open source" at the bottom of this page
 3. Then select "Download"
-#### When prompted which components to install:
-1. Under the latest Qt version:
-  - Select MSVC 2017 64-bit (or MSVC 2015 64-bit if you still use Visual Studio 2015)
-  - Optionally, enable Qt WebEngine
-2. Under Tools:
-  - Select Qt Creator, and Qt Creator CDB Debugger Support
 
-### Compile with Breakpad support (Optional)
-1. Open up lib/qBreakpad/handler/handler.pro
-2. Build it in whichever mode you wanna build Chatterino (Debug/Profile/Release)
-3. Copy the newly built qBreakpad.lib to a folder you create: `lib/qBreakpad/build/handler`
+Notes:
+  - Creating/linking an account with your Qt installation is entirely optional, you may simply click "Skip" in the installer instead of entering any information.
+  - Installing the latest Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.10 or later**.
 
-# Windows (Using MSYS2, not recommended)
-Note: This guide is currently out of date and will not work as is.
-Note: This build will have some features missing from the build.
+### When prompted which components to install:
 
-Building using MSYS2 can be quite easier process. Check out MSYS2 at [msys2.org](http://www.msys2.org/).
+1. Unfold the tree element that says "Qt"
+2. Unfold the top most tree element (latest Qt version, e.g. `Qt 5.11.2`)
+3. Under this version, select the following entries:
+     -  `MSVC 2017 64-bit` (or alternative version if you are using that)
+     -  `Qt WebEngine` (optional)
+4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Qt Creator X.X.X CDB Debugger Support` are selected. (they should be checked by default)
+5. Continue through the installer and let the installer finish installing Qt.
 
-Be sure to add `-j <number of threads>` as a make argument so it will use all your cpu cores to build. [example setup](https://i.imgur.com/qlESlS1.png)
+Note: This installation will take about 2 GB of disk space.
 
-You can also add `-o2` to optimize the final binary size but increase compilation time, and add `-pipe` to use more ram in compilation but increase compilation speed
-1. open appropriate MSYS2 terminal and do `pacman -S mingw-w64-<arch>-boost mingw-w64-<arch>-qt5 mingw-w64-<arch>-rapidjson` where `<arch>` is `x86_64` or `i686`
-2. go into the project directory
-3. create build folder `mkdir build && cd build`
-4. `qmake .. && mingw32-make`
+## Compile with Breakpad support (Optional)
+Compiling with Breakpad support enables crash reports that can be of use for developing/beta versions of Chatterino. If you have no interest in reporting crashes anyways, this optional dependency will probably be of no use to you.
+
+1. Open up `lib/qBreakpad/handler/handler.pro`in Qt Creator
+2. Build it in whichever mode you want to build Chatterino in (Debug/Profile/Release)
+3. Copy the newly built `qBreakpad.lib` to the following directory: `lib/qBreakpad/build/handler` (You will have to manually create this directory)
+
+## Run the build in Qt Creator
+1. Open the `chatterino.pro` file by double-clicking or by opening it via Qt Creator.
+2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
+    ![Qt Create Configure Project screenshot](https://i.imgur.com/dbz45mB.png)
+3. Select the profile(s) you want to build with and click "Configure Project".
+
+### How to run and produce builds
+
+  - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
+  - Click the hammer on the bottom left to generate a build (does not run the build though).
+
+Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2017_64bit-Release`.)
+
+  - Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
+  - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
+
+## Producing standalone builds
+
+If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
+
+To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.11.2\msvc2017_64\bin\windeployqt.exe`.
+
+To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
+
+ 1. Navigate to your build output directory with windows explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2017_64bit-Release`
+ 2. Enter the `release` directory
+ 3. Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
+ 4. Open a `cmd` window and execute:
+
+        cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2017_64bit-Release\release
+        C:\Qt\5.11.2\msvc2017_64\bin\windeployqt.exe chatterino.exe
+ 
+ 5. The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
+
+You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](REAMDE.md)).

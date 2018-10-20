@@ -231,10 +231,14 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         c->addMessage(_message);
 
+        auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
+        overrideFlags->set(MessageFlag::DoNotTriggerNotification);
+
         if (getSettings()->inlineWhispers) {
-            app->twitch.server->forEachChannel([_message](ChannelPtr channel) {
-                channel->addMessage(_message);  //
-            });
+            app->twitch.server->forEachChannel(
+                [_message, overrideFlags](ChannelPtr channel) {
+                    channel->addMessage(_message, overrideFlags);  //
+                });
         }
     }
 }
@@ -357,6 +361,9 @@ void IrcMessageHandler::handleWriteConnectionNoticeMessage(
         // a better message from there
         "timeout_success",
         "ban_success",
+
+        // Channel suspended notices
+        "msg_channel_suspended",
     };
 
     QVariant v = message->tag("msg-id");

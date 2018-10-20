@@ -6,6 +6,7 @@
 #include <QBrush>
 #include <QColor>
 #include <pajlada/settings/setting.hpp>
+#include <singletons/Settings.hpp>
 
 namespace chatterino {
 
@@ -49,7 +50,6 @@ public:
         TabColors newMessage;
         TabColors highlighted;
         TabColors selected;
-        TabColors notified;
         QColor border;
         QColor bottomLine;
     } tabs;

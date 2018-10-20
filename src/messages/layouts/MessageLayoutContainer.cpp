@@ -321,7 +321,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             int x = this->elements_[line.startIndex]->getRect().left();
             int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-            if (line.endCharIndex < selection.selectionMin.charIndex) {
+            if (line.endCharIndex <= selection.selectionMin.charIndex) {
                 continue;
             }
 
@@ -485,7 +485,7 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         }
 
         // this is the word
-        if (point.x() < this->elements_[i]->getRect().right()) {
+        if (point.x() <= this->elements_[i]->getRect().right()) {
             index += this->elements_[i]->getMouseOverIndex(point);
             break;
         }
@@ -503,6 +503,26 @@ int MessageLayoutContainer::getLastCharacterIndex() const
         return 0;
     }
     return this->lines_.back().endCharIndex;
+}
+
+int MessageLayoutContainer::getFirstMessageCharacterIndex() const
+{
+    static FlagsEnum<MessageElementFlag> flags;
+    flags.set(MessageElementFlag::Username);
+    flags.set(MessageElementFlag::Timestamp);
+    flags.set(MessageElementFlag::Badges);
+
+    // Get the index of the first character of the real message
+    // (no badges/timestamps/username)
+    int index = 0;
+    for (auto &element : this->elements_) {
+        if (element->getFlags().hasAny(flags)) {
+            index += element->getSelectionIndexCount();
+        } else {
+            break;
+        }
+    }
+    return index;
 }
 
 void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,

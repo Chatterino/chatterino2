@@ -32,9 +32,17 @@ public:
     static const int uiScaleMax;
 
     void showSettingsDialog();
+
+    // Show the account selector widget at point
     void showAccountSelectPopup(QPoint point);
 
+    // Tell a channel (or all channels if channel is nullptr) to redo their
+    // layout
     void layoutChannelViews(Channel *channel = nullptr);
+
+    // Force all channel views to redo their layout
+    // This is called, for example, when the emote scale or timestamp format has
+    // changed
     void forceLayoutChannelViews();
     void repaintVisibleChatWidgets(Channel *channel = nullptr);
     void repaintGifEmotes();
@@ -57,9 +65,22 @@ public:
     void updateWordTypeMask();
 
     pajlada::Signals::NoArgSignal repaintGifs;
+
+    // This signal fires whenever views rendering a channel, or all views if the
+    // channel is a nullptr, need to redo their layout
     pajlada::Signals::Signal<Channel *> layout;
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
+
+    // Sends an alert to the main window
+    // It reads the `longAlert` setting to decide whether the alert will expire
+    // or not
+    void sendAlert();
+
+    // Queue up a save in the next 10 seconds
+    // If a save was already queued up, we reset the to happen in 10 seconds
+    // again
+    void queueSave();
 
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
@@ -75,6 +96,8 @@ private:
 
     MessageElementFlags wordFlags_{};
     pajlada::Settings::SettingListener wordFlagsListener_;
+
+    QTimer *saveTimer;
 };
 
 }  // namespace chatterino

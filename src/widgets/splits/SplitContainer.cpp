@@ -1,4 +1,5 @@
 #include "widgets/splits/SplitContainer.hpp"
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -83,7 +84,7 @@ void SplitContainer::setTab(NotebookTab *_tab)
 
     this->tab_->page = this;
 
-    this->refreshTabTitle();
+    this->refreshTab();
 }
 
 void SplitContainer::hideResizeHandles()
@@ -142,6 +143,9 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
 void SplitContainer::insertSplit(Split *split, Direction direction,
                                  Node *relativeTo)
 {
+    // Queue up save because: Split added
+    getApp()->windows->queueSave();
+
     assertInGuiThread();
 
     split->setContainer(this);
@@ -173,7 +177,7 @@ void SplitContainer::addSplit(Split *split)
     this->unsetCursor();
     this->splits_.push_back(split);
 
-    this->refreshTabTitle();
+    this->refreshTab();
 
     split->getChannelView().tabHighlightRequested.connect(
         [this](HighlightState state) {
@@ -181,6 +185,10 @@ void SplitContainer::addSplit(Split *split)
                 this->tab_->setHighlightState(state);
             }
         });
+
+    split->getChannelView().liveStatusChanged.connect([this]() {
+        this->refreshTabLiveStatus();  //
+    });
 
     split->focused.connect([this, split] { this->setSelected(split); });
 
@@ -224,7 +232,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
         this->splits_.front()->giveFocus(Qt::MouseFocusReason);
     }
 
-    this->refreshTabTitle();
+    this->refreshTab();
 
     // fourtf: really bad
     split->getChannelView().tabHighlightRequested.disconnectAll();
@@ -236,6 +244,9 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
 SplitContainer::Position SplitContainer::deleteSplit(Split *split)
 {
+    // Queue up save because: Split removed
+    getApp()->windows->queueSave();
+
     assertInGuiThread();
     assert(split != nullptr);
 
@@ -458,10 +469,7 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         if (notebook != nullptr) {
             if (notebook->getPageCount() > 1) {
-                text +=
-                    "\n\nTip: After adding a split you can hold <Ctrl+Alt> to "
-                    "move it or split it "
-                    "further.";
+                text += "\n\nAfter adding hold <Ctrl+Alt> to move or split it.";
             }
         }
 
@@ -561,34 +569,10 @@ void SplitContainer::focusInEvent(QFocusEvent *)
     }
 }
 
-void SplitContainer::refreshTabTitle()
+void SplitContainer::refreshTab()
 {
-    if (this->tab_ == nullptr) {
-        return;
-    }
-
-    QString newTitle = "";
-    bool first = true;
-
-    for (const auto &chatWidget : this->splits_) {
-        auto channelName = chatWidget->getChannel()->getName();
-        if (channelName.isEmpty()) {
-            continue;
-        }
-
-        if (!first) {
-            newTitle += ", ";
-        }
-        newTitle += channelName;
-
-        first = false;
-    }
-
-    if (newTitle.isEmpty()) {
-        newTitle = "empty";
-    }
-
-    this->tab_->setDefaultTitle(newTitle);
+    this->refreshTabTitle();
+    this->refreshTabLiveStatus();
 }
 
 int SplitContainer::getSplitCount()
@@ -668,6 +652,54 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             }
         }
     }
+}
+
+void SplitContainer::refreshTabTitle()
+{
+    if (this->tab_ == nullptr) {
+        return;
+    }
+
+    QString newTitle = "";
+    bool first = true;
+
+    for (const auto &chatWidget : this->splits_) {
+        auto channelName = chatWidget->getChannel()->getName();
+        if (channelName.isEmpty()) {
+            continue;
+        }
+
+        if (!first) {
+            newTitle += ", ";
+        }
+        newTitle += channelName;
+
+        first = false;
+    }
+
+    if (newTitle.isEmpty()) {
+        newTitle = "empty";
+    }
+
+    this->tab_->setDefaultTitle(newTitle);
+}
+
+void SplitContainer::refreshTabLiveStatus()
+{
+    if (this->tab_ == nullptr) {
+        return;
+    }
+
+    bool liveStatus = false;
+    for (const auto &s : this->splits_) {
+        auto c = s->getChannel();
+        if (c->isLive()) {
+            liveStatus = true;
+            break;
+        }
+    }
+
+    this->tab_->setLive(liveStatus);
 }
 
 //

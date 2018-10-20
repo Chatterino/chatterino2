@@ -54,6 +54,7 @@ protected:
 
     virtual void onConnected();
     virtual void onDisconnected();
+    virtual void onSocketError();
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelName);
@@ -69,6 +70,9 @@ private:
 
     std::unique_ptr<IrcConnection> writeConnection_ = nullptr;
     std::unique_ptr<IrcConnection> readConnection_ = nullptr;
+
+    QTimer reconnectTimer_;
+    int falloffCounter_ = 1;
 
     std::mutex connectionMutex_;
 

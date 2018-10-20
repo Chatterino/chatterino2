@@ -48,18 +48,25 @@ namespace {
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
         Channel &globalChannel, Channel &subChannel)
     {
-        for (const auto &set : sets) {
-            auto &channel = set->key == "0" ? globalChannel : subChannel;
+        QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
+        for (const auto &set : sets) {
             // TITLE
+            auto channelName = set->channelName;
             auto text =
                 set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
-            channel.addMessage(makeTitleMessage(text));
 
             // EMOTES
             MessageBuilder builder;
             builder->flags.set(MessageFlag::Centered);
             builder->flags.set(MessageFlag::DisableCompactEmotes);
+
+            // If value of map is empty, create init pair and add title.
+            if (mapOfSets.find(channelName) == mapOfSets.end()) {
+                std::vector<MessagePtr> b;
+                b.push_back(makeTitleMessage(text));
+                mapOfSets[channelName] = qMakePair(set->key == "0", b);
+            }
 
             for (const auto &emote : set->emotes) {
                 builder
@@ -70,7 +77,16 @@ namespace {
                     ->setLink(Link(Link::InsertText, emote.name.string));
             }
 
-            channel.addMessage(builder.release());
+            mapOfSets[channelName].second.push_back(builder.release());
+        }
+
+        // Output to channel all created messages,
+        // That contain title or emotes.
+        foreach (auto pair, mapOfSets) {
+            auto &channel = pair.first ? globalChannel : subChannel;
+            for (auto message : pair.second) {
+                channel.addMessage(message);
+            }
         }
     }
 }  // namespace

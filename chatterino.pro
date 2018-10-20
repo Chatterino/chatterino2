@@ -261,7 +261,9 @@ SOURCES += \
     src/messages/MessageContainer.cpp \
     src/debug/Benchmark.cpp \
     src/common/UsernameSet.cpp \
-    src/widgets/settingspages/AdvancedPage.cpp
+    src/widgets/settingspages/AdvancedPage.cpp \
+    src/util/IncognitoBrowser.cpp \
+    src/widgets/splits/ClosedSplits.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -462,7 +464,9 @@ HEADERS  += \
     src/widgets/helper/Button.hpp \
     src/messages/MessageContainer.hpp \
     src/common/UsernameSet.hpp \
-    src/widgets/settingspages/AdvancedPage.hpp
+    src/widgets/settingspages/AdvancedPage.hpp \
+    src/util/IncognitoBrowser.hpp \
+    src/widgets/splits/ClosedSplits.hpp
 
 RESOURCES += \
     resources/resources.qrc \

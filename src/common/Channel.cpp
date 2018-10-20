@@ -58,7 +58,8 @@ LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
     return this->messages_.getSnapshot();
 }
 
-void Channel::addMessage(MessagePtr message)
+void Channel::addMessage(MessagePtr message,
+                         boost::optional<MessageFlags> overridingFlags)
 {
     auto app = getApp();
     MessagePtr deleted;
@@ -78,7 +79,7 @@ void Channel::addMessage(MessagePtr message)
         this->messageRemovedFromStart.invoke(deleted);
     }
 
-    this->messageAppended.invoke(message);
+    this->messageAppended.invoke(message, overridingFlags);
 }
 
 void Channel::addOrReplaceTimeout(MessagePtr message)
@@ -218,6 +219,11 @@ bool Channel::hasModRights() const
 {
     // fourtf: check if staff
     return this->isMod() || this->isBroadcaster();
+}
+
+bool Channel::isLive() const
+{
+    return false;
 }
 
 std::shared_ptr<Channel> Channel::getEmpty()

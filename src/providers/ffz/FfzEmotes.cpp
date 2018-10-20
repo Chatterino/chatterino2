@@ -147,7 +147,7 @@ void FfzEmotes::loadEmotes()
 void FfzEmotes::loadChannel(const QString &channelName,
                             std::function<void(EmoteMap &&)> callback)
 {
-    log("[FFZEmotes] Reload FFZ Channel Emotes for channel %s\n", channelName);
+    log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelName);
 
     NetworkRequest request("https://api.frankerfacez.com/v1/room/" +
                            channelName);

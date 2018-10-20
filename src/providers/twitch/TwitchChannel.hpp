@@ -66,7 +66,7 @@ public:
     const QString &subscriptionUrl();
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
-    bool isLive() const;
+    virtual bool isLive() const override;
     QString roomId() const;
     AccessGuard<const RoomModes> accessRoomModes() const;
     AccessGuard<const StreamStatus> accessStreamStatus() const;
@@ -92,7 +92,6 @@ public:
     pajlada::Signals::NoArgSignal userStateChanged;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
-    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
 
 protected:
     void addRecentChatter(const MessagePtr &message) override;

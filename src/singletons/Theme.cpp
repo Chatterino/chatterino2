@@ -105,10 +105,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#000"),
                 {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
-            this->tabs.notified = {
-                fg,
-                {QColor("#fff"), QColor("#fff"), QColor("#fff")},
-                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         } else {
             this->tabs.regular = {
                 QColor("#aaa"),
@@ -127,10 +123,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#fff"),
                 {QColor("#555555"), QColor("#555555"), QColor("#555555")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
-            this->tabs.notified = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#F824A8"), QColor("#F824A8"), QColor("#F824A8")}};
         }
 
         this->splits.input.focusedLine = highlighted;
@@ -212,7 +204,8 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->messages.backgrounds.highlighted =
             blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
     } else {
-        this->messages.backgrounds.highlighted = QColor(75, 40, 44);
+        this->messages.backgrounds.highlighted =
+            QColor(getSettings()->highlightColor);
     }
 
     this->messages.backgrounds.subscription =

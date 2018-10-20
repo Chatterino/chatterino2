@@ -16,6 +16,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -26,6 +27,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
+#include <QMessageBox>
 #include <QPainter>
 
 #include <algorithm>
@@ -119,6 +121,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     QObject::connect(shortcut, &QShortcut::activated, [this] {
         QGuiApplication::clipboard()->setText(this->getSelectedText());
     });
+
+    this->clickTimer_ = new QTimer(this);
+    this->clickTimer_->setSingleShot(true);
+    this->clickTimer_->setInterval(500);
 }
 
 void ChannelView::initializeLayout()
@@ -400,9 +406,15 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->clearMessages();
 
     // on new message
-    this->channelConnections_.push_back(
-        newChannel->messageAppended.connect([this](MessagePtr &message) {
+    this->channelConnections_.push_back(newChannel->messageAppended.connect(
+        [this](MessagePtr &message,
+               boost::optional<MessageFlags> overridingFlags) {
             MessageLayoutPtr deleted;
+
+            auto *messageFlags = &message->flags;
+            if (overridingFlags) {
+                messageFlags = overridingFlags.get_ptr();
+            }
 
             auto messageRef = new MessageLayout(message);
 
@@ -427,8 +439,8 @@ void ChannelView::setChannel(ChannelPtr newChannel)
                 //                }
             }
 
-            if (!message->flags.has(MessageFlag::DoNotTriggerNotification)) {
-                if (message->flags.has(MessageFlag::Highlighted)) {
+            if (!messageFlags->has(MessageFlag::DoNotTriggerNotification)) {
+                if (messageFlags->has(MessageFlag::Highlighted)) {
                     this->tabHighlightRequested.invoke(
                         HighlightState::Highlighted);
                 } else {
@@ -541,10 +553,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->queueUpdate();
 
     // Notifications
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get());
-    if (tc != nullptr) {
-        tc->tabHighlightRequested.connect([this](HighlightState state) {
-            this->tabHighlightRequested.invoke(HighlightState::Notification);
+    if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get())) {
+        tc->liveStatusChanged.connect([this]() {
+            this->liveStatusChanged.invoke();  //
         });
     }
 }
@@ -873,6 +884,106 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->hide();
         return;
     }
+
+    if (this->isDoubleClick_) {
+        int wordStart;
+        int wordEnd;
+        this->getWordBounds(layout.get(), hoverLayoutElement, relativePos,
+                            wordStart, wordEnd);
+        SelectionItem newStart(messageIndex, wordStart);
+        SelectionItem newEnd(messageIndex, wordEnd);
+
+        // Selection changed in same message
+        if (messageIndex == this->dCSelection_.origMessageIndex) {
+            // Selecting to the left
+            if (wordStart < this->selection_.start.charIndex &&
+                !this->dCSelection_.selectingRight) {
+                this->dCSelection_.selectingLeft = true;
+                // Ensure that the original word stays selected(Edge case)
+                if (wordStart > this->dCSelection_.originalEnd) {
+                    this->setSelection(this->dCSelection_.origStartItem,
+                                       newEnd);
+                } else {
+                    this->setSelection(newStart, this->selection_.end);
+                }
+                // Selecting to the right
+            } else if (wordEnd > this->selection_.end.charIndex &&
+                       !this->dCSelection_.selectingLeft) {
+                this->dCSelection_.selectingRight = true;
+                // Ensure that the original word stays selected(Edge case)
+                if (wordEnd < this->dCSelection_.originalStart) {
+                    this->setSelection(newStart,
+                                       this->dCSelection_.origEndItem);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
+            }
+            // Swapping from selecting left to selecting right
+            if (wordStart > this->selection_.start.charIndex &&
+                !this->dCSelection_.selectingRight) {
+                if (wordStart > this->dCSelection_.originalEnd) {
+                    this->dCSelection_.selectingLeft = false;
+                    this->dCSelection_.selectingRight = true;
+                    this->setSelection(this->dCSelection_.origStartItem,
+                                       newEnd);
+                } else {
+                    this->setSelection(newStart, this->selection_.end);
+                }
+                // Swapping from selecting right to selecting left
+            } else if (wordEnd < this->selection_.end.charIndex &&
+                       !this->dCSelection_.selectingLeft) {
+                if (wordEnd < this->dCSelection_.originalStart) {
+                    this->dCSelection_.selectingLeft = true;
+                    this->dCSelection_.selectingRight = false;
+                    this->setSelection(newStart,
+                                       this->dCSelection_.origEndItem);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
+            }
+            // Selection changed in a different message
+        } else {
+            // Message over the original
+            if (messageIndex < this->selection_.start.messageIndex) {
+                // Swapping from left to right selecting
+                if (!this->dCSelection_.selectingLeft) {
+                    this->dCSelection_.selectingLeft = true;
+                    this->dCSelection_.selectingRight = false;
+                }
+                if (wordStart < this->selection_.start.charIndex &&
+                    !this->dCSelection_.selectingRight) {
+                    this->dCSelection_.selectingLeft = true;
+                }
+                this->setSelection(newStart, this->dCSelection_.origEndItem);
+                // Message under the original
+            } else if (messageIndex > this->selection_.end.messageIndex) {
+                // Swapping from right to left selecting
+                if (!this->dCSelection_.selectingRight) {
+                    this->dCSelection_.selectingLeft = false;
+                    this->dCSelection_.selectingRight = true;
+                }
+                if (wordEnd > this->selection_.end.charIndex &&
+                    !this->dCSelection_.selectingLeft) {
+                    this->dCSelection_.selectingRight = true;
+                }
+                this->setSelection(this->dCSelection_.origStartItem, newEnd);
+                // Selection changed in non original message
+            } else {
+                if (this->dCSelection_.selectingLeft) {
+                    this->setSelection(newStart, this->selection_.end);
+                } else {
+                    this->setSelection(this->selection_.start, newEnd);
+                }
+            }
+        }
+        // Reset direction of selection
+        if (wordStart == this->dCSelection_.originalStart &&
+            wordEnd == this->dCSelection_.originalEnd) {
+            this->dCSelection_.selectingLeft =
+                this->dCSelection_.selectingRight = false;
+        }
+    }
+
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
 
@@ -907,7 +1018,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
     if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
         setCursor(Qt::ArrowCursor);
-
         auto messagesSnapshot = this->getMessagesSnapshot();
         if (messagesSnapshot.getLength() == 0) {
             return;
@@ -940,7 +1050,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             }
 
             int index = layout->getSelectionIndex(relativePos);
-
             auto selectionItem = SelectionItem(messageIndex, index);
             this->setSelection(selectionItem, selectionItem);
         } break;
@@ -960,7 +1069,17 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton) {
-        if (this->isMouseDown_) {
+        this->dCSelection_.selectingLeft = this->dCSelection_.selectingRight =
+            false;
+        if (this->isDoubleClick_) {
+            this->isDoubleClick_ = false;
+            // Was actually not a wanted triple-click
+            if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                            event->screenPos())) > 10.f) {
+                this->clickTimer_->stop();
+                return;
+            }
+        } else if (this->isMouseDown_) {
             this->isMouseDown_ = false;
 
             if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
@@ -985,7 +1104,6 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         // not left or right button
         return;
     }
-
     // find message
     this->layoutMessages();
 
@@ -1010,6 +1128,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     const MessageLayoutElement *hoverLayoutElement =
         layout->getElementAt(relativePos);
+    // Triple-clicking a message selects the whole message
+    if (this->clickTimer_->isActive() && this->selecting_) {
+        if (fabsf(distanceBetweenPoints(this->lastDClickPosition_,
+                                        event->screenPos())) < 10.f) {
+            this->selectWholeMessage(layout.get(), messageIndex);
+        }
+    }
 
     if (hoverLayoutElement == nullptr) {
         return;
@@ -1096,8 +1221,20 @@ void ChannelView::addContextMenuItems(
     if (hoveredElement->getLink().type == Link::Url) {
         QString url = hoveredElement->getLink().value;
 
-        menu->addAction("Open link",
-                        [url] { QDesktopServices::openUrl(QUrl(url)); });
+        // open link
+        bool incognitoByDefault = supportsIncognitoLinks() &&
+                                  layout->getMessage()->loginName == "hemirt";
+        menu->addAction("Open link", [url, incognitoByDefault] {
+            if (incognitoByDefault)
+                openLinkIncognito(url);
+            else
+                QDesktopServices::openUrl(QUrl(url));
+        });
+        // open link default
+        if (supportsIncognitoLinks()) {
+            menu->addAction("Open link incognito",
+                            [url] { openLinkIncognito(url); });
+        }
         menu->addAction("Copy link",
                         [url] { QApplication::clipboard()->setText(url); });
 
@@ -1126,14 +1263,14 @@ void ChannelView::addContextMenuItems(
         QGuiApplication::clipboard()->setText(copyString);
     });
 
-    // Join to channel
+    // Open in new split.
     if (hoveredElement->getLink().type == Link::Url) {
         static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]+))",
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
-            "videos",
-            "settings",
+            "videos",    "settings", "directory",     "jobs",     "friends",
+            "inventory", "payments", "subscriptions", "messages",
         };
 
         auto twitchMatch =
@@ -1156,27 +1293,52 @@ void ChannelView::addContextMenuItems(
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    std::shared_ptr<MessageLayout> layout;
+    QPoint relativePos;
+    int messageIndex;
+
+    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
+        return;
+    }
+
+    // message under cursor is collapsed
+    if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
+        return;
+    }
+
+    const MessageLayoutElement *hoverLayoutElement =
+        layout->getElementAt(relativePos);
+    this->lastDClickPosition_ = event->screenPos();
+
+    if (hoverLayoutElement == nullptr) {
+        // Possibility for triple click which doesn't have to be over an
+        // existing layout element
+        this->clickTimer_->start();
+        return;
+    }
+    if (!this->isMouseDown_) {
+        this->isDoubleClick_ = true;
+
+        int wordStart;
+        int wordEnd;
+        this->getWordBounds(layout.get(), hoverLayoutElement, relativePos,
+                            wordStart, wordEnd);
+
+        this->clickTimer_->start();
+
+        SelectionItem wordMin(messageIndex, wordStart);
+        SelectionItem wordMax(messageIndex, wordEnd);
+
+        this->dCSelection_.originalStart = wordStart;
+        this->dCSelection_.originalEnd = wordEnd;
+        this->dCSelection_.origMessageIndex = messageIndex;
+        this->dCSelection_.origStartItem = wordMin;
+        this->dCSelection_.origEndItem = wordMax;
+
+        this->setSelection(wordMin, wordMax);
+    }
+
     if (getSettings()->linksDoubleClickOnly) {
-        std::shared_ptr<MessageLayout> layout;
-        QPoint relativePos;
-        int messageIndex;
-
-        if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex)) {
-            return;
-        }
-
-        // message under cursor is collapsed
-        if (layout->flags.has(MessageLayoutFlag::Collapsed)) {
-            return;
-        }
-
-        const MessageLayoutElement *hoverLayoutElement =
-            layout->getElementAt(relativePos);
-
-        if (hoverLayoutElement == nullptr) {
-            return;
-        }
-
         auto &link = hoverLayoutElement->getLink();
         this->handleLinkClick(event, link, layout.get());
     }
@@ -1191,6 +1353,16 @@ void ChannelView::hideEvent(QHideEvent *)
     this->messagesOnScreen_.clear();
 }
 
+void ChannelView::showUserInfoPopup(const QString &userName)
+{
+    auto *userPopup = new UserInfoPopup;
+    userPopup->setData(userName, this->channel_);
+    userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    QPoint offset(int(150 * this->getScale()), int(70 * this->getScale()));
+    userPopup->move(QCursor::pos() - offset);
+    userPopup->show();
+}
+
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
@@ -1202,17 +1374,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserWhisper:
         case Link::UserInfo: {
             auto user = link.value;
-
-            auto *userPopup = new UserInfoPopup;
-            userPopup->setData(user, this->channel_);
-            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
-            QPoint offset(int(150 * this->getScale()),
-                          int(70 * this->getScale()));
-            userPopup->move(QCursor::pos() - offset);
-            userPopup->show();
-
+            this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
-
         } break;
 
         case Link::Url: {
@@ -1266,6 +1429,27 @@ int ChannelView::getLayoutWidth() const
         return int(this->width() - 8 * this->getScale());
 
     return this->width();
+}
+
+void ChannelView::selectWholeMessage(MessageLayout *layout, int &messageIndex)
+{
+    SelectionItem msgStart(messageIndex,
+                           layout->getFirstMessageCharacterIndex());
+    SelectionItem msgEnd(messageIndex, layout->getLastCharacterIndex());
+    this->setSelection(msgStart, msgEnd);
+}
+
+void ChannelView::getWordBounds(MessageLayout *layout,
+                                const MessageLayoutElement *element,
+                                const QPoint &relativePos, int &wordStart,
+                                int &wordEnd)
+{
+    const int mouseInWordIndex = element->getMouseOverIndex(relativePos);
+    wordStart = layout->getSelectionIndex(relativePos) - mouseInWordIndex;
+    const int selectionLength = element->getSelectionIndexCount();
+    const int length =
+        element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
+    wordEnd = wordStart + length;
 }
 
 }  // namespace chatterino

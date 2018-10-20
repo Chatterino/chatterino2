@@ -29,6 +29,12 @@ MessageElement *MessageElement::setLink(const Link &link)
     return this;
 }
 
+MessageElement *MessageElement::setText(const QString &text)
+{
+    this->text_ = text;
+    return this;
+}
+
 MessageElement *MessageElement::setTooltip(const QString &tooltip)
 {
     this->tooltip_ = tooltip;
@@ -158,6 +164,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                               color, this->style_, container.getScale()))
                              ->setLink(this->getLink());
                 e->setTrailingSpace(trailingSpace);
+                e->setText(text);
 
                 // If URL link was changed,
                 // Should update it in MessageLayoutElement too!

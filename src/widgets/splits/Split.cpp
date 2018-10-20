@@ -19,9 +19,11 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/DebugPopup.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/helper/Shortcut.hpp"
+#include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -33,8 +35,10 @@
 #include <QDockWidget>
 #include <QDrag>
 #include <QJsonArray>
+#include <QLabel>
 #include <QListWidget>
 #include <QMimeData>
+#include <QMovie>
 #include <QPainter>
 #include <QVBoxLayout>
 
@@ -42,6 +46,27 @@
 #include <random>
 
 namespace chatterino {
+namespace {
+    void showTutorialVideo(QWidget *parent, const QString &source,
+                           const QString &title, const QString &description)
+    {
+        auto window =
+            new BaseWindow(parent, BaseWindow::Flags::EnableCustomFrame);
+        window->setWindowTitle("Chatterino - " + title);
+        window->setAttribute(Qt::WA_DeleteOnClose);
+        auto layout = new QVBoxLayout();
+        layout->addWidget(new QLabel(description));
+        auto label = new QLabel(window);
+        layout->addWidget(label);
+        auto movie = new QMovie(label);
+        movie->setFileName(source);
+        label->setMovie(movie);
+        movie->start();
+        window->getLayoutContainer()->setLayout(layout);
+        window->show();
+    }
+}  // namespace
+
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
@@ -224,6 +249,9 @@ void Split::setChannel(IndirectChannel newChannel)
     this->header_->updateRoomModes();
 
     this->channelChanged.invoke();
+
+    // Queue up save because: Split channel changed
+    getApp()->windows->queueSave();
 }
 
 void Split::setModerationMode(bool value)
@@ -264,7 +292,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         if (dialog->hasSeletedChannel()) {
             this->setChannel(dialog->getSelectedChannel());
             if (this->isInContainer()) {
-                this->container_->refreshTabTitle();
+                this->container_->refreshTab();
             }
         }
 
@@ -326,6 +354,9 @@ void Split::keyReleaseEvent(QKeyEvent *event)
 
 void Split::resizeEvent(QResizeEvent *event)
 {
+    // Queue up save because: Split resized
+    getApp()->windows->queueSave();
+
     BaseWidget::resizeEvent(event);
 
     this->overlay_->setGeometry(this->rect());
@@ -386,6 +417,10 @@ void Split::deleteFromContainer()
 {
     if (this->container_) {
         this->container_->deleteSplit(this);
+        auto *tab = this->getContainer()->getTab();
+        tab->connect(tab, &QWidget::destroyed,
+                     [tab]() mutable { ClosedSplits::invalidateTab(tab); });
+        ClosedSplits::push({this->getChannel()->getName(), tab});
     }
 }
 
@@ -399,6 +434,18 @@ void Split::changeChannel()
         popup.at(0)->hide();
         showViewerList();
     }
+}
+
+void Split::explainMoving()
+{
+    showTutorialVideo(this, ":/examples/moving.gif", "Moving",
+                      "Hold <Ctrl+Alt> to move splits.\n\nExample:");
+}
+
+void Split::explainSplitting()
+{
+    showTutorialVideo(this, ":/examples/splitting.gif", "Splitting",
+                      "Hold <Ctrl+Alt> to add new splits.\n\nExample:");
 }
 
 void Split::popup()
@@ -527,16 +574,18 @@ void Split::showViewerList()
     QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this,
                      [=]() { viewerDock->setMinimumWidth(300); });
 
-    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
-        if (!labels.contains(chattersList->currentItem()->text())) {
-            showUserInfoPopup(chattersList->currentItem()->text());
+    auto listDoubleClick = [=](QString userName) {
+        if (!labels.contains(userName)) {
+            this->view_->showUserInfoPopup(userName);
         }
+    };
+
+    QObject::connect(chattersList, &QListWidget::doubleClicked, this, [=]() {
+        listDoubleClick(chattersList->currentItem()->text());
     });
 
     QObject::connect(resultList, &QListWidget::doubleClicked, this, [=]() {
-        if (!labels.contains(resultList->currentItem()->text())) {
-            showUserInfoPopup(resultList->currentItem()->text());
-        }
+        listDoubleClick(resultList->currentItem()->text());
     });
 
     dockVbox->addWidget(searchBar);
@@ -549,16 +598,6 @@ void Split::showViewerList()
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
     viewerDock->show();
-}
-
-void Split::showUserInfoPopup(const UserName &user)
-{
-    auto *userPopup = new UserInfoPopup;
-    userPopup->setData(user.string, this->getChannel());
-    userPopup->setAttribute(Qt::WA_DeleteOnClose);
-    userPopup->move(QCursor::pos() - QPoint(int(150 * this->getScale()),
-                                            int(70 * this->getScale())));
-    userPopup->show();
 }
 
 void Split::copyToClipboard()

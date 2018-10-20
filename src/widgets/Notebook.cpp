@@ -45,6 +45,9 @@ Notebook::Notebook(QWidget *parent)
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 {
+    // Queue up save because: Tab added
+    getApp()->windows->queueSave();
+
     auto *tab = new NotebookTab(this);
     tab->page = page;
 
@@ -72,6 +75,9 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
 
 void Notebook::removePage(QWidget *page)
 {
+    // Queue up save because: Tab removed
+    getApp()->windows->queueSave();
+
     for (int i = 0; i < this->items_.count(); i++) {
         if (this->items_[i].page == page) {
             if (this->items_.count() == 1) {
@@ -267,6 +273,9 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 
 void Notebook::rearrangePage(QWidget *page, int index)
 {
+    // Queue up save because: Tab rearranged
+    getApp()->windows->queueSave();
+
     this->items_.move(this->indexOf(page), index);
 
     this->performLayout(true);

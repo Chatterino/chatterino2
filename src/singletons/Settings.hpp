@@ -54,7 +54,7 @@ public:
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
-    BoolSetting enableUsernameBold = {"/appearence/messages/boldUsernames",
+    BoolSetting enableUsernameBold = {"/appearance/messages/boldUsernames",
                                       false};
     // BoolSetting customizable splitheader
     BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount",
@@ -117,7 +117,8 @@ public:
     BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
 
     /// Ignored phrases
-    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace", "***"};
+    QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
+                                           "***"};
 
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
@@ -141,6 +142,9 @@ public:
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
+    QStringSetting highlightColor = {"/highlighting/color", "#4B282C"};
+
+    BoolSetting longAlerts = {"/highlighting/alerts", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};

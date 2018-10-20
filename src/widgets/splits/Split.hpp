@@ -88,16 +88,17 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
 
 private:
-    void showUserInfoPopup(const QString &userName)
-    {
-        this->showUserInfoPopup(UserName{userName});
-    }
-    void showUserInfoPopup(const UserName &user);
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
 
     SplitContainer *container_;
     IndirectChannel channel_;
+
+    bool moderationMode_{};
+    bool isTopRightSplit_{};
+
+    bool isMouseOver_{};
+    bool isDragging_{};
 
     QVBoxLayout *vbox_;
     SplitHeader *header_;
@@ -106,12 +107,6 @@ private:
     SplitOverlay *overlay_;
 
     NullablePtr<SelectChannelDialog> selectChannelDialog_;
-
-    bool moderationMode_{};
-    bool isTopRightSplit_{};
-
-    bool isMouseOver_{};
-    bool isDragging_{};
 
     pajlada::Signals::Connection channelIDChangedConnection_;
     pajlada::Signals::Connection usermodeChangedConnection_;
@@ -125,6 +120,8 @@ public slots:
     void addSibling();
     void deleteFromContainer();
     void changeChannel();
+    void explainMoving();
+    void explainSplitting();
     void popup();
     void clear();
     void openInBrowser();

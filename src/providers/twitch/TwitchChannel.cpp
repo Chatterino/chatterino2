@@ -29,8 +29,7 @@
 
 namespace chatterino {
 namespace {
-    auto parseRecentMessages(const QJsonObject &jsonRoot,
-                             TwitchChannel &channel)
+    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
         std::vector<MessagePtr> messages;
@@ -46,7 +45,7 @@ namespace {
             assert(privMsg);
 
             MessageParseArgs args;
-            TwitchMessageBuilder builder(&channel, privMsg, args);
+            TwitchMessageBuilder builder(channel.get(), privMsg, args);
             if (!builder.isIgnored()) {
                 messages.push_back(builder.build());
             }
@@ -90,7 +89,6 @@ TwitchChannel::TwitchChannel(const QString &name,
 {
     log("[TwitchChannel:{}] Opened", name);
 
-    this->tabHighlightRequested.connect([](HighlightState state) {});
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1) {
         }
@@ -408,14 +406,11 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->notifications->playSound();
                     }
                     if (getSettings()->notificationFlashTaskbar) {
-                        QApplication::alert(
-                            getApp()->windows->getMainWindow().window(), 2500);
+                        getApp()->windows->sendAlert();
                     }
                 }
                 auto live = makeSystemMessage(this->getName() + " is live");
                 this->addMessage(live);
-                this->tabHighlightRequested.invoke(
-                    HighlightState::Notification);
             } else {
                 auto offline =
                     makeSystemMessage(this->getName() + " is offline");
@@ -549,13 +544,13 @@ void TwitchChannel::loadRecentMessages()
     // can't be concurrent right now due to SignalVector
     //    request.setExecuteConcurrently(true);
 
-    request.onSuccess([that = this](auto result) -> Outcome {
-        auto messages = parseRecentMessages(result.parseJson(), *that);
+    request.onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+        auto shared = weak.lock();
+        if (!shared) return Failure;
 
-        //        postToThread([that, weak = weakOf<Channel>(that),
-        //                      messages = std::move(messages)]() mutable {
-        that->addMessagesAtStart(messages);
-        //        });
+        auto messages = parseRecentMessages(result.parseJson(), shared);
+
+        shared->addMessagesAtStart(messages);
 
         return Success;
     });

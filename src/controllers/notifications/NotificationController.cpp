@@ -180,8 +180,7 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                     getApp()->notifications->playSound();
                 }
                 if (getSettings()->notificationFlashTaskbar) {
-                    QApplication::alert(
-                        getApp()->windows->getMainWindow().window(), 2500);
+                    getApp()->windows->sendAlert();
                 }
             }
             return Success;

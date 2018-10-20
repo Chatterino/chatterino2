@@ -1,5 +1,7 @@
 # Linux
 
+Note on Qt version compatibility: If you are installing Qt from a package manager, please ensure the version you are installing is at least **Qt 5.10 or newer**.
+
 ## Ubuntu 18.04
 *most likely works the same for other Debian-like distros*
 1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev`

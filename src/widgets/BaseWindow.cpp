@@ -420,9 +420,20 @@ void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
 
 void BaseWindow::resizeEvent(QResizeEvent *)
 {
+    // Queue up save because: Window resized
+    getApp()->windows->queueSave();
+
     this->moveIntoDesktopRect(this);
 
     this->calcButtonsSizes();
+}
+
+void BaseWindow::moveEvent(QMoveEvent *event)
+{
+    // Queue up save because: Window position changed
+    getApp()->windows->queueSave();
+
+    BaseWidget::moveEvent(event);
 }
 
 void BaseWindow::closeEvent(QCloseEvent *)

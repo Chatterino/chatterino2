@@ -6,6 +6,7 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Clamp.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
@@ -146,6 +147,9 @@ const QString &NotebookTab::getTitle() const
 
 void NotebookTab::titleUpdated()
 {
+    // Queue up save because: Tab title changed
+    getApp()->windows->queueSave();
+
     this->updateSize();
     this->update();
 }
@@ -164,13 +168,20 @@ void NotebookTab::setSelected(bool value)
     this->update();
 }
 
+void NotebookTab::setLive(bool isLive)
+{
+    if (this->isLive_ != isLive) {
+        this->isLive_ = isLive;
+        this->update();
+    }
+}
+
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
     if (this->isSelected() || !this->highlightEnabled_) {
         return;
     }
-    if (this->highlightState_ != HighlightState::Highlighted &&
-        this->highlightState_ != HighlightState::Notification) {
+    if (this->highlightState_ != HighlightState::Highlighted) {
         this->highlightState_ = newHighlightStyle;
 
         this->update();
@@ -248,8 +259,6 @@ void NotebookTab::paintEvent(QPaintEvent *)
         colors = this->theme->tabs.selected;
     } else if (this->highlightState_ == HighlightState::Highlighted) {
         colors = this->theme->tabs.highlighted;
-    } else if (this->highlightState_ == HighlightState::Notification) {
-        colors = this->theme->tabs.notified;
     } else if (this->highlightState_ == HighlightState::NewMessage) {
         colors = this->theme->tabs.newMessage;
     } else {
@@ -292,6 +301,20 @@ void NotebookTab::paintEvent(QPaintEvent *)
         this->mouseOver_
             ? colors.line.hover
             : (windowFocused ? colors.line.regular : colors.line.unfocused));
+
+    // draw live indicator
+    if (this->isLive_) {
+        painter.setPen(QColor(Qt::GlobalColor::red));
+        QBrush b;
+        b.setColor(QColor(Qt::GlobalColor::red));
+        b.setStyle(Qt::SolidPattern);
+        painter.setBrush(b);
+
+        auto x = this->width() - (6.f * scale);
+        auto y = 4.f * scale;
+        auto diameter = 4.f * scale;
+        painter.drawEllipse(QRectF(x, y, diameter, diameter));
+    }
 
     // set the pen color
     painter.setPen(colors.text);
@@ -477,6 +500,15 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
     }
 
     Button::mouseMoveEvent(event);
+}
+
+void NotebookTab::wheelEvent(QWheelEvent *event)
+{
+    if (event->delta() > 0) {
+        this->notebook_->selectPreviousTab();
+    } else {
+        this->notebook_->selectNextTab();
+    }
 }
 
 QRect NotebookTab::getXRect()

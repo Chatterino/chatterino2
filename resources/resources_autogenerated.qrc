@@ -28,6 +28,8 @@
     <file>buttons/unmod.png</file>
     <file>buttons/update.png</file>
     <file>buttons/updateError.png</file>
+    <file>examples/moving.gif</file>
+    <file>examples/splitting.gif</file>
     <file>licenses/boost_boost.txt</file>
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/fmt_bsd2.txt</file>

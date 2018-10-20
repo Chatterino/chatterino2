@@ -11,8 +11,8 @@
 #include <boost/noncopyable.hpp>
 #include <cstdint>
 #include <memory>
-#include <vector>
 #include <pajlada/signals/signalholder.hpp>
+#include <vector>
 
 namespace chatterino {
 class Channel;
@@ -123,6 +123,7 @@ public:
     virtual ~MessageElement();
 
     MessageElement *setLink(const Link &link);
+    MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
@@ -140,6 +141,7 @@ protected:
     pajlada::Signals::NoArgSignal linkChanged;
 
 private:
+    QString text_;
     Link link_;
     QString tooltip_;
     MessageElementFlags flags_;

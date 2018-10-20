@@ -15,8 +15,10 @@
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/Shortcut.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
+#include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -304,6 +306,26 @@ void Window::addShortcuts()
     // Close tab
     createWindowShortcut(this, "CTRL+SHIFT+W",
                          [this] { this->notebook_->removeCurrentPage(); });
+
+    // Reopen last closed split
+    createWindowShortcut(this, "CTRL+G", [this] {
+        if (ClosedSplits::empty()) {
+            return;
+        }
+        ClosedSplits::SplitInfo si = ClosedSplits::pop();
+        SplitContainer *splitContainer{nullptr};
+        if (si.tab) {
+            splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
+        }
+        if (!splitContainer) {
+            splitContainer = this->notebook_->getOrAddSelectedPage();
+        }
+        this->notebook_->select(splitContainer);
+        Split *split = new Split(splitContainer);
+        split->setChannel(
+            getApp()->twitch.server->getOrAddChannel(si.channelName));
+        splitContainer->appendSplit(split);
+    });
 }
 
 #define UGLYMACROHACK1(s) #s
@@ -314,7 +336,9 @@ void Window::onAccountSelected()
     auto user = getApp()->accounts->twitch.getCurrent();
 
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-    auto windowTitleEnd = QString(" - Chatterino Nightly " CHATTERINO_VERSION " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
+    auto windowTitleEnd =
+        QString(" - Chatterino Nightly " CHATTERINO_VERSION
+                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
 #else
     auto windowTitleEnd = QString(" - Chatterino Beta " CHATTERINO_VERSION);
 #endif

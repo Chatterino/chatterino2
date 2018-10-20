@@ -56,10 +56,12 @@ public:
     void layoutMessages();
 
     void clearMessages();
+    void showUserInfoPopup(const QString &userName);
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
+    pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString> joinToChannel;
 
@@ -104,6 +106,10 @@ private:
     void setSelection(const SelectionItem &start, const SelectionItem &end);
     MessageElementFlags getFlags() const;
     bool isPaused();
+    void selectWholeMessage(MessageLayout *layout, int &messageIndex);
+    void getWordBounds(MessageLayout *layout,
+                       const MessageLayoutElement *element,
+                       const QPoint &relativePos, int &wordStart, int &wordEnd);
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
@@ -146,8 +152,12 @@ private:
     // Mouse event variables
     bool isMouseDown_ = false;
     bool isRightMouseDown_ = false;
+    bool isDoubleClick_ = false;
+    DoubleClickSelection dCSelection_;
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
+    QPointF lastDClickPosition_;
+    QTimer *clickTimer_;
 
     Selection selection_;
     bool selecting_ = false;
