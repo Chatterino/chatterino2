@@ -367,8 +367,8 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     };
 
     auto getCurrentColor = []() {
-        return getSettings()->lastMessageColor != 0
-                   ? QRgb(getSettings()->lastMessageColor.getValue())
+        return getSettings()->lastMessageColor != ""
+                   ? QColor(getSettings()->lastMessageColor.getValue())
                    : getApp()
                          ->themes->tabs.selected.backgrounds.regular.color();
     };
@@ -382,7 +382,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
         button, &QPushButton::clicked, [updatePreviewColor, getCurrentColor]() {
             QColor newColor = QColorDialog::getColor(getCurrentColor());
             updatePreviewColor(newColor);
-            getSettings()->lastMessageColor = newColor.rgba();
+            getSettings()->lastMessageColor = newColor.name();
         });
 
     QPushButton *resetButton = new QPushButton("Reset Color");
@@ -393,7 +393,7 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
             QColor defaultColor =
                 getApp()->themes->tabs.selected.backgrounds.regular.color();
             updatePreviewColor(defaultColor);
-            getSettings()->lastMessageColor = 0;
+            getSettings()->lastMessageColor = "";
         });
 
     // layout

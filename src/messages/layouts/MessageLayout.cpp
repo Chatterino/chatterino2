@@ -184,8 +184,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     // draw last read message line
     if (isLastReadMessage) {
         QColor color;
-        if (getSettings()->lastMessageColor != 0) {
-            color = QRgb(getSettings()->lastMessageColor.getValue());
+        if (getSettings()->lastMessageColor != "") {
+            color = QColor(getSettings()->lastMessageColor.getValue());
         } else {
             color =
                 isWindowFocused
