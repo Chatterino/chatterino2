@@ -310,7 +310,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         b.setStyle(Qt::SolidPattern);
         painter.setBrush(b);
 
-        auto x = this->width() - (6.f * scale);
+        auto x = this->width() - (7.f * scale);
         auto y = 4.f * scale;
         auto diameter = 4.f * scale;
         painter.drawEllipse(QRectF(x, y, diameter, diameter));
