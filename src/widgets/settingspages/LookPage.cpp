@@ -11,6 +11,7 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/Line.hpp"
 
+#include <QColorDialog>
 #include <QFontDialog>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -351,11 +352,60 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
             }();
         });
 
+    // color picker
+
+    QLabel *colorPreview = new QLabel();
+
+    auto updatePreviewColor = [colorPreview](QColor newColor) {
+        QPixmap pixmap(16, 16);
+        pixmap.fill(QColor(0, 0, 0, 255));
+
+        QPainter painter(&pixmap);
+        QBrush brush(newColor);
+        painter.fillRect(1, 1, pixmap.width() - 2, pixmap.height() - 2, brush);
+        colorPreview->setPixmap(pixmap);
+    };
+
+    auto getCurrentColor = []() {
+        return getSettings()->lastMessageColor != ""
+                   ? QColor(getSettings()->lastMessageColor.getValue())
+                   : getApp()
+                         ->themes->tabs.selected.backgrounds.regular.color();
+    };
+
+    updatePreviewColor(getCurrentColor());
+
+    QPushButton *button = new QPushButton("Select Color");
+    button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
+
+    QObject::connect(
+        button, &QPushButton::clicked, [updatePreviewColor, getCurrentColor]() {
+            QColor newColor = QColorDialog::getColor(getCurrentColor());
+            if (newColor.isValid()) {
+                updatePreviewColor(newColor);
+                getSettings()->lastMessageColor = newColor.name();
+            }
+        });
+
+    QPushButton *resetButton = new QPushButton("Reset Color");
+    resetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
+
+    QObject::connect(
+        resetButton, &QPushButton::clicked, [updatePreviewColor]() {
+            QColor defaultColor =
+                getApp()->themes->tabs.selected.backgrounds.regular.color();
+            updatePreviewColor(defaultColor);
+            getSettings()->lastMessageColor = "";
+        });
+
     // layout
     auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();
     hbox.append(this->createCheckBox(LAST_MSG,
                                      getSettings()->showLastMessageIndicator));
     hbox.append(combo);
+    hbox.append(colorPreview);
+    hbox.append(button);
+    hbox.append(resetButton);
     hbox->addStretch(1);
 }
 
