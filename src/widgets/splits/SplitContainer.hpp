@@ -89,7 +89,6 @@ public:
         qreal getHorizontalFlex();
         qreal getVerticalFlex();
         const std::vector<std::unique_ptr<Node>> &getChildren();
-        void traverseAndApply(std::function<void(Split *)> func);
 
     private:
         Node();

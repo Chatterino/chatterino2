@@ -356,20 +356,14 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
 
     QLabel *colorPreview = new QLabel();
 
-    auto colorUpdater = [colorPreview](std::function<QColor()> getNewColor) {
-        return [colorPreview, getNewColor]() {
-            QPixmap pixmap(16, 16);
-            pixmap.fill(QColor(0, 0, 0, 255));
+    auto updatePreviewColor = [colorPreview](QColor newColor) {
+        QPixmap pixmap(16, 16);
+        pixmap.fill(QColor(0, 0, 0, 255));
 
-            QColor color = getNewColor();
-            QPainter painter(&pixmap);
-            QBrush brush(color);
-            painter.fillRect(1, 1, pixmap.width() - 2, pixmap.height() - 2,
-                             brush);
-
-            colorPreview->setPixmap(pixmap);
-            getSettings()->lastMessageColor = color.rgba();
-        };
+        QPainter painter(&pixmap);
+        QBrush brush(newColor);
+        painter.fillRect(1, 1, pixmap.width() - 2, pixmap.height() - 2, brush);
+        colorPreview->setPixmap(pixmap);
     };
 
     auto getCurrentColor = []() {
@@ -379,23 +373,28 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
                          ->themes->tabs.selected.backgrounds.regular.color();
     };
 
-    colorUpdater(getCurrentColor)();
+    updatePreviewColor(getCurrentColor());
 
     QPushButton *button = new QPushButton("Select Color");
     button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
-    QObject::connect(button, &QPushButton::clicked,
-                     colorUpdater([getCurrentColor]() {
-                         return QColorDialog::getColor(getCurrentColor());
-                     }));
+    QObject::connect(
+        button, &QPushButton::clicked, [updatePreviewColor, getCurrentColor]() {
+            QColor newColor = QColorDialog::getColor(getCurrentColor());
+            updatePreviewColor(newColor);
+            getSettings()->lastMessageColor = newColor.rgba();
+        });
 
     QPushButton *resetButton = new QPushButton("Reset Color");
     resetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
     QObject::connect(
-        resetButton, &QPushButton::clicked, colorUpdater([]() {
-            return getApp()->themes->tabs.selected.backgrounds.regular.color();
-        }));
+        resetButton, &QPushButton::clicked, [updatePreviewColor]() {
+            QColor defaultColor =
+                getApp()->themes->tabs.selected.backgrounds.regular.color();
+            updatePreviewColor(defaultColor);
+            getSettings()->lastMessageColor = 0;
+        });
 
     // layout
     auto hbox = layout.emplace<QHBoxLayout>().withoutMargin();

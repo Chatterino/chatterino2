@@ -11,6 +11,7 @@
 #include "widgets/helper/NotebookButton.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/Shortcut.hpp"
+#include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QDebug>
@@ -488,6 +489,19 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
 
     return selectedPage != nullptr ? (SplitContainer *)selectedPage
                                    : this->addPage();
+}
+
+void SplitNotebook::select(QWidget *page)
+{
+    if (auto selectedPage = this->getSelectedPage()) {
+        if (auto splitContainer =
+                dynamic_cast<SplitContainer *>(selectedPage)) {
+            for (auto split : splitContainer->getSplits()) {
+                split->updateLastReadMessage();
+            }
+        }
+    }
+    this->Notebook::select(page);
 }
 
 }  // namespace chatterino

@@ -30,7 +30,7 @@ public:
     void removeCurrentPage();
 
     int indexOf(QWidget *page) const;
-    void select(QWidget *page);
+    virtual void select(QWidget *page);
     void selectIndex(int index);
     void selectNextTab();
     void selectPreviousTab();
@@ -90,6 +90,7 @@ public:
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
+    void select(QWidget *page) override;
 
 private:
     void addCustomButtons();

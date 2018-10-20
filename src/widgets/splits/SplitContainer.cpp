@@ -197,13 +197,6 @@ void SplitContainer::addSplit(Split *split)
 
 void SplitContainer::setSelected(Split *split)
 {
-    static SplitContainer *previousSplitContainer;
-    if (previousSplitContainer && previousSplitContainer != this) {
-        previousSplitContainer->getBaseNode()->traverseAndApply(
-            [](Split *split) { split->updateLastReadMessage(); });
-    }
-    previousSplitContainer = this;
-
     this->selected_ = split;
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split)) {
@@ -741,22 +734,6 @@ const std::vector<std::unique_ptr<SplitContainer::Node>>
     &SplitContainer::Node::getChildren()
 {
     return this->children_;
-}
-
-void SplitContainer::Node::traverseAndApply(std::function<void(Split *)> func)
-{
-    switch (this->getType()) {
-        case SplitContainer::Node::EmptyRoot:
-            return;
-        case SplitContainer::Node::_Split:
-            func(this->getSplit());
-            return;
-        case SplitContainer::Node::VerticalContainer:
-        case SplitContainer::Node::HorizontalContainer:
-            for (auto &child : this->getChildren()) {
-                child->traverseAndApply(func);
-            }
-    }
 }
 
 SplitContainer::Node::Node()
