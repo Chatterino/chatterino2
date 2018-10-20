@@ -34,12 +34,11 @@ NotificationPage::NotificationPage()
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
-                    "Playsound (doesn't mute the Windows 8.x sound of toasts)",
-                    getSettings()->notificationPlaySound));
+                    "Play sound", getSettings()->notificationPlaySound));
 #ifdef Q_OS_WIN
-                settings.append(this->createCheckBox(
-                    "Enable toasts (currently only for windows 8.x or 10)",
-                    getSettings()->notificationToast));
+                settings.append(
+                    this->createCheckBox("Enable toasts (Windows 8 or later)",
+                                         getSettings()->notificationToast));
 #endif
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();

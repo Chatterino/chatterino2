@@ -128,12 +128,6 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // font
     layout.append(this->createFontChanger());
 
-    // bold-slider
-    {
-        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
-        box.emplace<QLabel>("Boldness: ");
-        box.append(this->createBoldScaleSlider());
-    }
     // --
     layout.emplace<Line>(false);
 
@@ -150,8 +144,8 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // --
     layout.emplace<Line>(false);
 
-    // seperate
-    layout.append(this->createCheckBox("Seperate lines",
+    // separate
+    layout.append(this->createCheckBox("Lines between messages",
                                        getSettings()->separateMessages));
 
     // alternate
@@ -161,12 +155,23 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // --
     layout.emplace<Line>(false);
 
+    // bold-slider
+    {
+        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
+        box.emplace<QLabel>("Username boldness: ");
+        box.append(this->createBoldScaleSlider());
+    }
+
+    // bold usernames
+    layout.append(this->createCheckBox("Bold mentions (@username)",
+                                       getSettings()->enableUsernameBold));
+
+    // --
+    layout.emplace<Line>(false);
+
     // lowercase links
     layout.append(this->createCheckBox("Lowercase domains",
                                        getSettings()->enableLowercaseLink));
-    // bold usernames
-    layout.append(this->createCheckBox("Bold @usernames",
-                                       getSettings()->enableUsernameBold));
 
     // collapsing
     {
@@ -583,14 +588,14 @@ QLayout *LookPage::createBoldScaleSlider()
     //    },
     //    this->connections_);
 
-    QPushButton *button = new QPushButton("Reset");
-    layout->addWidget(button);
-    button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
+    // QPushButton *button = new QPushButton("Reset");
+    // layout->addWidget(button);
+    // button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Policy::Fixed);
 
-    QObject::connect(button, &QPushButton::clicked, [=]() {
-        getSettings()->boldScale.setValue(57);
-        slider->setValue(57);
-    });
+    // QObject::connect(button, &QPushButton::clicked, [=]() {
+    //    getSettings()->boldScale.setValue(57);
+    //    slider->setValue(57);
+    //});
 
     return layout;
 }

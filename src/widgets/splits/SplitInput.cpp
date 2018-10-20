@@ -98,7 +98,8 @@ void SplitInput::initLayout()
     // textEditLength visibility
     getSettings()->showMessageLength.connect(
         [this](const bool &value, auto) {
-            this->ui_.textEditLength->setHidden(!value);
+            // this->ui_.textEditLength->setHidden(!value);
+            this->editTextChanged();
         },
         this->managedConnections_);
 }
@@ -376,7 +377,7 @@ void SplitInput::editTextChanged()
 
     QString labelText;
 
-    if (text.length() == 0) {
+    if (text.length() == 0 || getSettings()->showMessageLength) {
         labelText = "";
     } else {
         labelText = QString::number(text.length());
