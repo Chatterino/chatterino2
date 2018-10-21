@@ -39,6 +39,8 @@ public:
     bool isSelected() const;
     void setSelected(bool value);
 
+    void setInLastRow(bool value);
+
     void setLive(bool isLive);
     void setHighlightState(HighlightState style);
     void setHighlightsEnabled(const bool &newVal);
@@ -79,11 +81,12 @@ private:
     QString customTitle_;
     QString defaultTitle_;
 
-    bool selected_ = false;
-    bool mouseOver_ = false;
-    bool mouseDown_ = false;
-    bool mouseOverX_ = false;
-    bool mouseDownX_ = false;
+    bool selected_{};
+    bool mouseOver_{};
+    bool mouseDown_{};
+    bool mouseOverX_{};
+    bool mouseDownX_{};
+    bool isInLastRow_{};
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;

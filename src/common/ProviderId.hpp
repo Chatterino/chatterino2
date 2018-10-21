@@ -2,5 +2,6 @@
 
 namespace chatterino {
 
-enum class ProviderId { Twitch };
-}
+enum class ProviderId { Twitch, Irc };
+//
+}  // namespace chatterino

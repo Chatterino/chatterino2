@@ -8,6 +8,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 
 #include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -115,20 +116,26 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              watching_btn.getElement());
 
         // tab
-        NotebookTab *tab = notebook->addPage(obj.getElement());
+        auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Twitch");
     }
 
     // irc
-    /*{
-        LayoutCreator<QWidget> obj(new QWidget());
-        auto vbox = obj.setLayoutType<QVBoxLayout>();
+    /*
+        {
+            LayoutCreator<QWidget> obj(new QWidget());
+            auto vbox = obj.setLayoutType<QVBoxLayout>();
+            auto form = vbox.emplace<QFormLayout>();
 
-        auto edit = vbox.emplace<QLabel>("not implemented");
+            form->addRow(new QLabel("User name:"), new QLineEdit());
+            form->addRow(new QLabel("First nick choice:"), new QLineEdit());
+            form->addRow(new QLabel("Second nick choice:"), new QLineEdit());
+            form->addRow(new QLabel("Third nick choice:"), new QLineEdit());
 
-        NotebookTab2 *tab = notebook->addPage(obj.getElement());
-        tab->setTitle("Irc");
-    }*/
+            auto tab = notebook->addPage(obj.getElement());
+            tab->setCustomTitle("Irc");
+        }
+    */
 
     layout->setStretchFactor(notebook.getElement(), 1);
 
@@ -143,7 +150,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                          [=](bool) { this->close(); });
     }
 
-    this->setScaleIndependantSize(300, 210);
+    this->setScaleIndependantSize(300, 310);
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 

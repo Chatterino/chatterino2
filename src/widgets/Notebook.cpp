@@ -210,7 +210,8 @@ void Notebook::selectNextTab()
         return;
     }
 
-    int index = (this->indexOf(this->selectedPage_) + 1) % this->items_.count();
+    auto index =
+        (this->indexOf(this->selectedPage_) + 1) % this->items_.count();
 
     this->select(this->items_[index].page);
 }
@@ -252,11 +253,11 @@ QWidget *Notebook::getSelectedPage() const
 
 QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 {
-    int i = 0;
+    auto i = 0;
 
     for (auto &item : this->items_) {
-        QRect rect = item.tab->getDesiredRect();
-        rect.setHeight((int)(this->getScale() * 24));
+        auto rect = item.tab->getDesiredRect();
+        rect.setHeight(int(this->getScale() * 24));
 
         rect.setWidth(std::min(maxWidth, rect.width()));
 
@@ -322,47 +323,59 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::performLayout(bool animated)
 {
-    int xStart = int(2 * this->getScale());
+    const auto left = int(2 * this->getScale());
+    const auto scale = this->getScale();
+    const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
+    const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
-    int x = xStart, y = 0;
-    float scale = this->getScale();
+    auto x = left;
+    auto y = 0;
 
-    int h = int(NOTEBOOK_TAB_HEIGHT * this->getScale());
-
+    // set size of custom buttons (settings, user, ...)
     for (auto *btn : this->customButtons_) {
         if (!btn->isVisible()) {
             continue;
         }
 
-        btn->setFixedSize(h, h);
+        btn->setFixedSize(tabHeight, tabHeight);
         btn->move(x, 0);
-        x += h;
+        x += tabHeight;
     }
 
-    int tabHeight = static_cast<int>(NOTEBOOK_TAB_HEIGHT * scale);
-    bool first = true;
+    // layout tabs
+    /// Notebook tabs need to know if they are in the last row.
+    auto firstInBottomRow =
+        this->items_.size() ? &this->items_.front() : nullptr;
 
-    for (auto i = this->items_.begin(); i != this->items_.end(); i++) {
-        bool wrap =
-            !first &&
-            (((i + 1 == this->items_.end() && this->showAddButton_) ? tabHeight
-                                                                    : 0) +
-             x + i->tab->width()) > width();
+    for (auto &item : this->items_) {
+        /// Break line if element doesn't fit.
+        auto isFirst = &item == &this->items_.front();
+        auto isLast = &item == &this->items_.back();
 
-        if (wrap) {
-            y += i->tab->height();
-            i->tab->moveAnimated(QPoint(xStart, y), animated);
-            x = i->tab->width() + xStart;
-        } else {
-            i->tab->moveAnimated(QPoint(x, y), animated);
-            x += i->tab->width();
+        auto fitsInLine =
+            ((isLast ? addButtonWidth : 0) + x + item.tab->width()) <= width();
+
+        if (!isFirst && !fitsInLine) {
+            y += item.tab->height();
+            x = left;
+            firstInBottomRow = &item;
         }
 
-        x += int(scale * 1);
-
-        first = false;
+        /// Layout tab
+        item.tab->moveAnimated(QPoint(x, y), animated);
+        x += item.tab->width() + int(scale * 1);
     }
 
+    /// Update which tabs are in the last row
+    auto inLastRow = false;
+    for (const auto &item : this->items_) {
+        if (&item == firstInBottomRow) {
+            inLastRow = true;
+        }
+        item.tab->setInLastRow(inLastRow);
+    }
+
+    // move misc buttons
     if (this->showAddButton_) {
         this->addButton_->move(x, y);
     }
@@ -372,8 +385,10 @@ void Notebook::performLayout(bool animated)
         this->update();
     }
 
-    y += int(3 * scale);
+    /// Increment for the line at the bottom
+    y += int(2 * scale);
 
+    // raise elements
     for (auto &i : this->items_) {
         i.tab->raise();
     }
@@ -382,6 +397,7 @@ void Notebook::performLayout(bool animated)
         this->addButton_->raise();
     }
 
+    // set page bounds
     if (this->selectedPage_ != nullptr) {
         this->selectedPage_->move(0, y + tabHeight);
         this->selectedPage_->resize(width(), height() - y - tabHeight);
@@ -394,8 +410,8 @@ void Notebook::paintEvent(QPaintEvent *event)
     BaseWidget::paintEvent(event);
 
     QPainter painter(this);
-    painter.fillRect(0, this->lineY_, this->width(),
-                     (int)(3 * this->getScale()), this->theme->tabs.bottomLine);
+    painter.fillRect(0, this->lineY_, this->width(), int(2 * this->getScale()),
+                     this->theme->tabs.bottomLine);
 }
 
 NotebookButton *Notebook::getAddButton()
@@ -431,9 +447,8 @@ SplitNotebook::SplitNotebook(Window *parent)
         QTimer::singleShot(80, this, [this] { this->addPage(true); });
     });
 
-    bool customFrame = parent->hasCustomWindowFrame();
-
-    if (!customFrame) {
+    // add custom buttons if they are not in the parent window frame
+    if (!parent->hasCustomWindowFrame()) {
         this->addCustomButtons();
     }
 }
@@ -475,8 +490,8 @@ void SplitNotebook::addCustomButtons()
 
 SplitContainer *SplitNotebook::addPage(bool select)
 {
-    SplitContainer *container = new SplitContainer(this);
-    auto *tab = Notebook::addPage(container, QString(), select);
+    auto container = new SplitContainer(this);
+    auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
     tab->show();

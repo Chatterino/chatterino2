@@ -337,21 +337,19 @@ void Window::onAccountSelected()
 
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
     auto windowTitleEnd =
-        QString(" - Chatterino Nightly " CHATTERINO_VERSION
+        QString("Chatterino Nightly " CHATTERINO_VERSION
                 " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
 #else
-    auto windowTitleEnd = QString(" - Chatterino Beta " CHATTERINO_VERSION);
+    auto windowTitleEnd = QString("Chatterino Beta " CHATTERINO_VERSION);
 #endif
 
-    if (user->isAnon()) {
-        this->setWindowTitle("Not logged in" + windowTitleEnd);
+    this->setWindowTitle(windowTitleEnd);
 
+    if (user->isAnon()) {
         if (this->userLabel_) {
             this->userLabel_->getLabel().setText("anonymous");
         }
     } else {
-        this->setWindowTitle(user->getUserName() + windowTitleEnd);
-
         if (this->userLabel_) {
             this->userLabel_->getLabel().setText(user->getUserName());
         }

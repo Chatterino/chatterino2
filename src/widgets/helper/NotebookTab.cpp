@@ -168,6 +168,14 @@ void NotebookTab::setSelected(bool value)
     this->update();
 }
 
+void NotebookTab::setInLastRow(bool value)
+{
+    if (this->isInLastRow_ != value) {
+        this->isInLastRow_ = value;
+        this->update();
+    }
+}
+
 void NotebookTab::setLive(bool isLive)
 {
     if (this->isLive_ != isLive) {
@@ -249,7 +257,6 @@ void NotebookTab::paintEvent(QPaintEvent *)
         scale * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
-    //    int fullHeight = (int)(scale * 48);
 
     // select the right tab colors
     Theme::TabColors colors;
@@ -266,33 +273,17 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
-    // || SettingsDialog::getHandle() == QApplication::activeWindow();
 
     QBrush tabBackground = /*this->mouseOver_ ? colors.backgrounds.hover
                                             :*/
         (windowFocused ? colors.backgrounds.regular
                        : colors.backgrounds.unfocused);
 
-    //    painter.fillRect(rect(), this->mouseOver_ ? regular.backgrounds.hover
-    //                                              : (windowFocused ?
-    //                                              regular.backgrounds.regular
-    //                                                               :
-    //                                                               regular.backgrounds.unfocused));
-
     // fill the tab background
     auto bgRect = rect();
     bgRect.setTop(bgRect.top() + 2);
 
     painter.fillRect(bgRect, tabBackground);
-
-    // draw border
-    //    painter.setPen(QPen("#fff"));
-    //    QPainterPath path(QPointF(0, height));
-    //    path.lineTo(0, 0);
-    //    path.lineTo(this->width() - 1, 0);
-    //    path.lineTo(this->width() - 1, this->height() - 1);
-    //    path.lineTo(0, this->height() - 1);
-    //    painter.drawPath(path);
 
     // top line
     painter.fillRect(
@@ -305,14 +296,15 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // draw live indicator
     if (this->isLive_) {
         painter.setPen(QColor(Qt::GlobalColor::red));
+        painter.setRenderHint(QPainter::Antialiasing);
         QBrush b;
         b.setColor(QColor(Qt::GlobalColor::red));
         b.setStyle(Qt::SolidPattern);
         painter.setBrush(b);
 
-        auto x = this->width() - (7.f * scale);
-        auto y = 4.f * scale;
-        auto diameter = 4.f * scale;
+        auto x = this->width() - (7 * scale);
+        auto y = 4 * scale + (this->isSelected() ? 0 : 1);
+        auto diameter = 4 * scale;
         painter.drawEllipse(QRectF(x, y, diameter, diameter));
     }
 
@@ -367,10 +359,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     }
 
     // draw line at bottom
-    if (!this->selected_) {
+    if (!this->selected_ && this->isInLastRow_) {
         painter.fillRect(0, this->height() - 1, this->width(), 1,
                          app->themes->window.background);
+    }
 
+    // draw mouse over effect
+    if (!this->selected_) {
         this->fancyPaint(painter);
     }
 }
