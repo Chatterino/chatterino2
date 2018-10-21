@@ -84,7 +84,7 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::clicked,
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked,
                      [=] { this->openEmotePopup(); });
 
     // clear channelview selection when selecting in the input

@@ -120,19 +120,19 @@ void BaseWindow::init()
                 TitleBarButton *_exitButton = new TitleBarButton;
                 _exitButton->setButtonStyle(TitleBarButtonStyle::Close);
 
-                QObject::connect(_minButton, &TitleBarButton::clicked, this,
+                QObject::connect(_minButton, &TitleBarButton::leftClicked, this,
                                  [this] {
                                      this->setWindowState(Qt::WindowMinimized |
                                                           this->windowState());
                                  });
                 QObject::connect(
-                    _maxButton, &TitleBarButton::clicked, this, [this] {
+                    _maxButton, &TitleBarButton::leftClicked, this, [this] {
                         this->setWindowState(this->windowState() ==
                                                      Qt::WindowMaximized
                                                  ? Qt::WindowActive
                                                  : Qt::WindowMaximized);
                     });
-                QObject::connect(_exitButton, &TitleBarButton::clicked, this,
+                QObject::connect(_exitButton, &TitleBarButton::leftClicked, this,
                                  [this] { this->close(); });
 
                 this->ui_.minButton = _minButton;
@@ -398,7 +398,7 @@ TitleBarButton *BaseWindow::addTitleBarButton(const TitleBarButtonStyle &style,
     this->ui_.titlebarBox->insertWidget(1, button);
     button->setButtonStyle(style);
 
-    QObject::connect(button, &TitleBarButton::clicked, this,
+    QObject::connect(button, &TitleBarButton::leftClicked, this,
                      [onClicked] { onClicked(); });
 
     return button;
@@ -412,7 +412,7 @@ EffectLabel *BaseWindow::addTitleBarLabel(std::function<void()> onClicked)
     this->ui_.buttons.push_back(button);
     this->ui_.titlebarBox->insertWidget(1, button);
 
-    QObject::connect(button, &EffectLabel::clicked, this,
+    QObject::connect(button, &EffectLabel::leftClicked, this,
                      [onClicked] { onClicked(); });
 
     return button;

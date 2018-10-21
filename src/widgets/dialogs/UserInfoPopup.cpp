@@ -50,7 +50,7 @@ UserInfoPopup::UserInfoPopup()
         auto avatar =
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
-        QObject::connect(avatar.getElement(), &Button::clicked, [this] {
+        QObject::connect(avatar.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl(
                 QUrl("https://twitch.tv/" + this->userName_.toLower()));
         });
@@ -94,17 +94,17 @@ UserInfoPopup::UserInfoPopup()
 
         user->addStretch(1);
 
-        QObject::connect(viewLogs.getElement(), &Button::clicked, [this] {
+        QObject::connect(viewLogs.getElement(), &Button::leftClicked, [this] {
             auto logs = new LogsPopup();
             logs->setInfo(this->channel_, this->userName_);
             logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
         });
 
-        QObject::connect(mod.getElement(), &Button::clicked, [this] {
+        QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
-        QObject::connect(unmod.getElement(), &Button::clicked, [this] {
+        QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/unmod " + this->userName_);
         });
 
@@ -476,7 +476,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 button->setBorderColor(QColor(255, 255, 255, 127));
 
                 QObject::connect(
-                    button.getElement(), &Button::clicked, [this, action] {
+                    button.getElement(), &Button::leftClicked, [this, action] {
                         this->buttonClicked.invoke(std::make_pair(action, -1));
                     });
             }
@@ -512,7 +512,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 }
                 a->setBorderColor(color1);
 
-                QObject::connect(a.getElement(), &EffectLabel2::clicked,
+                QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
                                  [this, timeout = std::get<1>(item)] {
                                      this->buttonClicked.invoke(std::make_pair(
                                          Action::Timeout, timeout));

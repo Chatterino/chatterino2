@@ -167,25 +167,40 @@ void SplitHeader::initializeLayout()
         }),
         // moderator
         this->moderationButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(w, &Button::clicked, this, [this, w]() mutable {
-                if (this->split_->getModerationMode())
-                    this->split_->setModerationMode(false);
-                else
-                {
-                    if (getApp()->moderationActions->items.getVector().empty())
+            QObject::connect(
+                w, &Button::clicked, this,
+                [this, w](Qt::MouseButton button) mutable {
+                    switch (button)
                     {
-                        getApp()->windows->showSettingsDialog(
-                            SettingsDialogPreference::ModerationActions);
-                        this->split_->setModerationMode(true);
-                    }
-                    else
-                    {
-                        this->split_->setModerationMode(true);
-                    }
-                }
+                        case Qt::LeftButton:
+                            if (getApp()
+                                    ->moderationActions->items.getVector()
+                                    .empty())
+                            {
+                                getApp()->windows->showSettingsDialog(
+                                    SettingsDialogPreference::
+                                        ModerationActions);
+                                this->split_->setModerationMode(true);
+                                w->setDim(true);
+                            }
+                            else
+                            {
+                                auto moderationMode =
+                                    this->split_->getModerationMode();
 
-                w->setDim(!this->split_->getModerationMode());
-            });
+                                this->split_->setModerationMode(
+                                    !moderationMode);
+                                w->setDim(moderationMode);
+                            }
+                            break;
+
+                        case Qt::RightButton:
+                        case Qt::MiddleButton:
+                            getApp()->windows->showSettingsDialog(
+                                SettingsDialogPreference::ModerationActions);
+                            break;
+                    }
+                });
         }),
         // dropdown
         this->dropdownButton_ = makeWidget<Button>(
@@ -195,10 +210,25 @@ void SplitHeader::initializeLayout()
             w->setPixmap(getApp()->resources->buttons.addSplitDark);
             w->setEnableMargin(false);
 
-            QObject::connect(w, &Button::clicked, this,
+            QObject::connect(w, &Button::leftClicked, this,
                              [this]() { this->split_->addSibling(); });
         }),
     });
+
+    // update moderation button when items changed
+    this->managedConnect(
+        getApp()->moderationActions->items.delayedItemsChanged, [this] {
+            if (getApp()->moderationActions->items.getVector().empty())
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+            else
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+        });
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -447,10 +477,13 @@ void SplitHeader::updateChannelText()
 
 void SplitHeader::updateModerationModeIcon()
 {
+    auto moderationMode =
+        this->split_->getModerationMode() &&
+        !getApp()->moderationActions->items.getVector().empty();
+
     this->moderationButton_->setPixmap(
-        this->split_->getModerationMode()
-            ? getApp()->resources->buttons.modModeEnabled
-            : getApp()->resources->buttons.modModeDisabled);
+        moderationMode ? getApp()->resources->buttons.modModeEnabled
+                       : getApp()->resources->buttons.modModeDisabled);
 
     auto channel = this->split_->getChannel();
     auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());

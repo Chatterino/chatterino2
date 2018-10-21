@@ -139,7 +139,7 @@ void ChannelView::initializeLayout()
     this->goToBottom_->getLabel().setText("More messages below");
     this->goToBottom_->setVisible(false);
 
-    QObject::connect(this->goToBottom_, &EffectLabel::clicked, this, [=] {
+    QObject::connect(this->goToBottom_, &EffectLabel::leftClicked, this, [=] {
         QTimer::singleShot(180, [=] {
             this->scrollBar_->scrollToBottom(
                 getSettings()->enableSmoothScrollingNewMessages.getValue());

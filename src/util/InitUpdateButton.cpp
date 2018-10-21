@@ -11,7 +11,7 @@ void initUpdateButton(Button &button,
     button.hide();
 
     // show update prompt when clicking the button
-    QObject::connect(&button, &Button::clicked, [&button] {
+    QObject::connect(&button, &Button::leftClicked, [&button] {
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(

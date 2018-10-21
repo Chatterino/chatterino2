@@ -50,7 +50,8 @@ public:
     void setMenu(std::unique_ptr<QMenu> menu);
 
 signals:
-    void clicked();
+    void leftClicked();
+    void clicked(Qt::MouseButton button);
     void leftMousePress();
 
 protected:

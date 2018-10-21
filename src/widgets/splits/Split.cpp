@@ -268,12 +268,9 @@ void Split::setChannel(IndirectChannel newChannel)
 
 void Split::setModerationMode(bool value)
 {
-    if (value != this->moderationMode_)
-    {
-        this->moderationMode_ = value;
-        this->header_->updateModerationModeIcon();
-        this->view_->layoutMessages();
-    }
+    this->moderationMode_ = value;
+    this->header_->updateModerationModeIcon();
+    this->view_->layoutMessages();
 }
 
 bool Split::getModerationMode() const

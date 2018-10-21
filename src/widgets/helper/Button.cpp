@@ -230,33 +230,27 @@ void Button::mousePressEvent(QMouseEvent *event)
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!this->enabled_)
-    {
         return;
-    }
 
-    if (event->button() != Qt::LeftButton)
+    if (event->button() == Qt::LeftButton)
     {
-        return;
+        this->mouseDown_ = false;
+
+        if (this->rect().contains(event->pos()))
+            emit leftClicked();
     }
 
-    this->mouseDown_ = false;
-
-    if (this->rect().contains(event->pos()))
-    {
-        emit clicked();
-    }
+    emit clicked(event->button());
 }
 
 void Button::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!this->enabled_)
+    if (this->enabled_)
     {
-        return;
+        this->mousePos_ = event->pos();
+
+        this->update();
     }
-
-    this->mousePos_ = event->pos();
-
-    this->update();
 }
 
 void Button::onMouseEffectTimeout()

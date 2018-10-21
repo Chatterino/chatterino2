@@ -150,7 +150,7 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 
         update();
 
-        emit clicked();
+        emit leftClicked();
     }
 
     Button::mouseReleaseEvent(event);

@@ -484,7 +484,7 @@ NotebookTab *Notebook::getTabFromPage(QWidget *page)
 SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
-    this->connect(this->getAddButton(), &NotebookButton::clicked, [this]() {
+    this->connect(this->getAddButton(), &NotebookButton::leftClicked, [this]() {
         QTimer::singleShot(80, this, [this] { this->addPage(true); });
     });
 
@@ -508,7 +508,7 @@ void SplitNotebook::addCustomButtons()
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
-    QObject::connect(settingsBtn, &NotebookButton::clicked,
+    QObject::connect(settingsBtn, &NotebookButton::leftClicked,
                      [] { getApp()->windows->showSettingsDialog(); });
 
     // account
@@ -519,7 +519,7 @@ void SplitNotebook::addCustomButtons()
         this->connections_);
 
     userBtn->setIcon(NotebookButton::User);
-    QObject::connect(userBtn, &NotebookButton::clicked, [this, userBtn] {
+    QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {
         getApp()->windows->showAccountSelectPopup(
             this->mapToGlobal(userBtn->rect().bottomRight()));
     });
