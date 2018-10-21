@@ -188,9 +188,7 @@ void SplitInput::installKeyPressedEvent()
         {
             auto c = this->split_->getChannel();
             if (c == nullptr)
-            {
                 return;
-            }
 
             QString message = ui_.textEdit->toPlainText();
 
@@ -202,7 +200,9 @@ void SplitInput::installKeyPressedEvent()
             if ((this->prevMsg_.isEmpty() ||
                  !this->prevMsg_.endsWith(message)) &&
                 !message.trimmed().isEmpty())
+            {
                 this->prevMsg_.append(message);
+            }
 
             event->accept();
             if (!(event->modifiers() == Qt::ControlModifier))
