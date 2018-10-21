@@ -117,8 +117,11 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             auto image = this->emote_->images.getImage(container.getScale());
             if (image->isEmpty()) return;
 
-            auto size = QSize(int(container.getScale() * image->width()),
-                              int(container.getScale() * image->height()));
+            auto emoteScale = getSettings()->emoteScale.getValue();
+
+            auto size =
+                QSize(int(container.getScale() * image->width() * emoteScale),
+                      int(container.getScale() * image->height() * emoteScale));
 
             container.addElement((new ImageLayoutElement(*this, image, size))
                                      ->setLink(this->getLink()));

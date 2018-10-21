@@ -58,6 +58,8 @@ const ImagePtr &ImageSet::getImage3() const
 
 const ImagePtr &ImageSet::getImage(float scale) const
 {
+    scale *= getSettings()->emoteScale;
+
     int quality = 1;
 
     if (scale > 2.999)
