@@ -214,13 +214,20 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     int x = this->getRect().left();
 
     for (int i = 0; i < this->getText().size(); i++) {
-        int w = metrics.width(this->getText()[i]);
+        auto &text = this->getText();
+        auto width = metrics.width(this->getText()[i]);
 
-        if (x + w > abs.x()) {
+        if (x + width > abs.x()) {
+            if (text.size() > i + 1 &&
+                QChar::isLowSurrogate(text[i].unicode()))  //
+            {
+                i++;
+            }
+
             return i;
         }
 
-        x += w;
+        x += width;
     }
 
     return this->getSelectionIndexCount();

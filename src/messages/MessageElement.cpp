@@ -159,7 +159,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
         for (Word &word : this->words_) {
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool trailingSpace) {
-                QColor color = this->color_.getColor(*app->themes);
+                auto color = this->color_.getColor(*app->themes);
                 app->themes->normalizeColor(color);
 
                 auto e = (new TextLayoutElement(
@@ -205,26 +205,34 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             QString text = word.text;
             int textLength = text.length();
             int wordStart = 0;
-            int width = metrics.width(text[0]);
+            int width = 0;
 
-            for (int i = 1; i < textLength; i++) {
-                int charWidth = metrics.width(text[i]);
+            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
-                if (!container.fitsInLine(width + charWidth)) {
+            for (int i = 0; i < textLength; i++)  //
+            {
+                auto isSurrogate = text.size() > i + 1 &&
+                                   QChar::isHighSurrogate(text[i].unicode());
+
+                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
+                                             : metrics.width(text[i]);
+
+                if (!container.fitsInLine(width + charWidth))  //
+                {
                     container.addElementNoLineBreak(getTextLayoutElement(
                         text.mid(wordStart, i - wordStart), width, false));
                     container.breakLine();
 
                     wordStart = i;
-                    width = 0;
-                    if (textLength > i + 2) {
-                        width += metrics.width(text[i]);
-                        width += metrics.width(text[i + 1]);
-                        i += 1;
-                    }
+                    width = charWidth;
+
+                    if (isSurrogate) i++;
                     continue;
                 }
+
                 width += charWidth;
+
+                if (isSurrogate) i++;
             }
 
             container.addElement(getTextLayoutElement(
