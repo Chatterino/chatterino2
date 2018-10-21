@@ -10,7 +10,8 @@ namespace chatterino {
 
 void NetworkTimer::start()
 {
-    if (this->timeoutMS_ <= 0) {
+    if (this->timeoutMS_ <= 0)
+    {
         return;
     }
 

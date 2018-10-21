@@ -28,13 +28,15 @@ BaseWidget::BaseWidget(QWidget *parent, Qt::WindowFlags f)
 
 float BaseWidget::getScale() const
 {
-    if (this->overrideScale_) {
+    if (this->overrideScale_)
+    {
         return this->overrideScale_.get();
     }
 
     BaseWidget *baseWidget = dynamic_cast<BaseWidget *>(this->window());
 
-    if (baseWidget == nullptr) {
+    if (baseWidget == nullptr)
+    {
         return 1.f;
     }
 
@@ -87,10 +89,12 @@ void BaseWidget::setScaleIndependantSize(QSize size)
 {
     this->scaleIndependantSize_ = size;
 
-    if (size.width() > 0) {
+    if (size.width() > 0)
+    {
         this->setFixedWidth((int)(size.width() * this->getScale()));
     }
-    if (size.height() > 0) {
+    if (size.height() > 0)
+    {
         this->setFixedHeight((int)(size.height() * this->getScale()));
     }
 }
@@ -109,16 +113,21 @@ void BaseWidget::setScaleIndependantHeight(int value)
 
 void BaseWidget::childEvent(QChildEvent *event)
 {
-    if (event->added()) {
+    if (event->added())
+    {
         BaseWidget *widget = dynamic_cast<BaseWidget *>(event->child());
 
-        if (widget != nullptr) {
+        if (widget != nullptr)
+        {
             this->widgets_.push_back(widget);
         }
-    } else if (event->removed()) {
-        for (auto it = this->widgets_.begin(); it != this->widgets_.end();
-             it++) {
-            if (*it == event->child()) {
+    }
+    else if (event->removed())
+    {
+        for (auto it = this->widgets_.begin(); it != this->widgets_.end(); it++)
+        {
+            if (*it == event->child())
+            {
                 this->widgets_.erase(it);
                 break;
             }

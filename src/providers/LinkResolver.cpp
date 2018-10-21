@@ -23,12 +23,16 @@ void LinkResolver::getLinkInfo(
         auto statusCode = root.value("status").toInt();
         QString response = QString();
         QString linkString = url;
-        if (statusCode == 200) {
+        if (statusCode == 200)
+        {
             response = root.value("tooltip").toString();
-            if (getSettings()->enableUnshortLinks) {
+            if (getSettings()->enableUnshortLinks)
+            {
                 linkString = root.value("link").toString();
             }
-        } else {
+        }
+        else
+        {
             response = root.value("message").toString();
         }
         successCallback(QUrl::fromPercentEncoding(response.toUtf8()),

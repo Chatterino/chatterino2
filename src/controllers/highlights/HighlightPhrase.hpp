@@ -92,7 +92,8 @@ namespace Settings {
     struct Deserialize<chatterino::HighlightPhrase> {
         static chatterino::HighlightPhrase get(const rapidjson::Value &value)
         {
-            if (!value.IsObject()) {
+            if (!value.IsObject())
+            {
                 return chatterino::HighlightPhrase(QString(), true, false,
                                                    false);
             }

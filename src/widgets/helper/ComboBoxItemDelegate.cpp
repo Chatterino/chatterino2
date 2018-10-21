@@ -19,7 +19,8 @@ QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent,
 {
     QVariant data = index.data(Qt::UserRole + 1);
 
-    if (data.type() != QVariant::StringList) {
+    if (data.type() != QVariant::StringList)
+    {
         return QStyledItemDelegate::createEditor(parent, option, index);
     }
 
@@ -31,17 +32,21 @@ QWidget *ComboBoxItemDelegate::createEditor(QWidget *parent,
 void ComboBoxItemDelegate::setEditorData(QWidget *editor,
                                          const QModelIndex &index) const
 {
-    if (QComboBox *cb = qobject_cast<QComboBox *>(editor)) {
+    if (QComboBox *cb = qobject_cast<QComboBox *>(editor))
+    {
         // get the index of the text in the combobox that matches the current
         // value of the itenm
         QString currentText = index.data(Qt::EditRole).toString();
         int cbIndex = cb->findText(currentText);
 
         // if it is valid, adjust the combobox
-        if (cbIndex >= 0) {
+        if (cbIndex >= 0)
+        {
             cb->setCurrentIndex(cbIndex);
         }
-    } else {
+    }
+    else
+    {
         QStyledItemDelegate::setEditorData(editor, index);
     }
 }

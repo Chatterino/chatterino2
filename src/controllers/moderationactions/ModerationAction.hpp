@@ -53,7 +53,8 @@ namespace Settings {
     struct Deserialize<chatterino::ModerationAction> {
         static chatterino::ModerationAction get(const rapidjson::Value &value)
         {
-            if (!value.IsObject()) {
+            if (!value.IsObject())
+            {
                 return chatterino::ModerationAction(QString());
             }
 

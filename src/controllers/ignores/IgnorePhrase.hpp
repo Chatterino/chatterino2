@@ -35,10 +35,13 @@ public:
         , replace_(replace)
         , isCaseSensitive_(isCaseSensitive)
     {
-        if (this->isCaseSensitive_) {
+        if (this->isCaseSensitive_)
+        {
             regex_.setPatternOptions(
                 QRegularExpression::UseUnicodePropertiesOption);
-        } else {
+        }
+        else
+        {
             regex_.setPatternOptions(
                 QRegularExpression::CaseInsensitiveOption |
                 QRegularExpression::UseUnicodePropertiesOption);
@@ -101,14 +104,18 @@ public:
 
     bool containsEmote() const
     {
-        if (!this->emotesChecked_) {
+        if (!this->emotesChecked_)
+        {
             const auto &accvec =
                 getApp()->accounts->twitch.accounts.getVector();
-            for (const auto &acc : accvec) {
+            for (const auto &acc : accvec)
+            {
                 const auto &accemotes = *acc->accessEmotes();
-                for (const auto &emote : accemotes.emotes) {
+                for (const auto &emote : accemotes.emotes)
+                {
                     if (this->replace_.contains(emote.first.string,
-                                                Qt::CaseSensitive)) {
+                                                Qt::CaseSensitive))
+                    {
                         this->emotes_.emplace(emote.first, emote.second);
                     }
                 }
@@ -154,7 +161,8 @@ namespace Settings {
     struct Deserialize<chatterino::IgnorePhrase> {
         static chatterino::IgnorePhrase get(const rapidjson::Value &value)
         {
-            if (!value.IsObject()) {
+            if (!value.IsObject())
+            {
                 return chatterino::IgnorePhrase(
                     QString(), false, false,
                     ::chatterino::getSettings()

@@ -16,7 +16,8 @@ NetworkResult::NetworkResult(const QByteArray &data)
 QJsonObject NetworkResult::parseJson() const
 {
     QJsonDocument jsonDoc(QJsonDocument::fromJson(this->data_));
-    if (jsonDoc.isNull()) {
+    if (jsonDoc.isNull())
+    {
         return QJsonObject{};
     }
 
@@ -30,7 +31,8 @@ rapidjson::Document NetworkResult::parseRapidJson() const
     rapidjson::ParseResult result =
         ret.Parse(this->data_.data(), this->data_.length());
 
-    if (result.Code() != rapidjson::kParseErrorNone) {
+    if (result.Code() != rapidjson::kParseErrorNone)
+    {
         log("JSON parse error: {} ({})",
             rapidjson::GetParseError_En(result.Code()), result.Offset());
         return ret;

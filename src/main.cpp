@@ -20,9 +20,12 @@ int main(int argc, char **argv)
                    [&](auto s) { return s; });
 
     // run in gui mode or browser extension host mode
-    if (shouldRunBrowserExtensionHost(args)) {
+    if (shouldRunBrowserExtensionHost(args))
+    {
         runBrowserExtensionHost();
-    } else {
+    }
+    else
+    {
         Paths paths;
         Settings settings(paths);
 

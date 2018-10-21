@@ -21,7 +21,8 @@ public:
         QMutexLocker lock(&this->mutex_);
 
         auto a = this->data_.find(name);
-        if (a == this->data_.end()) {
+        if (a == this->data_.end())
+        {
             return false;
         }
 
@@ -35,7 +36,8 @@ public:
         QMutexLocker lock(&this->mutex_);
 
         auto a = this->data_.find(name);
-        if (a == this->data_.end()) {
+        if (a == this->data_.end())
+        {
             TValue value = addLambda();
             this->data_.insert(name, value);
             return value;
@@ -72,7 +74,8 @@ public:
 
         QMapIterator<TKey, TValue> it(this->data_);
 
-        while (it.hasNext()) {
+        while (it.hasNext())
+        {
             it.next();
             func(it.key(), it.value());
         }
@@ -84,7 +87,8 @@ public:
 
         QMutableMapIterator<TKey, TValue> it(this->data_);
 
-        while (it.hasNext()) {
+        while (it.hasNext())
+        {
             it.next();
             func(it.key(), it.value());
         }

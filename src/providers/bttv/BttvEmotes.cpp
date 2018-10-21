@@ -29,7 +29,8 @@ namespace {
         auto urlTemplate =
             qS("https:") + jsonRoot.value("urlTemplate").toString();
 
-        for (auto jsonEmote : jsonEmotes) {
+        for (auto jsonEmote : jsonEmotes)
+        {
             auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
             auto name =
                 EmoteName{jsonEmote.toObject().value("code").toString()};
@@ -62,7 +63,8 @@ namespace {
         auto jsonEmotes = jsonRoot.value("emotes").toArray();
         auto urlTemplate = "https:" + jsonRoot.value("urlTemplate").toString();
 
-        for (auto jsonEmote_ : jsonEmotes) {
+        for (auto jsonEmote_ : jsonEmotes)
+        {
             auto jsonEmote = jsonEmote_.toObject();
 
             auto id = EmoteId{jsonEmote.value("id").toString()};
@@ -103,7 +105,8 @@ boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
 
-    if (it == emotes->end()) return boost::none;
+    if (it == emotes->end())
+        return boost::none;
     return it->second;
 }
 
@@ -137,7 +140,8 @@ void BttvEmotes::loadChannel(const QString &channelName,
 
     request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
         auto pair = parseChannelEmotes(result.parseJson());
-        if (pair.first) callback(std::move(pair.second));
+        if (pair.first)
+            callback(std::move(pair.second));
         return pair.first;
     });
 

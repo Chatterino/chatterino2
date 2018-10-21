@@ -19,7 +19,8 @@ EmotePtr cachedOrMakeEmotePtr(Emote &&emote, const EmoteMap &cache)
 {
     // reuse old shared_ptr if nothing changed
     auto it = cache.find(emote.name);
-    if (it != cache.end() && *it->second == emote) return it->second;
+    if (it != cache.end() && *it->second == emote)
+        return it->second;
 
     return std::make_shared<Emote>(std::move(emote));
 }
@@ -32,10 +33,13 @@ EmotePtr cachedOrMakeEmotePtr(
     std::lock_guard<std::mutex> guard(mutex);
 
     auto shared = cache[id].lock();
-    if (shared && *shared == emote) {
+    if (shared && *shared == emote)
+    {
         // reuse old shared_ptr if nothing changed
         return shared;
-    } else {
+    }
+    else
+    {
         shared = std::make_shared<Emote>(std::move(emote));
         cache[id] = shared;
         return shared;

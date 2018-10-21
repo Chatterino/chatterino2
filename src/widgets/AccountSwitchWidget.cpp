@@ -15,7 +15,8 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
     this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-    for (const auto &userName : app->accounts->twitch.getUsernames()) {
+    for (const auto &userName : app->accounts->twitch.getUsernames())
+    {
         this->addItem(userName);
     }
 
@@ -26,7 +27,8 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
 
         this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-        for (const auto &userName : app->accounts->twitch.getUsernames()) {
+        for (const auto &userName : app->accounts->twitch.getUsernames())
+        {
             this->addItem(userName);
         }
 
@@ -38,12 +40,16 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
     this->refreshSelection();
 
     QObject::connect(this, &QListWidget::clicked, [=] {
-        if (!this->selectedItems().isEmpty()) {
+        if (!this->selectedItems().isEmpty())
+        {
             QString newUsername = this->currentItem()->text();
             if (newUsername.compare(ANONYMOUS_USERNAME_LABEL,
-                                    Qt::CaseInsensitive) == 0) {
+                                    Qt::CaseInsensitive) == 0)
+            {
                 app->accounts->twitch.currentUsername = "";
-            } else {
+            }
+            else
+            {
                 app->accounts->twitch.currentUsername =
                     newUsername.toStdString();
             }
@@ -61,20 +67,25 @@ void AccountSwitchWidget::refreshSelection()
     this->blockSignals(true);
 
     // Select the currently logged in user
-    if (this->count() > 0) {
+    if (this->count() > 0)
+    {
         auto app = getApp();
 
         auto currentUser = app->accounts->twitch.getCurrent();
 
-        if (currentUser->isAnon()) {
+        if (currentUser->isAnon())
+        {
             this->setCurrentRow(0);
-        } else {
+        }
+        else
+        {
             const QString &currentUsername = currentUser->getUserName();
-            for (int i = 0; i < this->count(); ++i) {
+            for (int i = 0; i < this->count(); ++i)
+            {
                 QString itemText = this->item(i)->text();
 
-                if (itemText.compare(currentUsername, Qt::CaseInsensitive) ==
-                    0) {
+                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0)
+                {
                     this->setCurrentRow(i);
                     break;
                 }

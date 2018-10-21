@@ -48,7 +48,8 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     , frameless_(_flags & Frameless)
     , flags_(_flags)
 {
-    if (this->frameless_) {
+    if (this->frameless_)
+    {
         this->enableCustomFrame_ = false;
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
@@ -82,7 +83,8 @@ void BaseWindow::init()
     this->setWindowIcon(QIcon(":/images/icon.png"));
 
 #ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         // CUSTOM WINDOW FRAME
         QVBoxLayout *layout = new QVBoxLayout();
         this->ui_.windowLayout = layout;
@@ -90,7 +92,8 @@ void BaseWindow::init()
         layout->setSpacing(0);
         this->setLayout(layout);
         {
-            if (!this->frameless_) {
+            if (!this->frameless_)
+            {
                 QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
                     new QHBoxLayout();
                 buttonLayout->setMargin(0);
@@ -161,7 +164,8 @@ void BaseWindow::init()
 
 #ifdef USEWINSDK
     // fourtf: don't ask me why we need to delay this
-    if (!(this->flags_ & Flags::TopMost)) {
+    if (!(this->flags_ & Flags::TopMost))
+    {
         QTimer::singleShot(1, this, [this] {
             getSettings()->windowTopMost.connect(
                 [this](bool topMost, auto) {
@@ -204,9 +208,12 @@ BaseWindow::ActionOnFocusLoss BaseWindow::getActionOnFocusLoss() const
 
 QWidget *BaseWindow::getLayoutContainer()
 {
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         return this->ui_.layoutBase;
-    } else {
+    }
+    else
+    {
         return this;
     }
 }
@@ -224,13 +231,15 @@ bool BaseWindow::hasCustomWindowFrame()
 
 void BaseWindow::themeChangedEvent()
 {
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         QPalette palette;
         palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
         palette.setColor(QPalette::Foreground, this->theme->window.text);
         this->setPalette(palette);
 
-        if (this->ui_.titleLabel) {
+        if (this->ui_.titleLabel)
+        {
             QPalette palette_title;
             palette_title.setColor(
                 QPalette::Foreground,
@@ -238,10 +247,13 @@ void BaseWindow::themeChangedEvent()
             this->ui_.titleLabel->setPalette(palette_title);
         }
 
-        for (Button *button : this->ui_.buttons) {
+        for (Button *button : this->ui_.buttons)
+        {
             button->setMouseEffectColor(this->theme->window.text);
         }
-    } else {
+    }
+    else
+    {
         QPalette palette;
         palette.setColor(QPalette::Background, this->theme->window.background);
         palette.setColor(QPalette::Foreground, this->theme->window.text);
@@ -252,7 +264,8 @@ void BaseWindow::themeChangedEvent()
 bool BaseWindow::event(QEvent *event)
 {
     if (event->type() ==
-        QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/) {
+        QEvent::WindowDeactivate /*|| event->type() == QEvent::FocusOut*/)
+    {
         this->onFocusLost();
     }
 
@@ -261,15 +274,20 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical) {
+    if (event->orientation() != Qt::Vertical)
+    {
         return;
     }
 
-    if (event->modifiers() & Qt::ControlModifier) {
-        if (event->delta() > 0) {
+    if (event->modifiers() & Qt::ControlModifier)
+    {
+        if (event->delta() > 0)
+        {
             getSettings()->uiScale.setValue(WindowManager::clampUiScale(
                 getSettings()->uiScale.getValue() + 1));
-        } else {
+        }
+        else
+        {
             getSettings()->uiScale.setValue(WindowManager::clampUiScale(
                 getSettings()->uiScale.getValue() - 1));
         }
@@ -278,18 +296,25 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
 
 void BaseWindow::onFocusLost()
 {
-    switch (this->getActionOnFocusLoss()) {
-        case Delete: {
+    switch (this->getActionOnFocusLoss())
+    {
+        case Delete:
+        {
             this->deleteLater();
-        } break;
+        }
+        break;
 
-        case Close: {
+        case Close:
+        {
             this->close();
-        } break;
+        }
+        break;
 
-        case Hide: {
+        case Hide:
+        {
             this->hide();
-        } break;
+        }
+        break;
 
         default:;
     }
@@ -298,24 +323,29 @@ void BaseWindow::onFocusLost()
 void BaseWindow::mousePressEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable) {
+    if (this->flags_ & FramelessDraggable)
+    {
         this->movingRelativePos = event->localPos();
         if (auto widget =
-                this->childAt(event->localPos().x(), event->localPos().y())) {
+                this->childAt(event->localPos().x(), event->localPos().y()))
+        {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr) {
+                if (widget == nullptr)
+                {
                     return false;
                 }
 
-                if (widget->hasMouseTracking()) {
+                if (widget->hasMouseTracking())
+                {
                     return true;
                 }
 
                 return recursiveCheckMouseTracking(widget->parentWidget());
             };
 
-            if (!recursiveCheckMouseTracking(widget)) {
+            if (!recursiveCheckMouseTracking(widget))
+            {
                 log("Start moving");
                 this->moving = true;
             }
@@ -329,8 +359,10 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable) {
-        if (this->moving) {
+    if (this->flags_ & FramelessDraggable)
+    {
+        if (this->moving)
+        {
             log("Stop moving");
             this->moving = false;
         }
@@ -343,8 +375,10 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 void BaseWindow::mouseMoveEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable) {
-        if (this->moving) {
+    if (this->flags_ & FramelessDraggable)
+    {
+        if (this->moving)
+        {
             const auto &newPos = event->screenPos() - this->movingRelativePos;
             this->move(newPos.x(), newPos.y());
         }
@@ -389,7 +423,8 @@ void BaseWindow::changeEvent(QEvent *)
     TooltipWidget::getInstance()->hide();
 
 #ifdef USEWINSDK
-    if (this->ui_.maxButton) {
+    if (this->ui_.maxButton)
+    {
         this->ui_.maxButton->setButtonStyle(
             this->windowState() & Qt::WindowMaximized
                 ? TitleBarButtonStyle::Unmaximize
@@ -409,7 +444,8 @@ void BaseWindow::leaveEvent(QEvent *)
 
 void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
 {
-    if (offset) {
+    if (offset)
+    {
         point.rx() += 16;
         point.ry() += 16;
     }
@@ -443,7 +479,8 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 {
-    if (!this->stayInScreenRect_) return;
+    if (!this->stayInScreenRect_)
+        return;
 
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
@@ -451,20 +488,25 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
     QRect s = desktop->availableGeometry(parent);
     QPoint p = this->pos();
 
-    if (p.x() < s.left()) {
+    if (p.x() < s.left())
+    {
         p.setX(s.left());
     }
-    if (p.y() < s.top()) {
+    if (p.y() < s.top())
+    {
         p.setY(s.top());
     }
-    if (p.x() + this->width() > s.right()) {
+    if (p.x() + this->width() > s.right())
+    {
         p.setX(s.right() - this->width());
     }
-    if (p.y() + this->height() > s.bottom()) {
+    if (p.y() + this->height() > s.bottom())
+    {
         p.setY(s.bottom() - this->height());
     }
 
-    if (p != this->pos()) this->move(p);
+    if (p != this->pos())
+        this->move(p);
 }
 
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
@@ -479,7 +521,8 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
 
     bool returnValue = false;
 
-    switch (msg->message) {
+    switch (msg->message)
+    {
         case WM_DPICHANGED:
             returnValue = handleDPICHANGED(msg);
             break;
@@ -523,7 +566,8 @@ void BaseWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (this->frameless_) {
+    if (this->frameless_)
+    {
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
@@ -539,25 +583,30 @@ void BaseWindow::updateScale()
                                   : getApp()->windows->getUiScaleValue());
     this->setScale(scale);
 
-    for (auto child : this->findChildren<BaseWidget *>()) {
+    for (auto child : this->findChildren<BaseWidget *>())
+    {
         child->setScale(scale);
     }
 }
 
 void BaseWindow::calcButtonsSizes()
 {
-    if (!this->shown_) {
+    if (!this->shown_)
+    {
         return;
     }
 
-    if ((this->width() / this->getScale()) < 300) {
+    if ((this->width() / this->getScale()) < 300)
+    {
         if (this->ui_.minButton)
             this->ui_.minButton->setScaleIndependantSize(30, 30);
         if (this->ui_.maxButton)
             this->ui_.maxButton->setScaleIndependantSize(30, 30);
         if (this->ui_.exitButton)
             this->ui_.exitButton->setScaleIndependantSize(30, 30);
-    } else {
+    }
+    else
+    {
         if (this->ui_.minButton)
             this->ui_.minButton->setScaleIndependantSize(46, 30);
         if (this->ui_.maxButton)
@@ -570,7 +619,8 @@ void BaseWindow::calcButtonsSizes()
 void BaseWindow::drawCustomWindowFrame(QPainter &painter)
 {
 #ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         QPainter painter(this);
 
         QColor bg = this->overrideBackgroundColor_.value_or(
@@ -591,7 +641,8 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 
     static bool firstResize = true;
 
-    if (!firstResize) {
+    if (!firstResize)
+    {
         auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
         SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
                      prcNewWindow->right - prcNewWindow->left,
@@ -612,12 +663,14 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 {
 #ifdef USEWINSDK
-    if (auto dpi = getWindowDpi(msg->hwnd)) {
+    if (auto dpi = getWindowDpi(msg->hwnd))
+    {
         this->nativeScale_ = dpi.get() / 96.f;
         this->updateScale();
     }
 
-    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame()) {
+    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame())
+    {
         this->shown_ = true;
 
         const MARGINS shadow = {8, 8, 8, 8};
@@ -635,11 +688,13 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
 bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
 {
 #ifdef USEWINSDK
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         // int cx = GetSystemMetrics(SM_CXSIZEFRAME);
         // int cy = GetSystemMetrics(SM_CYSIZEFRAME);
 
-        if (msg->wParam == TRUE) {
+        if (msg->wParam == TRUE)
+        {
             NCCALCSIZE_PARAMS *ncp =
                 (reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam));
             ncp->lppos->flags |= SWP_NOREDRAW;
@@ -663,16 +718,23 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
 bool BaseWindow::handleSIZE(MSG *msg)
 {
 #ifdef USEWINSDK
-    if (this->ui_.windowLayout) {
-        if (this->frameless_) {
+    if (this->ui_.windowLayout)
+    {
+        if (this->frameless_)
+        {
             //
-        } else if (this->hasCustomWindowFrame()) {
-            if (msg->wParam == SIZE_MAXIMIZED) {
+        }
+        else if (this->hasCustomWindowFrame())
+        {
+            if (msg->wParam == SIZE_MAXIMIZED)
+            {
                 auto offset = int(this->getScale() * 8);
 
                 this->ui_.windowLayout->setContentsMargins(offset, offset,
                                                            offset, offset);
-            } else {
+            }
+            else
+            {
                 this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
             }
         }
@@ -695,102 +757,130 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
     QPoint point(x - winrect.left, y - winrect.top);
 
-    if (this->hasCustomWindowFrame()) {
+    if (this->hasCustomWindowFrame())
+    {
         *result = 0;
 
         bool resizeWidth = minimumWidth() != maximumWidth();
         bool resizeHeight = minimumHeight() != maximumHeight();
 
-        if (resizeWidth) {
+        if (resizeWidth)
+        {
             // left border
-            if (x < winrect.left + border_width) {
+            if (x < winrect.left + border_width)
+            {
                 *result = HTLEFT;
             }
             // right border
-            if (x >= winrect.right - border_width) {
+            if (x >= winrect.right - border_width)
+            {
                 *result = HTRIGHT;
             }
         }
-        if (resizeHeight) {
+        if (resizeHeight)
+        {
             // bottom border
-            if (y >= winrect.bottom - border_width) {
+            if (y >= winrect.bottom - border_width)
+            {
                 *result = HTBOTTOM;
             }
             // top border
-            if (y < winrect.top + border_width) {
+            if (y < winrect.top + border_width)
+            {
                 *result = HTTOP;
             }
         }
-        if (resizeWidth && resizeHeight) {
+        if (resizeWidth && resizeHeight)
+        {
             // bottom left corner
             if (x >= winrect.left && x < winrect.left + border_width &&
-                y < winrect.bottom && y >= winrect.bottom - border_width) {
+                y < winrect.bottom && y >= winrect.bottom - border_width)
+            {
                 *result = HTBOTTOMLEFT;
             }
             // bottom right corner
             if (x < winrect.right && x >= winrect.right - border_width &&
-                y < winrect.bottom && y >= winrect.bottom - border_width) {
+                y < winrect.bottom && y >= winrect.bottom - border_width)
+            {
                 *result = HTBOTTOMRIGHT;
             }
             // top left corner
             if (x >= winrect.left && x < winrect.left + border_width &&
-                y >= winrect.top && y < winrect.top + border_width) {
+                y >= winrect.top && y < winrect.top + border_width)
+            {
                 *result = HTTOPLEFT;
             }
             // top right corner
             if (x < winrect.right && x >= winrect.right - border_width &&
-                y >= winrect.top && y < winrect.top + border_width) {
+                y >= winrect.top && y < winrect.top + border_width)
+            {
                 *result = HTTOPRIGHT;
             }
         }
 
-        if (*result == 0) {
+        if (*result == 0)
+        {
             bool client = false;
 
-            for (QWidget *widget : this->ui_.buttons) {
-                if (widget->geometry().contains(point)) {
+            for (QWidget *widget : this->ui_.buttons)
+            {
+                if (widget->geometry().contains(point))
+                {
                     client = true;
                 }
             }
 
-            if (this->ui_.layoutBase->geometry().contains(point)) {
+            if (this->ui_.layoutBase->geometry().contains(point))
+            {
                 client = true;
             }
 
-            if (client) {
+            if (client)
+            {
                 *result = HTCLIENT;
-            } else {
+            }
+            else
+            {
                 *result = HTCAPTION;
             }
         }
 
         return true;
-    } else if (this->flags_ & FramelessDraggable) {
+    }
+    else if (this->flags_ & FramelessDraggable)
+    {
         *result = 0;
         bool client = false;
 
-        if (auto widget = this->childAt(point)) {
+        if (auto widget = this->childAt(point))
+        {
             std::function<bool(QWidget *)> recursiveCheckMouseTracking;
             recursiveCheckMouseTracking = [&](QWidget *widget) {
-                if (widget == nullptr) {
+                if (widget == nullptr)
+                {
                     return false;
                 }
 
-                if (widget->hasMouseTracking()) {
+                if (widget->hasMouseTracking())
+                {
                     return true;
                 }
 
                 return recursiveCheckMouseTracking(widget->parentWidget());
             };
 
-            if (recursiveCheckMouseTracking(widget)) {
+            if (recursiveCheckMouseTracking(widget))
+            {
                 client = true;
             }
         }
 
-        if (client) {
+        if (client)
+        {
             *result = HTCLIENT;
-        } else {
+        }
+        else
+        {
             *result = HTCAPTION;
         }
 

@@ -19,19 +19,25 @@ namespace Settings {
     struct Deserialize<QString> {
         static QString get(const rapidjson::Value &value, bool *error = nullptr)
         {
-            if (!value.IsString()) {
+            if (!value.IsString())
+            {
                 PAJLADA_REPORT_ERROR(error)
                 PAJLADA_THROW_EXCEPTION(
                     "Deserialized rapidjson::Value is not a string");
                 return QString{};
             }
 
-            try {
+            try
+            {
                 return QString::fromUtf8(value.GetString(),
                                          value.GetStringLength());
-            } catch (const std::exception &) {
+            }
+            catch (const std::exception &)
+            {
                 //            int x = 5;
-            } catch (...) {
+            }
+            catch (...)
+            {
                 //            int y = 5;
             }
 

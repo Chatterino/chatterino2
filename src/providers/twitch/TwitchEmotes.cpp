@@ -37,7 +37,8 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
 
     // replace regexes
     auto it = replacements.find(name);
-    if (it != replacements.end()) {
+    if (it != replacements.end())
+    {
         name = it.value();
     }
 
@@ -45,7 +46,8 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     auto cache = this->twitchEmotesCache_.access();
     auto shared = (*cache)[id].lock();
 
-    if (!shared) {
+    if (!shared)
+    {
         (*cache)[id] = shared = std::make_shared<Emote>(
             Emote{EmoteName{name},
                   ImageSet{

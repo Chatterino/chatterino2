@@ -43,31 +43,42 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
 {
     this->ui_.installButton->setVisible(status == Updates::UpdateAvailable);
 
-    switch (status) {
-        case Updates::UpdateAvailable: {
+    switch (status)
+    {
+        case Updates::UpdateAvailable:
+        {
             this->ui_.label->setText(
                 QString("An update (%1) is available.\n\nDo you want to "
                         "download and install it?")
                     .arg(Updates::getInstance().getOnlineVersion()));
-        } break;
+        }
+        break;
 
-        case Updates::SearchFailed: {
+        case Updates::SearchFailed:
+        {
             this->ui_.label->setText("Failed to load version information.");
-        } break;
+        }
+        break;
 
-        case Updates::Downloading: {
+        case Updates::Downloading:
+        {
             this->ui_.label->setText(
                 "Downloading updates.\n\nChatterino will restart "
                 "automatically when the download is done.");
-        } break;
+        }
+        break;
 
-        case Updates::DownloadFailed: {
+        case Updates::DownloadFailed:
+        {
             this->ui_.label->setText("Failed to download the update.");
-        } break;
+        }
+        break;
 
-        case Updates::WriteFileFailed: {
+        case Updates::WriteFileFailed:
+        {
             this->ui_.label->setText("Failed to save the update to disk.");
-        } break;
+        }
+        break;
 
         default:;
     }

@@ -65,17 +65,20 @@ void Channel::addMessage(MessagePtr message,
     MessagePtr deleted;
 
     const QString &username = message->loginName;
-    if (!username.isEmpty()) {
+    if (!username.isEmpty())
+    {
         // TODO: Add recent chatters display name
         this->addRecentChatter(message);
     }
 
     // FOURTF: change this when adding more providers
-    if (this->isTwitchChannel()) {
+    if (this->isTwitchChannel())
+    {
         app->logging->addMessage(this->name_, message);
     }
 
-    if (this->messages_.pushBack(message, deleted)) {
+    if (this->messages_.pushBack(message, deleted))
+    {
         this->messageRemovedFromStart.invoke(deleted);
     }
 
@@ -93,15 +96,18 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
     QTime minimumTime = QTime::currentTime().addSecs(-5);
 
-    for (int i = snapshotLength - 1; i >= end; --i) {
+    for (int i = snapshotLength - 1; i >= end; --i)
+    {
         auto &s = snapshot[i];
 
-        if (s->parseTime < minimumTime) {
+        if (s->parseTime < minimumTime)
+        {
             break;
         }
 
         if (s->flags.has(MessageFlag::Untimeout) &&
-            s->timeoutUser == message->timeoutUser) {
+            s->timeoutUser == message->timeoutUser)
+        {
             break;
         }
 
@@ -139,17 +145,20 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     }
 
     // disable the messages from the user
-    for (int i = 0; i < snapshotLength; i++) {
+    for (int i = 0; i < snapshotLength; i++)
+    {
         auto &s = snapshot[i];
         if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
-            s->loginName == message->timeoutUser) {
+            s->loginName == message->timeoutUser)
+        {
             // FOURTF: disabled for now
             // PAJLADA: Shitty solution described in Message.hpp
             s->flags.set(MessageFlag::Disabled);
         }
     }
 
-    if (addMessage) {
+    if (addMessage)
+    {
         this->addMessage(message);
     }
 
@@ -161,10 +170,11 @@ void Channel::disableAllMessages()
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.getLength();
-    for (int i = 0; i < snapshotLength; i++) {
+    for (int i = 0; i < snapshotLength; i++)
+    {
         auto &message = snapshot[i];
-        if (message->flags.hasAny(
-                {MessageFlag::System, MessageFlag::Timeout})) {
+        if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout}))
+        {
             continue;
         }
 
@@ -178,7 +188,8 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
     std::vector<MessagePtr> addedMessages =
         this->messages_.pushFront(_messages);
 
-    if (addedMessages.size() != 0) {
+    if (addedMessages.size() != 0)
+    {
         this->messagesAddedAtStart.invoke(addedMessages);
     }
 }
@@ -187,7 +198,8 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
 {
     int index = this->messages_.replaceItem(message, replacement);
 
-    if (index >= 0) {
+    if (index >= 0)
+    {
         this->messageReplaced.invoke((size_t)index, replacement);
     }
 }
@@ -276,9 +288,12 @@ pajlada::Signals::NoArgSignal &IndirectChannel::getChannelChanged()
 
 Channel::Type IndirectChannel::getType()
 {
-    if (this->data_->type == Channel::Type::Direct) {
+    if (this->data_->type == Channel::Type::Direct)
+    {
         return this->get()->getType();
-    } else {
+    }
+    else
+    {
         return this->data_->type;
     }
 }

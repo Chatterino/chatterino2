@@ -34,17 +34,21 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
     painter.setRenderHint(QPainter::Antialiasing, false);
 
-    switch (this->style_) {
-        case TitleBarButtonStyle::Minimize: {
+    switch (this->style_)
+    {
+        case TitleBarButtonStyle::Minimize:
+        {
             painter.fillRect(centerX - xD / 2, xD * 3 / 2, xD, 1, color);
             break;
         }
-        case TitleBarButtonStyle::Maximize: {
+        case TitleBarButtonStyle::Maximize:
+        {
             painter.setPen(color);
             painter.drawRect(centerX - xD / 2, xD, xD - 1, xD - 1);
             break;
         }
-        case TitleBarButtonStyle::Unmaximize: {
+        case TitleBarButtonStyle::Unmaximize:
+        {
             int xD2 = xD * 1 / 5;
             int xD3 = xD * 4 / 5;
 
@@ -54,7 +58,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             painter.drawRect(centerX - xD / 2, xD + xD2, xD3, xD3);
             break;
         }
-        case TitleBarButtonStyle::Close: {
+        case TitleBarButtonStyle::Close:
+        {
             QRect rect(centerX - xD / 2, xD, xD - 1, xD - 1);
             painter.setPen(QPen(color, 1));
 
@@ -62,7 +67,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             painter.drawLine(rect.topRight(), rect.bottomLeft());
             break;
         }
-        case TitleBarButtonStyle::User: {
+        case TitleBarButtonStyle::User:
+        {
             color = "#999";
 
             painter.setRenderHint(QPainter::Antialiasing);
@@ -88,7 +94,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
             break;
         }
-        case TitleBarButtonStyle::Settings: {
+        case TitleBarButtonStyle::Settings:
+        {
             color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -101,7 +108,8 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
 
             path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
 
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++)
+            {
                 path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
                            (360 / 32.0));
                 path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,

@@ -98,12 +98,14 @@ void IgnoresPage::onShow()
 
     auto user = app->accounts->twitch.getCurrent();
 
-    if (user->isAnon()) {
+    if (user->isAnon())
+    {
         return;
     }
 
     QStringList users;
-    for (const auto &ignoredUser : user->getIgnores()) {
+    for (const auto &ignoredUser : user->getIgnores())
+    {
         users << ignoredUser.name;
     }
     this->userListModel_.setStringList(users);

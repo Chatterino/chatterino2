@@ -35,7 +35,8 @@ void Fonts::initialize(Settings &, Paths &)
     this->chatFontFamily.connect([this](const std::string &, auto) {
         assertInGuiThread();
 
-        for (auto &map : this->fontsByType_) {
+        for (auto &map : this->fontsByType_)
+        {
             map.clear();
         }
         this->fontChanged.invoke();
@@ -44,7 +45,8 @@ void Fonts::initialize(Settings &, Paths &)
     this->chatFontSize.connect([this](const int &, auto) {
         assertInGuiThread();
 
-        for (auto &map : this->fontsByType_) {
+        for (auto &map : this->fontsByType_)
+        {
             map.clear();
         }
         this->fontChanged.invoke();
@@ -55,7 +57,8 @@ void Fonts::initialize(Settings &, Paths &)
 
         getApp()->windows->incGeneration();
 
-        for (auto &map : this->fontsByType_) {
+        for (auto &map : this->fontsByType_)
+        {
             map.clear();
         }
         this->fontChanged.invoke();
@@ -82,7 +85,8 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 
     // find element
     auto it = map.find(scale);
-    if (it != map.end()) {
+    if (it != map.end())
+    {
         // return if found
 
         return it->second;
@@ -98,7 +102,8 @@ Fonts::FontData &Fonts::getOrCreateFontData(FontStyle type, float scale)
 Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
 {
     // check if it's a chat (scale the setting)
-    if (type >= FontStyle::ChatStart && type <= FontStyle::ChatEnd) {
+    if (type >= FontStyle::ChatStart && type <= FontStyle::ChatEnd)
+    {
         static std::unordered_map<FontStyle, ChatFontData> sizeScale{
             {FontStyle::ChatSmall, {0.6f, false, QFont::Normal}},
             {FontStyle::ChatMediumSmall, {0.8f, false, QFont::Normal}},

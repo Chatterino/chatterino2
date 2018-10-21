@@ -18,9 +18,12 @@ public:
         auto counts = counts_.access();
 
         auto it = counts->find(name);
-        if (it == counts->end()) {
+        if (it == counts->end())
+        {
             counts->insert(name, 1);
-        } else {
+        }
+        else
+        {
             reinterpret_cast<int64_t &>(it.value())++;
         }
     }
@@ -30,9 +33,12 @@ public:
         auto counts = counts_.access();
 
         auto it = counts->find(name);
-        if (it == counts->end()) {
+        if (it == counts->end())
+        {
             counts->insert(name, -1);
-        } else {
+        }
+        else
+        {
             reinterpret_cast<int64_t &>(it.value())--;
         }
     }
@@ -42,7 +48,8 @@ public:
         auto counts = counts_.access();
 
         QString text;
-        for (auto it = counts->begin(); it != counts->end(); it++) {
+        for (auto it = counts->begin(); it != counts->end(); it++)
+        {
             text += it.key() + ": " + QString::number(it.value()) + "\n";
         }
         return text;

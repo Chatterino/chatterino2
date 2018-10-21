@@ -66,42 +66,63 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                                       int column, const QVariant &value,
                                       int role, int rowIndex)
 {
-    switch (column) {
-        case 0: {
-            if (role == Qt::CheckStateRole) {
-                if (rowIndex == 0) {
+    switch (column)
+    {
+        case 0:
+        {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex == 0)
+                {
                     getSettings()->enableSelfHighlight.setValue(value.toBool());
-                } else if (rowIndex == 1) {
+                }
+                else if (rowIndex == 1)
+                {
                     getSettings()->enableWhisperHighlight.setValue(
                         value.toBool());
                 }
             }
-        } break;
-        case 1: {
-            if (role == Qt::CheckStateRole) {
-                if (rowIndex == 0) {
+        }
+        break;
+        case 1:
+        {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex == 0)
+                {
                     getSettings()->enableSelfHighlightTaskbar.setValue(
                         value.toBool());
-                } else if (rowIndex == 1) {
+                }
+                else if (rowIndex == 1)
+                {
                     getSettings()->enableWhisperHighlightTaskbar.setValue(
                         value.toBool());
                 }
             }
-        } break;
-        case 2: {
-            if (role == Qt::CheckStateRole) {
-                if (rowIndex == 0) {
+        }
+        break;
+        case 2:
+        {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex == 0)
+                {
                     getSettings()->enableSelfHighlightSound.setValue(
                         value.toBool());
-                } else if (rowIndex == 1) {
+                }
+                else if (rowIndex == 1)
+                {
                     getSettings()->enableWhisperHighlightSound.setValue(
                         value.toBool());
                 }
             }
-        } break;
-        case 3: {
+        }
+        break;
+        case 3:
+        {
             // empty element
-        } break;
+        }
+        break;
     }
 }
 

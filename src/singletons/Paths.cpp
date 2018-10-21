@@ -49,7 +49,8 @@ QString Paths::cacheDirectory()
 
     auto path = cachePathSetting.getValue();
 
-    if (path == "") {
+    if (path == "")
+    {
         return this->cacheDirectory_;
     }
 
@@ -83,14 +84,16 @@ void Paths::initAppDataDirectory()
 
     this->rootAppDataDirectory = [&]() -> QString {
         // portable
-        if (this->isPortable()) {
+        if (this->isPortable())
+        {
             return QCoreApplication::applicationDirPath();
         }
 
         // permanent installation
         QString path =
             QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        if (path.isEmpty()) {
+        if (path.isEmpty())
+        {
             throw std::runtime_error(
                 "Error finding writable location for settings");
         }
@@ -117,7 +120,8 @@ void Paths::initSubDirectories()
         auto path = combinePath(this->rootAppDataDirectory,
                                 QString::fromStdString(name));
 
-        if (!QDir().mkpath(path)) {
+        if (!QDir().mkpath(path))
+        {
             throw std::runtime_error(
                 "Error creating appdata path %appdata%/chatterino/" + name);
         }

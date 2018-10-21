@@ -65,7 +65,8 @@ void MessageLayoutContainer::clear()
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
 {
-    if (!this->fitsInLine(element->getRect().width())) {
+    if (!this->fitsInLine(element->getRect().width()))
+    {
         this->breakLine();
     }
 
@@ -86,13 +87,15 @@ bool MessageLayoutContainer::canAddElements()
 void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
                                          bool forceAdd)
 {
-    if (!this->canAddElements() && !forceAdd) {
+    if (!this->canAddElements() && !forceAdd)
+    {
         delete element;
         return;
     }
 
     // top margin
-    if (this->elements_.size() == 0) {
+    if (this->elements_.size() == 0)
+    {
         this->currentY_ = this->margin.top * this->scale_;
     }
 
@@ -103,7 +106,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
         element->getCreator().getFlags().has(MessageElementFlag::EmoteImages);
 
-    if (isCompactEmote) {
+    if (isCompactEmote)
+    {
         newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
     }
 
@@ -120,7 +124,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     // set current x
     this->currentX_ += element->getRect().width();
 
-    if (element->hasTrailingSpace()) {
+    if (element->hasTrailingSpace())
+    {
         this->currentX_ += this->spaceWidth_;
     }
 }
@@ -129,7 +134,8 @@ void MessageLayoutContainer::breakLine()
 {
     int xOffset = 0;
 
-    if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0) {
+    if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
+    {
         xOffset = (width_ - this->elements_.at(0)->getRect().left() -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
@@ -137,7 +143,8 @@ void MessageLayoutContainer::breakLine()
                   2;
     }
 
-    for (size_t i = lineStart_; i < this->elements_.size(); i++) {
+    for (size_t i = lineStart_; i < this->elements_.size(); i++)
+    {
         MessageLayoutElement *element = this->elements_.at(i).get();
 
         bool isCompactEmote =
@@ -146,14 +153,16 @@ void MessageLayoutContainer::breakLine()
                 MessageElementFlag::EmoteImages);
 
         int yExtra = 0;
-        if (isCompactEmote) {
+        if (isCompactEmote)
+        {
             yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
         }
 
         //        if (element->getCreator().getFlags() &
         //        MessageElementFlag::Badges)
         //        {
-        if (element->getRect().height() < this->textLineHeight_) {
+        if (element->getRect().height() < this->textLineHeight_)
+        {
             yExtra -= (this->textLineHeight_ - element->getRect().height()) / 2;
         }
 
@@ -162,7 +171,8 @@ void MessageLayoutContainer::breakLine()
                    element->getRect().y() + this->lineHeight_ + yExtra));
     }
 
-    if (this->lines_.size() != 0) {
+    if (this->lines_.size() != 0)
+    {
         this->lines_.back().endIndex = this->lineStart_;
         this->lines_.back().endCharIndex = this->charIndex_;
     }
@@ -170,14 +180,16 @@ void MessageLayoutContainer::breakLine()
         {(int)lineStart_, 0, this->charIndex_, 0,
          QRect(-100000, this->currentY_, 200000, lineHeight_)});
 
-    for (int i = this->lineStart_; i < this->elements_.size(); i++) {
+    for (int i = this->lineStart_; i < this->elements_.size(); i++)
+    {
         this->charIndex_ += this->elements_[i]->getSelectionIndexCount();
     }
 
     this->lineStart_ = this->elements_.size();
     //    this->currentX = (int)(this->scale * 8);
 
-    if (this->canCollapse() && line_ + 1 >= MAX_UNCOLLAPSED_LINES) {
+    if (this->canCollapse() && line_ + 1 >= MAX_UNCOLLAPSED_LINES)
+    {
         this->canAddMessages_ = false;
         return;
     }
@@ -204,7 +216,8 @@ bool MessageLayoutContainer::fitsInLine(int _width)
 
 void MessageLayoutContainer::end()
 {
-    if (!this->canAddElements()) {
+    if (!this->canAddElements())
+    {
         static TextElement dotdotdot("...", MessageElementFlag::Collapsed,
                                      MessageColor::Link);
         static QString dotdotdotText("...");
@@ -219,13 +232,15 @@ void MessageLayoutContainer::end()
         this->isCollapsed_ = true;
     }
 
-    if (!this->atStartOfLine()) {
+    if (!this->atStartOfLine())
+    {
         this->breakLine();
     }
 
     this->height_ += this->lineHeight_;
 
-    if (this->lines_.size() != 0) {
+    if (this->lines_.size() != 0)
+    {
         this->lines_[0].rect.setTop(-100000);
         this->lines_.back().rect.setBottom(100000);
         this->lines_.back().endIndex = this->elements_.size();
@@ -246,8 +261,10 @@ bool MessageLayoutContainer::isCollapsed()
 
 MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 {
-    for (std::unique_ptr<MessageLayoutElement> &element : this->elements_) {
-        if (element->getRect().contains(point)) {
+    for (std::unique_ptr<MessageLayoutElement> &element : this->elements_)
+    {
+        if (element->getRect().contains(point))
+        {
             return element.get();
         }
     }
@@ -258,8 +275,8 @@ MessageLayoutElement *MessageLayoutContainer::getElementAt(QPoint point)
 // painting
 void MessageLayoutContainer::paintElements(QPainter &painter)
 {
-    for (const std::unique_ptr<MessageLayoutElement> &element :
-         this->elements_) {
+    for (const std::unique_ptr<MessageLayoutElement> &element : this->elements_)
+    {
 #ifdef FOURTF
         painter.setPen(QColor(0, 255, 0));
         painter.drawRect(element->getRect());
@@ -272,8 +289,8 @@ void MessageLayoutContainer::paintElements(QPainter &painter)
 void MessageLayoutContainer::paintAnimatedElements(QPainter &painter,
                                                    int yOffset)
 {
-    for (const std::unique_ptr<MessageLayoutElement> &element :
-         this->elements_) {
+    for (const std::unique_ptr<MessageLayoutElement> &element : this->elements_)
+    {
         element->paintAnimated(painter, yOffset);
     }
 }
@@ -286,14 +303,17 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
     // don't draw anything
     if (selection.selectionMin.messageIndex > messageIndex ||
-        selection.selectionMax.messageIndex < messageIndex) {
+        selection.selectionMax.messageIndex < messageIndex)
+    {
         return;
     }
 
     // fully selected
     if (selection.selectionMin.messageIndex < messageIndex &&
-        selection.selectionMax.messageIndex > messageIndex) {
-        for (Line &line : this->lines_) {
+        selection.selectionMax.messageIndex > messageIndex)
+    {
+        for (Line &line : this->lines_)
+        {
             QRect rect = line.rect;
 
             rect.setTop(std::max(0, rect.top()) + yOffset);
@@ -311,8 +331,10 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
     int index = 0;
 
     // start in this message
-    if (selection.selectionMin.messageIndex == messageIndex) {
-        for (; lineIndex < this->lines_.size(); lineIndex++) {
+    if (selection.selectionMin.messageIndex == messageIndex)
+    {
+        for (; lineIndex < this->lines_.size(); lineIndex++)
+        {
             Line &line = this->lines_[lineIndex];
             index = line.startCharIndex;
 
@@ -321,14 +343,17 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
             int x = this->elements_[line.startIndex]->getRect().left();
             int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-            if (line.endCharIndex <= selection.selectionMin.charIndex) {
+            if (line.endCharIndex <= selection.selectionMin.charIndex)
+            {
                 continue;
             }
 
-            for (int i = line.startIndex; i < line.endIndex; i++) {
+            for (int i = line.startIndex; i < line.endIndex; i++)
+            {
                 int c = this->elements_[i]->getSelectionIndexCount();
 
-                if (index + c > selection.selectionMin.charIndex) {
+                if (index + c > selection.selectionMin.charIndex)
+                {
                     x = this->elements_[i]->getXFromIndex(
                         selection.selectionMin.charIndex - index);
 
@@ -339,11 +364,13 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     {
                         returnAfter = true;
                         index = line.startCharIndex;
-                        for (int i = line.startIndex; i < line.endIndex; i++) {
+                        for (int i = line.startIndex; i < line.endIndex; i++)
+                        {
                             int c =
                                 this->elements_[i]->getSelectionIndexCount();
 
-                            if (index + c > selection.selectionMax.charIndex) {
+                            if (index + c > selection.selectionMax.charIndex)
+                            {
                                 r = this->elements_[i]->getXFromIndex(
                                     selection.selectionMax.charIndex - index);
                                 break;
@@ -353,9 +380,11 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     }
                     // ends in same line end
 
-                    if (selection.selectionMax.messageIndex != messageIndex) {
+                    if (selection.selectionMax.messageIndex != messageIndex)
+                    {
                         int lineIndex2 = lineIndex + 1;
-                        for (; lineIndex2 < this->lines_.size(); lineIndex2++) {
+                        for (; lineIndex2 < this->lines_.size(); lineIndex2++)
+                        {
                             Line &line = this->lines_[lineIndex2];
                             QRect rect = line.rect;
 
@@ -373,7 +402,9 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                             painter.fillRect(rect, selectionColor);
                         }
                         returnAfter = true;
-                    } else {
+                    }
+                    else
+                    {
                         lineIndex++;
                         breakAfter = true;
                     }
@@ -392,23 +423,27 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
             painter.fillRect(rect, selectionColor);
 
-            if (returnAfter) {
+            if (returnAfter)
+            {
                 return;
             }
 
-            if (breakAfter) {
+            if (breakAfter)
+            {
                 break;
             }
         }
     }
 
     // start in this message
-    for (; lineIndex < this->lines_.size(); lineIndex++) {
+    for (; lineIndex < this->lines_.size(); lineIndex++)
+    {
         Line &line = this->lines_[lineIndex];
         index = line.startCharIndex;
 
         // just draw the garbage
-        if (line.endCharIndex < /*=*/selection.selectionMax.charIndex) {
+        if (line.endCharIndex < /*=*/selection.selectionMax.charIndex)
+        {
             QRect rect = line.rect;
 
             rect.setTop(std::max(0, rect.top()) + yOffset);
@@ -423,10 +458,12 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
         int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-        for (int i = line.startIndex; i < line.endIndex; i++) {
+        for (int i = line.startIndex; i < line.endIndex; i++)
+        {
             int c = this->elements_[i]->getSelectionIndexCount();
 
-            if (index + c > selection.selectionMax.charIndex) {
+            if (index + c > selection.selectionMax.charIndex)
+            {
                 r = this->elements_[i]->getXFromIndex(
                     selection.selectionMax.charIndex - index);
                 break;
@@ -450,21 +487,25 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 // selection
 int MessageLayoutContainer::getSelectionIndex(QPoint point)
 {
-    if (this->elements_.size() == 0) {
+    if (this->elements_.size() == 0)
+    {
         return 0;
     }
 
     auto line = this->lines_.begin();
 
-    for (; line != this->lines_.end(); line++) {
-        if (line->rect.contains(point)) {
+    for (; line != this->lines_.end(); line++)
+    {
+        if (line->rect.contains(point))
+        {
             break;
         }
     }
 
     int lineStart = line == this->lines_.end() ? this->lines_.back().startIndex
                                                : line->startIndex;
-    if (line != this->lines_.end()) {
+    if (line != this->lines_.end())
+    {
         line++;
     }
     int lineEnd =
@@ -472,20 +513,24 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
 
     int index = 0;
 
-    for (int i = 0; i < lineEnd; i++) {
+    for (int i = 0; i < lineEnd; i++)
+    {
         // end of line
-        if (i == lineEnd) {
+        if (i == lineEnd)
+        {
             break;
         }
 
         // before line
-        if (i < lineStart) {
+        if (i < lineStart)
+        {
             index += this->elements_[i]->getSelectionIndexCount();
             continue;
         }
 
         // this is the word
-        if (point.x() <= this->elements_[i]->getRect().right()) {
+        if (point.x() <= this->elements_[i]->getRect().right())
+        {
             index += this->elements_[i]->getMouseOverIndex(point);
             break;
         }
@@ -499,7 +544,8 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
 // fourtf: no idea if this is acurate LOL
 int MessageLayoutContainer::getLastCharacterIndex() const
 {
-    if (this->lines_.size() == 0) {
+    if (this->lines_.size() == 0)
+    {
         return 0;
     }
     return this->lines_.back().endCharIndex;
@@ -515,10 +561,14 @@ int MessageLayoutContainer::getFirstMessageCharacterIndex() const
     // Get the index of the first character of the real message
     // (no badges/timestamps/username)
     int index = 0;
-    for (auto &element : this->elements_) {
-        if (element->getFlags().hasAny(flags)) {
+    for (auto &element : this->elements_)
+    {
+        if (element->getFlags().hasAny(flags))
+        {
             index += element->getSelectionIndexCount();
-        } else {
+        }
+        else
+        {
             break;
         }
     }
@@ -531,8 +581,10 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
     int index = 0;
     bool first = true;
 
-    for (auto &element : this->elements_) {
-        if (copymode == CopyMode::OnlyTextAndEmotes) {
+    for (auto &element : this->elements_)
+    {
+        if (copymode == CopyMode::OnlyTextAndEmotes)
+        {
             if (element->getCreator().getFlags().hasAny(
                     {MessageElementFlag::Timestamp,
                      MessageElementFlag::Username, MessageElementFlag::Badges}))
@@ -541,20 +593,28 @@ void MessageLayoutContainer::addSelectionText(QString &str, int from, int to,
 
         auto indexCount = element->getSelectionIndexCount();
 
-        if (first) {
-            if (index + indexCount > from) {
+        if (first)
+        {
+            if (index + indexCount > from)
+            {
                 element->addCopyTextToString(str, from - index, to - index);
                 first = false;
 
-                if (index + indexCount > to) {
+                if (index + indexCount > to)
+                {
                     break;
                 }
             }
-        } else {
-            if (index + indexCount > to) {
+        }
+        else
+        {
+            if (index + indexCount > to)
+            {
                 element->addCopyTextToString(str, 0, to - index);
                 break;
-            } else {
+            }
+            else
+            {
                 element->addCopyTextToString(str);
             }
         }

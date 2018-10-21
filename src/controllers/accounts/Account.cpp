@@ -10,7 +10,8 @@ Account::Account(ProviderId providerId)
     static QString twitch("Twitch");
 
     this->category_ = [&]() {
-        switch (providerId) {
+        switch (providerId)
+        {
             case ProviderId::Twitch:
                 return twitch;
         }

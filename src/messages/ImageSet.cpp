@@ -67,11 +67,13 @@ const ImagePtr &ImageSet::getImage(float scale) const
     else if (scale > 1.5)
         quality = 2;
 
-    if (!this->imageX3_->isEmpty() && quality == 3) {
+    if (!this->imageX3_->isEmpty() && quality == 3)
+    {
         return this->imageX3_;
     }
 
-    if (!this->imageX2_->isEmpty() && quality == 2) {
+    if (!this->imageX2_->isEmpty() && quality == 2)
+    {
         return this->imageX2_;
     }
 

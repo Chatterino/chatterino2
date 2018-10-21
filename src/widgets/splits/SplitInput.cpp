@@ -90,7 +90,8 @@ void SplitInput::initLayout()
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
                      [this](bool available) {
-                         if (available) {
+                         if (available)
+                         {
                              this->split_->view_->clearSelection();
                          }
                      });
@@ -139,7 +140,8 @@ void SplitInput::updateEmoteButton()
     QString text = "<img src=':/buttons/emote.svg' width='xD' height='xD' />";
     text.replace("xD", QString::number(int(12 * scale)));
 
-    if (this->theme->isLightTheme()) {
+    if (this->theme->isLightTheme())
+    {
         text.replace("emote", "emoteDark");
     }
 
@@ -149,17 +151,20 @@ void SplitInput::updateEmoteButton()
 
 void SplitInput::openEmotePopup()
 {
-    if (!this->emotePopup_) {
+    if (!this->emotePopup_)
+    {
         this->emotePopup_ = std::make_unique<EmotePopup>();
         this->emotePopup_->linkClicked.connect([this](const Link &link) {
-            if (link.type == Link::InsertText) {
+            if (link.type == Link::InsertText)
+            {
                 QTextCursor cursor = this->ui_.textEdit->textCursor();
                 QString textToInsert(link.value + " ");
 
                 // If symbol before cursor isn't space or empty
                 // Then insert space before emote.
                 if (cursor.position() > 0 &&
-                    !this->getInputText()[cursor.position() - 1].isSpace()) {
+                    !this->getInputText()[cursor.position() - 1].isSpace())
+                {
                     textToInsert = " " + textToInsert;
                 }
                 this->insertText(textToInsert);
@@ -179,9 +184,11 @@ void SplitInput::installKeyPressedEvent()
     auto app = getApp();
 
     this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
-        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+        {
             auto c = this->split_->getChannel();
-            if (c == nullptr) {
+            if (c == nullptr)
+            {
                 return;
             }
 
@@ -198,28 +205,39 @@ void SplitInput::installKeyPressedEvent()
                 this->prevMsg_.append(message);
 
             event->accept();
-            if (!(event->modifiers() == Qt::ControlModifier)) {
+            if (!(event->modifiers() == Qt::ControlModifier))
+            {
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
                 this->prevIndex_ = 0;
-            } else if (message ==
-                       this->prevMsg_.at(this->prevMsg_.size() - 1)) {
+            }
+            else if (message == this->prevMsg_.at(this->prevMsg_.size() - 1))
+            {
                 this->prevMsg_.removeLast();
             }
             this->prevIndex_ = this->prevMsg_.size();
-        } else if (event->key() == Qt::Key_Up) {
-            if ((event->modifiers() & Qt::ShiftModifier) != 0) {
+        }
+        else if (event->key() == Qt::Key_Up)
+        {
+            if ((event->modifiers() & Qt::ShiftModifier) != 0)
+            {
                 return;
             }
-            if (event->modifiers() == Qt::AltModifier) {
+            if (event->modifiers() == Qt::AltModifier)
+            {
                 SplitContainer *page = this->split_->getContainer();
 
-                if (page != nullptr) {
+                if (page != nullptr)
+                {
                     page->selectNextSplit(SplitContainer::Above);
                 }
-            } else {
-                if (this->prevMsg_.size() && this->prevIndex_) {
-                    if (this->prevIndex_ == (this->prevMsg_.size())) {
+            }
+            else
+            {
+                if (this->prevMsg_.size() && this->prevIndex_)
+                {
+                    if (this->prevIndex_ == (this->prevMsg_.size()))
+                    {
                         this->currMsg_ = ui_.textEdit->toPlainText();
                     }
 
@@ -232,36 +250,50 @@ void SplitInput::installKeyPressedEvent()
                     this->ui_.textEdit->setTextCursor(cursor);
                 }
             }
-        } else if (event->key() == Qt::Key_Down) {
-            if ((event->modifiers() & Qt::ShiftModifier) != 0) {
+        }
+        else if (event->key() == Qt::Key_Down)
+        {
+            if ((event->modifiers() & Qt::ShiftModifier) != 0)
+            {
                 return;
             }
-            if (event->modifiers() == Qt::AltModifier) {
+            if (event->modifiers() == Qt::AltModifier)
+            {
                 SplitContainer *page = this->split_->getContainer();
 
-                if (page != nullptr) {
+                if (page != nullptr)
+                {
                     page->selectNextSplit(SplitContainer::Below);
                 }
-            } else {
+            }
+            else
+            {
                 // If user did not write anything before then just do nothing.
-                if (this->prevMsg_.isEmpty()) {
+                if (this->prevMsg_.isEmpty())
+                {
                     return;
                 }
                 bool cursorToEnd = true;
                 QString message = ui_.textEdit->toPlainText();
 
                 if (this->prevIndex_ != (this->prevMsg_.size() - 1) &&
-                    this->prevIndex_ != this->prevMsg_.size()) {
+                    this->prevIndex_ != this->prevMsg_.size())
+                {
                     this->prevIndex_++;
                     this->ui_.textEdit->setText(
                         this->prevMsg_.at(this->prevIndex_));
-                } else {
+                }
+                else
+                {
                     this->prevIndex_ = this->prevMsg_.size();
-                    if (message == this->prevMsg_.at(this->prevIndex_ - 1)) {
+                    if (message == this->prevMsg_.at(this->prevIndex_ - 1))
+                    {
                         // If user has just come from a message history
                         // Then simply get currMsg_.
                         this->ui_.textEdit->setText(this->currMsg_);
-                    } else if (message != this->currMsg_) {
+                    }
+                    else if (message != this->currMsg_)
+                    {
                         // If user are already in current message
                         // And type something new
                         // Then replace currMsg_ with new one.
@@ -273,30 +305,42 @@ void SplitInput::installKeyPressedEvent()
                         (message == this->prevMsg_.at(this->prevIndex_ - 1));
                 }
 
-                if (cursorToEnd) {
+                if (cursorToEnd)
+                {
                     QTextCursor cursor = this->ui_.textEdit->textCursor();
                     cursor.movePosition(QTextCursor::End);
                     this->ui_.textEdit->setTextCursor(cursor);
                 }
             }
-        } else if (event->key() == Qt::Key_Left) {
-            if (event->modifiers() == Qt::AltModifier) {
+        }
+        else if (event->key() == Qt::Key_Left)
+        {
+            if (event->modifiers() == Qt::AltModifier)
+            {
                 SplitContainer *page = this->split_->getContainer();
 
-                if (page != nullptr) {
+                if (page != nullptr)
+                {
                     page->selectNextSplit(SplitContainer::Left);
                 }
             }
-        } else if (event->key() == Qt::Key_Right) {
-            if (event->modifiers() == Qt::AltModifier) {
+        }
+        else if (event->key() == Qt::Key_Right)
+        {
+            if (event->modifiers() == Qt::AltModifier)
+            {
                 SplitContainer *page = this->split_->getContainer();
 
-                if (page != nullptr) {
+                if (page != nullptr)
+                {
                     page->selectNextSplit(SplitContainer::Right);
                 }
             }
-        } else if (event->key() == Qt::Key_Tab) {
-            if (event->modifiers() == Qt::ControlModifier) {
+        }
+        else if (event->key() == Qt::Key_Tab)
+        {
+            if (event->modifiers() == Qt::ControlModifier)
+            {
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->split_->parentWidget());
 
@@ -305,9 +349,11 @@ void SplitInput::installKeyPressedEvent()
 
                 notebook->selectNextTab();
             }
-        } else if (event->key() == Qt::Key_Backtab) {
-            if (event->modifiers() ==
-                (Qt::ControlModifier | Qt::ShiftModifier)) {
+        }
+        else if (event->key() == Qt::Key_Backtab)
+        {
+            if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
+            {
                 SplitContainer *page =
                     static_cast<SplitContainer *>(this->split_->parentWidget());
 
@@ -316,14 +362,19 @@ void SplitInput::installKeyPressedEvent()
 
                 notebook->selectPreviousTab();
             }
-        } else if (event->key() == Qt::Key_C &&
-                   event->modifiers() == Qt::ControlModifier) {
-            if (this->split_->view_->hasSelection()) {
+        }
+        else if (event->key() == Qt::Key_C &&
+                 event->modifiers() == Qt::ControlModifier)
+        {
+            if (this->split_->view_->hasSelection())
+            {
                 this->split_->copyToClipboard();
                 event->accept();
             }
-        } else if (event->key() == Qt::Key_E &&
-                   event->modifiers() == Qt::ControlModifier) {
+        }
+        else if (event->key() == Qt::Key_E &&
+                 event->modifiers() == Qt::ControlModifier)
+        {
             this->openEmotePopup();
         }
     });
@@ -360,11 +411,14 @@ void SplitInput::editTextChanged()
         this->split_->getChannel()->isTwitchChannel())  //
     {
         QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
-        if (!lastUser.isEmpty()) {
+        if (!lastUser.isEmpty())
+        {
             this->ui_.textEdit->setPlainText("/w " + lastUser + text.mid(2));
             this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
         }
-    } else {
+    }
+    else
+    {
         this->textChanged.invoke(text);
 
         text = text.trimmed();
@@ -377,9 +431,12 @@ void SplitInput::editTextChanged()
 
     QString labelText;
 
-    if (text.length() == 0 || getSettings()->showMessageLength) {
+    if (text.length() == 0 || getSettings()->showMessageLength)
+    {
         labelText = "";
-    } else {
+    }
+    else
+    {
         labelText = QString::number(text.length());
     }
 
@@ -390,7 +447,8 @@ void SplitInput::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    if (this->theme->isLightTheme()) {
+    if (this->theme->isLightTheme())
+    {
         int s = int(3 * this->getScale());
         QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
@@ -398,7 +456,9 @@ void SplitInput::paintEvent(QPaintEvent *)
 
         painter.setPen(QColor("#ccc"));
         painter.drawRect(rect);
-    } else {
+    }
+    else
+    {
         int s = int(1 * this->getScale());
         QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
@@ -416,9 +476,12 @@ void SplitInput::paintEvent(QPaintEvent *)
 
 void SplitInput::resizeEvent(QResizeEvent *)
 {
-    if (this->height() == this->maximumHeight()) {
+    if (this->height() == this->maximumHeight())
+    {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    } else {
+    }
+    else
+    {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
 }

@@ -45,7 +45,8 @@ public:
     {
         assertInGuiThread();
 
-        if (!this->itemsChangedTimer_.isActive()) {
+        if (!this->itemsChangedTimer_.isActive())
+        {
             this->itemsChangedTimer_.start();
         }
     }
@@ -92,9 +93,12 @@ public:
                            void *caller = nullptr) override
     {
         assertInGuiThread();
-        if (index == -1) {
+        if (index == -1)
+        {
             index = this->vector_.size();
-        } else {
+        }
+        else
+        {
             assert(index >= 0 && index <= this->vector_.size());
         }
 

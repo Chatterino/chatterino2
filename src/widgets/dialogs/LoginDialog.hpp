@@ -2,7 +2,6 @@
 
 #include "widgets/BaseWidget.hpp"
 
-#include <QtCore/QVariant>
 #include <QAction>
 #include <QApplication>
 #include <QButtonGroup>
@@ -16,6 +15,7 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include <QVBoxLayout>
+#include <QtCore/QVariant>
 
 namespace chatterino {
 

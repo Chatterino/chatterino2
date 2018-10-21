@@ -17,9 +17,11 @@ typedef HRESULT(CALLBACK *GetDpiForMonitor_)(HMONITOR, MONITOR_DPI_TYPE, UINT *,
 boost::optional<UINT> getWindowDpi(HWND hwnd)
 {
     static HINSTANCE shcore = LoadLibrary(L"Shcore.dll");
-    if (shcore != nullptr) {
+    if (shcore != nullptr)
+    {
         if (auto getDpiForMonitor =
-                GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor"))) {
+                GetDpiForMonitor_(GetProcAddress(shcore, "GetDpiForMonitor")))
+        {
             HMONITOR monitor =
                 MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
 
@@ -39,8 +41,11 @@ typedef HRESULT(CALLBACK *OleFlushClipboard_)();
 void flushClipboard()
 {
     static HINSTANCE ole32 = LoadLibrary(L"Ole32.dll");
-    if (ole32 != nullptr) {
-        if (auto oleFlushClipboard = OleFlushClipboard_(GetProcAddress(ole32, "OleFlushClipboard"))) {
+    if (ole32 != nullptr)
+    {
+        if (auto oleFlushClipboard =
+                OleFlushClipboard_(GetProcAddress(ole32, "OleFlushClipboard")))
+        {
             oleFlushClipboard();
         }
     }

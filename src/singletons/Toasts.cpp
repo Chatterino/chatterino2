@@ -45,12 +45,16 @@ void Toasts::sendChannelNotification(const QString &channelName, Platform p)
     };
 #endif
     // Fetch user profile avatar
-    if (p == Platform::Twitch) {
+    if (p == Platform::Twitch)
+    {
         QFileInfo check_file(getPaths()->twitchProfileAvatars + "/twitch/" +
                              channelName + ".png");
-        if (check_file.exists() && check_file.isFile()) {
+        if (check_file.exists() && check_file.isFile())
+        {
             sendChannelNotification();
-        } else {
+        }
+        else
+        {
             this->fetchChannelAvatar(
                 channelName,
                 [channelName, sendChannelNotification](QString avatarLink) {
@@ -81,7 +85,8 @@ public:
     void toastActivated() const
     {
         QString link;
-        if (platform_ == Platform::Twitch) {
+        if (platform_ == Platform::Twitch)
+        {
             link = "http://www.twitch.tv/" + channelName_;
         }
         QDesktopServices::openUrl(QUrl(link));
@@ -112,14 +117,16 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     templ.setTextField(L"Click here to open in browser",
                        WinToastLib::WinToastTemplate::SecondLine);
     QString Path;
-    if (p == Platform::Twitch) {
+    if (p == Platform::Twitch)
+    {
         Path = getPaths()->twitchProfileAvatars + "/twitch/" + channelName +
                ".png";
     }
     std::string temp_Utf8 = Path.toUtf8().constData();
     std::wstring imagePath = std::wstring(temp_Utf8.begin(), temp_Utf8.end());
     templ.setImagePath(imagePath);
-    if (getSettings()->notificationPlaySound) {
+    if (getSettings()->notificationPlaySound)
+    {
         templ.setAudioOption(
             WinToastLib::WinToastTemplate::AudioOption::Silent);
     }
@@ -151,19 +158,22 @@ void Toasts::fetchChannelAvatar(const QString channelName,
     request.setTimeout(30000);
     request.onSuccess([successCallback](auto result) mutable -> Outcome {
         auto root = result.parseJson();
-        if (!root.value("users").isArray()) {
+        if (!root.value("users").isArray())
+        {
             // log("API Error while getting user id, users is not an array");
             successCallback("");
             return Failure;
         }
         auto users = root.value("users").toArray();
-        if (users.size() != 1) {
+        if (users.size() != 1)
+        {
             // log("API Error while getting user id, users array size is not
             // 1");
             successCallback("");
             return Failure;
         }
-        if (!users[0].isObject()) {
+        if (!users[0].isObject())
+        {
             // log("API Error while getting user id, first user is not an
             // object");
             successCallback("");
@@ -171,7 +181,8 @@ void Toasts::fetchChannelAvatar(const QString channelName,
         }
         auto firstUser = users[0].toObject();
         auto avatar = firstUser.value("logo");
-        if (!avatar.isString()) {
+        if (!avatar.isString())
+        {
             // log("API Error: while getting user avatar, first user object "
             //    "`avatar` key "
             //    "is not a "

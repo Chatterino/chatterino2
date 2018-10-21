@@ -34,7 +34,8 @@ namespace detail {
         assertInGuiThread();
         DebugCount::increase("images");
 
-        if (this->animated()) {
+        if (this->animated())
+        {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
@@ -48,7 +49,8 @@ namespace detail {
         assertInGuiThread();
         DebugCount::decrease("images");
 
-        if (this->animated()) {
+        if (this->animated())
+        {
             DebugCount::decrease("animated images");
         }
 
@@ -59,7 +61,8 @@ namespace detail {
     {
         this->durationOffset_ += GIF_FRAME_LENGTH;
 
-        while (true) {
+        while (true)
+        {
             this->index_ %= this->items_.size();
 
             // TODO: Figure out what this was supposed to achieve
@@ -67,10 +70,13 @@ namespace detail {
             //     this->index_ = this->index_;
             // }
 
-            if (this->durationOffset_ > this->items_[this->index_].duration) {
+            if (this->durationOffset_ > this->items_[this->index_].duration)
+            {
                 this->durationOffset_ -= this->items_[this->index_].duration;
                 this->index_ = (this->index_ + 1) % this->items_.size();
-            } else {
+            }
+            else
+            {
                 break;
             }
         }
@@ -83,13 +89,15 @@ namespace detail {
 
     boost::optional<QPixmap> Frames::current() const
     {
-        if (this->items_.size() == 0) return boost::none;
+        if (this->items_.size() == 0)
+            return boost::none;
         return this->items_[this->index_].image;
     }
 
     boost::optional<QPixmap> Frames::first() const
     {
-        if (this->items_.size() == 0) return boost::none;
+        if (this->items_.size() == 0)
+            return boost::none;
         return this->items_.front().image;
     }
 
@@ -98,15 +106,18 @@ namespace detail {
     {
         QVector<Frame<QImage>> frames;
 
-        if (reader.imageCount() == 0) {
+        if (reader.imageCount() == 0)
+        {
             log("Error while reading image {}: '{}'", url.string,
                 reader.errorString());
             return frames;
         }
 
         QImage image;
-        for (int index = 0; index < reader.imageCount(); ++index) {
-            if (reader.read(&image)) {
+        for (int index = 0; index < reader.imageCount(); ++index)
+        {
+            if (reader.read(&image))
+            {
                 QPixmap::fromImage(image);
 
                 int duration = std::max(20, reader.nextImageDelay());
@@ -114,7 +125,8 @@ namespace detail {
             }
         }
 
-        if (frames.size() == 0) {
+        if (frames.size() == 0)
+        {
             log("Error while reading image {}: '{}'", url.string,
                 reader.errorString());
         }
@@ -131,11 +143,13 @@ namespace detail {
         std::lock_guard<std::mutex> lock(mutex);
         int i = 0;
 
-        while (!queued.empty()) {
+        while (!queued.empty())
+        {
             queued.front().first(queued.front().second);
             queued.pop();
 
-            if (++i > 50) {
+            if (++i > 50)
+            {
                 QTimer::singleShot(3, [&] {
                     assignDelayed(queued, mutex, loadedEventQueued);
                 });
@@ -171,7 +185,8 @@ namespace detail {
 
             static std::atomic_bool loadedEventQueued{false};
 
-            if (!loadedEventQueued) {
+            if (!loadedEventQueued)
+            {
                 loadedEventQueued = true;
 
                 QTimer::singleShot(100, [=] {
@@ -192,9 +207,12 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
 
     auto shared = cache[url].lock();
 
-    if (!shared) {
+    if (!shared)
+    {
         cache[url] = shared = ImagePtr(new Image(url, scale));
-    } else {
+    }
+    else
+    {
         // Warn("same image loaded multiple times: {}", url.string);
     }
 
@@ -241,7 +259,8 @@ boost::optional<QPixmap> Image::pixmap() const
 {
     assertInGuiThread();
 
-    if (this->shouldLoad_) {
+    if (this->shouldLoad_)
+    {
         const_cast<Image *>(this)->shouldLoad_ = false;
         const_cast<Image *>(this)->load();
     }
@@ -294,7 +313,8 @@ void Image::load()
     req.setUseQuickLoadCache(true);
     req.onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
         auto shared = weak.lock();
-        if (!shared) return Failure;
+        if (!shared)
+            return Failure;
 
         auto data = result.getData();
 
@@ -313,7 +333,8 @@ void Image::load()
     });
     req.onError([weak = weakOf(this)](auto result) -> bool {
         auto shared = weak.lock();
-        if (!shared) return false;
+        if (!shared)
+            return false;
 
         shared->empty_ = true;
 
@@ -325,9 +346,12 @@ void Image::load()
 
 bool Image::operator==(const Image &other) const
 {
-    if (this->isEmpty() && other.isEmpty()) return true;
-    if (!this->url_.string.isEmpty() && this->url_ == other.url_) return true;
-    if (this->frames_->first() == other.frames_->first()) return true;
+    if (this->isEmpty() && other.isEmpty())
+        return true;
+    if (!this->url_.string.isEmpty() && this->url_ == other.url_)
+        return true;
+    if (this->frames_->first() == other.frames_->first())
+        return true;
 
     return false;
 }

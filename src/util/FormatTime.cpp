@@ -19,23 +19,30 @@ QString formatTime(int totalSeconds)
     int timeoutHours = timeoutMinutes / 60;
     int hours = timeoutHours % 24;
     int days = timeoutHours / 24;
-    if (days > 0) {
+    if (days > 0)
+    {
         appendDuration(days, 'd', res);
     }
-    if (hours > 0) {
-        if (!res.isEmpty()) {
+    if (hours > 0)
+    {
+        if (!res.isEmpty())
+        {
             res.append(" ");
         }
         appendDuration(hours, 'h', res);
     }
-    if (minutes > 0) {
-        if (!res.isEmpty()) {
+    if (minutes > 0)
+    {
+        if (!res.isEmpty())
+        {
             res.append(" ");
         }
         appendDuration(minutes, 'm', res);
     }
-    if (seconds > 0) {
-        if (!res.isEmpty()) {
+    if (seconds > 0)
+    {
+        if (!res.isEmpty())
+        {
             res.append(" ");
         }
         appendDuration(seconds, 's', res);

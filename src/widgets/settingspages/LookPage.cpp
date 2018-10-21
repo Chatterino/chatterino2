@@ -181,7 +181,8 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
 
         const auto currentIndex = []() -> int {
             auto val = getSettings()->collpseMessagesMinLines.getValue();
-            if (val > 0) {
+            if (val > 0)
+            {
                 --val;
             }
             return val;
@@ -332,7 +333,8 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     combo->addItems({"Dotted line", "Solid line"});
 
     const auto currentIndex = []() -> int {
-        switch (getSettings()->lastMessagePattern.getValue()) {
+        switch (getSettings()->lastMessagePattern.getValue())
+        {
             case Qt::SolidLine:
                 return 1;
             case Qt::VerPattern:
@@ -347,7 +349,8 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
         static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
         [](int index) {
             getSettings()->lastMessagePattern = [&] {
-                switch (index) {
+                switch (index)
+                {
                     case 1:
                         return Qt::SolidPattern;
                     case 0:
@@ -386,7 +389,8 @@ void LookPage::addLastReadMessageIndicatorPatternSelector(
     QObject::connect(
         button, &QPushButton::clicked, [updatePreviewColor, getCurrentColor]() {
             QColor newColor = QColorDialog::getColor(getCurrentColor());
-            if (newColor.isValid()) {
+            if (newColor.isValid())
+            {
                 updatePreviewColor(newColor);
                 getSettings()->lastMessageColor = newColor.name();
             }

@@ -46,8 +46,10 @@ public:
 
     bool isMatch(const QString &subject) const
     {
-        if (this->isRegex()) {
-            if (this->isValidRegex()) {
+        if (this->isRegex())
+        {
+            if (this->isValidRegex())
+            {
                 return this->regex_.match(subject).hasMatch();
             }
 
@@ -91,7 +93,8 @@ namespace Settings {
             QString pattern;
             bool isRegex = false;
 
-            if (!value.IsObject()) {
+            if (!value.IsObject())
+            {
                 return chatterino::HighlightBlacklistUser(pattern, isRegex);
             }
 

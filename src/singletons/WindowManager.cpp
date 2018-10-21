@@ -45,7 +45,8 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     //    static QWidget *lastFocusedWidget = nullptr;
     static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget();
 
-    if (w->hasFocus()) {
+    if (w->hasFocus())
+    {
         w->hide();
         //            if (lastFocusedWidget) {
         //                lastFocusedWidget->setFocus();
@@ -109,7 +110,8 @@ void WindowManager::updateWordTypeMask()
     auto flags = MessageElementFlags(MEF::Text);
 
     // timestamp
-    if (settings->showTimestamps) {
+    if (settings->showTimestamps)
+    {
         flags.set(MEF::Timestamp);
     }
 
@@ -152,7 +154,8 @@ void WindowManager::updateWordTypeMask()
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
 
-    if (newFlags != this->wordFlags_) {
+    if (newFlags != this->wordFlags_)
+    {
         this->wordFlags_ = newFlags;
 
         this->wordFlagsChanged.invoke();
@@ -172,7 +175,8 @@ void WindowManager::forceLayoutChannelViews()
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (this->mainWindow_ != nullptr) {
+    if (this->mainWindow_ != nullptr)
+    {
         this->mainWindow_->repaintVisibleChatWidgets(channel);
     }
 }
@@ -211,13 +215,16 @@ Window &WindowManager::createWindow(WindowType type)
     this->windows_.push_back(window);
     window->show();
 
-    if (type != WindowType::Main) {
+    if (type != WindowType::Main)
+    {
         window->setAttribute(Qt::WA_DeleteOnClose);
 
         QObject::connect(window, &QWidget::destroyed, [this, window] {
             for (auto it = this->windows_.begin(); it != this->windows_.end();
-                 it++) {
-                if (*it == window) {
+                 it++)
+            {
+                if (*it == window)
+                {
                     this->windows_.erase(it);
                     break;
                 }
@@ -237,7 +244,8 @@ Window *WindowManager::windowAt(int index)
 {
     assertInGuiThread();
 
-    if (index < 0 || (size_t)index >= this->windows_.size()) {
+    if (index < 0 || (size_t)index >= this->windows_.size())
+    {
         return nullptr;
     }
     log("getting window at bad index {}", index);
@@ -263,7 +271,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     QJsonArray windows_arr = document.object().value("windows").toArray();
 
     // "deserialize"
-    for (QJsonValue window_val : windows_arr) {
+    for (QJsonValue window_val : windows_arr)
+    {
         QJsonObject window_obj = window_val.toObject();
 
         // get type
@@ -271,13 +280,15 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         WindowType type =
             type_val == "main" ? WindowType::Main : WindowType::Popup;
 
-        if (type == WindowType::Main && mainWindow_ != nullptr) {
+        if (type == WindowType::Main && mainWindow_ != nullptr)
+        {
             type = WindowType::Popup;
         }
 
         Window &window = createWindow(type);
 
-        if (type == WindowType::Main) {
+        if (type == WindowType::Main)
+        {
             mainWindow_ = &window;
         }
 
@@ -288,7 +299,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             int width = window_obj.value("width").toInt(-1);
             int height = window_obj.value("height").toInt(-1);
 
-            if (x != -1 && y != -1 && width != -1 && height != -1) {
+            if (x != -1 && y != -1 && width != -1 && height != -1)
+            {
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left
                 window.setGeometry(x + 1, y, width, height);
@@ -297,19 +309,22 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
-        for (QJsonValue tab_val : tabs) {
+        for (QJsonValue tab_val : tabs)
+        {
             SplitContainer *page = window.getNotebook().addPage(false);
 
             QJsonObject tab_obj = tab_val.toObject();
 
             // set custom title
             QJsonValue title_val = tab_obj.value("title");
-            if (title_val.isString()) {
+            if (title_val.isString())
+            {
                 page->getTab()->setCustomTitle(title_val.toString());
             }
 
             // selected
-            if (tab_obj.value("selected").toBool(false)) {
+            if (tab_obj.value("selected").toBool(false))
+            {
                 window.getNotebook().select(page);
             }
 
@@ -320,7 +335,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             // load splits
             QJsonObject splitRoot = tab_obj.value("splits2").toObject();
 
-            if (!splitRoot.isEmpty()) {
+            if (!splitRoot.isEmpty())
+            {
                 page->decodeFromJson(splitRoot);
 
                 continue;
@@ -328,8 +344,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
             // fallback load splits (old)
             int colNr = 0;
-            for (QJsonValue column_val : tab_obj.value("splits").toArray()) {
-                for (QJsonValue split_val : column_val.toArray()) {
+            for (QJsonValue column_val : tab_obj.value("splits").toArray())
+            {
+                for (QJsonValue split_val : column_val.toArray())
+                {
                     Split *split = new Split(page);
 
                     QJsonObject split_obj = split_val.toObject();
@@ -342,7 +360,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         }
     }
 
-    if (mainWindow_ == nullptr) {
+    if (mainWindow_ == nullptr)
+    {
         mainWindow_ = &createWindow(WindowType::Main);
         mainWindow_->getNotebook().addPage(true);
     }
@@ -376,11 +395,13 @@ void WindowManager::save()
 
     // "serialize"
     QJsonArray window_arr;
-    for (Window *window : this->windows_) {
+    for (Window *window : this->windows_)
+    {
         QJsonObject window_obj;
 
         // window type
-        switch (window->getType()) {
+        switch (window->getType())
+        {
             case WindowType::Main:
                 window_obj.insert("type", "main");
                 break;
@@ -402,19 +423,22 @@ void WindowManager::save()
         QJsonArray tabs_arr;
 
         for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
-             tab_i++) {
+             tab_i++)
+        {
             QJsonObject tab_obj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
                 window->getNotebook().getPageAt(tab_i));
             assert(tab != nullptr);
 
             // custom tab title
-            if (tab->getTab()->hasCustomTitle()) {
+            if (tab->getTab()->hasCustomTitle())
+            {
                 tab_obj.insert("title", tab->getTab()->getCustomTitle());
             }
 
             // selected
-            if (window->getNotebook().getSelectedPage() == tab) {
+            if (window->getNotebook().getSelectedPage() == tab)
+            {
                 tab_obj.insert("selected", true);
             }
 
@@ -459,7 +483,8 @@ void WindowManager::save()
 void WindowManager::sendAlert()
 {
     int flashDuration = 2500;
-    if (getSettings()->longAlerts) {
+    if (getSettings()->longAlerts)
+    {
         flashDuration = 0;
     }
     QApplication::alert(this->getMainWindow().window(), flashDuration);
@@ -474,29 +499,35 @@ void WindowManager::queueSave()
 
 void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 {
-    switch (node->getType()) {
-        case SplitNode::_Split: {
+    switch (node->getType())
+    {
+        case SplitNode::_Split:
+        {
             obj.insert("type", "split");
             QJsonObject split;
             encodeChannel(node->getSplit()->getIndirectChannel(), split);
             obj.insert("data", split);
             obj.insert("flexh", node->getHorizontalFlex());
             obj.insert("flexv", node->getVerticalFlex());
-        } break;
+        }
+        break;
         case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer: {
+        case SplitNode::VerticalContainer:
+        {
             obj.insert("type", node->getType() == SplitNode::HorizontalContainer
                                    ? "horizontal"
                                    : "vertical");
 
             QJsonArray items_arr;
-            for (const std::unique_ptr<SplitNode> &n : node->getChildren()) {
+            for (const std::unique_ptr<SplitNode> &n : node->getChildren())
+            {
                 QJsonObject subObj;
                 this->encodeNodeRecusively(n.get(), subObj);
                 items_arr.append(subObj);
             }
             obj.insert("items", items_arr);
-        } break;
+        }
+        break;
     }
 }
 
@@ -504,20 +535,29 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 {
     assertInGuiThread();
 
-    switch (channel.getType()) {
-        case Channel::Type::Twitch: {
+    switch (channel.getType())
+    {
+        case Channel::Type::Twitch:
+        {
             obj.insert("type", "twitch");
             obj.insert("name", channel.get()->getName());
-        } break;
-        case Channel::Type::TwitchMentions: {
+        }
+        break;
+        case Channel::Type::TwitchMentions:
+        {
             obj.insert("type", "mentions");
-        } break;
-        case Channel::Type::TwitchWatching: {
+        }
+        break;
+        case Channel::Type::TwitchWatching:
+        {
             obj.insert("type", "watching");
-        } break;
-        case Channel::Type::TwitchWhispers: {
+        }
+        break;
+        case Channel::Type::TwitchWhispers:
+        {
             obj.insert("type", "whispers");
-        } break;
+        }
+        break;
     }
 }
 
@@ -528,14 +568,21 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
     auto app = getApp();
 
     QString type = obj.value("type").toString();
-    if (type == "twitch") {
+    if (type == "twitch")
+    {
         return app->twitch.server->getOrAddChannel(
             obj.value("name").toString());
-    } else if (type == "mentions") {
+    }
+    else if (type == "mentions")
+    {
         return app->twitch.server->mentionsChannel;
-    } else if (type == "watching") {
+    }
+    else if (type == "watching")
+    {
         return app->twitch.server->watchingChannel;
-    } else if (type == "whispers") {
+    }
+    else if (type == "whispers")
+    {
         return app->twitch.server->whispersChannel;
     }
 
@@ -546,7 +593,8 @@ void WindowManager::closeAll()
 {
     assertInGuiThread();
 
-    for (Window *window : windows_) {
+    for (Window *window : windows_)
+    {
         window->close();
     }
 }
@@ -573,7 +621,8 @@ float WindowManager::getUiScaleValue()
 
 float WindowManager::getUiScaleValue(int scale)
 {
-    switch (clampUiScale(scale)) {
+    switch (clampUiScale(scale))
+    {
         case -5:
             return 0.5f;
         case -4:

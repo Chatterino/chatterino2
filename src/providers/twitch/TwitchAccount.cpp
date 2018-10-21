@@ -31,7 +31,8 @@ namespace {
         };
 
         auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
-        if (it != emoteNameReplacements.end()) {
+        if (it != emoteNameReplacements.end())
+        {
             cleanCode = it.value();
         }
 
@@ -91,7 +92,8 @@ void TwitchAccount::setColor(QColor color)
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
 {
-    if (this->oauthClient_.compare(newClientID) == 0) {
+    if (this->oauthClient_.compare(newClientID) == 0)
+    {
         return false;
     }
 
@@ -102,7 +104,8 @@ bool TwitchAccount::setOAuthClient(const QString &newClientID)
 
 bool TwitchAccount::setOAuthToken(const QString &newOAuthToken)
 {
-    if (this->oauthToken_.compare(newOAuthToken) == 0) {
+    if (this->oauthToken_.compare(newOAuthToken) == 0)
+    {
         return false;
     }
 
@@ -126,17 +129,20 @@ void TwitchAccount::loadIgnores()
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
     req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
-        if (!document.IsObject()) {
+        if (!document.IsObject())
+        {
             return Failure;
         }
 
         auto blocksIt = document.FindMember("blocks");
-        if (blocksIt == document.MemberEnd()) {
+        if (blocksIt == document.MemberEnd())
+        {
             return Failure;
         }
         const auto &blocks = blocksIt->value;
 
-        if (!blocks.IsArray()) {
+        if (!blocks.IsArray())
+        {
             return Failure;
         }
 
@@ -144,16 +150,20 @@ void TwitchAccount::loadIgnores()
             std::lock_guard<std::mutex> lock(this->ignoresMutex_);
             this->ignores_.clear();
 
-            for (const auto &block : blocks.GetArray()) {
-                if (!block.IsObject()) {
+            for (const auto &block : blocks.GetArray())
+            {
+                if (!block.IsObject())
+                {
                     continue;
                 }
                 auto userIt = block.FindMember("user");
-                if (userIt == block.MemberEnd()) {
+                if (userIt == block.MemberEnd())
+                {
                     continue;
                 }
                 TwitchUser ignoredUser;
-                if (!rj::getSafe(userIt->value, ignoredUser)) {
+                if (!rj::getSafe(userIt->value, ignoredUser))
+                {
                     log("Error parsing twitch user JSON {}",
                         rj::stringify(userIt->value));
                     continue;
@@ -201,14 +211,16 @@ void TwitchAccount::ignoreByID(
 
     req.onSuccess([=](auto result) -> Outcome {
         auto document = result.parseRapidJson();
-        if (!document.IsObject()) {
+        if (!document.IsObject())
+        {
             onFinished(IgnoreResult_Failed,
                        "Bad JSON data while ignoring user " + targetName);
             return Failure;
         }
 
         auto userIt = document.FindMember("user");
-        if (userIt == document.MemberEnd()) {
+        if (userIt == document.MemberEnd())
+        {
             onFinished(IgnoreResult_Failed,
                        "Bad JSON data while ignoring user (missing user) " +
                            targetName);
@@ -216,7 +228,8 @@ void TwitchAccount::ignoreByID(
         }
 
         TwitchUser ignoredUser;
-        if (!rj::getSafe(userIt->value, ignoredUser)) {
+        if (!rj::getSafe(userIt->value, ignoredUser))
+        {
             onFinished(IgnoreResult_Failed,
                        "Bad JSON data while ignoring user (invalid user) " +
                            targetName);
@@ -226,7 +239,8 @@ void TwitchAccount::ignoreByID(
             std::lock_guard<std::mutex> lock(this->ignoresMutex_);
 
             auto res = this->ignores_.insert(ignoredUser);
-            if (!res.second) {
+            if (!res.second)
+            {
                 const TwitchUser &existingUser = *(res.first);
                 existingUser.update(ignoredUser);
                 onFinished(IgnoreResult_AlreadyIgnored,
@@ -303,9 +317,12 @@ void TwitchAccount::checkFollow(const QString targetUserID,
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        if (errorCode == 203) {
+        if (errorCode == 203)
+        {
             onFinished(FollowResult_NotFollowing);
-        } else {
+        }
+        else
+        {
             onFinished(FollowResult_Failed);
         }
 
@@ -354,7 +371,8 @@ void TwitchAccount::unfollowUser(const QString userID,
     request.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     request.onError([successCallback](int code) {
-        if (code >= 200 && code <= 299) {
+        if (code >= 200 && code <= 299)
+        {
             successCallback();
         }
 
@@ -384,7 +402,8 @@ void TwitchAccount::loadEmotes()
     const auto &clientID = this->getOAuthClient();
     const auto &oauthToken = this->getOAuthToken();
 
-    if (clientID.isEmpty() || oauthToken.isEmpty()) {
+    if (clientID.isEmpty() || oauthToken.isEmpty())
+    {
         log("Missing Client ID or OAuth token");
         return;
     }
@@ -398,9 +417,12 @@ void TwitchAccount::loadEmotes()
 
     req.onError([=](int errorCode) {
         log("[TwitchAccount::loadEmotes] Error {}", errorCode);
-        if (errorCode == 203) {
+        if (errorCode == 203)
+        {
             // onFinished(FollowResult_NotFollowing);
-        } else {
+        }
+        else
+        {
             // onFinished(FollowResult_Failed);
         }
 
@@ -430,33 +452,38 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
     emoteData->allEmoteNames.clear();
 
     auto emoticonSets = root.FindMember("emoticon_sets");
-    if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject()) {
+    if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject())
+    {
         log("No emoticon_sets in load emotes response");
         return;
     }
 
-    for (const auto &emoteSetJSON : emoticonSets->value.GetObject()) {
+    for (const auto &emoteSetJSON : emoticonSets->value.GetObject())
+    {
         auto emoteSet = std::make_shared<EmoteSet>();
 
         emoteSet->key = emoteSetJSON.name.GetString();
 
         this->loadEmoteSetData(emoteSet);
 
-        for (const rapidjson::Value &emoteJSON :
-             emoteSetJSON.value.GetArray()) {
-            if (!emoteJSON.IsObject()) {
+        for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray())
+        {
+            if (!emoteJSON.IsObject())
+            {
                 log("Emote value was invalid");
                 return;
             }
 
             uint64_t idNumber;
-            if (!rj::getSafe(emoteJSON, "id", idNumber)) {
+            if (!rj::getSafe(emoteJSON, "id", idNumber))
+            {
                 log("No ID key found in Emote value");
                 return;
             }
 
             QString _code;
-            if (!rj::getSafe(emoteJSON, "code", _code)) {
+            if (!rj::getSafe(emoteJSON, "code", _code))
+            {
                 log("No code key found in Emote value");
                 return;
             }
@@ -478,13 +505,15 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 
 void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 {
-    if (!emoteSet) {
+    if (!emoteSet)
+    {
         log("null emote set sent");
         return;
     }
 
     auto staticSetIt = this->staticEmoteSets.find(emoteSet->key);
-    if (staticSetIt != this->staticEmoteSets.end()) {
+    if (staticSetIt != this->staticEmoteSets.end())
+    {
         const auto &staticSet = staticSetIt->second;
         emoteSet->channelName = staticSet.channelName;
         emoteSet->text = staticSet.text;
@@ -503,18 +532,21 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
     req.onSuccess([emoteSet](auto result) -> Outcome {
         auto root = result.parseRapidJson();
-        if (!root.IsObject()) {
+        if (!root.IsObject())
+        {
             return Failure;
         }
 
         std::string emoteSetID;
         QString channelName;
         QString type;
-        if (!rj::getSafe(root, "channel_name", channelName)) {
+        if (!rj::getSafe(root, "channel_name", channelName))
+        {
             return Failure;
         }
 
-        if (!rj::getSafe(root, "type", type)) {
+        if (!rj::getSafe(root, "type", type))
+        {
             return Failure;
         }
 

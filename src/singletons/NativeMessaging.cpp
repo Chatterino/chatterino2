@@ -37,7 +37,8 @@ void registerNmManifest(Paths &paths, const QString &manifestFilename,
 
 void registerNmHost(Paths &paths)
 {
-    if (paths.isPortable()) return;
+    if (paths.isPortable())
+        return;
 
     auto getBaseDocument = [&] {
         QJsonObject obj;
@@ -112,11 +113,14 @@ std::string &getNmQueueName(Paths &paths)
 
 void NativeMessagingClient::sendMessage(const QByteArray &array)
 {
-    try {
+    try
+    {
         ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
 
         messageQueue.try_send(array.data(), array.size(), 1);
-    } catch (ipc::interprocess_exception &ex) {
+    }
+    catch (ipc::interprocess_exception &ex)
+    {
         qDebug() << "send to gui process:" << ex.what();
     }
 }
@@ -144,8 +148,10 @@ void NativeMessagingServer::ReceiverThread::run()
     ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
                                     MESSAGE_SIZE);
 
-    while (true) {
-        try {
+    while (true)
+    {
+        try
+        {
             auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
             auto retSize = ipc::message_queue::size_type();
             auto priority = static_cast<unsigned int>(0);
@@ -156,7 +162,9 @@ void NativeMessagingServer::ReceiverThread::run()
                 QByteArray::fromRawData(buf.get(), retSize));
 
             this->handleMessage(document.object());
-        } catch (ipc::interprocess_exception &ex) {
+        }
+        catch (ipc::interprocess_exception &ex)
+        {
             qDebug() << "received from gui process:" << ex.what();
         }
     }
@@ -169,12 +177,14 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
 
     QString action = root.value("action").toString();
 
-    if (action.isNull()) {
+    if (action.isNull())
+    {
         qDebug() << "NM action was null";
         return;
     }
 
-    if (action == "select") {
+    if (action == "select")
+    {
         QString _type = root.value("type").toString();
         bool attach = root.value("attach").toBool();
         QString name = root.value("name").toString();
@@ -188,26 +198,31 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         args.width = root.value("size").toObject().value("width").toInt(-1);
         args.height = root.value("size").toObject().value("height").toInt(-1);
 
-        if (_type.isNull() || args.winId.isNull()) {
+        if (_type.isNull() || args.winId.isNull())
+        {
             qDebug() << "NM type, name or winId missing";
             attach = false;
             return;
         }
 #endif
 
-        if (_type == "twitch") {
+        if (_type == "twitch")
+        {
             postToThread([=] {
-                if (!name.isEmpty()) {
+                if (!name.isEmpty())
+                {
                     app->twitch.server->watchingChannel.reset(
                         app->twitch.server->getOrAddChannel(name));
                 }
 
-                if (attach) {
+                if (attach)
+                {
 #ifdef USEWINSDK
                     //                    if (args.height != -1) {
                     auto *window =
                         AttachedWindow::get(::GetForegroundWindow(), args);
-                    if (!name.isEmpty()) {
+                    if (!name.isEmpty())
+                    {
                         window->setChannel(
                             app->twitch.server->getOrAddChannel(name));
                     }
@@ -216,14 +231,18 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
 #endif
                 }
             });
-
-        } else {
+        }
+        else
+        {
             qDebug() << "NM unknown channel type";
         }
-    } else if (action == "detach") {
+    }
+    else if (action == "detach")
+    {
         QString winId = root.value("winId").toString();
 
-        if (winId.isNull()) {
+        if (winId.isNull())
+        {
             qDebug() << "NM winId missing";
             return;
         }
@@ -234,7 +253,9 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
             AttachedWindow::detach(winId);
         });
 #endif
-    } else {
+    }
+    else
+    {
         qDebug() << "NM unknown action " + action;
     }
 }

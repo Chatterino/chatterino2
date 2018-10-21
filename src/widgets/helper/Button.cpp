@@ -97,7 +97,8 @@ void Button::setMenu(std::unique_ptr<QMenu> menu)
 
     this->menu_->installEventFilter(
         new FunctionEventFilter(this, [this](QObject *, QEvent *event) {
-            if (event->type() == QEvent::Hide) {
+            if (event->type() == QEvent::Hide)
+            {
                 QTimer::singleShot(20, this,
                                    [this] { this->menuVisible_ = false; });
             }
@@ -111,8 +112,10 @@ void Button::paintEvent(QPaintEvent *)
 
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (!this->pixmap_.isNull()) {
-        if (!this->mouseOver_ && this->dimPixmap_ && this->enabled_) {
+    if (!this->pixmap_.isNull())
+    {
+        if (!this->mouseOver_ && this->dimPixmap_ && this->enabled_)
+        {
             painter.setOpacity(this->getCurrentDimAmount());
         }
 
@@ -131,7 +134,8 @@ void Button::paintEvent(QPaintEvent *)
 
     this->fancyPaint(painter);
 
-    if (this->borderColor_.isValid()) {
+    if (this->borderColor_.isValid())
+    {
         painter.setRenderHint(QPainter::Antialiasing, false);
         painter.setPen(this->borderColor_);
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
@@ -140,7 +144,8 @@ void Button::paintEvent(QPaintEvent *)
 
 void Button::fancyPaint(QPainter &painter)
 {
-    if (!this->enabled_) {
+    if (!this->enabled_)
+    {
         return;
     }
 
@@ -148,14 +153,18 @@ void Button::fancyPaint(QPainter &painter)
     painter.setRenderHint(QPainter::Antialiasing);
     QColor c;
 
-    if (this->mouseEffectColor_) {
+    if (this->mouseEffectColor_)
+    {
         c = this->mouseEffectColor_.get();
-    } else {
+    }
+    else
+    {
         c = this->theme->isLightTheme() ? QColor(0, 0, 0)
                                         : QColor(255, 255, 255);
     }
 
-    if (this->hoverMultiplier_ > 0) {
+    if (this->hoverMultiplier_ > 0)
+    {
         QRadialGradient gradient(QPointF(mousePos_), this->width() / 2);
 
         gradient.setColorAt(0, QColor(c.red(), c.green(), c.blue(),
@@ -166,7 +175,8 @@ void Button::fancyPaint(QPainter &painter)
         painter.fillRect(this->rect(), gradient);
     }
 
-    for (auto effect : this->clickEffects_) {
+    for (auto effect : this->clickEffects_)
+    {
         QRadialGradient gradient(effect.position.x(), effect.position.y(),
                                  effect.progress * qreal(width()) * 2,
                                  effect.position.x(), effect.position.y());
@@ -193,11 +203,13 @@ void Button::leaveEvent(QEvent *)
 
 void Button::mousePressEvent(QMouseEvent *event)
 {
-    if (!this->enabled_) {
+    if (!this->enabled_)
+    {
         return;
     }
 
-    if (event->button() != Qt::LeftButton) {
+    if (event->button() != Qt::LeftButton)
+    {
         return;
     }
 
@@ -207,7 +219,8 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     emit this->leftMousePress();
 
-    if (this->menu_ && !this->menuVisible_) {
+    if (this->menu_ && !this->menuVisible_)
+    {
         QTimer::singleShot(80, this, [this] { this->showMenu(); });
         this->mouseDown_ = false;
         this->mouseOver_ = false;
@@ -216,24 +229,28 @@ void Button::mousePressEvent(QMouseEvent *event)
 
 void Button::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!this->enabled_) {
+    if (!this->enabled_)
+    {
         return;
     }
 
-    if (event->button() != Qt::LeftButton) {
+    if (event->button() != Qt::LeftButton)
+    {
         return;
     }
 
     this->mouseDown_ = false;
 
-    if (this->rect().contains(event->pos())) {
+    if (this->rect().contains(event->pos()))
+    {
         emit clicked();
     }
 }
 
 void Button::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!this->enabled_) {
+    if (!this->enabled_)
+    {
         return;
     }
 
@@ -246,49 +263,64 @@ void Button::onMouseEffectTimeout()
 {
     bool performUpdate = false;
 
-    if (selected_) {
-        if (this->hoverMultiplier_ != 0) {
+    if (selected_)
+    {
+        if (this->hoverMultiplier_ != 0)
+        {
             this->hoverMultiplier_ =
                 std::max(0.0, this->hoverMultiplier_ - 0.1);
             performUpdate = true;
         }
-    } else if (mouseOver_) {
-        if (this->hoverMultiplier_ != 1) {
+    }
+    else if (mouseOver_)
+    {
+        if (this->hoverMultiplier_ != 1)
+        {
             this->hoverMultiplier_ =
                 std::min(1.0, this->hoverMultiplier_ + 0.5);
             performUpdate = true;
         }
-    } else {
-        if (this->hoverMultiplier_ != 0) {
+    }
+    else
+    {
+        if (this->hoverMultiplier_ != 0)
+        {
             this->hoverMultiplier_ =
                 std::max(0.0, this->hoverMultiplier_ - 0.3);
             performUpdate = true;
         }
     }
 
-    if (this->clickEffects_.size() != 0) {
+    if (this->clickEffects_.size() != 0)
+    {
         performUpdate = true;
 
         for (auto it = this->clickEffects_.begin();
-             it != this->clickEffects_.end();) {
+             it != this->clickEffects_.end();)
+        {
             it->progress += mouseDown_ ? 0.02 : 0.07;
 
-            if (it->progress >= 1.0) {
+            if (it->progress >= 1.0)
+            {
                 it = this->clickEffects_.erase(it);
-            } else {
+            }
+            else
+            {
                 it++;
             }
         }
     }
 
-    if (performUpdate) {
+    if (performUpdate)
+    {
         update();
     }
 }
 
 void Button::showMenu()
 {
-    if (!this->menu_) return;
+    if (!this->menu_)
+        return;
 
     auto point = [this] {
         auto bounds = QApplication::desktop()->availableGeometry(this);
@@ -296,7 +328,8 @@ void Button::showMenu()
         auto point = this->mapToGlobal(
             QPoint(this->width() - this->menu_->width(), this->height()));
 
-        if (point.y() + this->menu_->height() > bounds.bottom()) {
+        if (point.y() + this->menu_->height() > bounds.bottom())
+        {
             point.setY(point.y() - this->menu_->height() - this->height());
         }
 

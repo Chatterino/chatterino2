@@ -25,7 +25,8 @@ ChatterinoBadges::ChatterinoBadges()
 boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserName &username)
 {
     auto it = badgeMap.find(username.string);
-    if (it != badgeMap.end()) {
+    if (it != badgeMap.end())
+    {
         return emotes[it->second];
     }
     return boost::none;
@@ -41,7 +42,8 @@ void ChatterinoBadges::loadChatterinoBadges()
     req.onSuccess([this](auto result) -> Outcome {
         auto jsonRoot = result.parseJson();
         int index = 0;
-        for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray()) {
+        for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())
+        {
             auto jsonBadge = jsonBadge_.toObject();
             auto emote = Emote{
                 EmoteName{}, ImageSet{Url{jsonBadge.value("image").toString()}},
@@ -49,7 +51,8 @@ void ChatterinoBadges::loadChatterinoBadges()
 
             emotes.push_back(std::make_shared<const Emote>(std::move(emote)));
 
-            for (const auto &user : jsonBadge.value("users").toArray()) {
+            for (const auto &user : jsonBadge.value("users").toArray())
+            {
                 badgeMap[user.toString()] = index;
             }
             ++index;

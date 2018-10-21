@@ -48,16 +48,21 @@ void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
 
 void DownloadManager::onFinished(QNetworkReply *reply)
 {
-    switch (reply->error()) {
-        case QNetworkReply::NoError: {
+    switch (reply->error())
+    {
+        case QNetworkReply::NoError:
+        {
             qDebug("file is downloaded successfully.");
-        } break;
-        default: {
+        }
+        break;
+        default:
+        {
             qDebug() << reply->errorString().toLatin1();
         };
     }
 
-    if (file->isOpen()) {
+    if (file->isOpen())
+    {
         file->close();
         file->deleteLater();
     }
@@ -71,7 +76,8 @@ void DownloadManager::onReadyRead()
 
 void DownloadManager::onReplyFinished()
 {
-    if (file->isOpen()) {
+    if (file->isOpen())
+    {
         file->close();
         file->deleteLater();
     }

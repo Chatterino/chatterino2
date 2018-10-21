@@ -21,11 +21,13 @@ UsernameSet::ConstIterator UsernameSet::end() const
 UsernameSet::Range UsernameSet::subrange(const Prefix &prefix) const
 {
     auto it = this->firstKeyForPrefix.find(prefix);
-    if (it != this->firstKeyForPrefix.end()) {
+    if (it != this->firstKeyForPrefix.end())
+    {
         auto start = this->items.find(it->second);
         auto end = start;
 
-        while (end != this->items.end() && prefix.isStartOf(*end)) {
+        while (end != this->items.end() && prefix.isStartOf(*end))
+        {
             end++;
         }
         return {start, end};
@@ -57,7 +59,8 @@ void UsernameSet::insertPrefix(const QString &value)
 {
     auto &string = this->firstKeyForPrefix[Prefix(value)];
 
-    if (string.isNull() || value < string) string = value;
+    if (string.isNull() || value < string)
+        string = value;
 }
 
 //
@@ -98,12 +101,17 @@ bool Prefix::operator==(const Prefix &other) const
 
 bool Prefix::isStartOf(const QString &string) const
 {
-    if (string.size() == 0) {
+    if (string.size() == 0)
+    {
         return this->first == QChar('\0') && this->second == QChar('\0');
-    } else if (string.size() == 1) {
+    }
+    else if (string.size() == 1)
+    {
         return this->first == string[0].toLower() &&
                this->second == QChar('\0');
-    } else {
+    }
+    else
+    {
         return this->first == string[0].toLower() &&
                this->second == string[1].toLower();
     }

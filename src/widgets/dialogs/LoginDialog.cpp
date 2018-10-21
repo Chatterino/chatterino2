@@ -28,20 +28,25 @@ namespace {
     {
         QStringList errors;
 
-        if (userID.empty()) {
+        if (userID.empty())
+        {
             errors.append("Missing user ID");
         }
-        if (username.empty()) {
+        if (username.empty())
+        {
             errors.append("Missing username");
         }
-        if (clientID.empty()) {
+        if (clientID.empty())
+        {
             errors.append("Missing Client ID");
         }
-        if (oauthToken.empty()) {
+        if (oauthToken.empty())
+        {
             errors.append("Missing OAuth Token");
         }
 
-        if (errors.length() > 0) {
+        if (errors.length() > 0)
+        {
             QMessageBox messageBox;
             messageBox.setIcon(QMessageBox::Critical);
             messageBox.setText(errors.join("<br />"));
@@ -96,23 +101,34 @@ BasicLoginWidget::BasicLoginWidget()
 
         std::string oauthToken, clientID, username, userID;
 
-        for (const auto &param : parameters) {
+        for (const auto &param : parameters)
+        {
             QStringList kvParameters = param.split('=');
-            if (kvParameters.size() != 2) {
+            if (kvParameters.size() != 2)
+            {
                 continue;
             }
             QString key = kvParameters[0];
             QString value = kvParameters[1];
 
-            if (key == "oauth_token") {
+            if (key == "oauth_token")
+            {
                 oauthToken = value.toStdString();
-            } else if (key == "client_id") {
+            }
+            else if (key == "client_id")
+            {
                 clientID = value.toStdString();
-            } else if (key == "username") {
+            }
+            else if (key == "username")
+            {
                 username = value.toStdString();
-            } else if (key == "user_id") {
+            }
+            else if (key == "user_id")
+            {
                 userID = value.toStdString();
-            } else {
+            }
+            else
+            {
                 qDebug() << "Unknown key in code: " << key;
             }
         }
@@ -212,9 +228,12 @@ void AdvancedLoginWidget::refreshButtons()
     if (this->ui_.userIDInput.text().isEmpty() ||
         this->ui_.usernameInput.text().isEmpty() ||
         this->ui_.clientIDInput.text().isEmpty() ||
-        this->ui_.oauthTokenInput.text().isEmpty()) {
+        this->ui_.oauthTokenInput.text().isEmpty())
+    {
         this->ui_.buttonUpperRow.addUserButton.setEnabled(false);
-    } else {
+    }
+    else
+    {
         this->ui_.buttonUpperRow.addUserButton.setEnabled(true);
     }
 }

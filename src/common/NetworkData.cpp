@@ -20,12 +20,14 @@ NetworkData::~NetworkData()
 
 QString NetworkData::getHash()
 {
-    if (this->hash_.isEmpty()) {
+    if (this->hash_.isEmpty())
+    {
         QByteArray bytes;
 
         bytes.append(this->request_.url().toString());
 
-        for (const auto &header : this->request_.rawHeaderList()) {
+        for (const auto &header : this->request_.rawHeaderList())
+        {
             bytes.append(header);
         }
 
@@ -40,10 +42,12 @@ QString NetworkData::getHash()
 
 void NetworkData::writeToCache(const QByteArray &bytes)
 {
-    if (this->useQuickLoadCache_) {
+    if (this->useQuickLoadCache_)
+    {
         QFile cachedFile(getPaths()->cacheDirectory() + "/" + this->getHash());
 
-        if (cachedFile.open(QIODevice::WriteOnly)) {
+        if (cachedFile.open(QIODevice::WriteOnly))
+        {
             cachedFile.write(bytes);
 
             cachedFile.close();

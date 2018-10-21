@@ -75,7 +75,8 @@ void Application::initialize(Settings &settings, Paths &paths)
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
-    for (auto &singleton : this->singletons_) {
+    for (auto &singleton : this->singletons_)
+    {
         singleton->initialize(settings, paths);
     }
 
@@ -98,7 +99,8 @@ int Application::run(QApplication &qtApp)
 
 void Application::save()
 {
-    for (auto &singleton : this->singletons_) {
+    for (auto &singleton : this->singletons_)
+    {
         singleton->save();
     }
 }
@@ -132,7 +134,8 @@ void Application::initPubsub()
         [this](const auto &action) {
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
-            if (chan->isEmpty()) {
+            if (chan->isEmpty())
+            {
                 return;
             }
 
@@ -147,7 +150,8 @@ void Application::initPubsub()
         [this](const auto &action) {
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
-            if (chan->isEmpty()) {
+            if (chan->isEmpty())
+            {
                 return;
             }
 
@@ -158,7 +162,8 @@ void Application::initPubsub()
                                                                       : "off")
                     .arg(action.getModeName());
 
-            if (action.duration > 0) {
+            if (action.duration > 0)
+            {
                 text.append(" (" + QString::number(action.duration) +
                             " seconds)");
             }
@@ -171,16 +176,20 @@ void Application::initPubsub()
         [this](const auto &action) {
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
-            if (chan->isEmpty()) {
+            if (chan->isEmpty())
+            {
                 return;
             }
 
             QString text;
 
-            if (action.modded) {
+            if (action.modded)
+            {
                 text = QString("%1 modded %2")
                            .arg(action.source.name, action.target.name);
-            } else {
+            }
+            else
+            {
                 text = QString("%1 unmodded %2")
                            .arg(action.source.name, action.target.name);
             }
@@ -194,7 +203,8 @@ void Application::initPubsub()
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
-            if (chan->isEmpty()) {
+            if (chan->isEmpty())
+            {
                 return;
             }
 
@@ -211,7 +221,8 @@ void Application::initPubsub()
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
-            if (chan->isEmpty()) {
+            if (chan->isEmpty())
+            {
                 return;
             }
 

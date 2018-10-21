@@ -13,7 +13,8 @@ namespace {
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
         auto emote = urls.value(emoteScale);
-        if (emote.isUndefined()) {
+        if (emote.isUndefined())
+        {
             return {""};
         }
 
@@ -48,10 +49,12 @@ namespace {
         auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
-        for (auto jsonSet : jsonSets) {
+        for (auto jsonSet : jsonSets)
+        {
             auto jsonEmotes = jsonSet.toObject().value("emoticons").toArray();
 
-            for (auto jsonEmoteValue : jsonEmotes) {
+            for (auto jsonEmoteValue : jsonEmotes)
+            {
                 auto jsonEmote = jsonEmoteValue.toObject();
 
                 auto name = EmoteName{jsonEmote.value("name").toString()};
@@ -78,10 +81,12 @@ namespace {
         auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
-        for (auto jsonSet : jsonSets) {
+        for (auto jsonSet : jsonSets)
+        {
             auto jsonEmotes = jsonSet.toObject().value("emoticons").toArray();
 
-            for (auto _jsonEmote : jsonEmotes) {
+            for (auto _jsonEmote : jsonEmotes)
+            {
                 auto jsonEmote = _jsonEmote.toObject();
 
                 // margins
@@ -120,7 +125,8 @@ boost::optional<EmotePtr> FfzEmotes::emote(const EmoteName &name) const
 {
     auto emotes = this->global_.get();
     auto it = emotes->find(name);
-    if (it != emotes->end()) return it->second;
+    if (it != emotes->end())
+        return it->second;
     return boost::none;
 }
 
@@ -156,17 +162,20 @@ void FfzEmotes::loadChannel(const QString &channelName,
 
     request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
         auto pair = parseChannelEmotes(result.parseJson());
-        if (pair.first) callback(std::move(pair.second));
+        if (pair.first)
+            callback(std::move(pair.second));
         return pair.first;
     });
 
     request.onError([channelName](int result) {
-        if (result == 203) {
+        if (result == 203)
+        {
             // User does not have any FFZ emotes
             return true;
         }
 
-        if (result == -2) {
+        if (result == -2)
+        {
             // TODO: Auto retry in case of a timeout, with a delay
             log("Fetching FFZ emotes for channel {} failed due to timeout",
                 channelName);

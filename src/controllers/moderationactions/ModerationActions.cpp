@@ -21,7 +21,8 @@ void ModerationActions::initialize(Settings &settings, Paths &paths)
         std::make_unique<ChatterinoSetting<std::vector<ModerationAction>>>(
             "/moderation/actions");
 
-    for (auto &val : this->setting_->getValue()) {
+    for (auto &val : this->setting_->getValue())
+    {
         this->items.insertItem(val);
     }
 

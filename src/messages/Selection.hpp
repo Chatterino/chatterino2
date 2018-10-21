@@ -59,7 +59,8 @@ struct Selection {
         , selectionMin(start)
         , selectionMax(end)
     {
-        if (selectionMin > selectionMax) {
+        if (selectionMin > selectionMax)
+        {
             std::swap(this->selectionMin, this->selectionMax);
         }
     }

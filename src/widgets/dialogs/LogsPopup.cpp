@@ -54,7 +54,8 @@ void LogsPopup::getRoomID()
 {
     TwitchChannel *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr) {
+    if (twitchChannel == nullptr)
+    {
         return;
     }
 
@@ -84,7 +85,8 @@ void LogsPopup::getLogviewerLogs()
 {
     TwitchChannel *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr) {
+    if (twitchChannel == nullptr)
+    {
         return;
     }
 
@@ -107,7 +109,8 @@ void LogsPopup::getLogviewerLogs()
 
         QJsonValue before = data.value("before");
 
-        for (auto i : before.toArray()) {
+        for (auto i : before.toArray())
+        {
             auto messageObject = i.toObject();
             QString message = messageObject.value("text").toString();
 
@@ -137,7 +140,8 @@ void LogsPopup::getOverrustleLogs()
 {
     TwitchChannel *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr) {
+    if (twitchChannel == nullptr)
+    {
         return;
     }
 
@@ -164,9 +168,11 @@ void LogsPopup::getOverrustleLogs()
     req.onSuccess([this, channelName](auto result) -> Outcome {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
-        if (data.contains("lines")) {
+        if (data.contains("lines"))
+        {
             QJsonArray dataMessages = data.value("lines").toArray();
-            for (auto i : dataMessages) {
+            for (auto i : dataMessages)
+            {
                 QJsonObject singleMessage = i.toObject();
                 QTime timeStamp = QDateTime::fromSecsSinceEpoch(
                                       singleMessage.value("timestamp").toInt())

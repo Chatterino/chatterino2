@@ -12,13 +12,20 @@ namespace detail {
 
     double getMultiplierByTheme(const QString &themeName)
     {
-        if (themeName == "Light") {
+        if (themeName == "Light")
+        {
             return 0.8;
-        } else if (themeName == "White") {
+        }
+        else if (themeName == "White")
+        {
             return 1.0;
-        } else if (themeName == "Black") {
+        }
+        else if (themeName == "Black")
+        {
             return -1.0;
-        } else if (themeName == "Dark") {
+        }
+        else if (themeName == "Dark")
+        {
             return -0.8;
         }
 
@@ -88,7 +95,8 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         QColor highlighted = lightWin ? QColor("#ff0000") : QColor("#ee6166");
 
         /// TABS
-        if (lightWin) {
+        if (lightWin)
+        {
             this->tabs.regular = {
                 QColor("#444"),
                 {QColor("#fff"), QColor("#eee"), QColor("#fff")},
@@ -105,7 +113,9 @@ void Theme::actuallyUpdate(double hue, double multiplier)
                 QColor("#000"),
                 {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
                 {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
-        } else {
+        }
+        else
+        {
             this->tabs.regular = {
                 QColor("#aaa"),
                 {QColor("#252525"), QColor("#252525"), QColor("#252525")},
@@ -161,13 +171,16 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
-    if (isLight_) {
+    if (isLight_)
+    {
         this->splits.dropTargetRect = QColor(255, 255, 255, 0x00);
         this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
-    } else {
+    }
+    else
+    {
         this->splits.dropTargetRect = QColor(0, 148, 255, 0x00);
         this->splits.dropTargetRectBorder = QColor(0, 148, 255, 0x00);
 
@@ -200,10 +213,13 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->messages.backgrounds.regular = splits.background;
     this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
 
-    if (isLight_) {
+    if (isLight_)
+    {
         this->messages.backgrounds.highlighted =
             blendColors(themeColor, this->messages.backgrounds.regular, 0.8);
-    } else {
+    }
+    else
+    {
         this->messages.backgrounds.highlighted =
             QColor(getSettings()->highlightColor);
     }
@@ -247,25 +263,32 @@ QColor Theme::blendColors(const QColor &color1, const QColor &color2,
 
 void Theme::normalizeColor(QColor &color)
 {
-    if (this->isLight_) {
-        if (color.lightnessF() > 0.5) {
+    if (this->isLight_)
+    {
+        if (color.lightnessF() > 0.5)
+        {
             color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
         if (color.lightnessF() > 0.4 && color.hueF() > 0.1 &&
-            color.hueF() < 0.33333) {
+            color.hueF() < 0.33333)
+        {
             color.setHslF(color.hueF(), color.saturationF(),
                           color.lightnessF() - sin((color.hueF() - 0.1) /
                                                    (0.3333 - 0.1) * 3.14159) *
                                                    color.saturationF() * 0.4);
         }
-    } else {
-        if (color.lightnessF() < 0.5) {
+    }
+    else
+    {
+        if (color.lightnessF() < 0.5)
+        {
             color.setHslF(color.hueF(), color.saturationF(), 0.5);
         }
 
         if (color.lightnessF() < 0.6 && color.hueF() > 0.54444 &&
-            color.hueF() < 0.83333) {
+            color.hueF() < 0.83333)
+        {
             color.setHslF(
                 color.hueF(), color.saturationF(),
                 color.lightnessF() + sin((color.hueF() - 0.54444) /

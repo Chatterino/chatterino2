@@ -17,7 +17,8 @@ MessageColor::MessageColor(Type type)
 
 const QColor &MessageColor::getColor(Theme &themeManager) const
 {
-    switch (this->type_) {
+    switch (this->type_)
+    {
         case Type::Custom:
             return this->customColor_;
         case Type::Text:

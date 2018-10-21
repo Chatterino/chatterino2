@@ -39,7 +39,8 @@ const QString &Updates::getOnlineVersion() const
 
 void Updates::installUpdates()
 {
-    if (this->status_ != UpdateAvailable) {
+    if (this->status_ != UpdateAvailable)
+    {
         assert(false);
         return;
     }
@@ -77,7 +78,8 @@ void Updates::installUpdates()
         QFile file(filename);
         file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
-        if (file.write(object) == -1) {
+        if (file.write(object) == -1)
+        {
             this->setStatus_(WriteFileFailed);
             return Failure;
         }
@@ -109,7 +111,8 @@ void Updates::checkForUpdates()
         QJsonValue version_val = object.value("version");
         QJsonValue update_val = object.value("update");
 
-        if (!version_val.isString() || !update_val.isString()) {
+        if (!version_val.isString() || !update_val.isString())
+        {
             this->setStatus_(SearchFailed);
             qDebug() << "error updating";
 
@@ -129,7 +132,8 @@ void Updates::checkForUpdates()
         this->onlineVersion_ = version_val.toString();
         this->updateUrl_ = update_val.toString();
 
-        if (this->currentVersion_ != this->onlineVersion_) {
+        if (this->currentVersion_ != this->onlineVersion_)
+        {
             this->setStatus_(UpdateAvailable);
             postToThread([this] {
                 QMessageBox *box = new QMessageBox(
@@ -140,11 +144,14 @@ void Updates::checkForUpdates()
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->show();
                 box->raise();
-                if (box->exec() == QMessageBox::Yes) {
+                if (box->exec() == QMessageBox::Yes)
+                {
                     this->installUpdates();
                 }
             });
-        } else {
+        }
+        else
+        {
             this->setStatus_(NoUpdateAvailable);
         }
         return Failure;
@@ -161,7 +168,8 @@ Updates::Status Updates::getStatus() const
 
 bool Updates::shouldShowUpdateButton() const
 {
-    switch (this->getStatus()) {
+    switch (this->getStatus())
+    {
         case UpdateAvailable:
         case SearchFailed:
         case Downloading:
@@ -176,7 +184,8 @@ bool Updates::shouldShowUpdateButton() const
 
 bool Updates::isError() const
 {
-    switch (this->getStatus()) {
+    switch (this->getStatus())
+    {
         case SearchFailed:
         case DownloadFailed:
         case WriteFileFailed:
@@ -189,7 +198,8 @@ bool Updates::isError() const
 
 void Updates::setStatus_(Status status)
 {
-    if (this->status_ != status) {
+    if (this->status_ != status)
+    {
         this->status_ = status;
         postToThread([this, status] { this->statusUpdated.invoke(status); });
     }

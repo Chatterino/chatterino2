@@ -63,7 +63,8 @@ NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
     page->hide();
     page->setParent(this);
 
-    if (select || this->items_.count() == 1) {
+    if (select || this->items_.count() == 1)
+    {
         this->select(page);
     }
 
@@ -79,13 +80,20 @@ void Notebook::removePage(QWidget *page)
     // Queue up save because: Tab removed
     getApp()->windows->queueSave();
 
-    for (int i = 0; i < this->items_.count(); i++) {
-        if (this->items_[i].page == page) {
-            if (this->items_.count() == 1) {
+    for (int i = 0; i < this->items_.count(); i++)
+    {
+        if (this->items_[i].page == page)
+        {
+            if (this->items_.count() == 1)
+            {
                 this->select(nullptr);
-            } else if (i == this->items_.count() - 1) {
+            }
+            else if (i == this->items_.count() - 1)
+            {
                 this->select(this->items_[i - 1].page);
-            } else {
+            }
+            else
+            {
                 this->select(this->items_[i + 1].page);
             }
 
@@ -106,15 +114,18 @@ void Notebook::removePage(QWidget *page)
 
 void Notebook::removeCurrentPage()
 {
-    if (this->selectedPage_ != nullptr) {
+    if (this->selectedPage_ != nullptr)
+    {
         this->removePage(this->selectedPage_);
     }
 }
 
 int Notebook::indexOf(QWidget *page) const
 {
-    for (int i = 0; i < this->items_.count(); i++) {
-        if (this->items_[i].page == page) {
+    for (int i = 0; i < this->items_.count(); i++)
+    {
+        if (this->items_[i].page == page)
+        {
             return i;
         }
     }
@@ -124,11 +135,13 @@ int Notebook::indexOf(QWidget *page) const
 
 void Notebook::select(QWidget *page)
 {
-    if (page == this->selectedPage_) {
+    if (page == this->selectedPage_)
+    {
         return;
     }
 
-    if (page != nullptr) {
+    if (page != nullptr)
+    {
         page->setHidden(false);
 
         assert(this->containsPage(page));
@@ -137,20 +150,27 @@ void Notebook::select(QWidget *page)
         item.tab->setSelected(true);
         item.tab->raise();
 
-        if (item.selectedWidget == nullptr) {
+        if (item.selectedWidget == nullptr)
+        {
             item.page->setFocus();
-        } else {
-            if (containsChild(page, item.selectedWidget)) {
+        }
+        else
+        {
+            if (containsChild(page, item.selectedWidget))
+            {
                 qDebug() << item.selectedWidget;
                 item.selectedWidget->setFocus(Qt::MouseFocusReason);
-            } else {
+            }
+            else
+            {
                 qDebug()
                     << "Notebook: selected child of page doesn't exist anymore";
             }
         }
     }
 
-    if (this->selectedPage_ != nullptr) {
+    if (this->selectedPage_ != nullptr)
+    {
         this->selectedPage_->setHidden(true);
 
         Item &item = this->findItem(selectedPage_);
@@ -187,7 +207,8 @@ bool Notebook::containsChild(const QObject *obj, const QObject *child)
 {
     return std::any_of(obj->children().begin(), obj->children().end(),
                        [child](const QObject *o) {
-                           if (o == child) {
+                           if (o == child)
+                           {
                                return true;
                            }
 
@@ -197,7 +218,8 @@ bool Notebook::containsChild(const QObject *obj, const QObject *child)
 
 void Notebook::selectIndex(int index)
 {
-    if (index < 0 || this->items_.count() <= index) {
+    if (index < 0 || this->items_.count() <= index)
+    {
         return;
     }
 
@@ -206,7 +228,8 @@ void Notebook::selectIndex(int index)
 
 void Notebook::selectNextTab()
 {
-    if (this->items_.size() <= 1) {
+    if (this->items_.size() <= 1)
+    {
         return;
     }
 
@@ -218,13 +241,15 @@ void Notebook::selectNextTab()
 
 void Notebook::selectPreviousTab()
 {
-    if (this->items_.size() <= 1) {
+    if (this->items_.size() <= 1)
+    {
         return;
     }
 
     int index = this->indexOf(this->selectedPage_) - 1;
 
-    if (index < 0) {
+    if (index < 0)
+    {
         index += this->items_.count();
     }
 
@@ -255,13 +280,15 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
 {
     auto i = 0;
 
-    for (auto &item : this->items_) {
+    for (auto &item : this->items_)
+    {
         auto rect = item.tab->getDesiredRect();
         rect.setHeight(int(this->getScale() * 24));
 
         rect.setWidth(std::min(maxWidth, rect.width()));
 
-        if (rect.contains(point)) {
+        if (rect.contains(point))
+        {
             index = i;
             return item.page;
         }
@@ -311,7 +338,8 @@ void Notebook::scaleChangedEvent(float scale)
 
     this->addButton_->setFixedSize(h, h);
 
-    for (auto &i : this->items_) {
+    for (auto &i : this->items_)
+    {
         i.tab->updateSize();
     }
 }
@@ -332,8 +360,10 @@ void Notebook::performLayout(bool animated)
     auto y = 0;
 
     // set size of custom buttons (settings, user, ...)
-    for (auto *btn : this->customButtons_) {
-        if (!btn->isVisible()) {
+    for (auto *btn : this->customButtons_)
+    {
+        if (!btn->isVisible())
+        {
             continue;
         }
 
@@ -347,7 +377,8 @@ void Notebook::performLayout(bool animated)
     auto firstInBottomRow =
         this->items_.size() ? &this->items_.front() : nullptr;
 
-    for (auto &item : this->items_) {
+    for (auto &item : this->items_)
+    {
         /// Break line if element doesn't fit.
         auto isFirst = &item == &this->items_.front();
         auto isLast = &item == &this->items_.back();
@@ -355,7 +386,8 @@ void Notebook::performLayout(bool animated)
         auto fitsInLine =
             ((isLast ? addButtonWidth : 0) + x + item.tab->width()) <= width();
 
-        if (!isFirst && !fitsInLine) {
+        if (!isFirst && !fitsInLine)
+        {
             y += item.tab->height();
             x = left;
             firstInBottomRow = &item;
@@ -368,19 +400,23 @@ void Notebook::performLayout(bool animated)
 
     /// Update which tabs are in the last row
     auto inLastRow = false;
-    for (const auto &item : this->items_) {
-        if (&item == firstInBottomRow) {
+    for (const auto &item : this->items_)
+    {
+        if (&item == firstInBottomRow)
+        {
             inLastRow = true;
         }
         item.tab->setInLastRow(inLastRow);
     }
 
     // move misc buttons
-    if (this->showAddButton_) {
+    if (this->showAddButton_)
+    {
         this->addButton_->move(x, y);
     }
 
-    if (this->lineY_ != y + tabHeight) {
+    if (this->lineY_ != y + tabHeight)
+    {
         this->lineY_ = y + tabHeight;
         this->update();
     }
@@ -389,16 +425,19 @@ void Notebook::performLayout(bool animated)
     y += int(2 * scale);
 
     // raise elements
-    for (auto &i : this->items_) {
+    for (auto &i : this->items_)
+    {
         i.tab->raise();
     }
 
-    if (this->showAddButton_) {
+    if (this->showAddButton_)
+    {
         this->addButton_->raise();
     }
 
     // set page bounds
-    if (this->selectedPage_ != nullptr) {
+    if (this->selectedPage_ != nullptr)
+    {
         this->selectedPage_->move(0, y + tabHeight);
         this->selectedPage_->resize(width(), height() - y - tabHeight);
         this->selectedPage_->raise();
@@ -431,8 +470,10 @@ NotebookButton *Notebook::addCustomButton()
 
 NotebookTab *Notebook::getTabFromPage(QWidget *page)
 {
-    for (auto &it : this->items_) {
-        if (it.page == page) {
+    for (auto &it : this->items_)
+    {
+        if (it.page == page)
+        {
             return it.tab;
         }
     }
@@ -448,7 +489,8 @@ SplitNotebook::SplitNotebook(Window *parent)
     });
 
     // add custom buttons if they are not in the parent window frame
-    if (!parent->hasCustomWindowFrame()) {
+    if (!parent->hasCustomWindowFrame())
+    {
         this->addCustomButtons();
     }
 }
@@ -508,10 +550,12 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
 
 void SplitNotebook::select(QWidget *page)
 {
-    if (auto selectedPage = this->getSelectedPage()) {
-        if (auto splitContainer =
-                dynamic_cast<SplitContainer *>(selectedPage)) {
-            for (auto split : splitContainer->getSplits()) {
+    if (auto selectedPage = this->getSelectedPage())
+    {
+        if (auto splitContainer = dynamic_cast<SplitContainer *>(selectedPage))
+        {
+            for (auto split : splitContainer->getSplits())
+            {
                 split->updateLastReadMessage();
             }
         }

@@ -16,11 +16,16 @@ QByteArray endline("\n");
 LoggingChannel::LoggingChannel(const QString &_channelName)
     : channelName(_channelName)
 {
-    if (this->channelName.startsWith("/whispers")) {
+    if (this->channelName.startsWith("/whispers"))
+    {
         this->subDirectory = "Whispers";
-    } else if (channelName.startsWith("/mentions")) {
+    }
+    else if (channelName.startsWith("/mentions"))
+    {
         this->subDirectory = "Mentions";
-    } else {
+    }
+    else
+    {
         this->subDirectory =
             QStringLiteral("Channels") + QDir::separator() + channelName;
     }
@@ -33,9 +38,12 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
         auto app = getApp();
 
-        if (logPath.isEmpty()) {
+        if (logPath.isEmpty())
+        {
             this->baseDirectory = getPaths()->messageLogDirectory;
-        } else {
+        }
+        else
+        {
             this->baseDirectory = logPath;
         }
 
@@ -54,7 +62,8 @@ void LoggingChannel::openLogFile()
     QDateTime now = QDateTime::currentDateTime();
     this->dateString = this->generateDateString(now);
 
-    if (this->fileHandle.isOpen()) {
+    if (this->fileHandle.isOpen())
+    {
         this->fileHandle.flush();
         this->fileHandle.close();
     }
@@ -64,7 +73,8 @@ void LoggingChannel::openLogFile()
     QString directory =
         this->baseDirectory + QDir::separator() + this->subDirectory;
 
-    if (!QDir().mkpath(directory)) {
+    if (!QDir().mkpath(directory))
+    {
         log("Unable to create logging path");
         return;
     }
@@ -84,7 +94,8 @@ void LoggingChannel::addMessage(MessagePtr message)
     QDateTime now = QDateTime::currentDateTime();
 
     QString messageDateString = this->generateDateString(now);
-    if (messageDateString != this->dateString) {
+    if (messageDateString != this->dateString)
+    {
         this->dateString = messageDateString;
         this->openLogFile();
     }

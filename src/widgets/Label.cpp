@@ -29,7 +29,8 @@ const QString &Label::getText() const
 
 void Label::setText(const QString &text)
 {
-    if (this->text_ != text) {
+    if (this->text_ != text)
+    {
         this->text_ = text;
         this->updateSize();
         this->update();

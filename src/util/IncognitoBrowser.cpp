@@ -21,7 +21,8 @@ namespace {
 
         // transform into regex and replacement string
         std::vector<std::pair<QRegularExpression, QString>> replacers;
-        for (const auto &switch_ : switches) {
+        for (const auto &switch_ : switches)
+        {
             replacers.emplace_back(
                 QRegularExpression("(" + switch_.first + "\\.exe\"?).*",
                                    QRegularExpression::CaseInsensitiveOption),
@@ -29,8 +30,10 @@ namespace {
         }
 
         // try to find matching regex and apply it
-        for (const auto &replacement : replacers) {
-            if (replacement.first.match(command).hasMatch()) {
+        for (const auto &replacement : replacers)
+        {
+            if (replacement.first.match(command).hasMatch())
+            {
                 command.replace(replacement.first, replacement.second);
                 return command;
             }
@@ -57,13 +60,15 @@ namespace {
                                  QSettings::NativeFormat)
                            .value("Default")
                            .toString();
-        if (command.isNull()) return QString();
+        if (command.isNull())
+            return QString();
 
         log(command);
 
         // inject switch to enable private browsing
         command = injectPrivateSwitch(command);
-        if (command.isNull()) return QString();
+        if (command.isNull())
+            return QString();
 
         // link
         command += " " + link;

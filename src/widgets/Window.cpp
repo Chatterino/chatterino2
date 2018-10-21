@@ -48,9 +48,12 @@ Window::Window(WindowType type)
         [this] { this->onAccountSelected(); });
     this->onAccountSelected();
 
-    if (type == WindowType::Main) {
+    if (type == WindowType::Main)
+    {
         this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
-    } else {
+    }
+    else
+    {
         this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
     }
 }
@@ -69,8 +72,10 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
 {
     auto page = this->notebook_->getOrAddSelectedPage();
 
-    for (const auto &split : page->getSplits()) {
-        if (channel == nullptr || channel == split->getChannel().get()) {
+    for (const auto &split : page->getSplits())
+    {
+        if (channel == nullptr || channel == split->getChannel().get())
+        {
             split->layoutMessages();
         }
     }
@@ -78,26 +83,32 @@ void Window::repaintVisibleChatWidgets(Channel *channel)
 
 bool Window::event(QEvent *event)
 {
-    switch (event->type()) {
+    switch (event->type())
+    {
         case QEvent::WindowActivate:
             break;
 
-        case QEvent::WindowDeactivate: {
+        case QEvent::WindowDeactivate:
+        {
             auto page = this->notebook_->getOrAddSelectedPage();
 
-            if (page != nullptr) {
+            if (page != nullptr)
+            {
                 std::vector<Split *> splits = page->getSplits();
 
-                for (Split *split : splits) {
+                for (Split *split : splits)
+                {
                     split->updateLastReadMessage();
                 }
             }
 
             if (SplitContainer *container =
-                    dynamic_cast<SplitContainer *>(page)) {
+                    dynamic_cast<SplitContainer *>(page))
+            {
                 container->hideResizeHandles();
             }
-        } break;
+        }
+        break;
 
         default:;
     };
@@ -108,7 +119,8 @@ bool Window::event(QEvent *event)
 void Window::showEvent(QShowEvent *event)
 {
     // Startup notification
-    if (getSettings()->startUpNotification.getValue() < 1) {
+    if (getSettings()->startUpNotification.getValue() < 1)
+    {
         getSettings()->startUpNotification = 1;
 
         auto box = new QMessageBox(
@@ -122,12 +134,14 @@ void Window::showEvent(QShowEvent *event)
 
     // Show changelog
     if (getSettings()->currentVersion.getValue() != "" &&
-        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION) {
+        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
+    {
         auto box = new QMessageBox(QMessageBox::Information,
                                    "Chatterino 2 Beta", "Show changelog?",
                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
-        if (box->exec() == QMessageBox::Yes) {
+        if (box->exec() == QMessageBox::Yes)
+        {
             QDesktopServices::openUrl(
                 QUrl("https://fourtf.com/chatterino-changelog/"));
         }
@@ -141,7 +155,8 @@ void Window::showEvent(QShowEvent *event)
 
 void Window::closeEvent(QCloseEvent *)
 {
-    if (this->type_ == WindowType::Main) {
+    if (this->type_ == WindowType::Main)
+    {
         auto app = getApp();
         app->windows->save();
         app->windows->closeAll();
@@ -149,7 +164,8 @@ void Window::closeEvent(QCloseEvent *)
 
     this->closed.invoke();
 
-    if (this->type_ == WindowType::Main) {
+    if (this->type_ == WindowType::Main)
+    {
         QApplication::exit();
     }
 }
@@ -170,8 +186,10 @@ void Window::addLayout()
 
 void Window::addCustomTitlebarButtons()
 {
-    if (!this->hasCustomWindowFrame()) return;
-    if (this->type_ != WindowType::Main) return;
+    if (!this->hasCustomWindowFrame())
+        return;
+    if (this->type_ != WindowType::Main)
+        return;
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings,
@@ -309,15 +327,18 @@ void Window::addShortcuts()
 
     // Reopen last closed split
     createWindowShortcut(this, "CTRL+G", [this] {
-        if (ClosedSplits::empty()) {
+        if (ClosedSplits::empty())
+        {
             return;
         }
         ClosedSplits::SplitInfo si = ClosedSplits::pop();
         SplitContainer *splitContainer{nullptr};
-        if (si.tab) {
+        if (si.tab)
+        {
             splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
         }
-        if (!splitContainer) {
+        if (!splitContainer)
+        {
             splitContainer = this->notebook_->getOrAddSelectedPage();
         }
         this->notebook_->select(splitContainer);
@@ -345,12 +366,17 @@ void Window::onAccountSelected()
 
     this->setWindowTitle(windowTitleEnd);
 
-    if (user->isAnon()) {
-        if (this->userLabel_) {
+    if (user->isAnon())
+    {
+        if (this->userLabel_)
+        {
             this->userLabel_->getLabel().setText("anonymous");
         }
-    } else {
-        if (this->userLabel_) {
+    }
+    else
+    {
+        if (this->userLabel_)
+        {
             this->userLabel_->getLabel().setText(user->getUserName());
         }
     }

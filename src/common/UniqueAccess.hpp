@@ -32,7 +32,8 @@ public:
 
     ~AccessGuard()
     {
-        if (this->isValid_) this->mutex_->unlock();
+        if (this->isValid_)
+            this->mutex_->unlock();
     }
 
     T *operator->() const

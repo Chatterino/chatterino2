@@ -20,13 +20,18 @@ void initUpdateButton(Button &button,
         dialog->raise();
 
         dialog->buttonClicked.connect([&button](auto buttonType) {
-            switch (buttonType) {
-                case UpdateDialog::Dismiss: {
+            switch (buttonType)
+            {
+                case UpdateDialog::Dismiss:
+                {
                     button.hide();
-                } break;
-                case UpdateDialog::Install: {
+                }
+                break;
+                case UpdateDialog::Install:
+                {
                     Updates::getInstance().installUpdates();
-                } break;
+                }
+                break;
             }
         });
 

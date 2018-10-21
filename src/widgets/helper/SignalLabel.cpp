@@ -14,7 +14,8 @@ void SignalLabel::mouseDoubleClickEvent(QMouseEvent *ev)
 
 void SignalLabel::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton)
+    {
         emit mouseDown();
     }
 
@@ -23,7 +24,8 @@ void SignalLabel::mousePressEvent(QMouseEvent *event)
 
 void SignalLabel::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton)
+    {
         emit mouseUp();
     }
 

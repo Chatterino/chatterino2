@@ -29,7 +29,8 @@ int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
                                std::vector<QStandardItem *> &row,
                                int proposedIndex)
 {
-    if (this->categoryCount_[item->getCategory()]++ == 0) {
+    if (this->categoryCount_[item->getCategory()]++ == 0)
+    {
         auto row = this->createRow();
 
         setStringItem(row[0], item->getCategory(), false, false);
@@ -49,10 +50,13 @@ void AccountModel::afterRemoved(const std::shared_ptr<Account> &item,
     auto it = this->categoryCount_.find(item->getCategory());
     assert(it != this->categoryCount_.end());
 
-    if (it->second <= 1) {
+    if (it->second <= 1)
+    {
         this->categoryCount_.erase(it);
         this->removeCustomRow(index - 1);
-    } else {
+    }
+    else
+    {
         it->second--;
     }
 }

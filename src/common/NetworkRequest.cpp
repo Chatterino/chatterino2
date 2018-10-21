@@ -93,7 +93,8 @@ void NetworkRequest::makeAuthorizedV5(const QString &clientID,
 {
     this->setRawHeader("Client-ID", clientID);
     this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    if (!oauthToken.isEmpty()) {
+    if (!oauthToken.isEmpty())
+    {
         this->setRawHeader("Authorization", "OAuth " + oauthToken);
     }
 }
@@ -112,34 +113,45 @@ void NetworkRequest::execute()
 {
     this->executed_ = true;
 
-    switch (this->data->requestType_) {
-        case NetworkRequestType::Get: {
+    switch (this->data->requestType_)
+    {
+        case NetworkRequestType::Get:
+        {
             // Get requests try to load from cache, then perform the request
-            if (this->data->useQuickLoadCache_) {
-                if (this->tryLoadCachedFile()) {
+            if (this->data->useQuickLoadCache_)
+            {
+                if (this->tryLoadCachedFile())
+                {
                     // Successfully loaded from cache
                     return;
                 }
             }
 
             this->doRequest();
-        } break;
+        }
+        break;
 
-        case NetworkRequestType::Put: {
+        case NetworkRequestType::Put:
+        {
             // Put requests cannot be cached, therefore the request is called
             // immediately
             this->doRequest();
-        } break;
+        }
+        break;
 
-        case NetworkRequestType::Delete: {
+        case NetworkRequestType::Delete:
+        {
             // Delete requests cannot be cached, therefore the request is called
             // immediately
             this->doRequest();
-        } break;
+        }
+        break;
 
-        default: {
+        default:
+        {
             log("[Execute] Unhandled request type");
-        } break;
+        }
+        break;
     }
 }
 
@@ -153,12 +165,14 @@ Outcome NetworkRequest::tryLoadCachedFile()
     QFile cachedFile(getPaths()->cacheDirectory() + "/" +
                      this->data->getHash());
 
-    if (!cachedFile.exists()) {
+    if (!cachedFile.exists())
+    {
         // File didn't exist
         return Failure;
     }
 
-    if (!cachedFile.open(QIODevice::ReadOnly)) {
+    if (!cachedFile.open(QIODevice::ReadOnly))
+    {
         // File could not be opened
         return Failure;
     }
@@ -190,7 +204,8 @@ void NetworkRequest::doRequest()
     auto onUrlRequested = [data = this->data, timer = this->timer,
                            worker]() mutable {
         auto reply = [&]() -> QNetworkReply * {
-            switch (data->requestType_) {
+            switch (data->requestType_)
+            {
                 case NetworkRequestType::Get:
                     return NetworkManager::accessManager.get(data->request_);
 
@@ -207,29 +222,35 @@ void NetworkRequest::doRequest()
             }
         }();
 
-        if (reply == nullptr) {
+        if (reply == nullptr)
+        {
             log("Unhandled request type");
             return;
         }
 
-        if (timer->isStarted()) {
+        if (timer->isStarted())
+        {
             timer->onTimeout(worker, [reply, data]() {
                 log("Aborted!");
                 reply->abort();
-                if (data->onError_) {
+                if (data->onError_)
+                {
                     data->onError_(-2);
                 }
             });
         }
 
-        if (data->onReplyCreated_) {
+        if (data->onReplyCreated_)
+        {
             data->onReplyCreated_(reply);
         }
 
         auto handleReply = [data, timer, reply]() mutable {
             // TODO(pajlada): A reply was received, kill the timeout timer
-            if (reply->error() != QNetworkReply::NetworkError::NoError) {
-                if (data->onError_) {
+            if (reply->error() != QNetworkReply::NetworkError::NoError)
+            {
+                if (data->onError_)
+                {
                     data->onError_(reply->error());
                 }
                 return;
@@ -242,7 +263,8 @@ void NetworkRequest::doRequest()
 
             DebugCount::increase("http request success");
             // log("starting {}", data->request_.url().toString());
-            if (data->onSuccess_) {
+            if (data->onSuccess_)
+            {
                 if (data->executeConcurrently)
                     QtConcurrent::run(
                         [onSuccess = std::move(data->onSuccess_),
@@ -255,7 +277,8 @@ void NetworkRequest::doRequest()
             reply->deleteLater();
         };
 
-        if (data->caller_ != nullptr) {
+        if (data->caller_ != nullptr)
+        {
             QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
                              handleReply);
             QObject::connect(reply, &QNetworkReply::finished, worker,
@@ -264,7 +287,9 @@ void NetworkRequest::doRequest()
 
                                  delete worker;
                              });
-        } else {
+        }
+        else
+        {
             QObject::connect(reply, &QNetworkReply::finished, worker,
                              [handleReply, worker]() mutable {
                                  handleReply();

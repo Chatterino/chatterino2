@@ -25,7 +25,8 @@ namespace chatterino {
 void NotificationController::initialize(Settings &settings, Paths &paths)
 {
     this->initialized_ = true;
-    for (const QString &channelName : this->twitchSetting_.getValue()) {
+    for (const QString &channelName : this->twitchSetting_.getValue())
+    {
         this->channelMap[Platform::Twitch].appendItem(channelName);
     }
 
@@ -55,9 +56,12 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 void NotificationController::updateChannelNotification(
     const QString &channelName, Platform p)
 {
-    if (isChannelNotified(channelName, p)) {
+    if (isChannelNotified(channelName, p))
+    {
         removeChannelNotification(channelName, p);
-    } else {
+    }
+    else
+    {
         addChannelNotification(channelName, p);
     }
 }
@@ -65,8 +69,10 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p)
 {
-    for (const auto &channel : this->channelMap[p].getVector()) {
-        if (channelName.toLower() == channel.toLower()) {
+    for (const auto &channel : this->channelMap[p].getVector())
+    {
+        if (channelName.toLower() == channel.toLower())
+        {
             return true;
         }
     }
@@ -83,8 +89,10 @@ void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[p].getVector().size(); i++) {
-        if (channelMap[p].getVector()[i].toLower() == channelName.toLower()) {
+         i != channelMap[p].getVector().size(); i++)
+    {
+        if (channelMap[p].getVector()[i].toLower() == channelName.toLower())
+        {
             channelMap[p].removeItem(i);
             i--;
         }
@@ -96,13 +104,17 @@ void NotificationController::playSound()
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl;
-    if (getSettings()->notificationCustomSound) {
+    if (getSettings()->notificationCustomSound)
+    {
         highlightSoundUrl = QUrl::fromLocalFile(
             getSettings()->notificationPathSound.getValue());
-    } else {
+    }
+    else
+    {
         highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
     }
-    if (currentPlayerUrl != highlightSoundUrl) {
+    if (currentPlayerUrl != highlightSoundUrl)
+    {
         player->setMedia(highlightSoundUrl);
 
         currentPlayerUrl = highlightSoundUrl;
@@ -121,10 +133,12 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 void NotificationController::fetchFakeChannels()
 {
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[Platform::Twitch].getVector().size(); i++) {
+         i != channelMap[Platform::Twitch].getVector().size(); i++)
+    {
         auto chan = getApp()->twitch.server->getChannelOrEmpty(
             channelMap[Platform::Twitch].getVector()[i]);
-        if (chan->isEmpty()) {
+        if (chan->isEmpty())
+        {
             getFakeTwitchChannelLiveStatus(
                 channelMap[Platform::Twitch].getVector()[i]);
         }
@@ -135,7 +149,8 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
     const QString &channelName)
 {
     TwitchApi::findUserId(channelName, [channelName, this](QString roomID) {
-        if (roomID.isEmpty()) {
+        if (roomID.isEmpty())
+        {
             log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
                 channelName);
             removeFakeChannel(channelName);
@@ -149,19 +164,22 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 
         request.onSuccess([this, channelName](auto result) -> Outcome {
             rapidjson::Document document = result.parseRapidJson();
-            if (!document.IsObject()) {
+            if (!document.IsObject())
+            {
                 log("[TwitchChannel:refreshLiveStatus]root is not an object");
                 return Failure;
             }
 
-            if (!document.HasMember("stream")) {
+            if (!document.HasMember("stream"))
+            {
                 log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
                 return Failure;
             }
 
             const auto &stream = document["stream"];
 
-            if (!stream.IsObject()) {
+            if (!stream.IsObject())
+            {
                 // Stream is offline (stream is most likely null)
                 // removeFakeChannel(channelName);
                 return Failure;
@@ -170,16 +188,20 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             auto i = std::find(fakeTwitchChannels.begin(),
                                fakeTwitchChannels.end(), channelName);
 
-            if (!(i != fakeTwitchChannels.end())) {
+            if (!(i != fakeTwitchChannels.end()))
+            {
                 fakeTwitchChannels.push_back(channelName);
-                if (Toasts::isEnabled()) {
+                if (Toasts::isEnabled())
+                {
                     getApp()->toasts->sendChannelNotification(channelName,
                                                               Platform::Twitch);
                 }
-                if (getSettings()->notificationPlaySound) {
+                if (getSettings()->notificationPlaySound)
+                {
                     getApp()->notifications->playSound();
                 }
-                if (getSettings()->notificationFlashTaskbar) {
+                if (getSettings()->notificationFlashTaskbar)
+                {
                     getApp()->windows->sendAlert();
                 }
             }
@@ -194,7 +216,8 @@ void NotificationController::removeFakeChannel(const QString channelName)
 {
     auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
                        channelName);
-    if (i != fakeTwitchChannels.end()) {
+    if (i != fakeTwitchChannels.end())
+    {
         fakeTwitchChannels.erase(i);
     }
 }

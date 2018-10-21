@@ -58,7 +58,8 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();
 
-    if (!oauthToken.startsWith("oauth:")) {
+    if (!oauthToken.startsWith("oauth:"))
+    {
         oauthToken.prepend("oauth:");
     }
 
@@ -66,7 +67,8 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
     connection->setNickName(username);
     connection->setRealName(username);
 
-    if (!account->isAnon()) {
+    if (!account->isAnon())
+    {
         connection->setPassword(oauthToken);
     }
 
@@ -103,7 +105,8 @@ void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
     //    this->readConnection
-    if (message->type() == Communi::IrcMessage::Type::Private) {
+    if (message->type() == Communi::IrcMessage::Type::Private)
+    {
         // We already have a handler for private messages
         return;
     }
@@ -112,35 +115,55 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
 
     auto &handler = IrcMessageHandler::getInstance();
 
-    if (command == "ROOMSTATE") {
+    if (command == "ROOMSTATE")
+    {
         handler.handleRoomStateMessage(message);
-    } else if (command == "CLEARCHAT") {
+    }
+    else if (command == "CLEARCHAT")
+    {
         handler.handleClearChatMessage(message);
-    } else if (command == "USERSTATE") {
+    }
+    else if (command == "USERSTATE")
+    {
         handler.handleUserStateMessage(message);
-    } else if (command == "WHISPER") {
+    }
+    else if (command == "WHISPER")
+    {
         handler.handleWhisperMessage(message);
-    } else if (command == "USERNOTICE") {
+    }
+    else if (command == "USERNOTICE")
+    {
         handler.handleUserNoticeMessage(message, *this);
-    } else if (command == "MODE") {
+    }
+    else if (command == "MODE")
+    {
         handler.handleModeMessage(message);
-    } else if (command == "NOTICE") {
+    }
+    else if (command == "NOTICE")
+    {
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
-    } else if (command == "JOIN") {
+    }
+    else if (command == "JOIN")
+    {
         handler.handleJoinMessage(message);
-    } else if (command == "PART") {
+    }
+    else if (command == "PART")
+    {
         handler.handlePartMessage(message);
     }
 }
 
 void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 {
-    switch (message->type()) {
-        case Communi::IrcMessage::Type::Notice: {
+    switch (message->type())
+    {
+        case Communi::IrcMessage::Type::Notice:
+        {
             IrcMessageHandler::getInstance().handleWriteConnectionNoticeMessage(
                 static_cast<Communi::IrcNoticeMessage *>(message));
-        } break;
+        }
+        break;
 
         default:;
     }
@@ -149,11 +172,13 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 std::shared_ptr<Channel> TwitchServer::getCustomChannel(
     const QString &channelName)
 {
-    if (channelName == "/whispers") {
+    if (channelName == "/whispers")
+    {
         return this->whispersChannel;
     }
 
-    if (channelName == "/mentions") {
+    if (channelName == "/mentions")
+    {
         return this->mentionsChannel;
     }
 
@@ -174,14 +199,18 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    for (const auto &weakChannel : this->channels) {
+    for (const auto &weakChannel : this->channels)
+    {
         auto channel = weakChannel.lock();
-        if (!channel) continue;
+        if (!channel)
+            continue;
 
         auto twitchChannel = std::dynamic_pointer_cast<TwitchChannel>(channel);
-        if (!twitchChannel) continue;
+        if (!twitchChannel)
+            continue;
 
-        if (twitchChannel->roomId() == channelId) {
+        if (twitchChannel->roomId() == channelId)
+        {
             return twitchChannel;
         }
     }
@@ -217,9 +246,10 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
         auto now = std::chrono::steady_clock::now();
 
         // check if you are sending messages too fast
-        if (!lastMessage.empty() &&
-            lastMessage.back() + minMessageOffset > now) {
-            if (this->lastErrorTimeSpeed_ + 30s < now) {
+        if (!lastMessage.empty() && lastMessage.back() + minMessageOffset > now)
+        {
+            if (this->lastErrorTimeSpeed_ + 30s < now)
+            {
                 auto errorMessage =
                     makeSystemMessage("sending messages too fast");
 
@@ -231,13 +261,16 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
         }
 
         // remove messages older than 30 seconds
-        while (!lastMessage.empty() && lastMessage.front() + 32s < now) {
+        while (!lastMessage.empty() && lastMessage.front() + 32s < now)
+        {
             lastMessage.pop();
         }
 
         // check if you are sending too many messages
-        if (lastMessage.size() >= maxMessageCount) {
-            if (this->lastErrorTimeAmount_ + 30s < now) {
+        if (lastMessage.size() >= maxMessageCount)
+        {
+            if (this->lastErrorTimeAmount_ + 30s < now)
+            {
                 auto errorMessage =
                     makeSystemMessage("sending too many messages");
 

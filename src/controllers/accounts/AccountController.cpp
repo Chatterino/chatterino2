@@ -14,7 +14,8 @@ AccountController::AccountController()
     });
 
     this->twitch.accounts.itemRemoved.connect([this](const auto &args) {
-        if (args.caller != this) {
+        if (args.caller != this)
+        {
             auto &accs = this->twitch.accounts.getVector();
             auto it = std::find(accs.begin(), accs.end(), args.item);
             assert(it != accs.end());
@@ -24,14 +25,17 @@ AccountController::AccountController()
     });
 
     this->accounts_.itemRemoved.connect([this](const auto &args) {
-        switch (args.item->getProviderId()) {
-            case ProviderId::Twitch: {
+        switch (args.item->getProviderId())
+        {
+            case ProviderId::Twitch:
+            {
                 auto &accs = this->twitch.accounts.getVector();
                 auto it = std::find(accs.begin(), accs.end(), args.item);
                 assert(it != accs.end());
 
                 this->twitch.accounts.removeItem(it - accs.begin(), this);
-            } break;
+            }
+            break;
         }
     });
 }

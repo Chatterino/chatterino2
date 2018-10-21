@@ -12,7 +12,8 @@ void IgnoreController::initialize(Settings &, Paths &)
     assert(!this->initialized_);
     this->initialized_ = true;
 
-    for (const IgnorePhrase &phrase : this->ignoresSetting_.getValue()) {
+    for (const IgnorePhrase &phrase : this->ignoresSetting_.getValue())
+    {
         this->phrases.appendItem(phrase);
     }
 

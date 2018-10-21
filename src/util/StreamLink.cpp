@@ -38,9 +38,12 @@ namespace {
     {
         auto app = getApp();
 
-        if (getSettings()->streamlinkUseCustomPath) {
+        if (getSettings()->streamlinkUseCustomPath)
+        {
             return getSettings()->streamlinkPath + "/" + getBinaryName();
-        } else {
+        }
+        else
+        {
             return getBinaryName();
         }
     }
@@ -49,7 +52,8 @@ namespace {
     {
         QFileInfo fileinfo(path);
 
-        if (!fileinfo.exists()) {
+        if (!fileinfo.exists())
+        {
             return false;
             // throw Exception(fS("Streamlink path ({}) is invalid, file does
             // not exist", path));
@@ -63,13 +67,16 @@ namespace {
         static QErrorMessage *msg = new QErrorMessage;
 
         auto app = getApp();
-        if (getSettings()->streamlinkUseCustomPath) {
+        if (getSettings()->streamlinkUseCustomPath)
+        {
             msg->showMessage(
                 "Unable to find Streamlink executable\nMake sure your custom "
                 "path "
                 "is pointing "
                 "to the DIRECTORY where the streamlink executable is located");
-        } else {
+        }
+        else
+        {
             msg->showMessage(
                 "Unable to find Streamlink executable.\nIf you have Streamlink "
                 "installed, you might need to enable the custom path option");
@@ -82,9 +89,12 @@ namespace {
         p->setProgram(getStreamlinkProgram());
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
-            if (err == QProcess::FailedToStart) {
+            if (err == QProcess::FailedToStart)
+            {
                 showStreamlinkNotFoundError();
-            } else {
+            }
+            else
+            {
                 log("Error occured {}", err);
             }
 
@@ -110,20 +120,24 @@ void getStreamQualities(const QString &channelURL,
     QObject::connect(
         p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
         [=](int res) {
-            if (res != 0) {
+            if (res != 0)
+            {
                 log("Got error code {}", res);
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
             lastLine = lastLine.trimmed().split('\n').last().trimmed();
-            if (lastLine.startsWith("Available streams: ")) {
+            if (lastLine.startsWith("Available streams: "))
+            {
                 QStringList options;
                 QStringList split =
                     lastLine.right(lastLine.length() - 19).split(", ");
 
-                for (int i = split.length() - 1; i >= 0; i--) {
+                for (int i = split.length() - 1; i >= 0; i--)
+                {
                     QString option = split.at(i);
-                    if (option == "best)") {
+                    if (option == "best)")
+                    {
                         // As it turns out, sometimes, one quality option can
                         // be the best and worst quality at the same time.
                         // Since we start loop from the end, we can check
@@ -131,11 +145,17 @@ void getStreamQualities(const QString &channelURL,
                         option = split.at(--i);
                         // "900p60 (worst"
                         options << option.left(option.length() - 7);
-                    } else if (option.endsWith(" (worst)")) {
+                    }
+                    else if (option.endsWith(" (worst)"))
+                    {
                         options << option.left(option.length() - 8);
-                    } else if (option.endsWith(" (best)")) {
+                    }
+                    else if (option.endsWith(" (best)"))
+                    {
                         options << option.left(option.length() - 7);
-                    } else {
+                    }
+                    else
+                    {
                         options << option;
                     }
                 }
@@ -157,7 +177,8 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QStringList arguments;
 
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
-    if (!additionalOptions.isEmpty()) {
+    if (!additionalOptions.isEmpty())
+    {
         arguments << getSettings()->streamlinkOpts;
     }
 
@@ -165,14 +186,16 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
     arguments << channelURL;
 
-    if (!quality.isEmpty()) {
+    if (!quality.isEmpty())
+    {
         arguments << quality;
     }
 
     bool res = QProcess::startDetached(getStreamlinkProgram() + " " +
                                        QString(arguments.join(' ')));
 
-    if (!res) {
+    if (!res)
+    {
         showStreamlinkNotFoundError();
     }
 }
@@ -186,7 +209,8 @@ void openStreamlinkForChannel(const QString &channel)
     QString preferredQuality = getSettings()->preferredQuality;
     preferredQuality = preferredQuality.toLower();
 
-    if (preferredQuality == "choose") {
+    if (preferredQuality == "choose")
+    {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
             QualityPopup::showDialog(channel, qualityOptions);
         });
@@ -201,21 +225,31 @@ void openStreamlinkForChannel(const QString &channel)
     // Streamlink qualities to exclude
     QString exclude;
 
-    if (preferredQuality == "high") {
+    if (preferredQuality == "high")
+    {
         exclude = ">720p30";
         quality = "high,best";
-    } else if (preferredQuality == "medium") {
+    }
+    else if (preferredQuality == "medium")
+    {
         exclude = ">540p30";
         quality = "medium,best";
-    } else if (preferredQuality == "low") {
+    }
+    else if (preferredQuality == "low")
+    {
         exclude = ">360p30";
         quality = "low,best";
-    } else if (preferredQuality == "audio only") {
+    }
+    else if (preferredQuality == "audio only")
+    {
         quality = "audio,audio_only";
-    } else {
+    }
+    else
+    {
         quality = "best";
     }
-    if (!exclude.isEmpty()) {
+    if (!exclude.isEmpty())
+    {
         args << "--stream-sorting-excludes" << exclude;
     }
 

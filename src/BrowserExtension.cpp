@@ -27,11 +27,13 @@ namespace {
 
     void runLoop(NativeMessagingClient &client)
     {
-        while (true) {
+        while (true)
+        {
             char size_c[4];
             std::cin.read(size_c, 4);
 
-            if (std::cin.eof()) break;
+            if (std::cin.eof())
+                break;
 
             auto size = *reinterpret_cast<uint32_t *>(size_c);
 
@@ -72,7 +74,8 @@ void runBrowserExtensionHost()
 
     QTimer timer;
     QObject::connect(&timer, &QTimer::timeout, [&ping] {
-        if (!ping.exchange(false)) {
+        if (!ping.exchange(false))
+        {
             _Exit(0);
         }
     });

@@ -52,7 +52,8 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     QString text;
 
     text.append(username);
-    if (!durationInSeconds.isEmpty()) {
+    if (!durationInSeconds.isEmpty())
+    {
         text.append(" has been timed out");
 
         // TODO: Implement who timed the user out
@@ -60,21 +61,26 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
         text.append(" for ");
         bool ok = true;
         int timeoutSeconds = durationInSeconds.toInt(&ok);
-        if (ok) {
+        if (ok)
+        {
             text.append(formatTime(timeoutSeconds));
         }
-    } else {
+    }
+    else
+    {
         text.append(" has been permanently banned");
     }
 
-    if (reason.length() > 0) {
+    if (reason.length() > 0)
+    {
         text.append(": \"");
         text.append(parseTagString(reason));
         text.append("\"");
     }
     text.append(".");
 
-    if (multipleTimes) {
+    if (multipleTimes)
+    {
         text.append(" (multiple times)");
     }
 
@@ -99,24 +105,33 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     QString text;
 
-    if (action.isBan()) {
-        if (action.reason.isEmpty()) {
+    if (action.isBan())
+    {
+        if (action.reason.isEmpty())
+        {
             text = QString("%1 banned %2.")  //
                        .arg(action.source.name)
                        .arg(action.target.name);
-        } else {
+        }
+        else
+        {
             text = QString("%1 banned %2: \"%3\".")  //
                        .arg(action.source.name)
                        .arg(action.target.name)
                        .arg(action.reason);
         }
-    } else {
-        if (action.reason.isEmpty()) {
+    }
+    else
+    {
+        if (action.reason.isEmpty())
+        {
             text = QString("%1 timed out %2 for %3.")  //
                        .arg(action.source.name)
                        .arg(action.target.name)
                        .arg(formatTime(action.duration));
-        } else {
+        }
+        else
+        {
             text = QString("%1 timed out %2 for %3: \"%4\".")  //
                        .arg(action.source.name)
                        .arg(action.target.name)
@@ -124,7 +139,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
                        .arg(action.reason);
         }
 
-        if (count > 1) {
+        if (count > 1)
+        {
             text.append(QString(" (%1 times)").arg(count));
         }
     }
@@ -145,11 +161,14 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     QString text;
 
-    if (action.wasBan()) {
+    if (action.wasBan())
+    {
         text = QString("%1 unbanned %2.")  //
                    .arg(action.source.name)
                    .arg(action.target.name);
-    } else {
+    }
+    else
+    {
         text = QString("%1 untimedout %2.")  //
                    .arg(action.source.name)
                    .arg(action.target.name);
@@ -193,14 +212,16 @@ QString MessageBuilder::matchLink(const QString &string)
     static QRegularExpression spotifyRegex(
         "\\bspotify:", QRegularExpression::CaseInsensitiveOption);
 
-    if (!linkParser.hasMatch()) {
+    if (!linkParser.hasMatch())
+    {
         return QString();
     }
 
     QString captured = linkParser.getCaptured();
 
     if (!captured.contains(httpRegex) && !captured.contains(ftpRegex) &&
-        !captured.contains(spotifyRegex)) {
+        !captured.contains(spotifyRegex))
+    {
         captured.insert(0, "http://");
     }
 

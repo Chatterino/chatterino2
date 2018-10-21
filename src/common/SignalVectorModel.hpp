@@ -19,7 +19,8 @@ public:
         : QAbstractTableModel(parent)
         , columnCount_(columnCount)
     {
-        for (int i = 0; i < columnCount; i++) {
+        for (int i = 0; i < columnCount; i++)
+        {
             this->headerData_.emplace_back();
         }
     }
@@ -29,7 +30,8 @@ public:
         this->vector_ = vec;
 
         auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
-            if (args.caller == this) {
+            if (args.caller == this)
+            {
                 return;
             }
             // get row index
@@ -50,7 +52,8 @@ public:
         };
 
         int i = 0;
-        for (const TVectorItem &item : vec->getVector()) {
+        for (const TVectorItem &item : vec->getVector())
+        {
             SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
 
             insert(args);
@@ -59,7 +62,8 @@ public:
         this->managedConnect(vec->itemInserted, insert);
 
         this->managedConnect(vec->itemRemoved, [this](auto args) {
-            if (args.caller == this) {
+            if (args.caller == this)
+            {
                 return;
             }
 
@@ -76,7 +80,8 @@ public:
 
             this->afterRemoved(args.item, items, row);
 
-            for (QStandardItem *item : items) {
+            for (QStandardItem *item : items)
+            {
                 delete item;
             }
         });
@@ -86,8 +91,10 @@ public:
 
     virtual ~SignalVectorModel()
     {
-        for (Row &row : this->rows_) {
-            for (QStandardItem *item : row.items) {
+        for (Row &row : this->rows_)
+        {
+            for (QStandardItem *item : row.items)
+            {
                 delete item;
             }
         }
@@ -123,9 +130,12 @@ public:
 
         rowItem.items[column]->setData(value, role);
 
-        if (rowItem.isCustomRow) {
+        if (rowItem.isCustomRow)
+        {
             this->customRowSetData(rowItem.items, column, value, role, row);
-        } else {
+        }
+        else
+        {
             int vecRow = this->getVectorIndexFromModelIndex(row);
             this->vector_->removeItem(vecRow, this);
 
@@ -141,14 +151,18 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role) const override
     {
-        if (orientation != Qt::Horizontal) {
+        if (orientation != Qt::Horizontal)
+        {
             return QVariant();
         }
 
         auto it = this->headerData_[section].find(role);
-        if (it == this->headerData_[section].end()) {
+        if (it == this->headerData_[section].end())
+        {
             return QVariant();
-        } else {
+        }
+        else
+        {
             return it.value();
         }
     }
@@ -157,7 +171,8 @@ public:
                        const QVariant &value,
                        int role = Qt::DisplayRole) override
     {
-        if (orientation != Qt::Horizontal) {
+        if (orientation != Qt::Horizontal)
+        {
             return false;
         }
 
@@ -192,7 +207,8 @@ public:
 
     bool removeRows(int row, int count, const QModelIndex &parent) override
     {
-        if (count != 1) {
+        if (count != 1)
+        {
             return false;
         }
 
@@ -258,7 +274,8 @@ protected:
     std::vector<QStandardItem *> createRow()
     {
         std::vector<QStandardItem *> row;
-        for (int i = 0; i < this->columnCount_; i++) {
+        for (int i = 0; i < this->columnCount_; i++)
+        {
             row.push_back(new QStandardItem());
         }
         return row;
@@ -296,13 +313,16 @@ private:
     {
         int i = 0;
 
-        for (auto &row : this->rows_) {
-            if (row.isCustomRow) {
+        for (auto &row : this->rows_)
+        {
+            if (row.isCustomRow)
+            {
                 index--;
                 continue;
             }
 
-            if (i == index) {
+            if (i == index)
+            {
                 return i;
             }
             i++;
@@ -316,12 +336,15 @@ private:
     {
         int i = 0;
 
-        for (auto &row : this->rows_) {
-            if (row.isCustomRow) {
+        for (auto &row : this->rows_)
+        {
+            if (row.isCustomRow)
+            {
                 index++;
             }
 
-            if (i == index) {
+            if (i == index)
+            {
                 return i;
             }
             i++;

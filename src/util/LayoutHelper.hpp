@@ -13,8 +13,10 @@ T *makeLayout(std::initializer_list<LayoutItem> items)
 {
     auto t = new T;
 
-    for (auto &item : items) {
-        switch (item.which()) {
+    for (auto &item : items)
+    {
+        switch (item.which())
+        {
             case 0:
                 t->addItem(new QWidgetItem(boost::get<QWidget *>(item)));
                 break;

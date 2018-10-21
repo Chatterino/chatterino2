@@ -17,7 +17,8 @@ void HighlightController::initialize(Settings &settings, Paths &paths)
     assert(!this->initialized_);
     this->initialized_ = true;
 
-    for (const HighlightPhrase &phrase : this->highlightsSetting_.getValue()) {
+    for (const HighlightPhrase &phrase : this->highlightsSetting_.getValue())
+    {
         this->phrases.appendItem(phrase);
     }
 
@@ -26,7 +27,8 @@ void HighlightController::initialize(Settings &settings, Paths &paths)
     });
 
     for (const HighlightBlacklistUser &blacklistedUser :
-         this->blacklistSetting_.getValue()) {
+         this->blacklistSetting_.getValue())
+    {
         this->blacklistedUsers.appendItem(blacklistedUser);
     }
 
@@ -54,8 +56,10 @@ UserHighlightModel *HighlightController::createUserModel(QObject *parent)
 bool HighlightController::isHighlightedUser(const QString &username)
 {
     const auto &userItems = this->highlightedUsers.getVector();
-    for (const auto &highlightedUser : userItems) {
-        if (highlightedUser.isMatch(username)) {
+    for (const auto &highlightedUser : userItems)
+    {
+        if (highlightedUser.isMatch(username))
+        {
             return true;
         }
     }
@@ -76,8 +80,10 @@ bool HighlightController::blacklistContains(const QString &username)
 {
     std::vector<HighlightBlacklistUser> blacklistItems =
         this->blacklistedUsers.getVector();
-    for (const auto &blacklistedUser : blacklistItems) {
-        if (blacklistedUser.isMatch(username)) {
+    for (const auto &blacklistedUser : blacklistItems)
+    {
+        if (blacklistedUser.isMatch(username))
+        {
             return true;
         }
     }

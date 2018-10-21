@@ -46,7 +46,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         QObject::connect(channel_btn.getElement(), &QRadioButton::toggled,
                          [=](bool enabled) mutable {
-                             if (enabled) {
+                             if (enabled)
+                             {
                                  channel_edit->setFocus();
                                  channel_edit->setSelection(
                                      0, channel_edit->text().length());
@@ -176,25 +177,35 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     this->selectedChannel_ = channel;
 
-    switch (_channel.getType()) {
-        case Channel::Type::Twitch: {
+    switch (_channel.getType())
+    {
+        case Channel::Type::Twitch:
+        {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
             this->ui_.twitch.channelName->setText(channel->getName());
-        } break;
-        case Channel::Type::TwitchWatching: {
+        }
+        break;
+        case Channel::Type::TwitchWatching:
+        {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.watching->setFocus();
-        } break;
-        case Channel::Type::TwitchMentions: {
+        }
+        break;
+        case Channel::Type::TwitchMentions:
+        {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.mentions->setFocus();
-        } break;
-        case Channel::Type::TwitchWhispers: {
+        }
+        break;
+        case Channel::Type::TwitchWhispers:
+        {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.whispers->setFocus();
-        } break;
-        default: {
+        }
+        break;
+        default:
+        {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
         }
@@ -205,22 +216,32 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
 IndirectChannel SelectChannelDialog::getSelectedChannel() const
 {
-    if (!this->hasSelectedChannel_) {
+    if (!this->hasSelectedChannel_)
+    {
         return this->selectedChannel_;
     }
 
     auto app = getApp();
 
-    switch (this->ui_.notebook->getSelectedIndex()) {
-        case TAB_TWITCH: {
-            if (this->ui_.twitch.channel->isChecked()) {
+    switch (this->ui_.notebook->getSelectedIndex())
+    {
+        case TAB_TWITCH:
+        {
+            if (this->ui_.twitch.channel->isChecked())
+            {
                 return app->twitch.server->getOrAddChannel(
                     this->ui_.twitch.channelName->text().trimmed());
-            } else if (this->ui_.twitch.watching->isChecked()) {
+            }
+            else if (this->ui_.twitch.watching->isChecked())
+            {
                 return app->twitch.server->watchingChannel;
-            } else if (this->ui_.twitch.mentions->isChecked()) {
+            }
+            else if (this->ui_.twitch.mentions->isChecked())
+            {
                 return app->twitch.server->mentionsChannel;
-            } else if (this->ui_.twitch.whispers->isChecked()) {
+            }
+            else if (this->ui_.twitch.whispers->isChecked())
+            {
                 return app->twitch.server->whispersChannel;
             }
         }
@@ -239,54 +260,74 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 {
     auto *widget = (QWidget *)watched;
 
-    if (event->type() == QEvent::FocusIn) {
+    if (event->type() == QEvent::FocusIn)
+    {
         widget->grabKeyboard();
 
         auto *radio = dynamic_cast<QRadioButton *>(watched);
-        if (radio) {
+        if (radio)
+        {
             radio->setChecked(true);
         }
 
         return true;
-    } else if (event->type() == QEvent::FocusOut) {
+    }
+    else if (event->type() == QEvent::FocusOut)
+    {
         widget->releaseKeyboard();
         return false;
-    } else if (event->type() == QEvent::KeyPress) {
+    }
+    else if (event->type() == QEvent::KeyPress)
+    {
         QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
         if ((event_key->key() == Qt::Key_Tab ||
              event_key->key() == Qt::Key_Down) &&
-            event_key->modifiers() == Qt::NoModifier) {
-            if (widget == this->dialog->ui_.twitch.channelName) {
+            event_key->modifiers() == Qt::NoModifier)
+        {
+            if (widget == this->dialog->ui_.twitch.channelName)
+            {
                 this->dialog->ui_.twitch.whispers->setFocus();
                 return true;
-            } else {
+            }
+            else
+            {
                 widget->nextInFocusChain()->setFocus();
             }
             return true;
-        } else if (((event_key->key() == Qt::Key_Tab ||
-                     event_key->key() == Qt::Key_Backtab) &&
-                    event_key->modifiers() == Qt::ShiftModifier) ||
-                   ((event_key->key() == Qt::Key_Up) &&
-                    event_key->modifiers() == Qt::NoModifier)) {
-            if (widget == this->dialog->ui_.twitch.channelName) {
+        }
+        else if (((event_key->key() == Qt::Key_Tab ||
+                   event_key->key() == Qt::Key_Backtab) &&
+                  event_key->modifiers() == Qt::ShiftModifier) ||
+                 ((event_key->key() == Qt::Key_Up) &&
+                  event_key->modifiers() == Qt::NoModifier))
+        {
+            if (widget == this->dialog->ui_.twitch.channelName)
+            {
                 this->dialog->ui_.twitch.watching->setFocus();
                 return true;
-            } else if (widget == this->dialog->ui_.twitch.whispers) {
+            }
+            else if (widget == this->dialog->ui_.twitch.whispers)
+            {
                 this->dialog->ui_.twitch.channel->setFocus();
                 return true;
             }
 
             widget->previousInFocusChain()->setFocus();
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
         return true;
-    } else if (event->type() == QEvent::KeyRelease) {
+    }
+    else if (event->type() == QEvent::KeyRelease)
+    {
         QKeyEvent *event_key = static_cast<QKeyEvent *>(event);
         if ((event_key->key() == Qt::Key_Backtab ||
              event_key->key() == Qt::Key_Down) &&
-            event_key->modifiers() == Qt::NoModifier) {
+            event_key->modifiers() == Qt::NoModifier)
+        {
             return true;
         }
     }
@@ -303,10 +344,13 @@ void SelectChannelDialog::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
 
-    if (this->theme->isLightTheme()) {
+    if (this->theme->isLightTheme())
+    {
         this->setStyleSheet(
             "QRadioButton { color: #000 } QLabel { color: #000 }");
-    } else {
+    }
+    else
+    {
         this->setStyleSheet(
             "QRadioButton { color: #fff } QLabel { color: #fff }");
     }

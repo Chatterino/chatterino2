@@ -29,14 +29,18 @@ namespace {
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        if (!map.empty()) {
-            for (const auto &emote : map) {
+        if (!map.empty())
+        {
+            for (const auto &emote : map)
+            {
                 builder
                     .emplace<EmoteElement>(emote.second,
                                            MessageElementFlag::AlwaysShow)
                     ->setLink(Link(Link::InsertText, emote.first.string));
             }
-        } else {
+        }
+        else
+        {
             builder.emplace<TextElement>("no emotes available",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
@@ -50,7 +54,8 @@ namespace {
     {
         QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
-        for (const auto &set : sets) {
+        for (const auto &set : sets)
+        {
             // TITLE
             auto channelName = set->channelName;
             auto text =
@@ -62,13 +67,15 @@ namespace {
             builder->flags.set(MessageFlag::DisableCompactEmotes);
 
             // If value of map is empty, create init pair and add title.
-            if (mapOfSets.find(channelName) == mapOfSets.end()) {
+            if (mapOfSets.find(channelName) == mapOfSets.end())
+            {
                 std::vector<MessagePtr> b;
                 b.push_back(makeTitleMessage(text));
                 mapOfSets[channelName] = qMakePair(set->key == "0", b);
             }
 
-            for (const auto &emote : set->emotes) {
+            for (const auto &emote : set->emotes)
+            {
                 builder
                     .emplace<EmoteElement>(
                         getApp()->emotes->twitch.getOrCreateEmote(emote.id,
@@ -82,9 +89,11 @@ namespace {
 
         // Output to channel all created messages,
         // That contain title or emotes.
-        foreach (auto pair, mapOfSets) {
+        foreach (auto pair, mapOfSets)
+        {
             auto &channel = pair.first ? globalChannel : subChannel;
-            for (auto message : pair.second) {
+            for (auto message : pair.second)
+            {
                 channel.addMessage(message);
             }
         }
@@ -131,7 +140,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     this->setWindowTitle("Emotes in #" + _channel->getName());
 
     auto twitchChannel = dynamic_cast<TwitchChannel *>(_channel.get());
-    if (twitchChannel == nullptr) return;
+    if (twitchChannel == nullptr)
+        return;
 
     auto addEmotes = [&](Channel &channel, const EmoteMap &map,
                          const QString &title) {
@@ -162,7 +172,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     this->subEmotesView_->setChannel(subChannel);
     this->channelEmotesView_->setChannel(channelChannel);
 
-    if (subChannel->getMessageSnapshot().getLength() == 0) {
+    if (subChannel->getMessageSnapshot().getLength() == 0)
+    {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);

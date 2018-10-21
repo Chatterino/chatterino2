@@ -72,15 +72,18 @@ namespace rj {
     template <typename Type>
     bool getSafe(const rapidjson::Value &obj, const char *key, Type &out)
     {
-        if (!obj.IsObject()) {
+        if (!obj.IsObject())
+        {
             return false;
         }
 
-        if (!obj.HasMember(key)) {
+        if (!obj.HasMember(key))
+        {
             return false;
         }
 
-        if (obj.IsNull()) {
+        if (obj.IsNull())
+        {
             return false;
         }
 

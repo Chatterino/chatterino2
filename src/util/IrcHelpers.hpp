@@ -11,34 +11,49 @@ inline QString parseTagString(const QString &input)
 
     auto length = output.length();
 
-    for (int i = 0; i < length - 1; i++) {
-        if (output[i] == '\\') {
+    for (int i = 0; i < length - 1; i++)
+    {
+        if (output[i] == '\\')
+        {
             QChar c = output[i + 1];
 
-            switch (c.cell()) {
-                case 'n': {
+            switch (c.cell())
+            {
+                case 'n':
+                {
                     output.replace(i, 2, '\n');
-                } break;
+                }
+                break;
 
-                case 'r': {
+                case 'r':
+                {
                     output.replace(i, 2, '\r');
-                } break;
+                }
+                break;
 
-                case 's': {
+                case 's':
+                {
                     output.replace(i, 2, ' ');
-                } break;
+                }
+                break;
 
-                case '\\': {
+                case '\\':
+                {
                     output.replace(i, 2, '\\');
-                } break;
+                }
+                break;
 
-                case ':': {
+                case ':':
+                {
                     output.replace(i, 2, ';');
-                } break;
+                }
+                break;
 
-                default: {
+                default:
+                {
                     output.remove(i, 1);
-                } break;
+                }
+                break;
             }
 
             i++;

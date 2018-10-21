@@ -44,7 +44,8 @@ struct ModeChangedAction : PubSubAction {
 
     const char *getModeName() const
     {
-        switch (this->mode) {
+        switch (this->mode)
+        {
             case Mode::Slow:
                 return "slow";
             case Mode::R9K:

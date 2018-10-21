@@ -125,7 +125,8 @@ Split::Split(QWidget *parent)
         this->giveFocus(Qt::MouseFocusReason);
     });
     this->view_->selectionChanged.connect([this]() {
-        if (view_->hasSelection()) {
+        if (view_->hasSelection())
+        {
             this->input_->clearSelection();
         }
     });
@@ -136,22 +137,29 @@ Split::Split(QWidget *parent)
     });
 
     this->input_->textChanged.connect([=](const QString &newText) {
-        if (getSettings()->showEmptyInput) {
+        if (getSettings()->showEmptyInput)
+        {
             return;
         }
 
-        if (newText.length() == 0) {
+        if (newText.length() == 0)
+        {
             this->input_->hide();
-        } else if (this->input_->isHidden()) {
+        }
+        else if (this->input_->isHidden())
+        {
             this->input_->show();
         }
     });
 
     getSettings()->showEmptyInput.connect(
         [this](const bool &showEmptyInput, auto) {
-            if (!showEmptyInput && this->input_->getInputText().length() == 0) {
+            if (!showEmptyInput && this->input_->getInputText().length() == 0)
+            {
                 this->input_->hide();
-            } else {
+            }
+            else
+            {
                 this->input_->show();
             }
         },
@@ -166,9 +174,12 @@ Split::Split(QWidget *parent)
     this->managedConnect(modifierStatusChanged,
                          [this](Qt::KeyboardModifiers status) {
                              if ((status == showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
-            this->isMouseOver_) {
+            this->isMouseOver_)
+                             {
                                  this->overlay_->show();
-                             } else {
+                             }
+                             else
+                             {
                                  this->overlay_->hide();
                              }
                          });
@@ -229,7 +240,8 @@ void Split::setChannel(IndirectChannel newChannel)
 
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
 
-    if (tc != nullptr) {
+    if (tc != nullptr)
+    {
         this->usermodeChangedConnection_ = tc->userStateChanged.connect([this] {
             this->header_->updateModerationModeIcon();
             this->header_->updateRoomModes();
@@ -256,7 +268,8 @@ void Split::setChannel(IndirectChannel newChannel)
 
 void Split::setModerationMode(bool value)
 {
-    if (value != this->moderationMode_) {
+    if (value != this->moderationMode_)
+    {
         this->moderationMode_ = value;
         this->header_->updateModerationModeIcon();
         this->view_->layoutMessages();
@@ -276,22 +289,26 @@ void Split::insertTextToInput(const QString &text)
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {
-    if (this->selectChannelDialog_.hasElement()) {
+    if (this->selectChannelDialog_.hasElement())
+    {
         this->selectChannelDialog_->raise();
 
         return;
     }
 
     SelectChannelDialog *dialog = new SelectChannelDialog(this);
-    if (!empty) {
+    if (!empty)
+    {
         dialog->setSelectedChannel(this->getIndirectChannel());
     }
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
     dialog->closed.connect([=] {
-        if (dialog->hasSeletedChannel()) {
+        if (dialog->hasSeletedChannel())
+        {
             this->setChannel(dialog->getSelectedChannel());
-            if (this->isInContainer()) {
+            if (this->isInContainer())
+            {
                 this->container_->refreshTab();
             }
         }
@@ -368,11 +385,14 @@ void Split::enterEvent(QEvent *event)
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 
-    if (modifierStatus == showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/) {
+    if (modifierStatus ==
+        showSplitOverlayModifiers /*|| modifierStatus == showAddSplitRegions*/)
+    {
         this->overlay_->show();
     }
 
-    if (this->container_ != nullptr) {
+    if (this->container_ != nullptr)
+    {
         this->container_->resetMouseStatus();
     }
 }
@@ -393,7 +413,8 @@ void Split::focusInEvent(QFocusEvent *event)
 
 void Split::handleModifiers(Qt::KeyboardModifiers modifiers)
 {
-    if (modifierStatus != modifiers) {
+    if (modifierStatus != modifiers)
+    {
         modifierStatus = modifiers;
         modifierStatusChanged.invoke(modifiers);
     }
@@ -408,14 +429,16 @@ void Split::setIsTopRightSplit(bool value)
 /// Slots
 void Split::addSibling()
 {
-    if (this->container_) {
+    if (this->container_)
+    {
         this->container_->appendNewSplit(true);
     }
 }
 
 void Split::deleteFromContainer()
 {
-    if (this->container_) {
+    if (this->container_)
+    {
         this->container_->deleteSplit(this);
         auto *tab = this->getContainer()->getTab();
         tab->connect(tab, &QWidget::destroyed,
@@ -429,8 +452,8 @@ void Split::changeChannel()
     this->showChangeChannelPopup("Change channel", false, [](bool) {});
 
     auto popup = this->findChildren<QDockWidget *>();
-    if (popup.size() && popup.at(0)->isVisible() &&
-        !popup.at(0)->isFloating()) {
+    if (popup.size() && popup.at(0)->isVisible() && !popup.at(0)->isFloating())
+    {
         popup.at(0)->hide();
         showViewerList();
     }
@@ -471,7 +494,8 @@ void Split::openInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
         QDesktopServices::openUrl("https://twitch.tv/" +
                                   twitchChannel->getName());
     }
@@ -480,7 +504,8 @@ void Split::openInBrowser()
 void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get())) {
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
         QDesktopServices::openUrl("https://player.twitch.tv/?channel=" +
                                   twitchChannel->getName());
     }
@@ -488,9 +513,12 @@ void Split::openBrowserPlayer()
 
 void Split::openInStreamlink()
 {
-    try {
+    try
+    {
         openStreamlinkForChannel(this->getChannel()->getName());
-    } catch (const Exception &ex) {
+    }
+    catch (const Exception &ex)
+    {
         log("Error in doOpenStreamlink: {}", ex.what());
     }
 }
@@ -519,7 +547,8 @@ void Split::showViewerList()
     static QStringList jsonLabels = {"moderators", "staff", "admins",
                                      "global_mods", "viewers"};
     QList<QListWidgetItem *> labelList;
-    for (auto &x : labels) {
+    for (auto &x : labels)
+    {
         auto label = new QListWidgetItem(x);
         label->setBackgroundColor(this->theme->splits.header.background);
         labelList.append(label);
@@ -536,12 +565,14 @@ void Split::showViewerList()
         QJsonObject chattersObj = obj.value("chatters").toObject();
 
         loadingLabel->hide();
-        for (int i = 0; i < jsonLabels.size(); i++) {
+        for (int i = 0; i < jsonLabels.size(); i++)
+        {
             auto currentCategory =
                 chattersObj.value(jsonLabels.at(i)).toArray();
             // If current category of chatters is empty, dont show this
             // category.
-            if (currentCategory.empty()) continue;
+            if (currentCategory.empty())
+                continue;
 
             chattersList->addItem(labelList.at(i));
             foreach (const QJsonValue &v, currentCategory)
@@ -556,16 +587,20 @@ void Split::showViewerList()
     searchBar->setPlaceholderText("Search User...");
     QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {
         auto query = searchBar->text();
-        if (!query.isEmpty()) {
+        if (!query.isEmpty())
+        {
             auto results = chattersList->findItems(query, Qt::MatchStartsWith);
             chattersList->hide();
             resultList->clear();
-            for (auto &item : results) {
+            for (auto &item : results)
+            {
                 if (!labels.contains(item->text()))
                     resultList->addItem(item->text());
             }
             resultList->show();
-        } else {
+        }
+        else
+        {
             resultList->hide();
             chattersList->show();
         }
@@ -575,7 +610,8 @@ void Split::showViewerList()
                      [=]() { viewerDock->setMinimumWidth(300); });
 
     auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName)) {
+        if (!labels.contains(userName))
+        {
             this->view_->showUserInfoPopup(userName);
         }
     };
@@ -631,7 +667,8 @@ static Iter select_randomly(Iter start, Iter end)
 
 void Split::drag()
 {
-    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget())) {
+    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget()))
+    {
         SplitContainer::isDraggingSplit = true;
         SplitContainer::draggingSplit = this;
 
@@ -642,7 +679,8 @@ void Split::drag()
         mimeData->setData("chatterino/split", "xD");
         drag->setMimeData(mimeData);
 
-        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction) {
+        if (drag->exec(Qt::MoveAction) == Qt::IgnoreAction)
+        {
             container->insertSplit(this, originalLocation);
         }
 

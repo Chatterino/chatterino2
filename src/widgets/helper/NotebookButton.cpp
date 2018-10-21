@@ -45,10 +45,13 @@ void NotebookButton::paintEvent(QPaintEvent *event)
     QColor background;
     QColor foreground;
 
-    if (mouseDown_ || mouseOver_) {
+    if (mouseDown_ || mouseOver_)
+    {
         background = this->theme->tabs.regular.backgrounds.hover.color();
         foreground = this->theme->tabs.regular.text;
-    } else {
+    }
+    else
+    {
         background = this->theme->tabs.regular.backgrounds.regular.color();
         foreground = this->theme->tabs.regular.text;
     }
@@ -57,13 +60,18 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
     float h = height(), w = width();
 
-    switch (icon_) {
-        case Plus: {
+    switch (icon_)
+    {
+        case Plus:
+        {
             painter.setPen([&] {
                 QColor tmp = foreground;
-                if (SplitContainer::isDraggingSplit) {
+                if (SplitContainer::isDraggingSplit)
+                {
                     tmp = this->theme->tabs.selected.line.regular;
-                } else if (!this->mouseOver_) {
+                }
+                else if (!this->mouseOver_)
+                {
                     tmp.setAlpha(180);
                 }
                 return tmp;
@@ -79,9 +87,11 @@ void NotebookButton::paintEvent(QPaintEvent *event)
                              rect.top() + rect.height() / 2 - (s / 2),
                              rect.left() + rect.width() / 2,
                              rect.top() + rect.height() / 2 + (s / 2));
-        } break;
+        }
+        break;
 
-        case User: {
+        case User:
+        {
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
@@ -98,9 +108,11 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
             painter.setBrush(foreground);
             painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
-        } break;
+        }
+        break;
 
-        case Settings: {
+        case Settings:
+        {
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
@@ -109,7 +121,8 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
             path.arcMoveTo(a, a, 6 * a, 6 * a, 0 - (360 / 32.0));
 
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 8; i++)
+            {
                 path.arcTo(a, a, 6 * a, 6 * a, i * (360 / 8.0) - (360 / 32.0),
                            (360 / 32.0));
                 path.arcTo(2 * a, 2 * a, 4 * a, 4 * a,
@@ -120,7 +133,8 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
             painter.setBrush(background);
             painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
-        } break;
+        }
+        break;
 
         default:;
     }
@@ -130,7 +144,8 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
 void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton)
+    {
         mouseDown_ = false;
 
         update();
@@ -143,7 +158,8 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (!event->mimeData()->hasFormat("chatterino/split")) {
+    if (!event->mimeData()->hasFormat("chatterino/split"))
+    {
         return;
     }
 
@@ -170,12 +186,14 @@ void NotebookButton::dragLeaveEvent(QDragLeaveEvent *)
 
 void NotebookButton::dropEvent(QDropEvent *event)
 {
-    if (SplitContainer::isDraggingSplit) {
+    if (SplitContainer::isDraggingSplit)
+    {
         event->acceptProposedAction();
 
         Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
 
-        if (notebook != nuuls) {
+        if (notebook != nuuls)
+        {
             SplitContainer *page = new SplitContainer(notebook);
             auto *tab = notebook->addPage(page);
             page->setTab(tab);

@@ -113,7 +113,8 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-            if (twitchChannel) {
+            if (twitchChannel)
+            {
                 qDebug() << this->userName_;
 
                 bool isMyself =
@@ -140,7 +141,8 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-            if (twitchChannel) {
+            if (twitchChannel)
+            {
                 lineMod->setVisible(twitchChannel->hasModRights());
                 timeout->setVisible(twitchChannel->hasModRights());
             }
@@ -151,25 +153,35 @@ UserInfoPopup::UserInfoPopup()
             int arg;
             std::tie(action, arg) = item;
 
-            switch (action) {
-                case TimeoutWidget::Ban: {
-                    if (this->channel_) {
+            switch (action)
+            {
+                case TimeoutWidget::Ban:
+                {
+                    if (this->channel_)
+                    {
                         this->channel_->sendMessage("/ban " + this->userName_);
                     }
-                } break;
-                case TimeoutWidget::Unban: {
-                    if (this->channel_) {
+                }
+                break;
+                case TimeoutWidget::Unban:
+                {
+                    if (this->channel_)
+                    {
                         this->channel_->sendMessage("/unban " +
                                                     this->userName_);
                     }
-                } break;
-                case TimeoutWidget::Timeout: {
-                    if (this->channel_) {
+                }
+                break;
+                case TimeoutWidget::Timeout:
+                {
+                    if (this->channel_)
+                    {
                         this->channel_->sendMessage("/timeout " +
                                                     this->userName_ + " " +
                                                     QString::number(arg));
                     }
-                } break;
+                }
+                break;
             }
         });
     }
@@ -204,9 +216,12 @@ void UserInfoPopup::installEvents()
             };
 
             this->ui_.follow->setEnabled(false);
-            if (this->ui_.follow->isChecked()) {
+            if (this->ui_.follow->isChecked())
+            {
                 currentUser->followUser(this->userId_, reenableFollowCheckbox);
-            } else {
+            }
+            else
+            {
                 currentUser->unfollowUser(this->userId_,
                                           reenableFollowCheckbox);
             }
@@ -218,7 +233,8 @@ void UserInfoPopup::installEvents()
     QObject::connect(
         this->ui_.ignore, &QCheckBox::stateChanged,
         [this, ignoreNext, hack](int) mutable {
-            if (*ignoreNext) {
+            if (*ignoreNext)
+            {
                 *ignoreNext = false;
                 return;
             }
@@ -226,24 +242,31 @@ void UserInfoPopup::installEvents()
             this->ui_.ignore->setEnabled(false);
 
             auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (this->ui_.ignore->isChecked()) {
+            if (this->ui_.ignore->isChecked())
+            {
                 currentUser->ignoreByID(
                     this->userId_, this->userName_,
                     [=](auto result, const auto &message) mutable {
-                        if (hack.lock()) {
-                            if (result == IgnoreResult_Failed) {
+                        if (hack.lock())
+                        {
+                            if (result == IgnoreResult_Failed)
+                            {
                                 *ignoreNext = true;
                                 this->ui_.ignore->setChecked(false);
                             }
                             this->ui_.ignore->setEnabled(true);
                         }
                     });
-            } else {
+            }
+            else
+            {
                 currentUser->unignoreByID(
                     this->userId_, this->userName_,
                     [=](auto result, const auto &message) mutable {
-                        if (hack.lock()) {
-                            if (result == UnignoreResult_Failed) {
+                        if (hack.lock())
+                        {
+                            if (result == UnignoreResult_Failed)
+                            {
                                 *ignoreNext = true;
                                 this->ui_.ignore->setChecked(true);
                             }
@@ -259,24 +282,32 @@ void UserInfoPopup::installEvents()
         [this](bool checked) mutable {
             this->ui_.ignoreHighlights->setEnabled(false);
 
-            if (checked) {
+            if (checked)
+            {
                 getApp()->highlights->blacklistedUsers.insertItem(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
-            } else {
+            }
+            else
+            {
                 const auto &vector =
                     getApp()->highlights->blacklistedUsers.getVector();
 
-                for (int i = 0; i < vector.size(); i++) {
-                    if (this->userName_ == vector[i].getPattern()) {
+                for (int i = 0; i < vector.size(); i++)
+                {
+                    if (this->userName_ == vector[i].getPattern())
+                    {
                         getApp()->highlights->blacklistedUsers.removeItem(i);
                         i--;
                     }
                 }
-                if (getApp()->highlights->blacklistContains(this->userName_)) {
+                if (getApp()->highlights->blacklistContains(this->userName_))
+                {
                     this->ui_.ignoreHighlights->setToolTip(
                         "Name matched by regex");
-                } else {
+                }
+                else
+                {
                     this->ui_.ignoreHighlights->setEnabled(true);
                 }
             }
@@ -329,8 +360,10 @@ void UserInfoPopup::updateUserData()
 
         // get follow state
         currentUser->checkFollow(id, [this, hack](auto result) {
-            if (hack.lock()) {
-                if (result != FollowResult_Failed) {
+            if (hack.lock())
+            {
+                if (result != FollowResult_Failed)
+                {
                     this->ui_.follow->setEnabled(true);
                     this->ui_.follow->setChecked(result ==
                                                  FollowResult_Following);
@@ -340,8 +373,10 @@ void UserInfoPopup::updateUserData()
 
         // get ignore state
         bool isIgnoring = false;
-        for (const auto &ignoredUser : currentUser->getIgnores()) {
-            if (id == ignoredUser.id) {
+        for (const auto &ignoredUser : currentUser->getIgnores())
+        {
+            if (id == ignoredUser.id)
+            {
                 isIgnoring = true;
                 break;
             }
@@ -350,16 +385,21 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
-        for (int i = 0; i < vector.size(); i++) {
-            if (this->userName_ == vector[i].getPattern()) {
+        for (int i = 0; i < vector.size(); i++)
+        {
+            if (this->userName_ == vector[i].getPattern())
+            {
                 isIgnoringHighlights = true;
                 break;
             }
         }
         if (getApp()->highlights->blacklistContains(this->userName_) &&
-            !isIgnoringHighlights) {
+            !isIgnoringHighlights)
+        {
             this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
-        } else {
+        }
+        else
+        {
             this->ui_.ignoreHighlights->setEnabled(true);
         }
         this->ui_.ignore->setEnabled(true);
@@ -381,14 +421,17 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
     auto *reply = manager->get(req);
 
     QObject::connect(reply, &QNetworkReply::finished, this, [=] {
-        if (reply->error() == QNetworkReply::NoError) {
+        if (reply->error() == QNetworkReply::NoError)
+        {
             const auto data = reply->readAll();
 
             // might want to cache the avatar image
             QPixmap avatar;
             avatar.loadFromData(data);
             this->ui_.avatarButton->setPixmap(avatar);
-        } else {
+        }
+        else
+        {
             this->ui_.avatarButton->setPixmap(QPixmap());
         }
     });
@@ -454,13 +497,17 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
             hbox->setSpacing(0);
 
-            for (const auto &item : items) {
+            for (const auto &item : items)
+            {
                 auto a = hbox.emplace<EffectLabel2>();
                 a->getLabel().setText(std::get<0>(item));
 
-                if (std::get<0>(item).length() > 1) {
+                if (std::get<0>(item).length() > 1)
+                {
                     a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                } else {
+                }
+                else
+                {
                     a->setScaleIndependantSize(buttonWidth, buttonHeight);
                 }
                 a->setBorderColor(color1);

@@ -43,26 +43,30 @@ namespace Settings {
 
             TwitchUser user;
 
-            if (!value.IsObject()) {
+            if (!value.IsObject())
+            {
                 PAJLADA_REPORT_ERROR(error)
                 PAJLADA_THROW_EXCEPTION(
                     "Deserialized rapidjson::Value is wrong type");
                 return user;
             }
 
-            if (!rj::getSafe(value, "_id", user.id)) {
+            if (!rj::getSafe(value, "_id", user.id))
+            {
                 PAJLADA_REPORT_ERROR(error)
                 PAJLADA_THROW_EXCEPTION("Missing ID key");
                 return user;
             }
 
-            if (!rj::getSafe(value, "name", user.name)) {
+            if (!rj::getSafe(value, "name", user.name))
+            {
                 PAJLADA_REPORT_ERROR(error)
                 PAJLADA_THROW_EXCEPTION("Missing name key");
                 return user;
             }
 
-            if (!rj::getSafe(value, "display_name", user.displayName)) {
+            if (!rj::getSafe(value, "display_name", user.displayName))
+            {
                 PAJLADA_REPORT_ERROR(error)
                 PAJLADA_THROW_EXCEPTION("Missing display name key");
                 return user;

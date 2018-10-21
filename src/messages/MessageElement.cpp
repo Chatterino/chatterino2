@@ -84,7 +84,8 @@ ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
 void ImageElement::addToContainer(MessageLayoutContainer &container,
                                   MessageElementFlags flags)
 {
-    if (flags.hasAny(this->getFlags())) {
+    if (flags.hasAny(this->getFlags()))
+    {
         auto size = QSize(this->image_->width() * container.getScale(),
                           this->image_->height() * container.getScale());
 
@@ -112,10 +113,13 @@ EmotePtr EmoteElement::getEmote() const
 void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                   MessageElementFlags flags)
 {
-    if (flags.hasAny(this->getFlags())) {
-        if (flags.has(MessageElementFlag::EmoteImages)) {
+    if (flags.hasAny(this->getFlags()))
+    {
+        if (flags.has(MessageElementFlag::EmoteImages))
+        {
             auto image = this->emote_->images.getImage(container.getScale());
-            if (image->isEmpty()) return;
+            if (image->isEmpty())
+                return;
 
             auto emoteScale = getSettings()->emoteScale.getValue();
 
@@ -125,8 +129,11 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
 
             container.addElement((new ImageLayoutElement(*this, image, size))
                                      ->setLink(this->getLink()));
-        } else {
-            if (this->textElement_) {
+        }
+        else
+        {
+            if (this->textElement_)
+            {
                 this->textElement_->addToContainer(container,
                                                    MessageElementFlag::Misc);
             }
@@ -141,7 +148,8 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     , color_(color)
     , style_(style)
 {
-    for (const auto &word : text.split(' ')) {
+    for (const auto &word : text.split(' '))
+    {
         this->words_.push_back({word, -1});
         // fourtf: add logic to store multiple spaces after message
     }
@@ -152,11 +160,13 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 {
     auto app = getApp();
 
-    if (flags.hasAny(this->getFlags())) {
+    if (flags.hasAny(this->getFlags()))
+    {
         QFontMetrics metrics =
             app->fonts->getFontMetrics(this->style_, container.getScale());
 
-        for (Word &word : this->words_) {
+        for (Word &word : this->words_)
+        {
             auto getTextLayoutElement = [&](QString text, int width,
                                             bool trailingSpace) {
                 auto color = this->color_.getColor(*app->themes);
@@ -171,7 +181,8 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
                 // If URL link was changed,
                 // Should update it in MessageLayoutElement too!
-                if (this->getLink().type == Link::Url) {
+                if (this->getLink().type == Link::Url)
+                {
                     this->linkChanged.connect(
                         [this, e]() { e->setLink(this->getLink()); });
                 }
@@ -184,17 +195,20 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
             //            }
 
             // see if the text fits in the current line
-            if (container.fitsInLine(word.width)) {
+            if (container.fitsInLine(word.width))
+            {
                 container.addElementNoLineBreak(getTextLayoutElement(
                     word.text, word.width, this->hasTrailingSpace()));
                 continue;
             }
 
             // see if the text fits in the next line
-            if (!container.atStartOfLine()) {
+            if (!container.atStartOfLine())
+            {
                 container.breakLine();
 
-                if (container.fitsInLine(word.width)) {
+                if (container.fitsInLine(word.width))
+                {
                     container.addElementNoLineBreak(getTextLayoutElement(
                         word.text, word.width, this->hasTrailingSpace()));
                     continue;
@@ -226,13 +240,15 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                     wordStart = i;
                     width = charWidth;
 
-                    if (isSurrogate) i++;
+                    if (isSurrogate)
+                        i++;
                     continue;
                 }
 
                 width += charWidth;
 
-                if (isSurrogate) i++;
+                if (isSurrogate)
+                    i++;
             }
 
             container.addElement(getTextLayoutElement(
@@ -254,9 +270,11 @@ TimestampElement::TimestampElement(QTime time)
 void TimestampElement::addToContainer(MessageLayoutContainer &container,
                                       MessageElementFlags flags)
 {
-    if (flags.hasAny(this->getFlags())) {
+    if (flags.hasAny(this->getFlags()))
+    {
         auto app = getApp();
-        if (getSettings()->timestampFormat != this->format_) {
+        if (getSettings()->timestampFormat != this->format_)
+        {
             this->format_ = getSettings()->timestampFormat.getValue();
             this->element_.reset(this->formatTime(this->time_));
         }
@@ -284,17 +302,22 @@ TwitchModerationElement::TwitchModerationElement()
 void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                              MessageElementFlags flags)
 {
-    if (flags.has(MessageElementFlag::ModeratorTools)) {
+    if (flags.has(MessageElementFlag::ModeratorTools))
+    {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
 
         for (const auto &action :
-             getApp()->moderationActions->items.getVector()) {
-            if (auto image = action.getImage()) {
+             getApp()->moderationActions->items.getVector())
+        {
+            if (auto image = action.getImage())
+            {
                 container.addElement(
                     (new ImageLayoutElement(*this, image.get(), size))
                         ->setLink(Link(Link::UserAction, action.getAction())));
-            } else {
+            }
+            else
+            {
                 container.addElement(
                     (new TextIconLayoutElement(*this, action.getLine1(),
                                                action.getLine2(),

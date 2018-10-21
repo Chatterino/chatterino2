@@ -80,10 +80,14 @@ namespace {
 #ifndef C_DISABLE_CRASH_DIALOG
         LastRunCrashDialog dialog;
 
-        switch (dialog.exec()) {
-            case QDialog::Accepted: {
-            }; break;
-            default: {
+        switch (dialog.exec())
+        {
+            case QDialog::Accepted:
+            {
+            };
+            break;
+            default:
+            {
                 _exit(0);
             }
         }
@@ -120,9 +124,12 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     auto runningPath =
         paths.miscDirectory + "/running_" + paths.applicationFilePathHash;
 
-    if (QFile::exists(runningPath)) {
+    if (QFile::exists(runningPath))
+    {
         showLastCrashDialog();
-    } else {
+    }
+    else
+    {
         createRunningFile(runningPath);
     }
 
@@ -138,7 +145,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     chatterino::NetworkManager::deinit();
 
 #ifdef USEWINSDK
-	// flushing windows clipboard to keep copied messages
+    // flushing windows clipboard to keep copied messages
     flushClipboard();
 #endif
 

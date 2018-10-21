@@ -129,14 +129,17 @@ AboutPage::AboutPage()
 
             QString line;
 
-            while (stream.readLineInto(&line)) {
-                if (line.isEmpty() || line.startsWith('#')) {
+            while (stream.readLineInto(&line))
+            {
+                if (line.isEmpty() || line.startsWith('#'))
+                {
                     continue;
                 }
 
                 QStringList contributorParts = line.split("|");
 
-                if (contributorParts.size() != 4) {
+                if (contributorParts.size() != 4)
+                {
                     log("Missing parts in line '{}'", line);
                     continue;
                 }
@@ -154,7 +157,8 @@ AboutPage::AboutPage()
                 auto contributorBox2 = l.emplace<QHBoxLayout>();
 
                 const auto addAvatar = [&avatarUrl, &contributorBox2] {
-                    if (!avatarUrl.isEmpty()) {
+                    if (!avatarUrl.isEmpty())
+                    {
                         QPixmap avatarPixmap;
                         avatarPixmap.load(avatarUrl);
 

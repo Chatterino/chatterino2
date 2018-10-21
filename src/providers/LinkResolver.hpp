@@ -11,7 +11,7 @@ class LinkResolver
 {
 public:
     static void getLinkInfo(const QString url,
-                           std::function<void(QString, Link)> callback);
+                            std::function<void(QString, Link)> callback);
 
 private:
 };

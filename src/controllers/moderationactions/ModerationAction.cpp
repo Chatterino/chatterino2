@@ -33,23 +33,31 @@ ModerationAction::ModerationAction(const QString &action)
 
     auto timeoutMatch = timeoutRegex.match(action);
 
-    if (timeoutMatch.hasMatch()) {
+    if (timeoutMatch.hasMatch())
+    {
         // if (multipleTimeouts > 1) {
         // QString line1;
         // QString line2;
 
         int amount = timeoutMatch.captured(1).toInt();
 
-        if (amount < 60) {
+        if (amount < 60)
+        {
             this->line1_ = QString::number(amount);
             this->line2_ = "s";
-        } else if (amount < 60 * 60) {
+        }
+        else if (amount < 60 * 60)
+        {
             this->line1_ = QString::number(amount / 60);
             this->line2_ = "m";
-        } else if (amount < 60 * 60 * 24) {
+        }
+        else if (amount < 60 * 60 * 24)
+        {
             this->line1_ = QString::number(amount / 60 / 60);
             this->line2_ = "h";
-        } else {
+        }
+        else
+        {
             this->line1_ = QString::number(amount / 60 / 60 / 24);
             this->line2_ = "d";
         }
@@ -60,9 +68,13 @@ ModerationAction::ModerationAction(const QString &action)
         //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
         //     str);
         // }
-    } else if (action.startsWith("/ban ")) {
+    }
+    else if (action.startsWith("/ban "))
+    {
         this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
-    } else {
+    }
+    else
+    {
         QString xD = action;
 
         xD.replace(replaceRegex, "");

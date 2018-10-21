@@ -33,11 +33,14 @@ void NotificationPopup::updatePosition()
     QDesktopWidget *desktop = QApplication::desktop();
     const QRect rect = desktop->availableGeometry();
 
-    switch (location) {
-        case BottomRight: {
+    switch (location)
+    {
+        case BottomRight:
+        {
             this->move(rect.right() - this->width(),
                        rect.bottom() - this->height());
-        } break;
+        }
+        break;
     }
 }
 

@@ -11,7 +11,8 @@ void ClosedSplits::invalidateTab(NotebookTab *const tab)
     auto it = std::find_if(
         ClosedSplits::closedSplits_.begin(), ClosedSplits::closedSplits_.end(),
         [tab](const auto &item) -> bool { return item.tab == tab; });
-    if (it == ClosedSplits::closedSplits_.end()) {
+    if (it == ClosedSplits::closedSplits_.end())
+    {
         return;
     }
     it->tab = nullptr;

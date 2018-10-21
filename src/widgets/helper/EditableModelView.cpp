@@ -40,7 +40,8 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     QObject::connect(remove, &QPushButton::clicked, [this] {
         QModelIndexList list;
         while ((list = this->getTableView()->selectionModel()->selectedRows(0))
-                   .length() > 0) {
+                   .length() > 0)
+        {
             model_->removeRow(list[0].row());
         }
     });
@@ -52,8 +53,10 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
 void EditableModelView::setTitles(std::initializer_list<QString> titles)
 {
     int i = 0;
-    for (const QString &title : titles) {
-        if (this->model_->columnCount() == i) {
+    for (const QString &title : titles)
+    {
+        if (this->model_->columnCount() == i)
+        {
             break;
         }
 

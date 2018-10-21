@@ -19,7 +19,8 @@ static QString CreateUUID()
 
 static QString createLink(const QString &url, bool file = false)
 {
-    if (file) {
+    if (file)
+    {
         return QString("<a href=\"file:///" + url +
                        "\"><span style=\"color: white;\">" + url +
                        "</span></a>");
@@ -29,9 +30,11 @@ static QString createLink(const QString &url, bool file = false)
                    url + "</span></a>");
 }
 
-static QString createNamedLink(const QString &url, const QString &name, bool file = false)
+static QString createNamedLink(const QString &url, const QString &name,
+                               bool file = false)
 {
-    if (file) {
+    if (file)
+    {
         return QString("<a href=\"file:///" + url +
                        "\"><span style=\"color: white;\">" + name +
                        "</span></a>");
@@ -43,7 +46,8 @@ static QString createNamedLink(const QString &url, const QString &name, bool fil
 
 static QString shortenString(const QString &str, unsigned maxWidth = 50)
 {
-    if (str.size() <= maxWidth) {
+    if (str.size() <= maxWidth)
+    {
         return str;
     }
 

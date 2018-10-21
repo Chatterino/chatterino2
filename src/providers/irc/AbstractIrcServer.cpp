@@ -60,7 +60,8 @@ AbstractIrcServer::AbstractIrcServer()
         this->falloffCounter_ =
             std::min(MAX_FALLOFF_COUNTER, this->falloffCounter_ + 1);
 
-        if (!this->readConnection_->isConnected()) {
+        if (!this->readConnection_->isConnected())
+        {
             log("Trying to reconnect... {}", this->falloffCounter_);
             this->connect();
         }
@@ -73,10 +74,13 @@ void AbstractIrcServer::connect()
 
     bool separateWriteConnection = this->hasSeparateWriteConnection();
 
-    if (separateWriteConnection) {
+    if (separateWriteConnection)
+    {
         this->initializeConnection(this->writeConnection_.get(), false, true);
         this->initializeConnection(this->readConnection_.get(), true, false);
-    } else {
+    }
+    else
+    {
         this->initializeConnection(this->readConnection_.get(), true, true);
     }
 
@@ -85,8 +89,10 @@ void AbstractIrcServer::connect()
         std::lock_guard<std::mutex> lock1(this->connectionMutex_);
         std::lock_guard<std::mutex> lock2(this->channelMutex);
 
-        for (std::weak_ptr<Channel> &weak : this->channels.values()) {
-            if (auto channel = std::shared_ptr<Channel>(weak.lock())) {
+        for (std::weak_ptr<Channel> &weak : this->channels.values())
+        {
+            if (auto channel = std::shared_ptr<Channel>(weak.lock()))
+            {
                 this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
         }
@@ -117,9 +123,12 @@ void AbstractIrcServer::sendRawMessage(const QString &rawMessage)
 {
     std::lock_guard<std::mutex> locker(this->connectionMutex_);
 
-    if (this->hasSeparateWriteConnection()) {
+    if (this->hasSeparateWriteConnection())
+    {
         this->writeConnection_->sendRaw(rawMessage);
-    } else {
+    }
+    else
+    {
         this->readConnection_->sendRaw(rawMessage);
     }
 }
@@ -136,7 +145,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
 
     // try get channel
     ChannelPtr chan = this->getChannelOrEmpty(channelName);
-    if (chan != Channel::getEmpty()) {
+    if (chan != Channel::getEmpty())
+    {
         return chan;
     }
 
@@ -144,7 +154,8 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
 
     // value doesn't exist
     chan = this->createChannel(channelName);
-    if (!chan) {
+    if (!chan)
+    {
         return Channel::getEmpty();
     }
 
@@ -158,11 +169,13 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
             clojuresInCppAreShit);
         this->channels.remove(clojuresInCppAreShit);
 
-        if (this->readConnection_) {
+        if (this->readConnection_)
+        {
             this->readConnection_->sendRaw("PART #" + clojuresInCppAreShit);
         }
 
-        if (this->writeConnection_) {
+        if (this->writeConnection_)
+        {
             this->writeConnection_->sendRaw("PART #" + clojuresInCppAreShit);
         }
     });
@@ -171,11 +184,13 @@ std::shared_ptr<Channel> AbstractIrcServer::getOrAddChannel(
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
-        if (this->readConnection_) {
+        if (this->readConnection_)
+        {
             this->readConnection_->sendRaw("JOIN #" + channelName);
         }
 
-        if (this->writeConnection_) {
+        if (this->writeConnection_)
+        {
             this->writeConnection_->sendRaw("JOIN #" + channelName);
         }
     }
@@ -192,16 +207,19 @@ std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(
 
     // try get special channel
     ChannelPtr chan = this->getCustomChannel(channelName);
-    if (chan) {
+    if (chan)
+    {
         return chan;
     }
 
     // value exists
     auto it = this->channels.find(channelName);
-    if (it != this->channels.end()) {
+    if (it != this->channels.end())
+    {
         chan = it.value().lock();
 
-        if (chan) {
+        if (chan)
+        {
             return chan;
         }
     }
@@ -216,9 +234,11 @@ void AbstractIrcServer::onConnected()
     auto connected = makeSystemMessage("connected to chat");
     auto reconnected = makeSystemMessage("reconnected to chat");
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values()) {
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
         std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan) {
+        if (!chan)
+        {
             continue;
         }
 
@@ -228,7 +248,8 @@ void AbstractIrcServer::onConnected()
                               snapshot[snapshot.getLength() - 1]->flags.has(
                                   MessageFlag::DisconnectedMessage);
 
-        if (replaceMessage) {
+        if (replaceMessage)
+        {
             chan->replaceMessage(snapshot[snapshot.getLength() - 1],
                                  reconnected);
             continue;
@@ -248,9 +269,11 @@ void AbstractIrcServer::onDisconnected()
     b->flags.set(MessageFlag::DisconnectedMessage);
     auto disconnected = b.release();
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values()) {
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
         std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan) {
+        if (!chan)
+        {
             continue;
         }
 
@@ -279,10 +302,13 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
     auto fakeMessage = Communi::IrcMessage::fromData(
         data.toUtf8(), this->readConnection_.get());
 
-    if (fakeMessage->command() == "PRIVMSG") {
+    if (fakeMessage->command() == "PRIVMSG")
+    {
         this->privateMessageReceived(
             static_cast<Communi::IrcPrivateMessage *>(fakeMessage));
-    } else {
+    }
+    else
+    {
         this->messageReceived(fakeMessage);
     }
 }
@@ -300,9 +326,11 @@ void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    for (std::weak_ptr<Channel> &weak : this->channels.values()) {
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
         std::shared_ptr<Channel> chan = weak.lock();
-        if (!chan) {
+        if (!chan)
+        {
             continue;
         }
 

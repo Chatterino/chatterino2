@@ -23,7 +23,8 @@ SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog,
 
 void SettingsDialogTab::setSelected(bool _selected)
 {
-    if (this->selected_ == _selected) {
+    if (this->selected_ == _selected)
+    {
         return;
     }
 
@@ -61,7 +62,8 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
 void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() != Qt::LeftButton) {
+    if (event->button() != Qt::LeftButton)
+    {
         return;
     }
 

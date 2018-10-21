@@ -121,7 +121,8 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
 
-    if (this->tabs_.size() == 1) {
+    if (this->tabs_.size() == 1)
+    {
         this->selectTab(tab);
     }
 }
@@ -130,7 +131,8 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab)
 {
     this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
 
-    if (this->selectedTab_ != nullptr) {
+    if (this->selectedTab_ != nullptr)
+    {
         this->selectedTab_->setSelected(false);
         this->selectedTab_->setStyleSheet("color: #FFF");
     }
@@ -145,10 +147,13 @@ void SettingsDialog::showDialog(PreferredTab preferredTab)
     static SettingsDialog *instance = new SettingsDialog();
     instance->refresh();
 
-    switch (preferredTab) {
-        case SettingsDialog::PreferredTab::Accounts: {
+    switch (preferredTab)
+    {
+        case SettingsDialog::PreferredTab::Accounts:
+        {
             instance->selectTab(instance->tabs_.at(0));
-        } break;
+        }
+        break;
     }
 
     instance->show();
@@ -161,7 +166,8 @@ void SettingsDialog::refresh()
 {
     getSettings()->saveSnapshot();
 
-    for (auto *tab : this->tabs_) {
+    for (auto *tab : this->tabs_)
+    {
         tab->getSettingsPage()->onShow();
     }
 }
@@ -174,7 +180,8 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
     styleSheet.replace("<font-size>", QString::number(int(14 * newDpi)));
     styleSheet.replace("<checkbox-size>", QString::number(int(14 * newDpi)));
 
-    for (SettingsDialogTab *tab : this->tabs_) {
+    for (SettingsDialogTab *tab : this->tabs_)
+    {
         tab->setFixedHeight(int(30 * newDpi));
     }
 
@@ -200,7 +207,8 @@ void SettingsDialog::onOkClicked()
 
 void SettingsDialog::onCancelClicked()
 {
-    for (auto &tab : this->tabs_) {
+    for (auto &tab : this->tabs_)
+    {
         tab->getSettingsPage()->cancel();
     }
 

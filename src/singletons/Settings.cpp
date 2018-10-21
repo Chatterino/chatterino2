@@ -37,9 +37,11 @@ void Settings::saveSnapshot()
     rapidjson::Document *d = new rapidjson::Document(rapidjson::kObjectType);
     rapidjson::Document::AllocatorType &a = d->GetAllocator();
 
-    for (const auto &weakSetting : _settings) {
+    for (const auto &weakSetting : _settings)
+    {
         auto setting = weakSetting.lock();
-        if (!setting) {
+        if (!setting)
+        {
             continue;
         }
 
@@ -55,22 +57,26 @@ void Settings::saveSnapshot()
 
 void Settings::restoreSnapshot()
 {
-    if (!this->snapshot_) {
+    if (!this->snapshot_)
+    {
         return;
     }
 
     const auto &snapshotObject = this->snapshot_->GetObject();
 
-    for (const auto &weakSetting : _settings) {
+    for (const auto &weakSetting : _settings)
+    {
         auto setting = weakSetting.lock();
-        if (!setting) {
+        if (!setting)
+        {
             log("Error stage 1 of loading");
             continue;
         }
 
         const char *path = setting->getPath().c_str();
 
-        if (!snapshotObject.HasMember(path)) {
+        if (!snapshotObject.HasMember(path))
+        {
             log("Error stage 2 of loading");
             continue;
         }

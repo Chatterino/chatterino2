@@ -18,7 +18,8 @@ namespace chatterino {
 TooltipWidget *TooltipWidget::getInstance()
 {
     static TooltipWidget *tooltipWidget = nullptr;
-    if (tooltipWidget == nullptr) {
+    if (tooltipWidget == nullptr)
+    {
         tooltipWidget = new TooltipWidget();
     }
     return tooltipWidget;

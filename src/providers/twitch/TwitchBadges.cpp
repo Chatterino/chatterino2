@@ -24,11 +24,13 @@ void TwitchBadges::loadTwitchBadges()
         auto badgeSets = this->badgeSets_.access();
 
         auto jsonSets = root.value("badge_sets").toObject();
-        for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt) {
+        for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
+        {
             auto key = sIt.key();
             auto versions = sIt.value().toObject().value("versions").toObject();
 
-            for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt) {
+            for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+            {
                 auto versionObj = vIt.value().toObject();
 
                 auto emote = Emote{
@@ -61,9 +63,11 @@ boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
 {
     auto badgeSets = this->badgeSets_.access();
     auto it = badgeSets->find(set);
-    if (it != badgeSets->end()) {
+    if (it != badgeSets->end())
+    {
         auto it2 = it->second.find(version);
-        if (it2 != it->second.end()) {
+        if (it2 != it->second.end())
+        {
             return it2->second;
         }
     }

@@ -20,7 +20,8 @@ public:
 
     FlagsEnum(std::initializer_list<T> flags)
     {
-        for (auto flag : flags) {
+        for (auto flag : flags)
+        {
             this->set(flag);
         }
     }

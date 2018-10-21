@@ -4,7 +4,7 @@ AccessModifierOffset: -1
 AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: true
 AllowShortFunctionsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
@@ -12,10 +12,10 @@ BasedOnStyle: Google
 BraceWrapping: {
     AfterNamespace: 'false'
     AfterClass: 'true'
-    BeforeElse: 'false'
-    AfterControlStatement: 'false'
+    BeforeElse: 'true'
+    AfterControlStatement: 'true'
     AfterFunction: 'true'
-    BeforeCatch: 'false'
+    BeforeCatch: 'true'
 }
 BreakBeforeBraces: Custom
 BreakConstructorInitializersBeforeComma: true

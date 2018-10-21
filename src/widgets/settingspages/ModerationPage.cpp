@@ -32,7 +32,8 @@ qint64 dirSize(QString dirPath)
     QDir dir(dirPath);
     // calculate total size of current directories' files
     QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters)) {
+    for (QString filePath : dir.entryList(fileFilters))
+    {
         QFileInfo fi(dir, filePath);
         size += fi.size();
     }
@@ -49,8 +50,10 @@ QString formatSize(qint64 size)
     QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
     int i;
     double outputSize = size;
-    for (i = 0; i < units.size() - 1; i++) {
-        if (outputSize < 1024) break;
+    for (i = 0; i < units.size() - 1; i++)
+    {
+        if (outputSize < 1024)
+            break;
         outputSize = outputSize / 1024;
     }
     return QString("%0 %1").arg(outputSize, 0, 'f', 2).arg(units[i]);
@@ -59,9 +62,12 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logPathDirectory;
-    if (getSettings()->logPath == "") {
+    if (getSettings()->logPath == "")
+    {
         logPathDirectory = getPaths()->messageLogDirectory;
-    } else {
+    }
+    else
+    {
         logPathDirectory = getSettings()->logPath;
     }
     qint64 logsSize = dirSize(logPathDirectory);
@@ -93,9 +99,12 @@ ModerationPage::ModerationPage()
             [logsPathLabel](const QString &logPath, auto) mutable {
                 QString pathOriginal;
 
-                if (logPath == "") {
+                if (logPath == "")
+                {
                     pathOriginal = getPaths()->messageLogDirectory;
-                } else {
+                }
+                else
+                {
                     pathOriginal = logPath;
                 }
 

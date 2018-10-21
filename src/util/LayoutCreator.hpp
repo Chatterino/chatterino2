@@ -153,7 +153,8 @@ private:
                                       int>::type = 0>
     QLayout *getOrCreateLayout()
     {
-        if (!this->item_->layout()) {
+        if (!this->item_->layout())
+        {
             this->item_->setLayout(new QHBoxLayout());
         }
 
