@@ -35,9 +35,10 @@ using SplitDirection = SplitContainer::Direction;
 const int WindowManager::uiScaleMin = -5;
 const int WindowManager::uiScaleMax = 10;
 
-void WindowManager::showSettingsDialog()
+void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
 {
-    QTimer::singleShot(80, [] { SettingsDialog::showDialog(); });
+    QTimer::singleShot(
+        80, [preference] { SettingsDialog::showDialog(preference); });
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)

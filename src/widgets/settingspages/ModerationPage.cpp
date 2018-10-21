@@ -84,6 +84,7 @@ ModerationPage::ModerationPage()
     LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
+    this->tabWidget_ = tabs.getElement();
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
@@ -109,7 +110,7 @@ ModerationPage::ModerationPage()
                 }
 
                 QString pathShortened =
-                    "Logs saved at <a href=\"file:///" + pathOriginal +
+                    "Logs are saved at <a href=\"file:///" + pathOriginal +
                     "\"><span style=\"color: white;\">" +
                     shortenString(pathOriginal, 50) + "</span></a>";
 
@@ -158,7 +159,9 @@ ModerationPage::ModerationPage()
     auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation buttons");
     {
         // clang-format off
-        auto label = modMode.emplace<QLabel>("Click the moderation mod button (<img width='18' height='18' src=':/buttons/modModeDisabled.png'>) in a channel that you moderate to enable moderator mode.<br>");
+        auto label = modMode.emplace<QLabel>(
+            "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
+            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\" or any other custom text commands.<br>");
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on
@@ -205,6 +208,11 @@ ModerationPage::ModerationPage()
 
     // ---- misc
     this->itemsChangedTimer_.setSingleShot(true);
+}
+
+void ModerationPage::selectModerationActions()
+{
+    this->tabWidget_->setCurrentIndex(1);
 }
 
 }  // namespace chatterino

@@ -2,16 +2,19 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -165,8 +168,21 @@ void SplitHeader::initializeLayout()
         // moderator
         this->moderationButton_ = makeWidget<Button>([&](auto w) {
             QObject::connect(w, &Button::clicked, this, [this, w]() mutable {
-                this->split_->setModerationMode(
-                    !this->split_->getModerationMode());
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(false);
+                else
+                {
+                    if (getApp()->moderationActions->items.getVector().empty())
+                    {
+                        getApp()->windows->showSettingsDialog(
+                            SettingsDialogPreference::ModerationActions);
+                        this->split_->setModerationMode(true);
+                    }
+                    else
+                    {
+                        this->split_->setModerationMode(true);
+                    }
+                }
 
                 w->setDim(!this->split_->getModerationMode());
             });

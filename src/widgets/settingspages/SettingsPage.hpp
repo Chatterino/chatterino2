@@ -10,6 +10,8 @@
 
 namespace chatterino {
 
+class SettingsDialogTab;
+
 class SettingsPage : public QWidget
 {
 public:
@@ -17,6 +19,9 @@ public:
 
     const QString &getName();
     const QString &getIconResource();
+
+    SettingsDialogTab *tab() const;
+    void setTab(SettingsDialogTab *tab);
 
     void cancel();
 
@@ -35,6 +40,8 @@ public:
 protected:
     QString name_;
     QString iconResource_;
+
+    SettingsDialogTab *tab_;
 
     pajlada::Signals::NoArgSignal onCancel_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;

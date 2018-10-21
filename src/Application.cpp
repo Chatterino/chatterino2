@@ -84,6 +84,9 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->initNm(paths);
     this->initPubsub();
+
+    this->moderationActions->items.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
 }
 
 int Application::run(QApplication &qtApp)

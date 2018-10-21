@@ -16,6 +16,8 @@ enum class MessageElementFlag;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
+enum class SettingsDialogPreference;
+
 class WindowManager final : public Singleton
 {
 public:
@@ -31,7 +33,8 @@ public:
     static const int uiScaleMin;
     static const int uiScaleMax;
 
-    void showSettingsDialog();
+    void showSettingsDialog(
+        SettingsDialogPreference preference = SettingsDialogPreference());
 
     // Show the account selector widget at point
     void showAccountSelectPopup(QPoint point);

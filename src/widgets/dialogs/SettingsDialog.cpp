@@ -102,7 +102,7 @@ void SettingsDialog::addTabs()
 
     this->addTab(new KeyboardSettingsPage);
     //    this->addTab(new LogsPage);
-    this->addTab(new ModerationPage);
+    this->addTab(this->ui_.moderationPage = new ModerationPage);
     this->addTab(new NotificationPage);
     //    this->addTab(new SpecialChannelsPage);
     this->addTab(new BrowserExtensionPage);
@@ -116,6 +116,7 @@ void SettingsDialog::addTabs()
 void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
 {
     auto tab = new SettingsDialogTab(this, page, page->getIconResource());
+    page->setTab(tab);
 
     this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
@@ -142,18 +143,31 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab)
     this->selectedTab_ = tab;
 }
 
-void SettingsDialog::showDialog(PreferredTab preferredTab)
+void SettingsDialog::selectPage(SettingsPage *page)
+{
+    assert(page);
+    assert(page->tab());
+
+    this->selectTab(page->tab());
+}
+
+void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
 {
     static SettingsDialog *instance = new SettingsDialog();
     instance->refresh();
 
     switch (preferredTab)
     {
-        case SettingsDialog::PreferredTab::Accounts:
-        {
+        case SettingsDialogPreference::Accounts:
             instance->selectTab(instance->tabs_.at(0));
-        }
-        break;
+            break;
+
+        case SettingsDialogPreference::ModerationActions:
+            instance->selectPage(instance->ui_.moderationPage);
+            instance->ui_.moderationPage->selectModerationActions();
+            break;
+
+        default:;
     }
 
     instance->show();

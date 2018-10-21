@@ -21,6 +21,16 @@ const QString &SettingsPage::getIconResource()
     return this->iconResource_;
 }
 
+SettingsDialogTab *SettingsPage::tab() const
+{
+    return this->tab_;
+}
+
+void SettingsPage::setTab(SettingsDialogTab *tab)
+{
+    this->tab_ = tab;
+}
+
 void SettingsPage::cancel()
 {
     this->onCancel_.invoke();
