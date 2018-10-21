@@ -58,9 +58,7 @@ const ImagePtr &ImageSet::getImage3() const
 
 const ImagePtr &ImageSet::getImage(float scale) const
 {
-    auto emoteScale = getSettings()->emoteScale.getValue();
-
-    scale += emoteScale - 1.f;
+    scale *= getSettings()->emoteScale;
 
     int quality = 1;
 
