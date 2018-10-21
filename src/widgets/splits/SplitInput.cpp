@@ -209,11 +209,6 @@ void SplitInput::installKeyPressedEvent()
             {
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
-                this->prevIndex_ = 0;
-            }
-            else if (message == this->prevMsg_.at(this->prevMsg_.size() - 1))
-            {
-                this->prevMsg_.removeLast();
             }
             this->prevIndex_ = this->prevMsg_.size();
         }
