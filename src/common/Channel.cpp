@@ -226,6 +226,12 @@ bool Channel::isLive() const
     return false;
 }
 
+bool Channel::shouldIgnoreHighlights() const
+{
+    return this->type_ == Type::TwitchMentions ||
+           this->type_ == Type::TwitchWhispers;
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
     static std::shared_ptr<Channel> channel(new Channel("", Type::None));

@@ -209,21 +209,20 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     auto app = getApp();
 
     QPainter painter(buffer);
-
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    QColor backgroundColor;
-    if (this->message_->flags.has(MessageFlag::Highlighted)) {
+    QColor backgroundColor = app->themes->messages.backgrounds.regular;
+    if (this->message_->flags.has(MessageFlag::Highlighted) &&
+        !this->flags.has(MessageLayoutFlag::IgnoreHighlights)) {
         backgroundColor = app->themes->messages.backgrounds.highlighted;
     } else if (this->message_->flags.has(MessageFlag::Subscription)) {
         backgroundColor = app->themes->messages.backgrounds.subscription;
     } else if (getSettings()->alternateMessageBackground.getValue() &&
                this->flags.has(MessageLayoutFlag::AlternateBackground)) {
         backgroundColor = app->themes->messages.backgrounds.alternate;
-    } else {
-        backgroundColor = app->themes->messages.backgrounds.regular;
     }
+
     painter.fillRect(buffer->rect(), backgroundColor);
 
     // draw message

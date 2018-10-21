@@ -70,6 +70,7 @@ public:
     virtual bool isBroadcaster() const;
     virtual bool hasModRights() const;
     virtual bool isLive() const;
+    virtual bool shouldIgnoreHighlights() const;
 
     static std::shared_ptr<Channel> getEmpty();
 

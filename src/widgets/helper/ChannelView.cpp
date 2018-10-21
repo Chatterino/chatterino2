@@ -421,6 +421,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
             if (this->lastMessageHasAlternateBackground_) {
                 messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
             }
+            if (this->channel_->shouldIgnoreHighlights()) {
+                messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
+            }
             this->lastMessageHasAlternateBackground_ =
                 !this->lastMessageHasAlternateBackground_;
 
