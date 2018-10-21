@@ -93,9 +93,10 @@ void NotebookTab::updateSize()
     }
 
     width = clamp(width, this->height(), int(150 * scale));
+    auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
 
-    if (this->width() != width) {
-        this->resize(width, int(NOTEBOOK_TAB_HEIGHT * scale));
+    if (this->width() != width || this->height() != height) {
+        this->resize(width, height);
         this->notebook_->performLayout();
     }
 }
