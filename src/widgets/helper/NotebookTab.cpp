@@ -42,20 +42,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction("Rename", [this]() {
-        TextInputDialog d(this);
-
-        d.setWindowTitle(
-            "Change tab title (Leave empty for default behaviour)");
-        d.setText(this->getCustomTitle());
-        d.highlightText();
-
-        if (d.exec() == QDialog::Accepted)
-        {
-            QString newTitle = d.getText();
-            this->setCustomTitle(newTitle);
-        }
-    });
+    this->menu_.addAction("Rename", [this]() { this->showRenameDialog(); });
 
     this->menu_.addAction("Close",
                           [=]() { this->notebook_->removePage(this->page); });
@@ -68,6 +55,21 @@ NotebookTab::NotebookTab(Notebook *notebook)
         highlightNewMessagesAction_, &QAction::triggered,
         [this](bool checked) { this->highlightEnabled_ = checked; });
     this->menu_.addAction(highlightNewMessagesAction_);
+}
+
+void NotebookTab::showRenameDialog()
+{
+    TextInputDialog d(this);
+
+    d.setWindowTitle("Choose tab title (Empty for default)");
+    d.setText(this->getCustomTitle());
+    d.highlightText();
+
+    if (d.exec() == QDialog::Accepted)
+    {
+        QString newTitle = d.getText();
+        this->setCustomTitle(newTitle);
+    }
 }
 
 void NotebookTab::themeChangedEvent()
@@ -278,21 +280,13 @@ void NotebookTab::paintEvent(QPaintEvent *)
     Theme::TabColors regular = this->theme->tabs.regular;
 
     if (this->selected_)
-    {
         colors = this->theme->tabs.selected;
-    }
     else if (this->highlightState_ == HighlightState::Highlighted)
-    {
         colors = this->theme->tabs.highlighted;
-    }
     else if (this->highlightState_ == HighlightState::NewMessage)
-    {
         colors = this->theme->tabs.newMessage;
-    }
     else
-    {
         colors = this->theme->tabs.regular;
-    }
 
     bool windowFocused = this->window() == QApplication::activeWindow();
 
@@ -387,17 +381,17 @@ void NotebookTab::paintEvent(QPaintEvent *)
         }
     }
 
+    // draw mouse over effect
+    if (!this->selected_)
+    {
+        this->fancyPaint(painter);
+    }
+
     // draw line at bottom
     if (!this->selected_ && this->isInLastRow_)
     {
         painter.fillRect(0, this->height() - 1, this->width(), 1,
                          app->themes->window.background);
-    }
-
-    // draw mouse over effect
-    if (!this->selected_)
-    {
-        this->fancyPaint(painter);
     }
 }
 
@@ -474,6 +468,15 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
         {
             this->update();
         }
+    }
+}
+
+void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton &&
+        this->notebook_->getAllowUserTabManagement())
+    {
+        this->showRenameDialog();
     }
 }
 

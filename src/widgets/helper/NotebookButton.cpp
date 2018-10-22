@@ -159,9 +159,7 @@ void NotebookButton::mouseReleaseEvent(QMouseEvent *event)
 void NotebookButton::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!event->mimeData()->hasFormat("chatterino/split"))
-    {
         return;
-    }
 
     event->acceptProposedAction();
 

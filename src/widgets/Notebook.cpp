@@ -334,7 +334,7 @@ void Notebook::setShowAddButton(bool value)
 
 void Notebook::scaleChangedEvent(float scale)
 {
-    float h = NOTEBOOK_TAB_HEIGHT * this->getScale();
+    float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->getScale();
 
     this->addButton_->setFixedSize(h, h);
 
@@ -367,7 +367,7 @@ void Notebook::performLayout(bool animated)
             continue;
         }
 
-        btn->setFixedSize(tabHeight, tabHeight);
+        btn->setFixedSize(tabHeight, tabHeight - 1);
         btn->move(x, 0);
         x += tabHeight;
     }
