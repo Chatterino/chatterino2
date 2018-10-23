@@ -43,6 +43,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                  new QLabel("Search in current channel"));
     form->addRow(new QLabel("Ctrl + E"), new QLabel("Open Emote menu"));
     form->addRow(new QLabel("Ctrl + P"), new QLabel("Open Settings menu"));
+	form->addRow(new QLabel("F5"), new QLabel("Reload subscriber and channel emotes"));
 }
 
 }  // namespace chatterino
