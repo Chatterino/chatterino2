@@ -251,7 +251,7 @@ void Window::addDebugStuff()
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     // clang-format on
 
-    createWindowShortcut(this, "F5", [=] {
+    createWindowShortcut(this, "F6", [=] {
         const auto &messages = miscMessages;
         static int index = 0;
         auto app = getApp();
