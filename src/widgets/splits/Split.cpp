@@ -107,7 +107,7 @@ Split::Split(QWidget *parent)
     createShortcut(this, "CTRL+F", &Split::showSearch);
 
 	// F5: reload emotes
-    createShortcut(this, "F6", &Split::reloadChannelAndSubscriberEmotes);
+    createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
 
     // F12
     createShortcut(this, "F10", [] {
