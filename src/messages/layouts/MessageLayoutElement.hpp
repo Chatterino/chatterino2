@@ -83,6 +83,8 @@ public:
                       const QSize &size, QColor color, FontStyle style,
                       float scale);
 
+    void listenToLinkChanges();
+
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
@@ -96,6 +98,8 @@ private:
     QColor color;
     FontStyle style;
     float scale;
+
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
 // TEXT ICON

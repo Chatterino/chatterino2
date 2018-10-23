@@ -12,8 +12,6 @@ namespace chatterino {
 void LinkResolver::getLinkInfo(
     const QString url, std::function<void(QString, Link)> successCallback)
 {
-    return;
-
     QString requestUrl("https://braize.pajlada.com/chatterino/link_resolver/" +
                        QUrl::toPercentEncoding(url, "", "/:"));
 

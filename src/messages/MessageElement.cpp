@@ -183,8 +183,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 // Should update it in MessageLayoutElement too!
                 if (this->getLink().type == Link::Url)
                 {
-                    this->linkChanged.connect(
-                        [this, e]() { e->setLink(this->getLink()); });
+                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
                 }
                 return e;
             };

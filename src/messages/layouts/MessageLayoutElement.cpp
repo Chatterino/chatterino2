@@ -181,6 +181,17 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
     this->setText(_text);
 }
 
+void TextLayoutElement::listenToLinkChanges()
+{
+    this->managedConnections_.emplace_back(
+        static_cast<TextElement &>(this->getCreator())
+            .linkChanged.connect([this]() {
+                // log("Old link: {}", this->getCreator().getLink().value);
+                // log("This link: {}", this->getLink().value);
+                this->setLink(this->getCreator().getLink());  //
+            }));
+}
+
 void TextLayoutElement::addCopyTextToString(QString &str, int from,
                                             int to) const
 {
