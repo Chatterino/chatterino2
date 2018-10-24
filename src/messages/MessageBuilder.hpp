@@ -43,6 +43,7 @@ public:
     Message *operator->();
     Message &message();
     MessagePtr release();
+    std::weak_ptr<Message> weakOf();
 
     void append(std::unique_ptr<MessageElement> element);
     QString matchLink(const QString &string);

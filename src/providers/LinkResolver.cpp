@@ -15,6 +15,8 @@ void LinkResolver::getLinkInfo(
     QString requestUrl("https://braize.pajlada.com/chatterino/link_resolver/" +
                        QUrl::toPercentEncoding(url, "", "/:"));
 
+    // Uncomment to test crashes
+    // QTimer::singleShot(3000, [=]() {
     NetworkRequest request(requestUrl);
     request.setCaller(QThread::currentThread());
     request.setTimeout(30000);
@@ -48,6 +50,7 @@ void LinkResolver::getLinkInfo(
     });
 
     request.execute();
+    // });
 }
 
 }  // namespace chatterino

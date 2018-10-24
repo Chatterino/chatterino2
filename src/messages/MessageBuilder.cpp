@@ -196,6 +196,11 @@ MessagePtr MessageBuilder::release()
     return ptr;
 }
 
+std::weak_ptr<Message> MessageBuilder::weakOf()
+{
+    return this->message_;
+}
+
 void MessageBuilder::append(std::unique_ptr<MessageElement> element)
 {
     this->message().elements.push_back(std::move(element));

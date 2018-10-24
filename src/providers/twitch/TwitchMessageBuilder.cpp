@@ -544,8 +544,14 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 ->setLink(link);
 
         LinkResolver::getLinkInfo(
-            linkString, [linkMELowercase, linkMEOriginal, linkString](
-                            QString tooltipText, Link originalLink) {
+            linkString,
+            [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
+             linkString](QString tooltipText, Link originalLink) {
+                auto shared = weakMessage.lock();
+                if (!shared)
+                {
+                    return;
+                }
                 if (!tooltipText.isEmpty())
                 {
                     linkMELowercase->setTooltip(tooltipText);
