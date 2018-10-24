@@ -427,12 +427,12 @@ void SplitInput::editTextChanged()
     QString labelText;
 
     if (text.length() > 0 && getSettings()->showMessageLength)
-    {       
+    {
         labelText = QString::number(text.length());       
     }
     else
     {
-         labelText = "";
+        labelText = "";
     }
 
     this->ui_.textEditLength->setText(labelText);
