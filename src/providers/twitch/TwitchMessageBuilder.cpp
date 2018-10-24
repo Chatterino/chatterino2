@@ -10,6 +10,7 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -980,8 +981,23 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     // Special channels, like /whispers and /channels return here
     // This means they will not render any BTTV or FFZ emotes
-    if (this->twitchChannel == nullptr)
-    {
+    if (this->twitchChannel == nullptr) {
+        auto *app = getApp();
+        const auto &bttvemotes = app->twitch.server->getBttvEmotes();
+        const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+        auto flags = MessageElementFlags();
+        auto emote = boost::optional<EmotePtr>{};
+        {  // bttv/ffz emote
+            if ((emote = bttvemotes.emote(name))) {
+                flags = MessageElementFlag::BttvEmote;
+            } else if ((emote = ffzemotes.emote(name))) {
+                flags = MessageElementFlag::FfzEmote;
+            }
+            if (emote) {
+                this->emplace<EmoteElement>(emote.get(), flags);
+                return Success;
+            }
+        }  // bttv/ffz emote
         return Failure;
     }
 
