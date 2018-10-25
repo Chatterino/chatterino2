@@ -19,6 +19,9 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QRegularExpression>
 
 #define TWITCH_DEFAULT_COMMANDS                                         \
@@ -58,15 +61,25 @@ void CommandController::initialize(Settings &, Paths &paths)
 
 void CommandController::load(Paths &paths)
 {
-    this->filePath_ = combinePath(paths.settingsDirectory, "commands.txt");
+    this->filePath_ = combinePath(paths.settingsDirectory, "commands.json");
 
-    QFile textFile(this->filePath_);
-    if (!textFile.open(QIODevice::ReadOnly))
+    QFile jsonFile(this->filePath_);
+    if (!jsonFile.open(QIODevice::ReadOnly))
     {
         // No commands file created yet
         return;
     }
+    auto val = jsonFile.readAll();
+    jsonFile.close();
 
+    QJsonDocument jsonObj = QJsonDocument::fromJson(val);
+    for (const auto &command_ : jsonObj.array())
+    {
+        this->items.appendItem(
+            Command(command_.toObject().value("Trigger").toString(),
+                    command_.toObject().value("Command").toString()));
+    }
+/*
     QList<QByteArray> test = textFile.readAll().split('\n');
 
     for (const auto &command : test)
@@ -80,11 +93,29 @@ void CommandController::load(Paths &paths)
     }
 
     textFile.close();
-}
+*/}
 
 void CommandController::save()
 {
-    QFile textFile(this->filePath_);
+    QFile jsonFile(this->filePath_);
+    if (!jsonFile.open(QIODevice::WriteOnly))
+    {
+        log("[CommandController::saveCommands] Unable to open {} for writing",
+            this->filePath_);
+        return;
+    }
+    QJsonArray jsonArray;
+    for (const Command &cmd : this->items.getVector())
+    {
+        QJsonObject cmdObject;
+        cmdObject["Trigger"] = cmd.name;
+        cmdObject["Command"] = cmd.func;
+        jsonArray.push_back(cmdObject);
+    }
+    QJsonDocument jsonDoc(jsonArray);
+    jsonFile.write(jsonDoc.toJson());
+    jsonFile.close();
+/*    QFile textFile(this->filePath_);
     if (!textFile.open(QIODevice::WriteOnly))
     {
         log("[CommandController::saveCommands] Unable to open {} for writing",
@@ -98,7 +129,7 @@ void CommandController::save()
     }
 
     textFile.close();
-}
+*/}
 
 CommandModel *CommandController::createModel(QObject *parent)
 {
@@ -154,10 +185,12 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                 const auto &ffzemotes = app->twitch.server->getFfzEmotes();
                 auto flags = MessageElementFlags();
                 auto emote = boost::optional<EmotePtr>{};
-                for (int i = 2; i < words.length(); i++) {
+                for (int i = 2; i < words.length(); i++)
+                {
                     {  // twitch emote
                         auto it = accemotes.emotes.find({words[i]});
-                        if (it != accemotes.emotes.end()) {
+                        if (it != accemotes.emotes.end())
+                        {
                             b.emplace<EmoteElement>(
                                 it->second, MessageElementFlag::TwitchEmote);
                             continue;
@@ -165,12 +198,16 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                     }  // twitch emote
                     {  // bttv/ffz emote
                         {
-                            if ((emote = bttvemotes.emote({words[i]}))) {
+                            if ((emote = bttvemotes.emote({words[i]})))
+                            {
                                 flags = MessageElementFlag::BttvEmote;
-                            } else if ((emote = ffzemotes.emote({words[i]}))) {
+                            }
+                            else if ((emote = ffzemotes.emote({words[i]})))
+                            {
                                 flags = MessageElementFlag::FfzEmote;
                             }
-                            if (emote) {
+                            if (emote)
+                            {
                                 b.emplace<EmoteElement>(emote.get(), flags);
                                 continue;
                             }
