@@ -28,6 +28,9 @@ namespace detail {
         {
             return -0.8;
         }
+        else if (themeName == "Custom") {
+            return getSettings()->customThemeMultiplier.getValue();
+        }
 
         return -0.8;
     }

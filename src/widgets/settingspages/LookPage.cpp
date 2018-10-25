@@ -21,7 +21,7 @@
 #include <QSlider>
 #include <QVBoxLayout>
 
-#define THEME_ITEMS "White", "Light", "Dark", "Black"
+#define THEME_ITEMS "White", "Light", "Dark", "Black", "Custom"
 
 #define TAB_X "Show tab close button"
 #define TAB_PREF "Hide preferences button (ctrl+p to show)"
@@ -79,14 +79,43 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
     {
         auto *theme =
             this->createComboBox({THEME_ITEMS}, getApp()->themes->themeName);
+        QDoubleSpinBox *w = new QDoubleSpinBox;
+
         QObject::connect(theme, &QComboBox::currentTextChanged,
-                         [](const QString &) {
+                         [w](const QString &themeName) {
+                             if (themeName == "Custom") {
+                                 w->show();
+                             } else {
+                                 w->hide();
+                             }
                              getApp()->windows->forceLayoutChannelViews();
                          });
 
         auto box = layout.emplace<QHBoxLayout>().withoutMargin();
         box.emplace<QLabel>("Theme: ");
         box.append(theme);
+
+        {
+            w->setButtonSymbols(QDoubleSpinBox::NoButtons);
+            if (getApp()->themes->themeName.getValue() != "Custom") {
+                w->hide();
+            } else {
+                w->show();
+            }
+            w->setRange(-1.0, 1.0);
+            w->setSingleStep(0.05);
+            w->setValue(getSettings()->customThemeMultiplier.getValue());
+
+            QObject::connect(
+                w, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+                [](double value) {
+                    getSettings()->customThemeMultiplier.setValue(float(value));
+                    getApp()->themes->update();
+                    getApp()->windows->forceLayoutChannelViews();
+                });
+            box.append(w);
+        }
+
         box->addStretch(1);
     }
 

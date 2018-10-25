@@ -66,7 +66,8 @@ public:
     BoolSetting showTitle = {"/appearance/splitheader/showTitle", false};
     BoolSetting showGame = {"/appearance/splitheader/showGame", false};
     BoolSetting showUptime = {"/appearance/splitheader/showUptime", false};
-
+    FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
+                                          -0.5f};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
