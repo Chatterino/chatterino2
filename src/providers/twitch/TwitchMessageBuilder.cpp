@@ -1091,7 +1091,14 @@ void TwitchMessageBuilder::appendTwitchBadges()
         }
         else if (badge == "moderator/1")
         {
-            // TODO: Implement custom FFZ moderator badge
+            if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
+            {
+                this->emplace<EmoteElement>(
+                        customModBadge.get(),
+                        MessageElementFlag::BadgeChannelAuthority)
+                    ->setTooltip((*customModBadge)->tooltip.string);
+                continue;
+            }
             this->emplace<ImageElement>(
                     Image::fromPixmap(app->resources->twitch.moderator),
                     MessageElementFlag::BadgeChannelAuthority)

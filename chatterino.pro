@@ -263,7 +263,8 @@ SOURCES += \
     src/common/UsernameSet.cpp \
     src/widgets/settingspages/AdvancedPage.cpp \
     src/util/IncognitoBrowser.cpp \
-    src/widgets/splits/ClosedSplits.cpp
+    src/widgets/splits/ClosedSplits.cpp \
+    src/providers/ffz/FfzModBadge.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -466,7 +467,8 @@ HEADERS  += \
     src/common/UsernameSet.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \
     src/util/IncognitoBrowser.hpp \
-    src/widgets/splits/ClosedSplits.hpp
+    src/widgets/splits/ClosedSplits.hpp \
+    src/providers/ffz/FfzModBadge.hpp
 
 RESOURCES += \
     resources/resources.qrc \

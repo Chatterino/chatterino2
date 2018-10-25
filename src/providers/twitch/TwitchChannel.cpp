@@ -90,6 +90,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
+    , ffzCustomModBadge_(name)
     , mod_(false)
 {
     log("[TwitchChannel:{}] Opened", name);
@@ -142,6 +143,7 @@ void TwitchChannel::initialize()
 {
     this->refreshChatters();
     this->refreshChannelEmotes();
+    this->ffzCustomModBadge_.loadCustomModBadge();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -779,6 +781,14 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
             return it2->second;
         }
     }
+    return boost::none;
+}
+
+boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
+{
+    if (auto badge = this->ffzCustomModBadge_.badge())
+        return badge;
+
     return boost::none;
 }
 
