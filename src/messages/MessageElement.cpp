@@ -121,7 +121,10 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             if (image->isEmpty())
                 return;
 
-            auto emoteScale = getSettings()->emoteScale.getValue();
+            auto emoteScale =
+                this->getFlags().hasAny(MessageElementFlag::Badges)
+                    ? 1
+                    : getSettings()->emoteScale.getValue();
 
             auto size =
                 QSize(int(container.getScale() * image->width() * emoteScale),
