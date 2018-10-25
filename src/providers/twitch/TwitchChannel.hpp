@@ -6,6 +6,7 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
+#include "providers/ffz/FfzModBadge.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include <rapidjson/document.h>
@@ -84,6 +85,7 @@ public:
     void refreshChannelEmotes();
 
     // Badges
+    boost::optional<EmotePtr> ffzCustomModBadge() const;
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
@@ -141,6 +143,7 @@ private:
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
+    FfzModBadge ffzCustomModBadge_;
 
     bool mod_ = false;
     UniqueAccess<QString> roomID_;
