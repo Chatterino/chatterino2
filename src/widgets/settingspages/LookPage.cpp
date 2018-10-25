@@ -152,6 +152,8 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     layout.append(this->createCheckBox(
         "Alternate background", getSettings()->alternateMessageBackground));
 
+    layout.append(this->createCheckBox("Grey out historic messages",
+                                       getSettings()->greyOutHistoricMessages));
     // --
     layout.emplace<Line>(false);
 

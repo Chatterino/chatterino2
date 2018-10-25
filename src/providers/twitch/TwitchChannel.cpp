@@ -48,7 +48,8 @@ namespace {
 
             MessageParseArgs args;
             TwitchMessageBuilder builder(channel.get(), privMsg, args);
-            builder.message().flags.set(MessageFlag::Disabled);
+            if (getSettings()->greyOutHistoricMessages)
+                builder.message().flags.set(MessageFlag::Disabled);
 
             if (!builder.isIgnored())
                 messages.push_back(builder.build());
