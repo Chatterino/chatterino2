@@ -40,6 +40,9 @@ public:
 
     PubSub *pubsub;
 
+    const BttvEmotes &getBttvEmotes() const;
+    const FfzEmotes &getFfzEmotes() const;
+
 protected:
     virtual void initializeConnection(IrcConnection *connection, bool isRead,
                                       bool isWrite) override;

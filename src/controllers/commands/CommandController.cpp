@@ -148,14 +148,40 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                                        MessageColor::Text,
                                        FontStyle::ChatMediumBold);
 
-                QString rest = "";
-
-                for (int i = 2; i < words.length(); i++)
-                {
-                    rest += words[i] + " ";
+                const auto &acc = app->accounts->twitch.getCurrent();
+                const auto &accemotes = *acc->accessEmotes();
+                const auto &bttvemotes = app->twitch.server->getBttvEmotes();
+                const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+                auto flags = MessageElementFlags();
+                auto emote = boost::optional<EmotePtr>{};
+                for (int i = 2; i < words.length(); i++) {
+                    {  // twitch emote
+                        auto it = accemotes.emotes.find({words[i]});
+                        if (it != accemotes.emotes.end()) {
+                            b.emplace<EmoteElement>(
+                                it->second, MessageElementFlag::TwitchEmote);
+                            continue;
+                        }
+                    }  // twitch emote
+                    {  // bttv/ffz emote
+                        {
+                            if ((emote = bttvemotes.emote({words[i]}))) {
+                                flags = MessageElementFlag::BttvEmote;
+                            } else if ((emote = ffzemotes.emote({words[i]}))) {
+                                flags = MessageElementFlag::FfzEmote;
+                            }
+                            if (emote) {
+                                b.emplace<EmoteElement>(emote.get(), flags);
+                                continue;
+                            }
+                        }  // bttv/ffz emote
+                        {  // text
+                            b.emplace<TextElement>(words[i],
+                                                   MessageElementFlag::Text);
+                        }  // text
+                    }
                 }
 
-                b.emplace<TextElement>(rest, MessageElementFlag::Text);
                 b->flags.set(MessageFlag::DoNotTriggerNotification);
                 auto messagexD = b.release();
 

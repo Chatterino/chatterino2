@@ -288,4 +288,13 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
     sent = true;
 }
 
+const BttvEmotes &TwitchServer::getBttvEmotes() const
+{
+    return this->bttv;
+}
+const FfzEmotes &TwitchServer::getFfzEmotes() const
+{
+    return this->ffz;
+}
+
 }  // namespace chatterino
