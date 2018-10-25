@@ -19,58 +19,35 @@ FfzModBadge::FfzModBadge(const QString &channelName)
 
 void FfzModBadge::loadCustomModBadge()
 {
-    static QString partialUrl("https://api.frankerfacez.com/v1/_room/");
+    static QString partialUrl("https://cdn.frankerfacez.com/room-badge/mod/");
 
-    QString url = partialUrl + channelName_;
+    QString url = partialUrl + channelName_ + "/1";
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
-    req.onSuccess([this](auto result) -> Outcome {
-        auto root = result.parseJson();
+    req.onSuccess([this, url](auto result) -> Outcome {
+        auto data = result.getData();
 
-        auto modBadgeUrlField =
-            root.value("room").toObject().value("moderator_badge");
-        if (modBadgeUrlField.isNull())
+        QBuffer buffer(const_cast<QByteArray *>(&data));
+        buffer.open(QIODevice::ReadOnly);
+        QImageReader reader(&buffer);
+        if (reader.imageCount() == 0)
             return Failure;
 
-        auto badgeUrl = "https:" + modBadgeUrlField.toString();
-        /* doesnt work for some reason
-        auto badgeOverlay =
-            Image::fromUrl({"https:" + modBadgeUrlField.toString()});
-        auto badgeOverlayPixmap = badgeOverlay->pixmap();
-        if (!badgeOverlayPixmap)
-            return Failure;
-        */
-        NetworkRequest getBadge(badgeUrl);
-        getBadge.setCaller(QThread::currentThread());
-        getBadge.onSuccess([this, &badgeUrl](auto result) -> Outcome {
-            auto data = result.getData();
+        QPixmap badgeOverlay = QPixmap::fromImageReader(&reader);
+        QPixmap badgePixmap(18, 18);
 
-            QBuffer buffer(const_cast<QByteArray *>(&data));
-            buffer.open(QIODevice::ReadOnly);
-            QImageReader reader(&buffer);
-            if (reader.imageCount() == 0)
-                return Failure;
-            auto badgeOverlay = QPixmap::fromImageReader(&reader);
+        // the default mod badge green color
+        badgePixmap.fill(QColor("#34AE0A"));
+        QPainter painter(&badgePixmap);
+        QRectF rect(0, 0, 18, 18);
+        painter.drawPixmap(rect, badgeOverlay, rect);
 
-            QPixmap badgePixmap(18, 18);
-            // the default mod badge green color
-            badgePixmap.fill(QColor("#34AE0A"));
+        auto emote = Emote{{""},
+                           ImageSet{Image::fromPixmap(badgePixmap)},
+                           Tooltip{"Twitch Channel Moderator"},
+                           Url{url}};
 
-            QPainter painter(&badgePixmap);
-            QRectF rect(0, 0, 18, 18);
-            painter.drawPixmap(rect, badgeOverlay, rect);
-
-            auto emote = Emote{{""},
-                               ImageSet{Image::fromPixmap(badgePixmap)},
-                               Tooltip{"Twitch Channel Moderator"},
-                               Url{badgeUrl}};
-
-            this->badge_ = std::make_shared<Emote>(emote);
-
-            return Success;
-        });
-
-        getBadge.execute();
+        this->badge_ = std::make_shared<Emote>(emote);
 
         return Success;
     });
