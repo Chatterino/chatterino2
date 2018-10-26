@@ -177,8 +177,9 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                         }
                     }  // bttv/ffz emote
                     {  // emoji/text
-                        for (auto &variant :
-                             app->emotes->emojis.parse(words[i])) {
+                        for (auto &variant : app->emotes->emojis.parse(
+                                 app->emotes->emojis.replaceShortCodes(
+                                     words[i]))) {
                             constexpr const static struct {
                                 void operator()(EmotePtr emote,
                                                 MessageBuilder &b) const
@@ -197,19 +198,20 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                                 [&b](auto &&arg) { visitor(arg, b); }, variant);
                         }  // emoji/text
                     }
+                }
 
-                    b->flags.set(MessageFlag::DoNotTriggerNotification);
-                    auto messagexD = b.release();
+                b->flags.set(MessageFlag::DoNotTriggerNotification);
+                auto messagexD = b.release();
 
-                    app->twitch.server->whispersChannel->addMessage(messagexD);
+                app->twitch.server->whispersChannel->addMessage(messagexD);
 
-                    app->twitch.server->sendMessage("jtv", text);
+                app->twitch.server->sendMessage("jtv", text);
 
-                    if (getSettings()->inlineWhispers) {
-                        app->twitch.server->forEachChannel(
-                            [&messagexD](ChannelPtr _channel) {
-                                _channel->addMessage(messagexD);
-                            });
+                if (getSettings()->inlineWhispers) {
+                    app->twitch.server->forEachChannel(
+                        [&messagexD](ChannelPtr _channel) {
+                            _channel->addMessage(messagexD);
+                        });
                 }
 
                 return "";
