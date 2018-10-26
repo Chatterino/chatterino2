@@ -109,9 +109,10 @@ CommandModel *CommandController::createModel(QObject *parent)
     return model;
 }
 
-QString CommandController::execCommand(const QString &text, ChannelPtr channel,
+QString CommandController::execCommand(const QString &textNoEmoji, ChannelPtr channel,
                                        bool dryRun)
 {
+    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
     Command command;
 
@@ -177,9 +178,8 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                         }
                     }  // bttv/ffz emote
                     {  // emoji/text
-                        for (auto &variant : app->emotes->emojis.parse(
-                                 app->emotes->emojis.replaceShortCodes(
-                                     words[i]))) {
+                        for (auto &variant :
+                             app->emotes->emojis.parse(words[i])) {
                             constexpr const static struct {
                                 void operator()(EmotePtr emote,
                                                 MessageBuilder &b) const
