@@ -25,6 +25,7 @@ private:
     ChannelPtr channel_;
 
     QString userName_;
+    QString channelName_;
 
     void initLayout();
     void setMessages(std::vector<MessagePtr> &messages);

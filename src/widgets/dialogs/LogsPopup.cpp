@@ -37,6 +37,17 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 {
     this->channel_ = channel;
     this->userName_ = userName;
+
+    if (auto twitchChannel =
+        dynamic_cast<TwitchChannel *>(this->channel_.get()))
+    {
+        this->channelName_ = twitchChannel->getName();
+    }
+    else
+    {
+        return;
+    }  
+
     this->getRoomID();
     this->setWindowTitle(this->userName_ + "'s logs in #" +
                          this->channel_->getName());
@@ -69,17 +80,9 @@ void LogsPopup::getRoomID()
 
 void LogsPopup::getLogviewerLogs(const QString &roomID)
 {
-    TwitchChannel *twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr)
-    {
-        return;
-    }
-
-    QString channelName = twitchChannel->getName();
 
     auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
-                   .arg(channelName, this->userName_);
+                   .arg(this->channelName_, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
@@ -124,26 +127,18 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
 
 void LogsPopup::getOverrustleLogs()
 {
-    TwitchChannel *twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr)
-    {
-        return;
-    }
-
-    QString channelName = twitchChannel->getName();
 
     QString url =
         QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
-            .arg(channelName, this->userName_);
+            .arg(this->channelName_, this->userName_);
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
-    req.onError([channelName](int errorCode) {
+    req.onError([this](int errorCode) {
         //        this->close();
         auto box = new QMessageBox(
             QMessageBox::Information, "Error getting logs",
-            "No logs could be found for channel " + channelName);
+            "No logs could be found for channel " + this->channelName_);
         box->setAttribute(Qt::WA_DeleteOnClose);
         box->show();
         box->raise();
@@ -151,7 +146,7 @@ void LogsPopup::getOverrustleLogs()
         return true;
     });
 
-    req.onSuccess([this, channelName](auto result) -> Outcome {
+    req.onSuccess([this](auto result) -> Outcome {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
         if (data.contains("lines"))
