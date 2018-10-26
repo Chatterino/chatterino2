@@ -79,21 +79,7 @@ void CommandController::load(Paths &paths)
             Command(command_.toObject().value("Trigger").toString(),
                     command_.toObject().value("Command").toString()));
     }
-/*
-    QList<QByteArray> test = textFile.readAll().split('\n');
-
-    for (const auto &command : test)
-    {
-        if (command.isEmpty())
-        {
-            continue;
-        }
-
-        this->items.appendItem(Command(command));
-    }
-
-    textFile.close();
-*/}
+}
 
 void CommandController::save()
 {
@@ -115,21 +101,7 @@ void CommandController::save()
     QJsonDocument jsonDoc(jsonArray);
     jsonFile.write(jsonDoc.toJson());
     jsonFile.close();
-/*    QFile textFile(this->filePath_);
-    if (!textFile.open(QIODevice::WriteOnly))
-    {
-        log("[CommandController::saveCommands] Unable to open {} for writing",
-            this->filePath_);
-        return;
-    }
-
-    for (const Command &cmd : this->items.getVector())
-    {
-        textFile.write((cmd.toString() + "\n").toUtf8());
-    }
-
-    textFile.close();
-*/}
+}
 
 CommandModel *CommandController::createModel(QObject *parent)
 {
