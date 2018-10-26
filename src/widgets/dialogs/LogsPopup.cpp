@@ -50,8 +50,7 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
 
     this->getRoomID();
     this->setWindowTitle(this->userName_ + "'s logs in #" +
-                         this->channel_->getName());
-    this->getLogviewerLogs();
+                         this->channelName_);
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
@@ -64,17 +63,10 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 
 void LogsPopup::getRoomID()
 {
-    TwitchChannel *twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->channel_.get());
-    if (twitchChannel == nullptr)
-    {
-        return;
-    }
-
     const auto onIdFetched = [=](const QString &userID) {
         this->getLogviewerLogs(userID);
     };
-    PartialTwitchUser::byName(twitchChannel->getName())
+    PartialTwitchUser::byName(this->channelName_)
         .getId(onIdFetched, this);
 }
 
