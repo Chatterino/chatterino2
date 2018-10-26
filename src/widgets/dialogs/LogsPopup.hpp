@@ -29,7 +29,6 @@ private:
 
     void initLayout();
     void setMessages(std::vector<MessagePtr> &messages);
-    void getRoomID();
     void getOverrustleLogs();
     void getLogviewerLogs(const QString &roomID);
 };

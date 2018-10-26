@@ -48,7 +48,12 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
         return;
     }  
 
-    this->getRoomID();
+    // Get channel ID.
+    PartialTwitchUser::byName(this->channelName_)
+        .getId([=](const QString &roomID) {
+            this->getLogviewerLogs(roomID); 
+        }, this);
+
     this->setWindowTitle(this->userName_ + "'s logs in #" +
                          this->channelName_);
 }
@@ -59,15 +64,6 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 
     logsChannel->addMessagesAtStart(messages);
     this->channelView_->setChannel(logsChannel);
-}
-
-void LogsPopup::getRoomID()
-{
-    const auto onIdFetched = [=](const QString &userID) {
-        this->getLogviewerLogs(userID);
-    };
-    PartialTwitchUser::byName(this->channelName_)
-        .getId(onIdFetched, this);
 }
 
 void LogsPopup::getLogviewerLogs(const QString &roomID)
