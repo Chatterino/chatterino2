@@ -205,7 +205,7 @@ void SplitInput::installKeyPressedEvent()
             }
 
             event->accept();
-            if (!(event->modifiers() == Qt::ControlModifier))
+            if (!(event->modifiers() & Qt::ControlModifier))
             {
                 this->currMsg_ = QString();
                 this->ui_.textEdit->setText(QString());
