@@ -12,6 +12,7 @@
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
@@ -163,38 +164,52 @@ QString CommandController::execCommand(const QString &text, ChannelPtr channel,
                             continue;
                         }
                     }  // twitch emote
+
                     {  // bttv/ffz emote
-                        {
-                            if ((emote = bttvemotes.emote({words[i]}))) {
-                                flags = MessageElementFlag::BttvEmote;
-                            } else if ((emote = ffzemotes.emote({words[i]}))) {
-                                flags = MessageElementFlag::FfzEmote;
-                            }
-                            if (emote) {
-                                b.emplace<EmoteElement>(emote.get(), flags);
-                                continue;
-                            }
-                        }  // bttv/ffz emote
-                        {  // text
-                            b.emplace<TextElement>(words[i],
-                                                   MessageElementFlag::Text);
-                        }  // text
+                        if ((emote = bttvemotes.emote({words[i]}))) {
+                            flags = MessageElementFlag::BttvEmote;
+                        } else if ((emote = ffzemotes.emote({words[i]}))) {
+                            flags = MessageElementFlag::FfzEmote;
+                        }
+                        if (emote) {
+                            b.emplace<EmoteElement>(emote.get(), flags);
+                            continue;
+                        }
+                    }  // bttv/ffz emote
+                    {  // emoji/text
+                        for (auto &variant :
+                             app->emotes->emojis.parse(words[i])) {
+                            constexpr const static struct {
+                                void operator()(EmotePtr emote,
+                                                MessageBuilder &b) const
+                                {
+                                    b.emplace<EmoteElement>(
+                                        emote, MessageElementFlag::EmojiAll);
+                                }
+                                void operator()(const QString &string,
+                                                MessageBuilder &b) const
+                                {
+                                    b.emplace<TextElement>(
+                                        string, MessageElementFlag::Text);
+                                }
+                            } visitor;
+                            boost::apply_visitor(
+                                [&b](auto &&arg) { visitor(arg, b); }, variant);
+                        }  // emoji/text
                     }
-                }
 
-                b->flags.set(MessageFlag::DoNotTriggerNotification);
-                auto messagexD = b.release();
+                    b->flags.set(MessageFlag::DoNotTriggerNotification);
+                    auto messagexD = b.release();
 
-                app->twitch.server->whispersChannel->addMessage(messagexD);
+                    app->twitch.server->whispersChannel->addMessage(messagexD);
 
-                app->twitch.server->sendMessage("jtv", text);
+                    app->twitch.server->sendMessage("jtv", text);
 
-                if (getSettings()->inlineWhispers)
-                {
-                    app->twitch.server->forEachChannel(
-                        [&messagexD](ChannelPtr _channel) {
-                            _channel->addMessage(messagexD);
-                        });
+                    if (getSettings()->inlineWhispers) {
+                        app->twitch.server->forEachChannel(
+                            [&messagexD](ChannelPtr _channel) {
+                                _channel->addMessage(messagexD);
+                            });
                 }
 
                 return "";
