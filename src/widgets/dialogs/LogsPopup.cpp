@@ -3,6 +3,7 @@
 #include "IrcMessage"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -59,26 +60,12 @@ void LogsPopup::getRoomID()
         return;
     }
 
-    QString channelName = twitchChannel->getName();
-
-    QString url = QString("https://cbenni.com/api/channel/%1").arg(channelName);
-
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-
-    req.onError([this](int errorCode) {
-        this->getOverrustleLogs();
-        return true;
-    });
-
-    req.onSuccess([this, channelName](auto result) -> Outcome {
-        auto data = result.parseJson();
-        this->roomID_ = data.value("channel").toObject()["id"].toInt();
+    const auto onIdFetched = [=](const QString &userID) {
+        this->roomID_ = userID.toInt();
         this->getLogviewerLogs();
-        return Success;
-    });
-
-    req.execute();
+    };
+    PartialTwitchUser::byName(twitchChannel->getName())
+        .getId(onIdFetched, this);
 }
 
 void LogsPopup::getLogviewerLogs()
