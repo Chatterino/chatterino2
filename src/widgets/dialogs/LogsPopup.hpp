@@ -25,13 +25,12 @@ private:
     ChannelPtr channel_;
 
     QString userName_;
-    int roomID_;
 
     void initLayout();
     void setMessages(std::vector<MessagePtr> &messages);
     void getRoomID();
     void getOverrustleLogs();
-    void getLogviewerLogs();
+    void getLogviewerLogs(const QString &roomID);
 };
 
 }  // namespace chatterino

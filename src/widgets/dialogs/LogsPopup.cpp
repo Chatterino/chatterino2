@@ -61,14 +61,13 @@ void LogsPopup::getRoomID()
     }
 
     const auto onIdFetched = [=](const QString &userID) {
-        this->roomID_ = userID.toInt();
-        this->getLogviewerLogs();
+        this->getLogviewerLogs(userID);
     };
     PartialTwitchUser::byName(twitchChannel->getName())
         .getId(onIdFetched, this);
 }
 
-void LogsPopup::getLogviewerLogs()
+void LogsPopup::getLogviewerLogs(const QString &roomID)
 {
     TwitchChannel *twitchChannel =
         dynamic_cast<TwitchChannel *>(this->channel_.get());
@@ -90,7 +89,7 @@ void LogsPopup::getLogviewerLogs()
         return true;
     });
 
-    req.onSuccess([this, channelName](auto result) -> Outcome {
+    req.onSuccess([this, roomID](auto result) -> Outcome {
         auto data = result.parseJson();
         std::vector<MessagePtr> messages;
 
@@ -105,7 +104,7 @@ void LogsPopup::getLogviewerLogs()
             message.insert(1, "historical=1;");
             message.insert(1, QString("tmi-sent-ts=%10000;")
                                   .arg(messageObject["time"].toInt()));
-            message.insert(1, QString("room-id=%1;").arg(this->roomID_));
+            message.insert(1, QString("room-id=%1;").arg(roomID));
 
             MessageParseArgs args;
             auto ircMessage =
