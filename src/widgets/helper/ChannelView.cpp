@@ -697,9 +697,9 @@ MessageElementFlags ChannelView::getFlags() const
 
 bool ChannelView::isPaused()
 {
-    return false;
-    //    return this->pausedTemporarily_ || this->pausedBySelection_ ||
-    //    this->pausedByScrollingUp_;
+    // return false;
+    return this->pausedTemporarily_;
+    //   || this->pausedBySelection_ || this->pausedByScrollingUp_;
 }
 
 void ChannelView::updatePauseStatus()
