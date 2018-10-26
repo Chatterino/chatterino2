@@ -199,7 +199,8 @@ void NotebookTab::setLive(bool isLive)
 
 void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
 {
-    if (this->isSelected() || !this->highlightEnabled_)
+    if (this->isSelected() || (!this->highlightEnabled_ &&
+                               newHighlightStyle == HighlightState::NewMessage))
     {
         return;
     }
