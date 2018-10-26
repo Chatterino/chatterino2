@@ -48,6 +48,12 @@ namespace {
         if (errors.length() > 0)
         {
             QMessageBox messageBox;
+// Set error window on top
+#ifdef USEWINSDK
+            ::SetWindowPos(HWND(messageBox.winId()), HWND_TOPMOST, 0, 0, 0, 0,
+                           SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
+#endif
             messageBox.setIcon(QMessageBox::Critical);
             messageBox.setText(errors.join("<br />"));
             messageBox.setStandardButtons(QMessageBox::Ok);
