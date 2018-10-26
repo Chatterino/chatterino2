@@ -39,7 +39,6 @@ void LogsPopup::setInfo(ChannelPtr channel, QString userName)
     this->getRoomID();
     this->setWindowTitle(this->userName_ + "'s logs in #" +
                          this->channel_->getName());
-    this->getLogviewerLogs();
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
