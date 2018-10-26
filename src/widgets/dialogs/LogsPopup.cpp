@@ -152,14 +152,22 @@ void LogsPopup::getOverrustleLogs()
 
     NetworkRequest req(url);
     req.setCaller(QThread::currentThread());
-    req.onError([channelName](int errorCode) {
-        //        this->close();
+    req.onError([this, channelName](int errorCode) {
         auto box = new QMessageBox(
             QMessageBox::Information, "Error getting logs",
             "No logs could be found for channel " + channelName);
         box->setAttribute(Qt::WA_DeleteOnClose);
         box->show();
         box->raise();
+
+        static QSet<int> closeButtons {
+            QMessageBox::Ok,
+            QMessageBox::Close,
+        };
+        if (closeButtons.contains(box->exec())) 
+        {
+            this->close();
+        }
 
         return true;
     });
