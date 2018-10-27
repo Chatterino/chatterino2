@@ -144,6 +144,7 @@ void TwitchChannel::initialize()
 {
     this->refreshChatters();
     this->refreshChannelEmotes();
+    this->refreshBadges();
     this->ffzCustomModBadge_.loadCustomModBadge();
 }
 
