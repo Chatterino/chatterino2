@@ -216,6 +216,7 @@ void SettingsDialog::themeChangedEvent()
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {
+    pajlada::Settings::SettingManager::gSave();
     this->close();
 }
 
