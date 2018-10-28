@@ -125,13 +125,14 @@ void BaseWindow::init()
                                      this->setWindowState(Qt::WindowMinimized |
                                                           this->windowState());
                                  });
-                QObject::connect(_maxButton, &TitleBarButton::leftClicked, this, 
+                QObject::connect(_maxButton, &TitleBarButton::leftClicked, this,
                                  [this, _maxButton] {
-                    this->setWindowState(_maxButton->getButtonStyle() !=
-                                                TitleBarButtonStyle::Maximize
-                                                    ? Qt::WindowActive
-                                                    : Qt::WindowMaximized);
-                });
+                                     this->setWindowState(
+                                         _maxButton->getButtonStyle() !=
+                                                 TitleBarButtonStyle::Maximize
+                                             ? Qt::WindowActive
+                                             : Qt::WindowMaximized);
+                                 });
                 QObject::connect(_exitButton, &TitleBarButton::leftClicked, this,
                                  [this] { this->close(); });
 
