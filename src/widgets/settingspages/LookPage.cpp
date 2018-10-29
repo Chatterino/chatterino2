@@ -83,9 +83,12 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
 
         QObject::connect(theme, &QComboBox::currentTextChanged,
                          [w](const QString &themeName) {
-                             if (themeName == "Custom") {
+                             if (themeName == "Custom")
+                             {
                                  w->show();
-                             } else {
+                             }
+                             else
+                             {
                                  w->hide();
                              }
                              getApp()->windows->forceLayoutChannelViews();
@@ -97,9 +100,12 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
 
         {
             w->setButtonSymbols(QDoubleSpinBox::NoButtons);
-            if (getApp()->themes->themeName.getValue() != "Custom") {
+            if (getApp()->themes->themeName.getValue() != "Custom")
+            {
                 w->hide();
-            } else {
+            }
+            else
+            {
                 w->show();
             }
             w->setRange(-1.0, 1.0);
@@ -180,6 +186,9 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
     // alternate
     layout.append(this->createCheckBox(
         "Alternate background", getSettings()->alternateMessageBackground));
+
+    layout.append(
+        this->createCheckBox("Compact emotes", getSettings()->compactEmotes));
 
     layout.append(this->createCheckBox("Grey out historic messages",
                                        getSettings()->greyOutHistoricMessages));

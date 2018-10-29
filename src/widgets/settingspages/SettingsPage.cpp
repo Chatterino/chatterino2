@@ -1,5 +1,8 @@
 #include "SettingsPage.hpp"
 
+#include "Application.hpp"
+#include "singletons/WindowManager.hpp"
+
 #include <QDebug>
 #include <QPainter>
 
@@ -51,8 +54,8 @@ QCheckBox *SettingsPage::createCheckBox(
     // update setting on toggle
     QObject::connect(checkbox, &QCheckBox::toggled, this,
                      [&setting](bool state) {
-                         qDebug() << "update checkbox value";
-                         setting = state;  //
+                         setting = state;
+                         getApp()->windows->forceLayoutChannelViews();
                      });
 
     return checkbox;

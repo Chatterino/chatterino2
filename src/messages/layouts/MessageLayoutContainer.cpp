@@ -103,6 +103,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     // compact emote offset
     bool isCompactEmote =
+        getSettings()->compactEmotes &&
         !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
         element->getCreator().getFlags().has(MessageElementFlag::EmoteImages);
 
@@ -148,6 +149,7 @@ void MessageLayoutContainer::breakLine()
         MessageLayoutElement *element = this->elements_.at(i).get();
 
         bool isCompactEmote =
+            getSettings()->compactEmotes &&
             !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
             element->getCreator().getFlags().has(
                 MessageElementFlag::EmoteImages);

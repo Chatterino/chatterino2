@@ -42,6 +42,8 @@ public:
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
+    BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
+
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
     IntSetting collpseMessagesMinLines = {
