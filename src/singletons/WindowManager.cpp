@@ -288,6 +288,15 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         Window &window = createWindow(type);
 
+        if (window_obj.value("state") == "maximized")
+        {
+            window.setWindowState(Qt::WindowMaximized);
+        }
+        else if (window_obj.value("state") == "minimized")
+        {
+            window.setWindowState(Qt::WindowMinimized);
+        }
+
         if (type == WindowType::Main)
         {
             mainWindow_ = &window;
@@ -412,6 +421,15 @@ void WindowManager::save()
                 break;
 
             case WindowType::Attached:;
+        }
+
+        if (window->isMaximized())
+        {
+            window_obj.insert("state", "maximized");
+        }
+        else if (window->isMinimized())
+        {
+            window_obj.insert("state", "minimized");
         }
 
         // window geometry
