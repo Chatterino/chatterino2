@@ -643,7 +643,7 @@ float WindowManager::getUiScaleValue(int scale)
         case 3:
             return 1.6f;
         case 4:
-            return 1.6f;
+            return 1.8f;
         case 5:
             return 2;
         case 6:
