@@ -640,43 +640,9 @@ float WindowManager::getUiScaleValue()
 
 float WindowManager::getUiScaleValue(int scale)
 {
-    switch (clampUiScale(scale))
-    {
-        case -5:
-            return 0.5f;
-        case -4:
-            return 0.6f;
-        case -3:
-            return 0.7f;
-        case -2:
-            return 0.8f;
-        case -1:
-            return 0.9f;
-        case 0:
-            return 1;
-        case 1:
-            return 1.2f;
-        case 2:
-            return 1.4f;
-        case 3:
-            return 1.6f;
-        case 4:
-            return 1.8f;
-        case 5:
-            return 2;
-        case 6:
-            return 2.33f;
-        case 7:
-            return 2.66f;
-        case 8:
-            return 3;
-        case 9:
-            return 3.5f;
-        case 10:
-            return 4;
-        default:
-            assert(false);
-    }
+    static auto scales = new float[16]{.5f, .6f, .7f, .8f, .9f, 1, 1.2f, 1.4f,
+                                       1.6f, 1.8f, 2, 2.33f, 2.66f, 3, 3.5f, 4};
+    return scales[clampUiScale(scale) + 5];
 }
 
 }  // namespace chatterino
