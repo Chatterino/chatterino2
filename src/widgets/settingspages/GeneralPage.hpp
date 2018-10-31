@@ -56,6 +56,15 @@ struct DropdownArgs {
     QComboBox *combobox;
 };
 
+class ComboBox : public QComboBox
+{
+    Q_OBJECT
+
+    void wheelEvent(QWheelEvent *event) override
+    {
+    }
+};
+
 class SettingsLayout : public QVBoxLayout
 {
     Q_OBJECT
@@ -64,12 +73,12 @@ public:
     TitleLabel *addTitle(const QString &text);
     TitleLabel2 *addTitle2(const QString &text);
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting);
-    QComboBox *addDropdown(const QString &text, const QStringList &items);
-    QComboBox *addDropdown(const QString &text, const QStringList &items,
-                           pajlada::Settings::Setting<QString> &setting);
+    ComboBox *addDropdown(const QString &text, const QStringList &items);
+    ComboBox *addDropdown(const QString &text, const QStringList &items,
+                          pajlada::Settings::Setting<QString> &setting);
 
     template <typename T>
-    QComboBox *addDropdown(
+    ComboBox *addDropdown(
         const QString &text, const QStringList &items,
         pajlada::Settings::Setting<T> &setting,
         std::function<boost::variant<int, QString>(T)> getValue,

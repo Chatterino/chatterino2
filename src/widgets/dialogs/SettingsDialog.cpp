@@ -35,7 +35,7 @@ SettingsDialog::SettingsDialog()
 
     this->scaleChangedEvent(this->getScale());
 
-    this->overrideBackgroundColor_ = QColor("#282828");
+    this->overrideBackgroundColor_ = QColor("#111111");
     this->themeChangedEvent();
 
     this->resize(766, 600);
@@ -96,6 +96,8 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
 
+    this->ui_.tabContainer->addSpacing(16);
+
     this->addTab(new GeneralPage);
 
     this->ui_.tabContainer->addSpacing(16);
@@ -155,8 +157,10 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab)
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet(
-        "background: #161616; color: #4FC3F7; border: 1px solid #111");
+    tab->setStyleSheet("background: #222; color: #4FC3F7;"
+                       "border-left: 1px solid #444;"
+                       "border-top: 1px solid #444;"
+                       "border-bottom: 1px solid #444;");
     this->selectedTab_ = tab;
 }
 
@@ -226,7 +230,7 @@ void SettingsDialog::themeChangedEvent()
     BaseWindow::themeChangedEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#222"));
+    palette.setColor(QPalette::Background, QColor("#111"));
     this->setPalette(palette);
 }
 

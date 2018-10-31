@@ -59,11 +59,12 @@ QCheckBox *SettingsLayout::addCheckbox(const QString &text,
     return check;
 }
 
-QComboBox *SettingsLayout::addDropdown(const QString &text,
-                                       const QStringList &list)
+ComboBox *SettingsLayout::addDropdown(const QString &text,
+                                      const QStringList &list)
 {
     auto layout = new QHBoxLayout;
-    auto combo = new QComboBox;
+    auto combo = new ComboBox;
+    combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(list);
 
     layout->addWidget(new QLabel(text + ":"));
@@ -74,7 +75,7 @@ QComboBox *SettingsLayout::addDropdown(const QString &text,
     return combo;
 }
 
-QComboBox *SettingsLayout::addDropdown(
+ComboBox *SettingsLayout::addDropdown(
     const QString &text, const QStringList &items,
     pajlada::Settings::Setting<QString> &setting)
 {
@@ -203,7 +204,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Emotes");
     layout.addDropdown<float>(
-        "Emote size", {"0.5x", "0.75x", "Default", "1.25", "1.5x", "2x"},
+        "Emote size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
         [](auto val) {
             if (val == 1)

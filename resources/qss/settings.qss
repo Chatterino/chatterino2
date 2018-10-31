@@ -7,8 +7,27 @@ QCheckBox::indicator {
     height: <checkbox-size>px;
 }
 
-QComboBox {
+chatterino--ComboBox {
     width: 100px;
+}
+
+QScrollArea {
+    border: none;
+}
+
+QScrollArea QFrame {
+    background: #222;
+    border: none;
+}
+
+QComboBox QFrame {
+    background: #000;
+    border: 1px solid #66BCFF;
+}
+
+chatterino--SettingsPage {
+    background: #222;
+    border: 1px solid #555;
 }
 
 chatterino--TitleLabel {
